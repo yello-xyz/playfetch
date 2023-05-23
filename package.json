@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
   },
   "dependencies": {
     "@types/node": "20.2.3",
