@@ -2,17 +2,20 @@
 
 import { savePrompt } from '@/server/datastore'
 import { Button, Label, TextInput } from 'flowbite-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function AddPromptInput() {
   const [prompt, setPrompt] = useState('')
+  const router = useRouter()
 
   const addPrompt = async () => {
     await savePrompt(prompt)
+    router.refresh()
   }
 
   return (
-    <form className='flex flex-col gap-4' onSubmit={addPrompt}>
+    <form className='flex flex-col gap-4'>
       <div>
         <div className='block mb-2'>
           <Label htmlFor='prompt' value='Prompt' />
@@ -27,7 +30,9 @@ export default function AddPromptInput() {
         />
       </div>
       <div className='flex'>
-        <Button type='submit'>Add</Button>
+        <Button onClick={addPrompt}>
+          Add
+        </Button>
       </div>
     </form>
   )
