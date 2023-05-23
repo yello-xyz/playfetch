@@ -12,6 +12,7 @@
     "url": "https://github.com/yello-xyz/playfetch/issues"
   },
   "scripts": {
+    "clean": "npx next telemetry disable && rm -rf ./build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
