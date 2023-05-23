@@ -1,7 +1,16 @@
 {
   "name": "playfetch",
   "version": "0.1.0",
+  "author": "Yello XYZ Ltd",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yello-xyz/playfetch.git"
+  },
+  "homepage": "https://github.com/yello-xyz/playfetch#readme",
+  "bugs": {
+    "url": "https://github.com/yello-xyz/playfetch/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
