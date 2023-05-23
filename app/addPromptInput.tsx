@@ -4,7 +4,7 @@ import { savePrompt } from '@/server/datastore'
 import { Button, Label, TextInput } from 'flowbite-react'
 import { useState } from 'react'
 
-export default function AddPrompt() {
+export default function AddPromptInput() {
   const [prompt, setPrompt] = useState('')
 
   const addPrompt = async () => {
@@ -26,7 +26,9 @@ export default function AddPrompt() {
           required={true}
         />
       </div>
-      <Button type='submit'>Add</Button>
+      <div className='flex'>
+        <Button type='submit'>Add</Button>
+      </div>
     </form>
   )
 }

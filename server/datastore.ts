@@ -20,7 +20,7 @@ export async function savePrompt(prompt: string) {
   await datastore.save({ key, data: { prompt } })
 }
 
-export async function getPrompts() {
+export async function getPrompts(): Promise<string[]> {
   const datastore = getDatastore()
   const query = datastore.createQuery(Entity.PROMPT)
   const [prompts] = await datastore.runQuery(query)
