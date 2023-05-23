@@ -3,11 +3,12 @@
 import { savePrompt } from '@/server/datastore'
 import { Button, Label, TextInput } from 'flowbite-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 
 export default function AddPromptInput() {
-  const [prompt, setPrompt] = useState('')
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [prompt, setPrompt] = useState('')
 
   const addPrompt = async () => {
     await savePrompt(prompt)
@@ -30,7 +31,7 @@ export default function AddPromptInput() {
         />
       </div>
       <div className='flex'>
-        <Button onClick={addPrompt}>
+        <Button disabled={isPending} onClick={() => startTransition(addPrompt)}>
           Add
         </Button>
       </div>
