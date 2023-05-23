@@ -1,0 +1,18 @@
+steps:
+  - name: node
+    entrypoint: npm
+    args: ['install']
+  - name: node
+    entrypoint: npm
+    args: ['run', 'clean']
+  - name: node
+    entrypoint: npm
+    args: ['run', 'create-env']
+    env:
+      - 'OPENAI_API_KEY=${_OPENAI_API_KEY}'
+  - name: node
+    entrypoint: npm
+    args: ['run', 'build']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy']
+timeout: '1600s'

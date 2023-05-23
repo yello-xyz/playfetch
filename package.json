@@ -13,9 +13,10 @@
   },
   "scripts": {
     "clean": "npx next telemetry disable && rm -rf ./build",
-    "dev": "next dev",
     "build": "next build",
+    "create-env": "printenv > .env.local",
     "start": "next start",
+    "dev": "next dev",
     "lint": "next lint",
     "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
   },
