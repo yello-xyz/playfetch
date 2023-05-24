@@ -13,15 +13,16 @@ enum Entity {
   PROMPT = 'prompt',
 }
 
-export const addID = (entity?: any) => (entity ? { ...entity, id: entity[getDatastore().KEY].name } : entity)
+export const addID = (entity?: any) => (entity ? { ...entity, id: Number(entity[getDatastore().KEY].id) } : entity)
 
-function buildQuery(type: string, key: string, value: {}, limit: number = 1) {
-  return getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
-}
+const buildKey = (type: string, id?: string | number) => getDatastore().key([type, ...(id ? [id] : [])])
+
+const buildQuery = (type: string, key: string, value: {}, limit: number = 1) =>
+  getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
 
 export async function savePrompt(prompt: string) {
   const datastore = getDatastore()
-  const key = datastore.key(Entity.PROMPT)
+  const key = buildKey(Entity.PROMPT)
   await datastore.save({ key, data: { prompt } })
 }
 
@@ -33,19 +34,25 @@ export async function getPrompts(): Promise<string[]> {
 }
 
 type User = {
-  id: string
+  id: number
   email: string
   isAdmin: boolean
 }
 
+export async function getUser(userID: number) {
+  const datastore = getDatastore()
+  const [user] = await datastore.get(buildKey(Entity.USER, userID))
+  return addID(user)
+}
+
 export async function saveUser({ email, isAdmin }: User) {
   const datastore = getDatastore()
-  const user = await getUser(email)
-  const key = datastore.key([Entity.USER, ...(user ? [user.id] : [])])
+  const user = await getUserForEmail(email)
+  const key = buildKey(Entity.USER, user?.id)
   await datastore.save({ key, data: { email, isAdmin } })
 }
 
-export async function getUser(email: string): Promise<User | undefined> {
+export async function getUserForEmail(email: string): Promise<User | undefined> {
   const [[user]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
   return addID(user)
 }
