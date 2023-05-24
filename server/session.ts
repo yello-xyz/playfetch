@@ -19,8 +19,18 @@ export const sessionOptions = {
   },
 }
 
-export function withSession(handler: NextApiHandler) {
+export function withSessionRoute(handler: NextApiHandler) {
   return withIronSessionApiRoute(handler, sessionOptions)
+}
+
+export function withLoggedInSessionRoute(handler: NextApiHandler) {
+  return withSessionRoute(async (req, res) => {
+    if (req.session.user) {
+      return handler(req, res)
+    } else {
+      return res.status(401).json(null)
+    }
+  })
 }
 
 type UnknownRecord = Record<string, unknown>
@@ -28,12 +38,12 @@ type ServerSideHandler<P extends UnknownRecord = UnknownRecord> = (
   context: GetServerSidePropsContext
 ) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>
 
-export function withServerSideSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
+export function withSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
   return withIronSessionSsr(handler, sessionOptions)
 }
 
 export function withLoggedInSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
-  return withServerSideSession(async context => {
+  return withSession(async context => {
     if (context.req.session.user) {
       return handler(context)
     } else {
@@ -43,7 +53,7 @@ export function withLoggedInSession<P extends UnknownRecord = UnknownRecord>(han
 }
 
 export function withLoggedOutSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
-  return withServerSideSession(async context => {
+  return withSession(async context => {
     if (context.req.session.user) {
       return { redirect: { destination: ClientRoute.Home, permanent: false } }
     } else {

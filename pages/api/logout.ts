@@ -1,4 +1,4 @@
-import { withSession } from '@/server/session'
+import { withSessionRoute } from '@/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function logout(req: NextApiRequest, res: NextApiResponse) {
@@ -6,4 +6,4 @@ async function logout(req: NextApiRequest, res: NextApiResponse) {
   res.json({})
 }
 
-export default withSession(logout)
+export default withSessionRoute(logout)
