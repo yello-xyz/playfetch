@@ -1,4 +1,4 @@
-import { withSessionHandler } from '@/server/session'
+import { withSession } from '@/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function login(req: NextApiRequest, res: NextApiResponse) {
@@ -10,4 +10,4 @@ async function login(req: NextApiRequest, res: NextApiResponse) {
   res.json({})
 }
 
-export default withSessionHandler(login)
+export default withSession(login)

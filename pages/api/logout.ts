@@ -1,4 +1,4 @@
-import { withSessionHandler } from '@/server/session'
+import { withSession } from '@/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function logout(req: NextApiRequest, res: NextApiResponse) {
@@ -6,4 +6,4 @@ async function logout(req: NextApiRequest, res: NextApiResponse) {
   res.json({})
 }
 
-export default withSessionHandler(logout)
+export default withSession(logout)

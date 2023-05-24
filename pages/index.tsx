@@ -1,22 +1,15 @@
 import { getPrompts } from '@/server/datastore'
 import PromptBadge from '@/client/promptBadge'
 import { Inter } from 'next/font/google'
-import { withSession } from '@/server/session'
+import { withLoggedInSession } from '@/server/session'
 import TextInput from '@/client/textInput'
 import { useRouter } from 'next/navigation'
 import { Button } from 'flowbite-react'
 import api from '@/client/api'
-import ClientRoute from '@/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const getServerSideProps = withSession(async function getServerSideProps({ req }) {
-  if (req.session.user) {
-    return { props: { prompts: await getPrompts() } }
-  } else {
-    return { redirect: { destination: ClientRoute.Login, permanent: false } }
-  }
-})
+export const getServerSideProps = withLoggedInSession(async () => ({ props: { prompts: await getPrompts() } }))
 
 export default function Home({ prompts }: { prompts: string[] }) {
   const router = useRouter()
