@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import { withSession } from '@/server/session'
 import TextInput from '@/client/textInput'
 import { useRouter } from 'next/navigation'
+import { Button } from 'flowbite-react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,9 +18,14 @@ export const getServerSideProps = withSession(async function getServerSideProps(
 
 export default function Home({ prompts }: { prompts: string[] }) {
   const router = useRouter()
-  
+
   const addPrompt = async (prompt: string) => {
     await fetch(`/api/addPrompt?prompt=${prompt}`)
+    router.refresh()
+  }
+
+  const logout = async () => {
+    await fetch(`/api/logout`)
     router.refresh()
   }
 
@@ -31,6 +37,9 @@ export default function Home({ prompts }: { prompts: string[] }) {
         </div>
       ))}
       <TextInput label='Prompt' placeholder='Enter your prompt...' buttonTitle='Add' onSubmit={addPrompt} />
+      <div>
+        <Button onClick={logout}>Log out</Button>
+      </div>
     </main>
   )
 }
