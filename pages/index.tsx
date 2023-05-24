@@ -3,10 +3,10 @@ import PromptBadge from '@/client/promptBadge'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/navigation'
-import { Button } from 'flowbite-react'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
+import PendingButton from '@/client/pendingButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,8 +32,8 @@ export default function Home({ prompts }: { prompts: string[] }) {
         <PromptBadge key={index} prompt={prompt} />
       ))}
       <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
-      <Button onClick={addPrompt}>Add Prompt</Button>
-      <Button onClick={logout}>Log out</Button>
+      <PendingButton onClick={addPrompt}>Add Prompt</PendingButton>
+      <PendingButton onClick={logout}>Log out</PendingButton>
     </main>
   )
 }

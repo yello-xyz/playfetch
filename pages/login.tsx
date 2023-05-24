@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
-import { Button } from 'flowbite-react'
+import PendingButton from '@/client/pendingButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,7 +28,7 @@ export default function Login() {
         value={email}
         setValue={setEmail}
       />
-      <Button onClick={login}>Log in</Button>
+      <PendingButton onClick={login}>Log in</PendingButton>
     </main>
   )
 }

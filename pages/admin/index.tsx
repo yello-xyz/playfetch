@@ -1,9 +1,10 @@
 import { Inter } from 'next/font/google'
 import { withAdminSession } from '@/server/session'
 import TextInput from '@/client/labeledTextInput'
-import { Button, Checkbox, Label } from 'flowbite-react'
+import { Checkbox, Label } from 'flowbite-react'
 import api from '@/client/admin/api'
 import { useState } from 'react'
+import PendingButton from '@/client/pendingButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,7 @@ export default function Admin() {
         <Checkbox id='admin' checked={addAsAdmin} onChange={() => setAddAsAdmin(!addAsAdmin)} />
         <Label htmlFor='admin'>Add as Admin</Label>
       </div>
-      <Button onClick={addUser}>Add User</Button>
+      <PendingButton onClick={addUser}>Add User</PendingButton>
     </main>
   )
 }
