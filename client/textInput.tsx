@@ -16,7 +16,7 @@ export default function TextInput({
   const [value, setValue] = useState('')
 
   return (
-    <form className='flex flex-col gap-4'>
+    <form className='flex flex-col self-stretch gap-4'>
       <div>
         <div className='block mb-2'>
           <Label htmlFor='input' value={label} />

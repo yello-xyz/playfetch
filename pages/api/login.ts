@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 async function login(req: NextApiRequest, res: NextApiResponse) {
   req.session.user = {
-    id: 230,
+    email: req.body.email,
     admin: true,
   }
   await req.session.save()

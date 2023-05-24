@@ -4,7 +4,8 @@ import { Inter } from 'next/font/google'
 import { withSession } from '@/server/session'
 import TextInput from '@/client/textInput'
 import { useRouter } from 'next/navigation'
-import { Button } from 'flowbite-react'
+import { Button, Label } from 'flowbite-react'
+import api from '@/client/api'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,26 +21,24 @@ export default function Home({ prompts }: { prompts: string[] }) {
   const router = useRouter()
 
   const addPrompt = async (prompt: string) => {
-    await fetch(`/api/addPrompt?prompt=${prompt}`)
+    await api.addPrompt(prompt)
     router.refresh()
   }
 
   const logout = async () => {
-    await fetch(`/api/logout`)
+    await api.logout()
     router.refresh()
   }
 
   return (
-    <main className={`flex flex-col gap-4 p-10 align-items: flex-start ${inter.className}`}>
+    <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
       {prompts.map((prompt, index) => (
-        <div key={index} className='flex'>
-          <PromptBadge prompt={prompt} />
-        </div>
+        <PromptBadge key={index} prompt={prompt} />
       ))}
       <TextInput label='Prompt' placeholder='Enter your prompt...' buttonTitle='Add' onSubmit={addPrompt} />
-      <div>
-        <Button onClick={logout}>Log out</Button>
-      </div>
+      <Button id='logout' onClick={logout}>
+        Log out
+      </Button>
     </main>
   )
 }
