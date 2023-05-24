@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google'
 import { withSession } from '@/server/session'
-import EmailInput from '@/client/EmailInput'
+import { useRouter } from 'next/navigation'
+import TextInput from '@/client/textInput'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,9 +14,16 @@ export const getServerSideProps = withSession(function getServerSideProps({ req 
 })
 
 export default function Login() {
+  const router = useRouter()
+
+  const login = async (email: string) => {
+    await fetch(`/api/login?email=${email}`)
+    router.refresh()
+  }
+
   return (
     <main className={`flex flex-col gap-4 p-10 align-items: flex-start ${inter.className}`}>
-      <EmailInput />
+      <TextInput label='Email' placeholder='Enter your email address...' buttonTitle='Log in' onSubmit={login} />
     </main>
   )
 }
