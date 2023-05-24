@@ -1,4 +1,4 @@
-import { Datastore } from '@google-cloud/datastore'
+import { Datastore, PropertyFilter } from '@google-cloud/datastore'
 
 let datastore: Datastore
 const getDatastore = () => {
@@ -11,6 +11,10 @@ const getDatastore = () => {
 enum Entity {
   USER = 'user',
   PROMPT = 'prompt',
+}
+
+function buildQuery(type: string, key: string, value: {}, limit: number = 1) {
+  return getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
 }
 
 export async function savePrompt(prompt: string) {
@@ -27,9 +31,7 @@ export async function getPrompts(): Promise<string[]> {
 }
 
 async function getUserInternal(email: string) {
-  const datastore = getDatastore()
-  const query = datastore.createQuery(Entity.USER).filter('email', email)
-  const [[user]] = await datastore.runQuery(query)
+  const [[user]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
   return user
 }
 
