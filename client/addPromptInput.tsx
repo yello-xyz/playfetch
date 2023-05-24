@@ -1,6 +1,3 @@
-'use client'
-
-import { savePrompt } from '@/server/datastore'
 import { Button, Label, TextInput } from 'flowbite-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -11,7 +8,7 @@ export default function AddPromptInput() {
   const [prompt, setPrompt] = useState('')
 
   const addPrompt = async () => {
-    await savePrompt(prompt)
+    await fetch(`/api/addPrompt?prompt=${prompt}`)
     router.refresh()
   }
 

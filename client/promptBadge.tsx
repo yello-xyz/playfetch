@@ -1,5 +1,3 @@
-'use client'
-
 import { Badge } from 'flowbite-react'
 
 export default function PromptBadge({ prompt }: { prompt: string }) {

@@ -1,5 +1,3 @@
-'use server'
-
 import { Datastore } from '@google-cloud/datastore'
 
 let datastore: Datastore

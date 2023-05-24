@@ -6,10 +6,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    serverActions: true,
-    serverComponentsExternalPackages: ['@google-cloud/datastore'],
-  },
 }
 
 module.exports = nextConfig
