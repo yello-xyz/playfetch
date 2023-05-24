@@ -7,8 +7,11 @@ import { withSession } from '@/server/session'
 const inter = Inter({ subsets: ['latin'] })
 
 export const getServerSideProps = withSession(async function getServerSideProps({ req }) {
-  const prompts = req.session.user?.admin ? await getPrompts() : []
-  return { props: { prompts } }
+  if (req.session.user) {
+    return { props: { prompts: await getPrompts() } }
+  } else {
+    return { redirect: { destination: '/login', permanent: false } }
+  }
 })
 
 export default function Home({ prompts }: { prompts: string[] }) {
