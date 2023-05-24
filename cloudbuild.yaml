@@ -9,7 +9,7 @@ steps:
     entrypoint: npm
     args: ['run', 'create-env']
     env:
-      - 'OPENAI_API_KEY=${_OPENAI_API_KEY}'
+      - 'SESSION_SECRET=${_SESSION_SECRET}'
   - name: node
     entrypoint: npm
     args: ['run', 'build']
