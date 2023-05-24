@@ -3,12 +3,13 @@ import { withSession } from '@/server/session'
 import { useRouter } from 'next/navigation'
 import TextInput from '@/client/textInput'
 import api from '@/client/api'
+import ClientRoute from '@/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const getServerSideProps = withSession(function getServerSideProps({ req }) {
   if (req.session.user) {
-    return { redirect: { destination: '/', permanent: false } }
+    return { redirect: { destination: ClientRoute.Home, permanent: false } }
   } else {
     return { props: { blah: 2 } }
   }

@@ -4,8 +4,9 @@ import { Inter } from 'next/font/google'
 import { withSession } from '@/server/session'
 import TextInput from '@/client/textInput'
 import { useRouter } from 'next/navigation'
-import { Button, Label } from 'flowbite-react'
+import { Button } from 'flowbite-react'
 import api from '@/client/api'
+import ClientRoute from '@/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,7 +14,7 @@ export const getServerSideProps = withSession(async function getServerSideProps(
   if (req.session.user) {
     return { props: { prompts: await getPrompts() } }
   } else {
-    return { redirect: { destination: '/login', permanent: false } }
+    return { redirect: { destination: ClientRoute.Login, permanent: false } }
   }
 })
 

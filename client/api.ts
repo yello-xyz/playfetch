@@ -1,8 +1,10 @@
+import ClientRoute from "./clientRoute"
+
 async function parseResponse(response: Response) {
   if (response.ok) {
     return response.json()
   } else if (response.status === 401) {
-    window.location.href = '/'
+    window.location.href = ClientRoute.Home
   }
   return Promise.resolve(null)
 }
