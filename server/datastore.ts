@@ -26,6 +26,13 @@ export async function getPrompts(): Promise<string[]> {
   return prompts.map(prompt => prompt.prompt)
 }
 
+async function getUserInternal(email: string) {
+  const datastore = getDatastore()
+  const query = datastore.createQuery(Entity.USER).filter('email', email)
+  const [[user]] = await datastore.runQuery(query)
+  return user
+}
+
 type User = {
   email: string
   isAdmin: boolean
@@ -33,13 +40,12 @@ type User = {
 
 export async function saveUser({ email, isAdmin }: User) {
   const datastore = getDatastore()
-  const key = datastore.key(Entity.USER)
+  const user = await getUserInternal(email)
+  const key = user ? user[datastore.KEY] : datastore.key(Entity.USER)
   await datastore.save({ key, data: { email, isAdmin } })
 }
 
 export async function getUser(email: string): Promise<User | undefined> {
-  const datastore = getDatastore()
-  const query = datastore.createQuery(Entity.USER).filter('email', email)
-  const [[user]] = await datastore.runQuery(query)
-  return user
+  const user = await getUserInternal(email)
+  return user as User | undefined
 }
