@@ -18,7 +18,13 @@ export default function Login() {
 
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
-      <TextInput label='Email' placeholder='Enter your email address...' buttonTitle='Log in' onSubmit={login} />
+      <TextInput
+        type='email'
+        label='Email'
+        placeholder='Enter your email address...'
+        buttonTitle='Log in'
+        onSubmit={login}
+      />
     </main>
   )
 }

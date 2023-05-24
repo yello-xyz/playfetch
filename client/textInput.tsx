@@ -1,12 +1,14 @@
 import { Button, Label, TextInput as FBTextInput } from 'flowbite-react'
-import { useState, useTransition } from 'react'
+import { HTMLInputTypeAttribute, useState, useTransition } from 'react'
 
 export default function TextInput({
+  type = 'text',
   label,
   placeholder,
   buttonTitle,
   onSubmit,
 }: {
+  type?: HTMLInputTypeAttribute
   label: string
   placeholder: string
   buttonTitle: string
@@ -22,10 +24,10 @@ export default function TextInput({
           <Label htmlFor='input' value={label} />
         </div>
         <FBTextInput
+          type={type}
           value={value}
           onChange={event => setValue(event.target.value)}
           id='input'
-          type='text'
           placeholder={placeholder}
           required={true}
         />
