@@ -13,6 +13,8 @@ enum Entity {
   PROMPT = 'prompt',
 }
 
+export const addID = (entity?: any) => (entity ? { ...entity, id: entity[getDatastore().KEY].name } : entity)
+
 function buildQuery(type: string, key: string, value: {}, limit: number = 1) {
   return getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
 }
@@ -30,24 +32,20 @@ export async function getPrompts(): Promise<string[]> {
   return prompts.map(prompt => prompt.prompt)
 }
 
-async function getUserInternal(email: string) {
-  const [[user]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
-  return user
-}
-
 type User = {
+  id: string
   email: string
   isAdmin: boolean
 }
 
 export async function saveUser({ email, isAdmin }: User) {
   const datastore = getDatastore()
-  const user = await getUserInternal(email)
-  const key = user ? user[datastore.KEY] : datastore.key(Entity.USER)
+  const user = await getUser(email)
+  const key = datastore.key([Entity.USER, ...(user ? [user.id] : [])])
   await datastore.save({ key, data: { email, isAdmin } })
 }
 
 export async function getUser(email: string): Promise<User | undefined> {
-  const user = await getUserInternal(email)
-  return user as User | undefined
+  const [[user]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
+  return addID(user)
 }
