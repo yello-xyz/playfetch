@@ -2,17 +2,14 @@ import { getPrompts } from '@/server/datastore'
 import AddPromptInput from '@/client/addPromptInput'
 import PromptBadge from '@/client/promptBadge'
 import { Inter } from 'next/font/google'
+import { withSession } from '@/server/session'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export async function getServerSideProps() {
-  const prompts = await getPrompts()
-  return {
-    props: {
-      prompts
-    }
-  }
-}
+export const getServerSideProps = withSession(async function getServerSideProps({ req }) {
+  const prompts = req.session.user?.admin ? await getPrompts() : []
+  return { props: { prompts } }
+})
 
 export default function Home({ prompts }: { prompts: string[] }) {
   return (
