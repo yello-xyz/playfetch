@@ -45,7 +45,7 @@ export async function getUser(userID: number) {
   return addID(user)
 }
 
-export async function saveUser({ email, isAdmin }: User) {
+export async function saveUser(email: string, isAdmin: boolean) {
   const datastore = getDatastore()
   const user = await getUserForEmail(email)
   const key = buildKey(Entity.USER, user?.id)

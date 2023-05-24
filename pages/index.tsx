@@ -31,7 +31,9 @@ export default function Home({ prompts }: { prompts: string[] }) {
       {prompts.map((prompt, index) => (
         <PromptBadge key={index} prompt={prompt} />
       ))}
-      <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
+      <div className='self-stretch'>
+        <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
+      </div>
       <PendingButton onClick={addPrompt}>Add Prompt</PendingButton>
       <PendingButton onClick={logout}>Log out</PendingButton>
     </main>
