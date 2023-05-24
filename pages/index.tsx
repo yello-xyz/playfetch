@@ -2,10 +2,11 @@ import { getPrompts } from '@/server/datastore'
 import PromptBadge from '@/client/promptBadge'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
-import TextInput from '@/client/textInput'
 import { useRouter } from 'next/navigation'
 import { Button } from 'flowbite-react'
 import api from '@/client/api'
+import LabeledTextInput from '@/client/labeledTextInput'
+import { useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -13,8 +14,9 @@ export const getServerSideProps = withLoggedInSession(async () => ({ props: { pr
 
 export default function Home({ prompts }: { prompts: string[] }) {
   const router = useRouter()
+  const [prompt, setPrompt] = useState('')
 
-  const addPrompt = async (prompt: string) => {
+  const addPrompt = async () => {
     await api.addPrompt(prompt)
     router.refresh()
   }
@@ -29,10 +31,9 @@ export default function Home({ prompts }: { prompts: string[] }) {
       {prompts.map((prompt, index) => (
         <PromptBadge key={index} prompt={prompt} />
       ))}
-      <TextInput label='Prompt' placeholder='Enter your prompt...' buttonTitle='Add Prompt' onSubmit={addPrompt} />
-      <Button id='logout' onClick={logout}>
-        Log out
-      </Button>
+      <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
+      <Button onClick={addPrompt}>Add Prompt</Button>
+      <Button onClick={logout}>Log out</Button>
     </main>
   )
 }
