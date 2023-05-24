@@ -6,7 +6,7 @@ declare module 'iron-session' {
   interface IronSessionData {
     user?: {
       email: string
-      admin?: boolean
+      isAdmin: boolean
     }
   }
 }
@@ -33,6 +33,16 @@ export function withLoggedInSessionRoute(handler: NextApiHandler) {
   })
 }
 
+export function withAdminRoute(handler: NextApiHandler) {
+  return withSessionRoute(async (req, res) => {
+    if (req.session.user?.isAdmin) {
+      return handler(req, res)
+    } else {
+      return res.status(401).json(null)
+    }
+  })
+}
+
 type UnknownRecord = Record<string, unknown>
 type ServerSideHandler<P extends UnknownRecord = UnknownRecord> = (
   context: GetServerSidePropsContext
@@ -48,6 +58,16 @@ export function withLoggedInSession<P extends UnknownRecord = UnknownRecord>(han
       return handler(context)
     } else {
       return { redirect: { destination: ClientRoute.Login, permanent: false } }
+    }
+  })
+}
+
+export function withAdminSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
+  return withSession(async context => {
+    if (context.req.session.user?.isAdmin) {
+      return handler(context)
+    } else {
+      return { redirect: { destination: ClientRoute.Home, permanent: false } }
     }
   })
 }

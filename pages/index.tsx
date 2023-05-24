@@ -29,7 +29,7 @@ export default function Home({ prompts }: { prompts: string[] }) {
       {prompts.map((prompt, index) => (
         <PromptBadge key={index} prompt={prompt} />
       ))}
-      <TextInput label='Prompt' placeholder='Enter your prompt...' buttonTitle='Add' onSubmit={addPrompt} />
+      <TextInput label='Prompt' placeholder='Enter your prompt...' buttonTitle='Add Prompt' onSubmit={addPrompt} />
       <Button id='logout' onClick={logout}>
         Log out
       </Button>
