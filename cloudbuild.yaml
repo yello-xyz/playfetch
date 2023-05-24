@@ -10,6 +10,8 @@ steps:
     args: ['run', 'create-env']
     env:
       - 'SESSION_SECRET=${_SESSION_SECRET}'
+      - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
+      - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
   - name: node
     entrypoint: npm
     args: ['run', 'build']
