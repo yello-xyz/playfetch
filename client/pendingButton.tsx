@@ -11,7 +11,7 @@ export default function PendingButton({ children, onClick }: { children: ReactNo
   }
 
   return (
-    <Button gradientDuoTone='purpleToBlue' size='xs' pill={true} disabled={isPending} onClick={handleClick}>
+    <Button gradientDuoTone='purpleToBlue' size='sm' pill={true} disabled={isPending} onClick={handleClick}>
       {children}
     </Button>
   )
