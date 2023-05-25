@@ -6,7 +6,8 @@ import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
-import { Accordion } from 'flowbite-react'
+import { Accordion, Badge } from 'flowbite-react'
+import { Project } from '@/types'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,7 +15,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req }) => ({
   props: { projects: await getProjectsForUser(req.session.user!.id) },
 }))
 
-export default function Home({ projects }: { projects: { id: number; name: string }[] }) {
+export default function Home({ projects }: { projects: Project[] }) {
   const router = useRouter()
   const [prompt, setPrompt] = useState('')
   const [activeProjectID, setActiveProjectID] = useState(projects[0]?.id)
@@ -37,10 +38,17 @@ export default function Home({ projects }: { projects: { id: number; name: strin
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
       <PendingButton onClick={addProject}>Add New Project</PendingButton>
-      <Accordion alwaysOpen={true}>
+      <Accordion>
         {projects.map((project, index) => (
-          <Accordion.Panel key={index} setOpen={() => setActiveProjectID(project.id)}>
-            <Accordion.Title>{project.name}</Accordion.Title>
+          <Accordion.Panel key={index}>
+            <Accordion.Title onClickCapture={() => setActiveProjectID(project.id)}>{project.name}</Accordion.Title>
+            <Accordion.Content>
+              {project.prompts.map((prompt, promptIndex) => (
+                <Badge key={promptIndex} className='mb-2'>
+                  {prompt.prompt}
+                </Badge>
+              ))}
+            </Accordion.Content>
           </Accordion.Panel>
         ))}
       </Accordion>
