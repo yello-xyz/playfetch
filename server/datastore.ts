@@ -40,7 +40,7 @@ export async function getUserForEmail(email: string): Promise<User | undefined> 
 export async function saveUser(email: string, isAdmin: boolean) {
   const user = await getUserForEmail(email)
   const key = buildKey(Entity.USER, user?.id)
-  await getDatastore().save({ key, data: { email, isAdmin } })
+  await getDatastore().save({ key, data: { email, isAdmin, createdAt: new Date() } })
 }
 
 const toProject = (data: any | undefined, prompts: any[]): Project | undefined =>
@@ -66,7 +66,7 @@ export async function addProjectForUser(userID: number) {
   const existingNames = new Set(existingProjects.map(project => project.name))
   const name = uniqueName('New Project', existingNames)
   const key = buildKey(Entity.PROJECT)
-  await getDatastore().save({ key, data: { name, userID } })
+  await getDatastore().save({ key, data: { name, userID, createdAt: new Date() } })
   await addPromptForUser(userID, Number(key.id))
 }
 
@@ -90,7 +90,7 @@ export async function addPromptForUser(userID: number, projectID: number) {
   const existingNames = new Set(existingPrompts.map(prompt => prompt.prompt))
   const prompt = uniqueName('New Prompt', existingNames)
   const key = buildKey(Entity.PROMPT)
-  await datastore.save({ key, data: { userID, projectID, prompt } })
+  await datastore.save({ key, data: { userID, projectID, prompt, createdAt: new Date() } })
 }
 
 export async function savePromptForUser(userID: number, promptID: number, prompt: string) {
