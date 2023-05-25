@@ -1,5 +1,4 @@
-import { getPrompts } from '@/server/datastore'
-import PromptBadge from '@/client/promptBadge'
+import { getProjectsForUser } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/navigation'
@@ -7,14 +6,22 @@ import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
+import { Accordion } from 'flowbite-react'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const getServerSideProps = withLoggedInSession(async () => ({ props: { prompts: await getPrompts() } }))
+export const getServerSideProps = withLoggedInSession(async ({ req }) => ({
+  props: { projects: await getProjectsForUser(req.session.user!.id) },
+}))
 
-export default function Home({ prompts }: { prompts: string[] }) {
+export default function Home({ projects }: { projects: { id: number; name: string }[] }) {
   const router = useRouter()
   const [prompt, setPrompt] = useState('')
+
+  const addProject = async () => {
+    await api.addProject()
+    router.refresh()
+  }
 
   const addPrompt = async () => {
     await api.addPrompt(prompt)
@@ -28,9 +35,14 @@ export default function Home({ prompts }: { prompts: string[] }) {
 
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
-      {prompts.map((prompt, index) => (
-        <PromptBadge key={index} prompt={prompt} />
-      ))}
+      <Accordion alwaysOpen={true}>
+        {projects.map((project, index) => (
+          <Accordion.Panel key={index}>
+            <Accordion.Title>{project.name}</Accordion.Title>
+          </Accordion.Panel>
+        ))}
+      </Accordion>
+      <PendingButton onClick={addProject}>Add Project</PendingButton>
       <div className='self-stretch'>
         <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
       </div>

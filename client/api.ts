@@ -31,6 +31,9 @@ const api = {
   logout: async function () {
     return post(this.logout)
   },
+  addProject: async function () {
+    return post(this.addProject)
+  },
   addPrompt: async function (prompt: string) {
     return post(this.addPrompt, { prompt })
   },

@@ -10,12 +10,13 @@ const getDatastore = () => {
 
 enum Entity {
   USER = 'user',
+  PROJECT = 'project',
   PROMPT = 'prompt',
 }
 
-export const addID = (entity?: any) => (entity ? { ...entity, id: Number(entity[getDatastore().KEY].id) } : entity)
+const getID = (entity: any) => Number(entity[getDatastore().KEY].id)
 
-const buildKey = (type: string, id?: string | number) => getDatastore().key([type, ...(id ? [id] : [])])
+const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
 const buildQuery = (type: string, key: string, value: {}, limit: number = 1) =>
   getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
@@ -39,7 +40,8 @@ type User = {
   isAdmin: boolean
 }
 
-const toUser = (user?: any): User | undefined => user ? addID({ email: user.email, isAdmin: user.isAdmin }) : user
+const toUser = (data?: any): User | undefined =>
+  data ? { id: getID(data), email: data.email, isAdmin: data.isAdmin } : data
 
 export async function getUser(userID: number): Promise<User | undefined> {
   const datastore = getDatastore()
@@ -57,4 +59,35 @@ export async function saveUser(email: string, isAdmin: boolean) {
   const user = await getUserForEmail(email)
   const key = buildKey(Entity.USER, user?.id)
   await datastore.save({ key, data: { email, isAdmin } })
+}
+
+type Project = {
+  id: number
+  name: string
+}
+
+const toProject = (data?: any): Project | undefined => (data ? { id: getID(data), name: data.name } : data)
+
+const uniqueName = (name: string, existingNames: Set<string>) => {
+  let uniqueName = name
+  let counter = 2
+  while (existingNames.has(uniqueName)) {
+    uniqueName = `${name} ${counter++}`
+  }
+  return uniqueName
+}
+
+export async function addProjectForUser(userID: number) {
+  const datastore = getDatastore()
+  const existingProjects = await getProjectsForUser(userID)
+  const existingNames = new Set(existingProjects.map(project => project.name))
+  const name = uniqueName('New Project', existingNames)
+  const key = buildKey(Entity.PROJECT)
+  await datastore.save({ key, data: { name, userID } })
+}
+
+export async function getProjectsForUser(userID: number): Promise<Project[]> {
+  const datastore = getDatastore()
+  const [projects] = await datastore.runQuery(buildQuery(Entity.PROJECT, 'userID', userID, 100))
+  return projects.map(toProject) as Project[]
 }
