@@ -10,7 +10,8 @@ async function login(req: NextApiRequest, res: NextApiResponse<string>) {
   const user = await getUserForEmail(req.body.email)
   if (user) {
     const { id, email } = user
-    const token = await sealData({ id }, { password: process.env.TOKEN_SECRET ?? '', ttl: 15 * 60 })
+    const seal = await sealData({ id }, { password: process.env.TOKEN_SECRET ?? '', ttl: 15 * 60 })
+    const token = Buffer.from(seal).toString('base64')
     const url = buildURLForClientRoute(`${ClientRoute.Login}/${token}`, req.headers)
     await sendMail(email, 'Log in to PlayFetch', `Log in: ${url}`, `<a href="${url}">Log in</a>`)
     return res.json('Please check your email for a login link.')
