@@ -1,5 +1,6 @@
 import { Project, Prompt, User } from '@/types'
 import { Datastore, PropertyFilter, and } from '@google-cloud/datastore'
+import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
 let datastore: Datastore
 const getDatastore = () => {
@@ -15,14 +16,18 @@ enum Entity {
   PROMPT = 'prompt',
 }
 
-const fetchLimit = 100
-
 const getID = (entity: any) => Number(entity[getDatastore().KEY].id)
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
-const buildQuery = (type: string, key: string, value: {}, limit: number = 1) =>
-  getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
+const buildEntityQuery = (type: string, key: string, value: {}) =>
+  getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(1)
+
+const buildMultiQuery = (type: string, filter: EntityFilter, limit: number = 100) =>
+  getDatastore().createQuery(type).filter(filter).order('createdAt', { descending: true }).limit(limit)
+
+const buildQuery = (type: string, key: string, value: {}, limit?: number) =>
+  buildMultiQuery(type, new PropertyFilter(key, '=', value), limit)
 
 const toUser = (data?: any): User | undefined =>
   data ? { id: getID(data), email: data.email, isAdmin: data.isAdmin } : data
@@ -33,7 +38,7 @@ export async function getUser(userID: number): Promise<User | undefined> {
 }
 
 export async function getUserForEmail(email: string): Promise<User | undefined> {
-  const [[userData]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
+  const [[userData]] = await getDatastore().runQuery(buildEntityQuery(Entity.USER, 'email', email))
   return toUser(userData)
 }
 
@@ -72,8 +77,8 @@ export async function addProjectForUser(userID: number) {
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const datastore = getDatastore()
-  const [projects] = await datastore.runQuery(buildQuery(Entity.PROJECT, 'userID', userID, fetchLimit))
-  const [prompts] = await datastore.runQuery(buildQuery(Entity.PROMPT, 'userID', userID, fetchLimit))
+  const [projects] = await datastore.runQuery(buildQuery(Entity.PROJECT, 'userID', userID))
+  const [prompts] = await datastore.runQuery(buildQuery(Entity.PROMPT, 'userID', userID))
   return projects.map(project => toProject(project, prompts)) as Project[]
 }
 
@@ -82,10 +87,10 @@ const toPrompt = (data?: any): Prompt | undefined => (data ? { id: getID(data), 
 export async function addPromptForUser(userID: number, projectID: number) {
   const datastore = getDatastore()
   const [existingPrompts] = await datastore.runQuery(
-    datastore
-      .createQuery(Entity.PROMPT)
-      .filter(and([new PropertyFilter('userID', '=', userID), new PropertyFilter('projectID', '=', projectID)]))
-      .limit(fetchLimit)
+    buildMultiQuery(
+      Entity.PROMPT,
+      and([new PropertyFilter('userID', '=', userID), new PropertyFilter('projectID', '=', projectID)])
+    )
   )
   const existingNames = new Set(existingPrompts.map(prompt => prompt.prompt))
   const prompt = uniqueName('New Prompt', existingNames)

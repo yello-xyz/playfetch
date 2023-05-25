@@ -1,0 +1,19 @@
+indexes:
+
+- kind: project
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: prompt
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: prompt
+  properties:
+  - name: projectID
+  - name: createdAt
+    direction: desc
