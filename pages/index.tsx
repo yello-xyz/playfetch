@@ -37,8 +37,8 @@ export default function Home({ projects }: { projects: Project[] }) {
 
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
-      <PendingButton onClick={addProject}>Add New Project</PendingButton>
       <Sidebar>
+      <PendingButton onClick={addProject}>Add New Project</PendingButton>
         <Sidebar.Items>
           {projects.map((project, index) => (
             <Sidebar.Collapse
