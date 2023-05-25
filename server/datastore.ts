@@ -1,3 +1,4 @@
+import { Project, Prompt, User } from '@/types'
 import { Datastore, PropertyFilter } from '@google-cloud/datastore'
 
 let datastore: Datastore
@@ -23,12 +24,6 @@ const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id
 const buildQuery = (type: string, key: string, value: {}, limit: number = 1) =>
   getDatastore().createQuery(type).filter(new PropertyFilter(key, '=', value)).limit(limit)
 
-type User = {
-  id: number
-  email: string
-  isAdmin: boolean
-}
-
 const toUser = (data?: any): User | undefined =>
   data ? { id: getID(data), email: data.email, isAdmin: data.isAdmin } : data
 
@@ -48,26 +43,9 @@ export async function saveUser(email: string, isAdmin: boolean) {
   await getDatastore().save({ key, data: { email, isAdmin } })
 }
 
-type Prompt = {
-  id: number
-  prompt: string
-}
-
-export async function addPromptForUser(userID: number, projectID: number, prompt: string) {
-  const datastore = getDatastore()
-  const key = buildKey(Entity.PROMPT)
-  await datastore.save({ key, data: { userID, projectID, prompt } })
-}
-
-type Project = {
-  id: number
-  name: string
-  prompts: Prompt[]
-}
-
 const toProject = (data: any | undefined, prompts: any[]): Project | undefined =>
   data
-    ? { id: getID(data), name: data.name, prompts: prompts.filter(prompt => prompt.projectID === getID(data)) }
+    ? { id: getID(data), name: data.name, prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt) }
     : data
 
 const uniqueName = (name: string, existingNames: Set<string>) => {
@@ -91,4 +69,12 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const [projects] = await getDatastore().runQuery(buildQuery(Entity.PROJECT, 'userID', userID, fetchLimit))
   const [prompts] = await getDatastore().runQuery(buildQuery(Entity.PROMPT, 'userID', userID, fetchLimit))
   return projects.map(project => toProject(project, prompts)) as Project[]
+}
+
+const toPrompt = (data?: any): Prompt | undefined => (data ? { id: getID(data), prompt: data.prompt } : data)
+
+export async function addPromptForUser(userID: number, projectID: number, prompt: string) {
+  const datastore = getDatastore()
+  const key = buildKey(Entity.PROMPT)
+  await datastore.save({ key, data: { userID, projectID, prompt } })
 }
