@@ -92,3 +92,12 @@ export async function addPromptForUser(userID: number, projectID: number) {
   const key = buildKey(Entity.PROMPT)
   await datastore.save({ key, data: { userID, projectID, prompt } })
 }
+
+export async function savePromptForUser(userID: number, promptID: number, prompt: string) {
+  const datastore = getDatastore()
+  const key = buildKey(Entity.PROMPT, promptID)
+  const [promptData] = await datastore.get(buildKey(Entity.PROMPT, promptID))
+  if (promptData.userID === userID) {
+    await datastore.save({ key, data: { ...promptData, prompt } })
+  }
+}

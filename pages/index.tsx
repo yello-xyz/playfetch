@@ -35,6 +35,11 @@ export default function Home({ projects }: { projects: Project[] }) {
     router.refresh()
   }
 
+  const updatePrompt = async () => {
+    await api.updatePrompt(activePromptID, prompt)
+    router.refresh()
+  }
+
   const logout = async () => {
     await api.logout()
     router.refresh()
@@ -53,7 +58,7 @@ export default function Home({ projects }: { projects: Project[] }) {
         <Sidebar.Items>
           {projects.map((project, projectIndex) => (
             <Sidebar.Collapse key={projectIndex} label={project.name}>
-              <PendingButton onClick={() => addPrompt(project.id)}>Add Prompt</PendingButton>
+              <Sidebar.Item><PendingButton onClick={() => addPrompt(project.id)}>Add Prompt</PendingButton></Sidebar.Item>
               {project.prompts.map((prompt, promptIndex) => (
                 <Sidebar.Item key={promptIndex} onClick={() => setActivePromptID(prompt.id)}>
                   {prompt.prompt}
@@ -68,7 +73,7 @@ export default function Home({ projects }: { projects: Project[] }) {
           <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
         </div>
         <div>
-          <PendingButton onClick={() => {}}>Save Prompt</PendingButton>
+          <PendingButton onClick={updatePrompt}>Save Prompt</PendingButton>
         </div>
       </div>
     </main>

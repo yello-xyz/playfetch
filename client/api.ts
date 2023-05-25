@@ -37,6 +37,9 @@ const api = {
   addPrompt: async function (projectID: number) {
     return post(this.addPrompt, { projectID })
   },
+  updatePrompt: async function (promptID: number, prompt: string) {
+    return post(this.updatePrompt, { promptID, prompt })
+  },
 }
 
 export default api
