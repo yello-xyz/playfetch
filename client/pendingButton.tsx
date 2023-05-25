@@ -1,7 +1,13 @@
 import { Button } from 'flowbite-react'
 import { ReactNode, useState } from 'react'
 
-export default function PendingButton({ children, onClick }: { children: ReactNode; onClick: () => Promise<void> }) {
+export default function PendingButton({
+  children,
+  onClick,
+}: {
+  children: ReactNode
+  onClick: () => void | Promise<void>
+}) {
   const [isPending, setPending] = useState(false)
 
   const handleClick = async () => {

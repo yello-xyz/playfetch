@@ -34,8 +34,8 @@ const api = {
   addProject: async function () {
     return post(this.addProject)
   },
-  addPrompt: async function (projectID: number, prompt: string) {
-    return post(this.addPrompt, { projectID, prompt })
+  addPrompt: async function (projectID: number) {
+    return post(this.addPrompt, { projectID })
   },
 }
 

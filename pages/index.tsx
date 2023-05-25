@@ -4,10 +4,10 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/navigation'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Sidebar } from 'flowbite-react'
-import { Project } from '@/types'
+import { Project, Prompt } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -19,15 +19,19 @@ export const getServerSideProps = withLoggedInSession(async ({ req }) => ({
 export default function Home({ projects }: { projects: Project[] }) {
   const router = useRouter()
   const [prompt, setPrompt] = useState('')
-  const [activeProjectID, setActiveProjectID] = useState(projects[0].id)
+  const [activePromptID, setActivePromptID] = useState(projects[0].prompts[0].id)
+
+  useEffect(() => {
+    setPrompt(projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt)
+  }, [activePromptID])
 
   const addProject = async () => {
     await api.addProject()
     router.refresh()
   }
 
-  const addPrompt = async () => {
-    await api.addPrompt(activeProjectID, prompt)
+  const addPrompt = async (projectID: number) => {
+    await api.addPrompt(projectID)
     router.refresh()
   }
 
@@ -47,25 +51,24 @@ export default function Home({ projects }: { projects: Project[] }) {
           </PendingButton>
         </div>
         <Sidebar.Items>
-          {projects.map((project, index) => (
-            <Sidebar.Collapse
-              key={index}
-              label={project.name}
-              open={project.id === activeProjectID}
-              onClick={() => setActiveProjectID(project.id)}>
+          {projects.map((project, projectIndex) => (
+            <Sidebar.Collapse key={projectIndex} label={project.name}>
+              <PendingButton onClick={() => addPrompt(project.id)}>Add Prompt</PendingButton>
               {project.prompts.map((prompt, promptIndex) => (
-                <Sidebar.Item key={promptIndex}>{prompt.prompt}</Sidebar.Item>
+                <Sidebar.Item key={promptIndex} onClick={() => setActivePromptID(prompt.id)}>
+                  {prompt.prompt}
+                </Sidebar.Item>
               ))}
             </Sidebar.Collapse>
           ))}
         </Sidebar.Items>
       </Sidebar>
-      <div className='flex flex-col gap-4 p-10 grow'>
+      <div className='flex flex-col gap-4 p-8 grow'>
         <div className='self-stretch'>
           <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
         </div>
         <div>
-          <PendingButton onClick={addPrompt}>Add Prompt</PendingButton>
+          <PendingButton onClick={() => {}}>Save Prompt</PendingButton>
         </div>
       </div>
     </main>
