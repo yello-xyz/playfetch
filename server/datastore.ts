@@ -39,10 +39,17 @@ type User = {
   isAdmin: boolean
 }
 
-export async function getUser(userID: number) {
+const toUser = (user?: any): User | undefined => user ? addID({ email: user.email, isAdmin: user.isAdmin }) : user
+
+export async function getUser(userID: number): Promise<User | undefined> {
   const datastore = getDatastore()
-  const [user] = await datastore.get(buildKey(Entity.USER, userID))
-  return addID(user)
+  const [userData] = await datastore.get(buildKey(Entity.USER, userID))
+  return toUser(userData)
+}
+
+export async function getUserForEmail(email: string): Promise<User | undefined> {
+  const [[userData]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
+  return toUser(userData)
 }
 
 export async function saveUser(email: string, isAdmin: boolean) {
@@ -50,9 +57,4 @@ export async function saveUser(email: string, isAdmin: boolean) {
   const user = await getUserForEmail(email)
   const key = buildKey(Entity.USER, user?.id)
   await datastore.save({ key, data: { email, isAdmin } })
-}
-
-export async function getUserForEmail(email: string): Promise<User | undefined> {
-  const [[user]] = await getDatastore().runQuery(buildQuery(Entity.USER, 'email', email))
-  return addID(user)
 }
