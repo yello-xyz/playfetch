@@ -41,7 +41,11 @@ export default function Home({ projects }: { projects: Project[] }) {
       <Sidebar>
         <Sidebar.Items>
           {projects.map((project, index) => (
-            <Sidebar.Collapse key={index} label={project.name}>
+            <Sidebar.Collapse
+              key={index}
+              label={project.name}
+              open={project.id === activeProjectID}
+              onClick={() => setActiveProjectID(project.id)}>
               {project.prompts.map((prompt, promptIndex) => (
                 <Sidebar.Item key={promptIndex}>{prompt.prompt}</Sidebar.Item>
               ))}
