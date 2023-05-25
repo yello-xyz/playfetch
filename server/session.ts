@@ -5,6 +5,7 @@ import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } f
 declare module 'iron-session' {
   interface IronSessionData {
     user?: {
+      id: number
       email: string
       isAdmin: boolean
     }

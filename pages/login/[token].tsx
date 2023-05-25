@@ -8,10 +8,9 @@ export const getServerSideProps = withSession(async (context) => {
   const seal = Buffer.from(token, 'base64').toString()
   const { id } = await unsealData(seal, { password: process.env.TOKEN_SECRET ?? '' }) as { id: number }
   if (id) {
-    const user = await getUser(id as number)
+    const user = await getUser(id)
     if (user) {
-      const { email, isAdmin } = user
-      context.req.session.user = { email, isAdmin }
+      context.req.session.user = user
       await context.req.session.save()
       return { redirect: { destination: ClientRoute.Home, permanent: false } }
     }
