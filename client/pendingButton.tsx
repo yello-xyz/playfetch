@@ -3,9 +3,11 @@ import { ReactNode, useState } from 'react'
 
 export default function PendingButton({
   children,
+  disabled,
   onClick,
 }: {
   children: ReactNode
+  disabled?: boolean
   onClick: () => void | Promise<void>
 }) {
   const [isPending, setPending] = useState(false)
@@ -17,7 +19,7 @@ export default function PendingButton({
   }
 
   return (
-    <Button gradientDuoTone='purpleToBlue' size='sm' pill={true} disabled={isPending} onClick={handleClick}>
+    <Button disabled={disabled || isPending} gradientDuoTone='purpleToBlue' size='sm' pill={true} onClick={handleClick}>
       {children}
     </Button>
   )

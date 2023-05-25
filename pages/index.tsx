@@ -21,8 +21,10 @@ export default function Home({ projects }: { projects: Project[] }) {
   const [prompt, setPrompt] = useState('')
   const [activePromptID, setActivePromptID] = useState(projects[0].prompts[0].id)
 
+  const getActivePrompt = () => projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!
+
   useEffect(() => {
-    setPrompt(projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt)
+    setPrompt(getActivePrompt().prompt)
   }, [activePromptID])
 
   const addProject = async () => {
@@ -73,7 +75,7 @@ export default function Home({ projects }: { projects: Project[] }) {
           <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
         </div>
         <div>
-          <PendingButton onClick={updatePrompt}>Save Prompt</PendingButton>
+          <PendingButton disabled={prompt === getActivePrompt().prompt} onClick={updatePrompt}>Save Prompt</PendingButton>
         </div>
       </div>
     </main>
