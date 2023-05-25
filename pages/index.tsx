@@ -6,7 +6,7 @@ import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
-import { Accordion, Badge } from 'flowbite-react'
+import { Sidebar } from 'flowbite-react'
 import { Project } from '@/types'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -38,20 +38,17 @@ export default function Home({ projects }: { projects: Project[] }) {
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
       <PendingButton onClick={addProject}>Add New Project</PendingButton>
-      <Accordion>
-        {projects.map((project, index) => (
-          <Accordion.Panel key={index}>
-            <Accordion.Title onClickCapture={() => setActiveProjectID(project.id)}>{project.name}</Accordion.Title>
-            <Accordion.Content>
+      <Sidebar>
+        <Sidebar.Items>
+          {projects.map((project, index) => (
+            <Sidebar.Collapse key={index} label={project.name}>
               {project.prompts.map((prompt, promptIndex) => (
-                <Badge key={promptIndex} className='mb-2'>
-                  {prompt.prompt}
-                </Badge>
+                <Sidebar.Item key={promptIndex}>{prompt.prompt}</Sidebar.Item>
               ))}
-            </Accordion.Content>
-          </Accordion.Panel>
-        ))}
-      </Accordion>
+            </Sidebar.Collapse>
+          ))}
+        </Sidebar.Items>
+      </Sidebar>
       <div className='self-stretch'>
         <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
       </div>
