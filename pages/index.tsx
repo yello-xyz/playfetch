@@ -17,6 +17,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req }) => ({
 export default function Home({ projects }: { projects: { id: number; name: string }[] }) {
   const router = useRouter()
   const [prompt, setPrompt] = useState('')
+  const [activeProjectID, setActiveProjectID] = useState(projects[0]?.id)
 
   const addProject = async () => {
     await api.addProject()
@@ -24,7 +25,7 @@ export default function Home({ projects }: { projects: { id: number; name: strin
   }
 
   const addPrompt = async () => {
-    await api.addPrompt(prompt)
+    await api.addPrompt(activeProjectID, prompt)
     router.refresh()
   }
 
@@ -35,14 +36,14 @@ export default function Home({ projects }: { projects: { id: number; name: strin
 
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
+      <PendingButton onClick={addProject}>Add New Project</PendingButton>
       <Accordion alwaysOpen={true}>
         {projects.map((project, index) => (
-          <Accordion.Panel key={index}>
+          <Accordion.Panel key={index} setOpen={() => setActiveProjectID(project.id)}>
             <Accordion.Title>{project.name}</Accordion.Title>
           </Accordion.Panel>
         ))}
       </Accordion>
-      <PendingButton onClick={addProject}>Add Project</PendingButton>
       <div className='self-stretch'>
         <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
       </div>
