@@ -1,4 +1,4 @@
-import ClientRoute from '@/client/clientRoute'
+import ClientRoute, { Redirect } from '@/client/clientRoute'
 import { withIronSessionApiRoute, withIronSessionSsr } from 'iron-session/next'
 import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from 'next'
 
@@ -58,7 +58,7 @@ export function withLoggedInSession<P extends UnknownRecord = UnknownRecord>(han
     if (context.req.session.user) {
       return handler(context)
     } else {
-      return { redirect: { destination: ClientRoute.Login, permanent: false } }
+      return Redirect(ClientRoute.Login)
     }
   })
 }
@@ -68,7 +68,7 @@ export function withAdminSession<P extends UnknownRecord = UnknownRecord>(handle
     if (context.req.session.user?.isAdmin) {
       return handler(context)
     } else {
-      return { redirect: { destination: ClientRoute.Home, permanent: false } }
+      return Redirect(ClientRoute.Home)
     }
   })
 }
@@ -76,7 +76,7 @@ export function withAdminSession<P extends UnknownRecord = UnknownRecord>(handle
 export function withLoggedOutSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
   return withSession(async context => {
     if (context.req.session.user) {
-      return { redirect: { destination: ClientRoute.Home, permanent: false } }
+      return Redirect(ClientRoute.Home)
     } else {
       return handler(context)
     }

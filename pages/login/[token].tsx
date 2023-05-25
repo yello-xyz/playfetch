@@ -1,6 +1,6 @@
 import { withSession } from '@/server/session'
 import { unsealData } from 'iron-session'
-import ClientRoute, { ParseQuery } from '@/client/clientRoute'
+import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
 import { getUser } from '@/server/datastore'
 
 export const getServerSideProps = withSession(async (context) => {
@@ -12,10 +12,10 @@ export const getServerSideProps = withSession(async (context) => {
     if (user) {
       context.req.session.user = user
       await context.req.session.save()
-      return { redirect: { destination: ClientRoute.Home, permanent: false } }
+      return Redirect(ClientRoute.Home)
     }
   }
-  return { redirect: { destination: ClientRoute.Login, permanent: false } }
+  return Redirect(ClientRoute.Login)
 })
 
 export default function Token() {
