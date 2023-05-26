@@ -75,9 +75,6 @@ export default function Home({
     await refreshData()
   }
 
-  const formatDate = (timestamp: string) =>
-    `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
-
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <Sidebar>
@@ -120,19 +117,28 @@ export default function Home({
             Save Prompt
           </PendingButton>
         </div>
-        <Timeline>
-          {versions.map((version, index) => (
-            <Timeline.Item key={index}>
-              <Timeline.Point />
-              <Timeline.Content>
-                <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
-                {(version as any).title && <Timeline.Title></Timeline.Title>}
-                <Timeline.Body>{version.prompt}</Timeline.Body>
-              </Timeline.Content>
-            </Timeline.Item>
-          ))}
-        </Timeline>
+        <VersionTimeline versions={versions} />
       </div>
     </main>
+  )
+}
+
+function VersionTimeline({ versions }: { versions: Version[] }) {
+  const formatDate = (timestamp: string) =>
+    `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
+
+  return (
+    <Timeline>
+      {versions.map((version, index) => (
+        <Timeline.Item key={index}>
+          <Timeline.Point />
+          <Timeline.Content>
+            <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
+            {(version as any).title && <Timeline.Title></Timeline.Title>}
+            <Timeline.Body>{version.prompt}</Timeline.Body>
+          </Timeline.Content>
+        </Timeline.Item>
+      ))}
+    </Timeline>
   )
 }
