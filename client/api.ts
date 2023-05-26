@@ -1,3 +1,4 @@
+import { Version } from "@/types"
 import ClientRoute from "./clientRoute"
 
 async function parseResponse(response: Response) {
@@ -39,6 +40,9 @@ const api = {
   },
   updatePrompt: function (promptID: number, prompt: string) {
     return post(this.updatePrompt, { promptID, prompt })
+  },
+  getPromptVersions: function (promptID: number): Promise<Version[]> {
+    return post(this.getPromptVersions, { promptID })
   },
 }
 

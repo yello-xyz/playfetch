@@ -17,3 +17,9 @@ indexes:
   - name: projectID
   - name: createdAt
     direction: desc
+
+- kind: version
+  properties:
+  - name: promptID
+  - name: createdAt
+    direction: desc

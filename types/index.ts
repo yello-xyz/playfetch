@@ -14,3 +14,9 @@ export type Prompt = {
   id: number
   prompt: string
 }
+
+export type Version = {
+  id: number
+  timestamp: string
+  prompt: string
+}

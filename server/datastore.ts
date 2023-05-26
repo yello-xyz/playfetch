@@ -1,4 +1,4 @@
-import { Project, Prompt, User } from '@/types'
+import { Project, Prompt, User, Version } from '@/types'
 import { Datastore, PropertyFilter, and } from '@google-cloud/datastore'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
@@ -14,9 +14,12 @@ enum Entity {
   USER = 'user',
   PROJECT = 'project',
   PROMPT = 'prompt',
+  VERSION = 'version',
 }
 
 const getID = (entity: any) => Number(entity[getDatastore().KEY].id)
+
+const getTimestamp = (entity: any) => (entity.createdAt as Date).toISOString()
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
@@ -32,17 +35,16 @@ const getEntities = (type: string, key: string, value: {}, limit?: number) =>
 const getEntity = async (type: string, key: string, value: {}) =>
   getEntities(type, key, value, 1).then(([entity]) => entity)
 
-const toUser = (data?: any): User | undefined =>
-  data ? { id: getID(data), email: data.email, isAdmin: data.isAdmin } : data
+const toUser = (data: any): User => ({ id: getID(data), email: data.email, isAdmin: data.isAdmin })
 
 export async function getUser(userID: number): Promise<User | undefined> {
   const [userData] = await getDatastore().get(buildKey(Entity.USER, userID))
-  return toUser(userData)
+  return userData ? toUser(userData) : userData
 }
 
 export async function getUserForEmail(email: string): Promise<User | undefined> {
   const [[userData]] = await getEntity(Entity.USER, 'email', email)
-  return toUser(userData)
+  return userData ? toUser(userData) : userData
 }
 
 export async function saveUser(email: string, isAdmin: boolean) {
@@ -51,14 +53,11 @@ export async function saveUser(email: string, isAdmin: boolean) {
   await getDatastore().save({ key, data: { email, isAdmin, createdAt: new Date() } })
 }
 
-const toProject = (data: any | undefined, prompts: any[]): Project | undefined =>
-  data
-    ? {
-        id: getID(data),
-        name: data.name,
-        prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
-      }
-    : data
+const toProject = (data: any, prompts: any[]): Project => ({
+  id: getID(data),
+  name: data.name,
+  prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
+})
 
 const uniqueName = (name: string, existingNames: Set<string>) => {
   let uniqueName = name
@@ -81,10 +80,10 @@ export async function addProjectForUser(userID: number): Promise<number> {
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const [projects] = await getEntities(Entity.PROJECT, 'userID', userID)
   const [prompts] = await getEntities(Entity.PROMPT, 'userID', userID)
-  return projects.map(project => toProject(project, prompts)) as Project[]
+  return projects.map(project => toProject(project, prompts))
 }
 
-const toPrompt = (data?: any): Prompt | undefined => (data ? { id: getID(data), prompt: data.prompt } : data)
+const toPrompt = (data: any): Prompt => ({ id: getID(data), prompt: data.prompt })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   const [existingPrompts] = await getFilteredEntities(
@@ -104,5 +103,18 @@ export async function savePromptForUser(userID: number, promptID: number, prompt
   const [promptData] = await datastore.get(buildKey(Entity.PROMPT, promptID))
   if (promptData.userID === userID) {
     await datastore.save({ key, data: { ...promptData, prompt } })
+    await saveVersion(userID, promptID, prompt)
   }
+}
+
+async function saveVersion(userID: number, promptID: number, prompt: string) {
+  const key = buildKey(Entity.VERSION)
+  await getDatastore().save({ key, data: { userID, promptID, prompt, createdAt: new Date() } })
+}
+
+const toVersion = (data: any): Version => ({ id: getID(data), timestamp: getTimestamp(data), prompt: data.prompt })
+
+export async function getVersionsForPrompt(userID: number, promptID: number): Promise<Version[]> {
+  const [versions] = await getEntities(Entity.VERSION, 'promptID', promptID)
+  return versions.filter(version => version.userID === userID).map(toVersion)
 }
