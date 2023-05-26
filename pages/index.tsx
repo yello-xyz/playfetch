@@ -34,36 +34,38 @@ export default function Home({
   initialVersions: Version[]
 }) {
   const router = useRouter()
-  const [prompt, setPrompt] = useState('')
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
 
-  const getActivePrompt = () =>
-    projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!
+  const [prompt, setPrompt] = useState('')
 
-  useEffect(() => {
-    api.getPromptVersions(activePromptID).then(setVersions)
-    setPrompt(getActivePrompt().prompt)
-  }, [activePromptID])
+  const getPrompt = (promptID = activePromptID) =>
+    projects.flatMap(project => project.prompts).find(prompt => prompt.id === promptID)!.prompt
+
+  const updateActivePromptID = (promptID: number) => {
+    setActivePromptID(promptID)
+    setPrompt(getPrompt(promptID))
+    api.getPromptVersions(promptID).then(setVersions)
+  }
 
   const refreshData = async () => router.replace(router.asPath)
 
   const addProject = async () => {
     const promptID = await api.addProject()
     await refreshData()
-    setActivePromptID(promptID)
+    updateActivePromptID(promptID)
   }
 
   const addPrompt = async (projectID: number) => {
     const promptID = await api.addPrompt(projectID)
     await refreshData()
-    setActivePromptID(promptID)
+    updateActivePromptID(promptID)
   }
 
   const updatePrompt = async () => {
     await api.updatePrompt(activePromptID, prompt)
     await refreshData()
-    setVersions(initialVersions)
+    updateActivePromptID(activePromptID)
   }
 
   const logout = async () => {
@@ -94,7 +96,7 @@ export default function Home({
                 <Sidebar.Item
                   key={promptIndex}
                   active={activePromptID === prompt.id}
-                  onClick={() => setActivePromptID(prompt.id)}>
+                  onClick={() => updateActivePromptID(prompt.id)}>
                   {prompt.prompt}
                 </Sidebar.Item>
               ))}
@@ -107,7 +109,7 @@ export default function Home({
           <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
         </div>
         <div>
-          <PendingButton disabled={prompt === getActivePrompt().prompt} onClick={updatePrompt}>
+          <PendingButton disabled={prompt === getPrompt()} onClick={updatePrompt}>
             Save Prompt
           </PendingButton>
         </div>
