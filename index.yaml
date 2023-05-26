@@ -1,5 +1,11 @@
 indexes:
 
+- kind: user
+  properties:
+  - name: email
+  - name: createdAt
+    direction: desc
+
 - kind: project
   properties:
   - name: userID

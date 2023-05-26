@@ -33,17 +33,22 @@ const getEntities = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredEntities(type, new PropertyFilter(key, '=', value), limit)
 
 const getEntity = async (type: string, key: string, value: {}) =>
-  getEntities(type, key, value, 1).then(([entity]) => entity)
+  getEntities(type, key, value, 1).then(([[entity]]) => entity)
 
 const toUser = (data: any): User => ({ id: getID(data), email: data.email, isAdmin: data.isAdmin })
 
-export async function getUser(userID: number): Promise<User | undefined> {
-  const [userData] = await getDatastore().get(buildKey(Entity.USER, userID))
+export async function markUserLogin(userID: number): Promise<User | undefined> {
+  const key = buildKey(Entity.USER, userID)
+  const [userData] = await getDatastore().get(key)
+  if (userData) {
+    const lastLoginAt = new Date()
+    await getDatastore().save({ key, data: { ...userData, lastLoginAt } })
+  }
   return userData ? toUser(userData) : userData
 }
 
 export async function getUserForEmail(email: string): Promise<User | undefined> {
-  const [[userData]] = await getEntity(Entity.USER, 'email', email)
+  const userData = await getEntity(Entity.USER, 'email', email)
   return userData ? toUser(userData) : userData
 }
 

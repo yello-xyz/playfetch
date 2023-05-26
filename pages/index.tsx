@@ -45,6 +45,7 @@ export default function Home({
   const updateActivePromptID = (promptID: number) => {
     setActivePromptID(promptID)
     setPrompt(getPrompt(promptID))
+    setVersions([])
     api.getPromptVersions(promptID).then(setVersions)
   }
 
