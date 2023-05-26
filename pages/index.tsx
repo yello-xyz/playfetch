@@ -37,29 +37,29 @@ export default function Home({
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersionID, setActiveVersionID] = useState<number>()
-  const [prompt, setPrompt] = useState<string>()
 
-  const activePrompt = projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
-  const activeTimestamp = activeVersionID
-    ? versions.find(version => version.id === activeVersionID)!.timestamp
-    : undefined
-  const newerVersions = versions.filter(
-    version => activeTimestamp && new Date(version.timestamp) > new Date(activeTimestamp)
-  )
+  const activeVersion = activeVersionID ? versions.find(version => version.id === activeVersionID) : undefined
+  const activeTimestamp = activeVersion ? new Date(activeVersion.timestamp) : undefined
+  const newerVersions = versions.filter(version => activeTimestamp && new Date(version.timestamp) > activeTimestamp)
   const olderVersions = activeTimestamp
-    ? versions.filter(version => new Date(version.timestamp) < new Date(activeTimestamp))
+    ? versions.filter(version => new Date(version.timestamp) < activeTimestamp)
     : versions.slice(1)
+
+  const activePrompt = activeVersion
+    ? activeVersion.prompt
+    : projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
 
   const updateActivePrompt = (promptID: number) => {
     setActivePromptID(promptID)
-    setPrompt(undefined)
     setActiveVersionID(undefined)
+    if (promptID !== activePromptID) {
+      setVersions([])
+    }
     api.getPromptVersions(promptID).then(setVersions)
   }
 
   const updateActiveVersion = (version: Version) => {
     setActiveVersionID(version.id)
-    setPrompt(version.prompt)
   }
 
   const refreshData = async () => router.replace(router.asPath)
@@ -76,7 +76,7 @@ export default function Home({
     updateActivePrompt(promptID)
   }
 
-  const updatePrompt = async () => {
+  const updatePrompt = async (prompt: string) => {
     if (prompt) {
       await api.updatePrompt(activePromptID, prompt)
       await refreshData()
@@ -119,22 +119,27 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 grow'>
         {activeVersionID && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
-        <div className='self-stretch'>
-          <LabeledTextInput
-            label='Prompt'
-            placeholder='Enter your prompt...'
-            value={prompt ?? activePrompt}
-            setValue={setPrompt}
-          />
-        </div>
-        <div>
-          <PendingButton disabled={prompt === activePrompt} onClick={updatePrompt}>
-            Save Prompt
-          </PendingButton>
-        </div>
+        <PromptPanel key={activePrompt} initialPrompt={activePrompt} onSave={updatePrompt} />
         <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
     </main>
+  )
+}
+
+function PromptPanel({ initialPrompt, onSave }: { initialPrompt: string; onSave: (prompt: string) => void }) {
+  const [prompt, setPrompt] = useState<string>(initialPrompt)
+
+  return (
+    <>
+      <div className='self-stretch'>
+        <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
+      </div>
+      <div>
+        <PendingButton disabled={prompt === initialPrompt} onClick={() => onSave(prompt)}>
+          Save Prompt
+        </PendingButton>
+      </div>
+    </>
   )
 }
 
@@ -145,7 +150,7 @@ function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect
   return (
     <Timeline>
       {versions.map((version, index) => (
-        <Timeline.Item key={index} onClick={() => onSelect(version)}>
+        <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(version)}>
           <Timeline.Point />
           <Timeline.Content>
             <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
