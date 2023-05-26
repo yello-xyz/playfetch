@@ -4,7 +4,7 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Sidebar, Timeline } from 'flowbite-react'
 import { Project, Version } from '@/types'
@@ -37,14 +37,13 @@ export default function Home({
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
 
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState<string>()
 
-  const getPrompt = (promptID = activePromptID) =>
-    projects.flatMap(project => project.prompts).find(prompt => prompt.id === promptID)!.prompt
+  const activePrompt = projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
 
   const updateActivePromptID = (promptID: number) => {
     setActivePromptID(promptID)
-    setPrompt(getPrompt(promptID))
+    setPrompt(undefined)
     setVersions([])
     api.getPromptVersions(promptID).then(setVersions)
   }
@@ -64,9 +63,11 @@ export default function Home({
   }
 
   const updatePrompt = async () => {
-    await api.updatePrompt(activePromptID, prompt)
-    await refreshData()
-    updateActivePromptID(activePromptID)
+    if (prompt) {
+      await api.updatePrompt(activePromptID, prompt)
+      await refreshData()
+      updateActivePromptID(activePromptID)
+    }
   }
 
   const logout = async () => {
@@ -107,10 +108,15 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 grow'>
         <div className='self-stretch'>
-          <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
+          <LabeledTextInput
+            label='Prompt'
+            placeholder='Enter your prompt...'
+            value={prompt ?? activePrompt}
+            setValue={setPrompt}
+          />
         </div>
         <div>
-          <PendingButton disabled={prompt === getPrompt()} onClick={updatePrompt}>
+          <PendingButton disabled={prompt === activePrompt} onClick={updatePrompt}>
             Save Prompt
           </PendingButton>
         </div>
