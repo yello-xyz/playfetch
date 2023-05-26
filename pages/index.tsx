@@ -1,7 +1,7 @@
 import { addProjectForUser, getProjectsForUser } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useEffect, useState } from 'react'
@@ -34,24 +34,26 @@ export default function Home({ projects }: { projects: Project[] }) {
     setPrompt(getActivePrompt().prompt)
   }, [activePromptID])
 
+  const refreshData = async () => router.replace(router.asPath)
+
   const addProject = async () => {
     await api.addProject()
-    router.refresh()
+    await refreshData()
   }
 
   const addPrompt = async (projectID: number) => {
     await api.addPrompt(projectID)
-    router.refresh()
+    await refreshData()
   }
 
   const updatePrompt = async () => {
     await api.updatePrompt(activePromptID, prompt)
-    router.refresh()
+    await refreshData()
   }
 
   const logout = async () => {
     await api.logout()
-    router.refresh()
+    await refreshData()
   }
 
   return (
@@ -71,7 +73,10 @@ export default function Home({ projects }: { projects: Project[] }) {
                 <PendingButton onClick={() => addPrompt(project.id)}>Add Prompt</PendingButton>
               </Sidebar.Item>
               {project.prompts.map((prompt, promptIndex) => (
-                <Sidebar.Item key={promptIndex} onClick={() => setActivePromptID(prompt.id)}>
+                <Sidebar.Item
+                  key={promptIndex}
+                  active={activePromptID === prompt.id}
+                  onClick={() => setActivePromptID(prompt.id)}>
                   {prompt.prompt}
                 </Sidebar.Item>
               ))}
