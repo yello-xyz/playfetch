@@ -37,13 +37,15 @@ export default function Home({ projects }: { projects: Project[] }) {
   const refreshData = async () => router.replace(router.asPath)
 
   const addProject = async () => {
-    await api.addProject()
+    const promptID = await api.addProject()
     await refreshData()
+    setActivePromptID(promptID)
   }
 
   const addPrompt = async (projectID: number) => {
-    await api.addPrompt(projectID)
+    const promptID = await api.addPrompt(projectID)
     await refreshData()
+    setActivePromptID(promptID)
   }
 
   const updatePrompt = async () => {

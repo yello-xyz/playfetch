@@ -25,19 +25,19 @@ const post = (apiCall: Function, json: any = {}) => {
 }
 
 const api = {
-  login: async function (email: string) {
+  login: function (email: string) {
     return post(this.login, { email })
   },
   logout: async function () {
     return post(this.logout)
   },
-  addProject: async function () {
+  addProject: function (): Promise<number> {
     return post(this.addProject)
   },
-  addPrompt: async function (projectID: number) {
+  addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
-  updatePrompt: async function (promptID: number, prompt: string) {
+  updatePrompt: function (promptID: number, prompt: string) {
     return post(this.updatePrompt, { promptID, prompt })
   },
 }
