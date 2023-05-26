@@ -36,16 +36,30 @@ export default function Home({
   const router = useRouter()
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
-
+  const [activeVersionID, setActiveVersionID] = useState<number>()
   const [prompt, setPrompt] = useState<string>()
 
   const activePrompt = projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
+  const activeTimestamp = activeVersionID
+    ? versions.find(version => version.id === activeVersionID)!.timestamp
+    : undefined
+  const newerVersions = versions.filter(
+    version => activeTimestamp && new Date(version.timestamp) > new Date(activeTimestamp)
+  )
+  const olderVersions = activeTimestamp
+    ? versions.filter(version => new Date(version.timestamp) < new Date(activeTimestamp))
+    : versions.slice(1)
 
-  const updateActivePromptID = (promptID: number) => {
+  const updateActivePrompt = (promptID: number) => {
     setActivePromptID(promptID)
     setPrompt(undefined)
-    setVersions([])
+    setActiveVersionID(undefined)
     api.getPromptVersions(promptID).then(setVersions)
+  }
+
+  const updateActiveVersion = (version: Version) => {
+    setActiveVersionID(version.id)
+    setPrompt(version.prompt)
   }
 
   const refreshData = async () => router.replace(router.asPath)
@@ -53,20 +67,20 @@ export default function Home({
   const addProject = async () => {
     const promptID = await api.addProject()
     await refreshData()
-    updateActivePromptID(promptID)
+    updateActivePrompt(promptID)
   }
 
   const addPrompt = async (projectID: number) => {
     const promptID = await api.addPrompt(projectID)
     await refreshData()
-    updateActivePromptID(promptID)
+    updateActivePrompt(promptID)
   }
 
   const updatePrompt = async () => {
     if (prompt) {
       await api.updatePrompt(activePromptID, prompt)
       await refreshData()
-      updateActivePromptID(activePromptID)
+      updateActivePrompt(activePromptID)
     }
   }
 
@@ -95,7 +109,7 @@ export default function Home({
                 <Sidebar.Item
                   key={promptIndex}
                   active={activePromptID === prompt.id}
-                  onClick={() => updateActivePromptID(prompt.id)}>
+                  onClick={() => updateActivePrompt(prompt.id)}>
                   {prompt.prompt}
                 </Sidebar.Item>
               ))}
@@ -104,6 +118,7 @@ export default function Home({
         </Sidebar.Items>
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 grow'>
+        {activeVersionID && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
         <div className='self-stretch'>
           <LabeledTextInput
             label='Prompt'
@@ -117,20 +132,20 @@ export default function Home({
             Save Prompt
           </PendingButton>
         </div>
-        <VersionTimeline versions={versions} />
+        <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
     </main>
   )
 }
 
-function VersionTimeline({ versions }: { versions: Version[] }) {
+function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect: (version: Version) => void }) {
   const formatDate = (timestamp: string) =>
     `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
 
   return (
     <Timeline>
       {versions.map((version, index) => (
-        <Timeline.Item key={index}>
+        <Timeline.Item key={index} onClick={() => onSelect(version)}>
           <Timeline.Point />
           <Timeline.Content>
             <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
