@@ -48,13 +48,28 @@ export default function Home({
     ? activeVersion.prompt
     : projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
 
+
+  const [prompt, setPrompt] = useState<string>(activePrompt)
+  const activeItemID = activeVersion ? activeVersion.id : activePromptID
+  const [previousActiveItemID, setPreviousActiveID] = useState<number>(activeItemID)
+  if (activeItemID !== previousActiveItemID) {
+    setPrompt(activePrompt)
+    setPreviousActiveID(activeItemID)
+  }
+
   const updateActivePrompt = (promptID: number) => {
-    setActivePromptID(promptID)
-    setActiveVersion(undefined)
     if (promptID !== activePromptID) {
+      savePromptIfNeeded()
+      setActivePromptID(promptID)
+      setActiveVersion(undefined)
       setVersions([])
+      api.getPromptVersions(promptID).then(setVersions)
     }
-    api.getPromptVersions(promptID).then(setVersions)
+  }
+
+  const updateActiveVersion = (version: Version) => {
+    savePromptIfNeeded()
+    setActiveVersion(version)
   }
 
   const refreshData = async () => router.replace(router.asPath)
@@ -71,12 +86,21 @@ export default function Home({
     updateActivePrompt(promptID)
   }
 
-  const updatePrompt = async (prompt: string) => {
-    if (prompt) {
-      await api.updatePrompt(activePromptID, prompt)
-      await refreshData()
-      updateActivePrompt(activePromptID)
+  const savePromptIfNeeded = () => {
+    if (prompt !== activePrompt) {
+      savePrompt(false)
     }
+  }
+
+  const savePrompt = async (focusOnNewlySaved = true) => {
+    await api.updatePrompt(activePromptID, prompt)
+    await refreshData()
+    api.getPromptVersions(activePromptID).then(versions => {
+      setVersions(versions)
+      if (focusOnNewlySaved) {
+        setActiveVersion(undefined)
+      }
+    })
   }
 
   const logout = async () => {
@@ -113,24 +137,32 @@ export default function Home({
         </Sidebar.Items>
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 grow'>
-        {activeVersion && <VersionTimeline versions={newerVersions} onSelect={setActiveVersion} />}
-        <PromptPanel key={activePrompt} initialPrompt={activePrompt} onSave={updatePrompt} />
-        <VersionTimeline versions={olderVersions} onSelect={setActiveVersion} />
+        {activeVersion && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
+        <PromptPanel prompt={prompt} setPrompt={setPrompt} disabled={prompt === activePrompt} onSave={savePrompt} />
+        <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
     </main>
   )
 }
 
-function PromptPanel({ initialPrompt, onSave }: { initialPrompt: string; onSave: (prompt: string) => void }) {
-  const [prompt, setPrompt] = useState<string>(initialPrompt)
-
+function PromptPanel({
+  prompt,
+  setPrompt,
+  disabled,
+  onSave,
+}: {
+  prompt: string
+  setPrompt: (prompt: string) => void
+  disabled?: boolean
+  onSave: () => void
+}) {
   return (
     <>
       <div className='self-stretch'>
         <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
       </div>
       <div>
-        <PendingButton disabled={prompt === initialPrompt} onClick={() => onSave(prompt)}>
+        <PendingButton disabled={disabled} onClick={onSave}>
           Save
         </PendingButton>
       </div>
