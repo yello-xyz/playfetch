@@ -36,9 +36,8 @@ export default function Home({
   const router = useRouter()
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
-  const [activeVersionID, setActiveVersionID] = useState<number>()
+  const [activeVersion, setActiveVersion] = useState<Version>()
 
-  const activeVersion = activeVersionID ? versions.find(version => version.id === activeVersionID) : undefined
   const activeTimestamp = activeVersion ? new Date(activeVersion.timestamp) : undefined
   const newerVersions = versions.filter(version => activeTimestamp && new Date(version.timestamp) > activeTimestamp)
   const olderVersions = activeTimestamp
@@ -51,15 +50,11 @@ export default function Home({
 
   const updateActivePrompt = (promptID: number) => {
     setActivePromptID(promptID)
-    setActiveVersionID(undefined)
+    setActiveVersion(undefined)
     if (promptID !== activePromptID) {
       setVersions([])
     }
     api.getPromptVersions(promptID).then(setVersions)
-  }
-
-  const updateActiveVersion = (version: Version) => {
-    setActiveVersionID(version.id)
   }
 
   const refreshData = async () => router.replace(router.asPath)
@@ -118,9 +113,9 @@ export default function Home({
         </Sidebar.Items>
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 grow'>
-        {activeVersionID && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
+        {activeVersion && <VersionTimeline versions={newerVersions} onSelect={setActiveVersion} />}
         <PromptPanel key={activePrompt} initialPrompt={activePrompt} onSave={updatePrompt} />
-        <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
+        <VersionTimeline versions={olderVersions} onSelect={setActiveVersion} />
       </div>
     </main>
   )
@@ -136,7 +131,7 @@ function PromptPanel({ initialPrompt, onSave }: { initialPrompt: string; onSave:
       </div>
       <div>
         <PendingButton disabled={prompt === initialPrompt} onClick={() => onSave(prompt)}>
-          Save Prompt
+          Save
         </PendingButton>
       </div>
     </>
