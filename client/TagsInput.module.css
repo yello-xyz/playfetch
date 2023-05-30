@@ -1,0 +1,55 @@
+.tagsContainer {
+  position: relative;
+  cursor: text;
+  background-color: white;
+  border: solid 2px darkblue;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  min-height: 107px;
+  padding: 10px;
+  gap: 6px;
+}
+
+.tagsContainer textarea.tagInput {
+  all: unset;
+  white-space: pre-wrap;
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  height: auto;
+  min-height: 0px;
+  width: calc(100% - 10px - 10px - 14px - 10px);
+}
+
+.placeHolderRef {
+  opacity: 0;
+  z-index: -1000;
+  white-space: pre-wrap;
+}
+
+.tag {
+  padding: 10px 10px;
+  border-radius: 9px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: lightblue;
+}
+
+.emptyTag {
+  padding: 10px 10px;
+  border-radius: 9px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: lightblue;
+  flex: 1;
+  background-color: transparent;
+}
+
+.emptyTag div, .emptyTag svg {
+  display: none;
+}

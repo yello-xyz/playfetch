@@ -9,6 +9,7 @@ import PendingButton from '@/client/pendingButton'
 import { Sidebar, Timeline } from 'flowbite-react'
 import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
+import TagsInput from '@/client/tagsInput'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -46,6 +47,7 @@ export default function Home({
   const olderVersions = versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
+  const [tags, setTags] = useState<string>('')
   const [previousActiveVersionID, setPreviousActiveID] = useState<number>(activeVersion.id)
   if (activeVersion.id !== previousActiveVersionID) {
     setPrompt(activeVersion.prompt)
@@ -126,6 +128,7 @@ export default function Home({
           setValue={setPrompt}
         />
       </div>
+      <TagsInput tags={tags} setTags={setTags} />
       <div className='flex gap-2'>
         <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
           Save
