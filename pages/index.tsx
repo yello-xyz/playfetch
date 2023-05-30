@@ -6,7 +6,7 @@ import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { ReactNode, useState } from 'react'
 import PendingButton from '@/client/pendingButton'
-import { Sidebar, Timeline } from 'flowbite-react'
+import { Badge, Sidebar, Timeline } from 'flowbite-react'
 import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import TagsInput from '@/client/tagsInput'
@@ -182,6 +182,13 @@ export default function Home({
   )
 }
 
+const formatDate = (timestamp: string) => {
+  const dateString = new Date(timestamp).toLocaleDateString()
+  const timeString = new Date(timestamp).toLocaleTimeString()
+  const todayString = new Date().toLocaleDateString()
+  return dateString === todayString ? timeString : `${dateString} ${timeString}`
+}
+
 function VersionTimeline({
   headNode,
   versions,
@@ -191,16 +198,21 @@ function VersionTimeline({
   versions: Version[]
   onSelect: (version: Version) => void
 }) {
-  const formatDate = (timestamp: string) =>
-    `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
-
   return (
     <Timeline>
       {versions.map((version, index) => (
         <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(version)}>
           <Timeline.Point />
           <Timeline.Content>
-            <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
+            <Timeline.Time className='flex items-center gap-1'>
+              {formatDate(version.timestamp)}
+              {(index > 0 || !headNode) &&
+                version.tags
+                  .split(', ')
+                  .map(tag => tag.trim())
+                  .filter(tag => tag.length)
+                  .map((tag, tagIndex) => <Badge key={tagIndex}>{tag}</Badge>)}
+            </Timeline.Time>
             {(version as any).title && <Timeline.Title></Timeline.Title>}
             <Timeline.Body>
               {index === 0 && headNode ? headNode : version.prompt}
@@ -214,9 +226,6 @@ function VersionTimeline({
 }
 
 function RunTimeline({ runs }: { runs: Run[] }) {
-  const formatDate = (timestamp: string) =>
-    `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
-
   return (
     <Timeline>
       {runs.map((run, index) => (
