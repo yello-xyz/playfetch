@@ -125,9 +125,11 @@ export default function Home({
         <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
           Save
         </PendingButton>
-        <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
-          Overwrite
-        </PendingButton>
+        {activeVersion.runs.length === 0 && (
+          <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
+            Overwrite
+          </PendingButton>
+        )}
         <PendingButton disabled={!prompt.length} onClick={runPrompt}>
           Run
         </PendingButton>
