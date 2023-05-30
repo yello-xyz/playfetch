@@ -54,7 +54,8 @@ export default function Home({
     setTags(activeVersion.tags)
     setPreviousActiveID(activeVersion.id)
   }
-  const isDirty = activeVersion.prompt !== prompt || activeVersion.tags !== tags
+  const isPromptDirty = activeVersion.prompt !== prompt
+  const isDirty = isPromptDirty || activeVersion.tags !== tags
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
@@ -134,11 +135,9 @@ export default function Home({
         <PendingButton disabled={!isDirty} onClick={savePrompt}>
           Save
         </PendingButton>
-        {activeVersion.runs.length === 0 && (
-          <PendingButton disabled={!isDirty} onClick={overwritePrompt}>
-            Overwrite
-          </PendingButton>
-        )}
+        <PendingButton disabled={!isDirty || (isPromptDirty && !!activeVersion.runs.length)} onClick={overwritePrompt}>
+          Overwrite
+        </PendingButton>
         <PendingButton disabled={!prompt.length} onClick={runPrompt}>
           Run
         </PendingButton>
