@@ -59,8 +59,10 @@ export default function Home({
   }
 
   const updateActiveVersion = (version: Version) => {
-    savePromptIfNeeded()
-    setActiveVersion(version)
+    if (version.id !== activeVersion.id) {
+      savePromptIfNeeded()
+      setActiveVersion(version)
+    }
   }
 
   const refreshData = async () => router.replace(router.asPath)
@@ -110,7 +112,7 @@ export default function Home({
     await refreshData()
   }
 
-  const PromptPanel = () => (
+  const promptPanel = (
     <div className='flex flex-col gap-2 p-2'>
       <div className='self-stretch'>
         <LabeledTextInput
@@ -167,7 +169,7 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 overflow-y-auto grow max-w-prose'>
         <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />
-        <VersionTimeline headNode={<PromptPanel />} versions={olderVersions} onSelect={updateActiveVersion} />
+        <VersionTimeline headNode={promptPanel} versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
     </main>
   )
