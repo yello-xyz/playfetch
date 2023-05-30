@@ -36,19 +36,22 @@ function TagInput({
     }
   }
 
+  const emptyTag = tag.length === 0
+  const tagStyle = 'text-xs p-1 pl-3 py-0.5 rounded-full relative flex items-center gap-1 bg-blue-100'
+  const emptyTagStyle = `${tagStyle} flex-1 bg-transparent`
+
   return (
     <>
-      <div className={tag.length === 0 ? styles.emptyTag : styles.tag}>
-        <div className={styles.placeHolderRef}>{tag.length == 0 ? '.' : tag}</div>
+      <div className={emptyTag ? emptyTagStyle : tagStyle}>
+        {!emptyTag && <div className='whitespace-pre-wrap opacity-0 -z-50'>{tag.length == 0 ? '.' : tag}</div>}
         <textarea
-          className={styles.tagInput}
           ref={inputRef}
           onKeyDown={onKeyDown}
           onBeforeInput={onBeforeInput}
           value={tag}
           onChange={event => setTag(event.target.value)}
         />
-        <XCircleIcon className='w-6 h-6 text-black cursor-pointer' onClick={() => setTag('')} />
+        {!emptyTag && <XCircleIcon className='w-6 h-6 text-black cursor-pointer' onClick={() => setTag('')} />}
       </div>
     </>
   )
