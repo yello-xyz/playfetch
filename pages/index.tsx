@@ -36,7 +36,7 @@ export default function Home({
   const router = useRouter()
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
-  const [activeVersion, setActiveVersion] = useState<Version>()
+  const [activeVersion, setActiveVersion] = useState<Version>(initialVersions[0])
 
   const activeTimestamp = activeVersion ? new Date(activeVersion.timestamp) : undefined
   const newerVersions = versions.filter(version => activeTimestamp && new Date(version.timestamp) > activeTimestamp)
@@ -62,7 +62,10 @@ export default function Home({
       setActivePromptID(promptID)
       setActiveVersion(undefined)
       setVersions([])
-      api.getPromptVersions(promptID).then(setVersions)
+      api.getPromptVersions(promptID).then(versions => {
+        setVersions(versions)
+        setActiveVersion(versions[0])
+      })
     }
   }
 
@@ -99,7 +102,7 @@ export default function Home({
     api.getPromptVersions(activePromptID).then(versions => {
       setVersions(versions)
       if (focusOnNewlySaved) {
-        setActiveVersion(undefined)
+        setActiveVersion(versions[0])
       }
     })
   }
@@ -152,9 +155,11 @@ export default function Home({
           <PendingButton disabled={prompt === activePrompt} onClick={savePrompt}>
             Save
           </PendingButton>
-          {activeVersion && <PendingButton disabled={prompt === activePrompt} onClick={overwritePrompt}>
-            Overwrite
-          </PendingButton>}
+          {activeVersion && (
+            <PendingButton disabled={prompt === activePrompt} onClick={overwritePrompt}>
+              Overwrite
+            </PendingButton>
+          )}
         </div>
         <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
