@@ -12,7 +12,7 @@ export type Project = {
 
 export type Prompt = {
   id: number
-  prompt: string
+  name: string
 }
 
 export type Version = {

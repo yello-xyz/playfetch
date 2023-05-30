@@ -169,7 +169,7 @@ export default function Home({
                   key={promptIndex}
                   active={activePromptID === prompt.id}
                   onClick={() => updateActivePrompt(prompt.id)}>
-                  {truncate(prompt.prompt)}
+                  {truncate(prompt.name)}
                 </Sidebar.Item>
               ))}
             </Sidebar.Collapse>

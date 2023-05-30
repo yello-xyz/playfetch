@@ -89,7 +89,7 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
   return projects.map(project => toProject(project, prompts))
 }
 
-const toPrompt = (data: any): Prompt => ({ id: getID(data), prompt: data.prompt })
+const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   const [existingPrompts] = await getFilteredEntities(
@@ -97,10 +97,10 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
     and([new PropertyFilter('userID', '=', userID), new PropertyFilter('projectID', '=', projectID)])
   )
   const existingNames = new Set(existingPrompts.map(prompt => prompt.prompt))
-  const prompt = uniqueName('New Prompt', existingNames)
+  const name = uniqueName('New Prompt', existingNames)
   const key = buildKey(Entity.PROMPT)
-  await getDatastore().save({ key, data: { userID, projectID, prompt, createdAt: new Date() } })
-  await savePromptForUser(userID, Number(key.id), prompt, '', '')
+  await getDatastore().save({ key, data: { userID, projectID, name, createdAt: new Date() } })
+  await savePromptForUser(userID, Number(key.id), name, '', '')
   return Number(key.id)
 }
 
@@ -116,7 +116,7 @@ export async function savePromptForUser(
   const promptKey = buildKey(Entity.PROMPT, promptID)
   const [promptData] = await datastore.get(promptKey)
   if (promptData?.userID === userID) {
-    await datastore.save({ key: promptKey, data: { ...promptData, prompt } })
+    await datastore.save({ key: promptKey, data: { ...promptData, name: title.length ? title : prompt } })
     const key = buildKey(Entity.VERSION, versionID)
     await getDatastore().save({ key, data: { userID, promptID, prompt, title, tags, createdAt: new Date() } })
     return Number(key.id)
