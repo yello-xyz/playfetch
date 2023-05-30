@@ -4,7 +4,7 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Sidebar, Timeline } from 'flowbite-react'
 import { Project, Run, Version } from '@/types'
@@ -110,6 +110,31 @@ export default function Home({
     await refreshData()
   }
 
+  const PromptPanel = () => (
+    <div className='flex flex-col gap-2 p-2'>
+      <div className='self-stretch'>
+        <LabeledTextInput
+          multiline
+          label='Prompt'
+          placeholder='Enter your prompt...'
+          value={prompt}
+          setValue={setPrompt}
+        />
+      </div>
+      <div className='flex gap-2'>
+        <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
+          Save
+        </PendingButton>
+        <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
+          Overwrite
+        </PendingButton>
+        <PendingButton disabled={!prompt.length} onClick={runPrompt}>
+          Run
+        </PendingButton>
+      </div>
+    </div>
+  )
+
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <Sidebar>
@@ -140,33 +165,21 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 overflow-y-auto grow max-w-prose'>
         <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />
-        <div className='self-stretch'>
-          <LabeledTextInput
-            multiline
-            label='Prompt'
-            placeholder='Enter your prompt...'
-            value={prompt}
-            setValue={setPrompt}
-          />
-        </div>
-        <div className='flex gap-2'>
-          <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
-            Save
-          </PendingButton>
-          <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
-            Overwrite
-          </PendingButton>
-          <PendingButton disabled={!prompt.length} onClick={runPrompt}>
-            Run
-          </PendingButton>
-        </div>
-        <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
+        <VersionTimeline headNode={<PromptPanel />} versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
     </main>
   )
 }
 
-function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect: (version: Version) => void }) {
+function VersionTimeline({
+  headNode,
+  versions,
+  onSelect,
+}: {
+  headNode?: ReactNode
+  versions: Version[]
+  onSelect: (version: Version) => void
+}) {
   const formatDate = (timestamp: string) =>
     `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
 
@@ -179,7 +192,7 @@ function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect
             <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
             {(version as any).title && <Timeline.Title></Timeline.Title>}
             <Timeline.Body>
-              {version.prompt}
+              {index === 0 && headNode ? headNode : version.prompt}
               <RunTimeline runs={version.runs} />
             </Timeline.Body>
           </Timeline.Content>
