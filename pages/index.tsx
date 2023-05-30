@@ -128,7 +128,7 @@ export default function Home({
           setValue={setPrompt}
         />
       </div>
-      <TagsInput tags={tags} setTags={setTags} />
+      <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
       <div className='flex gap-2'>
         <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
           Save

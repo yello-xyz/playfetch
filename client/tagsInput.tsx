@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
 import styles from './TagsInput.module.css'
+import { useEffect, useRef, useState } from 'react'
 import { XCircleIcon } from '@heroicons/react/20/solid'
+import { Label } from 'flowbite-react'
 
 function TagInput({
   tag,
@@ -50,6 +51,7 @@ function TagInput({
           onBeforeInput={onBeforeInput}
           value={tag}
           onChange={event => setTag(event.target.value)}
+          onClick={event => event.stopPropagation()}
         />
         {!emptyTag && <XCircleIcon className='w-6 h-6 text-black cursor-pointer' onClick={() => setTag('')} />}
       </div>
@@ -76,7 +78,15 @@ const fromTagsArray = (tagsArray: string[]) =>
     .filter(tag => tag.trim().length > 0)
     .join(', ')
 
-export default function TagsInput({ tags, setTags }: { tags: string; setTags: (tags: string) => void }) {
+export default function TagsInput({
+  tags,
+  setTags,
+  label,
+}: {
+  tags: string
+  setTags: (tags: string) => void
+  label?: string
+}) {
   const [focusIndex, setFocusIndex] = useState<number>()
 
   const shiftFocus = (index?: number) => {
@@ -86,19 +96,23 @@ export default function TagsInput({ tags, setTags }: { tags: string; setTags: (t
   }
 
   const tagsArray = toTagsArray(tags)
+  const focusLast = () => setFocusIndex(tagsArray.length - 1)
 
   return (
-    <div className={styles.tagsContainer}>
-      {tagsArray.map((tag, index) => (
-        <TagInput
-          key={index}
-          index={index}
-          tag={tag}
-          shouldFocus={focusIndex === index}
-          shiftFocus={shiftFocus}
-          setTag={tag => setTags(fromTagsArray([...tagsArray.slice(0, index), tag, ...tagsArray.slice(index + 1)]))}
-        />
-      ))}
-    </div>
+    <>
+      {label && <Label onClick={focusLast}>{label}</Label>}
+      <div className={styles.tagsContainer} onClick={focusLast}>
+        {tagsArray.map((tag, index) => (
+          <TagInput
+            key={index}
+            index={index}
+            tag={tag}
+            shouldFocus={focusIndex === index}
+            shiftFocus={shiftFocus}
+            setTag={tag => setTags(fromTagsArray([...tagsArray.slice(0, index), tag, ...tagsArray.slice(index + 1)]))}
+          />
+        ))}
+      </div>
+    </>
   )
 }
