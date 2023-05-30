@@ -109,13 +109,15 @@ export async function savePromptForUser(userID: number, promptID: number, prompt
   const [promptData] = await datastore.get(buildKey(Entity.PROMPT, promptID))
   if (promptData.userID === userID) {
     await datastore.save({ key, data: { ...promptData, prompt } })
-    await saveVersion(userID, promptID, prompt, versionID)
+    return await saveVersion(userID, promptID, prompt, versionID)
   }
+  return undefined
 }
 
 async function saveVersion(userID: number, promptID: number, prompt: string, versionID?: number) {
   const key = buildKey(Entity.VERSION, versionID)
   await getDatastore().save({ key, data: { userID, promptID, prompt, createdAt: new Date() } })
+  return Number(key.id)
 }
 
 const toVersion = (data: any, runs: any[]): Version => ({

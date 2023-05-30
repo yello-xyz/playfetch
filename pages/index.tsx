@@ -7,7 +7,7 @@ import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Sidebar, Timeline } from 'flowbite-react'
-import { Project, Version } from '@/types'
+import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -36,12 +36,12 @@ export default function Home({
   const router = useRouter()
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
-  const [activeVersion, setActiveVersion] = useState<Version>(initialVersions[0])
+  const [activeVersion, setActiveVersion] = useState<Version | undefined>(initialVersions[0])
 
   const activeTimestamp = activeVersion ? new Date(activeVersion.timestamp) : undefined
   const newerVersions = versions.filter(version => activeTimestamp && new Date(version.timestamp) > activeTimestamp)
   const olderVersions = activeTimestamp
-    ? versions.filter(version => new Date(version.timestamp) < activeTimestamp)
+    ? versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
     : versions.slice(1)
 
   const activePrompt = activeVersion
@@ -55,6 +55,7 @@ export default function Home({
     setPrompt(activePrompt)
     setPreviousActiveID(activeItemID)
   }
+  const isPromptDirty = activePrompt !== prompt
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
@@ -89,22 +90,31 @@ export default function Home({
   }
 
   const savePromptIfNeeded = () => {
-    if (prompt !== activePrompt) {
+    if (isPromptDirty) {
       savePrompt(false)
     }
   }
 
-  const overwritePrompt = () => savePrompt(true, activeVersion?.id)
+  const overwritePrompt = () => savePrompt(true, activeVersion!.id)
+
+  const refreshVersions = async (focusOnMostRecent = true) => {
+    const versions = await api.getPromptVersions(activePromptID)
+    setVersions(versions)
+    if (focusOnMostRecent) {
+      setActiveVersion(versions[0])
+    }
+  }
 
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
     await api.updatePrompt(activePromptID, prompt, versionID)
     await refreshData()
-    api.getPromptVersions(activePromptID).then(versions => {
-      setVersions(versions)
-      if (focusOnNewlySaved) {
-        setActiveVersion(versions[0])
-      }
-    })
+    await refreshVersions(focusOnNewlySaved)
+  }
+
+  const runPrompt = async () => {
+    const versionID = isPromptDirty ? undefined : activeVersion?.id
+    await api.runPrompt(activePromptID, prompt, versionID)
+    await refreshVersions(isPromptDirty)
   }
 
   const logout = async () => {
@@ -152,14 +162,17 @@ export default function Home({
           />
         </div>
         <div className='flex gap-2'>
-          <PendingButton disabled={prompt === activePrompt} onClick={savePrompt}>
+          <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
             Save
           </PendingButton>
           {activeVersion && (
-            <PendingButton disabled={prompt === activePrompt} onClick={overwritePrompt}>
+            <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
               Overwrite
             </PendingButton>
           )}
+          <PendingButton disabled={!prompt.length} onClick={runPrompt}>
+            Run
+          </PendingButton>
         </div>
         <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
@@ -179,7 +192,26 @@ function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect
           <Timeline.Content>
             <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
             {(version as any).title && <Timeline.Title></Timeline.Title>}
-            <Timeline.Body>{version.prompt}</Timeline.Body>
+            <Timeline.Body>{version.prompt}<RunTimeline runs={version.runs} /></Timeline.Body>
+          </Timeline.Content>
+        </Timeline.Item>
+      ))}
+    </Timeline>
+  )
+}
+
+function RunTimeline({ runs }: { runs: Run[] }) {
+  const formatDate = (timestamp: string) =>
+    `${new Date(timestamp).toLocaleDateString()} ${new Date(timestamp).toLocaleTimeString()}`
+
+  return (
+    <Timeline>
+      {runs.map((run, index) => (
+        <Timeline.Item key={index} className='cursor-pointer'>
+          <Timeline.Point />
+          <Timeline.Content>
+            <Timeline.Time>{formatDate(run.timestamp)}</Timeline.Time>
+            <Timeline.Body>{run.output}</Timeline.Body>
           </Timeline.Content>
         </Timeline.Item>
       ))}
