@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@google-cloud/datastore": "^7.5.1",
+    "@heroicons/react": "^2.0.18",
     "@types/node": "20.2.3",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
@@ -30,7 +31,6 @@
     "eslint-config-next": "13.4.3",
     "flowbite": "^1.6.5",
     "flowbite-react": "^0.4.4",
-    "heroicons": "^2.0.18",
     "iron-session": "^6.3.1",
     "next": "13.4.3",
     "nodemailer": "^6.9.2",
