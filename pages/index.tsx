@@ -91,8 +91,10 @@ export default function Home({
     }
   }
 
-  const savePrompt = async (focusOnNewlySaved = true) => {
-    await api.updatePrompt(activePromptID, prompt)
+  const overwritePrompt = () => savePrompt(true, activeVersion?.id)
+
+  const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
+    await api.updatePrompt(activePromptID, prompt, versionID)
     await refreshData()
     api.getPromptVersions(activePromptID).then(versions => {
       setVersions(versions)
@@ -137,41 +139,26 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 grow'>
         {activeVersion && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
-        <PromptPanel prompt={prompt} setPrompt={setPrompt} disabled={prompt === activePrompt} onSave={savePrompt} />
+        <div className='self-stretch'>
+          <LabeledTextInput
+            multiline
+            label='Prompt'
+            placeholder='Enter your prompt...'
+            value={prompt}
+            setValue={setPrompt}
+          />
+        </div>
+        <div className='flex gap-2'>
+          <PendingButton disabled={prompt === activePrompt} onClick={savePrompt}>
+            Save
+          </PendingButton>
+          {activeVersion && <PendingButton disabled={prompt === activePrompt} onClick={overwritePrompt}>
+            Overwrite
+          </PendingButton>}
+        </div>
         <VersionTimeline versions={olderVersions} onSelect={updateActiveVersion} />
       </div>
     </main>
-  )
-}
-
-function PromptPanel({
-  prompt,
-  setPrompt,
-  disabled,
-  onSave,
-}: {
-  prompt: string
-  setPrompt: (prompt: string) => void
-  disabled?: boolean
-  onSave: () => void
-}) {
-  return (
-    <>
-      <div className='self-stretch'>
-        <LabeledTextInput
-          multiline
-          label='Prompt'
-          placeholder='Enter your prompt...'
-          value={prompt}
-          setValue={setPrompt}
-        />
-      </div>
-      <div>
-        <PendingButton disabled={disabled} onClick={onSave}>
-          Save
-        </PendingButton>
-      </div>
-    </>
   )
 }
 
