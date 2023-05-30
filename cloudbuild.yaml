@@ -9,8 +9,9 @@ steps:
     entrypoint: npm
     args: ['run', 'create-env']
     env:
-      - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
       - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
+      - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
+      - 'OPENAI_API_KEY=${_OPENAI_API_KEY}'
       - 'SESSION_SECRET=${_SESSION_SECRET}'
       - 'TOKEN_SECRET=${_TOKEN_SECRET}'
   - name: node
