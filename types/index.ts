@@ -19,4 +19,11 @@ export type Version = {
   id: number
   timestamp: string
   prompt: string
+  runs: Run[]
+}
+
+export type Run = {
+  id: number
+  timestamp: string
+  output: string
 }

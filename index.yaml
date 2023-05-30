@@ -29,3 +29,9 @@ indexes:
   - name: promptID
   - name: createdAt
     direction: desc
+
+- kind: run
+  properties:
+  - name: promptID
+  - name: createdAt
+    direction: desc

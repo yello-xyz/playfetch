@@ -1,4 +1,4 @@
-import { Project, Prompt, User, Version } from '@/types'
+import { Project, Prompt, Run, User, Version } from '@/types'
 import { Datastore, PropertyFilter, and } from '@google-cloud/datastore'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
@@ -15,6 +15,7 @@ enum Entity {
   PROJECT = 'project',
   PROMPT = 'prompt',
   VERSION = 'version',
+  RUN = 'run',
 }
 
 const getID = (entity: any) => Number(entity[getDatastore().KEY].id)
@@ -117,9 +118,22 @@ async function saveVersion(userID: number, promptID: number, prompt: string, ver
   await getDatastore().save({ key, data: { userID, promptID, prompt, createdAt: new Date() } })
 }
 
-const toVersion = (data: any): Version => ({ id: getID(data), timestamp: getTimestamp(data), prompt: data.prompt })
+const toVersion = (data: any, runs: any[]): Version => ({
+  id: getID(data),
+  timestamp: getTimestamp(data),
+  prompt: data.prompt,
+  runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
+})
 
 export async function getVersionsForPrompt(userID: number, promptID: number): Promise<Version[]> {
   const [versions] = await getEntities(Entity.VERSION, 'promptID', promptID)
-  return versions.filter(version => version.userID === userID).map(toVersion)
+  const [runs] = await getEntities(Entity.RUN, 'promptID', promptID)
+  return versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 }
+
+export async function saveRun(userID: number, promptID: number, versionID: number, output: string) {
+  const key = buildKey(Entity.RUN)
+  await getDatastore().save({ key, data: { userID, promptID, versionID, output, createdAt: new Date() } })
+}
+
+const toRun = (data: any): Run => ({ id: getID(data), timestamp: getTimestamp(data), output: data.output })
