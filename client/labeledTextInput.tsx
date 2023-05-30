@@ -12,7 +12,7 @@ export default function LabeledTextInput({
   type?: HTMLInputTypeAttribute
   multiline?: boolean
   label: string
-  placeholder: string
+  placeholder?: string
   value: string
   setValue: (value: string) => void
 }) {

@@ -47,15 +47,17 @@ export default function Home({
   const olderVersions = versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
+  const [title, setTitle] = useState(activeVersion.title)
   const [tags, setTags] = useState(activeVersion.tags)
   const [previousActiveVersionID, setPreviousActiveID] = useState<number>(activeVersion.id)
   if (activeVersion.id !== previousActiveVersionID) {
     setPrompt(activeVersion.prompt)
+    setTitle(activeVersion.title)
     setTags(activeVersion.tags)
     setPreviousActiveID(activeVersion.id)
   }
   const isPromptDirty = activeVersion.prompt !== prompt
-  const isDirty = isPromptDirty || activeVersion.tags !== tags
+  const isDirty = isPromptDirty || title !== activeVersion.title || tags !== activeVersion.tags
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
@@ -103,14 +105,14 @@ export default function Home({
   const overwritePrompt = () => savePrompt(true, activeVersion.id)
 
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
-    await api.updatePrompt(activePromptID, prompt, tags, versionID)
+    await api.updatePrompt(activePromptID, prompt, title, tags, versionID)
     await refreshData()
     await refreshVersions(activePromptID, focusOnNewlySaved)
   }
 
   const runPrompt = async () => {
     const versionID = isDirty ? undefined : activeVersion.id
-    await api.runPrompt(activePromptID, prompt, tags, versionID)
+    await api.runPrompt(activePromptID, prompt, title, tags, versionID)
     await refreshVersions(activePromptID, isDirty)
   }
 
@@ -130,6 +132,7 @@ export default function Home({
           setValue={setPrompt}
         />
       </div>
+      <LabeledTextInput label='Title (optional)' value={title} setValue={setTitle} />
       <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
       <div className='flex gap-2'>
         <PendingButton disabled={!isDirty} onClick={savePrompt}>
@@ -203,16 +206,19 @@ function VersionTimeline({
         <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(version)}>
           <Timeline.Point />
           <Timeline.Content>
-            <Timeline.Time className='flex items-center gap-1'>
-              {formatDate(version.timestamp)}
-              {(index > 0 || !headNode) &&
-                version.tags
+            <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
+            {(index > 0 || !headNode) && (
+              <Timeline.Title className='flex items-center gap-2'>
+                {version.title}
+                {version.tags
                   .split(', ')
                   .map(tag => tag.trim())
                   .filter(tag => tag.length)
-                  .map((tag, tagIndex) => <Badge key={tagIndex}>{tag}</Badge>)}
-            </Timeline.Time>
-            {(version as any).title && <Timeline.Title></Timeline.Title>}
+                  .map((tag, tagIndex) => (
+                    <Badge key={tagIndex}>{tag}</Badge>
+                  ))}
+              </Timeline.Title>
+            )}
             <Timeline.Body>
               {index === 0 && headNode ? headNode : version.prompt}
               <RunTimeline runs={version.runs} />

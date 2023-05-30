@@ -100,7 +100,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   const prompt = uniqueName('New Prompt', existingNames)
   const key = buildKey(Entity.PROMPT)
   await getDatastore().save({ key, data: { userID, projectID, prompt, createdAt: new Date() } })
-  await savePromptForUser(userID, Number(key.id), prompt, '')
+  await savePromptForUser(userID, Number(key.id), prompt, '', '')
   return Number(key.id)
 }
 
@@ -108,6 +108,7 @@ export async function savePromptForUser(
   userID: number,
   promptID: number,
   prompt: string,
+  title: string,
   tags: string,
   versionID?: number
 ) {
@@ -117,7 +118,7 @@ export async function savePromptForUser(
   if (promptData?.userID === userID) {
     await datastore.save({ key: promptKey, data: { ...promptData, prompt } })
     const key = buildKey(Entity.VERSION, versionID)
-    await getDatastore().save({ key, data: { userID, promptID, prompt, tags, createdAt: new Date() } })
+    await getDatastore().save({ key, data: { userID, promptID, prompt, title, tags, createdAt: new Date() } })
     return Number(key.id)
   }
   return undefined
@@ -127,6 +128,7 @@ const toVersion = (data: any, runs: any[]): Version => ({
   id: getID(data),
   timestamp: getTimestamp(data),
   prompt: data.prompt,
+  title: data.title,
   tags: data.tags,
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })

@@ -3,7 +3,14 @@ import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function updatePrompt(req: NextApiRequest, res: NextApiResponse) {
-  await savePromptForUser(req.session.user!.id, req.body.promptID, req.body.prompt, req.body.tags, req.body.versionID)
+  await savePromptForUser(
+    req.session.user!.id,
+    req.body.promptID,
+    req.body.prompt,
+    req.body.title,
+    req.body.tags,
+    req.body.versionID
+  )
   res.json({})
 }
 
