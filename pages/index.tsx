@@ -54,7 +54,7 @@ export default function Home({
     if (promptID !== activePromptID) {
       savePromptIfNeeded()
       setActivePromptID(promptID)
-      refreshVersions()
+      refreshVersions(promptID)
     }
   }
 
@@ -65,8 +65,8 @@ export default function Home({
 
   const refreshData = async () => router.replace(router.asPath)
 
-  const refreshVersions = async (focusOnMostRecent = true) => {
-    const versions = await api.getPromptVersions(activePromptID)
+  const refreshVersions = async (promptID: number, focusOnMostRecent = true) => {
+    const versions = await api.getPromptVersions(promptID)
     setVersions(versions)
     if (focusOnMostRecent) {
       setActiveVersion(versions[0])
@@ -96,13 +96,13 @@ export default function Home({
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
     await api.updatePrompt(activePromptID, prompt, versionID)
     await refreshData()
-    await refreshVersions(focusOnNewlySaved)
+    await refreshVersions(activePromptID, focusOnNewlySaved)
   }
 
   const runPrompt = async () => {
     const versionID = isPromptDirty ? undefined : activeVersion.id
     await api.runPrompt(activePromptID, prompt, versionID)
-    await refreshVersions(isPromptDirty)
+    await refreshVersions(activePromptID, isPromptDirty)
   }
 
   const logout = async () => {
