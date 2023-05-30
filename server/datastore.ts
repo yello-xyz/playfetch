@@ -100,6 +100,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   const prompt = uniqueName('New Prompt', existingNames)
   const key = buildKey(Entity.PROMPT)
   await getDatastore().save({ key, data: { userID, projectID, prompt, createdAt: new Date() } })
+  await savePromptForUser(userID, Number(key.id), prompt)
   return Number(key.id)
 }
 

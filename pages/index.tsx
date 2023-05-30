@@ -36,37 +36,25 @@ export default function Home({
   const router = useRouter()
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
-  const [activeVersion, setActiveVersion] = useState<Version | undefined>(initialVersions[0])
+  const [activeVersion, setActiveVersion] = useState<Version>(initialVersions[0])
 
-  const activeTimestamp = activeVersion ? new Date(activeVersion.timestamp) : undefined
+  const activeTimestamp = new Date(activeVersion.timestamp)
   const newerVersions = versions.filter(version => activeTimestamp && new Date(version.timestamp) > activeTimestamp)
-  const olderVersions = activeTimestamp
-    ? versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
-    : versions.slice(1)
+  const olderVersions = versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
 
-  const activePrompt = activeVersion
-    ? activeVersion.prompt
-    : projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
-
-  const [prompt, setPrompt] = useState<string>(activePrompt)
-  const activeItemID = activeVersion ? activeVersion.id : activePromptID
-  const [previousActiveItemID, setPreviousActiveID] = useState<number>(activeItemID)
-  if (activeItemID !== previousActiveItemID) {
-    setPrompt(activePrompt)
-    setPreviousActiveID(activeItemID)
+  const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
+  const [previousActiveVersionID, setPreviousActiveID] = useState<number>(activeVersion.id)
+  if (activeVersion.id !== previousActiveVersionID) {
+    setPrompt(activeVersion.prompt)
+    setPreviousActiveID(activeVersion.id)
   }
-  const isPromptDirty = activePrompt !== prompt
+  const isPromptDirty = activeVersion.prompt !== prompt
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
       savePromptIfNeeded()
       setActivePromptID(promptID)
-      setActiveVersion(undefined)
-      setVersions([])
-      api.getPromptVersions(promptID).then(versions => {
-        setVersions(versions)
-        setActiveVersion(versions[0])
-      })
+      refreshVersions()
     }
   }
 
@@ -76,6 +64,14 @@ export default function Home({
   }
 
   const refreshData = async () => router.replace(router.asPath)
+
+  const refreshVersions = async (focusOnMostRecent = true) => {
+    const versions = await api.getPromptVersions(activePromptID)
+    setVersions(versions)
+    if (focusOnMostRecent) {
+      setActiveVersion(versions[0])
+    }
+  }
 
   const addProject = async () => {
     const promptID = await api.addProject()
@@ -95,15 +91,7 @@ export default function Home({
     }
   }
 
-  const overwritePrompt = () => savePrompt(true, activeVersion!.id)
-
-  const refreshVersions = async (focusOnMostRecent = true) => {
-    const versions = await api.getPromptVersions(activePromptID)
-    setVersions(versions)
-    if (focusOnMostRecent) {
-      setActiveVersion(versions[0])
-    }
-  }
+  const overwritePrompt = () => savePrompt(true, activeVersion.id)
 
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
     await api.updatePrompt(activePromptID, prompt, versionID)
@@ -112,7 +100,7 @@ export default function Home({
   }
 
   const runPrompt = async () => {
-    const versionID = isPromptDirty ? undefined : activeVersion?.id
+    const versionID = isPromptDirty ? undefined : activeVersion.id
     await api.runPrompt(activePromptID, prompt, versionID)
     await refreshVersions(isPromptDirty)
   }
@@ -151,7 +139,7 @@ export default function Home({
         </Sidebar.Items>
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 overflow-y-auto grow max-w-prose'>
-        {activeVersion && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
+        <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />
         <div className='self-stretch'>
           <LabeledTextInput
             multiline
@@ -165,11 +153,9 @@ export default function Home({
           <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
             Save
           </PendingButton>
-          {activeVersion && (
-            <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
-              Overwrite
-            </PendingButton>
-          )}
+          <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
+            Overwrite
+          </PendingButton>
           <PendingButton disabled={!prompt.length} onClick={runPrompt}>
             Run
           </PendingButton>
@@ -192,7 +178,10 @@ function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect
           <Timeline.Content>
             <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
             {(version as any).title && <Timeline.Title></Timeline.Title>}
-            <Timeline.Body>{version.prompt}<RunTimeline runs={version.runs} /></Timeline.Body>
+            <Timeline.Body>
+              {version.prompt}
+              <RunTimeline runs={version.runs} />
+            </Timeline.Body>
           </Timeline.Content>
         </Timeline.Item>
       ))}
