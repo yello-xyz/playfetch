@@ -48,7 +48,6 @@ export default function Home({
     ? activeVersion.prompt
     : projects.flatMap(project => project.prompts).find(prompt => prompt.id === activePromptID)!.prompt
 
-
   const [prompt, setPrompt] = useState<string>(activePrompt)
   const activeItemID = activeVersion ? activeVersion.id : activePromptID
   const [previousActiveItemID, setPreviousActiveID] = useState<number>(activeItemID)
@@ -159,7 +158,13 @@ function PromptPanel({
   return (
     <>
       <div className='self-stretch'>
-        <LabeledTextInput label='Prompt' placeholder='Enter your prompt...' value={prompt} setValue={setPrompt} />
+        <LabeledTextInput
+          multiline
+          label='Prompt'
+          placeholder='Enter your prompt...'
+          value={prompt}
+          setValue={setPrompt}
+        />
       </div>
       <div>
         <PendingButton disabled={disabled} onClick={onSave}>

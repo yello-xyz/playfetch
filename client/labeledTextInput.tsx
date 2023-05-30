@@ -1,14 +1,16 @@
-import { Label, TextInput } from 'flowbite-react'
+import { Label, TextInput, Textarea } from 'flowbite-react'
 import { HTMLInputTypeAttribute } from 'react'
 
 export default function LabeledTextInput({
   type = 'text',
+  multiline = false,
   label,
   placeholder,
   value,
   setValue,
 }: {
   type?: HTMLInputTypeAttribute
+  multiline?: boolean
   label: string
   placeholder: string
   value: string
@@ -19,14 +21,25 @@ export default function LabeledTextInput({
       <div className='block mb-2'>
         <Label htmlFor='input' value={label} />
       </div>
-      <TextInput
-        type={type}
-        value={value}
-        onChange={event => setValue(event.target.value)}
-        id='input'
-        placeholder={placeholder}
-        required={true}
-      />
+      {multiline ? (
+        <Textarea
+          id='input'
+          value={value}
+          onChange={event => setValue(event.target.value)}
+          placeholder={placeholder}
+          required={true}
+          rows={4}
+        />
+      ) : (
+        <TextInput
+          type={type}
+          value={value}
+          onChange={event => setValue(event.target.value)}
+          id='input'
+          placeholder={placeholder}
+          required={true}
+        />
+      )}
     </div>
   )
 }
