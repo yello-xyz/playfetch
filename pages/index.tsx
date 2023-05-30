@@ -150,7 +150,7 @@ export default function Home({
           ))}
         </Sidebar.Items>
       </Sidebar>
-      <div className='flex flex-col gap-4 p-8 grow'>
+      <div className='flex flex-col gap-4 p-8 overflow-y-auto grow max-w-prose'>
         {activeVersion && <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />}
         <div className='self-stretch'>
           <LabeledTextInput
