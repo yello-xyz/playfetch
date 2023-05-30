@@ -7,7 +7,8 @@ async function runPrompt(req: NextApiRequest, res: NextApiResponse<string | unde
   const userID = req.session.user!.id
   const promptID = req.body.promptID
   const prompt = req.body.prompt
-  const versionID = req.body.versionID ?? await savePromptForUser(userID, promptID, prompt)
+  const tags = req.body.tags
+  const versionID = req.body.versionID ?? await savePromptForUser(userID, promptID, prompt, tags)
 
   const output = await completeChat('', prompt, userID)
   if (output?.length) {

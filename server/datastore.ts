@@ -100,31 +100,34 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   const prompt = uniqueName('New Prompt', existingNames)
   const key = buildKey(Entity.PROMPT)
   await getDatastore().save({ key, data: { userID, projectID, prompt, createdAt: new Date() } })
-  await savePromptForUser(userID, Number(key.id), prompt)
+  await savePromptForUser(userID, Number(key.id), prompt, '')
   return Number(key.id)
 }
 
-export async function savePromptForUser(userID: number, promptID: number, prompt: string, versionID?: number) {
+export async function savePromptForUser(
+  userID: number,
+  promptID: number,
+  prompt: string,
+  tags: string,
+  versionID?: number
+) {
   const datastore = getDatastore()
-  const key = buildKey(Entity.PROMPT, promptID)
-  const [promptData] = await datastore.get(buildKey(Entity.PROMPT, promptID))
-  if (promptData.userID === userID) {
-    await datastore.save({ key, data: { ...promptData, prompt } })
-    return await saveVersion(userID, promptID, prompt, versionID)
+  const promptKey = buildKey(Entity.PROMPT, promptID)
+  const [promptData] = await datastore.get(promptKey)
+  if (promptData?.userID === userID) {
+    await datastore.save({ key: promptKey, data: { ...promptData, prompt } })
+    const key = buildKey(Entity.VERSION, versionID)
+    await getDatastore().save({ key, data: { userID, promptID, prompt, tags, createdAt: new Date() } })
+    return Number(key.id)
   }
   return undefined
-}
-
-async function saveVersion(userID: number, promptID: number, prompt: string, versionID?: number) {
-  const key = buildKey(Entity.VERSION, versionID)
-  await getDatastore().save({ key, data: { userID, promptID, prompt, createdAt: new Date() } })
-  return Number(key.id)
 }
 
 const toVersion = (data: any, runs: any[]): Version => ({
   id: getID(data),
   timestamp: getTimestamp(data),
   prompt: data.prompt,
+  tags: data.tags,
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })
 

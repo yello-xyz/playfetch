@@ -38,11 +38,11 @@ const api = {
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
-  updatePrompt: function (promptID: number, prompt: string, versionID?: number) {
-    return post(this.updatePrompt, { promptID, prompt, versionID })
+  updatePrompt: function (promptID: number, prompt: string, tags: string, versionID?: number) {
+    return post(this.updatePrompt, { promptID, prompt, tags, versionID })
   },
-  runPrompt: function (promptID: number, prompt: string, versionID?: number): Promise<string | undefined> {
-    return post(this.runPrompt, { promptID, prompt, versionID })
+  runPrompt: function (promptID: number, prompt: string, tags: string, versionID?: number): Promise<string | undefined> {
+    return post(this.runPrompt, { promptID, prompt, tags, versionID })
   },
   getPromptVersions: function (promptID: number): Promise<Version[]> {
     return post(this.getPromptVersions, { promptID })

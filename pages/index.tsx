@@ -47,13 +47,14 @@ export default function Home({
   const olderVersions = versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
-  const [tags, setTags] = useState<string>('')
+  const [tags, setTags] = useState(activeVersion.tags)
   const [previousActiveVersionID, setPreviousActiveID] = useState<number>(activeVersion.id)
   if (activeVersion.id !== previousActiveVersionID) {
     setPrompt(activeVersion.prompt)
+    setTags(activeVersion.tags)
     setPreviousActiveID(activeVersion.id)
   }
-  const isPromptDirty = activeVersion.prompt !== prompt
+  const isDirty = activeVersion.prompt !== prompt || activeVersion.tags !== tags
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
@@ -93,7 +94,7 @@ export default function Home({
   }
 
   const savePromptIfNeeded = () => {
-    if (isPromptDirty) {
+    if (isDirty) {
       savePrompt(false)
     }
   }
@@ -101,15 +102,15 @@ export default function Home({
   const overwritePrompt = () => savePrompt(true, activeVersion.id)
 
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
-    await api.updatePrompt(activePromptID, prompt, versionID)
+    await api.updatePrompt(activePromptID, prompt, tags, versionID)
     await refreshData()
     await refreshVersions(activePromptID, focusOnNewlySaved)
   }
 
   const runPrompt = async () => {
-    const versionID = isPromptDirty ? undefined : activeVersion.id
-    await api.runPrompt(activePromptID, prompt, versionID)
-    await refreshVersions(activePromptID, isPromptDirty)
+    const versionID = isDirty ? undefined : activeVersion.id
+    await api.runPrompt(activePromptID, prompt, tags, versionID)
+    await refreshVersions(activePromptID, isDirty)
   }
 
   const logout = async () => {
@@ -130,11 +131,11 @@ export default function Home({
       </div>
       <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
       <div className='flex gap-2'>
-        <PendingButton disabled={!isPromptDirty} onClick={savePrompt}>
+        <PendingButton disabled={!isDirty} onClick={savePrompt}>
           Save
         </PendingButton>
         {activeVersion.runs.length === 0 && (
-          <PendingButton disabled={!isPromptDirty} onClick={overwritePrompt}>
+          <PendingButton disabled={!isDirty} onClick={overwritePrompt}>
             Overwrite
           </PendingButton>
         )}
