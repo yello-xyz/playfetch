@@ -24,6 +24,9 @@ export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   return { props: { projects, initialActivePromptID, initialVersions } }
 })
 
+const truncate = (text: string, length: number = 20) =>
+  text.length <= length ? text : text.slice(0, length).trim() + '…'
+
 export default function Home({
   projects,
   initialActivePromptID,
@@ -160,7 +163,7 @@ export default function Home({
                   key={promptIndex}
                   active={activePromptID === prompt.id}
                   onClick={() => updateActivePrompt(prompt.id)}>
-                  {prompt.prompt}
+                  {truncate(prompt.prompt)}
                 </Sidebar.Item>
               ))}
             </Sidebar.Collapse>
