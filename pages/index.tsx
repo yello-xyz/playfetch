@@ -42,9 +42,18 @@ export default function Home({
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState<Version>(initialVersions[0])
 
+  const [filter, setFilter] = useState('')
+  const filteredVersions = versions.filter(
+    version =>
+      !filter.length ||
+      version.title.toLowerCase().includes(filter.toLowerCase()) ||
+      version.tags.toLowerCase().includes(filter.toLowerCase()) ||
+      version.prompt.toLowerCase().includes(filter.toLowerCase()) ||
+      version.runs.some(run => run.output.toLowerCase().includes(filter.toLowerCase()))
+  )
   const activeTimestamp = new Date(activeVersion.timestamp)
-  const newerVersions = versions.filter(version => activeTimestamp && new Date(version.timestamp) > activeTimestamp)
-  const olderVersions = versions.filter(version => new Date(version.timestamp) <= activeTimestamp)
+  const newerVersions = filteredVersions.filter(version => new Date(version.timestamp) > activeTimestamp)
+  const olderVersions = filteredVersions.filter(version => new Date(version.timestamp) <= activeTimestamp)
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
   const [title, setTitle] = useState(activeVersion.title)
@@ -177,6 +186,7 @@ export default function Home({
         </Sidebar.Items>
       </Sidebar>
       <div className='flex flex-col gap-4 p-8 overflow-y-auto grow max-w-prose'>
+        <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
         <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />
         <VersionTimeline headNode={promptPanel} versions={olderVersions} onSelect={updateActiveVersion} />
       </div>

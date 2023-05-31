@@ -11,16 +11,18 @@ export default function LabeledTextInput({
 }: {
   type?: HTMLInputTypeAttribute
   multiline?: boolean
-  label: string
+  label?: string
   placeholder?: string
   value: string
   setValue: (value: string) => void
 }) {
   return (
     <div>
-      <div className='block mb-2'>
-        <Label htmlFor='input' value={label} />
-      </div>
+      {label && (
+        <div className='block mb-2'>
+          <Label htmlFor='input' value={label} />
+        </div>
+      )}
       {multiline ? (
         <Textarea
           id='input'
