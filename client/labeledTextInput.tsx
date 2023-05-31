@@ -3,6 +3,7 @@ import { HTMLInputTypeAttribute } from 'react'
 
 export default function LabeledTextInput({
   type = 'text',
+  id = 'input',
   multiline = false,
   label,
   placeholder,
@@ -10,6 +11,7 @@ export default function LabeledTextInput({
   setValue,
 }: {
   type?: HTMLInputTypeAttribute
+  id?: string
   multiline?: boolean
   label?: string
   placeholder?: string
@@ -20,12 +22,12 @@ export default function LabeledTextInput({
     <div>
       {label && (
         <div className='block mb-2'>
-          <Label htmlFor='input' value={label} />
+          <Label htmlFor={id} value={label} />
         </div>
       )}
       {multiline ? (
         <Textarea
-          id='input'
+          id={id}
           value={value}
           onChange={event => setValue(event.target.value)}
           placeholder={placeholder}
@@ -37,7 +39,7 @@ export default function LabeledTextInput({
           type={type}
           value={value}
           onChange={event => setValue(event.target.value)}
-          id='input'
+          id={id}
           placeholder={placeholder}
           required={true}
         />

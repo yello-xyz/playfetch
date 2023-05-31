@@ -51,9 +51,6 @@ export default function Home({
       version.prompt.toLowerCase().includes(filter.toLowerCase()) ||
       version.runs.some(run => run.output.toLowerCase().includes(filter.toLowerCase()))
   )
-  const activeTimestamp = new Date(activeVersion.timestamp)
-  const newerVersions = filteredVersions.filter(version => new Date(version.timestamp) > activeTimestamp)
-  const olderVersions = filteredVersions.filter(version => new Date(version.timestamp) <= activeTimestamp)
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
   const [title, setTitle] = useState(activeVersion.title)
@@ -130,33 +127,6 @@ export default function Home({
     await refreshData()
   }
 
-  const promptPanel = (
-    <div className='flex flex-col gap-2 p-2'>
-      <div className='self-stretch'>
-        <LabeledTextInput
-          multiline
-          label='Prompt'
-          placeholder='Enter your prompt...'
-          value={prompt}
-          setValue={setPrompt}
-        />
-      </div>
-      <LabeledTextInput label='Title (optional)' value={title} setValue={setTitle} />
-      <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
-      <div className='flex gap-2'>
-        <PendingButton disabled={!isDirty} onClick={savePrompt}>
-          Save
-        </PendingButton>
-        <PendingButton disabled={!isDirty || (isPromptDirty && !!activeVersion.runs.length)} onClick={overwritePrompt}>
-          Overwrite
-        </PendingButton>
-        <PendingButton disabled={!prompt.length} onClick={runPrompt}>
-          Run
-        </PendingButton>
-      </div>
-    </div>
-  )
-
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <Sidebar>
@@ -185,10 +155,36 @@ export default function Home({
           ))}
         </Sidebar.Items>
       </Sidebar>
-      <div className='flex flex-col gap-4 p-8 overflow-y-auto grow max-w-prose'>
+      <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-        <VersionTimeline versions={newerVersions} onSelect={updateActiveVersion} />
-        <VersionTimeline headNode={promptPanel} versions={olderVersions} onSelect={updateActiveVersion} />
+        <VersionTimeline versions={filteredVersions} onSelect={updateActiveVersion} />
+      </div>
+      <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
+        <div className='self-stretch'>
+          <LabeledTextInput
+            id='prompt'
+            multiline
+            label='Prompt'
+            placeholder='Enter your prompt...'
+            value={prompt}
+            setValue={setPrompt}
+          />
+        </div>
+        <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={setTitle} />
+        <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
+        <div className='flex gap-2'>
+          <PendingButton disabled={!isDirty} onClick={savePrompt}>
+            Save
+          </PendingButton>
+          <PendingButton
+            disabled={!isDirty || (isPromptDirty && !!activeVersion.runs.length)}
+            onClick={overwritePrompt}>
+            Overwrite
+          </PendingButton>
+          <PendingButton disabled={!prompt.length} onClick={runPrompt}>
+            Run
+          </PendingButton>
+        </div>
       </div>
     </main>
   )
