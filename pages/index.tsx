@@ -117,8 +117,12 @@ export default function Home({
   }
 
   const runPrompt = async () => {
-    const versionID = isDirty ? undefined : activeVersion.id
-    await api.runPrompt(activePromptID, prompt, title, tags, versionID)
+    let versionID = activeVersion.id
+    if (isDirty) {
+      versionID = await api.updatePrompt(activePromptID, prompt, title, tags)
+      await refreshData()
+    }
+    await api.runPrompt(activePromptID, versionID, prompt)
     await refreshVersions(activePromptID, isDirty)
   }
 
