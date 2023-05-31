@@ -87,7 +87,11 @@ export default function TagsInput({
   setTags: (tags: string) => void
   label?: string
 }) {
+  const tagsArray = toTagsArray(tags)
   const [focusIndex, setFocusIndex] = useState<number>()
+  if (focusIndex && focusIndex >= tagsArray.length) {
+    setFocusIndex(tagsArray.length - 1)
+  }
 
   const shiftFocus = (index?: number) => {
     if (!index || (index >= 0 && index < tags.length)) {
@@ -95,7 +99,6 @@ export default function TagsInput({
     }
   }
 
-  const tagsArray = toTagsArray(tags)
   const focusLast = () => setFocusIndex(tagsArray.length - 1)
 
   return (
