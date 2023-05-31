@@ -111,7 +111,7 @@ export default function Home({
   const overwritePrompt = () => savePrompt(true, activeVersion.id)
 
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
-    await api.updatePrompt(activePromptID, prompt, title, tags, versionID)
+    await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id, versionID)
     await refreshData()
     await refreshVersions(activePromptID, focusOnNewlySaved)
   }
@@ -119,7 +119,7 @@ export default function Home({
   const runPrompt = async () => {
     let versionID = activeVersion.id
     if (isDirty) {
-      versionID = await api.updatePrompt(activePromptID, prompt, title, tags)
+      versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
       await refreshData()
     }
     await api.runPrompt(activePromptID, versionID, prompt)

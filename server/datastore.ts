@@ -110,7 +110,8 @@ export async function savePromptForUser(
   prompt: string,
   title: string,
   tags: string,
-  versionID?: number
+  versionID?: number,
+  previousVersionID?: number
 ) {
   const datastore = getDatastore()
   const promptKey = buildKey(Entity.PROMPT, promptID)
@@ -118,7 +119,8 @@ export async function savePromptForUser(
   if (promptData?.userID === userID) {
     await datastore.save({ key: promptKey, data: { ...promptData, name: title.length ? title : prompt } })
     const key = buildKey(Entity.VERSION, versionID)
-    await getDatastore().save({ key, data: { userID, promptID, prompt, title, tags, createdAt: new Date() } })
+    const createdAt = new Date()
+    await getDatastore().save({ key, data: { userID, promptID, prompt, title, tags, createdAt, previousVersionID } })
     return Number(key.id)
   }
   return undefined
@@ -126,6 +128,7 @@ export async function savePromptForUser(
 
 const toVersion = (data: any, runs: any[]): Version => ({
   id: getID(data),
+  previousID: data.previousVersionID ?? null,
   timestamp: getTimestamp(data),
   prompt: data.prompt,
   title: data.title,

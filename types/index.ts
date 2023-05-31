@@ -17,6 +17,7 @@ export type Prompt = {
 
 export type Version = {
   id: number
+  previousID?: number
   timestamp: string
   prompt: string
   title: string

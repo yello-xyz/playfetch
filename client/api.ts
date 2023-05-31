@@ -43,9 +43,10 @@ const api = {
     prompt: string,
     title: string,
     tags: string,
+    previousVersionID?: number,
     versionID?: number
   ): Promise<number> {
-    return post(this.updatePrompt, { promptID, prompt, title, tags, versionID })
+    return post(this.updatePrompt, { promptID, prompt, title, tags, previousVersionID, versionID })
   },
   runPrompt: function (promptID: number, versionID: number, prompt: string): Promise<string | undefined> {
     return post(this.runPrompt, { promptID, versionID, prompt })
