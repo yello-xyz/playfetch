@@ -4,12 +4,13 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Badge, Sidebar, Timeline } from 'flowbite-react'
 import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import TagsInput from '@/client/tagsInput'
+import simplediff from 'simplediff'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -161,7 +162,7 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-        <VersionTimeline versions={filteredVersions} onSelect={updateActiveVersion} />
+        <VersionTimeline versions={filteredVersions} activeVersion={activeVersion} onSelect={updateActiveVersion} />
       </div>
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
         <div className='self-stretch'>
@@ -201,7 +202,47 @@ const formatDate = (timestamp: string) => {
   return dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
-function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect: (version: Version) => void }) {
+const compare = (a: string, b: string) => {
+  const diff = simplediff.diff(a.split(/[ ]+/), b.split(/[ ]+/))
+  return diff.map((part: (string | string[])[], index: number) => {
+    const content = (part[1] as string[]).join(' ')
+    switch (part[0] as string) {
+      case '=':
+        return <span key={index}>{content} </span>
+      case '-':
+        return (
+          <span key={index}>
+            <span className='text-red-600 line-through'>{content}</span>{' '}
+          </span>
+        )
+      case '+':
+        return (
+          <span key={index}>
+            <span className='text-green-600 underline'>{content}</span>{' '}
+          </span>
+        )
+    }
+  })
+}
+
+function VersionTimeline({
+  versions,
+  activeVersion,
+  onSelect,
+}: {
+  versions: Version[]
+  activeVersion: Version
+  onSelect: (version: Version) => void
+}) {
+  const previousVersion = versions.find(version => version.id === activeVersion.previousID)
+  const renderPrompt = (version: Version) =>
+    previousVersion && version.id === activeVersion.id ? (
+      compare(previousVersion.prompt, version.prompt)
+    ) : previousVersion && version.id === previousVersion.id ? (
+      <span className='italic'>{version.prompt}</span>
+    ) : (
+      <span>{version.prompt}</span>
+    )
   return (
     <Timeline>
       {versions.map((version, index) => (
@@ -220,7 +261,7 @@ function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect
                 ))}
             </Timeline.Title>
             <Timeline.Body>
-              {version.prompt}
+              {renderPrompt(version)}
               <RunTimeline runs={version.runs} />
             </Timeline.Body>
           </Timeline.Content>
