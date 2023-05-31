@@ -201,15 +201,7 @@ const formatDate = (timestamp: string) => {
   return dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
-function VersionTimeline({
-  headNode,
-  versions,
-  onSelect,
-}: {
-  headNode?: ReactNode
-  versions: Version[]
-  onSelect: (version: Version) => void
-}) {
+function VersionTimeline({ versions, onSelect }: { versions: Version[]; onSelect: (version: Version) => void }) {
   return (
     <Timeline>
       {versions.map((version, index) => (
@@ -217,20 +209,18 @@ function VersionTimeline({
           <Timeline.Point />
           <Timeline.Content>
             <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
-            {(index > 0 || !headNode) && (
-              <Timeline.Title className='flex items-center gap-2'>
-                {version.title}
-                {version.tags
-                  .split(', ')
-                  .map(tag => tag.trim())
-                  .filter(tag => tag.length)
-                  .map((tag, tagIndex) => (
-                    <Badge key={tagIndex}>{tag}</Badge>
-                  ))}
-              </Timeline.Title>
-            )}
+            <Timeline.Title className='flex items-center gap-2'>
+              {version.title}
+              {version.tags
+                .split(', ')
+                .map(tag => tag.trim())
+                .filter(tag => tag.length)
+                .map((tag, tagIndex) => (
+                  <Badge key={tagIndex}>{tag}</Badge>
+                ))}
+            </Timeline.Title>
             <Timeline.Body>
-              {index === 0 && headNode ? headNode : version.prompt}
+              {version.prompt}
               <RunTimeline runs={version.runs} />
             </Timeline.Body>
           </Timeline.Content>
