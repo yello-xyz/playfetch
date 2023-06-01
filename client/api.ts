@@ -50,7 +50,7 @@ const api = {
   ): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, title, tags, versionID })
   },
-  runPrompt: function (promptID: number, versionID: number, prompt: string): Promise<string | undefined> {
+  runPrompt: function (promptID: number, versionID: number, prompt: string) {
     return post(this.runPrompt, { promptID, versionID, prompt })
   },
   getPromptVersions: function (promptID: number): Promise<Version[]> {

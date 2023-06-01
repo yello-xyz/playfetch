@@ -72,35 +72,6 @@ export default function Home({
   }
   const isDirty = activeVersion.prompt !== prompt || title !== activeVersion.title || tags !== activeVersion.tags
 
-  const updateActivePrompt = (promptID: number) => {
-    if (promptID !== activePromptID) {
-      if (isDirty) {
-        savePrompt()
-      }
-      setActivePromptID(promptID)
-      refreshVersions(promptID, true)
-    }
-  }
-
-  const updateActiveVersion = (version: Version) => {
-    if (version.id !== activeVersion.id) {
-      if (isDirty) {
-        savePrompt().then(() => refreshVersions(activePromptID, false))
-      }
-      setActiveVersion(version)
-    }
-  }
-
-  const refreshProjects = () => api.getProjects().then(setProjects)
-
-  const refreshVersions = async (promptID: number, refocus: boolean, focusID?: number) => {
-    const versions = await api.getPromptVersions(promptID)
-    setVersions(versions)
-    if (refocus) {
-      setActiveVersion((focusID ? versions.find(version => version.id === focusID) : undefined) ?? versions[0])
-    }
-  }
-
   const addProject = async () => {
     const promptID = await api.addProject()
     await refreshProjects()
@@ -113,20 +84,48 @@ export default function Home({
     updateActivePrompt(promptID)
   }
 
-  const savePrompt = async () => {
+  const updateActivePrompt = (promptID: number) => {
+    if (promptID !== activePromptID) {
+      savePrompt()
+      setActivePromptID(promptID)
+      refreshVersions(promptID)
+    }
+  }
+
+  const updateActiveVersion = (version: Version) => {
+    if (version.id !== activeVersion.id) {
+      if (isDirty) {
+        savePrompt().then(_ => refreshVersions())
+      }
+      setActiveVersion(version)
+    }
+  }
+
+  const refreshProjects = () => api.getProjects().then(setProjects)
+
+  const refreshVersions = async (promptID = activePromptID, focusID = activeVersion.id) => {
+    const versions = await api.getPromptVersions(promptID)
+    setVersions(versions)
+    if (promptID !== activePromptID || focusID !== activeVersion.id) {
+      setActiveVersion((focusID ? versions.find(version => version.id === focusID) : undefined) ?? versions[0])
+    }
+  }
+
+  const savePrompt = async (focusOnSavedVersion = false) => {
+    if (!isDirty) {
+      return activeVersion.id
+    }
     const versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
     refreshProjects()
+    if (focusOnSavedVersion) {
+      refreshVersions(activePromptID, versionID)
+    }
     return versionID
   }
 
-  const save = () => {
-    savePrompt().then(versionID => refreshVersions(activePromptID, true, versionID))
-  }
-
   const runPrompt = async () => {
-    const versionID = isDirty ? await savePrompt() : activeVersion.id
-    await api.runPrompt(activePromptID, versionID, prompt)
-    await refreshVersions(activePromptID, true, versionID)
+    const versionID = await savePrompt(true)
+    await api.runPrompt(activePromptID, versionID, prompt).then(_ => refreshVersions())
   }
 
   const logout = async () => {
@@ -187,7 +186,7 @@ export default function Home({
           <PendingButton disabled={!prompt.length} onClick={runPrompt}>
             Save & Run
           </PendingButton>
-          <PendingButton disabled={!isDirty} onClick={save}>
+          <PendingButton disabled={!isDirty} onClick={() => savePrompt(true).then()}>
             Save
           </PendingButton>
         </div>
