@@ -1,4 +1,4 @@
-import { Version } from '@/types'
+import { Project, Version } from '@/types'
 import ClientRoute from './clientRoute'
 
 async function parseResponse(response: Response) {
@@ -31,6 +31,9 @@ const api = {
   },
   logout: async function () {
     return post(this.logout)
+  },
+  getProjects: function (): Promise<Project[]> {
+    return post(this.getProjects)
   },
   addProject: function (): Promise<number> {
     return post(this.addProject)

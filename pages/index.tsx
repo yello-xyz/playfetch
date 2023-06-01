@@ -16,15 +16,15 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const userID = req.session.user!.id
-  let projects = await getProjectsForUser(userID)
-  if (projects.length === 0) {
+  let initialProjects = await getProjectsForUser(userID)
+  if (initialProjects.length === 0) {
     await addProjectForUser(userID)
-    projects = await getProjectsForUser(userID)
+    initialProjects = await getProjectsForUser(userID)
   }
-  const initialActivePromptID = projects[0].prompts[0].id
+  const initialActivePromptID = initialProjects[0].prompts[0].id
   const initialVersions = await getVersionsForPrompt(userID, initialActivePromptID)
   const initialActiveVersion = initialVersions[0]
-  return { props: { projects, initialActivePromptID, initialVersions, initialActiveVersion } }
+  return { props: { initialProjects, initialActivePromptID, initialVersions, initialActiveVersion } }
 })
 
 const truncate = (text: string, length: number = 20) =>
@@ -41,17 +41,18 @@ const versionFilter = (filter: string) => (version: Version) => {
 }
 
 export default function Home({
-  projects,
+  initialProjects,
   initialActivePromptID,
   initialVersions,
   initialActiveVersion,
 }: {
-  projects: Project[]
+  initialProjects: Project[]
   initialActivePromptID: number
   initialVersions: Version[]
   initialActiveVersion: Version
 }) {
   const router = useRouter()
+  const [projects, setProjects] = useState(initialProjects)
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
@@ -86,7 +87,7 @@ export default function Home({
     }
   }
 
-  const refreshData = async () => router.replace(router.asPath)
+  const refreshProjects = () => api.getProjects().then(setProjects)
 
   const refreshVersions = async (promptID: number, focusOnMostRecent = true) => {
     const versions = await api.getPromptVersions(promptID)
@@ -98,13 +99,13 @@ export default function Home({
 
   const addProject = async () => {
     const promptID = await api.addProject()
-    await refreshData()
+    await refreshProjects()
     updateActivePrompt(promptID)
   }
 
   const addPrompt = async (projectID: number) => {
     const promptID = await api.addPrompt(projectID)
-    await refreshData()
+    await refreshProjects()
     updateActivePrompt(promptID)
   }
 
@@ -118,15 +119,15 @@ export default function Home({
 
   const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
     await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id, versionID)
-    await refreshData()
-    await refreshVersions(activePromptID, focusOnNewlySaved)
+    refreshProjects()
+    refreshVersions(activePromptID, focusOnNewlySaved)
   }
 
   const runPrompt = async () => {
     let versionID = activeVersion.id
     if (isDirty) {
       versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
-      await refreshData()
+      refreshProjects()
     }
     await api.runPrompt(activePromptID, versionID, prompt)
     await refreshVersions(activePromptID, isDirty)
@@ -134,7 +135,7 @@ export default function Home({
 
   const logout = async () => {
     await api.logout()
-    await refreshData()
+    router.replace(router.asPath)
   }
 
   return (
