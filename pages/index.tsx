@@ -205,11 +205,12 @@ export default function Home({
   )
 }
 
-const formatDate = (timestamp: string) => {
+const formatDate = (timestamp: string, previousTimestamp?: string) => {
   const dateString = new Date(timestamp).toLocaleDateString()
   const timeString = new Date(timestamp).toLocaleTimeString()
+  const previousDateString = previousTimestamp ? new Date(previousTimestamp).toLocaleDateString() : undefined
   const todayString = new Date().toLocaleDateString()
-  return dateString === todayString ? timeString : `${dateString} ${timeString}`
+  return dateString === previousDateString || dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
 const classNameForComparison = (state: '=' | '-' | '+') => {
@@ -248,11 +249,13 @@ function VersionTimeline({
       : version.prompt
   return (
     <Timeline>
-      {versions.map((version, index) => (
+      {versions.map((version, index, versions) => (
         <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(version)}>
           <Timeline.Point />
           <Timeline.Content>
-            <Timeline.Time>{formatDate(version.timestamp)}</Timeline.Time>
+            <Timeline.Time>
+              {formatDate(version.timestamp, index > 0 ? versions[index - 1].timestamp : undefined)}
+            </Timeline.Time>
             <Timeline.Title className='flex items-center gap-2'>
               {version.title}
               {version.tags
@@ -265,7 +268,7 @@ function VersionTimeline({
             </Timeline.Title>
             <Timeline.Body>
               {renderPrompt(version)}
-              <RunTimeline runs={version.runs} />
+              <RunTimeline runs={version.runs} previousTimestamp={version.timestamp} />
             </Timeline.Body>
           </Timeline.Content>
         </Timeline.Item>
@@ -274,14 +277,16 @@ function VersionTimeline({
   )
 }
 
-function RunTimeline({ runs }: { runs: Run[] }) {
+function RunTimeline({ runs, previousTimestamp }: { runs: Run[]; previousTimestamp?: string }) {
   return (
     <Timeline>
-      {runs.map((run, index) => (
+      {runs.map((run, index, runs) => (
         <Timeline.Item key={index} className='cursor-pointer'>
           <Timeline.Point />
           <Timeline.Content>
-            <Timeline.Time>{formatDate(run.timestamp)}</Timeline.Time>
+            <Timeline.Time>
+              {formatDate(run.timestamp, index > 0 ? runs[index - 1].timestamp : previousTimestamp)}
+            </Timeline.Time>
             <Timeline.Body>{run.output}</Timeline.Body>
           </Timeline.Content>
         </Timeline.Item>
