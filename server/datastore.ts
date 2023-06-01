@@ -112,7 +112,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   const existingNames = new Set(existingPrompts.map(prompt => prompt.name))
   const name = uniqueName('New Prompt', existingNames)
   const promptData = toPromptData(userID, projectID, name, new Date())
-  await getDatastore().save(prompt)
+  await getDatastore().save(promptData)
   await savePromptForUser(userID, Number(promptData.key.id), name, '', '')
   return Number(promptData.key.id)
 }
@@ -171,8 +171,13 @@ export async function getVersionsForPrompt(userID: number, promptID: number): Pr
 }
 
 export async function saveRun(userID: number, promptID: number, versionID: number, output: string) {
-  const key = buildKey(Entity.RUN)
-  await getDatastore().save({ key, data: { userID, promptID, versionID, output, createdAt: new Date() } })
+  await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date()))
 }
+
+const toRunData = (userID: number, promptID: number, versionID: number, output: string, createdAt: Date) => ({
+  key: buildKey(Entity.RUN),
+  data: { userID, promptID, versionID, output, createdAt },
+  excludeFromIndexes: ['output'],
+})
 
 const toRun = (data: any): Run => ({ id: getID(data), timestamp: getTimestamp(data), output: data.output })
