@@ -102,7 +102,7 @@ export default function TagsInput({
   const focusLast = () => setFocusIndex(tagsArray.length - 1)
 
   return (
-    <>
+    <div>
       {label && <Label onClick={focusLast}>{label}</Label>}
       <div className={styles.tagsContainer} onClick={focusLast}>
         {tagsArray.map((tag, index) => (
@@ -116,6 +116,6 @@ export default function TagsInput({
           />
         ))}
       </div>
-    </>
+    </div>
   )
 }
