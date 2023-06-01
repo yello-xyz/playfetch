@@ -11,6 +11,7 @@ import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import TagsInput from '@/client/tagsInput'
 import simplediff from 'simplediff'
+import { HiOutlineSparkles, HiPlay } from 'react-icons/hi'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -240,6 +241,14 @@ const renderComparison = (previous: string, current: string) =>
       </span>
     ))
 
+const customPointTheme = {
+  marker: {
+    icon: {
+      wrapper: 'absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-white',
+    },
+  },
+}
+
 function VersionTimeline({
   versions,
   activeVersion,
@@ -265,7 +274,7 @@ function VersionTimeline({
         .flatMap(version => [version, ...version.runs])
         .map((item, index, items) => (
           <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item))}>
-            <Timeline.Point />
+            <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
             <Timeline.Content className={isPreviousVersion(item) ? 'italic' : ''}>
               <Timeline.Time>
                 {formatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
