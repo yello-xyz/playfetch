@@ -59,12 +59,6 @@ export async function saveUser(email: string, isAdmin: boolean) {
   await getDatastore().save({ key, data: { email, isAdmin, createdAt: new Date() } })
 }
 
-const toProject = (data: any, prompts: any[]): Project => ({
-  id: getID(data),
-  name: data.name,
-  prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
-})
-
 const uniqueName = (name: string, existingNames: Set<string>) => {
   let uniqueName = name
   let counter = 2
@@ -73,6 +67,13 @@ const uniqueName = (name: string, existingNames: Set<string>) => {
   }
   return uniqueName
 }
+
+const toProject = (data: any, prompts: any[]): Project => ({
+  id: getID(data),
+  name: data.name,
+  timestamp: getTimestamp(data),
+  prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
+})
 
 export async function addProjectForUser(userID: number): Promise<number> {
   const existingProjects = await getProjectsForUser(userID)
