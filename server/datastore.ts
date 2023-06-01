@@ -68,6 +68,12 @@ const uniqueName = (name: string, existingNames: Set<string>) => {
   return uniqueName
 }
 
+const fromProject = (userID: number, name: string, createdAt: Date) => ({
+  key: buildKey(Entity.PROJECT),
+  data: { userID, name, createdAt },
+  excludeFromIndexes: ['name'],
+})
+
 const toProject = (data: any, prompts: any[]): Project => ({
   id: getID(data),
   name: data.name,
@@ -79,9 +85,9 @@ export async function addProjectForUser(userID: number): Promise<number> {
   const existingProjects = await getProjectsForUser(userID)
   const existingNames = new Set(existingProjects.map(project => project.name))
   const name = uniqueName('New Project', existingNames)
-  const key = buildKey(Entity.PROJECT)
-  await getDatastore().save({ key, data: { name, userID, createdAt: new Date() } })
-  return await addPromptForUser(userID, Number(key.id))
+  const project = fromProject(userID, name, new Date())
+  await getDatastore().save(project)
+  return await addPromptForUser(userID, Number(project.key.id))
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
