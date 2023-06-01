@@ -23,35 +23,40 @@ export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   }
   const initialActivePromptID = projects[0].prompts[0].id
   const initialVersions = await getVersionsForPrompt(userID, initialActivePromptID)
-  return { props: { projects, initialActivePromptID, initialVersions } }
+  const initialActiveVersion = initialVersions[0]
+  return { props: { projects, initialActivePromptID, initialVersions, initialActiveVersion } }
 })
 
 const truncate = (text: string, length: number = 20) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
 
+const versionFilter = (filter: string) => (version: Version) => {
+  const lowerCaseFilter = filter.toLowerCase()
+  return (
+    version.title.toLowerCase().includes(lowerCaseFilter) ||
+    version.tags.toLowerCase().includes(lowerCaseFilter) ||
+    version.prompt.toLowerCase().includes(lowerCaseFilter) ||
+    version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
+  )
+}
+
 export default function Home({
   projects,
   initialActivePromptID,
   initialVersions,
+  initialActiveVersion,
 }: {
   projects: Project[]
   initialActivePromptID: number
   initialVersions: Version[]
+  initialActiveVersion: Version
 }) {
   const router = useRouter()
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
-  const [activeVersion, setActiveVersion] = useState<Version>(initialVersions[0])
+  const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
 
   const [filter, setFilter] = useState('')
-  const filteredVersions = versions.filter(
-    version =>
-      !filter.length ||
-      version.title.toLowerCase().includes(filter.toLowerCase()) ||
-      version.tags.toLowerCase().includes(filter.toLowerCase()) ||
-      version.prompt.toLowerCase().includes(filter.toLowerCase()) ||
-      version.runs.some(run => run.output.toLowerCase().includes(filter.toLowerCase()))
-  )
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
   const [title, setTitle] = useState(activeVersion.title)
@@ -162,7 +167,11 @@ export default function Home({
       </Sidebar>
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-        <VersionTimeline versions={filteredVersions} activeVersion={activeVersion} onSelect={updateActiveVersion} />
+        <VersionTimeline
+          versions={versions.filter(versionFilter(filter))}
+          activeVersion={activeVersion}
+          onSelect={updateActiveVersion}
+        />
       </div>
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
         <div className='self-stretch'>
@@ -202,28 +211,25 @@ const formatDate = (timestamp: string) => {
   return dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
-const compare = (a: string, b: string) => {
-  const diff = simplediff.diff(a.split(/[ ]+/), b.split(/[ ]+/))
-  return diff.map((part: (string | string[])[], index: number) => {
-    const content = (part[1] as string[]).join(' ')
-    switch (part[0] as string) {
-      case '=':
-        return <span key={index}>{content} </span>
-      case '-':
-        return (
-          <span key={index}>
-            <span className='text-red-600 line-through'>{content}</span>{' '}
-          </span>
-        )
-      case '+':
-        return (
-          <span key={index}>
-            <span className='text-green-600 underline'>{content}</span>{' '}
-          </span>
-        )
-    }
-  })
+const classNameForComparison = (state: '=' | '-' | '+') => {
+  switch (state) {
+    case '=':
+      return ''
+    case '-':
+      return 'text-red-600 line-through'
+    case '+':
+      return 'text-green-600 underline'
+  }
 }
+
+const renderComparison = (previous: string, current: string) =>
+  simplediff
+    .diff(previous.split(/[ ]+/), current.split(/[ ]+/))
+    .map((part: { 0: '=' | '-' | '+'; 1: string[] }, index: number) => (
+      <span key={index}>
+        <span className={classNameForComparison(part[0])}>{part[1].join(' ')}</span>{' '}
+      </span>
+    ))
 
 function VersionTimeline({
   versions,
@@ -236,13 +242,9 @@ function VersionTimeline({
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const renderPrompt = (version: Version) =>
-    previousVersion && version.id === activeVersion.id ? (
-      compare(previousVersion.prompt, version.prompt)
-    ) : previousVersion && version.id === previousVersion.id ? (
-      <span className='italic'>{version.prompt}</span>
-    ) : (
-      <span>{version.prompt}</span>
-    )
+    previousVersion && version.id === activeVersion.id
+      ? renderComparison(previousVersion.prompt, version.prompt)
+      : version.prompt
   return (
     <Timeline>
       {versions.map((version, index) => (
