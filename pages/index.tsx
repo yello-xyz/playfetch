@@ -250,6 +250,7 @@ function VersionTimeline({
   const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
   const toVersion = (item: Version | Run): Version =>
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
+  const isPreviousVersion = (item: Version | Run) => previousVersion && isVersion(item) && item.id === previousVersion.id
 
   return (
     <Timeline>
@@ -258,7 +259,7 @@ function VersionTimeline({
         .map((item, index, items) => (
           <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item))}>
             <Timeline.Point />
-            <Timeline.Content>
+            <Timeline.Content className={isPreviousVersion(item) ? 'italic' : ''}>
               <Timeline.Time>
                 {formatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
               </Timeline.Time>
