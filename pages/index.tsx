@@ -70,31 +70,34 @@ export default function Home({
     setTags(activeVersion.tags)
     setPreviousActiveID(activeVersion.id)
   }
-  const isPromptDirty = activeVersion.prompt !== prompt
-  const isDirty = isPromptDirty || title !== activeVersion.title || tags !== activeVersion.tags
+  const isDirty = activeVersion.prompt !== prompt || title !== activeVersion.title || tags !== activeVersion.tags
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
-      savePromptIfNeeded()
+      if (isDirty) {
+        savePrompt()
+      }
       setActivePromptID(promptID)
-      refreshVersions(promptID)
+      refreshVersions(promptID, true)
     }
   }
 
   const updateActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
-      savePromptIfNeeded()
+      if (isDirty) {
+        savePrompt().then(() => refreshVersions(activePromptID, false))
+      }
       setActiveVersion(version)
     }
   }
 
   const refreshProjects = () => api.getProjects().then(setProjects)
 
-  const refreshVersions = async (promptID: number, focusOnMostRecent = true) => {
+  const refreshVersions = async (promptID: number, refocus: boolean, focusID?: number) => {
     const versions = await api.getPromptVersions(promptID)
     setVersions(versions)
-    if (focusOnMostRecent) {
-      setActiveVersion(versions[0])
+    if (refocus) {
+      setActiveVersion((focusID ? versions.find(version => version.id === focusID) : undefined) ?? versions[0])
     }
   }
 
@@ -110,35 +113,20 @@ export default function Home({
     updateActivePrompt(promptID)
   }
 
-  const savePromptIfNeeded = () => {
-    if (isDirty) {
-      savePrompt(false)
-    }
+  const savePrompt = async () => {
+    const versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
+    refreshProjects()
+    return versionID
   }
 
-  const overwritePrompt = () => savePrompt(true, true)
-
-  const savePrompt = async (focusOnNewlySaved = true, overwrite = false) => {
-    await api.updatePrompt(
-      activePromptID,
-      prompt,
-      title,
-      tags,
-      overwrite ? activeVersion.previousID : activeVersion.id,
-      overwrite ? activeVersion.id : undefined
-    )
-    refreshProjects()
-    refreshVersions(activePromptID, focusOnNewlySaved)
+  const save = () => {
+    savePrompt().then(versionID => refreshVersions(activePromptID, true, versionID))
   }
 
   const runPrompt = async () => {
-    let versionID = activeVersion.id
-    if (isDirty) {
-      versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
-      refreshProjects()
-    }
+    const versionID = isDirty ? await savePrompt() : activeVersion.id
     await api.runPrompt(activePromptID, versionID, prompt)
-    await refreshVersions(activePromptID, isDirty)
+    await refreshVersions(activePromptID, true, versionID)
   }
 
   const logout = async () => {
@@ -196,16 +184,11 @@ export default function Home({
         <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={setTitle} />
         <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
         <div className='flex gap-2'>
-          <PendingButton disabled={!isDirty} onClick={savePrompt}>
-            Save
-          </PendingButton>
-          <PendingButton
-            disabled={!isDirty || (isPromptDirty && !!activeVersion.runs.length)}
-            onClick={overwritePrompt}>
-            Overwrite
-          </PendingButton>
           <PendingButton disabled={!prompt.length} onClick={runPrompt}>
-            Run
+            Save & Run
+          </PendingButton>
+          <PendingButton disabled={!isDirty} onClick={save}>
+            Save
           </PendingButton>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { Project, Prompt, Run, User, Version } from '@/types'
-import { Datastore, PropertyFilter, and } from '@google-cloud/datastore'
+import { Datastore, Key, PropertyFilter, and } from '@google-cloud/datastore'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
 let datastore: Datastore
@@ -35,6 +35,13 @@ const getEntities = (type: string, key: string, value: {}, limit?: number) =>
 
 const getEntity = async (type: string, key: string, value: {}) =>
   getEntities(type, key, value, 1).then(([[entity]]) => entity)
+
+const getKeyedEntities = async (type: string, ids: number[]) =>
+  getDatastore()
+    .get(ids.map(id => buildKey(type, id)))
+    .then(([entities]) => entities)
+
+const getKeyedEntity = async (type: string, id: number) => getKeyedEntities(type, [id]).then(([entity]) => entity)
 
 const toUserData = (email: string, isAdmin: boolean, createdAt: Date, lastLoginAt?: Date, userID?: number) => ({
   key: buildKey(Entity.USER, userID),
@@ -133,20 +140,34 @@ export async function savePromptForUser(
   prompt: string,
   title: string,
   tags: string,
-  previousVersionID?: number,
-  versionID?: number
+  currentVersionID?: number
 ) {
   const datastore = getDatastore()
-  const promptKey = buildKey(Entity.PROMPT, promptID)
-  const [promptData] = await datastore.get(promptKey)
-  if (promptData?.userID === userID) {
-    const name = title.length ? title : prompt
-    await datastore.save(toPromptData(userID, promptData.projectID, name, promptData.createdAt, promptID))
-    const versionData = toVersionData(userID, promptID, prompt, title, tags, new Date(), previousVersionID, versionID)
-    await getDatastore().save(versionData)
-    return Number(versionData.key.id)
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  if (promptData?.userID !== userID) {
+    return undefined
   }
-  return undefined
+
+  const currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
+  const canOverwrite =
+    currentVersionID &&
+    (prompt === currentVersion.prompt || !(await getEntity(Entity.RUN, 'versionID', currentVersionID)))
+  const versionID = canOverwrite ? currentVersionID : undefined
+  const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
+  const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
+
+  const versionData = toVersionData(userID, promptID, prompt, title, tags, createdAt, previousVersionID, versionID)
+  await getDatastore().save(versionData)
+
+  const promptName = title.length ? title : prompt
+  if (
+    promptName !== promptData.name &&
+    (!versionID || getID(await getEntity(Entity.VERSION, 'promptID', promptID)) === versionID)
+  ) {
+    await datastore.save(toPromptData(userID, promptData.projectID, promptName, promptData.createdAt, promptID))
+  }
+
+  return Number(versionData.key.id)
 }
 
 const toVersionData = (
