@@ -96,7 +96,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
     Entity.PROMPT,
     and([new PropertyFilter('userID', '=', userID), new PropertyFilter('projectID', '=', projectID)])
   )
-  const existingNames = new Set(existingPrompts.map(prompt => prompt.prompt))
+  const existingNames = new Set(existingPrompts.map(prompt => prompt.name))
   const name = uniqueName('New Prompt', existingNames)
   const key = buildKey(Entity.PROMPT)
   await getDatastore().save({ key, data: { userID, projectID, name, createdAt: new Date() } })
