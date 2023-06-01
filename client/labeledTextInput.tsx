@@ -1,5 +1,5 @@
 import { Label, TextInput, Textarea } from 'flowbite-react'
-import { HTMLInputTypeAttribute } from 'react'
+import { HTMLInputTypeAttribute, KeyboardEventHandler } from 'react'
 
 export default function LabeledTextInput({
   type = 'text',
@@ -9,6 +9,7 @@ export default function LabeledTextInput({
   placeholder,
   value,
   setValue,
+  onKeyDown,
 }: {
   type?: HTMLInputTypeAttribute
   id?: string
@@ -17,6 +18,7 @@ export default function LabeledTextInput({
   placeholder?: string
   value: string
   setValue: (value: string) => void
+  onKeyDown?: KeyboardEventHandler
 }) {
   return (
     <div>
@@ -33,6 +35,7 @@ export default function LabeledTextInput({
           placeholder={placeholder}
           required={true}
           rows={4}
+          onKeyDown={onKeyDown}
         />
       ) : (
         <TextInput
@@ -42,6 +45,7 @@ export default function LabeledTextInput({
           id={id}
           placeholder={placeholder}
           required={true}
+          onKeyDown={onKeyDown}
         />
       )}
     </div>
