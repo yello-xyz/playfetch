@@ -184,7 +184,7 @@ export default function Home({
         <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
         <div className='flex gap-2'>
           <PendingButton disabled={!prompt.length} onClick={runPrompt}>
-            Save & Run
+            Run
           </PendingButton>
           <PendingButton disabled={!isDirty} onClick={() => savePrompt(true).then()}>
             Save
@@ -241,14 +241,15 @@ function VersionTimeline({
   onSelect: (version: Version) => void
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
+  const isActiveVersion = (item: Version | Run) => item.id === activeVersion.id
   const renderPrompt = (version: Version) =>
-    previousVersion && version.id === activeVersion.id
+    previousVersion && isActiveVersion(version)
       ? renderComparison(previousVersion.prompt, version.prompt)
       : version.prompt
   const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
   const toVersion = (item: Version | Run): Version =>
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
-  const isPreviousVersion = (item: Version | Run) => previousVersion && item.id === previousVersion.id
+  const isPreviousVersion = (item: Version | Run) => !!previousVersion && item.id === previousVersion.id
 
   return (
     <Timeline>
@@ -257,8 +258,10 @@ function VersionTimeline({
         .map((item, index, items) => (
           <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item))}>
             <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
-            <Timeline.Content className={isPreviousVersion(item) ? 'italic' : ''}>
+            <Timeline.Content>
               <Timeline.Time>
+                {isActiveVersion(item) && '⮕ '}
+                {isPreviousVersion(item) && '⬅ '}
                 {formatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
               </Timeline.Time>
               {isVersion(item) && (
@@ -273,7 +276,9 @@ function VersionTimeline({
                     ))}
                 </Timeline.Title>
               )}
-              <Timeline.Body>{isVersion(item) ? renderPrompt(item) : item.output}</Timeline.Body>
+              <Timeline.Body className={isVersion(item) ? '' : 'italic'}>
+                {isVersion(item) ? renderPrompt(item) : item.output}
+              </Timeline.Body>
             </Timeline.Content>
           </Timeline.Item>
         ))}
