@@ -20,7 +20,7 @@ enum Entity {
 
 const getID = (entity: any) => Number(entity[getDatastore().KEY].id)
 
-const getTimestamp = (entity: any) => (entity.createdAt as Date).toISOString()
+const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date).toISOString()
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
@@ -36,14 +36,23 @@ const getEntities = (type: string, key: string, value: {}, limit?: number) =>
 const getEntity = async (type: string, key: string, value: {}) =>
   getEntities(type, key, value, 1).then(([[entity]]) => entity)
 
-const toUser = (data: any): User => ({ id: getID(data), email: data.email, isAdmin: data.isAdmin })
+const toUserData = (email: string, isAdmin: boolean, createdAt: Date, lastLoginAt?: Date, userID?: number) => ({
+  key: buildKey(Entity.USER, userID),
+  data: { email, isAdmin, createdAt, lastLoginAt },
+})
+
+const toUser = (data: any): User => ({
+  id: getID(data),
+  email: data.email,
+  isAdmin: data.isAdmin,
+  timestamp: getTimestamp(data),
+  lastLoginAt: getTimestamp(data, 'lastLoginAt'),
+})
 
 export async function markUserLogin(userID: number): Promise<User | undefined> {
-  const key = buildKey(Entity.USER, userID)
-  const [userData] = await getDatastore().get(key)
+  const [userData] = await getDatastore().get(buildKey(Entity.USER, userID))
   if (userData) {
-    const lastLoginAt = new Date()
-    await getDatastore().save({ key, data: { ...userData, lastLoginAt } })
+    await getDatastore().save(toUserData(userData.email, userData.isAdmin, userData.createdAt, new Date(), userID))
   }
   return userData ? toUser(userData) : userData
 }
@@ -54,9 +63,10 @@ export async function getUserForEmail(email: string): Promise<User | undefined> 
 }
 
 export async function saveUser(email: string, isAdmin: boolean) {
-  const user = await getUserForEmail(email)
-  const key = buildKey(Entity.USER, user?.id)
-  await getDatastore().save({ key, data: { email, isAdmin, createdAt: new Date() } })
+  const userData = await getEntity(Entity.USER, 'email', email)
+  await getDatastore().save(
+    toUserData(email, isAdmin, userData?.createdAt ?? new Date(), userData?.lastLoginAt, userData?.id)
+  )
 }
 
 const uniqueName = (name: string, existingNames: Set<string>) => {

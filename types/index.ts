@@ -1,7 +1,9 @@
 export type User = {
   id: number
   email: string
+  timestamp: string
   isAdmin: boolean
+  lastLoginAt?: string
 }
 
 export type Project = {
