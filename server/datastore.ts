@@ -110,8 +110,8 @@ export async function savePromptForUser(
   prompt: string,
   title: string,
   tags: string,
-  versionID?: number,
-  previousVersionID?: number
+  previousVersionID?: number,
+  versionID?: number
 ) {
   const datastore = getDatastore()
   const promptKey = buildKey(Entity.PROMPT, promptID)

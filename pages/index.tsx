@@ -115,10 +115,17 @@ export default function Home({
     }
   }
 
-  const overwritePrompt = () => savePrompt(true, activeVersion.id)
+  const overwritePrompt = () => savePrompt(true, true)
 
-  const savePrompt = async (focusOnNewlySaved = true, versionID?: number) => {
-    await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id, versionID)
+  const savePrompt = async (focusOnNewlySaved = true, overwrite = false) => {
+    await api.updatePrompt(
+      activePromptID,
+      prompt,
+      title,
+      tags,
+      overwrite ? activeVersion.previousID : activeVersion.id,
+      overwrite ? activeVersion.id : undefined
+    )
     refreshProjects()
     refreshVersions(activePromptID, focusOnNewlySaved)
   }
@@ -250,7 +257,7 @@ function VersionTimeline({
   const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
   const toVersion = (item: Version | Run): Version =>
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
-  const isPreviousVersion = (item: Version | Run) => previousVersion && isVersion(item) && item.id === previousVersion.id
+  const isPreviousVersion = (item: Version | Run) => previousVersion && item.id === previousVersion.id
 
   return (
     <Timeline>
