@@ -247,50 +247,37 @@ function VersionTimeline({
     previousVersion && version.id === activeVersion.id
       ? renderComparison(previousVersion.prompt, version.prompt)
       : version.prompt
-  return (
-    <Timeline>
-      {versions.map((version, index, versions) => (
-        <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(version)}>
-          <Timeline.Point />
-          <Timeline.Content>
-            <Timeline.Time>
-              {formatDate(version.timestamp, index > 0 ? versions[index - 1].timestamp : undefined)}
-            </Timeline.Time>
-            <Timeline.Title className='flex items-center gap-2'>
-              {version.title}
-              {version.tags
-                .split(', ')
-                .map(tag => tag.trim())
-                .filter(tag => tag.length)
-                .map((tag, tagIndex) => (
-                  <Badge key={tagIndex}>{tag}</Badge>
-                ))}
-            </Timeline.Title>
-            <Timeline.Body>
-              {renderPrompt(version)}
-              <RunTimeline runs={version.runs} previousTimestamp={version.timestamp} />
-            </Timeline.Body>
-          </Timeline.Content>
-        </Timeline.Item>
-      ))}
-    </Timeline>
-  )
-}
+  const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
+  const toVersion = (item: Version | Run): Version =>
+    isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
 
-function RunTimeline({ runs, previousTimestamp }: { runs: Run[]; previousTimestamp?: string }) {
   return (
     <Timeline>
-      {runs.map((run, index, runs) => (
-        <Timeline.Item key={index} className='cursor-pointer'>
-          <Timeline.Point />
-          <Timeline.Content>
-            <Timeline.Time>
-              {formatDate(run.timestamp, index > 0 ? runs[index - 1].timestamp : previousTimestamp)}
-            </Timeline.Time>
-            <Timeline.Body>{run.output}</Timeline.Body>
-          </Timeline.Content>
-        </Timeline.Item>
-      ))}
+      {versions
+        .flatMap(version => [version, ...version.runs])
+        .map((item, index, items) => (
+          <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item))}>
+            <Timeline.Point />
+            <Timeline.Content>
+              <Timeline.Time>
+                {formatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
+              </Timeline.Time>
+              {isVersion(item) && (
+                <Timeline.Title className='flex items-center gap-2'>
+                  {item.title}
+                  {item.tags
+                    .split(', ')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag.length)
+                    .map((tag, tagIndex) => (
+                      <Badge key={tagIndex}>{tag}</Badge>
+                    ))}
+                </Timeline.Title>
+              )}
+              <Timeline.Body>{isVersion(item) ? renderPrompt(item) : item.output}</Timeline.Body>
+            </Timeline.Content>
+          </Timeline.Item>
+        ))}
     </Timeline>
   )
 }
