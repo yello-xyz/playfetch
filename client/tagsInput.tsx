@@ -1,6 +1,6 @@
 import styles from './TagsInput.module.css'
 import { useEffect, useRef, useState } from 'react'
-import { XCircleIcon } from '@heroicons/react/20/solid'
+import { HiXCircle } from 'react-icons/hi'
 import { Label } from 'flowbite-react'
 
 function TagInput({
@@ -53,7 +53,7 @@ function TagInput({
           onChange={event => setTag(event.target.value)}
           onClick={event => event.stopPropagation()}
         />
-        {!emptyTag && <XCircleIcon className='w-6 h-6 text-black cursor-pointer' onClick={() => setTag('')} />}
+        {!emptyTag && <HiXCircle className='w-6 h-6 text-black cursor-pointer' onClick={() => setTag('')} />}
       </div>
     </>
   )
