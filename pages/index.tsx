@@ -12,6 +12,7 @@ import { HiOutlineFolderAdd } from 'react-icons/hi'
 import TagsInput from '@/client/tagsInput'
 import simplediff from 'simplediff'
 import { HiOutlineSparkles, HiPlay, HiOutlineTrash } from 'react-icons/hi'
+import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -59,6 +60,7 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
 
   const [filter, setFilter] = useState('')
+  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
   const [title, setTitle] = useState(activeVersion.title)
@@ -144,12 +146,18 @@ export default function Home({
   }
 
   const deleteVersion = async (version: Version) => {
-    await api.deleteVersion(version.id)
-    if (versions.length > 1) {
-      refreshVersions()
-    } else {
-      refreshProjects()
-    }
+    setDialogPrompt({
+      message:
+        'Are you sure you want to delete this version and all its associated runs? ' + 'This action cannot be undone.',
+      callback: async () => {
+        await api.deleteVersion(version.id)
+        if (versions.length > 1) {
+          refreshVersions()
+        } else {
+          refreshProjects()
+        }
+      },
+    })
   }
 
   return (
@@ -212,6 +220,7 @@ export default function Home({
           </PendingButton>
         </div>
       </div>
+      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </main>
   )
 }
