@@ -104,7 +104,7 @@ export default function Home({
   const refreshProjects = () => api.getProjects().then(setProjects)
 
   const refreshVersions = async (promptID = activePromptID, focusID = activeVersion.id) => {
-    const versions = await api.getPromptVersions(promptID)
+    const versions = await api.getVersions(promptID)
     setVersions(versions)
     if (promptID !== activePromptID || focusID !== activeVersion.id) {
       setActiveVersion((focusID ? versions.find(version => version.id === focusID) : undefined) ?? versions[0])
