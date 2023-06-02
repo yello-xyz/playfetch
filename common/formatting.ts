@@ -20,3 +20,5 @@ export const BuildUniqueName = (name: string, existingNames: string[]) => {
   return uniqueName
 }
 
+export const Truncate = (text: string, length: number) =>
+  text.length <= length ? text : text.slice(0, length).trim() + '…'

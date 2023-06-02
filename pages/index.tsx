@@ -13,7 +13,7 @@ import TagsInput from '@/client/tagsInput'
 import simplediff from 'simplediff'
 import { HiOutlineSparkles, HiPlay, HiOutlineTrash } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import { BuildUniqueName, FormatDate } from '@/common/formatting'
+import { BuildUniqueName, FormatDate, Truncate } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,9 +31,6 @@ export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const initialActiveVersion = initialVersions[0]
   return { props: { initialProjects, initialActivePromptID, initialVersions, initialActiveVersion } }
 })
-
-const truncate = (text: string, length: number = 20) =>
-  text.length <= length ? text : text.slice(0, length).trim() + '…'
 
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
@@ -61,6 +58,7 @@ export default function Home({
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
+  const [activeRun, setActiveRun] = useState<Run>()
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
   const [filter, setFilter] = useState('')
@@ -100,13 +98,15 @@ export default function Home({
   const updateActiveVersion = (version: Version) => {
     setActiveVersion(version)
     setDirtyVersion(undefined)
+    setActiveRun(undefined)
   }
 
-  const selectActiveVersion = (version: Version) => {
+  const selectActiveVersion = (version: Version, run?: Run) => {
     if (version.id !== activeVersion.id) {
       savePrompt(_ => refreshVersions())
       updateActiveVersion(version)
     }
+    setActiveRun(run)
   }
 
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
@@ -206,7 +206,7 @@ export default function Home({
                   key={promptIndex}
                   active={activePromptID === prompt.id}
                   onClick={() => updateActivePrompt(prompt.id)}>
-                  {truncate(prompt.name)}
+                  {Truncate(prompt.name, 20)}
                 </Sidebar.Item>
               ))}
             </Sidebar.Collapse>
@@ -226,6 +226,7 @@ export default function Home({
         key={activeVersion.id}
         version={activeVersion}
         setDirtyVersion={setDirtyVersion}
+        activeRun={activeRun}
         onRun={runPrompt}
         onSave={() => savePromptAndRefocus().then()}
       />
@@ -243,11 +244,13 @@ export default function Home({
 function PromptPanel({
   version,
   setDirtyVersion,
+  activeRun,
   onRun,
   onSave,
 }: {
   version: Version
   setDirtyVersion: (version?: Version) => void
+  activeRun?: Run
   onRun: () => void
   onSave: () => void
 }) {
@@ -291,6 +294,7 @@ function PromptPanel({
           Save
         </PendingButton>
       </div>
+      {activeRun && <div>{activeRun.output}</div>}
     </div>
   )
 }
@@ -331,7 +335,7 @@ function VersionTimeline({
 }: {
   versions: Version[]
   activeVersion: Version
-  onSelect: (version: Version) => void
+  onSelect: (version: Version, run?: Run) => void
   onDelete: (version: Version) => void
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
@@ -343,6 +347,7 @@ function VersionTimeline({
   const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
   const toVersion = (item: Version | Run): Version =>
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
+  const toRun = (item: Version | Run): Run | undefined => (isVersion(item) ? undefined : item)
   const isPreviousVersion = (item: Version | Run) => !!previousVersion && item.id === previousVersion.id
 
   const deleteVersion = async (event: MouseEvent, version: Version) => {
@@ -355,7 +360,7 @@ function VersionTimeline({
       {versions
         .flatMap(version => [version, ...version.runs])
         .map((item, index, items) => (
-          <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item))}>
+          <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item), toRun(item))}>
             <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
             <Timeline.Content>
               <Timeline.Time className='flex gap-2'>
@@ -377,7 +382,7 @@ function VersionTimeline({
                 </Timeline.Title>
               )}
               <Timeline.Body className={isVersion(item) ? '' : 'italic'}>
-                {isVersion(item) ? renderPrompt(item) : item.output}
+                {isVersion(item) ? renderPrompt(item) : Truncate(item.output, 200)}
               </Timeline.Body>
             </Timeline.Content>
           </Timeline.Item>
