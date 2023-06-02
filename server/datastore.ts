@@ -27,14 +27,21 @@ const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id
 const buildQuery = (type: string, filter: EntityFilter, limit: number = 100) =>
   getDatastore().createQuery(type).filter(filter).order('createdAt', { descending: true }).limit(limit)
 
+const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
+
 const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
-  getDatastore().runQuery(buildQuery(type, filter, limit))
+  getDatastore()
+    .runQuery(buildQuery(type, filter, limit))
+    .then(([entities]) => entities)
 
 const getEntities = (type: string, key: string, value: {}, limit?: number) =>
-  getFilteredEntities(type, new PropertyFilter(key, '=', value), limit)
+  getFilteredEntities(type, buildFilter(key, value), limit)
 
 const getEntity = async (type: string, key: string, value: {}) =>
-  getEntities(type, key, value, 1).then(([[entity]]) => entity)
+  getEntities(type, key, value, 1).then(([entity]) => entity)
+
+const getUserEntities = (type: string, key: string, value: {}, userID: number, limit?: number) =>
+  getFilteredEntities(type, and([buildFilter(key, value), buildFilter('userID', userID)]), limit)
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
@@ -108,8 +115,8 @@ export async function addProjectForUser(userID: number): Promise<number> {
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
-  const [projects] = await getEntities(Entity.PROJECT, 'userID', userID)
-  const [prompts] = await getEntities(Entity.PROMPT, 'userID', userID)
+  const projects = await getEntities(Entity.PROJECT, 'userID', userID)
+  const prompts = await getEntities(Entity.PROMPT, 'userID', userID)
   return projects.map(project => toProject(project, prompts))
 }
 
@@ -122,10 +129,7 @@ const toPromptData = (userID: number, projectID: number, name: string, createdAt
 const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
-  const [existingPrompts] = await getFilteredEntities(
-    Entity.PROMPT,
-    and([new PropertyFilter('userID', '=', userID), new PropertyFilter('projectID', '=', projectID)])
-  )
+  const existingPrompts = await getUserEntities(Entity.PROMPT, 'projectID', projectID, userID)
   const existingNames = new Set(existingPrompts.map(prompt => prompt.name))
   const name = uniqueName('New Prompt', existingNames)
   const promptData = toPromptData(userID, projectID, name, new Date())
@@ -196,8 +200,8 @@ const toVersion = (data: any, runs: any[]): Version => ({
 })
 
 export async function getVersionsForPrompt(userID: number, promptID: number): Promise<Version[]> {
-  const [versions] = await getEntities(Entity.VERSION, 'promptID', promptID)
-  const [runs] = await getEntities(Entity.RUN, 'promptID', promptID)
+  const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
+  const runs = await getEntities(Entity.RUN, 'promptID', promptID)
   return versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 }
 
