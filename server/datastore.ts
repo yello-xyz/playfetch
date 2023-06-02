@@ -1,5 +1,6 @@
 import { Project, Prompt, Run, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
+import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
 let datastore: Datastore
@@ -62,6 +63,13 @@ const getKeyedEntities = async (type: string, ids: number[]) =>
     .then(([entities]) => entities)
 
 const getKeyedEntity = async (type: string, id: number) => getKeyedEntities(type, [id]).then(([entity]) => entity)
+
+const getEntityCount = async (type: string, key: string, value: {}) => {
+  const datastore = getDatastore()
+  const query = datastore.createQuery(type).filter(buildFilter(key, value))
+  const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
+  return count
+}
 
 const toUserData = (email: string, isAdmin: boolean, createdAt: Date, lastLoginAt?: Date, userID?: number) => ({
   key: buildKey(Entity.USER, userID),
@@ -215,8 +223,18 @@ const toVersion = (data: any, runs: any[]): Version => ({
 export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
   if (versionData?.userID === userID) {
-    await deleteAllRunsForVersion(versionID)
-    await getDatastore().delete(buildKey(Entity.VERSION, versionID))
+    const keysToDelete = await getKeys(Entity.RUN, 'versionID', versionID)
+    keysToDelete.push(buildKey(Entity.VERSION, versionID))
+    const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
+    if (versionCount <= 1) {
+      keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
+      const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
+      const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', promptData.projectID)
+      if (promptCount <= 1) {
+        keysToDelete.push(buildKey(Entity.PROJECT, promptData.projectID))
+      }
+    }
+    await getDatastore().delete(keysToDelete)
   }
 }
 
@@ -228,13 +246,6 @@ export async function getVersionsForPrompt(userID: number, promptID: number): Pr
 
 export async function saveRun(userID: number, promptID: number, versionID: number, output: string) {
   await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date()))
-}
-
-async function deleteAllRunsForVersion(versionID: number) {
-  const runKeys = await getKeys(Entity.RUN, 'versionID', versionID)
-  if (runKeys.length) {
-    await getDatastore().delete(runKeys)
-  }
 }
 
 const toRunData = (userID: number, promptID: number, versionID: number, output: string, createdAt: Date) => ({
