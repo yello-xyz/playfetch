@@ -101,14 +101,23 @@ export default function Home({
     }
   }
 
-  const refreshProjects = () => api.getProjects().then(setProjects)
+  const refreshProjects = async () => {
+    const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
+    const oldIndex = projects.findIndex(hasActivePrompt)
+    const newProjects = await api.getProjects()
+    setProjects(newProjects)
+    if (!newProjects.some(hasActivePrompt)) {
+      const newIndex = Math.max(0, Math.min(newProjects.length - 1, oldIndex))
+      updateActivePrompt(newProjects[newIndex].prompts[0].id)
+    }
+  }
 
   const refreshVersions = async (promptID = activePromptID, focusID = activeVersion.id) => {
-    const versions = await api.getVersions(promptID)
-    setVersions(versions)
-    const focusedVersion = versions.find(version => version.id === focusID)
+    const newVersions = await api.getVersions(promptID)
+    setVersions(newVersions)
+    const focusedVersion = newVersions.find(version => version.id === focusID)
     if (!focusedVersion || focusID !== activeVersion.id) {
-      setActiveVersion(focusedVersion ?? versions[0])
+      setActiveVersion(focusedVersion ?? newVersions[0])
     }
   }
 
@@ -136,7 +145,11 @@ export default function Home({
 
   const deleteVersion = async (version: Version) => {
     await api.deleteVersion(version.id)
-    refreshVersions()
+    if (versions.length > 1) {
+      refreshVersions()
+    } else {
+      refreshProjects()
+    }
   }
 
   return (
