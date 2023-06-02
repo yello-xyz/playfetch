@@ -176,9 +176,8 @@ export default function Home({
         }
         if (versions.length > 1) {
           refreshVersions()
-        } else {
-          refreshProjects()
         }
+        refreshProjects()
       },
       destructive: true,
     })

@@ -120,7 +120,10 @@ const toProject = (data: any, prompts: any[]): Project => ({
 
 export async function addProjectForUser(userID: number, projectName: string): Promise<number> {
   const existingProjects = await getProjectsForUser(userID)
-  const name = BuildUniqueName(projectName, existingProjects.map(project => project.name))
+  const name = BuildUniqueName(
+    projectName,
+    existingProjects.map(project => project.name)
+  )
   const projectData = toProjectData(userID, name, new Date())
   await getDatastore().save(projectData)
   return await addPromptForUser(userID, Number(projectData.key.id))
@@ -142,11 +145,25 @@ const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
-  const name = BuildUniqueName('New Prompt', existingPrompts.map(prompt => prompt.name))
+  const name = BuildUniqueName(
+    'New Prompt',
+    existingPrompts.map(prompt => prompt.name)
+  )
   const promptData = toPromptData(userID, projectID, name, new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, Number(promptData.key.id), name, '', '')
   return Number(promptData.key.id)
+}
+
+async function updatePromptNameIfNeeded(promptData: any) {
+  const promptID = getID(promptData)
+  const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID)
+  const promptName = lastVersionData.title.length ? lastVersionData.title : lastVersionData.prompt
+  if (promptName !== promptData.name) {
+    await datastore.save(
+      toPromptData(promptData.userID, promptData.projectID, promptName, promptData.createdAt, promptID)
+    )
+  }
 }
 
 export async function savePromptForUser(
@@ -157,7 +174,6 @@ export async function savePromptForUser(
   tags: string,
   currentVersionID?: number
 ) {
-  const datastore = getDatastore()
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   if (promptData?.userID !== userID) {
     return undefined
@@ -173,14 +189,7 @@ export async function savePromptForUser(
 
   const versionData = toVersionData(userID, promptID, prompt, title, tags, createdAt, previousVersionID, versionID)
   await getDatastore().save(versionData)
-
-  const promptName = title.length ? title : prompt
-  if (
-    promptName !== promptData.name &&
-    (!versionID || getID(await getEntity(Entity.VERSION, 'promptID', promptID)) === versionID)
-  ) {
-    await datastore.save(toPromptData(userID, promptData.projectID, promptName, promptData.createdAt, promptID))
-  }
+  await updatePromptNameIfNeeded(promptData)
 
   return Number(versionData.key.id)
 }
@@ -216,15 +225,18 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     const keysToDelete = await getKeys(Entity.RUN, 'versionID', versionID)
     keysToDelete.push(buildKey(Entity.VERSION, versionID))
     const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
+    const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
     if (versionCount <= 1) {
       keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
-      const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
       const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', promptData.projectID)
       if (promptCount <= 1) {
         keysToDelete.push(buildKey(Entity.PROJECT, promptData.projectID))
       }
     }
     await getDatastore().delete(keysToDelete)
+    if (versionCount > 1) {
+      await updatePromptNameIfNeeded(promptData)
+    }
   }
 }
 
