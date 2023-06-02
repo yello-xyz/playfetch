@@ -4,14 +4,14 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
-import { useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import PendingButton from '@/client/pendingButton'
-import { Badge, Sidebar, Timeline } from 'flowbite-react'
+import { Badge, Button, Sidebar, Timeline } from 'flowbite-react'
 import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import TagsInput from '@/client/tagsInput'
 import simplediff from 'simplediff'
-import { HiOutlineSparkles, HiPlay } from 'react-icons/hi'
+import { HiOutlineSparkles, HiPlay, HiOutlineTrash } from 'react-icons/hi'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -133,6 +133,11 @@ export default function Home({
     router.replace(router.asPath)
   }
 
+  const deleteVersion = async (version: Version) => {
+    await api.deleteVersion(version.id)
+    refreshVersions()
+  }
+
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <Sidebar>
@@ -151,6 +156,7 @@ export default function Home({
               </Sidebar.Item>
               {project.prompts.map((prompt, promptIndex) => (
                 <Sidebar.Item
+                  className='cursor-pointer'
                   key={promptIndex}
                   active={activePromptID === prompt.id}
                   onClick={() => updateActivePrompt(prompt.id)}>
@@ -167,6 +173,7 @@ export default function Home({
           versions={versions.filter(versionFilter(filter))}
           activeVersion={activeVersion}
           onSelect={updateActiveVersion}
+          onDelete={deleteVersion}
         />
       </div>
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
@@ -235,10 +242,12 @@ function VersionTimeline({
   versions,
   activeVersion,
   onSelect,
+  onDelete,
 }: {
   versions: Version[]
   activeVersion: Version
   onSelect: (version: Version) => void
+  onDelete: (version: Version) => void
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const isActiveVersion = (item: Version | Run) => item.id === activeVersion.id
@@ -251,6 +260,11 @@ function VersionTimeline({
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
   const isPreviousVersion = (item: Version | Run) => !!previousVersion && item.id === previousVersion.id
 
+  const deleteVersion = async (event: MouseEvent, version: Version) => {
+    event.stopPropagation()
+    onDelete(version)
+  }
+
   return (
     <Timeline>
       {versions
@@ -259,10 +273,11 @@ function VersionTimeline({
           <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item))}>
             <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
             <Timeline.Content>
-              <Timeline.Time>
+              <Timeline.Time className='flex gap-2'>
                 {isActiveVersion(item) && '⮕ '}
                 {isPreviousVersion(item) && '⬅ '}
                 {formatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
+                {isVersion(item) && <HiOutlineTrash onClick={event => deleteVersion(event, item)} />}
               </Timeline.Time>
               {isVersion(item) && (
                 <Timeline.Title className='flex items-center gap-2'>

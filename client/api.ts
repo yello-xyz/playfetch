@@ -56,6 +56,9 @@ const api = {
   getVersions: function (promptID: number): Promise<Version[]> {
     return post(this.getVersions, { promptID })
   },
+  deleteVersion: function (versionID: number) {
+    return post(this.deleteVersion, { versionID })
+  },
 }
 
 export default api

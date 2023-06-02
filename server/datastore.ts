@@ -1,5 +1,5 @@
 import { Project, Prompt, Run, User, Version } from '@/types'
-import { Datastore, Key, PropertyFilter, and } from '@google-cloud/datastore'
+import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
 let datastore: Datastore
@@ -18,20 +18,27 @@ enum Entity {
   RUN = 'run',
 }
 
-const getID = (entity: any) => Number(entity[getDatastore().KEY].id)
+const getKey = (entity: any) => entity[getDatastore().KEY] as Key
+
+const getID = (entity: any) => Number(getKey(entity).id)
 
 const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date).toISOString()
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
-const buildQuery = (type: string, filter: EntityFilter, limit: number = 100) =>
-  getDatastore().createQuery(type).filter(filter).order('createdAt', { descending: true }).limit(limit)
+const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
+
+const buildQuery = (type: string, filter: EntityFilter, limit = 100, keysOnly = false) =>
+  projectQuery(
+    getDatastore().createQuery(type).filter(filter).order('createdAt', { descending: true }).limit(limit),
+    keysOnly
+  )
 
 const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
 
-const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
+const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number, keysOnly = false) =>
   getDatastore()
-    .runQuery(buildQuery(type, filter, limit))
+    .runQuery(buildQuery(type, filter, limit, keysOnly))
     .then(([entities]) => entities)
 
 const getEntities = (type: string, key: string, value: {}, limit?: number) =>
@@ -40,8 +47,14 @@ const getEntities = (type: string, key: string, value: {}, limit?: number) =>
 const getEntity = async (type: string, key: string, value: {}) =>
   getEntities(type, key, value, 1).then(([entity]) => entity)
 
-const getUserEntities = (type: string, key: string, value: {}, userID: number, limit?: number) =>
+const getUserScopedEntities = (type: string, key: string, value: {}, userID: number, limit?: number) =>
   getFilteredEntities(type, and([buildFilter(key, value), buildFilter('userID', userID)]), limit)
+
+const getFilteredKeys = (type: string, filter: EntityFilter, limit?: number) =>
+  getFilteredEntities(type, filter, limit, true).then(entities => entities.map(getKey))
+
+const getKeys = (type: string, key: string, value: {}, limit?: number) =>
+  getFilteredKeys(type, buildFilter(key, value), limit)
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
@@ -129,7 +142,7 @@ const toPromptData = (userID: number, projectID: number, name: string, createdAt
 const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
-  const existingPrompts = await getUserEntities(Entity.PROMPT, 'projectID', projectID, userID)
+  const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
   const existingNames = new Set(existingPrompts.map(prompt => prompt.name))
   const name = uniqueName('New Prompt', existingNames)
   const promptData = toPromptData(userID, projectID, name, new Date())
@@ -199,6 +212,14 @@ const toVersion = (data: any, runs: any[]): Version => ({
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })
 
+export async function deleteVersionForUser(userID: number, versionID: number) {
+  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
+  if (versionData?.userID === userID) {
+    await deleteAllRunsForVersion(versionID)
+    await getDatastore().delete(buildKey(Entity.VERSION, versionID))
+  }
+}
+
 export async function getVersionsForPrompt(userID: number, promptID: number): Promise<Version[]> {
   const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getEntities(Entity.RUN, 'promptID', promptID)
@@ -207,6 +228,13 @@ export async function getVersionsForPrompt(userID: number, promptID: number): Pr
 
 export async function saveRun(userID: number, promptID: number, versionID: number, output: string) {
   await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date()))
+}
+
+async function deleteAllRunsForVersion(versionID: number) {
+  const runKeys = await getKeys(Entity.RUN, 'versionID', versionID)
+  if (runKeys.length) {
+    await getDatastore().delete(runKeys)
+  }
 }
 
 const toRunData = (userID: number, promptID: number, versionID: number, output: string, createdAt: Date) => ({
