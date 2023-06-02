@@ -78,7 +78,10 @@ export default function Home({
   }
   const isDirty = activeVersion.prompt !== prompt || title !== activeVersion.title || tags !== activeVersion.tags
 
-  const uniqueProjectName = BuildUniqueName(defaultNewProjectName, projects.map(project => project.name))
+  const uniqueProjectName = BuildUniqueName(
+    defaultNewProjectName,
+    projects.map(project => project.name)
+  )
 
   const addProject = async () => {
     setProjectDialogPrompt({
@@ -114,8 +117,9 @@ export default function Home({
     }
   }
 
+  const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
+
   const refreshProjects = async () => {
-    const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
     const oldIndex = projects.findIndex(hasActivePrompt)
     const newProjects = await api.getProjects()
     setProjects(newProjects)
@@ -157,11 +161,21 @@ export default function Home({
   }
 
   const deleteVersion = async (version: Version) => {
+    const versionHasRuns = version.runs.length > 0
+    const isLastVersion = versions.length === 1
+    const activeProject = projects.find(hasActivePrompt)
+    const isLastPrompt = isLastVersion && activeProject && activeProject.prompts.length === 1
+    const isLastProject = isLastPrompt && projects.length === 1
+
+    const entity = isLastPrompt ? 'project' : isLastVersion ? 'prompt' : 'version'
+    const suffix = versionHasRuns ? ' and all its associated runs' : ''
     setDialogPrompt({
-      message:
-        'Are you sure you want to delete this version and all its associated runs? This action cannot be undone.',
+      message: `Are you sure you want to delete this ${entity}${suffix}? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
+        if (isLastProject) {
+          await api.addProject(defaultNewProjectName)
+        }
         if (versions.length > 1) {
           refreshVersions()
         } else {
