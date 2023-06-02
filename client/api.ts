@@ -35,8 +35,8 @@ const api = {
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
-  addProject: function (): Promise<number> {
-    return post(this.addProject)
+  addProject: function (name: string): Promise<number> {
+    return post(this.addProject, { name })
   },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })

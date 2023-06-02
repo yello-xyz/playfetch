@@ -118,9 +118,9 @@ const toProject = (data: any, prompts: any[]): Project => ({
   prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
 })
 
-export async function addProjectForUser(userID: number): Promise<number> {
+export async function addProjectForUser(userID: number, projectName: string): Promise<number> {
   const existingProjects = await getProjectsForUser(userID)
-  const name = BuildUniqueName('New Project', existingProjects.map(project => project.name))
+  const name = BuildUniqueName(projectName, existingProjects.map(project => project.name))
   const projectData = toProjectData(userID, name, new Date())
   await getDatastore().save(projectData)
   return await addPromptForUser(userID, Number(projectData.key.id))

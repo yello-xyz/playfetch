@@ -17,11 +17,13 @@ import { BuildUniqueName, FormatDate } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const defaultNewProjectName = 'New Project'
+
 export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const userID = req.session.user!.id
   let initialProjects = await getProjectsForUser(userID)
   if (initialProjects.length === 0) {
-    await addProjectForUser(userID)
+    await addProjectForUser(userID, defaultNewProjectName)
     initialProjects = await getProjectsForUser(userID)
   }
   const initialActivePromptID = initialProjects[0].prompts[0].id
@@ -62,7 +64,7 @@ export default function Home({
 
   const [filter, setFilter] = useState('')
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [newProjectName, setNewProjectName] = useState<string>()
+  const [projectDialogPrompt, setProjectDialogPrompt] = useState<ProjectDialogPrompt>()
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
   const [title, setTitle] = useState(activeVersion.title)
@@ -76,21 +78,16 @@ export default function Home({
   }
   const isDirty = activeVersion.prompt !== prompt || title !== activeVersion.title || tags !== activeVersion.tags
 
+  const uniqueProjectName = BuildUniqueName(defaultNewProjectName, projects.map(project => project.name))
+
   const addProject = async () => {
-    setNewProjectName(
-      BuildUniqueName(
-        'New Project',
-        projects.map(project => project.name)
-      )
-    )
-    setDialogPrompt({
+    setProjectDialogPrompt({
       message: 'Add a new project',
-      onConfirm: async () => {
-        const promptID = await api.addProject()
+      callback: async (name: string) => {
+        const promptID = await api.addProject(name)
         await refreshProjects()
         updateActivePrompt(promptID)
       },
-      onDismiss: () => setNewProjectName(undefined),
     })
   }
 
@@ -162,8 +159,8 @@ export default function Home({
   const deleteVersion = async (version: Version) => {
     setDialogPrompt({
       message:
-        'Are you sure you want to delete this version and all its associated runs? ' + 'This action cannot be undone.',
-      onConfirm: async () => {
+        'Are you sure you want to delete this version and all its associated runs? This action cannot be undone.',
+      callback: async () => {
         await api.deleteVersion(version.id)
         if (versions.length > 1) {
           refreshVersions()
@@ -171,6 +168,7 @@ export default function Home({
           refreshProjects()
         }
       },
+      destructive: true,
     })
   }
 
@@ -234,11 +232,13 @@ export default function Home({
           </PendingButton>
         </div>
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt}>
-        {newProjectName !== undefined && (
-          <LabeledTextInput id='name' label='Project name:' value={newProjectName} setValue={setNewProjectName} />
-        )}
-      </ModalDialog>
+      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      <ProjectNameDialog
+        key={uniqueProjectName}
+        suggestedProjectName={uniqueProjectName}
+        prompt={projectDialogPrompt}
+        setPrompt={setProjectDialogPrompt}
+      />
     </main>
   )
 }
@@ -331,5 +331,32 @@ function VersionTimeline({
           </Timeline.Item>
         ))}
     </Timeline>
+  )
+}
+
+type ProjectDialogPrompt = { message: string; callback: (name: string) => void }
+
+function ProjectNameDialog({
+  suggestedProjectName,
+  prompt,
+  setPrompt,
+}: {
+  suggestedProjectName: string
+  prompt?: ProjectDialogPrompt
+  setPrompt: (prompt?: ProjectDialogPrompt) => void
+}) {
+  const [projectName, setProjectName] = useState(suggestedProjectName)
+
+  const dialogPrompt = prompt
+    ? {
+        message: prompt.message,
+        callback: () => prompt.callback(projectName),
+      }
+    : undefined
+
+  return (
+    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
+      <LabeledTextInput id='name' label='Project Name:' value={projectName} setValue={setProjectName} />
+    </ModalDialog>
   )
 }
