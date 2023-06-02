@@ -13,6 +13,7 @@ import TagsInput from '@/client/tagsInput'
 import simplediff from 'simplediff'
 import { HiOutlineSparkles, HiPlay, HiOutlineTrash } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
+import { FormatDate } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -225,14 +226,6 @@ export default function Home({
   )
 }
 
-const formatDate = (timestamp: string, previousTimestamp?: string) => {
-  const dateString = new Date(timestamp).toLocaleDateString()
-  const timeString = new Date(timestamp).toLocaleTimeString()
-  const previousDateString = previousTimestamp ? new Date(previousTimestamp).toLocaleDateString() : undefined
-  const todayString = new Date().toLocaleDateString()
-  return dateString === previousDateString || dateString === todayString ? timeString : `${dateString} ${timeString}`
-}
-
 const classNameForComparison = (state: '=' | '-' | '+') => {
   switch (state) {
     case '=':
@@ -299,7 +292,7 @@ function VersionTimeline({
               <Timeline.Time className='flex gap-2'>
                 {isActiveVersion(item) && '⮕ '}
                 {isPreviousVersion(item) && '⬅ '}
-                {formatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
+                {FormatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
                 {isVersion(item) && <HiOutlineTrash onClick={event => deleteVersion(event, item)} />}
               </Timeline.Time>
               {isVersion(item) && (

@@ -5,13 +5,9 @@ import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Badge } from 'flowbite-react'
+import { CheckValidEmail } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
-
-const validEmailRegExp =
-  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-
-export const checkEmail = (email: string) => !!email.toLowerCase().match(validEmailRegExp)
 
 export const getServerSideProps = withLoggedOutSession(() => ({ props: {} }))
 
@@ -19,7 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<string>()
   const [isPending, setPending] = useState(false)
-  const isValidEmail = checkEmail(email)
+  const isValidEmail = CheckValidEmail(email)
 
   const logIn = async () => {
     setPending(true)

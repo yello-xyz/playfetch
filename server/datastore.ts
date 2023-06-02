@@ -1,3 +1,4 @@
+import { BuildUniqueName } from '@/common/formatting'
 import { Project, Prompt, Run, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -104,15 +105,6 @@ export async function saveUser(email: string, isAdmin: boolean) {
   )
 }
 
-const uniqueName = (name: string, existingNames: Set<string>) => {
-  let uniqueName = name
-  let counter = 2
-  while (existingNames.has(uniqueName)) {
-    uniqueName = `${name} ${counter++}`
-  }
-  return uniqueName
-}
-
 const toProjectData = (userID: number, name: string, createdAt: Date) => ({
   key: buildKey(Entity.PROJECT),
   data: { userID, name, createdAt },
@@ -128,8 +120,7 @@ const toProject = (data: any, prompts: any[]): Project => ({
 
 export async function addProjectForUser(userID: number): Promise<number> {
   const existingProjects = await getProjectsForUser(userID)
-  const existingNames = new Set(existingProjects.map(project => project.name))
-  const name = uniqueName('New Project', existingNames)
+  const name = BuildUniqueName('New Project', existingProjects.map(project => project.name))
   const projectData = toProjectData(userID, name, new Date())
   await getDatastore().save(projectData)
   return await addPromptForUser(userID, Number(projectData.key.id))
@@ -151,8 +142,7 @@ const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
-  const existingNames = new Set(existingPrompts.map(prompt => prompt.name))
-  const name = uniqueName('New Prompt', existingNames)
+  const name = BuildUniqueName('New Prompt', existingPrompts.map(prompt => prompt.name))
   const promptData = toPromptData(userID, projectID, name, new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, Number(promptData.key.id), name, '', '')
