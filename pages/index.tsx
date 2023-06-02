@@ -110,9 +110,7 @@ export default function Home({
 
   const updateActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
-      if (isDirty) {
-        savePrompt().then(_ => refreshVersions())
-      }
+      savePrompt(_ => refreshVersions())
       setActiveVersion(version)
     }
   }
@@ -138,20 +136,20 @@ export default function Home({
     }
   }
 
-  const savePrompt = async (focusOnSavedVersion = false) => {
+  const savePrompt = async (onSaved?: (versionID: number) => void) => {
     if (!isDirty) {
       return activeVersion.id
     }
     const versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
     refreshProjects()
-    if (focusOnSavedVersion) {
-      refreshVersions(activePromptID, versionID)
-    }
+    onSaved?.(versionID)
     return versionID
   }
 
+  const savePromptAndRefocus = () => savePrompt(versionID => refreshVersions(activePromptID, versionID))
+
   const runPrompt = async () => {
-    const versionID = await savePrompt(true)
+    const versionID = await savePromptAndRefocus()
     await api.runPrompt(activePromptID, versionID, prompt).then(_ => refreshVersions())
   }
 
@@ -241,7 +239,7 @@ export default function Home({
           <PendingButton disabled={!prompt.length} onClick={runPrompt}>
             Run
           </PendingButton>
-          <PendingButton disabled={!isDirty} onClick={() => savePrompt(true).then()}>
+          <PendingButton disabled={!isDirty} onClick={() => savePromptAndRefocus().then()}>
             Save
           </PendingButton>
         </div>
