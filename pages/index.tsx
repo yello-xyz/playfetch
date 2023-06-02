@@ -13,7 +13,7 @@ import TagsInput from '@/client/tagsInput'
 import simplediff from 'simplediff'
 import { HiOutlineSparkles, HiPlay, HiOutlineTrash } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import { FormatDate } from '@/common/formatting'
+import { BuildUniqueName, FormatDate } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -62,6 +62,7 @@ export default function Home({
 
   const [filter, setFilter] = useState('')
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [newProjectName, setNewProjectName] = useState<string>()
 
   const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
   const [title, setTitle] = useState(activeVersion.title)
@@ -76,9 +77,21 @@ export default function Home({
   const isDirty = activeVersion.prompt !== prompt || title !== activeVersion.title || tags !== activeVersion.tags
 
   const addProject = async () => {
-    const promptID = await api.addProject()
-    await refreshProjects()
-    updateActivePrompt(promptID)
+    setNewProjectName(
+      BuildUniqueName(
+        'New Project',
+        projects.map(project => project.name)
+      )
+    )
+    setDialogPrompt({
+      message: 'Add a new project',
+      onConfirm: async () => {
+        const promptID = await api.addProject()
+        await refreshProjects()
+        updateActivePrompt(promptID)
+      },
+      onDismiss: () => setNewProjectName(undefined),
+    })
   }
 
   const addPrompt = async (projectID: number) => {
@@ -150,7 +163,7 @@ export default function Home({
     setDialogPrompt({
       message:
         'Are you sure you want to delete this version and all its associated runs? ' + 'This action cannot be undone.',
-      callback: async () => {
+      onConfirm: async () => {
         await api.deleteVersion(version.id)
         if (versions.length > 1) {
           refreshVersions()
@@ -221,7 +234,11 @@ export default function Home({
           </PendingButton>
         </div>
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt}>
+        {newProjectName !== undefined && (
+          <LabeledTextInput id='name' label='Project name:' value={newProjectName} setValue={setNewProjectName} />
+        )}
+      </ModalDialog>
     </main>
   )
 }
