@@ -61,22 +61,11 @@ export default function Home({
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
+  const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
   const [filter, setFilter] = useState('')
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [projectDialogPrompt, setProjectDialogPrompt] = useState<ProjectDialogPrompt>()
-
-  const [prompt, setPrompt] = useState<string>(activeVersion.prompt)
-  const [title, setTitle] = useState(activeVersion.title)
-  const [tags, setTags] = useState(activeVersion.tags)
-  const [previousActiveVersionID, setPreviousActiveID] = useState<number>(activeVersion.id)
-  if (activeVersion.id !== previousActiveVersionID) {
-    setPrompt(activeVersion.prompt)
-    setTitle(activeVersion.title)
-    setTags(activeVersion.tags)
-    setPreviousActiveID(activeVersion.id)
-  }
-  const isDirty = activeVersion.prompt !== prompt || title !== activeVersion.title || tags !== activeVersion.tags
 
   const uniqueProjectName = BuildUniqueName(
     defaultNewProjectName,
@@ -109,9 +98,14 @@ export default function Home({
   }
 
   const updateActiveVersion = (version: Version) => {
+    setActiveVersion(version)
+    setDirtyVersion(undefined)
+  }
+
+  const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
       savePrompt(_ => refreshVersions())
-      setActiveVersion(version)
+      updateActiveVersion(version)
     }
   }
 
@@ -132,15 +126,21 @@ export default function Home({
     setVersions(newVersions)
     const focusedVersion = newVersions.find(version => version.id === focusID)
     if (!focusedVersion || focusID !== activeVersion.id) {
-      setActiveVersion(focusedVersion ?? newVersions[0])
+      updateActiveVersion(focusedVersion ?? newVersions[0])
     }
   }
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
-    if (!isDirty) {
+    if (!dirtyVersion) {
       return activeVersion.id
     }
-    const versionID = await api.updatePrompt(activePromptID, prompt, title, tags, activeVersion.id)
+    const versionID = await api.updatePrompt(
+      activePromptID,
+      dirtyVersion.prompt,
+      dirtyVersion.title,
+      dirtyVersion.tags,
+      activeVersion.id
+    )
     refreshProjects()
     onSaved?.(versionID)
     return versionID
@@ -150,6 +150,7 @@ export default function Home({
 
   const runPrompt = async () => {
     const versionID = await savePromptAndRefocus()
+    const prompt = dirtyVersion?.prompt ?? activeVersion.prompt
     await api.runPrompt(activePromptID, versionID, prompt).then(_ => refreshVersions())
   }
 
@@ -217,32 +218,17 @@ export default function Home({
         <VersionTimeline
           versions={versions.filter(versionFilter(filter))}
           activeVersion={activeVersion}
-          onSelect={updateActiveVersion}
+          onSelect={selectActiveVersion}
           onDelete={deleteVersion}
         />
       </div>
-      <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
-        <div className='self-stretch'>
-          <LabeledTextInput
-            id='prompt'
-            multiline
-            label='Prompt'
-            placeholder='Enter your prompt...'
-            value={prompt}
-            setValue={setPrompt}
-          />
-        </div>
-        <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={setTitle} />
-        <TagsInput label='Tags (optional)' tags={tags} setTags={setTags} />
-        <div className='flex gap-2'>
-          <PendingButton disabled={!prompt.length} onClick={runPrompt}>
-            Run
-          </PendingButton>
-          <PendingButton disabled={!isDirty} onClick={() => savePromptAndRefocus().then()}>
-            Save
-          </PendingButton>
-        </div>
-      </div>
+      <PromptPanel
+        key={activeVersion.id}
+        version={activeVersion}
+        setDirtyVersion={setDirtyVersion}
+        onRun={runPrompt}
+        onSave={() => savePromptAndRefocus().then()}
+      />
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
       <ProjectNameDialog
         key={uniqueProjectName}
@@ -251,6 +237,61 @@ export default function Home({
         setPrompt={setProjectDialogPrompt}
       />
     </main>
+  )
+}
+
+function PromptPanel({
+  version,
+  setDirtyVersion,
+  onRun,
+  onSave,
+}: {
+  version: Version
+  setDirtyVersion: (version?: Version) => void
+  onRun: () => void
+  onSave: () => void
+}) {
+  const [prompt, setPrompt] = useState<string>(version.prompt)
+  const [title, setTitle] = useState(version.title)
+  const [tags, setTags] = useState(version.tags)
+  const [isDirty, setDirty] = useState(false)
+
+  const update = (prompt: string, title: string, tags: string) => {
+    setPrompt(prompt)
+    setTitle(title)
+    setTags(tags)
+    const isDirty = prompt !== version.prompt || title !== version.title || tags !== version.tags
+    setDirty(isDirty)
+    setDirtyVersion(isDirty ? { ...version, prompt, title, tags } : undefined)
+  }
+
+  const updateTitle = (title: string) => update(prompt, title, tags)
+  const updateTags = (tags: string) => update(prompt, title, tags)
+  const updatePrompt = (prompt: string) => update(prompt, title, tags)
+
+  return (
+    <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
+      <div className='self-stretch'>
+        <LabeledTextInput
+          id='prompt'
+          multiline
+          label='Prompt'
+          placeholder='Enter your prompt...'
+          value={prompt}
+          setValue={updatePrompt}
+        />
+      </div>
+      <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={updateTitle} />
+      <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
+      <div className='flex gap-2'>
+        <PendingButton disabled={!prompt.length} onClick={onRun}>
+          Run
+        </PendingButton>
+        <PendingButton disabled={!isDirty} onClick={onSave}>
+          Save
+        </PendingButton>
+      </div>
+    </div>
   )
 }
 
