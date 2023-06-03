@@ -14,6 +14,7 @@ import simplediff from 'simplediff'
 import { HiOutlineSparkles, HiPlay, HiOutlineTrash } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import { BuildUniqueName, FormatDate, Truncate } from '@/common/formatting'
+import ProjectNameDialog, { ProjectDialogPrompt } from '@/client/projectNameDialog'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -397,32 +398,5 @@ function VersionTimeline({
           </Timeline.Item>
         ))}
     </Timeline>
-  )
-}
-
-type ProjectDialogPrompt = { message: string; callback: (name: string) => void }
-
-function ProjectNameDialog({
-  suggestedProjectName,
-  prompt,
-  setPrompt,
-}: {
-  suggestedProjectName: string
-  prompt?: ProjectDialogPrompt
-  setPrompt: (prompt?: ProjectDialogPrompt) => void
-}) {
-  const [projectName, setProjectName] = useState(suggestedProjectName)
-
-  const dialogPrompt = prompt
-    ? {
-        message: prompt.message,
-        callback: () => prompt.callback(projectName),
-      }
-    : undefined
-
-  return (
-    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
-      <LabeledTextInput id='name' label='Project Name:' value={projectName} setValue={setProjectName} />
-    </ModalDialog>
   )
 }
