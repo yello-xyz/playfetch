@@ -101,12 +101,11 @@ export default function Home({
     setActiveRun(undefined)
   }
 
-  const selectActiveVersion = (version: Version, run?: Run) => {
+  const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
       savePrompt(_ => refreshVersions())
       updateActiveVersion(version)
     }
-    setActiveRun(run)
   }
 
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
@@ -218,7 +217,9 @@ export default function Home({
         <VersionTimeline
           versions={versions.filter(versionFilter(filter))}
           activeVersion={activeVersion}
-          onSelect={selectActiveVersion}
+          setActiveVersion={selectActiveVersion}
+          activeRun={activeRun}
+          setActiveRun={setActiveRun}
           onDelete={deleteVersion}
         />
       </div>
@@ -226,7 +227,6 @@ export default function Home({
         key={activeVersion.id}
         version={activeVersion}
         setDirtyVersion={setDirtyVersion}
-        activeRun={activeRun}
         onRun={runPrompt}
         onSave={() => savePromptAndRefocus().then()}
       />
@@ -244,13 +244,11 @@ export default function Home({
 function PromptPanel({
   version,
   setDirtyVersion,
-  activeRun,
   onRun,
   onSave,
 }: {
   version: Version
   setDirtyVersion: (version?: Version) => void
-  activeRun?: Run
   onRun: () => void
   onSave: () => void
 }) {
@@ -294,7 +292,6 @@ function PromptPanel({
           Save
         </PendingButton>
       </div>
-      {activeRun && <div>{activeRun.output}</div>}
     </div>
   )
 }
@@ -330,12 +327,16 @@ const customPointTheme = {
 function VersionTimeline({
   versions,
   activeVersion,
-  onSelect,
+  activeRun,
+  setActiveVersion,
+  setActiveRun,
   onDelete,
 }: {
   versions: Version[]
   activeVersion: Version
-  onSelect: (version: Version, run?: Run) => void
+  activeRun?: Run
+  setActiveVersion: (version: Version) => void
+  setActiveRun: (run?: Run) => void
   onDelete: (version: Version) => void
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
@@ -347,7 +348,6 @@ function VersionTimeline({
   const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
   const toVersion = (item: Version | Run): Version =>
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
-  const toRun = (item: Version | Run): Run | undefined => (isVersion(item) ? undefined : item)
   const isPreviousVersion = (item: Version | Run) => !!previousVersion && item.id === previousVersion.id
 
   const deleteVersion = async (event: MouseEvent, version: Version) => {
@@ -355,12 +355,17 @@ function VersionTimeline({
     onDelete(version)
   }
 
+  const select = async (item: Version | Run) => {
+    setActiveVersion(toVersion(item))
+    setActiveRun(isVersion(item) ? undefined : item)
+  }
+
   return (
     <Timeline>
       {versions
         .flatMap(version => [version, ...version.runs])
         .map((item, index, items) => (
-          <Timeline.Item key={index} className='cursor-pointer' onClick={() => onSelect(toVersion(item), toRun(item))}>
+          <Timeline.Item key={index} className='cursor-pointer' onClick={() => select(item)}>
             <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
             <Timeline.Content>
               <Timeline.Time className='flex gap-2'>
@@ -382,7 +387,11 @@ function VersionTimeline({
                 </Timeline.Title>
               )}
               <Timeline.Body className={isVersion(item) ? '' : 'italic'}>
-                {isVersion(item) ? renderPrompt(item) : Truncate(item.output, 200)}
+                {isVersion(item)
+                  ? renderPrompt(item)
+                  : item.id === activeRun?.id
+                  ? item.output
+                  : Truncate(item.output, 200)}
               </Timeline.Body>
             </Timeline.Content>
           </Timeline.Item>
