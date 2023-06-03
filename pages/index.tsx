@@ -10,10 +10,11 @@ import { Sidebar } from 'flowbite-react'
 import { Project, Run, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import { BuildUniqueName, Truncate } from '@/common/formatting'
+import { BuildUniqueName } from '@/common/formatting'
 import ProjectNameDialog, { ProjectDialogPrompt } from '@/client/projectNameDialog'
 import PromptPanel from '@/client/promptPanel'
 import VersionTimeline from '@/client/versionTimeline'
+import ProjectItems from '@/client/projectItems'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -193,24 +194,12 @@ export default function Home({
             Add New Project
           </PendingButton>
         </div>
-        <Sidebar.Items>
-          {projects.map((project, projectIndex) => (
-            <Sidebar.Collapse key={projectIndex} label={project.name}>
-              <Sidebar.Item>
-                <PendingButton onClick={() => addPrompt(project.id)}>Add Prompt</PendingButton>
-              </Sidebar.Item>
-              {project.prompts.map((prompt, promptIndex) => (
-                <Sidebar.Item
-                  className='cursor-pointer'
-                  key={promptIndex}
-                  active={activePromptID === prompt.id}
-                  onClick={() => updateActivePrompt(prompt.id)}>
-                  {Truncate(prompt.name, 20)}
-                </Sidebar.Item>
-              ))}
-            </Sidebar.Collapse>
-          ))}
-        </Sidebar.Items>
+        <ProjectItems
+          projects={projects}
+          activePromptID={activePromptID}
+          addPrompt={addPrompt}
+          updateActivePrompt={updateActivePrompt}
+        />
       </Sidebar>
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
