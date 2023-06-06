@@ -1,10 +1,11 @@
-import { Configuration, OpenAIApi } from 'openai'
+import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
 
 const getAPI = () => new OpenAIApi(new Configuration({ apiKey: process.env.OPENAI_API_KEY }))
 
-export default async function completeChat(system: string, prompt: string, userID: number, attempts: number = 3) {
+export default async function predict(prompt: string, temperature: number, maxOutputTokens: number) {
+  const attempts = 3
   for (let attempt = 0; attempt < attempts; attempt++) {
-    const completion = await tryCompleteChat(system, prompt, userID)
+    const completion = await tryCompleteChat('', temperature, maxOutputTokens, prompt)
     if (completion?.length) {
       return completion
     }
@@ -12,17 +13,24 @@ export default async function completeChat(system: string, prompt: string, userI
   return undefined
 }
 
-async function tryCompleteChat(system: string, prompt: string, userID: number) {
+async function tryCompleteChat(
+  prompt: string,
+  temperature: number,
+  maxTokens: number,
+  system?: string,
+  userID?: number
+) {
   try {
     const response = await getAPI().createChatCompletion(
       {
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: system },
+          ...(system ? [{ role: 'system' as ChatCompletionRequestMessageRoleEnum, content: system }] : []),
           { role: 'user', content: prompt },
         ],
-        temperature: 1.0,
-        user: userID.toString(),
+        temperature,
+        max_tokens: maxTokens,
+        user: userID?.toString() ?? 'playfetch',
       },
       { timeout: 30 * 1000 }
     )

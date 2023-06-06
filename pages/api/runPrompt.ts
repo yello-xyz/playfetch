@@ -1,14 +1,12 @@
 import { saveRun } from '@/server/datastore'
-import completeChat from '@/server/openai'
+import predict from '@/server/openai'
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
-  const userID = req.session.user!.id
-
-  const output = await completeChat('', req.body.prompt, userID)
+  const output = await predict(req.body.prompt, 1.0, 256)
   if (output?.length) {
-    await saveRun(userID, req.body.promptID, req.body.versionID, output)
+    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output)
   }
   res.json({})
 }
