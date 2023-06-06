@@ -71,42 +71,38 @@ export default function PromptPanel({
           Save
         </PendingButton>
       </div>
-      <div>
-        <div className='block mb-1'>
-          <Label htmlFor='provider' value='Provider' />
+      <div className='flex justify-between gap-10'>
+        <div>
+          <div className='block mb-1'>
+            <Label htmlFor='provider' value='Provider' />
+          </div>
+          <Dropdown label={labelForProvider(provider)}>
+            <Dropdown.Item onClick={() => setProvider('openai')}>{labelForProvider('openai')}</Dropdown.Item>
+            <Dropdown.Item onClick={() => setProvider('anthropic')}>{labelForProvider('anthropic')}</Dropdown.Item>
+            <Dropdown.Item onClick={() => setProvider('google')}>{labelForProvider('google')}</Dropdown.Item>
+          </Dropdown>
         </div>
-        <Dropdown label={labelForProvider(provider)}>
-          <Dropdown.Item onClick={() => setProvider('openai')}>
-            {labelForProvider('openai')}
-          </Dropdown.Item>
-          <Dropdown.Item onClick={() => setProvider('anthropic')}>
-            {labelForProvider('anthropic')}
-          </Dropdown.Item>
-          <Dropdown.Item onClick={() => setProvider('google')}>
-            {labelForProvider('google')}
-          </Dropdown.Item>
-        </Dropdown>
-      </div>
-      <div>
-        <div className='block mb-1'>
-          <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
+        <div>
+          <div className='block mb-1'>
+            <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
+          </div>
+          <RangeSlider
+            id='temperature'
+            value={temperature}
+            min={0}
+            max={1}
+            step={0.01}
+            onChange={event => setTemperature(Number(event.target.value))}
+          />
         </div>
-        <RangeSlider
-          id='temperature'
-          value={temperature}
-          min={0}
-          max={1}
-          step={0.01}
-          onChange={event => setTemperature(Number(event.target.value))}
-        />
-      </div>
-      <div>
-        <LabeledTextInput
-          id='maxTokens'
-          label='Max Tokens'
-          value={maxTokens.toString()}
-          setValue={value => setMaxTokens(Number(value))}
-        />
+        <div>
+          <LabeledTextInput
+            id='maxTokens'
+            label='Max Tokens'
+            value={maxTokens.toString()}
+            setValue={value => setMaxTokens(Number(value))}
+          />
+        </div>
       </div>
     </div>
   )
