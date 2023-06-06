@@ -21,6 +21,7 @@
     "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
   },
   "dependencies": {
+    "@google-cloud/aiplatform": "^2.14.0",
     "@google-cloud/datastore": "^7.5.1",
     "@types/node": "20.2.3",
     "@types/react": "18.2.6",
