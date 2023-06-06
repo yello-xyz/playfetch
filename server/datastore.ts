@@ -12,6 +12,8 @@ const getDatastore = () => {
   return datastore
 }
 
+export const getProjectID = async () => getDatastore().getProjectId()
+
 enum Entity {
   USER = 'user',
   PROJECT = 'project',

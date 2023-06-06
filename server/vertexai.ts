@@ -1,31 +1,34 @@
 import aiplatform from '@google-cloud/aiplatform'
+import { getProjectID } from './datastore'
 const { PredictionServiceClient } = aiplatform.v1
 
-const client = new PredictionServiceClient({ apiEndpoint: 'us-central1-aiplatform.googleapis.com' })
+const location = 'us-central1'
+const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatform.googleapis.com` })
 
 export default async function predict(prompt: string, temperature: number, maxOutputTokens: number) {
-  const request = {
-    endpoint: `projects/playfetch-dev/locations/us-central1/publishers/google/models/text-bison@001`,
-    instances: [
-      {
+  try {
+    const projectID = await getProjectID()
+    const request = {
+      endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/text-bison@001`,
+      instances: [
+        {
+          structValue: {
+            fields: {
+              content: { stringValue: prompt },
+            },
+          },
+        },
+      ],
+      parameters: {
         structValue: {
           fields: {
-            content: { stringValue: prompt },
+            temperature: { numberValue: temperature },
+            maxOutputTokens: { numberValue: maxOutputTokens },
           },
         },
       },
-    ],
-    parameters: {
-      structValue: {
-        fields: {
-          temperature: { numberValue: temperature },
-          maxOutputTokens: { numberValue: maxOutputTokens },
-        },
-      },
-    },
-  }
+    }
 
-  try {
     const [response] = await client.predict(request)
     return response.predictions?.[0]?.structValue?.fields?.content?.stringValue
   } catch (error) {
