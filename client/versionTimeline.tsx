@@ -1,9 +1,9 @@
 import { MouseEvent } from 'react'
-import { Run, Version } from '@/types';
+import { Run, Version } from '@/types'
 import simplediff from 'simplediff'
-import { Badge, Timeline } from 'flowbite-react';
-import { HiOutlineSparkles, HiOutlineTrash, HiPlay } from 'react-icons/hi';
-import { FormatDate, Truncate } from '@/common/formatting';
+import { Badge, Timeline } from 'flowbite-react'
+import { HiOutlineSparkles, HiOutlineTrash, HiPlay } from 'react-icons/hi'
+import { FormatDate, Truncate } from '@/common/formatting'
 
 const classNameForComparison = (state: '=' | '-' | '+') => {
   switch (state) {
@@ -77,11 +77,12 @@ export default function VersionTimeline({
           <Timeline.Item key={index} className='cursor-pointer' onClick={() => select(item)}>
             <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
             <Timeline.Content>
-              <Timeline.Time className='flex gap-2'>
+              <Timeline.Time className='flex items-center gap-2'>
                 {isActiveVersion(item) && '⮕ '}
                 {isPreviousVersion(item) && '⬅ '}
                 {FormatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
                 {isVersion(item) && <HiOutlineTrash onClick={event => deleteVersion(event, item)} />}
+                {!isVersion(item) && item.config.length && <Badge color='green'>{item.config}</Badge>}
               </Timeline.Time>
               {isVersion(item) && (
                 <Timeline.Title className='flex items-center gap-2'>

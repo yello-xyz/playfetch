@@ -248,14 +248,35 @@ export async function getVersionsForPrompt(userID: number, promptID: number): Pr
   return versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 }
 
-export async function saveRun(userID: number, promptID: number, versionID: number, output: string) {
-  await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date()))
+export async function saveRun(
+  userID: number,
+  promptID: number,
+  versionID: number,
+  output: string,
+  config: string,
+  cost: number
+) {
+  await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date(), config, cost))
 }
 
-const toRunData = (userID: number, promptID: number, versionID: number, output: string, createdAt: Date) => ({
+const toRunData = (
+  userID: number,
+  promptID: number,
+  versionID: number,
+  output: string,
+  createdAt: Date,
+  config: string,
+  cost: number
+) => ({
   key: buildKey(Entity.RUN),
-  data: { userID, promptID, versionID, output, createdAt },
+  data: { userID, promptID, versionID, output, createdAt, config, cost },
   excludeFromIndexes: ['output'],
 })
 
-const toRun = (data: any): Run => ({ id: getID(data), timestamp: getTimestamp(data), output: data.output })
+const toRun = (data: any): Run => ({
+  id: getID(data),
+  timestamp: getTimestamp(data),
+  output: data.output,
+  config: data.config ?? '',
+  cost: data.cost ?? 0,
+})

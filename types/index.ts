@@ -32,6 +32,8 @@ export type Run = {
   id: number
   timestamp: string
   output: string
+  config: string
+  cost: number
 }
 
 export type RunConfig = {

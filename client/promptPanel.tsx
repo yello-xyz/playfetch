@@ -88,14 +88,6 @@ export default function PromptPanel({
         </Dropdown>
       </div>
       <div>
-        <LabeledTextInput
-          id='maxTokens'
-          label='Max Tokens'
-          value={maxTokens.toString()}
-          setValue={value => setMaxTokens(Number(value))}
-        />
-      </div>
-      <div>
         <div className='block mb-1'>
           <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
         </div>
@@ -106,6 +98,14 @@ export default function PromptPanel({
           max={1}
           step={0.01}
           onChange={event => setTemperature(Number(event.target.value))}
+        />
+      </div>
+      <div>
+        <LabeledTextInput
+          id='maxTokens'
+          label='Max Tokens'
+          value={maxTokens.toString()}
+          setValue={value => setMaxTokens(Number(value))}
         />
       </div>
     </div>
