@@ -9,6 +9,7 @@ steps:
     entrypoint: npm
     args: ['run', 'create-env']
     env:
+      - 'ANTHROPIC_API_KEY=${_ANTHROPIC_API_KEY}'
       - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
       - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
       - 'OPENAI_API_KEY=${_OPENAI_API_KEY}'
