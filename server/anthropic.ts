@@ -24,10 +24,9 @@ const calculateCost = (prompt: string, result: string) =>
       throw new Error(response.exception)
     }
     const cost = calculateCost(formattedPrompt, response.completion)
-    console.log(`Anthropic cost ~ $${cost.toFixed(3)}`)
-    return response?.completion
+    return { output: response?.completion, cost }
   } catch (error) {
     console.error(error)
-    return undefined
+    return { output: undefined, cost: 0 }
   }
 }

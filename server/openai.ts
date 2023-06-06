@@ -6,11 +6,11 @@ export default async function predict(prompt: string, temperature: number, maxOu
   const attempts = 3
   for (let attempt = 0; attempt < attempts; attempt++) {
     const completion = await tryCompleteChat('', temperature, maxOutputTokens, prompt)
-    if (completion?.length) {
+    if (completion?.output?.length) {
       return completion
     }
   }
-  return undefined
+  return { output: undefined, cost: 0 }
 }
 
 async function tryCompleteChat(
@@ -36,10 +36,9 @@ async function tryCompleteChat(
     )
     const totalTokens = response.data.usage?.total_tokens ?? 0
     const upperBoundCost = (totalTokens * 0.06) / 1000
-    console.log(`OpenAI cost < $${upperBoundCost.toFixed(3)}`)
-    return response.data.choices[0]?.message?.content?.trim()
+    return { output: response.data.choices[0]?.message?.content?.trim(), cost: upperBoundCost }
   } catch (error) {
     console.error(error)
-    return undefined
+    return { output: undefined, cost: 0 }
   }
 }

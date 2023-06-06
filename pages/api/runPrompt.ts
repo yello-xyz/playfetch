@@ -19,9 +19,9 @@ const getPredictor = (provider: string) => {
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
   const provider = req.body.provider
-  const output = await getPredictor(provider)(req.body.prompt, req.body.temperature, req.body.maxTokens)
+  const { output, cost } = await getPredictor(provider)(req.body.prompt, req.body.temperature, req.body.maxTokens)
   if (output?.length) {
-    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output, provider, 0)
+    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output, provider, cost)
   }
   res.json({})
 }
