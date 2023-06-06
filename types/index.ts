@@ -33,3 +33,9 @@ export type Run = {
   timestamp: string
   output: string
 }
+
+export type RunConfig = {
+  provider: 'openai' | 'anthropic' | 'google'
+  temperature: number
+  maxTokens: number
+}

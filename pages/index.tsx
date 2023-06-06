@@ -7,7 +7,7 @@ import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import PendingButton from '@/client/pendingButton'
 import { Sidebar } from 'flowbite-react'
-import { Project, Run, Version } from '@/types'
+import { Project, Run, RunConfig, Version } from '@/types'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import { BuildUniqueName } from '@/common/formatting'
@@ -148,10 +148,12 @@ export default function Home({
 
   const savePromptAndRefocus = () => savePrompt(versionID => refreshVersions(activePromptID, versionID))
 
-  const runPrompt = async () => {
+  const runPrompt = async (config: RunConfig) => {
     const versionID = await savePromptAndRefocus()
     const prompt = dirtyVersion?.prompt ?? activeVersion.prompt
-    await api.runPrompt(activePromptID, versionID, prompt).then(_ => refreshVersions())
+    await api
+      .runPrompt(activePromptID, versionID, prompt, config.provider, config.temperature, config.maxTokens)
+      .then(_ => refreshVersions())
   }
 
   const logout = async () => {
