@@ -30,7 +30,7 @@ async function tryCompleteChat(system: string, prompt: string, userID: number) {
     const upperBoundCost = (totalTokens * 0.06) / 1000
     console.log(`OpenAI cost < $${upperBoundCost.toFixed(3)}`)
     return response.data.choices[0]?.message?.content?.trim()
-  } catch (error: any) {
+  } catch (error) {
     console.error(error)
     return undefined
   }
