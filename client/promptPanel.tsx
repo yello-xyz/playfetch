@@ -4,6 +4,11 @@ import { RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
 import { Dropdown, Label, RangeSlider } from 'flowbite-react'
+import sanitizeHtml from 'sanitize-html'
+import ContentEditable from 'react-contenteditable'
+import { ContentEditableEvent } from 'react-contenteditable'
+import { FocusEvent } from 'react'
+import { useRef } from 'react'
 
 const labelForProvider = (provider: RunConfig['provider']) => {
   switch (provider) {
@@ -49,16 +54,37 @@ export default function PromptPanel({
   const updateTags = (tags: string) => update(prompt, title, tags)
   const updatePrompt = (prompt: string) => update(prompt, title, tags)
 
+  const contentEditableRef = useRef<HTMLElement>(null)
+  const htmlContent = prompt
+    .replaceAll(/{{(.*?)}}/g, '<b>$1</b>')
+    .replaceAll(/\n(.*)$/gm, '<div>$1</div>')
+    .replaceAll('<div></div>', '<div><br /></div>')
+
+  const updateHTMLContent = (event: ContentEditableEvent | FocusEvent) => {
+    updatePrompt(
+      sanitizeHtml(event.currentTarget.innerHTML, {
+        allowedTags: ['br', 'div', 'b'],
+        allowedAttributes: {},
+      })
+        .replaceAll('<br />', '')
+        .replaceAll(/<div>(.*?)<\/div>/g, '\n$1')
+        .replaceAll(/<b>(.*?)<\/b>/g, '{{$1}}')
+        .replaceAll('{{}}', '')
+    )
+  }
+
   return (
     <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
       <div className='self-stretch'>
-        <LabeledTextInput
-          id='prompt'
-          multiline
-          label='Prompt'
-          placeholder='Enter your prompt...'
-          value={prompt}
-          setValue={updatePrompt}
+        <div className='block mb-1'>
+          <Label value='Prompt' onClick={() => contentEditableRef.current?.focus()} />
+        </div>
+        <ContentEditable
+          className='p-2 bg-white'
+          onChange={updateHTMLContent}
+          onBlur={updateHTMLContent}
+          html={htmlContent}
+          innerRef={contentEditableRef}
         />
       </div>
       <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={updateTitle} />
