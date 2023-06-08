@@ -216,6 +216,7 @@ export default function Home({
       <PromptPanel
         key={activeVersion.id}
         version={activeVersion}
+        activeRun={activeRun ?? activeVersion.runs[0]}
         setDirtyVersion={setDirtyVersion}
         onRun={runPrompt}
         onSave={() => savePromptAndRefocus().then()}

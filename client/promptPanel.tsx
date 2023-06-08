@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
-import { RunConfig, Version } from '@/types'
+import { Run, RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
 import { Dropdown, Label, RangeSlider, TextInput } from 'flowbite-react'
@@ -29,11 +29,13 @@ const DefaultConfig: RunConfig = {
 
 export default function PromptPanel({
   version,
+  activeRun,
   setDirtyVersion,
   onRun,
   onSave,
 }: {
   version: Version
+  activeRun?: Run
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
   onSave: () => void
@@ -43,11 +45,19 @@ export default function PromptPanel({
   const [tags, setTags] = useState(version.tags)
   const [isDirty, setDirty] = useState(false)
 
-  const initialConfig = version.runs.length ? version.runs[0].config : DefaultConfig
+  const runConfig = activeRun?.config ?? DefaultConfig
 
-  const [provider, setProvider] = useState<RunConfig['provider']>(initialConfig.provider)
-  const [temperature, setTemperature] = useState(initialConfig.temperature)
-  const [maxTokens, setMaxTokens] = useState(initialConfig.maxTokens)
+  const [provider, setProvider] = useState<RunConfig['provider']>(runConfig.provider)
+  const [temperature, setTemperature] = useState(runConfig.temperature)
+  const [maxTokens, setMaxTokens] = useState(runConfig.maxTokens)
+
+  const [previousActiveRunID, setPreviousRunID] = useState(activeRun?.id)
+  if (activeRun?.id !== previousActiveRunID) {
+    setProvider(runConfig.provider)
+    setTemperature(runConfig.temperature)
+    setMaxTokens(runConfig.maxTokens)
+    setPreviousRunID(activeRun?.id)
+  }
 
   const update = (prompt: string, title: string, tags: string) => {
     setPrompt(prompt)
