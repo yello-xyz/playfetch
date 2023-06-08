@@ -1,4 +1,4 @@
-import { BuildUniqueName, stripPromptSentinels } from '@/common/formatting'
+import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
 import { Project, Prompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -57,8 +57,10 @@ const getUserScopedEntities = (type: string, key: string, value: {}, userID: num
 const getFilteredKeys = (type: string, filter: EntityFilter, limit?: number) =>
   getFilteredEntities(type, filter, limit, true).then(entities => entities.map(getKey))
 
-const getKeys = (type: string, key: string, value: {}, limit?: number) =>
+const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredKeys(type, buildFilter(key, value), limit)
+
+const getEntityKey = (type: string, key: string, value: {}) => getEntityKeys(type, key, value, 1).then(([key]) => key)
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
@@ -107,28 +109,36 @@ export async function saveUser(email: string, isAdmin: boolean) {
   )
 }
 
-const toProjectData = (userID: number, name: string, createdAt: Date) => ({
+const toProjectData = (userID: number, name: string, urlPath: string, createdAt: Date) => ({
   key: buildKey(Entity.PROJECT),
-  data: { userID, name, createdAt },
+  data: { userID, name, createdAt, urlPath },
   excludeFromIndexes: ['name'],
 })
 
 const toProject = (data: any, prompts: any[]): Project => ({
   id: getID(data),
   name: data.name,
+  urlPath: data.urlPath,
   timestamp: getTimestamp(data),
   prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
 })
 
 export async function addProjectForUser(userID: number, projectName: string): Promise<number> {
-  const existingProjects = await getProjectsForUser(userID)
-  const name = BuildUniqueName(
-    projectName,
-    existingProjects.map(project => project.name)
-  )
-  const projectData = toProjectData(userID, name, new Date())
+  const urlPath = ProjectNameToURLPath(projectName)
+  if (!CheckValidURLPath(urlPath)) {
+    throw new Error(`URL path '${urlPath}' is invalid`)
+  }
+  if (await getProjectIDFromURLPath(urlPath)) {
+    throw new Error(`URL path '${urlPath}' already exists`)
+  }
+  const projectData = toProjectData(userID, projectName, urlPath, new Date())
   await getDatastore().save(projectData)
   return await addPromptForUser(userID, Number(projectData.key.id))
+}
+
+export async function getProjectIDFromURLPath(urlPath: string): Promise<number | undefined> {
+  const projectKey = await getEntityKey(Entity.PROJECT, 'urlPath', urlPath)
+  return projectKey ? Number(projectKey.id) : undefined
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
@@ -160,7 +170,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
 async function updatePromptNameIfNeeded(promptData: any) {
   const promptID = getID(promptData)
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID)
-  const promptName = lastVersionData.title.length ? lastVersionData.title : stripPromptSentinels(lastVersionData.prompt)
+  const promptName = lastVersionData.title.length ? lastVersionData.title : StripPromptSentinels(lastVersionData.prompt)
   if (promptName !== promptData.name) {
     await datastore.save(
       toPromptData(promptData.userID, promptData.projectID, promptName, promptData.createdAt, promptID)
@@ -223,22 +233,24 @@ const toVersion = (data: any, runs: any[]): Version => ({
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  if (versionData?.userID === userID) {
-    const keysToDelete = await getKeys(Entity.RUN, 'versionID', versionID)
-    keysToDelete.push(buildKey(Entity.VERSION, versionID))
-    const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
-    const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
-    if (versionCount <= 1) {
-      keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
-      const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', promptData.projectID)
-      if (promptCount <= 1) {
-        keysToDelete.push(buildKey(Entity.PROJECT, promptData.projectID))
-      }
+  if (versionData?.userID !== userID) {
+    throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
+  }
+
+  const keysToDelete = await getEntityKeys(Entity.RUN, 'versionID', versionID)
+  keysToDelete.push(buildKey(Entity.VERSION, versionID))
+  const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
+  const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
+  if (versionCount <= 1) {
+    keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
+    const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', promptData.projectID)
+    if (promptCount <= 1) {
+      keysToDelete.push(buildKey(Entity.PROJECT, promptData.projectID))
     }
-    await getDatastore().delete(keysToDelete)
-    if (versionCount > 1) {
-      await updatePromptNameIfNeeded(promptData)
-    }
+  }
+  await getDatastore().delete(keysToDelete)
+  if (versionCount > 1) {
+    await updatePromptNameIfNeeded(promptData)
   }
 }
 

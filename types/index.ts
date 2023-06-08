@@ -9,6 +9,7 @@ export type User = {
 export type Project = {
   id: number
   name: string
+  urlPath: string
   timestamp: string
   prompts: Prompt[]
 }
