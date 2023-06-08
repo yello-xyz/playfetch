@@ -32,7 +32,7 @@ export type Run = {
   id: number
   timestamp: string
   output: string
-  config: string
+  config: RunConfig
   cost: number
 }
 

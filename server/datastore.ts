@@ -1,5 +1,5 @@
 import { BuildUniqueName, stripPromptSentinels } from '@/common/formatting'
-import { Project, Prompt, Run, User, Version } from '@/types'
+import { Project, Prompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
@@ -253,7 +253,7 @@ export async function saveRun(
   promptID: number,
   versionID: number,
   output: string,
-  config: string,
+  config: RunConfig,
   cost: number
 ) {
   await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date(), config, cost))
@@ -265,18 +265,18 @@ const toRunData = (
   versionID: number,
   output: string,
   createdAt: Date,
-  config: string,
+  config: RunConfig,
   cost: number
 ) => ({
   key: buildKey(Entity.RUN),
-  data: { userID, promptID, versionID, output, createdAt, config, cost },
-  excludeFromIndexes: ['output'],
+  data: { userID, promptID, versionID, output, createdAt, config: JSON.stringify(config), cost },
+  excludeFromIndexes: ['output', 'config'],
 })
 
 const toRun = (data: any): Run => ({
   id: getID(data),
   timestamp: getTimestamp(data),
   output: data.output,
-  config: data.config ?? '',
-  cost: data.cost ?? 0,
+  config: JSON.parse(data.config),
+  cost: data.cost,
 })

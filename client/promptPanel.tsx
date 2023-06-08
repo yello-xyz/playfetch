@@ -21,6 +21,12 @@ const labelForProvider = (provider: RunConfig['provider']) => {
   }
 }
 
+const DefaultConfig: RunConfig = {
+  provider: 'openai',
+  temperature: 0.5,
+  maxTokens: 250,
+}
+
 export default function PromptPanel({
   version,
   setDirtyVersion,
@@ -37,9 +43,11 @@ export default function PromptPanel({
   const [tags, setTags] = useState(version.tags)
   const [isDirty, setDirty] = useState(false)
 
-  const [provider, setProvider] = useState<RunConfig['provider']>('openai')
-  const [temperature, setTemperature] = useState(0.5)
-  const [maxTokens, setMaxTokens] = useState(250)
+  const initialConfig = version.runs.length ? version.runs[0].config : DefaultConfig
+
+  const [provider, setProvider] = useState<RunConfig['provider']>(initialConfig.provider)
+  const [temperature, setTemperature] = useState(initialConfig.temperature)
+  const [maxTokens, setMaxTokens] = useState(initialConfig.maxTokens)
 
   const update = (prompt: string, title: string, tags: string) => {
     setPrompt(prompt)

@@ -4,6 +4,7 @@ import anthropic from '@/server/anthropic'
 import vertexai from '@/server/vertexai'
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { RunConfig } from '@/types'
 
 const getPredictor = (provider: string) => {
   switch (provider) {
@@ -18,10 +19,14 @@ const getPredictor = (provider: string) => {
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
-  const provider = req.body.provider
-  const { output, cost } = await getPredictor(provider)(req.body.prompt, req.body.temperature, req.body.maxTokens)
+  const config: RunConfig = {
+    provider: req.body.provider,
+    temperature: req.body.temperature,
+    maxTokens: req.body.maxTokens,
+  }
+  const { output, cost } = await getPredictor(config.provider)(req.body.prompt, config.temperature, config.maxTokens)
   if (output?.length) {
-    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output, provider, cost)
+    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output, config, cost)
   }
   res.json({})
 }

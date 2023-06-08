@@ -110,7 +110,7 @@ export default function VersionTimeline({
                 {isPreviousVersion(item) && '⬅ '}
                 {FormatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
                 {isVersion(item) && <HiOutlineTrash onClick={event => deleteVersion(event, item)} />}
-                {!isVersion(item) && item.config.length && <Badge color='green'>{item.config}</Badge>}
+                {!isVersion(item) && item.config.provider.length && <Badge color='green'>{item.config.provider}</Badge>}
                 {!isVersion(item) && item.cost > 0.0005 && `$${item.cost.toFixed(3)}`}
               </Timeline.Time>
               {isVersion(item) && (
