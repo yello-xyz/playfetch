@@ -5,25 +5,55 @@ import { Badge, Timeline } from 'flowbite-react'
 import { HiOutlineSparkles, HiOutlineTrash, HiPlay } from 'react-icons/hi'
 import { FormatDate, Truncate } from '@/common/formatting'
 
-const classNameForComparison = (state: '=' | '-' | '+') => {
+type ComparisonState = '=' | '-' | '+'
+const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: boolean }) => {
+  const taggedClassName = tagged ? 'font-bold' : ''
   switch (state) {
     case '=':
-      return ''
+      return taggedClassName
     case '-':
-      return 'text-red-600 line-through'
+      return `text-red-600 line-through ${taggedClassName}`
     case '+':
-      return 'text-green-600 underline'
+      return `text-green-600 underline ${taggedClassName}`
   }
 }
 
-const renderComparison = (previous: string, current: string) =>
-  simplediff
-    .diff(previous.split(/[ ]+/), current.split(/[ ]+/))
-    .map((part: { 0: '=' | '-' | '+'; 1: string[] }, index: number) => (
-      <span key={index}>
-        <span className={classNameForComparison(part[0])}>{part[1].join(' ')}</span>{' '}
-      </span>
-    ))
+const renderDiffs = (parts: { 0: ComparisonState; 1: string[] }[]) => {
+  const result = []
+  let tagged = false
+  const startSentinel = '{{'
+  const endSentinel = '}}'
+
+  for (const part of parts) {
+    const state = part[0]
+    let content = part[1].join(' ')
+    while (content.length > 0) {
+      const start = content.indexOf(startSentinel)
+      const end = content.indexOf(endSentinel)
+      if (start < 0 && end < 0) {
+        result.push({ state, content, tagged })
+        break
+      } else if (start >= 0 && (end < 0 || start < end)) {
+        result.push({ state, content: content.substring(0, start + (tagged ? startSentinel.length : 0)), tagged })
+        content = content.substring(start + startSentinel.length)
+        tagged = true
+      } else {
+        result.push({ state, content: content.substring(0, end + (tagged ? 0 : endSentinel.length)), tagged })
+        content = content.substring(end + endSentinel.length)
+        tagged = false
+      }
+    }
+  }
+
+  return result.map((diff, index: number) => (
+    <span key={index}>
+      <span className={classNameForDiff(diff)}>{diff.content}</span>{' '}
+    </span>
+  ))
+}
+
+const renderPrompt = (prompt: string, comparison?: string) =>
+  renderDiffs(comparison ? simplediff.diff(comparison.split(/[ ]+/), prompt.split(/[ ]+/)) : [['=', [prompt]]])
 
 const customPointTheme = {
   marker: {
@@ -50,10 +80,8 @@ export default function VersionTimeline({
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const isActiveVersion = (item: Version | Run) => item.id === activeVersion.id
-  const renderPrompt = (version: Version) =>
-    previousVersion && isActiveVersion(version)
-      ? renderComparison(previousVersion.prompt, version.prompt)
-      : version.prompt
+  const renderPromptVersion = (version: Version) =>
+    renderPrompt(version.prompt, previousVersion && isActiveVersion(version) ? previousVersion.prompt : undefined)
   const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
   const toVersion = (item: Version | Run): Version =>
     isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
@@ -99,7 +127,7 @@ export default function VersionTimeline({
               )}
               <Timeline.Body className={isVersion(item) ? '' : 'italic'}>
                 {isVersion(item)
-                  ? renderPrompt(item)
+                  ? renderPromptVersion(item)
                   : item.id === activeRun?.id
                   ? item.output
                   : Truncate(item.output, 200)}
