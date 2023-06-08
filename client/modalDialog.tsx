@@ -1,7 +1,7 @@
 import { Button, Modal } from 'flowbite-react'
 import { ReactNode, useRef } from 'react'
 
-export type DialogPrompt = { message?: string; callback?: () => void; destructive?: boolean }
+export type DialogPrompt = { message?: string; callback?: () => void; destructive?: boolean; disabled?: boolean }
 
 export default function ModalDialog({
   prompt,
@@ -33,7 +33,7 @@ export default function ModalDialog({
             </h3>
             <div className='mb-5 text-left'>{children}</div>
             <div className='flex justify-center gap-4'>
-              <Button color={prompt?.destructive ? 'failure' : 'info'} onClick={onConfirm}>
+              <Button disabled={prompt?.disabled} color={prompt?.destructive ? 'failure' : 'info'} onClick={onConfirm}>
                 Confirm
               </Button>
               <Button color='gray' onClick={onDismiss}>

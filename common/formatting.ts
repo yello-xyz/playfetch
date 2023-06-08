@@ -31,5 +31,5 @@ export const CheckValidURLPath = (urlPath: string) => {
   const validRegexp = /^[a-zA-Z0-9\-]+$/
   const digitsOnlyRegexp = /^\d*$/
 
-  return urlPath?.length > 2 && validRegexp.test(urlPath) && !digitsOnlyRegexp.test(urlPath)
+  return urlPath.length > 2 && validRegexp.test(urlPath) && !digitsOnlyRegexp.test(urlPath)
 }

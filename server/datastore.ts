@@ -118,7 +118,7 @@ const toProjectData = (userID: number, name: string, urlPath: string, createdAt:
 const toProject = (data: any, prompts: any[]): Project => ({
   id: getID(data),
   name: data.name,
-  urlPath: data.urlPath,
+  urlPath: data.urlPath ?? '',
   timestamp: getTimestamp(data),
   prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
 })

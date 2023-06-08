@@ -1,6 +1,6 @@
 import { Project } from '@/types'
 import { Sidebar } from 'flowbite-react'
-import { BuildUniqueName, Truncate } from '@/common/formatting'
+import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import { useState } from 'react'
@@ -26,13 +26,6 @@ export default function ProjectSidebar({
     await api.logout()
     onLogout()
   }
-
-  const defaultNewProjectName = 'New Project'
-
-  const uniqueProjectName = BuildUniqueName(
-    defaultNewProjectName,
-    projects.map(project => project.name)
-  )
 
   const addProject = async () => {
     setDialogPrompt({
@@ -76,12 +69,7 @@ export default function ProjectSidebar({
           </Sidebar.Collapse>
         ))}
       </Sidebar.Items>
-      <ProjectNameDialog
-        key={uniqueProjectName}
-        suggestedProjectName={uniqueProjectName}
-        prompt={dialogPrompt}
-        setPrompt={setDialogPrompt}
-      />
+      <ProjectNameDialog key={projects.length} prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </Sidebar>
   )
 }
