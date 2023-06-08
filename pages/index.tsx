@@ -5,33 +5,13 @@ import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
-import PendingButton from '@/client/pendingButton'
-import { Sidebar } from 'flowbite-react'
 import { Project, Run, RunConfig, Version } from '@/types'
-import { HiOutlineFolderAdd } from 'react-icons/hi'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import { BuildUniqueName } from '@/common/formatting'
-import ProjectNameDialog, { ProjectDialogPrompt } from '@/client/projectNameDialog'
 import PromptPanel from '@/client/promptPanel'
 import VersionTimeline from '@/client/versionTimeline'
 import ProjectItems from '@/client/projectItems'
 
 const inter = Inter({ subsets: ['latin'] })
-
-const defaultNewProjectName = 'New Project'
-
-export const getServerSideProps = withLoggedInSession(async ({ req }) => {
-  const userID = req.session.user!.id
-  let initialProjects = await getProjectsForUser(userID)
-  if (initialProjects.length === 0) {
-    await addProjectForUser(userID, defaultNewProjectName)
-    initialProjects = await getProjectsForUser(userID)
-  }
-  const initialActivePromptID = initialProjects[0].prompts[0].id
-  const initialVersions = await getVersionsForPrompt(userID, initialActivePromptID)
-  const initialActiveVersion = initialVersions[0]
-  return { props: { initialProjects, initialActivePromptID, initialVersions, initialActiveVersion } }
-})
 
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
@@ -43,18 +23,43 @@ const versionFilter = (filter: string) => (version: Version) => {
   )
 }
 
-export default function Home({
+export const getServerSideProps = withLoggedInSession(async ({ req }) => {
+  const userID = req.session.user!.id
+  const projects = await getProjectsForUser(userID)
+  const versions = projects.length ? await getVersionsForPrompt(userID, projects[0].prompts[0].id) : []
+  return { props: { projects, versions } }
+})
+
+export default function Home({ projects, versions }: { projects: Project[]; versions: Version[] }) {
+  const router = useRouter()
+  const refreshData = () => router.replace(router.asPath)
+
+  return projects.length ? (
+    <HomeWithProjects
+      initialProjects={projects}
+      initialActivePromptID={projects[0].prompts[0].id}
+      initialVersions={versions}
+      initialActiveVersion={versions[0]}
+      refreshData={refreshData}
+    />
+  ) : (
+    <ProjectItems onLogout={refreshData} onRefresh={refreshData} />
+  )
+}
+
+function HomeWithProjects({
   initialProjects,
   initialActivePromptID,
   initialVersions,
   initialActiveVersion,
+  refreshData,
 }: {
   initialProjects: Project[]
   initialActivePromptID: number
   initialVersions: Version[]
   initialActiveVersion: Version
+  refreshData: () => void
 }) {
-  const router = useRouter()
   const [projects, setProjects] = useState(initialProjects)
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
@@ -64,29 +69,6 @@ export default function Home({
 
   const [filter, setFilter] = useState('')
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [projectDialogPrompt, setProjectDialogPrompt] = useState<ProjectDialogPrompt>()
-
-  const uniqueProjectName = BuildUniqueName(
-    defaultNewProjectName,
-    projects.map(project => project.name)
-  )
-
-  const addProject = async () => {
-    setProjectDialogPrompt({
-      message: 'Add a new project',
-      callback: async (name: string) => {
-        const promptID = await api.addProject(name)
-        await refreshProjects()
-        updateActivePrompt(promptID)
-      },
-    })
-  }
-
-  const addPrompt = async (projectID: number) => {
-    const promptID = await api.addPrompt(projectID)
-    await refreshProjects()
-    updateActivePrompt(promptID)
-  }
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
@@ -114,11 +96,20 @@ export default function Home({
   const refreshProjects = async () => {
     const oldIndex = projects.findIndex(hasActivePrompt)
     const newProjects = await api.getProjects()
-    setProjects(newProjects)
-    if (!newProjects.some(hasActivePrompt)) {
-      const newIndex = Math.max(0, Math.min(newProjects.length - 1, oldIndex))
-      updateActivePrompt(newProjects[newIndex].prompts[0].id)
+    if (!newProjects.length) {
+      refreshData()
+    } else {
+      setProjects(newProjects)
+      if (!newProjects.some(hasActivePrompt)) {
+        const newIndex = Math.max(0, Math.min(newProjects.length - 1, oldIndex))
+        updateActivePrompt(newProjects[newIndex].prompts[0].id)
+      }
     }
+  }
+
+  const refreshProjectsAndRefocus = async (promptID: number) => {
+    await refreshProjects()
+    updateActivePrompt(promptID)
   }
 
   const refreshVersions = async (promptID = activePromptID, focusID = activeVersion.id) => {
@@ -155,11 +146,6 @@ export default function Home({
       .then(_ => refreshVersions())
   }
 
-  const logout = async () => {
-    await api.logout()
-    router.replace(router.asPath)
-  }
-
   const deleteVersion = async (version: Version) => {
     const versionHasRuns = version.runs.length > 0
     const isLastVersion = versions.length === 1
@@ -173,10 +159,7 @@ export default function Home({
       message: `Are you sure you want to delete this ${entity}${suffix}? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
-        if (isLastProject) {
-          await api.addProject(defaultNewProjectName)
-        }
-        if (versions.length > 1) {
+        if (!isLastProject && versions.length > 1) {
           refreshVersions()
         }
         refreshProjects()
@@ -187,21 +170,13 @@ export default function Home({
 
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
-      <Sidebar>
-        <div className='flex flex-col gap-4'>
-          <PendingButton onClick={logout}>Log out</PendingButton>
-          <PendingButton onClick={addProject}>
-            <HiOutlineFolderAdd className='w-5 h-5 mr-2' />
-            Add New Project
-          </PendingButton>
-        </div>
-        <ProjectItems
-          projects={projects}
-          activePromptID={activePromptID}
-          addPrompt={addPrompt}
-          updateActivePrompt={updateActivePrompt}
-        />
-      </Sidebar>
+      <ProjectItems
+        projects={projects}
+        activePromptID={activePromptID}
+        updateActivePrompt={updateActivePrompt}
+        onLogout={refreshData}
+        onRefresh={refreshProjectsAndRefocus}
+      />
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
         <VersionTimeline
@@ -222,12 +197,6 @@ export default function Home({
         onSave={() => savePromptAndRefocus().then()}
       />
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-      <ProjectNameDialog
-        key={uniqueProjectName}
-        suggestedProjectName={uniqueProjectName}
-        prompt={projectDialogPrompt}
-        setPrompt={setProjectDialogPrompt}
-      />
     </main>
   )
 }
