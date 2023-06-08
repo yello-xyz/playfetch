@@ -39,11 +39,13 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.9.0",
+    "sanitize-html": "^2.10.0",
     "simplediff": "^0.1.1",
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.8"
+    "@types/nodemailer": "^6.4.8",
+    "@types/sanitize-html": "^2.9.0"
   }
 }
