@@ -22,3 +22,5 @@ export const BuildUniqueName = (name: string, existingNames: string[]) => {
 
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
+
+export const stripPromptSentinels = (prompt: string) => prompt.replaceAll('{{', '').replaceAll('}}', '')

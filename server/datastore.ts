@@ -1,4 +1,4 @@
-import { BuildUniqueName } from '@/common/formatting'
+import { BuildUniqueName, stripPromptSentinels } from '@/common/formatting'
 import { Project, Prompt, Run, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -160,7 +160,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
 async function updatePromptNameIfNeeded(promptData: any) {
   const promptID = getID(promptData)
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID)
-  const promptName = lastVersionData.title.length ? lastVersionData.title : lastVersionData.prompt
+  const promptName = lastVersionData.title.length ? lastVersionData.title : stripPromptSentinels(lastVersionData.prompt)
   if (promptName !== promptData.name) {
     await datastore.save(
       toPromptData(promptData.userID, promptData.projectID, promptName, promptData.createdAt, promptID)
