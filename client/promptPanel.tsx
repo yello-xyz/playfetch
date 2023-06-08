@@ -29,7 +29,7 @@ export default function PromptPanel({
 }: {
   version: Version
   setDirtyVersion: (version?: Version) => void
-  onRun: (config: RunConfig) => void
+  onRun: (prompt: string, config: RunConfig) => void
   onSave: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
@@ -90,7 +90,7 @@ export default function PromptPanel({
       <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={updateTitle} />
       <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
       <div className='flex gap-2'>
-        <PendingButton disabled={!prompt.length} onClick={() => onRun({ provider, temperature, maxTokens })}>
+        <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, { provider, temperature, maxTokens })}>
           Run
         </PendingButton>
         <PendingButton disabled={!isDirty} onClick={onSave}>

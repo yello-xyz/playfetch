@@ -148,9 +148,8 @@ export default function Home({
 
   const savePromptAndRefocus = () => savePrompt(versionID => refreshVersions(activePromptID, versionID))
 
-  const runPrompt = async (config: RunConfig) => {
+  const runPrompt = async (prompt: string, config: RunConfig) => {
     const versionID = await savePromptAndRefocus()
-    const prompt = dirtyVersion?.prompt ?? activeVersion.prompt
     await api
       .runPrompt(activePromptID, versionID, prompt, config.provider, config.temperature, config.maxTokens)
       .then(_ => refreshVersions())
