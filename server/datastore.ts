@@ -84,7 +84,7 @@ const toUser = (data: any): User => ({
   email: data.email,
   isAdmin: data.isAdmin,
   timestamp: getTimestamp(data),
-  lastLoginAt: getTimestamp(data, 'lastLoginAt'),
+  lastLoginAt: data.lastLoginAt ? getTimestamp(data, 'lastLoginAt') : undefined,
 })
 
 export async function markUserLogin(userID: number): Promise<User | undefined> {
