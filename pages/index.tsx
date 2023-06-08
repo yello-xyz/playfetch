@@ -1,4 +1,4 @@
-import { addProjectForUser, getProjectsForUser, getVersionsForPrompt } from '@/server/datastore'
+import { getProjectsForUser, getVersionsForPrompt } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -9,7 +9,7 @@ import { Project, Run, RunConfig, Version } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import PromptPanel from '@/client/promptPanel'
 import VersionTimeline from '@/client/versionTimeline'
-import ProjectItems from '@/client/projectItems'
+import ProjectSidebar from '@/client/projectSidebar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -43,7 +43,7 @@ export default function Home({ projects, versions }: { projects: Project[]; vers
       refreshData={refreshData}
     />
   ) : (
-    <ProjectItems onLogout={refreshData} onRefresh={refreshData} />
+    <ProjectSidebar onLogout={refreshData} onRefresh={refreshData} />
   )
 }
 
@@ -170,7 +170,7 @@ function HomeWithProjects({
 
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
-      <ProjectItems
+      <ProjectSidebar
         projects={projects}
         activePromptID={activePromptID}
         updateActivePrompt={updateActivePrompt}

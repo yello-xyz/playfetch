@@ -7,7 +7,7 @@ import { useState } from 'react'
 import ProjectNameDialog, { ProjectDialogPrompt } from './projectNameDialog'
 import api from './api'
 
-export default function ProjectItems({
+export default function ProjectSidebar({
   projects = [],
   activePromptID,
   updateActivePrompt,
@@ -20,7 +20,7 @@ export default function ProjectItems({
   onLogout: () => void
   onRefresh: (promptID: number) => void
 }) {
-  const [projectDialogPrompt, setProjectDialogPrompt] = useState<ProjectDialogPrompt>()
+  const [dialogPrompt, setDialogPrompt] = useState<ProjectDialogPrompt>()
 
   const logout = async () => {
     await api.logout()
@@ -35,7 +35,7 @@ export default function ProjectItems({
   )
 
   const addProject = async () => {
-    setProjectDialogPrompt({
+    setDialogPrompt({
       message: 'Add a new project',
       callback: async (name: string) => {
         const promptID = await api.addProject(name)
@@ -79,8 +79,8 @@ export default function ProjectItems({
       <ProjectNameDialog
         key={uniqueProjectName}
         suggestedProjectName={uniqueProjectName}
-        prompt={projectDialogPrompt}
-        setPrompt={setProjectDialogPrompt}
+        prompt={dialogPrompt}
+        setPrompt={setDialogPrompt}
       />
     </Sidebar>
   )
