@@ -4,7 +4,7 @@ import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import { useState } from 'react'
-import ProjectNameDialog, { ProjectDialogPrompt } from './projectNameDialog'
+import PickNameDialog, { DialogPrompt } from './projectNameDialog'
 import api from './api'
 
 export default function ProjectSidebar({
@@ -20,7 +20,7 @@ export default function ProjectSidebar({
   onLogout: () => void
   onRefresh: (promptID: number) => void
 }) {
-  const [dialogPrompt, setDialogPrompt] = useState<ProjectDialogPrompt>()
+  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const logout = async () => {
     await api.logout()
@@ -29,11 +29,13 @@ export default function ProjectSidebar({
 
   const addProject = async () => {
     setDialogPrompt({
-      message: 'Add a new project',
+      title: 'Add a new project',
+      label: 'Project name',
       callback: async (name: string) => {
         const promptID = await api.addProject(name)
         onRefresh(promptID)
       },
+      validator: name => api.checkProjectName(name),
     })
   }
 
@@ -69,7 +71,7 @@ export default function ProjectSidebar({
           </Sidebar.Collapse>
         ))}
       </Sidebar.Items>
-      <ProjectNameDialog key={projects.length} prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      <PickNameDialog key={projects.length} prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </Sidebar>
   )
 }

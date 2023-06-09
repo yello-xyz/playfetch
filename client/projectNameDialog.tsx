@@ -1,54 +1,56 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import ModalDialog from './modalDialog'
 import LabeledTextInput from './labeledTextInput'
-import api from './api'
 import { debounce } from 'debounce'
 
-export type ProjectDialogPrompt = { message: string; callback: (name: string) => void }
+export type DialogPrompt = {
+  title: string
+  label: string
+  callback: (name: string) => void
+  validator: (name: string) => Promise<{ url?: string }>
+}
 
-export default function ProjectNameDialog({
+export default function PickNameDialog({
   prompt,
   setPrompt,
 }: {
-  prompt?: ProjectDialogPrompt
-  setPrompt: (prompt?: ProjectDialogPrompt) => void
+  prompt?: DialogPrompt
+  setPrompt: (prompt?: DialogPrompt) => void
 }) {
-  const [projectName, setProjectName] = useState('')
+  const [name, setName] = useState('')
   const [url, setURL] = useState<string>()
   const [isPending, setPending] = useState(false)
 
-  const dialogPrompt = prompt
+  const innerDialogPrompt = prompt
     ? {
-        message: prompt.message,
-        callback: () => prompt.callback(projectName),
+        message: prompt.title,
+        callback: () => prompt.callback(name),
         disabled: isPending || !url,
       }
     : undefined
 
-  const checkProjectName = useMemo(
+  const checkName = useMemo(
     () =>
       debounce((name: string) => {
-        api.checkProjectName(name).then(({ url }) => {
+        prompt?.validator(name).then(({ url }) => {
           setURL(url)
           setPending(false)
         })
       }),
-    []
+    [prompt]
   )
 
-  const updateProjectName = (name: string) => {
-    setProjectName(name)
+  const updateName = (name: string) => {
+    setName(name)
     setPending(true)
-    checkProjectName(name)
+    checkName(name)
   }
 
   return (
-    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
-      <LabeledTextInput id='name' label='Project Name:' value={projectName} setValue={updateProjectName} />
+    <ModalDialog prompt={innerDialogPrompt} setPrompt={() => setPrompt()}>
+      <LabeledTextInput id='name' label={prompt?.label} value={name} setValue={updateName} />
       {url && <div className='text-sm text-gray-500'>{url}</div>}
-      {projectName.length > 0 && !url && (
-        <div className='text-sm text-red-500'>This name is not available.</div>
-      )}
+      {name.length > 0 && !url && <div className='text-sm text-red-500'>This name is not available.</div>}
     </ModalDialog>
   )
 }
