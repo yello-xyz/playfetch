@@ -43,3 +43,13 @@ export type RunConfig = {
   maxTokens: number
   inputs: { [variable: string]: string }
 }
+
+export type Endpoint = {
+  id: number
+  timestamp: string
+  name: string
+  projectID: string
+  promptID: number
+  prompt: string
+  config: RunConfig
+}

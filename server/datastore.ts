@@ -1,5 +1,5 @@
 import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
-import { Project, Prompt, Run, RunConfig, User, Version } from '@/types'
+import { Endpoint, Project, Prompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
@@ -20,6 +20,7 @@ enum Entity {
   PROMPT = 'prompt',
   VERSION = 'version',
   RUN = 'run',
+  ENDPOINT = 'endpoint',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
@@ -44,6 +45,9 @@ const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number,
   getDatastore()
     .runQuery(buildQuery(type, filter, limit, keysOnly))
     .then(([entities]) => entities)
+
+const getFilteredEntity = (type: string, filter: EntityFilter) =>
+  getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
 const getEntities = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredEntities(type, buildFilter(key, value), limit)
@@ -94,12 +98,12 @@ export async function markUserLogin(userID: number): Promise<User | undefined> {
   if (userData) {
     await getDatastore().save(toUserData(userData.email, userData.isAdmin, userData.createdAt, new Date(), userID))
   }
-  return userData ? toUser(userData) : userData
+  return userData ? toUser(userData) : undefined
 }
 
 export async function getUserForEmail(email: string): Promise<User | undefined> {
   const userData = await getEntity(Entity.USER, 'email', email)
-  return userData ? toUser(userData) : userData
+  return userData ? toUser(userData) : undefined
 }
 
 export async function saveUser(email: string, isAdmin: boolean) {
@@ -291,4 +295,58 @@ const toRun = (data: any): Run => ({
   output: data.output,
   config: JSON.parse(data.config),
   cost: data.cost,
+})
+
+export async function saveEndpoint(
+  userID: number,
+  name: string,
+  projectID: number,
+  promptID: number,
+  prompt: number,
+  config: RunConfig
+) {
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  if (promptData?.userID !== userID) {
+    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
+  }
+  if (promptData?.projectID !== projectID) {
+    throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
+  }
+  const endpointData = await getEndpoint(projectID, name)
+  if (endpointData && endpointData.promptID !== promptID) {
+    throw new Error(`Endpoint ${name} already used for different prompt in project with ID ${projectID}`)
+  }
+  await getDatastore().save(toEndpointData(name, projectID, promptID, new Date(), prompt, config, endpointData?.id))
+}
+
+export async function getEndpoint(projectID: number, name: string): Promise<Endpoint | undefined> {
+  const endpoint = await getFilteredEntity(
+    Entity.ENDPOINT,
+    and([buildFilter('projectID', projectID), buildFilter('name', name)])
+  )
+  return endpoint ? toEndpoint(endpoint) : undefined
+}
+
+const toEndpointData = (
+  name: string,
+  projectID: number,
+  promptID: number,
+  createdAt: Date,
+  prompt: number,
+  config: RunConfig,
+  endpointID?: number
+) => ({
+  key: buildKey(Entity.ENDPOINT, endpointID),
+  data: { name, projectID, promptID, createdAt, prompt, config: JSON.stringify(config) },
+  excludeFromIndexes: ['prompt', 'config'],
+})
+
+const toEndpoint = (data: any): Endpoint => ({
+  id: getID(data),
+  timestamp: getTimestamp(data),
+  name: data.name,
+  projectID: data.projectID,
+  promptID: data.promptID,
+  prompt: data.prompt,
+  config: JSON.parse(data.config),
 })
