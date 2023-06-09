@@ -48,7 +48,7 @@ export type Endpoint = {
   id: number
   timestamp: string
   name: string
-  projectID: string
+  projectID: number
   promptID: number
   prompt: string
   config: RunConfig

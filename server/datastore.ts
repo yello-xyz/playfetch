@@ -333,7 +333,7 @@ export async function saveEndpoint(
   name: string,
   projectID: number,
   promptID: number,
-  prompt: number,
+  prompt: string,
   config: RunConfig
 ) {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
@@ -363,7 +363,7 @@ const toEndpointData = (
   projectID: number,
   promptID: number,
   createdAt: Date,
-  prompt: number,
+  prompt: string,
   config: RunConfig,
   endpointID?: number
 ) => ({
