@@ -2,12 +2,14 @@ import { CheckValidURLPath, ProjectNameToURLPath } from "@/common/formatting"
 import { getProjectIDFromURLPath } from "@/server/datastore"
 import { withLoggedInSessionRoute } from "@/server/session"
 import { NextApiRequest, NextApiResponse } from "next"
+import { buildURLForClientRoute } from '@/server/routing'
 
-async function checkProjectName(req: NextApiRequest, res: NextApiResponse<boolean>) {
+async function checkProjectName(req: NextApiRequest, res: NextApiResponse<{ url?: string }>) {
   const name = req.body.name
   const urlPath = ProjectNameToURLPath(name)
   const available = CheckValidURLPath(urlPath) && !(await getProjectIDFromURLPath(urlPath))
-  res.json(available)
+  const url = available ? buildURLForClientRoute(`/${urlPath}`, req.headers) : undefined
+  res.json({ url })
 }
 
 export default withLoggedInSessionRoute(checkProjectName)

@@ -35,7 +35,7 @@ const api = {
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
-  checkProjectName: function (name: string): Promise<boolean> {
+  checkProjectName: function (name: string): Promise<{ url?: string }> {
     return post(this.checkProjectName, { name })
   },
   addProject: function (name: string): Promise<number> {
