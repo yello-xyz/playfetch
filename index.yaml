@@ -47,3 +47,10 @@ indexes:
   - name: versionID
   - name: createdAt
     direction: desc
+
+- kind: endpoint
+  properties:
+  - name: name
+  - name: projectID
+  - name: createdAt
+    direction: desc

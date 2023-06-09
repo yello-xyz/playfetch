@@ -3,6 +3,8 @@ import { Endpoint, Project, Prompt, Run, RunConfig, User, Version } from '@/type
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
+import { createHash } from 'crypto'
+import ShortUniqueId from 'short-unique-id'
 
 let datastore: Datastore
 const getDatastore = () => {
@@ -113,10 +115,19 @@ export async function saveUser(email: string, isAdmin: boolean) {
   )
 }
 
-const toProjectData = (userID: number, name: string, urlPath: string, createdAt: Date) => ({
-  key: buildKey(Entity.PROJECT),
-  data: { userID, name, createdAt, urlPath },
-  excludeFromIndexes: ['name'],
+const hashAPIKey = (apiKey: string) => createHash('sha256').update(apiKey).digest('hex')
+
+const toProjectData = (
+  userID: number,
+  name: string,
+  urlPath: string,
+  createdAt: Date,
+  apiKeyHash?: string,
+  projectID?: number
+) => ({
+  key: buildKey(Entity.PROJECT, projectID),
+  data: { userID, name, createdAt, urlPath, apiKeyHash },
+  excludeFromIndexes: ['name', 'apiKeyHash'],
 })
 
 const toProject = (data: any, prompts: any[]): Project => ({
@@ -140,9 +151,29 @@ export async function addProjectForUser(userID: number, projectName: string): Pr
   return await addPromptForUser(userID, Number(projectData.key.id))
 }
 
-export async function getProjectIDFromURLPath(urlPath: string): Promise<number | undefined> {
-  const projectKey = await getEntityKey(Entity.PROJECT, 'urlPath', urlPath)
-  return projectKey ? Number(projectKey.id) : undefined
+export async function getProjectIDFromURLPath(urlPath: string, apiKey?: string): Promise<number | undefined> {
+  const projectData = await getEntity(Entity.PROJECT, 'urlPath', urlPath)
+  return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey)) ? getID(projectData) : undefined
+}
+
+export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {
+  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
+  if (projectData?.userID !== userID) {
+    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
+  }
+  const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
+  const apiKeyHash = hashAPIKey(apiKey)
+  await getDatastore().save(
+    toProjectData(
+      projectData.userID,
+      projectData.name,
+      projectData.urlPath,
+      projectData.createdAt,
+      apiKeyHash,
+      projectID
+    )
+  )
+  return apiKey
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
