@@ -13,7 +13,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const endpoint = await getEndpoint(projectID, endpointName)
     if (endpoint) {
       // TODO log output, cost, failures, etc.
-      const { output } = await runPromptWithConfig(endpoint.prompt, endpoint.config)
+      const { output } = await runPromptWithConfig(endpoint.prompt, { ...endpoint.config, inputs: req.body })
       return res.json({ output })
     }
   }

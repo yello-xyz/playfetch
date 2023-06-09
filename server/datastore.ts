@@ -156,6 +156,11 @@ export async function getProjectIDFromURLPath(urlPath: string, apiKey?: string):
   return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey)) ? getID(projectData) : undefined
 }
 
+export async function getURLPathForProject(projectID: number): Promise<string> {
+  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
+  return projectData?.urlPath ?? ''
+}
+
 export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {
   const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
   if (projectData?.userID !== userID) {

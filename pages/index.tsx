@@ -70,6 +70,7 @@ function HomeWithProjects({
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
   const [filter, setFilter] = useState('')
+  const [curlCommand, setCURLCommand] = useState<string>()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const updateActivePrompt = (promptID: number) => {
@@ -144,6 +145,12 @@ function HomeWithProjects({
     await api.runPrompt(activePromptID, versionID, prompt, config).then(_ => refreshVersions(activePromptID, versionID))
   }
 
+  const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
+    await savePromptAndRefocus()
+    const projectID = projects.find(hasActivePrompt)!.id
+    await api.publishPrompt(projectID, activePromptID, endpoint, prompt, config).then(setCURLCommand)
+  }
+
   const deleteVersion = async (version: Version) => {
     const versionHasRuns = version.runs.length > 0
     const isLastVersion = versions.length === 1
@@ -186,17 +193,25 @@ function HomeWithProjects({
           onDelete={deleteVersion}
         />
       </div>
-      <Suspense>
-        <PromptPanel
-          key={activeVersion.id}
-          version={activeVersion}
-          activeRun={activeRun ?? activeVersion.runs[0]}
-          setDirtyVersion={setDirtyVersion}
-          onRun={runPrompt}
-          onSave={() => savePromptAndRefocus().then()}
-          onPublish={() => {}}
-        />
-      </Suspense>
+      <div>
+        <Suspense>
+          <PromptPanel
+            key={activeVersion.id}
+            version={activeVersion}
+            activeRun={activeRun ?? activeVersion.runs[0]}
+            setDirtyVersion={setDirtyVersion}
+            onRun={runPrompt}
+            onSave={() => savePromptAndRefocus().then()}
+            onPublish={publishPrompt}
+          />
+        </Suspense>
+        {curlCommand && (
+          <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
+            Prompt published. Try out your new API endpoint by running:
+            <pre>{curlCommand}</pre>
+          </div>
+        )}
+      </div>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </main>
   )

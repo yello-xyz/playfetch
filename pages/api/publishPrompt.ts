@@ -1,12 +1,14 @@
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { saveEndpoint, rotateProjectAPIKey } from '@/server/datastore'
+import { saveEndpoint, rotateProjectAPIKey, getURLPathForProject } from '@/server/datastore'
+import { buildURLForClientRoute } from '@/server/routing'
 
 const toCamelCase = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
 
-async function publishPrompt(req: NextApiRequest, res: NextApiResponse) {
+async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) {
   const userID = req.session.user!.id
   const projectID = req.body.projectID
+  const name = req.body.name
   const rawConfig = req.body.config
 
   const prompt = Object.keys(rawConfig.inputs).reduce(
@@ -20,16 +22,18 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse) {
     ),
   }
 
-  await saveEndpoint(userID, req.body.name, projectID, req.body.promptID, prompt, config)
+  await saveEndpoint(userID, name, projectID, req.body.promptID, prompt, config)
 
   const apiKey = await rotateProjectAPIKey(userID, projectID)
+  const projectURLPath = await getURLPathForProject(projectID)
+  const url = buildURLForClientRoute(`/${projectURLPath}/${name}`, req.headers)
 
-  const curlCommand = `curl -X POST \\
-  -H "Content-Type: application/json" \\
+  const curlCommand = `curl -X POST ${url} \\
   -H "x-api-key: ${apiKey}" \\
+  -H "Content-Type: application/json" \\
   -d '{ ${Object.entries(config.inputs).map(([variable, value]) => `"${variable}": "${value}"`).join(', ')} }'`
 
-  res.json({ curlCommand })
+  res.json(curlCommand)
 }
 
 export default withLoggedInSessionRoute(publishPrompt)

@@ -56,6 +56,15 @@ const api = {
   runPrompt: function (promptID: number, versionID: number, prompt: string, config: RunConfig) {
     return post(this.runPrompt, { promptID, versionID, prompt, config })
   },
+  publishPrompt: function (
+    projectID: number,
+    promptID: number,
+    name: string,
+    prompt: string,
+    config: RunConfig
+  ): Promise<string> {
+    return post(this.publishPrompt, { projectID, promptID, name, prompt, config })
+  },
   getVersions: function (promptID: number): Promise<Version[]> {
     return post(this.getVersions, { promptID })
   },

@@ -41,8 +41,8 @@ export default function PromptPanel({
   activeRun?: Run
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
+  onPublish: (endpoint: string, prompt: string, config: RunConfig) => void
   onSave: () => void
-  onPublish: (endpoint: string) => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [title, setTitle] = useState(version.title)
@@ -70,7 +70,7 @@ export default function PromptPanel({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (endpoint: string) => {
-        onPublish(endpoint)
+        onPublish(endpoint, prompt, { provider, temperature, maxTokens, inputs })
       },
       validator: (endpoint: string) => Promise.resolve({ url: endpoint }),
     })
