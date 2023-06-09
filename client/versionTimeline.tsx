@@ -26,7 +26,7 @@ const renderDiffs = (parts: { 0: ComparisonState; 1: string[] }[]) => {
 
   for (const part of parts) {
     const state = part[0]
-    let content = part[1].join(' ')
+    let content = part[1].join('')
     while (content.length > 0) {
       const start = content.indexOf(startSentinel)
       const end = content.indexOf(endSentinel)
@@ -46,17 +46,35 @@ const renderDiffs = (parts: { 0: ComparisonState; 1: string[] }[]) => {
   }
 
   return result.map((diff, index: number) => (
-    <span key={index}>
-      <span className={classNameForDiff(diff)}>{diff.content}</span>{' '}
+    <span key={index} className={classNameForDiff(diff)}>
+      {diff.content}
     </span>
   ))
 }
 
-const getTokens = (prompt: string) =>
-  prompt.split(/[ ]+/).flatMap(token => (token.endsWith('.') ? [token.slice(0, -1), '.'] : [token]))
+const tokenize = (prompt: string) => {
+  const delimiters = ' .,;:!?-_()[]<>"\'\n\t'
+  const tokens = [] as string[]
+  let currentCharacters = [] as string[]
+  for (const character of prompt) {
+    if (delimiters.includes(character)) {
+      if (currentCharacters.length) {
+        tokens.push(currentCharacters.join(''))
+        currentCharacters = []
+      }
+      tokens.push(character)
+    } else {
+      currentCharacters.push(character)
+    }
+  }
+  if (currentCharacters.length) {
+    tokens.push(currentCharacters.join(''))
+  }
+  return tokens
+}
 
 const renderPrompt = (prompt: string, comparison?: string) =>
-  renderDiffs(comparison ? simplediff.diff(getTokens(comparison), getTokens(prompt)) : [['=', [prompt]]])
+  renderDiffs(comparison ? simplediff.diff(tokenize(comparison), tokenize(prompt)) : [['=', [prompt]]])
 
 const customPointTheme = {
   marker: {
