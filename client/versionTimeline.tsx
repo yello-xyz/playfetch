@@ -52,8 +52,11 @@ const renderDiffs = (parts: { 0: ComparisonState; 1: string[] }[]) => {
   ))
 }
 
+const getTokens = (prompt: string) =>
+  prompt.split(/[ ]+/).flatMap(token => (token.endsWith('.') ? [token.slice(0, -1), '.'] : [token]))
+
 const renderPrompt = (prompt: string, comparison?: string) =>
-  renderDiffs(comparison ? simplediff.diff(comparison.split(/[ ]+/), prompt.split(/[ ]+/)) : [['=', [prompt]]])
+  renderDiffs(comparison ? simplediff.diff(getTokens(comparison), getTokens(prompt)) : [['=', [prompt]]])
 
 const customPointTheme = {
   marker: {
