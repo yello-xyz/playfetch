@@ -4,7 +4,7 @@ import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import { useState } from 'react'
-import PickNameDialog, { DialogPrompt } from './projectNameDialog'
+import PickNameDialog, { DialogPrompt } from './pickNameDialog'
 import api from './api'
 
 export default function ProjectSidebar({
