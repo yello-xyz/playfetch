@@ -33,12 +33,14 @@ export default function PromptPanel({
   setDirtyVersion,
   onRun,
   onSave,
+  onPublish,
 }: {
   version: Version
   activeRun?: Run
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
   onSave: () => void
+  onPublish: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [title, setTitle] = useState(version.title)
@@ -89,8 +91,8 @@ export default function PromptPanel({
         .replaceAll(/<b>(.*?)<\/b>/g, '{{$1}}')
         .replaceAll('{{}}', '')
         .replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
-        .replaceAll(/{{(.*?) }}([^ ])/g, '{{$1}} $2')
-        .replaceAll(/([^ ]){{ (.*?)}}/g, '$1 {{$2}}')
+        .replaceAll(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
+        .replaceAll(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
     )
   }
 
@@ -143,6 +145,9 @@ export default function PromptPanel({
         </PendingButton>
         <PendingButton disabled={!isDirty} onClick={onSave}>
           Save
+        </PendingButton>
+        <PendingButton disabled={version.runs.length === 0} onClick={onPublish}>
+          Publish
         </PendingButton>
       </div>
       <div className='flex justify-between gap-10'>

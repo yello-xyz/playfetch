@@ -116,9 +116,7 @@ function HomeWithProjects({
     const newVersions = await api.getVersions(promptID)
     setVersions(newVersions)
     const focusedVersion = newVersions.find(version => version.id === focusID)
-    if (!focusedVersion || focusID !== activeVersion.id) {
-      updateActiveVersion(focusedVersion ?? newVersions[0])
-    }
+    updateActiveVersion(focusedVersion ?? newVersions[0])
   }
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
@@ -195,6 +193,7 @@ function HomeWithProjects({
         setDirtyVersion={setDirtyVersion}
         onRun={runPrompt}
         onSave={() => savePromptAndRefocus().then()}
+        onPublish={() => {}}
       />
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </main>
