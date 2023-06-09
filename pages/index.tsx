@@ -141,7 +141,7 @@ function HomeWithProjects({
     const versionID = await savePromptAndRefocus()
     await api
       .runPrompt(activePromptID, versionID, prompt, config.provider, config.temperature, config.maxTokens)
-      .then(_ => refreshVersions())
+      .then(_ => refreshVersions(activePromptID, versionID))
   }
 
   const deleteVersion = async (version: Version) => {
