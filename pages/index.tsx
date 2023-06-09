@@ -4,12 +4,14 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Project, Run, RunConfig, Version } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import PromptPanel from '@/client/promptPanel'
 import VersionTimeline from '@/client/versionTimeline'
 import ProjectSidebar from '@/client/projectSidebar'
+
+import dynamic from 'next/dynamic'
+const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -184,15 +186,17 @@ function HomeWithProjects({
           onDelete={deleteVersion}
         />
       </div>
-      <PromptPanel
-        key={activeVersion.id}
-        version={activeVersion}
-        activeRun={activeRun ?? activeVersion.runs[0]}
-        setDirtyVersion={setDirtyVersion}
-        onRun={runPrompt}
-        onSave={() => savePromptAndRefocus().then()}
-        onPublish={() => {}}
-      />
+      <Suspense>
+        <PromptPanel
+          key={activeVersion.id}
+          version={activeVersion}
+          activeRun={activeRun ?? activeVersion.runs[0]}
+          setDirtyVersion={setDirtyVersion}
+          onRun={runPrompt}
+          onSave={() => savePromptAndRefocus().then()}
+          onPublish={() => {}}
+        />
+      </Suspense>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </main>
   )
