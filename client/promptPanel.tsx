@@ -113,10 +113,7 @@ export default function PromptPanel({
 
   const [inputState, setInputState] = useState<{ [key: string]: string }>(runConfig.inputs ?? {})
   const inputVariables = [...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? [])]
-  const promptInstance = inputVariables.reduce(
-    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, inputState[variable] ?? ''),
-    prompt
-  )
+  const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
   return (
     <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
@@ -155,7 +152,7 @@ export default function PromptPanel({
       <div className='flex gap-2'>
         <PendingButton
           disabled={!prompt.length}
-          onClick={() => onRun(promptInstance, { provider, temperature, maxTokens, inputs: inputState })}>
+          onClick={() => onRun(prompt, { provider, temperature, maxTokens, inputs })}>
           Run
         </PendingButton>
         <PendingButton disabled={!isDirty} onClick={onSave}>
