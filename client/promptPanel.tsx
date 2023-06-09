@@ -71,7 +71,7 @@ export default function PromptPanel({
       callback: (endpoint: string) => {
         onPublish(endpoint)
       },
-      validator: (endpoint: string) => Promise.resolve({ url: endpoint })
+      validator: (endpoint: string) => Promise.resolve({ url: endpoint }),
     })
   }
 
@@ -111,9 +111,9 @@ export default function PromptPanel({
   }
 
   const [inputState, setInputState] = useState<{ [key: string]: string }>({})
-  const inputVariables = prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? []
+  const inputVariables = [...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? [])]
   const promptInstance = inputVariables.reduce(
-    (prompt, variable) => prompt.replace(`{{${variable}}}`, inputState[variable] ?? ''),
+    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, inputState[variable] ?? ''),
     prompt
   )
 
