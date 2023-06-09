@@ -9,6 +9,7 @@ import ContentEditable from 'react-contenteditable'
 import { ContentEditableEvent } from 'react-contenteditable'
 import { FocusEvent } from 'react'
 import { useRef } from 'react'
+import PickNameDialog, { DialogPrompt } from './pickNameDialog'
 
 const labelForProvider = (provider: RunConfig['provider']) => {
   switch (provider) {
@@ -40,7 +41,7 @@ export default function PromptPanel({
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
   onSave: () => void
-  onPublish: () => void
+  onPublish: (endpoint: string) => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [title, setTitle] = useState(version.title)
@@ -59,6 +60,19 @@ export default function PromptPanel({
     setTemperature(runConfig.temperature)
     setMaxTokens(runConfig.maxTokens)
     setPreviousRunID(activeRun?.id)
+  }
+
+  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+
+  const publish = () => {
+    setDialogPrompt({
+      title: 'Publish Prompt',
+      label: 'Endpoint',
+      callback: (endpoint: string) => {
+        onPublish(endpoint)
+      },
+      validator: (endpoint: string) => Promise.resolve({ url: endpoint })
+    })
   }
 
   const update = (prompt: string, title: string, tags: string) => {
@@ -146,7 +160,7 @@ export default function PromptPanel({
         <PendingButton disabled={!isDirty} onClick={onSave}>
           Save
         </PendingButton>
-        <PendingButton disabled={version.runs.length === 0} onClick={onPublish}>
+        <PendingButton disabled={version.runs.length === 0} onClick={publish}>
           Publish
         </PendingButton>
       </div>
@@ -183,6 +197,7 @@ export default function PromptPanel({
           />
         </div>
       </div>
+      <PickNameDialog key={version.id} prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </div>
   )
 }
