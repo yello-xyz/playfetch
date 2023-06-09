@@ -41,4 +41,5 @@ export type RunConfig = {
   provider: 'openai' | 'anthropic' | 'google'
   temperature: number
   maxTokens: number
+  inputs: { [variable: string]: string }
 }

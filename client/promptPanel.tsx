@@ -26,6 +26,7 @@ const DefaultConfig: RunConfig = {
   provider: 'openai',
   temperature: 0.5,
   maxTokens: 250,
+  inputs: {}
 }
 
 export default function PromptPanel({
@@ -110,7 +111,7 @@ export default function PromptPanel({
     )
   }
 
-  const [inputState, setInputState] = useState<{ [key: string]: string }>({})
+  const [inputState, setInputState] = useState<{ [key: string]: string }>(runConfig.inputs ?? {})
   const inputVariables = [...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? [])]
   const promptInstance = inputVariables.reduce(
     (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, inputState[variable] ?? ''),
@@ -154,7 +155,7 @@ export default function PromptPanel({
       <div className='flex gap-2'>
         <PendingButton
           disabled={!prompt.length}
-          onClick={() => onRun(promptInstance, { provider, temperature, maxTokens })}>
+          onClick={() => onRun(promptInstance, { provider, temperature, maxTokens, inputs: inputState })}>
           Run
         </PendingButton>
         <PendingButton disabled={!isDirty} onClick={onSave}>

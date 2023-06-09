@@ -19,11 +19,7 @@ const getPredictor = (provider: string) => {
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
-  const config: RunConfig = {
-    provider: req.body.provider,
-    temperature: req.body.temperature,
-    maxTokens: req.body.maxTokens,
-  }
+  const config: RunConfig = req.body.config
   const { output, cost } = await getPredictor(config.provider)(req.body.prompt, config.temperature, config.maxTokens)
   if (output?.length) {
     await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output, config, cost)
