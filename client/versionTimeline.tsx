@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react'
 import { Run, Version } from '@/types'
 import simplediff from 'simplediff'
-import { Badge, Timeline } from 'flowbite-react'
+import { Badge, Timeline, Tooltip } from 'flowbite-react'
 import { HiOutlineSparkles, HiOutlineTrash, HiPlay } from 'react-icons/hi'
 import { FormatDate, Truncate } from '@/common/formatting'
 
@@ -130,7 +130,11 @@ export default function VersionTimeline({
                 {isActiveVersion(item) && '⮕ '}
                 {isPreviousVersion(item) && '⬅ '}
                 {FormatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
-                {isVersion(item) && <HiOutlineTrash onClick={event => deleteVersion(event, item)} />}
+                {isVersion(item) && (
+                  <Tooltip content='Delete version'>
+                    <HiOutlineTrash onClick={event => deleteVersion(event, item)} />
+                  </Tooltip>
+                )}
                 {!isVersion(item) && item.config.provider.length && <Badge color='green'>{item.config.provider}</Badge>}
                 {!isVersion(item) && item.cost > 0.0005 && `$${item.cost.toFixed(3)}`}
               </Timeline.Time>

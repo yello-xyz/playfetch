@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
 import { Run, RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
-import { Dropdown, Label, RangeSlider, TextInput } from 'flowbite-react'
+import { Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
 import sanitizeHtml from 'sanitize-html'
 import ContentEditable from 'react-contenteditable'
 import { ContentEditableEvent } from 'react-contenteditable'
 import { FocusEvent } from 'react'
 import { useRef } from 'react'
 import PickNameDialog, { DialogPrompt } from './pickNameDialog'
+import { HiCodeBracketSquare } from 'react-icons/hi2'
 
 const labelForProvider = (provider: RunConfig['provider']) => {
   switch (provider) {
@@ -26,7 +27,7 @@ const DefaultConfig: RunConfig = {
   provider: 'openai',
   temperature: 0.5,
   maxTokens: 250,
-  inputs: {}
+  inputs: {},
 }
 
 export default function PromptPanel({
@@ -111,6 +112,11 @@ export default function PromptPanel({
     )
   }
 
+  const extractVariable = (event: MouseEvent) => {
+    event.preventDefault()
+    document.execCommand('bold', false)
+  }
+
   const [inputState, setInputState] = useState<{ [key: string]: string }>(runConfig.inputs ?? {})
   const inputVariables = [...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? [])]
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
@@ -136,8 +142,11 @@ export default function PromptPanel({
         </div>
       )}
       <div className='self-stretch'>
-        <div className='block mb-1'>
+        <div className='flex items-center block gap-2 mb-1'>
           <Label value='Prompt' onClick={() => contentEditableRef.current?.focus()} />
+          <Tooltip content='Extract variable'>
+            <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />
+          </Tooltip>
         </div>
         <ContentEditable
           className='p-2 bg-white'
