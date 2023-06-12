@@ -1,24 +1,6 @@
 indexes:
 
-- kind: user
-  properties:
-  - name: email
-  - name: createdAt
-    direction: desc
-
 - kind: project
-  properties:
-  - name: userID
-  - name: createdAt
-    direction: desc
-
-- kind: project
-  properties:
-  - name: urlPath
-  - name: createdAt
-    direction: desc
-
-- kind: prompt
   properties:
   - name: userID
   - name: createdAt
@@ -26,7 +8,7 @@ indexes:
 
 - kind: prompt
   properties:
-  - name: projectID
+  - name: userID
   - name: createdAt
     direction: desc
 
@@ -42,21 +24,9 @@ indexes:
   - name: createdAt
     direction: desc
 
-- kind: run
-  properties:
-  - name: versionID
-  - name: createdAt
-    direction: desc
-
 - kind: endpoint
   properties:
   - name: name
   - name: projectURLPath
-  - name: createdAt
-    direction: desc
-
-- kind: endpoint
-  properties:
-  - name: userID
   - name: createdAt
     direction: desc

@@ -33,45 +33,41 @@ const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date).t
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
-const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
-
-const orderQuery = (query: Query, ordered: boolean) => (ordered ? query.order('createdAt', { descending: true }) : query)
-
-const buildQuery = (type: string, filter: EntityFilter, limit = 100, keysOnly = false, ordered = true) =>
-  projectQuery(
-    orderQuery(
-      getDatastore().createQuery(type).filter(filter).limit(limit),
-      ordered
-    ),
-    keysOnly
-  )
-
 const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
 
-const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number, keysOnly = false, ordered = true) =>
+const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
+
+const orderQuery = (query: Query, ordered: boolean) =>
+  ordered ? query.order('createdAt', { descending: true }) : query
+
+const buildQuery = (type: string, filter: EntityFilter, limit = 100, ordered = false, keysOnly = false) =>
+  projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), ordered), keysOnly)
+
+const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number, ordered = false, keysOnly = false) =>
   getDatastore()
-    .runQuery(buildQuery(type, filter, limit, keysOnly, ordered))
+    .runQuery(buildQuery(type, filter, limit, ordered, keysOnly))
     .then(([entities]) => entities)
 
 const getFilteredEntity = (type: string, filter: EntityFilter) =>
   getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
-const getEntities = (type: string, key: string, value: {}, limit?: number) =>
-  getFilteredEntities(type, buildFilter(key, value), limit)
+const getEntities = (type: string, key: string, value: {}, limit?: number, ordered = false) =>
+  getFilteredEntities(type, buildFilter(key, value), limit, ordered)
 
-const getEntity = async (type: string, key: string, value: {}) =>
-  getEntities(type, key, value, 1).then(([entity]) => entity)
+const getOrderedEntities = (type: string, key: string, value: {}, limit?: number) =>
+  getEntities(type, key, value, limit, true)
+
+const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
+  getEntities(type, key, value, 1, mostRecent).then(([entity]) => entity)
 
 const getUserScopedEntities = (type: string, key: string, value: {}, userID: number, limit?: number) =>
   getFilteredEntities(type, and([buildFilter(key, value), buildFilter('userID', userID)]), limit)
 
-const getFilteredKeys = (type: string, filter: EntityFilter, limit?: number) =>
-  getFilteredEntities(type, filter, limit, true).then(entities => entities.map(getKey))
-
 const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
-  getFilteredKeys(type, buildFilter(key, value), limit)
+  getFilteredEntities(type, buildFilter(key, value), limit, false, true).then(entities => entities.map(getKey))
 
-const getEntityKey = (type: string, key: string, value: {}) => getEntityKeys(type, key, value, 1).then(([key]) => key)
+const getEntityID = (type: string, key: string, value: {}) =>
+  getEntityKeys(type, key, value, 1).then(([key]) => Number(key.id))
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
@@ -194,8 +190,8 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
-  const projects = await getEntities(Entity.PROJECT, 'userID', userID)
-  const prompts = await getEntities(Entity.PROMPT, 'userID', userID)
+  const projects = await getOrderedEntities(Entity.PROJECT, 'userID', userID)
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'userID', userID)
   const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)
   return projects.map(project => toProject(project, prompts, endpoints))
 }
@@ -209,7 +205,7 @@ const toPromptData = (userID: number, projectID: number, name: string, createdAt
 const toPrompt = (data: any, endpointData?: any): Prompt => ({
   id: getID(data),
   name: data.name,
-  endpoint: endpointData ? toEndpoint(endpointData) : undefined,
+  ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
 })
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
@@ -226,7 +222,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
 
 async function updatePromptNameIfNeeded(promptData: any) {
   const promptID = getID(promptData)
-  const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID)
+  const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
   const promptName = lastVersionData.title.length ? lastVersionData.title : StripPromptSentinels(lastVersionData.prompt)
   if (promptName !== promptData.name) {
     await datastore.save(
@@ -312,8 +308,8 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 }
 
 export async function getVersionsForPrompt(userID: number, promptID: number): Promise<Version[]> {
-  const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
-  const runs = await getEntities(Entity.RUN, 'promptID', promptID)
+  const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
+  const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   return versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 }
 
@@ -362,7 +358,7 @@ export async function saveEndpoint(
   if (promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
-  const projectID = await getEntityKey(Entity.PROJECT, 'urlPath', projectURLPath).then(key => Number(key.id))
+  const projectID = await getEntityID(Entity.PROJECT, 'urlPath', projectURLPath)
   if (!projectID) {
     throw new Error(`Project with URL path ${projectURLPath} does not exist`)
   }
