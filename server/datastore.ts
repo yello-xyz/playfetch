@@ -377,7 +377,10 @@ export async function saveEndpoint(
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
     throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
   }
-  await getDatastore().save(toEndpointData(userID, promptID, urlPath, projectURLPath, new Date(), prompt, config))
+  const token = new ShortUniqueId({ length: 12, dictionary: 'alpha_upper' })()
+  await getDatastore().save(
+    toEndpointData(userID, promptID, urlPath, projectURLPath, new Date(), prompt, config, token)
+  )
 }
 
 export async function getEndpoint(promptID: number): Promise<Endpoint | undefined> {
@@ -408,10 +411,11 @@ const toEndpointData = (
   projectURLPath: string,
   createdAt: Date,
   prompt: string,
-  config: RunConfig
+  config: RunConfig,
+  token: string
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { userID, urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },
+  data: { userID, urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), token },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
@@ -422,4 +426,5 @@ const toEndpoint = (data: any): Endpoint => ({
   projectURLPath: data.projectURLPath,
   prompt: data.prompt,
   config: JSON.parse(data.config),
+  token: data.token,
 })

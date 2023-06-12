@@ -52,4 +52,5 @@ export type Endpoint = {
   projectURLPath: string
   prompt: string
   config: RunConfig
+  token: string
 }
