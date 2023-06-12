@@ -66,8 +66,6 @@ const getFilteredKeys = (type: string, filter: EntityFilter, limit?: number) =>
 const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredKeys(type, buildFilter(key, value), limit)
 
-const getEntityKey = (type: string, key: string, value: {}) => getEntityKeys(type, key, value, 1).then(([key]) => key)
-
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
     .get(ids.map(id => buildKey(type, id)))
@@ -349,10 +347,10 @@ export async function saveEndpoint(
     throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
   }
   const endpointData = await getEndpoint(projectID, name)
-  if (endpointData && endpointData.promptID !== promptID) {
+  if (endpointData && endpointData.id !== promptID) {
     throw new Error(`Endpoint ${name} already used for different prompt in project with ID ${projectID}`)
   }
-  await getDatastore().save(toEndpointData(name, projectID, promptID, new Date(), prompt, config, endpointData?.id))
+  await getDatastore().save(toEndpointData(name, projectID, promptID, new Date(), prompt, config))
 }
 
 export async function getEndpoint(projectID: number, name: string): Promise<Endpoint | undefined> {
@@ -370,10 +368,9 @@ const toEndpointData = (
   createdAt: Date,
   prompt: string,
   config: RunConfig,
-  endpointID?: number
 ) => ({
-  key: buildKey(Entity.ENDPOINT, endpointID),
-  data: { name, projectID, promptID, createdAt, prompt, config: JSON.stringify(config) },
+  key: buildKey(Entity.ENDPOINT, promptID),
+  data: { name, projectID, createdAt, prompt, config: JSON.stringify(config) },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
