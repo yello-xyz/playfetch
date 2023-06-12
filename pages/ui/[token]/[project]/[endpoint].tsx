@@ -1,0 +1,52 @@
+import ClientRoute, { ParseQuery, ParseRouterQuery, Redirect } from '@/client/clientRoute'
+import { getEndpointFromPath } from '@/server/datastore'
+import { useState } from 'react'
+import { Label, TextInput } from 'flowbite-react'
+import PendingButton from '@/client/pendingButton'
+import { withLoggedInSession } from '@/server/session'
+import api from '@/client/api'
+import { useRouter } from 'next/router'
+
+export const getServerSideProps = withLoggedInSession(async ({ query }) => {
+  const { token, project: projectURLPath, endpoint: urlPath } = ParseQuery(query)
+  const endpoint = await getEndpointFromPath(urlPath, projectURLPath, token)
+  if (token && endpoint) {
+    return { props: { inputVariables: Object.keys(endpoint.config.inputs) } }
+  }
+  return Redirect(ClientRoute.Home)
+})
+
+export default function UI({ inputVariables }: { inputVariables: string[] }) {
+  const router = useRouter()
+  const { token, project: projectURLPath, endpoint: urlPath } = ParseRouterQuery(router)
+
+  const [output, setOutput] = useState<string>()
+  const [inputState, setInputState] = useState<{ [key: string]: string }>({})
+  const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
+
+  const run = async () => {
+    api.runTokenizedEndpoint(urlPath, projectURLPath, token, inputs).then(({ output }) => setOutput(output))
+  }
+
+  return (
+    <div className='flex flex-col gap-2 p-8 max-w-prose'>
+      {inputVariables.map((variable, index) => (
+        <div key={index} className='flex gap-2'>
+          <Label className='flex-1' value={variable} htmlFor={variable} />
+          <TextInput
+            className='flex-1'
+            sizing='sm'
+            value={inputState[variable] ?? ''}
+            onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
+            id={variable}
+            required={true}
+          />
+        </div>
+      ))}
+      <div>
+        <PendingButton onClick={run}>Test Prompt</PendingButton>
+      </div>
+      {output && <div className='font-bold text-black'>{output}</div>}
+    </div>
+  )
+}

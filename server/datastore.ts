@@ -388,12 +388,12 @@ export async function getEndpoint(promptID: number): Promise<Endpoint | undefine
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
-export async function getEndpointFromPath(urlPath: string, projectURLPath: string): Promise<Endpoint | undefined> {
+export async function getEndpointFromPath(urlPath: string, projectURLPath: string, token?: string): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
     and([buildFilter('urlPath', urlPath), buildFilter('projectURLPath', projectURLPath)])
   )
-  return endpoint ? toEndpoint(endpoint) : undefined
+  return endpoint && (!token || endpoint.token === token) ? toEndpoint(endpoint) : undefined
 }
 
 export async function deleteEndpointForUser(userID: number, promptID: number) {

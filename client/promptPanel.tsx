@@ -12,6 +12,9 @@ import { useRef } from 'react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import { HiCodeBracketSquare } from 'react-icons/hi2'
 import ModalDialog, { DialogPrompt } from './modalDialog'
+import { HiExternalLink } from 'react-icons/hi'
+import { EndpointUIRoute } from './clientRoute'
+import Link from 'next/link'
 
 const labelForProvider = (provider: RunConfig['provider']) => {
   switch (provider) {
@@ -222,8 +225,15 @@ export default function PromptPanel({
         </div>
       </div>
       {endpoint && (
-        <div className='font-bold text-black'>
-          Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
+        <div className='flex gap-2'>
+          <div className='font-bold text-black'>
+            Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
+          </div>{' '}
+          <Link href={EndpointUIRoute(endpoint)} target='_blank' >
+            <Tooltip content='Try it now'>
+              <HiExternalLink size={20} />
+            </Tooltip>
+          </Link>
         </div>
       )}
       <PickNameDialog
