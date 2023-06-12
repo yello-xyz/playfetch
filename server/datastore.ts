@@ -35,17 +35,22 @@ const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id
 
 const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
 
-const buildQuery = (type: string, filter: EntityFilter, limit = 100, keysOnly = false) =>
+const orderQuery = (query: Query, ordered: boolean) => (ordered ? query.order('createdAt', { descending: true }) : query)
+
+const buildQuery = (type: string, filter: EntityFilter, limit = 100, keysOnly = false, ordered = true) =>
   projectQuery(
-    getDatastore().createQuery(type).filter(filter).order('createdAt', { descending: true }).limit(limit),
+    orderQuery(
+      getDatastore().createQuery(type).filter(filter).limit(limit),
+      ordered
+    ),
     keysOnly
   )
 
 const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
 
-const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number, keysOnly = false) =>
+const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number, keysOnly = false, ordered = true) =>
   getDatastore()
-    .runQuery(buildQuery(type, filter, limit, keysOnly))
+    .runQuery(buildQuery(type, filter, limit, keysOnly, ordered))
     .then(([entities]) => entities)
 
 const getFilteredEntity = (type: string, filter: EntityFilter) =>
