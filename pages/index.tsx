@@ -85,6 +85,7 @@ function HomeWithProjects({
     setActiveVersion(version)
     setDirtyVersion(undefined)
     setActiveRun(undefined)
+    setCURLCommand(undefined)
   }
 
   const selectActiveVersion = (version: Version) => {
@@ -150,6 +151,7 @@ function HomeWithProjects({
   const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
     await api.publishPrompt(activeProject.id, activePromptID, endpoint, prompt, config).then(setCURLCommand)
+    refreshProjects()
   }
 
   const unpublishPrompt = async () => {
@@ -209,6 +211,7 @@ function HomeWithProjects({
             activeRun={activeRun ?? activeVersion.runs[0]}
             endpoint={activePrompt?.endpoint}
             setDirtyVersion={setDirtyVersion}
+            endpointNameValidator={(name: string) => api.checkEndpointName(activePromptID, activeProject.urlPath, name)}
             onRun={runPrompt}
             onSave={() => savePromptAndRefocus().then()}
             onPublish={publishPrompt}

@@ -56,6 +56,9 @@ const api = {
   runPrompt: function (promptID: number, versionID: number, prompt: string, config: RunConfig) {
     return post(this.runPrompt, { promptID, versionID, prompt, config })
   },
+  checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<{ url?: string }> {
+    return post(this.checkEndpointName, { promptID, projectURLPath, name })
+  },
   publishPrompt: function (
     projectID: number,
     promptID: number,

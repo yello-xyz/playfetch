@@ -21,11 +21,12 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
     ),
   }
 
+  const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(projectID)
-  await saveEndpoint(userID, req.body.promptID, name, projectURLPath, prompt, config)
+  await saveEndpoint(userID, req.body.promptID, urlPath, projectURLPath, prompt, config)
 
   const apiKey = await rotateProjectAPIKey(userID, projectID)
-  const url = buildURLForClientRoute(`/${projectURLPath}/${name}`, req.headers)
+  const url = buildURLForClientRoute(`/${projectURLPath}/${urlPath}`, req.headers)
 
   const curlCommand = `curl -X POST ${url} \\
   -H "x-api-key: ${apiKey}" \\

@@ -1,10 +1,4 @@
-import {
-  BuildUniqueName,
-  CheckValidURLPath,
-  EndpointNameToURLPath,
-  ProjectNameToURLPath,
-  StripPromptSentinels,
-} from '@/common/formatting'
+import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
 import { Endpoint, Project, Prompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -358,13 +352,13 @@ export async function checkCanSaveEndpoint(
   projectURLPath: string
 ): Promise<boolean> {
   const endpointData = await getEndpointFromPath(urlPath, projectURLPath)
-  return !endpointData || getID(endpointData) === promptID
+  return !endpointData || endpointData.id === promptID
 }
 
 export async function saveEndpoint(
   userID: number,
   promptID: number,
-  name: string,
+  urlPath: string,
   projectURLPath: string,
   prompt: string,
   config: RunConfig
@@ -380,7 +374,6 @@ export async function saveEndpoint(
   if (promptData?.projectID !== projectID) {
     throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
   }
-  const urlPath = EndpointNameToURLPath(name)
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
     throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
   }

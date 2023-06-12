@@ -36,6 +36,7 @@ export default function PromptPanel({
   activeRun,
   endpoint,
   setDirtyVersion,
+  endpointNameValidator,
   onRun,
   onSave,
   onPublish,
@@ -45,6 +46,7 @@ export default function PromptPanel({
   activeRun?: Run
   endpoint?: Endpoint
   setDirtyVersion: (version?: Version) => void
+  endpointNameValidator: (name: string) => Promise<{ url?: string }>
   onRun: (prompt: string, config: RunConfig) => void
   onPublish: (name: string, prompt: string, config: RunConfig) => void
   onUnpublish: () => void
@@ -79,7 +81,7 @@ export default function PromptPanel({
       callback: (name: string) => {
         onPublish(name, prompt, { provider, temperature, maxTokens, inputs })
       },
-      validator: (name: string) => Promise.resolve({ url: name?.length ? name : undefined }),
+      validator: endpointNameValidator,
     })
   }
 

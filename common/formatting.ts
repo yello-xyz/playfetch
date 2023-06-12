@@ -23,13 +23,11 @@ export const BuildUniqueName = (name: string, existingNames: string[]) => {
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
 
-export const ToCamelCase = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+export const ToCamelCase = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase()).trim()
 
 export const StripPromptSentinels = (prompt: string) => prompt.replaceAll('{{', '').replaceAll('}}', '')
 
 export const ProjectNameToURLPath = (projectName: string) => projectName.replaceAll(' ', '-').toLowerCase()
-
-export const EndpointNameToURLPath = (projectName: string) => ToCamelCase(projectName.replaceAll(' ', ''))
 
 export const CheckValidURLPath = (urlPath: string) => {
   const validRegexp = /^[a-zA-Z0-9\-]+$/
