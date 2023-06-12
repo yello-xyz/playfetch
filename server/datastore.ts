@@ -356,7 +356,7 @@ export async function saveEndpoint(
   if (endpointData && endpointData.id !== promptID) {
     throw new Error(`Endpoint ${name} already used for different prompt in project with ID ${projectID}`)
   }
-  await getDatastore().save(toEndpointData(promptID, name, projectURLPath, new Date(), prompt, config))
+  await getDatastore().save(toEndpointData(userID, promptID, name, projectURLPath, new Date(), prompt, config))
 }
 
 export async function getEndpoint(promptID: number): Promise<Endpoint | undefined> {
@@ -373,6 +373,7 @@ export async function getEndpointFromPath(name: string, projectURLPath: string):
 }
 
 const toEndpointData = (
+  userID: number,
   promptID: number,
   name: string,
   projectURLPath: string,
@@ -381,7 +382,7 @@ const toEndpointData = (
   config: RunConfig,
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { name, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },
+  data: { userID, name, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
