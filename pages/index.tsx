@@ -192,7 +192,7 @@ function HomeWithProjects({
           onDelete={deleteVersion}
         />
       </div>
-      <div>
+      <div className='flex-1'>
         <Suspense>
           <PromptPanel
             key={activeVersion.id}
