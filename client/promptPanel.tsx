@@ -230,7 +230,7 @@ export default function PromptPanel({
             Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
           </div>{' '}
           <Link href={EndpointUIRoute(endpoint)} target='_blank' >
-            <Tooltip content='Try it now'>
+            <Tooltip content='Try in UI'>
               <HiExternalLink size={20} />
             </Tooltip>
           </Link>
