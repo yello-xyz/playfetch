@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
-import { Project, Run, RunConfig, Version } from '@/types'
+import { Endpoint, Project, Run, RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
 import { Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
@@ -34,6 +34,7 @@ export default function PromptPanel({
   project,
   version,
   activeRun,
+  endpoint,
   setDirtyVersion,
   onRun,
   onSave,
@@ -42,6 +43,7 @@ export default function PromptPanel({
   project: Project
   version: Version
   activeRun?: Run
+  endpoint?: Endpoint
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
   onPublish: (projectID: number, endpoint: string, prompt: string, config: RunConfig) => void
@@ -75,7 +77,7 @@ export default function PromptPanel({
       callback: (endpoint: string) => {
         onPublish(project.id, endpoint, prompt, { provider, temperature, maxTokens, inputs })
       },
-      validator: (endpoint: string) => Promise.resolve({ url: endpoint }),
+      validator: (endpoint: string) => Promise.resolve({ url: endpoint?.length ? endpoint : undefined }),
     })
   }
 
@@ -170,7 +172,7 @@ export default function PromptPanel({
           Save
         </PendingButton>
         <PendingButton disabled={version.runs.length === 0} onClick={publish}>
-          Publish
+          {endpoint ? 'Republish' : 'Publish'}
         </PendingButton>
       </div>
       <div className='flex justify-between gap-10'>
@@ -206,7 +208,17 @@ export default function PromptPanel({
           />
         </div>
       </div>
-      <PickNameDialog key={version.id} prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      {endpoint && (
+        <div className='font-bold text-black'>
+          Prompt published as <pre className='inline'>{`/${project.urlPath}/${endpoint.name}`}</pre>
+        </div>
+      )}
+      <PickNameDialog
+        key={endpoint?.name ?? version.id}
+        initialName={endpoint?.name}
+        prompt={dialogPrompt}
+        setPrompt={setDialogPrompt}
+      />
     </div>
   )
 }

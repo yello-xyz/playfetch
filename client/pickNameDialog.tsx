@@ -11,21 +11,23 @@ export type DialogPrompt = {
 }
 
 export default function PickNameDialog({
+  initialName,
   prompt,
   setPrompt,
 }: {
+  initialName?: string
   prompt?: DialogPrompt
   setPrompt: (prompt?: DialogPrompt) => void
 }) {
-  const [name, setName] = useState('')
-  const [url, setURL] = useState<string>()
+  const [name, setName] = useState(initialName ?? '')
+  const [url, setURL] = useState(initialName)
   const [isPending, setPending] = useState(false)
 
   const innerDialogPrompt = prompt
     ? {
         message: prompt.title,
         callback: () => prompt.callback(name),
-        disabled: isPending || !url,
+        disabled: !url,
       }
     : undefined
 
@@ -43,14 +45,18 @@ export default function PickNameDialog({
   const updateName = (name: string) => {
     setName(name)
     setPending(true)
+    setURL(undefined)
     checkName(name)
   }
+
+  const isURLUnavailable = name.length > 0 && !isPending && !url
 
   return (
     <ModalDialog prompt={innerDialogPrompt} setPrompt={() => setPrompt()}>
       <LabeledTextInput id='name' label={prompt?.label} value={name} setValue={updateName} />
-      {url && <div className='text-sm text-gray-500'>{url}</div>}
-      {name.length > 0 && !url && <div className='text-sm text-red-500'>This name is not available.</div>}
+      <div className={`text-sm ${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
+        {isURLUnavailable ? 'This name is not available.' : url ?? <span>&nbsp;</span>}
+      </div>
     </ModalDialog>
   )
 }

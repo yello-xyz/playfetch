@@ -96,6 +96,7 @@ function HomeWithProjects({
 
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
   const activeProject = projects.find(hasActivePrompt)!
+  const activePrompt = activeProject.prompts.find(prompt => prompt.id === activePromptID)
 
   const refreshProjects = async () => {
     const oldIndex = projects.findIndex(hasActivePrompt)
@@ -192,13 +193,14 @@ function HomeWithProjects({
           onDelete={deleteVersion}
         />
       </div>
-      <div className='flex-1'>
+      <div className='flex-1 overflow-y-auto'>
         <Suspense>
           <PromptPanel
             key={activeVersion.id}
             project={activeProject}
             version={activeVersion}
             activeRun={activeRun ?? activeVersion.runs[0]}
+            endpoint={activePrompt?.endpoint}
             setDirtyVersion={setDirtyVersion}
             onRun={runPrompt}
             onSave={() => savePromptAndRefocus().then()}
@@ -207,7 +209,7 @@ function HomeWithProjects({
         </Suspense>
         {curlCommand && (
           <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
-            Prompt published. Try out your new API endpoint by running:
+            Try out your API endpoint by running:
             <pre>{curlCommand}</pre>
           </div>
         )}
