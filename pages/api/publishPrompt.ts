@@ -22,10 +22,10 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
     ),
   }
 
-  await saveEndpoint(userID, name, projectID, req.body.promptID, prompt, config)
+  const projectURLPath = await getURLPathForProject(projectID)
+  await saveEndpoint(userID, req.body.promptID, name, projectURLPath, prompt, config)
 
   const apiKey = await rotateProjectAPIKey(userID, projectID)
-  const projectURLPath = await getURLPathForProject(projectID)
   const url = buildURLForClientRoute(`/${projectURLPath}/${name}`, req.headers)
 
   const curlCommand = `curl -X POST ${url} \\

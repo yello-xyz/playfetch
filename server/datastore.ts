@@ -66,6 +66,8 @@ const getFilteredKeys = (type: string, filter: EntityFilter, limit?: number) =>
 const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredKeys(type, buildFilter(key, value), limit)
 
+  const getEntityKey = (type: string, key: string, value: {}) => getEntityKeys(type, key, value, 1).then(([key]) => key)
+
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
     .get(ids.map(id => buildKey(type, id)))
@@ -141,7 +143,7 @@ export async function addProjectForUser(userID: number, projectName: string): Pr
   if (!CheckValidURLPath(urlPath)) {
     throw new Error(`URL path '${urlPath}' is invalid`)
   }
-  if (await getProjectIDFromURLPath(urlPath)) {
+  if (await checkProject(urlPath)) {
     throw new Error(`URL path '${urlPath}' already exists`)
   }
   const projectData = toProjectData(userID, projectName, urlPath, new Date())
@@ -149,9 +151,9 @@ export async function addProjectForUser(userID: number, projectName: string): Pr
   return await addPromptForUser(userID, Number(projectData.key.id))
 }
 
-export async function getProjectIDFromURLPath(urlPath: string, apiKey?: string): Promise<number | undefined> {
+export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
   const projectData = await getEntity(Entity.PROJECT, 'urlPath', urlPath)
-  return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey)) ? getID(projectData) : undefined
+  return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey))
 }
 
 export async function getURLPathForProject(projectID: number): Promise<string> {
@@ -333,9 +335,9 @@ const toRun = (data: any): Run => ({
 
 export async function saveEndpoint(
   userID: number,
-  name: string,
-  projectID: number,
   promptID: number,
+  name: string,
+  projectURLPath: string,
   prompt: string,
   config: RunConfig
 ) {
@@ -343,14 +345,18 @@ export async function saveEndpoint(
   if (promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
+  const projectID = await getEntityKey(Entity.PROJECT, 'urlPath', projectURLPath).then(key => Number(key.id))
+  if (!projectID) {
+    throw new Error(`Project with URL path ${projectURLPath} does not exist`)
+  }
   if (promptData?.projectID !== projectID) {
     throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
   }
-  const endpointData = await getEndpointForProject(projectID, name)
+  const endpointData = await getEndpointFromPath(name, projectURLPath)
   if (endpointData && endpointData.id !== promptID) {
     throw new Error(`Endpoint ${name} already used for different prompt in project with ID ${projectID}`)
   }
-  await getDatastore().save(toEndpointData(name, projectID, promptID, new Date(), prompt, config))
+  await getDatastore().save(toEndpointData(promptID, name, projectURLPath, new Date(), prompt, config))
 }
 
 export async function getEndpoint(promptID: number): Promise<Endpoint | undefined> {
@@ -358,24 +364,24 @@ export async function getEndpoint(promptID: number): Promise<Endpoint | undefine
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
-export async function getEndpointForProject(projectID: number, name: string): Promise<Endpoint | undefined> {
+export async function getEndpointFromPath(name: string, projectURLPath: string): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
-    and([buildFilter('projectID', projectID), buildFilter('name', name)])
+    and([buildFilter('name', name), buildFilter('projectURLPath', projectURLPath)])
   )
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
 const toEndpointData = (
-  name: string,
-  projectID: number,
   promptID: number,
+  name: string,
+  projectURLPath: string,
   createdAt: Date,
   prompt: string,
   config: RunConfig,
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { name, projectID, createdAt, prompt, config: JSON.stringify(config) },
+  data: { name, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
@@ -383,8 +389,7 @@ const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
   timestamp: getTimestamp(data),
   name: data.name,
-  projectID: data.projectID,
-  promptID: data.promptID,
+  projectURLPath: data.projectURLPath,
   prompt: data.prompt,
   config: JSON.parse(data.config),
 })
