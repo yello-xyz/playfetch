@@ -158,16 +158,17 @@ function HomeWithProjects({
     refreshProjects()
   }
 
+  const isLastVersion = versions.length === 1
+  const isLastPrompt = isLastVersion && activeProject.prompts.length === 1
+  const isLastProject = isLastPrompt && projects.length === 1
+
+  const entityToDelete = isLastPrompt ? 'project' : isLastVersion ? 'prompt' : 'version'
+
   const deleteVersion = async (version: Version) => {
     const versionHasRuns = version.runs.length > 0
-    const isLastVersion = versions.length === 1
-    const isLastPrompt = isLastVersion && activeProject.prompts.length === 1
-    const isLastProject = isLastPrompt && projects.length === 1
-
-    const entity = isLastPrompt ? 'project' : isLastVersion ? 'prompt' : 'version'
     const suffix = versionHasRuns ? ' and all its associated runs' : ''
     setDialogPrompt({
-      message: `Are you sure you want to delete this ${entity}${suffix}? This action cannot be undone.`,
+      message: `Are you sure you want to delete this ${entityToDelete}${suffix}? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
         if (!isLastProject && versions.length > 1) {
@@ -197,6 +198,7 @@ function HomeWithProjects({
           activeRun={activeRun}
           setActiveRun={setActiveRun}
           onDelete={deleteVersion}
+          entityToDelete={entityToDelete}
         />
       </div>
       <div className='flex-1 overflow-y-auto'>
