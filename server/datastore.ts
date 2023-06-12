@@ -385,6 +385,14 @@ export async function getEndpointFromPath(name: string, projectURLPath: string):
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
+export async function deleteEndpointForUser(userID: number, promptID: number) {
+  const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
+  if (endpointData?.userID !== userID) {
+    throw new Error(`Endpoint with ID ${promptID} does not exist or user has no access`)
+  }
+  await getDatastore().delete(buildKey(Entity.ENDPOINT, promptID))
+}
+
 const toEndpointData = (
   userID: number,
   promptID: number,

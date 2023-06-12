@@ -152,6 +152,12 @@ function HomeWithProjects({
     await api.publishPrompt(projectID, activePromptID, endpoint, prompt, config).then(setCURLCommand)
   }
 
+  const unpublishPrompt = async () => {
+    setCURLCommand(undefined)
+    await api.unpublishPrompt(activePromptID)
+    refreshProjects()
+  }
+
   const deleteVersion = async (version: Version) => {
     const versionHasRuns = version.runs.length > 0
     const isLastVersion = versions.length === 1
@@ -205,6 +211,7 @@ function HomeWithProjects({
             onRun={runPrompt}
             onSave={() => savePromptAndRefocus().then()}
             onPublish={publishPrompt}
+            onUnpublish={unpublishPrompt}
           />
         </Suspense>
         {curlCommand && (

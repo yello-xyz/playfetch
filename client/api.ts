@@ -65,6 +65,9 @@ const api = {
   ): Promise<string> {
     return post(this.publishPrompt, { projectID, promptID, name, prompt, config })
   },
+  unpublishPrompt: function (promptID: number) {
+    return post(this.unpublishPrompt, { promptID })
+  },
   getVersions: function (promptID: number): Promise<Version[]> {
     return post(this.getVersions, { promptID })
   },

@@ -9,8 +9,9 @@ import ContentEditable from 'react-contenteditable'
 import { ContentEditableEvent } from 'react-contenteditable'
 import { FocusEvent } from 'react'
 import { useRef } from 'react'
-import PickNameDialog, { DialogPrompt } from './pickNameDialog'
+import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import { HiCodeBracketSquare } from 'react-icons/hi2'
+import ModalDialog, { DialogPrompt } from './modalDialog'
 
 const labelForProvider = (provider: RunConfig['provider']) => {
   switch (provider) {
@@ -39,6 +40,7 @@ export default function PromptPanel({
   onRun,
   onSave,
   onPublish,
+  onUnpublish,
 }: {
   project: Project
   version: Version
@@ -47,6 +49,7 @@ export default function PromptPanel({
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
   onPublish: (projectID: number, endpoint: string, prompt: string, config: RunConfig) => void
+  onUnpublish: () => void
   onSave: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
@@ -69,15 +72,24 @@ export default function PromptPanel({
   }
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
   const publish = () => {
-    setDialogPrompt({
+    setPickNamePrompt({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (endpoint: string) => {
         onPublish(project.id, endpoint, prompt, { provider, temperature, maxTokens, inputs })
       },
       validator: (endpoint: string) => Promise.resolve({ url: endpoint?.length ? endpoint : undefined }),
+    })
+  }
+
+  const unpublish = () => {
+    setDialogPrompt({
+      message: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+      callback: () => onUnpublish(),
+      destructive: true,
     })
   }
 
@@ -174,6 +186,7 @@ export default function PromptPanel({
         <PendingButton disabled={version.runs.length === 0} onClick={publish}>
           {endpoint ? 'Republish' : 'Publish'}
         </PendingButton>
+        {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
       </div>
       <div className='flex justify-between gap-10'>
         <div>
@@ -216,9 +229,10 @@ export default function PromptPanel({
       <PickNameDialog
         key={endpoint?.name ?? version.id}
         initialName={endpoint?.name}
-        prompt={dialogPrompt}
-        setPrompt={setDialogPrompt}
+        prompt={pickNamePrompt}
+        setPrompt={setPickNamePrompt}
       />
+      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </div>
   )
 }

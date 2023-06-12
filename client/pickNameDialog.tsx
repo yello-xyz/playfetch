@@ -3,7 +3,7 @@ import ModalDialog from './modalDialog'
 import LabeledTextInput from './labeledTextInput'
 import { debounce } from 'debounce'
 
-export type DialogPrompt = {
+export type PickNamePrompt = {
   title: string
   label: string
   callback: (name: string) => void
@@ -16,14 +16,14 @@ export default function PickNameDialog({
   setPrompt,
 }: {
   initialName?: string
-  prompt?: DialogPrompt
-  setPrompt: (prompt?: DialogPrompt) => void
+  prompt?: PickNamePrompt
+  setPrompt: (prompt?: PickNamePrompt) => void
 }) {
   const [name, setName] = useState(initialName ?? '')
   const [url, setURL] = useState(initialName)
   const [isPending, setPending] = useState(false)
 
-  const innerDialogPrompt = prompt
+  const dialogPrompt = prompt
     ? {
         message: prompt.title,
         callback: () => prompt.callback(name),
@@ -52,7 +52,7 @@ export default function PickNameDialog({
   const isURLUnavailable = name.length > 0 && !isPending && !url
 
   return (
-    <ModalDialog prompt={innerDialogPrompt} setPrompt={() => setPrompt()}>
+    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
       <LabeledTextInput id='name' label={prompt?.label} value={name} setValue={updateName} />
       <div className={`text-sm ${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
         {isURLUnavailable ? 'This name is not available.' : url ?? <span>&nbsp;</span>}

@@ -4,7 +4,7 @@ import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
 import { HiOutlineFolderAdd } from 'react-icons/hi'
 import { useState } from 'react'
-import PickNameDialog, { DialogPrompt } from './pickNameDialog'
+import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
 
 export default function ProjectSidebar({
@@ -20,7 +20,7 @@ export default function ProjectSidebar({
   onLogout: () => void
   onRefresh: (promptID: number) => void
 }) {
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
   const logout = async () => {
     await api.logout()
@@ -28,7 +28,7 @@ export default function ProjectSidebar({
   }
 
   const addProject = async () => {
-    setDialogPrompt({
+    setPickNamePrompt({
       title: 'Add a new project',
       label: 'Project name',
       callback: async (name: string) => {
@@ -71,7 +71,7 @@ export default function ProjectSidebar({
           </Sidebar.Collapse>
         ))}
       </Sidebar.Items>
-      <PickNameDialog key={projects.length} prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      <PickNameDialog key={projects.length} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
     </Sidebar>
   )
 }
