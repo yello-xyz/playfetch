@@ -66,7 +66,7 @@ const getFilteredKeys = (type: string, filter: EntityFilter, limit?: number) =>
 const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredKeys(type, buildFilter(key, value), limit)
 
-  const getEntityKey = (type: string, key: string, value: {}) => getEntityKeys(type, key, value, 1).then(([key]) => key)
+const getEntityKey = (type: string, key: string, value: {}) => getEntityKeys(type, key, value, 1).then(([key]) => key)
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
@@ -130,12 +130,19 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash'],
 })
 
-const toProject = (data: any, prompts: any[]): Project => ({
-  id: getID(data),
-  name: data.name,
-  urlPath: data.urlPath ?? '',
-  timestamp: getTimestamp(data),
-  prompts: prompts.filter(prompt => prompt.projectID === getID(data)).map(toPrompt),
+const toProject = (projectData: any, prompts: any[], endpoints: any[]): Project => ({
+  id: getID(projectData),
+  name: projectData.name,
+  urlPath: projectData.urlPath ?? '',
+  timestamp: getTimestamp(projectData),
+  prompts: prompts
+    .filter(promptData => promptData.projectID === getID(projectData))
+    .map(promptData =>
+      toPrompt(
+        promptData,
+        endpoints.find(endpointData => getID(endpointData) === getID(promptData))
+      )
+    ),
 })
 
 export async function addProjectForUser(userID: number, projectName: string): Promise<number> {
@@ -184,7 +191,8 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projects = await getEntities(Entity.PROJECT, 'userID', userID)
   const prompts = await getEntities(Entity.PROMPT, 'userID', userID)
-  return projects.map(project => toProject(project, prompts))
+  const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)
+  return projects.map(project => toProject(project, prompts, endpoints))
 }
 
 const toPromptData = (userID: number, projectID: number, name: string, createdAt: Date, promptID?: number) => ({
@@ -193,7 +201,11 @@ const toPromptData = (userID: number, projectID: number, name: string, createdAt
   excludeFromIndexes: ['name'],
 })
 
-const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
+const toPrompt = (data: any, endpointData?: any): Prompt => ({
+  id: getID(data),
+  name: data.name,
+  endpoint: endpointData ? toEndpoint(endpointData) : undefined,
+})
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
@@ -379,7 +391,7 @@ const toEndpointData = (
   projectURLPath: string,
   createdAt: Date,
   prompt: string,
-  config: RunConfig,
+  config: RunConfig
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
   data: { userID, name, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },

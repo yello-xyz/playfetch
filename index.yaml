@@ -54,3 +54,9 @@ indexes:
   - name: projectURLPath
   - name: createdAt
     direction: desc
+
+- kind: endpoint
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
