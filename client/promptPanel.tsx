@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
-import { Run, RunConfig, Version } from '@/types'
+import { Project, Run, RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
 import { Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
@@ -31,6 +31,7 @@ const DefaultConfig: RunConfig = {
 }
 
 export default function PromptPanel({
+  project,
   version,
   activeRun,
   setDirtyVersion,
@@ -38,11 +39,12 @@ export default function PromptPanel({
   onSave,
   onPublish,
 }: {
+  project: Project
   version: Version
   activeRun?: Run
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
-  onPublish: (endpoint: string, prompt: string, config: RunConfig) => void
+  onPublish: (projectID: number, endpoint: string, prompt: string, config: RunConfig) => void
   onSave: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
@@ -71,7 +73,7 @@ export default function PromptPanel({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (endpoint: string) => {
-        onPublish(endpoint, prompt, { provider, temperature, maxTokens, inputs })
+        onPublish(project.id, endpoint, prompt, { provider, temperature, maxTokens, inputs })
       },
       validator: (endpoint: string) => Promise.resolve({ url: endpoint }),
     })

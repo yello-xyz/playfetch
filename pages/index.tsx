@@ -95,6 +95,7 @@ function HomeWithProjects({
   }
 
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
+  const activeProject = projects.find(hasActivePrompt)!
 
   const refreshProjects = async () => {
     const oldIndex = projects.findIndex(hasActivePrompt)
@@ -145,17 +146,15 @@ function HomeWithProjects({
     await api.runPrompt(activePromptID, versionID, prompt, config).then(_ => refreshVersions(activePromptID, versionID))
   }
 
-  const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
+  const publishPrompt = async (projectID: number, endpoint: string, prompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
-    const projectID = projects.find(hasActivePrompt)!.id
     await api.publishPrompt(projectID, activePromptID, endpoint, prompt, config).then(setCURLCommand)
   }
 
   const deleteVersion = async (version: Version) => {
     const versionHasRuns = version.runs.length > 0
     const isLastVersion = versions.length === 1
-    const activeProject = projects.find(hasActivePrompt)
-    const isLastPrompt = isLastVersion && activeProject && activeProject.prompts.length === 1
+    const isLastPrompt = isLastVersion && activeProject.prompts.length === 1
     const isLastProject = isLastPrompt && projects.length === 1
 
     const entity = isLastPrompt ? 'project' : isLastVersion ? 'prompt' : 'version'
@@ -197,6 +196,7 @@ function HomeWithProjects({
         <Suspense>
           <PromptPanel
             key={activeVersion.id}
+            project={activeProject}
             version={activeVersion}
             activeRun={activeRun ?? activeVersion.runs[0]}
             setDirtyVersion={setDirtyVersion}
