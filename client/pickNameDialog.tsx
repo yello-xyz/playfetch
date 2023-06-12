@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ModalDialog from './modalDialog'
 import LabeledTextInput from './labeledTextInput'
 import { debounce } from 'debounce'
@@ -19,9 +19,15 @@ export default function PickNameDialog({
   prompt?: PickNamePrompt
   setPrompt: (prompt?: PickNamePrompt) => void
 }) {
-  const [name, setName] = useState(initialName ?? '')
-  const [url, setURL] = useState(initialName)
+  const [name, setName] = useState('')
+  const [url, setURL] = useState<string>()
   const [isPending, setPending] = useState(false)
+
+  useEffect(() => {
+    if (initialName && prompt) {
+      updateName(initialName)
+    }
+  }, [prompt])
 
   const dialogPrompt = prompt
     ? {
