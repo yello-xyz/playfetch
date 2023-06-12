@@ -32,7 +32,6 @@ const DefaultConfig: RunConfig = {
 }
 
 export default function PromptPanel({
-  project,
   version,
   activeRun,
   endpoint,
@@ -42,13 +41,12 @@ export default function PromptPanel({
   onPublish,
   onUnpublish,
 }: {
-  project: Project
   version: Version
   activeRun?: Run
   endpoint?: Endpoint
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: RunConfig) => void
-  onPublish: (projectID: number, endpoint: string, prompt: string, config: RunConfig) => void
+  onPublish: (name: string, prompt: string, config: RunConfig) => void
   onUnpublish: () => void
   onSave: () => void
 }) {
@@ -78,10 +76,10 @@ export default function PromptPanel({
     setPickNamePrompt({
       title: 'Publish Prompt',
       label: 'Endpoint',
-      callback: (endpoint: string) => {
-        onPublish(project.id, endpoint, prompt, { provider, temperature, maxTokens, inputs })
+      callback: (name: string) => {
+        onPublish(name, prompt, { provider, temperature, maxTokens, inputs })
       },
-      validator: (endpoint: string) => Promise.resolve({ url: endpoint?.length ? endpoint : undefined }),
+      validator: (name: string) => Promise.resolve({ url: name?.length ? name : undefined }),
     })
   }
 
@@ -223,7 +221,7 @@ export default function PromptPanel({
       </div>
       {endpoint && (
         <div className='font-bold text-black'>
-          Prompt published as <pre className='inline'>{`/${project.urlPath}/${endpoint.name}`}</pre>
+          Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.name}`}</pre>
         </div>
       )}
       <PickNameDialog

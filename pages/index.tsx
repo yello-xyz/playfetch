@@ -147,9 +147,9 @@ function HomeWithProjects({
     await api.runPrompt(activePromptID, versionID, prompt, config).then(_ => refreshVersions(activePromptID, versionID))
   }
 
-  const publishPrompt = async (projectID: number, endpoint: string, prompt: string, config: RunConfig) => {
+  const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
-    await api.publishPrompt(projectID, activePromptID, endpoint, prompt, config).then(setCURLCommand)
+    await api.publishPrompt(activeProject.id, activePromptID, endpoint, prompt, config).then(setCURLCommand)
   }
 
   const unpublishPrompt = async () => {
@@ -203,7 +203,6 @@ function HomeWithProjects({
         <Suspense>
           <PromptPanel
             key={activeVersion.id}
-            project={activeProject}
             version={activeVersion}
             activeRun={activeRun ?? activeVersion.runs[0]}
             endpoint={activePrompt?.endpoint}
