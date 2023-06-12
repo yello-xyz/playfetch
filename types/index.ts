@@ -48,7 +48,7 @@ export type RunConfig = {
 export type Endpoint = {
   id: number
   timestamp: string
-  name: string
+  urlPath: string
   projectURLPath: string
   prompt: string
   config: RunConfig

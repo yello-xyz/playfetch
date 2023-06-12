@@ -2,8 +2,7 @@ import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveEndpoint, rotateProjectAPIKey, getURLPathForProject } from '@/server/datastore'
 import { buildURLForClientRoute } from '@/server/routing'
-
-const toCamelCase = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+import { ToCamelCase } from '@/common/formatting'
 
 async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) {
   const userID = req.session.user!.id
@@ -12,13 +11,13 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
   const rawConfig = req.body.config
 
   const prompt = Object.keys(rawConfig.inputs).reduce(
-    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${toCamelCase(variable)}}}`),
+    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
     req.body.prompt
   )
   const config = {
     ...rawConfig,
     inputs: Object.fromEntries(
-      Object.entries(rawConfig.inputs).map(([variable, value]) => [toCamelCase(variable), value])
+      Object.entries(rawConfig.inputs).map(([variable, value]) => [ToCamelCase(variable), value])
     ),
   }
 

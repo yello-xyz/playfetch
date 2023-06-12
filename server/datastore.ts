@@ -1,4 +1,10 @@
-import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
+import {
+  BuildUniqueName,
+  CheckValidURLPath,
+  EndpointNameToURLPath,
+  ProjectNameToURLPath,
+  StripPromptSentinels,
+} from '@/common/formatting'
 import { Endpoint, Project, Prompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -346,6 +352,15 @@ const toRun = (data: any): Run => ({
   cost: data.cost,
 })
 
+export async function checkCanSaveEndpoint(
+  promptID: number,
+  urlPath: string,
+  projectURLPath: string
+): Promise<boolean> {
+  const endpointData = await getEndpointFromPath(urlPath, projectURLPath)
+  return !endpointData || getID(endpointData) === promptID
+}
+
 export async function saveEndpoint(
   userID: number,
   promptID: number,
@@ -365,11 +380,11 @@ export async function saveEndpoint(
   if (promptData?.projectID !== projectID) {
     throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
   }
-  const endpointData = await getEndpointFromPath(name, projectURLPath)
-  if (endpointData && endpointData.id !== promptID) {
-    throw new Error(`Endpoint ${name} already used for different prompt in project with ID ${projectID}`)
+  const urlPath = EndpointNameToURLPath(name)
+  if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
+    throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
   }
-  await getDatastore().save(toEndpointData(userID, promptID, name, projectURLPath, new Date(), prompt, config))
+  await getDatastore().save(toEndpointData(userID, promptID, urlPath, projectURLPath, new Date(), prompt, config))
 }
 
 export async function getEndpoint(promptID: number): Promise<Endpoint | undefined> {
@@ -377,10 +392,10 @@ export async function getEndpoint(promptID: number): Promise<Endpoint | undefine
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
-export async function getEndpointFromPath(name: string, projectURLPath: string): Promise<Endpoint | undefined> {
+export async function getEndpointFromPath(urlPath: string, projectURLPath: string): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
-    and([buildFilter('name', name), buildFilter('projectURLPath', projectURLPath)])
+    and([buildFilter('urlPath', urlPath), buildFilter('projectURLPath', projectURLPath)])
   )
   return endpoint ? toEndpoint(endpoint) : undefined
 }
@@ -396,21 +411,21 @@ export async function deleteEndpointForUser(userID: number, promptID: number) {
 const toEndpointData = (
   userID: number,
   promptID: number,
-  name: string,
+  urlPath: string,
   projectURLPath: string,
   createdAt: Date,
   prompt: string,
   config: RunConfig
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { userID, name, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },
+  data: { userID, urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config) },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
 const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
   timestamp: getTimestamp(data),
-  name: data.name,
+  urlPath: data.urlPath,
   projectURLPath: data.projectURLPath,
   prompt: data.prompt,
   config: JSON.parse(data.config),

@@ -221,12 +221,12 @@ export default function PromptPanel({
       </div>
       {endpoint && (
         <div className='font-bold text-black'>
-          Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.name}`}</pre>
+          Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
         </div>
       )}
       <PickNameDialog
-        key={endpoint?.name ?? version.id}
-        initialName={endpoint?.name}
+        key={endpoint?.urlPath ?? version.id}
+        initialName={endpoint?.urlPath}
         prompt={pickNamePrompt}
         setPrompt={setPickNamePrompt}
       />
