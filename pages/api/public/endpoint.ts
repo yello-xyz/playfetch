@@ -1,5 +1,5 @@
 import { ParseQuery } from '@/client/clientRoute'
-import { getEndpoint, getProjectIDFromURLPath } from '@/server/datastore'
+import { getEndpointForProject, getProjectIDFromURLPath } from '@/server/datastore'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { runPromptWithConfig } from '../runPrompt'
 
@@ -10,7 +10,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const projectID = await getProjectIDFromURLPath(project, apiKey)
 
   if (projectID) {
-    const endpoint = await getEndpoint(projectID, endpointName)
+    const endpoint = await getEndpointForProject(projectID, endpointName)
     if (endpoint) {
       // TODO log output, cost, failures, etc.
       const { output } = await runPromptWithConfig(endpoint.prompt, { ...endpoint.config, inputs: req.body })

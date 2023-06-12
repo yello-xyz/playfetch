@@ -346,14 +346,19 @@ export async function saveEndpoint(
   if (promptData?.projectID !== projectID) {
     throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
   }
-  const endpointData = await getEndpoint(projectID, name)
+  const endpointData = await getEndpointForProject(projectID, name)
   if (endpointData && endpointData.id !== promptID) {
     throw new Error(`Endpoint ${name} already used for different prompt in project with ID ${projectID}`)
   }
   await getDatastore().save(toEndpointData(name, projectID, promptID, new Date(), prompt, config))
 }
 
-export async function getEndpoint(projectID: number, name: string): Promise<Endpoint | undefined> {
+export async function getEndpoint(promptID: number): Promise<Endpoint | undefined> {
+  const endpoint = await getKeyedEntity(Entity.ENDPOINT, promptID)
+  return endpoint ? toEndpoint(endpoint) : undefined
+}
+
+export async function getEndpointForProject(projectID: number, name: string): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
     and([buildFilter('projectID', projectID), buildFilter('name', name)])
