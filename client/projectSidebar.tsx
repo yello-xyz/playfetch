@@ -1,4 +1,4 @@
-import { Project } from '@/types'
+import { Project, Prompt } from '@/types'
 import { Sidebar } from 'flowbite-react'
 import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
@@ -8,12 +8,14 @@ import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
 
 export default function ProjectSidebar({
+  prompts = [],
   projects = [],
   activePromptID,
   updateActivePrompt,
   onLogout,
   onRefresh,
 }: {
+  prompts?: Prompt[]
   projects?: Project[]
   activePromptID?: number
   updateActivePrompt?: (promptID: number) => void
@@ -46,15 +48,30 @@ export default function ProjectSidebar({
 
   return (
     <Sidebar className='h-screen'>
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-4 mb-4'>
         <PendingButton onClick={logout}>Log out</PendingButton>
-        <PendingButton onClick={addProject}>
-          <HiOutlineFolderAdd className='w-5 h-5 mr-2' />
-          Add New Project
-        </PendingButton>
         <PendingButton onClick={() => addPrompt(null)}>
           <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
           Add New Prompt
+        </PendingButton>
+      </div>
+      <Sidebar.Items>
+        <Sidebar.ItemGroup>
+          {prompts.map((prompt, promptIndex) => (
+            <Sidebar.Item
+              className='cursor-pointer'
+              key={promptIndex}
+              active={activePromptID === prompt.id}
+              onClick={() => updateActivePrompt?.(prompt.id)}>
+              {Truncate(prompt.name, 20)}
+            </Sidebar.Item>
+          ))}
+        </Sidebar.ItemGroup>
+      </Sidebar.Items>
+      <div className='flex flex-col gap-4 mt-4'>
+        <PendingButton onClick={addProject}>
+          <HiOutlineFolderAdd className='w-5 h-5 mr-2' />
+          Add New Project
         </PendingButton>
       </div>
       <Sidebar.Items>

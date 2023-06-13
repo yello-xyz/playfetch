@@ -51,7 +51,7 @@ export default function PromptPanel({
   setDirtyVersion: (version?: Version) => void
   endpointNameValidator: (name: string) => Promise<{ url?: string }>
   onRun: (prompt: string, config: RunConfig) => void
-  onPublish: (name: string, prompt: string, config: RunConfig) => void
+  onPublish?: (name: string, prompt: string, config: RunConfig) => void
   onUnpublish: () => void
   onSave: () => void
 }) {
@@ -82,7 +82,7 @@ export default function PromptPanel({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (name: string) => {
-        onPublish(name, prompt, { provider, temperature, maxTokens, inputs })
+        onPublish?.(name, prompt, { provider, temperature, maxTokens, inputs })
       },
       validator: endpointNameValidator,
     })
@@ -186,9 +186,11 @@ export default function PromptPanel({
         <PendingButton disabled={!isDirty} onClick={onSave}>
           Save
         </PendingButton>
-        <PendingButton disabled={version.runs.length === 0} onClick={publish}>
-          {endpoint ? 'Republish' : 'Publish'}
-        </PendingButton>
+        {onPublish && (
+          <PendingButton disabled={version.runs.length === 0} onClick={publish}>
+            {endpoint ? 'Republish' : 'Publish'}
+          </PendingButton>
+        )}
         {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
       </div>
       <div className='flex justify-between gap-10'>
@@ -229,7 +231,7 @@ export default function PromptPanel({
           <div className='font-bold text-black'>
             Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
           </div>{' '}
-          <Link href={EndpointUIRoute(endpoint)} target='_blank' >
+          <Link href={EndpointUIRoute(endpoint)} target='_blank'>
             <Tooltip content='Try in UI'>
               <HiExternalLink size={20} />
             </Tooltip>

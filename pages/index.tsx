@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
-import { Project, Run, RunConfig, Version } from '@/types'
+import { Project, Prompt, Run, RunConfig, Version } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 import ProjectSidebar from '@/client/projectSidebar'
@@ -27,19 +27,31 @@ const versionFilter = (filter: string) => (version: Version) => {
 
 export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const userID = req.session.user!.id
-  const { projects } = await getGroupedPromptsForUser(userID)
-  const versions = projects.length ? await getVersionsForPrompt(userID, projects[0].prompts[0].id) : []
-  return { props: { projects, versions } }
+  const { prompts, projects } = await getGroupedPromptsForUser(userID)
+  const activePromptID = prompts[0]?.id ?? projects[0].prompts[0].id
+  const versions = projects.length ? await getVersionsForPrompt(userID, activePromptID) : []
+  return { props: { prompts, projects, activePromptID, versions } }
 })
 
-export default function Home({ projects, versions }: { projects: Project[]; versions: Version[] }) {
+export default function Home({
+  prompts,
+  projects,
+  activePromptID,
+  versions,
+}: {
+  prompts: Prompt[]
+  projects: Project[]
+  activePromptID: number
+  versions: Version[]
+}) {
   const router = useRouter()
   const refreshData = () => router.replace(router.asPath)
 
-  return projects.length ? (
+  return prompts.length || projects.length ? (
     <HomeWithProjects
+      initialPrompts={prompts}
       initialProjects={projects}
-      initialActivePromptID={projects[0].prompts[0].id}
+      initialActivePromptID={activePromptID}
       initialVersions={versions}
       initialActiveVersion={versions[0]}
       refreshData={refreshData}
@@ -50,18 +62,21 @@ export default function Home({ projects, versions }: { projects: Project[]; vers
 }
 
 function HomeWithProjects({
+  initialPrompts,
   initialProjects,
   initialActivePromptID,
   initialVersions,
   initialActiveVersion,
   refreshData,
 }: {
+  initialPrompts: Prompt[]
   initialProjects: Project[]
   initialActivePromptID: number
   initialVersions: Version[]
   initialActiveVersion: Version
   refreshData: () => void
 }) {
+  const [prompts, setPrompts] = useState(initialPrompts)
   const [projects, setProjects] = useState(initialProjects)
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
@@ -95,20 +110,28 @@ function HomeWithProjects({
     }
   }
 
+  const findActivePrompt = (prompts: Prompt[], projects: Project[]) =>
+    [...prompts, ...projects.flatMap(project => project.prompts)].find(prompt => prompt.id === activePromptID)
+
+  const activePrompt = findActivePrompt(prompts, projects)!
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
-  const activeProject = projects.find(hasActivePrompt)!
-  const activePrompt = activeProject.prompts.find(prompt => prompt.id === activePromptID)
+  const activeProject = projects.find(hasActivePrompt)
 
   const refreshProjects = async () => {
     const oldIndex = projects.findIndex(hasActivePrompt)
-    const { projects: newProjects } = await api.getProjects()
-    if (!newProjects.length) {
+    const { prompts: newPrompts, projects: newProjects } = await api.getProjects()
+    if (!newPrompts.length && !newProjects.length) {
       refreshData()
     } else {
+      setPrompts(newPrompts)
       setProjects(newProjects)
-      if (!newProjects.some(hasActivePrompt)) {
-        const newIndex = Math.max(0, Math.min(newProjects.length - 1, oldIndex))
-        updateActivePrompt(newProjects[newIndex].prompts[0].id)
+      if (!findActivePrompt(newPrompts, newProjects)) {
+        if (newPrompts.length && (!newProjects.length || oldIndex < 0)) {
+          updateActivePrompt(prompts[0].id)
+        } else {
+          const newIndex = Math.max(0, Math.min(newProjects.length - 1, oldIndex))
+          updateActivePrompt(newProjects[newIndex].prompts[0].id)
+        }
       }
     }
   }
@@ -150,7 +173,7 @@ function HomeWithProjects({
 
   const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
-    await api.publishPrompt(activeProject.id, activePromptID, endpoint, prompt, config).then(setCURLCommand)
+    await api.publishPrompt(activeProject!.id, activePromptID, endpoint, prompt, config).then(setCURLCommand)
     refreshProjects()
   }
 
@@ -161,8 +184,7 @@ function HomeWithProjects({
   }
 
   const isLastVersion = versions.length === 1
-  const isLastPrompt = isLastVersion && activeProject.prompts.length === 1
-  const isLastProject = isLastPrompt && projects.length === 1
+  const isLastPrompt = isLastVersion && activeProject && activeProject.prompts.length === 1
 
   const entityToDelete = isLastPrompt ? 'project' : isLastVersion ? 'prompt' : 'version'
 
@@ -173,7 +195,7 @@ function HomeWithProjects({
       message: `Are you sure you want to delete this ${entityToDelete}${suffix}? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
-        if (!isLastProject && versions.length > 1) {
+        if (versions.length > 1) {
           refreshVersions()
         }
         refreshProjects()
@@ -185,6 +207,7 @@ function HomeWithProjects({
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
+        prompts={prompts}
         projects={projects}
         activePromptID={activePromptID}
         updateActivePrompt={updateActivePrompt}
@@ -211,10 +234,12 @@ function HomeWithProjects({
             activeRun={activeRun ?? activeVersion.runs[0]}
             endpoint={activePrompt?.endpoint}
             setDirtyVersion={setDirtyVersion}
-            endpointNameValidator={(name: string) => api.checkEndpointName(activePromptID, activeProject.urlPath, name)}
+            endpointNameValidator={(name: string) =>
+              api.checkEndpointName(activePromptID, activeProject!.urlPath, name)
+            }
             onRun={runPrompt}
             onSave={() => savePromptAndRefocus().then()}
-            onPublish={publishPrompt}
+            onPublish={activeProject ? publishPrompt : undefined}
             onUnpublish={unpublishPrompt}
           />
         </Suspense>
