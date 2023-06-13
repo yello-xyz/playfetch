@@ -101,7 +101,7 @@ function HomeWithProjects({
 
   const refreshProjects = async () => {
     const oldIndex = projects.findIndex(hasActivePrompt)
-    const newProjects = await api.getProjects()
+    const { projects: newProjects } = await api.getProjects()
     if (!newProjects.length) {
       refreshData()
     } else {

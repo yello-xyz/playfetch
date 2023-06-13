@@ -1,11 +1,11 @@
 import { getGroupedPromptsForUser } from '@/server/datastore'
 import { withLoggedInSessionRoute } from '@/server/session'
-import { Project } from '@/types'
+import { Project, Prompt } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function getProjects(req: NextApiRequest, res: NextApiResponse<Project[]>) {
-  const { projects } = await getGroupedPromptsForUser(req.session.user!.id)
-  res.json(projects)
+async function getProjects(req: NextApiRequest, res: NextApiResponse<{ prompts: Prompt[]; projects: Project[] }>) {
+  const { prompts, projects } = await getGroupedPromptsForUser(req.session.user!.id)
+  res.json({ prompts, projects })
 }
 
 export default withLoggedInSessionRoute(getProjects)
