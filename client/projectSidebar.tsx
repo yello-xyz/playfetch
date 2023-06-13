@@ -39,7 +39,7 @@ export default function ProjectSidebar({
     })
   }
 
-  const addPrompt = async (projectID: number) => {
+  const addPrompt = async (projectID: number | null) => {
     const promptID = await api.addPrompt(projectID)
     onRefresh(promptID)
   }
@@ -51,6 +51,10 @@ export default function ProjectSidebar({
         <PendingButton onClick={addProject}>
           <HiOutlineFolderAdd className='w-5 h-5 mr-2' />
           Add New Project
+        </PendingButton>
+        <PendingButton onClick={() => addPrompt(null)}>
+          <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
+          Add New Prompt
         </PendingButton>
       </div>
       <Sidebar.Items>

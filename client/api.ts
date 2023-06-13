@@ -41,7 +41,7 @@ const api = {
   addProject: function (name: string): Promise<number> {
     return post(this.addProject, { name })
   },
-  addPrompt: function (projectID: number): Promise<number> {
+  addPrompt: function (projectID: number | null): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
   updatePrompt: function (
