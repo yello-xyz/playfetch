@@ -33,7 +33,7 @@ const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date).t
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
-const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
+const buildFilter = (key: string, value: {} | null) => new PropertyFilter(key, '=', value)
 
 const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
 
@@ -51,22 +51,22 @@ const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number,
 const getFilteredEntity = (type: string, filter: EntityFilter) =>
   getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
-const getEntities = (type: string, key: string, value: {}, limit?: number, ordered = false) =>
+const getEntities = (type: string, key: string, value: {} | null, limit?: number, ordered = false) =>
   getFilteredEntities(type, buildFilter(key, value), limit, ordered)
 
-const getOrderedEntities = (type: string, key: string, value: {}, limit?: number) =>
+const getOrderedEntities = (type: string, key: string, value: {} | null, limit?: number) =>
   getEntities(type, key, value, limit, true)
 
-const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
+const getEntity = async (type: string, key: string, value: {} | null, mostRecent = false) =>
   getEntities(type, key, value, 1, mostRecent).then(([entity]) => entity)
 
-const getUserScopedEntities = (type: string, key: string, value: {}, userID: number, limit?: number) =>
+const getUserScopedEntities = (type: string, key: string, value: {} | null, userID: number, limit?: number) =>
   getFilteredEntities(type, and([buildFilter(key, value), buildFilter('userID', userID)]), limit)
 
-const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
+const getEntityKeys = (type: string, key: string, value: {} | null, limit?: number) =>
   getFilteredEntities(type, buildFilter(key, value), limit, false, true).then(entities => entities.map(getKey))
 
-const getEntityID = (type: string, key: string, value: {}) =>
+const getEntityID = (type: string, key: string, value: {} | null) =>
   getEntityKeys(type, key, value, 1).then(([key]) => Number(key.id))
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
@@ -76,7 +76,7 @@ const getKeyedEntities = async (type: string, ids: number[]) =>
 
 const getKeyedEntity = async (type: string, id: number) => getKeyedEntities(type, [id]).then(([entity]) => entity)
 
-const getEntityCount = async (type: string, key: string, value: {}) => {
+const getEntityCount = async (type: string, key: string, value: {} | null) => {
   const datastore = getDatastore()
   const query = datastore.createQuery(type).filter(buildFilter(key, value))
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
@@ -389,7 +389,11 @@ export async function getEndpoint(promptID: number): Promise<Endpoint | undefine
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
-export async function getEndpointFromPath(urlPath: string, projectURLPath: string, token?: string): Promise<Endpoint | undefined> {
+export async function getEndpointFromPath(
+  urlPath: string,
+  projectURLPath: string,
+  token?: string
+): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
     and([buildFilter('urlPath', urlPath), buildFilter('projectURLPath', projectURLPath)])
