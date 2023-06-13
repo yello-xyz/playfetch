@@ -2,7 +2,7 @@ import { Project } from '@/types'
 import { Sidebar } from 'flowbite-react'
 import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
-import { HiOutlineFolderAdd } from 'react-icons/hi'
+import { HiOutlineFolderAdd, HiOutlineDocumentAdd } from 'react-icons/hi'
 import { useState } from 'react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
@@ -57,7 +57,10 @@ export default function ProjectSidebar({
         {projects.map((project, projectIndex) => (
           <Sidebar.Collapse key={projectIndex} label={project.name}>
             <Sidebar.Item>
-              <PendingButton onClick={() => addPrompt(project.id)}>Add Prompt</PendingButton>
+              <PendingButton onClick={() => addPrompt(project.id)}>
+                <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
+                Add Prompt
+              </PendingButton>
             </Sidebar.Item>
             {project.prompts.map((prompt, promptIndex) => (
               <Sidebar.Item
