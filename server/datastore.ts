@@ -131,19 +131,12 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash'],
 })
 
-const toProject = (projectData: any, prompts: any[], endpoints: any[]): Project => ({
-  id: getID(projectData),
-  name: projectData.name,
-  urlPath: projectData.urlPath ?? '',
-  timestamp: getTimestamp(projectData),
-  prompts: prompts
-    .filter(promptData => promptData.projectID === getID(projectData))
-    .map(promptData =>
-      toPrompt(
-        promptData,
-        endpoints.find(endpointData => getID(endpointData) === getID(promptData))
-      )
-    ),
+const toProject = (data: any, prompts: any[], endpoints: any[]): Project => ({
+  id: getID(data),
+  name: data.name,
+  urlPath: data.urlPath ?? '',
+  timestamp: getTimestamp(data),
+  prompts: toProjectPrompts(getID(data), prompts, endpoints),
 })
 
 export async function addProjectForUser(userID: number, projectName: string): Promise<number> {
@@ -189,11 +182,14 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
   return apiKey
 }
 
-export async function getProjectsForUser(userID: number): Promise<Project[]> {
+export async function getGroupedPromptsForUser(userID: number): Promise<{ prompts: Prompt[]; projects: Project[] }> {
   const projects = await getOrderedEntities(Entity.PROJECT, 'userID', userID)
   const prompts = await getOrderedEntities(Entity.PROMPT, 'userID', userID)
   const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)
-  return projects.map(project => toProject(project, prompts, endpoints))
+  return {
+    prompts: toProjectPrompts(null, prompts, endpoints),
+    projects: projects.map(project => toProject(project, prompts, endpoints)),
+  }
 }
 
 const toPromptData = (userID: number, projectID: number | null, name: string, createdAt: Date, promptID?: number) => ({
@@ -201,6 +197,16 @@ const toPromptData = (userID: number, projectID: number | null, name: string, cr
   data: { userID, projectID, name, createdAt },
   excludeFromIndexes: ['name'],
 })
+
+const toProjectPrompts = (projectID: number | null, prompts: any[], endpoints: any[]): Prompt[] =>
+  prompts
+    .filter(promptData => promptData.projectID === projectID)
+    .map(promptData =>
+      toPrompt(
+        promptData,
+        endpoints.find(endpointData => getID(endpointData) === getID(promptData))
+      )
+    )
 
 const toPrompt = (data: any, endpointData?: any): Prompt => ({
   id: getID(data),

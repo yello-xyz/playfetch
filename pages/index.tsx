@@ -1,4 +1,4 @@
-import { getProjectsForUser, getVersionsForPrompt } from '@/server/datastore'
+import { getGroupedPromptsForUser, getVersionsForPrompt } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -27,7 +27,7 @@ const versionFilter = (filter: string) => (version: Version) => {
 
 export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const userID = req.session.user!.id
-  const projects = await getProjectsForUser(userID)
+  const { projects } = await getGroupedPromptsForUser(userID)
   const versions = projects.length ? await getVersionsForPrompt(userID, projects[0].prompts[0].id) : []
   return { props: { projects, versions } }
 })
