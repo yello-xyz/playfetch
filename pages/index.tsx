@@ -28,6 +28,7 @@ export default function Home({
 
   const [prompts, setPrompts] = useState(initialPrompts)
   const [projects, setProjects] = useState(initialProjects)
+  const [activeProject, setActiveProject] = useState<Project>()
   const [activePrompt, setActivePrompt] = useState<Prompt>()
   const [versions, setVersions] = useState([] as Version[])
   const [activeVersion, setActiveVersion] = useState<Version>()
@@ -101,6 +102,8 @@ export default function Home({
       <ProjectSidebar
         prompts={prompts}
         projects={projects}
+        activeProject={activeProject}
+        setActiveProject={setActiveProject}
         activePrompt={activePrompt}
         setActivePrompt={updateActivePrompt}
         onLogout={refreshData}

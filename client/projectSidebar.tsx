@@ -10,6 +10,8 @@ import api from './api'
 export default function ProjectSidebar({
   prompts = [],
   projects = [],
+  activeProject,
+  setActiveProject,
   activePrompt,
   setActivePrompt,
   onLogout,
@@ -17,6 +19,8 @@ export default function ProjectSidebar({
 }: {
   prompts?: Prompt[]
   projects?: Project[]
+  activeProject?: Project
+  setActiveProject: (project?: Project) => void
   activePrompt?: Prompt
   setActivePrompt: (prompt?: Prompt) => void
   onLogout: () => void
@@ -76,7 +80,11 @@ export default function ProjectSidebar({
       </div>
       <Sidebar.Items>
         {projects.map((project, projectIndex) => (
-          <Sidebar.Collapse key={projectIndex} label={project.name}>
+          <Sidebar.Collapse
+            key={projectIndex}
+            label={project.name}
+            open={project.id === activeProject?.id}
+            onClick={() => setActiveProject(project)}>
             <Sidebar.Item>
               <PendingButton onClick={() => addPrompt(project.id)}>
                 <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
