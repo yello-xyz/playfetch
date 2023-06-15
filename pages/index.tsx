@@ -176,19 +176,17 @@ function HomeWithProjects({
   const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
     await api.publishPrompt(activeProject!.id, activePromptID, endpoint, prompt, config).then(setCURLCommand)
-    refreshProjects()
+    refreshProjects() // endpoints for prompts are fetched with projects
   }
 
   const unpublishPrompt = async () => {
     setCURLCommand(undefined)
     await api.unpublishPrompt(activePromptID)
-    refreshProjects()
+    refreshProjects() // endpoints for prompts are fetched with projects
   }
 
   const isLastVersion = versions.length === 1
-  const isLastPrompt = isLastVersion && activeProject && activeProject.prompts.length === 1
-
-  const entityToDelete = isLastPrompt ? 'project' : isLastVersion ? 'prompt' : 'version'
+  const entityToDelete = isLastVersion ? 'prompt' : 'version'
 
   const deleteVersion = async (version: Version) => {
     const versionHasRuns = version.runs.length > 0

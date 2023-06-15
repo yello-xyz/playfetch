@@ -303,12 +303,6 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   if (versionCount <= 1) {
     keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
     keysToDelete.push(buildKey(Entity.ENDPOINT, versionData.promptID))
-    if (promptData.projectID) {
-      const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', promptData.projectID)
-      if (promptCount <= 1) {
-        keysToDelete.push(buildKey(Entity.PROJECT, promptData.projectID))
-      }
-    }
   }
   await getDatastore().delete(keysToDelete)
   if (versionCount > 1) {
