@@ -23,9 +23,9 @@ export default function PromptTabView({
   project,
   versions,
   activeVersion,
+  setActiveVersion,
   setDirtyVersion,
   onSavePrompt,
-  onSelectVersion,
   onRefreshProjects,
   onRefreshVersions,
 }: {
@@ -33,9 +33,9 @@ export default function PromptTabView({
   project?: Project
   versions: Version[]
   activeVersion: Version
+  setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
-  onSelectVersion: (version: Version) => void
   onRefreshProjects: () => void
   onRefreshVersions: (promptID?: number, versionID?: number) => void
 }) {
@@ -48,7 +48,7 @@ export default function PromptTabView({
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
       onSavePrompt(_ => onRefreshVersions())
-      onSelectVersion(version)
+      setActiveVersion(version)
       setActiveRun(undefined)
       setCURLCommand(undefined)
     }

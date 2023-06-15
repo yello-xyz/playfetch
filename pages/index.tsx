@@ -101,8 +101,8 @@ export default function Home({
       <ProjectSidebar
         prompts={prompts}
         projects={projects}
-        activePromptID={activePrompt?.id}
-        updateActivePrompt={updateActivePrompt}
+        activePrompt={activePrompt}
+        setActivePrompt={updateActivePrompt}
         onLogout={refreshData}
         onRefresh={refreshProjects}
       />
@@ -112,9 +112,9 @@ export default function Home({
           project={projects.find(hasActivePrompt)}
           versions={versions}
           activeVersion={activeVersion}
+          setActiveVersion={updateActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
-          onSelectVersion={updateActiveVersion}
           onRefreshProjects={refreshProjects}
           onRefreshVersions={refreshVersions}
         />

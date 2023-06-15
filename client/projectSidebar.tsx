@@ -10,15 +10,15 @@ import api from './api'
 export default function ProjectSidebar({
   prompts = [],
   projects = [],
-  activePromptID,
-  updateActivePrompt,
+  activePrompt,
+  setActivePrompt,
   onLogout,
   onRefresh,
 }: {
   prompts?: Prompt[]
   projects?: Project[]
-  activePromptID?: number
-  updateActivePrompt?: (prompt: Prompt) => void
+  activePrompt?: Prompt
+  setActivePrompt: (prompt?: Prompt) => void
   onLogout: () => void
   onRefresh: (promptID?: number) => void
 }) {
@@ -61,8 +61,8 @@ export default function ProjectSidebar({
             <Sidebar.Item
               className='cursor-pointer'
               key={promptIndex}
-              active={activePromptID === prompt.id}
-              onClick={() => updateActivePrompt?.(prompt)}>
+              active={activePrompt?.id === prompt.id}
+              onClick={() => setActivePrompt(prompt)}>
               {Truncate(prompt.name, 20)}
             </Sidebar.Item>
           ))}
@@ -87,8 +87,8 @@ export default function ProjectSidebar({
               <Sidebar.Item
                 className='cursor-pointer'
                 key={promptIndex}
-                active={activePromptID === prompt.id}
-                onClick={() => { console.log('click'); updateActivePrompt?.(prompt) }}>
+                active={activePrompt?.id === prompt.id}
+                onClick={() => setActivePrompt(prompt)}>
                 {Truncate(prompt.name, 20)}
               </Sidebar.Item>
             ))}
