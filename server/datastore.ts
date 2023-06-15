@@ -140,7 +140,7 @@ const toProject = (data: any, prompts: any[], endpoints: any[]): Project => ({
   prompts: toProjectPrompts(getID(data), prompts, endpoints),
 })
 
-export async function addProjectForUser(userID: number, projectName: string): Promise<number> {
+export async function addProjectForUser(userID: number, projectName: string) {
   const urlPath = ProjectNameToURLPath(projectName)
   if (!CheckValidURLPath(urlPath)) {
     throw new Error(`URL path '${urlPath}' is invalid`)
@@ -150,7 +150,6 @@ export async function addProjectForUser(userID: number, projectName: string): Pr
   }
   const projectData = toProjectData(userID, projectName, urlPath, new Date())
   await getDatastore().save(projectData)
-  return await addPromptForUser(userID, Number(projectData.key.id))
 }
 
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {

@@ -2,9 +2,9 @@ import { addProjectForUser } from '@/server/datastore'
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function addProject(req: NextApiRequest, res: NextApiResponse<number>) {
-  const promptID = await addProjectForUser(req.session.user!.id, req.body.name)
-  res.json(promptID)
+async function addProject(req: NextApiRequest, res: NextApiResponse) {
+  await addProjectForUser(req.session.user!.id, req.body.name)
+  res.json({})
 }
 
 export default withLoggedInSessionRoute(addProject)

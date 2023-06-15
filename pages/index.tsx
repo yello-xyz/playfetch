@@ -136,9 +136,11 @@ function HomeWithProjects({
     }
   }
 
-  const refreshProjectsAndRefocus = async (promptID: number) => {
+  const refreshProjectsAndRefocus = async (promptID?: number) => {
     await refreshProjects()
-    updateActivePrompt(promptID)
+    if (promptID) {
+      updateActivePrompt(promptID)
+    }
   }
 
   const refreshVersions = async (promptID = activePromptID, focusID = activeVersion.id) => {

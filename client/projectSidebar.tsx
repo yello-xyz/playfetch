@@ -20,7 +20,7 @@ export default function ProjectSidebar({
   activePromptID?: number
   updateActivePrompt?: (promptID: number) => void
   onLogout: () => void
-  onRefresh: (promptID: number) => void
+  onRefresh: (promptID?: number) => void
 }) {
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
@@ -34,8 +34,8 @@ export default function ProjectSidebar({
       title: 'Add a new project',
       label: 'Project name',
       callback: async (name: string) => {
-        const promptID = await api.addProject(name)
-        onRefresh(promptID)
+        await api.addProject(name)
+        onRefresh()
       },
       validator: name => api.checkProjectName(name),
     })
