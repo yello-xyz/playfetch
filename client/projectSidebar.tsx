@@ -18,7 +18,7 @@ export default function ProjectSidebar({
   prompts?: Prompt[]
   projects?: Project[]
   activePromptID?: number
-  updateActivePrompt?: (promptID: number) => void
+  updateActivePrompt?: (prompt: Prompt) => void
   onLogout: () => void
   onRefresh: (promptID?: number) => void
 }) {
@@ -62,7 +62,7 @@ export default function ProjectSidebar({
               className='cursor-pointer'
               key={promptIndex}
               active={activePromptID === prompt.id}
-              onClick={() => updateActivePrompt?.(prompt.id)}>
+              onClick={() => updateActivePrompt?.(prompt)}>
               {Truncate(prompt.name, 20)}
             </Sidebar.Item>
           ))}
@@ -88,7 +88,7 @@ export default function ProjectSidebar({
                 className='cursor-pointer'
                 key={promptIndex}
                 active={activePromptID === prompt.id}
-                onClick={() => updateActivePrompt?.(prompt.id)}>
+                onClick={() => { console.log('click'); updateActivePrompt?.(prompt) }}>
                 {Truncate(prompt.name, 20)}
               </Sidebar.Item>
             ))}
