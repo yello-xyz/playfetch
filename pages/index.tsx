@@ -33,13 +33,13 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState<Version>()
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
-  const updateActivePrompt = (prompt: Prompt) => {
-    if (prompt.id !== activePrompt?.id) {
+  const updateActivePrompt = (prompt?: Prompt) => {
+    if (prompt?.id !== activePrompt?.id) {
       if (activePrompt) {
         savePrompt()
       }
       setActivePrompt(prompt)
-      refreshVersions(prompt.id)
+      refreshVersions(prompt?.id)
     }
   }
 
