@@ -48,13 +48,13 @@ export const runPromptWithConfig = async (prompt: string, config: RunConfig) => 
     prompt: resolvedPrompt,
   })
 
-  const cachedValue = await getCachedValue(cacheKey)
+  const cachedValue = config.useCache ? await getCachedValue(cacheKey) : undefined
   if (cachedValue) {
     return { output: cachedValue, cost: 0 }
   }
 
   const result = await getPredictor(config.provider)(resolvedPrompt, config.temperature, config.maxTokens)
-  if (result.output?.length) {
+  if (config.useCache && result.output?.length) {
     await cacheValue(cacheKey, result.output)
   }
 

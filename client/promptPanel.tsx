@@ -3,7 +3,7 @@ import LabeledTextInput from './labeledTextInput'
 import { Endpoint, Project, Run, RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
-import { Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
+import { Checkbox, Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
 import sanitizeHtml from 'sanitize-html'
 import ContentEditable from 'react-contenteditable'
 import { ContentEditableEvent } from 'react-contenteditable'
@@ -31,6 +31,7 @@ const DefaultConfig: RunConfig = {
   provider: 'openai',
   temperature: 0.5,
   maxTokens: 250,
+  useCache: false,
   inputs: {},
 }
 
@@ -65,12 +66,14 @@ export default function PromptPanel({
   const [provider, setProvider] = useState<RunConfig['provider']>(runConfig.provider)
   const [temperature, setTemperature] = useState(runConfig.temperature)
   const [maxTokens, setMaxTokens] = useState(runConfig.maxTokens)
+  const [useCache, setUseCache] = useState(runConfig.useCache)
 
   const [previousActiveRunID, setPreviousRunID] = useState(activeRun?.id)
   if (activeRun?.id !== previousActiveRunID) {
     setProvider(runConfig.provider)
     setTemperature(runConfig.temperature)
     setMaxTokens(runConfig.maxTokens)
+    setUseCache(runConfig.useCache)
     setPreviousRunID(activeRun?.id)
   }
 
@@ -82,7 +85,7 @@ export default function PromptPanel({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (name: string) => {
-        onPublish?.(name, prompt, { provider, temperature, maxTokens, inputs })
+        onPublish?.(name, prompt, { provider, temperature, maxTokens, useCache, inputs })
       },
       validator: endpointNameValidator,
     })
@@ -180,7 +183,7 @@ export default function PromptPanel({
       <div className='flex gap-2'>
         <PendingButton
           disabled={!prompt.length}
-          onClick={() => onRun(prompt, { provider, temperature, maxTokens, inputs })}>
+          onClick={() => onRun(prompt, { provider, temperature, maxTokens, useCache, inputs })}>
           Run
         </PendingButton>
         <PendingButton disabled={!isDirty} onClick={onSave}>
@@ -193,7 +196,7 @@ export default function PromptPanel({
         )}
         {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
       </div>
-      <div className='flex justify-between gap-10'>
+      <div className='flex flex-wrap justify-between gap-10'>
         <div>
           <div className='block mb-1'>
             <Label htmlFor='provider' value='Provider' />
@@ -224,6 +227,12 @@ export default function PromptPanel({
             value={maxTokens.toString()}
             setValue={value => setMaxTokens(Number(value))}
           />
+        </div>
+        <div className='flex items-baseline gap-2'>
+          <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
+          <div className='block mb-1'>
+            <Label htmlFor='useCache' value='Use cache' />
+          </div>
         </div>
       </div>
       {endpoint && (
