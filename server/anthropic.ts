@@ -1,7 +1,7 @@
 const headers = {
   'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
-  Accept: 'application/json',
-  'Content-Type': 'application/json',
+  'accept': 'application/json',
+  'content-type': 'application/json',
 }
 
 const calculateCost = (prompt: string, result: string) =>
