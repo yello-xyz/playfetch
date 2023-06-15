@@ -12,30 +12,20 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const userID = req.session.user!.id
-  const { prompts, projects } = await getGroupedPromptsForUser(userID)
-  return { props: { prompts, projects } }
+  const { prompts: initialPrompts, projects: initialProjects } = await getGroupedPromptsForUser(userID)
+  return { props: { initialPrompts, initialProjects } }
 })
 
-export default function Home({ prompts, projects }: { prompts: Prompt[]; projects: Project[] }) {
-  const router = useRouter()
-  const refreshData = () => router.replace(router.asPath)
-
-  return prompts.length || projects.length ? (
-    <HomeWithProjects initialPrompts={prompts} initialProjects={projects} refreshData={refreshData} />
-  ) : (
-    <ProjectSidebar onLogout={refreshData} onRefresh={refreshData} />
-  )
-}
-
-function HomeWithProjects({
+export default function Home({
   initialPrompts,
   initialProjects,
-  refreshData,
 }: {
   initialPrompts: Prompt[]
   initialProjects: Project[]
-  refreshData: () => void
 }) {
+  const router = useRouter()
+  const refreshData = () => router.replace(router.asPath)
+
   const [prompts, setPrompts] = useState(initialPrompts)
   const [projects, setProjects] = useState(initialProjects)
   const [activePrompt, setActivePrompt] = useState<Prompt>()
