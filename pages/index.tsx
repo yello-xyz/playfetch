@@ -3,27 +3,12 @@ import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
-import LabeledTextInput from '@/client/labeledTextInput'
-import { Suspense, useState } from 'react'
-import { Project, Prompt, Run, RunConfig, Version } from '@/types'
-import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import VersionTimeline from '@/client/versionTimeline'
+import { useState } from 'react'
+import { Project, Prompt, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
-
-import dynamic from 'next/dynamic'
-const PromptPanel = dynamic(() => import('@/client/promptPanel'))
+import PromptTabView from '@/client/promptTabView'
 
 const inter = Inter({ subsets: ['latin'] })
-
-const versionFilter = (filter: string) => (version: Version) => {
-  const lowerCaseFilter = filter.toLowerCase()
-  return (
-    version.title.toLowerCase().includes(lowerCaseFilter) ||
-    version.tags.toLowerCase().includes(lowerCaseFilter) ||
-    version.prompt.toLowerCase().includes(lowerCaseFilter) ||
-    version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
-  )
-}
 
 export const getServerSideProps = withLoggedInSession(async ({ req }) => {
   const userID = req.session.user!.id
@@ -81,12 +66,7 @@ function HomeWithProjects({
   const [activePromptID, setActivePromptID] = useState(initialActivePromptID)
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
-  const [activeRun, setActiveRun] = useState<Run>()
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
-
-  const [filter, setFilter] = useState('')
-  const [curlCommand, setCURLCommand] = useState<string>()
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const updateActivePrompt = (promptID: number) => {
     if (promptID !== activePromptID) {
@@ -99,23 +79,13 @@ function HomeWithProjects({
   const updateActiveVersion = (version: Version) => {
     setActiveVersion(version)
     setDirtyVersion(undefined)
-    setActiveRun(undefined)
-    setCURLCommand(undefined)
-  }
-
-  const selectActiveVersion = (version: Version) => {
-    if (version.id !== activeVersion.id) {
-      savePrompt(_ => refreshVersions())
-      updateActiveVersion(version)
-    }
   }
 
   const findActivePrompt = (prompts: Prompt[], projects: Project[]) =>
     [...prompts, ...projects.flatMap(project => project.prompts)].find(prompt => prompt.id === activePromptID)
 
-  const activePrompt = findActivePrompt(prompts, projects)!
+  const activePrompt = findActivePrompt(prompts, projects)
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePromptID)
-  const activeProject = projects.find(hasActivePrompt)
 
   const refreshProjects = async () => {
     const oldIndex = projects.findIndex(hasActivePrompt)
@@ -166,44 +136,6 @@ function HomeWithProjects({
     return versionID
   }
 
-  const savePromptAndRefocus = () => savePrompt(versionID => refreshVersions(activePromptID, versionID))
-
-  const runPrompt = async (prompt: string, config: RunConfig) => {
-    const versionID = await savePromptAndRefocus()
-    await api.runPrompt(activePromptID, versionID, prompt, config).then(_ => refreshVersions(activePromptID, versionID))
-  }
-
-  const publishPrompt = async (endpoint: string, prompt: string, config: RunConfig) => {
-    await savePromptAndRefocus()
-    await api.publishPrompt(activeProject!.id, activePromptID, endpoint, prompt, config).then(setCURLCommand)
-    refreshProjects() // endpoints for prompts are fetched with projects
-  }
-
-  const unpublishPrompt = async () => {
-    setCURLCommand(undefined)
-    await api.unpublishPrompt(activePromptID)
-    refreshProjects() // endpoints for prompts are fetched with projects
-  }
-
-  const isLastVersion = versions.length === 1
-  const entityToDelete = isLastVersion ? 'prompt' : 'version'
-
-  const deleteVersion = async (version: Version) => {
-    const versionHasRuns = version.runs.length > 0
-    const suffix = versionHasRuns ? ' and all its associated runs' : ''
-    setDialogPrompt({
-      message: `Are you sure you want to delete this ${entityToDelete}${suffix}? This action cannot be undone.`,
-      callback: async () => {
-        await api.deleteVersion(version.id)
-        if (versions.length > 1) {
-          refreshVersions()
-        }
-        refreshProjects()
-      },
-      destructive: true,
-    })
-  }
-
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
@@ -214,43 +146,19 @@ function HomeWithProjects({
         onLogout={refreshData}
         onRefresh={refreshProjectsAndRefocus}
       />
-      <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
-        <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-        <VersionTimeline
-          versions={versions.filter(versionFilter(filter))}
+      {activePrompt && (
+        <PromptTabView
+          prompt={activePrompt}
+          project={projects.find(hasActivePrompt)}
+          versions={versions}
           activeVersion={activeVersion}
-          setActiveVersion={selectActiveVersion}
-          activeRun={activeRun}
-          setActiveRun={setActiveRun}
-          onDelete={deleteVersion}
-          entityToDelete={entityToDelete}
+          setDirtyVersion={setDirtyVersion}
+          onSavePrompt={savePrompt}
+          onSelectVersion={updateActiveVersion}
+          onRefreshProjects={refreshProjects}
+          onRefreshVersions={refreshVersions}
         />
-      </div>
-      <div className='flex-1 overflow-y-auto'>
-        <Suspense>
-          <PromptPanel
-            key={activeVersion.id}
-            version={activeVersion}
-            activeRun={activeRun ?? activeVersion.runs[0]}
-            endpoint={activePrompt?.endpoint}
-            setDirtyVersion={setDirtyVersion}
-            endpointNameValidator={(name: string) =>
-              api.checkEndpointName(activePromptID, activeProject!.urlPath, name)
-            }
-            onRun={runPrompt}
-            onSave={() => savePromptAndRefocus().then()}
-            onPublish={activeProject ? publishPrompt : undefined}
-            onUnpublish={unpublishPrompt}
-          />
-        </Suspense>
-        {curlCommand && (
-          <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
-            Try out your API endpoint by running:
-            <pre>{curlCommand}</pre>
-          </div>
-        )}
-      </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      )}
     </main>
   )
 }
