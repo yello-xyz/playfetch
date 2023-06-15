@@ -23,6 +23,7 @@ enum Entity {
   VERSION = 'version',
   RUN = 'run',
   ENDPOINT = 'endpoint',
+  CACHE = 'cache',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
@@ -441,3 +442,16 @@ const toEndpoint = (data: any): Endpoint => ({
   config: JSON.parse(data.config),
   token: data.token,
 })
+
+export async function cacheValue(key: number, value: string) {
+  await getDatastore().save({
+    key: buildKey(Entity.CACHE, key),
+    data: { value },
+    excludeFromIndexes: ['value'],
+  })
+}
+
+export async function getCachedValue(key: number) {
+  const cachedValue = await getKeyedEntity(Entity.CACHE, key)
+  return cachedValue ? cachedValue.value : undefined
+}
