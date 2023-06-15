@@ -144,109 +144,111 @@ export default function PromptPanel({
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
   return (
-    <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto text-gray-500 max-w-prose'>
-      {inputVariables.length > 0 && (
-        <div className='flex flex-col gap-2'>
-          <Label value='Inputs' />
-          {inputVariables.map((variable, index) => (
-            <div key={index} className='flex gap-2'>
-              <Label className='flex-1' value={variable} htmlFor={variable} />
-              <TextInput
-                className='flex-1'
-                sizing='sm'
-                value={inputState[variable] ?? ''}
-                onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
-                id={variable}
-                required={true}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-      <div className='self-stretch'>
-        <div className='flex items-center block gap-2 mb-1'>
-          <Label value='Prompt' onClick={() => contentEditableRef.current?.focus()} />
-          <Tooltip content='Extract variable'>
-            <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />
-          </Tooltip>
-        </div>
-        <ContentEditable
-          className='p-2 bg-white'
-          onChange={updateHTMLContent}
-          onBlur={updateHTMLContent}
-          html={htmlContent}
-          innerRef={contentEditableRef}
-        />
-      </div>
-      <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={updateTitle} />
-      <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
-      <div className='flex gap-2'>
-        <PendingButton
-          disabled={!prompt.length}
-          onClick={() => onRun(prompt, { provider, temperature, maxTokens, useCache, inputs })}>
-          Run
-        </PendingButton>
-        <PendingButton disabled={!isDirty} onClick={onSave}>
-          Save
-        </PendingButton>
-        {onPublish && (
-          <PendingButton disabled={version.runs.length === 0} onClick={publish}>
-            {endpoint ? 'Republish' : 'Publish'}
-          </PendingButton>
+    <>
+      <div className='flex flex-col flex-1 gap-4 px-8 pt-8 overflow-y-auto text-gray-500 max-w-prose'>
+        {inputVariables.length > 0 && (
+          <div className='flex flex-col gap-2'>
+            <Label value='Inputs' />
+            {inputVariables.map((variable, index) => (
+              <div key={index} className='flex gap-2'>
+                <Label className='flex-1' value={variable} htmlFor={variable} />
+                <TextInput
+                  className='flex-1'
+                  sizing='sm'
+                  value={inputState[variable] ?? ''}
+                  onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
+                  id={variable}
+                  required={true}
+                />
+              </div>
+            ))}
+          </div>
         )}
-        {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
-      </div>
-      <div className='flex flex-wrap justify-between gap-10'>
-        <div>
-          <div className='block mb-1'>
-            <Label htmlFor='provider' value='Provider' />
-          </div>
-          <Dropdown label={labelForProvider(provider)}>
-            <Dropdown.Item onClick={() => setProvider('openai')}>{labelForProvider('openai')}</Dropdown.Item>
-            <Dropdown.Item onClick={() => setProvider('anthropic')}>{labelForProvider('anthropic')}</Dropdown.Item>
-            <Dropdown.Item onClick={() => setProvider('google')}>{labelForProvider('google')}</Dropdown.Item>
-          </Dropdown>
-        </div>
-        <div>
-          <div className='block mb-1'>
-            <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
-          </div>
-          <RangeSlider
-            id='temperature'
-            value={temperature}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={event => setTemperature(Number(event.target.value))}
-          />
-        </div>
-        <div>
-          <LabeledTextInput
-            id='maxTokens'
-            label='Max Tokens'
-            value={maxTokens.toString()}
-            setValue={value => setMaxTokens(Number(value))}
-          />
-        </div>
-        <div className='flex items-baseline gap-2'>
-          <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
-          <div className='block mb-1'>
-            <Label htmlFor='useCache' value='Use cache' />
-          </div>
-        </div>
-      </div>
-      {endpoint && (
-        <div className='flex gap-2'>
-          <div className='font-bold text-black'>
-            Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
-          </div>{' '}
-          <Link href={EndpointUIRoute(endpoint)} target='_blank'>
-            <Tooltip content='Try in UI'>
-              <HiExternalLink size={20} />
+        <div className='self-stretch'>
+          <div className='flex items-center block gap-2 mb-1'>
+            <Label value='Prompt' onClick={() => contentEditableRef.current?.focus()} />
+            <Tooltip content='Extract variable'>
+              <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />
             </Tooltip>
-          </Link>
+          </div>
+          <ContentEditable
+            className='p-2 bg-white'
+            onChange={updateHTMLContent}
+            onBlur={updateHTMLContent}
+            html={htmlContent}
+            innerRef={contentEditableRef}
+          />
         </div>
-      )}
+        <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={updateTitle} />
+        <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
+        <div className='flex gap-2'>
+          <PendingButton
+            disabled={!prompt.length}
+            onClick={() => onRun(prompt, { provider, temperature, maxTokens, useCache, inputs })}>
+            Run
+          </PendingButton>
+          <PendingButton disabled={!isDirty} onClick={onSave}>
+            Save
+          </PendingButton>
+          {onPublish && (
+            <PendingButton disabled={version.runs.length === 0} onClick={publish}>
+              {endpoint ? 'Republish' : 'Publish'}
+            </PendingButton>
+          )}
+          {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
+        </div>
+        <div className='flex flex-wrap justify-between gap-10'>
+          <div>
+            <div className='block mb-1'>
+              <Label htmlFor='provider' value='Provider' />
+            </div>
+            <Dropdown label={labelForProvider(provider)}>
+              <Dropdown.Item onClick={() => setProvider('openai')}>{labelForProvider('openai')}</Dropdown.Item>
+              <Dropdown.Item onClick={() => setProvider('anthropic')}>{labelForProvider('anthropic')}</Dropdown.Item>
+              <Dropdown.Item onClick={() => setProvider('google')}>{labelForProvider('google')}</Dropdown.Item>
+            </Dropdown>
+          </div>
+          <div>
+            <div className='block mb-1'>
+              <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
+            </div>
+            <RangeSlider
+              id='temperature'
+              value={temperature}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={event => setTemperature(Number(event.target.value))}
+            />
+          </div>
+          <div>
+            <LabeledTextInput
+              id='maxTokens'
+              label='Max Tokens'
+              value={maxTokens.toString()}
+              setValue={value => setMaxTokens(Number(value))}
+            />
+          </div>
+          <div className='flex items-baseline gap-2'>
+            <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
+            <div className='block mb-1'>
+              <Label htmlFor='useCache' value='Use cache' />
+            </div>
+          </div>
+        </div>
+        {endpoint && (
+          <div className='flex gap-2'>
+            <div className='font-bold text-black'>
+              Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
+            </div>{' '}
+            <Link href={EndpointUIRoute(endpoint)} target='_blank'>
+              <Tooltip content='Try in UI'>
+                <HiExternalLink size={20} />
+              </Tooltip>
+            </Link>
+          </div>
+        )}
+      </div>
       <PickNameDialog
         key={endpoint?.urlPath ?? version.id}
         initialName={endpoint?.urlPath}
@@ -254,6 +256,6 @@ export default function PromptPanel({
         setPrompt={setPickNamePrompt}
       />
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-    </div>
+    </>
   )
 }
