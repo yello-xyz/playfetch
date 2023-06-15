@@ -1,28 +1,20 @@
-import { Project, Prompt } from '@/types'
+import { Project } from '@/types'
 import { Sidebar } from 'flowbite-react'
-import { Truncate } from '@/common/formatting'
 import PendingButton from './pendingButton'
-import { HiOutlineFolderAdd, HiOutlineDocumentAdd } from 'react-icons/hi'
+import { HiOutlineFolderAdd, HiOutlineDocumentAdd, HiOutlineFolder } from 'react-icons/hi'
+import { TbPrompt } from 'react-icons/tb'
 import { useState } from 'react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
 
 export default function ProjectSidebar({
-  prompts = [],
   projects = [],
-  activeProject,
   setActiveProject,
-  activePrompt,
-  setActivePrompt,
   onLogout,
   onRefresh,
 }: {
-  prompts?: Prompt[]
   projects?: Project[]
-  activeProject?: Project
   setActiveProject: (project?: Project) => void
-  activePrompt?: Prompt
-  setActivePrompt: (prompt?: Prompt) => void
   onLogout: () => void
   onRefresh: (promptID?: number) => void
 }) {
@@ -61,13 +53,16 @@ export default function ProjectSidebar({
       </div>
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          {prompts.map((prompt, promptIndex) => (
+          <Sidebar.Item className='cursor-pointer' icon={TbPrompt} onClick={() => setActiveProject()}>
+            Prompts
+          </Sidebar.Item>
+          {projects.map((project, projectIndex) => (
             <Sidebar.Item
               className='cursor-pointer'
-              key={promptIndex}
-              active={activePrompt?.id === prompt.id}
-              onClick={() => setActivePrompt(prompt)}>
-              {Truncate(prompt.name, 20)}
+              key={projectIndex}
+              icon={HiOutlineFolder}
+              onClick={() => setActiveProject(project)}>
+              {project.name}
             </Sidebar.Item>
           ))}
         </Sidebar.ItemGroup>
@@ -78,31 +73,6 @@ export default function ProjectSidebar({
           Add New Project
         </PendingButton>
       </div>
-      <Sidebar.Items>
-        {projects.map((project, projectIndex) => (
-          <Sidebar.Collapse
-            key={projectIndex}
-            label={project.name}
-            open={project.id === activeProject?.id}
-            onClick={() => setActiveProject(project)}>
-            <Sidebar.Item>
-              <PendingButton onClick={() => addPrompt(project.id)}>
-                <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
-                Add Prompt
-              </PendingButton>
-            </Sidebar.Item>
-            {project.prompts.map((prompt, promptIndex) => (
-              <Sidebar.Item
-                className='cursor-pointer'
-                key={promptIndex}
-                active={activePrompt?.id === prompt.id}
-                onClick={() => setActivePrompt(prompt)}>
-                {Truncate(prompt.name, 20)}
-              </Sidebar.Item>
-            ))}
-          </Sidebar.Collapse>
-        ))}
-      </Sidebar.Items>
       <PickNameDialog key={projects.length} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
     </Sidebar>
   )

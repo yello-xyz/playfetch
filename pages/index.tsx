@@ -47,10 +47,8 @@ export default function Home({
   }
 
   const updateActiveProject = (project?: Project) => {
-    if (project?.id !== activeProject?.id) {
-      setActiveProject(project)
-      setActivePrompt(undefined)
-    }
+    setActiveProject(project)
+    setActivePrompt(undefined)
   }
 
   const updateActiveVersion = (version: Version) => {
@@ -109,12 +107,8 @@ export default function Home({
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
-        prompts={prompts}
         projects={projects}
-        activeProject={activeProject}
         setActiveProject={updateActiveProject}
-        activePrompt={activePrompt}
-        setActivePrompt={updateActivePrompt}
         onLogout={refreshData}
         onRefresh={refreshProjects}
       />
