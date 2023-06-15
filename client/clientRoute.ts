@@ -11,6 +11,11 @@ export const Redirect = (route: ClientRoute): GetServerSidePropsResult<Record<st
   redirect: { destination: route, permanent: false },
 })
 
+export const ProjectRoute = (projectID?: number) =>
+  projectID ? `${ClientRoute.Home}?g=${projectID}` : ClientRoute.Home
+
+export const PromptRoute = (promptID?: number) => (promptID ? `${ClientRoute.Home}?p=${promptID}` : ClientRoute.Home)
+
 export const EndpointUIRoute = (endpoint: Endpoint) => {
   return `/ui/${endpoint.token}/${endpoint.projectURLPath}/${endpoint.urlPath}`
 }

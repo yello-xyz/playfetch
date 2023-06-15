@@ -1,4 +1,4 @@
-import { getGroupedPromptsForUser } from '@/server/datastore'
+import { getGroupedPromptsForUser, getVersionsForPrompt } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -8,31 +8,60 @@ import { Project, Prompt, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
 import PromptTabView from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
+import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const getServerSideProps = withLoggedInSession(async ({ req }) => {
+const findActivePrompt = (prompts: Prompt[], projects: Project[], promptID?: number) =>
+  [...prompts, ...projects.flatMap(project => project.prompts)].find(prompt => prompt.id === promptID)
+
+const mapDictionary = <T, U>(dict: Record<string, T>, mapper: (value: T) => U) =>
+  Object.fromEntries(Object.entries(dict).map(([k, v]) =>[k, mapper(v)]))
+
+export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
   const userID = req.session.user!.id
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
   const { prompts: initialPrompts, projects: initialProjects } = await getGroupedPromptsForUser(userID)
-  return { props: { initialPrompts, initialProjects } }
+  const initialActiveProject = projectID ? initialProjects.find(project => project.id === projectID) : null
+  const initialActivePrompt = findActivePrompt(initialPrompts, initialProjects, promptID) ?? null
+  const initialVersions = initialActivePrompt ? await getVersionsForPrompt(userID, initialActivePrompt.id) : []
+  const initialActiveVersion = initialVersions[0] ?? null
+  return {
+    props: {
+      initialPrompts,
+      initialProjects,
+      initialActiveProject,
+      initialActivePrompt,
+      initialVersions,
+      initialActiveVersion,
+    },
+  }
 })
 
 export default function Home({
   initialPrompts,
   initialProjects,
+  initialActiveProject,
+  initialActivePrompt,
+  initialVersions,
+  initialActiveVersion,
 }: {
   initialPrompts: Prompt[]
   initialProjects: Project[]
+  initialActiveProject?: Project
+  initialActivePrompt?: Prompt
+  initialVersions: Version[]
+  initialActiveVersion?: Version
 }) {
   const router = useRouter()
   const refreshData = () => router.replace(router.asPath)
 
   const [prompts, setPrompts] = useState(initialPrompts)
   const [projects, setProjects] = useState(initialProjects)
-  const [activeProject, setActiveProject] = useState<Project>()
-  const [activePrompt, setActivePrompt] = useState<Prompt>()
-  const [versions, setVersions] = useState([] as Version[])
-  const [activeVersion, setActiveVersion] = useState<Version>()
+  const [activeProject, setActiveProject] = useState(initialActiveProject)
+  const [activePrompt, setActivePrompt] = useState(initialActivePrompt)
+  const [versions, setVersions] = useState(initialVersions)
+  const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
   const updateActivePrompt = (prompt?: Prompt) => {
@@ -42,6 +71,7 @@ export default function Home({
       }
       setActiveProject(undefined)
       setActivePrompt(prompt)
+      router.push(PromptRoute(prompt?.id), undefined, { shallow: true })
       refreshVersions(prompt?.id)
     }
   }
@@ -49,15 +79,13 @@ export default function Home({
   const updateActiveProject = (project?: Project) => {
     setActiveProject(project)
     setActivePrompt(undefined)
+    router.push(ProjectRoute(project?.id), undefined, { shallow: true })
   }
 
   const updateActiveVersion = (version: Version) => {
     setActiveVersion(version)
     setDirtyVersion(undefined)
   }
-
-  const findActivePrompt = (prompts: Prompt[], projects: Project[], promptID = activePrompt?.id) =>
-    [...prompts, ...projects.flatMap(project => project.prompts)].find(prompt => prompt.id === promptID)
 
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePrompt?.id)
 
