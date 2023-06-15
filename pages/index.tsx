@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Project, Prompt, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
 import PromptTabView from '@/client/promptTabView'
+import PromptsGridView from '@/client/promptsGridView'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -39,8 +40,16 @@ export default function Home({
       if (activePrompt) {
         savePrompt()
       }
+      setActiveProject(undefined)
       setActivePrompt(prompt)
       refreshVersions(prompt?.id)
+    }
+  }
+
+  const updateActiveProject = (project?: Project) => {
+    if (project?.id !== activeProject?.id) {
+      setActiveProject(project)
+      setActivePrompt(undefined)
     }
   }
 
@@ -103,13 +112,13 @@ export default function Home({
         prompts={prompts}
         projects={projects}
         activeProject={activeProject}
-        setActiveProject={setActiveProject}
+        setActiveProject={updateActiveProject}
         activePrompt={activePrompt}
         setActivePrompt={updateActivePrompt}
         onLogout={refreshData}
         onRefresh={refreshProjects}
       />
-      {activePrompt && activeVersion && (
+      {activePrompt && activeVersion ? (
         <PromptTabView
           prompt={activePrompt}
           project={projects.find(hasActivePrompt)}
@@ -121,6 +130,8 @@ export default function Home({
           onRefreshProjects={refreshProjects}
           onRefreshVersions={refreshVersions}
         />
+      ) : (
+        <PromptsGridView prompts={activeProject ? activeProject.prompts : prompts} onSelect={updateActivePrompt} />
       )}
     </main>
   )
