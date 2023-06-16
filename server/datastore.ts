@@ -26,9 +26,11 @@ enum Entity {
   CACHE = 'cache',
 }
 
+const toID = ({ key }: { key: Key }) => Number(key.id)
+
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
 
-const getID = (entity: any) => Number(getKey(entity).id)
+const getID = (entity: any) => toID({ key: getKey(entity) })
 
 const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date).toISOString()
 
@@ -68,7 +70,7 @@ const getEntityKeys = (type: string, key: string, value: {} | null, limit?: numb
   getFilteredEntities(type, buildFilter(key, value), limit, false, true).then(entities => entities.map(getKey))
 
 const getEntityID = (type: string, key: string, value: {} | null) =>
-  getEntityKeys(type, key, value, 1).then(([key]) => Number(key.id))
+  getEntityKeys(type, key, value, 1).then(([key]) => toID({ key }))
 
 const getKeyedEntities = async (type: string, ids: number[]) =>
   getDatastore()
@@ -150,7 +152,7 @@ export async function addProjectForUser(userID: number, projectName: string) {
   }
   const projectData = toProjectData(userID, projectName, urlPath, new Date())
   await getDatastore().save(projectData)
-  return Number(projectData.key.id)
+  return toID(projectData)
 }
 
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
@@ -233,7 +235,7 @@ export async function addPromptForUser(userID: number, projectID: number | null)
   )
   const promptData = toPromptData(userID, projectID, name, new Date())
   await getDatastore().save(promptData)
-  await savePromptForUser(userID, Number(promptData.key.id), name, '', '')
+  await savePromptForUser(userID, toID(promptData), name, '', '')
   return toPrompt(promptData)
 }
 
@@ -285,7 +287,7 @@ export async function savePromptForUser(
   await getDatastore().save(versionData)
   await updatePromptNameIfNeeded(promptData)
 
-  return Number(versionData.key.id)
+  return toID(versionData)
 }
 
 const toVersionData = (
