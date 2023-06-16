@@ -9,7 +9,7 @@ import { useRouter } from 'next/router'
 
 export const getServerSideProps = withLoggedInSession(async ({ query }) => {
   const { token, project: projectURLPath, endpoint: urlPath } = ParseQuery(query)
-  const endpoint = await getEndpointFromPath(urlPath, projectURLPath, token)
+  const endpoint = projectURLPath && urlPath ? await getEndpointFromPath(urlPath, projectURLPath, token) : undefined
   if (token && endpoint) {
     return { props: { inputVariables: Object.keys(endpoint.config.inputs) } }
   }
@@ -25,7 +25,9 @@ export default function UI({ inputVariables }: { inputVariables: string[] }) {
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
   const run = async () => {
-    api.runTokenizedEndpoint(urlPath, projectURLPath, token, inputs).then(({ output }) => setOutput(output))
+    if (projectURLPath && urlPath && token) {
+      api.runTokenizedEndpoint(urlPath, projectURLPath, token, inputs).then(({ output }) => setOutput(output))
+    }
   }
 
   return (
