@@ -192,6 +192,20 @@ export async function getProjectsForUser(userID: number): Promise<{ prompts: Pro
   }
 }
 
+export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID)
+  // TODO save projectID in endpoint so we can optimize this a little
+  const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)
+  return prompts
+    .filter(prompt => prompt.userID === userID)
+    .map(prompt =>
+      toPrompt(
+        prompt,
+        endpoints.find(endpointData => getID(endpointData) === getID(prompt))
+      )
+    )
+}
+
 const toPromptData = (userID: number, projectID: number | null, name: string, createdAt: Date, promptID?: number) => ({
   key: buildKey(Entity.PROMPT, promptID),
   data: { userID, projectID, name, createdAt },
