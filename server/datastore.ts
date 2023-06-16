@@ -1,5 +1,5 @@
 import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
-import { Endpoint, Project, Prompt, PromptWithVersions, Run, RunConfig, User, Version } from '@/types'
+import { Endpoint, Project, Prompt, ActivePrompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
@@ -197,7 +197,7 @@ const toPromptData = (userID: number, projectID: number | null, name: string, cr
 
 const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name, projectID: data.projectID })
 
-const toPromptWithVersions = (data: any, versions: any[], runs: any[], endpointData?: any): PromptWithVersions => ({
+const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
   ...toPrompt(data),
   versions: versions.map(version => toVersion(version, runs)),
   ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
@@ -208,7 +208,7 @@ export async function getPromptsForProject(userID: number, projectID: number | n
   return prompts.filter(prompt => prompt.userID === userID).map(prompt => toPrompt(prompt))
 }
 
-export async function getPromptWithVersions(userID: number, promptID: number): Promise<PromptWithVersions> {
+export async function getPromptWithVersions(userID: number, promptID: number): Promise<ActivePrompt> {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   if (!promptData || promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
@@ -218,7 +218,7 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 
-  return toPromptWithVersions(
+  return toActivePrompt(
     promptData,
     versions.filter(version => version.userID === userID),
     runs,

@@ -19,7 +19,7 @@ export type Prompt = {
   projectID: number | null
 }
 
-export type PromptWithVersions = Prompt & {
+export type ActivePrompt = Prompt & {
   endpoint?: Endpoint
   versions: Version[]
 }

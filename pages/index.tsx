@@ -4,7 +4,7 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import { useState } from 'react'
-import { Project, Prompt, PromptWithVersions, Version } from '@/types'
+import { Project, Prompt, ActivePrompt, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
 import PromptTabView from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
@@ -33,7 +33,7 @@ export default function Home({
 }: {
   initialProjects: Project[]
   initialPrompts: Prompt[]
-  initialPrompt?: PromptWithVersions
+  initialPrompt?: ActivePrompt
 }) {
   const router = useRouter()
 

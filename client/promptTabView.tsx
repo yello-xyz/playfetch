@@ -1,7 +1,7 @@
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
-import { Project, Prompt, PromptWithVersions, Run, RunConfig, Version } from '@/types'
+import { Project, ActivePrompt, Run, RunConfig, Version } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 
@@ -28,7 +28,7 @@ export default function PromptTabView({
   onPromptDeleted,
   onRefreshPrompt,
 }: {
-  prompt: PromptWithVersions
+  prompt: ActivePrompt
   project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
