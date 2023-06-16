@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
-import { Endpoint, Project, Run, RunConfig, Version } from '@/types'
+import { Endpoint, Run, RunConfig, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
 import { Checkbox, Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
@@ -174,7 +174,6 @@ export default function PromptPanel({
           <ContentEditable
             className='p-2 bg-white'
             onChange={updateHTMLContent}
-            onBlur={updateHTMLContent}
             html={htmlContent}
             innerRef={contentEditableRef}
           />
