@@ -114,15 +114,15 @@ export default function Home({
     return versionID
   }
 
-  const updateActivePrompt = (prompt?: Prompt) => {
+  const updateActivePrompt = async (prompt?: Prompt) => {
     if (prompt?.id !== activePrompt?.id) {
       if (activePrompt) {
         savePrompt()
       }
-      setActiveProject(undefined)
+      await refreshVersions(prompt?.id)
       setActivePrompt(prompt)
+      setActiveProject(undefined)
       router.push(PromptRoute(prompt?.id), undefined, { shallow: true })
-      refreshVersions(prompt?.id)
     }
   }
 
