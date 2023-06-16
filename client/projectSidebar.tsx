@@ -9,13 +9,13 @@ import api from './api'
 
 export default function ProjectSidebar({
   projects = [],
-  setActiveProject,
+  onSelectProject,
   onLogout,
   onProjectAdded,
   onAddPrompt,
 }: {
   projects?: Project[]
-  setActiveProject: (project?: Project) => void
+  onSelectProject: (project?: Project) => void
   onLogout: () => void
   onProjectAdded: () => void
   onAddPrompt: () => void
@@ -50,7 +50,7 @@ export default function ProjectSidebar({
       </div>
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item className='cursor-pointer' icon={TbPrompt} onClick={() => setActiveProject()}>
+          <Sidebar.Item className='cursor-pointer' icon={TbPrompt} onClick={() => onSelectProject()}>
             Prompts
           </Sidebar.Item>
           {projects.map((project, projectIndex) => (
@@ -58,7 +58,7 @@ export default function ProjectSidebar({
               className='cursor-pointer'
               key={projectIndex}
               icon={HiOutlineFolder}
-              onClick={() => setActiveProject(project)}>
+              onClick={() => onSelectProject(project)}>
               {project.name}
             </Sidebar.Item>
           ))}
