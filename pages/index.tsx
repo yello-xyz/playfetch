@@ -12,9 +12,6 @@ import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const findActivePrompt = (prompts: Prompt[], projects: Project[], promptID?: number) =>
-  [...prompts, ...projects.flatMap(project => project.prompts)].find(prompt => prompt.id === promptID)
-
 const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
@@ -78,17 +75,18 @@ export default function Home({
     updateActiveVersion(focusedVersion ?? newPrompt?.versions?.[0])
   }
 
-  const updateActivePrompt = async (prompt?: Prompt) => {
-    if (prompt?.id !== activePrompt?.id) {
+  const selectPrompt = async (promptID: number) => {
+    if (promptID !== activePrompt?.id) {
       if (activePrompt) {
         savePrompt()
       }
-      await refreshPrompt(prompt?.id)
-      router.push(PromptRoute(prompt?.id), undefined, { shallow: true })
+      await refreshPrompt(promptID)
+      router.push(PromptRoute(promptID), undefined, { shallow: true })
     }
   }
 
   const selectProject = async (projectID: number | null) => {
+    // TODO need to save prompt if dirty?
     const newPrompts = await api.getPrompts(projectID)
     setPrompts(newPrompts)
     setActivePrompt(undefined)
@@ -100,7 +98,7 @@ export default function Home({
   if (currentQuery !== query) {
     setQuery(currentQuery)
     if (promptID) {
-      updateActivePrompt(findActivePrompt(prompts, projects, promptID)) // TODO just pass in ID and refresh
+      selectPrompt(promptID)
     } else {
       selectProject(projectID ?? null)
     }
@@ -108,7 +106,7 @@ export default function Home({
 
   const addPrompt = async (projectID: number | null) => {
     const prompt = await api.addPrompt(projectID)
-    updateActivePrompt(prompt)
+    selectPrompt(prompt.id)
   }
 
   return (
@@ -132,7 +130,7 @@ export default function Home({
           onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
         />
       ) : (
-        <PromptsGridView prompts={prompts} onSelect={updateActivePrompt} />
+        <PromptsGridView prompts={prompts} onSelect={selectPrompt} />
       )}
     </main>
   )
