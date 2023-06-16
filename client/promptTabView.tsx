@@ -34,7 +34,7 @@ export default function PromptTabView({
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
-  onPromptDeleted: () => void
+  onPromptDeleted: (projectID: number | null) => void
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const [activeRun, setActiveRun] = useState<Run>()
@@ -84,7 +84,7 @@ export default function PromptTabView({
         if (prompt.versions.length > 1) {
           onRefreshPrompt()
         } else {
-          onPromptDeleted()
+          onPromptDeleted(prompt.projectID)
         }
       },
       destructive: true,

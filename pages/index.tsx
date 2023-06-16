@@ -54,8 +54,6 @@ export default function Home({
     setDirtyVersion(undefined)
   }
 
-  const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePrompt?.id)
-
   const refreshProjects = async () => api.getProjects().then(setProjects)
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
@@ -125,12 +123,12 @@ export default function Home({
       {activePrompt && activeVersion ? (
         <PromptTabView
           prompt={activePrompt}
-          project={projects.find(hasActivePrompt)}
+          project={projects.find(project => project.id === activePrompt.projectID)}
           activeVersion={activeVersion}
           setActiveVersion={updateActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
-          onPromptDeleted={() => selectProject(null)}
+          onPromptDeleted={selectProject}
           onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
         />
       ) : (

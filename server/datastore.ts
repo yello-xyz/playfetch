@@ -193,7 +193,7 @@ const toPromptData = (userID: number, projectID: number | null, name: string, cr
   excludeFromIndexes: ['name'],
 })
 
-const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
+const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name, projectID: data.projectID })
 
 const toPromptWithVersions = (data: any, versions: any[], runs: any[], endpointData?: any): PromptWithVersions => ({
   ...toPrompt(data),
