@@ -250,10 +250,22 @@ export async function savePromptForUser(
     return undefined
   }
 
-  const currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
+  let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
   const canOverwrite =
     currentVersionID &&
     (prompt === currentVersion.prompt || !(await getEntity(Entity.RUN, 'versionID', currentVersionID)))
+
+  if (canOverwrite && prompt !== currentVersion.prompt) {
+    const previousVersion = currentVersion.previousVersionID
+      ? await getKeyedEntity(Entity.VERSION, currentVersion.previousVersionID)
+      : undefined
+    if (previousVersion && previousVersion.prompt === prompt) {
+      await datastore.delete(buildKey(Entity.VERSION, currentVersionID))
+      currentVersionID = currentVersion.previousVersionID
+      currentVersion = previousVersion
+    }
+  }
+
   const versionID = canOverwrite ? currentVersionID : undefined
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
