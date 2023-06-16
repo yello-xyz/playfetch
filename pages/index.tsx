@@ -76,6 +76,11 @@ export default function Home({
     }
   }
 
+  const refreshPrompts = async () => {
+    const newPrompts = await api.getPrompts(projectID ?? null)
+    setPrompts(newPrompts)
+  }
+
   const refreshVersions = async (promptID = activePrompt?.id, focusID = activeVersion?.id) => {
     const newVersions = promptID ? await api.getVersions(promptID) : []
     setVersions(newVersions)
@@ -151,7 +156,7 @@ export default function Home({
           setActiveVersion={updateActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
-          onRefreshProjects={refreshProjects}
+          onRefreshPrompts={refreshPrompts}
           onRefreshVersions={refreshVersions}
         />
       ) : (

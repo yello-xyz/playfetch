@@ -26,7 +26,7 @@ export default function PromptTabView({
   setActiveVersion,
   setDirtyVersion,
   onSavePrompt,
-  onRefreshProjects,
+  onRefreshPrompts,
   onRefreshVersions,
 }: {
   prompt: Prompt
@@ -36,7 +36,7 @@ export default function PromptTabView({
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
-  onRefreshProjects: () => void
+  onRefreshPrompts: () => void
   onRefreshVersions: (promptID?: number, versionID?: number) => void
 }) {
   const [activeRun, setActiveRun] = useState<Run>()
@@ -64,13 +64,13 @@ export default function PromptTabView({
   const publishPrompt = async (endpoint: string, currentPrompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
     await api.publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config).then(setCURLCommand)
-    onRefreshProjects() // endpoints for prompts are fetched with projects
+    onRefreshPrompts() // endpoints for prompts are fetched with prompts
   }
 
   const unpublishPrompt = async () => {
     setCURLCommand(undefined)
     await api.unpublishPrompt(prompt.id)
-    onRefreshProjects() // endpoints for prompts are fetched with projects
+    onRefreshPrompts() // endpoints for prompts are fetched with prompts
   }
 
   const isLastVersion = versions.length === 1
@@ -86,7 +86,7 @@ export default function PromptTabView({
         if (versions.length > 1) {
           onRefreshVersions()
         }
-        onRefreshProjects()
+        onRefreshPrompts()
       },
       destructive: true,
     })
