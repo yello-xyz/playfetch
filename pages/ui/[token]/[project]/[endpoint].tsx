@@ -1,4 +1,4 @@
-import ClientRoute, { ParseQuery, ParseRouterQuery, Redirect } from '@/client/clientRoute'
+import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
 import { getEndpointFromPath } from '@/server/datastore'
 import { useState } from 'react'
 import { Label, TextInput } from 'flowbite-react'
@@ -18,7 +18,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query }) => {
 
 export default function UI({ inputVariables }: { inputVariables: string[] }) {
   const router = useRouter()
-  const { token, project: projectURLPath, endpoint: urlPath } = ParseRouterQuery(router)
+  const { token, project: projectURLPath, endpoint: urlPath } = ParseQuery(router.query)
 
   const [output, setOutput] = useState<string>()
   const [inputState, setInputState] = useState<{ [key: string]: string }>({})

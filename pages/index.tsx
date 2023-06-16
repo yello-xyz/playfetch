@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Project, Prompt, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
 import PromptTabView from '@/client/promptTabView'
@@ -15,8 +15,8 @@ const inter = Inter({ subsets: ['latin'] })
 const findActivePrompt = (prompts: Prompt[], projects: Project[], promptID?: number) =>
   [...prompts, ...projects.flatMap(project => project.prompts)].find(prompt => prompt.id === promptID)
 
-const mapDictionary = <T, U>(dict: Record<string, T>, mapper: (value: T) => U) =>
-  Object.fromEntries(Object.entries(dict).map(([k, v]) =>[k, mapper(v)]))
+const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
+  Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
   const userID = req.session.user!.id
@@ -63,24 +63,6 @@ export default function Home({
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
-
-  const updateActivePrompt = (prompt?: Prompt) => {
-    if (prompt?.id !== activePrompt?.id) {
-      if (activePrompt) {
-        savePrompt()
-      }
-      setActiveProject(undefined)
-      setActivePrompt(prompt)
-      router.push(PromptRoute(prompt?.id), undefined, { shallow: true })
-      refreshVersions(prompt?.id)
-    }
-  }
-
-  const updateActiveProject = (project?: Project) => {
-    setActiveProject(project)
-    setActivePrompt(undefined)
-    router.push(ProjectRoute(project?.id), undefined, { shallow: true })
-  }
 
   const updateActiveVersion = (version: Version) => {
     setActiveVersion(version)
@@ -130,6 +112,36 @@ export default function Home({
     refreshProjects()
     onSaved?.(versionID)
     return versionID
+  }
+
+  const updateActivePrompt = (prompt?: Prompt) => {
+    if (prompt?.id !== activePrompt?.id) {
+      if (activePrompt) {
+        savePrompt()
+      }
+      setActiveProject(undefined)
+      setActivePrompt(prompt)
+      router.push(PromptRoute(prompt?.id), undefined, { shallow: true })
+      refreshVersions(prompt?.id)
+    }
+  }
+
+  const updateActiveProject = (project?: Project) => {
+    setActiveProject(project)
+    setActivePrompt(undefined)
+    router.push(ProjectRoute(project?.id), undefined, { shallow: true })
+  }
+
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const currentQuery = projectID ?? promptID
+  const [query, setQuery] = useState(currentQuery)
+  if (currentQuery !== query) {
+    setQuery(currentQuery)
+    if (promptID) {
+      updateActivePrompt(findActivePrompt(prompts, projects, promptID))
+    } else {
+      updateActiveProject(projects.find(project => project.id === projectID))
+    }
   }
 
   return (
