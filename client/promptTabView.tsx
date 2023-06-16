@@ -25,8 +25,8 @@ export default function PromptTabView({
   setActiveVersion,
   setDirtyVersion,
   onSavePrompt,
-  onRefreshPrompts,
-  onRefreshVersions,
+  onPromptDeleted,
+  onRefreshPrompt,
 }: {
   prompt: PromptWithVersions
   project?: Project
@@ -34,8 +34,8 @@ export default function PromptTabView({
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
-  onRefreshPrompts: () => void
-  onRefreshVersions: (promptID?: number, versionID?: number) => void
+  onPromptDeleted: () => void
+  onRefreshPrompt: (promptID?: number, versionID?: number) => void
 }) {
   const [activeRun, setActiveRun] = useState<Run>()
 
@@ -45,30 +45,30 @@ export default function PromptTabView({
 
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
-      onSavePrompt(_ => onRefreshVersions())
+      onSavePrompt(_ => onRefreshPrompt())
       setActiveVersion(version)
       setActiveRun(undefined)
       setCURLCommand(undefined)
     }
   }
 
-  const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshVersions(prompt.id, versionID))
+  const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(prompt.id, versionID))
 
   const runPrompt = async (currentPrompt: string, config: RunConfig) => {
     const versionID = await savePromptAndRefocus()
-    await api.runPrompt(prompt.id, versionID, currentPrompt, config).then(_ => onRefreshVersions(prompt.id, versionID))
+    await api.runPrompt(prompt.id, versionID, currentPrompt, config).then(_ => onRefreshPrompt(prompt.id, versionID))
   }
 
   const publishPrompt = async (endpoint: string, currentPrompt: string, config: RunConfig) => {
     await savePromptAndRefocus()
     await api.publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config).then(setCURLCommand)
-    onRefreshPrompts() // endpoints for prompts are fetched with prompts
+    onRefreshPrompt()
   }
 
   const unpublishPrompt = async () => {
     setCURLCommand(undefined)
     await api.unpublishPrompt(prompt.id)
-    onRefreshPrompts() // endpoints for prompts are fetched with prompts
+    onRefreshPrompt()
   }
 
   const isLastVersion = prompt.versions.length === 1
@@ -82,9 +82,10 @@ export default function PromptTabView({
       callback: async () => {
         await api.deleteVersion(version.id)
         if (prompt.versions.length > 1) {
-          onRefreshVersions()
+          onRefreshPrompt()
+        } else {
+          onPromptDeleted()
         }
-        onRefreshPrompts()
       },
       destructive: true,
     })

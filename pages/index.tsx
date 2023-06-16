@@ -78,18 +78,6 @@ export default function Home({
     }
   }
 
-  const refreshPrompts = async () => {
-    const newPrompts = await api.getPrompts(projectID ?? null)
-    setPrompts(newPrompts)
-  }
-
-  const refreshPrompt = async (promptID = activePrompt?.id, focusID = activeVersion?.id) => {
-    const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
-    setActivePrompt(newPrompt)
-    const focusedVersion = newPrompt?.versions?.find(version => version.id === focusID)
-    updateActiveVersion(focusedVersion ?? newPrompt?.versions?.[0])
-  }
-
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
     if (!dirtyVersion) {
       return activeVersion!.id
@@ -106,6 +94,13 @@ export default function Home({
     return versionID
   }
 
+  const refreshPrompt = async (promptID = activePrompt?.id, focusVersionID = activeVersion?.id) => {
+    const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
+    setActivePrompt(newPrompt)
+    const focusedVersion = newPrompt?.versions?.find(version => version.id === focusVersionID)
+    updateActiveVersion(focusedVersion ?? newPrompt?.versions?.[0])
+  }
+
   const updateActivePrompt = async (prompt?: Prompt) => {
     if (prompt?.id !== activePrompt?.id) {
       if (activePrompt) {
@@ -117,8 +112,10 @@ export default function Home({
     }
   }
 
-  const updateActiveProject = (project?: Project) => {
-    setActiveProject(project)
+  const updateActiveProject = async (project?: Project) => {
+    const newPrompts = await api.getPrompts(project?.id ?? null)
+    setPrompts(newPrompts)
+    setActiveProject(projects.find(project => project.id === projectID))
     setActivePrompt(undefined)
     router.push(ProjectRoute(project?.id), undefined, { shallow: true })
   }
@@ -156,8 +153,8 @@ export default function Home({
           setActiveVersion={updateActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
-          onRefreshPrompts={refreshPrompts}
-          onRefreshVersions={refreshPrompt}
+          onPromptDeleted={() => updateActiveProject()}
+          onRefreshPrompt={refreshPrompt}
         />
       ) : (
         <PromptsGridView prompts={activeProject ? activeProject.prompts : prompts} onSelect={updateActivePrompt} />
