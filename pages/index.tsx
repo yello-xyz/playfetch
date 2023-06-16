@@ -21,7 +21,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
 
   const initialProjects = await getProjectsForUser(userID)
   const initialPrompts = promptID ? [] : await getPromptsForProject(userID, projectID ?? null)
-  const initialPrompt = promptID ? await getPromptWithVersions(userID, promptID) : undefined
+  const initialPrompt = promptID ? await getPromptWithVersions(userID, promptID) : null
 
   return { props: { initialProjects, initialPrompts, initialPrompt } }
 })
