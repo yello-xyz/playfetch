@@ -89,7 +89,6 @@ export default function Home({
       dirtyVersion.tags,
       activeVersion!.id
     )
-    refreshProjects()
     onSaved?.(versionID)
     return versionID
   }
@@ -115,7 +114,7 @@ export default function Home({
   const updateActiveProject = async (project?: Project) => {
     const newPrompts = await api.getPrompts(project?.id ?? null)
     setPrompts(newPrompts)
-    setActiveProject(projects.find(project => project.id === projectID))
+    setActiveProject(projects.find(p => p.id === project?.id))
     setActivePrompt(undefined)
     router.push(ProjectRoute(project?.id), undefined, { shallow: true })
   }
@@ -154,7 +153,7 @@ export default function Home({
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
           onPromptDeleted={() => updateActiveProject()}
-          onRefreshPrompt={(focusVersionID) => refreshPrompt(activePrompt.id, focusVersionID)}
+          onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
         />
       ) : (
         <PromptsGridView prompts={activeProject ? activeProject.prompts : prompts} onSelect={updateActivePrompt} />
