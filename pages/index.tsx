@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Project, Prompt, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
 import PromptTabView from '@/client/promptTabView'
@@ -22,8 +22,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
   const userID = req.session.user!.id
   const { p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
   const { prompts: initialPrompts, projects: initialProjects } = await getProjectsForUser(userID)
-  const initialActivePrompt = findActivePrompt(initialPrompts, initialProjects, promptID) ?? null
-  const initialVersions = initialActivePrompt ? await getVersionsForPrompt(userID, initialActivePrompt.id) : []
+  const initialVersions = promptID ? await getVersionsForPrompt(userID, promptID) : []
   return { props: { initialPrompts, initialProjects, initialVersions } }
 })
 
