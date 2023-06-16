@@ -32,7 +32,7 @@ const api = {
   logout: async function () {
     return post(this.logout)
   },
-  getProjects: function (): Promise<{ prompts: Prompt[]; projects: Project[] }> {
+  getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
   getPrompts: function (projectID: number | null): Promise<Prompt[]> {

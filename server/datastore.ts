@@ -132,12 +132,12 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash'],
 })
 
-const toProject = (data: any, prompts: any[], endpoints: any[]): Project => ({
+const toProject = (data: any): Project => ({
   id: getID(data),
   name: data.name,
   urlPath: data.urlPath ?? '',
   timestamp: getTimestamp(data),
-  prompts: toProjectPrompts(getID(data), prompts, endpoints),
+  prompts: [] // TODO fetch separately for specific project
 })
 
 export async function addProjectForUser(userID: number, projectName: string) {
@@ -182,14 +182,9 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
   return apiKey
 }
 
-export async function getProjectsForUser(userID: number): Promise<{ prompts: Prompt[]; projects: Project[] }> {
+export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projects = await getOrderedEntities(Entity.PROJECT, 'userID', userID)
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'userID', userID)
-  const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)
-  return {
-    prompts: toProjectPrompts(null, prompts, endpoints),
-    projects: projects.map(project => toProject(project, prompts, endpoints)),
-  }
+  return projects.map(project => toProject(project))
 }
 
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
