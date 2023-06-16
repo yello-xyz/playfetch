@@ -154,7 +154,7 @@ export default function Home({
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
           onPromptDeleted={() => updateActiveProject()}
-          onRefreshPrompt={refreshPrompt}
+          onRefreshPrompt={(focusVersionID) => refreshPrompt(activePrompt.id, focusVersionID)}
         />
       ) : (
         <PromptsGridView prompts={activeProject ? activeProject.prompts : prompts} onSelect={updateActivePrompt} />

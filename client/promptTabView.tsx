@@ -35,7 +35,7 @@ export default function PromptTabView({
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
   onPromptDeleted: () => void
-  onRefreshPrompt: (promptID?: number, versionID?: number) => void
+  onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const [activeRun, setActiveRun] = useState<Run>()
 
@@ -52,11 +52,11 @@ export default function PromptTabView({
     }
   }
 
-  const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(prompt.id, versionID))
+  const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(versionID))
 
   const runPrompt = async (currentPrompt: string, config: RunConfig) => {
     const versionID = await savePromptAndRefocus()
-    await api.runPrompt(prompt.id, versionID, currentPrompt, config).then(_ => onRefreshPrompt(prompt.id, versionID))
+    await api.runPrompt(prompt.id, versionID, currentPrompt, config).then(_ => onRefreshPrompt(versionID))
   }
 
   const publishPrompt = async (endpoint: string, currentPrompt: string, config: RunConfig) => {
