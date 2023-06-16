@@ -109,11 +109,11 @@ export default function Home({
     }
   }
 
-  const selectProject = async (project?: Project) => {
-    const newPrompts = await api.getPrompts(project?.id ?? null)
+  const selectProject = async (projectID: number | null) => {
+    const newPrompts = await api.getPrompts(projectID)
     setPrompts(newPrompts)
     setActivePrompt(undefined)
-    router.push(ProjectRoute(project?.id), undefined, { shallow: true })
+    router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
   }
 
   const currentQuery = projectID ?? promptID
@@ -123,7 +123,7 @@ export default function Home({
     if (promptID) {
       updateActivePrompt(findActivePrompt(prompts, projects, promptID)) // TODO just pass in ID and refresh
     } else {
-      selectProject(projects.find(project => project.id === projectID))
+      selectProject(projectID ?? null)
     }
   }
 
@@ -149,7 +149,7 @@ export default function Home({
           setActiveVersion={updateActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
-          onPromptDeleted={() => selectProject()}
+          onPromptDeleted={() => selectProject(null)}
           onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
         />
       ) : (

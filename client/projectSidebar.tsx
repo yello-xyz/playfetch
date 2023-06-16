@@ -15,7 +15,7 @@ export default function ProjectSidebar({
   onAddPrompt,
 }: {
   projects?: Project[]
-  onSelectProject: (project?: Project) => void
+  onSelectProject: (projectID: number | null) => void
   onLogout: () => void
   onProjectAdded: () => void
   onAddPrompt: () => void
@@ -50,7 +50,7 @@ export default function ProjectSidebar({
       </div>
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item className='cursor-pointer' icon={TbPrompt} onClick={() => onSelectProject()}>
+          <Sidebar.Item className='cursor-pointer' icon={TbPrompt} onClick={() => onSelectProject(null)}>
             Prompts
           </Sidebar.Item>
           {projects.map((project, projectIndex) => (
@@ -58,7 +58,7 @@ export default function ProjectSidebar({
               className='cursor-pointer'
               key={projectIndex}
               icon={HiOutlineFolder}
-              onClick={() => onSelectProject(project)}>
+              onClick={() => onSelectProject(project.id)}>
               {project.name}
             </Sidebar.Item>
           ))}
