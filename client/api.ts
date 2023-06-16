@@ -41,7 +41,7 @@ const api = {
   checkProjectName: function (name: string): Promise<{ url?: string }> {
     return post(this.checkProjectName, { name })
   },
-  addProject: function (name: string) {
+  addProject: function (name: string): Promise<number> {
     return post(this.addProject, { name })
   },
   getPrompt: function (promptID: number): Promise<PromptWithVersions> {

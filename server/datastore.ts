@@ -150,6 +150,7 @@ export async function addProjectForUser(userID: number, projectName: string) {
   }
   const projectData = toProjectData(userID, projectName, urlPath, new Date())
   await getDatastore().save(projectData)
+  return Number(projectData.key.id)
 }
 
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {

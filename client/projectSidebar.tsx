@@ -17,7 +17,7 @@ export default function ProjectSidebar({
   projects?: Project[]
   onSelectProject: (projectID: number | null) => void
   onLogout: () => void
-  onProjectAdded: () => void
+  onProjectAdded: (projectID: number) => void
   onAddPrompt: () => void
 }) {
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
@@ -32,8 +32,8 @@ export default function ProjectSidebar({
       title: 'Add a new project',
       label: 'Project name',
       callback: async (name: string) => {
-        await api.addProject(name)
-        onProjectAdded()
+        const projectID = await api.addProject(name)
+        onProjectAdded(projectID)
       },
       validator: name => api.checkProjectName(name),
     })

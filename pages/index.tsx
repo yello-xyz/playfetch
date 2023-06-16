@@ -51,7 +51,11 @@ export default function Home({
     setDirtyVersion(undefined)
   }
 
-  const refreshProjects = async () => api.getProjects().then(setProjects)
+  const refreshProjects = async (focusProjectID: number) => {
+    const newProjects = await api.getProjects()
+    setProjects(newProjects)
+    selectProject(focusProjectID)
+  }
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
     if (!dirtyVersion) {
