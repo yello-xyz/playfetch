@@ -226,7 +226,7 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   )
 }
 
-export async function addPromptForUser(userID: number, projectID: number | null): Promise<Prompt> {
+export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
   const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
   const name = BuildUniqueName(
     'New Prompt',
@@ -235,7 +235,7 @@ export async function addPromptForUser(userID: number, projectID: number | null)
   const promptData = toPromptData(userID, projectID, name, new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, toID(promptData), name, '', '')
-  return toPrompt(promptData)
+  return toID(promptData)
 }
 
 async function updatePromptNameIfNeeded(promptData: any) {
