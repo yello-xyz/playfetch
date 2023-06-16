@@ -182,7 +182,7 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
   return apiKey
 }
 
-export async function getGroupedPromptsForUser(userID: number): Promise<{ prompts: Prompt[]; projects: Project[] }> {
+export async function getProjectsForUser(userID: number): Promise<{ prompts: Prompt[]; projects: Project[] }> {
   const projects = await getOrderedEntities(Entity.PROJECT, 'userID', userID)
   const prompts = await getOrderedEntities(Entity.PROMPT, 'userID', userID)
   const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)

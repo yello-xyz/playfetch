@@ -32,8 +32,8 @@ const api = {
   logout: async function () {
     return post(this.logout)
   },
-  getGroupedPrompts: function (): Promise<{ prompts: Prompt[]; projects: Project[] }> {
-    return post(this.getGroupedPrompts)
+  getProjects: function (): Promise<{ prompts: Prompt[]; projects: Project[] }> {
+    return post(this.getProjects)
   },
   checkProjectName: function (name: string): Promise<{ url?: string }> {
     return post(this.checkProjectName, { name })

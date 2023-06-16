@@ -1,4 +1,4 @@
-import { getGroupedPromptsForUser, getVersionsForPrompt } from '@/server/datastore'
+import { getProjectsForUser, getVersionsForPrompt } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -21,7 +21,7 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
 export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
   const userID = req.session.user!.id
   const { p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
-  const { prompts: initialPrompts, projects: initialProjects } = await getGroupedPromptsForUser(userID)
+  const { prompts: initialPrompts, projects: initialProjects } = await getProjectsForUser(userID)
   const initialActivePrompt = findActivePrompt(initialPrompts, initialProjects, promptID) ?? null
   const initialVersions = initialActivePrompt ? await getVersionsForPrompt(userID, initialActivePrompt.id) : []
   return { props: { initialPrompts, initialProjects, initialVersions } }
@@ -57,7 +57,7 @@ export default function Home({
 
   const refreshProjects = async (promptID?: number) => {
     const oldIndex = projects.findIndex(hasActivePrompt)
-    const { prompts: newPrompts, projects: newProjects } = await api.getGroupedPrompts()
+    const { prompts: newPrompts, projects: newProjects } = await api.getProjects()
     if (!newPrompts.length && !newProjects.length) {
       refreshData()
     } else {
