@@ -36,8 +36,6 @@ export default function Home({
   initialPrompt?: PromptWithVersions
 }) {
   const router = useRouter()
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const refreshData = () => router.replace(router.asPath)
 
   const [projects, setProjects] = useState(initialProjects)
   const [prompts, setPrompts] = useState(initialPrompts)
@@ -46,48 +44,46 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
-  const updateActiveVersion = (version?: Version) => {
+  const selectVersion = (version?: Version) => {
     setActiveVersion(version)
     setDirtyVersion(undefined)
   }
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
-    if (!dirtyVersion) {
-      return activeVersion!.id
+    if (!activePrompt || !activeVersion || !dirtyVersion) {
+      return activeVersion?.id
     }
     const versionID = await api.updatePrompt(
-      activePrompt!.id,
+      activePrompt.id,
       dirtyVersion.prompt,
       dirtyVersion.title,
       dirtyVersion.tags,
-      activeVersion!.id
+      activeVersion.id
     )
     onSaved?.(versionID)
     return versionID
   }
 
-  const refreshPrompt = async (promptID = activePrompt?.id, focusVersionID = activeVersion?.id) => {
+  const refreshPrompt = async (promptID?: number, focusVersionID = activeVersion?.id) => {
     const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
     setActivePrompt(newPrompt)
     const focusedVersion = newPrompt?.versions?.find(version => version.id === focusVersionID)
-    updateActiveVersion(focusedVersion ?? newPrompt?.versions?.[0])
+    selectVersion(focusedVersion ?? newPrompt?.versions?.[0])
   }
 
   const selectPrompt = async (promptID: number) => {
     if (promptID !== activePrompt?.id) {
-      if (activePrompt) {
-        savePrompt()
-      }
+      savePrompt()
       await refreshPrompt(promptID)
       router.push(PromptRoute(promptID), undefined, { shallow: true })
     }
   }
 
   const selectProject = async (projectID: number | null) => {
-    // TODO need to save prompt if dirty?
+    savePrompt()
     const newPrompts = await api.getPrompts(projectID)
     setPrompts(newPrompts)
-    setActivePrompt(undefined)
+    refreshPrompt(undefined)
     router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
   }
 
@@ -97,6 +93,7 @@ export default function Home({
     selectProject(focusProjectID)
   }
 
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const currentQuery = projectID ?? promptID
   const [query, setQuery] = useState(currentQuery)
   if (currentQuery !== query) {
@@ -113,7 +110,7 @@ export default function Home({
       <ProjectSidebar
         projects={projects}
         onSelectProject={selectProject}
-        onLogout={refreshData}
+        onLogout={() => router.replace(router.asPath)}
         onProjectAdded={refreshProjectsAndFocus}
         onPromptAdded={selectPrompt}
       />
@@ -122,9 +119,9 @@ export default function Home({
           prompt={activePrompt}
           project={projects.find(project => project.id === activePrompt.projectID)}
           activeVersion={activeVersion}
-          setActiveVersion={updateActiveVersion}
+          setActiveVersion={selectVersion}
           setDirtyVersion={setDirtyVersion}
-          onSavePrompt={savePrompt}
+          onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
           onPromptDeleted={selectProject}
           onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
         />
