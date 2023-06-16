@@ -38,8 +38,8 @@ export default function ProjectSidebar({
   }
 
   const addPrompt = async (projectID: number | null) => {
-    const promptID = await api.addPrompt(projectID)
-    onRefresh(promptID)
+    const prompt = await api.addPrompt(projectID)
+    onRefresh(prompt.id)
   }
 
   return (

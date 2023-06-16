@@ -228,7 +228,7 @@ const toPrompt = (data: any, endpointData?: any): Prompt => ({
   ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
 })
 
-export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
+export async function addPromptForUser(userID: number, projectID: number | null): Promise<Prompt> {
   const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
   const name = BuildUniqueName(
     'New Prompt',
@@ -237,7 +237,7 @@ export async function addPromptForUser(userID: number, projectID: number | null)
   const promptData = toPromptData(userID, projectID, name, new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, Number(promptData.key.id), name, '', '')
-  return Number(promptData.key.id)
+  return toPrompt(promptData)
 }
 
 async function updatePromptNameIfNeeded(promptData: any) {
