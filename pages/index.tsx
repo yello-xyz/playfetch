@@ -79,12 +79,17 @@ export default function Home({
     }
   }
 
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const activeProjectID = activePrompt ? undefined : projectID ?? null
+
   const selectProject = async (projectID: number | null) => {
-    savePrompt()
-    const newPrompts = await api.getPrompts(projectID)
-    setPrompts(newPrompts)
-    refreshPrompt(undefined)
-    router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
+    if (projectID !== activeProjectID) {
+      savePrompt()
+      const newPrompts = await api.getPrompts(projectID)
+      setPrompts(newPrompts)
+      refreshPrompt(undefined)
+      router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })  
+    }
   }
 
   const refreshProjectsAndFocus = async (focusProjectID: number) => {
@@ -93,7 +98,6 @@ export default function Home({
     selectProject(focusProjectID)
   }
 
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const currentQuery = projectID ?? promptID
   const [query, setQuery] = useState(currentQuery)
   if (currentQuery !== query) {
@@ -109,7 +113,7 @@ export default function Home({
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
         projects={projects}
-        activeProjectID={activePrompt ? undefined : projectID ?? null}
+        activeProjectID={activeProjectID}
         onSelectProject={selectProject}
         onLogout={() => router.replace(router.asPath)}
         onProjectAdded={refreshProjectsAndFocus}
