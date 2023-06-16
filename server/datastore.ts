@@ -187,6 +187,18 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
   return projects.map(project => toProject(project))
 }
 
+const toPromptData = (userID: number, projectID: number | null, name: string, createdAt: Date, promptID?: number) => ({
+  key: buildKey(Entity.PROMPT, promptID),
+  data: { userID, projectID, name, createdAt },
+  excludeFromIndexes: ['name'],
+})
+
+const toPrompt = (data: any, endpointData?: any): Prompt => ({
+  id: getID(data),
+  name: data.name,
+  ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
+})
+
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
   const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID)
   // TODO save projectID in endpoint so we can optimize this a little
@@ -201,27 +213,14 @@ export async function getPromptsForProject(userID: number, projectID: number | n
     )
 }
 
-const toPromptData = (userID: number, projectID: number | null, name: string, createdAt: Date, promptID?: number) => ({
-  key: buildKey(Entity.PROMPT, promptID),
-  data: { userID, projectID, name, createdAt },
-  excludeFromIndexes: ['name'],
-})
-
-const toProjectPrompts = (projectID: number | null, prompts: any[], endpoints: any[]): Prompt[] =>
-  prompts
-    .filter(promptData => promptData.projectID === projectID)
-    .map(promptData =>
-      toPrompt(
-        promptData,
-        endpoints.find(endpointData => getID(endpointData) === getID(promptData))
-      )
-    )
-
-const toPrompt = (data: any, endpointData?: any): Prompt => ({
-  id: getID(data),
-  name: data.name,
-  ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
-})
+export async function getPromptForUser(userID: number, promptID: number): Promise<Prompt> {
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  if (!promptData || promptData?.userID !== userID) {
+    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
+  }
+  const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
+  return toPrompt(promptData, endpointData)
+}
 
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<Prompt> {
   const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)

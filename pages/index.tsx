@@ -1,4 +1,4 @@
-import { getProjectsForUser, getPromptsForProject, getVersionsForPrompt } from '@/server/datastore'
+import { getProjectsForUser, getPromptForUser, getPromptsForProject, getVersionsForPrompt } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -20,30 +20,38 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
   const userID = req.session.user!.id
-  const { p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
+
   const initialProjects = await getProjectsForUser(userID)
-  const initialPrompts = await getPromptsForProject(userID, null)
+
+  const initialPrompts = promptID ? [] : await getPromptsForProject(userID, projectID ?? null)
+
+  const initialPrompt = promptID ? await getPromptForUser(userID, promptID) : undefined
   const initialVersions = promptID ? await getVersionsForPrompt(userID, promptID) : []
-  return { props: { initialPrompts, initialProjects, initialVersions } }
+
+  return { props: { initialProjects, initialPrompts, initialPrompt, initialVersions } }
 })
 
 export default function Home({
-  initialPrompts,
   initialProjects,
+  initialPrompts,
+  initialPrompt,
   initialVersions,
 }: {
-  initialPrompts: Prompt[]
   initialProjects: Project[]
+  initialPrompts: Prompt[]
+  initialPrompt?: Prompt
   initialVersions: Version[]
 }) {
   const router = useRouter()
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const refreshData = () => router.replace(router.asPath)
 
-  const [prompts, setPrompts] = useState(initialPrompts)
   const [projects, setProjects] = useState(initialProjects)
   const [activeProject, setActiveProject] = useState(initialProjects.find(project => project.id === projectID))
-  const [activePrompt, setActivePrompt] = useState(findActivePrompt(initialPrompts, initialProjects, promptID))
+  const [prompts, setPrompts] = useState(initialPrompts)
+
+  const [activePrompt, setActivePrompt] = useState(initialPrompt)
   const [versions, setVersions] = useState(initialVersions)
   const [activeVersion, setActiveVersion] = useState(initialVersions[0])
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
