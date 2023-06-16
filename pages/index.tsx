@@ -56,26 +56,7 @@ export default function Home({
 
   const hasActivePrompt = (project: Project) => project.prompts.some(prompt => prompt.id === activePrompt?.id)
 
-  const refreshProjects = async (promptID?: number) => {
-    const oldIndex = projects.findIndex(hasActivePrompt)
-    const newProjects = await api.getProjects()
-    const newPrompts = await api.getPrompts(null)
-    if (!newPrompts.length && !newProjects.length) {
-      refreshData()
-    } else {
-      setPrompts(newPrompts)
-      setProjects(newProjects)
-      const newActivePrompt = findActivePrompt(newPrompts, newProjects, promptID)
-      if (newActivePrompt) {
-        updateActivePrompt(newActivePrompt)
-      } else if (newPrompts.length && (!newProjects.length || oldIndex < 0)) {
-        updateActivePrompt(prompts[0])
-      } else {
-        const newIndex = Math.max(0, Math.min(newProjects.length - 1, oldIndex))
-        updateActivePrompt(newProjects[newIndex].prompts[0])
-      }
-    }
-  }
+  const refreshProjects = async () => api.getProjects().then(setProjects)
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
     if (!dirtyVersion) {
