@@ -109,6 +109,7 @@ export default function Home({
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
         projects={projects}
+        activeProjectID={activePrompt ? undefined : projectID ?? null}
         onSelectProject={selectProject}
         onLogout={() => router.replace(router.asPath)}
         onProjectAdded={refreshProjectsAndFocus}
