@@ -1,4 +1,4 @@
-import { Project, Prompt, RunConfig, Version } from '@/types'
+import { Project, Prompt, PromptWithVersions, RunConfig, Version } from '@/types'
 import ClientRoute from './clientRoute'
 
 async function parseResponse(response: Response) {
@@ -44,7 +44,7 @@ const api = {
   addProject: function (name: string) {
     return post(this.addProject, { name })
   },
-  getPrompt: function (promptID: number): Promise<Prompt> {
+  getPrompt: function (promptID: number): Promise<PromptWithVersions> {
     return post(this.getPrompt, { promptID })
   },
   addPrompt: function (projectID: number | null): Promise<Prompt> {
@@ -84,9 +84,6 @@ const api = {
   },
   unpublishPrompt: function (promptID: number) {
     return post(this.unpublishPrompt, { promptID })
-  },
-  getVersions: function (promptID: number): Promise<Version[]> {
-    return post(this.getVersions, { promptID })
   },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })

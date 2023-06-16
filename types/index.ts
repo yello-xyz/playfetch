@@ -17,7 +17,11 @@ export type Project = {
 export type Prompt = {
   id: number
   name: string
+}
+
+export type PromptWithVersions = Prompt & {
   endpoint?: Endpoint
+  versions: Version[]
 }
 
 export type Version = {

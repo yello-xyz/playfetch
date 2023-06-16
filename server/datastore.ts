@@ -1,5 +1,5 @@
 import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
-import { Endpoint, Project, Prompt, Run, RunConfig, User, Version } from '@/types'
+import { Endpoint, Project, Prompt, PromptWithVersions, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
@@ -137,7 +137,7 @@ const toProject = (data: any): Project => ({
   name: data.name,
   urlPath: data.urlPath ?? '',
   timestamp: getTimestamp(data),
-  prompts: [] // TODO fetch separately for specific project
+  prompts: [], // TODO fetch separately for specific project
 })
 
 export async function addProjectForUser(userID: number, projectName: string) {
@@ -193,33 +193,35 @@ const toPromptData = (userID: number, projectID: number | null, name: string, cr
   excludeFromIndexes: ['name'],
 })
 
-const toPrompt = (data: any, endpointData?: any): Prompt => ({
-  id: getID(data),
-  name: data.name,
+const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name })
+
+const toPromptWithVersions = (data: any, versions: any[], runs: any[], endpointData?: any): PromptWithVersions => ({
+  ...toPrompt(data),
+  versions: versions.map(version => toVersion(version, runs)),
   ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
 })
 
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
   const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID)
-  // TODO save projectID in endpoint so we can optimize this a little
-  const endpoints = await getEntities(Entity.ENDPOINT, 'userID', userID)
-  return prompts
-    .filter(prompt => prompt.userID === userID)
-    .map(prompt =>
-      toPrompt(
-        prompt,
-        endpoints.find(endpointData => getID(endpointData) === getID(prompt))
-      )
-    )
+  return prompts.filter(prompt => prompt.userID === userID).map(prompt => toPrompt(prompt))
 }
 
-export async function getPromptForUser(userID: number, promptID: number): Promise<Prompt> {
+export async function getPromptWithVersions(userID: number, promptID: number): Promise<PromptWithVersions> {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   if (!promptData || promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
-  return toPrompt(promptData, endpointData)
+  const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
+  const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
+  versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
+
+  return toPromptWithVersions(
+    promptData,
+    versions.filter(version => version.userID === userID),
+    runs,
+    endpointData
+  )
 }
 
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<Prompt> {
@@ -328,12 +330,6 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   if (versionCount > 1) {
     await updatePromptNameIfNeeded(promptData)
   }
-}
-
-export async function getVersionsForPrompt(userID: number, promptID: number): Promise<Version[]> {
-  const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
-  const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
-  return versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 }
 
 export async function saveRun(

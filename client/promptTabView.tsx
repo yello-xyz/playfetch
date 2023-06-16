@@ -1,7 +1,7 @@
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
-import { Project, Prompt, Run, RunConfig, Version } from '@/types'
+import { Project, Prompt, PromptWithVersions, Run, RunConfig, Version } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 
@@ -21,7 +21,6 @@ const versionFilter = (filter: string) => (version: Version) => {
 export default function PromptTabView({
   prompt,
   project,
-  versions,
   activeVersion,
   setActiveVersion,
   setDirtyVersion,
@@ -29,9 +28,8 @@ export default function PromptTabView({
   onRefreshPrompts,
   onRefreshVersions,
 }: {
-  prompt: Prompt
+  prompt: PromptWithVersions
   project?: Project
-  versions: Version[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
@@ -73,7 +71,7 @@ export default function PromptTabView({
     onRefreshPrompts() // endpoints for prompts are fetched with prompts
   }
 
-  const isLastVersion = versions.length === 1
+  const isLastVersion = prompt.versions.length === 1
   const entityToDelete = isLastVersion ? 'prompt' : 'version'
 
   const deleteVersion = async (version: Version) => {
@@ -83,7 +81,7 @@ export default function PromptTabView({
       message: `Are you sure you want to delete this ${entityToDelete}${suffix}? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
-        if (versions.length > 1) {
+        if (prompt.versions.length > 1) {
           onRefreshVersions()
         }
         onRefreshPrompts()
@@ -97,7 +95,7 @@ export default function PromptTabView({
       <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
         <VersionTimeline
-          versions={versions.filter(versionFilter(filter))}
+          versions={prompt.versions.filter(versionFilter(filter))}
           activeVersion={activeVersion}
           setActiveVersion={selectActiveVersion}
           activeRun={activeRun}

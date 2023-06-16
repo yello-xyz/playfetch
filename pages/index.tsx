@@ -1,10 +1,10 @@
-import { getProjectsForUser, getPromptForUser, getPromptsForProject, getVersionsForPrompt } from '@/server/datastore'
+import { getProjectsForUser, getPromptWithVersions, getPromptsForProject } from '@/server/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import { useState } from 'react'
-import { Project, Prompt, Version } from '@/types'
+import { Project, Prompt, PromptWithVersions, Version } from '@/types'
 import ProjectSidebar from '@/client/projectSidebar'
 import PromptTabView from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
@@ -23,25 +23,20 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(userID)
-
   const initialPrompts = promptID ? [] : await getPromptsForProject(userID, projectID ?? null)
+  const initialPrompt = promptID ? await getPromptWithVersions(userID, promptID) : undefined
 
-  const initialPrompt = promptID ? await getPromptForUser(userID, promptID) : undefined
-  const initialVersions = promptID ? await getVersionsForPrompt(userID, promptID) : []
-
-  return { props: { initialProjects, initialPrompts, initialPrompt, initialVersions } }
+  return { props: { initialProjects, initialPrompts, initialPrompt } }
 })
 
 export default function Home({
   initialProjects,
   initialPrompts,
   initialPrompt,
-  initialVersions,
 }: {
   initialProjects: Project[]
   initialPrompts: Prompt[]
-  initialPrompt?: Prompt
-  initialVersions: Version[]
+  initialPrompt?: PromptWithVersions
 }) {
   const router = useRouter()
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
@@ -52,11 +47,10 @@ export default function Home({
   const [prompts, setPrompts] = useState(initialPrompts)
 
   const [activePrompt, setActivePrompt] = useState(initialPrompt)
-  const [versions, setVersions] = useState(initialVersions)
-  const [activeVersion, setActiveVersion] = useState(initialVersions[0])
+  const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
-  const updateActiveVersion = (version: Version) => {
+  const updateActiveVersion = (version?: Version) => {
     setActiveVersion(version)
     setDirtyVersion(undefined)
   }
@@ -89,11 +83,11 @@ export default function Home({
     setPrompts(newPrompts)
   }
 
-  const refreshVersions = async (promptID = activePrompt?.id, focusID = activeVersion?.id) => {
-    const newVersions = promptID ? await api.getVersions(promptID) : []
-    setVersions(newVersions)
-    const focusedVersion = newVersions.find(version => version.id === focusID)
-    updateActiveVersion(focusedVersion ?? newVersions[0])
+  const refreshPrompt = async (promptID = activePrompt?.id, focusID = activeVersion?.id) => {
+    const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
+    setActivePrompt(newPrompt)
+    const focusedVersion = newPrompt?.versions?.find(version => version.id === focusID)
+    updateActiveVersion(focusedVersion ?? newPrompt?.versions?.[0])
   }
 
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
@@ -117,8 +111,7 @@ export default function Home({
       if (activePrompt) {
         savePrompt()
       }
-      await refreshVersions(prompt?.id)
-      setActivePrompt(prompt)
+      await refreshPrompt(prompt?.id)
       setActiveProject(undefined)
       router.push(PromptRoute(prompt?.id), undefined, { shallow: true })
     }
@@ -159,13 +152,12 @@ export default function Home({
         <PromptTabView
           prompt={activePrompt}
           project={projects.find(hasActivePrompt)}
-          versions={versions}
           activeVersion={activeVersion}
           setActiveVersion={updateActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={savePrompt}
           onRefreshPrompts={refreshPrompts}
-          onRefreshVersions={refreshVersions}
+          onRefreshVersions={refreshPrompt}
         />
       ) : (
         <PromptsGridView prompts={activeProject ? activeProject.prompts : prompts} onSelect={updateActivePrompt} />

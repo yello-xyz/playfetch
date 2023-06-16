@@ -1,10 +1,10 @@
-import { getPromptForUser } from '@/server/datastore'
+import { getPromptWithVersions } from '@/server/datastore'
 import { withLoggedInSessionRoute } from '@/server/session'
-import { Prompt } from '@/types'
+import { PromptWithVersions } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function getPrompt(req: NextApiRequest, res: NextApiResponse<Prompt>) {
-  const prompt = await getPromptForUser(req.session.user!.id, req.body.promptID)
+async function getPrompt(req: NextApiRequest, res: NextApiResponse<PromptWithVersions>) {
+  const prompt = await getPromptWithVersions(req.session.user!.id, req.body.promptID)
   res.json(prompt)
 }
 
