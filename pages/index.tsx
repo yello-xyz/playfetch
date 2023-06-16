@@ -128,13 +128,19 @@ export default function Home({
     }
   }
 
+  const addPrompt = async (projectID: number | null) => {
+    const prompt = await api.addPrompt(projectID)
+    refreshProjects(prompt.id)
+  }
+
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
         projects={projects}
         setActiveProject={updateActiveProject}
         onLogout={refreshData}
-        onRefresh={refreshProjects}
+        onRefreshProjects={refreshProjects}
+        onAddPrompt={() => addPrompt(null)}
       />
       {activePrompt && activeVersion ? (
         <PromptTabView

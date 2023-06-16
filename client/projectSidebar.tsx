@@ -11,12 +11,14 @@ export default function ProjectSidebar({
   projects = [],
   setActiveProject,
   onLogout,
-  onRefresh,
+  onRefreshProjects,
+  onAddPrompt,
 }: {
   projects?: Project[]
   setActiveProject: (project?: Project) => void
   onLogout: () => void
-  onRefresh: (promptID?: number) => void
+  onRefreshProjects: () => void
+  onAddPrompt: () => void
 }) {
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
@@ -31,22 +33,17 @@ export default function ProjectSidebar({
       label: 'Project name',
       callback: async (name: string) => {
         await api.addProject(name)
-        onRefresh()
+        onRefreshProjects()
       },
       validator: name => api.checkProjectName(name),
     })
-  }
-
-  const addPrompt = async (projectID: number | null) => {
-    const prompt = await api.addPrompt(projectID)
-    onRefresh(prompt.id)
   }
 
   return (
     <Sidebar className='h-screen'>
       <div className='flex flex-col gap-4 mb-4'>
         <PendingButton onClick={logout}>Log out</PendingButton>
-        <PendingButton onClick={() => addPrompt(null)}>
+        <PendingButton onClick={onAddPrompt}>
           <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
           Add New Prompt
         </PendingButton>
