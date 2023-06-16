@@ -11,13 +11,13 @@ export default function ProjectSidebar({
   projects = [],
   setActiveProject,
   onLogout,
-  onRefreshProjects,
+  onProjectAdded,
   onAddPrompt,
 }: {
   projects?: Project[]
   setActiveProject: (project?: Project) => void
   onLogout: () => void
-  onRefreshProjects: () => void
+  onProjectAdded: () => void
   onAddPrompt: () => void
 }) {
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
@@ -33,7 +33,7 @@ export default function ProjectSidebar({
       label: 'Project name',
       callback: async (name: string) => {
         await api.addProject(name)
-        onRefreshProjects()
+        onProjectAdded()
       },
       validator: name => api.checkProjectName(name),
     })

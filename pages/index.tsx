@@ -125,7 +125,7 @@ export default function Home({
   if (currentQuery !== query) {
     setQuery(currentQuery)
     if (promptID) {
-      updateActivePrompt(findActivePrompt(prompts, projects, promptID))
+      updateActivePrompt(findActivePrompt(prompts, projects, promptID)) // TODO just pass in ID and refresh
     } else {
       updateActiveProject(projects.find(project => project.id === projectID))
     }
@@ -133,7 +133,7 @@ export default function Home({
 
   const addPrompt = async (projectID: number | null) => {
     const prompt = await api.addPrompt(projectID)
-    refreshProjects(prompt.id)
+    updateActivePrompt(prompt)
   }
 
   return (
@@ -142,7 +142,7 @@ export default function Home({
         projects={projects}
         setActiveProject={updateActiveProject}
         onLogout={refreshData}
-        onRefreshProjects={refreshProjects}
+        onProjectAdded={refreshProjects}
         onAddPrompt={() => addPrompt(null)}
       />
       {activePrompt && activeVersion ? (
