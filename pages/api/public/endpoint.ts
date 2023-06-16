@@ -6,9 +6,9 @@ import { ToCamelCase } from '@/common/formatting'
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
-  const apiKey = (req.headers['x-api-key'] as string)
+  const apiKey = req.headers['x-api-key'] as string
 
-  if (apiKey && projectURLPath && endpointName && await checkProject(projectURLPath, apiKey)) {
+  if (apiKey && projectURLPath && endpointName && (await checkProject(projectURLPath, apiKey))) {
     const endpoint = await getEndpointFromPath(endpointName, projectURLPath)
     if (endpoint) {
       const inputs = req.body

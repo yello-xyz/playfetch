@@ -20,7 +20,9 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
   const curlCommand = `curl -X POST ${url} \\
   -H "x-api-key: ${apiKey}" \\
   -H "content-type: application/json" \\
-  -d '{ ${Object.entries(config.inputs).map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
+  -d '{ ${Object.entries(config.inputs)
+    .map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`)
+    .join(', ')} }'`
 
   res.json(curlCommand)
 }

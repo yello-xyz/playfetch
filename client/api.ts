@@ -14,7 +14,7 @@ export async function postToAPI(apiPath: string, apiCall: string, body: Record<s
   return fetch(`${apiPath}/${apiCall}`, {
     method: 'POST',
     headers: {
-      'accept': 'application/json',
+      accept: 'application/json',
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
