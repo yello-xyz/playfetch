@@ -20,48 +20,32 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
   const userID = req.session.user!.id
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
   const { prompts: initialPrompts, projects: initialProjects } = await getGroupedPromptsForUser(userID)
-  const initialActiveProject = projectID ? initialProjects.find(project => project.id === projectID) : null
   const initialActivePrompt = findActivePrompt(initialPrompts, initialProjects, promptID) ?? null
   const initialVersions = initialActivePrompt ? await getVersionsForPrompt(userID, initialActivePrompt.id) : []
-  const initialActiveVersion = initialVersions[0] ?? null
-  return {
-    props: {
-      initialPrompts,
-      initialProjects,
-      initialActiveProject,
-      initialActivePrompt,
-      initialVersions,
-      initialActiveVersion,
-    },
-  }
+  return { props: { initialPrompts, initialProjects, initialVersions } }
 })
 
 export default function Home({
   initialPrompts,
   initialProjects,
-  initialActiveProject,
-  initialActivePrompt,
   initialVersions,
-  initialActiveVersion,
 }: {
   initialPrompts: Prompt[]
   initialProjects: Project[]
-  initialActiveProject?: Project
-  initialActivePrompt?: Prompt
   initialVersions: Version[]
-  initialActiveVersion?: Version
 }) {
   const router = useRouter()
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const refreshData = () => router.replace(router.asPath)
 
   const [prompts, setPrompts] = useState(initialPrompts)
   const [projects, setProjects] = useState(initialProjects)
-  const [activeProject, setActiveProject] = useState(initialActiveProject)
-  const [activePrompt, setActivePrompt] = useState(initialActivePrompt)
+  const [activeProject, setActiveProject] = useState(initialProjects.find(project => project.id === projectID))
+  const [activePrompt, setActivePrompt] = useState(findActivePrompt(initialPrompts, initialProjects, promptID))
   const [versions, setVersions] = useState(initialVersions)
-  const [activeVersion, setActiveVersion] = useState(initialActiveVersion)
+  const [activeVersion, setActiveVersion] = useState(initialVersions[0])
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
 
   const updateActiveVersion = (version: Version) => {
@@ -132,7 +116,6 @@ export default function Home({
     router.push(ProjectRoute(project?.id), undefined, { shallow: true })
   }
 
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const currentQuery = projectID ?? promptID
   const [query, setQuery] = useState(currentQuery)
   if (currentQuery !== query) {
