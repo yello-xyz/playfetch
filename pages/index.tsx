@@ -51,12 +51,6 @@ export default function Home({
     setDirtyVersion(undefined)
   }
 
-  const refreshProjects = async (focusProjectID: number) => {
-    const newProjects = await api.getProjects()
-    setProjects(newProjects)
-    selectProject(focusProjectID)
-  }
-
   const savePrompt = async (onSaved?: (versionID: number) => void) => {
     if (!dirtyVersion) {
       return activeVersion!.id
@@ -97,6 +91,12 @@ export default function Home({
     router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
   }
 
+  const refreshProjectsAndFocus = async (focusProjectID: number) => {
+    const newProjects = await api.getProjects()
+    setProjects(newProjects)
+    selectProject(focusProjectID)
+  }
+
   const currentQuery = projectID ?? promptID
   const [query, setQuery] = useState(currentQuery)
   if (currentQuery !== query) {
@@ -108,19 +108,14 @@ export default function Home({
     }
   }
 
-  const addPrompt = async (projectID: number | null) => {
-    const prompt = await api.addPrompt(projectID)
-    selectPrompt(prompt.id)
-  }
-
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
       <ProjectSidebar
         projects={projects}
         onSelectProject={selectProject}
         onLogout={refreshData}
-        onProjectAdded={refreshProjects}
-        onAddPrompt={() => addPrompt(null)}
+        onProjectAdded={refreshProjectsAndFocus}
+        onPromptAdded={selectPrompt}
       />
       {activePrompt && activeVersion ? (
         <PromptTabView
