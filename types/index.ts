@@ -11,7 +11,6 @@ export type Project = {
   name: string
   urlPath: string
   timestamp: string
-  prompts: Prompt[]
 }
 
 export type Prompt = {

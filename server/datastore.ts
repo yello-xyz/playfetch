@@ -139,7 +139,6 @@ const toProject = (data: any): Project => ({
   name: data.name,
   urlPath: data.urlPath ?? '',
   timestamp: getTimestamp(data),
-  prompts: [], // TODO fetch separately for specific project
 })
 
 export async function addProjectForUser(userID: number, projectName: string) {
