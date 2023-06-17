@@ -68,6 +68,7 @@ export default function Home({
   const refreshPrompt = async (promptID?: number, focusVersionID = activeVersion?.id) => {
     const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
     setActivePrompt(newPrompt)
+    setActiveProjectID(newPrompt ? undefined : activeProjectID)
     const focusedVersion = newPrompt?.versions?.find(version => version.id === focusVersionID)
     selectVersion(focusedVersion ?? newPrompt?.versions?.[0])
   }
@@ -81,7 +82,7 @@ export default function Home({
   }
 
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const activeProjectID = activePrompt ? undefined : projectID ?? null
+  const [activeProjectID, setActiveProjectID] = useState(activePrompt ? undefined : projectID ?? null)
 
   const selectProject = async (projectID: number | null) => {
     if (projectID !== activeProjectID) {
@@ -89,6 +90,7 @@ export default function Home({
       const newPrompts = await api.getPrompts(projectID)
       setPrompts(newPrompts)
       refreshPrompt(undefined)
+      setActiveProjectID(projectID)
       router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
     }
   }
