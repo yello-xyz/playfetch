@@ -47,7 +47,7 @@ export default function Sidebar({
   const itemClassName = (active: boolean) => `cursor-pointer ${active ? 'bg-gray-200' : ''}`
 
   return (
-    <div className='h-screen'>
+    <div className='flex flex-col h-screen gap-4 px-2 py-4 border-r border-gray-200'>
       <div className='flex flex-col gap-4 mb-4'>
         <PendingButton onClick={logout}>Log out</PendingButton>
         <PendingButton onClick={() => addPrompt(null)}>
