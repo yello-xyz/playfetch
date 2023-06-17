@@ -172,7 +172,7 @@ export default function PromptPanel({
             </Tooltip>
           </div>
           <ContentEditable
-            className='p-2 bg-white'
+            className='p-2 bg-gray-100'
             onChange={updateHTMLContent}
             html={htmlContent}
             innerRef={contentEditableRef}
