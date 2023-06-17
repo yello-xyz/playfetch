@@ -12,14 +12,14 @@ export default function Sidebar({
   onSelectProject,
   onLogout,
   onProjectAdded,
-  onPromptAdded,
+  onAddPrompt,
 }: {
   projects?: Project[]
   activeProjectID: number | null | undefined
   onSelectProject: (projectID: number | null) => void
   onLogout: () => void
   onProjectAdded: (projectID: number) => void
-  onPromptAdded: (promptID: number) => void
+  onAddPrompt: () => void
 }) {
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
@@ -40,13 +40,8 @@ export default function Sidebar({
     })
   }
 
-  const addPrompt = async (projectID: number | null) => {
-    const promptID = await api.addPrompt(projectID)
-    onPromptAdded(promptID)
-  }
-
   return (
-    <div className='flex flex-col gap-4 px-2 py-4 border-r border-gray-200'>
+    <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
       <SidebarSection>
         <SidebarButton title='Log out' onClick={logout} />
       </SidebarSection>
@@ -57,7 +52,7 @@ export default function Sidebar({
           active={activeProjectID === null}
           onClick={() => onSelectProject(null)}
         />
-        <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={() => addPrompt(null)} />
+        <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
       </SidebarSection>
       <SidebarSection title='My Projects'>
         {projects.map((project, projectIndex) => (
