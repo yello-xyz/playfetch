@@ -47,17 +47,20 @@ export default function Sidebar({
   const itemClassName = (active: boolean) => `cursor-pointer ${active ? 'bg-gray-200' : ''}`
 
   return (
-    <div className='flex flex-col h-screen gap-4 px-2 py-4 border-r border-gray-200'>
-      <div className='flex flex-col gap-4 mb-4'>
+    <div className='flex flex-col gap-4 px-2 py-4 border-r border-gray-200'>
+      <SidebarSection>
         <PendingButton onClick={logout}>Log out</PendingButton>
+      </SidebarSection>
+      <SidebarSection>
+        <div className={itemClassName(activeProjectID === null)} onClick={() => onSelectProject(null)}>
+          Prompts
+        </div>
         <PendingButton onClick={() => addPrompt(null)}>
           <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
           Add New Prompt
         </PendingButton>
-      </div>
-      <div className={itemClassName(activeProjectID === null)} onClick={() => onSelectProject(null)}>
-        Prompts
-      </div>
+      </SidebarSection>
+      <SidebarSection title='My Projects'>
       {projects.map((project, projectIndex) => (
         <div
           className={itemClassName(activeProjectID === project.id)}
@@ -72,7 +75,17 @@ export default function Sidebar({
           Add New Project
         </PendingButton>
       </div>
+      </SidebarSection>
       <PickNameDialog key={projects.length} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
+    </div>
+  )
+}
+
+function SidebarSection({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <div className='flex flex-col gap-1'>
+      {title && <div className='px-4 py-1 text-xs font-medium text-gray-400'>{title}</div>}
+      {children}
     </div>
   )
 }
