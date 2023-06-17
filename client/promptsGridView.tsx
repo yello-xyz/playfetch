@@ -1,5 +1,4 @@
 import { Prompt } from '@/types'
-import PendingButton from './pendingButton'
 
 export default function PromptsGridView({
   prompts = [],
@@ -8,12 +7,16 @@ export default function PromptsGridView({
   prompts: Prompt[]
   onSelect: (promptID: number) => void
 }) {
+  const itemSize = 'min-w-[370px] min-h-[240px]'
   return (
-    <div className='flex flex-wrap gap-8 p-8'>
+    <div className='flex flex-wrap gap-6 p-6'>
       {prompts.map((prompt, promptIndex) => (
-        <PendingButton key={promptIndex} onClick={() => onSelect(prompt.id)}>
-          {prompt.name}
-        </PendingButton>
+        <div
+          className={`flex flex-col gap-4 p-4 border border-gray-300 rounded-lg cursor-pointer ${itemSize}`}
+          key={promptIndex}
+          onClick={() => onSelect(prompt.id)}>
+          <span className='text-sm font-medium'>{prompt.name}</span>
+        </div>
       ))}
     </div>
   )
