@@ -1,8 +1,6 @@
 import { Project } from '@/types'
-import { Sidebar } from 'flowbite-react'
 import PendingButton from './pendingButton'
-import { HiOutlineFolderAdd, HiOutlineDocumentAdd, HiOutlineFolder } from 'react-icons/hi'
-import { TbPrompt } from 'react-icons/tb'
+import { HiOutlineFolderAdd, HiOutlineDocumentAdd } from 'react-icons/hi'
 import { useState } from 'react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
@@ -46,8 +44,10 @@ export default function ProjectSidebar({
     onPromptAdded(promptID)
   }
 
+  const itemClassName = (active: boolean) => `cursor-pointer ${active ? 'bg-gray-200' : ''}`
+
   return (
-    <Sidebar className='h-screen'>
+    <div className='h-screen'>
       <div className='flex flex-col gap-4 mb-4'>
         <PendingButton onClick={logout}>Log out</PendingButton>
         <PendingButton onClick={() => addPrompt(null)}>
@@ -55,27 +55,17 @@ export default function ProjectSidebar({
           Add New Prompt
         </PendingButton>
       </div>
-      <Sidebar.Items>
-        <Sidebar.ItemGroup>
-          <Sidebar.Item
-            active={activeProjectID === null}
-            className='cursor-pointer'
-            icon={TbPrompt}
-            onClick={() => onSelectProject(null)}>
-            Prompts
-          </Sidebar.Item>
-          {projects.map((project, projectIndex) => (
-            <Sidebar.Item
-              className='cursor-pointer'
-              key={projectIndex}
-              active={activeProjectID === project.id}
-              icon={HiOutlineFolder}
-              onClick={() => onSelectProject(project.id)}>
-              {project.name}
-            </Sidebar.Item>
-          ))}
-        </Sidebar.ItemGroup>
-      </Sidebar.Items>
+      <div className={itemClassName(activeProjectID === null)} onClick={() => onSelectProject(null)}>
+        Prompts
+      </div>
+      {projects.map((project, projectIndex) => (
+        <div
+          className={itemClassName(activeProjectID === project.id)}
+          key={projectIndex}
+          onClick={() => onSelectProject(project.id)}>
+          {project.name}
+        </div>
+      ))}
       <div className='flex flex-col gap-4 mt-4'>
         <PendingButton onClick={addProject}>
           <HiOutlineFolderAdd className='w-5 h-5 mr-2' />
@@ -83,6 +73,6 @@ export default function ProjectSidebar({
         </PendingButton>
       </div>
       <PickNameDialog key={projects.length} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
-    </Sidebar>
+    </div>
   )
 }
