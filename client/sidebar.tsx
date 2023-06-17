@@ -1,9 +1,10 @@
 import { Project } from '@/types'
-import PendingButton from './pendingButton'
-import { HiOutlineFolderAdd, HiOutlineDocumentAdd } from 'react-icons/hi'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
+import projectIcon from '@/public/project.svg'
+import promptIcon from '@/public/prompt.svg'
+import addIcon from '@/public/add.svg'
 
 export default function Sidebar({
   projects = [],
@@ -44,48 +45,64 @@ export default function Sidebar({
     onPromptAdded(promptID)
   }
 
-  const itemClassName = (active: boolean) => `cursor-pointer ${active ? 'bg-gray-200' : ''}`
-
   return (
     <div className='flex flex-col gap-4 px-2 py-4 border-r border-gray-200'>
       <SidebarSection>
-        <PendingButton onClick={logout}>Log out</PendingButton>
+        <SidebarButton title='Log out' onClick={logout} />
       </SidebarSection>
       <SidebarSection>
-        <div className={itemClassName(activeProjectID === null)} onClick={() => onSelectProject(null)}>
-          Prompts
-        </div>
-        <PendingButton onClick={() => addPrompt(null)}>
-          <HiOutlineDocumentAdd className='w-5 h-5 mr-2' />
-          Add New Prompt
-        </PendingButton>
+        <SidebarButton
+          title='Prompts'
+          icon={promptIcon.src}
+          active={activeProjectID === null}
+          onClick={() => onSelectProject(null)}
+        />
+        <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={() => addPrompt(null)} />
       </SidebarSection>
       <SidebarSection title='My Projects'>
-      {projects.map((project, projectIndex) => (
-        <div
-          className={itemClassName(activeProjectID === project.id)}
-          key={projectIndex}
-          onClick={() => onSelectProject(project.id)}>
-          {project.name}
-        </div>
-      ))}
-      <div className='flex flex-col gap-4 mt-4'>
-        <PendingButton onClick={addProject}>
-          <HiOutlineFolderAdd className='w-5 h-5 mr-2' />
-          Add New Project
-        </PendingButton>
-      </div>
+        {projects.map((project, projectIndex) => (
+          <SidebarButton
+            key={projectIndex}
+            title={project.name}
+            icon={projectIcon.src}
+            active={activeProjectID === project.id}
+            onClick={() => onSelectProject(project.id)}
+          />
+        ))}
+        <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={addProject} />
       </SidebarSection>
       <PickNameDialog key={projects.length} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
     </div>
   )
 }
 
-function SidebarSection({ title, children }: { title?: string; children: React.ReactNode }) {
+function SidebarSection({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <div className='flex flex-col gap-1'>
+    <div className='flex flex-col gap-0.5'>
       {title && <div className='px-4 py-1 text-xs font-medium text-gray-400'>{title}</div>}
       {children}
+    </div>
+  )
+}
+
+function SidebarButton({
+  title,
+  icon,
+  active = false,
+  onClick,
+}: {
+  title: string
+  icon?: string
+  active?: boolean
+  onClick: () => void
+}) {
+  const activeClass = 'bg-gray-100 rounded-lg'
+  const baseClass = 'flex gap-1 items-center px-4 py-1 cursor-pointer'
+  const className = `${baseClass} ${active ? activeClass : ''} hover:${activeClass}`
+  return (
+    <div className={className} onClick={onClick}>
+      {icon && <img className='w-6 h-6' src={icon} />}
+      <div className='text-sm font-normal text-grey-800 min-w-[150px]'>{title}</div>
     </div>
   )
 }
