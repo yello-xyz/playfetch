@@ -5,7 +5,7 @@ import { useState } from 'react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
 
-export default function ProjectSidebar({
+export default function Sidebar({
   projects = [],
   activeProjectID,
   onSelectProject,

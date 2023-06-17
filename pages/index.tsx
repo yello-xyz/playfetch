@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import api from '@/client/api'
 import { useState } from 'react'
 import { Project, Prompt, ActivePrompt, Version } from '@/types'
-import ProjectSidebar from '@/client/projectSidebar'
+import Sidebar from '@/client/sidebar'
 import PromptTabView from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
@@ -111,7 +111,7 @@ export default function Home({
 
   return (
     <main className={`flex items-stretch h-screen ${inter.className}`}>
-      <ProjectSidebar
+      <Sidebar
         projects={projects}
         activeProjectID={activeProjectID}
         onSelectProject={selectProject}
