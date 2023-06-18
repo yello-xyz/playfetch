@@ -11,15 +11,6 @@ export const FormatDate = (timestamp: string, previousTimestamp?: string) => {
   return dateString === previousDateString || dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
-export const BuildUniqueName = (name: string, existingNames: string[]) => {
-  let uniqueName = name
-  let counter = 2
-  while (existingNames.includes(uniqueName)) {
-    uniqueName = `${name} ${counter++}`
-  }
-  return uniqueName
-}
-
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
 

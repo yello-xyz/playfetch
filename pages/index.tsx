@@ -10,6 +10,7 @@ import PromptTabView from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
+import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500'] })
 
@@ -112,43 +113,54 @@ export default function Home({
     }
   }
 
+  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
+
   const addPrompt = async (projectID: number | null) => {
-    const promptID = await api.addPrompt(projectID)
-    selectPrompt(promptID)
+    setPickNamePrompt({
+      title: 'Add a new prompt',
+      label: 'Name',
+      callback: async (name: string) => {
+        const promptID = await api.addPrompt(name, projectID)
+        selectPrompt(promptID)
+      },
+    })
   }
 
   return (
-    <main className={`flex items-stretch h-screen ${inter.className}`}>
-      <Sidebar
-        projects={projects}
-        activeProjectID={activeProjectID}
-        onSelectProject={selectProject}
-        onLogout={() => router.replace(router.asPath)}
-        onProjectAdded={refreshProjectsAndFocus}
-        onAddPrompt={() => addPrompt(null)}
-      />
-      <div className='flex flex-col flex-grow'>
-        <TopBar
+    <>
+      <main className={`flex items-stretch h-screen ${inter.className}`}>
+        <Sidebar
           projects={projects}
           activeProjectID={activeProjectID}
-          activePrompt={activePrompt}
-          onAddPrompt={addPrompt}
+          onSelectProject={selectProject}
+          onLogout={() => router.replace(router.asPath)}
+          onProjectAdded={refreshProjectsAndFocus}
+          onAddPrompt={() => addPrompt(null)}
         />
-        {activePrompt && activeVersion ? (
-          <PromptTabView
-            prompt={activePrompt}
-            project={projects.find(project => project.id === activePrompt.projectID)}
-            activeVersion={activeVersion}
-            setActiveVersion={selectVersion}
-            setDirtyVersion={setDirtyVersion}
-            onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
-            onPromptDeleted={selectProject}
-            onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
+        <div className='flex flex-col flex-grow'>
+          <TopBar
+            projects={projects}
+            activeProjectID={activeProjectID}
+            activePrompt={activePrompt}
+            onAddPrompt={addPrompt}
           />
-        ) : (
-          <PromptsGridView prompts={prompts} onSelect={selectPrompt} />
-        )}
-      </div>
-    </main>
+          {activePrompt && activeVersion ? (
+            <PromptTabView
+              prompt={activePrompt}
+              project={projects.find(project => project.id === activePrompt.projectID)}
+              activeVersion={activeVersion}
+              setActiveVersion={selectVersion}
+              setDirtyVersion={setDirtyVersion}
+              onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
+              onPromptDeleted={selectProject}
+              onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
+            />
+          ) : (
+            <PromptsGridView prompts={prompts} onSelect={selectPrompt} />
+          )}
+        </div>
+      </main>
+      <PickNameDialog key={currentQuery} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
+    </>
   )
 }

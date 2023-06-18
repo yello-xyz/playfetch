@@ -1,4 +1,4 @@
-import { BuildUniqueName, CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
+import { CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
 import { Endpoint, Project, Prompt, ActivePrompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -226,12 +226,7 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   )
 }
 
-export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
-  const existingPrompts = await getUserScopedEntities(Entity.PROMPT, 'projectID', projectID, userID)
-  const name = BuildUniqueName(
-    'New Prompt',
-    existingPrompts.map(prompt => prompt.name)
-  )
+export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
   const promptData = toPromptData(userID, projectID, name, new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, toID(promptData), name, '', '')
