@@ -34,7 +34,7 @@ export default function TopBar({
 function TopBarButton({ title, icon, onClick }: { title: string; icon?: string; onClick: () => void }) {
   return (
     <div
-      className='flex items-center gap-1 py-1 pl-2 pr-4 border border-gray-300 rounded-lg cursor-pointer'
+      className='flex items-center gap-1 py-1 pl-2 pr-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
       {icon && <img className='w-6 h-6' src={icon} />}
       <div>{title}</div>
