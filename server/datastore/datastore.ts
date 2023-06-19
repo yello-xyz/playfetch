@@ -15,7 +15,7 @@ export async function runDataMigration() {
 }
 
 let datastore: Datastore
-const getDatastore = () => {
+export const getDatastore = () => {
   if (!datastore) {
     datastore = new Datastore()
   }
@@ -24,7 +24,7 @@ const getDatastore = () => {
 
 export const getProjectID = async () => getDatastore().getProjectId()
 
-enum Entity {
+export enum Entity {
   USER = 'user',
   PROJECT = 'project',
   PROMPT = 'prompt',
@@ -42,7 +42,7 @@ const getID = (entity: any) => toID({ key: getKey(entity) })
 
 const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date)?.toISOString()
 
-const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
+export const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
 const buildFilter = (key: string, value: {} | null) => new PropertyFilter(key, '=', value)
 
@@ -93,7 +93,8 @@ const getKeyedEntities = async (type: string, ids: number[]) =>
     .get(ids.map(id => buildKey(type, id)))
     .then(([entities]) => entities)
 
-const getKeyedEntity = async (type: string, id: number) => getKeyedEntities(type, [id]).then(([entity]) => entity)
+export const getKeyedEntity = async (type: string, id: number) =>
+  getKeyedEntities(type, [id]).then(([entity]) => entity)
 
 const getEntityCount = async (type: string, key: string, value: {} | null) => {
   const datastore = getDatastore()
@@ -480,16 +481,3 @@ const toEndpoint = (data: any): Endpoint => ({
   config: JSON.parse(data.config),
   token: data.token,
 })
-
-export async function cacheValue(key: number, value: string) {
-  await getDatastore().save({
-    key: buildKey(Entity.CACHE, key),
-    data: { value },
-    excludeFromIndexes: ['value'],
-  })
-}
-
-export async function getCachedValue(key: number) {
-  const cachedValue = await getKeyedEntity(Entity.CACHE, key)
-  return cachedValue ? cachedValue.value : undefined
-}
