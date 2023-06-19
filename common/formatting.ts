@@ -11,6 +11,32 @@ export const FormatDate = (timestamp: string, previousTimestamp?: string) => {
   return dateString === previousDateString || dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
+export const FormatRelativeDate = (timestamp: string) => {
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+  
+  const units: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
+    { unit: 'year', ms: 365 * day },
+    { unit: 'month', ms: 30 * day },
+    { unit: 'week', ms: 7 * day },
+    { unit: 'day', ms: day },
+    { unit: 'hour', ms: hour },
+    { unit: 'minute', ms: minute },
+  ]
+
+  const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'always', style: 'narrow' })
+  const elapsed = new Date(timestamp).getTime() - new Date().getTime()
+
+  for (const { unit, ms } of units) {
+    if (Math.abs(elapsed) > ms) {
+      return formatter.format(Math.round(elapsed / ms), unit)
+    }
+  }
+
+  return 'just now'
+}
+
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
 

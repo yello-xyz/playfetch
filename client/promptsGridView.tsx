@@ -1,4 +1,4 @@
-import { FormatDate, Truncate } from '@/common/formatting'
+import { FormatRelativeDate, Truncate } from '@/common/formatting'
 import { Prompt } from '@/types'
 
 export default function PromptsGridView({
@@ -16,7 +16,7 @@ export default function PromptsGridView({
           key={promptIndex}
           onClick={() => onSelect(prompt.id)}>
           <span className='text-sm font-medium'>{prompt.name}</span>
-          <span className='text-xs text-gray-500'>{FormatDate(prompt.timestamp)}</span>
+          <span className='text-xs text-gray-500'>Edited {FormatRelativeDate(prompt.timestamp)}</span>
           <span className='mt-3 text-xs text-gray-500'>{Truncate(prompt.prompt, 500)}</span>
         </div>
       ))}
