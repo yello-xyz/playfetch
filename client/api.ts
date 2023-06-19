@@ -53,6 +53,9 @@ const api = {
   updatePrompt: function (promptID: number, prompt: string, tags: string, versionID?: number): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, tags, versionID })
   },
+  renamePrompt: function (promptID: number, name: string) {
+    return post(this.renamePrompt, { promptID, name })
+  },
   toggleFavorite: function (promptID: number, favorite: boolean) {
     return post(this.toggleFavorite, { promptID, favorite })
   },

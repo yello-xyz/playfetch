@@ -98,19 +98,26 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
   )
 }
 
-export async function toggleFavoritePrompt(userID: number, promptID: number, favorited: boolean) {
+const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (promptData?.userID !== userID) {
+  if (!promptData || promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
+  return promptData
+}
+
+export async function updatePromptName(userID: number, promptID: number, name: string) {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+  await updatePrompt({ ...promptData, name }, true)
+}
+
+export async function toggleFavoritePrompt(userID: number, promptID: number, favorited: boolean) {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
   await updatePrompt({ ...promptData, favorited }, false)
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (promptData?.userID !== userID) {
-    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
-  }
+  await getVerifiedUserPromptData(userID, promptID)
   const versionIDs = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
   const runIDs = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   await getDatastore().delete([
