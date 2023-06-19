@@ -132,6 +132,7 @@ export default function Home({
             projects={projects}
             activeProjectID={activeProjectID}
             activePrompt={activePrompt}
+            onSelectProject={selectProject}
             onAddPrompt={addPrompt}
             onRefreshPrompt={() => refreshPrompt(activePrompt!.id)}
           />

@@ -12,12 +12,14 @@ export default function TopBar({
   projects = [],
   activeProjectID,
   activePrompt,
+  onSelectProject,
   onAddPrompt,
   onRefreshPrompt,
 }: {
   projects?: Project[]
   activeProjectID: number | null | undefined
   activePrompt?: Prompt
+  onSelectProject: (projectID: number | null) => void
   onAddPrompt: (projectID: number | null) => void
   onRefreshPrompt: () => void
 }) {
@@ -34,7 +36,11 @@ export default function TopBar({
       <div className='z-10 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200'>
         <div className='relative flex gap-1 text-base justify-self-start'>
           {(projectName || promptProjectName) && <img className='w-6 h-6' src={projectIcon.src} />}
-          {promptProjectName}
+          {promptProjectName && (
+            <span className='cursor-pointer' onClick={() => onSelectProject(activePrompt!.projectID)}>
+              {promptProjectName}
+            </span>
+          )}
           {promptProjectName && <span className='font-medium'>{' / '}</span>}
           {activePrompt ? (
             <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
