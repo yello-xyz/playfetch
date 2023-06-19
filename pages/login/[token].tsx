@@ -1,7 +1,7 @@
 import { withSession } from '@/server/session'
 import { unsealData } from 'iron-session'
 import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
-import { markUserLogin } from '@/server/datastore/datastore'
+import { markUserLogin } from '@/server/datastore/users'
 
 export const getServerSideProps = withSession(async context => {
   const { token } = ParseQuery(context.query)
