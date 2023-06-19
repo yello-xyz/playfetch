@@ -6,6 +6,14 @@ import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { createHash } from 'crypto'
 import ShortUniqueId from 'short-unique-id'
 
+export async function runDataMigration() {
+  const datastore = getDatastore()
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  for (const promptData of allPrompts) {
+    await updatePrompt(promptData)
+  }
+}
+
 let datastore: Datastore
 const getDatastore = () => {
   if (!datastore) {
