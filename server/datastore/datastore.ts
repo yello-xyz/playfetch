@@ -1,11 +1,12 @@
 import { CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
-import { Project, Prompt, ActivePrompt, Run, RunConfig, User, Version } from '@/types'
+import { Project, Prompt, ActivePrompt, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { createHash } from 'crypto'
 import ShortUniqueId from 'short-unique-id'
 import { toEndpoint } from './endpoints'
+import { toRun } from './runs'
 
 export async function runDataMigration() {
   const datastore = getDatastore()
@@ -362,36 +363,3 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     await updatePrompt(promptData)
   }
 }
-
-export async function saveRun(
-  userID: number,
-  promptID: number,
-  versionID: number,
-  output: string,
-  config: RunConfig,
-  cost: number
-) {
-  await getDatastore().save(toRunData(userID, promptID, versionID, output, new Date(), config, cost))
-}
-
-const toRunData = (
-  userID: number,
-  promptID: number,
-  versionID: number,
-  output: string,
-  createdAt: Date,
-  config: RunConfig,
-  cost: number
-) => ({
-  key: buildKey(Entity.RUN),
-  data: { userID, promptID, versionID, output, createdAt, config: JSON.stringify(config), cost },
-  excludeFromIndexes: ['output', 'config'],
-})
-
-const toRun = (data: any): Run => ({
-  id: getID(data),
-  timestamp: getTimestamp(data),
-  output: data.output,
-  config: JSON.parse(data.config),
-  cost: data.cost,
-})

@@ -1,4 +1,3 @@
-import { saveRun } from '@/server/datastore/datastore'
 import openai from '@/server/openai'
 import anthropic from '@/server/anthropic'
 import vertexai from '@/server/vertexai'
@@ -6,6 +5,7 @@ import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { RunConfig } from '@/types'
 import { cacheValue, getCachedValue } from '@/server/datastore/cache'
+import { saveRun } from '@/server/datastore/runs'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
