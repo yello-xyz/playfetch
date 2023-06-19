@@ -10,9 +10,9 @@ import {
   getKeyedEntity,
   getTimestamp,
   toID,
-  updatePrompt,
 } from './datastore'
 import { toRun } from './runs'
+import { updatePrompt } from './prompts'
 
 export async function saveVersionForUser(
   userID: number,

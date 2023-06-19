@@ -1,4 +1,4 @@
-import { getPromptWithVersions } from '@/server/datastore/datastore'
+import { getPromptWithVersions } from '@/server/datastore/prompts'
 import { withLoggedInSessionRoute } from '@/server/session'
 import { ActivePrompt } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

@@ -1,4 +1,4 @@
-import { addPromptForUser } from '@/server/datastore/datastore'
+import { addPromptForUser } from '@/server/datastore/prompts'
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

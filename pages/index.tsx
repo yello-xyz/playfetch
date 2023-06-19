@@ -1,4 +1,4 @@
-import { getProjectsForUser, getPromptWithVersions, getPromptsForProject } from '@/server/datastore/datastore'
+import { getProjectsForUser } from '@/server/datastore/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -11,6 +11,7 @@ import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
 import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
+import { getPromptWithVersions, getPromptsForProject } from '@/server/datastore/prompts'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500'] })
 
