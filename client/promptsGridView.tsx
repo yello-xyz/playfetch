@@ -5,9 +5,10 @@ import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from './api'
 import { useState } from 'react'
-import PopupMenu, { PopupMenuItem } from './popupMenu'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
+import PromptPopupMenu from './promptPopupMenu'
+import PickProjectDialog, { PickProjectPrompt } from './pickPromptDialog'
 
 export default function PromptsGridView({
   projects,
@@ -91,30 +92,6 @@ function PromptCell({
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
-  const deletePrompt = () => {
-    setDialogPrompt({
-      message: 'Are you sure you want to delete this prompt? This action cannot be undone.',
-      callback: () => api.deletePrompt(prompt.id).then(onRefresh),
-      destructive: true,
-    })
-  }
-
-  const renamePrompt = () => {
-    setPickNamePrompt({
-      title: 'Rename Prompt',
-      label: 'Name',
-      callback: (name: string) => api.renamePrompt(prompt.id, name).then(onRefresh),
-      initialName: prompt.name,
-    })
-  }
-
-  const movePrompt = () => {
-    setPickProjectPrompt!({
-      callback: (projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh),
-      initialProjectID: prompt.projectID,
-    })
-  }
-
   return (
     <div
       key={index}
@@ -130,11 +107,15 @@ function PromptCell({
           <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
           {isMenuExpanded && (
             <div className='absolute right-0 top-7'>
-              <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-                <PopupMenuItem title='Rename' callback={renamePrompt} />
-                {setPickProjectPrompt && <PopupMenuItem title='Move to Project' callback={movePrompt} />}
-                <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
-              </PopupMenu>
+              <PromptPopupMenu
+                prompt={prompt}
+                isMenuExpanded={isMenuExpanded}
+                setIsMenuExpanded={setIsMenuExpanded}
+                onRefresh={onRefresh}
+                setDialogPrompt={setDialogPrompt}
+                setPickNamePrompt={setPickNamePrompt}
+                setPickProjectPrompt={setPickProjectPrompt}
+              />
             </div>
           )}
         </div>
@@ -155,48 +136,3 @@ const IconButton = ({ icon, onClick }: { icon: string; onClick: () => void }) =>
     }}
   />
 )
-
-type PickProjectPrompt = {
-  callback: (projectID: number) => void
-  initialProjectID: number | null
-}
-
-function PickProjectDialog({
-  projects,
-  prompt,
-  setPrompt,
-}: {
-  projects: Project[]
-  prompt?: PickProjectPrompt
-  setPrompt: (prompt?: PickProjectPrompt) => void
-}) {
-  const [projectID, setProjectID] = useState<number | null>(prompt?.initialProjectID ?? null)
-
-  const dialogPrompt = prompt
-    ? {
-        message: 'Move Prompt to Project',
-        callback: () => prompt.callback(projectID!),
-        disabled: projectID === prompt.initialProjectID || projectID === null,
-      }
-    : undefined
-
-  return (
-    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
-      <div className='text-sm text-gray-500'>
-        <select
-          className='w-full p-2 text-sm text-gray-500 border border-gray-300 rounded-md'
-          value={projectID?.toString() ?? 0}
-          onChange={event => setProjectID(Number(event.target.value))}>
-          <option value={0} disabled>
-            Select a project
-          </option>
-          {projects.map((project, index) => (
-            <option key={index} value={project.id}>
-              {project.name}
-            </option>
-          ))}
-        </select>
-      </div>
-    </ModalDialog>
-  )
-}
