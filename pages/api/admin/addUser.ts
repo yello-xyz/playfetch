@@ -1,4 +1,4 @@
-import { saveUser } from '@/server/datastore'
+import { saveUser } from '@/server/datastore/datastore'
 import { withAdminRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

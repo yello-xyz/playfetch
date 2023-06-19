@@ -1,5 +1,5 @@
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
-import { checkProject } from '@/server/datastore'
+import { checkProject } from '@/server/datastore/datastore'
 import { withLoggedInSessionRoute } from '@/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { buildURLForClientRoute } from '@/server/routing'

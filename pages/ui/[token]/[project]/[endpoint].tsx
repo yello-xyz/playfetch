@@ -1,5 +1,5 @@
 import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
-import { getEndpointFromPath } from '@/server/datastore'
+import { getEndpointFromPath } from '@/server/datastore/datastore'
 import { useState } from 'react'
 import { Label, TextInput } from 'flowbite-react'
 import PendingButton from '@/client/pendingButton'

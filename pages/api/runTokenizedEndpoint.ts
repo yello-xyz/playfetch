@@ -1,4 +1,4 @@
-import { getEndpointFromPath } from '@/server/datastore'
+import { getEndpointFromPath } from '@/server/datastore/datastore'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { runPromptWithConfig } from './runPrompt'
 

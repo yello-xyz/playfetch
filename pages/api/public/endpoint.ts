@@ -1,5 +1,5 @@
 import { ParseQuery } from '@/client/clientRoute'
-import { getEndpointFromPath, checkProject } from '@/server/datastore'
+import { getEndpointFromPath, checkProject } from '@/server/datastore/datastore'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { runPromptWithConfig } from '../runPrompt'
 import { ToCamelCase } from '@/common/formatting'

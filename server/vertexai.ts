@@ -1,5 +1,5 @@
 import aiplatform from '@google-cloud/aiplatform'
-import { getProjectID } from './datastore'
+import { getProjectID } from './datastore/datastore'
 const { PredictionServiceClient } = aiplatform.v1
 
 const location = 'us-central1'

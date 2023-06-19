@@ -1,4 +1,4 @@
-import { getProjectsForUser, getPromptWithVersions, getPromptsForProject } from '@/server/datastore'
+import { getProjectsForUser, getPromptWithVersions, getPromptsForProject } from '@/server/datastore/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'

@@ -1,6 +1,6 @@
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { saveEndpoint, rotateProjectAPIKey, getURLPathForProject } from '@/server/datastore'
+import { saveEndpoint, rotateProjectAPIKey, getURLPathForProject } from '@/server/datastore/datastore'
 import { buildURLForClientRoute } from '@/server/routing'
 import { ToCamelCase } from '@/common/formatting'
 

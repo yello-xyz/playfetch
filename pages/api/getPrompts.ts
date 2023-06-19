@@ -1,4 +1,4 @@
-import { getPromptsForProject } from '@/server/datastore'
+import { getPromptsForProject } from '@/server/datastore/datastore'
 import { withLoggedInSessionRoute } from '@/server/session'
 import { Prompt } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

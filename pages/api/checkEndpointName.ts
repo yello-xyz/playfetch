@@ -1,5 +1,5 @@
 import { CheckValidURLPath, ToCamelCase } from '@/common/formatting'
-import { checkCanSaveEndpoint } from '@/server/datastore'
+import { checkCanSaveEndpoint } from '@/server/datastore/datastore'
 import { withLoggedInSessionRoute } from '@/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { buildURLForClientRoute } from '@/server/routing'

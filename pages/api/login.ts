@@ -1,5 +1,5 @@
 import ClientRoute from '@/client/clientRoute'
-import { getUserForEmail } from '@/server/datastore'
+import { getUserForEmail } from '@/server/datastore/datastore'
 import { sendMail } from '@/server/email'
 import { buildURLForClientRoute } from '@/server/routing'
 import { withSessionRoute } from '@/server/session'
