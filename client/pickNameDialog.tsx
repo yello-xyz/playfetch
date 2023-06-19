@@ -32,7 +32,7 @@ export default function PickNameDialog({
     ? {
         message: prompt.title,
         callback: () => prompt.callback(name),
-        disabled: url === undefined,
+        disabled: url === undefined || name.length === 0,
       }
     : undefined
 
