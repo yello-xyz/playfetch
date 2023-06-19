@@ -32,7 +32,7 @@ const getKey = (entity: any) => entity[getDatastore().KEY] as Key
 
 const getID = (entity: any) => toID({ key: getKey(entity) })
 
-const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date).toISOString()
+const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date)?.toISOString()
 
 const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
@@ -96,7 +96,7 @@ const toUser = (data: any): User => ({
   email: data.email,
   isAdmin: data.isAdmin,
   timestamp: getTimestamp(data),
-  lastLoginAt: data.lastLoginAt ? getTimestamp(data, 'lastLoginAt') : undefined,
+  lastLoginAt: getTimestamp(data, 'lastLoginAt'),
 })
 
 export async function markUserLogin(userID: number): Promise<User | undefined> {
@@ -208,6 +208,7 @@ const toPrompt = (data: any): Prompt => ({
   name: data.name,
   prompt: StripPromptSentinels(data.prompt ?? ''),
   projectID: data.projectID,
+  timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
 })
 
 const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
@@ -249,20 +250,17 @@ export async function addPromptForUser(userID: number, name: string, projectID: 
 async function updatePrompt(promptData: any) {
   const promptID = getID(promptData)
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
-  const prompt = lastVersionData.prompt
-  if (prompt !== promptData.prompt) {
-    await datastore.save(
-      toPromptData(
-        promptData.userID,
-        promptData.projectID,
-        promptData.name,
-        prompt,
-        promptData.createdAt,
-        new Date(),
-        promptID
-      )
+  await datastore.save(
+    toPromptData(
+      promptData.userID,
+      promptData.projectID,
+      promptData.name,
+      lastVersionData.prompt,
+      promptData.createdAt,
+      new Date(),
+      promptID
     )
-  }
+  )
 }
 
 export async function savePromptForUser(

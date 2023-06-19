@@ -18,6 +18,7 @@ export type Prompt = {
   name: string
   prompt: string
   projectID: number | null
+  timestamp: string
 }
 
 export type ActivePrompt = Prompt & {
