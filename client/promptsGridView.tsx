@@ -1,23 +1,24 @@
-import { FormatRelativeDate, Truncate } from '@/common/formatting'
+import { FormatRelativeDate } from '@/common/formatting'
 import { Project, Prompt } from '@/types'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from './api'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
-import LabeledTextInput from './labeledTextInput'
 
 export default function PromptsGridView({
   projects,
   prompts,
+  onAddPrompt,
   onSelect,
   onRefresh,
 }: {
   projects: Project[]
   prompts: Prompt[]
+  onAddPrompt: () => void
   onSelect: (promptID: number) => void
   onRefresh: () => void
 }) {
@@ -25,7 +26,7 @@ export default function PromptsGridView({
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
   const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
 
-  return (
+  return prompts.length ? (
     <>
       <div className='flex flex-wrap gap-6 p-6'>
         {prompts.map((prompt, index) => (
@@ -49,6 +50,25 @@ export default function PromptsGridView({
         setPrompt={setPickProjectPrompt}
       />
     </>
+  ) : (
+    <EmptyGrid onAddPrompt={onAddPrompt} />
+  )
+}
+
+function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
+  const AddPromptLink = ({ label }: { label: string }) => (
+    <span className='text-gray-500 underline cursor-pointer' onClick={onAddPrompt}>
+      {label}
+    </span>
+  )
+
+  return (
+    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-6 bg-gray-100 rounded-lg'>
+      <span className='text-sm font-medium'>No Prompts</span>
+      <span className='text-xs text-center text-gray-400 '>
+        Create a <AddPromptLink label={'New Prompt'} /> to get started.
+      </span>
+    </div>
   )
 }
 
@@ -156,7 +176,7 @@ function PickProjectDialog({
 
   const dialogPrompt = prompt
     ? {
-        message: 'Move prompt to project',
+        message: 'Move Prompt to Project',
         callback: () => prompt.callback(projectID!),
         disabled: projectID === prompt.initialProjectID || projectID === null,
       }

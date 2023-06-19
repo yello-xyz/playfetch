@@ -18,7 +18,7 @@ export default function TopBar({
 
   return (
     <div className='flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200'>
-      <div className='flex gap-1 text-base font-medium justify-self-start text-grey-400'>
+      <div className='flex gap-1 text-base font-medium justify-self-start'>
         {(projectName || promptProjectName) && <img className='w-6 h-6' src={projectIcon.src} />}
         {promptProjectName && <span className='font-normal'>{promptProjectName}</span>}
         {promptProjectName && ' / '}

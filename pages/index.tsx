@@ -158,6 +158,7 @@ export default function Home({
             <PromptsGridView
               projects={projects}
               prompts={prompts}
+              onAddPrompt={() => addPrompt(activeProjectID!)}
               onSelect={selectPrompt}
               onRefresh={() => refreshProject(activeProjectID!)}
             />
