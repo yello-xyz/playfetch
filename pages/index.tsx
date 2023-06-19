@@ -56,12 +56,7 @@ export default function Home({
     if (!activePrompt || !activeVersion || !dirtyVersion) {
       return activeVersion?.id
     }
-    const versionID = await api.updatePrompt(
-      activePrompt.id,
-      dirtyVersion.prompt,
-      dirtyVersion.tags,
-      activeVersion.id
-    )
+    const versionID = await api.updatePrompt(activePrompt.id, dirtyVersion.prompt, dirtyVersion.tags, activeVersion.id)
     onSaved?.(versionID)
     return versionID
   }
@@ -85,13 +80,17 @@ export default function Home({
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const [activeProjectID, setActiveProjectID] = useState(activePrompt ? undefined : projectID ?? null)
 
+  const refreshProject = async (projectID: number | null) => {
+    const newPrompts = await api.getPrompts(projectID)
+    setPrompts(newPrompts)
+    refreshPrompt(undefined)
+    setActiveProjectID(projectID)
+  }
+
   const selectProject = async (projectID: number | null) => {
     if (projectID !== activeProjectID) {
       savePrompt()
-      const newPrompts = await api.getPrompts(projectID)
-      setPrompts(newPrompts)
-      refreshPrompt(undefined)
-      setActiveProjectID(projectID)
+      refreshProject(projectID)
       router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
     }
   }
@@ -156,7 +155,11 @@ export default function Home({
               onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
             />
           ) : (
-            <PromptsGridView prompts={prompts} onSelect={selectPrompt} />
+            <PromptsGridView
+              prompts={prompts}
+              onSelect={selectPrompt}
+              onRefresh={() => refreshProject(activeProjectID!)}
+            />
           )}
         </div>
       </main>

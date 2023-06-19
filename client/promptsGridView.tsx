@@ -7,9 +7,11 @@ import api from './api'
 export default function PromptsGridView({
   prompts = [],
   onSelect,
+  onRefresh,
 }: {
   prompts: Prompt[]
   onSelect: (promptID: number) => void
+  onRefresh: () => void
 }) {
   return (
     <div className='flex flex-wrap gap-6 p-6'>
@@ -22,7 +24,7 @@ export default function PromptsGridView({
             <span className='text-sm font-medium'>{prompt.name}</span>
             <IconButton
               icon={prompt.favorited ? filledStarIcon.src : starIcon.src}
-              onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited)}
+              onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(onRefresh)}
             />
           </div>
           <span className='text-xs text-gray-500'>Edited {FormatRelativeDate(prompt.timestamp)}</span>
