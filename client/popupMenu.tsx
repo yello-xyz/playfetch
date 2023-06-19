@@ -29,7 +29,10 @@ export default function PopupMenu({
   useOutsideDetector(menuRef, collapse)
 
   return expanded ? (
-    <div className='' ref={menuRef}>
+    <div
+      onClick={event => event.stopPropagation()}
+      className='w-40 overflow-hidden bg-white border border-gray-300 rounded-lg drop-shadow'
+      ref={menuRef}>
       {children}
     </div>
   ) : null
@@ -46,8 +49,13 @@ export function PopupMenuItem({
   destructive?: boolean
   separated?: boolean
 }) {
+  const baseClass = 'px-4 py-2 text-xs'
+  const destructiveClass = destructive ? 'text-red-700' : ''
+  const separatedClass = separated ? 'border-t border-gray-300' : ''
+  const hoverClass = 'hover:bg-blue-600 hover:text-white'
+
   return (
-    <div onClick={callback} className=''>
+    <div onClick={callback} className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass}`}>
       {title}
     </div>
   )

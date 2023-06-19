@@ -54,7 +54,9 @@ function PromptCell({
           {isMenuExpanded && (
             <div className='absolute right-0 top-7'>
               <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-                <PopupMenuItem destructive title='Delete' callback={() => {}} />
+                <PopupMenuItem title='Rename' callback={() => {}} />
+                <PopupMenuItem title='Move to project' callback={() => {}} />
+                <PopupMenuItem separated destructive title='Delete' callback={() => {}} />
               </PopupMenu>
             </div>
           )}
