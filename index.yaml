@@ -9,6 +9,8 @@ indexes:
 - kind: prompt
   properties:
   - name: projectID
+  - name: favorited
+    direction: desc
   - name: lastEditedAt
     direction: desc
 

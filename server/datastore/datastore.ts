@@ -36,44 +36,44 @@ export const buildFilter = (key: string, value: {} | null) => new PropertyFilter
 
 const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
 
-const orderQuery = (query: Query, sortKey: string | undefined) =>
-  sortKey ? query.order(sortKey, { descending: true }) : query
+const orderQuery = (query: Query, sortKeys: string[]) =>
+  sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
 const buildQuery = (
   type: string,
   filter: EntityFilter,
   limit: number,
-  sortKey: string | undefined,
+  sortKeys: string[],
   keysOnly: boolean
-) => projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKey), keysOnly)
+) => projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), keysOnly)
 
 const getFilteredEntities = (
   type: string,
   filter: EntityFilter,
   limit = 100,
-  sortKey: string | undefined = undefined,
+  sortKeys = [] as string[],
   keysOnly = false
 ) =>
   getDatastore()
-    .runQuery(buildQuery(type, filter, limit, sortKey, keysOnly))
+    .runQuery(buildQuery(type, filter, limit, sortKeys, keysOnly))
     .then(([entities]) => entities)
 
 export const getFilteredEntity = (type: string, filter: EntityFilter) =>
   getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
-const getEntities = (type: string, key: string, value: {} | null, limit?: number, sortKey?: string) =>
+const getEntities = (type: string, key: string, value: {} | null, limit?: number, sortKey?: string[]) =>
   getFilteredEntities(type, buildFilter(key, value), limit, sortKey)
 
 export const getOrderedEntities = (
   type: string,
   key: string,
   value: {} | null,
-  sortKey = 'createdAt',
+  sortKeys = ['createdAt'],
   limit?: number
-) => getEntities(type, key, value, limit, sortKey)
+) => getEntities(type, key, value, limit, sortKeys)
 
 export const getEntity = async (type: string, key: string, value: {} | null, mostRecent = false) =>
-  getEntities(type, key, value, 1, mostRecent ? 'createdAt' : undefined).then(([entity]) => entity)
+  getEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
 
 export const getEntityKeys = (type: string, key: string, value: {} | null, limit?: number) =>
   getFilteredEntities(type, buildFilter(key, value), limit, undefined, true).then(entities => entities.map(getKey))

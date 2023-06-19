@@ -64,7 +64,7 @@ const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: 
 })
 
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, 'lastEditedAt')
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
   return prompts.filter(prompt => prompt.userID === userID).map(prompt => toPrompt(prompt))
 }
 
