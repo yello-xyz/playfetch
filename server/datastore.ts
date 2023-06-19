@@ -195,10 +195,11 @@ const toPromptData = (
   name: string,
   prompt: string,
   createdAt: Date,
+  lastEditedAt?: Date,
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { userID, projectID, prompt, name, createdAt },
+  data: { userID, projectID, prompt, name, createdAt, lastEditedAt },
   excludeFromIndexes: ['name', 'prompt'],
 })
 
@@ -251,7 +252,15 @@ async function updatePrompt(promptData: any) {
   const prompt = lastVersionData.prompt
   if (prompt !== promptData.prompt) {
     await datastore.save(
-      toPromptData(promptData.userID, promptData.projectID, promptData.name, prompt, promptData.createdAt, promptID)
+      toPromptData(
+        promptData.userID,
+        promptData.projectID,
+        promptData.name,
+        prompt,
+        promptData.createdAt,
+        new Date(),
+        promptID
+      )
     )
   }
 }
