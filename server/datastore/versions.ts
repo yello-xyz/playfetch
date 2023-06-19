@@ -12,7 +12,8 @@ import {
   toID,
 } from './datastore'
 import { toRun } from './runs'
-import { updatePrompt } from './prompts'
+import { DefaultPromptName, updatePrompt } from './prompts'
+import { StripPromptSentinels } from '@/common/formatting'
 
 export async function saveVersionForUser(
   userID: number,
@@ -49,7 +50,11 @@ export async function saveVersionForUser(
 
   const versionData = toVersionData(userID, promptID, prompt, tags, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
-  await updatePrompt({ ...promptData, prompt }, true)
+  const name =
+    promptData.name === DefaultPromptName && prompt.length && !promptData.prompt.length
+      ? StripPromptSentinels(prompt).split(' ').slice(0, 3).join(' ')
+      : promptData.name
+  await updatePrompt({ ...promptData, prompt, name }, true)
 
   return toID(versionData)
 }
