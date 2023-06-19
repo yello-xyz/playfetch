@@ -1,4 +1,4 @@
-import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
+import { CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
 import { Endpoint, Project, Prompt, ActivePrompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -192,8 +192,8 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
 const toPromptData = (
   userID: number,
   projectID: number | null,
-  prompt: string,
   name: string,
+  prompt: string,
   createdAt: Date,
   promptID?: number
 ) => ({
@@ -202,7 +202,12 @@ const toPromptData = (
   excludeFromIndexes: ['name', 'prompt'],
 })
 
-const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name, projectID: data.projectID })
+const toPrompt = (data: any): Prompt => ({
+  id: getID(data),
+  name: data.name,
+  prompt: StripPromptSentinels(data.prompt ?? ''),
+  projectID: data.projectID,
+})
 
 const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
   ...toPrompt(data),
@@ -234,7 +239,7 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 }
 
 export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
-  const promptData = toPromptData(userID, projectID, '', name, new Date())
+  const promptData = toPromptData(userID, projectID, name, '', new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, toID(promptData), '', '')
   return toID(promptData)
@@ -246,7 +251,7 @@ async function updatePrompt(promptData: any) {
   const prompt = lastVersionData.prompt
   if (prompt !== promptData.prompt) {
     await datastore.save(
-      toPromptData(promptData.userID, promptData.projectID, prompt, prompt.name, promptData.createdAt, promptID)
+      toPromptData(promptData.userID, promptData.projectID, promptData.name, prompt, promptData.createdAt, promptID)
     )
   }
 }

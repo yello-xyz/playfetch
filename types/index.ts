@@ -16,6 +16,7 @@ export type Project = {
 export type Prompt = {
   id: number
   name: string
+  prompt: string
   projectID: number | null
 }
 
