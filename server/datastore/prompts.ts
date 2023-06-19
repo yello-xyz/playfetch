@@ -75,9 +75,11 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   )
 }
 
-export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
+export const DefaultPromptName = 'New Prompt'
+
+export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
   const createdAt = new Date()
-  const promptData = toPromptData(userID, projectID, name, '', createdAt, createdAt, false)
+  const promptData = toPromptData(userID, projectID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, toID(promptData), '', '')
   return toID(promptData)

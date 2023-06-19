@@ -47,8 +47,8 @@ const api = {
   getPrompt: function (promptID: number): Promise<ActivePrompt> {
     return post(this.getPrompt, { promptID })
   },
-  addPrompt: function (name: string, projectID: number | null): Promise<number> {
-    return post(this.addPrompt, { name, projectID })
+  addPrompt: function (projectID: number | null): Promise<number> {
+    return post(this.addPrompt, { projectID })
   },
   updatePrompt: function (promptID: number, prompt: string, tags: string, versionID?: number): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, tags, versionID })

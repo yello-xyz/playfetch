@@ -116,34 +116,32 @@ function PromptCell({
   }
 
   return (
-    <>
-      <div
-        className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
-        key={index}
-        onClick={() => onSelect(prompt.id)}>
-        <div className='flex items-start justify-between gap-2'>
-          <span className='flex-1 text-sm font-medium line-clamp-2'>{prompt.name}</span>
-          <div className='relative flex'>
-            <IconButton
-              icon={prompt.favorited ? filledStarIcon.src : starIcon.src}
-              onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(onRefresh)}
-            />
-            <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
-            {isMenuExpanded && (
-              <div className='absolute right-0 top-7'>
-                <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-                  <PopupMenuItem title='Rename' callback={renamePrompt} />
-                  {setPickProjectPrompt && <PopupMenuItem title='Move to Project' callback={movePrompt} />}
-                  <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
-                </PopupMenu>
-              </div>
-            )}
-          </div>
+    <div
+      key={index}
+      className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
+      onClick={() => onSelect(prompt.id)}>
+      <div className='flex items-start justify-between gap-2'>
+        <span className='flex-1 text-sm font-medium line-clamp-2'>{prompt.name}</span>
+        <div className='relative flex'>
+          <IconButton
+            icon={prompt.favorited ? filledStarIcon.src : starIcon.src}
+            onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(onRefresh)}
+          />
+          <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+          {isMenuExpanded && (
+            <div className='absolute right-0 top-7'>
+              <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+                <PopupMenuItem title='Rename' callback={renamePrompt} />
+                {setPickProjectPrompt && <PopupMenuItem title='Move to Project' callback={movePrompt} />}
+                <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
+              </PopupMenu>
+            </div>
+          )}
         </div>
-        <span className='text-xs text-gray-500'>Edited {FormatRelativeDate(prompt.timestamp)}</span>
-        <span className='mt-3 text-xs text-gray-500 line-clamp-[9]'>{prompt.prompt}</span>
       </div>
-    </>
+      <span className='text-xs text-gray-500'>Edited {FormatRelativeDate(prompt.timestamp)}</span>
+      <span className='mt-3 text-xs text-gray-500 line-clamp-[9]'>{prompt.prompt}</span>
+    </div>
   )
 }
 

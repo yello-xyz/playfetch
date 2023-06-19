@@ -9,7 +9,6 @@ import PromptTabView from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
-import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
 import { getPromptWithVersions, getPromptsForProject } from '@/server/datastore/prompts'
 import { getProjectsForUser } from '@/server/datastore/projects'
 
@@ -112,17 +111,9 @@ export default function Home({
     }
   }
 
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
-
   const addPrompt = async (projectID: number | null) => {
-    setPickNamePrompt({
-      title: 'Add a new prompt',
-      label: 'Name',
-      callback: async (name: string) => {
-        const promptID = await api.addPrompt(name, projectID)
-        selectPrompt(promptID)
-      },
-    })
+    const promptID = await api.addPrompt(projectID)
+    selectPrompt(promptID)
   }
 
   return (
@@ -165,7 +156,6 @@ export default function Home({
           )}
         </div>
       </main>
-      <PickNameDialog key={currentQuery} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
     </>
   )
 }
