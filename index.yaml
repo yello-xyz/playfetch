@@ -9,7 +9,7 @@ indexes:
 - kind: prompt
   properties:
   - name: projectID
-  - name: createdAt
+  - name: lastEditedAt
     direction: desc
 
 - kind: version

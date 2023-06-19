@@ -40,34 +40,42 @@ const buildFilter = (key: string, value: {} | null) => new PropertyFilter(key, '
 
 const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
 
-const orderQuery = (query: Query, ordered: boolean) =>
-  ordered ? query.order('createdAt', { descending: true }) : query
+const orderQuery = (query: Query, sortKey: string | undefined) =>
+  sortKey ? query.order(sortKey, { descending: true }) : query
 
-const buildQuery = (type: string, filter: EntityFilter, limit = 100, ordered = false, keysOnly = false) =>
-  projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), ordered), keysOnly)
+const buildQuery = (
+  type: string,
+  filter: EntityFilter,
+  limit: number,
+  sortKey: string | undefined,
+  keysOnly: boolean
+) => projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKey), keysOnly)
 
-const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number, ordered = false, keysOnly = false) =>
+const getFilteredEntities = (
+  type: string,
+  filter: EntityFilter,
+  limit = 100,
+  sortKey: string | undefined = undefined,
+  keysOnly = false
+) =>
   getDatastore()
-    .runQuery(buildQuery(type, filter, limit, ordered, keysOnly))
+    .runQuery(buildQuery(type, filter, limit, sortKey, keysOnly))
     .then(([entities]) => entities)
 
 const getFilteredEntity = (type: string, filter: EntityFilter) =>
   getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
-const getEntities = (type: string, key: string, value: {} | null, limit?: number, ordered = false) =>
-  getFilteredEntities(type, buildFilter(key, value), limit, ordered)
+const getEntities = (type: string, key: string, value: {} | null, limit?: number, sortKey?: string) =>
+  getFilteredEntities(type, buildFilter(key, value), limit, sortKey)
 
-const getOrderedEntities = (type: string, key: string, value: {} | null, limit?: number) =>
-  getEntities(type, key, value, limit, true)
+const getOrderedEntities = (type: string, key: string, value: {} | null, sortKey = 'createdAt', limit?: number) =>
+  getEntities(type, key, value, limit, sortKey)
 
 const getEntity = async (type: string, key: string, value: {} | null, mostRecent = false) =>
-  getEntities(type, key, value, 1, mostRecent).then(([entity]) => entity)
-
-const getUserScopedEntities = (type: string, key: string, value: {} | null, userID: number, limit?: number) =>
-  getFilteredEntities(type, and([buildFilter(key, value), buildFilter('userID', userID)]), limit)
+  getEntities(type, key, value, 1, mostRecent ? 'createdAt' : undefined).then(([entity]) => entity)
 
 const getEntityKeys = (type: string, key: string, value: {} | null, limit?: number) =>
-  getFilteredEntities(type, buildFilter(key, value), limit, false, true).then(entities => entities.map(getKey))
+  getFilteredEntities(type, buildFilter(key, value), limit, undefined, true).then(entities => entities.map(getKey))
 
 const getEntityID = (type: string, key: string, value: {} | null) =>
   getEntityKeys(type, key, value, 1).then(([key]) => toID({ key }))
@@ -199,7 +207,7 @@ const toPromptData = (
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { userID, projectID, prompt, name, createdAt, lastEditedAt },
+  data: { userID, projectID, prompt, name, createdAt, lastEditedAt: lastEditedAt ?? createdAt },
   excludeFromIndexes: ['name', 'prompt'],
 })
 
@@ -218,7 +226,7 @@ const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: 
 })
 
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID)
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, 'lastEditedAt')
   return prompts.filter(prompt => prompt.userID === userID).map(prompt => toPrompt(prompt))
 }
 
