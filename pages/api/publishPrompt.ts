@@ -1,9 +1,9 @@
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { rotateProjectAPIKey, getURLPathForProject } from '@/server/datastore/datastore'
 import { buildURLForClientRoute } from '@/server/routing'
 import { ToCamelCase } from '@/common/formatting'
 import { saveEndpoint } from '@/server/datastore/endpoints'
+import { getURLPathForProject, rotateProjectAPIKey } from '@/server/datastore/projects'
 
 async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) {
   const userID = req.session.user!.id

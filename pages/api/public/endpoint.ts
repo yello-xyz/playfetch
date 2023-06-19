@@ -1,9 +1,9 @@
 import { ParseQuery } from '@/client/clientRoute'
-import { checkProject } from '@/server/datastore/datastore'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { runPromptWithConfig } from '../runPrompt'
 import { ToCamelCase } from '@/common/formatting'
 import { getEndpointFromPath } from '@/server/datastore/endpoints'
+import { checkProject } from '@/server/datastore/projects'
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)

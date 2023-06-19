@@ -1,4 +1,3 @@
-import { getProjectsForUser } from '@/server/datastore/datastore'
 import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
@@ -12,6 +11,7 @@ import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
 import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
 import { getPromptWithVersions, getPromptsForProject } from '@/server/datastore/prompts'
+import { getProjectsForUser } from '@/server/datastore/projects'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500'] })
 
