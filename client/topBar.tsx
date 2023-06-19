@@ -32,13 +32,13 @@ export default function TopBar({
   return (
     <>
       <div className='z-10 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200'>
-        <div className='relative flex gap-1 text-base font-medium justify-self-start'>
+        <div className='relative flex gap-1 text-base justify-self-start'>
           {(projectName || promptProjectName) && <img className='w-6 h-6' src={projectIcon.src} />}
-          {promptProjectName && <span className='font-normal'>{promptProjectName}</span>}
-          {promptProjectName && ' / '}
+          {promptProjectName}
+          {promptProjectName && <span className='font-medium'>{' / '}</span>}
           {activePrompt ? (
             <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-              {activePrompt.name}
+              <span className='font-medium'>{activePrompt.name}</span>
               <img className='w-6 h-6 cursor-pointer' src={chevronIcon.src} />
               {isMenuExpanded && (
                 <div className='absolute right-0 top-8'>
@@ -55,7 +55,7 @@ export default function TopBar({
               )}
             </div>
           ) : (
-            projectName ?? 'Prompts'
+            <span className='font-medium'>{projectName ?? 'Prompts'}</span>
           )}
         </div>
         {activeProjectID !== undefined && (
@@ -77,7 +77,7 @@ export default function TopBar({
 function TopBarButton({ title, icon, onClick }: { title: string; icon?: string; onClick: () => void }) {
   return (
     <div
-      className='flex items-center gap-1 py-1 pl-2 pr-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
+      className='flex items-center gap-1 py-1 pl-2 pr-4 text-sm font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
       {icon && <img className='w-6 h-6' src={icon} />}
       <div>{title}</div>
