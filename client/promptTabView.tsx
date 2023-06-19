@@ -70,14 +70,9 @@ export default function PromptTabView({
     onRefreshPrompt()
   }
 
-  const isLastVersion = prompt.versions.length === 1
-  const entityToDelete = isLastVersion ? 'prompt' : 'version'
-
   const deleteVersion = async (version: Version) => {
-    const versionHasRuns = version.runs.length > 0
-    const suffix = versionHasRuns ? ' and all its associated runs' : ''
     setDialogPrompt({
-      message: `Are you sure you want to delete this ${entityToDelete}${suffix}? This action cannot be undone.`,
+      message: `Are you sure you want to delete this version? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
         if (prompt.versions.length > 1) {
@@ -101,7 +96,6 @@ export default function PromptTabView({
           activeRun={activeRun}
           setActiveRun={setActiveRun}
           onDelete={deleteVersion}
-          entityToDelete={entityToDelete}
         />
       </div>
       <div className='flex-1 overflow-y-auto'>

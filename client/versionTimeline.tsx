@@ -91,7 +91,6 @@ export default function VersionTimeline({
   setActiveVersion,
   setActiveRun,
   onDelete,
-  entityToDelete,
 }: {
   versions: Version[]
   activeVersion: Version
@@ -99,7 +98,6 @@ export default function VersionTimeline({
   setActiveVersion: (version: Version) => void
   setActiveRun: (run?: Run) => void
   onDelete: (version: Version) => void
-  entityToDelete: string
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const isActiveVersion = (item: Version | Run) => item.id === activeVersion.id
@@ -132,8 +130,8 @@ export default function VersionTimeline({
                 {isActiveVersion(item) && '⮕ '}
                 {isPreviousVersion(item) && '⬅ '}
                 {FormatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
-                {isVersion(item) && (
-                  <Tooltip content={`Delete ${entityToDelete}`}>
+                {versions.length > 1 && isVersion(item) && (
+                  <Tooltip content='Delete version'>
                     <HiOutlineTrash onClick={event => deleteVersion(event, item)} />
                   </Tooltip>
                 )}

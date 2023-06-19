@@ -83,16 +83,14 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
+  if (versionCount <= 1) {
+    throw new Error(`Cannot delete last version for prompt ${versionData.promptID}`)
+  }
 
   const keysToDelete = await getEntityKeys(Entity.RUN, 'versionID', versionID)
   keysToDelete.push(buildKey(Entity.VERSION, versionID))
-  const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
-  if (versionCount <= 1) {
-    keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
-    keysToDelete.push(buildKey(Entity.ENDPOINT, versionData.promptID))
-  }
   await getDatastore().delete(keysToDelete)
-  if (versionCount > 1) {
-    await updatePrompt(promptData)
-  }
+
+  const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
+  await updatePrompt(promptData)
 }
