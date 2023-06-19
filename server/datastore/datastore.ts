@@ -1,15 +1,6 @@
 import { Datastore, Key, PropertyFilter, Query } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
-import { updatePrompt } from './prompts'
-
-export async function runDataMigration() {
-  const datastore = getDatastore()
-  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  for (const promptData of allPrompts) {
-    await updatePrompt(promptData)
-  }
-}
 
 let datastore: Datastore
 export const getDatastore = () => {

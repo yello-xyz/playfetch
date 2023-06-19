@@ -1,4 +1,4 @@
-import { runDataMigration } from '@/server/datastore/datastore'
+import { runDataMigration } from '@/server/datastore/migration'
 import { withAdminRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
