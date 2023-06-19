@@ -49,7 +49,7 @@ export async function saveVersionForUser(
 
   const versionData = toVersionData(userID, promptID, prompt, tags, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
-  await updatePrompt(promptData)
+  await updatePrompt({ ...promptData, prompt }, true)
 
   return toID(versionData)
 }
@@ -82,15 +82,17 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   if (versionData?.userID !== userID) {
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
-  const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
+  const promptID = versionData.promptID
+  const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   if (versionCount <= 1) {
-    throw new Error(`Cannot delete last version for prompt ${versionData.promptID}`)
+    throw new Error(`Cannot delete last version for prompt ${promptID}`)
   }
 
   const keysToDelete = await getEntityKeys(Entity.RUN, 'versionID', versionID)
   keysToDelete.push(buildKey(Entity.VERSION, versionID))
   await getDatastore().delete(keysToDelete)
 
-  const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
-  await updatePrompt(promptData)
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
+  await updatePrompt({ ...promptData, prompt: lastVersionData.prompt }, true)
 }

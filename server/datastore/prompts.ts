@@ -3,7 +3,6 @@ import {
   Entity,
   buildKey,
   getDatastore,
-  getEntity,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -19,18 +18,7 @@ export async function migratePrompts() {
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   for (const promptData of allPrompts) {
-    await datastore.save(
-      toPromptData(
-        promptData.userID,
-        promptData.projectID,
-        promptData.name,
-        promptData.prompt,
-        promptData.createdAt,
-        promptData.lastEditedAt,
-        promptData.favorited,
-        getID(promptData)
-      )
-    )
+    await updatePrompt(promptData, false)
   }
 }
 
@@ -95,19 +83,17 @@ export async function addPromptForUser(userID: number, name: string, projectID: 
   return toID(promptData)
 }
 
-export async function updatePrompt(promptData: any) {
-  const promptID = getID(promptData)
-  const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
+export async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(
       promptData.userID,
       promptData.projectID,
       promptData.name,
-      lastVersionData.prompt,
+      promptData.prompt,
       promptData.createdAt,
-      new Date(),
+      updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
       promptData.favorited,
-      promptID
+      getID(promptData)
     )
   )
 }
@@ -117,18 +103,7 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
   if (promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
-  await getDatastore().save(
-    toPromptData(
-      promptData.userID,
-      promptData.projectID,
-      promptData.name,
-      promptData.prompt,
-      promptData.createdAt,
-      promptData.lastEditedAt,
-      favorited,
-      promptID
-    )
-  )
+  await updatePrompt({ ...promptData, favorited }, false)
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
