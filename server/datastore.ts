@@ -1,4 +1,4 @@
-import { CheckValidURLPath, ProjectNameToURLPath, StripPromptSentinels } from '@/common/formatting'
+import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import { Endpoint, Project, Prompt, ActivePrompt, Run, RunConfig, User, Version } from '@/types'
 import { Datastore, Key, PropertyFilter, Query, and } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
@@ -189,10 +189,17 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
   return projects.map(project => toProject(project))
 }
 
-const toPromptData = (userID: number, projectID: number | null, name: string, createdAt: Date, promptID?: number) => ({
+const toPromptData = (
+  userID: number,
+  projectID: number | null,
+  prompt: string,
+  name: string,
+  createdAt: Date,
+  promptID?: number
+) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { userID, projectID, name, createdAt },
-  excludeFromIndexes: ['name'],
+  data: { userID, projectID, prompt, name, createdAt },
+  excludeFromIndexes: ['name', 'prompt'],
 })
 
 const toPrompt = (data: any): Prompt => ({ id: getID(data), name: data.name, projectID: data.projectID })
@@ -227,19 +234,19 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 }
 
 export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
-  const promptData = toPromptData(userID, projectID, name, new Date())
+  const promptData = toPromptData(userID, projectID, '', name, new Date())
   await getDatastore().save(promptData)
   await savePromptForUser(userID, toID(promptData), name, '', '')
   return toID(promptData)
 }
 
-async function updatePromptNameIfNeeded(promptData: any) {
+async function updatePrompt(promptData: any) {
   const promptID = getID(promptData)
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
-  const promptName = lastVersionData.title.length ? lastVersionData.title : StripPromptSentinels(lastVersionData.prompt)
-  if (promptName !== promptData.name) {
+  const prompt = lastVersionData.prompt
+  if (prompt !== promptData.prompt) {
     await datastore.save(
-      toPromptData(promptData.userID, promptData.projectID, promptName, promptData.createdAt, promptID)
+      toPromptData(promptData.userID, promptData.projectID, prompt, prompt.name, promptData.createdAt, promptID)
     )
   }
 }
@@ -279,7 +286,7 @@ export async function savePromptForUser(
 
   const versionData = toVersionData(userID, promptID, prompt, title, tags, createdAt, previousVersionID, versionID)
   await getDatastore().save(versionData)
-  await updatePromptNameIfNeeded(promptData)
+  await updatePrompt(promptData)
 
   return toID(versionData)
 }
@@ -325,7 +332,7 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   }
   await getDatastore().delete(keysToDelete)
   if (versionCount > 1) {
-    await updatePromptNameIfNeeded(promptData)
+    await updatePrompt(promptData)
   }
 }
 
