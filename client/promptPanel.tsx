@@ -86,6 +86,7 @@ export default function PromptPanel({
       callback: (name: string) => {
         onPublish?.(name, prompt, { provider, temperature, maxTokens, useCache, inputs })
       },
+      initialName: endpoint?.urlPath,
       validator: endpointNameValidator,
     })
   }
@@ -244,12 +245,7 @@ export default function PromptPanel({
           </div>
         )}
       </div>
-      <PickNameDialog
-        key={endpoint?.urlPath ?? version.id}
-        initialName={endpoint?.urlPath}
-        prompt={pickNamePrompt}
-        setPrompt={setPickNamePrompt}
-      />
+      <PickNameDialog key={endpoint?.urlPath ?? version.id} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </>
   )

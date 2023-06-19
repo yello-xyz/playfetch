@@ -7,15 +7,14 @@ export type PickNamePrompt = {
   title: string
   label: string
   callback: (name: string) => void
+  initialName?: string
   validator?: (name: string) => Promise<{ url?: string }>
 }
 
 export default function PickNameDialog({
-  initialName,
   prompt,
   setPrompt,
 }: {
-  initialName?: string
   prompt?: PickNamePrompt
   setPrompt: (prompt?: PickNamePrompt) => void
 }) {
@@ -24,8 +23,8 @@ export default function PickNameDialog({
   const [isPending, setPending] = useState(false)
 
   useEffect(() => {
-    if (initialName && prompt) {
-      updateName(initialName)
+    if (prompt?.initialName) {
+      updateName(prompt.initialName)
     }
   }, [prompt])
 
@@ -43,7 +42,7 @@ export default function PickNameDialog({
         prompt?.validator?.(name).then(({ url }) => {
           setURL(url)
           setPending(false)
-        })  
+        })
       }),
     [prompt]
   )
@@ -53,11 +52,11 @@ export default function PickNameDialog({
     if (prompt?.validator) {
       setPending(true)
       setURL(undefined)
-      checkName(name)  
+      checkName(name)
     }
   }
 
-  const isURLUnavailable = name.length > 0 && !isPending && (url === undefined)
+  const isURLUnavailable = name.length > 0 && !isPending && url === undefined
 
   return (
     <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>

@@ -7,7 +7,7 @@ import api from './api'
 import { useState } from 'react'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import ModalDialog, { DialogPrompt } from './modalDialog'
-import { PickNamePrompt } from './pickNameDialog'
+import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 
 export default function PromptsGridView({
   prompts = [],
@@ -19,6 +19,7 @@ export default function PromptsGridView({
   onRefresh: () => void
 }) {
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
   return (
     <>
@@ -30,10 +31,12 @@ export default function PromptsGridView({
             onSelect={onSelect}
             onRefresh={onRefresh}
             setDialogPrompt={setDialogPrompt}
+            setPickNamePrompt={setPickNamePrompt}
           />
         ))}
       </div>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      <PickNameDialog prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
     </>
   )
 }
@@ -44,12 +47,14 @@ function PromptCell({
   onSelect,
   onRefresh,
   setDialogPrompt,
+  setPickNamePrompt,
 }: {
   prompt: Prompt
   index: number
   onSelect: (promptID: number) => void
   onRefresh: () => void
   setDialogPrompt: (prompt: DialogPrompt) => void
+  setPickNamePrompt: (prompt: PickNamePrompt) => void
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
@@ -58,6 +63,15 @@ function PromptCell({
       message: 'Are you sure you want to delete this prompt? This action cannot be undone.',
       callback: () => api.deletePrompt(prompt.id).then(onRefresh),
       destructive: true,
+    })
+  }
+
+  const renamePrompt = () => {
+    setPickNamePrompt({
+      title: 'Rename Prompt',
+      label: 'Name',
+      callback: (name: string) => api.renamePrompt(prompt.id, name).then(onRefresh),
+      initialName: prompt.name,
     })
   }
 
@@ -78,7 +92,7 @@ function PromptCell({
             {isMenuExpanded && (
               <div className='absolute right-0 top-7'>
                 <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-                  <PopupMenuItem title='Rename' callback={() => {}} />
+                  <PopupMenuItem title='Rename' callback={renamePrompt} />
                   <PopupMenuItem title='Move to project' callback={() => {}} />
                   <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
                 </PopupMenu>
