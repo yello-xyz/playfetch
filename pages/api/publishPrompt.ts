@@ -12,7 +12,7 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
   const config = req.body.config
 
   const urlPath = ToCamelCase(name)
-  const projectURLPath = await getURLPathForProject(projectID)
+  const projectURLPath = await getURLPathForProject(userID, projectID)
   await saveEndpoint(userID, req.body.promptID, urlPath, projectURLPath, req.body.prompt, config)
 
   const apiKey = await rotateProjectAPIKey(userID, projectID)

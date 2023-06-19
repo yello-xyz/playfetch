@@ -14,6 +14,23 @@ import { Project } from '@/types'
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 
+export async function migrateProjects() {
+  const datastore = getDatastore()
+  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  for (const projectData of allProjects) {
+    await datastore.save(
+      toProjectData(
+        projectData.userID,
+        projectData.name,
+        projectData.urlPath ?? ProjectNameToURLPath(projectData.name),
+        projectData.createdAt,
+        projectData.apiKeyHash,
+        getID(projectData)
+      )
+    )
+  }
+}
+
 const hashAPIKey = (apiKey: string) => createHash('sha256').update(apiKey).digest('hex')
 
 const toProjectData = (
@@ -32,7 +49,7 @@ const toProjectData = (
 const toProject = (data: any): Project => ({
   id: getID(data),
   name: data.name,
-  urlPath: data.urlPath ?? '',
+  urlPath: data.urlPath,
   timestamp: getTimestamp(data),
 })
 
@@ -54,9 +71,12 @@ export async function checkProject(urlPath: string, apiKey?: string): Promise<bo
   return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey))
 }
 
-export async function getURLPathForProject(projectID: number): Promise<string> {
+export async function getURLPathForProject(userID: number, projectID: number): Promise<string> {
   const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
-  return projectData?.urlPath ?? ''
+  if (projectData?.userID !== userID) {
+    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
+  }
+  return projectData.urlPath
 }
 
 export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {
