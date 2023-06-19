@@ -2,6 +2,7 @@ import { FormatRelativeDate, Truncate } from '@/common/formatting'
 import { Prompt } from '@/types'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
+import api from './api'
 
 export default function PromptsGridView({
   prompts = [],
@@ -19,7 +20,10 @@ export default function PromptsGridView({
           onClick={() => onSelect(prompt.id)}>
           <div className='flex items-center justify-between'>
             <span className='text-sm font-medium'>{prompt.name}</span>
-            <IconButton icon={prompt.favorited ? filledStarIcon.src : starIcon.src} onClick={() => {}} />
+            <IconButton
+              icon={prompt.favorited ? filledStarIcon.src : starIcon.src}
+              onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited)}
+            />
           </div>
           <span className='text-xs text-gray-500'>Edited {FormatRelativeDate(prompt.timestamp)}</span>
           <span className='mt-3 text-xs text-gray-500'>{Truncate(prompt.prompt, 500)}</span>
@@ -30,5 +34,12 @@ export default function PromptsGridView({
 }
 
 const IconButton = ({ icon, onClick }: { icon: string; onClick: () => void }) => (
-  <img className='w-6 h-6 rounded cursor-pointer hover:bg-gray-100' src={icon} onClick={onClick} />
+  <img
+    className='w-6 h-6 rounded cursor-pointer hover:bg-gray-100'
+    src={icon}
+    onClick={event => {
+      event.stopPropagation()
+      onClick()
+    }}
+  />
 )

@@ -110,3 +110,22 @@ export async function updatePrompt(promptData: any) {
     )
   )
 }
+
+export async function toggleFavoritePrompt(userID: number, promptID: number, favorited: boolean) {
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  if (promptData?.userID !== userID) {
+    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
+  }
+  await getDatastore().save(
+    toPromptData(
+      promptData.userID,
+      promptData.projectID,
+      promptData.name,
+      promptData.prompt,
+      promptData.createdAt,
+      promptData.lastEditedAt,
+      favorited,
+      promptID
+    )
+  )
+}
