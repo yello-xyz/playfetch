@@ -19,6 +19,7 @@ export type Prompt = {
   prompt: string
   projectID: number | null
   timestamp: string
+  favorited: boolean
 }
 
 export type ActivePrompt = Prompt & {

@@ -14,26 +14,47 @@ import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
 
+export async function migratePrompts() {
+  const datastore = getDatastore()
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  for (const promptData of allPrompts) {
+    await datastore.save(
+      toPromptData(
+        promptData.userID,
+        promptData.projectID,
+        promptData.name,
+        promptData.prompt,
+        promptData.createdAt,
+        promptData.lastEditedAt,
+        promptData.favorited,
+        getID(promptData)
+      )
+    )
+  }
+}
+
 const toPromptData = (
   userID: number,
   projectID: number | null,
   name: string,
   prompt: string,
   createdAt: Date,
-  lastEditedAt?: Date,
+  lastEditedAt: Date,
+  favorited: boolean,
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { userID, projectID, prompt, name, createdAt, lastEditedAt: lastEditedAt ?? createdAt },
+  data: { userID, projectID, prompt, name, createdAt, lastEditedAt, favorited },
   excludeFromIndexes: ['name', 'prompt'],
 })
 
 const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
-  prompt: StripPromptSentinels(data.prompt ?? ''),
+  prompt: StripPromptSentinels(data.prompt),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
+  favorited: data.favorited,
 })
 
 const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
@@ -66,7 +87,8 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 }
 
 export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
-  const promptData = toPromptData(userID, projectID, name, '', new Date())
+  const createdAt = new Date()
+  const promptData = toPromptData(userID, projectID, name, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, toID(promptData), '', '')
   return toID(promptData)
@@ -83,6 +105,7 @@ export async function updatePrompt(promptData: any) {
       lastVersionData.prompt,
       promptData.createdAt,
       new Date(),
+      promptData.favorited,
       promptID
     )
   )
