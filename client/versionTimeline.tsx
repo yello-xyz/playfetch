@@ -142,7 +142,6 @@ export default function VersionTimeline({
               </Timeline.Time>
               {isVersion(item) && (
                 <Timeline.Title className='flex items-center gap-2'>
-                  {item.title}
                   {item.tags
                     .split(', ')
                     .map(tag => tag.trim())

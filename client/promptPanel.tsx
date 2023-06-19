@@ -57,7 +57,6 @@ export default function PromptPanel({
   onSave: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
-  const [title, setTitle] = useState(version.title)
   const [tags, setTags] = useState(version.tags)
   const [isDirty, setDirty] = useState(false)
 
@@ -99,18 +98,16 @@ export default function PromptPanel({
     })
   }
 
-  const update = (prompt: string, title: string, tags: string) => {
+  const update = (prompt: string, tags: string) => {
     setPrompt(prompt)
-    setTitle(title)
     setTags(tags)
-    const isDirty = prompt !== version.prompt || title !== version.title || tags !== version.tags
+    const isDirty = prompt !== version.prompt || tags !== version.tags
     setDirty(isDirty)
-    setDirtyVersion(isDirty ? { ...version, prompt, title, tags } : undefined)
+    setDirtyVersion(isDirty ? { ...version, prompt, tags } : undefined)
   }
 
-  const updateTitle = (title: string) => update(prompt, title, tags)
-  const updateTags = (tags: string) => update(prompt, title, tags)
-  const updatePrompt = (prompt: string) => update(prompt, title, tags)
+  const updateTags = (tags: string) => update(prompt, tags)
+  const updatePrompt = (prompt: string) => update(prompt, tags)
 
   const contentEditableRef = useRef<HTMLElement>(null)
   const htmlContent = prompt
@@ -178,7 +175,6 @@ export default function PromptPanel({
             innerRef={contentEditableRef}
           />
         </div>
-        <LabeledTextInput id='title' label='Title (optional)' value={title} setValue={updateTitle} />
         <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
         <div className='flex gap-2'>
           <PendingButton

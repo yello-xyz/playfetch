@@ -58,7 +58,6 @@ export default function Home({
     const versionID = await api.updatePrompt(
       activePrompt.id,
       dirtyVersion.prompt,
-      dirtyVersion.title,
       dirtyVersion.tags,
       activeVersion.id
     )

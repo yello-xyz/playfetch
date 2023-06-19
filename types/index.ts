@@ -29,7 +29,6 @@ export type Version = {
   previousID?: number
   timestamp: string
   prompt: string
-  title: string
   tags: string
   runs: Run[]
 }

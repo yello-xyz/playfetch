@@ -236,7 +236,7 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
   const promptData = toPromptData(userID, projectID, '', name, new Date())
   await getDatastore().save(promptData)
-  await savePromptForUser(userID, toID(promptData), name, '', '')
+  await savePromptForUser(userID, toID(promptData), '', '')
   return toID(promptData)
 }
 
@@ -255,7 +255,6 @@ export async function savePromptForUser(
   userID: number,
   promptID: number,
   prompt: string,
-  title: string,
   tags: string,
   currentVersionID?: number
 ) {
@@ -284,7 +283,7 @@ export async function savePromptForUser(
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
 
-  const versionData = toVersionData(userID, promptID, prompt, title, tags, createdAt, previousVersionID, versionID)
+  const versionData = toVersionData(userID, promptID, prompt, tags, createdAt, previousVersionID, versionID)
   await getDatastore().save(versionData)
   await updatePrompt(promptData)
 
@@ -295,15 +294,14 @@ const toVersionData = (
   userID: number,
   promptID: number,
   prompt: string,
-  title: string,
   tags: string,
   createdAt: Date,
   previousVersionID?: number,
   versionID?: number
 ) => ({
   key: buildKey(Entity.VERSION, versionID),
-  data: { userID, promptID, prompt, title, tags, createdAt, previousVersionID },
-  excludeFromIndexes: ['prompt', 'title', 'tags'],
+  data: { userID, promptID, prompt, tags, createdAt, previousVersionID },
+  excludeFromIndexes: ['prompt', 'tags'],
 })
 
 const toVersion = (data: any, runs: any[]): Version => ({
@@ -311,7 +309,6 @@ const toVersion = (data: any, runs: any[]): Version => ({
   previousID: data.previousVersionID ?? null,
   timestamp: getTimestamp(data),
   prompt: data.prompt,
-  title: data.title,
   tags: data.tags,
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })

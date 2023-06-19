@@ -11,7 +11,6 @@ const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
   return (
-    version.title.toLowerCase().includes(lowerCaseFilter) ||
     version.tags.toLowerCase().includes(lowerCaseFilter) ||
     version.prompt.toLowerCase().includes(lowerCaseFilter) ||
     version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
