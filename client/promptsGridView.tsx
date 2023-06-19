@@ -32,8 +32,8 @@ export default function PromptsGridView({
       <div className='flex flex-wrap gap-6 p-6'>
         {prompts.map((prompt, index) => (
           <PromptCell
+            key={index}
             prompt={prompt}
-            index={index}
             onSelect={onSelect}
             onRefresh={onRefresh}
             setDialogPrompt={setDialogPrompt}
@@ -75,7 +75,6 @@ function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
 
 function PromptCell({
   prompt,
-  index,
   onSelect,
   onRefresh,
   setDialogPrompt,
@@ -83,7 +82,6 @@ function PromptCell({
   setPickProjectPrompt,
 }: {
   prompt: Prompt
-  index: number
   onSelect: (promptID: number) => void
   onRefresh: () => void
   setDialogPrompt: (prompt: DialogPrompt) => void
@@ -94,7 +92,6 @@ function PromptCell({
 
   return (
     <div
-      key={index}
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
       onClick={() => onSelect(prompt.id)}>
       <div className='flex items-start justify-between gap-2'>
