@@ -1,6 +1,6 @@
-import { getEndpointFromPath } from '@/server/datastore/datastore'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { runPromptWithConfig } from './runPrompt'
+import { getEndpointFromPath } from '@/server/datastore/endpoints'
 
 async function runTokenizedEndpoint(req: NextApiRequest, res: NextApiResponse) {
   const urlPath = req.body.urlPath

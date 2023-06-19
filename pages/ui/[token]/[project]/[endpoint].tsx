@@ -1,11 +1,11 @@
 import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
-import { getEndpointFromPath } from '@/server/datastore/datastore'
 import { useState } from 'react'
 import { Label, TextInput } from 'flowbite-react'
 import PendingButton from '@/client/pendingButton'
 import { withLoggedInSession } from '@/server/session'
 import api from '@/client/api'
 import { useRouter } from 'next/router'
+import { getEndpointFromPath } from '@/server/datastore/endpoints'
 
 export const getServerSideProps = withLoggedInSession(async ({ query }) => {
   const { token, project: projectURLPath, endpoint: urlPath } = ParseQuery(query)
