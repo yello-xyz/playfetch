@@ -1,25 +1,29 @@
 import { FormatRelativeDate, Truncate } from '@/common/formatting'
-import { Prompt } from '@/types'
+import { Project, Prompt } from '@/types'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from './api'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
+import LabeledTextInput from './labeledTextInput'
 
 export default function PromptsGridView({
-  prompts = [],
+  projects,
+  prompts,
   onSelect,
   onRefresh,
 }: {
+  projects: Project[]
   prompts: Prompt[]
   onSelect: (promptID: number) => void
   onRefresh: () => void
 }) {
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
+  const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
 
   return (
     <>
@@ -32,11 +36,18 @@ export default function PromptsGridView({
             onRefresh={onRefresh}
             setDialogPrompt={setDialogPrompt}
             setPickNamePrompt={setPickNamePrompt}
+            setPickProjectPrompt={projects.length ? setPickProjectPrompt : undefined}
           />
         ))}
       </div>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
       <PickNameDialog prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
+      <PickProjectDialog
+        key={pickProjectPrompt?.initialProjectID}
+        projects={projects}
+        prompt={pickProjectPrompt}
+        setPrompt={setPickProjectPrompt}
+      />
     </>
   )
 }
@@ -48,6 +59,7 @@ function PromptCell({
   onRefresh,
   setDialogPrompt,
   setPickNamePrompt,
+  setPickProjectPrompt,
 }: {
   prompt: Prompt
   index: number
@@ -55,6 +67,7 @@ function PromptCell({
   onRefresh: () => void
   setDialogPrompt: (prompt: DialogPrompt) => void
   setPickNamePrompt: (prompt: PickNamePrompt) => void
+  setPickProjectPrompt?: (prompt: PickProjectPrompt) => void
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
@@ -72,6 +85,13 @@ function PromptCell({
       label: 'Name',
       callback: (name: string) => api.renamePrompt(prompt.id, name).then(onRefresh),
       initialName: prompt.name,
+    })
+  }
+
+  const movePrompt = () => {
+    setPickProjectPrompt!({
+      callback: (projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh),
+      initialProjectID: prompt.projectID,
     })
   }
 
@@ -93,7 +113,7 @@ function PromptCell({
               <div className='absolute right-0 top-7'>
                 <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
                   <PopupMenuItem title='Rename' callback={renamePrompt} />
-                  <PopupMenuItem title='Move to project' callback={() => {}} />
+                  {setPickProjectPrompt && <PopupMenuItem title='Move to Project' callback={movePrompt} />}
                   <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
                 </PopupMenu>
               </div>
@@ -117,3 +137,48 @@ const IconButton = ({ icon, onClick }: { icon: string; onClick: () => void }) =>
     }}
   />
 )
+
+type PickProjectPrompt = {
+  callback: (projectID: number) => void
+  initialProjectID: number | null
+}
+
+function PickProjectDialog({
+  projects,
+  prompt,
+  setPrompt,
+}: {
+  projects: Project[]
+  prompt?: PickProjectPrompt
+  setPrompt: (prompt?: PickProjectPrompt) => void
+}) {
+  const [projectID, setProjectID] = useState<number | null>(prompt?.initialProjectID ?? null)
+
+  const dialogPrompt = prompt
+    ? {
+        message: 'Move prompt to project',
+        callback: () => prompt.callback(projectID!),
+        disabled: projectID === prompt.initialProjectID || projectID === null,
+      }
+    : undefined
+
+  return (
+    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
+      <div className='text-sm text-gray-500'>
+        <select
+          className='w-full p-2 text-sm text-gray-500 border border-gray-300 rounded-md'
+          value={projectID?.toString() ?? 0}
+          onChange={event => setProjectID(Number(event.target.value))}>
+          <option value={0} disabled>
+            Select a project
+          </option>
+          {projects.map((project, index) => (
+            <option key={index} value={project.id}>
+              {project.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </ModalDialog>
+  )
+}
