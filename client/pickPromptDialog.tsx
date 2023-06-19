@@ -33,9 +33,11 @@ export default function PickProjectDialog({
           className='w-full p-2 text-sm text-gray-500 border border-gray-300 rounded-md'
           value={projectID?.toString() ?? 0}
           onChange={event => setProjectID(Number(event.target.value))}>
-          <option value={0} disabled>
-            Select a project
-          </option>
+          {!projectID && (
+            <option value={0} disabled>
+              Select a project
+            </option>
+          )}
           {projects.map((project, index) => (
             <option key={index} value={project.id}>
               {project.name}
