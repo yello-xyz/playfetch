@@ -60,7 +60,7 @@ export default function Home({
     return versionID
   }
 
-  const refreshPrompt = async (promptID?: number, focusVersionID = activeVersion?.id) => {
+  const refreshPrompt = async (promptID: number | undefined, focusVersionID = activeVersion?.id) => {
     const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
     setActivePrompt(newPrompt)
     setActiveProjectID(newPrompt ? undefined : activeProjectID)
@@ -133,6 +133,7 @@ export default function Home({
             activeProjectID={activeProjectID}
             activePrompt={activePrompt}
             onAddPrompt={addPrompt}
+            onRefreshPrompt={() => refreshPrompt(activePrompt!.id)}
           />
           {activePrompt && activeVersion ? (
             <PromptTabView
