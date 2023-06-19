@@ -7,6 +7,7 @@ import { createHash } from 'crypto'
 import ShortUniqueId from 'short-unique-id'
 import { toEndpoint } from './endpoints'
 import { toRun } from './runs'
+import { saveVersionForUser, toVersion } from './versions'
 
 export async function runDataMigration() {
   const datastore = getDatastore()
@@ -36,7 +37,7 @@ export enum Entity {
   CACHE = 'cache',
 }
 
-const toID = ({ key }: { key: Key }) => Number(key.id)
+export const toID = ({ key }: { key: Key }) => Number(key.id)
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
 
@@ -81,10 +82,10 @@ const getEntities = (type: string, key: string, value: {} | null, limit?: number
 const getOrderedEntities = (type: string, key: string, value: {} | null, sortKey = 'createdAt', limit?: number) =>
   getEntities(type, key, value, limit, sortKey)
 
-const getEntity = async (type: string, key: string, value: {} | null, mostRecent = false) =>
+export const getEntity = async (type: string, key: string, value: {} | null, mostRecent = false) =>
   getEntities(type, key, value, 1, mostRecent ? 'createdAt' : undefined).then(([entity]) => entity)
 
-const getEntityKeys = (type: string, key: string, value: {} | null, limit?: number) =>
+export const getEntityKeys = (type: string, key: string, value: {} | null, limit?: number) =>
   getFilteredEntities(type, buildFilter(key, value), limit, undefined, true).then(entities => entities.map(getKey))
 
 export const getEntityID = (type: string, key: string, value: {} | null) =>
@@ -98,7 +99,7 @@ const getKeyedEntities = async (type: string, ids: number[]) =>
 export const getKeyedEntity = async (type: string, id: number) =>
   getKeyedEntities(type, [id]).then(([entity]) => entity)
 
-const getEntityCount = async (type: string, key: string, value: {} | null) => {
+export const getEntityCount = async (type: string, key: string, value: {} | null) => {
   const datastore = getDatastore()
   const query = datastore.createQuery(type).filter(buildFilter(key, value))
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
@@ -262,11 +263,11 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 export async function addPromptForUser(userID: number, name: string, projectID: number | null): Promise<number> {
   const promptData = toPromptData(userID, projectID, name, '', new Date())
   await getDatastore().save(promptData)
-  await savePromptForUser(userID, toID(promptData), '', '')
+  await saveVersionForUser(userID, toID(promptData), '', '')
   return toID(promptData)
 }
 
-async function updatePrompt(promptData: any) {
+export async function updatePrompt(promptData: any) {
   const promptID = getID(promptData)
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
   await datastore.save(
@@ -280,86 +281,4 @@ async function updatePrompt(promptData: any) {
       promptID
     )
   )
-}
-
-export async function savePromptForUser(
-  userID: number,
-  promptID: number,
-  prompt: string,
-  tags: string,
-  currentVersionID?: number
-) {
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (promptData?.userID !== userID) {
-    return undefined
-  }
-
-  let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
-  const canOverwrite =
-    currentVersionID &&
-    (prompt === currentVersion.prompt || !(await getEntity(Entity.RUN, 'versionID', currentVersionID)))
-
-  if (canOverwrite && prompt !== currentVersion.prompt) {
-    const previousVersion = currentVersion.previousVersionID
-      ? await getKeyedEntity(Entity.VERSION, currentVersion.previousVersionID)
-      : undefined
-    if (previousVersion && previousVersion.prompt === prompt) {
-      await datastore.delete(buildKey(Entity.VERSION, currentVersionID))
-      currentVersionID = currentVersion.previousVersionID
-      currentVersion = previousVersion
-    }
-  }
-
-  const versionID = canOverwrite ? currentVersionID : undefined
-  const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
-  const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
-
-  const versionData = toVersionData(userID, promptID, prompt, tags, createdAt, previousVersionID, versionID)
-  await getDatastore().save(versionData)
-  await updatePrompt(promptData)
-
-  return toID(versionData)
-}
-
-const toVersionData = (
-  userID: number,
-  promptID: number,
-  prompt: string,
-  tags: string,
-  createdAt: Date,
-  previousVersionID?: number,
-  versionID?: number
-) => ({
-  key: buildKey(Entity.VERSION, versionID),
-  data: { userID, promptID, prompt, tags, createdAt, previousVersionID },
-  excludeFromIndexes: ['prompt', 'tags'],
-})
-
-const toVersion = (data: any, runs: any[]): Version => ({
-  id: getID(data),
-  previousID: data.previousVersionID ?? null,
-  timestamp: getTimestamp(data),
-  prompt: data.prompt,
-  tags: data.tags,
-  runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
-})
-
-export async function deleteVersionForUser(userID: number, versionID: number) {
-  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  if (versionData?.userID !== userID) {
-    throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
-  }
-
-  const keysToDelete = await getEntityKeys(Entity.RUN, 'versionID', versionID)
-  keysToDelete.push(buildKey(Entity.VERSION, versionID))
-  const versionCount = await getEntityCount(Entity.VERSION, 'promptID', versionData.promptID)
-  const promptData = await getKeyedEntity(Entity.PROMPT, versionData.promptID)
-  if (versionCount <= 1) {
-    keysToDelete.push(buildKey(Entity.PROMPT, versionData.promptID))
-    keysToDelete.push(buildKey(Entity.ENDPOINT, versionData.promptID))
-  }
-  await getDatastore().delete(keysToDelete)
-  if (versionCount > 1) {
-    await updatePrompt(promptData)
-  }
 }
