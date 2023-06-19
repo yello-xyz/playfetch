@@ -106,6 +106,11 @@ const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
   return promptData
 }
 
+export async function updatePromptProject(userID: number, promptID: number, projectID: number) {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+  await updatePrompt({ ...promptData, projectID }, true)
+}
+
 export async function updatePromptName(userID: number, promptID: number, name: string) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   await updatePrompt({ ...promptData, name }, true)
