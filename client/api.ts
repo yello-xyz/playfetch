@@ -56,6 +56,9 @@ const api = {
   toggleFavorite: function (promptID: number, favorite: boolean) {
     return post(this.toggleFavorite, { promptID, favorite })
   },
+  deletePrompt: function (promptID: number) {
+    return post(this.deletePrompt, { promptID })
+  },
   runPrompt: function (promptID: number, versionID: number, prompt: string, config: RunConfig) {
     return post(this.runPrompt, { promptID, versionID, prompt, config })
   },

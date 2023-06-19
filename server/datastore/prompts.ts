@@ -4,6 +4,7 @@ import {
   buildKey,
   getDatastore,
   getEntity,
+  getEntityKeys,
   getID,
   getKeyedEntity,
   getOrderedEntities,
@@ -128,4 +129,19 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
       promptID
     )
   )
+}
+
+export async function deletePromptForUser(userID: number, promptID: number) {
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  if (promptData?.userID !== userID) {
+    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
+  }
+  const versionIDs = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
+  const runIDs = await getEntityKeys(Entity.RUN, 'promptID', promptID)
+  await getDatastore().delete([
+    buildKey(Entity.PROMPT, promptID),
+    buildKey(Entity.ENDPOINT, promptID),
+    ...versionIDs,
+    ...runIDs,
+  ])
 }
