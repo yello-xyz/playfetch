@@ -23,6 +23,7 @@ export default function PromptPopupMenu({
   setPickProjectPrompt?: (prompt: PickProjectPrompt) => void
 }) {
   const deletePrompt = () => {
+    setIsMenuExpanded(false)
     setDialogPrompt({
       message: 'Are you sure you want to delete this prompt? This action cannot be undone.',
       callback: () => api.deletePrompt(prompt.id).then(onRefresh),
@@ -31,6 +32,7 @@ export default function PromptPopupMenu({
   }
 
   const renamePrompt = () => {
+    setIsMenuExpanded(false)
     setPickNamePrompt({
       title: 'Rename Prompt',
       label: 'Name',
@@ -40,6 +42,7 @@ export default function PromptPopupMenu({
   }
 
   const movePrompt = () => {
+    setIsMenuExpanded(false)
     setPickProjectPrompt!({
       callback: (projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh),
       initialProjectID: prompt.projectID,
