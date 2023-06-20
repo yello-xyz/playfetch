@@ -42,7 +42,6 @@ export default function PromptPanel({
   setDirtyVersion,
   endpointNameValidator,
   onRun,
-  onSave,
   onPublish,
   onUnpublish,
 }: {
@@ -54,11 +53,9 @@ export default function PromptPanel({
   onRun: (prompt: string, config: RunConfig) => void
   onPublish?: (name: string, prompt: string, config: RunConfig) => void
   onUnpublish: () => void
-  onSave: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [tags, setTags] = useState(version.tags)
-  const [isDirty, setDirty] = useState(false)
 
   const runConfig = activeRun?.config ?? DefaultConfig
 
@@ -103,7 +100,6 @@ export default function PromptPanel({
     setPrompt(prompt)
     setTags(tags)
     const isDirty = prompt !== version.prompt || tags !== version.tags
-    setDirty(isDirty)
     setDirtyVersion(isDirty ? { ...version, prompt, tags } : undefined)
   }
 
@@ -182,9 +178,6 @@ export default function PromptPanel({
             disabled={!prompt.length}
             onClick={() => onRun(prompt, { provider, temperature, maxTokens, useCache, inputs })}>
             Run
-          </PendingButton>
-          <PendingButton disabled={!isDirty} onClick={onSave}>
-            Save
           </PendingButton>
           {onPublish && (
             <PendingButton disabled={version.runs.length === 0} onClick={publish}>

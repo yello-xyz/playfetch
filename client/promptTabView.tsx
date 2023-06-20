@@ -108,7 +108,6 @@ export default function PromptTabView({
             setDirtyVersion={setDirtyVersion}
             endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
             onRun={runPrompt}
-            onSave={() => savePromptAndRefocus().then()}
             onPublish={project ? publishPrompt : undefined}
             onUnpublish={unpublishPrompt}
           />
