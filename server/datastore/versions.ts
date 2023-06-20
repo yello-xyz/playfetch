@@ -15,6 +15,24 @@ import { toRun } from './runs'
 import { DefaultPromptName, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/common/formatting'
 
+export async function migrateVersions() {
+  const datastore = getDatastore()
+  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
+  for (const versionData of allVersions) {
+    await datastore.save(
+      toVersionData(
+        versionData.userID,
+        versionData.promptID,
+        versionData.prompt,
+        versionData.tags,
+        versionData.createdAt,
+        versionData.previousVersionID,
+        getID(versionData)
+      )
+    )
+  }
+}
+
 export async function saveVersionForUser(
   userID: number,
   promptID: number,
