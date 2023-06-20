@@ -11,6 +11,7 @@ import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
 import { getPromptWithVersions, getPromptsForProject } from '@/server/datastore/prompts'
 import { getProjectsForUser } from '@/server/datastore/projects'
+import SegmentedControl, { Segment } from '@/client/segmentedControl'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500'] })
 
@@ -116,6 +117,8 @@ export default function Home({
     selectPrompt(promptID)
   }
 
+  const [selectedTab, setSelectedTab] = useState<'play' | 'test' | 'publish'>('play')
+
   return (
     <>
       <main className={`flex items-stretch h-screen ${inter.className}`}>
@@ -134,8 +137,15 @@ export default function Home({
             activePrompt={activePrompt}
             onSelectProject={selectProject}
             onAddPrompt={addPrompt}
-            onRefreshPrompt={() => refreshPrompt(activePrompt!.id)}
-          />
+            onRefreshPrompt={() => refreshPrompt(activePrompt!.id)}>
+            {activePrompt && (
+              <SegmentedControl selected={selectedTab} callback={setSelectedTab}>
+                <Segment value={'play'} title='Play' />
+                <Segment value={'test'} title='Test' />
+                <Segment value={'publish'} title='Publish' />
+              </SegmentedControl>
+            )}
+          </TopBar>
           {activePrompt && activeVersion ? (
             <PromptTabView
               prompt={activePrompt}
