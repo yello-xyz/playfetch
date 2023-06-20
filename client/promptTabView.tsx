@@ -86,8 +86,8 @@ export default function PromptTabView({
   }
 
   return (
-    <div className='flex items-stretch flex-1 h-screen'>
-      <div className='flex flex-col flex-1 gap-4 p-8 overflow-y-auto max-w-prose'>
+    <div className='flex items-stretch'>
+      <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
         <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
         <VersionTimeline
           versions={prompt.versions.filter(versionFilter(filter))}
@@ -98,7 +98,7 @@ export default function PromptTabView({
           onDelete={deleteVersion}
         />
       </div>
-      <div className='flex-1 overflow-y-auto'>
+      <div>
         <Suspense>
           <PromptPanel
             key={activeVersion.id}

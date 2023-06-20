@@ -37,7 +37,7 @@ export default function TopBar({
     <>
       <div className='flex flex-col'>
         <div className={`z-10 flex items-center justify-between gap-4 px-6 ${children ? 'pt-4' : 'py-4'}`}>
-          <div className='relative flex gap-1 text-base justify-self-start'>
+          <div className='relative flex gap-1 py-2 text-base justify-self-start'>
             {(projectName || promptProjectName) && <img className='w-6 h-6' src={projectIcon.src} />}
             {promptProjectName && (
               <span className='cursor-pointer' onClick={() => onSelectProject(activePrompt!.projectID)}>

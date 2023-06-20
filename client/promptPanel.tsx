@@ -143,7 +143,7 @@ export default function PromptPanel({
 
   return (
     <>
-      <div className='flex flex-col flex-1 gap-4 px-8 pt-8 overflow-y-auto text-gray-500 max-w-prose'>
+      <div className='flex flex-col gap-4 px-8 pt-8 text-gray-500 max-w-prose'>
         {inputVariables.length > 0 && (
           <div className='flex flex-col gap-2'>
             <Label value='Inputs' />

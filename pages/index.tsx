@@ -130,7 +130,7 @@ export default function Home({
           onProjectAdded={refreshProjectsAndFocus}
           onAddPrompt={() => addPrompt(null)}
         />
-        <div className='flex flex-col flex-grow'>
+        <div className='flex flex-col flex-1'>
           <TopBar
             projects={projects}
             activeProjectID={activeProjectID}
@@ -146,26 +146,28 @@ export default function Home({
               </SegmentedControl>
             )}
           </TopBar>
-          {activePrompt && activeVersion ? (
-            <PromptTabView
-              prompt={activePrompt}
-              project={projects.find(project => project.id === activePrompt.projectID)}
-              activeVersion={activeVersion}
-              setActiveVersion={selectVersion}
-              setDirtyVersion={setDirtyVersion}
-              onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
-              onPromptDeleted={selectProject}
-              onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
-            />
-          ) : (
-            <PromptsGridView
-              projects={projects}
-              prompts={prompts}
-              onAddPrompt={() => addPrompt(activeProjectID!)}
-              onSelect={selectPrompt}
-              onRefresh={() => refreshProject(activeProjectID!)}
-            />
-          )}
+          <div className='flex-1 h-screen overflow-y-auto'>
+            {activePrompt && activeVersion ? (
+              <PromptTabView
+                prompt={activePrompt}
+                project={projects.find(project => project.id === activePrompt.projectID)}
+                activeVersion={activeVersion}
+                setActiveVersion={selectVersion}
+                setDirtyVersion={setDirtyVersion}
+                onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
+                onPromptDeleted={selectProject}
+                onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
+              />
+            ) : (
+              <PromptsGridView
+                projects={projects}
+                prompts={prompts}
+                onAddPrompt={() => addPrompt(activeProjectID!)}
+                onSelect={selectPrompt}
+                onRefresh={() => refreshProject(activeProjectID!)}
+              />
+            )}
+          </div>
         </div>
       </main>
     </>
