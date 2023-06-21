@@ -10,11 +10,11 @@ import PromptInput from './promptInput'
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
     case 'openai':
-      return 'OpenAI'
+      return 'OpenAI - GPT-3.5'
     case 'anthropic':
-      return 'Anthropic'
+      return 'Anthropic - Claude v1'
     case 'google':
-      return 'Google'
+      return 'Google - PaLM v2'
   }
 }
 
@@ -126,16 +126,19 @@ export default function PromptPanel({
       </div>
       <div className='flex items-center self-end gap-4'>
         <select
-          className='w-full p-2 text-gray-500 border border-gray-300 rounded-md'
+          className='text-sm text-black border border-gray-300 rounded-lg'
           value={provider}
           onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
           <option value={'openai'}>{labelForProvider('openai')}</option>
           <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
           <option value={'google'}>{labelForProvider('google')}</option>
         </select>
-        <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
-          Run
-        </PendingButton>
+        <button
+          className='px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50'
+          disabled={!prompt.length}
+          onClick={() => onRun(prompt, config, inputs)}>
+          {version.runs.length ? 'Run again' : 'Run'}
+        </button>
       </div>
     </div>
   )
