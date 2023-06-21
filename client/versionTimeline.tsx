@@ -7,6 +7,7 @@ import { FormatDate } from '@/common/formatting'
 import LabeledTextInput from './labeledTextInput'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import api from './api'
+import historyIcon from '@/public/history.svg'
 
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
@@ -107,6 +108,7 @@ export default function VersionTimeline({
   setActiveVersion: (version: Version) => void
   onRefreshPrompt: () => void
 }) {
+  const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
@@ -115,6 +117,15 @@ export default function VersionTimeline({
   const renderPromptVersion = (version: Version) =>
     renderPrompt(version.prompt, previousVersion && isActiveVersion(version) ? previousVersion.prompt : undefined)
   const isPreviousVersion = (item: Version) => !!previousVersion && item.id === previousVersion.id
+
+  const selectVersion = (version: Version) => {
+    setFocused(true)
+    setActiveVersion(version)
+  }
+
+  if (filter.length && isFocused) {
+    setFocused(false)
+  }
 
   const deleteVersion = async (event: MouseEvent, version: Version) => {
     event.stopPropagation()
@@ -128,40 +139,47 @@ export default function VersionTimeline({
     })
   }
 
+  const ascendingVersions = versions.slice().reverse()
+  const versionsToShow = isFocused
+    ? [...(previousVersion ? [previousVersion] : []), activeVersion]
+    : ascendingVersions.filter(versionFilter(filter))
+
   return (
     <>
       <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
+      {isFocused && (
+        <div className='flex items-center cursor-pointer' onClick={() => setFocused(false)}>
+          <img className='w-6 h-6' src={historyIcon.src} />
+          View Full History
+        </div>
+      )}
       <div className='p-4 overflow-y-auto'>
         <Timeline>
-          {versions
-            .filter(versionFilter(filter))
-            .slice()
-            .reverse()
-            .map((version, index, items) => (
-              <Timeline.Item key={index} className='cursor-pointer' onClick={() => setActiveVersion(version)}>
-                <Timeline.Point icon={HiOutlineSparkles} theme={customPointTheme} />
-                <Timeline.Content>
-                  <Timeline.Time className='flex items-center gap-2'>
-                    {isActiveVersion(version) && '⮕ '}
-                    {isPreviousVersion(version) && '⬅ '}
-                    {`#${index + 1} | `}
-                    {FormatDate(version.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
-                    {versions.length > 1 && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
-                    {version.config.provider.length && <Badge color='green'>{version.config.provider}</Badge>}
-                  </Timeline.Time>
-                  <Timeline.Title className='flex items-center gap-2'>
-                    {version.tags
-                      .split(', ')
-                      .map(tag => tag.trim())
-                      .filter(tag => tag.length)
-                      .map((tag, tagIndex) => (
-                        <Badge key={tagIndex}>{tag}</Badge>
-                      ))}
-                  </Timeline.Title>
-                  <Timeline.Body>{renderPromptVersion(version)}</Timeline.Body>
-                </Timeline.Content>
-              </Timeline.Item>
-            ))}
+          {versionsToShow.map((version, index, items) => (
+            <Timeline.Item key={index} className='cursor-pointer' onClick={() => selectVersion(version)}>
+              <Timeline.Point icon={HiOutlineSparkles} theme={customPointTheme} />
+              <Timeline.Content>
+                <Timeline.Time className='flex items-center gap-2'>
+                  {isActiveVersion(version) && '⮕ '}
+                  {isPreviousVersion(version) && '⬅ '}
+                  {`#${ascendingVersions.findIndex(v => v.id === version.id) + 1} | `}
+                  {FormatDate(version.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
+                  {versions.length > 1 && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
+                  {version.config.provider.length && <Badge color='green'>{version.config.provider}</Badge>}
+                </Timeline.Time>
+                <Timeline.Title className='flex items-center gap-2'>
+                  {version.tags
+                    .split(', ')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag.length)
+                    .map((tag, tagIndex) => (
+                      <Badge key={tagIndex}>{tag}</Badge>
+                    ))}
+                </Timeline.Title>
+                <Timeline.Body>{renderPromptVersion(version)}</Timeline.Body>
+              </Timeline.Content>
+            </Timeline.Item>
+          ))}
         </Timeline>
       </div>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />

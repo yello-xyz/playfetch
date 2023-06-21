@@ -1,4 +1,4 @@
-import { Label, TextInput } from 'flowbite-react'
+import { Label } from 'flowbite-react'
 import { HTMLInputTypeAttribute, KeyboardEventHandler } from 'react'
 
 export default function LabeledTextInput({
@@ -25,7 +25,8 @@ export default function LabeledTextInput({
           <Label htmlFor={id} value={label} />
         </div>
       )}
-      <TextInput
+      <input
+        className='w-full bg-white border-gray-300 rounded-lg'
         type={type}
         value={value}
         onChange={event => setValue(event.target.value)}
