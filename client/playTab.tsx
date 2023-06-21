@@ -6,7 +6,6 @@ import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
-import PlayTab from './playTab'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 const versionFilter = (filter: string) => (version: Version) => {
@@ -18,10 +17,7 @@ const versionFilter = (filter: string) => (version: Version) => {
   )
 }
 
-export type ActivePromptTab = 'play' | 'test' | 'publish'
-
-export default function PromptTabView({
-  activeTab,
+export default function PlayTab({
   prompt,
   project,
   activeVersion,
@@ -31,7 +27,6 @@ export default function PromptTabView({
   onPromptDeleted,
   onRefreshPrompt,
 }: {
-  activeTab: ActivePromptTab
   prompt: ActivePrompt
   project?: Project
   activeVersion: Version
@@ -41,6 +36,8 @@ export default function PromptTabView({
   onPromptDeleted: (projectID: number | null) => void
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
+  const [activeRun, setActiveRun] = useState<Run>()
+
   const [filter, setFilter] = useState('')
   const [curlCommand, setCURLCommand] = useState<string>()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
@@ -49,6 +46,7 @@ export default function PromptTabView({
     if (version.id !== activeVersion.id) {
       onSavePrompt(_ => onRefreshPrompt())
       setActiveVersion(version)
+      setActiveRun(undefined)
       setCURLCommand(undefined)
     }
   }
@@ -87,55 +85,39 @@ export default function PromptTabView({
     })
   }
 
-  switch (activeTab) {
-    case 'play':
-      return (
-        <PlayTab
-          prompt={prompt}
-          project={project}
+  return (
+    <div className='flex items-stretch'>
+      <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
+        <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
+        <VersionTimeline
+          versions={prompt.versions.filter(versionFilter(filter))}
           activeVersion={activeVersion}
-          setActiveVersion={setActiveVersion}
-          setDirtyVersion={setDirtyVersion}
-          onSavePrompt={onSavePrompt}
-          onPromptDeleted={onPromptDeleted}
-          onRefreshPrompt={onRefreshPrompt}
+          setActiveVersion={selectActiveVersion}
+          onDelete={deleteVersion}
         />
-      )
-    default:
-      return (
-        <div className='flex items-stretch'>
-          <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
-            <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-            <VersionTimeline
-              versions={prompt.versions.filter(versionFilter(filter))}
-              activeVersion={activeVersion}
-              setActiveVersion={selectActiveVersion}
-              onDelete={deleteVersion}
-            />
+      </div>
+      <div>
+        <Suspense>
+          <PromptPanel
+            key={activeVersion.id}
+            version={activeVersion}
+            activeRun={activeRun ?? activeVersion.runs[0]}
+            endpoint={prompt?.endpoint}
+            setDirtyVersion={setDirtyVersion}
+            endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
+            onRun={runPrompt}
+            onPublish={project ? publishPrompt : undefined}
+            onUnpublish={unpublishPrompt}
+          />
+        </Suspense>
+        {curlCommand && (
+          <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
+            Try out your API endpoint by running:
+            <pre>{curlCommand}</pre>
           </div>
-          <div>
-            <Suspense>
-              <PromptPanel
-                key={activeVersion.id}
-                version={activeVersion}
-                activeRun={activeVersion.runs[0]}
-                endpoint={prompt?.endpoint}
-                setDirtyVersion={setDirtyVersion}
-                endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
-                onRun={runPrompt}
-                onPublish={project ? publishPrompt : undefined}
-                onUnpublish={unpublishPrompt}
-              />
-            </Suspense>
-            {curlCommand && (
-              <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
-                Try out your API endpoint by running:
-                <pre>{curlCommand}</pre>
-              </div>
-            )}
-          </div>
-          <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-        </div>
-      )
-  }
+        )}
+      </div>
+      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+    </div>
+  )
 }

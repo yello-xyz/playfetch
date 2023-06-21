@@ -1,9 +1,9 @@
 import { MouseEvent } from 'react'
-import { Run, Version } from '@/types'
+import { Version } from '@/types'
 import simplediff from 'simplediff'
 import { Badge, Timeline, Tooltip } from 'flowbite-react'
-import { HiOutlineSparkles, HiOutlineTrash, HiPlay } from 'react-icons/hi'
-import { FormatDate, Truncate } from '@/common/formatting'
+import { HiOutlineSparkles, HiOutlineTrash } from 'react-icons/hi'
+import { FormatDate } from '@/common/formatting'
 
 type ComparisonState = '=' | '-' | '+'
 const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: boolean }) => {
@@ -87,75 +87,56 @@ const customPointTheme = {
 export default function VersionTimeline({
   versions,
   activeVersion,
-  activeRun,
   setActiveVersion,
-  setActiveRun,
   onDelete,
 }: {
   versions: Version[]
   activeVersion: Version
-  activeRun?: Run
   setActiveVersion: (version: Version) => void
-  setActiveRun: (run?: Run) => void
   onDelete: (version: Version) => void
 }) {
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
-  const isActiveVersion = (item: Version | Run) => item.id === activeVersion.id
+  const isActiveVersion = (item: Version) => item.id === activeVersion.id
   const renderPromptVersion = (version: Version) =>
     renderPrompt(version.prompt, previousVersion && isActiveVersion(version) ? previousVersion.prompt : undefined)
-  const isVersion = (item: Version | Run): item is Version => (item as Version).runs !== undefined
-  const toVersion = (item: Version | Run): Version =>
-    isVersion(item) ? item : versions.find(version => version.runs.map(run => run.id).includes(item.id))!
-  const isPreviousVersion = (item: Version | Run) => !!previousVersion && item.id === previousVersion.id
+  const isPreviousVersion = (item: Version) => !!previousVersion && item.id === previousVersion.id
 
   const deleteVersion = async (event: MouseEvent, version: Version) => {
     event.stopPropagation()
     onDelete(version)
   }
 
-  const select = async (item: Version | Run) => {
-    setActiveVersion(toVersion(item))
-    setActiveRun(isVersion(item) ? undefined : item)
-  }
-
   return (
     <Timeline>
       {versions
-        .flatMap(version => [version, ...version.runs])
-        .map((item, index, items) => (
-          <Timeline.Item key={index} className='cursor-pointer' onClick={() => select(item)}>
-            <Timeline.Point icon={isVersion(item) ? HiOutlineSparkles : HiPlay} theme={customPointTheme} />
+        .slice()
+        .reverse()
+        .map((version, index, items) => (
+          <Timeline.Item key={index} className='cursor-pointer' onClick={() => setActiveVersion(version)}>
+            <Timeline.Point icon={HiOutlineSparkles} theme={customPointTheme} />
             <Timeline.Content>
               <Timeline.Time className='flex items-center gap-2'>
-                {isActiveVersion(item) && '⮕ '}
-                {isPreviousVersion(item) && '⬅ '}
-                {FormatDate(item.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
-                {versions.length > 1 && isVersion(item) && (
+                {isActiveVersion(version) && '⮕ '}
+                {isPreviousVersion(version) && '⬅ '}
+                {`#${index + 1} | `}
+                {FormatDate(version.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
+                {versions.length > 1 && (
                   <Tooltip content='Delete version'>
-                    <HiOutlineTrash onClick={event => deleteVersion(event, item)} />
+                    <HiOutlineTrash onClick={event => deleteVersion(event, version)} />
                   </Tooltip>
                 )}
-                {isVersion(item) && item.config.provider.length && <Badge color='green'>{item.config.provider}</Badge>}
-                {!isVersion(item) && item.cost > 0.0005 && `$${item.cost.toFixed(3)}`}
+                {version.config.provider.length && <Badge color='green'>{version.config.provider}</Badge>}
               </Timeline.Time>
-              {isVersion(item) && (
-                <Timeline.Title className='flex items-center gap-2'>
-                  {item.tags
-                    .split(', ')
-                    .map(tag => tag.trim())
-                    .filter(tag => tag.length)
-                    .map((tag, tagIndex) => (
-                      <Badge key={tagIndex}>{tag}</Badge>
-                    ))}
-                </Timeline.Title>
-              )}
-              <Timeline.Body className={isVersion(item) ? '' : 'italic'}>
-                {isVersion(item)
-                  ? renderPromptVersion(item)
-                  : item.id === activeRun?.id
-                  ? item.output
-                  : Truncate(item.output, 200)}
-              </Timeline.Body>
+              <Timeline.Title className='flex items-center gap-2'>
+                {version.tags
+                  .split(', ')
+                  .map(tag => tag.trim())
+                  .filter(tag => tag.length)
+                  .map((tag, tagIndex) => (
+                    <Badge key={tagIndex}>{tag}</Badge>
+                  ))}
+              </Timeline.Title>
+              <Timeline.Body>{renderPromptVersion(version)}</Timeline.Body>
             </Timeline.Content>
           </Timeline.Item>
         ))}

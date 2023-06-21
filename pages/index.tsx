@@ -5,7 +5,7 @@ import api from '@/client/api'
 import { useState } from 'react'
 import { Project, Prompt, ActivePrompt, Version } from '@/types'
 import Sidebar from '@/client/sidebar'
-import PromptTabView from '@/client/promptTabView'
+import PromptTabView, { ActivePromptTab } from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
@@ -123,7 +123,7 @@ export default function Home({
     selectPrompt(promptID)
   }
 
-  const [selectedTab, setSelectedTab] = useState<'play' | 'test' | 'publish'>('play')
+  const [selectedTab, setSelectedTab] = useState<ActivePromptTab>('play')
 
   return (
     <>
@@ -155,6 +155,7 @@ export default function Home({
           <div className='flex-1 h-screen overflow-y-auto'>
             {activePrompt && activeVersion ? (
               <PromptTabView
+                activeTab={selectedTab}
                 prompt={activePrompt}
                 project={projects.find(project => project.id === activePrompt.projectID)}
                 activeVersion={activeVersion}
