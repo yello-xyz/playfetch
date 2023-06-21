@@ -162,7 +162,6 @@ export default function Home({
                 setActiveVersion={selectVersion}
                 setDirtyVersion={setDirtyVersion}
                 onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
-                onPromptDeleted={selectProject}
                 onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
               />
             ) : (

@@ -24,7 +24,6 @@ export default function PlayTab({
   setActiveVersion,
   setDirtyVersion,
   onSavePrompt,
-  onPromptDeleted,
   onRefreshPrompt,
 }: {
   prompt: ActivePrompt
@@ -32,7 +31,6 @@ export default function PlayTab({
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
-  onPromptDeleted: (projectID: number | null) => void
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const [filter, setFilter] = useState('')
@@ -55,11 +53,7 @@ export default function PlayTab({
       message: `Are you sure you want to delete this version? This action cannot be undone.`,
       callback: async () => {
         await api.deleteVersion(version.id)
-        if (prompt.versions.length > 1) {
-          onRefreshPrompt()
-        } else {
-          onPromptDeleted(prompt.projectID)
-        }
+        onRefreshPrompt()
       },
       destructive: true,
     })
@@ -71,12 +65,12 @@ export default function PlayTab({
         <div className='flex flex-col flex-grow h-full gap-4 p-6 pr-4 max-w-prose'>
           <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
           <div className='p-4 overflow-y-auto'>
-          <VersionTimeline
-            versions={prompt.versions.filter(versionFilter(filter))}
-            activeVersion={activeVersion}
-            setActiveVersion={selectActiveVersion}
-            onDelete={deleteVersion}
-          />
+            <VersionTimeline
+              versions={prompt.versions.filter(versionFilter(filter))}
+              activeVersion={activeVersion}
+              setActiveVersion={selectActiveVersion}
+              onDelete={deleteVersion}
+            />
           </div>
           <Suspense>
             <PromptPanel

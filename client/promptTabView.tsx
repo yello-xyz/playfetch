@@ -17,7 +17,6 @@ export default function PromptTabView({
   setActiveVersion,
   setDirtyVersion,
   onSavePrompt,
-  onPromptDeleted,
   onRefreshPrompt,
 }: {
   activeTab: ActivePromptTab
@@ -27,7 +26,6 @@ export default function PromptTabView({
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
-  onPromptDeleted: (projectID: number | null) => void
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(versionID))
@@ -46,7 +44,6 @@ export default function PromptTabView({
           setActiveVersion={setActiveVersion}
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={onSavePrompt}
-          onPromptDeleted={onPromptDeleted}
           onRefreshPrompt={onRefreshPrompt}
         />
       )
