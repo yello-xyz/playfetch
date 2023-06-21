@@ -4,7 +4,7 @@ import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from './api'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import PromptPopupMenu from './promptPopupMenu'
@@ -90,6 +90,11 @@ function PromptCell({
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
+  const [formattedDate, setFormattedDate] = useState<string>()
+  useEffect(() => {
+    setFormattedDate(FormatRelativeDate(prompt.timestamp))
+  }, [prompt.timestamp])
+
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
@@ -117,7 +122,7 @@ function PromptCell({
           )}
         </div>
       </div>
-      <span className='text-xs text-gray-500'>Edited {FormatRelativeDate(prompt.timestamp)}</span>
+      <span className='text-xs text-gray-500'>Edited {formattedDate}</span>
       <span className='mt-3 text-xs text-gray-500 line-clamp-[9]'>{prompt.prompt}</span>
     </div>
   )
