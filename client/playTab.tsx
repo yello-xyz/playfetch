@@ -1,7 +1,7 @@
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
-import { Project, ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
+import { ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 

@@ -48,7 +48,7 @@ export default function TopBar({
             {activePrompt ? (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
                 <span className='font-medium'>{activePrompt.name}</span>
-                <img className='w-6 h-6 cursor-pointer' src={chevronIcon.src} />
+                <img className='w-6 h-6' src={chevronIcon.src} />
                 {isMenuExpanded && (
                   <div className='absolute right-0 top-8'>
                     <PromptPopupMenu

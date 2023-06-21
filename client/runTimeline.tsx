@@ -1,7 +1,7 @@
 import { Run } from '@/types'
 
 export default function RunTimeline({ runs }: { runs: Run[] }) {
-  return (
+  return runs.length ? (
     <div className='flex flex-col h-full gap-2'>
       <div className='font-medium text-gray-600'>Results</div>
       <div className='flex flex-col flex-1 gap-2 overflow-y-auto'>
@@ -12,5 +12,5 @@ export default function RunTimeline({ runs }: { runs: Run[] }) {
         ))}
       </div>
     </div>
-  )
+  ) : null
 }

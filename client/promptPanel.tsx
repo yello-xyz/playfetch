@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import LabeledTextInput from './labeledTextInput'
 import { PromptConfig, PromptInputs, Version } from '@/types'
 import TagsInput from './tagsInput'
-import PendingButton from './pendingButton'
-import { Label, RangeSlider, TextInput } from 'flowbite-react'
+import { Label, TextInput } from 'flowbite-react'
 import { ExtractPromptVariables } from '@/common/formatting'
 import PromptInput from './promptInput'
+import PromptSettingsPane from './promptSettingsPane'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -34,33 +33,23 @@ export default function PromptPanel({
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [tags, setTags] = useState(version.tags)
 
-  const versionConfig = version.config
-
-  const [provider, setProvider] = useState<PromptConfig['provider']>(versionConfig.provider)
-  const [temperature, setTemperature] = useState(versionConfig.temperature)
-  const [maxTokens, setMaxTokens] = useState(versionConfig.maxTokens)
+  const [config, setConfig] = useState(version.config)
 
   const [previousVersionID, setPreviousVersionID] = useState(version.id)
   if (version.id !== previousVersionID) {
-    setProvider(versionConfig.provider)
-    setTemperature(versionConfig.temperature)
-    setMaxTokens(versionConfig.maxTokens)
+    setConfig(version.config)
     setPreviousVersionID(version.id)
   }
 
-  const config = { provider, temperature, maxTokens }
-
   const update = (prompt: string, config: PromptConfig, tags: string) => {
     setPrompt(prompt)
-    setProvider(config.provider)
-    setTemperature(config.temperature)
-    setMaxTokens(config.maxTokens)
+    setConfig(config)
     setTags(tags)
     const isDirty =
       prompt !== version.prompt ||
-      config.provider !== versionConfig.provider ||
-      config.temperature !== versionConfig.temperature ||
-      config.maxTokens !== versionConfig.maxTokens ||
+      config.provider !== version.config.provider ||
+      config.temperature !== version.config.temperature ||
+      config.maxTokens !== version.config.maxTokens ||
       tags !== version.tags
     setDirtyVersion(isDirty ? { ...version, prompt, config, tags } : undefined)
   }
@@ -69,8 +58,6 @@ export default function PromptPanel({
   const updatePrompt = (prompt: string) => update(prompt, config, tags)
   const updateConfig = (config: PromptConfig) => update(prompt, config, tags)
   const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
-  const updateTemperature = (temperature: number) => updateConfig({ ...config, temperature })
-  const updateMaxTokens = (maxTokens: number) => updateConfig({ ...config, maxTokens })
 
   const lastRun = version.runs.slice(-1)[0]
   const [inputState, setInputState] = useState<{ [key: string]: string }>(lastRun?.inputs ?? {})
@@ -101,33 +88,11 @@ export default function PromptPanel({
         <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
       </div>
       {showTags && <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />}
-      <div className='flex flex-wrap justify-between gap-10'>
-        <div>
-          <div className='block mb-1'>
-            <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
-          </div>
-          <RangeSlider
-            id='temperature'
-            value={temperature}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={event => updateTemperature(Number(event.target.value))}
-          />
-        </div>
-        <div>
-          <LabeledTextInput
-            id='maxTokens'
-            label='Max Tokens'
-            value={maxTokens.toString()}
-            setValue={value => updateMaxTokens(Number(value))}
-          />
-        </div>
-      </div>
+      <PromptSettingsPane config={config} setConfig={updateConfig} />
       <div className='flex items-center self-end gap-4'>
         <select
           className='text-sm text-black border border-gray-300 rounded-lg'
-          value={provider}
+          value={config.provider}
           onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
           <option value={'openai'}>{labelForProvider('openai')}</option>
           <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
