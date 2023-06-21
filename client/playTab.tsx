@@ -6,6 +6,7 @@ import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
+import RunTimeline from './runTimeline'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 const versionFilter = (filter: string) => (version: Version) => {
@@ -86,38 +87,35 @@ export default function PlayTab({
   }
 
   return (
-    <div className='flex items-stretch'>
-      <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
-        <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-        <VersionTimeline
-          versions={prompt.versions.filter(versionFilter(filter))}
-          activeVersion={activeVersion}
-          setActiveVersion={selectActiveVersion}
-          onDelete={deleteVersion}
-        />
-      </div>
-      <div>
-        <Suspense>
-          <PromptPanel
-            key={activeVersion.id}
-            version={activeVersion}
-            activeRun={activeRun ?? activeVersion.runs[0]}
-            endpoint={prompt?.endpoint}
-            setDirtyVersion={setDirtyVersion}
-            endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
-            onRun={runPrompt}
-            onPublish={project ? publishPrompt : undefined}
-            onUnpublish={unpublishPrompt}
+    <>
+      <div className='flex items-stretch'>
+        <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
+          <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
+          <VersionTimeline
+            versions={prompt.versions.filter(versionFilter(filter))}
+            activeVersion={activeVersion}
+            setActiveVersion={selectActiveVersion}
+            onDelete={deleteVersion}
           />
-        </Suspense>
-        {curlCommand && (
-          <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
-            Try out your API endpoint by running:
-            <pre>{curlCommand}</pre>
-          </div>
-        )}
+          <Suspense>
+            <PromptPanel
+              key={activeVersion.id}
+              version={activeVersion}
+              activeRun={activeRun ?? activeVersion.runs[0]}
+              endpoint={prompt?.endpoint}
+              setDirtyVersion={setDirtyVersion}
+              endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
+              onRun={runPrompt}
+              onPublish={project ? publishPrompt : undefined}
+              onUnpublish={unpublishPrompt}
+            />
+          </Suspense>
+        </div>
+        <div className='flex-1 p-6 pl-2'>
+          <RunTimeline runs={activeVersion.runs} />
+        </div>
       </div>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-    </div>
+    </>
   )
 }
