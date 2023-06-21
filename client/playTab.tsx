@@ -1,13 +1,12 @@
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
-import { Project, ActivePrompt, Run, Version, PromptInputs, PromptConfig } from '@/types'
+import { Project, ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
-import PublishPane from './publishPane'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 const versionFilter = (filter: string) => (version: Version) => {
@@ -21,7 +20,6 @@ const versionFilter = (filter: string) => (version: Version) => {
 
 export default function PlayTab({
   prompt,
-  project,
   activeVersion,
   setActiveVersion,
   setDirtyVersion,
@@ -30,7 +28,6 @@ export default function PlayTab({
   onRefreshPrompt,
 }: {
   prompt: ActivePrompt
-  project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
@@ -39,42 +36,18 @@ export default function PlayTab({
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const [filter, setFilter] = useState('')
-  const [curlCommand, setCURLCommand] = useState<string>()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
       onSavePrompt(_ => onRefreshPrompt())
       setActiveVersion(version)
-      setCURLCommand(undefined)
     }
   }
 
-  const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(versionID))
-
   const runPrompt = async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
-    const versionID = await savePromptAndRefocus()
+    const versionID = await onSavePrompt(versionID => onRefreshPrompt(versionID))
     await api.runPrompt(prompt.id, versionID, currentPrompt, config, inputs).then(_ => onRefreshPrompt(versionID))
-  }
-
-  const publishPrompt = async (
-    endpoint: string,
-    currentPrompt: string,
-    config: PromptConfig,
-    inputs: PromptInputs,
-    useCache: boolean
-  ) => {
-    await savePromptAndRefocus()
-    await api
-      .publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config, inputs, useCache)
-      .then(setCURLCommand)
-    onRefreshPrompt()
-  }
-
-  const unpublishPrompt = async () => {
-    setCURLCommand(undefined)
-    await api.unpublishPrompt(prompt.id)
-    onRefreshPrompt()
   }
 
   const deleteVersion = async (version: Version) => {
@@ -111,16 +84,6 @@ export default function PlayTab({
               onRun={runPrompt}
             />
           </Suspense>
-          {project && (
-            <PublishPane
-              key={activeVersion.id}
-              version={activeVersion}
-              endpoint={prompt?.endpoint}
-              endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
-              onPublish={publishPrompt}
-              onUnpublish={unpublishPrompt}
-            />
-          )}
         </div>
         <div className='flex-1 p-6 pl-2'>
           <RunTimeline runs={activeVersion.runs} />
