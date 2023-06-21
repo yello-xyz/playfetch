@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Endpoint, PromptConfig, PromptInputs, Version } from '@/types'
+import { Endpoint, Project, Prompt, PromptConfig, PromptInputs, Version } from '@/types'
 import PendingButton from './pendingButton'
 import { Checkbox, Label } from 'flowbite-react'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
@@ -8,37 +8,46 @@ import { HiExternalLink } from 'react-icons/hi'
 import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
+import api from './api'
 
 export default function PublishPane({
+  project,
+  prompt,
   version,
   endpoint,
   endpointNameValidator,
-  onPublish,
-  onUnpublish,
+  onSavePrompt,
+  onRefreshPrompt,
 }: {
+  project: Project
+  prompt: Prompt
   version: Version
   endpoint?: Endpoint
   endpointNameValidator: (name: string) => Promise<{ url?: string }>
-  onPublish: (name: string, prompt: string, config: PromptConfig, inputs: PromptInputs, useCache: boolean) => void
-  onUnpublish: () => void
+  onSavePrompt: () => Promise<void>
+  onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
+  const [curlCommand, setCURLCommand] = useState<string>()
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
   const publish = () => {
-    const prompt = version.prompt
     const lastRun = version.runs.slice(-1)[0]
     const inputState = lastRun?.inputs ?? {}
-    const inputVariables = ExtractPromptVariables(prompt)
+    const inputVariables = ExtractPromptVariables(version.prompt)
     const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
     setPickNamePrompt({
       title: 'Publish Prompt',
       label: 'Endpoint',
-      callback: (name: string) => {
-        onPublish?.(name, prompt, version.config, inputs, useCache)
+      callback: async (name: string) => {
+        await onSavePrompt()
+        await api
+          .publishPrompt(project!.id, prompt.id, name, version.prompt, version.config, inputs, useCache)
+          .then(setCURLCommand)
+        onRefreshPrompt()
       },
       initialName: endpoint?.urlPath,
       validator: endpointNameValidator,
@@ -48,7 +57,11 @@ export default function PublishPane({
   const unpublish = () => {
     setDialogPrompt({
       message: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-      callback: () => onUnpublish(),
+      callback: async () => {
+        setCURLCommand(undefined)
+        await api.unpublishPrompt(prompt.id)
+        onRefreshPrompt()
+      },
       destructive: true,
     })
   }
@@ -78,6 +91,12 @@ export default function PublishPane({
             <Link href={EndpointUIRoute(endpoint)} target='_blank'>
               <HiExternalLink size={20} />
             </Link>
+          </div>
+        )}
+        {curlCommand && (
+          <div className='flex flex-col gap-4 text-black whitespace-pre-wrap'>
+            Try out your API endpoint by running:
+            <pre>{curlCommand}</pre>
           </div>
         )}
       </div>

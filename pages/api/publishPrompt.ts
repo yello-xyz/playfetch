@@ -21,12 +21,14 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
   const apiKey = await rotateProjectAPIKey(userID, projectID)
   const url = buildURLForClientRoute(`/${projectURLPath}/${urlPath}`, req.headers)
 
-  const curlCommand = `curl -X POST ${url} \\
+  const curlCommand = Object.entries(inputs).length
+    ? `curl -X POST ${url} \\
   -H "x-api-key: ${apiKey}" \\
   -H "content-type: application/json" \\
   -d '{ ${Object.entries(inputs)
     .map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`)
     .join(', ')} }'`
+    : `curl -X POST ${url} -H "x-api-key: ${apiKey}"`
 
   res.json(curlCommand)
 }
