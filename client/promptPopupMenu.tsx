@@ -1,27 +1,23 @@
-import { Prompt } from "@/types"
-import { DialogPrompt } from "./modalDialog"
-import { PickNamePrompt } from "./pickNameDialog"
-import { PickProjectPrompt } from "./pickProjectDialog"
-import api from "./api"
-import PopupMenu, { PopupMenuItem } from "./popupMenu"
+import { Prompt } from '@/types'
+import api from './api'
+import PopupMenu, { PopupMenuItem } from './popupMenu'
+import { useDialogPrompt, usePickNamePrompt, usePickProjectPrompt } from './modalDialogContext'
 
 export default function PromptPopupMenu({
   prompt,
   isMenuExpanded,
   setIsMenuExpanded,
   onRefresh,
-  setDialogPrompt,
-  setPickNamePrompt,
-  setPickProjectPrompt,
 }: {
   prompt: Prompt
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
-  setDialogPrompt: (prompt: DialogPrompt) => void
-  setPickNamePrompt: (prompt: PickNamePrompt) => void
-  setPickProjectPrompt?: (prompt: PickProjectPrompt) => void
 }) {
+  const setDialogPrompt = useDialogPrompt()
+  const setPickNamePrompt = usePickNamePrompt()
+  const setPickProjectPrompt = usePickProjectPrompt()
+
   const deletePrompt = () => {
     setIsMenuExpanded(false)
     setDialogPrompt({

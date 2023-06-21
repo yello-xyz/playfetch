@@ -12,6 +12,10 @@ import TopBar from '@/client/topBar'
 import { getPromptWithVersions, getPromptsForProject } from '@/server/datastore/prompts'
 import { getProjectsForUser } from '@/server/datastore/projects'
 import SegmentedControl, { Segment } from '@/client/segmentedControl'
+import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
+import PickProjectDialog, { PickProjectPrompt } from '@/client/pickProjectDialog'
+import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
+import { ModalDialogContext } from '@/client/modalDialogContext'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500'] })
 
@@ -39,6 +43,10 @@ export default function Home({
   initialPrompt?: ActivePrompt
 }) {
   const router = useRouter()
+
+  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
+  const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
 
   const [projects, setProjects] = useState(initialProjects)
   const [prompts, setPrompts] = useState(initialPrompts)
@@ -127,55 +135,70 @@ export default function Home({
 
   return (
     <>
-      <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
-        <Sidebar
-          projects={projects}
-          activeProjectID={activeProjectID}
-          onSelectProject={selectProject}
-          onLogout={() => router.replace(router.asPath)}
-          onProjectAdded={refreshProjectsAndFocus}
-          onAddPrompt={() => addPrompt(null)}
-        />
-        <div className='flex flex-col flex-1'>
-          <TopBar
+      <ModalDialogContext.Provider
+        value={{
+          setDialogPrompt,
+          setPickNamePrompt,
+          setPickProjectPrompt: projects.length ? setPickProjectPrompt : undefined,
+        }}>
+        <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
+          <Sidebar
             projects={projects}
             activeProjectID={activeProjectID}
-            activePrompt={activePrompt}
             onSelectProject={selectProject}
-            onAddPrompt={addPrompt}
-            onRefreshPrompt={() => refreshPrompt(activePrompt!.id)}>
-            {activePrompt && (
-              <SegmentedControl selected={selectedTab} callback={setSelectedTab}>
-                <Segment value={'play'} title='Play' />
-                <Segment value={'test'} title='Test' />
-                <Segment value={'publish'} title='Publish' />
-              </SegmentedControl>
-            )}
-          </TopBar>
-          <div className='flex-1 overflow-hidden'>
-            {activePrompt && activeVersion ? (
-              <PromptTabView
-                activeTab={selectedTab}
-                prompt={activePrompt}
-                project={projects.find(project => project.id === activePrompt.projectID)}
-                activeVersion={activeVersion}
-                setActiveVersion={selectVersion}
-                setDirtyVersion={setDirtyVersion}
-                onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
-                onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
-              />
-            ) : (
-              <PromptsGridView
-                projects={projects}
-                prompts={prompts}
-                onAddPrompt={() => addPrompt(activeProjectID!)}
-                onSelect={selectPrompt}
-                onRefresh={() => refreshProject(activeProjectID!)}
-              />
-            )}
+            onLogout={() => router.replace(router.asPath)}
+            onProjectAdded={refreshProjectsAndFocus}
+            onAddPrompt={() => addPrompt(null)}
+          />
+          <div className='flex flex-col flex-1'>
+            <TopBar
+              projects={projects}
+              activeProjectID={activeProjectID}
+              activePrompt={activePrompt}
+              onSelectProject={selectProject}
+              onAddPrompt={addPrompt}
+              onRefreshPrompt={() => refreshPrompt(activePrompt!.id)}>
+              {activePrompt && (
+                <SegmentedControl selected={selectedTab} callback={setSelectedTab}>
+                  <Segment value={'play'} title='Play' />
+                  <Segment value={'test'} title='Test' />
+                  <Segment value={'publish'} title='Publish' />
+                </SegmentedControl>
+              )}
+            </TopBar>
+            <div className='flex-1 overflow-hidden'>
+              {activePrompt && activeVersion ? (
+                <PromptTabView
+                  activeTab={selectedTab}
+                  prompt={activePrompt}
+                  project={projects.find(project => project.id === activePrompt.projectID)}
+                  activeVersion={activeVersion}
+                  setActiveVersion={selectVersion}
+                  setDirtyVersion={setDirtyVersion}
+                  onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
+                  onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
+                />
+              ) : (
+                <PromptsGridView
+                  projects={projects}
+                  prompts={prompts}
+                  onAddPrompt={() => addPrompt(activeProjectID!)}
+                  onSelect={selectPrompt}
+                  onRefresh={() => refreshProject(activeProjectID!)}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </ModalDialogContext.Provider>
+      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
+      <PickNameDialog prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
+      <PickProjectDialog
+        key={pickProjectPrompt?.initialProjectID}
+        projects={projects}
+        prompt={pickProjectPrompt}
+        setPrompt={setPickProjectPrompt}
+      />
     </>
   )
 }

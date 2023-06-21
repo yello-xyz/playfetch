@@ -1,14 +1,13 @@
 import { useState } from 'react'
-import { Endpoint, Project, Prompt, PromptConfig, PromptInputs, Version } from '@/types'
+import { Endpoint, Project, Prompt, Version } from '@/types'
 import PendingButton from './pendingButton'
 import { Checkbox, Label } from 'flowbite-react'
-import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
-import ModalDialog, { DialogPrompt } from './modalDialog'
 import { HiExternalLink } from 'react-icons/hi'
 import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
+import { useDialogPrompt, usePickNamePrompt } from './modalDialogContext'
 
 export default function PublishPane({
   project,
@@ -30,8 +29,8 @@ export default function PublishPane({
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
 
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
+  const setDialogPrompt = useDialogPrompt()
+  const setPickNamePrompt = usePickNamePrompt()
 
   const publish = () => {
     const lastRun = version.runs.slice(-1)[0]
@@ -100,8 +99,6 @@ export default function PublishPane({
           </div>
         )}
       </div>
-      <PickNameDialog key={endpoint?.urlPath ?? version.id} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </>
   )
 }

@@ -4,9 +4,6 @@ import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
-import ModalDialog, { DialogPrompt } from './modalDialog'
-import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
-import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
 
 export default function TopBar({
   projects = [],
@@ -26,9 +23,6 @@ export default function TopBar({
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
-  const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
 
   const projectName = projects.find(p => p.id === activeProjectID)?.name
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
@@ -56,9 +50,6 @@ export default function TopBar({
                       isMenuExpanded={isMenuExpanded}
                       setIsMenuExpanded={setIsMenuExpanded}
                       onRefresh={onRefreshPrompt}
-                      setDialogPrompt={setDialogPrompt}
-                      setPickNamePrompt={setPickNamePrompt}
-                      setPickProjectPrompt={setPickProjectPrompt}
                     />
                   </div>
                 )}
@@ -77,14 +68,6 @@ export default function TopBar({
           <Divider />
         </div>
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-      <PickNameDialog prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
-      <PickProjectDialog
-        key={pickProjectPrompt?.initialProjectID}
-        projects={projects}
-        prompt={pickProjectPrompt}
-        setPrompt={setPickProjectPrompt}
-      />
     </>
   )
 }

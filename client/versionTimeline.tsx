@@ -3,7 +3,6 @@ import { PromptConfig, Version } from '@/types'
 import simplediff from 'simplediff'
 import dotsIcon from '@/public/dots.svg'
 import { FormatDate } from '@/common/formatting'
-import { DialogPrompt } from './modalDialog'
 import historyIcon from '@/public/history.svg'
 import IconButton from './iconButton'
 import VersionPopupMenu from './versionPopupMenu'
@@ -104,13 +103,11 @@ export default function VersionTimeline({
   activeVersion,
   setActiveVersion,
   onRefreshPrompt,
-  setDialogPrompt,
 }: {
   versions: Version[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   onRefreshPrompt: () => void
-  setDialogPrompt: (dialogPrompt: DialogPrompt) => void
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
@@ -160,7 +157,6 @@ export default function VersionTimeline({
               previousVersion={previousVersion}
               onSelect={selectVersion}
               onRefreshPrompt={onRefreshPrompt}
-              setDialogPrompt={setDialogPrompt}
             />
           ))}
         </div>
@@ -178,7 +174,6 @@ function VersionCell({
   previousVersion,
   onSelect,
   onRefreshPrompt,
-  setDialogPrompt
 }: {
   version: Version
   index: number
@@ -188,7 +183,6 @@ function VersionCell({
   previousVersion?: Version
   onSelect: (version: Version) => void
   onRefreshPrompt: () => void
-  setDialogPrompt: (dialogPrompt: DialogPrompt) => void
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string>()
@@ -221,7 +215,6 @@ function VersionCell({
                     isMenuExpanded={isMenuExpanded}
                     setIsMenuExpanded={setIsMenuExpanded}
                     onRefreshPrompt={onRefreshPrompt}
-                    setDialogPrompt={setDialogPrompt}
                   />
                 </div>
               )}

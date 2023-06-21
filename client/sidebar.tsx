@@ -1,10 +1,10 @@
 import { Project } from '@/types'
 import { ReactNode, useState } from 'react'
-import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import api from './api'
 import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
+import { usePickNamePrompt } from './modalDialogContext'
 
 export default function Sidebar({
   projects = [],
@@ -21,7 +21,7 @@ export default function Sidebar({
   onProjectAdded: (projectID: number) => void
   onAddPrompt: () => void
 }) {
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
+  const setPickNamePrompt = usePickNamePrompt()
 
   const logout = async () => {
     await api.logout()
@@ -66,7 +66,6 @@ export default function Sidebar({
         ))}
         <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={addProject} />
       </SidebarSection>
-      <PickNameDialog key={projects.length} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
     </div>
   )
 }

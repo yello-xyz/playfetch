@@ -5,10 +5,7 @@ import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from './api'
 import { useEffect, useState } from 'react'
-import ModalDialog, { DialogPrompt } from './modalDialog'
-import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import PromptPopupMenu from './promptPopupMenu'
-import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
 import IconButton from './iconButton'
 
 export default function PromptsGridView({
@@ -24,10 +21,6 @@ export default function PromptsGridView({
   onSelect: (promptID: number) => void
   onRefresh: () => void
 }) {
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
-  const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
-
   return prompts.length ? (
     <>
       <div className='flex flex-wrap gap-6 p-6'>
@@ -37,20 +30,9 @@ export default function PromptsGridView({
             prompt={prompt}
             onSelect={onSelect}
             onRefresh={onRefresh}
-            setDialogPrompt={setDialogPrompt}
-            setPickNamePrompt={setPickNamePrompt}
-            setPickProjectPrompt={projects.length ? setPickProjectPrompt : undefined}
           />
         ))}
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-      <PickNameDialog prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
-      <PickProjectDialog
-        key={pickProjectPrompt?.initialProjectID}
-        projects={projects}
-        prompt={pickProjectPrompt}
-        setPrompt={setPickProjectPrompt}
-      />
     </>
   ) : (
     <EmptyGrid onAddPrompt={onAddPrompt} />
@@ -78,16 +60,10 @@ function PromptCell({
   prompt,
   onSelect,
   onRefresh,
-  setDialogPrompt,
-  setPickNamePrompt,
-  setPickProjectPrompt,
 }: {
   prompt: Prompt
   onSelect: (promptID: number) => void
   onRefresh: () => void
-  setDialogPrompt: (prompt: DialogPrompt) => void
-  setPickNamePrompt: (prompt: PickNamePrompt) => void
-  setPickProjectPrompt?: (prompt: PickProjectPrompt) => void
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
@@ -115,9 +91,6 @@ function PromptCell({
                 isMenuExpanded={isMenuExpanded}
                 setIsMenuExpanded={setIsMenuExpanded}
                 onRefresh={onRefresh}
-                setDialogPrompt={setDialogPrompt}
-                setPickNamePrompt={setPickNamePrompt}
-                setPickProjectPrompt={setPickProjectPrompt}
               />
             </div>
           )}

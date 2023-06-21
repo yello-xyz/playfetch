@@ -1,21 +1,21 @@
-import { Version } from "@/types"
-import { DialogPrompt } from "./modalDialog"
-import api from "./api"
-import PopupMenu, { PopupMenuItem } from "./popupMenu"
+import { Version } from '@/types'
+import api from './api'
+import PopupMenu, { PopupMenuItem } from './popupMenu'
+import { useDialogPrompt } from './modalDialogContext'
 
 export default function VersionPopupMenu({
   version,
   isMenuExpanded,
   setIsMenuExpanded,
   onRefreshPrompt,
-  setDialogPrompt,
 }: {
   version: Version
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRefreshPrompt: () => void
-  setDialogPrompt: (prompt: DialogPrompt) => void
 }) {
+  const setDialogPrompt = useDialogPrompt()
+
   const deleteVersion = async () => {
     setIsMenuExpanded(false)
     setDialogPrompt({

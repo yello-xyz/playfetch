@@ -1,11 +1,10 @@
 import api from '@/client/api'
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
 import { ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
 import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
-import ModalDialog, { DialogPrompt } from './modalDialog'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export default function PlayTab({
@@ -23,8 +22,6 @@ export default function PlayTab({
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
       onSavePrompt(_ => onRefreshPrompt())
@@ -46,7 +43,6 @@ export default function PlayTab({
             activeVersion={activeVersion}
             setActiveVersion={selectActiveVersion}
             onRefreshPrompt={onRefreshPrompt}
-            setDialogPrompt={setDialogPrompt}
           />
           <Suspense>
             <PromptPanel
@@ -61,7 +57,6 @@ export default function PlayTab({
           <RunTimeline runs={activeVersion.runs} />
         </div>
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </>
   )
 }
