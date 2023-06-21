@@ -34,6 +34,17 @@ export async function migrateVersions() {
   }
 }
 
+const isVersionDataCompatible = (versionData: any, prompt: string, config: PromptConfig) => {
+  const versionConfig = JSON.parse(versionData.config) as PromptConfig
+  return (
+    versionData.prompt === prompt &&
+    versionConfig.provider === config.provider &&
+    versionConfig.temperature === config.temperature &&
+    versionConfig.maxTokens === config.maxTokens &&
+    versionConfig.useCache === config.useCache
+  )
+}
+
 export async function saveVersionForUser(
   userID: number,
   promptID: number,
@@ -51,13 +62,14 @@ export async function saveVersionForUser(
   let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
   const canOverwrite =
     currentVersionID &&
-    (prompt === currentVersion.prompt || !(await getEntity(Entity.RUN, 'versionID', currentVersionID)))
+    (isVersionDataCompatible(currentVersion, prompt, config) ||
+      !(await getEntity(Entity.RUN, 'versionID', currentVersionID)))
 
-  if (canOverwrite && prompt !== currentVersion.prompt) {
+  if (canOverwrite && !isVersionDataCompatible(currentVersion, prompt, config)) {
     const previousVersion = currentVersion.previousVersionID
       ? await getKeyedEntity(Entity.VERSION, currentVersion.previousVersionID)
       : undefined
-    if (previousVersion && previousVersion.prompt === prompt) {
+    if (isVersionDataCompatible(previousVersion, prompt, config)) {
       await datastore.delete(buildKey(Entity.VERSION, currentVersionID))
       currentVersionID = currentVersion.previousVersionID
       currentVersion = previousVersion
