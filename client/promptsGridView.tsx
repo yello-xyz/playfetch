@@ -9,6 +9,7 @@ import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import PromptPopupMenu from './promptPopupMenu'
 import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
+import IconButton from './iconButton'
 
 export default function PromptsGridView({
   projects,
@@ -127,14 +128,3 @@ function PromptCell({
     </div>
   )
 }
-
-const IconButton = ({ icon, onClick }: { icon: string; onClick: () => void }) => (
-  <img
-    className='w-6 h-6 rounded cursor-pointer hover:bg-gray-100'
-    src={icon}
-    onClick={event => {
-      event.stopPropagation()
-      onClick()
-    }}
-  />
-)

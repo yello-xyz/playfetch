@@ -1,11 +1,12 @@
-import { MouseEvent, ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { PromptConfig, Version } from '@/types'
 import simplediff from 'simplediff'
-import { HiOutlineTrash } from 'react-icons/hi'
+import dotsIcon from '@/public/dots.svg'
 import { FormatDate } from '@/common/formatting'
 import { DialogPrompt } from './modalDialog'
-import api from './api'
 import historyIcon from '@/public/history.svg'
+import IconButton from './iconButton'
+import VersionPopupMenu from './versionPopupMenu'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -123,17 +124,6 @@ export default function VersionTimeline({
     setFocused(false)
   }
 
-  const deleteVersion = async (version: Version) => {
-    setDialogPrompt({
-      message: `Are you sure you want to delete this version? This action cannot be undone.`,
-      callback: async () => {
-        await api.deleteVersion(version.id)
-        onRefreshPrompt()
-      },
-      destructive: true,
-    })
-  }
-
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const ascendingVersions = versions.slice().reverse()
   const versionsToShow = isFocused
@@ -162,13 +152,15 @@ export default function VersionTimeline({
           {versionsToShow.map((version, index, items) => (
             <VersionCell
               key={index}
+              isOnly={versions.length == 1}
               isLast={index === items.length - 1}
               version={version}
               index={ascendingVersions.findIndex(v => v.id === version.id)}
               isActiveVersion={version.id === activeVersion.id}
               previousVersion={previousVersion}
               onSelect={selectVersion}
-              onDelete={versions.length > 1 ? deleteVersion : undefined}
+              onRefreshPrompt={onRefreshPrompt}
+              setDialogPrompt={setDialogPrompt}
             />
           ))}
         </div>
@@ -180,20 +172,25 @@ export default function VersionTimeline({
 function VersionCell({
   version,
   index,
+  isOnly,
   isLast,
   isActiveVersion,
   previousVersion,
   onSelect,
-  onDelete,
+  onRefreshPrompt,
+  setDialogPrompt
 }: {
   version: Version
   index: number
+  isOnly: boolean
   isLast: boolean
   isActiveVersion: boolean
   previousVersion?: Version
   onSelect: (version: Version) => void
-  onDelete?: (version: Version) => void
+  onRefreshPrompt: () => void
+  setDialogPrompt: (dialogPrompt: DialogPrompt) => void
 }) {
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatDate(version.timestamp))
@@ -201,11 +198,6 @@ function VersionCell({
 
   const renderPromptVersion = (version: Version) =>
     renderPrompt(version.prompt, previousVersion && isActiveVersion ? previousVersion.prompt : undefined)
-
-  const deleteVersion = async (event: MouseEvent, version: Version) => {
-    event.stopPropagation()
-    onDelete!(version)
-  }
 
   return (
     <VerticalBarWrapper bulletStyle={isActiveVersion ? 'filled' : 'stroked'} strokeStyle={isLast ? 'none' : 'stroked'}>
@@ -219,9 +211,24 @@ function VersionCell({
           <span>|</span>
           {labelForProvider(version.config.provider)}
           <span className='flex-1 font-normal'>{formattedDate}</span>
-          {onDelete && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
+          {!isOnly && (
+            <div className='relative flex'>
+              <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+              {isMenuExpanded && (
+                <div className='absolute right-0 top-7'>
+                  <VersionPopupMenu
+                    version={version}
+                    isMenuExpanded={isMenuExpanded}
+                    setIsMenuExpanded={setIsMenuExpanded}
+                    onRefreshPrompt={onRefreshPrompt}
+                    setDialogPrompt={setDialogPrompt}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        {version.tags.length && (
+        {version.tags.length > 0 && (
           <div className='flex gap-1'>
             {version.tags
               .split(', ')
@@ -257,7 +264,9 @@ function VerticalBarWrapper({
   return (
     <div className='flex items-stretch gap-4'>
       <div className='flex flex-col items-center gap-1 w-2.5'>
-        {hasBullet && <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-300'}`} />}
+        {hasBullet && (
+          <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-300'}`} />
+        )}
         {hasStroke && <div className={`border-l flex-1 mb-1 border-gray-300 ${isDashed ? 'border-dashed' : ''}`} />}
       </div>
       {children}
