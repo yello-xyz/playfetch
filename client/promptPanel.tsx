@@ -91,15 +91,30 @@ export default function PromptPanel({
     })
   }
 
-  const update = (prompt: string, tags: string) => {
+  const update = (prompt: string, config: PromptConfig, tags: string) => {
     setPrompt(prompt)
+    setProvider(config.provider)
+    setTemperature(config.temperature)
+    setMaxTokens(config.maxTokens)
+    setUseCache(config.useCache)
     setTags(tags)
-    const isDirty = prompt !== version.prompt || tags !== version.tags
+    const isDirty =
+      prompt !== version.prompt ||
+      config.provider !== versionConfig.provider ||
+      config.temperature !== versionConfig.temperature ||
+      config.maxTokens !== versionConfig.maxTokens ||
+      config.useCache !== versionConfig.useCache ||
+      tags !== version.tags
     setDirtyVersion(isDirty ? { ...version, prompt, config, tags } : undefined)
   }
 
-  const updateTags = (tags: string) => update(prompt, tags)
-  const updatePrompt = (prompt: string) => update(prompt, tags)
+  const updateTags = (tags: string) => update(prompt, config, tags)
+  const updatePrompt = (prompt: string) => update(prompt, config, tags)
+  const updateConfig = (config: PromptConfig) => update(prompt, config, tags)
+  const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
+  const updateTemperature = (temperature: number) => updateConfig({ ...config, temperature })
+  const updateMaxTokens = (maxTokens: number) => updateConfig({ ...config, maxTokens })
+  const updateUseCache = (useCache: boolean) => updateConfig({ ...config, useCache })
 
   const contentEditableRef = useRef<HTMLElement>(null)
   const htmlContent = prompt
@@ -169,9 +184,7 @@ export default function PromptPanel({
         </div>
         <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
         <div className='flex gap-2'>
-          <PendingButton
-            disabled={!prompt.length}
-            onClick={() => onRun(prompt, config, inputs)}>
+          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
             Run
           </PendingButton>
           {onPublish && (
@@ -187,9 +200,9 @@ export default function PromptPanel({
               <Label htmlFor='provider' value='Provider' />
             </div>
             <Dropdown label={labelForProvider(provider)}>
-              <Dropdown.Item onClick={() => setProvider('openai')}>{labelForProvider('openai')}</Dropdown.Item>
-              <Dropdown.Item onClick={() => setProvider('anthropic')}>{labelForProvider('anthropic')}</Dropdown.Item>
-              <Dropdown.Item onClick={() => setProvider('google')}>{labelForProvider('google')}</Dropdown.Item>
+              <Dropdown.Item onClick={() => updateProvider('openai')}>{labelForProvider('openai')}</Dropdown.Item>
+              <Dropdown.Item onClick={() => updateProvider('anthropic')}>{labelForProvider('anthropic')}</Dropdown.Item>
+              <Dropdown.Item onClick={() => updateProvider('google')}>{labelForProvider('google')}</Dropdown.Item>
             </Dropdown>
           </div>
           <div>
@@ -202,7 +215,7 @@ export default function PromptPanel({
               min={0}
               max={1}
               step={0.01}
-              onChange={event => setTemperature(Number(event.target.value))}
+              onChange={event => updateTemperature(Number(event.target.value))}
             />
           </div>
           <div>
@@ -210,11 +223,11 @@ export default function PromptPanel({
               id='maxTokens'
               label='Max Tokens'
               value={maxTokens.toString()}
-              setValue={value => setMaxTokens(Number(value))}
+              setValue={value => updateMaxTokens(Number(value))}
             />
           </div>
           <div className='flex items-baseline gap-2'>
-            <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
+            <Checkbox id='useCache' checked={useCache} onChange={() => updateUseCache(!useCache)} />
             <div className='block mb-1'>
               <Label htmlFor='useCache' value='Use cache' />
             </div>
