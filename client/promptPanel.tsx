@@ -78,72 +78,65 @@ export default function PromptPanel({
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
   return (
-    <>
-      <div className='flex flex-col gap-4 px-8 pt-8 text-gray-500 max-w-prose'>
-        {inputVariables.length > 0 && (
-          <div className='flex flex-col gap-2'>
-            <Label value='Inputs' />
-            {inputVariables.map((variable, index) => (
-              <div key={index} className='flex gap-2'>
-                <Label className='flex-1' value={variable} htmlFor={variable} />
-                <TextInput
-                  className='flex-1'
-                  sizing='sm'
-                  value={inputState[variable] ?? ''}
-                  onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
-                  id={variable}
-                  required
-                />
-              </div>
-            ))}
-          </div>
-        )}
-        <div className='self-stretch'>
-          <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
-        </div>
-        {showTags && <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />}
-        <div className='flex gap-2'>
-          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
-            Run
-          </PendingButton>
-        </div>
-        <div className='flex flex-wrap justify-between gap-10'>
-          <div>
-            <div className='block mb-1'>
-              <Label htmlFor='provider' value='Provider' />
+    <div className='flex flex-col gap-4 text-gray-500'>
+      {inputVariables.length > 0 && (
+        <div className='flex flex-col gap-2'>
+          <Label value='Inputs' />
+          {inputVariables.map((variable, index) => (
+            <div key={index} className='flex gap-2'>
+              <Label className='flex-1' value={variable} htmlFor={variable} />
+              <TextInput
+                className='flex-1'
+                sizing='sm'
+                value={inputState[variable] ?? ''}
+                onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
+                id={variable}
+                required
+              />
             </div>
-            <select
-              className='w-full p-2 text-gray-500 border border-gray-300 rounded-md'
-              value={provider}
-              onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
-              <option value={'openai'}>{labelForProvider('openai')}</option>
-              <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
-              <option value={'google'}>{labelForProvider('google')}</option>
-            </select>
+          ))}
+        </div>
+      )}
+      <div className='self-stretch'>
+        <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
+      </div>
+      {showTags && <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />}
+      <div className='flex flex-wrap justify-between gap-10'>
+        <div>
+          <div className='block mb-1'>
+            <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
           </div>
-          <div>
-            <div className='block mb-1'>
-              <Label htmlFor='temperature' value={`Temperature: ${temperature}`} />
-            </div>
-            <RangeSlider
-              id='temperature'
-              value={temperature}
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={event => updateTemperature(Number(event.target.value))}
-            />
-          </div>
-          <div>
-            <LabeledTextInput
-              id='maxTokens'
-              label='Max Tokens'
-              value={maxTokens.toString()}
-              setValue={value => updateMaxTokens(Number(value))}
-            />
-          </div>
+          <RangeSlider
+            id='temperature'
+            value={temperature}
+            min={0}
+            max={1}
+            step={0.01}
+            onChange={event => updateTemperature(Number(event.target.value))}
+          />
+        </div>
+        <div>
+          <LabeledTextInput
+            id='maxTokens'
+            label='Max Tokens'
+            value={maxTokens.toString()}
+            setValue={value => updateMaxTokens(Number(value))}
+          />
         </div>
       </div>
-    </>
+      <div className='flex items-center self-end gap-4'>
+        <select
+          className='w-full p-2 text-gray-500 border border-gray-300 rounded-md'
+          value={provider}
+          onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
+          <option value={'openai'}>{labelForProvider('openai')}</option>
+          <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
+          <option value={'google'}>{labelForProvider('google')}</option>
+        </select>
+        <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
+          Run
+        </PendingButton>
+      </div>
+    </div>
   )
 }
