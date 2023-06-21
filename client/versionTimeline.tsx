@@ -1,10 +1,9 @@
-import { MouseEvent, useEffect, useState } from 'react'
+import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import { PromptConfig, Version } from '@/types'
 import simplediff from 'simplediff'
 import { HiOutlineTrash } from 'react-icons/hi'
 import { FormatDate } from '@/common/formatting'
-import LabeledTextInput from './labeledTextInput'
-import ModalDialog, { DialogPrompt } from './modalDialog'
+import { DialogPrompt } from './modalDialog'
 import api from './api'
 import historyIcon from '@/public/history.svg'
 
@@ -143,18 +142,27 @@ export default function VersionTimeline({
 
   return (
     <>
-      <div className='flex flex-col flex-1 gap-4 overflow-hidden'>
-        <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
+      <div className='flex flex-col flex-1 overflow-hidden'>
+        <input
+          className='w-full py-2 mb-4 text-sm bg-white border-gray-300 rounded-lg'
+          type='text'
+          value={filter}
+          onChange={event => setFilter(event.target.value)}
+          placeholder='Filter'
+        />
         {isFocused && (
-          <div className='flex items-center cursor-pointer' onClick={() => setFocused(false)}>
-            <img className='w-6 h-6' src={historyIcon.src} />
-            View Full History
-          </div>
+          <VerticalBarWrapper strokeStyle='dashed'>
+            <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
+              <img className='w-6 h-6' src={historyIcon.src} />
+              View Full History
+            </div>
+          </VerticalBarWrapper>
         )}
         <div className='flex flex-col overflow-y-auto'>
-          {versionsToShow.map((version, index) => (
+          {versionsToShow.map((version, index, items) => (
             <VersionCell
               key={index}
+              isLast={index === items.length - 1}
               version={version}
               index={ascendingVersions.findIndex(v => v.id === version.id)}
               isActiveVersion={version.id === activeVersion.id}
@@ -172,6 +180,7 @@ export default function VersionTimeline({
 function VersionCell({
   version,
   index,
+  isLast,
   isActiveVersion,
   previousVersion,
   onSelect,
@@ -179,6 +188,7 @@ function VersionCell({
 }: {
   version: Version
   index: number
+  isLast: boolean
   isActiveVersion: boolean
   previousVersion?: Version
   onSelect: (version: Version) => void
@@ -198,32 +208,59 @@ function VersionCell({
   }
 
   return (
-    <div
-      className={`border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
-        isActiveVersion ? 'bg-gray-100' : ''
-      }`}
-      onClick={() => onSelect(version)}>
-      <div className='flex items-center gap-2 text-xs font-medium text-gray-800'>
-        {`#${index + 1}`}
-        <span>|</span>
-        {labelForProvider(version.config.provider)}
-        <span className='flex-1 font-normal'>{formattedDate}</span>
-        {onDelete && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
-      </div>
-      {version.tags.length && (
-        <div className='flex gap-1'>
-          {version.tags
-            .split(', ')
-            .map(tag => tag.trim())
-            .filter(tag => tag.length)
-            .map((tag, tagIndex) => (
-              <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={tagIndex}>
-                {tag}
-              </div>
-            ))}
+    <VerticalBarWrapper bulletStyle={isActiveVersion ? 'filled' : 'stroked'} strokeStyle={isLast ? 'none' : 'stroked'}>
+      <div
+        className={`flex-1 border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
+          isActiveVersion ? 'bg-gray-100' : ''
+        }`}
+        onClick={() => onSelect(version)}>
+        <div className='flex items-center gap-2 text-xs font-medium text-gray-800'>
+          {`#${index + 1}`}
+          <span>|</span>
+          {labelForProvider(version.config.provider)}
+          <span className='flex-1 font-normal'>{formattedDate}</span>
+          {onDelete && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
         </div>
-      )}
-      <div className={isActiveVersion ? '' : 'line-clamp-2'}>{renderPromptVersion(version)}</div>
+        {version.tags.length && (
+          <div className='flex gap-1'>
+            {version.tags
+              .split(', ')
+              .map(tag => tag.trim())
+              .filter(tag => tag.length)
+              .map((tag, tagIndex) => (
+                <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={tagIndex}>
+                  {tag}
+                </div>
+              ))}
+          </div>
+        )}
+        <div className={isActiveVersion ? '' : 'line-clamp-2'}>{renderPromptVersion(version)}</div>
+      </div>
+    </VerticalBarWrapper>
+  )
+}
+
+function VerticalBarWrapper({
+  bulletStyle = 'none',
+  strokeStyle = 'none',
+  children,
+}: {
+  bulletStyle?: 'filled' | 'stroked' | 'none'
+  strokeStyle?: 'stroked' | 'dashed' | 'none'
+  children: ReactNode
+}) {
+  const hasBullet = bulletStyle !== 'none'
+  const isFilled = bulletStyle === 'filled'
+  const hasStroke = strokeStyle !== 'none'
+  const isDashed = strokeStyle === 'dashed'
+
+  return (
+    <div className='flex items-stretch gap-4'>
+      <div className='flex flex-col items-center gap-1 w-2.5'>
+        {hasBullet && <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-300'}`} />}
+        {hasStroke && <div className={`border-l flex-1 mb-1 border-gray-300 ${isDashed ? 'border-dashed' : ''}`} />}
+      </div>
+      {children}
     </div>
   )
 }
