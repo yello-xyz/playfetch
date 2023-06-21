@@ -18,7 +18,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
       )
 
       // TODO log output, cost, failures, etc.
-      const { output } = await runPromptWithConfig(prompt, endpoint.config, req.body)
+      const { output } = await runPromptWithConfig(prompt, endpoint.config, req.body, endpoint.useCache)
       return res.json({ output })
     }
   }

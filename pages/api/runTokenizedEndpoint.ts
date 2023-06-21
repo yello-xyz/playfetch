@@ -12,7 +12,7 @@ async function runTokenizedEndpoint(req: NextApiRequest, res: NextApiResponse) {
   const endpoint = await getEndpointFromPath(urlPath, projectURLPath, token)
   if (token && endpoint) {
     // TODO log output, cost, failures, etc.
-    const { output } = await runPromptWithConfig(endpoint.prompt, endpoint.config, inputs)
+    const { output } = await runPromptWithConfig(endpoint.prompt, endpoint.config, inputs, endpoint.useCache)
     return res.json({ output })
   }
 

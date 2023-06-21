@@ -24,7 +24,12 @@ const hashValue = (object: any, seed = 0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
-export const runPromptWithConfig = async (prompt: string, config: PromptConfig, inputs: PromptInputs) => {
+export const runPromptWithConfig = async (
+  prompt: string,
+  config: PromptConfig,
+  inputs: PromptInputs,
+  useCache: boolean
+) => {
   const resolvedPrompt = Object.entries(inputs).reduce(
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     prompt
@@ -49,13 +54,13 @@ export const runPromptWithConfig = async (prompt: string, config: PromptConfig, 
     prompt: resolvedPrompt,
   })
 
-  const cachedValue = config.useCache ? await getCachedValue(cacheKey) : undefined
+  const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
   if (cachedValue) {
     return { output: cachedValue, cost: 0 }
   }
 
   const result = await getPredictor(config.provider)(resolvedPrompt, config.temperature, config.maxTokens)
-  if (config.useCache && result.output?.length) {
+  if (useCache && result.output?.length) {
     await cacheValue(cacheKey, result.output)
   }
 
@@ -65,7 +70,7 @@ export const runPromptWithConfig = async (prompt: string, config: PromptConfig, 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
   const config: PromptConfig = req.body.config
   const inputs: PromptInputs = req.body.inputs
-  const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs)
+  const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs, false)
   if (output?.length) {
     await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, inputs, output, cost)
   }

@@ -81,7 +81,6 @@ const DefaultConfig: PromptConfig = {
   provider: 'openai',
   temperature: 0.5,
   maxTokens: 250,
-  useCache: false,
 }
 
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {

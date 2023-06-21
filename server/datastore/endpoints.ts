@@ -13,6 +13,26 @@ import {
   getTimestamp,
 } from './datastore'
 
+export async function migrateEndpoints() {
+  const datastore = getDatastore()
+  const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
+  for (const endpointData of allEndpoints) {
+    await datastore.save(
+      toEndpointData(
+        endpointData.userID,
+        getID(endpointData),
+        endpointData.urlPath,
+        endpointData.projectURLPath,
+        endpointData.createdAt,
+        endpointData.prompt,
+        JSON.parse(endpointData.config),
+        endpointData.useCache,
+        endpointData.token
+      )
+    )
+  }
+}
+
 export async function checkCanSaveEndpoint(
   promptID: number,
   urlPath: string,
@@ -28,7 +48,8 @@ export async function saveEndpoint(
   urlPath: string,
   projectURLPath: string,
   prompt: string,
-  config: PromptConfig
+  config: PromptConfig,
+  useCache: boolean
 ) {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   if (promptData?.userID !== userID) {
@@ -46,7 +67,7 @@ export async function saveEndpoint(
   }
   const token = new ShortUniqueId({ length: 12, dictionary: 'alpha_upper' })()
   await getDatastore().save(
-    toEndpointData(userID, promptID, urlPath, projectURLPath, new Date(), prompt, config, token)
+    toEndpointData(userID, promptID, urlPath, projectURLPath, new Date(), prompt, config, useCache, token)
   )
 }
 
@@ -78,10 +99,11 @@ const toEndpointData = (
   createdAt: Date,
   prompt: string,
   config: PromptConfig,
+  useCache: boolean,
   token: string
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { userID, urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), token },
+  data: { userID, urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), useCache, token },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
@@ -92,5 +114,6 @@ export const toEndpoint = (data: any): Endpoint => ({
   projectURLPath: data.projectURLPath,
   prompt: data.prompt,
   config: JSON.parse(data.config),
+  useCache: data.useCache,
   token: data.token,
 })

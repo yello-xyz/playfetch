@@ -3,7 +3,7 @@ import LabeledTextInput from './labeledTextInput'
 import { Endpoint, PromptConfig, PromptInputs, Run, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
-import { Checkbox, Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
+import { Checkbox, Dropdown, Label, RangeSlider, TextInput } from 'flowbite-react'
 import sanitizeHtml from 'sanitize-html'
 import ContentEditable from 'react-contenteditable'
 import { ContentEditableEvent } from 'react-contenteditable'
@@ -44,7 +44,7 @@ export default function PromptPanel({
   setDirtyVersion: (version?: Version) => void
   endpointNameValidator: (name: string) => Promise<{ url?: string }>
   onRun: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
-  onPublish?: (name: string, prompt: string, config: PromptConfig, inputs: PromptInputs) => void
+  onPublish?: (name: string, prompt: string, config: PromptConfig, inputs: PromptInputs, useCache: boolean) => void
   onUnpublish: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
@@ -55,18 +55,17 @@ export default function PromptPanel({
   const [provider, setProvider] = useState<PromptConfig['provider']>(versionConfig.provider)
   const [temperature, setTemperature] = useState(versionConfig.temperature)
   const [maxTokens, setMaxTokens] = useState(versionConfig.maxTokens)
-  const [useCache, setUseCache] = useState(versionConfig.useCache)
+  const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
 
   const [previousVersionID, setPreviousVersionID] = useState(version.id)
   if (version.id !== previousVersionID) {
     setProvider(versionConfig.provider)
     setTemperature(versionConfig.temperature)
     setMaxTokens(versionConfig.maxTokens)
-    setUseCache(versionConfig.useCache)
     setPreviousVersionID(version.id)
   }
 
-  const config = { provider, temperature, maxTokens, useCache }
+  const config = { provider, temperature, maxTokens }
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
@@ -76,7 +75,7 @@ export default function PromptPanel({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (name: string) => {
-        onPublish?.(name, prompt, config, inputs)
+        onPublish?.(name, prompt, config, inputs, useCache)
       },
       initialName: endpoint?.urlPath,
       validator: endpointNameValidator,
@@ -96,14 +95,12 @@ export default function PromptPanel({
     setProvider(config.provider)
     setTemperature(config.temperature)
     setMaxTokens(config.maxTokens)
-    setUseCache(config.useCache)
     setTags(tags)
     const isDirty =
       prompt !== version.prompt ||
       config.provider !== versionConfig.provider ||
       config.temperature !== versionConfig.temperature ||
       config.maxTokens !== versionConfig.maxTokens ||
-      config.useCache !== versionConfig.useCache ||
       tags !== version.tags
     setDirtyVersion(isDirty ? { ...version, prompt, config, tags } : undefined)
   }
@@ -114,7 +111,6 @@ export default function PromptPanel({
   const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
   const updateTemperature = (temperature: number) => updateConfig({ ...config, temperature })
   const updateMaxTokens = (maxTokens: number) => updateConfig({ ...config, maxTokens })
-  const updateUseCache = (useCache: boolean) => updateConfig({ ...config, useCache })
 
   const contentEditableRef = useRef<HTMLElement>(null)
   const htmlContent = prompt
@@ -228,7 +224,7 @@ export default function PromptPanel({
             />
           </div>
           <div className='flex items-baseline gap-2'>
-            <Checkbox id='useCache' checked={useCache} onChange={() => updateUseCache(!useCache)} />
+            <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
             <div className='block mb-1'>
               <Label htmlFor='useCache' value='Use cache' />
             </div>

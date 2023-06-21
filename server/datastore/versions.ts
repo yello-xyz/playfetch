@@ -40,8 +40,7 @@ const isVersionDataCompatible = (versionData: any, prompt: string, config: Promp
     versionData.prompt === prompt &&
     versionConfig.provider === config.provider &&
     versionConfig.temperature === config.temperature &&
-    versionConfig.maxTokens === config.maxTokens &&
-    versionConfig.useCache === config.useCache
+    versionConfig.maxTokens === config.maxTokens
   )
 }
 

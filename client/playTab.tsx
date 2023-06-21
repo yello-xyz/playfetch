@@ -59,9 +59,17 @@ export default function PlayTab({
     await api.runPrompt(prompt.id, versionID, currentPrompt, config, inputs).then(_ => onRefreshPrompt(versionID))
   }
 
-  const publishPrompt = async (endpoint: string, currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
+  const publishPrompt = async (
+    endpoint: string,
+    currentPrompt: string,
+    config: PromptConfig,
+    inputs: PromptInputs,
+    useCache: boolean
+  ) => {
     await savePromptAndRefocus()
-    await api.publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config, inputs).then(setCURLCommand)
+    await api
+      .publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config, inputs, useCache)
+      .then(setCURLCommand)
     onRefreshPrompt()
   }
 

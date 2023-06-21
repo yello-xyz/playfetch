@@ -12,10 +12,11 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
   const name = req.body.name
   const config = req.body.config as PromptConfig
   const inputs = req.body.inputs as PromptInputs
+  const useCache = req.body.useCache
 
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
-  await saveEndpoint(userID, req.body.promptID, urlPath, projectURLPath, req.body.prompt, config)
+  await saveEndpoint(userID, req.body.promptID, urlPath, projectURLPath, req.body.prompt, config, useCache)
 
   const apiKey = await rotateProjectAPIKey(userID, projectID)
   const url = buildURLForClientRoute(`/${projectURLPath}/${urlPath}`, req.headers)

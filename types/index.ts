@@ -31,7 +31,6 @@ export type PromptConfig = {
   provider: 'openai' | 'anthropic' | 'google'
   temperature: number
   maxTokens: number
-  useCache: boolean
 }
 
 export type Version = {
@@ -61,5 +60,6 @@ export type Endpoint = {
   projectURLPath: string
   prompt: string
   config: PromptConfig
+  useCache: boolean
   token: string
 }
