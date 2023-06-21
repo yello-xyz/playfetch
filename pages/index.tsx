@@ -152,7 +152,7 @@ export default function Home({
               </SegmentedControl>
             )}
           </TopBar>
-          <div className='flex-1 h-screen overflow-y-auto'>
+          <div className='flex-1 overflow-hidden'>
             {activePrompt && activeVersion ? (
               <PromptTabView
                 activeTab={selectedTab}

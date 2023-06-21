@@ -88,8 +88,8 @@ export default function PlayTab({
 
   return (
     <>
-      <div className='flex items-stretch'>
-        <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
+      <div className='flex items-stretch h-full'>
+        <div className='flex flex-col gap-4 p-6 pr-4 overflow-y-auto max-w-prose'>
           <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
           <VersionTimeline
             versions={prompt.versions.filter(versionFilter(filter))}
@@ -114,8 +114,8 @@ export default function PlayTab({
         <div className='flex-1 p-6 pl-2'>
           <RunTimeline runs={activeVersion.runs} />
         </div>
+        <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </>
   )
 }
