@@ -1,7 +1,7 @@
 import { Prompt } from "@/types"
 import { DialogPrompt } from "./modalDialog"
 import { PickNamePrompt } from "./pickNameDialog"
-import { PickProjectPrompt } from "./pickPromptDialog"
+import { PickProjectPrompt } from "./pickProjectDialog"
 import api from "./api"
 import PopupMenu, { PopupMenuItem } from "./popupMenu"
 

@@ -8,7 +8,7 @@ import { useState } from 'react'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import PromptPopupMenu from './promptPopupMenu'
-import PickProjectDialog, { PickProjectPrompt } from './pickPromptDialog'
+import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
 
 export default function PromptsGridView({
   projects,

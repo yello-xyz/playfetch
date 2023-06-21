@@ -6,7 +6,7 @@ import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
-import PickProjectDialog, { PickProjectPrompt } from './pickPromptDialog'
+import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
 
 export default function TopBar({
   projects = [],
