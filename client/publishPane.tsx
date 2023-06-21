@@ -56,12 +56,6 @@ export default function PublishPane({
   return (
     <>
       <div className='flex flex-col gap-4 px-8 pt-8 text-gray-500 max-w-prose'>
-        <div className='flex gap-2'>
-          <PendingButton disabled={version.runs.length === 0} onClick={publish}>
-              {endpoint ? 'Republish' : 'Publish'}
-            </PendingButton>
-          {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
-        </div>
         <div className='flex flex-wrap justify-between gap-10'>
           <div className='flex items-baseline gap-2'>
             <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
@@ -69,6 +63,12 @@ export default function PublishPane({
               <Label htmlFor='useCache' value='Use cache' />
             </div>
           </div>
+        </div>
+        <div className='flex gap-2'>
+          <PendingButton disabled={version.runs.length === 0} onClick={publish}>
+            {endpoint ? 'Republish' : 'Publish'}
+          </PendingButton>
+          {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
         </div>
         {endpoint && (
           <div className='flex gap-2'>

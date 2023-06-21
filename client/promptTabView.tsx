@@ -1,23 +1,11 @@
 import api from '@/client/api'
-import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
 import { Project, ActivePrompt, Run, Version, PromptInputs, PromptConfig } from '@/types'
-import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
 import PublishPane from './publishPane'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
-
-const versionFilter = (filter: string) => (version: Version) => {
-  const lowerCaseFilter = filter.toLowerCase()
-  return (
-    version.tags.toLowerCase().includes(lowerCaseFilter) ||
-    version.prompt.toLowerCase().includes(lowerCaseFilter) ||
-    version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
-  )
-}
 
 export type ActivePromptTab = 'play' | 'test' | 'publish'
 
@@ -42,17 +30,7 @@ export default function PromptTabView({
   onPromptDeleted: (projectID: number | null) => void
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
-  const [filter, setFilter] = useState('')
   const [curlCommand, setCURLCommand] = useState<string>()
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-
-  const selectActiveVersion = (version: Version) => {
-    if (version.id !== activeVersion.id) {
-      onSavePrompt(_ => onRefreshPrompt())
-      setActiveVersion(version)
-      setCURLCommand(undefined)
-    }
-  }
 
   const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(versionID))
 
@@ -81,21 +59,6 @@ export default function PromptTabView({
     onRefreshPrompt()
   }
 
-  const deleteVersion = async (version: Version) => {
-    setDialogPrompt({
-      message: `Are you sure you want to delete this version? This action cannot be undone.`,
-      callback: async () => {
-        await api.deleteVersion(version.id)
-        if (prompt.versions.length > 1) {
-          onRefreshPrompt()
-        } else {
-          onPromptDeleted(prompt.projectID)
-        }
-      },
-      destructive: true,
-    })
-  }
-
   switch (activeTab) {
     case 'play':
       return (
@@ -109,18 +72,9 @@ export default function PromptTabView({
           onRefreshPrompt={onRefreshPrompt}
         />
       )
-    default:
+    case 'test':
       return (
-        <div className='flex items-stretch'>
-          <div className='flex flex-col flex-1 h-screen gap-4 p-8 overflow-y-auto max-w-prose'>
-            <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-            <VersionTimeline
-              versions={prompt.versions.filter(versionFilter(filter))}
-              activeVersion={activeVersion}
-              setActiveVersion={selectActiveVersion}
-              onDelete={deleteVersion}
-            />
-          </div>
+        <div className='p-8'>
           <div>
             <Suspense>
               <PromptPanel
@@ -128,8 +82,17 @@ export default function PromptTabView({
                 version={activeVersion}
                 setDirtyVersion={setDirtyVersion}
                 onRun={runPrompt}
+                showTags
+                showInputs
               />
             </Suspense>
+          </div>
+        </div>
+      )
+    case 'publish':
+      return (
+        <div className='flex items-stretch'>
+          <div>
             {project && (
               <PublishPane
                 key={activeVersion.id}
@@ -147,7 +110,6 @@ export default function PromptTabView({
               </div>
             )}
           </div>
-          <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
         </div>
       )
   }
