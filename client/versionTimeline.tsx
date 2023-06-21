@@ -115,16 +115,6 @@ export default function VersionTimeline({
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
 
-  const [formattedDates, setFormattedDates] = useState<{ [id: string]: string }>({})
-  useEffect(() => {
-    setFormattedDates(Object.fromEntries(versions.map(version => [version.id, FormatDate(version.timestamp)])))
-  }, [versions])
-
-  const previousVersion = versions.find(version => version.id === activeVersion.previousID)
-  const isActiveVersion = (version: Version) => version.id === activeVersion.id
-  const renderPromptVersion = (version: Version) =>
-    renderPrompt(version.prompt, previousVersion && isActiveVersion(version) ? previousVersion.prompt : undefined)
-
   const selectVersion = (version: Version) => {
     setFocused(true)
     setActiveVersion(version)
@@ -134,8 +124,7 @@ export default function VersionTimeline({
     setFocused(false)
   }
 
-  const deleteVersion = async (event: MouseEvent, version: Version) => {
-    event.stopPropagation()
+  const deleteVersion = async (version: Version) => {
     setDialogPrompt({
       message: `Are you sure you want to delete this version? This action cannot be undone.`,
       callback: async () => {
@@ -146,6 +135,7 @@ export default function VersionTimeline({
     })
   }
 
+  const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const ascendingVersions = versions.slice().reverse()
   const versionsToShow = isFocused
     ? [...(previousVersion ? [previousVersion] : []), activeVersion]
@@ -162,38 +152,78 @@ export default function VersionTimeline({
           </div>
         )}
         <div className='flex flex-col overflow-y-auto'>
-          {versionsToShow.map((version, index, items) => (
-            <div
+          {versionsToShow.map((version, index) => (
+            <VersionCell
               key={index}
-              className={`border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
-                isActiveVersion(version) ? 'bg-gray-100' : ''
-              }`}
-              onClick={() => selectVersion(version)}>
-              <div className='flex items-center gap-2 text-xs font-medium text-gray-800'>
-                {`#${ascendingVersions.findIndex(v => v.id === version.id) + 1}`}
-                <span>|</span>
-                {labelForProvider(version.config.provider)}
-                <span className='flex-1 font-normal'>{formattedDates[version.id]}</span>
-                {versions.length > 1 && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
-              </div>
-              {version.tags.length && (
-                <div className='flex gap-1'>
-                  {version.tags
-                    .split(', ')
-                    .map(tag => tag.trim())
-                    .filter(tag => tag.length)
-                    .map((tag, tagIndex) => (
-                      <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={tagIndex}>
-                        {tag}
-                      </div>
-                    ))}
-                </div>
-              )}
-              <div className={isActiveVersion(version) ? '' : 'line-clamp-2'}>{renderPromptVersion(version)}</div>
-            </div>
+              version={version}
+              index={ascendingVersions.findIndex(v => v.id === version.id)}
+              isActiveVersion={version.id === activeVersion.id}
+              previousVersion={previousVersion}
+              onSelect={selectVersion}
+              onDelete={versions.length > 1 ? deleteVersion : undefined}
+            />
           ))}
         </div>
       </div>
     </>
+  )
+}
+
+function VersionCell({
+  version,
+  index,
+  isActiveVersion,
+  previousVersion,
+  onSelect,
+  onDelete,
+}: {
+  version: Version
+  index: number
+  isActiveVersion: boolean
+  previousVersion?: Version
+  onSelect: (version: Version) => void
+  onDelete?: (version: Version) => void
+}) {
+  const [formattedDate, setFormattedDate] = useState<string>()
+  useEffect(() => {
+    setFormattedDate(FormatDate(version.timestamp))
+  }, [version.timestamp])
+
+  const renderPromptVersion = (version: Version) =>
+    renderPrompt(version.prompt, previousVersion && isActiveVersion ? previousVersion.prompt : undefined)
+
+  const deleteVersion = async (event: MouseEvent, version: Version) => {
+    event.stopPropagation()
+    onDelete!(version)
+  }
+
+  return (
+    <div
+      className={`border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
+        isActiveVersion ? 'bg-gray-100' : ''
+      }`}
+      onClick={() => onSelect(version)}>
+      <div className='flex items-center gap-2 text-xs font-medium text-gray-800'>
+        {`#${index + 1}`}
+        <span>|</span>
+        {labelForProvider(version.config.provider)}
+        <span className='flex-1 font-normal'>{formattedDate}</span>
+        {onDelete && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
+      </div>
+      {version.tags.length && (
+        <div className='flex gap-1'>
+          {version.tags
+            .split(', ')
+            .map(tag => tag.trim())
+            .filter(tag => tag.length)
+            .map((tag, tagIndex) => (
+              <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={tagIndex}>
+                {tag}
+              </div>
+            ))}
+        </div>
+      )}
+      <div className={isActiveVersion ? '' : 'line-clamp-2'}>{renderPromptVersion(version)}</div>
+    </div>
   )
 }
