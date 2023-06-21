@@ -171,9 +171,7 @@ export default function PromptPanel({
         <div className='self-stretch'>
           <div className='flex items-center block gap-2 mb-1'>
             <Label value='Prompt' onClick={() => contentEditableRef.current?.focus()} />
-            <Tooltip content='Extract variable'>
-              <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />
-            </Tooltip>
+            <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />
           </div>
           <ContentEditable
             className='p-2 bg-gray-100'
@@ -199,11 +197,14 @@ export default function PromptPanel({
             <div className='block mb-1'>
               <Label htmlFor='provider' value='Provider' />
             </div>
-            <Dropdown label={labelForProvider(provider)}>
-              <Dropdown.Item onClick={() => updateProvider('openai')}>{labelForProvider('openai')}</Dropdown.Item>
-              <Dropdown.Item onClick={() => updateProvider('anthropic')}>{labelForProvider('anthropic')}</Dropdown.Item>
-              <Dropdown.Item onClick={() => updateProvider('google')}>{labelForProvider('google')}</Dropdown.Item>
-            </Dropdown>
+            <select
+              className='w-full p-2 text-sm text-gray-500 border border-gray-300 rounded-md'
+              value={provider}
+              onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
+              <option value={'openai'}>{labelForProvider('openai')}</option>
+              <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
+              <option value={'google'}>{labelForProvider('google')}</option>
+            </select>
           </div>
           <div>
             <div className='block mb-1'>
@@ -239,9 +240,7 @@ export default function PromptPanel({
               Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
             </div>{' '}
             <Link href={EndpointUIRoute(endpoint)} target='_blank'>
-              <Tooltip content='Try in UI'>
-                <HiExternalLink size={20} />
-              </Tooltip>
+              <HiExternalLink size={20} />
             </Link>
           </div>
         )}

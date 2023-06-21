@@ -120,11 +120,7 @@ export default function VersionTimeline({
                 {isPreviousVersion(version) && '⬅ '}
                 {`#${index + 1} | `}
                 {FormatDate(version.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
-                {versions.length > 1 && (
-                  <Tooltip content='Delete version'>
-                    <HiOutlineTrash onClick={event => deleteVersion(event, version)} />
-                  </Tooltip>
-                )}
+                {versions.length > 1 && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
                 {version.config.provider.length && <Badge color='green'>{version.config.provider}</Badge>}
               </Timeline.Time>
               <Timeline.Title className='flex items-center gap-2'>
