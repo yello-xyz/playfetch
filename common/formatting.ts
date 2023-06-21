@@ -3,12 +3,20 @@ const validEmailRegExp =
 
 export const CheckValidEmail = (email: string) => !!email.toLowerCase().match(validEmailRegExp)
 
-export const FormatDate = (timestamp: string, previousTimestamp?: string) => {
-  const dateString = new Date(timestamp).toLocaleDateString()
-  const timeString = new Date(timestamp).toLocaleTimeString()
-  const previousDateString = previousTimestamp ? new Date(previousTimestamp).toLocaleDateString() : undefined
-  const todayString = new Date().toLocaleDateString()
-  return dateString === previousDateString || dateString === todayString ? timeString : `${dateString} ${timeString}`
+export const FormatDate = (timestamp: string) => {
+  const toDateString = (date: Date) => date.toLocaleDateString('en', {
+    year: '2-digit',
+    month: 'numeric',
+    day: 'numeric',
+  })
+  const dateString = toDateString(new Date(timestamp))
+  const timeString = new Date(timestamp).toLocaleTimeString('en', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  })
+  const todayString = toDateString(new Date())
+  return dateString === todayString ? timeString : `${dateString} ${timeString}`
 }
 
 export const FormatRelativeDate = (timestamp: string) => {

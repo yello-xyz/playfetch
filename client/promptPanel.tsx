@@ -66,7 +66,7 @@ export default function PromptPanel({
 
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
-      {inputVariables.length > 0 && (
+      {showInputs && inputVariables.length > 0 && (
         <div className='flex flex-col gap-2'>
           <Label value='Inputs' />
           {inputVariables.map((variable, index) => (

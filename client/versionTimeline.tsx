@@ -1,13 +1,23 @@
-import { MouseEvent, useState } from 'react'
-import { Version } from '@/types'
+import { MouseEvent, useEffect, useState } from 'react'
+import { PromptConfig, Version } from '@/types'
 import simplediff from 'simplediff'
-import { Badge, Timeline } from 'flowbite-react'
-import { HiOutlineSparkles, HiOutlineTrash } from 'react-icons/hi'
+import { HiOutlineTrash } from 'react-icons/hi'
 import { FormatDate } from '@/common/formatting'
 import LabeledTextInput from './labeledTextInput'
 import ModalDialog, { DialogPrompt } from './modalDialog'
 import api from './api'
 import historyIcon from '@/public/history.svg'
+
+const labelForProvider = (provider: PromptConfig['provider']) => {
+  switch (provider) {
+    case 'openai':
+      return 'OpenAI GPT3.5'
+    case 'anthropic':
+      return 'Anthropic Claude'
+    case 'google':
+      return 'Google PaLM'
+  }
+}
 
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
@@ -89,34 +99,31 @@ const tokenize = (prompt: string) => {
 const renderPrompt = (prompt: string, comparison?: string) =>
   renderDiffs(comparison ? simplediff.diff(tokenize(comparison), tokenize(prompt)) : [['=', [prompt]]])
 
-const customPointTheme = {
-  marker: {
-    icon: {
-      wrapper: 'absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-white',
-    },
-  },
-}
-
 export default function VersionTimeline({
   versions,
   activeVersion,
   setActiveVersion,
   onRefreshPrompt,
+  setDialogPrompt,
 }: {
   versions: Version[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   onRefreshPrompt: () => void
+  setDialogPrompt: (dialogPrompt: DialogPrompt) => void
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+
+  const [formattedDates, setFormattedDates] = useState<{ [id: string]: string }>({})
+  useEffect(() => {
+    setFormattedDates(Object.fromEntries(versions.map(version => [version.id, FormatDate(version.timestamp)])))
+  }, [versions])
 
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
-  const isActiveVersion = (item: Version) => item.id === activeVersion.id
+  const isActiveVersion = (version: Version) => version.id === activeVersion.id
   const renderPromptVersion = (version: Version) =>
     renderPrompt(version.prompt, previousVersion && isActiveVersion(version) ? previousVersion.prompt : undefined)
-  const isPreviousVersion = (item: Version) => !!previousVersion && item.id === previousVersion.id
 
   const selectVersion = (version: Version) => {
     setFocused(true)
@@ -145,44 +152,48 @@ export default function VersionTimeline({
     : ascendingVersions.filter(versionFilter(filter))
 
   return (
-    <div className='flex flex-col gap-6 overflow-hidden'>
-      <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
-      {isFocused && (
-        <div className='flex items-center cursor-pointer' onClick={() => setFocused(false)}>
-          <img className='w-6 h-6' src={historyIcon.src} />
-          View Full History
-        </div>
-      )}
-      <div className='p-4 overflow-y-auto'>
-        <Timeline>
+    <>
+      <div className='flex flex-col flex-1 gap-4 overflow-hidden'>
+        <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
+        {isFocused && (
+          <div className='flex items-center cursor-pointer' onClick={() => setFocused(false)}>
+            <img className='w-6 h-6' src={historyIcon.src} />
+            View Full History
+          </div>
+        )}
+        <div className='flex flex-col overflow-y-auto'>
           {versionsToShow.map((version, index, items) => (
-            <Timeline.Item key={index} className='cursor-pointer' onClick={() => selectVersion(version)}>
-              <Timeline.Point icon={HiOutlineSparkles} theme={customPointTheme} />
-              <Timeline.Content>
-                <Timeline.Time className='flex items-center gap-2'>
-                  {isActiveVersion(version) && '⮕ '}
-                  {isPreviousVersion(version) && '⬅ '}
-                  {`#${ascendingVersions.findIndex(v => v.id === version.id) + 1} | `}
-                  {FormatDate(version.timestamp, index > 0 ? items[index - 1].timestamp : undefined)}
-                  {versions.length > 1 && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
-                  {version.config.provider.length && <Badge color='green'>{version.config.provider}</Badge>}
-                </Timeline.Time>
-                <Timeline.Title className='flex items-center gap-2'>
+            <div
+              key={index}
+              className={`border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
+                isActiveVersion(version) ? 'bg-gray-100' : ''
+              }`}
+              onClick={() => selectVersion(version)}>
+              <div className='flex items-center gap-2 text-xs font-medium text-gray-800'>
+                {`#${ascendingVersions.findIndex(v => v.id === version.id) + 1}`}
+                <span>|</span>
+                {labelForProvider(version.config.provider)}
+                <span className='flex-1 font-normal'>{formattedDates[version.id]}</span>
+                {versions.length > 1 && <HiOutlineTrash onClick={event => deleteVersion(event, version)} />}
+              </div>
+              {version.tags.length && (
+                <div className='flex gap-1'>
                   {version.tags
                     .split(', ')
                     .map(tag => tag.trim())
                     .filter(tag => tag.length)
                     .map((tag, tagIndex) => (
-                      <Badge key={tagIndex}>{tag}</Badge>
+                      <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={tagIndex}>
+                        {tag}
+                      </div>
                     ))}
-                </Timeline.Title>
-                <Timeline.Body>{renderPromptVersion(version)}</Timeline.Body>
-              </Timeline.Content>
-            </Timeline.Item>
+                </div>
+              )}
+              <div className={isActiveVersion(version) ? '' : 'line-clamp-2'}>{renderPromptVersion(version)}</div>
+            </div>
           ))}
-        </Timeline>
+        </div>
       </div>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-    </div>
+    </>
   )
 }
