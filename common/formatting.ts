@@ -45,6 +45,10 @@ export const ToCamelCase = (s: string) =>
 
 export const StripPromptSentinels = (prompt: string) => prompt.replaceAll('{{', '').replaceAll('}}', '')
 
+export const ExtractPromptVariables = (prompt: string) => [
+  ...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? []),
+]
+
 export const ProjectNameToURLPath = (projectName: string) => projectName.replaceAll(' ', '-').toLowerCase()
 
 export const CheckValidURLPath = (urlPath: string) => {

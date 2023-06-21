@@ -15,6 +15,7 @@ import ModalDialog, { DialogPrompt } from './modalDialog'
 import { HiExternalLink } from 'react-icons/hi'
 import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
+import { ExtractPromptVariables } from '@/common/formatting'
 
 const labelForProvider = (provider: RunConfig['provider']) => {
   switch (provider) {
@@ -134,7 +135,7 @@ export default function PromptPanel({
   }
 
   const [inputState, setInputState] = useState<{ [key: string]: string }>(runConfig.inputs ?? {})
-  const inputVariables = [...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? [])]
+  const inputVariables = ExtractPromptVariables(prompt)
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
   return (

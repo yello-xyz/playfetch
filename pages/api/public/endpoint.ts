@@ -1,7 +1,7 @@
 import { ParseQuery } from '@/client/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { runPromptWithConfig } from '../runPrompt'
-import { ToCamelCase } from '@/common/formatting'
+import { ExtractPromptVariables, ToCamelCase } from '@/common/formatting'
 import { getEndpointFromPath } from '@/server/datastore/endpoints'
 import { checkProject } from '@/server/datastore/projects'
 
@@ -13,7 +13,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const endpoint = await getEndpointFromPath(endpointName, projectURLPath)
     if (endpoint) {
       const inputs = req.body
-      const prompt = Object.keys(endpoint.config.inputs).reduce(
+      const prompt = ExtractPromptVariables(endpoint.prompt).reduce(
         (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
         endpoint.prompt
       )
