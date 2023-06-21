@@ -56,7 +56,13 @@ export default function Home({
     if (!activePrompt || !activeVersion || !dirtyVersion) {
       return activeVersion?.id
     }
-    const versionID = await api.updatePrompt(activePrompt.id, dirtyVersion.prompt, dirtyVersion.tags, activeVersion.id)
+    const versionID = await api.updatePrompt(
+      activePrompt.id,
+      dirtyVersion.prompt,
+      dirtyVersion.config,
+      dirtyVersion.tags,
+      activeVersion.id
+    )
     onSaved?.(versionID)
     return versionID
   }

@@ -135,7 +135,7 @@ export default function VersionTimeline({
                     <HiOutlineTrash onClick={event => deleteVersion(event, item)} />
                   </Tooltip>
                 )}
-                {!isVersion(item) && item.config.provider.length && <Badge color='green'>{item.config.provider}</Badge>}
+                {isVersion(item) && item.config.provider.length && <Badge color='green'>{item.config.provider}</Badge>}
                 {!isVersion(item) && item.cost > 0.0005 && `$${item.cost.toFixed(3)}`}
               </Timeline.Time>
               {isVersion(item) && (

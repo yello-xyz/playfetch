@@ -27,29 +27,31 @@ export type ActivePrompt = Prompt & {
   versions: Version[]
 }
 
+export type PromptConfig = {
+  provider: 'openai' | 'anthropic' | 'google'
+  temperature: number
+  maxTokens: number
+  useCache: boolean
+}
+
 export type Version = {
   id: number
   previousID?: number
   timestamp: string
   prompt: string
+  config: PromptConfig
   tags: string
   runs: Run[]
 }
+
+export type PromptInputs = { [variable: string]: string }
 
 export type Run = {
   id: number
   timestamp: string
   output: string
-  config: RunConfig
+  inputs: PromptInputs
   cost: number
-}
-
-export type RunConfig = {
-  provider: 'openai' | 'anthropic' | 'google'
-  temperature: number
-  maxTokens: number
-  useCache: boolean
-  inputs: { [variable: string]: string }
 }
 
 export type Endpoint = {
@@ -58,6 +60,6 @@ export type Endpoint = {
   urlPath: string
   projectURLPath: string
   prompt: string
-  config: RunConfig
+  config: PromptConfig
   token: string
 }

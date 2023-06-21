@@ -6,12 +6,13 @@ import { withLoggedInSession } from '@/server/session'
 import api from '@/client/api'
 import { useRouter } from 'next/router'
 import { getEndpointFromPath } from '@/server/datastore/endpoints'
+import { ExtractPromptVariables } from '@/common/formatting'
 
 export const getServerSideProps = withLoggedInSession(async ({ query }) => {
   const { token, project: projectURLPath, endpoint: urlPath } = ParseQuery(query)
   const endpoint = projectURLPath && urlPath ? await getEndpointFromPath(urlPath, projectURLPath, token) : undefined
   if (token && endpoint) {
-    return { props: { inputVariables: Object.keys(endpoint.config.inputs) } }
+    return { props: { inputVariables: ExtractPromptVariables(endpoint.prompt) } }
   }
   return Redirect(ClientRoute.Home)
 })

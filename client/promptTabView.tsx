@@ -1,7 +1,7 @@
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { Suspense, useState } from 'react'
-import { Project, ActivePrompt, Run, RunConfig, Version } from '@/types'
+import { Project, ActivePrompt, Run, Version, PromptInputs, PromptConfig } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import VersionTimeline from '@/client/versionTimeline'
 
@@ -53,14 +53,14 @@ export default function PromptTabView({
 
   const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(versionID))
 
-  const runPrompt = async (currentPrompt: string, config: RunConfig) => {
+  const runPrompt = async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
     const versionID = await savePromptAndRefocus()
-    await api.runPrompt(prompt.id, versionID, currentPrompt, config).then(_ => onRefreshPrompt(versionID))
+    await api.runPrompt(prompt.id, versionID, currentPrompt, config, inputs).then(_ => onRefreshPrompt(versionID))
   }
 
-  const publishPrompt = async (endpoint: string, currentPrompt: string, config: RunConfig) => {
+  const publishPrompt = async (endpoint: string, currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
     await savePromptAndRefocus()
-    await api.publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config).then(setCURLCommand)
+    await api.publishPrompt(project!.id, prompt.id, endpoint, currentPrompt, config, inputs).then(setCURLCommand)
     onRefreshPrompt()
   }
 

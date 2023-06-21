@@ -12,7 +12,7 @@ import {
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
-import { ActivePrompt, Prompt } from '@/types'
+import { ActivePrompt, Prompt, PromptConfig } from '@/types'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -77,11 +77,18 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 
 export const DefaultPromptName = 'New Prompt'
 
+const DefaultConfig: PromptConfig = {
+  provider: 'openai',
+  temperature: 0.5,
+  maxTokens: 250,
+  useCache: false,
+}
+
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
   const createdAt = new Date()
   const promptData = toPromptData(userID, projectID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
-  await saveVersionForUser(userID, toID(promptData), '', '')
+  await saveVersionForUser(userID, toID(promptData), '', DefaultConfig, '')
   return toID(promptData)
 }
 

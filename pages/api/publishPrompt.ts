@@ -4,12 +4,14 @@ import { buildURLForClientRoute } from '@/server/routing'
 import { ToCamelCase } from '@/common/formatting'
 import { saveEndpoint } from '@/server/datastore/endpoints'
 import { getURLPathForProject, rotateProjectAPIKey } from '@/server/datastore/projects'
+import { PromptConfig, PromptInputs } from '@/types'
 
 async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) {
   const userID = req.session.user!.id
   const projectID = req.body.projectID
   const name = req.body.name
-  const config = req.body.config
+  const config = req.body.config as PromptConfig
+  const inputs = req.body.inputs as PromptInputs
 
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
@@ -21,7 +23,7 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
   const curlCommand = `curl -X POST ${url} \\
   -H "x-api-key: ${apiKey}" \\
   -H "content-type: application/json" \\
-  -d '{ ${Object.entries(config.inputs)
+  -d '{ ${Object.entries(inputs)
     .map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`)
     .join(', ')} }'`
 

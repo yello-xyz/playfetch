@@ -15,7 +15,7 @@ export const FormatRelativeDate = (timestamp: string) => {
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
-  
+
   const units: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
     { unit: 'year', ms: 365 * day },
     { unit: 'month', ms: 30 * day },

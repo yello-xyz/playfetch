@@ -12,14 +12,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   if (apiKey && projectURLPath && endpointName && (await checkProject(projectURLPath, apiKey))) {
     const endpoint = await getEndpointFromPath(endpointName, projectURLPath)
     if (endpoint) {
-      const inputs = req.body
       const prompt = ExtractPromptVariables(endpoint.prompt).reduce(
         (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
         endpoint.prompt
       )
 
       // TODO log output, cost, failures, etc.
-      const { output } = await runPromptWithConfig(prompt, { ...endpoint.config, inputs })
+      const { output } = await runPromptWithConfig(prompt, endpoint.config, req.body)
       return res.json({ output })
     }
   }

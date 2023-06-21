@@ -1,4 +1,4 @@
-import { Endpoint, RunConfig } from '@/types'
+import { Endpoint, PromptConfig } from '@/types'
 import { and } from '@google-cloud/datastore'
 import ShortUniqueId from 'short-unique-id'
 import {
@@ -28,7 +28,7 @@ export async function saveEndpoint(
   urlPath: string,
   projectURLPath: string,
   prompt: string,
-  config: RunConfig
+  config: PromptConfig
 ) {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   if (promptData?.userID !== userID) {
@@ -77,7 +77,7 @@ const toEndpointData = (
   projectURLPath: string,
   createdAt: Date,
   prompt: string,
-  config: RunConfig,
+  config: PromptConfig,
   token: string
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),

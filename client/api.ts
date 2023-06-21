@@ -1,4 +1,4 @@
-import { Project, Prompt, ActivePrompt, RunConfig } from '@/types'
+import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs } from '@/types'
 import ClientRoute from './clientRoute'
 
 async function parseResponse(response: Response) {
@@ -50,8 +50,14 @@ const api = {
   addPrompt: function (projectID: number | null): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
-  updatePrompt: function (promptID: number, prompt: string, tags: string, versionID?: number): Promise<number> {
-    return post(this.updatePrompt, { promptID, prompt, tags, versionID })
+  updatePrompt: function (
+    promptID: number,
+    prompt: string,
+    config: PromptConfig,
+    tags: string,
+    versionID?: number
+  ): Promise<number> {
+    return post(this.updatePrompt, { promptID, prompt, config, tags, versionID })
   },
   movePrompt: function (promptID: number, projectID: number) {
     return post(this.movePrompt, { promptID, projectID })
@@ -65,8 +71,14 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  runPrompt: function (promptID: number, versionID: number, prompt: string, config: RunConfig) {
-    return post(this.runPrompt, { promptID, versionID, prompt, config })
+  runPrompt: function (
+    promptID: number,
+    versionID: number,
+    prompt: string,
+    config: PromptConfig,
+    inputs: PromptInputs
+  ) {
+    return post(this.runPrompt, { promptID, versionID, prompt, config, inputs })
   },
   runTokenizedEndpoint: function (
     urlPath: string,
@@ -84,9 +96,10 @@ const api = {
     promptID: number,
     name: string,
     prompt: string,
-    config: RunConfig
+    config: PromptConfig,
+    inputs: PromptInputs
   ): Promise<string> {
-    return post(this.publishPrompt, { projectID, promptID, name, prompt, config })
+    return post(this.publishPrompt, { projectID, promptID, name, prompt, config, inputs })
   },
   unpublishPrompt: function (promptID: number) {
     return post(this.unpublishPrompt, { promptID })

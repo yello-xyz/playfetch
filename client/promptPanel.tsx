@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
-import { Endpoint, Run, RunConfig, Version } from '@/types'
+import { Endpoint, PromptConfig, PromptInputs, Run, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
 import { Checkbox, Dropdown, Label, RangeSlider, TextInput, Tooltip } from 'flowbite-react'
@@ -17,7 +17,7 @@ import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 
-const labelForProvider = (provider: RunConfig['provider']) => {
+const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -26,14 +26,6 @@ const labelForProvider = (provider: RunConfig['provider']) => {
     case 'google':
       return 'Google'
   }
-}
-
-const DefaultConfig: RunConfig = {
-  provider: 'openai',
-  temperature: 0.5,
-  maxTokens: 250,
-  useCache: false,
-  inputs: {},
 }
 
 export default function PromptPanel({
@@ -51,28 +43,30 @@ export default function PromptPanel({
   endpoint?: Endpoint
   setDirtyVersion: (version?: Version) => void
   endpointNameValidator: (name: string) => Promise<{ url?: string }>
-  onRun: (prompt: string, config: RunConfig) => void
-  onPublish?: (name: string, prompt: string, config: RunConfig) => void
+  onRun: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
+  onPublish?: (name: string, prompt: string, config: PromptConfig, inputs: PromptInputs) => void
   onUnpublish: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [tags, setTags] = useState(version.tags)
 
-  const runConfig = activeRun?.config ?? DefaultConfig
+  const versionConfig = version.config
 
-  const [provider, setProvider] = useState<RunConfig['provider']>(runConfig.provider)
-  const [temperature, setTemperature] = useState(runConfig.temperature)
-  const [maxTokens, setMaxTokens] = useState(runConfig.maxTokens)
-  const [useCache, setUseCache] = useState(runConfig.useCache)
+  const [provider, setProvider] = useState<PromptConfig['provider']>(versionConfig.provider)
+  const [temperature, setTemperature] = useState(versionConfig.temperature)
+  const [maxTokens, setMaxTokens] = useState(versionConfig.maxTokens)
+  const [useCache, setUseCache] = useState(versionConfig.useCache)
 
-  const [previousActiveRunID, setPreviousRunID] = useState(activeRun?.id)
-  if (activeRun?.id !== previousActiveRunID) {
-    setProvider(runConfig.provider)
-    setTemperature(runConfig.temperature)
-    setMaxTokens(runConfig.maxTokens)
-    setUseCache(runConfig.useCache)
-    setPreviousRunID(activeRun?.id)
+  const [previousVersionID, setPreviousVersionID] = useState(version.id)
+  if (version.id !== previousVersionID) {
+    setProvider(versionConfig.provider)
+    setTemperature(versionConfig.temperature)
+    setMaxTokens(versionConfig.maxTokens)
+    setUseCache(versionConfig.useCache)
+    setPreviousVersionID(version.id)
   }
+
+  const config = { provider, temperature, maxTokens, useCache }
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
@@ -82,7 +76,7 @@ export default function PromptPanel({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: (name: string) => {
-        onPublish?.(name, prompt, { provider, temperature, maxTokens, useCache, inputs })
+        onPublish?.(name, prompt, config, inputs)
       },
       initialName: endpoint?.urlPath,
       validator: endpointNameValidator,
@@ -101,7 +95,7 @@ export default function PromptPanel({
     setPrompt(prompt)
     setTags(tags)
     const isDirty = prompt !== version.prompt || tags !== version.tags
-    setDirtyVersion(isDirty ? { ...version, prompt, tags } : undefined)
+    setDirtyVersion(isDirty ? { ...version, prompt, config, tags } : undefined)
   }
 
   const updateTags = (tags: string) => update(prompt, tags)
@@ -134,7 +128,7 @@ export default function PromptPanel({
     document.execCommand('bold', false)
   }
 
-  const [inputState, setInputState] = useState<{ [key: string]: string }>(runConfig.inputs ?? {})
+  const [inputState, setInputState] = useState<{ [key: string]: string }>(activeRun?.inputs ?? {})
   const inputVariables = ExtractPromptVariables(prompt)
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
@@ -177,7 +171,7 @@ export default function PromptPanel({
         <div className='flex gap-2'>
           <PendingButton
             disabled={!prompt.length}
-            onClick={() => onRun(prompt, { provider, temperature, maxTokens, useCache, inputs })}>
+            onClick={() => onRun(prompt, config, inputs)}>
             Run
           </PendingButton>
           {onPublish && (

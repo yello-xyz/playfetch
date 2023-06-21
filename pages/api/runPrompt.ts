@@ -3,9 +3,9 @@ import anthropic from '@/server/anthropic'
 import vertexai from '@/server/vertexai'
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { RunConfig } from '@/types'
 import { cacheValue, getCachedValue } from '@/server/datastore/cache'
 import { saveRun } from '@/server/datastore/runs'
+import { PromptInputs, PromptConfig } from '@/types'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -24,8 +24,8 @@ const hashValue = (object: any, seed = 0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
-export const runPromptWithConfig = async (prompt: string, config: RunConfig) => {
-  const resolvedPrompt = Object.entries(config.inputs).reduce(
+export const runPromptWithConfig = async (prompt: string, config: PromptConfig, inputs: PromptInputs) => {
+  const resolvedPrompt = Object.entries(inputs).reduce(
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     prompt
   )
@@ -63,10 +63,11 @@ export const runPromptWithConfig = async (prompt: string, config: RunConfig) => 
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
-  const config: RunConfig = req.body.config
-  const { output, cost } = await runPromptWithConfig(req.body.prompt, config)
+  const config: PromptConfig = req.body.config
+  const inputs: PromptInputs = req.body.inputs
+  const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs)
   if (output?.length) {
-    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, output, config, cost)
+    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, inputs, output, cost)
   }
   res.json({})
 }
