@@ -1,7 +1,9 @@
 .tagsContainer {
   position: relative;
   cursor: text;
-  background-color: whitesmoke;
+  background-color: white;
+  border: 1px solid lightgray;
+  border-radius: 8px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;

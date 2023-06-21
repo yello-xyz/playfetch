@@ -26,7 +26,7 @@ export default function LabeledTextInput({
         </div>
       )}
       <input
-        className='w-full bg-white border-gray-300 rounded-lg'
+        className='w-full py-2 text-sm bg-white border-gray-300 rounded-lg'
         type={type}
         value={value}
         onChange={event => setValue(event.target.value)}

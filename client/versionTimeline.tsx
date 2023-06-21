@@ -145,7 +145,7 @@ export default function VersionTimeline({
     : ascendingVersions.filter(versionFilter(filter))
 
   return (
-    <>
+    <div className='flex flex-col gap-6 overflow-hidden'>
       <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
       {isFocused && (
         <div className='flex items-center cursor-pointer' onClick={() => setFocused(false)}>
@@ -183,6 +183,6 @@ export default function VersionTimeline({
         </Timeline>
       </div>
       <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-    </>
+    </div>
   )
 }

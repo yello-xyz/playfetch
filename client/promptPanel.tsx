@@ -88,25 +88,25 @@ export default function PromptPanel({
         <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
       </div>
       {showTags && <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />}
-      <PromptSettingsPane config={config} setConfig={updateConfig} />
-      <div className='flex items-center self-end gap-4'>
-        <select
-          className='text-sm text-black border border-gray-300 rounded-lg'
-          value={config.provider}
-          onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
-          <option value={'openai'}>{labelForProvider('openai')}</option>
-          <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
-          <option value={'google'}>{labelForProvider('google')}</option>
-        </select>
-        {onRun && (
+      {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
+      {onRun && (
+        <div className='flex items-center self-end gap-4'>
+          <select
+            className='text-sm text-black border border-gray-300 rounded-lg'
+            value={config.provider}
+            onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
+            <option value={'openai'}>{labelForProvider('openai')}</option>
+            <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
+            <option value={'google'}>{labelForProvider('google')}</option>
+          </select>
           <button
             className='px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50'
             disabled={!prompt.length}
             onClick={() => onRun(prompt, config, inputs)}>
             {version.runs.length ? 'Run again' : 'Run'}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -103,7 +103,7 @@ export default function TagsInput({
 
   return (
     <div>
-      {label && <Label onClick={focusLast}>{label}</Label>}
+      {label && <div className='mb-4 font-medium text-gray-600' onClick={focusLast}>{label}</div>}
       <div className={styles.tagsContainer} onClick={focusLast}>
         {tagsArray.map((tag, index) => (
           <TagInput
