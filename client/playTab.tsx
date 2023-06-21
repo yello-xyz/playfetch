@@ -68,14 +68,16 @@ export default function PlayTab({
   return (
     <>
       <div className='flex items-stretch h-full'>
-        <div className='flex flex-col flex-grow gap-4 p-6 pr-4 overflow-y-auto max-w-prose'>
+        <div className='flex flex-col flex-grow h-full gap-4 p-6 pr-4 max-w-prose'>
           <LabeledTextInput placeholder='Filter' value={filter} setValue={setFilter} />
+          <div className='p-4 overflow-y-auto'>
           <VersionTimeline
             versions={prompt.versions.filter(versionFilter(filter))}
             activeVersion={activeVersion}
             setActiveVersion={selectActiveVersion}
             onDelete={deleteVersion}
           />
+          </div>
           <Suspense>
             <PromptPanel
               key={activeVersion.id}
