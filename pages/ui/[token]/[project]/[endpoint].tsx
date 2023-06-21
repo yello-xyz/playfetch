@@ -27,6 +27,7 @@ export default function UI({ inputVariables }: { inputVariables: string[] }) {
 
   const run = async () => {
     if (projectURLPath && urlPath && token) {
+      setOutput(undefined)
       api.runTokenizedEndpoint(urlPath, projectURLPath, token, inputs).then(({ output }) => setOutput(output))
     }
   }
