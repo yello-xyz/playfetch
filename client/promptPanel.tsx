@@ -26,7 +26,7 @@ export default function PromptPanel({
 }: {
   version: Version
   setDirtyVersion: (version?: Version) => void
-  onRun: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
+  onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
   showTags?: boolean
   showInputs?: boolean
 }) {
@@ -98,12 +98,14 @@ export default function PromptPanel({
           <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
           <option value={'google'}>{labelForProvider('google')}</option>
         </select>
-        <button
-          className='px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50'
-          disabled={!prompt.length}
-          onClick={() => onRun(prompt, config, inputs)}>
-          {version.runs.length ? 'Run again' : 'Run'}
-        </button>
+        {onRun && (
+          <button
+            className='px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50'
+            disabled={!prompt.length}
+            onClick={() => onRun(prompt, config, inputs)}>
+            {version.runs.length ? 'Run again' : 'Run'}
+          </button>
+        )}
       </div>
     </div>
   )

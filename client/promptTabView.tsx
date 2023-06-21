@@ -1,6 +1,6 @@
 import api from '@/client/api'
 import { Suspense } from 'react'
-import { Project, ActivePrompt, Run, Version, PromptInputs, PromptConfig } from '@/types'
+import { Project, ActivePrompt, Version } from '@/types'
 
 import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
@@ -28,13 +28,6 @@ export default function PromptTabView({
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
-  const savePromptAndRefocus = () => onSavePrompt(versionID => onRefreshPrompt(versionID))
-
-  const runPrompt = async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
-    const versionID = await savePromptAndRefocus()
-    await api.runPrompt(prompt.id, versionID, currentPrompt, config, inputs).then(_ => onRefreshPrompt(versionID))
-  }
-
   switch (activeTab) {
     case 'play':
       return (
@@ -56,7 +49,6 @@ export default function PromptTabView({
                 key={activeVersion.id}
                 version={activeVersion}
                 setDirtyVersion={setDirtyVersion}
-                onRun={runPrompt}
                 showTags
                 showInputs
               />
@@ -76,7 +68,7 @@ export default function PromptTabView({
                 project={project}
                 endpoint={prompt?.endpoint}
                 endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
-                onSavePrompt={() => savePromptAndRefocus().then()}
+                onSavePrompt={() => onSavePrompt(versionID => onRefreshPrompt(versionID)).then()}
                 onRefreshPrompt={onRefreshPrompt}
               />
             )}
