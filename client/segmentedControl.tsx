@@ -15,7 +15,7 @@ export function Segment<T>({
   first?: boolean
   last?: boolean
 }) {
-  const baseStyle = 'px-6 py-2 cursor-pointer text-sm'
+  const baseStyle = 'px-6 py-2 cursor-pointer'
   const firstLastStyle = first ? 'rounded-l-lg' : last ? 'rounded-r-lg' : ''
   const selectedStyle = selected === value ? 'bg-blue-600 text-white rounded-lg' : ''
   return (

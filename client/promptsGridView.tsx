@@ -65,7 +65,7 @@ function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
 
   return (
     <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-6 bg-gray-100 rounded-lg'>
-      <span className='text-sm font-medium'>No Prompts</span>
+      <span className='font-medium'>No Prompts</span>
       <span className='text-xs text-center text-gray-400 '>
         Create a <AddPromptLink label={'New Prompt'} /> to get started.
       </span>
@@ -95,7 +95,7 @@ function PromptCell({
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
       onClick={() => onSelect(prompt.id)}>
       <div className='flex items-start justify-between gap-2'>
-        <span className='flex-1 text-sm font-medium line-clamp-2'>{prompt.name}</span>
+        <span className='flex-1 font-medium line-clamp-2'>{prompt.name}</span>
         <div className='relative flex'>
           <IconButton
             icon={prompt.favorited ? filledStarIcon.src : starIcon.src}

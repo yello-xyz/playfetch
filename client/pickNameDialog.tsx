@@ -61,7 +61,7 @@ export default function PickNameDialog({
   return (
     <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
       <LabeledTextInput id='name' label={prompt?.label} value={name} setValue={updateName} />
-      <div className={`text-sm ${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
+      <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
         {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}
       </div>
     </ModalDialog>

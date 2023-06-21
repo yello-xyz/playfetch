@@ -97,7 +97,7 @@ function SidebarButton({
   return (
     <div className={className} onClick={onClick}>
       {icon && <img className='w-6 h-6' src={icon} />}
-      <div className='text-sm font-normal w-36'>{title}</div>
+      <div className='font-normal w-36'>{title}</div>
     </div>
   )
 }

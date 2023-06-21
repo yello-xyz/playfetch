@@ -28,9 +28,9 @@ export default function PickProjectDialog({
 
   return (
     <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
-      <div className='text-sm text-gray-500'>
+      <div className='text-gray-500'>
         <select
-          className='w-full p-2 text-sm text-gray-500 border border-gray-300 rounded-md'
+          className='w-full p-2 text-gray-500 border border-gray-300 rounded-md'
           value={projectID?.toString() ?? 0}
           onChange={event => setProjectID(Number(event.target.value))}>
           {!projectID && (

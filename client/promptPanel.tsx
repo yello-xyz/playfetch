@@ -150,7 +150,7 @@ export default function PromptPanel({
               <Label htmlFor='provider' value='Provider' />
             </div>
             <select
-              className='w-full p-2 text-sm text-gray-500 border border-gray-300 rounded-md'
+              className='w-full p-2 text-gray-500 border border-gray-300 rounded-md'
               value={provider}
               onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
               <option value={'openai'}>{labelForProvider('openai')}</option>

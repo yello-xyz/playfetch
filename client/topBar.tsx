@@ -94,7 +94,7 @@ const Divider = () => <div className='flex-1 h-px bg-gray-200' />
 function TopBarButton({ title, icon, onClick }: { title: string; icon?: string; onClick: () => void }) {
   return (
     <div
-      className='flex items-center gap-1 py-1 pl-2 pr-4 text-sm font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
+      className='flex items-center gap-1 py-1 pl-2 pr-4 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
       {icon && <img className='w-6 h-6' src={icon} />}
       <div>{title}</div>

@@ -127,7 +127,7 @@ export default function Home({
 
   return (
     <>
-      <main className={`flex items-stretch h-screen ${inter.className}`}>
+      <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
         <Sidebar
           projects={projects}
           activeProjectID={activeProjectID}
