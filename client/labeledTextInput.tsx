@@ -31,7 +31,7 @@ export default function LabeledTextInput({
         onChange={event => setValue(event.target.value)}
         id={id}
         placeholder={placeholder}
-        required={true}
+        required
         onKeyDown={onKeyDown}
       />
     </div>

@@ -22,10 +22,14 @@ export default function PromptPanel({
   version,
   setDirtyVersion,
   onRun,
+  showTags,
+  showInputs,
 }: {
   version: Version
   setDirtyVersion: (version?: Version) => void
   onRun: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
+  showTags?: boolean
+  showInputs?: boolean
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [tags, setTags] = useState(version.tags)
@@ -88,16 +92,16 @@ export default function PromptPanel({
                   value={inputState[variable] ?? ''}
                   onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
                   id={variable}
-                  required={true}
+                  required
                 />
               </div>
             ))}
           </div>
         )}
         <div className='self-stretch'>
-          <PromptInput prompt={prompt} setPrompt={updatePrompt} />
+          <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
         </div>
-        <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />
+        {showTags && <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />}
         <div className='flex gap-2'>
           <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
             Run

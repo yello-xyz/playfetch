@@ -43,7 +43,7 @@ export default function UI({ inputVariables }: { inputVariables: string[] }) {
             value={inputState[variable] ?? ''}
             onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
             id={variable}
-            required={true}
+            required
           />
         </div>
       ))}

@@ -19,7 +19,7 @@ export default function PendingButton({
   }
 
   return (
-    <Button disabled={disabled || isPending} gradientDuoTone='purpleToBlue' size='sm' pill={true} onClick={handleClick}>
+    <Button disabled={disabled || isPending} gradientDuoTone='purpleToBlue' size='sm' pill onClick={handleClick}>
       {children}
     </Button>
   )
