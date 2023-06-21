@@ -7,6 +7,7 @@ import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
+import PublishPane from './publishPane'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 const versionFilter = (filter: string) => (version: Version) => {
@@ -126,15 +127,20 @@ export default function PromptTabView({
               <PromptPanel
                 key={activeVersion.id}
                 version={activeVersion}
-                activeRun={activeVersion.runs[0]}
-                endpoint={prompt?.endpoint}
                 setDirtyVersion={setDirtyVersion}
-                endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
                 onRun={runPrompt}
-                onPublish={project ? publishPrompt : undefined}
-                onUnpublish={unpublishPrompt}
               />
             </Suspense>
+            {project && (
+              <PublishPane
+                key={activeVersion.id}
+                version={activeVersion}
+                endpoint={prompt?.endpoint}
+                endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
+                onPublish={publishPrompt}
+                onUnpublish={unpublishPrompt}
+              />
+            )}
             {curlCommand && (
               <div className='flex flex-col gap-4 px-8 text-black whitespace-pre-wrap'>
                 Try out your API endpoint by running:

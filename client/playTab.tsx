@@ -7,6 +7,7 @@ import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
+import PublishPane from './publishPane'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 const versionFilter = (filter: string) => (version: Version) => {
@@ -37,8 +38,6 @@ export default function PlayTab({
   onPromptDeleted: (projectID: number | null) => void
   onRefreshPrompt: (focusVersionID?: number) => void
 }) {
-  const [activeRun, setActiveRun] = useState<Run>()
-
   const [filter, setFilter] = useState('')
   const [curlCommand, setCURLCommand] = useState<string>()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
@@ -47,7 +46,6 @@ export default function PlayTab({
     if (version.id !== activeVersion.id) {
       onSavePrompt(_ => onRefreshPrompt())
       setActiveVersion(version)
-      setActiveRun(undefined)
       setCURLCommand(undefined)
     }
   }
@@ -109,15 +107,20 @@ export default function PlayTab({
             <PromptPanel
               key={activeVersion.id}
               version={activeVersion}
-              activeRun={activeRun ?? activeVersion.runs[0]}
-              endpoint={prompt?.endpoint}
               setDirtyVersion={setDirtyVersion}
-              endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
               onRun={runPrompt}
-              onPublish={project ? publishPrompt : undefined}
-              onUnpublish={unpublishPrompt}
             />
           </Suspense>
+          {project && (
+            <PublishPane
+              key={activeVersion.id}
+              version={activeVersion}
+              endpoint={prompt?.endpoint}
+              endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
+              onPublish={publishPrompt}
+              onUnpublish={unpublishPrompt}
+            />
+          )}
         </div>
         <div className='flex-1 p-6 pl-2'>
           <RunTimeline runs={activeVersion.runs} />

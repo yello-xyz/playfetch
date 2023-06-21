@@ -1,20 +1,15 @@
 import { MouseEvent, useState } from 'react'
 import LabeledTextInput from './labeledTextInput'
-import { Endpoint, PromptConfig, PromptInputs, Run, Version } from '@/types'
+import { PromptConfig, PromptInputs, Version } from '@/types'
 import TagsInput from './tagsInput'
 import PendingButton from './pendingButton'
-import { Checkbox, Dropdown, Label, RangeSlider, TextInput } from 'flowbite-react'
+import { Label, RangeSlider, TextInput } from 'flowbite-react'
 import sanitizeHtml from 'sanitize-html'
 import ContentEditable from 'react-contenteditable'
 import { ContentEditableEvent } from 'react-contenteditable'
 import { FocusEvent } from 'react'
 import { useRef } from 'react'
-import PickNameDialog, { PickNamePrompt } from './pickNameDialog'
 import { HiCodeBracketSquare } from 'react-icons/hi2'
-import ModalDialog, { DialogPrompt } from './modalDialog'
-import { HiExternalLink } from 'react-icons/hi'
-import { EndpointUIRoute } from './clientRoute'
-import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
@@ -30,22 +25,12 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
 
 export default function PromptPanel({
   version,
-  activeRun,
-  endpoint,
   setDirtyVersion,
-  endpointNameValidator,
   onRun,
-  onPublish,
-  onUnpublish,
 }: {
   version: Version
-  activeRun?: Run
-  endpoint?: Endpoint
   setDirtyVersion: (version?: Version) => void
-  endpointNameValidator: (name: string) => Promise<{ url?: string }>
   onRun: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
-  onPublish?: (name: string, prompt: string, config: PromptConfig, inputs: PromptInputs, useCache: boolean) => void
-  onUnpublish: () => void
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [tags, setTags] = useState(version.tags)
@@ -55,7 +40,6 @@ export default function PromptPanel({
   const [provider, setProvider] = useState<PromptConfig['provider']>(versionConfig.provider)
   const [temperature, setTemperature] = useState(versionConfig.temperature)
   const [maxTokens, setMaxTokens] = useState(versionConfig.maxTokens)
-  const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
 
   const [previousVersionID, setPreviousVersionID] = useState(version.id)
   if (version.id !== previousVersionID) {
@@ -66,29 +50,6 @@ export default function PromptPanel({
   }
 
   const config = { provider, temperature, maxTokens }
-
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
-
-  const publish = () => {
-    setPickNamePrompt({
-      title: 'Publish Prompt',
-      label: 'Endpoint',
-      callback: (name: string) => {
-        onPublish?.(name, prompt, config, inputs, useCache)
-      },
-      initialName: endpoint?.urlPath,
-      validator: endpointNameValidator,
-    })
-  }
-
-  const unpublish = () => {
-    setDialogPrompt({
-      message: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-      callback: () => onUnpublish(),
-      destructive: true,
-    })
-  }
 
   const update = (prompt: string, config: PromptConfig, tags: string) => {
     setPrompt(prompt)
@@ -139,7 +100,8 @@ export default function PromptPanel({
     document.execCommand('bold', false)
   }
 
-  const [inputState, setInputState] = useState<{ [key: string]: string }>(activeRun?.inputs ?? {})
+  const lastRun = version.runs.slice(-1)[0]
+  const [inputState, setInputState] = useState<{ [key: string]: string }>(lastRun?.inputs ?? {})
   const inputVariables = ExtractPromptVariables(prompt)
   const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
@@ -181,12 +143,6 @@ export default function PromptPanel({
           <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
             Run
           </PendingButton>
-          {onPublish && (
-            <PendingButton disabled={version.runs.length === 0} onClick={publish}>
-              {endpoint ? 'Republish' : 'Publish'}
-            </PendingButton>
-          )}
-          {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
         </div>
         <div className='flex flex-wrap justify-between gap-10'>
           <div>
@@ -223,26 +179,8 @@ export default function PromptPanel({
               setValue={value => updateMaxTokens(Number(value))}
             />
           </div>
-          <div className='flex items-baseline gap-2'>
-            <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
-            <div className='block mb-1'>
-              <Label htmlFor='useCache' value='Use cache' />
-            </div>
-          </div>
         </div>
-        {endpoint && (
-          <div className='flex gap-2'>
-            <div className='font-bold text-black'>
-              Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
-            </div>{' '}
-            <Link href={EndpointUIRoute(endpoint)} target='_blank'>
-              <HiExternalLink size={20} />
-            </Link>
-          </div>
-        )}
       </div>
-      <PickNameDialog key={endpoint?.urlPath ?? version.id} prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
     </>
   )
 }
