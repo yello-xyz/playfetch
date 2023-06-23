@@ -6,7 +6,7 @@ export default function RunTimeline({ runs }: { runs: Run[] }) {
       <div className='font-medium text-gray-600'>Results</div>
       <div className='flex flex-col flex-1 gap-2 overflow-y-auto'>
         {runs.map((run, index) => (
-          <div key={index} className='p-4 bg-gray-100 rounded-lg'>
+          <div key={index} className='p-4 rounded-lg bg-sky-50'>
             {run.output}
           </div>
         ))}

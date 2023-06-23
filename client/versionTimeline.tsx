@@ -123,7 +123,7 @@ function VersionCell({
     <VerticalBarWrapper bulletStyle={isActiveVersion ? 'filled' : 'stroked'} strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
         className={`flex-1 border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
-          isActiveVersion ? 'bg-gray-100' : ''
+          isActiveVersion ? 'bg-sky-50' : ''
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2'>
