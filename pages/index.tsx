@@ -3,7 +3,7 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import { useState } from 'react'
-import { Project, Prompt, ActivePrompt, Version } from '@/types'
+import { Project, Prompt, ActivePrompt, Version, User } from '@/types'
 import Sidebar from '@/client/sidebar'
 import PromptTabView, { ActivePromptTab } from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
@@ -18,27 +18,29 @@ import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
 import { ModalDialogContext } from '@/client/modalDialogContext'
 import { RefreshContext } from '@/client/refreshContext'
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500'] })
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
-  const userID = req.session.user!.id
+  const user = req.session.user!
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
-  const initialProjects = await getProjectsForUser(userID)
-  const initialPrompts = promptID ? [] : await getPromptsForProject(userID, projectID ?? null)
-  const initialPrompt = promptID ? await getPromptWithVersions(userID, promptID) : null
+  const initialProjects = await getProjectsForUser(user.id)
+  const initialPrompts = promptID ? [] : await getPromptsForProject(user.id, projectID ?? null)
+  const initialPrompt = promptID ? await getPromptWithVersions(user.id, promptID) : null
 
-  return { props: { initialProjects, initialPrompts, initialPrompt } }
+  return { props: { user, initialProjects, initialPrompts, initialPrompt } }
 })
 
 export default function Home({
+  user,
   initialProjects,
   initialPrompts,
   initialPrompt,
 }: {
+  user: User
   initialProjects: Project[]
   initialPrompts: Prompt[]
   initialPrompt?: ActivePrompt
@@ -147,6 +149,7 @@ export default function Home({
           }}>
           <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
             <Sidebar
+              user={user}
               projects={projects}
               activeProjectID={activeProjectID}
               onLogout={() => router.replace(router.asPath)}

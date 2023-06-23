@@ -1,4 +1,4 @@
-import { Project } from '@/types'
+import { Project, User } from '@/types'
 import { ReactNode } from 'react'
 import api from './api'
 import projectIcon from '@/public/project.svg'
@@ -6,13 +6,16 @@ import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import { usePickNamePrompt } from './modalDialogContext'
 import { useRefreshProjects, useSelectProject } from './refreshContext'
+import UserSidebarItem from './userSidebarItem'
 
 export default function Sidebar({
+  user,
   projects = [],
   activeProjectID,
   onLogout,
   onAddPrompt,
 }: {
+  user: User
   projects?: Project[]
   activeProjectID: number | null | undefined
   onLogout: () => void
@@ -22,11 +25,6 @@ export default function Sidebar({
 
   const refreshProjects = useRefreshProjects()
   const selectProject = useSelectProject()
-
-  const logout = async () => {
-    await api.logout()
-    onLogout()
-  }
 
   const addProject = async () => {
     setPickNamePrompt({
@@ -44,7 +42,7 @@ export default function Sidebar({
   return (
     <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
       <SidebarSection>
-        <SidebarButton title='Log out' onClick={logout} />
+        <UserSidebarItem user={user} onLogout={onLogout} />
       </SidebarSection>
       <SidebarSection>
         <SidebarButton

@@ -7,6 +7,8 @@ declare module 'iron-session' {
     user?: {
       id: number
       email: string
+      fullName: string
+      avatarColor: string
       isAdmin: boolean
     }
   }
