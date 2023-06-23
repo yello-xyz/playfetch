@@ -26,7 +26,7 @@ export default function PlayTab({
 
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
-      savePrompt().then(() => refreshPrompt())
+      savePrompt().then(() => refreshPrompt(version.id))
       setActiveVersion(version)
     }
   }
