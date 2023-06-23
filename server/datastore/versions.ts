@@ -25,7 +25,7 @@ export async function migrateVersions() {
         versionData.promptID,
         versionData.prompt,
         JSON.parse(versionData.config),
-        versionData.labels,
+        JSON.parse(versionData.labels),
         versionData.createdAt,
         versionData.previousVersionID,
         getID(versionData)
@@ -84,7 +84,7 @@ export async function saveVersionForUser(
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
 
-  const labels = currentVersion?.labels ?? ''
+  const labels = currentVersion?.labels ?? []
   const versionData = toVersionData(userID, promptID, prompt, config, labels, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
   const name =
@@ -101,14 +101,22 @@ const toVersionData = (
   promptID: number,
   prompt: string,
   config: PromptConfig,
-  labels: string,
+  labels: string[],
   createdAt: Date,
   previousVersionID?: number,
   versionID?: number
 ) => ({
   key: buildKey(Entity.VERSION, versionID),
-  data: { userID, promptID, prompt, config: JSON.stringify(config), labels, createdAt, previousVersionID },
-  excludeFromIndexes: ['prompt', 'labels'],
+  data: {
+    userID,
+    promptID,
+    prompt,
+    config: JSON.stringify(config),
+    labels: JSON.stringify(labels),
+    createdAt,
+    previousVersionID,
+  },
+  excludeFromIndexes: ['prompt', 'config', 'labels'],
 })
 
 export const toVersion = (data: any, runs: any[]): Version => ({
@@ -117,7 +125,7 @@ export const toVersion = (data: any, runs: any[]): Version => ({
   timestamp: getTimestamp(data),
   prompt: data.prompt,
   config: JSON.parse(data.config),
-  labels: data.labels,
+  labels: JSON.parse(data.labels),
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })
 
