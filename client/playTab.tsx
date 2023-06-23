@@ -1,6 +1,6 @@
 import api from '@/client/api'
 import { Suspense } from 'react'
-import { ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
+import { ActivePrompt, Version, PromptInputs, PromptConfig, Project } from '@/types'
 import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
@@ -9,6 +9,7 @@ const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export default function PlayTab({
   prompt,
+  project,
   activeVersion,
   setActiveVersion,
   setDirtyVersion,
@@ -16,6 +17,7 @@ export default function PlayTab({
   onRefreshPrompt,
 }: {
   prompt: ActivePrompt
+  project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
@@ -40,6 +42,7 @@ export default function PlayTab({
         <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 pr-4 max-w-prose'>
           <VersionTimeline
             versions={prompt.versions}
+            project={project}
             activeVersion={activeVersion}
             setActiveVersion={selectActiveVersion}
             onRefreshPrompt={onRefreshPrompt}

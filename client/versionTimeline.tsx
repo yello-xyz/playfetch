@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { PromptConfig, Version } from '@/types'
+import { Project, PromptConfig, Version } from '@/types'
 import simplediff from 'simplediff'
 import dotsIcon from '@/public/dots.svg'
 import { FormatDate } from '@/common/formatting'
@@ -21,7 +21,7 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
   return (
-    version.labels.toLowerCase().includes(lowerCaseFilter) ||
+    version.labels.some(label => label.toLowerCase().includes(lowerCaseFilter)) ||
     version.prompt.toLowerCase().includes(lowerCaseFilter) ||
     version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
   )
@@ -100,17 +100,24 @@ const renderPrompt = (prompt: string, comparison?: string) =>
 
 export default function VersionTimeline({
   versions,
+  project,
   activeVersion,
   setActiveVersion,
   onRefreshPrompt,
 }: {
   versions: Version[]
+  project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   onRefreshPrompt: () => void
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
+
+  const colors = ['bg-red-500', 'bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500']
+  const labelColors = Object.fromEntries(
+    (project?.labels ?? []).map((label, index) => [label, colors[index % colors.length]])
+  )
 
   const selectVersion = (version: Version) => {
     setFocused(true)
@@ -155,6 +162,7 @@ export default function VersionTimeline({
               index={ascendingVersions.findIndex(v => v.id === version.id)}
               isActiveVersion={version.id === activeVersion.id}
               previousVersion={previousVersion}
+              labelColors={labelColors}
               onSelect={selectVersion}
               onRefreshPrompt={onRefreshPrompt}
             />
@@ -172,6 +180,7 @@ function VersionCell({
   isLast,
   isActiveVersion,
   previousVersion,
+  labelColors,
   onSelect,
   onRefreshPrompt,
 }: {
@@ -181,6 +190,7 @@ function VersionCell({
   isLast: boolean
   isActiveVersion: boolean
   previousVersion?: Version
+  labelColors: { [label: string]: string }
   onSelect: (version: Version) => void
   onRefreshPrompt: () => void
 }) {
@@ -223,15 +233,14 @@ function VersionCell({
         </div>
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
-            {version.labels
-              .split(', ')
-              .map(label => label.trim())
-              .filter(label => label.length)
-              .map((label, labelIndex) => (
-                <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={labelIndex}>
-                  {label}
-                </div>
-              ))}
+            {version.labels.map((label, labelIndex) => (
+              <div
+                className='px-1.5 text-xs flex items-center gap-1 rounded border border-gray-300 py-0.5'
+                key={labelIndex}>
+                {labelColors[label] && <div className={`w-1.5 h-1.5 rounded-full ${labelColors[label]}`} />}
+                {label}
+              </div>
+            ))}
           </div>
         )}
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>{renderPromptVersion(version)}</div>

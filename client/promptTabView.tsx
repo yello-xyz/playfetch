@@ -33,6 +33,7 @@ export default function PromptTabView({
       return (
         <PlayTab
           prompt={prompt}
+          project={project}
           activeVersion={activeVersion}
           setActiveVersion={setActiveVersion}
           setDirtyVersion={setDirtyVersion}
