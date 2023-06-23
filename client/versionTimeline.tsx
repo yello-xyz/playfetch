@@ -130,9 +130,12 @@ function VersionCell({
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2'>
-          <div className='flex items-center flex-1 gap-2 text-xs font-medium text-gray-800'>
-            {labelForProvider(version.config.provider)}
-            <span className='flex-1 font-normal'>{formattedDate}</span>
+          <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
+            <span className='font-medium'>{labelForProvider(version.config.provider)}</span>
+            <span className='font-normal'>{formattedDate}</span>
+            {version.runs.length > 0 && (
+              <span>• {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}</span>
+            )}
           </div>
           <div className='flex items-center gap-1'>
             {project && <LabelPopupMenu project={project} version={version} />}
