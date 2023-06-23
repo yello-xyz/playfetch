@@ -18,6 +18,7 @@ export default function PromptTabView({
   setDirtyVersion,
   onSavePrompt,
   onRefreshPrompt,
+  onRefreshProject,
 }: {
   activeTab: ActivePromptTab
   prompt: ActivePrompt
@@ -27,6 +28,7 @@ export default function PromptTabView({
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
   onRefreshPrompt: (focusVersionID?: number) => void
+  onRefreshProject: () => void
 }) {
   switch (activeTab) {
     case 'play':
@@ -39,6 +41,7 @@ export default function PromptTabView({
           setDirtyVersion={setDirtyVersion}
           onSavePrompt={onSavePrompt}
           onRefreshPrompt={onRefreshPrompt}
+          onRefreshProject={onRefreshProject}
         />
       )
     case 'test':

@@ -108,9 +108,10 @@ export default function Home({
     }
   }
 
+  const refreshProjects = () => api.getProjects().then(setProjects)
+
   const refreshProjectsAndFocus = async (focusProjectID: number) => {
-    const newProjects = await api.getProjects()
-    setProjects(newProjects)
+    await refreshProjects()
     selectProject(focusProjectID)
   }
 
@@ -176,6 +177,7 @@ export default function Home({
                   setDirtyVersion={setDirtyVersion}
                   onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
                   onRefreshPrompt={focusVersionID => refreshPrompt(activePrompt.id, focusVersionID)}
+                  onRefreshProject={refreshProjects}
                 />
               ) : (
                 <PromptsGridView

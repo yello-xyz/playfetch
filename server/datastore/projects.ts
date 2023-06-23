@@ -102,7 +102,7 @@ export async function ensureProjectLabels(
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const oldLabels = JSON.parse(projectData.labels)
   const newLabels = [...oldLabels, ...labels.filter(label => !oldLabels.includes(label))]
-  await updateProject({ ...projectData, labels: newLabels })
+  await updateProject({ ...projectData, labels: JSON.stringify(newLabels) })
 }
 
 export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {

@@ -15,6 +15,7 @@ export default function PlayTab({
   setDirtyVersion,
   onSavePrompt,
   onRefreshPrompt,
+  onRefreshProject,
 }: {
   prompt: ActivePrompt
   project?: Project
@@ -23,6 +24,7 @@ export default function PlayTab({
   setDirtyVersion: (version?: Version) => void
   onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
   onRefreshPrompt: (focusVersionID?: number) => void
+  onRefreshProject: () => void
 }) {
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
@@ -46,6 +48,7 @@ export default function PlayTab({
             activeVersion={activeVersion}
             setActiveVersion={selectActiveVersion}
             onRefreshPrompt={onRefreshPrompt}
+            onRefreshProject={onRefreshProject}
           />
           <Suspense>
             <PromptPanel
