@@ -39,7 +39,7 @@ export type Version = {
   timestamp: string
   prompt: string
   config: PromptConfig
-  tags: string
+  labels: string
   runs: Run[]
 }
 

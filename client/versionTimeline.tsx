@@ -21,7 +21,7 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
 const versionFilter = (filter: string) => (version: Version) => {
   const lowerCaseFilter = filter.toLowerCase()
   return (
-    version.tags.toLowerCase().includes(lowerCaseFilter) ||
+    version.labels.toLowerCase().includes(lowerCaseFilter) ||
     version.prompt.toLowerCase().includes(lowerCaseFilter) ||
     version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
   )
@@ -221,15 +221,15 @@ function VersionCell({
             </div>
           )}
         </div>
-        {version.tags.length > 0 && (
+        {version.labels.length > 0 && (
           <div className='flex gap-1'>
-            {version.tags
+            {version.labels
               .split(', ')
-              .map(tag => tag.trim())
-              .filter(tag => tag.length)
-              .map((tag, tagIndex) => (
-                <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={tagIndex}>
-                  {tag}
+              .map(label => label.trim())
+              .filter(label => label.length)
+              .map((label, labelIndex) => (
+                <div className='px-1 text-xs bg-blue-300 rounded py-0.5' key={labelIndex}>
+                  {label}
                 </div>
               ))}
           </div>
