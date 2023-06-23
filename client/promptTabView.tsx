@@ -1,6 +1,6 @@
 import api from '@/client/api'
 import { Suspense } from 'react'
-import { Project, ActivePrompt, Version } from '@/types'
+import { Project, ActivePrompt, Version, User } from '@/types'
 
 import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
@@ -11,6 +11,7 @@ export type ActivePromptTab = 'play' | 'test' | 'publish'
 
 export default function PromptTabView({
   activeTab,
+  user,
   prompt,
   project,
   activeVersion,
@@ -18,6 +19,7 @@ export default function PromptTabView({
   setDirtyVersion,
 }: {
   activeTab: ActivePromptTab
+  user: User
   prompt: ActivePrompt
   project?: Project
   activeVersion: Version
@@ -28,6 +30,7 @@ export default function PromptTabView({
     case 'play':
       return (
         <PlayTab
+          user={user}
           prompt={prompt}
           project={project}
           activeVersion={activeVersion}

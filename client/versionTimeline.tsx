@@ -1,10 +1,11 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { Project, PromptConfig, Version } from '@/types'
+import { Project, PromptConfig, Run, User, Version } from '@/types'
 import { FormatDate } from '@/common/formatting'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu, { LabelColorsFromProject } from './labelPopupMenu'
+import { UserAvatar } from './userSidebarItem'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -27,11 +28,13 @@ const versionFilter = (filter: string) => (version: Version) => {
 }
 
 export default function VersionTimeline({
+  user,
   versions,
   project,
   activeVersion,
   setActiveVersion,
 }: {
+  user: User
   versions: Version[]
   project?: Project
   activeVersion: Version
@@ -79,6 +82,7 @@ export default function VersionTimeline({
               key={index}
               isOnly={versions.length == 1}
               isLast={index === items.length - 1}
+              user={user}
               version={version}
               index={ascendingVersions.findIndex(v => v.id === version.id)}
               isActiveVersion={version.id === activeVersion.id}
@@ -94,6 +98,7 @@ export default function VersionTimeline({
 }
 
 function VersionCell({
+  user,
   version,
   index,
   isOnly,
@@ -103,6 +108,7 @@ function VersionCell({
   project,
   onSelect,
 }: {
+  user: User
   version: Version
   index: number
   isOnly: boolean
@@ -129,19 +135,17 @@ function VersionCell({
           isActiveVersion ? 'bg-sky-50' : ''
         }`}
         onClick={() => onSelect(version)}>
-        <div className='flex items-center justify-between gap-2'>
+        <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
             <span className='font-medium'>{labelForProvider(version.config.provider)}</span>
-            <span className='font-normal'>{formattedDate}</span>
-            {version.runs.length > 0 && (
-              <span>• {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}</span>
-            )}
+            {version.runs.length > 0 && <RunDetails runs={version.runs} />}
           </div>
           <div className='flex items-center gap-1'>
             {project && <LabelPopupMenu project={project} version={version} />}
             {!isOnly && <VersionPopupMenu version={version} />}
           </div>
         </div>
+        <UserDetails user={user} timestamp={formattedDate ?? ''} />
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
@@ -159,6 +163,29 @@ function VersionCell({
         </div>
       </div>
     </VerticalBarWrapper>
+  )
+}
+
+function UserDetails({ user, timestamp }: { user: User; timestamp: string }) {
+  return (
+    <div className='flex items-center gap-1 text-xs'>
+      <UserAvatar user={user} size='small' />
+      <span className='font-normal'>{user.fullName} • {timestamp}</span>
+    </div>
+  )
+}
+
+function RunDetails({ runs }: { runs: Run[] }) {
+  const averageCost = runs.reduce((sum, run) => sum + run.cost, 0) / runs.length
+
+  return (
+    <>
+      <span>
+        {' '}
+        | {averageCost < 0.0005 && '<'}${Math.max(averageCost, 0.001).toFixed(3)}/res • {runs.length}{' '}
+        {runs.length > 1 ? 'responses' : 'response'}
+      </span>
+    </>
   )
 }
 
@@ -186,7 +213,9 @@ function VerticalBarWrapper({
             <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-400'}`} />
           </div>
         )}
-        {hasStroke && <div className={`border-l flex-1 mb-1 pr-1 border-gray-400 ${isDashed ? 'border-dashed' : ''}`} />}
+        {hasStroke && (
+          <div className={`border-l flex-1 mb-1 pr-1 border-gray-400 ${isDashed ? 'border-dashed' : ''}`} />
+        )}
       </div>
       {children}
     </div>
