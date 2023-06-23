@@ -86,11 +86,27 @@ async function updateProject(projectData: any) {
   )
 }
 
-export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {
+const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
   if (projectData?.userID !== userID) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
+  return projectData
+}
+
+export async function ensureProjectLabels(
+  userID: number,
+  projectID: number,
+  labels: string[]
+) {
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  const oldLabels = JSON.parse(projectData.labels)
+  const newLabels = [...oldLabels, ...labels.filter(label => !oldLabels.includes(label))]
+  await updateProject({ ...projectData, labels: newLabels })
+}
+
+export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
   const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
   const apiKeyHash = hashAPIKey(apiKey)
   await updateProject({ ...projectData, apiKeyHash })

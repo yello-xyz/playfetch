@@ -14,6 +14,7 @@ import {
 import { toRun } from './runs'
 import { DefaultPromptName, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/common/formatting'
+import { ensureProjectLabels } from './projects'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
@@ -105,9 +106,8 @@ export async function saveVersionLabels(
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
   await updateVersion({ ...versionData, labels })
-  // await ensureProjectLabels(userID, projectID, labels)
+  await ensureProjectLabels(userID, projectID, labels)
 }
-
 
 const toVersionData = (
   userID: number,
@@ -149,7 +149,6 @@ const getVerifiedUserVersionData = async (userID: number, versionID: number) => 
   }
   return versionData
 }
-
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
