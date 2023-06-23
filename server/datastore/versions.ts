@@ -60,7 +60,7 @@ export async function saveVersionForUser(
     const previousVersion = currentVersion.previousVersionID
       ? await getKeyedEntity(Entity.VERSION, currentVersion.previousVersionID)
       : undefined
-    if (isVersionDataCompatible(previousVersion, prompt, config)) {
+    if (previousVersion && isVersionDataCompatible(previousVersion, prompt, config)) {
       await datastore.delete(buildKey(Entity.VERSION, currentVersionID))
       currentVersionID = currentVersion.previousVersionID
       currentVersion = previousVersion
