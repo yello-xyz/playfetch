@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 
 type RefreshContextType = {
+  refreshPage?: () => Promise<void>
   refreshProjects?: () => Promise<void>
   selectProject?: (projectID: number | null) => Promise<void>
   refreshProject?: () => Promise<void>
@@ -11,6 +12,7 @@ type RefreshContextType = {
 
 export const RefreshContext = createContext<RefreshContextType>({})
 
+export const useRefreshPage = () => useContext(RefreshContext).refreshPage!
 export const useRefreshProjects = () => useContext(RefreshContext).refreshProjects!
 export const useSelectProject = () => useContext(RefreshContext).selectProject!
 export const useRefreshProject = () => useContext(RefreshContext).refreshProject!

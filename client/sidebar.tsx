@@ -12,13 +12,11 @@ export default function Sidebar({
   user,
   projects = [],
   activeProjectID,
-  onLogout,
   onAddPrompt,
 }: {
   user: User
   projects?: Project[]
   activeProjectID: number | null | undefined
-  onLogout: () => void
   onAddPrompt: () => void
 }) {
   const setPickNamePrompt = usePickNamePrompt()
@@ -42,7 +40,7 @@ export default function Sidebar({
   return (
     <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
       <SidebarSection>
-        <UserSidebarItem user={user} onLogout={onLogout} />
+        <UserSidebarItem user={user} />
       </SidebarSection>
       <SidebarSection>
         <SidebarButton

@@ -3,13 +3,16 @@ import api from './api'
 import PopupMenu from './popupMenu'
 import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
+import { useRefreshPage } from './refreshContext'
 
-export default function UserSidebarItem({ user, onLogout }: { user: User, onLogout: () => void }) {
+export default function UserSidebarItem({ user }: { user: User }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+
+  const refreshPage = useRefreshPage()
 
   const logout = async () => {
     await api.logout()
-    onLogout()
+    refreshPage()
   }
 
   return (

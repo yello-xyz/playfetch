@@ -140,6 +140,7 @@ export default function Home({
         }}>
         <RefreshContext.Provider
           value={{
+            refreshPage: () => router.replace(router.asPath).then(),
             refreshProjects,
             selectProject,
             refreshProject: activeProjectID ? () => refreshProject(activeProjectID) : undefined,
@@ -152,7 +153,6 @@ export default function Home({
               user={user}
               projects={projects}
               activeProjectID={activeProjectID}
-              onLogout={() => router.replace(router.asPath)}
               onAddPrompt={() => addPrompt(null)}
             />
             <div className='flex flex-col flex-1'>
