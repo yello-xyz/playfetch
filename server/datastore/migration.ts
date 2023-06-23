@@ -5,9 +5,9 @@ import { migrateRuns } from './runs'
 import { migrateVersions } from './versions'
 
 export async function runDataMigration() {
-  // await migrateProjects()
+  await migrateProjects()
   // await migratePrompts()
-  await migrateVersions()
+  // await migrateVersions()
   // await migrateRuns()
   // await migrateEndpoints()
 }

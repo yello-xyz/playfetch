@@ -10,6 +10,7 @@ export type Project = {
   id: number
   name: string
   urlPath: string
+  labels: string[]
   timestamp: string
 }
 
@@ -39,7 +40,7 @@ export type Version = {
   timestamp: string
   prompt: string
   config: PromptConfig
-  labels: string
+  labels: string[]
   runs: Run[]
 }
 

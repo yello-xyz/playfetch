@@ -18,7 +18,7 @@ export async function migratePrompts() {
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   for (const promptData of allPrompts) {
-    await updatePrompt(promptData, false)
+    await updatePrompt({ ...promptData }, false)
   }
 }
 
