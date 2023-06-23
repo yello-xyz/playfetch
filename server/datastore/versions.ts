@@ -105,7 +105,7 @@ export async function saveVersionLabels(
   labels: string[]
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
-  await updateVersion({ ...versionData, labels })
+  await updateVersion({ ...versionData, labels: JSON.stringify(labels) })
   await ensureProjectLabels(userID, projectID, labels)
 }
 

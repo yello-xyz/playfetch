@@ -31,7 +31,7 @@ export default function PopupMenu({
   return expanded ? (
     <div
       onClick={event => event.stopPropagation()}
-      className='w-40 overflow-hidden bg-white border border-gray-300 rounded-lg drop-shadow'
+      className='relative z-20 w-40 overflow-hidden bg-white border border-gray-300 rounded-lg drop-shadow'
       ref={menuRef}>
       {children}
     </div>

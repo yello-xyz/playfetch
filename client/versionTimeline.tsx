@@ -1,11 +1,12 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { Project, PromptConfig, Version } from '@/types'
-import dotsIcon from '@/public/dots.svg'
+import labelIcon from '@/public/label.svg'
 import { FormatDate } from '@/common/formatting'
 import historyIcon from '@/public/history.svg'
 import IconButton from './iconButton'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
+import LabelPopupMenu, { LabelColorsFromProject } from './labelPopupMenu'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -42,11 +43,6 @@ export default function VersionTimeline({
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
-
-  const colors = ['bg-red-500', 'bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500']
-  const labelColors = Object.fromEntries(
-    (project?.labels ?? []).map((label, index) => [label, colors[index % colors.length]])
-  )
 
   const selectVersion = (version: Version) => {
     setFocused(true)
@@ -91,7 +87,7 @@ export default function VersionTimeline({
               index={ascendingVersions.findIndex(v => v.id === version.id)}
               isActiveVersion={version.id === activeVersion.id}
               previousVersion={previousVersion}
-              labelColors={labelColors}
+              project={project}
               onSelect={selectVersion}
               onRefreshPrompt={onRefreshPrompt}
             />
@@ -109,7 +105,7 @@ function VersionCell({
   isLast,
   isActiveVersion,
   previousVersion,
-  labelColors,
+  project,
   onSelect,
   onRefreshPrompt,
 }: {
@@ -119,15 +115,16 @@ function VersionCell({
   isLast: boolean
   isActiveVersion: boolean
   previousVersion?: Version
-  labelColors: { [label: string]: string }
+  project?: Project
   onSelect: (version: Version) => void
   onRefreshPrompt: () => void
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatDate(version.timestamp))
   }, [version.timestamp])
+
+  const labelColors = LabelColorsFromProject(project)
 
   return (
     <VerticalBarWrapper bulletStyle={isActiveVersion ? 'filled' : 'stroked'} strokeStyle={isLast ? 'none' : 'stroked'}>
@@ -136,26 +133,17 @@ function VersionCell({
           isActiveVersion ? 'bg-gray-100' : ''
         }`}
         onClick={() => onSelect(version)}>
-        <div className='flex items-center gap-2 text-xs font-medium text-gray-800'>
-          {`#${index + 1}`}
-          <span>|</span>
-          {labelForProvider(version.config.provider)}
-          <span className='flex-1 font-normal'>{formattedDate}</span>
-          {!isOnly && (
-            <div className='relative flex'>
-              <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
-              {isMenuExpanded && (
-                <div className='absolute right-0 top-7'>
-                  <VersionPopupMenu
-                    version={version}
-                    isMenuExpanded={isMenuExpanded}
-                    setIsMenuExpanded={setIsMenuExpanded}
-                    onRefreshPrompt={onRefreshPrompt}
-                  />
-                </div>
-              )}
-            </div>
-          )}
+        <div className='flex items-center justify-between gap-2'>
+          <div className='flex items-center flex-1 gap-2 text-xs font-medium text-gray-800'>
+            {`#${index + 1}`}
+            <span>|</span>
+            {labelForProvider(version.config.provider)}
+            <span className='flex-1 font-normal'>{formattedDate}</span>
+          </div>
+          <div className='flex items-center gap-1'>
+            {project && <LabelPopupMenu project={project} version={version} onRefreshPrompt={onRefreshPrompt} />}
+            {!isOnly && <VersionPopupMenu version={version} onRefreshPrompt={onRefreshPrompt} />}
+          </div>
         </div>
         {version.labels.length > 0 && (
           <div className='flex gap-1'>

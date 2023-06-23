@@ -2,18 +2,19 @@ import { Version } from '@/types'
 import api from './api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import { useDialogPrompt } from './modalDialogContext'
+import IconButton from './iconButton'
+import dotsIcon from '@/public/dots.svg'
+import { useState } from 'react'
 
 export default function VersionPopupMenu({
   version,
-  isMenuExpanded,
-  setIsMenuExpanded,
   onRefreshPrompt,
 }: {
   version: Version
-  isMenuExpanded: boolean
-  setIsMenuExpanded: (isExpanded: boolean) => void
   onRefreshPrompt: () => void
 }) {
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+
   const setDialogPrompt = useDialogPrompt()
 
   const deleteVersion = async () => {
@@ -26,8 +27,15 @@ export default function VersionPopupMenu({
   }
 
   return (
-    <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-      <PopupMenuItem destructive title='Delete' callback={deleteVersion} />
-    </PopupMenu>
+    <div className='relative flex'>
+      <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+      {isMenuExpanded && (
+        <div className='absolute right-0 top-7'>
+          <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+            <PopupMenuItem destructive title='Delete' callback={deleteVersion} />
+          </PopupMenu>
+        </div>
+      )}
+    </div>
   )
 }
