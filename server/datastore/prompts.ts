@@ -58,10 +58,7 @@ export async function getPromptsForProject(userID: number, projectID: number | n
 }
 
 export async function getPromptWithVersions(userID: number, promptID: number): Promise<ActivePrompt> {
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (!promptData || promptData?.userID !== userID) {
-    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
-  }
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
@@ -100,7 +97,7 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
   )
 }
 
-const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
+export const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   if (!promptData || promptData?.userID !== userID) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)

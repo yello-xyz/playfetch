@@ -12,25 +12,14 @@ import {
   toID,
 } from './datastore'
 import { toRun } from './runs'
-import { DefaultPromptName, updatePrompt } from './prompts'
+import { DefaultPromptName, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/common/formatting'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    await datastore.save(
-      toVersionData(
-        versionData.userID,
-        versionData.promptID,
-        versionData.prompt,
-        JSON.parse(versionData.config),
-        JSON.parse(versionData.labels),
-        versionData.createdAt,
-        versionData.previousVersionID,
-        getID(versionData)
-      )
-    )
+    await updateVersion({ ...versionData })
   }
 }
 
@@ -58,10 +47,7 @@ export async function saveVersionForUser(
   currentVersionID?: number
 ) {
   const datastore = getDatastore()
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (promptData?.userID !== userID) {
-    return undefined
-  }
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
 
   let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
   const canOverwrite =
@@ -96,6 +82,33 @@ export async function saveVersionForUser(
   return toID(versionData)
 }
 
+async function updateVersion(versionData: any) {
+  await getDatastore().save(
+    toVersionData(
+      versionData.userID,
+      versionData.promptID,
+      versionData.prompt,
+      JSON.parse(versionData.config),
+      JSON.parse(versionData.labels),
+      versionData.createdAt,
+      versionData.previousVersionID,
+      getID(versionData)
+    )
+)
+}
+
+export async function saveVersionLabels(
+  userID: number,
+  versionID: number,
+  projectID: number,
+  labels: string[]
+) {
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
+  await updateVersion({ ...versionData, labels })
+  // await ensureProjectLabels(userID, projectID, labels)
+}
+
+
 const toVersionData = (
   userID: number,
   promptID: number,
@@ -129,11 +142,17 @@ export const toVersion = (data: any, runs: any[]): Version => ({
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })
 
-export async function deleteVersionForUser(userID: number, versionID: number) {
+const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  if (versionData?.userID !== userID) {
+  if (!versionData || versionData?.userID !== userID) {
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
+  return versionData
+}
+
+
+export async function deleteVersionForUser(userID: number, versionID: number) {
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
   const promptID = versionData.promptID
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   if (versionCount <= 1) {

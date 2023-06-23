@@ -99,6 +99,9 @@ const api = {
   unpublishPrompt: function (promptID: number) {
     return post(this.unpublishPrompt, { promptID })
   },
+  updateVersionLabels: function (versionID: number, projectID: number, labels: string[]) {
+    return post(this.updateVersionLabels, { versionID, projectID, labels })
+  },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
