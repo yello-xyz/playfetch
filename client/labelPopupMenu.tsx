@@ -47,8 +47,9 @@ export default function LabelPopupMenu({
         <div className='absolute right-0 top-7'>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <div className='p-3'>
+              <input className='w-full mb-3 border border-gray-300 rounded-lg px-3 py-1.5' placeholder='Add a label' />
               {labels.map((label, index) => (
-                <div className='flex items-center gap-1 px-2 py-1' key={index} onClick={() => toggleLabel(label)}>
+                <div className='flex items-center gap-1 px-2 py-1 w-72' key={index} onClick={() => toggleLabel(label)}>
                   <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${colors[label]}`} />
                   <div className='flex-1'>{label}</div>
                   {version.labels.includes(label) && <img className='w-6 h-6' src={checkIcon.src} />}

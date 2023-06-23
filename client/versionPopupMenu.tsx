@@ -31,7 +31,7 @@ export default function VersionPopupMenu({
       <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
       {isMenuExpanded && (
         <div className='absolute right-0 top-7'>
-          <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+          <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <PopupMenuItem destructive title='Delete' callback={deleteVersion} />
           </PopupMenu>
         </div>
