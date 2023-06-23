@@ -1,5 +1,5 @@
 import { Project } from '@/types'
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import api from './api'
 import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'

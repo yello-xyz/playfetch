@@ -4,20 +4,22 @@ import { Entity, buildKey, getDatastore, getEntity, getID, getTimestamp } from '
 const toUserData = (
   email: string,
   fullName: string,
+  avatarColor: string,
   isAdmin: boolean,
   createdAt: Date,
   lastLoginAt?: Date,
   userID?: number
 ) => ({
   key: buildKey(Entity.USER, userID),
-  data: { email, fullName, isAdmin, createdAt, lastLoginAt },
-  excludeFromIndexes: ['fullName'],
+  data: { email, fullName, avatarColor, isAdmin, createdAt, lastLoginAt },
+  excludeFromIndexes: ['fullName', 'avatarColor'],
 })
 
 const toUser = (data: any): User => ({
   id: getID(data),
   email: data.email,
   fullName: data.fullName,
+  avatarColor: data.avatarColor,
   isAdmin: data.isAdmin,
   timestamp: getTimestamp(data),
   lastLoginAt: getTimestamp(data, 'lastLoginAt'),
@@ -28,7 +30,15 @@ export async function markUserLogin(userID: number): Promise<User | undefined> {
   const [userData] = await datastore.get(buildKey(Entity.USER, userID))
   if (userData) {
     await datastore.save(
-      toUserData(userData.email, userData.fullName, userData.isAdmin, userData.createdAt, new Date(), userID)
+      toUserData(
+        userData.email,
+        userData.fullName,
+        userData.avatarColor,
+        userData.isAdmin,
+        userData.createdAt,
+        new Date(),
+        userID
+      )
     )
   }
   return userData ? toUser(userData) : undefined
@@ -39,12 +49,13 @@ export async function getUserForEmail(email: string): Promise<User | undefined> 
   return userData ? toUser(userData) : undefined
 }
 
-export async function saveUser(email: string, fullName: string, isAdmin: boolean) {
+export async function saveUser(email: string, fullName: string, avatarColor: string, isAdmin: boolean) {
   const userData = await getEntity(Entity.USER, 'email', email)
   await getDatastore().save(
     toUserData(
       email,
       fullName,
+      avatarColor,
       isAdmin,
       userData?.createdAt ?? new Date(),
       userData?.lastLoginAt,

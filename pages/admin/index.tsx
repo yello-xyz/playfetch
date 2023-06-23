@@ -9,6 +9,15 @@ import { CheckValidEmail } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const avatarColors = [
+  'bg-red-500',
+  'bg-orange-500',
+  'bg-purple-500',
+  'bg-green-500',
+  'bg-blue-500',
+  'bg-yellow-500',
+]
+
 export const getServerSideProps = withAdminSession(async () => ({ props: {} }))
 
 export default function Admin() {
@@ -17,7 +26,8 @@ export default function Admin() {
   const [addAsAdmin, setAddAsAdmin] = useState(false)
 
   const addUser = async () => {
-    await api.addUser(email, fullName, addAsAdmin)
+    const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)]
+    await api.addUser(email.trim(), fullName, randomColor, addAsAdmin)
   }
 
   return (
@@ -28,7 +38,7 @@ export default function Admin() {
         <Checkbox id='admin' checked={addAsAdmin} onChange={() => setAddAsAdmin(!addAsAdmin)} />
         <Label htmlFor='admin'>Add as Admin</Label>
       </div>
-      <PendingButton disabled={!CheckValidEmail(email) || !fullName.length} onClick={addUser}>
+      <PendingButton disabled={!CheckValidEmail(email.trim()) || !fullName.length} onClick={addUser}>
         Add User
       </PendingButton>
     </main>

@@ -2,6 +2,7 @@ export type User = {
   id: number
   email: string
   fullName: string
+  avatarColor: string
   timestamp: string
   isAdmin: boolean
   lastLoginAt?: string
