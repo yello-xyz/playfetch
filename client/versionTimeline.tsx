@@ -120,7 +120,10 @@ function VersionCell({
   const labelColors = LabelColorsFromProject(project)
 
   return (
-    <VerticalBarWrapper bulletStyle={isActiveVersion ? 'filled' : 'stroked'} strokeStyle={isLast ? 'none' : 'stroked'}>
+    <VerticalBarWrapper
+      sequenceNumber={index + 1}
+      bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
+      strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
         className={`flex-1 border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
           isActiveVersion ? 'bg-sky-50' : ''
@@ -128,8 +131,6 @@ function VersionCell({
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2'>
           <div className='flex items-center flex-1 gap-2 text-xs font-medium text-gray-800'>
-            {`#${index + 1}`}
-            <span>|</span>
             {labelForProvider(version.config.provider)}
             <span className='flex-1 font-normal'>{formattedDate}</span>
           </div>
@@ -159,26 +160,30 @@ function VersionCell({
 }
 
 function VerticalBarWrapper({
-  bulletStyle = 'none',
+  sequenceNumber = undefined,
+  bulletStyle = 'stroked',
   strokeStyle = 'none',
   children,
 }: {
-  bulletStyle?: 'filled' | 'stroked' | 'none'
+  sequenceNumber?: number
+  bulletStyle?: 'filled' | 'stroked'
   strokeStyle?: 'stroked' | 'dashed' | 'none'
   children: ReactNode
 }) {
-  const hasBullet = bulletStyle !== 'none'
   const isFilled = bulletStyle === 'filled'
   const hasStroke = strokeStyle !== 'none'
   const isDashed = strokeStyle === 'dashed'
 
   return (
     <div className='flex items-stretch gap-4'>
-      <div className='flex flex-col items-center gap-1 w-2.5'>
-        {hasBullet && (
-          <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-300'}`} />
+      <div className='flex flex-col items-end w-10 gap-1'>
+        {sequenceNumber !== undefined && (
+          <div className='flex items-center gap-2'>
+            <span className={`${isFilled ? 'text-cyan-950' : 'text-gray-400'} text-xs`}>{sequenceNumber}</span>
+            <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-400'}`} />
+          </div>
         )}
-        {hasStroke && <div className={`border-l flex-1 mb-1 border-gray-300 ${isDashed ? 'border-dashed' : ''}`} />}
+        {hasStroke && <div className={`border-l flex-1 mb-1 pr-1 border-gray-400 ${isDashed ? 'border-dashed' : ''}`} />}
       </div>
       {children}
     </div>
