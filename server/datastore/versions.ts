@@ -71,7 +71,7 @@ export async function saveVersionForUser(
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
 
-  const labels = currentVersion?.labels ?? []
+  const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
   const versionData = toVersionData(userID, promptID, prompt, config, labels, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
   const name =
