@@ -4,25 +4,25 @@ import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
+import { useRefreshProject, useRefreshPrompt, useSelectProject } from './refreshContext'
 
 export default function TopBar({
   projects = [],
   activeProjectID,
   activePrompt,
-  onSelectProject,
   onAddPrompt,
-  onRefreshPrompt,
   children,
 }: {
   projects?: Project[]
   activeProjectID: number | null | undefined
   activePrompt?: Prompt
-  onSelectProject: (projectID: number | null) => void
   onAddPrompt: (projectID: number | null) => void
-  onRefreshPrompt: () => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+
+  const onRefresh = activeProjectID ? useRefreshProject() : useRefreshPrompt()
+  const selectProject = useSelectProject()
 
   const projectName = projects.find(p => p.id === activeProjectID)?.name
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
@@ -33,8 +33,8 @@ export default function TopBar({
         <div className={`z-10 flex items-center justify-between gap-4 px-6 ${children ? 'pt-4' : 'py-4'}`}>
           <div className='relative flex gap-1 py-2 text-base justify-self-start'>
             {(projectName || promptProjectName) && <img className='w-6 h-6' src={projectIcon.src} />}
-            {promptProjectName && (
-              <span className='cursor-pointer' onClick={() => onSelectProject(activePrompt!.projectID)}>
+            {activePrompt && promptProjectName && (
+              <span className='cursor-pointer' onClick={() => selectProject(activePrompt.projectID)}>
                 {promptProjectName}
               </span>
             )}
@@ -49,7 +49,7 @@ export default function TopBar({
                       prompt={activePrompt}
                       isMenuExpanded={isMenuExpanded}
                       setIsMenuExpanded={setIsMenuExpanded}
-                      onRefresh={onRefreshPrompt}
+                      onRefresh={onRefresh}
                     />
                   </div>
                 )}

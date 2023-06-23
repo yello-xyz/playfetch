@@ -31,15 +31,11 @@ export default function VersionTimeline({
   project,
   activeVersion,
   setActiveVersion,
-  onRefreshPrompt,
-  onRefreshProject,
 }: {
   versions: Version[]
   project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
-  onRefreshPrompt: () => void
-  onRefreshProject: () => void
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
@@ -89,8 +85,6 @@ export default function VersionTimeline({
               previousVersion={previousVersion}
               project={project}
               onSelect={selectVersion}
-              onRefreshPrompt={onRefreshPrompt}
-              onRefreshProject={onRefreshProject}
             />
           ))}
         </div>
@@ -108,8 +102,6 @@ function VersionCell({
   previousVersion,
   project,
   onSelect,
-  onRefreshPrompt,
-  onRefreshProject,
 }: {
   version: Version
   index: number
@@ -119,8 +111,6 @@ function VersionCell({
   previousVersion?: Version
   project?: Project
   onSelect: (version: Version) => void
-  onRefreshPrompt: () => void
-  onRefreshProject: () => void
 }) {
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
@@ -144,15 +134,8 @@ function VersionCell({
             <span className='flex-1 font-normal'>{formattedDate}</span>
           </div>
           <div className='flex items-center gap-1'>
-            {project && (
-              <LabelPopupMenu
-                project={project}
-                version={version}
-                onRefreshPrompt={onRefreshPrompt}
-                onRefreshProject={onRefreshProject}
-              />
-            )}
-            {!isOnly && <VersionPopupMenu version={version} onRefreshPrompt={onRefreshPrompt} />}
+            {project && <LabelPopupMenu project={project} version={version} />}
+            {!isOnly && <VersionPopupMenu version={version} />}
           </div>
         </div>
         {version.labels.length > 0 && (

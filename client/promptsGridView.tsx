@@ -1,5 +1,5 @@
 import { FormatRelativeDate } from '@/common/formatting'
-import { Project, Prompt } from '@/types'
+import { Prompt } from '@/types'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
@@ -7,30 +7,14 @@ import api from './api'
 import { useEffect, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
 import IconButton from './iconButton'
+import { useRefreshProject, useSelectPrompt } from './refreshContext'
 
-export default function PromptsGridView({
-  projects,
-  prompts,
-  onAddPrompt,
-  onSelect,
-  onRefresh,
-}: {
-  projects: Project[]
-  prompts: Prompt[]
-  onAddPrompt: () => void
-  onSelect: (promptID: number) => void
-  onRefresh: () => void
-}) {
+export default function PromptsGridView({ prompts, onAddPrompt }: { prompts: Prompt[]; onAddPrompt: () => void }) {
   return prompts.length ? (
     <>
       <div className='flex flex-wrap gap-6 p-6'>
         {prompts.map((prompt, index) => (
-          <PromptCell
-            key={index}
-            prompt={prompt}
-            onSelect={onSelect}
-            onRefresh={onRefresh}
-          />
+          <PromptCell key={index} prompt={prompt} />
         ))}
       </div>
     </>
@@ -56,16 +40,11 @@ function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
   )
 }
 
-function PromptCell({
-  prompt,
-  onSelect,
-  onRefresh,
-}: {
-  prompt: Prompt
-  onSelect: (promptID: number) => void
-  onRefresh: () => void
-}) {
+function PromptCell({ prompt }: { prompt: Prompt }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+
+  const selectPrompt = useSelectPrompt()
+  const refreshProject = useRefreshProject()
 
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
@@ -75,13 +54,13 @@ function PromptCell({
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
-      onClick={() => onSelect(prompt.id)}>
+      onClick={() => selectPrompt(prompt.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 font-medium line-clamp-2'>{prompt.name}</span>
         <div className='relative flex'>
           <IconButton
             icon={prompt.favorited ? filledStarIcon.src : starIcon.src}
-            onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(onRefresh)}
+            onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(refreshProject)}
           />
           <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
           {isMenuExpanded && (
@@ -90,7 +69,7 @@ function PromptCell({
                 prompt={prompt}
                 isMenuExpanded={isMenuExpanded}
                 setIsMenuExpanded={setIsMenuExpanded}
-                onRefresh={onRefresh}
+                onRefresh={refreshProject}
               />
             </div>
           )}

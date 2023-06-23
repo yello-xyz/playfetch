@@ -6,6 +6,7 @@ import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useState } from 'react'
+import { useRefreshProjects, useRefreshPrompt } from './refreshContext'
 
 const projectLabelColors = [
   'bg-red-500',
@@ -21,17 +22,7 @@ export const LabelColorsFromProject = (project?: Project) =>
     (project?.labels ?? []).map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
 
-export default function LabelPopupMenu({
-  version,
-  project,
-  onRefreshPrompt,
-  onRefreshProject,
-}: {
-  version: Version
-  project: Project
-  onRefreshPrompt: () => void
-  onRefreshProject: () => void
-}) {
+export default function LabelPopupMenu({ version, project }: { version: Version; project: Project }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const trimmedLabel = newLabel.trim()
@@ -41,14 +32,17 @@ export default function LabelPopupMenu({
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
+  const refreshPrompt = useRefreshPrompt()
+  const refreshProjects = useRefreshProjects()
+
   const toggleLabel = (label: string) => {
     setIsMenuExpanded(false)
     setNewLabel('')
     const labels = version.labels.includes(label) ? version.labels.filter(l => l !== label) : [...version.labels, label]
     api.updateVersionLabels(version.id, project.id, labels).then(() => {
-      onRefreshPrompt()
+      refreshPrompt()
       if (addingNewLabel) {
-        onRefreshProject()
+        refreshProjects()
       }
     })
   }

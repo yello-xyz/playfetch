@@ -5,23 +5,23 @@ import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import { usePickNamePrompt } from './modalDialogContext'
+import { useRefreshProjects, useSelectProject } from './refreshContext'
 
 export default function Sidebar({
   projects = [],
   activeProjectID,
-  onSelectProject,
   onLogout,
-  onProjectAdded,
   onAddPrompt,
 }: {
   projects?: Project[]
   activeProjectID: number | null | undefined
-  onSelectProject: (projectID: number | null) => void
   onLogout: () => void
-  onProjectAdded: (projectID: number) => void
   onAddPrompt: () => void
 }) {
   const setPickNamePrompt = usePickNamePrompt()
+
+  const refreshProjects = useRefreshProjects()
+  const selectProject = useSelectProject()
 
   const logout = async () => {
     await api.logout()
@@ -34,7 +34,8 @@ export default function Sidebar({
       label: 'Project name',
       callback: async (name: string) => {
         const projectID = await api.addProject(name)
-        onProjectAdded(projectID)
+        await refreshProjects()
+        selectProject(projectID)
       },
       validator: name => api.checkProjectName(name),
     })
@@ -50,7 +51,7 @@ export default function Sidebar({
           title='Prompts'
           icon={promptIcon.src}
           active={activeProjectID === null}
-          onClick={() => onSelectProject(null)}
+          onClick={() => selectProject(null)}
         />
         <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
       </SidebarSection>
@@ -61,7 +62,7 @@ export default function Sidebar({
             title={project.name}
             icon={projectIcon.src}
             active={activeProjectID === project.id}
-            onClick={() => onSelectProject(project.id)}
+            onClick={() => selectProject(project.id)}
           />
         ))}
         <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={addProject} />

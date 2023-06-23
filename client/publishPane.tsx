@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { Endpoint, Project, Prompt, Version } from '@/types'
 import PendingButton from './pendingButton'
 import { Checkbox, Label } from 'flowbite-react'
@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
 import { useDialogPrompt, usePickNamePrompt } from './modalDialogContext'
+import { useRefreshPrompt } from './refreshContext'
 
 export default function PublishPane({
   project,
@@ -16,7 +17,6 @@ export default function PublishPane({
   endpoint,
   endpointNameValidator,
   onSavePrompt,
-  onRefreshPrompt,
 }: {
   project: Project
   prompt: Prompt
@@ -24,13 +24,14 @@ export default function PublishPane({
   endpoint?: Endpoint
   endpointNameValidator: (name: string) => Promise<{ url?: string }>
   onSavePrompt: () => Promise<void>
-  onRefreshPrompt: (focusVersionID?: number) => void
 }) {
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
 
   const setDialogPrompt = useDialogPrompt()
   const setPickNamePrompt = usePickNamePrompt()
+
+  const refreshPrompt = useRefreshPrompt()
 
   const publish = () => {
     const lastRun = version.runs.slice(-1)[0]
@@ -46,7 +47,7 @@ export default function PublishPane({
         await api
           .publishPrompt(project!.id, prompt.id, name, version.prompt, version.config, inputs, useCache)
           .then(setCURLCommand)
-        onRefreshPrompt()
+        refreshPrompt()
       },
       initialName: endpoint?.urlPath,
       validator: endpointNameValidator,
@@ -59,7 +60,7 @@ export default function PublishPane({
       callback: async () => {
         setCURLCommand(undefined)
         await api.unpublishPrompt(prompt.id)
-        onRefreshPrompt()
+        refreshPrompt()
       },
       destructive: true,
     })
