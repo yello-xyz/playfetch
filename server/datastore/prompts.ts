@@ -77,17 +77,11 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 
 export const DefaultPromptName = 'New Prompt'
 
-const DefaultConfig: PromptConfig = {
-  provider: 'openai',
-  temperature: 0.5,
-  maxTokens: 250,
-}
-
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
   const createdAt = new Date()
   const promptData = toPromptData(userID, projectID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
-  await saveVersionForUser(userID, toID(promptData), '', DefaultConfig, '')
+  await saveVersionForUser(userID, toID(promptData))
   return toID(promptData)
 }
 

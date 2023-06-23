@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { PromptConfig, PromptInputs, Version } from '@/types'
-import TagsInput from './tagsInput'
 import { Label, TextInput } from 'flowbite-react'
 import { ExtractPromptVariables } from '@/common/formatting'
 import PromptInput from './promptInput'
@@ -21,17 +20,14 @@ export default function PromptPanel({
   version,
   setDirtyVersion,
   onRun,
-  showTags,
   showInputs,
 }: {
   version: Version
   setDirtyVersion: (version?: Version) => void
   onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
-  showTags?: boolean
   showInputs?: boolean
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
-  const [tags, setTags] = useState(version.tags)
 
   const [config, setConfig] = useState(version.config)
 
@@ -41,22 +37,19 @@ export default function PromptPanel({
     setPreviousVersionID(version.id)
   }
 
-  const update = (prompt: string, config: PromptConfig, tags: string) => {
+  const update = (prompt: string, config: PromptConfig) => {
     setPrompt(prompt)
     setConfig(config)
-    setTags(tags)
     const isDirty =
       prompt !== version.prompt ||
       config.provider !== version.config.provider ||
       config.temperature !== version.config.temperature ||
-      config.maxTokens !== version.config.maxTokens ||
-      tags !== version.tags
-    setDirtyVersion(isDirty ? { ...version, prompt, config, tags } : undefined)
+      config.maxTokens !== version.config.maxTokens
+    setDirtyVersion(isDirty ? { ...version, prompt, config } : undefined)
   }
 
-  const updateTags = (tags: string) => update(prompt, config, tags)
-  const updatePrompt = (prompt: string) => update(prompt, config, tags)
-  const updateConfig = (config: PromptConfig) => update(prompt, config, tags)
+  const updatePrompt = (prompt: string) => update(prompt, config)
+  const updateConfig = (config: PromptConfig) => update(prompt, config)
   const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
 
   const lastRun = version.runs.slice(-1)[0]
@@ -87,7 +80,6 @@ export default function PromptPanel({
       <div className='self-stretch'>
         <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
       </div>
-      {showTags && <TagsInput label='Tags (optional)' tags={tags} setTags={updateTags} />}
       {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {onRun && (
         <div className='flex items-center self-end gap-4'>

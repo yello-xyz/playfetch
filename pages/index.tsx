@@ -68,7 +68,6 @@ export default function Home({
       activePrompt.id,
       dirtyVersion.prompt,
       dirtyVersion.config,
-      dirtyVersion.tags,
       activeVersion.id
     )
     onSaved?.(versionID)

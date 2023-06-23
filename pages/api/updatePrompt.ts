@@ -8,7 +8,6 @@ async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>) {
     req.body.promptID,
     req.body.prompt,
     req.body.config,
-    req.body.tags,
     req.body.versionID
   )
   res.json(versionID!)

@@ -49,7 +49,6 @@ export default function PromptTabView({
                 key={activeVersion.id}
                 version={activeVersion}
                 setDirtyVersion={setDirtyVersion}
-                showTags
                 showInputs
               />
             </Suspense>

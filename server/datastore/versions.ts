@@ -44,12 +44,17 @@ const isVersionDataCompatible = (versionData: any, prompt: string, config: Promp
   )
 }
 
+const DefaultConfig: PromptConfig = {
+  provider: 'openai',
+  temperature: 0.5,
+  maxTokens: 250,
+}
+
 export async function saveVersionForUser(
   userID: number,
   promptID: number,
-  prompt: string,
-  config: PromptConfig,
-  tags: string,
+  prompt: string = '',
+  config: PromptConfig = DefaultConfig,
   currentVersionID?: number
 ) {
   const datastore = getDatastore()
@@ -79,6 +84,7 @@ export async function saveVersionForUser(
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
 
+  const tags = currentVersion?.tags ?? ''
   const versionData = toVersionData(userID, promptID, prompt, config, tags, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
   const name =
