@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
 import { useDialogPrompt, usePickNamePrompt } from './modalDialogContext'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 
 export default function PublishPane({
   project,
@@ -16,14 +16,12 @@ export default function PublishPane({
   version,
   endpoint,
   endpointNameValidator,
-  onSavePrompt,
 }: {
   project: Project
   prompt: Prompt
   version: Version
   endpoint?: Endpoint
   endpointNameValidator: (name: string) => Promise<{ url?: string }>
-  onSavePrompt: () => Promise<void>
 }) {
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
@@ -31,6 +29,7 @@ export default function PublishPane({
   const setDialogPrompt = useDialogPrompt()
   const setPickNamePrompt = usePickNamePrompt()
 
+  const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
 
   const publish = () => {
@@ -43,7 +42,7 @@ export default function PublishPane({
       title: 'Publish Prompt',
       label: 'Endpoint',
       callback: async (name: string) => {
-        await onSavePrompt()
+        await savePrompt()
         await api
           .publishPrompt(project!.id, prompt.id, name, version.prompt, version.config, inputs, useCache)
           .then(setCURLCommand)

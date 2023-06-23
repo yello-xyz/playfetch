@@ -61,7 +61,7 @@ export default function Home({
     setDirtyVersion(undefined)
   }
 
-  const savePrompt = async (onSaved?: (versionID: number) => void) => {
+  const savePrompt = async () => {
     if (!activePrompt || !activeVersion || !dirtyVersion) {
       return activeVersion?.id
     }
@@ -71,7 +71,6 @@ export default function Home({
       dirtyVersion.config,
       activeVersion.id
     )
-    onSaved?.(versionID)
     return versionID
   }
 
@@ -144,6 +143,7 @@ export default function Home({
             refreshProject: activeProjectID ? () => refreshProject(activeProjectID) : undefined,
             selectPrompt,
             refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
+            savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
           }}>
           <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
             <Sidebar
@@ -175,7 +175,6 @@ export default function Home({
                     activeVersion={activeVersion}
                     setActiveVersion={selectVersion}
                     setDirtyVersion={setDirtyVersion}
-                    onSavePrompt={onSaved => savePrompt(onSaved).then(versionID => versionID!)}
                   />
                 ) : (
                   <PromptsGridView prompts={prompts} onAddPrompt={() => addPrompt(activeProjectID!)} />

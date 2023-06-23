@@ -16,7 +16,6 @@ export default function PromptTabView({
   activeVersion,
   setActiveVersion,
   setDirtyVersion,
-  onSavePrompt,
 }: {
   activeTab: ActivePromptTab
   prompt: ActivePrompt
@@ -24,7 +23,6 @@ export default function PromptTabView({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
-  onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
 }) {
   switch (activeTab) {
     case 'play':
@@ -35,7 +33,6 @@ export default function PromptTabView({
           activeVersion={activeVersion}
           setActiveVersion={setActiveVersion}
           setDirtyVersion={setDirtyVersion}
-          onSavePrompt={onSavePrompt}
         />
       )
     case 'test':
@@ -65,7 +62,6 @@ export default function PromptTabView({
                 project={project}
                 endpoint={prompt?.endpoint}
                 endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
-                onSavePrompt={() => onSavePrompt().then()}
               />
             )}
           </div>

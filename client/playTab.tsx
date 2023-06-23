@@ -5,7 +5,7 @@ import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export default function PlayTab({
@@ -14,26 +14,26 @@ export default function PlayTab({
   activeVersion,
   setActiveVersion,
   setDirtyVersion,
-  onSavePrompt,
 }: {
   prompt: ActivePrompt
   project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setDirtyVersion: (version?: Version) => void
-  onSavePrompt: (onSaved?: (versionID: number) => void) => Promise<number>
 }) {
+  const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
 
   const selectActiveVersion = (version: Version) => {
     if (version.id !== activeVersion.id) {
-      onSavePrompt(_ => refreshPrompt())
+      savePrompt().then(() => refreshPrompt())
       setActiveVersion(version)
     }
   }
 
   const runPrompt = async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
-    const versionID = await onSavePrompt(versionID => refreshPrompt(versionID))
+    const versionID = await savePrompt()
+    await refreshPrompt(versionID)
     await api.runPrompt(prompt.id, versionID, currentPrompt, config, inputs).then(_ => refreshPrompt(versionID))
   }
 
