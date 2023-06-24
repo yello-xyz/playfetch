@@ -7,7 +7,6 @@ import {
   getID,
   getKeyedEntities,
   getKeyedEntity,
-  getOrderedEntities,
   getTimestamp,
   toID,
 } from './datastore'
@@ -87,8 +86,8 @@ async function updateProject(projectData: any) {
 
 export const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
-  const hasAccess = await hasUserAccess(userID, projectID)
-  if (!projectData || !hasAccess) {
+  const hasAccess = projectData ? await hasUserAccess(userID, projectID) : false
+  if (!hasAccess) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
   return projectData

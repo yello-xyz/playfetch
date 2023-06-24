@@ -14,6 +14,7 @@ import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
 import { getVerifiedUserProjectData } from './projects'
+import { hasUserAccess } from './access'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -24,7 +25,6 @@ export async function migratePrompts() {
 }
 
 const toPromptData = (
-  userID: number,
   projectID: number,
   name: string,
   prompt: string,
@@ -34,21 +34,21 @@ const toPromptData = (
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { userID, projectID, prompt, name, createdAt, lastEditedAt, favorited },
+  data: { projectID, prompt, name, createdAt, lastEditedAt, favorited },
   excludeFromIndexes: ['name', 'prompt'],
 })
 
-const toPrompt = (data: any): Prompt => ({
+const toPrompt = (userID: number, data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   prompt: StripPromptSentinels(data.prompt),
-  projectID: data.projectID === data.userID ? null : data.projectID,
+  projectID: data.projectID === userID ? null : data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
   favorited: data.favorited,
 })
 
-const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
-  ...toPrompt(data),
+const toActivePrompt = (userID: number, data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
+  ...toPrompt(userID, data),
   versions: versions.map(version => toVersion(version, runs)),
   ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
 })
@@ -60,7 +60,7 @@ export async function getPromptsForProject(userID: number, projectID: number | n
     await getVerifiedUserProjectData(userID, projectID)
   }
   const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
-  return prompts.map(prompt => toPrompt(prompt))
+  return prompts.map(promptData => toPrompt(userID, promptData))
 }
 
 export async function getPromptWithVersions(userID: number, promptID: number): Promise<ActivePrompt> {
@@ -69,14 +69,19 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
 
-  return toActivePrompt(promptData, versions, runs, endpointData)
+  return toActivePrompt(userID, promptData, versions, runs, endpointData)
 }
 
 export const DefaultPromptName = 'New Prompt'
 
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
+  if (projectID === null) {
+    projectID = userID
+  } else {
+    await getVerifiedUserProjectData(userID, projectID)
+  }
   const createdAt = new Date()
-  const promptData = toPromptData(userID, projectID ?? userID, DefaultPromptName, '', createdAt, createdAt, false)
+  const promptData = toPromptData(projectID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, toID(promptData))
   return toID(promptData)
@@ -85,7 +90,6 @@ export async function addPromptForUser(userID: number, projectID: number | null)
 export async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(
-      promptData.userID,
       promptData.projectID,
       promptData.name,
       promptData.prompt,
@@ -99,7 +103,10 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (!promptData || promptData?.userID !== userID) {
+  const hasAccess = promptData
+    ? promptData.projectID === userID || (await hasUserAccess(userID, promptData.projectID))
+    : false
+  if (!hasAccess) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
   return promptData
