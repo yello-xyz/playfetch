@@ -12,7 +12,7 @@ import {
   toID,
 } from './datastore'
 import { toRun } from './runs'
-import { DefaultPromptName, getVerifiedUserPromptData, updatePrompt } from './prompts'
+import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/common/formatting'
 import { ensureProjectLabels } from './projects'
 
@@ -100,7 +100,7 @@ async function updateVersion(versionData: any) {
 
 export async function saveVersionLabels(userID: number, versionID: number, projectID: number, labels: string[]) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  await getVerifiedUserPromptData(userID, versionData.promptID)
+  await ensurePromptAccess(userID, versionData.promptID)
   await updateVersion({ ...versionData, labels: JSON.stringify(labels) })
   await ensureProjectLabels(userID, projectID, labels)
 }
@@ -143,7 +143,7 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   if (!versionData) {
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
-  await getVerifiedUserPromptData(userID, versionData.promptID)
+  await ensurePromptAccess(userID, versionData.promptID)
   const promptID = versionData.promptID
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   if (versionCount <= 1) {

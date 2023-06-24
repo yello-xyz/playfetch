@@ -1,5 +1,6 @@
 import { PromptInputs, Run } from "@/types"
 import { Entity, buildKey, getDatastore, getID, getTimestamp } from "./datastore"
+import { ensurePromptAccess } from "./prompts"
 
 export async function migrateRuns() {
   const datastore = getDatastore()
@@ -20,12 +21,14 @@ export async function migrateRuns() {
 }
 
 export async function saveRun(
+  userID: number,
   promptID: number,
   versionID: number,
   inputs: PromptInputs,
   output: string,
   cost: number
 ) {
+  await ensurePromptAccess(userID, promptID)
   await getDatastore().save(toRunData(promptID, versionID, inputs, output, new Date(), cost))
 }
 

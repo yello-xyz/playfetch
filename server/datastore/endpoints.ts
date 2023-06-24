@@ -9,10 +9,9 @@ import {
   getEntityID,
   getFilteredEntity,
   getID,
-  getKeyedEntity,
   getTimestamp,
 } from './datastore'
-import { getVerifiedUserPromptData } from './prompts'
+import { ensurePromptAccess, getVerifiedUserPromptData } from './prompts'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -81,7 +80,7 @@ export async function getEndpointFromPath(
 }
 
 export async function deleteEndpointForUser(userID: number, promptID: number) {
-  await getVerifiedUserPromptData(userID, promptID)
+  await ensurePromptAccess(userID, promptID)
   await getDatastore().delete(buildKey(Entity.ENDPOINT, promptID))
 }
 

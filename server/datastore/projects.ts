@@ -84,20 +84,15 @@ async function updateProject(projectData: any) {
   )
 }
 
-export const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
-  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
-  const hasAccess = projectData ? await hasUserAccess(userID, projectID) : false
+const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
+  const hasAccess = await hasUserAccess(userID, projectID)
   if (!hasAccess) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
-  return projectData
+  return getKeyedEntity(Entity.PROJECT, projectID)
 }
 
-export async function ensureProjectLabels(
-  userID: number,
-  projectID: number,
-  labels: string[]
-) {
+export async function ensureProjectLabels(userID: number, projectID: number, labels: string[]) {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const oldLabels = JSON.parse(projectData.labels)
   const newLabels = [...oldLabels, ...labels.filter(label => !oldLabels.includes(label))]

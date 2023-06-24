@@ -13,7 +13,6 @@ import {
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
-import { getVerifiedUserProjectData } from './projects'
 import { hasUserAccess } from './access'
 
 export async function migratePrompts() {
@@ -47,19 +46,12 @@ const toPrompt = (userID: number, data: any): Prompt => ({
   favorited: data.favorited,
 })
 
-const toActivePrompt = (userID: number, data: any, versions: any[], runs: any[], endpointData?: any): ActivePrompt => ({
-  ...toPrompt(userID, data),
-  versions: versions.map(version => toVersion(version, runs)),
-  ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
-})
-
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
-  if (projectID === null) {
-    projectID = userID
-  } else {
-    await getVerifiedUserProjectData(userID, projectID)
-  }
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
+  await ensureProjectAccess(userID, projectID)
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID ?? userID, [
+    'favorited',
+    'lastEditedAt',
+  ])
   return prompts.map(promptData => toPrompt(userID, promptData))
 }
 
@@ -69,19 +61,19 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
 
-  return toActivePrompt(userID, promptData, versions, runs, endpointData)
+  return {
+    ...toPrompt(userID, promptData),
+    versions: versions.map(version => toVersion(version, runs)),
+    ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
+  }
 }
 
 export const DefaultPromptName = 'New Prompt'
 
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
-  if (projectID === null) {
-    projectID = userID
-  } else {
-    await getVerifiedUserProjectData(userID, projectID)
-  }
+  await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const promptData = toPromptData(projectID, DefaultPromptName, '', createdAt, createdAt, false)
+  const promptData = toPromptData(projectID ?? userID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, toID(promptData))
   return toID(promptData)
@@ -101,6 +93,13 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
   )
 }
 
+async function ensureProjectAccess(userID: number, projectID: number | null) {
+  const hasAccess = projectID === null || (await hasUserAccess(userID, projectID))
+  if (!hasAccess) {
+    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
+  }
+}
+
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   const hasAccess = promptData
@@ -110,6 +109,11 @@ export const getVerifiedUserPromptData = async (userID: number, promptID: number
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
   return promptData
+}
+
+export async function ensurePromptAccess(userID: number, promptID: number) {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+  return !!promptData
 }
 
 export async function updatePromptProject(userID: number, promptID: number, projectID: number) {
@@ -128,7 +132,7 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
-  await getVerifiedUserPromptData(userID, promptID)
+  await ensurePromptAccess(userID, promptID)
   const versionIDs = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
   const runIDs = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   await getDatastore().delete([
