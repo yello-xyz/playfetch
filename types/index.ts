@@ -14,12 +14,7 @@ export type Project = {
   timestamp: string
 }
 
-export type ActiveProject =
-  | (Project & {
-      prompts: Prompt[]
-      users: User[]
-    })
-  | { id: null; prompts: Prompt[] }
+export type ActiveProject = (Project | { id: null }) & { prompts: Prompt[]; users: User[] }
 
 export type Prompt = {
   id: number

@@ -1,10 +1,11 @@
-import { ActiveProject, Project, Prompt } from '@/types'
+import { ActiveProject, Project, Prompt, User } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
 import { useRefreshProject, useRefreshPrompt, useSelectProject } from './refreshContext'
+import { UserAvatar } from './userSidebarItem'
 
 export default function TopBar({
   projects = [],
@@ -58,9 +59,12 @@ export default function TopBar({
               <span className='font-medium'>{projectName ?? 'Prompts'}</span>
             )}
           </div>
-          {activeProject && (
-            <TopBarButton title='New Prompt' icon={addIcon.src} onClick={() => onAddPrompt(activeProject.id)} />
-          )}
+          <div className='flex items-center gap-4'>
+            {activeProject && <UserAvatars users={activeProject.users} />}
+            {activeProject && (
+              <TopBarButton title='New Prompt' icon={addIcon.src} onClick={() => onAddPrompt(activeProject.id)} />
+            )}
+          </div>
         </div>
         <div className='flex items-center'>
           <Divider />
@@ -70,6 +74,18 @@ export default function TopBar({
       </div>
     </>
   )
+}
+
+function UserAvatars({ users }: { users: User[] }) {
+  return users.length > 1 ? (
+    <div className={`flex flex-row-reverse space-x-reverse -space-x-[50px] mr-[${(users.length - 1) * 20}px]`}>
+      {users.map((user, index) => (
+        <div key={index}>
+          <UserAvatar user={user} border />
+        </div>
+      ))}
+    </div>
+  ) : null
 }
 
 const Divider = () => <div className='flex-1 h-px bg-gray-200' />

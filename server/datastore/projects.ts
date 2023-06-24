@@ -74,6 +74,7 @@ export async function getActiveProject(userID: number, projectID: number | null)
     return {
       id: null,
       prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+      users: [],
     }
   }
 }
