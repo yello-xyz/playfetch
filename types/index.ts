@@ -33,6 +33,7 @@ export type Prompt = {
 export type ActivePrompt = Prompt & {
   endpoint?: Endpoint
   versions: Version[]
+  users: User[]
 }
 
 export type PromptConfig = {

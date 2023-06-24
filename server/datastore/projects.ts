@@ -11,7 +11,7 @@ import {
   getTimestamp,
   toID,
 } from './datastore'
-import { ActiveProject, Project } from '@/types'
+import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess } from './access'
@@ -49,6 +49,12 @@ const toProject = (data: any): Project => ({
   timestamp: getTimestamp(data),
 })
 
+export async function getProjectUsers(projectID: number): Promise<User[]> {
+  const userIDs = await getUserIDsForProject(projectID)
+  const users = await getKeyedEntities(Entity.USER, userIDs)
+  return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
+}
+
 export async function getActiveProject(userID: number, projectID: number | null): Promise<ActiveProject> {
   const getOrderedPrompts = (projectID: number) =>
     getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
@@ -56,13 +62,12 @@ export async function getActiveProject(userID: number, projectID: number | null)
   if (projectID) {
     const projectData = await getVerifiedUserProjectData(userID, projectID)
     const prompts = await getOrderedPrompts(projectID)
-    const userIDs = await getUserIDsForProject(projectID)
-    const users = await getKeyedEntities(Entity.USER, userIDs)
+    const users = await getProjectUsers(projectID)
 
     return {
       ...toProject(projectData),
       prompts: prompts.map(promptData => toPrompt(userID, promptData)),
-      users: users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser),
+      users,
     }
   } else {
     const prompts = await getOrderedPrompts(userID)

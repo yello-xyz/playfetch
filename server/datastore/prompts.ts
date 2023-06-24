@@ -14,6 +14,7 @@ import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
 import { hasUserAccess } from './access'
+import { getProjectUsers } from './projects'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -51,11 +52,13 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
+  const users = await getProjectUsers(promptData.projectID)
 
   return {
     ...toPrompt(userID, promptData),
     versions: versions.map(version => toVersion(version, runs)),
     ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
+    users,
   }
 }
 
