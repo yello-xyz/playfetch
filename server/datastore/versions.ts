@@ -95,16 +95,12 @@ async function updateVersion(versionData: any) {
       versionData.previousVersionID,
       getID(versionData)
     )
-)
+  )
 }
 
-export async function saveVersionLabels(
-  userID: number,
-  versionID: number,
-  projectID: number,
-  labels: string[]
-) {
-  const versionData = await getVerifiedUserVersionData(userID, versionID)
+export async function saveVersionLabels(userID: number, versionID: number, projectID: number, labels: string[]) {
+  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
+  await getVerifiedUserPromptData(userID, versionData.promptID)
   await updateVersion({ ...versionData, labels: JSON.stringify(labels) })
   await ensureProjectLabels(userID, projectID, labels)
 }
@@ -142,16 +138,12 @@ export const toVersion = (data: any, runs: any[]): Version => ({
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
 })
 
-const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
+export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
   if (!versionData || versionData?.userID !== userID) {
+    // TODO should other users be able to delete a version you created (if they have access to the prompt)?
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
-  return versionData
-}
-
-export async function deleteVersionForUser(userID: number, versionID: number) {
-  const versionData = await getVerifiedUserVersionData(userID, versionID)
   const promptID = versionData.promptID
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   if (versionCount <= 1) {
