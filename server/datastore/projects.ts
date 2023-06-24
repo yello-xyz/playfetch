@@ -49,27 +49,27 @@ const toProject = (data: any): Project => ({
   timestamp: getTimestamp(data),
 })
 
-const DummyProject: Project = {
-  id: null,
-  name: 'Prompts',
-  urlPath: '',
-  labels: [],
-  timestamp: new Date(0).toISOString(),
-}
-
 export async function getProjectWithPrompts(userID: number, projectID: number | null): Promise<ActiveProject> {
-  const projectData = projectID ? await getVerifiedUserProjectData(userID, projectID) : undefined
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID ?? userID, [
-    'favorited',
-    'lastEditedAt',
-  ])
-  const userIDs = projectID ? await getUserIDsForProject(projectID) : [userID]
-  const users = await getKeyedEntities(Entity.USER, userIDs)
+  const getOrderedPrompts = (projectID: number) =>
+    getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
 
-  return {
-    ...(projectData ? toProject(projectData) : DummyProject),
-    prompts: prompts.map(promptData => toPrompt(userID, promptData)),
-    users: users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser),
+  if (projectID) {
+    const projectData = await getVerifiedUserProjectData(userID, projectID)
+    const prompts = await getOrderedPrompts(projectID)
+    const userIDs = await getUserIDsForProject(projectID)
+    const users = await getKeyedEntities(Entity.USER, userIDs)
+
+    return {
+      ...toProject(projectData),
+      prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+      users: users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser),
+    }
+  } else {
+    const prompts = await getOrderedPrompts(userID)
+    return {
+      id: null,
+      prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+    }
   }
 }
 

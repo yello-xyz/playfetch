@@ -7,17 +7,19 @@ export type User = {
 }
 
 export type Project = {
-  id: number | null
+  id: number
   name: string
   urlPath: string
   labels: string[]
   timestamp: string
 }
 
-export type ActiveProject = Project & {
-  prompts: Prompt[]
-  users: User[]
-}
+export type ActiveProject =
+  | (Project & {
+      prompts: Prompt[]
+      users: User[]
+    })
+  | { id: null; prompts: Prompt[] }
 
 export type Prompt = {
   id: number
