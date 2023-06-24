@@ -62,7 +62,6 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
-  versions.filter(version => version.userID === userID).map(version => toVersion(version, runs))
 
   return toActivePrompt(
     promptData,

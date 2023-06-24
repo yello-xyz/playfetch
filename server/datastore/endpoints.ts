@@ -12,6 +12,7 @@ import {
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
+import { getVerifiedUserPromptData } from './prompts'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -19,7 +20,6 @@ export async function migrateEndpoints() {
   for (const endpointData of allEndpoints) {
     await datastore.save(
       toEndpointData(
-        endpointData.userID,
         getID(endpointData),
         endpointData.urlPath,
         endpointData.projectURLPath,
@@ -51,10 +51,7 @@ export async function saveEndpoint(
   config: PromptConfig,
   useCache: boolean
 ) {
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (promptData?.userID !== userID) {
-    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
-  }
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
   const projectID = await getEntityID(Entity.PROJECT, 'urlPath', projectURLPath)
   if (!projectID) {
     throw new Error(`Project with URL path ${projectURLPath} does not exist`)
@@ -67,7 +64,7 @@ export async function saveEndpoint(
   }
   const token = new ShortUniqueId({ length: 12, dictionary: 'alpha_upper' })()
   await getDatastore().save(
-    toEndpointData(userID, promptID, urlPath, projectURLPath, new Date(), prompt, config, useCache, token)
+    toEndpointData(promptID, urlPath, projectURLPath, new Date(), prompt, config, useCache, token)
   )
 }
 
@@ -84,15 +81,11 @@ export async function getEndpointFromPath(
 }
 
 export async function deleteEndpointForUser(userID: number, promptID: number) {
-  const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
-  if (endpointData?.userID !== userID) {
-    throw new Error(`Endpoint with ID ${promptID} does not exist or user has no access`)
-  }
+  await getVerifiedUserPromptData(userID, promptID)
   await getDatastore().delete(buildKey(Entity.ENDPOINT, promptID))
 }
 
 const toEndpointData = (
-  userID: number,
   promptID: number,
   urlPath: string,
   projectURLPath: string,
@@ -103,7 +96,7 @@ const toEndpointData = (
   token: string
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { userID, urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), useCache, token },
+  data: { urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), useCache, token },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
