@@ -5,6 +5,7 @@ import {
   getDatastore,
   getEntity,
   getID,
+  getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
   getTimestamp,
@@ -13,7 +14,7 @@ import {
 import { Project } from '@/types'
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
-import { grantUserAccess } from './access'
+import { getProjectsIDsForUser, grantUserAccess, hasUserAccess } from './access'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -26,7 +27,6 @@ export async function migrateProjects() {
 const hashAPIKey = (apiKey: string) => createHash('sha256').update(apiKey).digest('hex')
 
 const toProjectData = (
-  userID: number,
   name: string,
   urlPath: string,
   labels: string[],
@@ -35,7 +35,7 @@ const toProjectData = (
   projectID?: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
-  data: { userID, name, createdAt, labels: JSON.stringify(labels), urlPath, apiKeyHash },
+  data: { name, createdAt, labels: JSON.stringify(labels), urlPath, apiKeyHash },
   excludeFromIndexes: ['name', 'apiKeyHash', 'labels'],
 })
 
@@ -55,7 +55,7 @@ export async function addProjectForUser(userID: number, projectName: string) {
   if (await checkProject(urlPath)) {
     throw new Error(`URL path '${urlPath}' already exists`)
   }
-  const projectData = toProjectData(userID, projectName, urlPath, [], new Date())
+  const projectData = toProjectData(projectName, urlPath, [], new Date())
   const projectID = toID(projectData)
   await getDatastore().save(projectData)
   await grantUserAccess(userID, projectID)
@@ -75,7 +75,6 @@ export async function getURLPathForProject(userID: number, projectID: number): P
 async function updateProject(projectData: any) {
   await getDatastore().save(
     toProjectData(
-      projectData.userID,
       projectData.name,
       projectData.urlPath,
       JSON.parse(projectData.labels),
@@ -88,7 +87,8 @@ async function updateProject(projectData: any) {
 
 export const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
-  if (!projectData || projectData?.userID !== userID) {
+  const hasAccess = await hasUserAccess(userID, projectID)
+  if (!projectData || !hasAccess) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
   return projectData
@@ -114,6 +114,7 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
-  const projects = await getOrderedEntities(Entity.PROJECT, 'userID', userID)
-  return projects.map(project => toProject(project))
+  const projectIDs = await getProjectsIDsForUser(userID)
+  const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
+  return projects.sort((a, b) => b.createdAt - a.createdAt).map(project => toProject(project))
 }
