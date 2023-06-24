@@ -1,4 +1,4 @@
-import { Project, Prompt } from '@/types'
+import { ActiveProject, Project, Prompt } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -8,23 +8,23 @@ import { useRefreshProject, useRefreshPrompt, useSelectProject } from './refresh
 
 export default function TopBar({
   projects = [],
-  activeProjectID,
+  activeProject,
   activePrompt,
   onAddPrompt,
   children,
 }: {
   projects?: Project[]
-  activeProjectID: number | null | undefined
+  activeProject?: ActiveProject
   activePrompt?: Prompt
   onAddPrompt: (projectID: number | null) => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
-  const onRefresh = activeProjectID ? useRefreshProject() : useRefreshPrompt()
+  const onRefresh = activeProject ? useRefreshProject() : useRefreshPrompt()
   const selectProject = useSelectProject()
 
-  const projectName = projects.find(p => p.id === activeProjectID)?.name
+  const projectName = projects.find(p => p.id === activeProject?.id)?.name
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
 
   return (
@@ -58,8 +58,8 @@ export default function TopBar({
               <span className='font-medium'>{projectName ?? 'Prompts'}</span>
             )}
           </div>
-          {activeProjectID !== undefined && (
-            <TopBarButton title='New Prompt' icon={addIcon.src} onClick={() => onAddPrompt(activeProjectID)} />
+          {activeProject && (
+            <TopBarButton title='New Prompt' icon={addIcon.src} onClick={() => onAddPrompt(activeProject.id)} />
           )}
         </div>
         <div className='flex items-center'>

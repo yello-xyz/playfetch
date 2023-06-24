@@ -149,13 +149,13 @@ export default function Home({
             <Sidebar
               user={user}
               projects={projects}
-              activeProjectID={activeProject?.id}
+              activeProject={activeProject}
               onAddPrompt={() => addPrompt(null)}
             />
             <div className='flex flex-col flex-1'>
               <TopBar
                 projects={projects}
-                activeProjectID={activeProject?.id}
+                activeProject={activeProject}
                 activePrompt={activePrompt}
                 onAddPrompt={addPrompt}>
                 {activePrompt && (

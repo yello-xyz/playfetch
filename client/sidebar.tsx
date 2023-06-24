@@ -1,4 +1,4 @@
-import { Project, User } from '@/types'
+import { ActiveProject, Project, User } from '@/types'
 import { ReactNode } from 'react'
 import api from './api'
 import projectIcon from '@/public/project.svg'
@@ -11,12 +11,12 @@ import UserSidebarItem from './userSidebarItem'
 export default function Sidebar({
   user,
   projects = [],
-  activeProjectID,
+  activeProject,
   onAddPrompt,
 }: {
   user: User
   projects?: Project[]
-  activeProjectID: number | null | undefined
+  activeProject?: ActiveProject
   onAddPrompt: () => void
 }) {
   const setPickNamePrompt = usePickNamePrompt()
@@ -46,7 +46,7 @@ export default function Sidebar({
         <SidebarButton
           title='Prompts'
           icon={promptIcon.src}
-          active={activeProjectID === null}
+          active={activeProject?.id === null}
           onClick={() => selectProject(null)}
         />
         <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
@@ -57,7 +57,7 @@ export default function Sidebar({
             key={projectIndex}
             title={project.name}
             icon={projectIcon.src}
-            active={activeProjectID === project.id}
+            active={activeProject?.id === project.id}
             onClick={() => selectProject(project.id)}
           />
         ))}
