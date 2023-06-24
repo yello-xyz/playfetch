@@ -14,8 +14,9 @@ import {
 import { ActiveProject, Project } from '@/types'
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
-import { getProjectsIDsForUser, grantUserAccess, hasUserAccess } from './access'
+import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess } from './access'
 import { toPrompt } from './prompts'
+import { toUser } from './users'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -62,10 +63,13 @@ export async function getProjectWithPrompts(userID: number, projectID: number | 
     'favorited',
     'lastEditedAt',
   ])
+  const userIDs = projectID ? await getUserIDsForProject(projectID) : [userID]
+  const users = await getKeyedEntities(Entity.USER, userIDs)
 
   return {
     ...(projectData ? toProject(projectData) : DummyProject),
     prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+    users: users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser),
   }
 }
 
@@ -133,5 +137,5 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getProjectsIDsForUser(userID)
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
-  return projects.sort((a, b) => b.createdAt - a.createdAt).map(project => toProject(project))
+  return projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)
 }

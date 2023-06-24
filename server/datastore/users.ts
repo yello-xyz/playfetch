@@ -15,14 +15,12 @@ const toUserData = (
   excludeFromIndexes: ['fullName', 'avatarColor'],
 })
 
-const toUser = (data: any): User => ({
+export const toUser = (data: any): User => ({
   id: getID(data),
   email: data.email,
   fullName: data.fullName,
   avatarColor: data.avatarColor,
   isAdmin: data.isAdmin,
-  timestamp: getTimestamp(data),
-  lastLoginAt: getTimestamp(data, 'lastLoginAt'),
 })
 
 export async function markUserLogin(userID: number): Promise<User | undefined> {

@@ -3,9 +3,7 @@ export type User = {
   email: string
   fullName: string
   avatarColor: string
-  timestamp: string
   isAdmin: boolean
-  lastLoginAt?: string
 }
 
 export type Project = {
@@ -18,6 +16,7 @@ export type Project = {
 
 export type ActiveProject = Project & {
   prompts: Prompt[]
+  users: User[]
 }
 
 export type Prompt = {
