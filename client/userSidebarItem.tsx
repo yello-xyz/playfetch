@@ -14,10 +14,12 @@ export function UserAvatar({
   size?: 'small' | 'medium'
   border?: boolean
 }) {
-  const sizeClass = size === 'small' ? 'w-[18px] h-[18px] text-[10px] font-normal' : 'w-7 h-7 text-sm font-semibold'
+  const sizeClass = size === 'small' ? 'w-[18px] h-[18px]' : 'w-7 h-7 font-medium'
   const borderClass = border ? 'border-2 border-white' : ''
+  const textClass = size === 'small' ? 'text-[10px]' : border ? 'text-xs' : 'text-sm'
+  const baseClass = 'rounded-full flex items-center justify-center'
   return (
-    <div className={`${sizeClass} ${borderClass} ${user.avatarColor} rounded-full flex items-center justify-center`}>
+    <div className={`${sizeClass} ${borderClass} ${textClass} ${user.avatarColor} ${baseClass}`}>
       {user.fullName.slice(0, 1)}
     </div>
   )
