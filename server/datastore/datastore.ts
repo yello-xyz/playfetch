@@ -20,6 +20,7 @@ export enum Entity {
   RUN = 'run',
   ENDPOINT = 'endpoint',
   CACHE = 'cache',
+  ACCESS = 'access',
 }
 
 export const toID = ({ key }: { key: Key }) => Number(key.id)
@@ -39,13 +40,8 @@ const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.sele
 const orderQuery = (query: Query, sortKeys: string[]) =>
   sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
-const buildQuery = (
-  type: string,
-  filter: EntityFilter,
-  limit: number,
-  sortKeys: string[],
-  keysOnly: boolean
-) => projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), keysOnly)
+const buildQuery = (type: string, filter: EntityFilter, limit: number, sortKeys: string[], keysOnly: boolean) =>
+  projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), keysOnly)
 
 const getFilteredEntities = (
   type: string,
@@ -61,7 +57,10 @@ const getFilteredEntities = (
 export const getFilteredEntity = (type: string, filter: EntityFilter) =>
   getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
-const getEntities = (type: string, key: string, value: {} | null, limit?: number, sortKey?: string[]) =>
+export const getFilteredEntityKey = (type: string, filter: EntityFilter) =>
+  getFilteredEntities(type, filter, 1, [], true).then(([entity]) => entity ? getKey(entity) : undefined)
+
+export const getEntities = (type: string, key: string, value: {} | null, limit?: number, sortKey?: string[]) =>
   getFilteredEntities(type, buildFilter(key, value), limit, sortKey)
 
 export const getOrderedEntities = (
