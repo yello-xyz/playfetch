@@ -12,7 +12,8 @@ import {
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
-import { ActivePrompt, Prompt, PromptConfig } from '@/types'
+import { ActivePrompt, Prompt } from '@/types'
+import { getVerifiedUserProjectData } from './projects'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -53,6 +54,7 @@ const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: 
 })
 
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
+  // TODO use userID rather than null as projectID so we don't need to query & filter prompts for ALL users!
   const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
   return prompts.filter(prompt => prompt.userID === userID).map(prompt => toPrompt(prompt))
 }
@@ -65,7 +67,7 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
 
   return toActivePrompt(
     promptData,
-    versions.filter(version => version.userID === userID),
+    versions,
     runs,
     endpointData
   )

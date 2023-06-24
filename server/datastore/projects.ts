@@ -65,10 +65,7 @@ export async function checkProject(urlPath: string, apiKey?: string): Promise<bo
 }
 
 export async function getURLPathForProject(userID: number, projectID: number): Promise<string> {
-  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
-  if (projectData?.userID !== userID) {
-    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
-  }
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
   return projectData.urlPath
 }
 
@@ -86,9 +83,9 @@ async function updateProject(projectData: any) {
   )
 }
 
-const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
+export const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
-  if (projectData?.userID !== userID) {
+  if (!projectData || projectData?.userID !== userID) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
   return projectData

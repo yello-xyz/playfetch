@@ -140,10 +140,10 @@ export const toVersion = (data: any, runs: any[]): Version => ({
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  if (!versionData || versionData?.userID !== userID) {
-    // TODO should other users be able to delete a version you created (if they have access to the prompt)?
+  if (!versionData) {
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
+  await getVerifiedUserPromptData(userID, versionData.promptID)
   const promptID = versionData.promptID
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   if (versionCount <= 1) {
