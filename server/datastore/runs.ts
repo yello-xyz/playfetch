@@ -7,7 +7,6 @@ export async function migrateRuns() {
   for (const runData of allRuns) {
     await datastore.save(
       toRunData(
-        runData.userID,
         runData.promptID,
         runData.versionID,
         JSON.parse(runData.inputs),
@@ -21,18 +20,16 @@ export async function migrateRuns() {
 }
 
 export async function saveRun(
-  userID: number,
   promptID: number,
   versionID: number,
   inputs: PromptInputs,
   output: string,
   cost: number
 ) {
-  await getDatastore().save(toRunData(userID, promptID, versionID, inputs, output, new Date(), cost))
+  await getDatastore().save(toRunData(promptID, versionID, inputs, output, new Date(), cost))
 }
 
 const toRunData = (
-  userID: number,
   promptID: number,
   versionID: number,
   inputs: PromptInputs,
@@ -42,7 +39,7 @@ const toRunData = (
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
-  data: { userID, promptID, versionID, inputs: JSON.stringify(inputs), output, createdAt, cost },
+  data: { promptID, versionID, inputs: JSON.stringify(inputs), output, createdAt, cost },
   excludeFromIndexes: ['output', 'config'],
 })
 
