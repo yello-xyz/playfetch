@@ -9,14 +9,7 @@ import { CheckValidEmail } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const avatarColors = [
-  'bg-red-500',
-  'bg-orange-500',
-  'bg-purple-500',
-  'bg-green-500',
-  'bg-blue-500',
-  'bg-yellow-500',
-]
+const avatarColors = ['bg-red-500', 'bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500']
 
 export const getServerSideProps = withAdminSession(async () => ({ props: {} }))
 

@@ -11,4 +11,3 @@ export async function runDataMigration() {
   // await migrateRuns()
   // await migrateEndpoints()
 }
-

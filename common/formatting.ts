@@ -4,11 +4,12 @@ const validEmailRegExp =
 export const CheckValidEmail = (email: string) => !!email.toLowerCase().match(validEmailRegExp)
 
 export const FormatDate = (timestamp: string) => {
-  const toDateString = (date: Date) => date.toLocaleDateString('en', {
-    year: '2-digit',
-    month: 'numeric',
-    day: 'numeric',
-  })
+  const toDateString = (date: Date) =>
+    date.toLocaleDateString('en', {
+      year: '2-digit',
+      month: 'numeric',
+      day: 'numeric',
+    })
   const dateString = toDateString(new Date(timestamp))
   const timeString = new Date(timestamp).toLocaleTimeString('en', {
     hour: 'numeric',

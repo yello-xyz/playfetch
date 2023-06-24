@@ -1,4 +1,4 @@
-import { Entity, buildKey, getDatastore, getKeyedEntity } from "./datastore"
+import { Entity, buildKey, getDatastore, getKeyedEntity } from './datastore'
 
 export async function cacheValue(key: number, value: string) {
   await getDatastore().save({

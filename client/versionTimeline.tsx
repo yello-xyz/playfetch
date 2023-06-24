@@ -170,7 +170,9 @@ function UserDetails({ user, timestamp }: { user: User; timestamp: string }) {
   return (
     <div className='flex items-center gap-1 text-xs'>
       <UserAvatar user={user} size='small' />
-      <span className='font-normal'>{user.fullName} • {timestamp}</span>
+      <span className='font-normal'>
+        {user.fullName} • {timestamp}
+      </span>
     </div>
   )
 }

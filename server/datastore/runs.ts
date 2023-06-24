@@ -1,6 +1,6 @@
-import { PromptInputs, Run } from "@/types"
-import { Entity, buildKey, getDatastore, getID, getTimestamp } from "./datastore"
-import { ensurePromptAccess } from "./prompts"
+import { PromptInputs, Run } from '@/types'
+import { Entity, buildKey, getDatastore, getID, getTimestamp } from './datastore'
+import { ensurePromptAccess } from './prompts'
 
 export async function migrateRuns() {
   const datastore = getDatastore()
