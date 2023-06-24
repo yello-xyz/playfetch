@@ -49,7 +49,7 @@ const toProject = (data: any): Project => ({
   timestamp: getTimestamp(data),
 })
 
-export async function getProjectWithPrompts(userID: number, projectID: number | null): Promise<ActiveProject> {
+export async function getActiveProject(userID: number, projectID: number | null): Promise<ActiveProject> {
   const getOrderedPrompts = (projectID: number) =>
     getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
 

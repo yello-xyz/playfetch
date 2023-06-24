@@ -9,8 +9,8 @@ import PromptTabView, { ActivePromptTab } from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
-import { getPromptWithVersions } from '@/server/datastore/prompts'
-import { getProjectWithPrompts, getProjectsForUser } from '@/server/datastore/projects'
+import { getActivePrompt } from '@/server/datastore/prompts'
+import { getActiveProject, getProjectsForUser } from '@/server/datastore/projects'
 import SegmentedControl, { Segment } from '@/client/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import PickProjectDialog, { PickProjectPrompt } from '@/client/pickProjectDialog'
@@ -28,8 +28,8 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
-  const initialProject = promptID ? null : await getProjectWithPrompts(user.id, projectID ?? null)
-  const initialPrompt = promptID ? await getPromptWithVersions(user.id, promptID) : null
+  const initialProject = promptID ? null : await getActiveProject(user.id, projectID ?? null)
+  const initialPrompt = promptID ? await getActivePrompt(user.id, promptID) : null
 
   return { props: { user, initialProjects, initialProject, initialPrompt } }
 })

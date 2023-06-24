@@ -46,7 +46,7 @@ export const toPrompt = (userID: number, data: any): Prompt => ({
   favorited: data.favorited,
 })
 
-export async function getPromptWithVersions(userID: number, promptID: number): Promise<ActivePrompt> {
+export async function getActivePrompt(userID: number, promptID: number): Promise<ActivePrompt> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
