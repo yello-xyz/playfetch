@@ -143,7 +143,7 @@ export default function Home({
             refreshPage: () => router.replace(router.asPath).then(),
             refreshProjects,
             selectProject,
-            refreshProject: activeProjectID ? () => refreshProject(activeProjectID) : undefined,
+            refreshProject: activeProjectID !== undefined ? () => refreshProject(activeProjectID) : undefined,
             selectPrompt,
             refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
             savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
