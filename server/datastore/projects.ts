@@ -88,8 +88,8 @@ export async function addProjectForUser(userID: number, projectName: string) {
     throw new Error(`URL path '${urlPath}' already exists`)
   }
   const projectData = toProjectData(projectName, urlPath, [], new Date())
-  const projectID = toID(projectData)
   await getDatastore().save(projectData)
+  const projectID = toID(projectData)
   await grantUserAccess(userID, projectID)
   return projectID
 }
