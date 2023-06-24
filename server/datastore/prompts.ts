@@ -25,7 +25,7 @@ export async function migratePrompts() {
 
 const toPromptData = (
   userID: number,
-  projectID: number | null,
+  projectID: number,
   name: string,
   prompt: string,
   createdAt: Date,
@@ -42,7 +42,7 @@ const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   prompt: StripPromptSentinels(data.prompt),
-  projectID: data.projectID,
+  projectID: data.projectID === data.userID ? null : data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
   favorited: data.favorited,
 })
@@ -54,9 +54,13 @@ const toActivePrompt = (data: any, versions: any[], runs: any[], endpointData?: 
 })
 
 export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
-  // TODO use userID rather than null as projectID so we don't need to query & filter prompts for ALL users!
+  if (projectID === null) {
+    projectID = userID
+  } else {
+    await getVerifiedUserProjectData(userID, projectID)
+  }
   const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
-  return prompts.filter(prompt => prompt.userID === userID).map(prompt => toPrompt(prompt))
+  return prompts.map(prompt => toPrompt(prompt))
 }
 
 export async function getPromptWithVersions(userID: number, promptID: number): Promise<ActivePrompt> {
@@ -65,19 +69,14 @@ export async function getPromptWithVersions(userID: number, promptID: number): P
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
 
-  return toActivePrompt(
-    promptData,
-    versions,
-    runs,
-    endpointData
-  )
+  return toActivePrompt(promptData, versions, runs, endpointData)
 }
 
 export const DefaultPromptName = 'New Prompt'
 
 export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
   const createdAt = new Date()
-  const promptData = toPromptData(userID, projectID, DefaultPromptName, '', createdAt, createdAt, false)
+  const promptData = toPromptData(userID, projectID ?? userID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, toID(promptData))
   return toID(promptData)
