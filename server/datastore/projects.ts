@@ -13,6 +13,7 @@ import {
 import { Project } from '@/types'
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
+import { grantUserAccess } from './access'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -55,8 +56,10 @@ export async function addProjectForUser(userID: number, projectName: string) {
     throw new Error(`URL path '${urlPath}' already exists`)
   }
   const projectData = toProjectData(userID, projectName, urlPath, [], new Date())
+  const projectID = toID(projectData)
   await getDatastore().save(projectData)
-  return toID(projectData)
+  await grantUserAccess(userID, projectID)
+  return projectID
 }
 
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
