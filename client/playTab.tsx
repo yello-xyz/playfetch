@@ -44,7 +44,7 @@ export default function PlayTab({
       <div className='flex items-stretch h-full'>
         <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 pr-4 max-w-prose'>
           <VersionTimeline
-            user={user}
+            users={prompt.users}
             versions={prompt.versions}
             project={project}
             activeVersion={activeVersion}

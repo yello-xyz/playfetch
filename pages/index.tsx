@@ -170,7 +170,6 @@ export default function Home({
                 {activePrompt && activeVersion && (
                   <PromptTabView
                     activeTab={selectedTab}
-                    user={user}
                     prompt={activePrompt}
                     project={projects.find(project => project.id === activePrompt.projectID)}
                     activeVersion={activeVersion}

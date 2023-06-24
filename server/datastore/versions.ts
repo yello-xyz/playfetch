@@ -130,6 +130,7 @@ const toVersionData = (
 
 export const toVersion = (data: any, runs: any[]): Version => ({
   id: getID(data),
+  userID: data.userID,
   previousID: data.previousVersionID ?? null,
   timestamp: getTimestamp(data),
   prompt: data.prompt,

@@ -44,6 +44,7 @@ export type PromptConfig = {
 
 export type Version = {
   id: number
+  userID: number
   previousID?: number
   timestamp: string
   prompt: string

@@ -28,13 +28,13 @@ const versionFilter = (filter: string) => (version: Version) => {
 }
 
 export default function VersionTimeline({
-  user,
+  users,
   versions,
   project,
   activeVersion,
   setActiveVersion,
 }: {
-  user: User
+  users: User[]
   versions: Version[]
   project?: Project
   activeVersion: Version
@@ -82,7 +82,7 @@ export default function VersionTimeline({
               key={index}
               isOnly={versions.length == 1}
               isLast={index === items.length - 1}
-              user={user}
+              users={users}
               version={version}
               index={ascendingVersions.findIndex(v => v.id === version.id)}
               isActiveVersion={version.id === activeVersion.id}
@@ -98,7 +98,7 @@ export default function VersionTimeline({
 }
 
 function VersionCell({
-  user,
+  users,
   version,
   index,
   isOnly,
@@ -108,7 +108,7 @@ function VersionCell({
   project,
   onSelect,
 }: {
-  user: User
+  users: User[]
   version: Version
   index: number
   isOnly: boolean
@@ -124,6 +124,7 @@ function VersionCell({
   }, [version.timestamp])
 
   const labelColors = LabelColorsFromProject(project)
+  const user = users.find(user => user.id === version.userID)
 
   return (
     <VerticalBarWrapper
@@ -145,7 +146,7 @@ function VersionCell({
             {!isOnly && <VersionPopupMenu version={version} />}
           </div>
         </div>
-        <UserDetails user={user} timestamp={formattedDate ?? ''} />
+        {user && <UserDetails user={user} timestamp={formattedDate ?? ''} />}
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
