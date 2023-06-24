@@ -3,14 +3,14 @@ import { withLoggedInSession } from '@/server/session'
 import { useRouter } from 'next/router'
 import api from '@/client/api'
 import { useState } from 'react'
-import { Project, Prompt, ActivePrompt, Version, User } from '@/types'
+import { Project, Prompt, ActivePrompt, Version, User, ActiveProject } from '@/types'
 import Sidebar from '@/client/sidebar'
 import PromptTabView, { ActivePromptTab } from '@/client/promptTabView'
 import PromptsGridView from '@/client/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/client/clientRoute'
 import TopBar from '@/client/topBar'
-import { getPromptWithVersions, getPromptsForProject } from '@/server/datastore/prompts'
-import { getProjectsForUser } from '@/server/datastore/projects'
+import { getPromptWithVersions } from '@/server/datastore/prompts'
+import { getProjectWithPrompts, getProjectsForUser } from '@/server/datastore/projects'
 import SegmentedControl, { Segment } from '@/client/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import PickProjectDialog, { PickProjectPrompt } from '@/client/pickProjectDialog'
@@ -28,21 +28,21 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
-  const initialPrompts = promptID ? [] : await getPromptsForProject(user.id, projectID ?? null)
+  const initialProject = promptID ? null : await getProjectWithPrompts(user.id, projectID ?? null)
   const initialPrompt = promptID ? await getPromptWithVersions(user.id, promptID) : null
 
-  return { props: { user, initialProjects, initialPrompts, initialPrompt } }
+  return { props: { user, initialProjects, initialProject, initialPrompt } }
 })
 
 export default function Home({
   user,
   initialProjects,
-  initialPrompts,
+  initialProject,
   initialPrompt,
 }: {
   user: User
   initialProjects: Project[]
-  initialPrompts: Prompt[]
+  initialProject?: ActiveProject
   initialPrompt?: ActivePrompt
 }) {
   const router = useRouter()
@@ -52,8 +52,8 @@ export default function Home({
   const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
 
   const [projects, setProjects] = useState(initialProjects)
-  const [prompts, setPrompts] = useState(initialPrompts)
 
+  const [activeProject, setActiveProject] = useState(initialProject)
   const [activePrompt, setActivePrompt] = useState(initialPrompt)
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [dirtyVersion, setDirtyVersion] = useState<Version>()
@@ -79,7 +79,7 @@ export default function Home({
   const refreshPrompt = async (promptID: number | undefined, focusVersionID = activeVersion?.id) => {
     const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
     setActivePrompt(newPrompt)
-    setActiveProjectID(newPrompt ? undefined : activeProjectID)
+    setActiveProject(newPrompt ? undefined : activeProject)
     const focusedVersion = newPrompt?.versions?.find(version => version.id === focusVersionID)
     selectVersion(focusedVersion ?? newPrompt?.versions?.[0])
   }
@@ -92,18 +92,14 @@ export default function Home({
     }
   }
 
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const [activeProjectID, setActiveProjectID] = useState(activePrompt ? undefined : projectID ?? null)
-
   const refreshProject = async (projectID: number | null) => {
-    const newPrompts = await api.getPrompts(projectID)
-    setPrompts(newPrompts)
+    const newProject = await api.getProject(projectID)
     refreshPrompt(undefined)
-    setActiveProjectID(projectID)
+    setActiveProject(newProject)
   }
 
   const selectProject = async (projectID: number | null) => {
-    if (projectID !== activeProjectID) {
+    if (projectID !== activeProject?.id) {
       savePrompt()
       refreshProject(projectID)
       router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
@@ -112,6 +108,7 @@ export default function Home({
 
   const refreshProjects = () => api.getProjects().then(setProjects)
 
+  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
   const currentQuery = projectID ?? promptID
   const [query, setQuery] = useState(currentQuery)
   if (currentQuery !== query) {
@@ -143,7 +140,7 @@ export default function Home({
             refreshPage: () => router.replace(router.asPath).then(),
             refreshProjects,
             selectProject,
-            refreshProject: activeProjectID !== undefined ? () => refreshProject(activeProjectID) : undefined,
+            refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
             selectPrompt,
             refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
             savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
@@ -152,13 +149,13 @@ export default function Home({
             <Sidebar
               user={user}
               projects={projects}
-              activeProjectID={activeProjectID}
+              activeProjectID={activeProject?.id}
               onAddPrompt={() => addPrompt(null)}
             />
             <div className='flex flex-col flex-1'>
               <TopBar
                 projects={projects}
-                activeProjectID={activeProjectID}
+                activeProjectID={activeProject?.id}
                 activePrompt={activePrompt}
                 onAddPrompt={addPrompt}>
                 {activePrompt && (
@@ -170,7 +167,7 @@ export default function Home({
                 )}
               </TopBar>
               <div className='flex-1 overflow-hidden'>
-                {activePrompt && activeVersion ? (
+                {activePrompt && activeVersion && (
                   <PromptTabView
                     activeTab={selectedTab}
                     user={user}
@@ -180,8 +177,9 @@ export default function Home({
                     setActiveVersion={selectVersion}
                     setDirtyVersion={setDirtyVersion}
                   />
-                ) : (
-                  <PromptsGridView prompts={prompts} onAddPrompt={() => addPrompt(activeProjectID!)} />
+                )}
+                {activeProject && (
+                  <PromptsGridView prompts={activeProject.prompts} onAddPrompt={() => addPrompt(activeProject.id)} />
                 )}
               </div>
             </div>

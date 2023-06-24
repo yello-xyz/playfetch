@@ -7,13 +7,15 @@ import {
   getID,
   getKeyedEntities,
   getKeyedEntity,
+  getOrderedEntities,
   getTimestamp,
   toID,
 } from './datastore'
-import { Project } from '@/types'
+import { ActiveProject, Project } from '@/types'
 import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, grantUserAccess, hasUserAccess } from './access'
+import { toPrompt } from './prompts'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -45,6 +47,27 @@ const toProject = (data: any): Project => ({
   labels: JSON.parse(data.labels),
   timestamp: getTimestamp(data),
 })
+
+const DummyProject: Project = {
+  id: null,
+  name: 'Prompts',
+  urlPath: '',
+  labels: [],
+  timestamp: new Date(0).toISOString(),
+}
+
+export async function getProjectWithPrompts(userID: number, projectID: number | null): Promise<ActiveProject> {
+  const projectData = projectID ? await getVerifiedUserProjectData(userID, projectID) : undefined
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID ?? userID, [
+    'favorited',
+    'lastEditedAt',
+  ])
+
+  return {
+    ...(projectData ? toProject(projectData) : DummyProject),
+    prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+  }
+}
 
 export async function addProjectForUser(userID: number, projectName: string) {
   const urlPath = ProjectNameToURLPath(projectName)

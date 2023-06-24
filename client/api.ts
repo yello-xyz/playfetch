@@ -1,4 +1,4 @@
-import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs } from '@/types'
+import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs, ActiveProject } from '@/types'
 import ClientRoute from './clientRoute'
 
 async function parseResponse(response: Response) {
@@ -35,8 +35,8 @@ const api = {
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
-  getPrompts: function (projectID: number | null): Promise<Prompt[]> {
-    return post(this.getPrompts, { projectID })
+  getProject: function (projectID: number | null): Promise<ActiveProject> {
+    return post(this.getProject, { projectID })
   },
   checkProjectName: function (name: string): Promise<{ url?: string }> {
     return post(this.checkProjectName, { name })

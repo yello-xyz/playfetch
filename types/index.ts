@@ -9,11 +9,15 @@ export type User = {
 }
 
 export type Project = {
-  id: number
+  id: number | null
   name: string
   urlPath: string
   labels: string[]
   timestamp: string
+}
+
+export type ActiveProject = Project & {
+  prompts: Prompt[]
 }
 
 export type Prompt = {

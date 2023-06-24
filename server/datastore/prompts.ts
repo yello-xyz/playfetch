@@ -37,7 +37,7 @@ const toPromptData = (
   excludeFromIndexes: ['name', 'prompt'],
 })
 
-const toPrompt = (userID: number, data: any): Prompt => ({
+export const toPrompt = (userID: number, data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   prompt: StripPromptSentinels(data.prompt),
@@ -45,15 +45,6 @@ const toPrompt = (userID: number, data: any): Prompt => ({
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
   favorited: data.favorited,
 })
-
-export async function getPromptsForProject(userID: number, projectID: number | null): Promise<Prompt[]> {
-  await ensureProjectAccess(userID, projectID)
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID ?? userID, [
-    'favorited',
-    'lastEditedAt',
-  ])
-  return prompts.map(promptData => toPrompt(userID, promptData))
-}
 
 export async function getPromptWithVersions(userID: number, promptID: number): Promise<ActivePrompt> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
