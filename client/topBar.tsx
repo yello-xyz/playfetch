@@ -78,7 +78,9 @@ export default function TopBar({
 
 function UserAvatars({ users }: { users: User[] }) {
   return users.length > 1 ? (
-    <div className={`flex flex-row-reverse space-x-reverse -space-x-[50px] mr-[${(users.length - 1) * 20}px]`}>
+    <div
+      className='flex flex-row-reverse space-x-reverse -space-x-[50px]'
+      style={{ marginRight: `${(users.length - 1) * 22}px` }}>
       {users.map((user, index) => (
         <div key={index}>
           <UserAvatar user={user} border />
