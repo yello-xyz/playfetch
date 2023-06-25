@@ -8,11 +8,12 @@ const truncateSpan = (span: Span, wordsToCut: number, isFirst: boolean, isLast: 
   const words = trimmedWords(span)
   const cutWords = Math.max(0, Math.min(wordsToCut, words.length - (isFirst || isLast ? 2 : 3)))
   if (cutWords > 0) {
+    const offset = Math.floor((words.length - cutWords - 3) / 2)
     const prefix = span.content.substring(0, span.content.indexOf(span.content.trim()))
-    const firstPart = isFirst ? '' : words.slice(0, words.length - cutWords - (isLast ? 1 : 2)).join(' ')
-    const lastPart = isLast ? '' : isFirst ? words.slice(cutWords + 1).join(' ') : words.slice(-1)[0]
+    const firstPart = isFirst ? '' : words.slice(0, words.length - cutWords - (isLast ? 1 : 2 + offset)).join(' ')
+    const lastPart = isLast ? '' : words.slice(isFirst ? cutWords + 1 : -1 - offset).join(' ')
     const suffix = span.content.substring(span.content.lastIndexOf(span.content.trim()) + span.content.trim().length)
-    span.content = `${prefix}${firstPart} […] ${lastPart}${suffix}`
+    span.content = `${prefix}${firstPart} … ${lastPart}${suffix}`
   }
   return wordsToCut - cutWords
 }
