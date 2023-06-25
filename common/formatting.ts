@@ -46,6 +46,8 @@ export const FormatRelativeDate = (timestamp: string) => {
   return 'just now'
 }
 
+export const FormatCost = (cost: number) => `${cost < 0.0005 ? '<' : ''}$${Math.max(cost, 0.001).toFixed(3)}`
+
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
 

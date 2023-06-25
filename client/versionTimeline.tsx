@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { Project, PromptConfig, Run, User, Version } from '@/types'
-import { FormatDate } from '@/common/formatting'
+import { FormatCost, FormatDate } from '@/common/formatting'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
@@ -185,7 +185,7 @@ function RunDetails({ runs }: { runs: Run[] }) {
     <>
       <span>
         {' '}
-        | {averageCost < 0.0005 && '<'}${Math.max(averageCost, 0.001).toFixed(3)}/res • {runs.length}{' '}
+        | {FormatCost(averageCost)}/res • {runs.length}{' '}
         {runs.length > 1 ? 'responses' : 'response'}
       </span>
     </>
