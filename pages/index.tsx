@@ -102,7 +102,7 @@ export default function Home({
   const selectProject = async (projectID: number | null) => {
     if (projectID !== activeProject?.id) {
       savePrompt()
-      refreshProject(projectID)
+      await refreshProject(projectID)
       router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
     }
   }
