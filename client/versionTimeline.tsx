@@ -68,7 +68,7 @@ export default function VersionTimeline({
           onChange={event => setFilter(event.target.value)}
           placeholder='Filter'
         />
-        {isFocused && (
+        {isFocused && versions.length > 1 && (
           <VerticalBarWrapper strokeStyle='dashed'>
             <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
               <img className='w-6 h-6' src={historyIcon.src} />
