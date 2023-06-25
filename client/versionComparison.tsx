@@ -1,9 +1,59 @@
 import { Version } from '@/types'
 import simplediff from 'simplediff'
 
+type Span = { state: ComparisonState; content: string; tagged: boolean }
+const trimmedWords = (span: Span) => span.content.trim().split(' ')
+
+const truncateSpan = (span: Span, wordsToCut: number) => {
+  const words = trimmedWords(span)
+  const cutWords = Math.max(0, Math.min(wordsToCut, words.length - 3))
+  if (cutWords > 0) {
+    const prefix = span.content.substring(0, span.content.indexOf(span.content.trim()))
+    const suffix = span.content.substring(span.content.lastIndexOf(span.content.trim()) + span.content.trim().length)
+    const firstPart = words.slice(0, words.length - cutWords - 2).join(' ')
+    const lastPart = words.slice(-1)[0]
+    span.content = `${prefix}${firstPart} […] ${lastPart}${suffix}`
+  }
+  return wordsToCut - cutWords
+}
+
+const truncateSpans = (spans: Span[], wordsToCut: number) => {
+  for (const span of spans) {
+    if (wordsToCut === 0) {
+      break
+    }
+    wordsToCut = truncateSpan(span, wordsToCut)
+  }
+  return wordsToCut
+}
+
+const truncateStateSpans = (spans: Span[], state: ComparisonState, wordsToCut: number) =>
+  truncateSpans(
+    spans.slice().reverse().filter(span => span.state === state),
+    wordsToCut
+  )
+
+const truncate = (spans: Span[], maxLength: number) => {
+  const wordCount = (spans: Span | Span[]) =>
+    (Array.isArray(spans) ? spans : [spans]).reduce((count, span) => count + trimmedWords(span).length, 0)
+
+  let wordsToCut = wordCount(spans) - maxLength
+  if (wordsToCut > 0) {
+    wordsToCut = truncateStateSpans(spans, '=', wordsToCut)
+  }
+  if (wordsToCut > 0) {
+    wordsToCut = truncateStateSpans(spans, '-', wordsToCut)
+  }
+  if (wordsToCut > 0) {
+    wordsToCut = truncateStateSpans(spans, '+', wordsToCut)
+  }
+
+  return spans
+}
+
 type ComparisonState = '=' | '-' | '+'
 const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: boolean }) => {
-  const taggedClassName = tagged ? 'font-bold' : ''
+  const taggedClassName = tagged ? 'font-bold mr-0.5' : 'mr-0.5'
   switch (state) {
     case '=':
       return taggedClassName
@@ -74,7 +124,7 @@ export default function VersionComparison({
 
   return (
     <>
-      {result.map((diff, index: number) => (
+      {(previousVersion ? truncate(result, 25) : result).map((diff, index: number) => (
         <span key={index} className={classNameForDiff(diff)}>
           {diff.content}
         </span>
