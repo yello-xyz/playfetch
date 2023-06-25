@@ -9,14 +9,12 @@ import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export default function PlayTab({
-  user,
   prompt,
   project,
   activeVersion,
   setActiveVersion,
   setDirtyVersion,
 }: {
-  user: User
   prompt: ActivePrompt
   project?: Project
   activeVersion: Version
