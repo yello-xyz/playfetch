@@ -54,8 +54,9 @@ export default function VersionTimeline({
 
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const ascendingVersions = versions.slice().reverse()
+  const index = ascendingVersions.findIndex(version => version.id === activeVersion.id)
   const versionsToShow = isFocused
-    ? [...(previousVersion ? [previousVersion] : []), activeVersion]
+    ? [...(previousVersion ? [previousVersion] : []), activeVersion, ...ascendingVersions.slice(index + 1, index + 2)]
     : ascendingVersions.filter(versionFilter(filter))
 
   return (
@@ -185,8 +186,7 @@ function RunDetails({ runs }: { runs: Run[] }) {
     <>
       <span>
         {' '}
-        | {FormatCost(averageCost)}/res • {runs.length}{' '}
-        {runs.length > 1 ? 'responses' : 'response'}
+        | {FormatCost(averageCost)}/res • {runs.length} {runs.length > 1 ? 'responses' : 'response'}
       </span>
     </>
   )
