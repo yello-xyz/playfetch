@@ -46,7 +46,6 @@ const toProject = (data: any): Project => ({
   name: data.name,
   urlPath: data.urlPath,
   labels: JSON.parse(data.labels),
-  timestamp: getTimestamp(data),
 })
 
 export async function getProjectUsers(projectID: number): Promise<User[]> {

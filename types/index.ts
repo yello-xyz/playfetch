@@ -11,7 +11,6 @@ export type Project = {
   name: string
   urlPath: string
   labels: string[]
-  timestamp: string
 }
 
 export type ActiveProject = (Project | { id: null }) & { prompts: Prompt[]; users: User[] }
