@@ -11,31 +11,28 @@ export type ActivePromptTab = 'play' | 'test' | 'publish'
 
 export default function PromptTabView({
   activeTab,
-  user,
   prompt,
   project,
   activeVersion,
   setActiveVersion,
-  setDirtyVersion,
+  setModifiedVersion,
 }: {
   activeTab: ActivePromptTab
-  user: User
   prompt: ActivePrompt
   project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
-  setDirtyVersion: (version?: Version) => void
+  setModifiedVersion: (version?: Version) => void
 }) {
   switch (activeTab) {
     case 'play':
       return (
         <PlayTab
-          user={user}
           prompt={prompt}
           project={project}
           activeVersion={activeVersion}
           setActiveVersion={setActiveVersion}
-          setDirtyVersion={setDirtyVersion}
+          setModifiedVersion={setModifiedVersion}
         />
       )
     case 'test':
@@ -46,7 +43,7 @@ export default function PromptTabView({
               <PromptPanel
                 key={activeVersion.id}
                 version={activeVersion}
-                setDirtyVersion={setDirtyVersion}
+                setModifiedVersion={setModifiedVersion}
                 showInputs
               />
             </Suspense>

@@ -18,12 +18,12 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
 
 export default function PromptPanel({
   version,
-  setDirtyVersion,
+  setModifiedVersion,
   onRun,
   showInputs,
 }: {
   version: Version
-  setDirtyVersion: (version?: Version) => void
+  setModifiedVersion: (version?: Version) => void
   onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
   showInputs?: boolean
 }) {
@@ -40,12 +40,7 @@ export default function PromptPanel({
   const update = (prompt: string, config: PromptConfig) => {
     setPrompt(prompt)
     setConfig(config)
-    const isDirty =
-      prompt !== version.prompt ||
-      config.provider !== version.config.provider ||
-      config.temperature !== version.config.temperature ||
-      config.maxTokens !== version.config.maxTokens
-    setDirtyVersion(isDirty ? { ...version, prompt, config } : undefined)
+    setModifiedVersion({ ...version, prompt, config })
   }
 
   const updatePrompt = (prompt: string) => update(prompt, config)

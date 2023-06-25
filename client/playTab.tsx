@@ -13,13 +13,13 @@ export default function PlayTab({
   project,
   activeVersion,
   setActiveVersion,
-  setDirtyVersion,
+  setModifiedVersion,
 }: {
   prompt: ActivePrompt
   project?: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
-  setDirtyVersion: (version?: Version) => void
+  setModifiedVersion: (version?: Version) => void
 }) {
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
@@ -52,7 +52,7 @@ export default function PlayTab({
             <PromptPanel
               key={activeVersion.id}
               version={activeVersion}
-              setDirtyVersion={setDirtyVersion}
+              setModifiedVersion={setModifiedVersion}
               onRun={runPrompt}
             />
           </Suspense>

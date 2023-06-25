@@ -56,33 +56,34 @@ export default function Home({
   const [activeProject, setActiveProject] = useState(initialProject)
   const [activePrompt, setActivePrompt] = useState(initialPrompt)
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
-  const [dirtyVersion, setDirtyVersion] = useState<Version>()
+  const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
   const selectVersion = (version?: Version) => {
     setActiveVersion(version)
-    setDirtyVersion(undefined)
+    setModifiedVersion(undefined)
   }
 
   const savePrompt = async () => {
-    if (!activePrompt || !activeVersion || !dirtyVersion) {
-      return activeVersion?.id
-    }
-    setDirtyVersion(undefined)
-    const versionID = await api.updatePrompt(
-      activePrompt.id,
-      dirtyVersion.prompt,
-      dirtyVersion.config,
-      activeVersion.id
-    )
-    return versionID
+    const versionNeedsSaving =
+      activePrompt &&
+      activeVersion &&
+      modifiedVersion &&
+      (modifiedVersion.prompt !== activeVersion.prompt ||
+        modifiedVersion.config.provider !== activeVersion.config.provider ||
+        modifiedVersion.config.temperature !== activeVersion.config.temperature ||
+        modifiedVersion.config.maxTokens !== activeVersion.config.maxTokens)
+    setModifiedVersion(undefined)
+    return versionNeedsSaving
+      ? api.updatePrompt(activePrompt.id, modifiedVersion.prompt, modifiedVersion.config, activeVersion.id)
+      : activeVersion?.id
   }
 
   const refreshPrompt = async (promptID: number | undefined, focusVersionID = activeVersion?.id) => {
     const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
     setActivePrompt(newPrompt)
     setActiveProject(newPrompt ? undefined : activeProject)
-    const focusedVersion = newPrompt?.versions?.find(version => version.id === focusVersionID)
-    selectVersion(focusedVersion ?? newPrompt?.versions?.[0])
+    const newVersions = newPrompt ? newPrompt.versions : []
+    selectVersion(newVersions.find(version => version.id === focusVersionID) ?? newVersions[0])
   }
 
   const selectPrompt = async (promptID: number) => {
@@ -175,7 +176,7 @@ export default function Home({
                     project={projects.find(project => project.id === activePrompt.projectID)}
                     activeVersion={activeVersion}
                     setActiveVersion={selectVersion}
-                    setDirtyVersion={setDirtyVersion}
+                    setModifiedVersion={setModifiedVersion}
                   />
                 )}
                 {activeProject && (
