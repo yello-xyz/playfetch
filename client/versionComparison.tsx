@@ -4,34 +4,31 @@ import simplediff from 'simplediff'
 type Span = { state: ComparisonState; content: string; tagged: boolean }
 const trimmedWords = (span: Span) => span.content.trim().split(' ')
 
-const truncateSpan = (span: Span, wordsToCut: number) => {
+const truncateSpan = (span: Span, wordsToCut: number, isFirst: boolean, isLast: boolean) => {
   const words = trimmedWords(span)
-  const cutWords = Math.max(0, Math.min(wordsToCut, words.length - 3))
+  const cutWords = Math.max(0, Math.min(wordsToCut, words.length - (isFirst || isLast ? 2 : 3)))
   if (cutWords > 0) {
     const prefix = span.content.substring(0, span.content.indexOf(span.content.trim()))
+    const firstPart = isFirst ? '' : words.slice(0, words.length - cutWords - (isLast ? 1 : 2)).join(' ')
+    const lastPart = isLast ? '' : isFirst ? words.slice(cutWords + 1).join(' ') : words.slice(-1)[0]
     const suffix = span.content.substring(span.content.lastIndexOf(span.content.trim()) + span.content.trim().length)
-    const firstPart = words.slice(0, words.length - cutWords - 2).join(' ')
-    const lastPart = words.slice(-1)[0]
     span.content = `${prefix}${firstPart} […] ${lastPart}${suffix}`
   }
   return wordsToCut - cutWords
 }
 
-const truncateSpans = (spans: Span[], wordsToCut: number) => {
-  for (const span of spans) {
+const truncateStateSpans = (spans: Span[], state: ComparisonState, wordsToCut: number) => {
+  for (const [index, span] of spans.slice().reverse().entries()) {
     if (wordsToCut === 0) {
       break
     }
-    wordsToCut = truncateSpan(span, wordsToCut)
+    if (span.state !== state) {
+      continue
+    }
+    wordsToCut = truncateSpan(span, wordsToCut, index === spans.length - 1 && index !== 0, index === 0)
   }
   return wordsToCut
 }
-
-const truncateStateSpans = (spans: Span[], state: ComparisonState, wordsToCut: number) =>
-  truncateSpans(
-    spans.slice().reverse().filter(span => span.state === state),
-    wordsToCut
-  )
 
 const truncate = (spans: Span[], maxLength: number) => {
   const wordCount = (spans: Span | Span[]) =>
