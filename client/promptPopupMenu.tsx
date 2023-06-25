@@ -1,22 +1,27 @@
-import { Prompt } from '@/types'
+import { Project, Prompt } from '@/types'
 import api from './api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
-import { useDialogPrompt, usePickNamePrompt, usePickProjectPrompt } from './modalDialogContext'
+import { useDialogPrompt, usePickNamePrompt } from './modalDialogContext'
+import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
+import { useState } from 'react'
 
 export default function PromptPopupMenu({
   prompt,
+  projects,
   isMenuExpanded,
   setIsMenuExpanded,
   onRefresh,
 }: {
   prompt: Prompt
+  projects: Project[]
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
 }) {
   const setDialogPrompt = useDialogPrompt()
   const setPickNamePrompt = usePickNamePrompt()
-  const setPickProjectPrompt = usePickProjectPrompt()
+
+  const [showPickProjectPrompt, setShowPickProjectPrompt] = useState(false)
 
   const deletePrompt = () => {
     setIsMenuExpanded(false)
@@ -39,17 +44,27 @@ export default function PromptPopupMenu({
 
   const movePrompt = () => {
     setIsMenuExpanded(false)
-    setPickProjectPrompt!({
-      callback: (projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh),
-      initialProjectID: prompt.projectID,
-    })
+    setShowPickProjectPrompt(true)
   }
 
   return (
-    <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-      <PopupMenuItem title='Rename' callback={renamePrompt} />
-      {setPickProjectPrompt && <PopupMenuItem title='Move to project' callback={movePrompt} />}
-      <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
-    </PopupMenu>
+    <>
+      <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+        <PopupMenuItem title='Rename' callback={renamePrompt} />
+        {projects.length > 0 && (prompt.projectID === null || projects.length > 1) && (
+          <PopupMenuItem title='Move to project' callback={movePrompt} />
+        )}
+        <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
+      </PopupMenu>
+      {showPickProjectPrompt && (
+        <PickProjectDialog
+          key={prompt.projectID}
+          projects={projects}
+          initialProjectID={prompt.projectID}
+          onConfirm={(projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh)}
+          onDismiss={() => setShowPickProjectPrompt(false)}
+        />
+      )}
+    </>
   )
 }

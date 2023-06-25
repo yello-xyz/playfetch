@@ -2,32 +2,29 @@ import { useState } from 'react'
 import ModalDialog from './modalDialog'
 import { Project } from '@/types'
 
-export type PickProjectPrompt = {
-  callback: (projectID: number) => void
-  initialProjectID: number | null
-}
+export type PickProjectPrompt = {}
 
 export default function PickProjectDialog({
   projects,
-  prompt,
-  setPrompt,
+  initialProjectID,
+  onConfirm,
+  onDismiss,
 }: {
   projects: Project[]
-  prompt?: PickProjectPrompt
-  setPrompt: (prompt?: PickProjectPrompt) => void
+  initialProjectID: number | null
+  onConfirm: (projectID: number) => void
+  onDismiss: () => void
 }) {
-  const [projectID, setProjectID] = useState<number | null>(prompt?.initialProjectID ?? null)
+  const [projectID, setProjectID] = useState<number | null>(initialProjectID)
 
-  const dialogPrompt = prompt
-    ? {
-        message: 'Move Prompt to Project',
-        callback: () => prompt.callback(projectID!),
-        disabled: projectID === prompt.initialProjectID || projectID === null,
-      }
-    : undefined
+  const dialogPrompt = {
+    message: 'Move Prompt to Project',
+    callback: () => onConfirm(projectID!),
+    disabled: projectID === initialProjectID || projectID === null,
+  }
 
   return (
-    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
+    <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
       <div className='text-gray-500'>
         <select
           className='w-full p-2 text-gray-500 border border-gray-300 rounded-md'

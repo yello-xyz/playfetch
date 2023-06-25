@@ -13,7 +13,6 @@ import { getActivePrompt } from '@/server/datastore/prompts'
 import { getActiveProject, getProjectsForUser } from '@/server/datastore/projects'
 import SegmentedControl, { Segment } from '@/client/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import PickProjectDialog, { PickProjectPrompt } from '@/client/pickProjectDialog'
 import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
 import { ModalDialogContext } from '@/client/modalDialogContext'
 import { RefreshContext } from '@/client/refreshContext'
@@ -49,7 +48,6 @@ export default function Home({
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
-  const [pickProjectPrompt, setPickProjectPrompt] = useState<PickProjectPrompt>()
 
   const [projects, setProjects] = useState(initialProjects)
 
@@ -135,7 +133,6 @@ export default function Home({
         value={{
           setDialogPrompt,
           setPickNamePrompt,
-          setPickProjectPrompt: projects.length ? setPickProjectPrompt : undefined,
         }}>
         <RefreshContext.Provider
           value={{
@@ -180,21 +177,19 @@ export default function Home({
                   />
                 )}
                 {activeProject && (
-                  <PromptsGridView prompts={activeProject.prompts} onAddPrompt={() => addPrompt(activeProject.id)} />
+                  <PromptsGridView
+                    prompts={activeProject.prompts}
+                    projects={projects}
+                    onAddPrompt={() => addPrompt(activeProject.id)}
+                  />
                 )}
               </div>
             </div>
           </main>
         </RefreshContext.Provider>
       </ModalDialogContext.Provider>
-      <ModalDialog prompt={dialogPrompt} setPrompt={setDialogPrompt} />
-      <PickNameDialog prompt={pickNamePrompt} setPrompt={setPickNamePrompt} />
-      <PickProjectDialog
-        key={pickProjectPrompt?.initialProjectID}
-        projects={projects}
-        prompt={pickProjectPrompt}
-        setPrompt={setPickProjectPrompt}
-      />
+      <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+      <PickNameDialog prompt={pickNamePrompt} onDismiss={() => setPickNamePrompt(undefined)} />
     </>
   )
 }

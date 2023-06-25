@@ -1,5 +1,5 @@
 import { FormatRelativeDate } from '@/common/formatting'
-import { Prompt } from '@/types'
+import { Project, Prompt } from '@/types'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
@@ -9,12 +9,20 @@ import PromptPopupMenu from './promptPopupMenu'
 import IconButton from './iconButton'
 import { useRefreshProject, useSelectPrompt } from './refreshContext'
 
-export default function PromptsGridView({ prompts, onAddPrompt }: { prompts: Prompt[]; onAddPrompt: () => void }) {
+export default function PromptsGridView({
+  prompts,
+  projects,
+  onAddPrompt,
+}: {
+  prompts: Prompt[]
+  projects: Project[]
+  onAddPrompt: () => void
+}) {
   return prompts.length ? (
     <>
       <div className='flex flex-wrap gap-6 p-6'>
         {prompts.map((prompt, index) => (
-          <PromptCell key={index} prompt={prompt} />
+          <PromptCell key={index} prompt={prompt} projects={projects} />
         ))}
       </div>
     </>
@@ -40,7 +48,7 @@ function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
   )
 }
 
-function PromptCell({ prompt }: { prompt: Prompt }) {
+function PromptCell({ prompt, projects }: { prompt: Prompt; projects: Project[] }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
   const selectPrompt = useSelectPrompt()
@@ -63,16 +71,15 @@ function PromptCell({ prompt }: { prompt: Prompt }) {
             onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(refreshProject)}
           />
           <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
-          {isMenuExpanded && (
-            <div className='absolute right-0 top-7'>
-              <PromptPopupMenu
-                prompt={prompt}
-                isMenuExpanded={isMenuExpanded}
-                setIsMenuExpanded={setIsMenuExpanded}
-                onRefresh={refreshProject}
-              />
-            </div>
-          )}
+          <div className='absolute right-0 top-7'>
+            <PromptPopupMenu
+              prompt={prompt}
+              projects={projects}
+              isMenuExpanded={isMenuExpanded}
+              setIsMenuExpanded={setIsMenuExpanded}
+              onRefresh={refreshProject}
+            />
+          </div>
         </div>
       </div>
       <span className='text-xs text-gray-500'>Edited {formattedDate}</span>

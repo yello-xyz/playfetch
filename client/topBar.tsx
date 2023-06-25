@@ -14,7 +14,7 @@ export default function TopBar({
   onAddPrompt,
   children,
 }: {
-  projects?: Project[]
+  projects: Project[]
   activeProject?: ActiveProject
   activePrompt?: Prompt
   onAddPrompt: (projectID: number | null) => void
@@ -44,16 +44,15 @@ export default function TopBar({
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
                 <span className='font-medium'>{activePrompt.name}</span>
                 <img className='w-6 h-6' src={chevronIcon.src} />
-                {isMenuExpanded && (
-                  <div className='absolute right-0 top-8'>
-                    <PromptPopupMenu
-                      prompt={activePrompt}
-                      isMenuExpanded={isMenuExpanded}
-                      setIsMenuExpanded={setIsMenuExpanded}
-                      onRefresh={onRefresh}
-                    />
-                  </div>
-                )}
+                <div className='absolute right-0 top-8'>
+                  <PromptPopupMenu
+                    prompt={activePrompt}
+                    projects={projects}
+                    isMenuExpanded={isMenuExpanded}
+                    setIsMenuExpanded={setIsMenuExpanded}
+                    onRefresh={onRefresh}
+                  />
+                </div>
               </div>
             ) : (
               <span className='font-medium'>{projectName ?? 'Prompts'}</span>

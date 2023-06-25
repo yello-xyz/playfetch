@@ -13,10 +13,10 @@ export type PickNamePrompt = {
 
 export default function PickNameDialog({
   prompt,
-  setPrompt,
+  onDismiss,
 }: {
   prompt?: PickNamePrompt
-  setPrompt: (prompt?: PickNamePrompt) => void
+  onDismiss: () => void
 }) {
   const [name, setName] = useState('')
   const [url, setURL] = useState(prompt?.validator ? undefined : '')
@@ -59,7 +59,7 @@ export default function PickNameDialog({
   const isURLUnavailable = name.length > 0 && !isPending && url === undefined
 
   return (
-    <ModalDialog prompt={dialogPrompt} setPrompt={() => setPrompt()}>
+    <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
       <LabeledTextInput id='name' label={prompt?.label} value={name} setValue={updateName} />
       <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
         {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}

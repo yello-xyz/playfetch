@@ -5,26 +5,24 @@ export type DialogPrompt = { message?: string; callback?: () => void; destructiv
 
 export default function ModalDialog({
   prompt,
-  setPrompt,
+  onDismiss,
   children,
 }: {
   prompt?: DialogPrompt
-  setPrompt: (prompt?: DialogPrompt) => void
+  onDismiss: () => void
   children?: ReactNode
 }) {
   // Workaround for https://github.com/themesberg/flowbite-react/issues/701
   const rootRef = useRef<HTMLDivElement>(null)
-
-  const onDismiss = () => setPrompt(undefined)
 
   const onConfirm = () => {
     prompt?.callback?.()
     onDismiss()
   }
 
-  return (
-    <div ref={rootRef}>
-      <Modal root={rootRef.current ?? undefined} show={!!prompt} popup size='sm' onClose={onDismiss}>
+  return prompt ? (
+    <div ref={rootRef} onClick={event => event.stopPropagation()}>
+      <Modal root={rootRef.current ?? undefined} show popup size='sm' onClose={onDismiss}>
         <Modal.Header />
         <Modal.Body>
           <div className='text-center'>
@@ -44,5 +42,5 @@ export default function ModalDialog({
         </Modal.Body>
       </Modal>
     </div>
-  )
+  ) : null
 }
