@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Endpoint, Project, Prompt, Version } from '@/types'
 import { PendingButton } from './button'
-import { Label } from 'flowbite-react'
 import { HiExternalLink } from 'react-icons/hi'
 import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
@@ -10,6 +9,7 @@ import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import PickNameDialog from './pickNameDialog'
+import Label from './label'
 
 export default function PublishPane({
   project,
@@ -62,7 +62,7 @@ export default function PublishPane({
         <div className='flex flex-wrap justify-between gap-10'>
           <div className='flex items-baseline gap-2'>
             <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
-            <Label htmlFor='useCache' value='Use cache' />
+            <Label htmlFor='useCache'>Use cache</Label>
           </div>
         </div>
         <div className='flex gap-2'>

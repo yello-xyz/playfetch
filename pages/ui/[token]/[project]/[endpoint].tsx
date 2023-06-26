@@ -1,6 +1,5 @@
 import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
 import { useState } from 'react'
-import { Label } from 'flowbite-react'
 import { PendingButton } from '@/client/button'
 import { withLoggedInSession } from '@/server/session'
 import api from '@/client/api'
@@ -8,6 +7,7 @@ import { useRouter } from 'next/router'
 import { getEndpointFromPath } from '@/server/datastore/endpoints'
 import { ExtractPromptVariables } from '@/common/formatting'
 import TextInput from '@/client/textInput'
+import Label from '@/client/label'
 
 export const getServerSideProps = withLoggedInSession(async ({ query }) => {
   const { token, project: projectURLPath, endpoint: urlPath } = ParseQuery(query)
@@ -37,7 +37,9 @@ export default function UI({ inputVariables }: { inputVariables: string[] }) {
     <div className='flex flex-col gap-2 p-8 max-w-prose'>
       {inputVariables.map((variable, index) => (
         <div key={index} className='flex gap-2'>
-          <Label className='flex-1' value={variable} htmlFor={variable} />
+          <Label className='flex-1' htmlFor={variable}>
+            {variable}
+          </Label>
           <TextInput
             value={inputState[variable] ?? ''}
             setValue={value => setInputState({ ...inputState, [variable]: value })}

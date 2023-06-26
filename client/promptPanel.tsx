@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { PromptConfig, PromptInputs, Version } from '@/types'
-import { Label } from 'flowbite-react'
 import { ExtractPromptVariables } from '@/common/formatting'
 import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import TextInput from './textInput'
+import Label from './label'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -58,10 +58,12 @@ export default function PromptPanel({
     <div className='flex flex-col gap-4 text-gray-500'>
       {showInputs && inputVariables.length > 0 && (
         <div className='flex flex-col gap-2'>
-          <Label value='Inputs' />
+          <Label>Inputs</Label>
           {inputVariables.map((variable, index) => (
             <div key={index} className='flex gap-2'>
-              <Label className='flex-1' value={variable} htmlFor={variable} />
+              <Label htmlFor={variable} className='flex-1'>
+                {variable}
+              </Label>
               <TextInput
                 value={inputState[variable] ?? ''}
                 setValue={value => setInputState({ ...inputState, [variable]: value })}

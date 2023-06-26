@@ -5,6 +5,7 @@ import { ContentEditableEvent } from 'react-contenteditable'
 import { FocusEvent } from 'react'
 import { useRef } from 'react'
 import { HiCodeBracketSquare } from 'react-icons/hi2'
+import Label from './label'
 
 export default function PromptInput({
   prompt,
@@ -45,9 +46,9 @@ export default function PromptInput({
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex items-center block gap-2 mb-1'>
-        <div className='font-medium text-gray-600 cursor-default' onClick={() => contentEditableRef.current?.focus()}>
+        <Label onClick={() => contentEditableRef.current?.focus()}>
           Prompt
-        </div>
+        </Label>
         {showInputs && <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />}
       </div>
       <ContentEditable

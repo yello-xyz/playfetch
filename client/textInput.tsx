@@ -1,5 +1,5 @@
-import { Label } from 'flowbite-react'
 import { HTMLInputTypeAttribute, KeyboardEventHandler } from 'react'
+import Label from './label'
 
 export default function TextInput({
   type = 'text',
@@ -20,11 +20,7 @@ export default function TextInput({
 }) {
   return (
     <div>
-      {label && (
-        <div className='block mb-2'>
-          <Label htmlFor={id} value={label} />
-        </div>
-      )}
+      {label && <Label htmlFor={id}>{label}</Label>}
       <input
         className='w-full py-2 text-sm bg-white border-gray-300 rounded-lg'
         type={type}

@@ -1,11 +1,11 @@
 import { Inter } from 'next/font/google'
 import { withAdminSession } from '@/server/session'
 import TextInput from '@/client/textInput'
-import { Label } from 'flowbite-react'
 import api from '@/client/admin/api'
 import { useState } from 'react'
 import { PendingButton } from '@/client/button'
 import { CheckValidEmail } from '@/common/formatting'
+import Label from '@/client/label'
 
 const inter = Inter({ subsets: ['latin'] })
 
