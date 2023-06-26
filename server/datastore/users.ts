@@ -24,7 +24,7 @@ export const toUser = (data: any): User => ({
 })
 
 export async function markUserLogin(userID: number): Promise<User | undefined> {
-  const [userData] = await getKeyedEntity(Entity.USER, userID)
+  const userData = await getKeyedEntity(Entity.USER, userID)
   if (userData) {
     await getDatastore().save(
       toUserData(
