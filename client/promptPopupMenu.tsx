@@ -51,9 +51,7 @@ export default function PromptPopupMenu({
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
         <PopupMenuItem title='Rename' callback={renamePrompt} />
-        {projects.length > 0 && (prompt.projectID === null || projects.length > 1) && (
-          <PopupMenuItem title='Move to project' callback={movePrompt} />
-        )}
+        {projects.length > 1 && <PopupMenuItem title='Move to project' callback={movePrompt} />}
         <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
       </PopupMenu>
       {showPickProjectPrompt && (

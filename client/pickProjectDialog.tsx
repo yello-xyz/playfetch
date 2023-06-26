@@ -11,16 +11,16 @@ export default function PickProjectDialog({
   onDismiss,
 }: {
   projects: Project[]
-  initialProjectID: number | null
+  initialProjectID: number
   onConfirm: (projectID: number) => void
   onDismiss: () => void
 }) {
-  const [projectID, setProjectID] = useState<number | null>(initialProjectID)
+  const [projectID, setProjectID] = useState(initialProjectID)
 
   const dialogPrompt = {
     message: 'Move Prompt to Project',
     callback: () => onConfirm(projectID!),
-    disabled: projectID === initialProjectID || projectID === null,
+    disabled: projectID === initialProjectID,
   }
 
   return (

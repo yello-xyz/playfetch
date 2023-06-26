@@ -17,7 +17,7 @@ export default function TopBar({
   projects: Project[]
   activeProject?: ActiveProject
   activePrompt?: Prompt
-  onAddPrompt: (projectID: number | null) => void
+  onAddPrompt: (projectID: number) => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)

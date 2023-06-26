@@ -10,12 +10,12 @@ import UserSidebarItem from './userSidebarItem'
 
 export default function Sidebar({
   user,
-  projects = [],
+  projects,
   activeProject,
   onAddPrompt,
 }: {
   user: User
-  projects?: Project[]
+  projects: Project[]
   activeProject?: ActiveProject
   onAddPrompt: () => void
 }) {
@@ -37,22 +37,27 @@ export default function Sidebar({
     })
   }
 
+  const userProject = projects.find(project => project.id === user.id)
+  const properProjects = projects.filter(project => project.id !== user.id)
+
   return (
     <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
       <SidebarSection>
         <UserSidebarItem user={user} />
       </SidebarSection>
       <SidebarSection>
-        <SidebarButton
-          title='Prompts'
-          icon={promptIcon.src}
-          active={activeProject?.id === null}
-          onClick={() => selectProject(null)}
-        />
+        {userProject && (
+          <SidebarButton
+            title={userProject.name}
+            icon={promptIcon.src}
+            active={activeProject?.id === userProject.id}
+            onClick={() => selectProject(userProject.id)}
+          />
+        )}
         <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
       </SidebarSection>
       <SidebarSection title='My Projects'>
-        {projects.map((project, projectIndex) => (
+        {properProjects.map((project, projectIndex) => (
           <SidebarButton
             key={projectIndex}
             title={project.name}

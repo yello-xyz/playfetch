@@ -8,7 +8,6 @@ import {
   getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
-  getTimestamp,
   toID,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
@@ -48,34 +47,28 @@ const toProject = (data: any): Project => ({
   labels: JSON.parse(data.labels),
 })
 
+const toUserProject = (userID: number): Project => ({
+  id: userID,
+  name: 'Prompts',
+  urlPath: '',
+  labels: [],
+})
+
 export async function getProjectUsers(userID: number, projectID: number): Promise<User[]> {
-  const userIDs = (projectID === userID) ? [userID] : await getUserIDsForProject(projectID)
+  const userIDs = projectID === userID ? [userID] : await getUserIDsForProject(projectID)
   const users = await getKeyedEntities(Entity.USER, userIDs)
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
 
-export async function getActiveProject(userID: number, projectID: number | null): Promise<ActiveProject> {
-  const getOrderedPrompts = (projectID: number) =>
-    getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
+export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
+  const projectData = projectID === userID ? undefined : await getVerifiedUserProjectData(userID, projectID)
+  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
+  const users = await getProjectUsers(userID, projectID)
 
-  if (projectID) {
-    const projectData = await getVerifiedUserProjectData(userID, projectID)
-    const prompts = await getOrderedPrompts(projectID)
-    const users = await getProjectUsers(userID, projectID)
-
-    return {
-      ...toProject(projectData),
-      prompts: prompts.map(promptData => toPrompt(userID, promptData)),
-      users,
-    }
-  } else {
-    const prompts = await getOrderedPrompts(userID)
-    const users = await getProjectUsers(userID, userID)
-    return {
-      id: null,
-      prompts: prompts.map(promptData => toPrompt(userID, promptData)),
-      users,
-    }
+  return {
+    ...(projectData ? toProject(projectData) : toUserProject(userID)),
+    prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+    users,
   }
 }
 
@@ -143,5 +136,5 @@ export async function rotateProjectAPIKey(userID: number, projectID: number): Pr
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getProjectsIDsForUser(userID)
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
-  return projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)
+  return [toUserProject(userID), ...projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)]
 }

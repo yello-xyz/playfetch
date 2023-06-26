@@ -29,7 +29,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
   const initialProjects = await getProjectsForUser(user.id)
   const initialActiveItem = promptID
     ? await getActivePrompt(user.id, promptID)
-    : await getActiveProject(user.id, projectID ?? null)
+    : await getActiveProject(user.id, projectID ?? user.id)
 
   return { props: { user, initialProjects, initialActiveItem } }
 })
@@ -93,13 +93,13 @@ export default function Home({
     }
   }
 
-  const refreshProject = async (projectID: number | null) => {
+  const refreshProject = async (projectID: number) => {
     const newProject = await api.getProject(projectID)
     setActiveItem(newProject)
     selectVersion(undefined)
   }
 
-  const selectProject = async (projectID: number | null) => {
+  const selectProject = async (projectID: number) => {
     if (projectID !== activeProject?.id) {
       savePrompt()
       await refreshProject(projectID)
@@ -117,11 +117,11 @@ export default function Home({
     if (promptID) {
       selectPrompt(promptID)
     } else {
-      selectProject(projectID ?? null)
+      selectProject(projectID ?? user.id)
     }
   }
 
-  const addPrompt = async (projectID: number | null) => {
+  const addPrompt = async (projectID: number) => {
     const promptID = await api.addPrompt(projectID)
     selectPrompt(promptID)
   }
@@ -150,7 +150,7 @@ export default function Home({
               user={user}
               projects={projects}
               activeProject={activeProject}
-              onAddPrompt={() => addPrompt(null)}
+              onAddPrompt={() => addPrompt(user.id)}
             />
             <div className='flex flex-col flex-1'>
               <TopBar

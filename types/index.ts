@@ -13,13 +13,16 @@ export type Project = {
   labels: string[]
 }
 
-export type ActiveProject = (Project | { id: null }) & { prompts: Prompt[]; users: User[] }
+export type ActiveProject = Project & { 
+  prompts: Prompt[]
+  users: User[] 
+}
 
 export type Prompt = {
   id: number
   name: string
   prompt: string
-  projectID: number | null
+  projectID: number
   timestamp: string
   favorited: boolean
 }

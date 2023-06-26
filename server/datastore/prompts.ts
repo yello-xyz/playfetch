@@ -42,7 +42,7 @@ export const toPrompt = (userID: number, data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   prompt: StripPromptSentinels(data.prompt),
-  projectID: data.projectID === userID ? null : data.projectID,
+  projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
   favorited: data.favorited,
 })
@@ -64,10 +64,10 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
 
 export const DefaultPromptName = 'New Prompt'
 
-export async function addPromptForUser(userID: number, projectID: number | null): Promise<number> {
+export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const promptData = toPromptData(projectID ?? userID, DefaultPromptName, '', createdAt, createdAt, false)
+  const promptData = toPromptData(projectID, DefaultPromptName, '', createdAt, createdAt, false)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, toID(promptData))
   return toID(promptData)
@@ -87,8 +87,8 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
   )
 }
 
-async function ensureProjectAccess(userID: number, projectID: number | null) {
-  const hasAccess = projectID === null || (await hasUserAccess(userID, projectID))
+async function ensureProjectAccess(userID: number, projectID: number) {
+  const hasAccess = projectID === userID || (await hasUserAccess(userID, projectID))
   if (!hasAccess) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
@@ -96,12 +96,10 @@ async function ensureProjectAccess(userID: number, projectID: number | null) {
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  const hasAccess = promptData
-    ? promptData.projectID === userID || (await hasUserAccess(userID, promptData.projectID))
-    : false
-  if (!hasAccess) {
+  if (!promptData) {
     throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
   }
+  await ensureProjectAccess(userID, promptData.projectID)
   return promptData
 }
 

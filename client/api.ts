@@ -35,7 +35,7 @@ const api = {
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
-  getProject: function (projectID: number | null): Promise<ActiveProject> {
+  getProject: function (projectID: number): Promise<ActiveProject> {
     return post(this.getProject, { projectID })
   },
   checkProjectName: function (name: string): Promise<{ url?: string }> {
@@ -47,7 +47,7 @@ const api = {
   getPrompt: function (promptID: number): Promise<ActivePrompt> {
     return post(this.getPrompt, { promptID })
   },
-  addPrompt: function (projectID: number | null): Promise<number> {
+  addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
   updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID?: number): Promise<number> {

@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react'
 type RefreshContextType = {
   refreshPage?: () => Promise<void>
   refreshProjects?: () => Promise<void>
-  selectProject?: (projectID: number | null) => Promise<void>
+  selectProject?: (projectID: number) => Promise<void>
   refreshProject?: () => Promise<void>
   selectPrompt?: (promptID: number) => Promise<void>
   refreshPrompt?: (focusVersionID?: number) => Promise<void>
