@@ -73,7 +73,10 @@ export async function getActiveProject(userID: number, projectID: number): Promi
 }
 
 const getUniqueURLPathFromProjectName = async (projectName: string) => {
-  let urlPath = projectName.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9\-]/gmi, '')
+  let urlPath = projectName
+    .replace(/\s+/g, '-')
+    .toLowerCase()
+    .replace(/[^a-z0-9\-]/gim, '')
   if (!CheckValidURLPath(urlPath)) {
     urlPath = `project-${urlPath}`
   }

@@ -62,9 +62,11 @@ export default function PickNameDialog({
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
       <TextInput id='name' label={label} value={name} setValue={updateName} />
-      {validator && <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
-        {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}
-      </div>}
+      {validator && (
+        <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
+          {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}
+        </div>
+      )}
     </ModalDialog>
   )
 }

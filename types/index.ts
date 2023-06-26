@@ -13,9 +13,9 @@ export type Project = {
   labels: string[]
 }
 
-export type ActiveProject = Project & { 
+export type ActiveProject = Project & {
   prompts: Prompt[]
-  users: User[] 
+  users: User[]
 }
 
 export type Prompt = {
