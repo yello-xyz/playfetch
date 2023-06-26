@@ -1,7 +1,7 @@
 import ClientRoute, { ParseQuery, Redirect } from '@/client/clientRoute'
 import { useState } from 'react'
 import { Label, TextInput } from 'flowbite-react'
-import PendingButton from '@/client/pendingButton'
+import { PendingButton } from '@/client/button'
 import { withLoggedInSession } from '@/server/session'
 import api from '@/client/api'
 import { useRouter } from 'next/router'

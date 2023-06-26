@@ -1,5 +1,5 @@
-import { Button } from 'flowbite-react'
 import { MouseEvent, ReactNode } from 'react'
+import Button from './button'
 
 export type DialogPrompt = {
   title?: string
@@ -37,10 +37,10 @@ export default function ModalDialog({
           <h3 className='text-base font-semibold'>{prompt.title ?? 'Are you sure?'}</h3>
           <div className='text-left'>{children}</div>
           <div className='flex justify-end gap-4'>
-            <Button color='gray' onClick={onDismiss}>
+            <Button type='outline' onClick={onDismiss}>
               Cancel
             </Button>
-            <Button disabled={prompt.disabled} color={prompt.destructive ? 'failure' : 'info'} onClick={confirm}>
+            <Button type={prompt.destructive ? 'destructive' : 'primary'} disabled={prompt.disabled} onClick={confirm}>
               {prompt.confirmTitle ?? 'Confirm'}
             </Button>
           </div>

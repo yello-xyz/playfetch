@@ -3,7 +3,7 @@ import { withLoggedOutSession } from '@/server/session'
 import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
-import PendingButton from '@/client/pendingButton'
+import { PendingButton } from '@/client/button'
 import { Badge } from 'flowbite-react'
 import { CheckValidEmail } from '@/common/formatting'
 

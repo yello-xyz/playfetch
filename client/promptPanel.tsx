@@ -4,6 +4,7 @@ import { Label, TextInput } from 'flowbite-react'
 import { ExtractPromptVariables } from '@/common/formatting'
 import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
+import { PendingButton } from './button'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -86,12 +87,11 @@ export default function PromptPanel({
             <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
             <option value={'google'}>{labelForProvider('google')}</option>
           </select>
-          <button
-            className='px-4 py-2 text-white bg-blue-600 rounded-lg disabled:opacity-50'
+          <PendingButton
             disabled={!prompt.length}
             onClick={() => onRun(prompt, config, inputs)}>
             {version.runs.length ? 'Run again' : 'Run'}
-          </button>
+          </PendingButton>
         </div>
       )}
     </div>

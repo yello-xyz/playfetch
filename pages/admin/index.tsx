@@ -4,7 +4,7 @@ import TextInput from '@/client/labeledTextInput'
 import { Checkbox, Label } from 'flowbite-react'
 import api from '@/client/admin/api'
 import { useState } from 'react'
-import PendingButton from '@/client/pendingButton'
+import { PendingButton } from '@/client/button'
 import { CheckValidEmail } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
