@@ -48,8 +48,8 @@ const toProject = (data: any): Project => ({
   labels: JSON.parse(data.labels),
 })
 
-export async function getProjectUsers(projectID: number): Promise<User[]> {
-  const userIDs = await getUserIDsForProject(projectID)
+export async function getProjectUsers(userID: number, projectID: number): Promise<User[]> {
+  const userIDs = (projectID === userID) ? [userID] : await getUserIDsForProject(projectID)
   const users = await getKeyedEntities(Entity.USER, userIDs)
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
@@ -61,7 +61,7 @@ export async function getActiveProject(userID: number, projectID: number | null)
   if (projectID) {
     const projectData = await getVerifiedUserProjectData(userID, projectID)
     const prompts = await getOrderedPrompts(projectID)
-    const users = await getProjectUsers(projectID)
+    const users = await getProjectUsers(userID, projectID)
 
     return {
       ...toProject(projectData),
@@ -70,10 +70,11 @@ export async function getActiveProject(userID: number, projectID: number | null)
     }
   } else {
     const prompts = await getOrderedPrompts(userID)
+    const users = await getProjectUsers(userID, userID)
     return {
       id: null,
       prompts: prompts.map(promptData => toPrompt(userID, promptData)),
-      users: [],
+      users,
     }
   }
 }

@@ -52,7 +52,7 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
-  const users = await getProjectUsers(promptData.projectID)
+  const users = await getProjectUsers(userID, promptData.projectID)
 
   return {
     ...toPrompt(userID, promptData),
