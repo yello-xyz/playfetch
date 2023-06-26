@@ -16,13 +16,11 @@ export default function PublishPane({
   prompt,
   version,
   endpoint,
-  endpointNameValidator,
 }: {
   project: Project
   prompt: Prompt
   version: Version
   endpoint?: Endpoint
-  endpointNameValidator: (name: string) => Promise<{ url?: string }>
 }) {
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
@@ -97,7 +95,7 @@ export default function PublishPane({
           title='Publish Prompt'
           label='Endpoint'
           initialName={endpoint?.urlPath}
-          validator={endpointNameValidator}
+          validator={(name: string) => api.checkEndpointName(prompt.id, project.urlPath, name)}
           onConfirm={publish}
           onDismiss={() => setShowPickNamePrompt(false)}
         />

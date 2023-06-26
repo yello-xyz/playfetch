@@ -61,7 +61,6 @@ export default function PromptTabView({
                 prompt={prompt}
                 project={project}
                 endpoint={prompt?.endpoint}
-                endpointNameValidator={(name: string) => api.checkEndpointName(prompt.id, project!.urlPath, name)}
               />
             )}
           </div>

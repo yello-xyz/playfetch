@@ -38,9 +38,6 @@ const api = {
   getProject: function (projectID: number): Promise<ActiveProject> {
     return post(this.getProject, { projectID })
   },
-  checkProjectName: function (name: string): Promise<{ url?: string }> {
-    return post(this.checkProjectName, { name })
-  },
   addProject: function (name: string): Promise<number> {
     return post(this.addProject, { name })
   },

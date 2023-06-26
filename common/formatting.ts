@@ -60,8 +60,6 @@ export const ExtractPromptVariables = (prompt: string) => [
   ...new Set(prompt.match(/{{(.*?)}}/g)?.map(match => match.replace(/{{(.*?)}}/g, '$1')) ?? []),
 ]
 
-export const ProjectNameToURLPath = (projectName: string) => projectName.replaceAll(' ', '-').toLowerCase()
-
 export const CheckValidURLPath = (urlPath: string) => {
   const validRegexp = /^[a-zA-Z0-9\-]+$/
   const digitsOnlyRegexp = /^\d*$/

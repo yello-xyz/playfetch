@@ -67,7 +67,6 @@ export default function Sidebar({
         <PickNameDialog
           title='Add a new project'
           label='Project name'
-          validator={name => api.checkProjectName(name)}
           onConfirm={addProject}
           onDismiss={() => setShowPickNamePrompt(false)}
         />

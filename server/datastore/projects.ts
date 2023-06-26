@@ -11,7 +11,7 @@ import {
   toID,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
-import { CheckValidURLPath, ProjectNameToURLPath } from '@/common/formatting'
+import { CheckValidURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess } from './access'
 import { toPrompt } from './prompts'
@@ -72,14 +72,21 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   }
 }
 
-export async function addProjectForUser(userID: number, projectName: string) {
-  const urlPath = ProjectNameToURLPath(projectName)
+const getUniqueURLPathFromProjectName = async (projectName: string) => {
+  let urlPath = projectName.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9\-]/gmi, '')
   if (!CheckValidURLPath(urlPath)) {
-    throw new Error(`URL path '${urlPath}' is invalid`)
+    urlPath = `project-${urlPath}`
   }
-  if (await checkProject(urlPath)) {
-    throw new Error(`URL path '${urlPath}' already exists`)
+  let uniqueURLPath = urlPath
+  let counter = 2
+  while (await checkProject(uniqueURLPath)) {
+    uniqueURLPath = `${urlPath}-${counter++}`
   }
+  return uniqueURLPath
+}
+
+export async function addProjectForUser(userID: number, projectName: string) {
+  const urlPath = await getUniqueURLPathFromProjectName(projectName)
   const projectData = toProjectData(projectName, urlPath, [], new Date())
   await getDatastore().save(projectData)
   const projectID = toID(projectData)
