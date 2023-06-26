@@ -27,22 +27,21 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
-  const initialProject = promptID ? null : await getActiveProject(user.id, projectID ?? null)
-  const initialPrompt = promptID ? await getActivePrompt(user.id, promptID) : null
+  const initialActiveItem = promptID
+    ? await getActivePrompt(user.id, promptID)
+    : await getActiveProject(user.id, projectID ?? null)
 
-  return { props: { user, initialProjects, initialProject, initialPrompt } }
+  return { props: { user, initialProjects, initialActiveItem } }
 })
 
 export default function Home({
   user,
   initialProjects,
-  initialProject,
-  initialPrompt,
+  initialActiveItem,
 }: {
   user: User
   initialProjects: Project[]
-  initialProject?: ActiveProject
-  initialPrompt?: ActivePrompt
+  initialActiveItem: ActiveProject | ActivePrompt
 }) {
   const router = useRouter()
 
@@ -51,8 +50,12 @@ export default function Home({
 
   const [projects, setProjects] = useState(initialProjects)
 
-  const [activeProject, setActiveProject] = useState(initialProject)
-  const [activePrompt, setActivePrompt] = useState(initialPrompt)
+  const [activeItem, setActiveItem] = useState(initialActiveItem)
+  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt =>
+    (item as ActivePrompt).projectID !== undefined
+  const activeProject = isPrompt(activeItem) ? undefined : activeItem
+  const activePrompt = isPrompt(activeItem) ? activeItem : undefined
+
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
@@ -76,12 +79,10 @@ export default function Home({
       : activeVersion?.id
   }
 
-  const refreshPrompt = async (promptID: number | undefined, focusVersionID = activeVersion?.id) => {
-    const newPrompt = promptID ? await api.getPrompt(promptID) : undefined
-    setActivePrompt(newPrompt)
-    setActiveProject(newPrompt ? undefined : activeProject)
-    const newVersions = newPrompt ? newPrompt.versions : []
-    selectVersion(newVersions.find(version => version.id === focusVersionID) ?? newVersions[0])
+  const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
+    const newPrompt = await api.getPrompt(promptID)
+    setActiveItem(newPrompt)
+    selectVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions[0])
   }
 
   const selectPrompt = async (promptID: number) => {
@@ -94,8 +95,8 @@ export default function Home({
 
   const refreshProject = async (projectID: number | null) => {
     const newProject = await api.getProject(projectID)
-    refreshPrompt(undefined)
-    setActiveProject(newProject)
+    setActiveItem(newProject)
+    selectVersion(undefined)
   }
 
   const selectProject = async (projectID: number | null) => {
