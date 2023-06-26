@@ -54,7 +54,7 @@ export default function PromptPopupMenu({
         <PickProjectDialog
           key={prompt.projectID}
           projects={projects}
-          initialProjectID={prompt.projectID}
+          prompt={prompt}
           onConfirm={(projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh)}
           onDismiss={() => setShowPickProjectPrompt(false)}
         />
