@@ -1,7 +1,7 @@
 import { Version } from '@/types'
 import api from './api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
-import { useDialogPrompt } from './modalDialogContext'
+import useModalDialogPrompt from './modalDialogContext'
 import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useState } from 'react'
@@ -12,7 +12,7 @@ export default function VersionPopupMenu({ version }: { version: Version }) {
 
   const refreshPrompt = useRefreshPrompt()
 
-  const setDialogPrompt = useDialogPrompt()
+  const setDialogPrompt = useModalDialogPrompt()
 
   const deleteVersion = async () => {
     setIsMenuExpanded(false)

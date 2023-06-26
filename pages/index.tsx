@@ -13,7 +13,6 @@ import { getActivePrompt } from '@/server/datastore/prompts'
 import { getActiveProject, getProjectsForUser } from '@/server/datastore/projects'
 import SegmentedControl, { Segment } from '@/client/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
-import PickNameDialog, { PickNamePrompt } from '@/client/pickNameDialog'
 import { ModalDialogContext } from '@/client/modalDialogContext'
 import { RefreshContext } from '@/client/refreshContext'
 
@@ -46,7 +45,6 @@ export default function Home({
   const router = useRouter()
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [pickNamePrompt, setPickNamePrompt] = useState<PickNamePrompt>()
 
   const [projects, setProjects] = useState(initialProjects)
 
@@ -130,11 +128,7 @@ export default function Home({
 
   return (
     <>
-      <ModalDialogContext.Provider
-        value={{
-          setDialogPrompt,
-          setPickNamePrompt,
-        }}>
+      <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <RefreshContext.Provider
           value={{
             refreshPage: () => router.replace(router.asPath).then(),
@@ -190,7 +184,6 @@ export default function Home({
         </RefreshContext.Provider>
       </ModalDialogContext.Provider>
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
-      <PickNameDialog prompt={pickNamePrompt} onDismiss={() => setPickNamePrompt(undefined)} />
     </>
   )
 }

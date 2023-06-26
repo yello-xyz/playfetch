@@ -3,43 +3,41 @@ import ModalDialog from './modalDialog'
 import LabeledTextInput from './labeledTextInput'
 import { debounce } from 'debounce'
 
-export type PickNamePrompt = {
-  title: string
-  label: string
-  callback: (name: string) => void
-  initialName?: string
-  validator?: (name: string) => Promise<{ url?: string }>
-}
-
 export default function PickNameDialog({
-  prompt,
+  title,
+  label,
+  initialName,
+  validator,
+  onConfirm,
   onDismiss,
 }: {
-  prompt?: PickNamePrompt
+  title: string
+  label: string
+  initialName?: string
+  validator?: (name: string) => Promise<{ url?: string }>
+  onConfirm: (name: string) => void
   onDismiss: () => void
 }) {
   const [name, setName] = useState('')
-  const [url, setURL] = useState(prompt?.validator ? undefined : '')
+  const [url, setURL] = useState(validator ? undefined : '')
   const [isPending, setPending] = useState(false)
 
   useEffect(() => {
-    if (prompt?.initialName) {
-      updateName(prompt.initialName)
+    if (initialName) {
+      updateName(initialName)
     }
   }, [prompt])
 
-  const dialogPrompt = prompt
-    ? {
-        message: prompt.title,
-        callback: () => prompt.callback(name),
-        disabled: url === undefined || name.length === 0,
-      }
-    : undefined
+  const dialogPrompt = {
+    message: title,
+    callback: () => onConfirm(name),
+    disabled: url === undefined || name.length === 0,
+  }
 
   const checkName = useMemo(
     () =>
       debounce((name: string) => {
-        prompt?.validator?.(name).then(({ url }) => {
+        validator?.(name).then(({ url }) => {
           setURL(url)
           setPending(false)
         })
@@ -49,7 +47,7 @@ export default function PickNameDialog({
 
   const updateName = (name: string) => {
     setName(name)
-    if (prompt?.validator) {
+    if (validator) {
       setPending(true)
       setURL(undefined)
       checkName(name)
@@ -60,7 +58,7 @@ export default function PickNameDialog({
 
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <LabeledTextInput id='name' label={prompt?.label} value={name} setValue={updateName} />
+      <LabeledTextInput id='name' label={label} value={name} setValue={updateName} />
       <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
         {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}
       </div>

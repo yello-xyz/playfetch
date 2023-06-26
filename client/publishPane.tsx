@@ -1,4 +1,4 @@
-import { use, useState } from 'react'
+import { useState } from 'react'
 import { Endpoint, Project, Prompt, Version } from '@/types'
 import PendingButton from './pendingButton'
 import { Checkbox, Label } from 'flowbite-react'
@@ -7,8 +7,9 @@ import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
-import { useDialogPrompt, usePickNamePrompt } from './modalDialogContext'
+import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
+import PickNameDialog from './pickNameDialog'
 
 export default function PublishPane({
   project,
@@ -25,32 +26,24 @@ export default function PublishPane({
 }) {
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
-  const setDialogPrompt = useDialogPrompt()
-  const setPickNamePrompt = usePickNamePrompt()
+  const setDialogPrompt = useModalDialogPrompt()
 
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
 
-  const publish = () => {
+  const publish = async (name: string) => {
     const lastRun = version.runs.slice(-1)[0]
     const inputState = lastRun?.inputs ?? {}
     const inputVariables = ExtractPromptVariables(version.prompt)
     const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
 
-    setPickNamePrompt({
-      title: 'Publish Prompt',
-      label: 'Endpoint',
-      callback: async (name: string) => {
-        await savePrompt()
-        await api
-          .publishPrompt(project!.id, prompt.id, name, version.prompt, version.config, inputs, useCache)
-          .then(setCURLCommand)
-        refreshPrompt()
-      },
-      initialName: endpoint?.urlPath,
-      validator: endpointNameValidator,
-    })
+    await savePrompt()
+    await api
+      .publishPrompt(project!.id, prompt.id, name, version.prompt, version.config, inputs, useCache)
+      .then(setCURLCommand)
+    refreshPrompt()
   }
 
   const unpublish = () => {
@@ -77,7 +70,7 @@ export default function PublishPane({
           </div>
         </div>
         <div className='flex gap-2'>
-          <PendingButton disabled={version.runs.length === 0} onClick={publish}>
+          <PendingButton disabled={version.runs.length === 0} onClick={() => setShowPickNamePrompt(true)}>
             {endpoint ? 'Republish' : 'Publish'}
           </PendingButton>
           {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
@@ -99,6 +92,16 @@ export default function PublishPane({
           </div>
         )}
       </div>
+      {showPickNamePrompt && (
+        <PickNameDialog
+          title='Publish Prompt'
+          label='Endpoint'
+          initialName={endpoint?.urlPath}
+          validator={endpointNameValidator}
+          onConfirm={publish}
+          onDismiss={() => setShowPickNamePrompt(false)}
+        />
+      )}
     </>
   )
 }

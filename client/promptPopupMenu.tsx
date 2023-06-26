@@ -1,9 +1,10 @@
 import { Project, Prompt } from '@/types'
 import api from './api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
-import { useDialogPrompt, usePickNamePrompt } from './modalDialogContext'
-import PickProjectDialog, { PickProjectPrompt } from './pickProjectDialog'
+import useModalDialogPrompt from './modalDialogContext'
+import PickProjectDialog from './pickProjectDialog'
 import { useState } from 'react'
+import PickNameDialog from './pickNameDialog'
 
 export default function PromptPopupMenu({
   prompt,
@@ -18,9 +19,9 @@ export default function PromptPopupMenu({
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
 }) {
-  const setDialogPrompt = useDialogPrompt()
-  const setPickNamePrompt = usePickNamePrompt()
+  const setDialogPrompt = useModalDialogPrompt()
 
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
   const [showPickProjectPrompt, setShowPickProjectPrompt] = useState(false)
 
   const deletePrompt = () => {
@@ -34,12 +35,7 @@ export default function PromptPopupMenu({
 
   const renamePrompt = () => {
     setIsMenuExpanded(false)
-    setPickNamePrompt({
-      title: 'Rename Prompt',
-      label: 'Name',
-      callback: (name: string) => api.renamePrompt(prompt.id, name).then(onRefresh),
-      initialName: prompt.name,
-    })
+    setShowPickNamePrompt(true)
   }
 
   const movePrompt = () => {
@@ -61,6 +57,15 @@ export default function PromptPopupMenu({
           initialProjectID={prompt.projectID}
           onConfirm={(projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh)}
           onDismiss={() => setShowPickProjectPrompt(false)}
+        />
+      )}
+      {showPickNamePrompt && (
+        <PickNameDialog
+          title='Rename Prompt'
+          label='Name'
+          initialName={prompt.name}
+          onConfirm={name => api.renamePrompt(prompt.id, name).then(onRefresh)}
+          onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
     </>

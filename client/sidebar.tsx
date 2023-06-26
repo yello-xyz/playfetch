@@ -1,12 +1,12 @@
 import { ActiveProject, Project, User } from '@/types'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import api from './api'
 import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
-import { usePickNamePrompt } from './modalDialogContext'
 import { useRefreshProjects, useSelectProject } from './refreshContext'
 import UserSidebarItem from './userSidebarItem'
+import PickNameDialog from './pickNameDialog'
 
 export default function Sidebar({
   user,
@@ -19,56 +19,60 @@ export default function Sidebar({
   activeProject?: ActiveProject
   onAddPrompt: () => void
 }) {
-  const setPickNamePrompt = usePickNamePrompt()
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const refreshProjects = useRefreshProjects()
   const selectProject = useSelectProject()
 
-  const addProject = async () => {
-    setPickNamePrompt({
-      title: 'Add a new project',
-      label: 'Project name',
-      callback: async (name: string) => {
-        const projectID = await api.addProject(name)
-        await refreshProjects()
-        selectProject(projectID)
-      },
-      validator: name => api.checkProjectName(name),
-    })
+  const addProject = async (name: string) => {
+    const projectID = await api.addProject(name)
+    await refreshProjects()
+    selectProject(projectID)
   }
 
   const userProject = projects.find(project => project.id === user.id)
   const properProjects = projects.filter(project => project.id !== user.id)
 
   return (
-    <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
-      <SidebarSection>
-        <UserSidebarItem user={user} />
-      </SidebarSection>
-      <SidebarSection>
-        {userProject && (
-          <SidebarButton
-            title={userProject.name}
-            icon={promptIcon.src}
-            active={activeProject?.id === userProject.id}
-            onClick={() => selectProject(userProject.id)}
-          />
-        )}
-        <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
-      </SidebarSection>
-      <SidebarSection title='My Projects'>
-        {properProjects.map((project, projectIndex) => (
-          <SidebarButton
-            key={projectIndex}
-            title={project.name}
-            icon={projectIcon.src}
-            active={activeProject?.id === project.id}
-            onClick={() => selectProject(project.id)}
-          />
-        ))}
-        <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={addProject} />
-      </SidebarSection>
-    </div>
+    <>
+      <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
+        <SidebarSection>
+          <UserSidebarItem user={user} />
+        </SidebarSection>
+        <SidebarSection>
+          {userProject && (
+            <SidebarButton
+              title={userProject.name}
+              icon={promptIcon.src}
+              active={activeProject?.id === userProject.id}
+              onClick={() => selectProject(userProject.id)}
+            />
+          )}
+          <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
+        </SidebarSection>
+        <SidebarSection title='My Projects'>
+          {properProjects.map((project, projectIndex) => (
+            <SidebarButton
+              key={projectIndex}
+              title={project.name}
+              icon={projectIcon.src}
+              active={activeProject?.id === project.id}
+              onClick={() => selectProject(project.id)}
+            />
+          ))}
+          <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={() => setShowPickNamePrompt(true)} />
+        </SidebarSection>
+      </div>
+      {showPickNamePrompt && (
+        <PickNameDialog
+          title='Add a new project'
+          label='Project name'
+          validator={name => api.checkProjectName(name)}
+          onConfirm={addProject}
+          onDismiss={() => setShowPickNamePrompt(false)}
+        />
+      )}
+    </>
   )
 }
 

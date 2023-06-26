@@ -2,8 +2,6 @@ import { useState } from 'react'
 import ModalDialog from './modalDialog'
 import { Project } from '@/types'
 
-export type PickProjectPrompt = {}
-
 export default function PickProjectDialog({
   projects,
   initialProjectID,

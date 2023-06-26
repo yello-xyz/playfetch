@@ -1,13 +1,12 @@
 import { createContext, useContext } from 'react'
 import { DialogPrompt } from './modalDialog'
-import { PickNamePrompt } from './pickNameDialog'
 
 type ModalDialogContextType = {
-  setDialogPrompt?: (prompt: DialogPrompt) => void
-  setPickNamePrompt?: (prompt: PickNamePrompt) => void
+  setDialogPrompt: (prompt: DialogPrompt) => void
 }
 
-export const ModalDialogContext = createContext<ModalDialogContextType>({})
+export const ModalDialogContext = createContext<ModalDialogContextType>({ setDialogPrompt: _ => {} })
 
-export const useDialogPrompt = () => useContext(ModalDialogContext).setDialogPrompt!
-export const usePickNamePrompt = () => useContext(ModalDialogContext).setPickNamePrompt!
+const useModalDialogPrompt = () => useContext(ModalDialogContext).setDialogPrompt
+
+export default useModalDialogPrompt
