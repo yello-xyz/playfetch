@@ -1,5 +1,5 @@
 import { User } from '@/types'
-import { Entity, buildKey, getDatastore, getEntity, getID, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getEntity, getID, getKeyedEntity, getTimestamp } from './datastore'
 
 const toUserData = (
   email: string,
@@ -24,10 +24,9 @@ export const toUser = (data: any): User => ({
 })
 
 export async function markUserLogin(userID: number): Promise<User | undefined> {
-  const datastore = getDatastore()
-  const [userData] = await datastore.get(buildKey(Entity.USER, userID))
+  const [userData] = await getKeyedEntity(Entity.USER, userID)
   if (userData) {
-    await datastore.save(
+    await getDatastore().save(
       toUserData(
         userData.email,
         userData.fullName,

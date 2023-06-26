@@ -76,9 +76,11 @@ export const getEntityID = (type: string, key: string, value: {}) =>
   getEntityKeys(type, key, value, 1).then(([key]) => toID({ key }))
 
 export const getKeyedEntities = async (type: string, ids: number[]): Promise<any[]> =>
-  getDatastore()
-    .get(ids.map(id => buildKey(type, id)))
-    .then(([entities]) => entities)
+  ids.length
+    ? getDatastore()
+        .get(ids.map(id => buildKey(type, id)))
+        .then(([entities]) => entities)
+    : Promise.resolve([])
 
 export const getKeyedEntity = async (type: string, id: number) =>
   getKeyedEntities(type, [id]).then(([entity]) => entity)
