@@ -19,10 +19,10 @@ export default function TextInput({
   onKeyDown?: KeyboardEventHandler
 }) {
   return (
-    <div>
+    <div className='flex flex-col gap-1'>
       {label && <Label htmlFor={id}>{label}</Label>}
       <input
-        className='w-full py-2 text-sm bg-white border-gray-300 rounded-lg'
+        className='w-full p-2 text-sm bg-white border border-gray-300 rounded-lg'
         type={type}
         value={value}
         onChange={event => setValue(event.target.value)}

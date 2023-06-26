@@ -1,7 +1,7 @@
 const validEmailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-export const CheckValidEmail = (email: string) => !!email.toLowerCase().match(validEmailRegExp)
+export const CheckValidEmail = (email: string) => !!email.trim().toLowerCase().match(validEmailRegExp)
 
 export const FormatDate = (timestamp: string) => {
   const toDateString = (date: Date) =>

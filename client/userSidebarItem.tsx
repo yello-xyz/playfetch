@@ -37,7 +37,7 @@ export default function UserSidebarItem({ user }: { user: User }) {
 
   return (
     <div
-      className='flex gap-2.5 items-center relative cursor-pointer'
+      className='flex pl-4 gap-2.5 items-center relative cursor-pointer'
       onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
       <UserAvatar user={user} />
       <span className='flex-1 font-semibold'>{user.fullName}</span>

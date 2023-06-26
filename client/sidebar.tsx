@@ -4,9 +4,11 @@ import api from './api'
 import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
-import { useRefreshProjects, useSelectProject } from './refreshContext'
+import inviteIcon from '@/public/invite.svg'
+import { useRefreshProject, useRefreshProjects, useSelectProject } from './refreshContext'
 import UserSidebarItem from './userSidebarItem'
 import PickNameDialog from './pickNameDialog'
+import InviteDialog from './inviteDialog'
 
 export default function Sidebar({
   user,
@@ -20,14 +22,24 @@ export default function Sidebar({
   onAddPrompt: () => void
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
 
   const refreshProjects = useRefreshProjects()
+  const refreshProject = useRefreshProject()
   const selectProject = useSelectProject()
 
   const addProject = async (name: string) => {
     const projectID = await api.addProject(name)
     await refreshProjects()
     selectProject(projectID)
+  }
+
+  const inviteMembers = async (projectID: number, emails: string[]) => {
+    await api.inviteMembers(projectID, emails)
+    await refreshProjects()
+    if (activeProject) {
+      refreshProject()
+    }
   }
 
   const userProject = projects.find(project => project.id === user.id)
@@ -50,7 +62,7 @@ export default function Sidebar({
           )}
           <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
         </SidebarSection>
-        <SidebarSection title='My Projects'>
+        <SidebarSection title='My Projects' className='flex-1'>
           {properProjects.map((project, projectIndex) => (
             <SidebarButton
               key={projectIndex}
@@ -62,6 +74,11 @@ export default function Sidebar({
           ))}
           <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={() => setShowPickNamePrompt(true)} />
         </SidebarSection>
+        <SidebarSection>
+          {properProjects.length > 0 && (
+            <SidebarButton title='Invite Members' icon={inviteIcon.src} onClick={() => setShowInviteDialog(true)} />
+          )}
+        </SidebarSection>
       </div>
       {showPickNamePrompt && (
         <PickNameDialog
@@ -72,13 +89,21 @@ export default function Sidebar({
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
+      {showInviteDialog && (
+        <InviteDialog
+          projects={properProjects}
+          initialProjectID={activeProject?.id !== user.id ? activeProject?.id : undefined}
+          onConfirm={inviteMembers}
+          onDismiss={() => setShowInviteDialog(false)}
+        />
+      )}
     </>
   )
 }
 
-function SidebarSection({ title, children }: { title?: string; children: ReactNode }) {
+function SidebarSection({ className, title, children }: { className?: string; title?: string; children: ReactNode }) {
   return (
-    <div className='flex flex-col gap-0.5'>
+    <div className={`${className ?? ''} flex flex-col gap-0.5`}>
       {title && <div className='px-4 py-1 text-xs font-medium text-gray-400'>{title}</div>}
       {children}
     </div>

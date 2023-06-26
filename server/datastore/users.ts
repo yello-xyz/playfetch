@@ -50,7 +50,7 @@ export async function saveUser(email: string, fullName: string, avatarColor: str
   const userData = await getEntity(Entity.USER, 'email', email)
   await getDatastore().save(
     toUserData(
-      email,
+      email.toLowerCase(),
       fullName,
       avatarColor,
       isAdmin,

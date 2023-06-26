@@ -6,6 +6,7 @@ import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import TextInput from './textInput'
 import Label from './label'
+import DropdownMenu from './dropdownMenu'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -79,14 +80,14 @@ export default function PromptPanel({
       {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {onRun && (
         <div className='flex items-center self-end gap-4'>
-          <select
-            className='text-sm text-black border border-gray-300 rounded-lg'
+          <DropdownMenu
+            size='medium'
             value={config.provider}
-            onChange={event => updateProvider(event.target.value as PromptConfig['provider'])}>
+            onChange={value => updateProvider(value as PromptConfig['provider'])}>
             <option value={'openai'}>{labelForProvider('openai')}</option>
             <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
             <option value={'google'}>{labelForProvider('google')}</option>
-          </select>
+          </DropdownMenu>
           <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ModalDialog from './modalDialog'
 import { Project, Prompt } from '@/types'
+import DropdownMenu from './dropdownMenu'
 
 export default function PickProjectDialog({
   projects,
@@ -24,21 +25,15 @@ export default function PickProjectDialog({
 
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <select
-        className='w-full p-2 text-xs rounded-md'
+      <DropdownMenu
         value={projectID.toString()}
-        onChange={event => setProjectID(Number(event.target.value))}>
-        {!projectID && (
-          <option value={0} disabled>
-            Select a project
-          </option>
-        )}
+        onChange={value => setProjectID(Number(value))}>
         {projects.map((project, index) => (
           <option key={index} value={project.id}>
             {project.name}
           </option>
         ))}
-      </select>
+      </DropdownMenu>
     </ModalDialog>
   )
 }

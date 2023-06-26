@@ -31,7 +31,7 @@ export default function Admin() {
         <input type='checkbox' id='admin' checked={addAsAdmin} onChange={() => setAddAsAdmin(!addAsAdmin)} />
         <Label htmlFor='admin'>Add as Admin</Label>
       </div>
-      <PendingButton disabled={!CheckValidEmail(email.trim()) || !fullName.length} onClick={addUser}>
+      <PendingButton disabled={!CheckValidEmail(email) || !fullName.length} onClick={addUser}>
         Add User
       </PendingButton>
     </main>

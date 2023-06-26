@@ -15,7 +15,7 @@ import { CheckValidURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess } from './access'
 import { toPrompt } from './prompts'
-import { toUser } from './users'
+import { getUserForEmail, toUser } from './users'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -95,6 +95,19 @@ export async function addProjectForUser(userID: number, projectName: string) {
   const projectID = toID(projectData)
   await grantUserAccess(userID, projectID)
   return projectID
+}
+
+export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
+  await getVerifiedUserProjectData(userID, projectID)
+  for (const email of emails) {
+    const user = await getUserForEmail(email.toLowerCase())
+    if (user) {
+      await grantUserAccess(user.id, projectID)
+      // TODO send notification
+    } else {
+      // TODO send invite to sign up
+    }
+  }
 }
 
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
