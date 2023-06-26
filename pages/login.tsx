@@ -4,7 +4,6 @@ import api from '@/client/api'
 import LabeledTextInput from '@/client/labeledTextInput'
 import { useState } from 'react'
 import { PendingButton } from '@/client/button'
-import { Badge } from 'flowbite-react'
 import { CheckValidEmail } from '@/common/formatting'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -33,7 +32,7 @@ export default function Login() {
 
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
-      {message && <Badge>{message}</Badge>}
+      {message && <div className='px-2 py-1 text-xs text-blue-800 bg-blue-200 rounded'>{message}</div>}
       <LabeledTextInput
         type='email'
         label='Email'
