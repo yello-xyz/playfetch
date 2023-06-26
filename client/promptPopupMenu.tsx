@@ -27,7 +27,7 @@ export default function PromptPopupMenu({
   const deletePrompt = () => {
     setIsMenuExpanded(false)
     setDialogPrompt({
-      message: 'Are you sure you want to delete this prompt? This action cannot be undone.',
+      title: 'Are you sure you want to delete this prompt? This action cannot be undone.',
       callback: () => api.deletePrompt(prompt.id).then(onRefresh),
       destructive: true,
     })
@@ -62,6 +62,7 @@ export default function PromptPopupMenu({
       {showPickNamePrompt && (
         <PickNameDialog
           title='Rename Prompt'
+          confirmTitle='Rename'
           label='Name'
           initialName={prompt.name}
           onConfirm={name => api.renamePrompt(prompt.id, name).then(onRefresh)}

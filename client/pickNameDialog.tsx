@@ -5,6 +5,7 @@ import { debounce } from 'debounce'
 
 export default function PickNameDialog({
   title,
+  confirmTitle,
   label,
   initialName,
   validator,
@@ -12,6 +13,7 @@ export default function PickNameDialog({
   onDismiss,
 }: {
   title: string
+  confirmTitle: string
   label: string
   initialName?: string
   validator?: (name: string) => Promise<{ url?: string }>
@@ -29,7 +31,8 @@ export default function PickNameDialog({
   }, [prompt])
 
   const dialogPrompt = {
-    message: title,
+    title,
+    confirmTitle,
     callback: () => onConfirm(name),
     disabled: url === undefined || name.length === 0,
   }
@@ -59,9 +62,9 @@ export default function PickNameDialog({
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
       <LabeledTextInput id='name' label={label} value={name} setValue={updateName} />
-      <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
+      {validator && <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
         {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}
-      </div>
+      </div>}
     </ModalDialog>
   )
 }

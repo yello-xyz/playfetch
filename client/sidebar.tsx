@@ -66,6 +66,7 @@ export default function Sidebar({
       {showPickNamePrompt && (
         <PickNameDialog
           title='Add a new project'
+          confirmTitle='Add'
           label='Project name'
           onConfirm={addProject}
           onDismiss={() => setShowPickNamePrompt(false)}

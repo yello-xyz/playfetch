@@ -16,7 +16,7 @@ export default function PickProjectDialog({
   const [projectID, setProjectID] = useState(initialProjectID)
 
   const dialogPrompt = {
-    message: 'Move Prompt to Project',
+    title: 'Move Prompt to Project',
     callback: () => onConfirm(projectID!),
     disabled: projectID === initialProjectID,
   }

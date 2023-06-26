@@ -46,7 +46,7 @@ export default function PublishPane({
 
   const unpublish = () => {
     setDialogPrompt({
-      message: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+      title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
       callback: async () => {
         setCURLCommand(undefined)
         await api.unpublishPrompt(prompt.id)
@@ -93,6 +93,7 @@ export default function PublishPane({
       {showPickNamePrompt && (
         <PickNameDialog
           title='Publish Prompt'
+          confirmTitle='Publish'
           label='Endpoint'
           initialName={endpoint?.urlPath}
           validator={(name: string) => api.checkEndpointName(prompt.id, project.urlPath, name)}

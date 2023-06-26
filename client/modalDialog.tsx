@@ -1,7 +1,13 @@
-import { Button, Modal } from 'flowbite-react'
-import { ReactNode, useRef } from 'react'
+import { Button } from 'flowbite-react'
+import { MouseEvent, ReactNode } from 'react'
 
-export type DialogPrompt = { message?: string; callback?: () => void; destructive?: boolean; disabled?: boolean }
+export type DialogPrompt = {
+  title?: string
+  confirmTitle?: string
+  callback?: () => void
+  destructive?: boolean
+  disabled?: boolean
+}
 
 export default function ModalDialog({
   prompt,
@@ -12,35 +18,34 @@ export default function ModalDialog({
   onDismiss: () => void
   children?: ReactNode
 }) {
-  // Workaround for https://github.com/themesberg/flowbite-react/issues/701
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  const onConfirm = () => {
+  const confirm = () => {
     prompt?.callback?.()
     onDismiss()
   }
 
+  const dismiss = (event: MouseEvent) => {
+    event.stopPropagation()
+    onDismiss()
+  }
+
   return prompt ? (
-    <div ref={rootRef} onClick={event => event.stopPropagation()}>
-      <Modal root={rootRef.current ?? undefined} show popup size='sm' onClose={onDismiss}>
-        <Modal.Header />
-        <Modal.Body>
-          <div className='text-center'>
-            <h3 className='mb-5 text-lg font-normal text-gray-500 dark:text-gray-400'>
-              {prompt?.message ?? 'Are you sure?'}
-            </h3>
-            <div className='mb-5 text-left'>{children}</div>
-            <div className='flex justify-center gap-4'>
-              <Button disabled={prompt?.disabled} color={prompt?.destructive ? 'failure' : 'info'} onClick={onConfirm}>
-                Confirm
-              </Button>
-              <Button color='gray' onClick={onDismiss}>
-                Cancel
-              </Button>
-            </div>
+    <div
+      onClick={dismiss}
+      className='fixed inset-0 z-30 flex items-center justify-center w-full h-full bg-gray-600 bg-opacity-50 '>
+      <div onClick={event => event.stopPropagation()} className='p-4 bg-white rounded-lg w-72 drop-shadow'>
+        <div className='flex flex-col gap-4 text-center'>
+          <h3 className='text-base font-semibold'>{prompt.title ?? 'Are you sure?'}</h3>
+          <div className='text-left'>{children}</div>
+          <div className='flex justify-end gap-4'>
+            <Button color='gray' onClick={onDismiss}>
+              Cancel
+            </Button>
+            <Button disabled={prompt.disabled} color={prompt.destructive ? 'failure' : 'info'} onClick={confirm}>
+              {prompt.confirmTitle ?? 'Confirm'}
+            </Button>
           </div>
-        </Modal.Body>
-      </Modal>
+        </div>
+      </div>
     </div>
   ) : null
 }
