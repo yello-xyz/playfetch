@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Endpoint, Project, Prompt, Version } from '@/types'
 import { PendingButton } from './button'
-import { Checkbox, Label } from 'flowbite-react'
+import { Label } from 'flowbite-react'
 import { HiExternalLink } from 'react-icons/hi'
 import { EndpointUIRoute } from './clientRoute'
 import Link from 'next/link'
@@ -61,10 +61,8 @@ export default function PublishPane({
       <div className='flex flex-col gap-4 px-8 pt-8 text-gray-500 max-w-prose'>
         <div className='flex flex-wrap justify-between gap-10'>
           <div className='flex items-baseline gap-2'>
-            <Checkbox id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
-            <div className='block mb-1'>
-              <Label htmlFor='useCache' value='Use cache' />
-            </div>
+            <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
+            <Label htmlFor='useCache' value='Use cache' />
           </div>
         </div>
         <div className='flex gap-2'>

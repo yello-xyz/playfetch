@@ -28,7 +28,7 @@ export default function Admin() {
       <TextInput label='Email' placeholder='Enter email address...' value={email} setValue={setEmail} />
       <TextInput label='Full Name' placeholder='Enter name...' value={fullName} setValue={setFullName} />
       <div className='flex items-center gap-2'>
-        <Checkbox id='admin' checked={addAsAdmin} onChange={() => setAddAsAdmin(!addAsAdmin)} />
+        <input type='checkbox' id='admin' checked={addAsAdmin} onChange={() => setAddAsAdmin(!addAsAdmin)} />
         <Label htmlFor='admin'>Add as Admin</Label>
       </div>
       <PendingButton disabled={!CheckValidEmail(email.trim()) || !fullName.length} onClick={addUser}>
