@@ -45,7 +45,7 @@ export default function PromptInput({
   return (
     <div className='flex flex-col gap-2'>
       <div className='flex items-center block gap-2 mb-1'>
-        <div className='font-medium text-gray-600' onClick={() => contentEditableRef.current?.focus()}>
+        <div className='font-medium text-gray-600 cursor-default' onClick={() => contentEditableRef.current?.focus()}>
           Prompt
         </div>
         {showInputs && <HiCodeBracketSquare size={24} className='cursor-pointer' onMouseDown={extractVariable} />}

@@ -1,7 +1,7 @@
 import { Label } from 'flowbite-react'
 import { HTMLInputTypeAttribute, KeyboardEventHandler } from 'react'
 
-export default function LabeledTextInput({
+export default function TextInput({
   type = 'text',
   id = 'input',
   label,

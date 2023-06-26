@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google'
 import { withLoggedOutSession } from '@/server/session'
 import api from '@/client/api'
-import LabeledTextInput from '@/client/labeledTextInput'
+import TextInput from '@/client/textInput'
 import { useState } from 'react'
 import { PendingButton } from '@/client/button'
 import { CheckValidEmail } from '@/common/formatting'
@@ -33,7 +33,7 @@ export default function Login() {
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
       {message && <div className='px-2 py-1 text-xs text-blue-800 bg-blue-200 rounded'>{message}</div>}
-      <LabeledTextInput
+      <TextInput
         type='email'
         label='Email'
         placeholder='Please enter your email address...'

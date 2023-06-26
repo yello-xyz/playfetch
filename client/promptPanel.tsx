@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { PromptConfig, PromptInputs, Version } from '@/types'
-import { Label, TextInput } from 'flowbite-react'
+import { Label } from 'flowbite-react'
 import { ExtractPromptVariables } from '@/common/formatting'
 import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
+import TextInput from './textInput'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -62,12 +63,9 @@ export default function PromptPanel({
             <div key={index} className='flex gap-2'>
               <Label className='flex-1' value={variable} htmlFor={variable} />
               <TextInput
-                className='flex-1'
-                sizing='sm'
                 value={inputState[variable] ?? ''}
-                onChange={event => setInputState({ ...inputState, [variable]: event.target.value })}
+                setValue={value => setInputState({ ...inputState, [variable]: value })}
                 id={variable}
-                required
               />
             </div>
           ))}
@@ -87,9 +85,7 @@ export default function PromptPanel({
             <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
             <option value={'google'}>{labelForProvider('google')}</option>
           </select>
-          <PendingButton
-            disabled={!prompt.length}
-            onClick={() => onRun(prompt, config, inputs)}>
+          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>

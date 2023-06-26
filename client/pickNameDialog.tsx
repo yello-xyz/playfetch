@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import ModalDialog from './modalDialog'
-import LabeledTextInput from './labeledTextInput'
+import TextInput from './textInput'
 import { debounce } from 'debounce'
 
 export default function PickNameDialog({
@@ -61,7 +61,7 @@ export default function PickNameDialog({
 
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <LabeledTextInput id='name' label={label} value={name} setValue={updateName} />
+      <TextInput id='name' label={label} value={name} setValue={updateName} />
       {validator && <div className={`${isURLUnavailable ? 'text-red-500' : 'text-gray-500'}`}>
         {isURLUnavailable ? 'This name is not available.' : url ? url : <span>&nbsp;</span>}
       </div>}
