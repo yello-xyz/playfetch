@@ -1,6 +1,5 @@
-import { ReactNode, useEffect, useState } from 'react'
-import { Project, PromptConfig, Run, User, Version } from '@/types'
-import { FormatCost, FormatDate } from '@/common/formatting'
+import { ReactNode, useState } from 'react'
+import { Project, PromptConfig, User, Version } from '@/types'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
@@ -119,11 +118,6 @@ function VersionCell({
   project?: Project
   onSelect: (version: Version) => void
 }) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    setFormattedDate(FormatDate(version.timestamp))
-  }, [version.timestamp])
-
   const labelColors = LabelColorsFromProject(project)
   const user = users.find(user => user.id === version.userID)
 
@@ -140,14 +134,19 @@ function VersionCell({
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
             <span className='font-medium'>{labelForProvider(version.config.provider)}</span>
-            {version.runs.length > 0 && <RunDetails runs={version.runs} />}
+            {version.runs.length > 0 && (
+              <span>
+                {' '}
+                | {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
+              </span>
+            )}
           </div>
           <div className='flex items-center gap-1'>
             {project && <LabelPopupMenu project={project} version={version} />}
             {!isOnly && <VersionPopupMenu version={version} />}
           </div>
         </div>
-        {user && <UserDetails user={user} timestamp={formattedDate ?? ''} />}
+        {user && <UserDetails user={user} />}
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
@@ -168,27 +167,14 @@ function VersionCell({
   )
 }
 
-function UserDetails({ user, timestamp }: { user: User; timestamp: string }) {
+function UserDetails({ user }: { user: User }) {
   return (
     <div className='flex items-center gap-1 text-xs'>
       <UserAvatar user={user} size='small' />
       <span className='font-normal'>
-        {user.fullName} • {timestamp}
+        {user.fullName}
       </span>
     </div>
-  )
-}
-
-function RunDetails({ runs }: { runs: Run[] }) {
-  const averageCost = runs.reduce((sum, run) => sum + run.cost, 0) / runs.length
-
-  return (
-    <>
-      <span>
-        {' '}
-        | {FormatCost(averageCost)}/res • {runs.length} {runs.length > 1 ? 'responses' : 'response'}
-      </span>
-    </>
   )
 }
 
