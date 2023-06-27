@@ -17,7 +17,7 @@ export function Segment<T>({
 }) {
   const baseStyle = 'px-6 py-2 cursor-pointer'
   const firstLastStyle = first ? 'rounded-l-lg' : last ? 'rounded-r-lg' : ''
-  const selectedStyle = selected === value ? 'bg-blue-600 text-white rounded-lg' : ''
+  const selectedStyle = selected === value ? 'bg-gray-500 text-white rounded-lg' : ''
   return (
     <div className={`${baseStyle} ${firstLastStyle} ${selectedStyle}`} onClick={() => callback?.(value)}>
       {title}
