@@ -67,7 +67,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
 
   return {
     ...(projectData ? toProject(projectData) : toUserProject(userID)),
-    prompts: prompts.map(promptData => toPrompt(userID, promptData)),
+    prompts: prompts.map(promptData => toPrompt(promptData)),
     users,
   }
 }

@@ -1,4 +1,3 @@
-import api from '@/client/api'
 import { Suspense } from 'react'
 import { Project, ActivePrompt, Version, User } from '@/types'
 
@@ -19,7 +18,7 @@ export default function PromptTabView({
 }: {
   activeTab: ActivePromptTab
   prompt: ActivePrompt
-  project?: Project
+  project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version?: Version) => void

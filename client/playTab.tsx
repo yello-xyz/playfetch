@@ -16,7 +16,7 @@ export default function PlayTab({
   setModifiedVersion,
 }: {
   prompt: ActivePrompt
-  project?: Project
+  project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version?: Version) => void

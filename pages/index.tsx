@@ -53,6 +53,7 @@ export default function Home({
     (item as ActivePrompt).projectID !== undefined
   const activeProject = isPrompt(activeItem) ? undefined : activeItem
   const activePrompt = isPrompt(activeItem) ? activeItem : undefined
+  const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
@@ -161,11 +162,11 @@ export default function Home({
                 )}
               </TopBar>
               <div className='flex-1 overflow-hidden'>
-                {activePrompt && activeVersion && (
+                {activePrompt && promptProject && activeVersion && (
                   <PromptTabView
                     activeTab={selectedTab}
                     prompt={activePrompt}
-                    project={projects.find(project => project.id === activePrompt.projectID)}
+                    project={promptProject}
                     activeVersion={activeVersion}
                     setActiveVersion={selectVersion}
                     setModifiedVersion={setModifiedVersion}

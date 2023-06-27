@@ -38,7 +38,7 @@ const toPromptData = (
   excludeFromIndexes: ['name', 'prompt'],
 })
 
-export const toPrompt = (userID: number, data: any): Prompt => ({
+export const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   prompt: StripPromptSentinels(data.prompt),
@@ -55,7 +55,7 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
   const users = await getProjectUsers(userID, promptData.projectID)
 
   return {
-    ...toPrompt(userID, promptData),
+    ...toPrompt(promptData),
     versions: versions.map(version => toVersion(version, runs)),
     ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
     users,
