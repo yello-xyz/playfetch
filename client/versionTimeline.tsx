@@ -63,7 +63,7 @@ export default function VersionTimeline({
     <>
       <div className='flex flex-col flex-1 overflow-hidden'>
         <input
-          className='w-full py-2 mb-4 text-sm bg-white border-gray-300 rounded-lg'
+          className='w-full p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
           type='text'
           value={filter}
           onChange={event => setFilter(event.target.value)}

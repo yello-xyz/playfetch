@@ -42,7 +42,7 @@ export default function PromptSettingsPane({
               onChange={event => updateTemperature(Number(event.target.value))}
             />
             <input
-              className='text-sm rounded-lg w-18'
+              className='p-2 text-sm rounded-lg w-18'
               type='number'
               min={0}
               max={1}
@@ -53,7 +53,7 @@ export default function PromptSettingsPane({
           </SettingsRow>
           <SettingsRow label='Maximum tokens'>
             <input
-              className='w-20 text-sm rounded-lg'
+              className='w-20 p-2 text-sm rounded-lg'
               type='text'
               value={config.maxTokens}
               onChange={event => updateMaxTokens(Number(event.target.value))}
