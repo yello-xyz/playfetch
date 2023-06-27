@@ -8,7 +8,7 @@ export default function RunTimeline({ runs }: { runs: Run[] }) {
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map((run, index) => (
-            <div key={index} className='flex flex-col gap-3 p-4 rounded-lg bg-sky-50'>
+            <div key={index} className='flex flex-col gap-3 p-4 whitespace-pre rounded-lg  bg-sky-50'>
               {run.output}
               <div className='self-end text-xs'>
                 {FormatCost(run.cost)} • {FormatDate(run.timestamp)}
