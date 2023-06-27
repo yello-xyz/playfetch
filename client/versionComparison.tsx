@@ -51,14 +51,15 @@ const truncate = (spans: Span[], maxLength: number) => {
 
 type ComparisonState = '=' | '-' | '+'
 const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: boolean }) => {
-  const taggedClassName = tagged ? 'font-bold mr-0.5' : 'mr-0.5'
+  const baseClassName = 'mr-0.5 whitespace-pre-wrap'
+  const taggedClassName = tagged ? 'font-bold' : ''
   switch (state) {
     case '=':
-      return taggedClassName
+      return `${baseClassName} ${taggedClassName}`
     case '-':
-      return `bg-red-300 ${taggedClassName}`
+      return `bg-red-300 ${baseClassName} ${taggedClassName}`
     case '+':
-      return `bg-green-200 ${taggedClassName}`
+      return `bg-green-200 ${baseClassName} ${taggedClassName}`
   }
 }
 
