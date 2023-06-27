@@ -53,7 +53,7 @@ export default function Button({
 
   return (
     <button
-      className={`${colorForType(type)} px-4 py-2 rounded-lg disabled:opacity-50`}
+      className={`${colorForType(type)} whitespace-nowrap px-4 py-2 rounded-lg disabled:opacity-50`}
       disabled={disabled}
       onClick={onClick}>
       {children}
