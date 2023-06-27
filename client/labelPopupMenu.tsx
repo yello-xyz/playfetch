@@ -1,4 +1,4 @@
-import { Project, Version } from '@/types'
+import { Project, ProperProject, Version, isProperProject } from '@/types'
 import api from './api'
 import PopupMenu from './popupMenu'
 import IconButton from './iconButton'
@@ -17,12 +17,14 @@ const projectLabelColors = [
   'bg-yellow-500',
 ]
 
-export const LabelColorsFromProject = (project?: Project) =>
-  Object.fromEntries(
-    (project?.labels ?? []).map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
-  )
+export const LabelColorsFromProject = (project: Project) =>
+  isProperProject(project)
+    ? Object.fromEntries(
+        project.labels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
+      )
+    : {}
 
-export default function LabelPopupMenu({ version, project }: { version: Version; project: Project }) {
+export default function LabelPopupMenu({ version, project }: { version: Version; project: ProperProject }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const trimmedLabel = newLabel.trim()

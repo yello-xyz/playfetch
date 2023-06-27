@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react'
-import { Project, PromptConfig, User, Version } from '@/types'
+import { Project, PromptConfig, User, Version, isProperProject } from '@/types'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
@@ -142,7 +142,7 @@ function VersionCell({
             )}
           </div>
           <div className='flex items-center gap-1'>
-            {project && <LabelPopupMenu project={project} version={version} />}
+            {isProperProject(project) && <LabelPopupMenu project={project} version={version} />}
             {!isOnly && <VersionPopupMenu version={version} />}
           </div>
         </div>
@@ -171,9 +171,7 @@ function UserDetails({ user }: { user: User }) {
   return (
     <div className='flex items-center gap-1 text-xs'>
       <UserAvatar user={user} size='small' />
-      <span className='font-normal'>
-        {user.fullName}
-      </span>
+      <span className='font-normal'>{user.fullName}</span>
     </div>
   )
 }

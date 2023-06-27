@@ -9,9 +9,16 @@ export type User = {
 export type Project = {
   id: number
   name: string
+  urlPath: string | null
+  labels: string[] | null
+}
+
+export type ProperProject = Project & {
   urlPath: string
   labels: string[]
 }
+
+export const isProperProject = (item: Project): item is ProperProject => (item as ProperProject).urlPath !== null
 
 export type ActiveProject = Project & {
   prompts: Prompt[]

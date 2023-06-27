@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Endpoint, Project, Prompt, Version } from '@/types'
+import { Endpoint, Project, Prompt, Version, isProperProject } from '@/types'
 import { PendingButton } from './button'
 import { HiExternalLink } from 'react-icons/hi'
 import { EndpointUIRoute } from './clientRoute'
@@ -88,7 +88,7 @@ export default function PublishPane({
           </div>
         )}
       </div>
-      {showPickNamePrompt && (
+      {showPickNamePrompt && isProperProject(project) && (
         <PickNameDialog
           title='Publish Prompt'
           confirmTitle='Publish'
