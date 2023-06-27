@@ -35,7 +35,7 @@ export default function VersionTimeline({
 }: {
   users: User[]
   versions: Version[]
-  project?: Project
+  project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
@@ -115,7 +115,7 @@ function VersionCell({
   isLast: boolean
   isActiveVersion: boolean
   previousVersion?: Version
-  project?: Project
+  project: Project
   onSelect: (version: Version) => void
 }) {
   const labelColors = LabelColorsFromProject(project)
@@ -146,7 +146,7 @@ function VersionCell({
             {!isOnly && <VersionPopupMenu version={version} />}
           </div>
         </div>
-        {user && <UserDetails user={user} />}
+        {user && project.id !== user.id && <UserDetails user={user} />}
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
