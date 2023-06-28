@@ -25,9 +25,7 @@ export default function PickProjectDialog({
 
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <DropdownMenu
-        value={projectID.toString()}
-        onChange={value => setProjectID(Number(value))}>
+      <DropdownMenu value={projectID.toString()} onChange={value => setProjectID(Number(value))}>
         {projects.map((project, index) => (
           <option key={index} value={project.id}>
             {project.name}

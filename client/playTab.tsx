@@ -25,7 +25,7 @@ export default function PlayTab({
   return (
     <>
       <div className='flex items-stretch h-full'>
-        <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 pr-4 max-w-[50%]'>
+        <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
           <VersionTimeline
             users={prompt.users}
             versions={prompt.versions}
@@ -39,10 +39,11 @@ export default function PlayTab({
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
               onRun={runPrompt}
+              showLabel
             />
           </Suspense>
         </div>
-        <div className='flex-1 p-6 pl-2'>
+        <div className='flex-1 p-6 pl-0'>
           <RunTimeline runs={activeVersion.runs} />
         </div>
       </div>

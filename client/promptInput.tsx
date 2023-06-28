@@ -4,6 +4,7 @@ import ContentEditable from 'react-contenteditable'
 import { useRef } from 'react'
 import Label from './label'
 import { StripPromptSentinels } from '@/common/formatting'
+import { Version } from '@/types'
 
 const inputStyle = 'class="text-white rounded px-1 py-0.5 bg-violet-500 font-normal"'
 const toHTML = (text: string) =>
@@ -51,10 +52,12 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerR
 export default function PromptInput({
   prompt,
   setPrompt,
+  showLabel,
   showInputControls,
 }: {
   prompt: string
   setPrompt: (prompt: string) => void
+  showLabel?: boolean
   showInputControls?: boolean
 }) {
   const contentEditableRef = useRef<HTMLElement>(null)
@@ -82,9 +85,11 @@ export default function PromptInput({
 
   return (
     <div ref={containerRef} className='relative flex flex-col gap-2'>
-      <div className='flex items-center block gap-2 mb-1'>
-        <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
-      </div>
+      {showLabel && (
+        <div className='flex items-center block gap-2 mb-1'>
+          <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
+        </div>
+      )}
       <ContentEditable
         className='p-4 text-gray-800 border border-gray-300 rounded-lg selection:bg-violet-300'
         onChange={event => setPrompt(fromHTML(event.currentTarget.innerHTML))}

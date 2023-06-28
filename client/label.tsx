@@ -11,7 +11,7 @@ export default function Label({
 }) {
   return (
     <label
-      className={`${className ?? ''} font-medium text-gray-600 cursor-default`}
+      className={`font-medium text-gray-600 cursor-default ${className ?? ''}`}
       htmlFor={htmlFor}
       onClick={onClick}>
       {children}
