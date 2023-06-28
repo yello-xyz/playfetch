@@ -26,12 +26,11 @@ export default function PromptPanel({
   showInputControls,
 }: {
   version: Version
-  setModifiedVersion: (version?: Version) => void
+  setModifiedVersion: (version: Version) => void
   onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => void
   showInputControls?: boolean
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
-
   const [config, setConfig] = useState(version.config)
 
   const [previousVersionID, setPreviousVersionID] = useState(version.id)
@@ -50,30 +49,12 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompt, config)
   const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
 
-  const lastRun = version.runs.slice(-1)[0]
-  const [inputState, setInputState] = useState<{ [key: string]: string }>(lastRun?.inputs ?? {})
-  const inputVariables = ExtractPromptVariables(prompt)
-  const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
+  // In the play tab, we let variables just stand for themselves rather than resolving them with test values.
+  // Once you start adding input variables in the Test tab, you are less likely to keep running in Play tab.
+  const dummyInputs = Object.fromEntries(ExtractPromptVariables(prompt).map(variable => [variable, variable]))
 
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
-      {showInputControls && inputVariables.length > 0 && (
-        <div className='flex flex-col gap-2'>
-          <Label>Inputs</Label>
-          {inputVariables.map((variable, index) => (
-            <div key={index} className='flex gap-2'>
-              <Label htmlFor={variable} className='flex-1'>
-                {variable}
-              </Label>
-              <TextInput
-                value={inputState[variable] ?? ''}
-                setValue={value => setInputState({ ...inputState, [variable]: value })}
-                id={variable}
-              />
-            </div>
-          ))}
-        </div>
-      )}
       <div className='self-stretch'>
         <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputControls={showInputControls} />
       </div>
@@ -88,7 +69,7 @@ export default function PromptPanel({
             <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
             <option value={'google'}>{labelForProvider('google')}</option>
           </DropdownMenu>
-          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [inputs])}>
+          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [dummyInputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>

@@ -18,7 +18,7 @@ export default function PlayTab({
   project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version?: Version) => void
+  setModifiedVersion: (version: Version) => void
 }) {
   const runPrompt = useRunPrompt(prompt.id)
 

@@ -20,7 +20,7 @@ export default function PromptTabView({
   project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version?: Version) => void
+  setModifiedVersion: (version: Version) => void
 }) {
   switch (activeTab) {
     case 'play':
