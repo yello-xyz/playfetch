@@ -88,9 +88,9 @@ export default function VersionTimeline({
   return (
     <>
       <div ref={containerRef} className='relative flex min-h-0'>
-        <div className='flex flex-col overflow-hidden'>
+        <div className='flex flex-col w-full overflow-hidden'>
           <input
-            className='w-full p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
+            className='p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
             type='text'
             value={filter}
             onChange={event => setFilter(event.target.value)}
