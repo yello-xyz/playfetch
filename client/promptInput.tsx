@@ -51,11 +51,11 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerR
 export default function PromptInput({
   prompt,
   setPrompt,
-  showInputs,
+  showInputControls,
 }: {
   prompt: string
   setPrompt: (prompt: string) => void
-  showInputs?: boolean
+  showInputControls?: boolean
 }) {
   const contentEditableRef = useRef<HTMLElement>(null)
 
@@ -64,7 +64,7 @@ export default function PromptInput({
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
-    if (showInputs) {
+    if (showInputControls) {
       document.addEventListener('selectionchange', selectionChangeHandler)
     }
     return () => {

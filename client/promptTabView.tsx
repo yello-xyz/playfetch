@@ -4,6 +4,7 @@ import { Project, ActivePrompt, Version, User } from '@/types'
 import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
 import PublishPane from './publishPane'
+import TestTab from './testTab'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export type ActivePromptTab = 'play' | 'test' | 'publish'
@@ -36,18 +37,13 @@ export default function PromptTabView({
       )
     case 'test':
       return (
-        <div className='p-8'>
-          <div>
-            <Suspense>
-              <PromptPanel
-                key={activeVersion.prompt}
-                version={activeVersion}
-                setModifiedVersion={setModifiedVersion}
-                showInputs
-              />
-            </Suspense>
-          </div>
-        </div>
+        <TestTab
+          prompt={prompt}
+          project={project}
+          activeVersion={activeVersion}
+          setActiveVersion={setActiveVersion}
+          setModifiedVersion={setModifiedVersion}
+        />
       )
     case 'publish':
       return (

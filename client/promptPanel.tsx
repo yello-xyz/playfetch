@@ -23,12 +23,12 @@ export default function PromptPanel({
   version,
   setModifiedVersion,
   onRun,
-  showInputs,
+  showInputControls,
 }: {
   version: Version
   setModifiedVersion: (version?: Version) => void
   onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
-  showInputs?: boolean
+  showInputControls?: boolean
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
 
@@ -57,7 +57,7 @@ export default function PromptPanel({
 
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
-      {showInputs && inputVariables.length > 0 && (
+      {showInputControls && inputVariables.length > 0 && (
         <div className='flex flex-col gap-2'>
           <Label>Inputs</Label>
           {inputVariables.map((variable, index) => (
@@ -75,7 +75,7 @@ export default function PromptPanel({
         </div>
       )}
       <div className='self-stretch'>
-        <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputs={showInputs} />
+        <PromptInput prompt={prompt} setPrompt={updatePrompt} showInputControls={showInputControls} />
       </div>
       {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {onRun && (
