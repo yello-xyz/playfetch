@@ -14,7 +14,7 @@ import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
 import { hasUserAccess } from './access'
-import { getProjectUsers } from './projects'
+import { ensureProjectAccess, getProjectUsers } from './projects'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -85,13 +85,6 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
       getID(promptData)
     )
   )
-}
-
-async function ensureProjectAccess(userID: number, projectID: number) {
-  const hasAccess = projectID === userID || (await hasUserAccess(userID, projectID))
-  if (!hasAccess) {
-    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
-  }
 }
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) => {

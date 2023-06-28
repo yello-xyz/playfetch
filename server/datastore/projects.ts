@@ -133,6 +133,13 @@ async function updateProject(projectData: any) {
   )
 }
 
+export async function ensureProjectAccess(userID: number, projectID: number) {
+  const hasAccess = projectID === userID || (await hasUserAccess(userID, projectID))
+  if (!hasAccess) {
+    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
+  }
+}
+
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const hasAccess = await hasUserAccess(userID, projectID)
   if (!hasAccess) {
