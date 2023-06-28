@@ -5,7 +5,7 @@ import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
-import { DependencyList, RefObject, useEffect, useRef, useState } from 'react'
+import { RefObject, useRef, useState } from 'react'
 import { useRefreshProjects, useRefreshPrompt } from './refreshContext'
 
 const projectLabelColors = [
