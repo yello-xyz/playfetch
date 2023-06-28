@@ -6,6 +6,7 @@ import { FocusEvent } from 'react'
 import { useRef } from 'react'
 import { HiCodeBracketSquare } from 'react-icons/hi2'
 import Label from './label'
+import { ExtractPromptVariables } from '@/common/formatting'
 
 export default function PromptInput({
   prompt,
@@ -16,9 +17,10 @@ export default function PromptInput({
   setPrompt: (prompt: string) => void
   showInputs?: boolean
 }) {
+  const styling = 'class="text-white rounded px-1 py-0.5 bg-violet-500 font-normal"'
   const contentEditableRef = useRef<HTMLElement>(null)
   const htmlContent = prompt
-    .replaceAll(/{{([^{]*?)}}/g, '<b>$1</b>')
+    .replaceAll(/{{([^{]*?)}}/g, `<b ${styling}>$1</b>`)
     .replaceAll(/\n(.*)$/gm, '<div>$1</div>')
     .replaceAll('<div></div>', '<div><br /></div>')
 
@@ -26,11 +28,11 @@ export default function PromptInput({
     setPrompt(
       sanitizeHtml(event.currentTarget.innerHTML, {
         allowedTags: ['br', 'div', 'b'],
-        allowedAttributes: {},
+        allowedAttributes: { b: ['class'] },
       })
         .replaceAll('<br />', '')
         .replaceAll(/<div>(.*?)<\/div>/g, '\n$1')
-        .replaceAll(/<b>(.*?)<\/b>/g, '{{$1}}')
+        .replaceAll(/<b[^>]*>(.*?)<\/b>/g, '{{$1}}')
         .replaceAll('{{}}', '')
         .replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
         .replaceAll(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
@@ -38,9 +40,17 @@ export default function PromptInput({
     )
   }
 
-  const extractVariable = (event: MouseEvent) => {
-    event.preventDefault()
-    document.execCommand('bold', false)
+  const inputs = ExtractPromptVariables(prompt)
+
+  const extractVariable = () => {
+    const selection = window.getSelection()?.toString()?.trim()
+    if (selection && selection.length > 0) {
+      if (inputs.includes(selection)) {
+        setPrompt(prompt.replaceAll(`{{${selection}}}`, selection))
+      } else {
+        setPrompt(prompt.replaceAll(selection, `{{${selection}}}`))
+      }
+    }
   }
 
   return (
