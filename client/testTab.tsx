@@ -11,6 +11,7 @@ import TextInput from './textInput'
 import { PendingButton } from './button'
 import RunTimeline from './runTimeline'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
+import TestDataPane from './testDataPane'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -44,10 +45,12 @@ export default function TestTab({
   }
 
   const runPrompt = useRunPrompt(prompt.id)
-  const lastRun = version.runs.slice(-1)[0]
-  const [inputState, setInputState] = useState<{ [key: string]: string }>(lastRun?.inputs ?? {})
-  const inputVariables = ExtractPromptVariables(version.prompt)
-  const inputs = Object.fromEntries(inputVariables.map(variable => [variable, inputState[variable] ?? '']))
+
+  const variables = ExtractPromptVariables(version.prompt)
+  // TODO get this from project
+  const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>({})
+  // TODO provide additional options beyond selecting the first available value for each variable
+  const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable]?.[0] ?? '']))
 
   return (
     <>
@@ -55,18 +58,7 @@ export default function TestTab({
         <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
           <div className='flex flex-col flex-grow gap-2'>
             <Label>Test Data</Label>
-            {inputVariables.map((variable, index) => (
-              <div key={index} className='flex gap-2'>
-                <Label htmlFor={variable} className='flex-1'>
-                  {variable}
-                </Label>
-                <TextInput
-                  value={inputState[variable] ?? ''}
-                  setValue={value => setInputState({ ...inputState, [variable]: value })}
-                  id={variable}
-                />
-              </div>
-            ))}
+            <TestDataPane variables={variables} inputValues={inputValues} setInputValues={setInputValues} />
           </div>
           <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={setVersion} />
           <Suspense>
@@ -76,7 +68,7 @@ export default function TestTab({
             <PendingButton
               disabled={!version.prompt.length}
               onClick={() => runPrompt(version.prompt, version.config, [inputs])}>
-              {'Run'}
+              Run
             </PendingButton>
           </div>
         </div>
