@@ -4,15 +4,18 @@ import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
+import { CalculatePopupOffset } from './labelPopupMenu'
 
-export default function VersionPopupMenu({ version }: { version: Version }) {
+export default function VersionPopupMenu({ version, containerRect }: { version: Version; containerRect?: DOMRect }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
   const refreshPrompt = useRefreshPrompt()
 
   const setDialogPrompt = useModalDialogPrompt()
+
+  const iconRef = useRef<HTMLDivElement>(null)
 
   const deleteVersion = async () => {
     setIsMenuExpanded(false)
@@ -24,15 +27,17 @@ export default function VersionPopupMenu({ version }: { version: Version }) {
   }
 
   return (
-    <div className='relative flex'>
-      <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+    <>
+      <div ref={iconRef}>
+        <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+      </div>
       {isMenuExpanded && (
-        <div className='absolute right-0 top-7'>
+        <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
           <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <PopupMenuItem destructive title='Delete' callback={deleteVersion} />
           </PopupMenu>
         </div>
       )}
-    </div>
+    </>
   )
 }

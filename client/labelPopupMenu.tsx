@@ -5,7 +5,7 @@ import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
-import { useState } from 'react'
+import { DependencyList, RefObject, useEffect, useRef, useState } from 'react'
 import { useRefreshProjects, useRefreshPrompt } from './refreshContext'
 
 const projectLabelColors = [
@@ -24,7 +24,23 @@ export const LabelColorsFromProject = (project: Project) =>
       )
     : {}
 
-export default function LabelPopupMenu({ version, project }: { version: Version; project: ProperProject }) {
+export const CalculatePopupOffset = (ref: RefObject<HTMLDivElement>, containerRect?: DOMRect) => {
+  const iconRect = ref.current?.getBoundingClientRect()
+  return {
+    right: (containerRect?.right ?? 0) - (iconRect?.right ?? 0),
+    top: (iconRect?.top ?? 0) - (containerRect?.top ?? 0) + 28,
+  }
+}
+
+export default function LabelPopupMenu({
+  version,
+  project,
+  containerRect,
+}: {
+  version: Version
+  project: ProperProject
+  containerRect?: DOMRect
+}) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const trimmedLabel = newLabel.trim()
@@ -36,6 +52,8 @@ export default function LabelPopupMenu({ version, project }: { version: Version;
 
   const refreshPrompt = useRefreshPrompt()
   const refreshProjects = useRefreshProjects()
+
+  const iconRef = useRef<HTMLDivElement>(null)
 
   const toggleLabel = (label: string) => {
     setIsMenuExpanded(false)
@@ -50,10 +68,12 @@ export default function LabelPopupMenu({ version, project }: { version: Version;
   }
 
   return (
-    <div className='relative flex'>
-      <IconButton icon={labelIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+    <>
+      <div ref={iconRef}>
+        <IconButton icon={labelIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+      </div>
       {isMenuExpanded && (
-        <div className='absolute right-0 top-7'>
+        <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <div className='p-3 w-80'>
               <input
@@ -82,6 +102,6 @@ export default function LabelPopupMenu({ version, project }: { version: Version;
           </PopupMenu>
         </div>
       )}
-    </div>
+    </>
   )
 }

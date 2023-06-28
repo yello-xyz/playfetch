@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, RefObject, useEffect, useRef, useState } from 'react'
 import { Project, PromptConfig, User, Version, isProperProject } from '@/types'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
@@ -26,6 +26,26 @@ const versionFilter = (filter: string) => (version: Version) => {
   )
 }
 
+function useScrollDetection(callback: () => void, element: RefObject<HTMLDivElement>) {
+  let frame = 0
+  const debouncedCallback = () => {
+    if (frame) {
+      cancelAnimationFrame(frame)
+    }
+    frame = requestAnimationFrame(() => {
+      callback()
+    })
+  }
+
+  useEffect(() => {
+    callback()
+    element.current?.addEventListener('scroll', debouncedCallback, { passive: true })
+    return () => {
+      element.current?.removeEventListener('scroll', debouncedCallback)
+    }
+  }, [element.current])
+}
+
 export default function VersionTimeline({
   users,
   versions,
@@ -41,6 +61,13 @@ export default function VersionTimeline({
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filter, setFilter] = useState('')
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerRect, setContainerRect] = useState<DOMRect>()
+  useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [containerRef.current])
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [_, forceStateUpdate] = useState(0)
+  useScrollDetection(() => forceStateUpdate(scrollRef.current?.scrollTop ?? 0), scrollRef)
 
   const selectVersion = (version: Version) => {
     setFocused(true)
@@ -60,37 +87,40 @@ export default function VersionTimeline({
 
   return (
     <>
-      <div className='flex flex-col flex-1 overflow-hidden'>
-        <input
-          className='w-full p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
-          type='text'
-          value={filter}
-          onChange={event => setFilter(event.target.value)}
-          placeholder='Filter'
-        />
-        {isFocused && versions.length > 1 && (
-          <VerticalBarWrapper strokeStyle='dashed'>
-            <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
-              <img className='w-6 h-6' src={historyIcon.src} />
-              View Full History
-            </div>
-          </VerticalBarWrapper>
-        )}
-        <div className='flex flex-col overflow-y-auto'>
-          {versionsToShow.map((version, index, items) => (
-            <VersionCell
-              key={index}
-              isOnly={versions.length == 1}
-              isLast={index === items.length - 1}
-              users={users}
-              version={version}
-              index={ascendingVersions.findIndex(v => v.id === version.id)}
-              isActiveVersion={version.id === activeVersion.id}
-              previousVersion={previousVersion}
-              project={project}
-              onSelect={selectVersion}
-            />
-          ))}
+      <div ref={containerRef} className='relative flex min-h-0'>
+        <div className='flex flex-col overflow-hidden'>
+          <input
+            className='w-full p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
+            type='text'
+            value={filter}
+            onChange={event => setFilter(event.target.value)}
+            placeholder='Filter'
+          />
+          {isFocused && versions.length > 1 && (
+            <VerticalBarWrapper strokeStyle='dashed'>
+              <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
+                <img className='w-6 h-6' src={historyIcon.src} />
+                View Full History
+              </div>
+            </VerticalBarWrapper>
+          )}
+          <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
+            {versionsToShow.map((version, index, items) => (
+              <VersionCell
+                key={index}
+                isOnly={versions.length == 1}
+                isLast={index === items.length - 1}
+                users={users}
+                version={version}
+                index={ascendingVersions.findIndex(v => v.id === version.id)}
+                isActiveVersion={version.id === activeVersion.id}
+                previousVersion={previousVersion}
+                project={project}
+                onSelect={selectVersion}
+                containerRect={containerRect}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </>
@@ -107,6 +137,7 @@ function VersionCell({
   previousVersion,
   project,
   onSelect,
+  containerRect,
 }: {
   users: User[]
   version: Version
@@ -117,6 +148,7 @@ function VersionCell({
   previousVersion?: Version
   project: Project
   onSelect: (version: Version) => void
+  containerRect?: DOMRect
 }) {
   const labelColors = LabelColorsFromProject(project)
   const user = users.find(user => user.id === version.userID)
@@ -142,8 +174,10 @@ function VersionCell({
             )}
           </div>
           <div className='flex items-center gap-1'>
-            {isProperProject(project) && <LabelPopupMenu project={project} version={version} />}
-            {!isOnly && <VersionPopupMenu version={version} />}
+            {isProperProject(project) && (
+              <LabelPopupMenu containerRect={containerRect} project={project} version={version} />
+            )}
+            {!isOnly && <VersionPopupMenu containerRect={containerRect} version={version} />}
           </div>
         </div>
         {user && project.id !== user.id && <UserDetails user={user} />}
