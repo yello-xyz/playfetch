@@ -102,6 +102,9 @@ const api = {
   updateVersionLabels: function (versionID: number, projectID: number, labels: string[]) {
     return post(this.updateVersionLabels, { versionID, projectID, labels })
   },
+  updateInputValues: function (projectID: number, name: string, values: string[]) {
+    return post(this.updateInputValues, { projectID, name, values })
+  },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },

@@ -1,4 +1,3 @@
-import api from '@/client/api'
 import { useRef, useState } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
@@ -7,12 +6,15 @@ export default function TestDataPane({
   variables,
   inputValues,
   setInputValues,
+  activeColumn,
+  setActiveColumn,
 }: {
   variables: string[]
   inputValues: { [key: string]: string[] }
   setInputValues: (inputValues: { [key: string]: string[] }) => void
+  activeColumn: number
+  setActiveColumn: (index: number) => void
 }) {
-  const [activeColumn, setActiveColumn] = useState(0)
   const activeVariable = variables[activeColumn]
   const activeInputs = inputValues[activeVariable] ?? ['']
 

@@ -87,12 +87,34 @@ export default function TestTab({
     setVersion(version)
     setModifiedVersion(version)
   }
+  const selectVersion = (version: Version) => {
+    persistValuesIfNeeded()
+    setVersion(version)
+    setActiveVersion(version)
+  }
 
   const setDialogPrompt = useModalDialogPrompt()
-
   const runPrompt = useRunPrompt(prompt.id)
 
+  const originalInputs = Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
+  const variables = ExtractPromptVariables(version.prompt)
+  const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>(originalInputs)
+  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+  const [activeColumn, setActiveColumn] = useState(0)
+  if (activeColumn >= variables.length) {
+    setActiveColumn(0)
+  }
+  const activeVariable = variables[activeColumn] || null
+  const activeInputs = activeVariable ? inputValues[activeVariable] ?? [] : []
+
+  const persistValuesIfNeeded = () => {
+    if (activeVariable && activeInputs.join(',') !== originalInputs[activeVariable].join(',')) {
+      api.updateInputValues(prompt.projectID, activeVariable, activeInputs)
+    }
+  }
+
   const testPrompt = async () => {
+    persistValuesIfNeeded()
     const inputs = selectInputs(allInputs, testMode)
     if (inputs.length > 1) {
       setDialogPrompt({
@@ -105,11 +127,10 @@ export default function TestTab({
     }
   }
 
-  const variables = ExtractPromptVariables(version.prompt)
-  const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>(
-    Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
-  )
-  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+  const selectColumn = (index: number) => {
+    persistValuesIfNeeded()
+    setActiveColumn(index)
+  }
 
   return (
     <>
@@ -117,9 +138,15 @@ export default function TestTab({
         <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
           <div className='flex flex-col flex-grow gap-2'>
             <Label>Test Data</Label>
-            <TestDataPane variables={variables} inputValues={inputValues} setInputValues={setInputValues} />
+            <TestDataPane
+              variables={variables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              activeColumn={activeColumn}
+              setActiveColumn={selectColumn}
+            />
           </div>
-          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={setActiveVersion} />
+          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={selectVersion} />
           <Suspense>
             <PromptPanel
               key={activeVersion.prompt}
