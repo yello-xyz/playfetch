@@ -36,8 +36,8 @@ export default function TestDataPane({
   const addInput = () => {
     updateInputs('', activeInputs.length)
     setTimeout(() => {
-      const container = containerRef.current
-      const lastChild = container ? (container.children[container.children.length - 1] as HTMLElement) : undefined
+      const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
+      const lastChild = editables[editables.length - 1] as HTMLElement
       lastChild?.focus()
     }, 0)
   }
@@ -56,13 +56,21 @@ export default function TestDataPane({
           ))}
         </div>
         <div ref={containerRef} className='flex flex-col'>
+          <div className='flex'>
+            <div className='border-b border-l border-gray-300 w-14' />
+            <div className='w-full px-2 py-1.5 font-medium text-gray-800 bg-white border-b border-gray-300 border-x'>
+              Value
+            </div>
+          </div>
           {activeInputs.map((value, index) => (
-            <ContentEditable
-              key={index}
-              className='w-full p-2 text-sm bg-white border-b border-gray-300 outline-none border-x'
-              html={value}
-              onChange={event => updateInputs(event.target.value, index)}
-            />
+            <div key={index} className='flex'>
+              <div className='text-center py-2.5 border-b border-l border-gray-300 w-14'>{index + 1}</div>
+              <ContentEditable
+                className='w-full p-2 text-sm bg-white border-b border-gray-300 outline-none border-x'
+                html={value}
+                onChange={event => updateInputs(event.target.value, index)}
+              />
+            </div>
           ))}
         </div>
         <div
