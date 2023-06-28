@@ -6,6 +6,16 @@ import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
+export const useRunPrompt =
+  (promptID: number) => async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
+    const savePrompt = useSavePrompt()
+    const refreshPrompt = useRefreshPrompt()
+
+    const versionID = await savePrompt()
+    await refreshPrompt(versionID)
+    await api.runPrompt(promptID, versionID, currentPrompt, config, inputs).then(_ => refreshPrompt(versionID))
+  }
+
 export default function TestTab({
   prompt,
   project,
@@ -19,22 +29,6 @@ export default function TestTab({
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version?: Version) => void
 }) {
-  const savePrompt = useSavePrompt()
-  const refreshPrompt = useRefreshPrompt()
-
-  const selectActiveVersion = (version: Version) => {
-    if (version.id !== activeVersion.id) {
-      savePrompt().then(() => refreshPrompt(version.id))
-      setActiveVersion(version)
-    }
-  }
-
-  const runPrompt = async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
-    const versionID = await savePrompt()
-    await refreshPrompt(versionID)
-    await api.runPrompt(prompt.id, versionID, currentPrompt, config, inputs).then(_ => refreshPrompt(versionID))
-  }
-
   return (
     <>
       <div className='p-8'>

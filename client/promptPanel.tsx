@@ -27,7 +27,7 @@ export default function PromptPanel({
 }: {
   version: Version
   setModifiedVersion: (version?: Version) => void
-  onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs) => void
+  onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => void
   showInputControls?: boolean
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
@@ -88,7 +88,7 @@ export default function PromptPanel({
             <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
             <option value={'google'}>{labelForProvider('google')}</option>
           </DropdownMenu>
-          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, inputs)}>
+          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>

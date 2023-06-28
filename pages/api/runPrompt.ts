@@ -69,10 +69,12 @@ export const runPromptWithConfig = async (
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
   const config: PromptConfig = req.body.config
-  const inputs: PromptInputs = req.body.inputs
-  const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs, false)
-  if (output?.length) {
-    await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, inputs, output, cost)
+  const multipleInputs: PromptInputs[] = req.body.inputs
+  for (const inputs of multipleInputs) {
+    const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs, false)
+    if (output?.length) {
+      await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, inputs, output, cost)
+    }
   }
   res.json({})
 }

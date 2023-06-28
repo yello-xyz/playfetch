@@ -70,7 +70,7 @@ const api = {
     versionID: number,
     prompt: string,
     config: PromptConfig,
-    inputs: PromptInputs
+    inputs: PromptInputs[]
   ) {
     return post(this.runPrompt, { promptID, versionID, prompt, config, inputs })
   },
