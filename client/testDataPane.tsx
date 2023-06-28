@@ -37,13 +37,12 @@ export default function TestDataPane({
     updateInputs('', activeInputs.length)
     setTimeout(() => {
       const container = containerRef.current
-      if (container) {
-        (container.children[container.childNodes.length - 1] as HTMLElement)?.focus()
-      }
+      const lastChild = container ? (container.children[container.children.length - 1] as HTMLElement) : undefined
+      lastChild?.focus()
     }, 0)
   }
 
-  return (
+  return variables.length ? (
     <>
       <div className='flex flex-col items-stretch'>
         <div className='flex border-l border-gray-300 border-y'>
@@ -74,5 +73,15 @@ export default function TestDataPane({
         </div>
       </div>
     </>
+  ) : (
+    <EmptyInputsPane />
+  )
+}
+
+function EmptyInputsPane() {
+  return (
+    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+      <span className='font-medium'>Create inputs for your prompt below</span>
+    </div>
   )
 }
