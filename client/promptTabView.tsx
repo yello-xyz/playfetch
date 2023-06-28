@@ -37,7 +37,6 @@ export default function PromptTabView({
       return (
         <TestTab
           prompt={prompt}
-          project={project}
           activeVersion={activeVersion}
           setActiveVersion={setActiveVersion}
           setModifiedVersion={setModifiedVersion}

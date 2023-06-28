@@ -20,6 +20,12 @@ export type ProperProject = Project & {
 
 export const isProperProject = (item: Project): item is ProperProject => (item as ProperProject).urlPath !== null
 
+export type InputValues = { 
+  id: number
+  name: string
+  values: string[]
+}
+
 export type ActiveProject = Project & {
   prompts: Prompt[]
   users: User[]
@@ -38,6 +44,7 @@ export type ActivePrompt = Prompt & {
   endpoint?: Endpoint
   versions: Version[]
   users: User[]
+  inputs: InputValues[]
 }
 
 export type PromptConfig = {
@@ -57,7 +64,7 @@ export type Version = {
   runs: Run[]
 }
 
-export type PromptInputs = { [variable: string]: string }
+export type PromptInputs = { [name: string]: string }
 
 export type Run = {
   id: number

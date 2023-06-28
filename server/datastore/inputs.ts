@@ -10,6 +10,7 @@ import {
   toID,
 } from './datastore'
 import { ensureProjectAccess } from './projects'
+import { InputValues } from '@/types'
 
 const toInputData = (projectID: number, name: string, values: string[], inputID?: number) => ({
   key: buildKey(Entity.INPUT, inputID),
@@ -26,7 +27,7 @@ export async function saveInputValues(userID: number, projectID: number, name: s
   await getDatastore().save(toInputData(projectID, name, values, key ? toID({ key }) : undefined))
 }
 
-export const toInput = (data: any) => ({
+export const toInput = (data: any): InputValues => ({
   id: getID(data),
   name: data.name,
   values: JSON.parse(data.values),

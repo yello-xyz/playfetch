@@ -72,13 +72,11 @@ const selectInputs = (inputs: { [key: string]: string[] }, mode: TestMode): { [k
 
 export default function TestTab({
   prompt,
-  project,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
 }: {
   prompt: ActivePrompt
-  project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -108,8 +106,9 @@ export default function TestTab({
   }
 
   const variables = ExtractPromptVariables(version.prompt)
-  // TODO get this from project
-  const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>({})
+  const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>(
+    Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
+  )
   const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
   return (
