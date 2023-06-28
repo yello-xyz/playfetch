@@ -50,7 +50,7 @@ export default function PlayTab({
           />
           <Suspense>
             <PromptPanel
-              key={activeVersion.id}
+              key={activeVersion.prompt}
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
               onRun={runPrompt}

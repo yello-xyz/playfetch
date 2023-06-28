@@ -40,7 +40,7 @@ export default function PromptTabView({
           <div>
             <Suspense>
               <PromptPanel
-                key={activeVersion.id}
+                key={activeVersion.prompt}
                 version={activeVersion}
                 setModifiedVersion={setModifiedVersion}
                 showInputs

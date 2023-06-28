@@ -126,6 +126,10 @@ export default function Home({
   }
 
   const [selectedTab, setSelectedTab] = useState<ActivePromptTab>('play')
+  const updateSelectedTab = (tab: ActivePromptTab) => {
+    savePrompt().then(versionID => refreshPrompt(activePrompt!.id, versionID))
+    setSelectedTab(tab)
+  }
 
   return (
     <>
@@ -154,7 +158,7 @@ export default function Home({
                 activePrompt={activePrompt}
                 onAddPrompt={addPrompt}>
                 {activePrompt && (
-                  <SegmentedControl selected={selectedTab} callback={setSelectedTab}>
+                  <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                     <Segment value={'play'} title='Play' />
                     <Segment value={'test'} title='Test' />
                     <Segment value={'publish'} title='Publish' />
