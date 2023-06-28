@@ -1,11 +1,9 @@
-import { Suspense } from 'react'
-import { Project, ActivePrompt, Version, User } from '@/types'
+import { Project, ActivePrompt, Version } from '@/types'
 
 import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
 import PublishPane from './publishPane'
 import TestTab from './testTab'
-const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export type ActivePromptTab = 'play' | 'test' | 'publish'
 

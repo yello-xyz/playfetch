@@ -58,11 +58,6 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
-  const selectVersion = (version?: Version) => {
-    setActiveVersion(version)
-    setModifiedVersion(undefined)
-  }
-
   const savePrompt = async () => {
     const versionNeedsSaving =
       activePrompt &&
@@ -78,10 +73,22 @@ export default function Home({
       : activeVersion?.id
   }
 
+  const updateVersion = (version?: Version) => {
+    setActiveVersion(version)
+    setModifiedVersion(undefined)
+  }
+
+  const selectVersion = (version: Version) => {
+    if (activePrompt && activeVersion && version.id !== activeVersion.id) {
+      savePrompt().then(() => refreshPrompt(activePrompt.id, version.id))
+      updateVersion(version)
+    }
+  }
+
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
     const newPrompt = await api.getPrompt(promptID)
     setActiveItem(newPrompt)
-    selectVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions[0])
+    updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions[0])
   }
 
   const selectPrompt = async (promptID: number) => {
@@ -95,7 +102,7 @@ export default function Home({
   const refreshProject = async (projectID: number) => {
     const newProject = await api.getProject(projectID)
     setActiveItem(newProject)
-    selectVersion(undefined)
+    updateVersion(undefined)
   }
 
   const selectProject = async (projectID: number) => {

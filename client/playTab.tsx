@@ -1,6 +1,6 @@
 import api from '@/client/api'
 import { Suspense } from 'react'
-import { ActivePrompt, Version, PromptInputs, PromptConfig, Project, User } from '@/types'
+import { ActivePrompt, Version, PromptInputs, PromptConfig, Project } from '@/types'
 import VersionTimeline from '@/client/versionTimeline'
 
 import dynamic from 'next/dynamic'
@@ -24,13 +24,6 @@ export default function PlayTab({
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
 
-  const selectActiveVersion = (version: Version) => {
-    if (version.id !== activeVersion.id) {
-      savePrompt().then(() => refreshPrompt(version.id))
-      setActiveVersion(version)
-    }
-  }
-
   const runPrompt = async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs) => {
     const versionID = await savePrompt()
     await refreshPrompt(versionID)
@@ -46,7 +39,7 @@ export default function PlayTab({
             versions={prompt.versions}
             project={project}
             activeVersion={activeVersion}
-            setActiveVersion={selectActiveVersion}
+            setActiveVersion={setActiveVersion}
           />
           <Suspense>
             <PromptPanel
