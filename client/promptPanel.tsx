@@ -4,8 +4,6 @@ import { ExtractPromptVariables } from '@/common/formatting'
 import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
-import TextInput from './textInput'
-import Label from './label'
 import DropdownMenu from './dropdownMenu'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {

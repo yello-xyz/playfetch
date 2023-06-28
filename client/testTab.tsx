@@ -7,11 +7,12 @@ import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import Label from './label'
 import { ExtractPromptVariables } from '@/common/formatting'
-import TextInput from './textInput'
 import { PendingButton } from './button'
 import RunTimeline from './runTimeline'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import TestDataPane from './testDataPane'
+import DropdownMenu from './dropdownMenu'
+import useModalDialogPrompt from './modalDialogContext'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -22,6 +23,50 @@ export const useRunPrompt = (promptID: number) => {
     const versionID = await savePrompt()
     await refreshPrompt(versionID)
     await api.runPrompt(promptID, versionID, currentPrompt, config, inputs).then(_ => refreshPrompt(versionID))
+  }
+}
+
+type TestMode = 'first' | 'last' | 'random' | 'all'
+
+const selectInputs = (inputs: { [key: string]: string[] }, mode: TestMode): { [key: string]: string }[] => {
+  const selectInput = (inputs: string[], mode: TestMode): string => {
+    switch (mode) {
+      default:
+      case 'first':
+        return inputs[0] ?? ''
+      case 'last':
+        return inputs[inputs.length - 1] ?? ''
+      case 'random':
+        return inputs[Math.floor(Math.random() * inputs.length)] ?? ''
+    }
+  }
+
+  const cartesian = (array: string[][]) =>
+    array.reduce(
+      (a, b) => {
+        return a
+          .map(x => {
+            return b.map(y => {
+              return x.concat(y)
+            })
+          })
+          .reduce((c, d) => c.concat(d), [])
+      },
+      [[]] as string[][]
+    )
+
+  const entries = Object.entries(inputs)
+
+  switch (mode) {
+    default:
+    case 'first':
+    case 'last':
+    case 'random':
+      return [Object.fromEntries(entries.map(([key, values]) => [key, selectInput(values, mode)]))]
+    case 'all':
+      const keys = entries.map(([key, _]) => key)
+      const values = cartesian(entries.map(([_, values]) => values))
+      return values.map(value => Object.fromEntries(keys.map((key, i) => [key, value[i]])))
   }
 }
 
@@ -38,19 +83,34 @@ export default function TestTab({
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
 }) {
+  const [testMode, setTestMode] = useState<TestMode>('first')
   const [version, setVersion] = useState(activeVersion)
   const updateVersion = (version: Version) => {
     setVersion(version)
     setModifiedVersion(version)
   }
 
+  const setDialogPrompt = useModalDialogPrompt()
+
   const runPrompt = useRunPrompt(prompt.id)
+
+  const testPrompt = async () => {
+    const inputs = selectInputs(allInputs, testMode)
+    if (inputs.length > 1) {
+      setDialogPrompt({
+        title: `Run ${inputs.length} times?`,
+        confirmTitle: 'Run',
+        callback: async () => runPrompt(version.prompt, version.config, inputs),
+      })
+    } else {
+      await runPrompt(version.prompt, version.config, inputs)
+    }
+  }
 
   const variables = ExtractPromptVariables(version.prompt)
   // TODO get this from project
   const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>({})
-  // TODO provide additional options beyond selecting the first available value for each variable
-  const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable]?.[0] ?? '']))
+  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
   return (
     <>
@@ -60,14 +120,23 @@ export default function TestTab({
             <Label>Test Data</Label>
             <TestDataPane variables={variables} inputValues={inputValues} setInputValues={setInputValues} />
           </div>
-          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={setVersion} />
+          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={setActiveVersion} />
           <Suspense>
-            <PromptPanel key={version.prompt} version={version} setModifiedVersion={updateVersion} showInputControls />
+            <PromptPanel
+              key={activeVersion.prompt}
+              version={version}
+              setModifiedVersion={updateVersion}
+              showInputControls
+            />
           </Suspense>
-          <div className='self-end'>
-            <PendingButton
-              disabled={!version.prompt.length}
-              onClick={() => runPrompt(version.prompt, version.config, [inputs])}>
+          <div className='flex items-center self-end gap-4'>
+            <DropdownMenu size='medium' value={testMode} onChange={value => setTestMode(value as TestMode)}>
+              <option value={'first'}>First</option>
+              <option value={'last'}>Last</option>
+              <option value={'random'}>Random</option>
+              <option value={'all'}>All</option>
+            </DropdownMenu>
+            <PendingButton disabled={!version.prompt.length} onClick={testPrompt}>
               Run
             </PendingButton>
           </div>
@@ -107,7 +176,7 @@ function VersionSelector({
       <div className=''>
         <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
           {ascendingVersions.map((version, index) => (
-            <PopupMenuItem title={`Prompt ${index + 1}`} callback={() => selectVersion(version)} />
+            <PopupMenuItem key={index} title={`Prompt ${index + 1}`} callback={() => selectVersion(version)} />
           ))}
         </PopupMenu>
       </div>

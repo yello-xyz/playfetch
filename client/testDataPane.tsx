@@ -1,5 +1,4 @@
 import api from '@/client/api'
-import TextInput from './textInput'
 import { useRef, useState } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
@@ -50,6 +49,7 @@ export default function TestDataPane({
         <div className='flex border-l border-gray-300 border-y'>
           {variables.map((variable, index) => (
             <div
+              key={index}
               className={`font-medium border-r border-gray-300 px-3 py-2.5 ${styleForColumn(index)}`}
               onClick={() => setActiveColumn(index)}>
               {variable}
@@ -59,6 +59,7 @@ export default function TestDataPane({
         <div ref={containerRef} className='flex flex-col'>
           {activeInputs.map((value, index) => (
             <ContentEditable
+              key={index}
               className='w-full p-2 text-sm bg-white border-b border-gray-300 outline-none border-x'
               html={value}
               onChange={event => updateInputs(event.target.value, index)}
