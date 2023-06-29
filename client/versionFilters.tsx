@@ -1,5 +1,6 @@
 import { User, Version } from '@/types'
 import clearIcon from '@/public/clear.svg'
+import { UserAvatar } from './userSidebarItem'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
@@ -45,6 +46,7 @@ export default function VersionFilters({
           <FilterCell
             key={index}
             filter={filter}
+            users={users}
             labelColors={labelColors}
             onClick={() => setFilters(filters.filter((_, i) => i !== index))}
           />
@@ -70,23 +72,40 @@ export default function VersionFilters({
 
 function FilterCell({
   filter,
+  users,
   labelColors,
   onClick,
 }: {
   filter: VersionFilter
+  users: User[]
   labelColors: Record<string, string>
   onClick: () => void
 }) {
   return (
     <div className='flex items-center gap-1 p-1 pl-2 border border-gray-300 rounded-md'>
-      {isTextFilter(filter) && <>contains: “{filter.text}”</>}
-      {isLabelFilter(filter) && (
-        <>
-          label: <div className={`w-1.5 h-1.5 rounded-full ${labelColors[filter.label]}`} />
-          {filter.label}
-        </>
-      )}
+      {isTextFilter(filter) && <TextFilterCell filter={filter} />}
+      {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
+      {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
       <img className='w-[18px] h-[18px] cursor-pointer' src={clearIcon.src} onClick={onClick} />
     </div>
   )
+}
+
+const TextFilterCell = ({ filter }: { filter: TextFilter }) => <>contains: “{filter.text}”</>
+
+const LabelFilterCell = ({ filter, labelColors }: { filter: LabelFilter; labelColors: Record<string, string> }) => (
+  <>
+    label: <div className={`w-1.5 h-1.5 rounded-full ${labelColors[filter.label]}`} />
+    {filter.label}
+  </>
+)
+
+const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }) => {
+  const user = users.find(user => user.id === filter.userID)
+  return user ? (
+    <>
+      created by: <UserAvatar user={user} size='xs' />
+      {user.fullName}
+    </>
+  ) : null
 }

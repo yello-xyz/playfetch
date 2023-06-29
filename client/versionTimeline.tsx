@@ -211,7 +211,7 @@ function VersionCell({
 function UserDetails({ user }: { user: User }) {
   return (
     <div className='flex items-center gap-1 text-xs'>
-      <UserAvatar user={user} size='small' />
+      <UserAvatar user={user} size='sm' />
       <span className='font-normal'>{user.fullName}</span>
     </div>
   )

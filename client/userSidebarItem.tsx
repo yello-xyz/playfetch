@@ -5,18 +5,10 @@ import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
 import { useRefreshPage } from './refreshContext'
 
-export function UserAvatar({
-  user,
-  size = 'medium',
-  border,
-}: {
-  user: User
-  size?: 'small' | 'medium'
-  border?: boolean
-}) {
-  const sizeClass = size === 'small' ? 'w-[18px] h-[18px]' : 'w-7 h-7 font-medium'
+export function UserAvatar({ user, size = 'md', border }: { user: User; size?: 'xs' | 'sm' | 'md'; border?: boolean }) {
+  const sizeClass = size === 'xs' ? 'w-3.5 h-3.5' : size === 'sm' ? 'w-[18px] h-[18px]' : 'w-7 h-7 font-medium'
   const borderClass = border ? 'border-2 border-white' : ''
-  const textClass = size === 'small' ? 'text-[10px]' : border ? 'text-xs' : 'text-sm'
+  const textClass = size === 'xs' ? 'text-[8px]' : size === 'sm' ? 'text-[10px]' : border ? 'text-xs' : 'text-sm'
   const baseClass = 'rounded-full flex items-center justify-center'
   return (
     <div className={`${sizeClass} ${borderClass} ${textClass} ${user.avatarColor} ${baseClass}`}>
