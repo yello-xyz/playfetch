@@ -1,4 +1,4 @@
-import { ActiveProject, Project, Prompt, User } from '@/types'
+import { ActiveProject, ActivePrompt, Project, User, isProperProject } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -6,6 +6,7 @@ import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
 import { useRefreshProject, useRefreshPrompt, useSelectProject } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
+import ProjectPopupMenu from './projectPopupMenu'
 
 export default function TopBar({
   projects = [],
@@ -16,7 +17,7 @@ export default function TopBar({
 }: {
   projects: Project[]
   activeProject?: ActiveProject
-  activePrompt?: Prompt
+  activePrompt?: ActivePrompt
   onAddPrompt: (projectID: number) => void
   children?: ReactNode
 }) {
@@ -25,7 +26,6 @@ export default function TopBar({
   const onRefresh = activeProject ? useRefreshProject() : useRefreshPrompt()
   const selectProject = useSelectProject()
 
-  const projectName = projects.find(p => p.id === activeProject?.id)?.name
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
 
   return (
@@ -33,29 +33,40 @@ export default function TopBar({
       <div className='flex flex-col'>
         <div className={`z-10 flex items-center justify-between gap-4 px-6 ${children ? 'pt-4' : 'py-4'}`}>
           <div className='relative flex gap-1 py-2 text-base justify-self-start'>
-            {(projectName || promptProjectName) && <img className='w-6 h-6' src={projectIcon.src} />}
-            {activePrompt && promptProjectName && (
-              <span className='cursor-pointer' onClick={() => selectProject(activePrompt.projectID)}>
-                {promptProjectName}
-              </span>
+            <img className='w-6 h-6' src={projectIcon.src} />
+            {activePrompt && (
+              <>
+                <span className='cursor-pointer' onClick={() => selectProject(activePrompt.projectID)}>
+                  {promptProjectName}
+                </span>
+                <span className='font-medium'>{' / '}</span>
+              </>
             )}
-            {promptProjectName && <span className='font-medium'>{' / '}</span>}
-            {activePrompt ? (
+            {activeProject && !isProperProject(activeProject) ? (
+              <span className='font-medium'>{activeProject.name}</span>
+            ) : (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-                <span className='font-medium'>{activePrompt.name}</span>
+                <span className='font-medium'>{activeProject?.name ?? activePrompt?.name}</span>
                 <img className='w-6 h-6' src={chevronIcon.src} />
                 <div className='absolute right-0 top-8'>
-                  <PromptPopupMenu
-                    prompt={activePrompt}
-                    projects={projects}
-                    isMenuExpanded={isMenuExpanded}
-                    setIsMenuExpanded={setIsMenuExpanded}
-                    onRefresh={onRefresh}
-                  />
+                  {activePrompt && (
+                    <PromptPopupMenu
+                      prompt={activePrompt}
+                      projects={projects}
+                      isMenuExpanded={isMenuExpanded}
+                      setIsMenuExpanded={setIsMenuExpanded}
+                      onRefresh={onRefresh}
+                    />
+                  )}
+                  {activeProject && (
+                    <ProjectPopupMenu
+                      project={activeProject!}
+                      isMenuExpanded={isMenuExpanded}
+                      setIsMenuExpanded={setIsMenuExpanded}
+                    />
+                  )}
                 </div>
               </div>
-            ) : (
-              <span className='font-medium'>{projectName ?? 'Prompts'}</span>
             )}
           </div>
           <div className='flex items-center gap-4'>
