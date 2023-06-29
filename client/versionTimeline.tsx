@@ -5,6 +5,7 @@ import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu, { LabelColorsFromProject } from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
+import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -15,25 +16,6 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
     case 'google':
       return 'Google PaLM'
   }
-}
-
-type VersionFilter = { user: User } | { label: string } | { text: string }
-
-const versionFilter = (filters: VersionFilter[]) => (version: Version) => {
-  const userFilters = filters.filter(filter => 'user' in filter).map(filter => (filter as { user: User }).user)
-  const userFilter = (version: Version) => !userFilters.length || userFilters.some(user => user.id === version.userID)
-
-  const labelFilters = filters.filter(filter => 'label' in filter).map(filter => (filter as { label: string }).label)
-  const labelFilter = (version: Version) =>
-    !labelFilters.length || version.labels.some(label => labelFilters.includes(label))
-
-  const textFilters = filters
-    .filter(filter => 'text' in filter)
-    .map(filter => (filter as { text: string }).text.toLowerCase())
-  const textFilter = (version: Version) =>
-    !textFilters.length || textFilters.every(filter => version.prompt.toLowerCase().includes(filter))
-
-  return userFilter(version) && labelFilter(version) && textFilter(version)
 }
 
 function useScrollDetection(callback: () => void, element: RefObject<HTMLDivElement>) {
@@ -99,7 +81,7 @@ export default function VersionTimeline({
   const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID) + 1
   const versionsToShow = isFocused
     ? [...ascendingVersions.slice(0, previousIndex), ...ascendingVersions.slice(index)]
-    : ascendingVersions.filter(versionFilter(filters))
+    : ascendingVersions.filter(BuildVersionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
@@ -114,13 +96,7 @@ export default function VersionTimeline({
               </div>
             </VerticalBarWrapper>
           )}
-          <input
-            className='flex-grow p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
-            type='text'
-            value={filters.map(filter => ('text' in filter ? filter.text : '')).join(' ')}
-            onChange={event => setFilters(event.target.value.length ? [{ text: event.target.value }] : [])}
-            placeholder='Filter'
-          />
+          <VersionFilters versions={versions} filters={filters} setFilters={setFilters} />
           </div>
           <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
             {versionsToShow.map((version, index, items) => (
