@@ -72,7 +72,7 @@ export default function VersionTimeline({
   useEffect(() => {
     const element = document.getElementById(activeVersion.id.toString())
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', inline: 'nearest' })
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [activeVersion])
 
