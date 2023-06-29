@@ -41,6 +41,9 @@ const api = {
   addProject: function (name: string): Promise<number> {
     return post(this.addProject, { name })
   },
+  renameProject: function (projectID: number, name: string): Promise<void> {
+    return post(this.renameProject, { projectID, name })
+  },
   inviteMembers: function (projectID: number, emails: string[]): Promise<void> {
     return post(this.inviteMembers, { projectID, emails })
   },

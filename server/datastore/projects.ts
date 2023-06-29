@@ -148,6 +148,11 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
   return getKeyedEntity(Entity.PROJECT, projectID)
 }
 
+export async function updateProjectName(userID: number, projectID: number, name: string) {
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  await updateProject({ ...projectData, name })
+}
+
 export async function ensureProjectLabels(userID: number, projectID: number, labels: string[]) {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const oldLabels = JSON.parse(projectData.labels)
