@@ -81,8 +81,9 @@ export default function VersionTimeline({
   const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const ascendingVersions = versions.slice().reverse()
   const index = ascendingVersions.findIndex(version => version.id === activeVersion.id)
+  const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID) + 1
   const versionsToShow = isFocused
-    ? [...(previousVersion ? [previousVersion] : []), activeVersion, ...ascendingVersions.slice(index + 1, index + 2)]
+    ? [...ascendingVersions.slice(0, previousIndex), ...ascendingVersions.slice(index)]
     : ascendingVersions.filter(versionFilter(filter))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
