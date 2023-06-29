@@ -123,7 +123,7 @@ export default function VersionComparison({
 
   return (
     <>
-      {(previousVersion ? truncate(result, 25) : result).map((diff, index: number) => (
+      {truncate(result, 25).map((diff, index: number) => (
         <span key={index} className={classNameForDiff(diff)}>
           {diff.content}
         </span>
