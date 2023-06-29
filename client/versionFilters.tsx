@@ -42,7 +42,12 @@ export default function VersionFilters({
     <div className='flex items-start justify-between w-full gap-2'>
       <div className='flex flex-wrap flex-grow gap-2 text-xs text-gray-800'>
         {filters.map((filter, index) => (
-          <FilterCell key={index} filter={filter} onClick={() => setFilters(filters.filter((_, i) => i !== index))} />
+          <FilterCell
+            key={index}
+            filter={filter}
+            labelColors={labelColors}
+            onClick={() => setFilters(filters.filter((_, i) => i !== index))}
+          />
         ))}
         {filters.length > 1 && (
           <div
@@ -63,10 +68,24 @@ export default function VersionFilters({
   )
 }
 
-function FilterCell({ filter, onClick }: { filter: VersionFilter; onClick: () => void }) {
+function FilterCell({
+  filter,
+  labelColors,
+  onClick,
+}: {
+  filter: VersionFilter
+  labelColors: Record<string, string>
+  onClick: () => void
+}) {
   return (
     <div className='flex items-center gap-1 p-1 pl-2 border border-gray-300 rounded-md'>
       {isTextFilter(filter) && <>contains: “{filter.text}”</>}
+      {isLabelFilter(filter) && (
+        <>
+          label: <div className={`w-1.5 h-1.5 rounded-full ${labelColors[filter.label]}`} />
+          {filter.label}
+        </>
+      )}
       <img className='w-[18px] h-[18px] cursor-pointer' src={clearIcon.src} onClick={onClick} />
     </div>
   )
