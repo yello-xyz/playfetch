@@ -6,7 +6,7 @@ import userIcon from '@/public/user.svg'
 import labelIcon from '@/public/label.svg'
 import textIcon from '@/public/text.svg'
 import { UserAvatar } from './userSidebarItem'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useRef, useState } from 'react'
 import PopupMenu from './popupMenu'
 
 type UserFilter = { userID: number }
@@ -147,16 +147,31 @@ function FilterButton({
     label => !activeLabels.includes(label) && countForLabel(label) < versions.length
   )
 
+  const [text, setText] = useState('')
   const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'text'>('collapsed')
 
   const canShowTopLevel = availableUsers.length > 0 || availableLabels.length > 0
+
   const addFilter = (filter: VersionFilter) => {
     setMenuState('collapsed')
     setFilters([...filters, filter])
   }
 
+  const inputRef = useRef<HTMLInputElement>(null)
+  if (menuState === 'text' && !inputRef.current) {
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  const updateText = (newText: string) => {
+    setText(newText)
+    setFilters([
+      ...filters.filter(filter => !isTextFilter(filter) || filter.text !== text),
+      ...(newText.trim().length > 0 ? [{ text: newText }] : []),
+    ])
+  }
+
   return (
-    <div className='relative flex'>
+    <div className='relative flex overflow-visible'>
       <div
         className='flex items-center gap-1 px-2 pb-1.5 -mt-0.5 cursor-pointer'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
@@ -164,7 +179,10 @@ function FilterButton({
         Filter
       </div>
       <div className='absolute right-0 top-7'>
-        <PopupMenu className='w-56 p-3' expanded={menuState !== 'collapsed'} collapse={() => setMenuState('collapsed')}>
+        <PopupMenu
+          className={menuState === 'text' ? 'w-72 p-2' : 'w-56 p-3'}
+          expanded={menuState !== 'collapsed'}
+          collapse={() => setMenuState('collapsed')}>
           {menuState === 'expanded' && (
             <>
               {availableUsers.length > 0 && (
@@ -192,15 +210,17 @@ function FilterButton({
                 <div className='pr-2'>{countForUserID(user.id)}</div>
               </FilterPopupItem>
             ))}
+          {menuState === 'text' && (
+            <input
+              ref={inputRef}
+              type='text'
+              className='w-full text-xs border border-gray-300 outline-none rounded p-1.5'
+              value={text}
+              onChange={event => updateText(event.target.value)}
+            />
+          )}
         </PopupMenu>
       </div>
-      {/* <input
-        className='flex-grow p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
-        type='text'
-        value={filters.map(filter => ('text' in filter ? filter.text : '')).join(' ')}
-        onChange={event => setFilters(event.target.value.length ? [{ text: event.target.value }] : [])}
-        placeholder='Filter'
-      /> */}
     </div>
   )
 }

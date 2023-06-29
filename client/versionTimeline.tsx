@@ -88,7 +88,7 @@ export default function VersionTimeline({
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
       <div ref={containerRef} className='relative flex min-h-0'>
-        <div className='flex flex-col w-full overflow-hidden'>
+        <div className={`flex flex-col w-full ${versionsToShow.length > 0 ? 'overflow-hidden' : ''}`}>
           <div className='flex items-center gap-2'>
             {isFocused && versionsToShow.length < versions.length && (
               <VerticalBarWrapper strokeStyle='dashed'>
