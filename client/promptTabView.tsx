@@ -36,6 +36,7 @@ export default function PromptTabView({
     case 'test':
       return (
         <TestTab
+          key={activeVersion.prompt}
           prompt={prompt}
           activeVersion={activeVersion}
           setActiveVersion={setActiveVersion}
