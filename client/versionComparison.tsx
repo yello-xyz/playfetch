@@ -84,15 +84,9 @@ const tokenize = (prompt: string) => {
   return tokens
 }
 
-export default function VersionComparison({
-  version,
-  previousVersion,
-}: {
-  version: Version
-  previousVersion?: Version
-}) {
-  const parts = previousVersion
-    ? simplediff.diff(tokenize(previousVersion.prompt), tokenize(version.prompt))
+export default function VersionComparison({ version, compareVersion }: { version: Version; compareVersion?: Version }) {
+  const parts = compareVersion
+    ? simplediff.diff(tokenize(compareVersion.prompt), tokenize(version.prompt))
     : [['=', [version.prompt]]]
 
   const result = []

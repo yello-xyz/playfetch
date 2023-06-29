@@ -122,7 +122,7 @@ export default function VersionTimeline({
                 version={version}
                 index={ascendingVersions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
-                previousVersion={previousVersion}
+                compareVersion={version.id === activeVersion.id ? previousVersion : undefined}
                 project={project}
                 onSelect={selectVersion}
                 containerRect={containerRect}
@@ -144,7 +144,7 @@ function VersionCell({
   isOnly,
   isLast,
   isActiveVersion,
-  previousVersion,
+  compareVersion,
   project,
   onSelect,
   containerRect,
@@ -155,7 +155,7 @@ function VersionCell({
   isOnly: boolean
   isLast: boolean
   isActiveVersion: boolean
-  previousVersion?: Version
+  compareVersion?: Version
   project: Project
   onSelect: (version: Version) => void
   containerRect?: DOMRect
@@ -205,7 +205,7 @@ function VersionCell({
           </div>
         )}
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
-          <VersionComparison version={version} previousVersion={isActiveVersion ? previousVersion : undefined} />
+          <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </div>
     </VerticalBarWrapper>
