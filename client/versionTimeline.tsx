@@ -69,6 +69,13 @@ export default function VersionTimeline({
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(() => forceStateUpdate(scrollRef.current?.scrollTop ?? 0), scrollRef)
 
+  useEffect(() => {
+    const element = document.getElementById(activeVersion.id.toString())
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', inline: 'nearest' })
+    }
+  }, [activeVersion])
+
   const selectVersion = (version: Version) => {
     setFocused(true)
     setActiveVersion(version)
@@ -125,7 +132,9 @@ export default function VersionTimeline({
         </div>
       </div>
     </>
-  ) : <div/>
+  ) : (
+    <div />
+  )
 }
 
 function VersionCell({
@@ -156,6 +165,7 @@ function VersionCell({
 
   return (
     <VerticalBarWrapper
+      id={version.id.toString()}
       sequenceNumber={index + 1}
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
       strokeStyle={isLast ? 'none' : 'stroked'}>
@@ -212,11 +222,13 @@ function UserDetails({ user }: { user: User }) {
 }
 
 function VerticalBarWrapper({
+  id,
   sequenceNumber = undefined,
   bulletStyle = 'stroked',
   strokeStyle = 'none',
   children,
 }: {
+  id?: string
   sequenceNumber?: number
   bulletStyle?: 'filled' | 'stroked'
   strokeStyle?: 'stroked' | 'dashed' | 'none'
@@ -227,7 +239,7 @@ function VerticalBarWrapper({
   const isDashed = strokeStyle === 'dashed'
 
   return (
-    <div className='flex items-stretch gap-4'>
+    <div id={id} className='flex items-stretch gap-4'>
       <div className='flex flex-col items-end w-10 gap-1'>
         {sequenceNumber !== undefined && (
           <div className='flex items-center gap-2'>
