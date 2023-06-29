@@ -85,7 +85,7 @@ export default function VersionTimeline({
     ? [...(previousVersion ? [previousVersion] : []), activeVersion, ...ascendingVersions.slice(index + 1, index + 2)]
     : ascendingVersions.filter(versionFilter(filter))
 
-  return (
+  return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
       <div ref={containerRef} className='relative flex min-h-0'>
         <div className='flex flex-col w-full overflow-hidden'>
@@ -124,7 +124,7 @@ export default function VersionTimeline({
         </div>
       </div>
     </>
-  )
+  ) : <div/>
 }
 
 function VersionCell({

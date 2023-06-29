@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
 
