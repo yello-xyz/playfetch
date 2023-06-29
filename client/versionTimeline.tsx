@@ -17,13 +17,23 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
   }
 }
 
-const versionFilter = (filter: string) => (version: Version) => {
-  const lowerCaseFilter = filter.toLowerCase()
-  return (
-    version.labels.some(label => label.toLowerCase().includes(lowerCaseFilter)) ||
-    version.prompt.toLowerCase().includes(lowerCaseFilter) ||
-    version.runs.some(run => run.output.toLowerCase().includes(lowerCaseFilter))
-  )
+type VersionFilter = { user: User } | { label: string } | { text: string }
+
+const versionFilter = (filters: VersionFilter[]) => (version: Version) => {
+  const userFilters = filters.filter(filter => 'user' in filter).map(filter => (filter as { user: User }).user)
+  const userFilter = (version: Version) => !userFilters.length || userFilters.some(user => user.id === version.userID)
+
+  const labelFilters = filters.filter(filter => 'label' in filter).map(filter => (filter as { label: string }).label)
+  const labelFilter = (version: Version) =>
+    !labelFilters.length || version.labels.some(label => labelFilters.includes(label))
+
+  const textFilters = filters
+    .filter(filter => 'text' in filter)
+    .map(filter => (filter as { text: string }).text.toLowerCase())
+  const textFilter = (version: Version) =>
+    !textFilters.length || textFilters.every(filter => version.prompt.toLowerCase().includes(filter))
+
+  return userFilter(version) && labelFilter(version) && textFilter(version)
 }
 
 function useScrollDetection(callback: () => void, element: RefObject<HTMLDivElement>) {
@@ -60,7 +70,7 @@ export default function VersionTimeline({
   setActiveVersion: (version: Version) => void
 }) {
   const [isFocused, setFocused] = useState(true)
-  const [filter, setFilter] = useState('')
+  const [filters, setFilters] = useState<VersionFilter[]>([])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
@@ -81,17 +91,16 @@ export default function VersionTimeline({
     setActiveVersion(version)
   }
 
-  if (filter.length && isFocused) {
+  if (filters.length && isFocused) {
     setFocused(false)
   }
 
-  const previousVersion = versions.find(version => version.id === activeVersion.previousID)
   const ascendingVersions = versions.slice().reverse()
   const index = ascendingVersions.findIndex(version => version.id === activeVersion.id)
   const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID) + 1
   const versionsToShow = isFocused
     ? [...ascendingVersions.slice(0, previousIndex), ...ascendingVersions.slice(index)]
-    : ascendingVersions.filter(versionFilter(filter))
+    : ascendingVersions.filter(versionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
@@ -100,8 +109,8 @@ export default function VersionTimeline({
           <input
             className='p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
             type='text'
-            value={filter}
-            onChange={event => setFilter(event.target.value)}
+            value={filters.map(filter => ('text' in filter ? filter.text : '')).join(' ')}
+            onChange={event => setFilters([{ text: event.target.value }])}
             placeholder='Filter'
           />
           {versionsToShow.length < versions.length && (

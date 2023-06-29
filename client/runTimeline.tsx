@@ -25,7 +25,6 @@ function RunCell({ run }: { run: Run }) {
     setFormattedDate(FormatDate(run.timestamp))
   }, [run.timestamp])
 
-
   return (
     <div className='flex flex-col gap-3 p-4 whitespace-pre-wrap rounded-lg bg-sky-50'>
       {run.output}

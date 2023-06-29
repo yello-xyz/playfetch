@@ -115,7 +115,6 @@ export async function revokeMemberAccessForProject(userID: number, projectID: nu
   await revokeUserAccess(userID, projectID)
 }
 
-
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
   const projectData = await getEntity(Entity.PROJECT, 'urlPath', urlPath)
   return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey))
@@ -191,7 +190,7 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   }
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
   for (const key of promptKeys) {
-    await deletePromptForUser(userID, toID({key}))
+    await deletePromptForUser(userID, toID({ key }))
   }
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
   await getDatastore().delete([...accessKeys, ...inputKeys, buildKey(Entity.PROJECT, projectID)])

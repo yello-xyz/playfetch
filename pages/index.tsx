@@ -49,8 +49,7 @@ export default function Home({
   const [projects, setProjects] = useState(initialProjects)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt =>
-    (item as ActivePrompt).projectID !== undefined
+  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'projectID' in (item as ActivePrompt)
   const activeProject = isPrompt(activeItem) ? undefined : activeItem
   const activePrompt = isPrompt(activeItem) ? activeItem : undefined
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)

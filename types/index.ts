@@ -20,7 +20,7 @@ export type ProperProject = Project & {
 
 export const isProperProject = (item: Project): item is ProperProject => (item as ProperProject).urlPath !== null
 
-export type InputValues = { 
+export type InputValues = {
   id: number
   name: string
   values: string[]
