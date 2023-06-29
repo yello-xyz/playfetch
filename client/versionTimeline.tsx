@@ -122,7 +122,7 @@ export default function VersionTimeline({
                 version={version}
                 index={ascendingVersions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
-                compareVersion={version.id === activeVersion.id ? previousVersion : undefined}
+                compareVersion={versions.find(v => v.id === version.previousID)}
                 project={project}
                 onSelect={selectVersion}
                 containerRect={containerRect}
