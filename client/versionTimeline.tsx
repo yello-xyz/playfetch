@@ -54,6 +54,8 @@ export default function VersionTimeline({
   const [isFocused, setFocused] = useState(true)
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
+  const labelColors = LabelColorsFromProject(project)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
   useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [containerRef.current])
@@ -88,15 +90,21 @@ export default function VersionTimeline({
       <div ref={containerRef} className='relative flex min-h-0'>
         <div className='flex flex-col w-full overflow-hidden'>
           <div className='flex items-center gap-2'>
-          {isFocused && versionsToShow.length < versions.length && (
-            <VerticalBarWrapper strokeStyle='dashed'>
-              <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
-                <img className='w-6 h-6' src={historyIcon.src} />
-                View Full History
-              </div>
-            </VerticalBarWrapper>
-          )}
-          <VersionFilters versions={versions} filters={filters} setFilters={setFilters} />
+            {isFocused && versionsToShow.length < versions.length && (
+              <VerticalBarWrapper strokeStyle='dashed'>
+                <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
+                  <img className='w-6 h-6' src={historyIcon.src} />
+                  View Full History
+                </div>
+              </VerticalBarWrapper>
+            )}
+            <VersionFilters
+              users={users}
+              labelColors={labelColors}
+              versions={versions}
+              filters={filters}
+              setFilters={setFilters}
+            />
           </div>
           <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
             {versionsToShow.map((version, index, items) => (
@@ -105,6 +113,7 @@ export default function VersionTimeline({
                 isOnly={versions.length == 1}
                 isLast={index === items.length - 1}
                 users={users}
+                labelColors={labelColors}
                 version={version}
                 index={ascendingVersions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
@@ -125,6 +134,7 @@ export default function VersionTimeline({
 
 function VersionCell({
   users,
+  labelColors,
   version,
   index,
   isOnly,
@@ -136,6 +146,7 @@ function VersionCell({
   containerRect,
 }: {
   users: User[]
+  labelColors: Record<string, string>
   version: Version
   index: number
   isOnly: boolean
@@ -146,7 +157,6 @@ function VersionCell({
   onSelect: (version: Version) => void
   containerRect?: DOMRect
 }) {
-  const labelColors = LabelColorsFromProject(project)
   const user = users.find(user => user.id === version.userID)
 
   return (
