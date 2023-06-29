@@ -108,7 +108,7 @@ export default function TestTab({
   const activeInputs = activeVariable ? inputValues[activeVariable] ?? [] : []
 
   const persistValuesIfNeeded = () => {
-    if (activeVariable && activeInputs.join(',') !== originalInputs[activeVariable].join(',')) {
+    if (activeVariable && activeInputs.join(',') !== (originalInputs[activeVariable] ?? []).join(',')) {
       api.updateInputValues(prompt.projectID, activeVariable, activeInputs)
     }
   }
