@@ -135,13 +135,17 @@ function FilterButton({
 }) {
   const activeUserIDs = userIDsFromFilters(filters)
   const versionUserIDs = versions.map(version => version.userID)
-  const availableUsers = users.filter(user => versionUserIDs.includes(user.id) && !activeUserIDs.includes(user.id))
   const countForUserID = (userID: number) => versionUserIDs.filter(id => id === userID).length
+  const availableUsers = users.filter(
+    user => !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < versions.length
+  )
 
   const activeLabels = labelsFromFilters(filters)
   const versionLabels = versions.map(version => version.labels)
-  const availableLabels = [...new Set(versionLabels.flat())].filter(label => !activeLabels.includes(label))
   const countForLabel = (label: string) => versionLabels.filter(labels => labels.includes(label)).length
+  const availableLabels = [...new Set(versionLabels.flat())].filter(
+    label => !activeLabels.includes(label) && countForLabel(label) < versions.length
+  )
 
   const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'text'>('collapsed')
 
@@ -154,7 +158,7 @@ function FilterButton({
   return (
     <div className='relative flex'>
       <div
-        className='flex items-center gap-1 px-2 cursor-pointer'
+        className='flex items-center gap-1 px-2 pb-1.5 -mt-0.5 cursor-pointer'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
         <img className='w-6 h-6' src={filterIcon.src} />
         Filter
