@@ -13,7 +13,7 @@ import {
 import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
-import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess } from './access'
+import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
 import { toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 
@@ -109,6 +109,11 @@ export async function inviteMembersToProject(userID: number, projectID: number, 
     }
   }
 }
+
+export async function revokeMemberAccessForProject(userID: number, projectID: number) {
+  await revokeUserAccess(userID, projectID)
+}
+
 
 export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
   const projectData = await getEntity(Entity.PROJECT, 'urlPath', urlPath)
