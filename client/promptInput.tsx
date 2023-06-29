@@ -3,12 +3,11 @@ import sanitizeHtml from 'sanitize-html'
 import ContentEditable from 'react-contenteditable'
 import { useRef } from 'react'
 import Label from './label'
-import { StripPromptSentinels } from '@/common/formatting'
-import { Version } from '@/types'
 
 const inputStyle = 'class="text-white rounded px-1 py-0.5 bg-violet-500 font-normal"'
 const toHTML = (text: string) =>
   text
+    .replace(/}}$/, '}}&nbsp;')
     .replaceAll(/{{([^{]*?)}}/g, `<b ${inputStyle}>$1</b>`)
     .replaceAll(/\n(.*)$/gm, '<div>$1</div>')
     .replaceAll('<div></div>', '<div><br /></div>')
@@ -18,6 +17,7 @@ const fromHTML = (html: string) =>
     allowedTags: ['br', 'div', 'b'],
     allowedAttributes: { b: ['class'] },
   })
+    .replace(/}}&nbsp;$/, '}}')
     .replaceAll('<br />', '')
     .replaceAll(/<div>(.*?)<\/div>/g, '\n$1')
     .replaceAll(/<b[^>]*>(.*?)<\/b>/g, '{{$1}}')
