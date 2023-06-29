@@ -101,7 +101,7 @@ export default function TestTab({
   const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>(originalInputs)
   const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
   const [activeColumn, setActiveColumn] = useState(0)
-  if (activeColumn >= variables.length) {
+  if (activeColumn > 0 && activeColumn >= variables.length) {
     setActiveColumn(0)
   }
   const activeVariable = variables[activeColumn] || null
