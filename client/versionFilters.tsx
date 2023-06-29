@@ -50,7 +50,7 @@ export default function VersionFilters({
   setFilters: (filters: VersionFilter[]) => void
 }) {
   return (
-    <div className='flex items-start justify-between w-full gap-2'>
+    <div className='flex items-start flex-1 gap-2'>
       <div className='flex flex-wrap flex-1 gap-2 pb-2 text-xs text-gray-800'>
         {filters.map((filter, index) => (
           <FilterCell
@@ -155,6 +155,10 @@ function FilterButton({
   const addFilter = (filter: VersionFilter) => {
     setMenuState('collapsed')
     setFilters([...filters, filter])
+  }
+
+  if (menuState === 'collapsed' && text.length > 0) {
+    setText('')
   }
 
   const inputRef = useRef<HTMLInputElement>(null)
