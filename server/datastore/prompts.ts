@@ -121,11 +121,11 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
 
 export async function deletePromptForUser(userID: number, promptID: number) {
   await ensurePromptAccess(userID, promptID)
-  const versionIDs = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
-  const runIDs = await getEntityKeys(Entity.RUN, 'promptID', promptID)
+  const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
+  const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   await getDatastore().delete([
-    ...runIDs,
-    ...versionIDs,
+    ...runKeys,
+    ...versionKeys,
     buildKey(Entity.ENDPOINT, promptID),
     buildKey(Entity.PROMPT, promptID),
   ])

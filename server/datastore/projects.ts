@@ -4,6 +4,7 @@ import {
   buildKey,
   getDatastore,
   getEntity,
+  getEntityKeys,
   getID,
   getKeyedEntities,
   getKeyedEntity,
@@ -14,7 +15,7 @@ import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
-import { toPrompt } from './prompts'
+import { deletePromptForUser, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 
 export async function migrateProjects() {
@@ -177,4 +178,21 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getProjectsIDsForUser(userID)
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
   return [toUserProject(userID), ...projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)]
+}
+
+export async function deleteProjectForUser(userID: number, projectID: number) {
+  await ensureProjectAccess(userID, projectID)
+  if (projectID === userID) {
+    throw new Error('Cannot delete user project')
+  }
+  const accessKeys = await getEntityKeys(Entity.ACCESS, 'projectID', projectID)
+  if (accessKeys.length > 1) {
+    throw new Error('Cannot delete multi-user project')
+  }
+  const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
+  for (const key of promptKeys) {
+    await deletePromptForUser(userID, toID({key}))
+  }
+  const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
+  await getDatastore().delete([...accessKeys, ...inputKeys, buildKey(Entity.PROJECT, projectID)])
 }

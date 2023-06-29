@@ -41,14 +41,17 @@ const api = {
   addProject: function (name: string): Promise<number> {
     return post(this.addProject, { name })
   },
-  renameProject: function (projectID: number, name: string): Promise<void> {
+  renameProject: function (projectID: number, name: string) {
     return post(this.renameProject, { projectID, name })
   },
-  leaveProject: function (projectID: number): Promise<void> {
+  inviteMembers: function (projectID: number, emails: string[]) {
+    return post(this.inviteMembers, { projectID, emails })
+  },
+  leaveProject: function (projectID: number) {
     return post(this.leaveProject, { projectID })
   },
-  inviteMembers: function (projectID: number, emails: string[]): Promise<void> {
-    return post(this.inviteMembers, { projectID, emails })
+  deleteProject: function (projectID: number) {
+    return post(this.deleteProject, { projectID })
   },
   getPrompt: function (promptID: number): Promise<ActivePrompt> {
     return post(this.getPrompt, { promptID })
