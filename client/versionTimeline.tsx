@@ -192,9 +192,8 @@ function VersionCell({
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
               <div
-                className='px-1.5 text-xs flex items-center gap-1 rounded border border-gray-300 py-0.5'
+                className={`px-1.5 py-px text-xs text-white rounded ${labelColors[label]}`}
                 key={labelIndex}>
-                {labelColors[label] && <div className={`w-1.5 h-1.5 rounded-full ${labelColors[label]}`} />}
                 {label}
               </div>
             ))}

@@ -78,7 +78,7 @@ export default function LabelPopupMenu({
             <div className='p-3 w-80'>
               <input
                 type='text'
-                className='w-full text-sm mb-3 border border-gray-300 rounded-lg px-3 py-1.5'
+                className='w-full text-sm mb-3 border border-gray-300 outline-none rounded-lg px-3 py-1.5'
                 placeholder='Add a label'
                 value={newLabel}
                 onChange={event => setNewLabel(event.target.value)}

@@ -194,18 +194,16 @@ function VersionSelector({
   }
 
   return (
-    <div className='relative flex items-end cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-      <div className='flex items-center'>
+    <div className='relative flex items-end'>
+      <div className='flex items-center cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
         <Label className='cursor-pointer'>{`Prompt ${index + 1}`}</Label>
         <img className='w-6 h-6' src={chevronIcon.src} />
       </div>
-      <div className=''>
-        <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-          {ascendingVersions.map((version, index) => (
-            <PopupMenuItem key={index} title={`Prompt ${index + 1}`} callback={() => selectVersion(version)} />
-          ))}
-        </PopupMenu>
-      </div>
+      <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+        {ascendingVersions.map((version, index) => (
+          <PopupMenuItem key={index} title={`Prompt ${index + 1}`} callback={() => selectVersion(version)} />
+        ))}
+      </PopupMenu>
     </div>
   )
 }
