@@ -105,13 +105,7 @@ export default function VersionTimeline({
     <>
       <div ref={containerRef} className='relative flex min-h-0'>
         <div className='flex flex-col w-full overflow-hidden'>
-          <input
-            className='p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
-            type='text'
-            value={filters.map(filter => ('text' in filter ? filter.text : '')).join(' ')}
-            onChange={event => setFilters([{ text: event.target.value }])}
-            placeholder='Filter'
-          />
+          <div className='flex items-center gap-2'>
           {isFocused && versionsToShow.length < versions.length && (
             <VerticalBarWrapper strokeStyle='dashed'>
               <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
@@ -120,6 +114,14 @@ export default function VersionTimeline({
               </div>
             </VerticalBarWrapper>
           )}
+          <input
+            className='flex-grow p-2 mb-4 text-sm bg-white border border-gray-300 rounded-lg'
+            type='text'
+            value={filters.map(filter => ('text' in filter ? filter.text : '')).join(' ')}
+            onChange={event => setFilters(event.target.value.length ? [{ text: event.target.value }] : [])}
+            placeholder='Filter'
+          />
+          </div>
           <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
             {versionsToShow.map((version, index, items) => (
               <VersionCell
