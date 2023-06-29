@@ -156,7 +156,11 @@ export default function TestTab({
             />
           </Suspense>
           <div className='flex items-center self-end gap-4'>
-            <DropdownMenu size='medium' value={testMode} onChange={value => setTestMode(value as TestMode)}>
+            <DropdownMenu
+              disabled={!variables.length}
+              size='medium'
+              value={testMode}
+              onChange={value => setTestMode(value as TestMode)}>
               <option value={'first'}>First</option>
               <option value={'last'}>Last</option>
               <option value={'random'}>Random</option>
