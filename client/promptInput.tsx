@@ -31,11 +31,11 @@ type Selection = { text: string; range: Range; popupPoint: { x: number; y: numbe
 const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerRef: RefObject<HTMLElement>) => {
   const selection = document.getSelection()
   const selectionParent = selection?.anchorNode?.parentElement
-  if (selection && selectionParent?.textContent && containerRef.current) {
-    const isTopLevel = selectionParent === contentEditableRef.current
-    const isInput = !isTopLevel && selectionParent.parentElement === contentEditableRef.current
-    const text = isTopLevel ? selection.toString().trim() : selectionParent.textContent.trim()
-    if ((isTopLevel || isInput) && text.length > 0) {
+  if (selection && selectionParent && containerRef.current) {
+    const isPromptSelection = selectionParent.closest('[contenteditable=true]') === contentEditableRef.current
+    const isInput = selectionParent.tagName === 'B'
+    const text = isInput ? selectionParent.textContent!.trim() : selection.toString().trim()
+    if (isPromptSelection && text.length > 0) {
       const range = selection.getRangeAt(0)
       const selectionRect = range.getBoundingClientRect()
       const containerRect = containerRef.current.getBoundingClientRect()
