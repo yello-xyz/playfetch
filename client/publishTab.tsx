@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
 import Button, { PendingButton } from './button'
 import api from './api'
@@ -93,16 +93,9 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
         {endpoint && (
           <div className='flex flex-col items-start gap-4'>
             <Label>Endpoint</Label>
-            <div className='p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
-              <div className='relative overflow-hidden'>
-                <pre className='pl-10 break-all whitespace-pre-wrap'>{curlCommand}</pre>
-                <div className='absolute top-0 left-0'>
-                  <pre className='w-4 text-right text-gray-400'>
-                    {[...Array(100).keys()].map(i => (i + 1).toString()).join('\n')}
-                  </pre>
-                </div>
-              </div>
-            </div>
+            <CodeBlock>
+              <MarkedUpCURLCommand>{curlCommand}</MarkedUpCURLCommand>
+            </CodeBlock>
             {canCopyToClipboard && (
               <div className='self-end'>
                 <Button onClick={() => copyToClipboard(curlCommand)}>Copy</Button>
@@ -125,6 +118,63 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
     </>
   ) : (
     <EmptyPublishTab />
+  )
+}
+
+function CodeBlock({ children }: { children: ReactNode }) {
+  return (
+    <div className='p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
+      <div className='relative overflow-hidden'>
+        {children}
+        <div className='absolute top-0 left-0'>
+          <pre className='w-4 text-right text-gray-400'>
+            {[...Array(100).keys()].map(i => (i + 1).toString()).join('\n')}
+          </pre>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MarkedUpCURLCommand({ children }: { children: ReactNode }) {
+  return (
+    <pre className='pl-10 break-all whitespace-pre-wrap'>
+      {children
+        ?.toString()
+        .split('\n')
+        .map((line, index) => (
+          <div key={index}>
+            <MarkedUpStartLine
+              line={line}
+              markup={[
+                ['curl', 'text-fuchsia-500'],
+                ['-X POST', 'text-blue-500'],
+              ]}>
+              <MarkedUpStartLine line={line} markup={[['  -H', 'text-blue-500']]}>
+                <MarkedUpStartLine line={line} markup={[['  -d', 'text-blue-500']]}>
+                  {line}
+                </MarkedUpStartLine>
+              </MarkedUpStartLine>
+            </MarkedUpStartLine>
+          </div>
+        ))}
+    </pre>
+  )
+}
+
+function MarkedUpStartLine({ line, markup, children }: { line: string; markup: string[][]; children: ReactNode }) {
+  const sentinel = markup.map(([text]) => text).join(' ')
+  return line.startsWith(sentinel) ? (
+    <>
+      {markup.map(([text, color], index) => (
+        <span key={index} className={color}>
+          {index > 0 ? ' ' : ''}{text}
+        </span>
+      ))}
+      {line.replace(sentinel, '')}
+    </>
+  ) : (
+    <>{children}</>
   )
 }
 
