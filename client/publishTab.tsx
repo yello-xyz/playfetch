@@ -27,12 +27,17 @@ const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
 }
 
 export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePrompt; activeVersion: Version }) {
-  // TODO render all endpoints
-  const endpoint: ResolvedEndpoint | undefined = prompt.endpoints[0]
+  const availableFlavors = prompt.availableFlavors
+  const endpoints = prompt.endpoints
+  const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
+  const initialFlavor = availableFlavors.find(flavor => endpointFlavors.includes(flavor)) ?? availableFlavors[0]
+
+  const [flavor, setFlavor] = useState(initialFlavor)
+
+  const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
 
-  const [flavor, setFlavor] = useState(endpoint?.flavor ?? prompt.availableFlavors[0])
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -86,7 +91,7 @@ export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePr
     }
   }
 
-  return prompt.availableFlavors.length > 0 ? (
+  return availableFlavors.length > 0 ? (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <Label>Settings</Label>
@@ -94,7 +99,7 @@ export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePr
           <div className='flex items-center gap-8'>
             <Label>Environment</Label>
             <DropdownMenu value={flavor} onChange={setFlavor}>
-              {prompt.availableFlavors.map((flavor, index) => (
+              {availableFlavors.map((flavor, index) => (
                 <option key={index} value={flavor}>
                   {flavor}
                 </option>
