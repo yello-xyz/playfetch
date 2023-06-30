@@ -26,7 +26,15 @@ const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
   )
 }
 
-export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePrompt; activeVersion: Version }) {
+export default function PublishTab({
+  prompt,
+  activeVersion,
+  setActiveVersion,
+}: {
+  prompt: ActivePrompt
+  activeVersion: Version
+  setActiveVersion: (version: Version) => void
+}) {
   const availableFlavors = prompt.availableFlavors
   const endpoints = prompt.endpoints
   const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
@@ -115,6 +123,11 @@ export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePr
           />
           <Checkbox label='Cache' id='cache' checked={useCache} setChecked={toggleCache} />
         </div>
+        {version.id !== activeVersion.id && (
+          <div className='font-medium underline cursor-pointer text-grey-500' onClick={() => setActiveVersion(version)}>
+            Switch to published version
+          </div>
+        )}
       </div>
       <div className='flex flex-col p-6 pl-0 items-'>
         {endpoint && (

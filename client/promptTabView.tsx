@@ -42,10 +42,15 @@ export default function PromptTabView({
         )
       case 'publish':
         return (
-          <PublishTab key={activeVersion.id} activeVersion={activeVersion} prompt={prompt} />
+          <PublishTab
+            key={activeVersion.id}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            prompt={prompt}
+          />
         )
     }
   }
-  
+
   return <div className='flex items-stretch h-full'>{renderTab()}</div>
 }
