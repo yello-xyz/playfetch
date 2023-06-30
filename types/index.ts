@@ -73,9 +73,11 @@ export type Run = {
 export type Endpoint = {
   id: number
   promptID: number
+  versionID: number
   timestamp: string
   urlPath: string
   projectURLPath: string
+  flavor: string
   prompt: string
   config: PromptConfig
   useCache: boolean

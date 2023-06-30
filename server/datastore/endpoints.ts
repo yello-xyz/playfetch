@@ -165,9 +165,11 @@ const toEndpointData = (
 export const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
   promptID: data.promptID,
+  versionID: data.versionID,
   timestamp: getTimestamp(data),
   urlPath: data.urlPath,
   projectURLPath: data.projectURLPath,
+  flavor: data.flavor,
   prompt: data.prompt,
   config: JSON.parse(data.config),
   useCache: data.useCache,
