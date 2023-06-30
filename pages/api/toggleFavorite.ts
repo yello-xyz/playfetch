@@ -1,6 +1,3 @@
-import openai from '@/server/openai'
-import anthropic from '@/server/anthropic'
-import vertexai from '@/server/vertexai'
 import { withLoggedInSessionRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { toggleFavoritePrompt } from '@/server/datastore/prompts'

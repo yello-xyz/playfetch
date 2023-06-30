@@ -103,6 +103,26 @@ export async function getEndpointFromPath(
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
+export async function toggleEndpointCache(userID: number, endpointID: number, useCache: boolean) {
+  const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
+  await ensurePromptAccess(userID, endpointData.promptID)
+  await getDatastore().save(
+    toEndpointData(
+      endpointData.userID,
+      endpointData.promptID,
+      endpointData.versionID,
+      endpointData.urlPath,
+      endpointData.projectURLPath,
+      endpointData.flavor,
+      endpointData.createdAt,
+      endpointData.prompt,
+      JSON.parse(endpointData.config),
+      useCache,
+      getID(endpointData)
+    )
+  )
+}
+
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   try {

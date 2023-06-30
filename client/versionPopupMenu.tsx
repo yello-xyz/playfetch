@@ -21,7 +21,7 @@ export default function VersionPopupMenu({ version, containerRect }: { version: 
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: `Are you sure you want to delete this version? This action cannot be undone.`,
-      callback: () => api.deleteVersion(version.id).then(refreshPrompt),
+      callback: () => api.deleteVersion(version.id).then(_ => refreshPrompt()),
       destructive: true,
     })
   }

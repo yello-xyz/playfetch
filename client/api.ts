@@ -98,6 +98,9 @@ const api = {
   ): Promise<string> {
     return post(this.publishPrompt, { projectID, promptID, versionID, name, flavor, prompt, config, useCache })
   },
+  toggleCache: function (endpointID: number, useCache: boolean) {
+    return post(this.toggleCache, { endpointID, useCache })
+  },
   unpublishPrompt: function (endpointID: number) {
     return post(this.unpublishPrompt, { endpointID })
   },

@@ -27,7 +27,7 @@ const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
 
 export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; version: Version }) {
   // TODO render all endpoints
-  const endpoint: ResolvedEndpoint | undefined = prompt.endpoints[0]
+  const endpoint: ResolvedEndpoint | undefined = version.runs.length > 0 ? prompt.endpoints[0] : undefined
   // TODO allow publishing to other environments
   const flavor = prompt.availableFlavors[0]
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
@@ -78,6 +78,13 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
     }
   }
 
+  const toggleCache = (checked: boolean) => {
+    setUseCache(checked)
+    if (endpoint) {
+      api.toggleCache(endpoint.id, checked).then(_ => refreshPrompt())
+    }
+  }
+
   return prompt.availableFlavors.length > 0 ? (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
@@ -90,15 +97,8 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
             checked={!!endpoint}
             setChecked={togglePublish}
           />
-          <Checkbox label='Cache' id='cache' checked={useCache} setChecked={setUseCache} />
+          <Checkbox label='Cache' id='cache' checked={useCache} setChecked={toggleCache} />
         </div>
-        {endpoint && (
-          <div className='flex gap-2'>
-            <div className='font-bold text-black'>
-              Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
-            </div>{' '}
-          </div>
-        )}
       </div>
       <div className='flex flex-col p-6 pl-0 items-'>
         {endpoint && (
