@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Endpoint, Project, Prompt, Version, isProperProject } from '@/types'
+import { ActivePrompt, Endpoint, Project, Prompt, ProperProject, Version, isProperProject } from '@/types'
 import { PendingButton } from './button'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
@@ -14,13 +14,15 @@ export default function PublishPane({
   version,
   endpoints,
 }: {
-  project: Project
-  prompt: Prompt
+  project: ProperProject
+  prompt: ActivePrompt
   version: Version
   endpoints: Endpoint[]
 }) {
   // TODO render all endpoints
   const endpoint: Endpoint | undefined = endpoints[0]
+  // TODO allow publishing to other environments
+  const flavor = project.flavors[0]
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
@@ -44,7 +46,7 @@ export default function PublishPane({
         prompt.id,
         version.id,
         name,
-        null, // TODO allow publishing to other environments
+        flavor,
         version.prompt,
         version.config,
         inputs,

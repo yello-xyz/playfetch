@@ -91,7 +91,7 @@ const api = {
     promptID: number,
     versionID: number,
     name: string,
-    flavor: string | null,
+    flavor: string,
     prompt: string,
     config: PromptConfig,
     inputs: PromptInputs,

@@ -50,7 +50,7 @@ export async function saveEndpoint(
   versionID: number,
   urlPath: string,
   projectURLPath: string,
-  flavor: string | null, // TODO make less fragile by removing null option and get default flavor from project
+  flavor: string,
   prompt: string,
   config: PromptConfig,
   useCache: boolean
@@ -68,7 +68,7 @@ export async function saveEndpoint(
   }
   const previouslySaved = await getFilteredEntity(
     Entity.ENDPOINT,
-    and([buildFilter('promptID', promptID), buildFilter('flavor', flavor ?? 'default')])
+    and([buildFilter('promptID', promptID), buildFilter('flavor', flavor)])
   )
   await getDatastore().save(
     toEndpointData(
@@ -77,7 +77,7 @@ export async function saveEndpoint(
       versionID,
       urlPath,
       projectURLPath,
-      flavor ?? 'default',
+      flavor,
       new Date(),
       prompt,
       config,

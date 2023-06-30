@@ -11,11 +11,13 @@ export type Project = {
   name: string
   urlPath: string | null
   labels: string[] | null
+  flavors: string[] | null
 }
 
 export type ProperProject = Project & {
   urlPath: string
   labels: string[]
+  flavors: string[]
 }
 
 export const isProperProject = (item: Project): item is ProperProject => (item as ProperProject).urlPath !== null

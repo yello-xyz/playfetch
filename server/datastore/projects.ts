@@ -32,13 +32,14 @@ const toProjectData = (
   name: string,
   urlPath: string,
   labels: string[],
+  flavors: string[],
   createdAt: Date,
   apiKeyHash?: string,
   projectID?: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
-  data: { name, createdAt, labels: JSON.stringify(labels), urlPath, apiKeyHash },
-  excludeFromIndexes: ['name', 'apiKeyHash', 'labels'],
+  data: { name, createdAt, labels: JSON.stringify(labels), flavors: JSON.stringify(flavors), urlPath, apiKeyHash },
+  excludeFromIndexes: ['name', 'apiKeyHash', 'labels', 'flavors'],
 })
 
 const toProject = (data: any): Project => ({
@@ -46,6 +47,7 @@ const toProject = (data: any): Project => ({
   name: data.name,
   urlPath: data.urlPath,
   labels: JSON.parse(data.labels),
+  flavors: JSON.parse(data.flavors),
 })
 
 const toUserProject = (userID: number): Project => ({
@@ -53,6 +55,7 @@ const toUserProject = (userID: number): Project => ({
   name: 'Prompts',
   urlPath: null,
   labels: null,
+  flavors: null,
 })
 
 export async function getProjectUsers(userID: number, projectID: number): Promise<User[]> {
@@ -91,7 +94,7 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
 
 export async function addProjectForUser(userID: number, projectName: string) {
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  const projectData = toProjectData(projectName, urlPath, [], new Date())
+  const projectData = toProjectData(projectName, urlPath, [], ['default'], new Date())
   await getDatastore().save(projectData)
   const projectID = toID(projectData)
   await grantUserAccess(userID, projectID)
@@ -131,6 +134,7 @@ async function updateProject(projectData: any) {
       projectData.name,
       projectData.urlPath,
       JSON.parse(projectData.labels),
+      JSON.parse(projectData.flavors),
       projectData.createdAt,
       projectData.apiKeyHash,
       getID(projectData)

@@ -104,7 +104,7 @@ export default function TestTab({
   if (activeColumn > 0 && activeColumn >= variables.length) {
     setActiveColumn(0)
   }
-  const activeVariable = variables[activeColumn] || null
+  const activeVariable: string | undefined = variables[activeColumn]
   const activeInputs = activeVariable ? inputValues[activeVariable] ?? [] : []
 
   const persistValuesIfNeeded = () => {
