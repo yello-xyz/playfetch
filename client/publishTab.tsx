@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ActivePrompt, EndpointWithExample, Version } from '@/types'
-import { PendingButton } from './button'
+import Button, { PendingButton } from './button'
 import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
@@ -20,6 +20,10 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
 
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
+
+  const [canCopyToClipboard, setCanCopyToClipboard] = useState(false)
+  useEffect(() => setCanCopyToClipboard(!!navigator.clipboard?.writeText), [])
+  const copyToClipboard = (content: string) => navigator.clipboard.writeText(content)
 
   const publish = async (name: string) => {
     await savePrompt()
@@ -49,7 +53,7 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
 
   return prompt.availableFlavors.length > 0 ? (
     <>
-      <div className='flex flex-col gap-4 p-8 text-gray-500 max-w-prose'>
+      <div className='flex flex-col flex-1 gap-4 p-6 text-gray-500'>
         <div className='flex flex-wrap justify-between gap-10'>
           <div className='flex items-baseline gap-2'>
             <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
@@ -69,10 +73,19 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
             </div>{' '}
           </div>
         )}
+      </div>
+      <div className='flex flex-col p-6 pl-0 items-'>
         {endpoint && (
-          <div className='flex flex-col gap-4 text-black whitespace-pre-wrap'>
-            Try out your API endpoint by running:
-            <pre>{endpoint.curlCommand}</pre>
+          <div className='flex flex-col items-start gap-4'>
+            <Label>Endpoint</Label>
+            <div className='flex flex-col gap-4 p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
+              <pre>{endpoint.curlCommand}</pre>
+            </div>
+            {canCopyToClipboard && (
+              <div className='self-end'>
+                <Button onClick={() => copyToClipboard(endpoint.curlCommand)}>Copy</Button>
+              </div>
+            )}
           </div>
         )}
       </div>
