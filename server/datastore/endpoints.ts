@@ -110,7 +110,7 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
   } catch {
     throw new Error(`Endpoint with ID ${endpointID} does not exist or user has no access`)
   }
-  await getDatastore().delete(buildKey(Entity.ENDPOINT, endpointData.promptID))
+  await getDatastore().delete(buildKey(Entity.ENDPOINT, endpointID))
 }
 
 const toEndpointData = (
