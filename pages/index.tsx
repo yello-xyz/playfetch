@@ -151,6 +151,7 @@ export default function Home({
             selectPrompt,
             refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
             savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
+            selectTab: setSelectedTab,
           }}>
           <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
             <Sidebar

@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react'
+import { ActivePromptTab } from './promptTabView'
 
 type RefreshContextType = {
   refreshPage?: () => Promise<void>
@@ -9,6 +10,7 @@ type RefreshContextType = {
   selectPrompt?: (promptID: number) => Promise<void>
   refreshPrompt?: (focusVersionID?: number) => Promise<void>
   savePrompt?: () => Promise<number>
+  selectTab?: (tab: ActivePromptTab) => void
 }
 
 export const RefreshContext = createContext<RefreshContextType>({})
@@ -21,3 +23,4 @@ export const useRefreshProject = () => useContext(RefreshContext).refreshProject
 export const useSelectPrompt = () => useContext(RefreshContext).selectPrompt!
 export const useRefreshPrompt = () => useContext(RefreshContext).refreshPrompt!
 export const useSavePrompt = () => useContext(RefreshContext).savePrompt!
+export const useSelectTab = () => useContext(RefreshContext).selectTab!

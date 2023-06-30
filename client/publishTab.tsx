@@ -3,7 +3,7 @@ import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
 import Button from './button'
 import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
-import { useRefreshPrompt, useSavePrompt } from './refreshContext'
+import { useRefreshPrompt, useSavePrompt, useSelectTab } from './refreshContext'
 import PickNameDialog from './pickNameDialog'
 import Label from './label'
 import { ExtractPromptVariables, ToCamelCase } from '@/common/formatting'
@@ -44,6 +44,7 @@ export default function PublishTab({
 
   const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
+  const isPublishingDisabled = !endpoint && version.runs.length === 0
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
@@ -53,6 +54,7 @@ export default function PublishTab({
 
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
+  const selectTab = useSelectTab()
 
   const [canCopyToClipboard, setCanCopyToClipboard] = useState(false)
   useEffect(() => setCanCopyToClipboard(!!navigator.clipboard?.writeText), [])
@@ -99,6 +101,11 @@ export default function PublishTab({
     }
   }
 
+  const switchToPublishedVersion = () => {
+    setActiveVersion(version)
+    selectTab('play')
+  }
+
   return availableFlavors.length > 0 ? (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
@@ -117,15 +124,20 @@ export default function PublishTab({
           <Checkbox
             label='Publish'
             id='publish'
-            disabled={version.runs.length === 0}
+            disabled={isPublishingDisabled}
             checked={!!endpoint}
             setChecked={togglePublish}
           />
           <Checkbox label='Cache' id='cache' checked={useCache} setChecked={toggleCache} />
         </div>
         {version.id !== activeVersion.id && (
-          <div className='font-medium underline cursor-pointer text-grey-500' onClick={() => setActiveVersion(version)}>
+          <div className='font-medium underline cursor-pointer text-grey-500' onClick={switchToPublishedVersion}>
             Switch to published version
+          </div>
+        )}
+        {isPublishingDisabled && (
+          <div className='font-medium underline cursor-pointer text-grey-500' onClick={() => selectTab('test')}>
+            Test version before publishing
           </div>
         )}
       </div>
