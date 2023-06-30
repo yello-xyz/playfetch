@@ -93,8 +93,15 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
         {endpoint && (
           <div className='flex flex-col items-start gap-4'>
             <Label>Endpoint</Label>
-            <div className='flex flex-col gap-4 p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
-              <pre>{curlCommand}</pre>
+            <div className='p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
+              <div className='relative overflow-hidden'>
+                <pre className='pl-10 break-all whitespace-pre-wrap'>{curlCommand}</pre>
+                <div className='absolute top-0 left-0'>
+                  <pre className='w-4 text-right text-gray-400'>
+                    {[...Array(100).keys()].map(i => (i + 1).toString()).join('\n')}
+                  </pre>
+                </div>
+              </div>
             </div>
             {canCopyToClipboard && (
               <div className='self-end'>
