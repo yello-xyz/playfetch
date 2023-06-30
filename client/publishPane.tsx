@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { Endpoint, Project, Prompt, Version, isProperProject } from '@/types'
 import { PendingButton } from './button'
-import { HiExternalLink } from 'react-icons/hi'
-import { EndpointUIRoute } from './clientRoute'
-import Link from 'next/link'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
@@ -76,9 +73,6 @@ export default function PublishPane({
             <div className='font-bold text-black'>
               Prompt published as <pre className='inline'>{`/${endpoint.projectURLPath}/${endpoint.urlPath}`}</pre>
             </div>{' '}
-            <Link href={EndpointUIRoute(endpoint)} target='_blank'>
-              <HiExternalLink size={20} />
-            </Link>
           </div>
         )}
         {curlCommand && (

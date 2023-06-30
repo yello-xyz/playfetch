@@ -82,5 +82,4 @@ export type Endpoint = {
   prompt: string
   config: PromptConfig
   useCache: boolean
-  token: string
 }

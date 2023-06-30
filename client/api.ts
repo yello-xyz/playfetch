@@ -83,14 +83,6 @@ const api = {
   ) {
     return post(this.runPrompt, { promptID, versionID, prompt, config, inputs })
   },
-  runTokenizedEndpoint: function (
-    urlPath: string,
-    projectURLPath: string,
-    token: string,
-    inputs: { [key: string]: string }
-  ): Promise<{ output: string }> {
-    return post(this.runTokenizedEndpoint, { urlPath, projectURLPath, token, inputs })
-  },
   checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<{ url?: string }> {
     return post(this.checkEndpointName, { promptID, projectURLPath, name })
   },

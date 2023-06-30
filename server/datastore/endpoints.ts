@@ -1,6 +1,5 @@
 import { Endpoint, PromptConfig } from '@/types'
 import { and } from '@google-cloud/datastore'
-import ShortUniqueId from 'short-unique-id'
 import {
   Entity,
   buildFilter,
@@ -25,8 +24,7 @@ export async function migrateEndpoints() {
         endpointData.createdAt,
         endpointData.prompt,
         JSON.parse(endpointData.config),
-        endpointData.useCache,
-        endpointData.token
+        endpointData.useCache
       )
     )
   }
@@ -61,22 +59,15 @@ export async function saveEndpoint(
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
     throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
   }
-  const token = new ShortUniqueId({ length: 12, dictionary: 'alpha_upper' })()
-  await getDatastore().save(
-    toEndpointData(promptID, urlPath, projectURLPath, new Date(), prompt, config, useCache, token)
-  )
+  await getDatastore().save(toEndpointData(promptID, urlPath, projectURLPath, new Date(), prompt, config, useCache))
 }
 
-export async function getEndpointFromPath(
-  urlPath: string,
-  projectURLPath: string,
-  token?: string
-): Promise<Endpoint | undefined> {
+export async function getEndpointFromPath(urlPath: string, projectURLPath: string): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
     and([buildFilter('urlPath', urlPath), buildFilter('projectURLPath', projectURLPath)])
   )
-  return endpoint && (!token || endpoint.token === token) ? toEndpoint(endpoint) : undefined
+  return endpoint ? toEndpoint(endpoint) : undefined
 }
 
 export async function deleteEndpointForUser(userID: number, promptID: number) {
@@ -91,11 +82,10 @@ const toEndpointData = (
   createdAt: Date,
   prompt: string,
   config: PromptConfig,
-  useCache: boolean,
-  token: string
+  useCache: boolean
 ) => ({
   key: buildKey(Entity.ENDPOINT, promptID),
-  data: { urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), useCache, token },
+  data: { urlPath, projectURLPath, createdAt, prompt, config: JSON.stringify(config), useCache },
   excludeFromIndexes: ['prompt', 'config'],
 })
 
@@ -107,5 +97,4 @@ export const toEndpoint = (data: any): Endpoint => ({
   prompt: data.prompt,
   config: JSON.parse(data.config),
   useCache: data.useCache,
-  token: data.token,
 })

@@ -10,6 +10,6 @@ export async function runDataMigration() {
   // await migratePrompts()
   // await migrateVersions()
   // await migrateRuns()
-  // await migrateEndpoints()
-  await migrateAccess()
+  await migrateEndpoints()
+  // await migrateAccess()
 }
