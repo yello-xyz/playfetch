@@ -134,46 +134,44 @@ export default function TestTab({
 
   return (
     <>
-      <div className='flex items-stretch h-full'>
-        <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
-          <div className='flex flex-col flex-grow gap-2'>
-            <Label>Test Data</Label>
-            <TestDataPane
-              variables={variables}
-              inputValues={inputValues}
-              setInputValues={setInputValues}
-              activeColumn={activeColumn}
-              setActiveColumn={selectColumn}
-            />
-          </div>
-          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={selectVersion} />
-          <Suspense>
-            <PromptPanel
-              key={activeVersion.prompt}
-              version={version}
-              setModifiedVersion={updateVersion}
-              showInputControls
-            />
-          </Suspense>
-          <div className='flex items-center self-end gap-4'>
-            <DropdownMenu
-              disabled={!variables.length}
-              size='medium'
-              value={testMode}
-              onChange={value => setTestMode(value as TestMode)}>
-              <option value={'first'}>First</option>
-              <option value={'last'}>Last</option>
-              <option value={'random'}>Random</option>
-              <option value={'all'}>All</option>
-            </DropdownMenu>
-            <PendingButton disabled={!version.prompt.length} onClick={testPrompt}>
-              Run
-            </PendingButton>
-          </div>
+      <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
+        <div className='flex flex-col flex-grow gap-2'>
+          <Label>Test Data</Label>
+          <TestDataPane
+            variables={variables}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
+            activeColumn={activeColumn}
+            setActiveColumn={selectColumn}
+          />
         </div>
-        <div className='flex-1 p-6 pl-0'>
-          <RunTimeline runs={activeVersion.runs} />
+        <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={selectVersion} />
+        <Suspense>
+          <PromptPanel
+            key={activeVersion.prompt}
+            version={version}
+            setModifiedVersion={updateVersion}
+            showInputControls
+          />
+        </Suspense>
+        <div className='flex items-center self-end gap-4'>
+          <DropdownMenu
+            disabled={!variables.length}
+            size='medium'
+            value={testMode}
+            onChange={value => setTestMode(value as TestMode)}>
+            <option value={'first'}>First</option>
+            <option value={'last'}>Last</option>
+            <option value={'random'}>Random</option>
+            <option value={'all'}>All</option>
+          </DropdownMenu>
+          <PendingButton disabled={!version.prompt.length} onClick={testPrompt}>
+            Run
+          </PendingButton>
         </div>
+      </div>
+      <div className='flex-1 p-6 pl-0'>
+        <RunTimeline runs={activeVersion.runs} />
       </div>
     </>
   )

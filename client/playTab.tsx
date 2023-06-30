@@ -9,13 +9,11 @@ const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export default function PlayTab({
   prompt,
-  project,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
 }: {
   prompt: ActivePrompt
-  project: Project
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -24,22 +22,20 @@ export default function PlayTab({
 
   return (
     <>
-      <div className='flex items-stretch h-full'>
-        <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
-          <VersionTimeline prompt={prompt} activeVersion={activeVersion} setActiveVersion={setActiveVersion} />
-          <Suspense>
-            <PromptPanel
-              key={activeVersion.prompt}
-              version={activeVersion}
-              setModifiedVersion={setModifiedVersion}
-              onRun={runPrompt}
-              showLabel
-            />
-          </Suspense>
-        </div>
-        <div className='flex-1 p-6 pl-0'>
-          <RunTimeline runs={activeVersion.runs} />
-        </div>
+      <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
+        <VersionTimeline prompt={prompt} activeVersion={activeVersion} setActiveVersion={setActiveVersion} />
+        <Suspense>
+          <PromptPanel
+            key={activeVersion.prompt}
+            version={activeVersion}
+            setModifiedVersion={setModifiedVersion}
+            onRun={runPrompt}
+            showLabel
+          />
+        </Suspense>
+      </div>
+      <div className='flex-1 p-6 pl-0'>
+        <RunTimeline runs={activeVersion.runs} />
       </div>
     </>
   )

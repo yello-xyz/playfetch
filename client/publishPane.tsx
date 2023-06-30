@@ -66,9 +66,9 @@ export default function PublishPane({
     })
   }
 
-  return (
+  return prompt.availableFlavors.length > 0 ? (
     <>
-      <div className='flex flex-col gap-4 px-8 pt-8 text-gray-500 max-w-prose'>
+      <div className='flex flex-col gap-4 p-8 text-gray-500 max-w-prose'>
         <div className='flex flex-wrap justify-between gap-10'>
           <div className='flex items-baseline gap-2'>
             <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
@@ -107,5 +107,15 @@ export default function PublishPane({
         />
       )}
     </>
+  ) : (
+    <EmptyPublishPane />
+  )
+}
+
+function EmptyPublishPane() {
+  return (
+    <div className='flex flex-col items-center justify-center w-full p-8 m-8 bg-gray-100 rounded-lg'>
+      <span className='font-medium text-gray-600'>Move your prompt to a Project before publishing it</span>
+    </div>
   )
 }

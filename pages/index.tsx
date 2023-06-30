@@ -177,7 +177,6 @@ export default function Home({
                   <PromptTabView
                     activeTab={selectedTab}
                     prompt={activePrompt}
-                    project={promptProject}
                     activeVersion={activeVersion}
                     setActiveVersion={selectVersion}
                     setModifiedVersion={setModifiedVersion}
