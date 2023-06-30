@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
-import Button, { PendingButton } from './button'
+import Button from './button'
 import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
@@ -26,7 +26,7 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
   const endpoint: ResolvedEndpoint | undefined = prompt.endpoints[0]
   // TODO allow publishing to other environments
   const flavor = prompt.availableFlavors[0]
-  const curlCommand = buildCurlCommand(endpoint, version.runs[0])
+  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -66,20 +66,33 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
     })
   }
 
+  const togglePublish = () => {
+    if (endpoint) {
+      unpublish(endpoint.id)
+    } else {
+      setShowPickNamePrompt(true)
+    }
+  }
+
   return prompt.availableFlavors.length > 0 ? (
     <>
-      <div className='flex flex-col flex-1 gap-4 p-6 text-gray-500'>
-        <div className='flex flex-wrap justify-between gap-10'>
-          <div className='flex items-baseline gap-2'>
-            <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
-            <Label htmlFor='useCache'>Use cache</Label>
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
+        <Label>Settings</Label>
+        <div className='flex flex-col gap-2 p-6 py-4 bg-gray-100 rounded-lg w-60'>
+          <div className='flex items-baseline justify-between gap-2'>
+            <Label htmlFor='publish'>Publish</Label>
+            <input
+              type='checkbox'
+              id='publish'
+              disabled={version.runs.length === 0}
+              checked={!!endpoint}
+              onChange={togglePublish}
+            />
           </div>
-        </div>
-        <div className='flex gap-2'>
-          <PendingButton disabled={version.runs.length === 0} onClick={() => setShowPickNamePrompt(true)}>
-            {endpoint ? 'Republish' : 'Publish'}
-          </PendingButton>
-          {endpoint && <PendingButton onClick={() => unpublish(endpoint.id)}>Unpublish</PendingButton>}
+          <div className='flex items-baseline justify-between gap-2'>
+            <Label htmlFor='useCache'>Cache</Label>
+            <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
+          </div>
         </div>
         {endpoint && (
           <div className='flex gap-2'>
@@ -168,7 +181,8 @@ function MarkedUpStartLine({ line, markup, children }: { line: string; markup: s
     <>
       {markup.map(([text, color], index) => (
         <span key={index} className={color}>
-          {index > 0 ? ' ' : ''}{text}
+          {index > 0 ? ' ' : ''}
+          {text}
         </span>
       ))}
       {line.replace(sentinel, '')}
