@@ -79,50 +79,47 @@ export default function VersionTimeline({
   }
 
   const ascendingVersions = versions.slice().reverse()
-  const index = ascendingVersions.findIndex(version => version.id === activeVersion.id)
-  const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID) + 1
-  const versionsToShow = isFocused
-    ? [...ascendingVersions.slice(0, previousIndex), ...ascendingVersions.slice(index)]
-    : ascendingVersions.filter(BuildVersionFilter(filters))
+  const activeIndex = ascendingVersions.findIndex(version => version.id === activeVersion.id)
+  const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID)
+  const versionsToShow = isFocused ? ascendingVersions : ascendingVersions.filter(BuildVersionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
       <div ref={containerRef} className='relative flex min-h-0'>
         <div className={`flex flex-col w-full ${versionsToShow.length > 0 ? 'overflow-hidden' : ''}`}>
-          <div className='flex items-center gap-2'>
-            {isFocused && versionsToShow.length < versions.length && (
-              <VerticalBarWrapper strokeStyle='dashed'>
-                <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
-                  <img className='w-6 h-6' src={historyIcon.src} />
-                  View Full History
-                </div>
-              </VerticalBarWrapper>
-            )}
-            <VersionFilters
-              users={users}
-              labelColors={labelColors}
-              versions={versions}
-              filters={filters}
-              setFilters={setFilters}
-            />
-          </div>
+          <VersionFilters
+            users={users}
+            labelColors={labelColors}
+            versions={versions}
+            filters={filters}
+            setFilters={setFilters}
+          />
           <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
-            {versionsToShow.map((version, index, items) => (
-              <VersionCell
-                key={index}
-                isOnly={versions.length == 1}
-                isLast={index === items.length - 1}
-                users={users}
-                labelColors={labelColors}
-                version={version}
-                index={ascendingVersions.findIndex(v => v.id === version.id)}
-                isActiveVersion={version.id === activeVersion.id}
-                compareVersion={versions.find(v => v.id === version.previousID)}
-                project={project}
-                onSelect={selectVersion}
-                containerRect={containerRect}
-              />
-            ))}
+            {versionsToShow.map((version, index) =>
+              !isFocused || index <= previousIndex || index >= activeIndex ? (
+                <VersionCell
+                  key={index}
+                  isOnly={versions.length == 1}
+                  isLast={index === versionsToShow.length - 1}
+                  users={users}
+                  labelColors={labelColors}
+                  version={version}
+                  index={ascendingVersions.findIndex(v => v.id === version.id)}
+                  isActiveVersion={version.id === activeVersion.id}
+                  compareVersion={versions.find(v => v.id === version.previousID)}
+                  project={project}
+                  onSelect={selectVersion}
+                  containerRect={containerRect}
+                />
+              ) : index === previousIndex + 1 ? (
+                <VerticalBarWrapper key={index} strokeStyle='dashed'>
+                  <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
+                    <img className='w-6 h-6' src={historyIcon.src} />
+                    View Full History
+                  </div>
+                </VerticalBarWrapper>
+              ) : null
+            )}
           </div>
         </div>
       </div>
@@ -191,9 +188,7 @@ function VersionCell({
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
-              <div
-                className={`px-1.5 py-px text-xs text-white rounded ${labelColors[label]}`}
-                key={labelIndex}>
+              <div className={`px-1.5 py-px text-xs text-white rounded ${labelColors[label]}`} key={labelIndex}>
                 {label}
               </div>
             ))}
