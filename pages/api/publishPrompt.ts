@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { buildURLForClientRoute } from '@/server/routing'
 import { ToCamelCase } from '@/common/formatting'
 import { saveEndpoint } from '@/server/datastore/endpoints'
-import { getURLPathForProject, rotateProjectAPIKey } from '@/server/datastore/projects'
+import { getProjectAPIKeyDev, getURLPathForProject } from '@/server/datastore/projects'
 import { PromptConfig, PromptInputs } from '@/types'
 
 async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) {
@@ -28,7 +28,7 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse<string>) 
     useCache
   )
 
-  const apiKey = await rotateProjectAPIKey(userID, projectID)
+  const apiKey = await getProjectAPIKeyDev(userID, projectID)
   const url = buildURLForClientRoute(`/${projectURLPath}/${urlPath}`, req.headers)
 
   const curlCommand = Object.entries(inputs).length

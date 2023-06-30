@@ -35,11 +35,20 @@ const toProjectData = (
   flavors: string[],
   createdAt: Date,
   apiKeyHash?: string,
+  apiKeyDev?: string,
   projectID?: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
-  data: { name, createdAt, labels: JSON.stringify(labels), flavors: JSON.stringify(flavors), urlPath, apiKeyHash },
-  excludeFromIndexes: ['name', 'apiKeyHash', 'labels', 'flavors'],
+  data: {
+    name,
+    createdAt,
+    labels: JSON.stringify(labels),
+    flavors: JSON.stringify(flavors),
+    urlPath,
+    apiKeyHash,
+    apiKeyDev, // TODO do NOT store api key in datastore but show it once to user on creation
+  },
+  excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
 const toProject = (data: any): Project => ({
@@ -133,6 +142,7 @@ async function updateProject(projectData: any) {
       JSON.parse(projectData.flavors),
       projectData.createdAt,
       projectData.apiKeyHash,
+      projectData.apiKeyDev,
       getID(projectData)
     )
   )
@@ -165,11 +175,15 @@ export async function ensureProjectLabels(userID: number, projectID: number, lab
   await updateProject({ ...projectData, labels: JSON.stringify(newLabels) })
 }
 
-export async function rotateProjectAPIKey(userID: number, projectID: number): Promise<string> {
+export async function getProjectAPIKeyDev(userID: number, projectID: number): Promise<string> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
+  return projectData.apiKeyDev ?? rotateProjectAPIKey(projectData)
+}
+
+async function rotateProjectAPIKey(projectData: any): Promise<string> {
   const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
   const apiKeyHash = hashAPIKey(apiKey)
-  await updateProject({ ...projectData, apiKeyHash })
+  await updateProject({ ...projectData, apiKeyHash, apiKeyDev: apiKey })
   return apiKey
 }
 
