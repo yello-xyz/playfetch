@@ -8,6 +8,7 @@ import PickNameDialog from './pickNameDialog'
 import Label from './label'
 import { ExtractPromptVariables, ToCamelCase } from '@/common/formatting'
 import Checkbox from './checkbox'
+import DropdownMenu from './dropdownMenu'
 
 const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
   const apiKey = endpoint.apiKeyDev
@@ -29,10 +30,9 @@ export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePr
   // TODO render all endpoints
   const endpoint: ResolvedEndpoint | undefined = prompt.endpoints[0]
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
-  // TODO allow publishing to other environments
-  const flavor = prompt.availableFlavors[0]
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
 
+  const [flavor, setFlavor] = useState(endpoint?.flavor ?? prompt.availableFlavors[0])
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -90,7 +90,17 @@ export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePr
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <Label>Settings</Label>
-        <div className='flex flex-col gap-2 p-6 py-4 bg-gray-100 rounded-lg w-60'>
+        <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg w-96'>
+          <div className='flex items-center gap-8'>
+            <Label>Environment</Label>
+            <DropdownMenu value={flavor} onChange={setFlavor}>
+              {prompt.availableFlavors.map((flavor, index) => (
+                <option key={index} value={flavor}>
+                  {flavor}
+                </option>
+              ))}
+            </DropdownMenu>
+          </div>
           <Checkbox
             label='Publish'
             id='publish'
