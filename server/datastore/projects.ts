@@ -180,6 +180,7 @@ export async function getProjectsForUser(userID: number): Promise<Project[]> {
 }
 
 export async function deleteProjectForUser(userID: number, projectID: number) {
+  // TODO warn or even refuse when project has published endpoints
   await ensureProjectAccess(userID, projectID)
   if (projectID === userID) {
     throw new Error('Cannot delete user project')

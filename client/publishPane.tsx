@@ -12,13 +12,16 @@ export default function PublishPane({
   project,
   prompt,
   version,
-  endpoint,
+  endpoints,
 }: {
   project: Project
   prompt: Prompt
   version: Version
-  endpoint?: Endpoint
+  endpoints: Endpoint[]
 }) {
+  // TODO render all endpoints
+  const endpoint: Endpoint | undefined = endpoints[0]
+
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -36,17 +39,27 @@ export default function PublishPane({
 
     await savePrompt()
     await api
-      .publishPrompt(project!.id, prompt.id, name, version.prompt, version.config, inputs, useCache)
+      .publishPrompt(
+        project!.id,
+        prompt.id,
+        version.id,
+        name,
+        null, // TODO allow publishing to other environments
+        version.prompt,
+        version.config,
+        inputs,
+        useCache
+      )
       .then(setCURLCommand)
     refreshPrompt()
   }
 
-  const unpublish = () => {
+  const unpublish = (endpointID: number) => {
     setDialogPrompt({
       title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
       callback: async () => {
         setCURLCommand(undefined)
-        await api.unpublishPrompt(prompt.id)
+        await api.unpublishPrompt(endpointID)
         refreshPrompt()
       },
       destructive: true,
@@ -66,7 +79,7 @@ export default function PublishPane({
           <PendingButton disabled={version.runs.length === 0} onClick={() => setShowPickNamePrompt(true)}>
             {endpoint ? 'Republish' : 'Publish'}
           </PendingButton>
-          {endpoint && <PendingButton onClick={unpublish}>Unpublish</PendingButton>}
+          {endpoint && <PendingButton onClick={() => unpublish(endpoint.id)}>Unpublish</PendingButton>}
         </div>
         {endpoint && (
           <div className='flex gap-2'>

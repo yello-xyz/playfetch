@@ -28,7 +28,11 @@ indexes:
 
 - kind: endpoint
   properties:
+  - name: promptID
+  - name: flavor
+
+- kind: endpoint
+  properties:
   - name: name
   - name: projectURLPath
-  - name: createdAt
-    direction: desc
+  - name: flavor

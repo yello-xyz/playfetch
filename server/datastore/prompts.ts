@@ -3,6 +3,7 @@ import {
   Entity,
   buildKey,
   getDatastore,
+  getEntities,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -13,7 +14,6 @@ import {
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
-import { hasUserAccess } from './access'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 
@@ -50,7 +50,7 @@ export const toPrompt = (data: any): Prompt => ({
 
 export async function getActivePrompt(userID: number, promptID: number): Promise<ActivePrompt> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
-  const endpointData = await getKeyedEntity(Entity.ENDPOINT, promptID)
+  const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const users = await getProjectUsers(userID, promptData.projectID)
@@ -59,7 +59,7 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
   return {
     ...toPrompt(promptData),
     versions: versions.map(version => toVersion(version, runs)),
-    ...(endpointData ? { endpoint: toEndpoint(endpointData) } : {}),
+    endpoints: endpoints.map(endpoint => toEndpoint(endpoint)),
     users,
     inputs,
   }
@@ -100,11 +100,11 @@ export const getVerifiedUserPromptData = async (userID: number, promptID: number
 }
 
 export async function ensurePromptAccess(userID: number, promptID: number) {
-  const promptData = await getVerifiedUserPromptData(userID, promptID)
-  return !!promptData
+  await getVerifiedUserPromptData(userID, promptID)
 }
 
 export async function updatePromptProject(userID: number, promptID: number, projectID: number) {
+  // TODO should we update the endpoints project url paths or even refuse when prompt has published endpoints?
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   await updatePrompt({ ...promptData, projectID }, true)
 }
@@ -120,13 +120,15 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
+  // TODO warn or even refuse when prompt has published endpoints
   await ensurePromptAccess(userID, promptID)
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
+  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'promptID', promptID)
   const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   await getDatastore().delete([
     ...runKeys,
+    ...endpointKeys,
     ...versionKeys,
-    buildKey(Entity.ENDPOINT, promptID),
     buildKey(Entity.PROMPT, promptID),
   ])
 }

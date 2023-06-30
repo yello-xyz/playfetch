@@ -10,6 +10,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const apiKey = req.headers['x-api-key'] as string
 
   if (apiKey && projectURLPath && endpointName && (await checkProject(projectURLPath, apiKey))) {
+    // TODO decide which flavor to use and pass in below
     const endpoint = await getEndpointFromPath(endpointName, projectURLPath)
     if (endpoint) {
       const prompt = ExtractPromptVariables(endpoint.prompt).reduce(

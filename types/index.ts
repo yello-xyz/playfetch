@@ -41,7 +41,7 @@ export type Prompt = {
 }
 
 export type ActivePrompt = Prompt & {
-  endpoint?: Endpoint
+  endpoints: Endpoint[]
   versions: Version[]
   users: User[]
   inputs: InputValues[]
@@ -76,6 +76,7 @@ export type Run = {
 
 export type Endpoint = {
   id: number
+  promptID: number
   timestamp: string
   urlPath: string
   projectURLPath: string

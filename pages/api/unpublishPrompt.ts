@@ -4,9 +4,9 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function unpublishPrompt(req: NextApiRequest, res: NextApiResponse) {
   const userID = req.session.user!.id
-  const promptID = req.body.promptID
+  const endpointID = req.body.endpointID
 
-  await deleteEndpointForUser(userID, promptID)
+  await deleteEndpointForUser(userID, endpointID)
 
   res.json({})
 }

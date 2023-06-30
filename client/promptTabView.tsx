@@ -53,7 +53,7 @@ export default function PromptTabView({
                 version={activeVersion}
                 prompt={prompt}
                 project={project}
-                endpoint={prompt?.endpoint}
+                endpoints={prompt.endpoints}
               />
             )}
           </div>
