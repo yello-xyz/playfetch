@@ -1,7 +1,7 @@
-import { Project, ActivePrompt, Version } from '@/types'
+import { ActivePrompt, Version } from '@/types'
 
 import PlayTab from './playTab'
-import PublishPane from './publishPane'
+import PublishTab from './publishTab'
 import TestTab from './testTab'
 
 export type ActivePromptTab = 'play' | 'test' | 'publish'
@@ -42,7 +42,7 @@ export default function PromptTabView({
         )
       case 'publish':
         return (
-          <PublishPane key={activeVersion.id} version={activeVersion} prompt={prompt} endpoints={prompt.endpoints} />
+          <PublishTab key={activeVersion.id} version={activeVersion} prompt={prompt} endpoints={prompt.endpoints} />
         )
     }
   }

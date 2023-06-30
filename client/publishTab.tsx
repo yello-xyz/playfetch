@@ -8,7 +8,7 @@ import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import PickNameDialog from './pickNameDialog'
 import Label from './label'
 
-export default function PublishPane({
+export default function PublishTab({
   prompt,
   version,
   endpoints,
@@ -108,11 +108,11 @@ export default function PublishPane({
       )}
     </>
   ) : (
-    <EmptyPublishPane />
+    <EmptyPublishTab />
   )
 }
 
-function EmptyPublishPane() {
+function EmptyPublishTab() {
   return (
     <div className='flex flex-col items-center justify-center w-full p-8 m-8 bg-gray-100 rounded-lg'>
       <span className='font-medium text-gray-600'>Move your prompt to a Project before publishing it</span>
