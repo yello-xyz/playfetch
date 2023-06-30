@@ -1,14 +1,15 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
 import Button from './button'
 import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import Label from './label'
-import { ExtractPromptVariables, ToCamelCase } from '@/common/formatting'
+import { CheckValidURLPath, ExtractPromptVariables, ToCamelCase } from '@/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
+import { debounce } from 'debounce'
 
 const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
   const apiKey = endpoint.apiKeyDev
@@ -44,12 +45,17 @@ export default function PublishTab({
 
   const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
-  const publishingDisabled = !endpoint && version.runs.length === 0
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
 
-  const [name, setName] = useState(endpoint?.urlPath ?? ToCamelCase(prompt.name.split(' ').slice(0, 3).join(' ')))
+  const initialName = endpoint?.urlPath ?? ToCamelCase(prompt.name.split(' ').slice(0, 3).join(' '))
+  const [name, setName] = useState(initialName)
+  const [nameAvailable, setNameAvailable] = useState<boolean>()
+  useEffect(() => updateName(initialName), [initialName])
+
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
 
+  const noRuns = version.runs.length === 0
+  const publishingDisabled = !endpoint && (noRuns || !nameAvailable)
   const setDialogPrompt = useModalDialogPrompt()
 
   const refreshPrompt = useRefreshPrompt()
@@ -104,6 +110,22 @@ export default function PublishTab({
     selectTab('play')
   }
 
+  const checkName = useMemo(
+    () =>
+      debounce((name: string) => api.checkEndpointName(prompt.id, prompt.projectURLPath, name).then(setNameAvailable)),
+    [prompt]
+  )
+
+  const updateName = (name: string) => {
+    setName(name)
+    setNameAvailable(undefined)
+    if (CheckValidURLPath(name)) {
+      checkName(name)
+    } else {
+      setNameAvailable(false)
+    }
+  }
+
   return availableFlavors.length > 0 ? (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
@@ -121,10 +143,10 @@ export default function PublishTab({
           </div>
           <div className='flex items-center gap-8'>
             <Label className='w-32'>Name</Label>
-            {endpoint ? (
-              <div className='flex-1 text-right'>{endpoint.urlPath}</div>
+            {endpoint || noRuns ? (
+              <div className='flex-1 text-right'>{name}</div>
             ) : (
-              <TextInput disabled={publishingDisabled} value={name} setValue={setName} />
+              <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
             )}
           </div>
           <Checkbox
@@ -141,9 +163,14 @@ export default function PublishTab({
             Switch to published version
           </div>
         )}
-        {publishingDisabled && (
+        {noRuns && (
           <div className='font-medium underline cursor-pointer text-grey-500' onClick={() => selectTab('test')}>
             Test version before publishing
+          </div>
+        )}
+        {nameAvailable === false && name.length > 0 && (
+          <div className='font-medium text-grey-500'>
+            {CheckValidURLPath(name) ? 'Name already used for other prompt in project' : 'Invalid endpoint name'}
           </div>
         )}
       </div>

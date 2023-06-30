@@ -83,7 +83,7 @@ const api = {
   ) {
     return post(this.runPrompt, { promptID, versionID, prompt, config, inputs })
   },
-  checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<{ url?: string }> {
+  checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {
     return post(this.checkEndpointName, { promptID, projectURLPath, name })
   },
   publishPrompt: function (
