@@ -45,17 +45,13 @@ const toProjectData = (
 const toProject = (data: any): Project => ({
   id: getID(data),
   name: data.name,
-  urlPath: data.urlPath,
-  labels: JSON.parse(data.labels),
-  flavors: JSON.parse(data.flavors),
+  isUserProject: false,
 })
 
 const toUserProject = (userID: number): Project => ({
   id: userID,
   name: 'Prompts',
-  urlPath: null,
-  labels: null,
-  flavors: null,
+  isUserProject: true,
 })
 
 export async function getProjectUsers(userID: number, projectID: number): Promise<User[]> {

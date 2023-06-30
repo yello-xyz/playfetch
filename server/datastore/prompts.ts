@@ -50,6 +50,8 @@ export const toPrompt = (data: any): Prompt => ({
 
 export async function getActivePrompt(userID: number, promptID: number): Promise<ActivePrompt> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
+  const projectData =
+    promptData.projectID === userID ? undefined : await getKeyedEntity(Entity.PROJECT, promptData.projectID)
   const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
@@ -58,10 +60,14 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
 
   return {
     ...toPrompt(promptData),
+    projectID: promptData.projectID,
     versions: versions.map(version => toVersion(version, runs)),
     endpoints: endpoints.map(endpoint => toEndpoint(endpoint)),
     users,
     inputs,
+    projectURLPath: projectData?.urlPath ?? '',
+    availableLabels: projectData ? JSON.parse(projectData.labels) : [],
+    availableFlavors: projectData ? JSON.parse(projectData.flavors) : [],
   }
 }
 
@@ -125,10 +131,5 @@ export async function deletePromptForUser(userID: number, promptID: number) {
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'promptID', promptID)
   const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
-  await getDatastore().delete([
-    ...runKeys,
-    ...endpointKeys,
-    ...versionKeys,
-    buildKey(Entity.PROMPT, promptID),
-  ])
+  await getDatastore().delete([...runKeys, ...endpointKeys, ...versionKeys, buildKey(Entity.PROMPT, promptID)])
 }

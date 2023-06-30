@@ -26,13 +26,7 @@ export default function PlayTab({
     <>
       <div className='flex items-stretch h-full'>
         <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
-          <VersionTimeline
-            users={prompt.users}
-            versions={prompt.versions}
-            project={project}
-            activeVersion={activeVersion}
-            setActiveVersion={setActiveVersion}
-          />
+          <VersionTimeline prompt={prompt} activeVersion={activeVersion} setActiveVersion={setActiveVersion} />
           <Suspense>
             <PromptPanel
               key={activeVersion.prompt}

@@ -1,4 +1,4 @@
-import { Project, ProperProject, Version, isProperProject } from '@/types'
+import { ActivePrompt, Version } from '@/types'
 import api from './api'
 import PopupMenu from './popupMenu'
 import IconButton from './iconButton'
@@ -17,12 +17,10 @@ const projectLabelColors = [
   'bg-yellow-500',
 ]
 
-export const LabelColorsFromProject = (project: Project) =>
-  isProperProject(project)
-    ? Object.fromEntries(
-        project.labels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
-      )
-    : {}
+export const AvailableLabelColorsForPrompt = (prompt: ActivePrompt) =>
+  Object.fromEntries(
+    prompt.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
+  )
 
 export const CalculatePopupOffset = (ref: RefObject<HTMLDivElement>, containerRect?: DOMRect) => {
   const iconRect = ref.current?.getBoundingClientRect()
@@ -34,19 +32,19 @@ export const CalculatePopupOffset = (ref: RefObject<HTMLDivElement>, containerRe
 
 export default function LabelPopupMenu({
   version,
-  project,
+  prompt,
   containerRect,
 }: {
   version: Version
-  project: ProperProject
+  prompt: ActivePrompt,
   containerRect?: DOMRect
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const trimmedLabel = newLabel.trim()
 
-  const labels = project.labels
-  const colors = LabelColorsFromProject(project)
+  const labels = prompt.availableLabels
+  const colors = AvailableLabelColorsForPrompt(prompt)
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
@@ -59,7 +57,7 @@ export default function LabelPopupMenu({
     setIsMenuExpanded(false)
     setNewLabel('')
     const labels = version.labels.includes(label) ? version.labels.filter(l => l !== label) : [...version.labels, label]
-    api.updateVersionLabels(version.id, project.id, labels).then(() => {
+    api.updateVersionLabels(version.id, prompt.projectID, labels).then(() => {
       refreshPrompt()
       if (addingNewLabel) {
         refreshProjects()

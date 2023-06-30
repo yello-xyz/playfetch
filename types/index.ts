@@ -9,18 +9,8 @@ export type User = {
 export type Project = {
   id: number
   name: string
-  urlPath: string | null
-  labels: string[] | null
-  flavors: string[] | null
+  isUserProject: boolean
 }
-
-export type ProperProject = Project & {
-  urlPath: string
-  labels: string[]
-  flavors: string[]
-}
-
-export const isProperProject = (item: Project): item is ProperProject => (item as ProperProject).urlPath !== null
 
 export type InputValues = {
   id: number
@@ -43,10 +33,14 @@ export type Prompt = {
 }
 
 export type ActivePrompt = Prompt & {
+  projectID: number
   endpoints: Endpoint[]
   versions: Version[]
   users: User[]
   inputs: InputValues[]
+  projectURLPath: string
+  availableLabels: string[]
+  availableFlavors: string[]
 }
 
 export type PromptConfig = {

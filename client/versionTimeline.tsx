@@ -1,9 +1,9 @@
 import { ReactNode, RefObject, useEffect, useRef, useState } from 'react'
-import { Project, PromptConfig, User, Version, isProperProject } from '@/types'
+import { ActivePrompt, PromptConfig, User, Version } from '@/types'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
-import LabelPopupMenu, { LabelColorsFromProject } from './labelPopupMenu'
+import LabelPopupMenu, { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 
@@ -39,22 +39,18 @@ function useScrollDetection(callback: () => void, element: RefObject<HTMLDivElem
 }
 
 export default function VersionTimeline({
-  users,
-  versions,
-  project,
+  prompt,
   activeVersion,
   setActiveVersion,
 }: {
-  users: User[]
-  versions: Version[]
-  project: Project
+  prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
   const [isFocused, setFocused] = useState(true)
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
-  const labelColors = LabelColorsFromProject(project)
+  const labelColors = AvailableLabelColorsForPrompt(prompt)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
@@ -78,6 +74,7 @@ export default function VersionTimeline({
     setFocused(false)
   }
 
+  const versions = prompt.versions
   const ascendingVersions = versions.slice().reverse()
   const activeIndex = ascendingVersions.findIndex(version => version.id === activeVersion.id)
   const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID)
@@ -88,7 +85,7 @@ export default function VersionTimeline({
       <div ref={containerRef} className='relative flex min-h-0'>
         <div className={`flex flex-col w-full ${versionsToShow.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
-            users={users}
+            users={prompt.users}
             labelColors={labelColors}
             versions={versions}
             filters={filters}
@@ -101,13 +98,12 @@ export default function VersionTimeline({
                   key={index}
                   isOnly={versions.length == 1}
                   isLast={index === versionsToShow.length - 1}
-                  users={users}
                   labelColors={labelColors}
                   version={version}
                   index={ascendingVersions.findIndex(v => v.id === version.id)}
                   isActiveVersion={version.id === activeVersion.id}
                   compareVersion={versions.find(v => v.id === version.previousID)}
-                  project={project}
+                  prompt={prompt}
                   onSelect={selectVersion}
                   containerRect={containerRect}
                 />
@@ -130,7 +126,6 @@ export default function VersionTimeline({
 }
 
 function VersionCell({
-  users,
   labelColors,
   version,
   index,
@@ -138,11 +133,10 @@ function VersionCell({
   isLast,
   isActiveVersion,
   compareVersion,
-  project,
+  prompt,
   onSelect,
   containerRect,
 }: {
-  users: User[]
   labelColors: Record<string, string>
   version: Version
   index: number
@@ -150,11 +144,11 @@ function VersionCell({
   isLast: boolean
   isActiveVersion: boolean
   compareVersion?: Version
-  project: Project
+  prompt: ActivePrompt
   onSelect: (version: Version) => void
   containerRect?: DOMRect
 }) {
-  const user = users.find(user => user.id === version.userID)
+  const user = prompt.users.find(user => user.id === version.userID)
 
   return (
     <VerticalBarWrapper
@@ -178,13 +172,13 @@ function VersionCell({
             )}
           </div>
           <div className='flex items-center gap-1'>
-            {isProperProject(project) && (
-              <LabelPopupMenu containerRect={containerRect} project={project} version={version} />
+            {prompt.availableLabels.length > 0 && (
+              <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
             )}
             {!isOnly && <VersionPopupMenu containerRect={containerRect} version={version} />}
           </div>
         </div>
-        {user && project.id !== user.id && <UserDetails user={user} />}
+        {user && prompt.projectID !== user.id && <UserDetails user={user} />}
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (

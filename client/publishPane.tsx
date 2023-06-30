@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, Endpoint, Project, Prompt, ProperProject, Version, isProperProject } from '@/types'
+import { ActivePrompt, Endpoint, Version } from '@/types'
 import { PendingButton } from './button'
 import { ExtractPromptVariables } from '@/common/formatting'
 import api from './api'
@@ -9,12 +9,10 @@ import PickNameDialog from './pickNameDialog'
 import Label from './label'
 
 export default function PublishPane({
-  project,
   prompt,
   version,
   endpoints,
 }: {
-  project: ProperProject
   prompt: ActivePrompt
   version: Version
   endpoints: Endpoint[]
@@ -22,7 +20,7 @@ export default function PublishPane({
   // TODO render all endpoints
   const endpoint: Endpoint | undefined = endpoints[0]
   // TODO allow publishing to other environments
-  const flavor = project.flavors[0]
+  const flavor = prompt.availableFlavors[0]
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [curlCommand, setCURLCommand] = useState<string>()
@@ -42,7 +40,7 @@ export default function PublishPane({
     await savePrompt()
     await api
       .publishPrompt(
-        project!.id,
+        prompt.projectID,
         prompt.id,
         version.id,
         name,
@@ -97,13 +95,13 @@ export default function PublishPane({
           </div>
         )}
       </div>
-      {showPickNamePrompt && isProperProject(project) && (
+      {showPickNamePrompt && (
         <PickNameDialog
           title='Publish Prompt'
           confirmTitle='Publish'
           label='Endpoint'
           initialName={endpoint?.urlPath}
-          validator={(name: string) => api.checkEndpointName(prompt.id, project.urlPath, name)}
+          validator={(name: string) => api.checkEndpointName(prompt.id, prompt.projectURLPath, name)}
           onConfirm={publish}
           onDismiss={() => setShowPickNamePrompt(false)}
         />

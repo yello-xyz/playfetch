@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Project, User, isProperProject } from '@/types'
+import { ActiveProject, ActivePrompt, Project, User } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -42,7 +42,7 @@ export default function TopBar({
                 <span className='font-medium'>{' / '}</span>
               </>
             )}
-            {activeProject && !isProperProject(activeProject) ? (
+            {activeProject && !activeProject.isUserProject ? (
               <span className='font-medium'>{activeProject.name}</span>
             ) : (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>

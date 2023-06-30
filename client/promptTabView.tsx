@@ -1,6 +1,5 @@
-import { Project, ActivePrompt, Version, isProperProject } from '@/types'
+import { Project, ActivePrompt, Version } from '@/types'
 
-import dynamic from 'next/dynamic'
 import PlayTab from './playTab'
 import PublishPane from './publishPane'
 import TestTab from './testTab'
@@ -47,12 +46,11 @@ export default function PromptTabView({
       return (
         <div className='flex items-stretch'>
           <div>
-            {isProperProject(project) && (
+            {prompt.availableFlavors.length > 0 && (
               <PublishPane
                 key={activeVersion.id}
                 version={activeVersion}
                 prompt={prompt}
-                project={project}
                 endpoints={prompt.endpoints}
               />
             )}
