@@ -6,19 +6,23 @@ import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import PickNameDialog from './pickNameDialog'
 import Label from './label'
-import { ToCamelCase } from '@/common/formatting'
+import { ExtractPromptVariables, ToCamelCase } from '@/common/formatting'
+import Checkbox from './checkbox'
 
 const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
-  const inputs = Object.entries(lastRun.inputs)
+  const inputs = Object.entries(
+    lastRun?.inputs ?? ExtractPromptVariables(endpoint.prompt).map(variable => [variable, ''])
+  )
 
-  return inputs.length
-    ? `curl -X POST ${url} \\
-  -H "x-api-key: ${apiKey}" \\
-  -H "content-type: application/json" \\
-  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
-    : `curl -X POST ${url} -H "x-api-key: ${apiKey}"`
+  return (
+    `curl -X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
+    (inputs.length > 0
+      ? ` \\\n  -H "content-type: application/json"` +
+        ` \\\n  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
+      : '')
+  )
 }
 
 export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; version: Version }) {
@@ -79,20 +83,14 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <Label>Settings</Label>
         <div className='flex flex-col gap-2 p-6 py-4 bg-gray-100 rounded-lg w-60'>
-          <div className='flex items-baseline justify-between gap-2'>
-            <Label htmlFor='publish'>Publish</Label>
-            <input
-              type='checkbox'
-              id='publish'
-              disabled={version.runs.length === 0}
-              checked={!!endpoint}
-              onChange={togglePublish}
-            />
-          </div>
-          <div className='flex items-baseline justify-between gap-2'>
-            <Label htmlFor='useCache'>Cache</Label>
-            <input type='checkbox' id='useCache' checked={useCache} onChange={() => setUseCache(!useCache)} />
-          </div>
+          <Checkbox
+            label='Publish'
+            id='publish'
+            disabled={version.runs.length === 0}
+            checked={!!endpoint}
+            setChecked={togglePublish}
+          />
+          <Checkbox label='Cache' id='cache' checked={useCache} setChecked={setUseCache} />
         </div>
         {endpoint && (
           <div className='flex gap-2'>

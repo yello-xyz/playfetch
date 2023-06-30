@@ -5,7 +5,7 @@ import api from '@/client/admin/api'
 import { useState } from 'react'
 import { PendingButton } from '@/client/button'
 import { CheckValidEmail } from '@/common/formatting'
-import Label from '@/client/label'
+import Checkbox from '@/client/checkbox'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,10 +27,7 @@ export default function Admin() {
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
       <TextInput label='Email' placeholder='Enter email address...' value={email} setValue={setEmail} />
       <TextInput label='Full Name' placeholder='Enter name...' value={fullName} setValue={setFullName} />
-      <div className='flex items-center gap-2'>
-        <input type='checkbox' id='admin' checked={addAsAdmin} onChange={() => setAddAsAdmin(!addAsAdmin)} />
-        <Label htmlFor='admin'>Add as Admin</Label>
-      </div>
+      <Checkbox label='Add as Admin' id='admin' checked={addAsAdmin} setChecked={setAddAsAdmin} />
       <PendingButton disabled={!CheckValidEmail(email) || !fullName.length} onClick={addUser}>
         Add User
       </PendingButton>
