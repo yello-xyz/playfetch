@@ -76,7 +76,7 @@ export async function saveVersionForUser(
   await datastore.save(versionData)
   const name =
     promptData.name === DefaultPromptName && prompt.length && !promptData.prompt.length
-      ? StripPromptSentinels(prompt).split(' ').slice(0, 3).join(' ')
+      ? StripPromptSentinels(prompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
   await updatePrompt({ ...promptData, prompt, name }, true)
 
