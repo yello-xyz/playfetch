@@ -34,7 +34,7 @@ export type Prompt = {
 
 export type ActivePrompt = Prompt & {
   projectID: number
-  endpoints: Endpoint[]
+  endpoints: EndpointWithExample[]
   versions: Version[]
   users: User[]
   inputs: InputValues[]
@@ -80,3 +80,5 @@ export type Endpoint = {
   config: PromptConfig
   useCache: boolean
 }
+
+export type EndpointWithExample = Endpoint & { curlCommand: string }

@@ -94,10 +94,9 @@ const api = {
     flavor: string,
     prompt: string,
     config: PromptConfig,
-    inputs: PromptInputs,
     useCache: boolean
   ): Promise<string> {
-    return post(this.publishPrompt, { projectID, promptID, versionID, name, flavor, prompt, config, inputs, useCache })
+    return post(this.publishPrompt, { projectID, promptID, versionID, name, flavor, prompt, config, useCache })
   },
   unpublishPrompt: function (endpointID: number) {
     return post(this.unpublishPrompt, { endpointID })

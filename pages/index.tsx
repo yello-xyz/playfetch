@@ -15,6 +15,7 @@ import SegmentedControl, { Segment } from '@/client/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/client/modalDialog'
 import { ModalDialogContext } from '@/client/modalDialogContext'
 import { RefreshContext } from '@/client/refreshContext'
+import { urlBuilderFromHeaders } from '@/server/routing'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -27,7 +28,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query }) => 
 
   const initialProjects = await getProjectsForUser(user.id)
   const initialActiveItem = promptID
-    ? await getActivePrompt(user.id, promptID)
+    ? await getActivePrompt(user.id, promptID, urlBuilderFromHeaders(req.headers))
     : await getActiveProject(user.id, projectID ?? user.id)
 
   return { props: { user, initialProjects, initialActiveItem } }

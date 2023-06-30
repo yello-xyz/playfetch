@@ -42,7 +42,7 @@ export default function PromptTabView({
         )
       case 'publish':
         return (
-          <PublishTab key={activeVersion.id} version={activeVersion} prompt={prompt} endpoints={prompt.endpoints} />
+          <PublishTab key={activeVersion.id} version={activeVersion} prompt={prompt} />
         )
     }
   }

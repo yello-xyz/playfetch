@@ -9,3 +9,6 @@ export function buildURLForClientRoute(clientRoute: string, headers: IncomingHtt
 
   return `${protocol}://${host}${clientRoute}`
 }
+
+export const urlBuilderFromHeaders = (headers: IncomingHttpHeaders) => (path: string) =>
+  buildURLForClientRoute(path, headers)
