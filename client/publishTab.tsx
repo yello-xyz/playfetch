@@ -25,9 +25,10 @@ const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
   )
 }
 
-export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; version: Version }) {
+export default function PublishTab({ prompt, activeVersion }: { prompt: ActivePrompt; activeVersion: Version }) {
   // TODO render all endpoints
-  const endpoint: ResolvedEndpoint | undefined = version.runs.length > 0 ? prompt.endpoints[0] : undefined
+  const endpoint: ResolvedEndpoint | undefined = prompt.endpoints[0]
+  const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
   // TODO allow publishing to other environments
   const flavor = prompt.availableFlavors[0]
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
