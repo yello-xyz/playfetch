@@ -1,4 +1,4 @@
-import { ExtractPromptVariables, StripPromptSentinels } from '@/common/formatting'
+import { StripPromptSentinels } from '@/common/formatting'
 import {
   Entity,
   buildKey,
@@ -16,7 +16,6 @@ import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
-import { ToCamelCase } from '@/common/formatting'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -49,23 +48,11 @@ export const toPrompt = (data: any): Prompt => ({
   favorited: data.favorited,
 })
 
-type URLBuilder = (path: string) => string
-const buildCurlCommand = (endpointData: any, projectData: any, lastRunData: any, buildURL: URLBuilder) => {
-  const apiKey = projectData.apiKeyDev
-  const url = buildURL(`/${projectData.urlPath}/${endpointData.urlPath}`)
-  const inputs = lastRunData
-    ? Object.entries(JSON.parse(lastRunData.inputs))
-    : ExtractPromptVariables(endpointData.prompt).map(variable => [variable, ''])
-
-  return inputs.length
-    ? `curl -X POST ${url} \\
-  -H "x-api-key: ${apiKey}" \\
-  -H "content-type: application/json" \\
-  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
-    : `curl -X POST ${url} -H "x-api-key: ${apiKey}"`
-}
-
-export async function getActivePrompt(userID: number, promptID: number, buildURL: URLBuilder): Promise<ActivePrompt> {
+export async function getActivePrompt(
+  userID: number,
+  promptID: number,
+  buildURL: (path: string) => string
+): Promise<ActivePrompt> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   const projectData =
     promptData.projectID === userID ? undefined : await getKeyedEntity(Entity.PROJECT, promptData.projectID)
@@ -81,7 +68,8 @@ export async function getActivePrompt(userID: number, promptID: number, buildURL
     versions: versions.map(version => toVersion(version, runs)),
     endpoints: endpoints.map(endpoint => ({
       ...toEndpoint(endpoint),
-      curlCommand: buildCurlCommand(endpoint, projectData, runs[0], buildURL),
+      url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
+      apiKeyDev: projectData?.apiKeyDev ?? '',
     })),
     users,
     inputs,

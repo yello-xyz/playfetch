@@ -1,17 +1,32 @@
 import { useEffect, useState } from 'react'
-import { ActivePrompt, EndpointWithExample, Version } from '@/types'
+import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
 import Button, { PendingButton } from './button'
 import api from './api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import PickNameDialog from './pickNameDialog'
 import Label from './label'
+import { ToCamelCase } from '@/common/formatting'
+
+const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
+  const apiKey = endpoint.apiKeyDev
+  const url = endpoint.url
+  const inputs = Object.entries(lastRun.inputs)
+
+  return inputs.length
+    ? `curl -X POST ${url} \\
+  -H "x-api-key: ${apiKey}" \\
+  -H "content-type: application/json" \\
+  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
+    : `curl -X POST ${url} -H "x-api-key: ${apiKey}"`
+}
 
 export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; version: Version }) {
   // TODO render all endpoints
-  const endpoint: EndpointWithExample | undefined = prompt.endpoints[0]
+  const endpoint: ResolvedEndpoint | undefined = prompt.endpoints[0]
   // TODO allow publishing to other environments
   const flavor = prompt.availableFlavors[0]
+  const curlCommand = buildCurlCommand(endpoint, version.runs[0])
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -79,11 +94,11 @@ export default function PublishTab({ prompt, version }: { prompt: ActivePrompt; 
           <div className='flex flex-col items-start gap-4'>
             <Label>Endpoint</Label>
             <div className='flex flex-col gap-4 p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
-              <pre>{endpoint.curlCommand}</pre>
+              <pre>{curlCommand}</pre>
             </div>
             {canCopyToClipboard && (
               <div className='self-end'>
-                <Button onClick={() => copyToClipboard(endpoint.curlCommand)}>Copy</Button>
+                <Button onClick={() => copyToClipboard(curlCommand)}>Copy</Button>
               </div>
             )}
           </div>
