@@ -2,7 +2,7 @@ export type User = {
   id: number
   email: string
   fullName: string
-  avatarColor: string
+  imageURL: string
   isAdmin: boolean
 }
 

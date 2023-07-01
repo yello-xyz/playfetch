@@ -17,7 +17,7 @@ export default function Login() {
           className='flex justify-center bg-gray-100 hover:bg-gray-200 w-96 py-3.5 border border-gray-300 rounded'
           onClick={() => signIn('github', { callbackUrl: ClientRoute.Home }).then()}>
           <div className='flex items-center gap-2'>
-            <img src={githubIcon.src} className='w-[22px] h-[22px]' />
+            <img className='w-[22px] h-[22px]' src={githubIcon.src} />
             Sign in with Github
           </div>
         </button>

@@ -28,7 +28,7 @@ export const authOptions = {
         if (registeredUser) {
           token.id = registeredUser.id
           token.fullName = registeredUser.fullName
-          token.avatarColor = registeredUser.avatarColor
+          token.imageURL = registeredUser.imageURL
           token.isAdmin = registeredUser.isAdmin
         }
       }
@@ -39,7 +39,7 @@ export const authOptions = {
         id: token.id as number,
         email: token.email as string,
         fullName: token.fullName as string,
-        avatarColor: token.avatarColor as string,
+        imageURL: token.imageURL as string,
         isAdmin: token.isAdmin as boolean,
       }
       return session

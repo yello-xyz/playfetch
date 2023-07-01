@@ -9,8 +9,6 @@ import Checkbox from '@/client/checkbox'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const avatarColors = ['bg-red-500', 'bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500']
-
 export const getServerSideProps = withAdminSession(async () => ({ props: {} }))
 
 export default function Admin() {
@@ -18,8 +16,7 @@ export default function Admin() {
   const [addAsAdmin, setAddAsAdmin] = useState(false)
 
   const addUser = async () => {
-    const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)]
-    await api.addUser(email.trim(), randomColor, addAsAdmin)
+    await api.addUser(email.trim(), addAsAdmin)
   }
 
   return (

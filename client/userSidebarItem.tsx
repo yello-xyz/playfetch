@@ -7,16 +7,7 @@ import { signOut } from 'next-auth/react'
 export function UserAvatar({ user, size = 'md', border }: { user: User; size?: 'xs' | 'sm' | 'md'; border?: boolean }) {
   const sizeClass = size === 'xs' ? 'w-3.5 h-3.5' : size === 'sm' ? 'w-[18px] h-[18px]' : 'w-7 h-7'
   const borderClass = border ? 'border-2 border-white' : ''
-  const textClass =
-    size === 'xs' ? 'text-[8px]' : size === 'sm' ? 'text-[10px]' : `font-medium ${border ? 'text-xs' : 'text-sm'}`
-  const baseClass = 'rounded-full flex items-center justify-center'
-  return user.avatarColor.startsWith('https') ? ( // TODO temporary hack
-    <img className={`${sizeClass} ${borderClass} ${baseClass}`} src={user.avatarColor} />
-  ) : (
-    <div className={`${sizeClass} ${borderClass} ${textClass} ${user.avatarColor} ${baseClass}`}>
-      {user.fullName.slice(0, 1)}
-    </div>
-  )
+  return <img className={`${sizeClass} ${borderClass} rounded-full`} src={user.imageURL} />
 }
 
 export default function UserSidebarItem({ user }: { user: User }) {
