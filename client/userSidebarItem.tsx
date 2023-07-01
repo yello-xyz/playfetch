@@ -4,10 +4,26 @@ import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 
+const avatarColors = ['bg-red-500', 'bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500']
+
+const getAvatarColor = (user: User) => {
+  const charCodeSum = user.fullName.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return avatarColors[charCodeSum % avatarColors.length]
+}
+
 export function UserAvatar({ user, size = 'md', border }: { user: User; size?: 'xs' | 'sm' | 'md'; border?: boolean }) {
   const sizeClass = size === 'xs' ? 'w-3.5 h-3.5' : size === 'sm' ? 'w-[18px] h-[18px]' : 'w-7 h-7'
   const borderClass = border ? 'border-2 border-white' : ''
-  return <img className={`${sizeClass} ${borderClass} rounded-full`} src={user.imageURL} />
+  const textClass =
+    size === 'xs' ? 'text-[8px]' : size === 'sm' ? 'text-[10px]' : `font-medium ${border ? 'text-xs' : 'text-sm'}`
+  const baseClass = 'rounded-full flex items-center justify-center'
+  return user.imageURL.length ? (
+    <img className={`${sizeClass} ${borderClass} rounded-full`} src={user.imageURL} />
+  ) : (
+    <div className={`${sizeClass} ${borderClass} ${textClass} ${getAvatarColor(user)} ${baseClass}`}>
+      {user.fullName.slice(0, 1)}
+    </div>
+  )
 }
 
 export default function UserSidebarItem({ user }: { user: User }) {
