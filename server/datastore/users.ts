@@ -46,12 +46,12 @@ export async function getUserForEmail(email: string): Promise<User | undefined> 
   return userData ? toUser(userData) : undefined
 }
 
-export async function saveUser(email: string, fullName: string, avatarColor: string, isAdmin: boolean) {
+export async function saveUser(email: string, avatarColor: string, isAdmin: boolean) {
   const userData = await getEntity(Entity.USER, 'email', email)
   await getDatastore().save(
     toUserData(
       email.toLowerCase(),
-      fullName,
+      '',
       avatarColor,
       isAdmin,
       userData?.createdAt ?? new Date(),
