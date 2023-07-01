@@ -44,6 +44,9 @@ const api = {
   renameProject: function (projectID: number, name: string) {
     return post(this.renameProject, { projectID, name })
   },
+  addFlavor: function (projectID: number, flavor: string) {
+    return post(this.addFlavor, { projectID, flavor })
+  },
   inviteMembers: function (projectID: number, emails: string[]) {
     return post(this.inviteMembers, { projectID, emails })
   },

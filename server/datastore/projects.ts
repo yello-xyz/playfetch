@@ -168,6 +168,11 @@ export async function updateProjectName(userID: number, projectID: number, name:
   await updateProject({ ...projectData, name })
 }
 
+export async function addProjectFlavor(userID: number, projectID: number, flavor: string) {
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  await updateProject({ ...projectData, flavors: JSON.stringify([...JSON.parse(projectData.flavors), flavor]) })
+}
+
 export async function ensureProjectLabels(userID: number, projectID: number, labels: string[]) {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const oldLabels = JSON.parse(projectData.labels)

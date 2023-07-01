@@ -10,8 +10,9 @@ import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
 import { debounce } from 'debounce'
+import PickNameDialog from './pickNameDialog'
 
-const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
+const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run, defaultFlavor: string) => {
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
   const inputs = Object.entries(
@@ -20,6 +21,7 @@ const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run) => {
 
   return (
     `curl -X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
+    (endpoint.flavor !== defaultFlavor ? ` \\\n  -H "x-environment: ${endpoint.flavor}"` : '') +
     (inputs.length > 0
       ? ` \\\n  -H "content-type: application/json"` +
         ` \\\n  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
@@ -41,13 +43,15 @@ export default function PublishTab({
   const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
   const initialFlavor = availableFlavors.find(flavor => endpointFlavors.includes(flavor)) ?? availableFlavors[0]
 
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
   const [flavor, setFlavor] = useState(initialFlavor)
 
   const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
-  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0]) : ''
+  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0], availableFlavors[0]) : ''
 
-  const initialName = endpoint?.urlPath ?? ToCamelCase(prompt.name.split(' ').slice(0, 3).join(' '))
+  const initialName =
+    endpoint?.urlPath ?? endpoints[0]?.urlPath ?? ToCamelCase(prompt.name.split(' ').slice(0, 3).join(' '))
   const [name, setName] = useState(initialName)
   const [nameAvailable, setNameAvailable] = useState<boolean>()
   useEffect(() => updateName(initialName), [initialName])
@@ -126,6 +130,21 @@ export default function PublishTab({
     }
   }
 
+  const addNewEnvironment = 'Add New Environment…'
+  const updateFlavor = (flavor: string) => {
+    if (flavor === addNewEnvironment) {
+      setShowPickNamePrompt(true)
+    } else {
+      setFlavor(flavor)
+    }
+  }
+
+  const addFlavor = async (flavor: string) => {
+    await api.addFlavor(prompt.projectID, flavor)
+    await refreshPrompt()
+    setFlavor(flavor)
+  }
+
   return availableFlavors.length > 0 ? (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
@@ -133,12 +152,15 @@ export default function PublishTab({
         <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg w-96'>
           <div className='flex items-center gap-8'>
             <Label>Environment</Label>
-            <DropdownMenu value={flavor} onChange={setFlavor}>
+            <DropdownMenu value={flavor} onChange={updateFlavor}>
               {availableFlavors.map((flavor, index) => (
                 <option key={index} value={flavor}>
                   {flavor}
                 </option>
               ))}
+              <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
+                {addNewEnvironment}
+              </option>
             </DropdownMenu>
           </div>
           <div className='flex items-center gap-8'>
@@ -189,6 +211,16 @@ export default function PublishTab({
           </div>
         )}
       </div>
+      {showPickNamePrompt && (
+        <PickNameDialog
+          title='Add Project Environment'
+          confirmTitle='Add'
+          label='Name'
+          initialName={availableFlavors.includes('production') ? '' : 'production'}
+          onConfirm={addFlavor}
+          onDismiss={() => setShowPickNamePrompt(false)}
+        />
+      )}
     </>
   ) : (
     <EmptyPublishTab />
