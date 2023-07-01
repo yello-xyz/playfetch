@@ -158,6 +158,7 @@ export default function Home({
               user={user}
               projects={projects}
               activeProject={activeProject}
+              activePrompt={activePrompt}
               onAddPrompt={() => addPrompt(user.id)}
             />
             <div className='flex flex-col flex-1'>

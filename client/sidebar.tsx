@@ -1,4 +1,4 @@
-import { ActiveProject, Project, User } from '@/types'
+import { ActiveProject, ActivePrompt, Project, User } from '@/types'
 import { ReactNode, useState } from 'react'
 import api from './api'
 import projectIcon from '@/public/project.svg'
@@ -14,11 +14,13 @@ export default function Sidebar({
   user,
   projects,
   activeProject,
+  activePrompt,
   onAddPrompt,
 }: {
   user: User
   projects: Project[]
   activeProject?: ActiveProject
+  activePrompt?: ActivePrompt
   onAddPrompt: () => void
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -44,6 +46,7 @@ export default function Sidebar({
 
   const userProject = projects.find(project => project.id === user.id)
   const properProjects = projects.filter(project => project.id !== user.id)
+  const activeProjectID = activeProject?.id ?? activePrompt?.projectID
 
   return (
     <>
@@ -92,7 +95,7 @@ export default function Sidebar({
       {showInviteDialog && (
         <InviteDialog
           projects={properProjects}
-          initialProjectID={activeProject?.id !== user.id ? activeProject?.id : undefined}
+          initialProjectID={activeProjectID !== user.id ? activeProjectID : undefined}
           onConfirm={inviteMembers}
           onDismiss={() => setShowInviteDialog(false)}
         />
