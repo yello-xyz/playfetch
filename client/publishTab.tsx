@@ -41,7 +41,9 @@ export default function PublishTab({
   const availableFlavors = prompt.availableFlavors
   const endpoints = prompt.endpoints
   const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
-  const initialFlavor = availableFlavors.find(flavor => endpointFlavors.includes(flavor)) ?? availableFlavors[0]
+  const flavorOfActiveVersion = endpoints.find(endpoint => endpoint.versionID === activeVersion.id)?.flavor
+  const initialFlavor =
+    flavorOfActiveVersion ?? availableFlavors.find(flavor => endpointFlavors.includes(flavor)) ?? availableFlavors[0]
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
   const [flavor, setFlavor] = useState(initialFlavor)
