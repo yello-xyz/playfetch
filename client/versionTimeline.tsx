@@ -64,7 +64,7 @@ export default function VersionTimeline({
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-  }, [activeVersion])
+  }, [activeVersion, isFocused])
 
   const selectVersion = (version: Version) => {
     setFocused(true)
