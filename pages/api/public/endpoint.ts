@@ -8,10 +8,10 @@ import { checkProject } from '@/server/datastore/projects'
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
   const apiKey = req.headers['x-api-key'] as string
+  const flavor = req.headers['x-environment'] as string | undefined
 
   if (apiKey && projectURLPath && endpointName && (await checkProject(projectURLPath, apiKey))) {
-    // TODO decide which flavor to use and pass in below
-    const endpoint = await getEndpointFromPath(endpointName, projectURLPath)
+    const endpoint = await getEndpointFromPath(endpointName, projectURLPath, flavor)
     if (endpoint) {
       const prompt = ExtractPromptVariables(endpoint.prompt).reduce(
         (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
