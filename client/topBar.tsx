@@ -42,7 +42,7 @@ export default function TopBar({
                 <span className='font-medium'>{' / '}</span>
               </>
             )}
-            {activeProject && !activeProject.isUserProject ? (
+            {activeProject && activeProject.isUserProject ? (
               <span className='font-medium'>{activeProject.name}</span>
             ) : (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
