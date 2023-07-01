@@ -23,14 +23,14 @@ export const toUser = (data: any): User => ({
   isAdmin: data.isAdmin,
 })
 
-export async function markUserLogin(userID: number): Promise<User | undefined> {
+export async function markUserLogin(userID: number, fullName: string, avatarColor: string): Promise<User | undefined> {
   const userData = await getKeyedEntity(Entity.USER, userID)
   if (userData) {
     await getDatastore().save(
       toUserData(
         userData.email,
-        userData.fullName,
-        userData.avatarColor,
+        fullName.length ? fullName : userData.fullName,
+        avatarColor.length ? avatarColor : userData.avatarColor,
         userData.isAdmin,
         userData.createdAt,
         new Date(),

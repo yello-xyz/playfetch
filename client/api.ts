@@ -26,12 +26,6 @@ const post = (apiCall: Function, json: any = {}) => {
 }
 
 const api = {
-  login: function (email: string) {
-    return post(this.login, { email })
-  },
-  logout: async function () {
-    return post(this.logout)
-  },
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },

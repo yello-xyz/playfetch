@@ -16,8 +16,7 @@ export const authOptions = {
     async signIn({ user }: { user: User }) {
       const registeredUser = await getRegisteredUser(user.email)
       if (registeredUser) {
-        // TODO update user with full name and avatar from provider (if different).
-        await markUserLogin(registeredUser.id)
+        await markUserLogin(registeredUser.id, user.name ?? '', user.image ?? '')
         return true
       } else {
         return false
