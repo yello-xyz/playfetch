@@ -1,10 +1,11 @@
 import { addPromptForUser } from '@/server/datastore/prompts'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
+import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function addPrompt(req: NextApiRequest, res: NextApiResponse<number>) {
-  const promptID = await addPromptForUser(req.session.user!.id, req.body.projectID)
+async function addPrompt(req: NextApiRequest, res: NextApiResponse<number>, user: User) {
+  const promptID = await addPromptForUser(user.id, req.body.projectID)
   res.json(promptID)
 }
 
-export default withLoggedInSessionRoute(addPrompt)
+export default withLoggedInUserRoute(addPrompt)

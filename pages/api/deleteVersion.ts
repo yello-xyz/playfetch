@@ -1,10 +1,11 @@
 import { deleteVersionForUser } from '@/server/datastore/versions'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
+import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function deleteVersion(req: NextApiRequest, res: NextApiResponse) {
-  await deleteVersionForUser(req.session.user!.id, req.body.versionID)
+async function deleteVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
+  await deleteVersionForUser(user.id, req.body.versionID)
   res.json({})
 }
 
-export default withLoggedInSessionRoute(deleteVersion)
+export default withLoggedInUserRoute(deleteVersion)

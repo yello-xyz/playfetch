@@ -1,11 +1,11 @@
 import openai from '@/server/openai'
 import anthropic from '@/server/anthropic'
 import vertexai from '@/server/vertexai'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { cacheValue, getCachedValue } from '@/server/datastore/cache'
 import { saveRun } from '@/server/datastore/runs'
-import { PromptInputs, PromptConfig } from '@/types'
+import { PromptInputs, PromptConfig, User } from '@/types'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -67,16 +67,16 @@ export const runPromptWithConfig = async (
   return result
 }
 
-async function runPrompt(req: NextApiRequest, res: NextApiResponse) {
+async function runPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
   const config: PromptConfig = req.body.config
   const multipleInputs: PromptInputs[] = req.body.inputs
   for (const inputs of multipleInputs) {
     const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs, false)
     if (output?.length) {
-      await saveRun(req.session.user!.id, req.body.promptID, req.body.versionID, inputs, output, cost)
+      await saveRun(user.id, req.body.promptID, req.body.versionID, inputs, output, cost)
     }
   }
   res.json({})
 }
 
-export default withLoggedInSessionRoute(runPrompt)
+export default withLoggedInUserRoute(runPrompt)

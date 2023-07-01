@@ -1,5 +1,5 @@
 import { CheckValidURLPath, ToCamelCase } from '@/common/formatting'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { checkCanSaveEndpoint } from '@/server/datastore/endpoints'
 
@@ -14,4 +14,4 @@ async function checkEndpointName(req: NextApiRequest, res: NextApiResponse<boole
   res.json(available)
 }
 
-export default withLoggedInSessionRoute(checkEndpointName)
+export default withLoggedInUserRoute(checkEndpointName)

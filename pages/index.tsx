@@ -22,8 +22,7 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
-export const getServerSideProps = withLoggedInSession(async ({ req, query }) => {
-  const user = req.session.user!
+export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)

@@ -1,10 +1,11 @@
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { toggleFavoritePrompt } from '@/server/datastore/prompts'
+import { User } from '@/types'
 
-async function toggleFavorite(req: NextApiRequest, res: NextApiResponse) {
-  await toggleFavoritePrompt(req.session.user!.id, req.body.promptID, req.body.favorite)
+async function toggleFavorite(req: NextApiRequest, res: NextApiResponse, user: User) {
+  await toggleFavoritePrompt(user.id, req.body.promptID, req.body.favorite)
   res.json({})
 }
 
-export default withLoggedInSessionRoute(toggleFavorite)
+export default withLoggedInUserRoute(toggleFavorite)

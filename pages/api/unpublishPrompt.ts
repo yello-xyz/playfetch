@@ -1,9 +1,10 @@
 import { deleteEndpointForUser } from '@/server/datastore/endpoints'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
+import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function unpublishPrompt(req: NextApiRequest, res: NextApiResponse) {
-  const userID = req.session.user!.id
+async function unpublishPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
+  const userID = user.id
   const endpointID = req.body.endpointID
 
   await deleteEndpointForUser(userID, endpointID)
@@ -11,4 +12,4 @@ async function unpublishPrompt(req: NextApiRequest, res: NextApiResponse) {
   res.json({})
 }
 
-export default withLoggedInSessionRoute(unpublishPrompt)
+export default withLoggedInUserRoute(unpublishPrompt)

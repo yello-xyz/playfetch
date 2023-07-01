@@ -1,10 +1,11 @@
 import { saveVersionForUser } from '@/server/datastore/versions'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
+import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>) {
+async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>, user: User) {
   const versionID = await saveVersionForUser(
-    req.session.user!.id,
+    user.id,
     req.body.promptID,
     req.body.prompt,
     req.body.config,
@@ -13,4 +14,4 @@ async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>) {
   res.json(versionID!)
 }
 
-export default withLoggedInSessionRoute(updatePrompt)
+export default withLoggedInUserRoute(updatePrompt)

@@ -1,10 +1,11 @@
 import { deleteProjectForUser } from '@/server/datastore/projects'
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
+import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function deleteProject(req: NextApiRequest, res: NextApiResponse) {
-  await deleteProjectForUser(req.session.user!.id, req.body.projectID)
+async function deleteProject(req: NextApiRequest, res: NextApiResponse, user: User) {
+  await deleteProjectForUser(user.id, req.body.projectID)
   res.json({})
 }
 
-export default withLoggedInSessionRoute(deleteProject)
+export default withLoggedInUserRoute(deleteProject)

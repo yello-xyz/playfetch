@@ -1,10 +1,11 @@
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { updatePromptName } from '@/server/datastore/prompts'
+import { User } from '@/types'
 
-async function renamePrompt(req: NextApiRequest, res: NextApiResponse) {
-  await updatePromptName(req.session.user!.id, req.body.promptID, req.body.name)
+async function renamePrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
+  await updatePromptName(user.id, req.body.promptID, req.body.name)
   res.json({})
 }
 
-export default withLoggedInSessionRoute(renamePrompt)
+export default withLoggedInUserRoute(renamePrompt)

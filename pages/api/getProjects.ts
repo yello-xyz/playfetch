@@ -1,11 +1,11 @@
 import { getProjectsForUser } from '@/server/datastore/projects'
-import { withLoggedInSessionRoute } from '@/server/session'
-import { Project } from '@/types'
+import { withLoggedInUserRoute } from '@/server/session'
+import { Project, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function getProjects(req: NextApiRequest, res: NextApiResponse<Project[]>) {
-  const projects = await getProjectsForUser(req.session.user!.id)
+async function getProjects(req: NextApiRequest, res: NextApiResponse<Project[]>, user: User) {
+  const projects = await getProjectsForUser(user.id)
   res.json(projects)
 }
 
-export default withLoggedInSessionRoute(getProjects)
+export default withLoggedInUserRoute(getProjects)

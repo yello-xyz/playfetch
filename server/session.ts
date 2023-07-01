@@ -1,45 +1,43 @@
 import ClientRoute, { Redirect } from '@/client/clientRoute'
-import { withIronSessionApiRoute, withIronSessionSsr } from 'iron-session/next'
-import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from 'next'
+import {
+  GetServerSidePropsContext,
+  GetServerSidePropsResult,
+  NextApiHandler,
+  NextApiRequest,
+  NextApiResponse,
+} from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/pages/api/auth/[...nextauth]'
+import { User } from '@/types'
 
-declare module 'iron-session' {
-  interface IronSessionData {
-    user?: {
-      id: number
-      email: string
-      fullName: string
-      avatarColor: string
-      isAdmin: boolean
+function withErrorRoute(handler: NextApiHandler): NextApiHandler {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
+    try {
+      return await handler(req, res)
+    } catch (error) {
+      console.error(error)
+      res.status(500).send(error)
     }
   }
 }
 
-export const sessionOptions = {
-  cookieName: 'playfetch',
-  password: process.env.SESSION_SECRET ?? '',
-  cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
-  },
-}
+type LoggedInAPIHandler = (req: NextApiRequest, res: NextApiResponse, user: User) => Promise<void> | void
 
-export function withSessionRoute(handler: NextApiHandler) {
-  return withIronSessionApiRoute(handler, sessionOptions)
-}
-
-export function withLoggedInSessionRoute(handler: NextApiHandler) {
-  return withSessionRoute(async (req, res) => {
-    if (req.session.user) {
-      return handler(req, res)
+export function withLoggedInUserRoute(handler: LoggedInAPIHandler): NextApiHandler {
+  return withErrorRoute(async (req, res) => {
+    const session = await getServerSession(req, res, authOptions)
+    if (session?.user?.id) {
+      return handler(req, res, session.user)
     } else {
       return res.status(401).json(null)
     }
   })
 }
 
-export function withAdminRoute(handler: NextApiHandler) {
-  return withSessionRoute(async (req, res) => {
-    if (req.session.user?.isAdmin) {
-      return handler(req, res)
+export function withAdminUserRoute(handler: LoggedInAPIHandler): NextApiHandler {
+  return withLoggedInUserRoute(async (req, res, user) => {
+    if (user.isAdmin) {
+      return handler(req, res, user)
     } else {
       return res.status(401).json(null)
     }
@@ -47,27 +45,40 @@ export function withAdminRoute(handler: NextApiHandler) {
 }
 
 type UnknownRecord = Record<string, unknown>
-type ServerSideHandler<P extends UnknownRecord = UnknownRecord> = (
+type GetServerSidePropsContextWithUser = GetServerSidePropsContext & { user: User }
+type ServerSideHandler = (
   context: GetServerSidePropsContext
-) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>
+) => GetServerSidePropsResult<UnknownRecord> | Promise<GetServerSidePropsResult<UnknownRecord>>
 
-export function withSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
-  return withIronSessionSsr(handler, sessionOptions)
+function withServerSideError(handler: ServerSideHandler): ServerSideHandler {
+  return async function (context: GetServerSidePropsContext) {
+    try {
+      return await handler(context)
+    } catch (error) {
+      console.error(error)
+      return {} as GetServerSidePropsResult<UnknownRecord>
+    }
+  }
 }
 
-export function withLoggedInSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
-  return withSession(async context => {
-    if (context.req.session.user) {
-      return handler(context)
+type LoggedInServerSideHandler = (
+  context: GetServerSidePropsContextWithUser
+) => GetServerSidePropsResult<UnknownRecord> | Promise<GetServerSidePropsResult<UnknownRecord>>
+
+export function withLoggedInSession(handler: LoggedInServerSideHandler): ServerSideHandler {
+  return withServerSideError(async context => {
+    const session = await getServerSession(context.req, context.res, authOptions)
+    if (session?.user?.id) {
+      return handler({ ...context,  user: session.user })
     } else {
       return Redirect(ClientRoute.Login)
     }
   })
 }
 
-export function withAdminSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
-  return withSession(async context => {
-    if (context.req.session.user?.isAdmin) {
+export function withAdminSession(handler: LoggedInServerSideHandler) {
+  return withLoggedInSession(async context => {
+    if (context.user.isAdmin) {
       return handler(context)
     } else {
       return Redirect(ClientRoute.Home)
@@ -75,9 +86,10 @@ export function withAdminSession<P extends UnknownRecord = UnknownRecord>(handle
   })
 }
 
-export function withLoggedOutSession<P extends UnknownRecord = UnknownRecord>(handler: ServerSideHandler<P>) {
-  return withSession(async context => {
-    if (context.req.session.user) {
+export function withLoggedOutSession(handler: ServerSideHandler): ServerSideHandler {
+  return withServerSideError(async context => {
+    const session = await getServerSession(context.req, context.res, authOptions)
+    if (session?.user?.id) {
       return Redirect(ClientRoute.Home)
     } else {
       return handler(context)

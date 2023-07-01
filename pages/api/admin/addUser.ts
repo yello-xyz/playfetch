@@ -1,5 +1,5 @@
 import { saveUser } from '@/server/datastore/users'
-import { withAdminRoute } from '@/server/session'
+import { withAdminUserRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function addUser(req: NextApiRequest, res: NextApiResponse) {
@@ -7,4 +7,4 @@ async function addUser(req: NextApiRequest, res: NextApiResponse) {
   res.json({})
 }
 
-export default withAdminRoute(addUser)
+export default withAdminUserRoute(addUser)

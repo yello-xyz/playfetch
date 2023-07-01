@@ -1,12 +1,12 @@
-import { withLoggedInSessionRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ToCamelCase } from '@/common/formatting'
 import { saveEndpoint } from '@/server/datastore/endpoints'
 import { getURLPathForProject } from '@/server/datastore/projects'
-import { PromptConfig } from '@/types'
+import { PromptConfig, User } from '@/types'
 
-async function publishPrompt(req: NextApiRequest, res: NextApiResponse) {
-  const userID = req.session.user!.id
+async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
+  const userID = user.id
   const projectID = req.body.projectID
   const name = req.body.name
   const config = req.body.config as PromptConfig
@@ -28,4 +28,4 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse) {
   res.json({})
 }
 
-export default withLoggedInSessionRoute(publishPrompt)
+export default withLoggedInUserRoute(publishPrompt)

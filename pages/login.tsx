@@ -5,6 +5,8 @@ import TextInput from '@/client/textInput'
 import { useState } from 'react'
 import { PendingButton } from '@/client/button'
 import { CheckValidEmail } from '@/common/formatting'
+import { signIn } from "next-auth/react"
+import ClientRoute from '@/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,6 +34,7 @@ export default function Login() {
 
   return (
     <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
+      <button onClick={() => signIn('github', { callbackUrl: ClientRoute.Home })}>Sign in</button>
       {message && <div className='px-2 py-1 text-xs text-blue-800 bg-blue-200 rounded'>{message}</div>}
       <TextInput
         type='email'
