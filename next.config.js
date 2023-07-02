@@ -6,6 +6,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  eslint: {
+    dirs: ['pages', 'client', 'server', 'common'],
+  },
   async rewrites() {
     return [
       {
