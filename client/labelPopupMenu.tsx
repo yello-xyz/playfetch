@@ -7,6 +7,7 @@ import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { RefObject, useRef, useState } from 'react'
 import { useRefreshProjects, useRefreshPrompt } from './refreshContext'
+import Icon from './icon'
 
 const projectLabelColors = [
   'bg-red-500',
@@ -68,7 +69,7 @@ export default function LabelPopupMenu({
   return (
     <>
       <div ref={iconRef}>
-        <IconButton icon={labelIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+        <IconButton icon={labelIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
       </div>
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
@@ -84,7 +85,7 @@ export default function LabelPopupMenu({
 
               {addingNewLabel ? (
                 <div className='flex items-center gap-1 p-1' onClick={() => toggleLabel(trimmedLabel)}>
-                  <img className='w-6 h-6' src={addIcon.src} />
+                  <Icon icon={addIcon} />
                   Create new label <span className='font-medium'>“{trimmedLabel}”</span>
                 </div>
               ) : (
@@ -92,7 +93,7 @@ export default function LabelPopupMenu({
                   <div className='flex items-center gap-1 px-2 py-1' key={index} onClick={() => toggleLabel(label)}>
                     <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${colors[label]}`} />
                     <div className='flex-1'>{label}</div>
-                    {version.labels.includes(label) && <img className='w-6 h-6' src={checkIcon.src} />}
+                    {version.labels.includes(label) && <Icon icon={checkIcon} />}
                   </div>
                 ))
               )}

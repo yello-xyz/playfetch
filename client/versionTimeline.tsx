@@ -6,6 +6,7 @@ import VersionComparison from './versionComparison'
 import LabelPopupMenu, { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
+import Icon from './icon'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -110,7 +111,7 @@ export default function VersionTimeline({
               ) : index === previousIndex + 1 ? (
                 <VerticalBarWrapper key={index} strokeStyle='dashed'>
                   <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
-                    <img className='w-6 h-6' src={historyIcon.src} />
+                    <Icon icon={historyIcon} />
                     View Full History
                   </div>
                 </VerticalBarWrapper>

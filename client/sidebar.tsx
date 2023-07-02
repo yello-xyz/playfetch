@@ -9,6 +9,8 @@ import { useRefreshProject, useRefreshProjects, useSelectProject } from './refre
 import UserSidebarItem from './userSidebarItem'
 import PickNameDialog from './pickNameDialog'
 import InviteDialog from './inviteDialog'
+import Icon from './icon'
+import { StaticImageData } from 'next/image'
 
 export default function Sidebar({
   user,
@@ -58,28 +60,28 @@ export default function Sidebar({
           {userProject && (
             <SidebarButton
               title={userProject.name}
-              icon={promptIcon.src}
+              icon={promptIcon}
               active={activeProject?.id === userProject.id}
               onClick={() => selectProject(userProject.id)}
             />
           )}
-          <SidebarButton title='New Prompt…' icon={addIcon.src} onClick={onAddPrompt} />
+          <SidebarButton title='New Prompt…' icon={addIcon} onClick={onAddPrompt} />
         </SidebarSection>
         <SidebarSection title='My Projects' className='flex-1'>
           {properProjects.map((project, projectIndex) => (
             <SidebarButton
               key={projectIndex}
               title={project.name}
-              icon={projectIcon.src}
+              icon={projectIcon}
               active={activeProject?.id === project.id}
               onClick={() => selectProject(project.id)}
             />
           ))}
-          <SidebarButton title='Add new Project…' icon={addIcon.src} onClick={() => setShowPickNamePrompt(true)} />
+          <SidebarButton title='Add new Project…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
         </SidebarSection>
         <SidebarSection>
           {properProjects.length > 0 && (
-            <SidebarButton title='Invite Members' icon={inviteIcon.src} onClick={() => setShowInviteDialog(true)} />
+            <SidebarButton title='Invite Members' icon={inviteIcon} onClick={() => setShowInviteDialog(true)} />
           )}
         </SidebarSection>
       </div>
@@ -120,7 +122,7 @@ function SidebarButton({
   onClick,
 }: {
   title: string
-  icon?: string
+  icon?: StaticImageData
   active?: boolean
   onClick: () => void
 }) {
@@ -129,7 +131,7 @@ function SidebarButton({
   const className = `${baseClass} ${active ? activeClass : ''} hover:${activeClass}`
   return (
     <div className={className} onClick={onClick}>
-      {icon && <img className='w-6 h-6' src={icon} />}
+      {icon && <Icon icon={icon} />}
       <div className='font-normal w-36'>{title}</div>
     </div>
   )

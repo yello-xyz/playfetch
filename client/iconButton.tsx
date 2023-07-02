@@ -1,9 +1,13 @@
-export default function IconButton({ icon, onClick }: { icon: string; onClick: () => void }) {
+import { StaticImageData } from 'next/image'
+import { MouseEvent } from 'react'
+import Icon from './icon';
+
+export default function IconButton({ icon, onClick }: { icon: StaticImageData; onClick: () => void }) {
   return (
-    <img
-      className='w-6 h-6 rounded cursor-pointer hover:bg-gray-100'
-      src={icon}
-      onClick={event => {
+    <Icon
+      icon={icon}
+      className='rounded cursor-pointer hover:bg-gray-100'
+      onClick={(event: MouseEvent) => {
         event.stopPropagation()
         onClick()
       }}

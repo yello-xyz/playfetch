@@ -67,10 +67,10 @@ function PromptCell({ prompt, projects }: { prompt: Prompt; projects: Project[] 
         <span className='flex-1 font-medium line-clamp-2'>{prompt.name}</span>
         <div className='relative flex'>
           <IconButton
-            icon={prompt.favorited ? filledStarIcon.src : starIcon.src}
+            icon={prompt.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavorite(prompt.id, !prompt.favorited).then(refreshProject)}
           />
-          <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+          <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
             <PromptPopupMenu
               prompt={prompt}

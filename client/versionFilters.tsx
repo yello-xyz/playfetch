@@ -8,6 +8,8 @@ import textIcon from '@/public/text.svg'
 import { UserAvatar } from './userSidebarItem'
 import { ReactNode, useRef, useState } from 'react'
 import PopupMenu from './popupMenu'
+import Icon from './icon'
+import { StaticImageData } from 'next/image'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
@@ -96,7 +98,7 @@ function FilterCell({
       {isTextFilter(filter) && <TextFilterCell filter={filter} />}
       {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
       {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
-      <img className='w-[18px] h-[18px] cursor-pointer' src={clearIcon.src} onClick={onClick} />
+      <Icon className='w-[18px] h-fit cursor-pointer' icon={clearIcon} onClick={onClick} />
     </div>
   )
 }
@@ -179,7 +181,7 @@ function FilterButton({
       <div
         className='flex items-center gap-1 px-2 pb-1.5 -mt-0.5 cursor-pointer'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
-        <img className='w-6 h-6' src={filterIcon.src} />
+        <Icon icon={filterIcon} />
         Filter
       </div>
       <div className='absolute right-0 top-7'>
@@ -190,12 +192,12 @@ function FilterButton({
           {menuState === 'expanded' && (
             <>
               {availableUsers.length > 0 && (
-                <FilterCategoryItem title='Created by' icon={userIcon.src} onClick={() => setMenuState('user')} />
+                <FilterCategoryItem title='Created by' icon={userIcon} onClick={() => setMenuState('user')} />
               )}
               {availableLabels.length > 0 && (
-                <FilterCategoryItem title='Label' icon={labelIcon.src} onClick={() => setMenuState('label')} />
+                <FilterCategoryItem title='Label' icon={labelIcon} onClick={() => setMenuState('label')} />
               )}
-              <FilterCategoryItem title='Contains' icon={textIcon.src} onClick={() => setMenuState('text')} />
+              <FilterCategoryItem title='Contains' icon={textIcon} onClick={() => setMenuState('text')} />
             </>
           )}
           {menuState === 'label' &&
@@ -229,12 +231,12 @@ function FilterButton({
   )
 }
 
-function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: string; onClick: () => void }) {
+function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: StaticImageData; onClick: () => void }) {
   return (
     <FilterPopupItem onClick={onClick}>
-      <img className='w-6 h-6' src={icon} />
+      <Icon icon={icon} />
       <div className='flex-grow'>{title}</div>
-      <img className='w-6 h-6' src={chevronIcon.src} />
+      <Icon icon={chevronIcon} />
     </FilterPopupItem>
   )
 }

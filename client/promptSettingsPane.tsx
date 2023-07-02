@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PromptConfig } from '@/types'
 import chevronIcon from '@/public/chevron.svg'
+import Icon from './icon'
 
 const SettingsRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className='flex items-center w-full gap-4'>
@@ -26,7 +27,7 @@ export default function PromptSettingsPane({
       <div
         className='flex items-center font-medium text-gray-600 cursor-pointer'
         onClick={() => setOptionsExpanded(!areOptionsExpanded)}>
-        <img className={`-ml-1 w-6 h-6 ${areOptionsExpanded ? '' : '-rotate-90'}`} src={chevronIcon.src} />
+        <Icon className={`-ml-1 ${areOptionsExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
         Advanced Settings
       </div>
       {areOptionsExpanded && (

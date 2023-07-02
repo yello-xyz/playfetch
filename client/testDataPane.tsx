@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
+import Icon from './icon'
 
 export default function TestDataPane({
   variables,
@@ -78,7 +79,7 @@ export default function TestDataPane({
         <div
           className='flex justify-center border-b border-gray-300 border-x py-1.5 cursor-pointer items-center font-medium'
           onClick={addInput}>
-          <img className='w-6 h-6' src={addIcon.src} />
+          <Icon icon={addIcon} />
           Add
         </div>
       </div>

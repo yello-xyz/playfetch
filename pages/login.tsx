@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react'
 import ClientRoute from '@/client/clientRoute'
 import githubIcon from '@/public/github.svg'
 import googleIcon from '@/public/google.svg'
+import Icon from '@/client/icon'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -27,7 +28,7 @@ function SignInButton({ name, icon, provider }: { name: string; icon: string; pr
     className='flex justify-center bg-gray-100 hover:bg-gray-200 w-96 py-3.5 border border-gray-300 rounded'
     onClick={() => signIn(provider, { callbackUrl: ClientRoute.Home }).then()}>
     <div className='flex items-center gap-2'>
-      <img className='w-[22px] h-[22px]' src={icon} />
+      <Icon className='w-[22px] h-fit' icon={icon} />
       Sign in with {name}
     </div>
   </button>

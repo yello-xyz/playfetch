@@ -29,7 +29,7 @@ export default function VersionPopupMenu({ version, containerRect }: { version: 
   return (
     <>
       <div ref={iconRef}>
-        <IconButton icon={dotsIcon.src} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+        <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
       </div>
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>

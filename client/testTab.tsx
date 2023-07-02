@@ -13,6 +13,7 @@ import PopupMenu, { PopupMenuItem } from './popupMenu'
 import TestDataPane from './testDataPane'
 import DropdownMenu from './dropdownMenu'
 import useModalDialogPrompt from './modalDialogContext'
+import Icon from './icon'
 const PromptPanel = dynamic(() => import('@/client/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -199,7 +200,7 @@ function VersionSelector({
     <div className='relative flex items-end'>
       <div className='flex items-center cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
         <Label className='cursor-pointer'>{`Prompt ${index + 1}`}</Label>
-        <img className='w-6 h-6' src={chevronIcon.src} />
+        <Icon icon={chevronIcon} />
       </div>
       <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
         {ascendingVersions.map((version, index) => (

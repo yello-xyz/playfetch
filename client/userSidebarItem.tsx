@@ -3,6 +3,8 @@ import PopupMenu from './popupMenu'
 import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
+import Image from 'next/image'
+import Icon from './icon'
 
 const avatarColors = ['bg-red-500', 'bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500']
 
@@ -12,13 +14,20 @@ const getAvatarColor = (user: User) => {
 }
 
 export function UserAvatar({ user, size = 'md', border }: { user: User; size?: 'xs' | 'sm' | 'md'; border?: boolean }) {
+  const width = size === 'xs' ? 14 : size === 'sm' ? 18 : 28
   const sizeClass = size === 'xs' ? 'w-3.5 h-3.5' : size === 'sm' ? 'w-[18px] h-[18px]' : 'w-7 h-7'
   const borderClass = border ? 'border-2 border-white' : ''
   const textClass =
     size === 'xs' ? 'text-[8px]' : size === 'sm' ? 'text-[10px]' : `font-medium ${border ? 'text-xs' : 'text-sm'}`
   const baseClass = 'rounded-full flex items-center justify-center'
   return user.imageURL.length ? (
-    <img className={`${sizeClass} ${borderClass} rounded-full`} src={user.imageURL} />
+    <Image
+      width={width}
+      height={width}
+      className={`${sizeClass} ${borderClass} rounded-full`}
+      src={user.imageURL}
+      alt='avatar'
+    />
   ) : (
     <div className={`${sizeClass} ${borderClass} ${textClass} ${getAvatarColor(user)} ${baseClass}`}>
       {user.fullName.slice(0, 1)}
@@ -36,7 +45,7 @@ export default function UserSidebarItem({ user }: { user: User }) {
       <UserAvatar user={user} />
       <span className='flex-1 font-semibold'>{user.fullName}</span>
       <div className='flex'>
-        <img className='w-6 h-6' src={chevronIcon.src} />
+        <Icon icon={chevronIcon} />
         {isMenuExpanded && (
           <div className='absolute top-0 left-0'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>

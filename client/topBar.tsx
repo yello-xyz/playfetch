@@ -7,6 +7,8 @@ import PromptPopupMenu from './promptPopupMenu'
 import { useRefreshProject, useRefreshPrompt, useSelectProject } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import ProjectPopupMenu from './projectPopupMenu'
+import Icon from './icon'
+import { StaticImageData } from 'next/image'
 
 export default function TopBar({
   projects = [],
@@ -35,7 +37,7 @@ export default function TopBar({
       <div className='flex flex-col'>
         <div className={`z-10 flex items-center justify-between gap-4 px-6 ${children ? 'pt-4' : 'py-4'}`}>
           <div className='relative flex gap-1 py-2 text-base justify-self-start'>
-            <img className='w-6 h-6' src={projectIcon.src} />
+            <Icon icon={projectIcon} />
             {activePrompt && (
               <>
                 <span className='cursor-pointer' onClick={() => selectProject(activePrompt.projectID)}>
@@ -49,7 +51,7 @@ export default function TopBar({
             ) : (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
                 <span className='font-medium'>{activeProject?.name ?? activePrompt?.name}</span>
-                <img className='w-6 h-6' src={chevronIcon.src} />
+                <Icon icon={chevronIcon} />
                 <div className='absolute right-0 top-8'>
                   {activePrompt && (
                     <PromptPopupMenu
@@ -74,7 +76,7 @@ export default function TopBar({
           <div className='flex items-center gap-4'>
             {activeProject && <UserAvatars users={activeProject.users} />}
             {activeProject && (
-              <TopBarButton title='New Prompt' icon={addIcon.src} onClick={() => onAddPrompt(activeProject.id)} />
+              <TopBarButton title='New Prompt' icon={addIcon} onClick={() => onAddPrompt(activeProject.id)} />
             )}
           </div>
         </div>
@@ -104,12 +106,12 @@ function UserAvatars({ users }: { users: User[] }) {
 
 const Divider = () => <div className='flex-1 h-px bg-gray-200' />
 
-function TopBarButton({ title, icon, onClick }: { title: string; icon?: string; onClick: () => void }) {
+function TopBarButton({ title, icon, onClick }: { title: string; icon?: StaticImageData; onClick: () => void }) {
   return (
     <div
       className='flex items-center gap-1 py-1 pl-2 pr-4 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
-      {icon && <img className='w-6 h-6' src={icon} />}
+      {icon && <Icon icon={icon} />}
       <div>{title}</div>
     </div>
   )
