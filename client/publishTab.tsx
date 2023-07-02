@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
 import Button from './button'
 import api from './api'
@@ -52,11 +52,27 @@ export default function PublishTab({
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
   const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0], availableFlavors[0]) : ''
 
+  const checkName = useMemo(
+    () =>
+      debounce((name: string) => api.checkEndpointName(prompt.id, prompt.projectURLPath, name).then(setNameAvailable)),
+    [prompt]
+  )
+
+  const updateName = useCallback((name: string) => {
+    setName(name)
+    setNameAvailable(undefined)
+    if (CheckValidURLPath(name)) {
+      checkName(name)
+    } else {
+      setNameAvailable(false)
+    }
+  }, [checkName])
+
   const initialName =
     endpoint?.urlPath ?? endpoints[0]?.urlPath ?? ToCamelCase(prompt.name.split(' ').slice(0, 3).join(' '))
   const [name, setName] = useState(initialName)
   const [nameAvailable, setNameAvailable] = useState<boolean>()
-  useEffect(() => updateName(initialName), [initialName])
+  useEffect(() => updateName(initialName), [initialName, updateName])
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
 
@@ -114,22 +130,6 @@ export default function PublishTab({
   const switchToPublishedVersion = () => {
     setActiveVersion(version)
     selectTab('play')
-  }
-
-  const checkName = useMemo(
-    () =>
-      debounce((name: string) => api.checkEndpointName(prompt.id, prompt.projectURLPath, name).then(setNameAvailable)),
-    [prompt]
-  )
-
-  const updateName = (name: string) => {
-    setName(name)
-    setNameAvailable(undefined)
-    if (CheckValidURLPath(name)) {
-      checkName(name)
-    } else {
-      setNameAvailable(false)
-    }
   }
 
   const addNewEnvironment = 'Add New Environment…'

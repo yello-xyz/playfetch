@@ -1,4 +1,4 @@
-import { ReactNode, RefObject, useEffect, useRef, useState } from 'react'
+import { ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { ActivePrompt, PromptConfig, User, Version } from '@/types'
 import historyIcon from '@/public/history.svg'
 import VersionPopupMenu from './versionPopupMenu'
@@ -20,23 +20,24 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
 }
 
 function useScrollDetection(callback: () => void, element: RefObject<HTMLDivElement>) {
-  let frame = 0
-  const debouncedCallback = () => {
-    if (frame) {
-      cancelAnimationFrame(frame)
+  const frame = useRef(0)
+  const debouncedCallback = useCallback(() => {
+    if (frame.current) {
+      cancelAnimationFrame(frame.current)
     }
-    frame = requestAnimationFrame(() => {
+    frame.current = requestAnimationFrame(() => {
       callback()
     })
-  }
+  }, [callback, frame])
 
   useEffect(() => {
     callback()
-    element.current?.addEventListener('scroll', debouncedCallback, { passive: true })
+    const currentElement = element.current
+    currentElement?.addEventListener('scroll', debouncedCallback, { passive: true })
     return () => {
-      element.current?.removeEventListener('scroll', debouncedCallback)
+      currentElement?.removeEventListener('scroll', debouncedCallback)
     }
-  }, [element.current])
+  }, [element, callback, debouncedCallback])
 }
 
 export default function VersionTimeline({
@@ -55,7 +56,7 @@ export default function VersionTimeline({
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
-  useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [containerRef.current])
+  useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [])
   const scrollRef = useRef<HTMLDivElement>(null)
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(() => forceStateUpdate(scrollRef.current?.scrollTop ?? 0), scrollRef)

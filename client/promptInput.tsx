@@ -73,7 +73,7 @@ export default function PromptInput({
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [contentEditableRef.current, containerRef.current])
+  }, [showInputControls, contentEditableRef, containerRef])
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
     if (isInput) {
