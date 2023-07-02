@@ -23,7 +23,9 @@ export default function TopBar({
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
-  const onRefresh = activeProject ? useRefreshProject() : useRefreshPrompt()
+  const refreshProject = useRefreshProject()
+  const refreshPrompt = useRefreshPrompt()
+  const onRefresh = activeProject ? refreshProject : refreshPrompt
   const selectProject = useSelectProject()
 
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
