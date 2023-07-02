@@ -151,7 +151,7 @@ export default function PublishTab({
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <Label>Settings</Label>
-        <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg w-96'>
+        <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
           <div className='flex items-center gap-8'>
             <Label>Environment</Label>
             <DropdownMenu value={flavor} onChange={updateFlavor}>
