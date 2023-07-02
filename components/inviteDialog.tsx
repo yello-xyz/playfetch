@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ModalDialog from './modalDialog'
 import { Project } from '@/types'
-import { CheckValidEmail } from '@/common/formatting'
+import { CheckValidEmail } from '@/src/common/formatting'
 import TextInput from './textInput'
 import DropdownMenu from './dropdownMenu'
 

@@ -1,5 +1,5 @@
-import { deleteVersionForUser } from '@/server/datastore/versions'
-import { withLoggedInUserRoute } from '@/server/session'
+import { deleteVersionForUser } from '@/src/server/datastore/versions'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

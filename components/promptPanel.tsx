@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { PromptConfig, PromptInputs, Version } from '@/types'
-import { ExtractPromptVariables } from '@/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'

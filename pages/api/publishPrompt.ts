@@ -1,8 +1,8 @@
-import { withLoggedInUserRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { ToCamelCase } from '@/common/formatting'
-import { saveEndpoint } from '@/server/datastore/endpoints'
-import { getURLPathForProject } from '@/server/datastore/projects'
+import { ToCamelCase } from '@/src/common/formatting'
+import { saveEndpoint } from '@/src/server/datastore/endpoints'
+import { getURLPathForProject } from '@/src/server/datastore/projects'
 import { PromptConfig, User } from '@/types'
 
 async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {

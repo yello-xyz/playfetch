@@ -1,10 +1,10 @@
-import openai from '@/server/openai'
-import anthropic from '@/server/anthropic'
-import vertexai from '@/server/vertexai'
-import { withLoggedInUserRoute } from '@/server/session'
+import openai from '@/src/server/openai'
+import anthropic from '@/src/server/anthropic'
+import vertexai from '@/src/server/vertexai'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { cacheValue, getCachedValue } from '@/server/datastore/cache'
-import { saveRun } from '@/server/datastore/runs'
+import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
+import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, PromptConfig, User } from '@/types'
 
 const hashValue = (object: any, seed = 0) => {

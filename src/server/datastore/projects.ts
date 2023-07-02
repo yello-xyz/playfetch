@@ -12,7 +12,7 @@ import {
   toID,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
-import { CheckValidURLPath } from '@/common/formatting'
+import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
 import { deletePromptForUser, toPrompt } from './prompts'

@@ -1,4 +1,4 @@
-import api from '@/client/api'
+import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
 import { ActivePrompt, Version, PromptInputs, PromptConfig, Project } from '@/types'
 import chevronIcon from '@/public/chevron.svg'
@@ -6,7 +6,7 @@ import chevronIcon from '@/public/chevron.svg'
 import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import Label from './label'
-import { ExtractPromptVariables } from '@/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PendingButton } from './button'
 import RunTimeline from './runTimeline'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
@@ -14,7 +14,7 @@ import TestDataPane from './testDataPane'
 import DropdownMenu from './dropdownMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import Icon from './icon'
-const PromptPanel = dynamic(() => import('@/client/promptPanel'))
+const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
   const savePrompt = useSavePrompt()

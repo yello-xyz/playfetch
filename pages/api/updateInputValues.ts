@@ -1,5 +1,5 @@
-import { saveInputValues } from '@/server/datastore/inputs'
-import { withLoggedInUserRoute } from '@/server/session'
+import { saveInputValues } from '@/src/server/datastore/inputs'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

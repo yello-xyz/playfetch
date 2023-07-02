@@ -1,6 +1,6 @@
-import { getActivePrompt } from '@/server/datastore/prompts'
-import { urlBuilderFromHeaders } from '@/server/routing'
-import { withLoggedInUserRoute } from '@/server/session'
+import { getActivePrompt } from '@/src/server/datastore/prompts'
+import { urlBuilderFromHeaders } from '@/src/server/routing'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { ActivePrompt, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

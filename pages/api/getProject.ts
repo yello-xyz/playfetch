@@ -1,5 +1,5 @@
-import { getActiveProject } from '@/server/datastore/projects'
-import { withLoggedInUserRoute } from '@/server/session'
+import { getActiveProject } from '@/src/server/datastore/projects'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { ActiveProject, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

@@ -13,7 +13,7 @@ import {
 } from './datastore'
 import { toRun } from './runs'
 import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
-import { StripPromptSentinels } from '@/common/formatting'
+import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabels } from './projects'
 
 export async function migrateVersions() {

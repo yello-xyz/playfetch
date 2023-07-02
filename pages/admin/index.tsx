@@ -1,11 +1,11 @@
 import { Inter } from 'next/font/google'
-import { withAdminSession } from '@/server/session'
-import TextInput from '@/client/textInput'
-import api from '@/client/admin/api'
+import { withAdminSession } from '@/src/server/session'
+import TextInput from '@/components/textInput'
+import api from '@/src/client/admin/api'
 import { useState } from 'react'
-import { PendingButton } from '@/client/button'
-import { CheckValidEmail } from '@/common/formatting'
-import Checkbox from '@/client/checkbox'
+import { PendingButton } from '@/components/button'
+import { CheckValidEmail } from '@/src/common/formatting'
+import Checkbox from '@/components/checkbox'
 
 const inter = Inter({ subsets: ['latin'] })
 

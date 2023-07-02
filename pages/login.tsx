@@ -1,10 +1,10 @@
 import { Inter } from 'next/font/google'
-import { withLoggedOutSession } from '@/server/session'
+import { withLoggedOutSession } from '@/src/server/session'
 import { signIn } from 'next-auth/react'
-import ClientRoute from '@/client/clientRoute'
+import ClientRoute from '@/components/clientRoute'
 import githubIcon from '@/public/github.svg'
 import googleIcon from '@/public/google.svg'
-import Icon from '@/client/icon'
+import Icon from '@/components/icon'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 

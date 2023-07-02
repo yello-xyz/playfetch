@@ -1,4 +1,4 @@
-import { FormatCost, FormatDate } from '@/common/formatting'
+import { FormatCost, FormatDate } from '@/src/common/formatting'
 import { Run } from '@/types'
 import { useEffect, useState } from 'react'
 

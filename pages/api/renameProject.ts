@@ -1,6 +1,6 @@
-import { withLoggedInUserRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { updateProjectName } from '@/server/datastore/projects'
+import { updateProjectName } from '@/src/server/datastore/projects'
 import { User } from '@/types'
 
 async function renameProject(req: NextApiRequest, res: NextApiResponse, user: User) {

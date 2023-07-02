@@ -1,5 +1,5 @@
 import { ActivePrompt, Version } from '@/types'
-import api from './api'
+import api from '../src/client/api'
 import PopupMenu from './popupMenu'
 import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'

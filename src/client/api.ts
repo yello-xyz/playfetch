@@ -1,5 +1,5 @@
 import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs, ActiveProject } from '@/types'
-import ClientRoute from './clientRoute'
+import ClientRoute from '../../components/clientRoute'
 
 async function parseResponse(response: Response) {
   if (response.ok) {

@@ -1,5 +1,5 @@
-import { deleteEndpointForUser } from '@/server/datastore/endpoints'
-import { withLoggedInUserRoute } from '@/server/session'
+import { deleteEndpointForUser } from '@/src/server/datastore/endpoints'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

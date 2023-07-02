@@ -1,7 +1,7 @@
-import { CheckValidURLPath, ToCamelCase } from '@/common/formatting'
-import { withLoggedInUserRoute } from '@/server/session'
+import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { checkCanSaveEndpoint } from '@/server/datastore/endpoints'
+import { checkCanSaveEndpoint } from '@/src/server/datastore/endpoints'
 
 async function checkEndpointName(req: NextApiRequest, res: NextApiResponse<boolean>) {
   const promptID = req.body.promptID

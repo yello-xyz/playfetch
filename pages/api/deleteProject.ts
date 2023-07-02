@@ -1,5 +1,5 @@
-import { deleteProjectForUser } from '@/server/datastore/projects'
-import { withLoggedInUserRoute } from '@/server/session'
+import { deleteProjectForUser } from '@/src/server/datastore/projects'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 

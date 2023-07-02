@@ -1,4 +1,4 @@
-import { getUserForEmail, markUserLogin } from '@/server/datastore/users'
+import { getUserForEmail, markUserLogin } from '@/src/server/datastore/users'
 import NextAuth, { Session, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
 import GithubProvider from 'next-auth/providers/github'

@@ -1,4 +1,4 @@
-import { StripPromptSentinels } from '@/common/formatting'
+import { StripPromptSentinels } from '@/src/common/formatting'
 import {
   Entity,
   buildKey,

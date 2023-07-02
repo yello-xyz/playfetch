@@ -1,5 +1,5 @@
 import { Project, Prompt } from '@/types'
-import api from './api'
+import api from '../src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import PickProjectDialog from './pickProjectDialog'

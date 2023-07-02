@@ -1,11 +1,11 @@
 import { Suspense } from 'react'
 import { ActivePrompt, Version, Project } from '@/types'
-import VersionTimeline from '@/client/versionTimeline'
+import VersionTimeline from '@/components/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
 import { useRunPrompt } from './testTab'
-const PromptPanel = dynamic(() => import('@/client/promptPanel'))
+const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export default function PlayTab({
   prompt,

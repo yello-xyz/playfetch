@@ -1,6 +1,6 @@
 import { ActiveProject, ActivePrompt, Project, User } from '@/types'
 import { ReactNode, useState } from 'react'
-import api from './api'
+import api from '../src/client/api'
 import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'

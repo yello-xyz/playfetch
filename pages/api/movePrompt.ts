@@ -1,6 +1,6 @@
-import { withLoggedInUserRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { updatePromptProject } from '@/server/datastore/prompts'
+import { updatePromptProject } from '@/src/server/datastore/prompts'
 import { User } from '@/types'
 
 async function movePrompt(req: NextApiRequest, res: NextApiResponse, user: User) {

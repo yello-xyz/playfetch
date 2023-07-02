@@ -1,6 +1,6 @@
-import { withLoggedInUserRoute } from '@/server/session'
+import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { toggleFavoritePrompt } from '@/server/datastore/prompts'
+import { toggleFavoritePrompt } from '@/src/server/datastore/prompts'
 import { User } from '@/types'
 
 async function toggleFavorite(req: NextApiRequest, res: NextApiResponse, user: User) {
