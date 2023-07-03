@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
@@ -7,15 +7,18 @@ export default function TestDataPane({
   variables,
   inputValues,
   setInputValues,
-  activeColumn,
-  setActiveColumn,
+  onPersistInputValues,
 }: {
   variables: string[]
   inputValues: { [key: string]: string[] }
   setInputValues: (inputValues: { [key: string]: string[] }) => void
-  activeColumn: number
-  setActiveColumn: (index: number) => void
+  onPersistInputValues: () => void
 }) {
+  const [activeColumn, setActiveColumn] = useState(0)
+  if (activeColumn > 0 && activeColumn >= variables.length) {
+    setActiveColumn(0)
+  }
+
   const activeVariable = variables[activeColumn]
   const activeInputs = inputValues[activeVariable] ?? ['']
 
@@ -45,6 +48,11 @@ export default function TestDataPane({
     }, 0)
   }
 
+  const selectColumn = (index: number) => {
+    onPersistInputValues()
+    setActiveColumn(index)
+  }
+
   return variables.length ? (
     <>
       <div className='flex flex-col items-stretch'>
@@ -53,7 +61,7 @@ export default function TestDataPane({
             <div
               key={index}
               className={`font-medium border-r border-gray-300 px-3 py-2.5 ${styleForColumn(index)}`}
-              onClick={() => setActiveColumn(index)}>
+              onClick={() => selectColumn(index)}>
               {variable}
             </div>
           ))}

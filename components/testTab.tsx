@@ -47,19 +47,14 @@ export default function TestTab({
 
   const originalInputs = Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
   const variables = ExtractPromptVariables(version.prompt)
-  const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>(originalInputs)
+  const [inputValues, setInputValues] = useState(originalInputs)
   
-  const [activeColumn, setActiveColumn] = useState(0)
-  if (activeColumn > 0 && activeColumn >= variables.length) {
-    setActiveColumn(0)
-  }
-  const activeVariable: string | undefined = variables[activeColumn]
-  const activeInputs = activeVariable ? inputValues[activeVariable] ?? [] : []
-
   // TODO this should also be persisted when switching tabs
   const persistValuesIfNeeded = () => {
-    if (activeVariable && activeInputs.join(',') !== (originalInputs[activeVariable] ?? []).join(',')) {
-      api.updateInputValues(prompt.projectID, activeVariable, activeInputs)
+    for (const [variable, inputs] of Object.entries(inputValues)) {
+      if (inputs.join(',') !== (originalInputs[variable] ?? []).join(',')) {
+        api.updateInputValues(prompt.projectID, variable, inputs)
+      }
     }
   }
 
@@ -67,11 +62,6 @@ export default function TestTab({
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistValuesIfNeeded()
     return runPrompt(version.prompt, version.config, inputs)
-  }
-
-  const selectColumn = (index: number) => {
-    persistValuesIfNeeded()
-    setActiveColumn(index)
   }
 
   return (
@@ -83,8 +73,7 @@ export default function TestTab({
             variables={variables}
             inputValues={inputValues}
             setInputValues={setInputValues}
-            activeColumn={activeColumn}
-            setActiveColumn={selectColumn}
+            onPersistInputValues={persistValuesIfNeeded}
           />
         </div>
         <div className='self-start'>
