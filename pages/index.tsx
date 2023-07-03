@@ -16,6 +16,7 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
+import ChainTabView from '@/components/chainTabView'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -203,6 +204,9 @@ export default function Home({
                     onAddPrompt={() => addPrompt(activeProject.id)}
                     onSelectPrompt={selectPrompt}
                   />
+                )}
+                {isChainMode && activeProject && (
+                  <ChainTabView activeTab={selectedTab} prompts={activeProject.prompts} />
                 )}
               </div>
             </div>
