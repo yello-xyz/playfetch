@@ -86,6 +86,7 @@ export type Endpoint = {
 export type ResolvedEndpoint = Endpoint & {
   url: string
   apiKeyDev: string
+  usage: Usage
 }
 
 export type Usage = {

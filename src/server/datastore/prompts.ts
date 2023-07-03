@@ -16,6 +16,7 @@ import { toEndpoint } from './endpoints'
 import { ActivePrompt, Prompt } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
+import { toUsage } from './usage'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -57,6 +58,7 @@ export async function getActivePrompt(
   const projectData =
     promptData.projectID === userID ? undefined : await getKeyedEntity(Entity.PROJECT, promptData.projectID)
   const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
+  const usages = await getEntities(Entity.USAGE, 'promptID', promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const users = await getProjectUsers(userID, promptData.projectID)
@@ -70,6 +72,7 @@ export async function getActivePrompt(
       ...toEndpoint(endpoint),
       url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
       apiKeyDev: projectData?.apiKeyDev ?? '',
+      usage: toUsage(usages.find(usage => usage.endpointID === endpoint.id)),
     })),
     users,
     inputs,
