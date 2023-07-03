@@ -1,11 +1,11 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
+import { ActivePrompt, ResolvedEndpoint, Run, Usage, Version } from '@/types'
 import Button from './button'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import Label from './label'
-import { CheckValidURLPath, ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+import { CheckValidURLPath, ExtractPromptVariables, FormatCost, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
@@ -202,6 +202,7 @@ export default function PublishTab({
             {CheckValidURLPath(name) ? 'Name already used for other prompt in project' : 'Invalid endpoint name'}
           </div>
         )}
+        {endpoint && <UsagePane usage={endpoint.usage} />}
       </div>
       <div className='flex flex-col p-6 pl-0 items-'>
         {endpoint && (
@@ -231,6 +232,33 @@ export default function PublishTab({
     </>
   ) : (
     <EmptyPublishTab />
+  )
+}
+
+function UsagePane({ usage }: { usage: Usage }) {
+  const averageCost = usage.requests ? usage.cost / usage.requests : 0
+  const averageAttempts = usage.requests ? usage.attempts / usage.requests : 0
+  return (
+    <>
+      <Label>Usage</Label>
+      <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+        <UsageRow label='Requests' value={usage.requests} />
+        <UsageRow label='Failed Requests' value={usage.failures} />
+        <UsageRow label='Total Cost' value={FormatCost(usage.cost)} />
+        <UsageRow label='Average Cost' value={FormatCost(averageCost)} />
+        <UsageRow label='Average Attempts' value={averageAttempts ? averageAttempts.toFixed(2) : averageAttempts} />
+        <UsageRow label='Cache Hits' value={usage.cacheHits} />
+      </div>
+    </>
+  )
+}
+
+function UsageRow({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className='flex items-center justify-between gap-8'>
+      <Label className='w-60'>{label}</Label>
+      {value}
+    </div>
   )
 }
 
