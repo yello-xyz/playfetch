@@ -6,25 +6,34 @@ import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
 import { ActiveChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
-import { useRunPrompt } from './testTab'
 import RunTimeline from './runTimeline'
+import { Run } from '@/types'
 
-const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]) => {
-  
+const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): Promise<Run[]> => {
+  const versions = chain.map(item => item.version)
+  return versions.length
+    ? api.runChain(
+        chain[0].prompt.id,
+        versions.map(version => version.id),
+        versions.map(version => version.prompt),
+        versions.map(version => version.config),
+        inputs,
+        chain.map(item => item.output)
+      )
+    : Promise.resolve([])
 }
 
 export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
+  const [runs, setRuns] = useState<Run[]>([])
   const variables = ExtractUnboundChainVariables(chain)
 
   const activePrompt = chain[0].prompt
 
-  // TODO deduplicate this logic
+  // TODO deduplicate this bit of logic
   const [originalInputValues, setOriginalInputValues] = useState(
     Object.fromEntries(activePrompt.inputs.map(input => [input.name, input.values]))
   )
   const [inputValues, setInputValues] = useState(originalInputValues)
-
-  // TODO this should also be persisted when switching tabs
   const persistValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
       if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
@@ -34,10 +43,10 @@ export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
     setOriginalInputValues(inputValues)
   }
 
-  const runPrompt = useRunPrompt(activePrompt.id)
   const testChain = async (inputs: Record<string, string>[]) => {
     persistValuesIfNeeded()
-    // TODO actually run chain
+    const runs = await runChain(chain, inputs)
+    setRuns(runs)
   }
 
   return chain.length ? (
@@ -52,14 +61,10 @@ export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
             onPersistInputValues={persistValuesIfNeeded}
           />
         </div>
-        <TestButtons
-          variables={variables}
-          inputValues={inputValues}
-          callback={testChain}
-        />
+        <TestButtons variables={variables} inputValues={inputValues} callback={testChain} />
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={chain.slice(-1)[0].version.runs} />
+        <RunTimeline runs={runs} />
       </div>
     </>
   ) : null
