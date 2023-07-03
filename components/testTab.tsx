@@ -45,17 +45,20 @@ export default function TestTab({
     setActiveVersion(version)
   }
 
-  const originalInputs = Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
   const variables = ExtractPromptVariables(version.prompt)
-  const [inputValues, setInputValues] = useState(originalInputs)
-  
+  const [originalInputValues, setOriginalInputValues] = useState(
+    Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
+  )
+  const [inputValues, setInputValues] = useState(originalInputValues)
+
   // TODO this should also be persisted when switching tabs
   const persistValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
-      if (inputs.join(',') !== (originalInputs[variable] ?? []).join(',')) {
+      if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
         api.updateInputValues(prompt.projectID, variable, inputs)
       }
     }
+    setOriginalInputValues(inputValues)
   }
 
   const runPrompt = useRunPrompt(prompt.id)
