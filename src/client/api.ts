@@ -80,6 +80,16 @@ const api = {
   ) {
     return post(this.runPrompt, { promptID, versionID, prompt, config, inputs })
   },
+  runChain: function (
+    promptID: number,
+    versionIDs: number[],
+    prompts: string[],
+    configs: PromptConfig[],
+    inputs: PromptInputs[],
+    outputs: (string | undefined)[]
+  ) {
+    return post(this.runChain, { promptID, versionIDs, prompts, configs, inputs, outputs })
+  },
   checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {
     return post(this.checkEndpointName, { promptID, projectURLPath, name })
   },
