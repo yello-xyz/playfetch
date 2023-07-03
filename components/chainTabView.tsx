@@ -11,13 +11,14 @@ export default function ChainTabView({ activeTab, prompts }: { activeTab: Active
   const [chain, setChain] = useState<ChainItem[]>([])
 
   const isActiveChainItem = (item: ChainItem): item is ActiveChainItem => !!item.version
+  const activeChain = chain.filter(isActiveChainItem)
 
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
         return <BuildChainTab chain={chain} setChain={setChain} prompts={prompts} />
       case 'test':
-        return <TestChainTab chain={chain.filter(isActiveChainItem)} />
+        return activeChain.length ? <TestChainTab chain={activeChain} /> : null
       case 'publish':
         return null
     }
