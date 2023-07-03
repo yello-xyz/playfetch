@@ -3,14 +3,7 @@ import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from '
 const getAPI = () => new OpenAIApi(new Configuration({ apiKey: process.env.OPENAI_API_KEY }))
 
 export default async function predict(prompt: string, temperature: number, maxOutputTokens: number) {
-  const attempts = 3
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    const completion = await tryCompleteChat(prompt, temperature, maxOutputTokens)
-    if (completion?.output?.length) {
-      return completion
-    }
-  }
-  return { output: undefined, cost: 0 }
+  return tryCompleteChat(prompt, temperature, maxOutputTokens)
 }
 
 async function tryCompleteChat(

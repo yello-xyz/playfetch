@@ -24,12 +24,14 @@ const hashValue = (object: any, seed = 0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
+type RunResponse = { output: string | undefined; cost: number }
+
 export const runPromptWithConfig = async (
   prompt: string,
   config: PromptConfig,
   inputs: PromptInputs,
   useCache: boolean
-): Promise<{ output: string | undefined; cost: number }> => {
+): Promise<RunResponse> => {
   const resolvedPrompt = Object.entries(inputs).reduce(
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     prompt
@@ -59,7 +61,17 @@ export const runPromptWithConfig = async (
     return { output: cachedValue, cost: 0 }
   }
 
-  const result = await getPredictor(config.provider)(resolvedPrompt, config.temperature, config.maxTokens)
+  const predictor = getPredictor(config.provider)
+
+  const maxAttempts = 3
+  let result: RunResponse = { output: undefined, cost: 0 }
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens)
+    if (result.output?.length) {
+      break
+    }
+  }
+
   if (useCache && result.output?.length) {
     await cacheValue(cacheKey, result.output)
   }
