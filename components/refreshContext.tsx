@@ -2,7 +2,6 @@ import { createContext, useContext } from 'react'
 import { ActivePromptTab } from './promptTabView'
 
 type RefreshContextType = {
-  refreshPage?: () => Promise<void>
   refreshProjects?: () => Promise<void>
   selectProject?: (projectID: number) => Promise<void>
   selectUserProject?: () => Promise<void>
@@ -15,7 +14,6 @@ type RefreshContextType = {
 
 export const RefreshContext = createContext<RefreshContextType>({})
 
-export const useRefreshPage = () => useContext(RefreshContext).refreshPage!
 export const useRefreshProjects = () => useContext(RefreshContext).refreshProjects!
 export const useSelectProject = () => useContext(RefreshContext).selectProject!
 export const useSelectUserProject = () => useContext(RefreshContext).selectUserProject!

@@ -144,7 +144,6 @@ export default function Home({
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <RefreshContext.Provider
           value={{
-            refreshPage: () => router.replace(router.asPath).then(),
             refreshProjects,
             selectProject,
             selectUserProject: () => selectProject(user.id),
