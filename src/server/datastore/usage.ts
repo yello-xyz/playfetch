@@ -5,6 +5,7 @@ export async function saveOrResetUsage(endpointID: number, promptID: number) {
   await getDatastore().save(toUsageData(endpointID, promptID, 0, 0, 0, 0, 0, new Date()))
 }
 
+// TODO make transactional with exponential backoff as this may be run many times in parallel
 export async function updateUsage(
   endpointID: number,
   promptID: number,

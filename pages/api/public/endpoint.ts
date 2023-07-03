@@ -4,6 +4,7 @@ import { runPromptWithConfig } from '../runPrompt'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
+import { updateUsage } from '@/src/server/datastore/usage'
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -18,8 +19,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         endpoint.prompt
       )
 
-      // TODO log output, cost, failures, etc.
-      const { output } = await runPromptWithConfig(prompt, endpoint.config, req.body, endpoint.useCache)
+      const { output, cost, attempts, cacheHit } = await runPromptWithConfig(
+        prompt,
+        endpoint.config,
+        req.body,
+        endpoint.useCache
+      )
+      await updateUsage(endpoint.id, endpoint.promptID, cost, cacheHit, attempts, !output?.length)
       return res.json({ output })
     }
   }

@@ -24,7 +24,8 @@ const hashValue = (object: any, seed = 0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
-type RunResponse = { output: string | undefined; cost: number }
+type PredictionResponse = { output: string | undefined; cost: number }
+type RunResponse = PredictionResponse & { attempts: number; cacheHit: boolean }
 
 export const runPromptWithConfig = async (
   prompt: string,
@@ -58,14 +59,15 @@ export const runPromptWithConfig = async (
 
   const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
   if (cachedValue) {
-    return { output: cachedValue, cost: 0 }
+    return { output: cachedValue, cost: 0, attempts: 1, cacheHit: true }
   }
 
   const predictor = getPredictor(config.provider)
 
+  let result: PredictionResponse = { output: undefined, cost: 0 }
+  let attempts = 0
   const maxAttempts = 3
-  let result: RunResponse = { output: undefined, cost: 0 }
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  while (++attempts <= maxAttempts) {
     result = await predictor(resolvedPrompt, config.temperature, config.maxTokens)
     if (result.output?.length) {
       break
@@ -76,7 +78,7 @@ export const runPromptWithConfig = async (
     await cacheValue(cacheKey, result.output)
   }
 
-  return result
+  return { ...result, attempts, cacheHit: false }
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
