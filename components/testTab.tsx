@@ -146,7 +146,9 @@ export default function TestTab({
             setActiveColumn={selectColumn}
           />
         </div>
-        <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={selectVersion} />
+        <div className='self-start'>
+          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={selectVersion} />
+        </div>
         <Suspense>
           <PromptPanel
             key={activeVersion.prompt}
@@ -187,26 +189,18 @@ function VersionSelector({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
-
-  const ascendingVersions = versions.slice().reverse()
-  const index = ascendingVersions.findIndex(version => version.id === activeVersion.id)
-  const selectVersion = (version: Version) => {
-    setIsMenuExpanded(false)
-    setActiveVersion(version)
-  }
-
   return (
-    <div className='relative flex items-end'>
-      <div className='flex items-center cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-        <Label className='cursor-pointer'>{`Prompt ${index + 1}`}</Label>
-        <Icon icon={chevronIcon} />
-      </div>
-      <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-        {ascendingVersions.map((version, index) => (
-          <PopupMenuItem key={index} title={`Prompt ${index + 1}`} callback={() => selectVersion(version)} />
+    <DropdownMenu
+      value={activeVersion.id}
+      onChange={value => setActiveVersion(versions.find(version => version.id === Number(value))!)}>
+      {versions
+        .slice()
+        .reverse()
+        .map((version, index) => (
+          <option key={index} value={version.id}>
+            {`Prompt ${index + 1}`}
+          </option>
         ))}
-      </PopupMenu>
-    </div>
+    </DropdownMenu>
   )
 }
