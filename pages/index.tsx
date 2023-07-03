@@ -53,6 +53,7 @@ export default function Home({
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const activeProject = 'isUserProject' in activeItem ? activeItem as ActiveProject : undefined
   const activePrompt = 'projectID' in activeItem ? activeItem as ActivePrompt : undefined
+  const isChainMode = !activeProject && !activePrompt
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
@@ -168,7 +169,7 @@ export default function Home({
                 activeProject={activeProject}
                 activePrompt={activePrompt}
                 onAddPrompt={addPrompt}>
-                {activePrompt && (
+                {(activePrompt || isChainMode) && (
                   <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                     <Segment value={'play'} title='Play' />
                     <Segment value={'test'} title='Test' />
