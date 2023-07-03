@@ -5,7 +5,17 @@ import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
-import { ChainItem } from './chainTabView'
+import { ActiveChainItem, ChainItem } from './chainTabView'
+
+const ExtractChainVariables = (chain: ChainItem[]) => [
+  ...new Set(chain.flatMap(item => (item.version ? ExtractPromptVariables(item.version.prompt) : []))),
+]
+
+export const ExtractUnboundChainVariables = (chain: ChainItem[]) => {
+  const allInputVariables = ExtractChainVariables(chain)
+  const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
+  return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
+}
 
 export default function BuildChainTab({
   chain,
@@ -47,10 +57,8 @@ export default function BuildChainTab({
     setChain([...chain.slice(0, index), ...chain.slice(index + 1)])
   }
 
-  const asLoaded = (item: ChainItem) => item as { prompt: ActivePrompt; version: Version; output?: string }
-
   const selectVersion = (index: number) => (version: Version) => {
-    setChain([...chain.slice(0, index), { ...asLoaded(chain[index]), version }, ...chain.slice(index + 1)])
+    setChain([...chain.slice(0, index), { ...(chain[index] as ActiveChainItem), version }, ...chain.slice(index + 1)])
   }
 
   const mapOutput = (index: number) => (output?: string) => {
@@ -59,24 +67,17 @@ export default function BuildChainTab({
     )
     setChain([
       ...resetChain.slice(0, index),
-      { ...asLoaded(resetChain[index]), output },
+      { ...(resetChain[index] as ActiveChainItem), output },
       ...resetChain.slice(index + 1),
     ])
   }
-
-  const variablesFromItem = (item: ChainItem) => (item.version ? ExtractPromptVariables(item.version.prompt) : [])
-  const variablesFromSlice = (slice: ChainItem[]) => [...new Set(slice.flatMap(variablesFromItem))]
-  const variablesFromIndex = (index: number) => variablesFromSlice(chain.slice(index + 1))
-  const allInputVariables = variablesFromSlice(chain)
-  const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
-  const unboundInputVariables = allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 
   return (
     <>
       <div className='flex flex-col flex-grow h-full gap-4 p-6'>
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
-          {unboundInputVariables.map((variable, index) => (
+          {ExtractUnboundChainVariables(chain).map((variable, index) => (
             <span key={index} className='text-white rounded px-1 py-0.5 bg-violet-500 font-normal'>
               {variable}
             </span>
@@ -100,11 +101,11 @@ export default function BuildChainTab({
                 />
               </Selector>
             )}
-            {item.version && variablesFromIndex(index).length > 0 && (
+            {item.version && (
               <OutputMapper
                 key={item.output}
                 output={item.output}
-                inputs={variablesFromIndex(index)}
+                inputs={ExtractChainVariables(chain.slice(index + 1))}
                 onMapOutput={mapOutput(index)}
               />
             )}
@@ -134,7 +135,7 @@ function OutputMapper({
   inputs: string[]
   onMapOutput: (input?: string) => void
 }) {
-  return (
+  return inputs.length ? (
     <Selector>
       <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
         <option value={0}>Map Output</option>
@@ -145,7 +146,7 @@ function OutputMapper({
         ))}
       </DropdownMenu>
     </Selector>
-  )
+  ) : null
 }
 
 function PromptSelector({
