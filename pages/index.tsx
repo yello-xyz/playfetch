@@ -147,7 +147,6 @@ export default function Home({
             refreshProjects,
             resetProject: () => selectProject(user.id),
             refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
-            selectPrompt,
             refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
             savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
             selectTab: setSelectedTab,
@@ -192,6 +191,7 @@ export default function Home({
                     prompts={activeProject.prompts}
                     projects={projects}
                     onAddPrompt={() => addPrompt(activeProject.id)}
+                    onSelectPrompt={selectPrompt}
                   />
                 )}
               </div>

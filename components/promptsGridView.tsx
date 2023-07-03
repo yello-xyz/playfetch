@@ -7,22 +7,24 @@ import api from '../src/client/api'
 import { useEffect, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
 import IconButton from './iconButton'
-import { useRefreshProject, useSelectPrompt } from './refreshContext'
+import { useRefreshProject } from './refreshContext'
 
 export default function PromptsGridView({
   prompts,
   projects,
   onAddPrompt,
+  onSelectPrompt,
 }: {
   prompts: Prompt[]
   projects: Project[]
   onAddPrompt: () => void
+  onSelectPrompt: (promptID: number) => void
 }) {
   return prompts.length ? (
     <>
       <div className='flex flex-wrap gap-6 p-6'>
         {prompts.map((prompt, index) => (
-          <PromptCell key={index} prompt={prompt} projects={projects} />
+          <PromptCell key={index} prompt={prompt} projects={projects} onSelectPrompt={onSelectPrompt} />
         ))}
       </div>
     </>
@@ -48,10 +50,17 @@ function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
   )
 }
 
-function PromptCell({ prompt, projects }: { prompt: Prompt; projects: Project[] }) {
+function PromptCell({
+  prompt,
+  projects,
+  onSelectPrompt,
+}: {
+  prompt: Prompt
+  projects: Project[]
+  onSelectPrompt: (promptID: number) => void
+}) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
-  const selectPrompt = useSelectPrompt()
   const refreshProject = useRefreshProject()
 
   const [formattedDate, setFormattedDate] = useState<string>()
@@ -62,7 +71,7 @@ function PromptCell({ prompt, projects }: { prompt: Prompt; projects: Project[] 
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
-      onClick={() => selectPrompt(prompt.id)}>
+      onClick={() => onSelectPrompt(prompt.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 font-medium line-clamp-2'>{prompt.name}</span>
         <div className='relative flex'>
