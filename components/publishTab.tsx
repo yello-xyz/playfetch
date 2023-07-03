@@ -238,6 +238,7 @@ export default function PublishTab({
 function UsagePane({ usage }: { usage: Usage }) {
   const averageCost = usage.requests ? usage.cost / usage.requests : 0
   const averageAttempts = usage.requests ? usage.attempts / usage.requests : 0
+  const cacheHitRatio = usage.requests ? usage.cacheHits / usage.requests : 0
   return (
     <>
       <Label>Usage</Label>
@@ -247,7 +248,7 @@ function UsagePane({ usage }: { usage: Usage }) {
         <UsageRow label='Total Cost' value={FormatCost(usage.cost)} />
         <UsageRow label='Average Cost' value={FormatCost(averageCost)} />
         <UsageRow label='Average Attempts' value={averageAttempts ? averageAttempts.toFixed(2) : averageAttempts} />
-        <UsageRow label='Cache Hits' value={usage.cacheHits} />
+        <UsageRow label='Cache Hit Ratio' value={`${(100 * cacheHitRatio).toFixed(1)}%`} />
       </div>
     </>
   )

@@ -72,7 +72,7 @@ export async function getActivePrompt(
       ...toEndpoint(endpoint),
       url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
       apiKeyDev: projectData?.apiKeyDev ?? '',
-      usage: toUsage(usages.find(usage => usage.endpointID === endpoint.id)),
+      usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     })),
     users,
     inputs,
