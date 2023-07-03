@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
+import { ExtractPromptVariables } from '@/src/common/formatting'
+import Label from './label'
 
 type ChainItem = { prompt: Prompt; version: undefined } | { prompt: ActivePrompt; version: Version }
 
@@ -48,9 +50,17 @@ export default function BuildChainTab({ prompts }: { prompts: Prompt[] }) {
     ])
   }
 
+  const allInputVariables = [... new Set(chain.flatMap(item => item.version ? ExtractPromptVariables(item.version.prompt) : []))]
+
   return (
     <>
       <div className='flex flex-col flex-grow h-full gap-4 p-6 max-w-[50%]'>
+        <div className='flex flex-wrap gap-2'>
+          <Label>Inputs:</Label>
+          {allInputVariables.map((variable, index) => (
+            <span key={index} className='text-white rounded px-1 py-0.5 bg-violet-500 font-normal'>{variable}</span>
+          ))}
+          </div>
         {chain.map((item, index) => (
           <div key={index} className='flex gap-4'>
             <PromptSelector
