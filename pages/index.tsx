@@ -139,7 +139,9 @@ export default function Home({
 
   const [selectedTab, setSelectedTab] = useState<ActivePromptTab>('play')
   const updateSelectedTab = (tab: ActivePromptTab) => {
-    savePrompt().then(versionID => refreshPrompt(activePrompt!.id, versionID))
+    if (activePrompt) {
+      savePrompt().then(versionID => refreshPrompt(activePrompt.id, versionID))
+    }
     setSelectedTab(tab)
   }
 
