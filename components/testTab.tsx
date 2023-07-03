@@ -6,12 +6,10 @@ import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import { PendingButton } from './button'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
-import DropdownMenu from './dropdownMenu'
-import useModalDialogPrompt from './modalDialogContext'
 import VersionSelector from './versionSelector'
+import TestButtons from './testButtons'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -22,50 +20,6 @@ export const useRunPrompt = (promptID: number) => {
     const versionID = await savePrompt()
     await refreshPrompt(versionID)
     await api.runPrompt(promptID, versionID, currentPrompt, config, inputs).then(_ => refreshPrompt(versionID))
-  }
-}
-
-type TestMode = 'first' | 'last' | 'random' | 'all'
-
-const selectInputs = (inputs: { [key: string]: string[] }, mode: TestMode): { [key: string]: string }[] => {
-  const selectInput = (inputs: string[], mode: TestMode): string => {
-    switch (mode) {
-      default:
-      case 'first':
-        return inputs[0] ?? ''
-      case 'last':
-        return inputs[inputs.length - 1] ?? ''
-      case 'random':
-        return inputs[Math.floor(Math.random() * inputs.length)] ?? ''
-    }
-  }
-
-  const cartesian = (array: string[][]) =>
-    array.reduce(
-      (a, b) => {
-        return a
-          .map(x => {
-            return b.map(y => {
-              return x.concat(y)
-            })
-          })
-          .reduce((c, d) => c.concat(d), [])
-      },
-      [[]] as string[][]
-    )
-
-  const entries = Object.entries(inputs)
-
-  switch (mode) {
-    default:
-    case 'first':
-    case 'last':
-    case 'random':
-      return [Object.fromEntries(entries.map(([key, values]) => [key, selectInput(values, mode)]))]
-    case 'all':
-      const keys = entries.map(([key, _]) => key)
-      const values = cartesian(entries.map(([_, values]) => values))
-      return values.map(value => Object.fromEntries(keys.map((key, i) => [key, value[i]])))
   }
 }
 
@@ -80,7 +34,6 @@ export default function TestTab({
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
 }) {
-  const [testMode, setTestMode] = useState<TestMode>('first')
   const [version, setVersion] = useState(activeVersion)
   const updateVersion = (version: Version) => {
     setVersion(version)
@@ -92,13 +45,10 @@ export default function TestTab({
     setActiveVersion(version)
   }
 
-  const setDialogPrompt = useModalDialogPrompt()
-  const runPrompt = useRunPrompt(prompt.id)
-
   const originalInputs = Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
   const variables = ExtractPromptVariables(version.prompt)
   const [inputValues, setInputValues] = useState<{ [key: string]: string[] }>(originalInputs)
-  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+  
   const [activeColumn, setActiveColumn] = useState(0)
   if (activeColumn > 0 && activeColumn >= variables.length) {
     setActiveColumn(0)
@@ -113,18 +63,10 @@ export default function TestTab({
     }
   }
 
-  const testPrompt = async () => {
+  const runPrompt = useRunPrompt(prompt.id)
+  const testPrompt = async (inputs: Record<string, string>[]) => {
     persistValuesIfNeeded()
-    const inputs = selectInputs(allInputs, testMode)
-    if (inputs.length > 1) {
-      setDialogPrompt({
-        title: `Run ${inputs.length} times?`,
-        confirmTitle: 'Run',
-        callback: async () => runPrompt(version.prompt, version.config, inputs),
-      })
-    } else {
-      await runPrompt(version.prompt, version.config, inputs)
-    }
+    return runPrompt(version.prompt, version.config, inputs)
   }
 
   const selectColumn = (index: number) => {
@@ -161,21 +103,12 @@ export default function TestTab({
             showInputControls
           />
         </Suspense>
-        <div className='flex items-center self-end gap-4'>
-          <DropdownMenu
-            disabled={!variables.length}
-            size='medium'
-            value={testMode}
-            onChange={value => setTestMode(value as TestMode)}>
-            <option value={'first'}>First</option>
-            <option value={'last'}>Last</option>
-            <option value={'random'}>Random</option>
-            <option value={'all'}>All</option>
-          </DropdownMenu>
-          <PendingButton disabled={!version.prompt.length} onClick={testPrompt}>
-            Run
-          </PendingButton>
-        </div>
+        <TestButtons
+          variables={variables}
+          inputValues={inputValues}
+          disabled={!version.prompt.length}
+          callback={testPrompt}
+        />
       </div>
       <div className='flex-1 p-6 pl-0'>
         <RunTimeline runs={activeVersion.runs} />
