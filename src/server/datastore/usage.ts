@@ -1,6 +1,10 @@
 import { Usage } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
 
+export async function saveOrResetUsage(endpointID: number, promptID: number) {
+  await getDatastore().save(toUsageData(endpointID, promptID, 0, 0, 0, 0, 0, new Date()))
+}
+
 export async function updateUsage(
   endpointID: number,
   promptID: number,
@@ -14,12 +18,12 @@ export async function updateUsage(
     toUsageData(
       endpointID,
       promptID,
-      (usageData.requests ?? 0)  + 1,
-      (usageData.cost ?? 0) + incrementalCost,
-      (usageData.cacheHits ?? 0) + (cacheHit ? 1 : 0),
-      (usageData.attempts ?? 0) + attempts,
-      (usageData.failures ?? 0) + (failed ? 1 : 0),
-      usageData.createdAt ?? new Date(),
+      usageData.requests + 1,
+      usageData.cost + incrementalCost,
+      usageData.cacheHits + (cacheHit ? 1 : 0),
+      usageData.attempts + attempts,
+      usageData.failures + (failed ? 1 : 0),
+      usageData.createdAt,
       new Date()
     )
   )
@@ -34,7 +38,7 @@ const toUsageData = (
   attempts: number,
   failures: number,
   createdAt: Date,
-  lastRunAt: Date,
+  lastRunAt?: Date
 ) => ({
   key: buildKey(Entity.USAGE, endpointID),
   data: { promptID, requests, cost, cacheHits, attempts, failures, createdAt, lastRunAt },

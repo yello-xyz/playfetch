@@ -12,26 +12,13 @@ import {
   getTimestamp,
 } from './datastore'
 import { ensurePromptAccess, getVerifiedUserPromptData } from './prompts'
+import { saveOrResetUsage } from './usage'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    await datastore.save(
-      toEndpointData(
-        endpointData.userID,
-        endpointData.promptID,
-        endpointData.versionID,
-        endpointData.urlPath,
-        endpointData.projectURLPath,
-        endpointData.flavor,
-        endpointData.createdAt,
-        endpointData.prompt,
-        JSON.parse(endpointData.config),
-        endpointData.useCache,
-        getID(endpointData)
-      )
-    )
+    await saveOrResetUsage(getID(endpointData), endpointData.promptID)
   }
 }
 
@@ -70,21 +57,21 @@ export async function saveEndpoint(
     Entity.ENDPOINT,
     and([buildFilter('promptID', promptID), buildFilter('flavor', flavor)])
   )
-  await getDatastore().save(
-    toEndpointData(
-      userID,
-      promptID,
-      versionID,
-      urlPath,
-      projectURLPath,
-      flavor,
-      new Date(),
-      prompt,
-      config,
-      useCache,
-      previouslySaved ? getID(previouslySaved) : undefined
-    )
+  const endpointData = toEndpointData(
+    userID,
+    promptID,
+    versionID,
+    urlPath,
+    projectURLPath,
+    flavor,
+    new Date(),
+    prompt,
+    config,
+    useCache,
+    previouslySaved ? getID(previouslySaved) : undefined
   )
+  await getDatastore().save(endpointData)
+  await saveOrResetUsage(getID(endpointData), promptID)
 }
 
 export async function getEndpointFromPath(
@@ -130,7 +117,7 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
   } catch {
     throw new Error(`Endpoint with ID ${endpointID} does not exist or user has no access`)
   }
-  await getDatastore().delete(buildKey(Entity.ENDPOINT, endpointID))
+  await getDatastore().delete([buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)])
 }
 
 const toEndpointData = (
