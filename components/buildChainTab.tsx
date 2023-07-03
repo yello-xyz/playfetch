@@ -1,38 +1,76 @@
-import { Prompt } from '@/types'
-import { useState } from 'react'
+import { ActivePrompt, Prompt, Version } from '@/types'
+import { useEffect, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
+import api from '@/src/client/api'
+import VersionSelector from './versionSelector'
+
+type ChainItem = { prompt: Prompt; version: undefined } | { prompt: ActivePrompt; version: Version }
 
 export default function BuildChainTab({ prompts }: { prompts: Prompt[] }) {
-  const [chain, setChain] = useState<Prompt[]>([])
+  const [chain, setChain] = useState<ChainItem[]>([])
 
-  const promptFromID = (promptID: number) => prompts.find(prompt => prompt.id === promptID)!
+  const [promptCache, setPromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
+
+  useEffect(() => {
+    const promptID = chain.find(item => !item.version)?.prompt?.id
+    if (promptID) {
+      api.getPrompt(promptID).then(prompt => {
+        setPromptCache({ ...promptCache, [promptID]: prompt })
+        setChain(chain.map(item => (item.prompt.id === promptID ? { prompt, version: prompt.versions[0] } : item)))
+      })
+    }
+  }, [chain])
+
+  const chainItemFromPromptID = (promptID: number): ChainItem => {
+    const cachedPrompt = promptCache[promptID]
+    return cachedPrompt
+      ? { prompt: cachedPrompt, version: cachedPrompt.versions[0] }
+      : { prompt: prompts.find(prompt => prompt.id === promptID)!, version: undefined }
+  }
 
   const addPrompt = (promptID: number) => {
-    setChain([...chain, promptFromID(promptID)])
+    setChain([...chain, chainItemFromPromptID(promptID)])
   }
 
   const replacePrompt = (index: number) => (promptID: number) => {
-    setChain([...chain.slice(0, index), promptFromID(promptID), ...chain.slice(index + 1)])
+    setChain([...chain.slice(0, index), chainItemFromPromptID(promptID), ...chain.slice(index + 1)])
   }
 
   const removePrompt = (index: number) => () => {
     setChain([...chain.slice(0, index), ...chain.slice(index + 1)])
   }
 
+  const selectVersion = (index: number) => (version: Version) => {
+    setChain([
+      ...chain.slice(0, index),
+      { prompt: chain[index].prompt as ActivePrompt, version },
+      ...chain.slice(index + 1),
+    ])
+  }
+
   return (
     <>
       <div className='flex flex-col flex-grow h-full gap-4 p-6 max-w-[50%]'>
-        {chain.map((prompt, index) => (
-          <PromptSelector
-            key={index}
-            prompts={prompts}
-            selectedPrompt={prompt}
-            onSelectPrompt={replacePrompt(index)}
-            onRemovePrompt={removePrompt(index)}
-          />
+        {chain.map((item, index) => (
+          <div key={index} className='flex gap-4'>
+            <PromptSelector
+              prompts={prompts}
+              selectedPrompt={item.prompt}
+              onSelectPrompt={replacePrompt(index)}
+              onRemovePrompt={removePrompt(index)}
+            />
+            {item.version && (
+              <VersionSelector
+                versions={item.prompt.versions}
+                endpoints={item.prompt.endpoints}
+                activeVersion={item.version}
+                setActiveVersion={selectVersion(index)}
+              />
+            )}
+          </div>
         ))}
         <PromptSelector
-          key={chain.map(prompt => prompt.id).join('')}
+          key={chain.map(item => item.prompt.id).join('')}
           prompts={prompts}
           onSelectPrompt={addPrompt}
           includeAddPromptOption
