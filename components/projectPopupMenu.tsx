@@ -4,7 +4,7 @@ import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
-import { useRefreshProject, useRefreshProjects, useSelectUserProject } from './refreshContext'
+import { useRefreshProject, useRefreshProjects, useResetProject } from './refreshContext'
 
 export default function ProjectPopupMenu({
   project,
@@ -21,7 +21,7 @@ export default function ProjectPopupMenu({
 
   const refreshProjects = useRefreshProjects()
   const refreshProject = useRefreshProject()
-  const selectUserProject = useSelectUserProject()
+  const resetProject = useResetProject()
 
   const refresh = () => {
     refreshProject()
@@ -29,7 +29,7 @@ export default function ProjectPopupMenu({
   }
 
   const reset = () => {
-    selectUserProject()
+    resetProject()
     refreshProjects()
   }
 

@@ -146,7 +146,7 @@ export default function Home({
           value={{
             refreshProjects,
             selectProject,
-            selectUserProject: () => selectProject(user.id),
+            resetProject: () => selectProject(user.id),
             refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
             selectPrompt,
             refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
