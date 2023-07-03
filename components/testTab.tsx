@@ -108,6 +108,7 @@ export default function TestTab({
   const activeVariable: string | undefined = variables[activeColumn]
   const activeInputs = activeVariable ? inputValues[activeVariable] ?? [] : []
 
+  // TODO this should also be persisted when switching tabs
   const persistValuesIfNeeded = () => {
     if (activeVariable && activeInputs.join(',') !== (originalInputs[activeVariable] ?? []).join(',')) {
       api.updateInputValues(prompt.projectID, activeVariable, activeInputs)

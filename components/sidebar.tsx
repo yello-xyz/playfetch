@@ -5,6 +5,7 @@ import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import inviteIcon from '@/public/invite.svg'
+import chainIcon from '@/public/chain.svg'
 import { useRefreshProject, useRefreshProjects, useSelectProject } from './refreshContext'
 import UserSidebarItem from './userSidebarItem'
 import PickNameDialog from './pickNameDialog'
@@ -18,12 +19,14 @@ export default function Sidebar({
   activeProject,
   activePrompt,
   onAddPrompt,
+  onSelectChains,
 }: {
   user: User
   projects: Project[]
   activeProject?: ActiveProject
   activePrompt?: ActivePrompt
   onAddPrompt: () => void
+  onSelectChains: () => void
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
@@ -65,6 +68,7 @@ export default function Sidebar({
               onClick={() => selectProject(userProject.id)}
             />
           )}
+          <SidebarButton title='Chains' icon={chainIcon} onClick={onSelectChains} />
           <SidebarButton title='New Prompt…' icon={addIcon} onClick={onAddPrompt} />
         </SidebarSection>
         <SidebarSection title='My Projects' className='flex-1'>

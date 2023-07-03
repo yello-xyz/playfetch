@@ -33,6 +33,8 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   return { props: { user, initialProjects, initialActiveItem } }
 })
 
+type ActiveItem = ActiveProject | ActivePrompt | { mode: 'Chains' }
+
 export default function Home({
   user,
   initialProjects,
@@ -40,7 +42,7 @@ export default function Home({
 }: {
   user: User
   initialProjects: Project[]
-  initialActiveItem: ActiveProject | ActivePrompt
+  initialActiveItem: ActiveItem
 }) {
   const router = useRouter()
 
@@ -49,9 +51,8 @@ export default function Home({
   const [projects, setProjects] = useState(initialProjects)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'projectID' in (item as ActivePrompt)
-  const activeProject = isPrompt(activeItem) ? undefined : activeItem
-  const activePrompt = isPrompt(activeItem) ? activeItem : undefined
+  const activeProject = 'isUserProject' in activeItem ? activeItem as ActiveProject : undefined
+  const activePrompt = 'projectID' in activeItem ? activeItem as ActivePrompt : undefined
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
@@ -159,6 +160,7 @@ export default function Home({
               activeProject={activeProject}
               activePrompt={activePrompt}
               onAddPrompt={() => addPrompt(user.id)}
+              onSelectChains={() => setActiveItem({ mode: 'Chains' })}
             />
             <div className='flex flex-col flex-1'>
               <TopBar
