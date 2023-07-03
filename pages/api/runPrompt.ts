@@ -29,7 +29,7 @@ export const runPromptWithConfig = async (
   config: PromptConfig,
   inputs: PromptInputs,
   useCache: boolean
-) => {
+): Promise<{ output: string | undefined; cost: number }> => {
   const resolvedPrompt = Object.entries(inputs).reduce(
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     prompt
