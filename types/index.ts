@@ -87,3 +87,12 @@ export type ResolvedEndpoint = Endpoint & {
   url: string
   apiKeyDev: string
 }
+
+export type Usage = {
+  endpointID: number
+  requests: number
+  cost: number
+  cacheHits: number
+  attempts: number
+  failures: number
+}

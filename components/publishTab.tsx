@@ -58,15 +58,18 @@ export default function PublishTab({
     [prompt]
   )
 
-  const updateName = useCallback((name: string) => {
-    setName(name)
-    setNameAvailable(undefined)
-    if (CheckValidURLPath(name)) {
-      checkName(name)
-    } else {
-      setNameAvailable(false)
-    }
-  }, [checkName])
+  const updateName = useCallback(
+    (name: string) => {
+      setName(name)
+      setNameAvailable(undefined)
+      if (CheckValidURLPath(name)) {
+        checkName(name)
+      } else {
+        setNameAvailable(false)
+      }
+    },
+    [checkName]
+  )
 
   const initialName =
     endpoint?.urlPath ?? endpoints[0]?.urlPath ?? ToCamelCase(prompt.name.split(' ').slice(0, 3).join(' '))
@@ -103,7 +106,9 @@ export default function PublishTab({
 
   const unpublish = (endpointID: number) => {
     setDialogPrompt({
-      title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+      title:
+        'Are you sure you want to unpublish this prompt? ' +
+        'You will no longer be able to access the API and any usage statistics will be reset.',
       callback: async () => {
         await api.unpublishPrompt(endpointID)
         refreshPrompt()

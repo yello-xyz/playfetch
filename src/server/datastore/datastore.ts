@@ -22,6 +22,7 @@ export enum Entity {
   CACHE = 'cache',
   ACCESS = 'access',
   INPUT = 'input',
+  USAGE = 'usage',
 }
 
 export const toID = ({ key }: { key: Key }) => Number(key.id)
