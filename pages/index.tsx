@@ -33,7 +33,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   return { props: { user, initialProjects, initialActiveItem } }
 })
 
-type ActiveItem = ActiveProject | ActivePrompt | { mode: 'Chains' }
+type ActiveItem = ActiveProject | ActivePrompt
 
 export default function Home({
   user,
@@ -51,10 +51,12 @@ export default function Home({
   const [projects, setProjects] = useState(initialProjects)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const activeProject = 'isUserProject' in activeItem ? (activeItem as ActiveProject) : undefined
-  const activePrompt = 'projectID' in activeItem ? (activeItem as ActivePrompt) : undefined
-  const isChainMode = !activeProject && !activePrompt
+  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'projectID' in (item as ActivePrompt)
+  const activeProject = isPrompt(activeItem) ? undefined : activeItem
+  const activePrompt = isPrompt(activeItem) ? activeItem : undefined
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
+
+  const [isChainMode, setChainMode] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
@@ -106,10 +108,11 @@ export default function Home({
     updateVersion(undefined)
   }
 
-  const selectProject = async (projectID: number) => {
-    if (projectID !== activeProject?.id) {
+  const selectProject = async (projectID: number, chainMode = false) => {
+    if (projectID !== activeProject?.id || chainMode !== isChainMode) {
       savePrompt()
       await refreshProject(projectID)
+      setChainMode(chainMode)
       router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
     }
   }
@@ -139,6 +142,13 @@ export default function Home({
     setSelectedTab(tab)
   }
 
+  const selectChains = () => {
+    setChainMode(true)
+    if (activePrompt) {
+      selectProject(activePrompt.projectID, true)
+    }
+  }
+
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
@@ -159,7 +169,7 @@ export default function Home({
               activePrompt={activePrompt}
               onAddPrompt={() => addPrompt(user.id)}
               onSelectProject={selectProject}
-              onSelectChains={() => setActiveItem({ mode: 'Chains' })}
+              onSelectChains={selectChains}
             />
             <div className='flex flex-col flex-1'>
               <TopBar
@@ -167,7 +177,7 @@ export default function Home({
                 activeProject={activeProject}
                 activePrompt={activePrompt}
                 onAddPrompt={addPrompt}
-                onSelectProject={selectProject}>
+                onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}>
                 {(activePrompt || isChainMode) && (
                   <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                     <Segment value={'play'} title='Play' />
@@ -177,7 +187,7 @@ export default function Home({
                 )}
               </TopBar>
               <div className='flex-1 overflow-hidden'>
-                {activePrompt && promptProject && activeVersion && (
+                {!isChainMode && activePrompt && promptProject && activeVersion && (
                   <PromptTabView
                     activeTab={selectedTab}
                     prompt={activePrompt}
@@ -186,7 +196,7 @@ export default function Home({
                     setModifiedVersion={setModifiedVersion}
                   />
                 )}
-                {activeProject && (
+                {!isChainMode && activeProject && (
                   <PromptsGridView
                     prompts={activeProject.prompts}
                     projects={projects}
