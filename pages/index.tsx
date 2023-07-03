@@ -51,8 +51,8 @@ export default function Home({
   const [projects, setProjects] = useState(initialProjects)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const activeProject = 'isUserProject' in activeItem ? activeItem as ActiveProject : undefined
-  const activePrompt = 'projectID' in activeItem ? activeItem as ActivePrompt : undefined
+  const activeProject = 'isUserProject' in activeItem ? (activeItem as ActiveProject) : undefined
+  const activePrompt = 'projectID' in activeItem ? (activeItem as ActivePrompt) : undefined
   const isChainMode = !activeProject && !activePrompt
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
@@ -145,7 +145,6 @@ export default function Home({
         <RefreshContext.Provider
           value={{
             refreshProjects,
-            selectProject,
             resetProject: () => selectProject(user.id),
             refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
             selectPrompt,
@@ -160,6 +159,7 @@ export default function Home({
               activeProject={activeProject}
               activePrompt={activePrompt}
               onAddPrompt={() => addPrompt(user.id)}
+              onSelectProject={selectProject}
               onSelectChains={() => setActiveItem({ mode: 'Chains' })}
             />
             <div className='flex flex-col flex-1'>
@@ -167,7 +167,8 @@ export default function Home({
                 projects={projects}
                 activeProject={activeProject}
                 activePrompt={activePrompt}
-                onAddPrompt={addPrompt}>
+                onAddPrompt={addPrompt}
+                onSelectProject={selectProject}>
                 {(activePrompt || isChainMode) && (
                   <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                     <Segment value={'play'} title='Play' />

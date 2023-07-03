@@ -6,7 +6,7 @@ import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import inviteIcon from '@/public/invite.svg'
 import chainIcon from '@/public/chain.svg'
-import { useRefreshProject, useRefreshProjects, useSelectProject } from './refreshContext'
+import { useRefreshProject, useRefreshProjects } from './refreshContext'
 import UserSidebarItem from './userSidebarItem'
 import PickNameDialog from './pickNameDialog'
 import InviteDialog from './inviteDialog'
@@ -19,6 +19,7 @@ export default function Sidebar({
   activeProject,
   activePrompt,
   onAddPrompt,
+  onSelectProject,
   onSelectChains,
 }: {
   user: User
@@ -26,6 +27,7 @@ export default function Sidebar({
   activeProject?: ActiveProject
   activePrompt?: ActivePrompt
   onAddPrompt: () => void
+  onSelectProject: (projectID: number) => void
   onSelectChains: () => void
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -33,12 +35,11 @@ export default function Sidebar({
 
   const refreshProjects = useRefreshProjects()
   const refreshProject = useRefreshProject()
-  const selectProject = useSelectProject()
 
   const addProject = async (name: string) => {
     const projectID = await api.addProject(name)
     await refreshProjects()
-    selectProject(projectID)
+    onSelectProject(projectID)
   }
 
   const inviteMembers = async (projectID: number, emails: string[]) => {
@@ -65,7 +66,7 @@ export default function Sidebar({
               title={userProject.name}
               icon={promptIcon}
               active={activeProject?.id === userProject.id}
-              onClick={() => selectProject(userProject.id)}
+              onClick={() => onSelectProject(userProject.id)}
             />
           )}
           <SidebarButton title='Chains' icon={chainIcon} onClick={onSelectChains} />
@@ -78,7 +79,7 @@ export default function Sidebar({
               title={project.name}
               icon={projectIcon}
               active={activeProject?.id === project.id}
-              onClick={() => selectProject(project.id)}
+              onClick={() => onSelectProject(project.id)}
             />
           ))}
           <SidebarButton title='Add new Project…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />

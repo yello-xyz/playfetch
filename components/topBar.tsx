@@ -4,7 +4,7 @@ import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
-import { useRefreshProject, useRefreshPrompt, useSelectProject } from './refreshContext'
+import { useRefreshProject, useRefreshPrompt } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
@@ -15,12 +15,14 @@ export default function TopBar({
   activeProject,
   activePrompt,
   onAddPrompt,
+  onSelectProject,
   children,
 }: {
   projects: Project[]
   activeProject?: ActiveProject
   activePrompt?: ActivePrompt
   onAddPrompt: (projectID: number) => void
+  onSelectProject: (projectID: number) => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
@@ -28,7 +30,6 @@ export default function TopBar({
   const refreshProject = useRefreshProject()
   const refreshPrompt = useRefreshPrompt()
   const onRefresh = activeProject ? refreshProject : refreshPrompt
-  const selectProject = useSelectProject()
 
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
 
@@ -40,7 +41,7 @@ export default function TopBar({
             <Icon icon={projectIcon} />
             {activePrompt && (
               <>
-                <span className='cursor-pointer' onClick={() => selectProject(activePrompt.projectID)}>
+                <span className='cursor-pointer' onClick={() => onSelectProject(activePrompt.projectID)}>
                   {promptProjectName}
                 </span>
                 <span className='font-medium'>{' / '}</span>
