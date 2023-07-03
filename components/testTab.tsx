@@ -1,7 +1,6 @@
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, PromptInputs, PromptConfig, Project, Endpoint } from '@/types'
-import chevronIcon from '@/public/chevron.svg'
+import { ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
 
 import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
@@ -9,11 +8,10 @@ import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PendingButton } from './button'
 import RunTimeline from './runTimeline'
-import PopupMenu, { PopupMenuItem } from './popupMenu'
 import TestDataPane from './testDataPane'
 import DropdownMenu from './dropdownMenu'
 import useModalDialogPrompt from './modalDialogContext'
-import Icon from './icon'
+import VersionSelector from './versionSelector'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -183,37 +181,5 @@ export default function TestTab({
         <RunTimeline runs={activeVersion.runs} />
       </div>
     </>
-  )
-}
-
-function VersionSelector({
-  versions,
-  endpoints,
-  activeVersion,
-  setActiveVersion,
-}: {
-  versions: Version[]
-  endpoints: Endpoint[]
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
-}) {
-  const suffix = (version: Version) => {
-    const endpoint = endpoints.find(endpoint => endpoint.versionID === version.id)
-    return endpoint ? ` (${endpoint.flavor})` : ''
-  }
-
-  return (
-    <DropdownMenu
-      value={activeVersion.id}
-      onChange={value => setActiveVersion(versions.find(version => version.id === Number(value))!)}>
-      {versions
-        .slice()
-        .reverse()
-        .map((version, index) => (
-          <option key={index} value={version.id}>
-            {`Prompt ${index + 1}${suffix(version)}`}
-          </option>
-        ))}
-    </DropdownMenu>
   )
 }
