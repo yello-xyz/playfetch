@@ -1,6 +1,6 @@
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, PromptInputs, PromptConfig, Project } from '@/types'
+import { ActivePrompt, Version, PromptInputs, PromptConfig, Project, Endpoint } from '@/types'
 import chevronIcon from '@/public/chevron.svg'
 
 import dynamic from 'next/dynamic'
@@ -147,7 +147,12 @@ export default function TestTab({
           />
         </div>
         <div className='self-start'>
-          <VersionSelector versions={prompt.versions} activeVersion={version} setActiveVersion={selectVersion} />
+          <VersionSelector
+            versions={prompt.versions}
+            endpoints={prompt.endpoints}
+            activeVersion={version}
+            setActiveVersion={selectVersion}
+          />
         </div>
         <Suspense>
           <PromptPanel
@@ -182,13 +187,20 @@ export default function TestTab({
 
 function VersionSelector({
   versions,
+  endpoints,
   activeVersion,
   setActiveVersion,
 }: {
   versions: Version[]
+  endpoints: Endpoint[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
+  const suffix = (version: Version) => {
+    const endpoint = endpoints.find(endpoint => endpoint.versionID === version.id)
+    return endpoint ? ` (${endpoint.flavor})` : ''
+  }
+
   return (
     <DropdownMenu
       value={activeVersion.id}
@@ -198,7 +210,7 @@ function VersionSelector({
         .reverse()
         .map((version, index) => (
           <option key={index} value={version.id}>
-            {`Prompt ${index + 1}`}
+            {`Prompt ${index + 1}${suffix(version)}`}
           </option>
         ))}
     </DropdownMenu>
