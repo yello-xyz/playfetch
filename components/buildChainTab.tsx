@@ -22,11 +22,11 @@ export default function BuildChainTab({
     const promptID = chain.find(item => !item.version)?.prompt?.id
     if (promptID) {
       api.getPrompt(promptID).then(prompt => {
-        setPromptCache({ ...promptCache, [promptID]: prompt })
+        setPromptCache(promptCache => ({ ...promptCache, [promptID]: prompt }))
         setChain(chain.map(item => (item.prompt.id === promptID ? { prompt, version: prompt.versions[0] } : item)))
       })
     }
-  }, [chain])
+  }, [chain, setChain])
 
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const cachedPrompt = promptCache[promptID]
