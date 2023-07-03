@@ -5,14 +5,17 @@ import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
+import { ChainItem } from './chainTabView'
 
-type ChainItem =
-  | { prompt: Prompt; version: undefined; output: undefined }
-  | { prompt: ActivePrompt; version: Version; output?: string }
-
-export default function BuildChainTab({ prompts }: { prompts: Prompt[] }) {
-  const [chain, setChain] = useState<ChainItem[]>([])
-
+export default function BuildChainTab({
+  chain,
+  setChain,
+  prompts,
+}: {
+  prompts: Prompt[]
+  chain: ChainItem[]
+  setChain: (chain: ChainItem[]) => void
+}) {
   const [promptCache, setPromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
 
   useEffect(() => {
