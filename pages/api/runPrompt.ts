@@ -5,7 +5,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { PromptInputs, PromptConfig, User, RunConfig } from '@/types'
-import { runChainWithInputs } from './runChain'
+import { runConfigsWithInputs } from './runChain'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -82,7 +82,7 @@ export const runPromptWithConfig = async (
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
-  await runChainWithInputs(user.id, [req.body.config], req.body.inputs)
+  await runConfigsWithInputs(user.id, [req.body.config], req.body.inputs)
   res.json({})
 }
 
