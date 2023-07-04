@@ -1,4 +1,4 @@
-import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs, ActiveProject } from '@/types'
+import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs, ActiveProject, RunConfig } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
 async function parseResponse(response: Response) {
@@ -71,39 +71,17 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  runPrompt: function (
-    promptID: number,
-    versionID: number,
-    prompt: string,
-    config: PromptConfig,
-    inputs: PromptInputs[]
-  ) {
-    return post(this.runPrompt, { promptID, versionID, prompt, config, inputs })
+  runPrompt: function (config: RunConfig, inputs: PromptInputs[]) {
+    return post(this.runPrompt, { config, inputs })
   },
-  runChain: function (
-    promptIDs: number[],
-    versionIDs: number[],
-    prompts: string[],
-    configs: PromptConfig[],
-    inputs: PromptInputs[],
-    outputs: (string | undefined)[]
-  ) {
-    return post(this.runChain, { promptIDs, versionIDs, prompts, configs, inputs, outputs })
+  runChain: function (configs: RunConfig[], inputs: PromptInputs[], outputs: (string | undefined)[]) {
+    return post(this.runChain, { configs, inputs, outputs })
   },
   checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {
     return post(this.checkEndpointName, { promptID, projectURLPath, name })
   },
-  publishPrompt: function (
-    projectID: number,
-    promptID: number,
-    versionID: number,
-    name: string,
-    flavor: string,
-    prompt: string,
-    config: PromptConfig,
-    useCache: boolean
-  ) {
-    return post(this.publishPrompt, { projectID, promptID, versionID, name, flavor, prompt, config, useCache })
+  publishPrompt: function (config: RunConfig, projectID: number, name: string, flavor: string, useCache: boolean) {
+    return post(this.publishPrompt, { config, projectID, name, flavor, useCache })
   },
   publishChain: function (projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishChain, { projectID, name, flavor, useCache })

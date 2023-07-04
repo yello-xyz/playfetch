@@ -1,12 +1,12 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, PromptConfig, User, Run } from '@/types'
+import { PromptInputs, PromptConfig, User, Run, RunConfig } from '@/types'
 import { runPromptWithConfig } from './runPrompt'
 
 export const runChainWithInputs = async (
   userID: number,
-  chain: { promptID: number; versionID: number; prompt: string; config: PromptConfig; mappedOutput?: string }[],
+  chain: (RunConfig & { mappedOutput?: string })[],
   multipleInputs: PromptInputs[]
 ): Promise<Run[]> => {
   const runs: Run[] = []
@@ -26,22 +26,13 @@ export const runChainWithInputs = async (
 }
 
 async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: User) {
-  const promptIDs: number[] = req.body.promptIDs
-  const configs: PromptConfig[] = req.body.configs
-  const versionIDs: number[] = req.body.versionIDs
-  const prompts: string[] = req.body.prompts
+  const configs: RunConfig[] = req.body.configs
   const multipleInputs: PromptInputs[] = req.body.inputs
   const mappedOutputs: (string | undefined)[] = req.body.outputs
 
   const runs = await runChainWithInputs(
     user.id,
-    promptIDs.map((promptID, index) => ({
-      promptID,
-      versionID: versionIDs[index],
-      prompt: prompts[index],
-      config: configs[index],
-      mappedOutput: mappedOutputs[index],
-    })),
+    configs.map((config, index) => ({ ...config, mappedOutput: mappedOutputs[index] })),
     multipleInputs
   )
 

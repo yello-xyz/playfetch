@@ -77,16 +77,19 @@ export type Run = {
   cost: number
 }
 
-export type Endpoint = {
-  id: number
+export type RunConfig = {
   promptID: number
   versionID: number
+  prompt: string
+  config: PromptConfig
+}
+
+export type Endpoint = RunConfig & {
+  id: number
   timestamp: string
   urlPath: string
   projectURLPath: string
   flavor: string
-  prompt: string
-  config: PromptConfig
   useCache: boolean
 }
 

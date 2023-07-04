@@ -16,10 +16,10 @@ export const useRunPrompt = (promptID: number) => {
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
 
-  return async (currentPrompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
+  return async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
     const versionID = await savePrompt()
     await refreshPrompt(versionID)
-    await api.runPrompt(promptID, versionID, currentPrompt, config, inputs).then(_ => refreshPrompt(versionID))
+    await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
   }
 }
 
