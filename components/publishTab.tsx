@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, Run, Usage, Version } from '@/types'
+import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
 import Button from './button'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
@@ -11,6 +11,7 @@ import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
 import { debounce } from 'debounce'
 import PickNameDialog from './pickNameDialog'
+import UsagePane from './usagePane'
 
 const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run, defaultFlavor: string) => {
   const apiKey = endpoint.apiKeyDev
@@ -50,7 +51,7 @@ export default function PublishTab({
 
   const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
-  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0], availableFlavors[0]) : ''
+  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0], availableFlavors[0]) : undefined
 
   const checkName = useMemo(
     () =>
@@ -202,10 +203,10 @@ export default function PublishTab({
             {CheckValidURLPath(name) ? 'Name already used for other prompt in project' : 'Invalid endpoint name'}
           </div>
         )}
-        {endpoint && <UsagePane usage={endpoint.usage} />}
+        {endpoint && <UsagePane endpoint={endpoint} />}
       </div>
       <div className='flex flex-col p-6 pl-0 items-'>
-        {endpoint && (
+        {curlCommand && (
           <div className='flex flex-col items-start gap-4'>
             <Label>Endpoint</Label>
             <CodeBlock>
@@ -232,34 +233,6 @@ export default function PublishTab({
     </>
   ) : (
     <EmptyPublishTab />
-  )
-}
-
-function UsagePane({ usage }: { usage: Usage }) {
-  const averageCost = usage.requests ? usage.cost / usage.requests : 0
-  const averageAttempts = usage.requests ? usage.attempts / usage.requests : 0
-  const cacheHitRatio = usage.requests ? usage.cacheHits / usage.requests : 0
-  return (
-    <>
-      <Label>Usage</Label>
-      <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        <UsageRow label='Requests' value={usage.requests} />
-        <UsageRow label='Failed Requests' value={usage.failures} />
-        <UsageRow label='Total Cost' value={FormatCost(usage.cost)} />
-        <UsageRow label='Average Cost' value={FormatCost(averageCost)} />
-        <UsageRow label='Average Attempts' value={averageAttempts ? averageAttempts.toFixed(2) : averageAttempts} />
-        <UsageRow label='Cache Hit Ratio' value={`${(100 * cacheHitRatio).toFixed(1)}%`} />
-      </div>
-    </>
-  )
-}
-
-function UsageRow({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className='flex items-center justify-between gap-8'>
-      <Label className='w-60'>{label}</Label>
-      {value}
-    </div>
   )
 }
 
