@@ -55,7 +55,7 @@ export default function PublishChainTab({
           <ExamplePane
             endpoint={endpoint}
             variables={ExtractUnboundChainVariables(chain)}
-            exampleInputs={{}}
+            inputValues={project.inputs}
             defaultFlavor={availableFlavors[0]}
           />
         )}
