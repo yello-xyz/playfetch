@@ -1,11 +1,11 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, Run, Version } from '@/types'
+import { ActivePrompt, PromptInputs, ResolvedEndpoint, Version } from '@/types'
 import Button from './button'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import Label from './label'
-import { CheckValidURLPath, ExtractPromptVariables, FormatCost, ToCamelCase } from '@/src/common/formatting'
+import { CheckValidURLPath, ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
@@ -13,12 +13,10 @@ import { debounce } from 'debounce'
 import PickNameDialog from './pickNameDialog'
 import UsagePane from './usagePane'
 
-const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run, defaultFlavor: string) => {
+const buildCurlCommand = (endpoint: ResolvedEndpoint, exampleRunInputs: PromptInputs, defaultFlavor: string) => {
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
-  const inputs = lastRun ? Object.entries(
-    lastRun.inputs) : ExtractPromptVariables(endpoint.prompt).map(variable => [variable, '']
-  )
+  const inputs = ExtractPromptVariables(endpoint.prompt).map(variable => [variable, exampleRunInputs[variable] ?? ''])
 
   return (
     `curl -X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
@@ -51,7 +49,7 @@ export default function PublishTab({
 
   const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
   const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
-  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0], availableFlavors[0]) : undefined
+  const curlCommand = endpoint ? buildCurlCommand(endpoint, version.runs[0].inputs, availableFlavors[0]) : undefined
 
   const checkName = useMemo(
     () =>
