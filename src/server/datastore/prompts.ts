@@ -54,6 +54,18 @@ export const toPrompt = (data: any, userID: number): Prompt => ({
   favorited: JSON.parse(data.favorited).includes(userID),
 })
 
+export async function loadEndpoints(promptID: number, projectData: any, buildURL: (path: string) => string) {
+  const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
+  const usages = await getEntities(Entity.USAGE, 'promptID', promptID)
+
+  return endpoints.map(endpoint => ({
+    ...toEndpoint(endpoint),
+    url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
+    apiKeyDev: projectData?.apiKeyDev ?? '',
+    usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
+  }))
+}
+
 export async function getActivePrompt(
   userID: number,
   promptID: number,
@@ -62,23 +74,17 @@ export async function getActivePrompt(
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   const projectData =
     promptData.projectID === userID ? undefined : await getKeyedEntity(Entity.PROJECT, promptData.projectID)
-  const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
-  const usages = await getEntities(Entity.USAGE, 'promptID', promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const users = await getProjectUsers(userID, promptData.projectID)
   const inputs = await getProjectInputValues(promptData.projectID)
+  const endpoints = await loadEndpoints(promptID, projectData, buildURL)
 
   return {
     ...toPrompt(promptData, userID),
     projectID: promptData.projectID,
     versions: versions.map(version => toVersion(version, runs)),
-    endpoints: endpoints.map(endpoint => ({
-      ...toEndpoint(endpoint),
-      url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
-      apiKeyDev: projectData?.apiKeyDev ?? '',
-      usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
-    })),
+    endpoints,
     users,
     inputs,
     projectURLPath: projectData?.urlPath ?? '',

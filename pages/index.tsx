@@ -27,9 +27,10 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
+  const buildURL = urlBuilderFromHeaders(req.headers)
   const initialActiveItem = promptID
-    ? await getActivePrompt(user.id, promptID, urlBuilderFromHeaders(req.headers))
-    : await getActiveProject(user.id, projectID ?? user.id)
+    ? await getActivePrompt(user.id, promptID, buildURL)
+    : await getActiveProject(user.id, projectID ?? user.id, buildURL)
 
   return { props: { user, initialProjects, initialActiveItem } }
 })

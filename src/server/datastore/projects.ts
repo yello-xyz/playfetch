@@ -15,7 +15,7 @@ import { ActiveProject, Project, ProperProject, User, UserProject } from '@/type
 import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
-import { deletePromptForUser, toPrompt } from './prompts'
+import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 import { getProjectInputValues } from './inputs'
 
@@ -70,7 +70,11 @@ export async function getProjectUsers(userID: number, projectID: number): Promis
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
 
-export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
+export async function getActiveProject(
+  userID: number,
+  projectID: number,
+  buildURL: (path: string) => string
+): Promise<ActiveProject> {
   const projectData = projectID === userID ? undefined : await getVerifiedUserProjectData(userID, projectID)
   const promptDatas = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
   const prompts = promptDatas.map(promptData => toPrompt(promptData, userID))
@@ -83,7 +87,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
           inputs: await getProjectInputValues(projectID),
           projectURLPath: projectData.urlPath,
           availableFlavors: JSON.parse(projectData.flavors),
-          endpoints: [],
+          endpoints: await loadEndpoints(projectID, projectData, buildURL),
         }
       : toUserProject(userID)),
     prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
