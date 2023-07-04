@@ -210,7 +210,7 @@ export default function Home({
                     onSelectPrompt={selectPrompt}
                   />
                 )}
-                {isChainMode && activeProject && (
+                {isChainMode && activeProject && !activeProject.isUserProject && (
                   <ChainTabView activeTab={selectedTab} project={activeProject} />
                 )}
               </div>

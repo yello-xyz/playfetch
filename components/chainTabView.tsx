@@ -1,14 +1,21 @@
-import { ActiveProject, ActivePrompt, Prompt, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Prompt, ProperProject, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
 import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
+import PublishChainTab from './publishChainTab'
 
 export type ActiveChainItem = { prompt: ActivePrompt; version: Version; output?: string }
 export type ChainItem = { prompt: Prompt; version: undefined; output: undefined } | ActiveChainItem
 
-export default function ChainTabView({ activeTab, project }: { activeTab: MainViewTab; project: ActiveProject }) {
+export default function ChainTabView({
+  activeTab,
+  project,
+}: {
+  activeTab: MainViewTab
+  project: ActiveProject & ProperProject
+}) {
   const [chain, setChain] = useState<ChainItem[]>([])
 
   const isActiveChainItem = (item: ChainItem): item is ActiveChainItem => !!item.version
@@ -34,7 +41,7 @@ export default function ChainTabView({ activeTab, project }: { activeTab: MainVi
           />
         ) : null
       case 'publish':
-        return null
+        return activeChain.length ? <PublishChainTab project={project} /> : null
     }
   }
 
