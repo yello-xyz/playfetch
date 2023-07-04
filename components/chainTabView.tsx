@@ -7,7 +7,9 @@ import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 
 export type ActiveChainItem = { prompt: ActivePrompt; version: Version; output?: string }
-export type ChainItem = { prompt: Prompt; version: undefined; output: undefined } | ActiveChainItem
+export type ChainItem = { prompt: Prompt; version: undefined | { id: number }; output?: undefined } | ActiveChainItem
+export const IsActiveChainItem = (item: ChainItem): item is ActiveChainItem =>
+  !!item.version && 'prompt' in item.version
 
 export default function ChainTabView({
   activeTab,
@@ -19,14 +21,13 @@ export default function ChainTabView({
   // TODO generalise this and expose all previous chains in the project
   const previousChain = (project.chains[0] ?? []).map(item => ({
     prompt: project.prompts.find(prompt => prompt.id === item.promptID),
-    version: undefined,
-    output: undefined,
+    version: { id: item.versionID },
+    output: item.output,
   }))
-  const initialChain = previousChain.every(item => !!item.prompt) ? previousChain as ChainItem[] : []
+  const initialChain = previousChain.every(item => !!item.prompt) ? (previousChain as ChainItem[]) : []
   const [chain, setChain] = useState(initialChain)
 
-  const isActiveChainItem = (item: ChainItem): item is ActiveChainItem => !!item.version
-  const activeChain = chain.filter(isActiveChainItem)
+  const activeChain = chain.filter(IsActiveChainItem)
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     project.inputs,

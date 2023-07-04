@@ -5,10 +5,10 @@ import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
-import { ActiveChainItem, ChainItem } from './chainTabView'
+import { ActiveChainItem, ChainItem, IsActiveChainItem } from './chainTabView'
 
 const ExtractChainVariables = (chain: ChainItem[]) => [
-  ...new Set(chain.flatMap(item => (item.version ? ExtractPromptVariables(item.version.prompt) : []))),
+  ...new Set(chain.flatMap(item => (IsActiveChainItem(item) ? ExtractPromptVariables(item.version.prompt) : []))),
 ]
 
 export const ExtractUnboundChainVariables = (chain: ChainItem[]) => {
@@ -29,11 +29,18 @@ export default function BuildChainTab({
   const [promptCache, setPromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
 
   useEffect(() => {
-    const promptID = chain.find(item => !item.version)?.prompt?.id
+    const selectPromptVersion = (prompt: ActivePrompt, versionID?: number) =>
+      (versionID ? prompt.versions.find(version => version.id === versionID) : undefined) ?? prompt.versions[0]
+    const promoteChainItem = (prompt: ActivePrompt) => (item: ChainItem) =>
+      item.prompt.id === prompt.id
+        ? { prompt, version: selectPromptVersion(prompt, item.version?.id), output: item.output }
+        : item
+
+    const promptID = chain.find(item => !IsActiveChainItem(item))?.prompt?.id
     if (promptID) {
       api.getPrompt(promptID).then(prompt => {
         setPromptCache(promptCache => ({ ...promptCache, [promptID]: prompt }))
-        setChain(chain.map(item => (item.prompt.id === promptID ? { prompt, version: prompt.versions[0] } : item)))
+        setChain(chain.map(promoteChainItem(prompt)))
       })
     }
   }, [chain, setChain])
@@ -63,7 +70,7 @@ export default function BuildChainTab({
 
   const mapOutput = (index: number) => (output?: string) => {
     const resetChain = chain.map(item =>
-      item.version ? { ...item, output: item.output === output ? undefined : item.output } : item
+      IsActiveChainItem(item) ? { ...item, output: item.output === output ? undefined : item.output } : item
     )
     setChain([
       ...resetChain.slice(0, index),
@@ -91,7 +98,7 @@ export default function BuildChainTab({
               onSelectPrompt={replacePrompt(index)}
               onRemovePrompt={removePrompt(index)}
             />
-            {item.version && (
+            {IsActiveChainItem(item) && (
               <Selector>
                 <VersionSelector
                   versions={item.prompt.versions}
@@ -101,7 +108,7 @@ export default function BuildChainTab({
                 />
               </Selector>
             )}
-            {item.version && (
+            {IsActiveChainItem(item) && (
               <OutputMapper
                 key={item.output}
                 output={item.output}
