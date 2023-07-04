@@ -42,8 +42,6 @@ export default function PublishPromptTab({
     refreshPrompt()
   }
 
-  const publishingDisabled = version.runs.length === 0
-
   return availableFlavors.length > 0 ? (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
@@ -54,16 +52,10 @@ export default function PublishPromptTab({
           setFlavor={setFlavor}
           onPublish={publish}
           onRefresh={refreshPrompt}
-          publishingDisabled={publishingDisabled}
         />
         {version.id !== activeVersion.id && (
           <div className='font-medium underline cursor-pointer text-grey-500' onClick={switchToPublishedVersion}>
             Switch to published version
-          </div>
-        )}
-        {publishingDisabled && (
-          <div className='font-medium underline cursor-pointer text-grey-500' onClick={() => selectTab('test')}>
-            Test version before publishing
           </div>
         )}
         {endpoint && <UsagePane endpoint={endpoint} />}

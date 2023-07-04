@@ -15,14 +15,12 @@ export default function PublishSettingsPane({
   flavor,
   setFlavor,
   onPublish,
-  publishingDisabled,
   onRefresh,
 }: {
   activeItem: ActivePrompt | (ActiveProject & ProperProject)
   flavor: string
   setFlavor: (flavor: string) => void
   onPublish: (name: string, useCache: boolean) => Promise<void>
-  publishingDisabled?: boolean
   onRefresh: () => Promise<void>
 }) {
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
@@ -125,7 +123,7 @@ export default function PublishSettingsPane({
         </div>
         <div className='flex items-center gap-8'>
           <Label className='w-32'>Name</Label>
-          {endpoint || publishingDisabled ? (
+          {endpoint ? (
             <div className='flex-1 text-right'>{name}</div>
           ) : (
             <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
@@ -134,7 +132,7 @@ export default function PublishSettingsPane({
         <Checkbox
           label='Publish'
           id='publish'
-          disabled={!endpoint && (publishingDisabled || !nameAvailable)}
+          disabled={!endpoint && !nameAvailable}
           checked={!!endpoint}
           setChecked={togglePublish}
         />
