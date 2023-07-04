@@ -82,7 +82,7 @@ export const runPromptWithConfig = async (
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
-  await runChainWithInputs(user.id, req.body.config, req.body.inputs)
+  await runChainWithInputs(user.id, [req.body.config], req.body.inputs)
   res.json({})
 }
 
