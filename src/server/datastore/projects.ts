@@ -71,12 +71,13 @@ export async function getProjectUsers(userID: number, projectID: number): Promis
 
 export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
   const projectData = projectID === userID ? undefined : await getVerifiedUserProjectData(userID, projectID)
-  const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['favorited', 'lastEditedAt'])
+  const promptDatas = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
+  const prompts = promptDatas.map(promptData => toPrompt(promptData, userID))
   const users = await getProjectUsers(userID, projectID)
 
   return {
     ...(projectData ? toProject(projectData) : toUserProject(userID)),
-    prompts: prompts.map(promptData => toPrompt(promptData)),
+    prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
     users,
   }
 }

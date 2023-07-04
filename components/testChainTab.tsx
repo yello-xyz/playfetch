@@ -49,7 +49,7 @@ export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
     setRuns(runs)
   }
 
-  return chain.length ? (
+  return (
     <>
       <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
         <div className='flex flex-col flex-grow gap-2'>
@@ -67,5 +67,5 @@ export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
         <RunTimeline runs={runs} />
       </div>
     </>
-  ) : null
+  )
 }
