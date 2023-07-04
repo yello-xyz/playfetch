@@ -6,7 +6,7 @@ import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
 
-export default function PublishTab({
+export default function PublishPromptTab({
   prompt,
   activeVersion,
   setActiveVersion,

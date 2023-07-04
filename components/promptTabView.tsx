@@ -1,7 +1,7 @@
 import { ActivePrompt, Version } from '@/types'
 
 import PlayTab from './playTab'
-import PublishTab from './publishTab'
+import PublishPromptTab from './publishPromptTab'
 import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 
@@ -52,7 +52,7 @@ export default function PromptTabView({
         )
       case 'publish':
         return (
-          <PublishTab
+          <PublishPromptTab
             key={activeVersion.id}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
