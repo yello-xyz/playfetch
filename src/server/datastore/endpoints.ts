@@ -33,6 +33,25 @@ export async function checkCanSaveEndpoint(
   return !endpointData || endpointData.promptID === promptID
 }
 
+async function ensureEndpointAccess(userID: number, projectID: number, promptID: number) {
+  if (promptID === projectID) {
+    await ensureProjectAccess(userID, promptID)
+  } else {
+    const promptData = await getVerifiedUserPromptData(userID, promptID)
+    if (promptData?.projectID !== projectID) {
+      throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
+    }  
+  }
+}
+
+async function ensureProjectIDFromURLPath(projectURLPath: string) {
+  const projectID = await getEntityID(Entity.PROJECT, 'urlPath', projectURLPath)
+  if (!projectID) {
+    throw new Error(`Project with URL path ${projectURLPath} does not exist`)
+  }
+  return projectID
+}
+
 export async function saveEndpoint(
   userID: number,
   promptID: number,
@@ -44,19 +63,8 @@ export async function saveEndpoint(
   config: PromptConfig,
   useCache: boolean
 ) {
-  const projectID = await getEntityID(Entity.PROJECT, 'urlPath', projectURLPath)
-  if (!projectID) {
-    throw new Error(`Project with URL path ${projectURLPath} does not exist`)
-  }
-  if (promptID === projectID) {
-    // Temporary hack where version is 0 and promptID is actually projectID when publishing chain
-    await ensureProjectAccess(userID, promptID)
-  } else {
-    const promptData = await getVerifiedUserPromptData(userID, promptID)
-    if (promptData?.projectID !== projectID) {
-      throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
-    }  
-  }
+  const projectID = await ensureProjectIDFromURLPath(projectURLPath)
+  await ensureEndpointAccess(userID, projectID, promptID)
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
     throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
   }
@@ -119,11 +127,8 @@ export async function toggleEndpointCache(userID: number, endpointID: number, us
 
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
-  try {
-    await ensurePromptAccess(userID, endpointData.promptID)
-  } catch {
-    throw new Error(`Endpoint with ID ${endpointID} does not exist or user has no access`)
-  }
+  const projectID = await ensureProjectIDFromURLPath(endpointData.projectURLPath)
+  await ensureEndpointAccess(userID, projectID, endpointData.promptID)
   await getDatastore().delete([buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)])
 }
 
