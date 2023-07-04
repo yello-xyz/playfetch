@@ -67,7 +67,7 @@ export async function getActivePrompt(
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const users = await getProjectUsers(userID, promptData.projectID)
-  const inputs = await getProjectInputValues(userID, promptData.projectID)
+  const inputs = await getProjectInputValues(promptData.projectID)
 
   return {
     ...toPrompt(promptData, userID),

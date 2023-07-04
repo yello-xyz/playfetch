@@ -22,7 +22,7 @@ export default function ChainTabView({
   const activeChain = chain.filter(isActiveChainItem)
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    activeChain[0]?.prompt?.inputs ?? [],
+    project.inputs,
     project.id,
     activeTab
   )

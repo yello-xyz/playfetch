@@ -21,8 +21,9 @@ export type ActiveProject = (
   | UserProject
   | (ProperProject & {
       endpoints: ResolvedEndpoint[]
-      availableFlavors: string[]
+      inputs: InputValues
       projectURLPath: string
+      availableFlavors: string[]
     })
 ) & {
   prompts: Prompt[]

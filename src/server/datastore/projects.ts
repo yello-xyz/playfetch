@@ -17,6 +17,7 @@ import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
 import { deletePromptForUser, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
+import { getProjectInputValues } from './inputs'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -79,6 +80,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     ...(projectData
       ? {
           ...toProject(projectData),
+          inputs: await getProjectInputValues(projectID),
           projectURLPath: projectData.urlPath,
           availableFlavors: JSON.parse(projectData.flavors),
           endpoints: [],

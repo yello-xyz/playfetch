@@ -28,8 +28,7 @@ export async function saveInputValues(userID: number, projectID: number, name: s
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })
 
-export async function getProjectInputValues(userID: number, projectID: number) {
-  await ensureProjectAccess(userID, projectID)
+export async function getProjectInputValues(projectID: number) {
   const entities = await getEntities(Entity.INPUT, 'projectID', projectID)
   return Object.fromEntries(entities.map(toInput).map(input => [input.name, input.values])) as InputValues
 }
