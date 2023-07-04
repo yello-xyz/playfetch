@@ -128,7 +128,7 @@ export default function Home({
     if (promptID) {
       selectPrompt(promptID)
     } else {
-      selectProject(projectID ?? user.id)
+      selectProject(projectID ?? user.id, isChainMode)
     }
   }
 
@@ -146,9 +146,12 @@ export default function Home({
   }
 
   const selectChains = () => {
-    setChainMode(true)
     if (activePrompt) {
       selectProject(activePrompt.projectID, true)
+    } else if (activeProject?.isUserProject) {
+      selectProject(projects.filter(project => !project.isUserProject)[0].id, true)
+    } else {
+      setChainMode(true)
     }
   }
 
