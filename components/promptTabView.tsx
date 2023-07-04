@@ -3,6 +3,7 @@ import { ActivePrompt, Version } from '@/types'
 import PlayTab from './playTab'
 import PublishTab from './publishTab'
 import TestTab from './testTab'
+import useInputValues from './inputValues'
 
 export type ActivePromptTab = 'play' | 'test' | 'publish'
 
@@ -19,6 +20,12 @@ export default function PromptTabView({
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
 }) {
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
+    prompt.inputs,
+    prompt.projectID,
+    activeTab
+  )
+
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
@@ -38,6 +45,9 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
+            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
         )
       case 'publish':

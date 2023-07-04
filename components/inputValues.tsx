@@ -1,22 +1,31 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import { ActivePrompt, InputValues } from '@/types'
+import { InputValues } from '@/types'
 import api from '@/src/client/api'
+import { ActivePromptTab } from './promptTabView'
 
 export default function useInputValues(
-  prompt: ActivePrompt
+  initialInputs: InputValues,
+  projectID: number,
+  activeTab: ActivePromptTab,
 ): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
-  const [originalInputValues, setOriginalInputValues] = useState(prompt.inputs)
+  const [originalInputValues, setOriginalInputValues] = useState(initialInputs)
   const [inputValues, setInputValues] = useState(originalInputValues)
 
-  // TODO this should also be persisted when switching tabs
-  const persistValuesIfNeeded = () => {
+  const persistInputValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
       if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(prompt.projectID, variable, inputs)
+        console.log('persisting', variable)
+        api.updateInputValues(projectID, variable, inputs)
       }
     }
     setOriginalInputValues(inputValues)
   }
 
-  return [inputValues, setInputValues, persistValuesIfNeeded]
+  const [previouslyActiveTab, setPreviouslyActiveTab] = useState(activeTab)
+  if (activeTab !== previouslyActiveTab) {
+    setPreviouslyActiveTab(activeTab)
+    persistInputValuesIfNeeded()
+  }
+
+  return [inputValues, setInputValues, persistInputValuesIfNeeded]
 }

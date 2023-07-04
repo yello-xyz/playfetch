@@ -1,6 +1,6 @@
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, PromptInputs, PromptConfig } from '@/types'
+import { ActivePrompt, Version, PromptInputs, PromptConfig, InputValues } from '@/types'
 
 import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
@@ -10,7 +10,6 @@ import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
-import useInputValues from './inputValues'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -29,11 +28,17 @@ export default function TestTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
+  inputValues,
+  setInputValues,
+  persistInputValuesIfNeeded,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
+  inputValues: InputValues
+  setInputValues: (inputValues: InputValues) => void
+  persistInputValuesIfNeeded: () => void
 }) {
   const [version, setVersion] = useState(activeVersion)
   const updateVersion = (version: Version) => {
@@ -42,17 +47,16 @@ export default function TestTab({
   }
 
   const variables = ExtractPromptVariables(version.prompt)
-  const [inputValues, setInputValues, persistValuesIfNeeded] = useInputValues(prompt)
 
   const selectVersion = (version: Version) => {
-    persistValuesIfNeeded()
+    persistInputValuesIfNeeded()
     setVersion(version)
     setActiveVersion(version)
   }
 
   const runPrompt = useRunPrompt(prompt.id)
   const testPrompt = async (inputs: Record<string, string>[]) => {
-    persistValuesIfNeeded()
+    persistInputValuesIfNeeded()
     return runPrompt(version.prompt, version.config, inputs)
   }
 
@@ -65,7 +69,7 @@ export default function TestTab({
             variables={variables}
             inputValues={inputValues}
             setInputValues={setInputValues}
-            onPersistInputValues={persistValuesIfNeeded}
+            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
         </div>
         <div className='self-start'>

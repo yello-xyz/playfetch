@@ -7,8 +7,7 @@ import TestButtons from './testButtons'
 import { ActiveChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
-import { Run } from '@/types'
-import useInputValues from './inputValues'
+import { InputValues, Run } from '@/types'
 
 const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): Promise<Run[]> => {
   const versions = chain.map(item => item.version)
@@ -24,14 +23,23 @@ const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): P
     : Promise.resolve([])
 }
 
-export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
+export default function TestChainTab({
+  chain,
+  inputValues,
+  setInputValues,
+  persistInputValuesIfNeeded,
+}: {
+  chain: ActiveChainItem[]
+  inputValues: InputValues
+  setInputValues: (inputValues: InputValues) => void
+  persistInputValuesIfNeeded: () => void
+}) {
   const [runs, setRuns] = useState<Run[]>([])
 
   const variables = ExtractUnboundChainVariables(chain)
-  const [inputValues, setInputValues, persistValuesIfNeeded] = useInputValues(chain[0].prompt)
 
   const testChain = async (inputs: Record<string, string>[]) => {
-    persistValuesIfNeeded()
+    persistInputValuesIfNeeded()
     const runs = await runChain(chain, inputs)
     setRuns(runs)
   }
@@ -45,7 +53,7 @@ export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
             variables={variables}
             inputValues={inputValues}
             setInputValues={setInputValues}
-            onPersistInputValues={persistValuesIfNeeded}
+            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
         </div>
         <TestButtons variables={variables} inputValues={inputValues} callback={testChain} />

@@ -8,12 +8,12 @@ export default function TestDataPane({
   variables,
   inputValues,
   setInputValues,
-  onPersistInputValues,
+  persistInputValuesIfNeeded,
 }: {
   variables: string[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
-  onPersistInputValues: () => void
+  persistInputValuesIfNeeded: () => void
 }) {
   const [activeColumn, setActiveColumn] = useState(0)
   if (activeColumn > 0 && activeColumn >= variables.length) {
@@ -50,7 +50,7 @@ export default function TestDataPane({
   }
 
   const selectColumn = (index: number) => {
-    onPersistInputValues()
+    persistInputValuesIfNeeded()
     setActiveColumn(index)
   }
 
