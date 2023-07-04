@@ -13,14 +13,16 @@ import PickNameDialog from './pickNameDialog'
 
 export default function PublishSettingsPane({
   prompt,
-  version,
   flavor,
   setFlavor,
+  onPublish,
+  publishingDisabled,
 }: {
   prompt: ActivePrompt
-  version: Version
   flavor: string
   setFlavor: (flavor: string) => void
+  onPublish: (name: string, useCache: boolean) => Promise<void>
+  publishingDisabled?: boolean
 }) {
   const availableFlavors = prompt.availableFlavors
   const endpoints = prompt.endpoints
@@ -55,25 +57,9 @@ export default function PublishSettingsPane({
 
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
 
-  const noRuns = version.runs.length === 0
-  const publishingDisabled = !endpoint && (noRuns || !nameAvailable)
   const setDialogPrompt = useModalDialogPrompt()
 
   const refreshPrompt = useRefreshPrompt()
-
-  const publish = async (name: string) => {
-    await api.publishPrompt(
-      prompt.projectID,
-      prompt.id,
-      version.id,
-      name,
-      flavor,
-      version.prompt,
-      version.config,
-      useCache
-    )
-    refreshPrompt()
-  }
 
   const unpublish = (endpointID: number) => {
     setDialogPrompt({
@@ -92,7 +78,7 @@ export default function PublishSettingsPane({
     if (endpoint) {
       unpublish(endpoint.id)
     } else {
-      publish(name)
+      onPublish(name, useCache)
     }
   }
 
@@ -137,7 +123,7 @@ export default function PublishSettingsPane({
           </div>
           <div className='flex items-center gap-8'>
             <Label className='w-32'>Name</Label>
-            {endpoint || noRuns ? (
+            {endpoint || publishingDisabled ? (
               <div className='flex-1 text-right'>{name}</div>
             ) : (
               <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
@@ -146,7 +132,7 @@ export default function PublishSettingsPane({
           <Checkbox
             label='Publish'
             id='publish'
-            disabled={publishingDisabled}
+            disabled={!endpoint && (publishingDisabled || !nameAvailable)}
             checked={!!endpoint}
             setChecked={togglePublish}
           />
