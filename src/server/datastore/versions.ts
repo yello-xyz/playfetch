@@ -40,6 +40,20 @@ const DefaultConfig: PromptConfig = {
   maxTokens: 250,
 }
 
+const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
+  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
+  if (!versionData) {
+    throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
+  }
+  await ensurePromptAccess(userID, versionData.promptID)
+  return versionData
+}
+
+export async function getVersion(userID: number, versionID: number) {
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
+  return versionData ? toVersion(versionData, []) : undefined
+}
+
 export async function saveVersionForUser(
   userID: number,
   promptID: number,
@@ -99,8 +113,7 @@ async function updateVersion(versionData: any) {
 }
 
 export async function saveVersionLabels(userID: number, versionID: number, projectID: number, labels: string[]) {
-  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  await ensurePromptAccess(userID, versionData.promptID)
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
   await updateVersion({ ...versionData, labels: JSON.stringify(labels) })
   await ensureProjectLabels(userID, projectID, labels)
 }
@@ -130,6 +143,7 @@ const toVersionData = (
 
 export const toVersion = (data: any, runs: any[]): Version => ({
   id: getID(data),
+  promptID: data.promptID,
   userID: data.userID,
   previousID: data.previousVersionID ?? null,
   timestamp: getTimestamp(data),
@@ -140,11 +154,7 @@ export const toVersion = (data: any, runs: any[]): Version => ({
 })
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
-  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  if (!versionData) {
-    throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
-  }
-  await ensurePromptAccess(userID, versionData.promptID)
+  const versionData = await getVerifiedUserVersionData(userID, versionID)
   const promptID = versionData.promptID
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   if (versionCount <= 1) {
