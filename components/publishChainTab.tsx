@@ -39,6 +39,7 @@ export default function PublishChainTab({
           flavor={flavor}
           setFlavor={setFlavor}
           onPublish={publish}
+          onRefresh={refreshProject}
         />
         {endpoint && <UsagePane endpoint={endpoint} />}
       </div>

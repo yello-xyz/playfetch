@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActiveProject, ActivePrompt, ProperProject, ResolvedEndpoint } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
-import { useRefreshPrompt } from './refreshContext'
 import Label from './label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
@@ -17,12 +16,14 @@ export default function PublishSettingsPane({
   setFlavor,
   onPublish,
   publishingDisabled,
+  onRefresh,
 }: {
   activeItem: ActivePrompt | (ActiveProject & ProperProject)
   flavor: string
   setFlavor: (flavor: string) => void
   onPublish: (name: string, useCache: boolean) => Promise<void>
   publishingDisabled?: boolean
+  onRefresh: () => Promise<void>
 }) {
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
   const availableFlavors = activeItem.availableFlavors
@@ -62,8 +63,6 @@ export default function PublishSettingsPane({
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const refreshPrompt = useRefreshPrompt()
-
   const unpublish = (endpointID: number) => {
     setDialogPrompt({
       title:
@@ -71,7 +70,7 @@ export default function PublishSettingsPane({
         'You will no longer be able to access the API and any usage statistics will be reset.',
       callback: async () => {
         await api.unpublishPrompt(endpointID)
-        refreshPrompt()
+        onRefresh()
       },
       destructive: true,
     })
@@ -88,7 +87,7 @@ export default function PublishSettingsPane({
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
     if (endpoint) {
-      api.toggleCache(endpoint.id, checked).then(_ => refreshPrompt())
+      api.toggleCache(endpoint.id, checked).then(_ => onRefresh())
     }
   }
 
@@ -103,7 +102,7 @@ export default function PublishSettingsPane({
 
   const addFlavor = async (flavor: string) => {
     await api.addFlavor(projectID, flavor)
-    await refreshPrompt()
+    await onRefresh()
     setFlavor(flavor)
   }
 

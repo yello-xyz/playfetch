@@ -52,6 +52,7 @@ export default function PublishPromptTab({
           flavor={flavor}
           setFlavor={setFlavor}
           onPublish={publish}
+          onRefresh={refreshPrompt}
           publishingDisabled={publishingDisabled}
         />
         {version.id !== activeVersion.id && (
