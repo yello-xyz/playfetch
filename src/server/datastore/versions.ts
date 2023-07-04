@@ -49,9 +49,9 @@ const getVerifiedUserVersionData = async (userID: number, versionID: number) => 
   return versionData
 }
 
-export async function getVersion(userID: number, versionID: number) {
+export async function getVersionWithoutRuns(userID: number, versionID: number) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
-  return versionData ? toVersion(versionData, []) : undefined
+  return toVersion(versionData, [])
 }
 
 export async function saveVersionForUser(

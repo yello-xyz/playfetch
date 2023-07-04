@@ -37,13 +37,7 @@ export default function PublishPromptTab({
   const refreshPrompt = useRefreshPrompt()
 
   const publish = async (name: string, useCache: boolean) => {
-    await api.publishPrompt(
-      { promptID: prompt.id, versionID: version.id, prompt: version.prompt, config: version.config },
-      prompt.projectID,
-      name,
-      flavor,
-      useCache
-    )
+    await api.publishPrompt(version.id, prompt.projectID, name, flavor, useCache)
     refreshPrompt()
   }
 

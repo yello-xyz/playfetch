@@ -80,8 +80,8 @@ const api = {
   checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {
     return post(this.checkEndpointName, { promptID, projectURLPath, name })
   },
-  publishPrompt: function (config: RunConfig, projectID: number, name: string, flavor: string, useCache: boolean) {
-    return post(this.publishPrompt, { config, projectID, name, flavor, useCache })
+  publishPrompt: function (versionID: number, projectID: number, name: string, flavor: string, useCache: boolean) {
+    return post(this.publishPrompt, { versionID, projectID, name, flavor, useCache })
   },
   publishChain: function (projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishChain, { projectID, name, flavor, useCache })
