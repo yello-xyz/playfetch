@@ -4,7 +4,7 @@ import VersionTimeline from '@/components/versionTimeline'
 
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
-import { useRunPrompt } from './testTab'
+import { useRunPrompt } from './testPromptTab'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export default function PlayTab({

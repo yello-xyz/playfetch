@@ -2,7 +2,7 @@ import { ActivePrompt, Version } from '@/types'
 
 import PlayTab from './playTab'
 import PublishTab from './publishTab'
-import TestTab from './testTab'
+import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
@@ -39,7 +39,7 @@ export default function PromptTabView({
         )
       case 'test':
         return (
-          <TestTab
+          <TestPromptTab
             key={activeVersion.prompt}
             prompt={prompt}
             activeVersion={activeVersion}

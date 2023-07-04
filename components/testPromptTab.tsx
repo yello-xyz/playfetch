@@ -23,7 +23,7 @@ export const useRunPrompt = (promptID: number) => {
   }
 }
 
-export default function TestTab({
+export default function TestPromptTab({
   prompt,
   activeVersion,
   setActiveVersion,
