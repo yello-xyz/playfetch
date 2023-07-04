@@ -1,12 +1,12 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, PromptConfig, User, Run, RunConfig } from '@/types'
+import { PromptInputs, User, Run, RunConfig } from '@/types'
 import { runPromptWithConfig } from './runPrompt'
 
 export const runChainWithInputs = async (
   userID: number,
-  chain: (RunConfig & { mappedOutput?: string })[],
+  chain: RunConfig[],
   multipleInputs: PromptInputs[]
 ): Promise<Run[]> => {
   const runs: Run[] = []
@@ -17,8 +17,8 @@ export const runChainWithInputs = async (
         break
       }
       runs.push(await saveRun(userID, item.promptID, item.versionID, inputs, output, cost))
-      if (item.mappedOutput) {
-        inputs[item.mappedOutput] = output
+      if (item.output) {
+        inputs[item.output] = output
       }
     }
   }
@@ -28,13 +28,8 @@ export const runChainWithInputs = async (
 async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: User) {
   const configs: RunConfig[] = req.body.configs
   const multipleInputs: PromptInputs[] = req.body.inputs
-  const mappedOutputs: (string | undefined)[] = req.body.outputs
 
-  const runs = await runChainWithInputs(
-    user.id,
-    configs.map((config, index) => ({ ...config, mappedOutput: mappedOutputs[index] })),
-    multipleInputs
-  )
+  const runs = await runChainWithInputs(user.id, configs, multipleInputs)
 
   res.json(runs)
 }

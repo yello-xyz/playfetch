@@ -82,6 +82,7 @@ export type RunConfig = {
   versionID: number
   prompt: string
   config: PromptConfig
+  output?: string
 }
 
 export type Endpoint = RunConfig & {

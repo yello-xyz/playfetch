@@ -18,9 +18,9 @@ const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): P
           versionID: item.version.id,
           prompt: item.version.prompt,
           config: item.version.config,
+          output: item.output,
         })),
-        inputs,
-        chain.map(item => item.output)
+        inputs
       )
     : Promise.resolve([])
 }
