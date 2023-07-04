@@ -38,6 +38,8 @@ export const runPromptWithConfig = async (
     prompt
   )
 
+  console.log(resolvedPrompt, JSON.stringify(inputs))
+
   const getPredictor = (provider: string) => {
     switch (provider) {
       default:

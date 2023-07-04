@@ -14,7 +14,7 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: Us
   const flavor = req.body.flavor
   const useCache = req.body.useCache
 
-  const version = await getVersionWithoutRuns(userID, versionID)
+  const version = await getVersionWithoutRuns(versionID)
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
   await saveEndpoint(

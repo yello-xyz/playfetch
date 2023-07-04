@@ -137,9 +137,9 @@ export async function revokeMemberAccessForProject(userID: number, projectID: nu
   await revokeUserAccess(userID, projectID)
 }
 
-export async function checkProject(urlPath: string, apiKey?: string): Promise<boolean> {
+export async function checkProject(urlPath: string, apiKey?: string): Promise<number | undefined> {
   const projectData = await getEntity(Entity.PROJECT, 'urlPath', urlPath)
-  return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey))
+  return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey)) ? getID(projectData) : undefined
 }
 
 export async function getURLPathForProject(userID: number, projectID: number): Promise<string> {

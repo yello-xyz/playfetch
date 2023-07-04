@@ -9,12 +9,8 @@ export async function saveChain(userID: number, projectID: number, chain: Chain)
   return toID(chainData)
 }
 
-export async function getChain(userID: number, chainID: number): Promise<Chain> {
+export async function getChain(chainID: number): Promise<Chain> {
   const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
-  if (!chainData) {
-    throw new Error(`Chain with ID ${chainID} does not exist or user has no access`)
-  }
-  await ensureProjectAccess(userID, chainData.projectID)
   return toChain(chainData)
 }
 

@@ -49,8 +49,8 @@ const getVerifiedUserVersionData = async (userID: number, versionID: number) => 
   return versionData
 }
 
-export async function getVersionWithoutRuns(userID: number, versionID: number) {
-  const versionData = await getVerifiedUserVersionData(userID, versionID)
+export async function getVersionWithoutRuns(versionID: number) {
+  const versionData = await getKeyedEntity(Entity.VERSION, versionID)
   return toVersion(versionData, [])
 }
 
