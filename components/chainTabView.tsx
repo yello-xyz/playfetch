@@ -2,7 +2,7 @@ import { ActivePrompt, Prompt, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
-import { ActivePromptTab } from './promptTabView'
+import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 
 export type ActiveChainItem = { prompt: ActivePrompt; version: Version; output?: string }
@@ -13,7 +13,7 @@ export default function ChainTabView({
   projectID,
   prompts,
 }: {
-  activeTab: ActivePromptTab
+  activeTab: MainViewTab
   projectID: number
   prompts: Prompt[]
 }) {

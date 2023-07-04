@@ -5,7 +5,7 @@ import PublishTab from './publishTab'
 import TestTab from './testTab'
 import useInputValues from './inputValues'
 
-export type ActivePromptTab = 'play' | 'test' | 'publish'
+export type MainViewTab = 'play' | 'test' | 'publish'
 
 export default function PromptTabView({
   activeTab,
@@ -14,7 +14,7 @@ export default function PromptTabView({
   setActiveVersion,
   setModifiedVersion,
 }: {
-  activeTab: ActivePromptTab
+  activeTab: MainViewTab
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void

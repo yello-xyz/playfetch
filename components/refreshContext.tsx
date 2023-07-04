@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { ActivePromptTab } from './promptTabView'
+import { MainViewTab } from './promptTabView'
 
 type RefreshContextType = {
   refreshProjects?: () => Promise<void>
@@ -7,7 +7,7 @@ type RefreshContextType = {
   refreshProject?: () => Promise<void>
   refreshPrompt?: (focusVersionID?: number) => Promise<void>
   savePrompt?: () => Promise<number>
-  selectTab?: (tab: ActivePromptTab) => void
+  selectTab?: (tab: MainViewTab) => void
 }
 
 export const RefreshContext = createContext<RefreshContextType>({})

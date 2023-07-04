@@ -5,7 +5,7 @@ import api from '@/src/client/api'
 import { useState } from 'react'
 import { Project, ActivePrompt, Version, User, ActiveProject } from '@/types'
 import Sidebar from '@/components/sidebar'
-import PromptTabView, { ActivePromptTab } from '@/components/promptTabView'
+import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import PromptsGridView from '@/components/promptsGridView'
 import { ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
@@ -137,8 +137,8 @@ export default function Home({
     selectPrompt(promptID)
   }
 
-  const [selectedTab, setSelectedTab] = useState<ActivePromptTab>('play')
-  const updateSelectedTab = (tab: ActivePromptTab) => {
+  const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
+  const updateSelectedTab = (tab: MainViewTab) => {
     if (activePrompt) {
       savePrompt().then(versionID => refreshPrompt(activePrompt.id, versionID))
     }
