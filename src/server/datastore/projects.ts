@@ -11,7 +11,7 @@ import {
   getOrderedEntities,
   toID,
 } from './datastore'
-import { ActiveProject, Project, User } from '@/types'
+import { ActiveProject, Project, ProperProject, User, UserProject } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
@@ -51,13 +51,13 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
-const toProject = (data: any): Project => ({
+const toProject = (data: any): ProperProject => ({
   id: getID(data),
   name: data.name,
   isUserProject: false,
 })
 
-const toUserProject = (userID: number): Project => ({
+const toUserProject = (userID: number): UserProject => ({
   id: userID,
   name: 'Prompts',
   isUserProject: true,
@@ -76,7 +76,14 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const users = await getProjectUsers(userID, projectID)
 
   return {
-    ...(projectData ? toProject(projectData) : toUserProject(userID)),
+    ...(projectData
+      ? {
+          ...toProject(projectData),
+          projectURLPath: projectData.urlPath,
+          availableFlavors: JSON.parse(projectData.flavors),
+          endpoints: [],
+        }
+      : toUserProject(userID)),
     prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
     users,
   }
