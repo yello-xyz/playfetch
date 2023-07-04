@@ -8,6 +8,7 @@ import { ActiveChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
 import { Run } from '@/types'
+import useInputValues from './inputValues'
 
 const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): Promise<Run[]> => {
   const versions = chain.map(item => item.version)
@@ -25,23 +26,9 @@ const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): P
 
 export default function TestChainTab({ chain }: { chain: ActiveChainItem[] }) {
   const [runs, setRuns] = useState<Run[]>([])
+
   const variables = ExtractUnboundChainVariables(chain)
-
-  const activePrompt = chain[0].prompt
-
-  // TODO deduplicate this bit of logic
-  const [originalInputValues, setOriginalInputValues] = useState(
-    Object.fromEntries(activePrompt.inputs.map(input => [input.name, input.values]))
-  )
-  const [inputValues, setInputValues] = useState(originalInputValues)
-  const persistValuesIfNeeded = () => {
-    for (const [variable, inputs] of Object.entries(inputValues)) {
-      if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(activePrompt.projectID, variable, inputs)
-      }
-    }
-    setOriginalInputValues(inputValues)
-  }
+  const [inputValues, setInputValues, persistValuesIfNeeded] = useInputValues(chain[0].prompt)
 
   const testChain = async (inputs: Record<string, string>[]) => {
     persistValuesIfNeeded()

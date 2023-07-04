@@ -10,6 +10,7 @@ import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
+import useInputValues from './inputValues'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export const useRunPrompt = (promptID: number) => {
@@ -39,26 +40,14 @@ export default function TestTab({
     setVersion(version)
     setModifiedVersion(version)
   }
+
+  const variables = ExtractPromptVariables(version.prompt)
+  const [inputValues, setInputValues, persistValuesIfNeeded] = useInputValues(prompt)
+
   const selectVersion = (version: Version) => {
     persistValuesIfNeeded()
     setVersion(version)
     setActiveVersion(version)
-  }
-
-  const variables = ExtractPromptVariables(version.prompt)
-  const [originalInputValues, setOriginalInputValues] = useState(
-    Object.fromEntries(prompt.inputs.map(input => [input.name, input.values]))
-  )
-  const [inputValues, setInputValues] = useState(originalInputValues)
-
-  // TODO this should also be persisted when switching tabs
-  const persistValuesIfNeeded = () => {
-    for (const [variable, inputs] of Object.entries(inputValues)) {
-      if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(prompt.projectID, variable, inputs)
-      }
-    }
-    setOriginalInputValues(inputValues)
   }
 
   const runPrompt = useRunPrompt(prompt.id)
