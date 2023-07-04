@@ -1,4 +1,4 @@
-import { Datastore, Key, PropertyFilter, Query } from '@google-cloud/datastore'
+import { Datastore, Key, PropertyFilter, Query, Transaction } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
@@ -92,4 +92,27 @@ export const getEntityCount = async (type: string, key: string, value: {}) => {
   const query = datastore.createQuery(type).filter(buildFilter(key, value))
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
   return count
+}
+
+export const runTransactionWithExponentialBackoff = async (
+  operation: (transaction: Transaction) => Promise<void>,
+  maxTries: number = 10,
+  currentAttempt: number = 1,
+  milliseconds: number = 100
+) => {
+  const transaction = getDatastore().transaction()
+  try {
+    await transaction.run()
+    await operation(transaction)
+    await transaction.commit()
+  } catch (error) {
+    await transaction.rollback()
+    if (currentAttempt < maxTries) {
+      new Promise(resolve => setTimeout(resolve, milliseconds)).then(() =>
+        runTransactionWithExponentialBackoff(operation, maxTries, currentAttempt + 1, milliseconds * 2)
+      )
+    } else {
+      throw error
+    }
+  }
 }

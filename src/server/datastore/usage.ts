@@ -1,11 +1,10 @@
 import { Usage } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
+import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getID } from './datastore'
 
 export async function saveOrResetUsage(endpointID: number, promptID: number) {
   await getDatastore().save(toUsageData(endpointID, promptID, 0, 0, 0, 0, 0, new Date()))
 }
 
-// TODO make transactional with exponential backoff as this may be run many times in parallel
 export async function updateUsage(
   endpointID: number,
   promptID: number,
@@ -14,20 +13,22 @@ export async function updateUsage(
   attempts: number,
   failed: boolean
 ) {
-  const usageData = await getKeyedEntity(Entity.USAGE, endpointID)
-  await getDatastore().save(
-    toUsageData(
-      endpointID,
-      promptID,
-      usageData.requests + 1,
-      usageData.cost + incrementalCost,
-      usageData.cacheHits + (cacheHit ? 1 : 0),
-      usageData.attempts + attempts,
-      usageData.failures + (failed ? 1 : 0),
-      usageData.createdAt,
-      new Date()
+  await runTransactionWithExponentialBackoff(async transaction => {
+    const [usageData] = await transaction.get(buildKey(Entity.USAGE, endpointID))
+    transaction.save(
+      toUsageData(
+        endpointID,
+        promptID,
+        usageData.requests + 1,
+        usageData.cost + incrementalCost,
+        usageData.cacheHits + (cacheHit ? 1 : 0),
+        usageData.attempts + attempts,
+        usageData.failures + (failed ? 1 : 0),
+        usageData.createdAt,
+        new Date()
+      )
     )
-  )
+  })
 }
 
 const toUsageData = (
