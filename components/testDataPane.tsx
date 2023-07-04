@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
+import { InputValues } from '@/types'
 
 export default function TestDataPane({
   variables,
@@ -10,8 +11,8 @@ export default function TestDataPane({
   onPersistInputValues,
 }: {
   variables: string[]
-  inputValues: { [key: string]: string[] }
-  setInputValues: (inputValues: { [key: string]: string[] }) => void
+  inputValues: InputValues
+  setInputValues: (inputValues: InputValues) => void
   onPersistInputValues: () => void
 }) {
   const [activeColumn, setActiveColumn] = useState(0)

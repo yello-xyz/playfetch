@@ -12,11 +12,7 @@ export type Project = {
   isUserProject: boolean
 }
 
-export type InputValues = {
-  id: number
-  name: string
-  values: string[]
-}
+export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {
   prompts: Prompt[]
@@ -37,7 +33,7 @@ export type ActivePrompt = Prompt & {
   endpoints: ResolvedEndpoint[]
   versions: Version[]
   users: User[]
-  inputs: InputValues[]
+  inputs: InputValues
   projectURLPath: string
   availableLabels: string[]
   availableFlavors: string[]

@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import useModalDialogPrompt from './modalDialogContext'
+import { InputValues } from '@/types'
 
 type TestMode = 'first' | 'last' | 'random' | 'all'
 
-const selectInputs = (inputs: { [key: string]: string[] }, mode: TestMode): { [key: string]: string }[] => {
+const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: string }[] => {
   const selectInput = (inputs: string[], mode: TestMode): string => {
     switch (mode) {
       default:
@@ -54,7 +55,7 @@ export default function TestButtons({
   callback,
 }: {
   variables: string[]
-  inputValues: Record<string, string[]>
+  inputValues: InputValues
   disabled?: boolean
   callback: (inputs: Record<string, string>[]) => Promise<void>
 }) {

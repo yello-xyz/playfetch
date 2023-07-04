@@ -6,7 +6,6 @@ import {
   getDatastore,
   getEntities,
   getFilteredEntityKey,
-  getID,
   toID,
 } from './datastore'
 import { ensureProjectAccess } from './projects'
@@ -27,14 +26,10 @@ export async function saveInputValues(userID: number, projectID: number, name: s
   await getDatastore().save(toInputData(projectID, name, values, key ? toID({ key }) : undefined))
 }
 
-export const toInput = (data: any): InputValues => ({
-  id: getID(data),
-  name: data.name,
-  values: JSON.parse(data.values),
-})
+const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })
 
 export async function getProjectInputValues(userID: number, projectID: number) {
   await ensureProjectAccess(userID, projectID)
   const entities = await getEntities(Entity.INPUT, 'projectID', projectID)
-  return entities.map(toInput)
+  return Object.fromEntries(entities.map(toInput).map(input => [input.name, input.values])) as InputValues
 }
