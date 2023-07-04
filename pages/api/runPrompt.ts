@@ -4,8 +4,8 @@ import vertexai from '@/src/server/vertexai'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
-import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, PromptConfig, User } from '@/types'
+import { runChainWithInputs } from './runChain'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -82,14 +82,10 @@ export const runPromptWithConfig = async (
 }
 
 async function runPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
-  const config: PromptConfig = req.body.config
-  const multipleInputs: PromptInputs[] = req.body.inputs
-  for (const inputs of multipleInputs) {
-    const { output, cost } = await runPromptWithConfig(req.body.prompt, config, inputs, false)
-    if (output?.length) {
-      await saveRun(user.id, req.body.promptID, req.body.versionID, inputs, output, cost)
-    }
-  }
+  const singleItemChain = [
+    { promptID: req.body.promptID, versionID: req.body.versionID, prompt: req.body.prompt, config: req.body.config },
+  ]
+  await runChainWithInputs(user.id, singleItemChain, req.body.inputs)
   res.json({})
 }
 
