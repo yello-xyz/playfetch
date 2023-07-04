@@ -111,6 +111,7 @@ export type Usage = {
 }
 
 export type Chain = {
+  promptID: number
   versionID: number
   output?: string
 }[]
