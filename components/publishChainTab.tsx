@@ -26,7 +26,13 @@ export default function PublishChainTab({
   const refreshProject = useRefreshProject()
 
   const publish = async (name: string, useCache: boolean) => {
-    await api.publishChain(project.id, name, flavor, useCache)
+    await api.publishChain(
+      chain.map(item => ({ versionID: item.version.id, output: item.output })),
+      project.id,
+      name,
+      flavor,
+      useCache
+    )
     refreshProject()
   }
 

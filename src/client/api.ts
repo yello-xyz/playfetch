@@ -1,4 +1,4 @@
-import { Project, Prompt, ActivePrompt, PromptConfig, PromptInputs, ActiveProject, RunConfig } from '@/types'
+import { Project, ActivePrompt, PromptConfig, PromptInputs, ActiveProject, RunConfig, Chain } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
 async function parseResponse(response: Response) {
@@ -83,8 +83,8 @@ const api = {
   publishPrompt: function (versionID: number, projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishPrompt, { versionID, projectID, name, flavor, useCache })
   },
-  publishChain: function (projectID: number, name: string, flavor: string, useCache: boolean) {
-    return post(this.publishChain, { projectID, name, flavor, useCache })
+  publishChain: function (chain: Chain, projectID: number, name: string, flavor: string, useCache: boolean) {
+    return post(this.publishChain, { chain, projectID, name, flavor, useCache })
   },
   toggleCache: function (endpointID: number, useCache: boolean) {
     return post(this.toggleCache, { endpointID, useCache })
