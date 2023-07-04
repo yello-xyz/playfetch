@@ -20,8 +20,8 @@ async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCa
 }
 
 const loadConfigs = async (endpoint: Endpoint, projectID: number) => {
-  const configFromVersion = (version: Version) => ({
-    promptID: version.promptID,
+  const configFromVersion = (promptID: number) => (version: Version) => ({
+    promptID,
     versionID: version.id,
     prompt: version.prompt,
     config: version.config,
@@ -37,7 +37,7 @@ const loadConfigs = async (endpoint: Endpoint, projectID: number) => {
   if (endpoint.promptID === projectID) {
     const chain = await getChain(endpoint.versionID)
     return chain.map(item => ({
-      getConfig: () => getVersionWithoutRuns(item.versionID).then(configFromVersion),
+      getConfig: () => getVersionWithoutRuns(item.versionID).then(configFromVersion(projectID)),
       mappedOutput: item.output,
     }))
   } else {

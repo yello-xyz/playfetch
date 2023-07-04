@@ -14,7 +14,6 @@ export default function useInputValues(
   const persistInputValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
       if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        console.log('persisting', variable)
         api.updateInputValues(projectID, variable, inputs)
       }
     }
