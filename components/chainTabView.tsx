@@ -16,7 +16,14 @@ export default function ChainTabView({
   activeTab: MainViewTab
   project: ActiveProject & ProperProject
 }) {
-  const [chain, setChain] = useState<ChainItem[]>([])
+  // TODO generalise this and expose all previous chains in the project
+  const previousChain = (project.chains[0] ?? []).map(item => ({
+    prompt: project.prompts.find(prompt => prompt.id === item.promptID),
+    version: undefined,
+    output: undefined,
+  }))
+  const initialChain = previousChain.every(item => !!item.prompt) ? previousChain as ChainItem[] : []
+  const [chain, setChain] = useState(initialChain)
 
   const isActiveChainItem = (item: ChainItem): item is ActiveChainItem => !!item.version
   const activeChain = chain.filter(isActiveChainItem)
