@@ -227,5 +227,13 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
     await deletePromptForUser(userID, toID({ key }))
   }
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
-  await getDatastore().delete([...accessKeys, ...inputKeys, buildKey(Entity.PROJECT, projectID)])
+  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'promptID', projectID)
+  const usageKeys = await getEntityKeys(Entity.USAGE, 'promptID', projectID)
+  await getDatastore().delete([
+    ...accessKeys,
+    ...usageKeys,
+    ...endpointKeys,
+    ...inputKeys,
+    buildKey(Entity.PROJECT, projectID),
+  ])
 }
