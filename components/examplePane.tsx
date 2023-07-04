@@ -2,12 +2,17 @@ import { ReactNode, useEffect, useState } from 'react'
 import { PromptInputs, ResolvedEndpoint } from '@/types'
 import Button from './button'
 import Label from './label'
-import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+import { ToCamelCase } from '@/src/common/formatting'
 
-const buildCurlCommand = (endpoint: ResolvedEndpoint, exampleInputs: PromptInputs, defaultFlavor: string) => {
+const buildCurlCommand = (
+  endpoint: ResolvedEndpoint,
+  variables: string[],
+  exampleInputs: PromptInputs,
+  defaultFlavor: string
+) => {
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
-  const inputs = ExtractPromptVariables(endpoint.prompt).map(variable => [variable, exampleInputs[variable] ?? ''])
+  const inputs = variables.map(variable => [variable, exampleInputs[variable] ?? ''])
 
   return (
     `curl -X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
@@ -21,14 +26,16 @@ const buildCurlCommand = (endpoint: ResolvedEndpoint, exampleInputs: PromptInput
 
 export default function ExamplePane({
   endpoint,
+  variables,
   exampleInputs,
   defaultFlavor,
 }: {
   endpoint: ResolvedEndpoint
+  variables: string[]
   exampleInputs: PromptInputs
   defaultFlavor: string
 }) {
-  const curlCommand = buildCurlCommand(endpoint, exampleInputs, defaultFlavor)
+  const curlCommand = buildCurlCommand(endpoint, variables, exampleInputs, defaultFlavor)
 
   const [canCopyToClipboard, setCanCopyToClipboard] = useState(false)
   useEffect(() => setCanCopyToClipboard(!!navigator.clipboard?.writeText), [])

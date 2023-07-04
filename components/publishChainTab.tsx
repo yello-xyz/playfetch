@@ -6,6 +6,7 @@ import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
 import { ActiveChainItem } from './chainTabView'
+import { ExtractUnboundChainVariables } from './buildChainTab'
 
 export default function PublishChainTab({
   chain,
@@ -50,7 +51,14 @@ export default function PublishChainTab({
         {endpoint && <UsagePane endpoint={endpoint} />}
       </div>
       <div className='flex flex-col items-start gap-4 p-6 pl-0'>
-        {endpoint && <ExamplePane endpoint={endpoint} exampleInputs={{}} defaultFlavor={availableFlavors[0]} />}
+        {endpoint && (
+          <ExamplePane
+            endpoint={endpoint}
+            variables={ExtractUnboundChainVariables(chain)}
+            exampleInputs={{}}
+            defaultFlavor={availableFlavors[0]}
+          />
+        )}
       </div>
     </>
   )

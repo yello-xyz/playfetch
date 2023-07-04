@@ -5,6 +5,7 @@ import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 
 export default function PublishPromptTab({
   prompt,
@@ -69,7 +70,12 @@ export default function PublishPromptTab({
       </div>
       <div className='flex flex-col items-start gap-4 p-6 pl-0'>
         {endpoint && (
-          <ExamplePane endpoint={endpoint} exampleInputs={version.runs[0].inputs} defaultFlavor={availableFlavors[0]} />
+          <ExamplePane
+            endpoint={endpoint}
+            variables={ExtractPromptVariables(endpoint.prompt)}
+            exampleInputs={version.runs[0].inputs}
+            defaultFlavor={availableFlavors[0]}
+          />
         )}
       </div>
     </>
