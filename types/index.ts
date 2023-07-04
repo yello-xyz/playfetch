@@ -109,3 +109,8 @@ export type Usage = {
   attempts: number
   failures: number
 }
+
+export type Chain = {
+  versionID: number
+  output?: string
+}[]
