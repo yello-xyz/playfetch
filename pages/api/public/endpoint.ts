@@ -66,7 +66,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             break
           }
           if (mappedOutput) {
-            inputs[mappedOutput] = output
+            inputs[ToCamelCase(mappedOutput)] = output
           }
         }
         return res.json({ output })
