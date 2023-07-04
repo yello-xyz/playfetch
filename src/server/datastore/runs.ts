@@ -1,22 +1,25 @@
 import { PromptInputs, Run } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getTimestamp, toID } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp, toID } from './datastore'
 import { ensurePromptAccess } from './prompts'
 
 export async function migrateRuns() {
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    await datastore.save(
-      toRunData(
-        runData.promptID,
-        runData.versionID,
-        JSON.parse(runData.inputs),
-        runData.output,
-        runData.createdAt,
-        runData.cost,
-        getID(runData)
+    const versionData = await getKeyedEntity(Entity.VERSION, runData.versionID)
+    if (versionData && versionData.promptID !== runData.promptID) {
+      await datastore.save(
+        toRunData(
+          versionData.promptID,
+          runData.versionID,
+          JSON.parse(runData.inputs),
+          runData.output,
+          runData.createdAt,
+          runData.cost,
+          getID(runData)
+        )
       )
-    )
+    }
   }
 }
 

@@ -13,7 +13,7 @@ const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): P
   const versions = chain.map(item => item.version)
   return versions.length
     ? api.runChain(
-        chain[0].prompt.id,
+        chain.map(item => item.prompt.id),
         versions.map(version => version.id),
         versions.map(version => version.prompt),
         versions.map(version => version.config),
