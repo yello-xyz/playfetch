@@ -1,4 +1,4 @@
-import { ActivePrompt, Prompt, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Prompt, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -8,15 +8,7 @@ import useInputValues from './inputValues'
 export type ActiveChainItem = { prompt: ActivePrompt; version: Version; output?: string }
 export type ChainItem = { prompt: Prompt; version: undefined; output: undefined } | ActiveChainItem
 
-export default function ChainTabView({
-  activeTab,
-  projectID,
-  prompts,
-}: {
-  activeTab: MainViewTab
-  projectID: number
-  prompts: Prompt[]
-}) {
+export default function ChainTabView({ activeTab, project }: { activeTab: MainViewTab; project: ActiveProject }) {
   const [chain, setChain] = useState<ChainItem[]>([])
 
   const isActiveChainItem = (item: ChainItem): item is ActiveChainItem => !!item.version
@@ -24,14 +16,14 @@ export default function ChainTabView({
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     activeChain[0]?.prompt?.inputs ?? [],
-    projectID,
+    project.id,
     activeTab
   )
 
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
-        return <BuildChainTab chain={chain} setChain={setChain} prompts={prompts} />
+        return <BuildChainTab chain={chain} setChain={setChain} prompts={project.prompts} />
       case 'test':
         return activeChain.length ? (
           <TestChainTab

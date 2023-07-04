@@ -211,7 +211,7 @@ export default function Home({
                   />
                 )}
                 {isChainMode && activeProject && (
-                  <ChainTabView activeTab={selectedTab} projectID={activeProject.id} prompts={activeProject.prompts} />
+                  <ChainTabView activeTab={selectedTab} project={activeProject} />
                 )}
               </div>
             </div>
