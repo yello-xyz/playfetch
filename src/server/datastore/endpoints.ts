@@ -129,7 +129,11 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   const projectID = await ensureProjectIDFromURLPath(endpointData.projectURLPath)
   await ensureEndpointAccess(userID, projectID, endpointData.promptID)
-  await getDatastore().delete([buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)])
+  const keysToDelete = [buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
+  if (endpointData.promptID === projectID) {
+    keysToDelete.push(buildKey(Entity.CHAIN, endpointData.versionID))
+  }
+  await getDatastore().delete(keysToDelete)
 }
 
 const toEndpointData = (
