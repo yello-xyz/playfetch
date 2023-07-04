@@ -5,8 +5,15 @@ import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
+import { ActiveChainItem } from './chainTabView'
 
-export default function PublishChainTab({ project }: { project: ActiveProject & ProperProject }) {
+export default function PublishChainTab({
+  chain,
+  project,
+}: {
+  chain: ActiveChainItem[]
+  project: ActiveProject & ProperProject
+}) {
   const availableFlavors = project.availableFlavors
   const endpoints = project.endpoints
   const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
@@ -19,7 +26,7 @@ export default function PublishChainTab({ project }: { project: ActiveProject & 
   const refreshProject = useRefreshProject()
 
   const publish = async (name: string, useCache: boolean) => {
-    // await api.publishChain(project.id, name, flavor, useCache)
+    await api.publishChain(project.id, name, flavor, useCache)
     refreshProject()
   }
 

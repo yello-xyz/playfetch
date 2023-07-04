@@ -41,7 +41,7 @@ export default function ChainTabView({
           />
         ) : null
       case 'publish':
-        return activeChain.length ? <PublishChainTab project={project} /> : null
+        return activeChain.length ? <PublishChainTab chain={activeChain} project={project} /> : null
     }
   }
 

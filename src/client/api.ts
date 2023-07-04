@@ -102,8 +102,11 @@ const api = {
     prompt: string,
     config: PromptConfig,
     useCache: boolean
-  ): Promise<string> {
+  ) {
     return post(this.publishPrompt, { projectID, promptID, versionID, name, flavor, prompt, config, useCache })
+  },
+  publishChain: function (projectID: number, name: string, flavor: string, useCache: boolean) {
+    return post(this.publishChain, { projectID, name, flavor, useCache })
   },
   toggleCache: function (endpointID: number, useCache: boolean) {
     return post(this.toggleCache, { endpointID, useCache })

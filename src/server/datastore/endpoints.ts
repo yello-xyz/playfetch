@@ -10,9 +10,11 @@ import {
   getID,
   getKeyedEntity,
   getTimestamp,
+  toID,
 } from './datastore'
 import { ensurePromptAccess, getVerifiedUserPromptData } from './prompts'
 import { saveOrResetUsage } from './usage'
+import { ensureProjectAccess } from './projects'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -42,13 +44,18 @@ export async function saveEndpoint(
   config: PromptConfig,
   useCache: boolean
 ) {
-  const promptData = await getVerifiedUserPromptData(userID, promptID)
   const projectID = await getEntityID(Entity.PROJECT, 'urlPath', projectURLPath)
   if (!projectID) {
     throw new Error(`Project with URL path ${projectURLPath} does not exist`)
   }
-  if (promptData?.projectID !== projectID) {
-    throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
+  if (promptID === projectID) {
+    // Temporary hack where version is 0 and promptID is actually projectID when publishing chain
+    await ensureProjectAccess(userID, promptID)
+  } else {
+    const promptData = await getVerifiedUserPromptData(userID, promptID)
+    if (promptData?.projectID !== projectID) {
+      throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
+    }  
   }
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
     throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
@@ -71,7 +78,7 @@ export async function saveEndpoint(
     previouslySaved ? getID(previouslySaved) : undefined
   )
   await getDatastore().save(endpointData)
-  await saveOrResetUsage(getID(endpointData), promptID)
+  await saveOrResetUsage(toID(endpointData), promptID)
 }
 
 export async function getEndpointFromPath(
