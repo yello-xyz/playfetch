@@ -57,7 +57,7 @@ export default function PublishTab({
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <PublishSettingsPane
           key={flavor}
-          prompt={prompt}
+          activeItem={prompt}
           flavor={flavor}
           setFlavor={setFlavor}
           onPublish={publish}
