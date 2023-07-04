@@ -16,8 +16,8 @@ import UsagePane from './usagePane'
 const buildCurlCommand = (endpoint: ResolvedEndpoint, lastRun: Run, defaultFlavor: string) => {
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
-  const inputs = Object.entries(
-    lastRun?.inputs ?? ExtractPromptVariables(endpoint.prompt).map(variable => [variable, ''])
+  const inputs = lastRun ? Object.entries(
+    lastRun.inputs) : ExtractPromptVariables(endpoint.prompt).map(variable => [variable, '']
   )
 
   return (
@@ -205,9 +205,9 @@ export default function PublishTab({
         )}
         {endpoint && <UsagePane endpoint={endpoint} />}
       </div>
-      <div className='flex flex-col p-6 pl-0 items-'>
+      <div className='flex flex-col items-start gap-4 p-6 pl-0'>
         {curlCommand && (
-          <div className='flex flex-col items-start gap-4'>
+          <>
             <Label>Endpoint</Label>
             <CodeBlock>
               <MarkedUpCURLCommand>{curlCommand}</MarkedUpCURLCommand>
@@ -217,7 +217,7 @@ export default function PublishTab({
                 <Button onClick={() => copyToClipboard(curlCommand)}>Copy</Button>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
       {showPickNamePrompt && (
