@@ -21,14 +21,11 @@ export default function VersionSelector({
     <DropdownMenu
       value={activeVersion.id}
       onChange={value => setActiveVersion(versions.find(version => version.id === Number(value))!)}>
-      {versions
-        .slice()
-        .reverse()
-        .map((version, index) => (
-          <option key={index} value={version.id}>
-            {`Prompt ${index + 1}${suffix(version)}`}
-          </option>
-        ))}
+      {versions.map((version, index) => (
+        <option key={index} value={version.id}>
+          {`Prompt ${index + 1}${suffix(version)}`}
+        </option>
+      ))}
     </DropdownMenu>
   )
 }

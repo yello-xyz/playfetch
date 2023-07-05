@@ -64,10 +64,9 @@ export default function VersionTimeline({
   }
 
   const versions = prompt.versions
-  const ascendingVersions = versions.slice().reverse()
-  const activeIndex = ascendingVersions.findIndex(version => version.id === activeVersion.id)
-  const previousIndex = ascendingVersions.findIndex(version => version.id === activeVersion.previousID)
-  const versionsToShow = isFocused ? ascendingVersions : ascendingVersions.filter(BuildVersionFilter(filters))
+  const activeIndex = versions.findIndex(version => version.id === activeVersion.id)
+  const previousIndex = versions.findIndex(version => version.id === activeVersion.previousID)
+  const versionsToShow = isFocused ? versions : versions.filter(BuildVersionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
@@ -89,7 +88,7 @@ export default function VersionTimeline({
                   isLast={index === versionsToShow.length - 1}
                   labelColors={labelColors}
                   version={version}
-                  index={ascendingVersions.findIndex(v => v.id === version.id)}
+                  index={versions.findIndex(v => v.id === version.id)}
                   isActiveVersion={version.id === activeVersion.id}
                   compareVersion={versions.find(v => v.id === version.previousID)}
                   prompt={prompt}

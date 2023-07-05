@@ -92,7 +92,7 @@ export async function getActivePrompt(
   return {
     ...toPrompt(promptData, userID),
     projectID: promptData.projectID,
-    versions: versions.map(version => toVersion(version, runs, comments)),
+    versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
     endpoints,
     users,
     inputs,

@@ -62,7 +62,7 @@ export default function Home({
   const [isChainMode, setChainMode] = useState(false)
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
+  const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
   const savePrompt = async () => {
@@ -95,7 +95,7 @@ export default function Home({
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
     const newPrompt = await api.getPrompt(promptID)
     setActiveItem(newPrompt)
-    updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions[0])
+    updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }
 
   const selectPrompt = async (promptID: number) => {
