@@ -29,7 +29,7 @@ export default function LabelPopupMenu({
   containerRect,
 }: {
   version: Version
-  prompt: ActivePrompt,
+  prompt: ActivePrompt
   containerRect?: DOMRect
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
@@ -82,7 +82,10 @@ export default function LabelPopupMenu({
                 </div>
               ) : (
                 labels.map((label, index) => (
-                  <div className='flex items-center gap-1 px-2 py-1' key={index} onClick={() => toggleLabel(label)}>
+                  <div
+                    className='flex items-center gap-1 px-2 py-1 cursor-pointer'
+                    key={index}
+                    onClick={() => toggleLabel(label)}>
                     <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${colors[label]}`} />
                     <div className='flex-1'>{label}</div>
                     {version.labels.includes(label) && <Icon icon={checkIcon} />}

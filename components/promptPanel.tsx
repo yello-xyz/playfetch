@@ -70,9 +70,9 @@ export default function PromptPanel({
             size='medium'
             value={config.provider}
             onChange={value => updateProvider(value as PromptConfig['provider'])}>
-            <option value={'openai'}>{labelForProvider('openai')}</option>
             <option value={'anthropic'}>{labelForProvider('anthropic')}</option>
             <option value={'google'}>{labelForProvider('google')}</option>
+            <option value={'openai'}>{labelForProvider('openai')}</option>
           </DropdownMenu>
           <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [dummyInputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
