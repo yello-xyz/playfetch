@@ -75,7 +75,7 @@ export default function TopBar({
             )}
           </div>
           <div className='flex items-center gap-4'>
-            {activeProject && <UserAvatars users={activeProject.users} />}
+            {<UserAvatars users={activeProject?.users ?? activePrompt?.users ?? []} />}
             {activeProject && (
               <TopBarButton title='New Prompt' icon={addIcon} onClick={() => onAddPrompt(activeProject.id)} />
             )}
