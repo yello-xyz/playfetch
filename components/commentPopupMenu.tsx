@@ -25,35 +25,15 @@ export default function CommentPopupMenu({
   containerRect?: DOMRect
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
-  const [newComment, setNewComment] = useState('')
-  const trimmedComment = newComment.trim()
-  const canAddComment = trimmedComment.length > 0
 
   const [lastSelection, setLastSelection] = useState<string>()
   if (!isMenuExpanded && selection !== lastSelection) {
     setLastSelection(selection)
   }
 
-  const user = useLoggedInUser()
-
   const comments = version.comments
 
-  const refreshPrompt = useRefreshPrompt()
-
   const iconRef = useRef<HTMLDivElement>(null)
-
-  const addComment = () => {
-    if (canAddComment) {
-      setNewComment('')
-      api.addComment(version.id, version.promptID, trimmedComment, lastSelection).then(_ => refreshPrompt())
-    }
-  }
-
-  const onKeyDown = (event: any) => {
-    if (event.key === 'Enter') {
-      addComment()
-    }
-  }
 
   return (
     <>
@@ -63,39 +43,74 @@ export default function CommentPopupMenu({
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-            <div className='flex flex-col gap-2 p-3 w-80'>
-              <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
-              {comments.map((comment, index) => (
-                <CommentCell
-                  comment={comment}
-                  user={users.find(user => user.id === comment.userID)!}
-                  labelColors={labelColors}
-                  key={index}
-                />
-              ))}
-              </div>
-              <div className='flex items-center gap-2'>
-                <UserAvatar user={user} size='md' />
-                <input
-                  type='text'
-                  className='flex-1 text-sm outline-none rounded-lg py-1.5 text-gray-600'
-                  placeholder='Add a comment…'
-                  value={newComment}
-                  onChange={event => setNewComment(event.target.value)}
-                  onKeyDown={onKeyDown}
-                />
-                {
-                  <IconButton
-                    disabled={!canAddComment}
-                    icon={canAddComment ? enterIcon : enterDisabledIcon}
-                    onClick={addComment}
-                  />
-                }
-              </div>
+            <div className={`flex flex-col gap-2 w-80 ${comments.length > 0 ? 'p-3' : 'px-2 py-1'}`}>
+              {comments.length > 0 && (
+                <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
+                  {comments.map((comment, index) => (
+                    <CommentCell
+                      comment={comment}
+                      user={users.find(user => user.id === comment.userID)!}
+                      labelColors={labelColors}
+                      key={index}
+                    />
+                  ))}
+                </div>
+              )}
+              <CommentInput version={version} selection={lastSelection} />
             </div>
           </PopupMenu>
         </div>
       )}
     </>
+  )
+}
+
+export function CommentInput({ version, selection, focus }: { version: Version; selection?: string; focus?: boolean }) {
+  const [newComment, setNewComment] = useState('')
+  const trimmedComment = newComment.trim()
+  const canAddComment = trimmedComment.length > 0
+
+  const user = useLoggedInUser()
+
+  const refreshPrompt = useRefreshPrompt()
+
+  const addComment = () => {
+    if (canAddComment) {
+      setNewComment('')
+      api.addComment(version.id, version.promptID, trimmedComment, selection).then(_ => refreshPrompt())
+    }
+  }
+
+  const onKeyDown = (event: any) => {
+    if (event.key === 'Enter') {
+      addComment()
+    }
+  }
+
+  const inputRef = useRef<HTMLInputElement>(null)
+  if (focus && !inputRef.current) {
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  return (
+    <div className='flex items-center gap-2'>
+      <UserAvatar user={user} size='md' />
+      <input
+        ref={inputRef}
+        type='text'
+        className='flex-1 text-sm outline-none rounded-lg py-1.5 text-gray-600'
+        placeholder='Add a comment…'
+        value={newComment}
+        onChange={event => setNewComment(event.target.value)}
+        onKeyDown={onKeyDown}
+      />
+      {
+        <IconButton
+          disabled={!canAddComment}
+          icon={canAddComment ? enterIcon : enterDisabledIcon}
+          onClick={addComment}
+        />
+      }
+    </div>
   )
 }
