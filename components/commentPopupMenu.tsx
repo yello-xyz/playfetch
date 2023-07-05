@@ -57,6 +57,7 @@ export default function CommentPopupMenu({
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <div className='flex flex-col gap-2 p-3 w-80'>
+              <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
               {comments.map((comment, index) => (
                 <CommentCell
                   comment={comment}
@@ -65,6 +66,7 @@ export default function CommentPopupMenu({
                   key={index}
                 />
               ))}
+              </div>
               <div className='flex items-center gap-2'>
                 <UserAvatar user={user} size='md' />
                 <input
