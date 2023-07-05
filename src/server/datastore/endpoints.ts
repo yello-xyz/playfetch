@@ -14,24 +14,16 @@ import {
 import { getVerifiedUserPromptData } from './prompts'
 import { saveOrResetUsage } from './usage'
 import { ensureProjectAccess } from './projects'
-import { getChain } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    const projectID = await getEntityID(Entity.PROJECT, 'urlPath', endpointData.projectURLPath)
-    let chain: Chain
-    if (endpointData.promptID === projectID) {
-      chain = await getChain(endpointData.versionID)
-    } else {
-      chain = [{ promptID: endpointData.promptID, versionID: endpointData.versionID }]
-    }
     await getDatastore().save(
       toEndpointData(
         endpointData.userID,
         endpointData.promptID,
-        chain,
+        JSON.parse(endpointData.chain),
         endpointData.urlPath,
         endpointData.projectURLPath,
         endpointData.flavor,

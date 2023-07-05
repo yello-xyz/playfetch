@@ -42,7 +42,7 @@ export type Prompt = {
 
 export type ActivePrompt = Prompt & {
   projectID: number
-  endpoints: ResolvedEndpoint[]
+  endpoints: ResolvedPromptEndpoint[]
   versions: Version[]
   users: User[]
   inputs: InputValues
@@ -102,6 +102,10 @@ export type ResolvedEndpoint = Endpoint & {
   url: string
   apiKeyDev: string
   usage: Usage
+}
+
+export type ResolvedPromptEndpoint = ResolvedEndpoint & {
+  versionID: number
 }
 
 export type Usage = {

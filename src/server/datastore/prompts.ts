@@ -57,8 +57,16 @@ export async function loadEndpoints(promptID: number, projectData: any, buildURL
   const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
   const usages = await getEntities(Entity.USAGE, 'promptID', promptID)
 
+  const toPromptEndpoint = (endpointData: any) => {
+    const endpoint = toEndpoint(endpointData)
+    return {
+      ...endpoint,
+      versionID: endpoint.chain[0].versionID,
+    }
+  }
+
   return endpoints.map(endpoint => ({
-    ...toEndpoint(endpoint),
+    ...toPromptEndpoint(endpoint),
     url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
     apiKeyDev: projectData?.apiKeyDev ?? '',
     usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),

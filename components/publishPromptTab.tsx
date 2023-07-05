@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, Version } from '@/types'
+import { ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -19,14 +19,14 @@ export default function PublishPromptTab({
   const availableFlavors = prompt.availableFlavors
   const endpoints = prompt.endpoints
   const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
-  const flavorOfActiveVersion = endpoints.find(endpoint => endpoint.chain[0].versionID === activeVersion.id)?.flavor
+  const flavorOfActiveVersion = endpoints.find(endpoint => endpoint.versionID === activeVersion.id)?.flavor
   const initialFlavor =
     flavorOfActiveVersion ?? availableFlavors.find(flavor => endpointFlavors.includes(flavor)) ?? availableFlavors[0]
 
   const [flavor, setFlavor] = useState(initialFlavor)
 
-  const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
-  const version = prompt.versions.find(version => version.id === endpoint?.chain?.[0]?.versionID) ?? activeVersion
+  const endpoint: ResolvedPromptEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
+  const version = prompt.versions.find(version => version.id === endpoint?.versionID) ?? activeVersion
 
   const selectTab = useSelectTab()
 

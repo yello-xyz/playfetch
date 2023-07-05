@@ -1,4 +1,4 @@
-import { Version, Endpoint } from '@/types'
+import { Version, ResolvedPromptEndpoint } from '@/types'
 import DropdownMenu from './dropdownMenu'
 
 export default function VersionSelector({
@@ -8,12 +8,12 @@ export default function VersionSelector({
   setActiveVersion,
 }: {
   versions: Version[]
-  endpoints: Endpoint[]
+  endpoints: ResolvedPromptEndpoint[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
   const suffix = (version: Version) => {
-    const endpoint = endpoints.find(endpoint => endpoint.chain[0].versionID === version.id)
+    const endpoint = endpoints.find(endpoint => endpoint.versionID === version.id)
     return endpoint ? ` (${endpoint.flavor})` : ''
   }
 
