@@ -1,11 +1,12 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
-import { Run } from '@/types'
+import { Run, Version } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
 import useScrollDetection from './useScrollDetection'
+import { CommentInput } from './commentPopupMenu'
 
-export default function RunTimeline({ runs }: { runs: Run[] }) {
+export default function RunTimeline({ runs, version }: { runs: Run[]; version?: Version }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
   useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [])
@@ -18,8 +19,8 @@ export default function RunTimeline({ runs }: { runs: Run[] }) {
       <div className='font-medium text-gray-600'>Results</div>
       {runs.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
-          {runs.map((run, index) => (
-            <RunCell key={index} run={run} containerRect={containerRect} scrollTop={scrollTop} />
+          {runs.map(run => (
+            <RunCell key={run.id} run={run} version={version} containerRect={containerRect} scrollTop={scrollTop} />
           ))}
         </div>
       ) : (
@@ -49,7 +50,17 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   return undefined
 }
 
-function RunCell({ run, containerRect, scrollTop }: { run: Run; containerRect?: DOMRect; scrollTop: number }) {
+function RunCell({
+  run,
+  version,
+  containerRect,
+  scrollTop,
+}: {
+  run: Run
+  version?: Version
+  containerRect?: DOMRect
+  scrollTop: number
+}) {
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatDate(run.timestamp))
@@ -66,6 +77,8 @@ function RunCell({ run, containerRect, scrollTop }: { run: Run; containerRect?: 
     setStartScrollTop(scrollTop)
   }
 
+  const [selectionForComment, setSelectionForComment] = useState<Selection>()
+
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(identifier, containerRect))
     document.addEventListener('selectionchange', selectionChangeHandler)
@@ -75,19 +88,30 @@ function RunCell({ run, containerRect, scrollTop }: { run: Run; containerRect?: 
   }, [identifier, containerRect])
 
   return (
-    <div className='flex flex-col gap-3 p-4 whitespace-pre-wrap rounded-lg bg-sky-50'>
+    <div
+      className='flex flex-col gap-3 p-4 whitespace-pre-wrap rounded-lg bg-sky-50'
+      onClick={() => setSelectionForComment(undefined)}>
       <div id={identifier}>{run.output}</div>
-      {selection && (
+      {(selection || selectionForComment) && version && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
-          style={{ top: selection.popupPoint.y - scrollTop + startScrollTop, left: selection.popupPoint.x }}>
+          style={{
+            top: (selection || selectionForComment)!.popupPoint.y - scrollTop + startScrollTop,
+            left: (selection || selectionForComment)!.popupPoint.x,
+          }}>
           <div className='p-1 bg-white rounded-lg shadow'>
-            <div
-              className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
-              onMouseDown={() => {}}>
-              <Icon className='max-w-[24px]' icon={commentIcon} />
-              <div>Comment</div>
-            </div>
+            {selectionForComment ? (
+              <div className='px-1 w-80' onClick={event => event.stopPropagation()}>
+                <CommentInput version={version} selection={selectionForComment.text} focus />
+              </div>
+            ) : (
+              <div
+                className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
+                onMouseDown={() => setSelectionForComment(selection)}>
+                <Icon className='max-w-[24px]' icon={commentIcon} />
+                <div>Comment</div>
+              </div>
+            )}
           </div>
         </div>
       )}

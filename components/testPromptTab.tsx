@@ -96,7 +96,7 @@ export default function TestPromptTab({
         />
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={activeVersion.runs} />
+        <RunTimeline runs={activeVersion.runs} version={activeVersion} />
       </div>
     </>
   )

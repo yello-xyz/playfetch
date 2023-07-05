@@ -40,7 +40,7 @@ export default function PlayTab({
         </Suspense>
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={activeVersion.runs} />
+        <RunTimeline runs={activeVersion.runs} version={activeVersion} />
       </div>
       {showComments && <CommentsPane prompt={prompt} onDismiss={() => setShowComments(false)} />}
     </>
