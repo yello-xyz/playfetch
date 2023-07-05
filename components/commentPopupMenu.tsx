@@ -1,10 +1,10 @@
-import { Version } from '@/types'
+import { Comment, Version } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/comment.svg'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import Icon from './icon'
 import { FormatRelativeDate } from '@/src/common/formatting'
@@ -35,9 +35,7 @@ export default function CommentPopupMenu({ version, containerRect }: { version: 
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <div className='p-3 w-80'>
               {comments.map((comment, index) => (
-                <div className='flex items-center gap-1 px-2 py-1' key={index}>
-                  {comment.text}
-                </div>
+                <CommentCell comment={comment} key={index} />
               ))}
               <input
                 type='text'
@@ -58,5 +56,19 @@ export default function CommentPopupMenu({ version, containerRect }: { version: 
         </div>
       )}
     </>
+  )
+}
+
+function CommentCell({ comment }: { comment: Comment }) {
+  const [formattedDate, setFormattedDate] = useState<string>()
+  useEffect(() => {
+    setFormattedDate(FormatRelativeDate(comment.timestamp, 1))
+  }, [comment.timestamp])
+
+  return (
+    <div className='flex items-center gap-1 px-2 py-1 text-xs'>
+      {comment.text}
+      <span className='text-gray-400'>{formattedDate}</span>
+    </div>
   )
 }

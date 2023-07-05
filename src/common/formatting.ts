@@ -3,7 +3,7 @@ const validEmailRegExp =
 
 export const CheckValidEmail = (email: string) => !!email.trim().toLowerCase().match(validEmailRegExp)
 
-export const FormatDate = (timestamp: string) => {
+export const FormatDate = (timestamp: string, alwaysIncludeTime = true) => {
   const toDateString = (date: Date) =>
     date.toLocaleDateString('en', {
       year: '2-digit',
@@ -17,13 +17,19 @@ export const FormatDate = (timestamp: string) => {
     hour12: false,
   })
   const todayString = toDateString(new Date())
-  return dateString === todayString ? timeString : `${dateString} ${timeString}`
+  return dateString === todayString ? timeString : alwaysIncludeTime ? `${dateString} ${timeString}` : dateString
 }
 
-export const FormatRelativeDate = (timestamp: string) => {
+export const FormatRelativeDate = (timestamp: string, thresholdDays = 0) => {
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
+
+  const elapsed = new Date(timestamp).getTime() - new Date().getTime()
+
+  if (thresholdDays > 0 && Math.abs(elapsed) > thresholdDays * day) {
+    return FormatDate(timestamp, false)
+  }
 
   const units: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
     { unit: 'year', ms: 365 * day },
@@ -35,7 +41,6 @@ export const FormatRelativeDate = (timestamp: string) => {
   ]
 
   const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'always', style: 'narrow' })
-  const elapsed = new Date(timestamp).getTime() - new Date().getTime()
 
   for (const { unit, ms } of units) {
     if (Math.abs(elapsed) > ms) {
