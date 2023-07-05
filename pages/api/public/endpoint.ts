@@ -1,12 +1,12 @@
 import { ParseQuery } from '@/components/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { runPromptWithConfig } from '../runPrompt'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs, RunConfig, Version } from '@/types'
 import { getVersionWithoutRuns } from '@/src/server/datastore/versions'
+import { runPromptWithConfig } from '../runChain'
 
 async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCache: boolean, inputs: PromptInputs) {
   const prompt = ExtractPromptVariables(runConfig.prompt).reduce(

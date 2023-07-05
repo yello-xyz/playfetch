@@ -72,7 +72,7 @@ const api = {
     return post(this.deletePrompt, { promptID })
   },
   runPrompt: function (config: RunConfig, inputs: PromptInputs[]) {
-    return post(this.runPrompt, { config, inputs })
+    return post(this.runChain, { configs: [config], inputs })
   },
   runChain: function (configs: RunConfig[], inputs: PromptInputs[]) {
     return post(this.runChain, { configs, inputs })
