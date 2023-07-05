@@ -1,16 +1,15 @@
-import { Comment, User, Version } from '@/types'
+import { User, Version } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import commentIcon from '@/public/comment.svg'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
-import { FormatRelativeDate } from '@/src/common/formatting'
-import { VersionLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from './userContext'
+import { CommentCell } from './commentsPane'
 
 export default function CommentPopupMenu({
   version,
@@ -89,40 +88,5 @@ export default function CommentPopupMenu({
         </div>
       )}
     </>
-  )
-}
-
-function CommentCell({
-  comment,
-  user,
-  labelColors,
-}: {
-  comment: Comment
-  user: User
-  labelColors: Record<string, string>
-}) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    setFormattedDate(FormatRelativeDate(comment.timestamp, 1))
-  }, [comment.timestamp])
-
-  return comment.action ? (
-    <div className='flex flex-wrap items-center gap-1 p-3 text-xs bg-gray-100 rounded-lg'>
-      <UserAvatar user={user} size='sm' />
-      <span className='font-medium'>{user.fullName}</span>
-      {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
-      <VersionLabel label={comment.text} colors={labelColors} />
-      {' • '}
-      <span className='text-gray-400'>{formattedDate}</span>
-    </div>
-  ) : (
-    <div className='flex flex-col gap-2 text-xs'>
-      <div className='flex items-center gap-1'>
-        <UserAvatar user={user} size='sm' />
-        <span className='font-medium'>{user.fullName}</span>
-        <span className='text-gray-400'>{formattedDate}</span>
-      </div>
-      <div className='ml-5 text-gray-600'>{comment.text}</div>
-    </div>
   )
 }

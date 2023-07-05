@@ -5,6 +5,7 @@ import VersionTimeline from '@/components/versionTimeline'
 import dynamic from 'next/dynamic'
 import RunTimeline from './runTimeline'
 import { useRunPrompt } from './testPromptTab'
+import CommentsPane from './commentsPane'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export default function PlayTab({
@@ -41,7 +42,7 @@ export default function PlayTab({
       <div className='flex-1 p-6 pl-0'>
         <RunTimeline runs={activeVersion.runs} />
       </div>
-      {showComments && <div onClick={() => setShowComments(false)}>COMMENTS</div>}
+      {showComments && <CommentsPane prompt={prompt} onDismiss={() => setShowComments(false)} />}
     </>
   )
 }

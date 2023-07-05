@@ -187,7 +187,8 @@ export default function Home({
                   activePrompt={activePrompt}
                   onAddPrompt={addPrompt}
                   onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
-                  onToggleComments={() => setShowComments(!showComments)}>
+                  showComments={showComments}
+                  setShowComments={setShowComments}>
                   {(activePrompt || isChainMode) && (
                     <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                       <Segment value={'play'} title='Play' />

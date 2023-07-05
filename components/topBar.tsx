@@ -17,7 +17,8 @@ export default function TopBar({
   activePrompt,
   onAddPrompt,
   onSelectProject,
-  onToggleComments,
+  showComments,
+  setShowComments,
   children,
 }: {
   projects: Project[]
@@ -25,7 +26,8 @@ export default function TopBar({
   activePrompt?: ActivePrompt
   onAddPrompt: (projectID: number) => void
   onSelectProject: (projectID: number) => void
-  onToggleComments: () => void
+  showComments: boolean
+  setShowComments: (show: boolean) => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
@@ -83,13 +85,13 @@ export default function TopBar({
             {activeProject && (
               <TopBarButton title='New Prompt' icon={addIcon} onClick={() => onAddPrompt(activeProject.id)} />
             )}
-            {promptHasComments && <TopBarButton icon={commentIcon} onClick={onToggleComments} />}
+            {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
           </div>
         </div>
         <div className='flex items-center'>
           <Divider />
           {children}
-          <Divider />
+          {showComments ? <CommentDivider /> : <Divider />}
         </div>
       </div>
     </>
@@ -110,7 +112,19 @@ function UserAvatars({ users }: { users: User[] }) {
   ) : null
 }
 
-const Divider = () => <div className='flex-1 h-px bg-gray-200' />
+const CommentDivider = () => (
+  <div className='flex flex-1 h-full'>
+    <Divider />
+    <Divider width='w-[280px]' />
+  </div>
+)
+
+const Divider = ({ width }: { width?: string }) => (
+  <div className={`h-full ${width ?? 'flex-1'}`}>
+    <div className='h-1/2' />
+    <div className={`border-t border-gray-200 h-1/2 ${width ? 'border-l' : ''}`} />
+  </div>
+)
 
 function TopBarButton({ title, icon, onClick }: { title?: string; icon?: StaticImageData; onClick: () => void }) {
   return (
