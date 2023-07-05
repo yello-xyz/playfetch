@@ -12,9 +12,9 @@ import PickNameDialog from './pickNameDialog'
 import InviteDialog from './inviteDialog'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
+import { useLoggedInUser } from './userContext'
 
 export default function Sidebar({
-  user,
   projects,
   activeProject,
   activePrompt,
@@ -22,7 +22,6 @@ export default function Sidebar({
   onSelectProject,
   onSelectChains,
 }: {
-  user: User
   projects: Project[]
   activeProject?: ActiveProject
   activePrompt?: ActivePrompt
@@ -35,7 +34,7 @@ export default function Sidebar({
 
   const refreshProjects = useRefreshProjects()
   const refreshProject = useRefreshProject()
-
+  
   const addProject = async (name: string) => {
     const projectID = await api.addProject(name)
     await refreshProjects()
@@ -50,6 +49,7 @@ export default function Sidebar({
     }
   }
 
+  const user = useLoggedInUser()
   const userProject = projects.find(project => project.id === user.id)
   const properProjects = projects.filter(project => project.id !== user.id)
   const activeProjectID = activeProject?.id ?? activePrompt?.projectID

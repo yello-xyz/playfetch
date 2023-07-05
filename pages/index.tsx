@@ -17,6 +17,7 @@ import { ModalDialogContext } from '@/components/modalDialogContext'
 import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
 import ChainTabView from '@/components/chainTabView'
+import { UserContext } from '@/components/userContext'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -159,65 +160,66 @@ export default function Home({
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <RefreshContext.Provider
-          value={{
-            refreshProjects,
-            resetProject: () => selectProject(user.id),
-            refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
-            refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
-            savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
-            selectTab: setSelectedTab,
-          }}>
-          <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
-            <Sidebar
-              user={user}
-              projects={projects}
-              activeProject={activeProject}
-              activePrompt={activePrompt}
-              onAddPrompt={() => addPrompt(user.id)}
-              onSelectProject={selectProject}
-              onSelectChains={selectChains}
-            />
-            <div className='flex flex-col flex-1'>
-              <TopBar
+        <UserContext.Provider value={{ loggedInUser: user }}>
+          <RefreshContext.Provider
+            value={{
+              refreshProjects,
+              resetProject: () => selectProject(user.id),
+              refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
+              refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
+              savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
+              selectTab: setSelectedTab,
+            }}>
+            <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
+              <Sidebar
                 projects={projects}
                 activeProject={activeProject}
                 activePrompt={activePrompt}
-                onAddPrompt={addPrompt}
-                onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}>
-                {(activePrompt || isChainMode) && (
-                  <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
-                    <Segment value={'play'} title='Play' />
-                    <Segment value={'test'} title='Test' />
-                    <Segment value={'publish'} title='Publish' />
-                  </SegmentedControl>
-                )}
-              </TopBar>
-              <div className='flex-1 overflow-hidden'>
-                {!isChainMode && activePrompt && promptProject && activeVersion && (
-                  <PromptTabView
-                    activeTab={selectedTab}
-                    prompt={activePrompt}
-                    activeVersion={activeVersion}
-                    setActiveVersion={selectVersion}
-                    setModifiedVersion={setModifiedVersion}
-                  />
-                )}
-                {!isChainMode && activeProject && (
-                  <PromptsGridView
-                    prompts={activeProject.prompts}
-                    projects={projects}
-                    onAddPrompt={() => addPrompt(activeProject.id)}
-                    onSelectPrompt={selectPrompt}
-                  />
-                )}
-                {isChainMode && activeProject && !activeProject.isUserProject && (
-                  <ChainTabView activeTab={selectedTab} project={activeProject} />
-                )}
+                onAddPrompt={() => addPrompt(user.id)}
+                onSelectProject={selectProject}
+                onSelectChains={selectChains}
+              />
+              <div className='flex flex-col flex-1'>
+                <TopBar
+                  projects={projects}
+                  activeProject={activeProject}
+                  activePrompt={activePrompt}
+                  onAddPrompt={addPrompt}
+                  onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}>
+                  {(activePrompt || isChainMode) && (
+                    <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
+                      <Segment value={'play'} title='Play' />
+                      <Segment value={'test'} title='Test' />
+                      <Segment value={'publish'} title='Publish' />
+                    </SegmentedControl>
+                  )}
+                </TopBar>
+                <div className='flex-1 overflow-hidden'>
+                  {!isChainMode && activePrompt && promptProject && activeVersion && (
+                    <PromptTabView
+                      activeTab={selectedTab}
+                      prompt={activePrompt}
+                      activeVersion={activeVersion}
+                      setActiveVersion={selectVersion}
+                      setModifiedVersion={setModifiedVersion}
+                    />
+                  )}
+                  {!isChainMode && activeProject && (
+                    <PromptsGridView
+                      prompts={activeProject.prompts}
+                      projects={projects}
+                      onAddPrompt={() => addPrompt(activeProject.id)}
+                      onSelectPrompt={selectPrompt}
+                    />
+                  )}
+                  {isChainMode && activeProject && !activeProject.isUserProject && (
+                    <ChainTabView activeTab={selectedTab} project={activeProject} />
+                  )}
+                </div>
               </div>
-            </div>
-          </main>
-        </RefreshContext.Provider>
+            </main>
+          </RefreshContext.Provider>
+        </UserContext.Provider>
       </ModalDialogContext.Provider>
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
     </>
