@@ -1,6 +1,7 @@
-import { ActiveProject, ActivePrompt, Project, User } from '@/types'
+import { ActiveProject, ActivePrompt, Comment, Project, User } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
+import commentIcon from '@/public/comment.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
 import PromptPopupMenu from './promptPopupMenu'
@@ -16,6 +17,7 @@ export default function TopBar({
   activePrompt,
   onAddPrompt,
   onSelectProject,
+  onToggleComments,
   children,
 }: {
   projects: Project[]
@@ -23,6 +25,7 @@ export default function TopBar({
   activePrompt?: ActivePrompt
   onAddPrompt: (projectID: number) => void
   onSelectProject: (projectID: number) => void
+  onToggleComments: () => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
@@ -32,6 +35,7 @@ export default function TopBar({
   const onRefresh = activeProject ? refreshProject : refreshPrompt
 
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
+  const promptHasComments = (activePrompt?.versions ?? []).some(version => version.comments.length > 0)
 
   return (
     <>
@@ -79,6 +83,7 @@ export default function TopBar({
             {activeProject && (
               <TopBarButton title='New Prompt' icon={addIcon} onClick={() => onAddPrompt(activeProject.id)} />
             )}
+            {promptHasComments && <TopBarButton icon={commentIcon} onClick={onToggleComments} />}
           </div>
         </div>
         <div className='flex items-center'>
@@ -107,13 +112,13 @@ function UserAvatars({ users }: { users: User[] }) {
 
 const Divider = () => <div className='flex-1 h-px bg-gray-200' />
 
-function TopBarButton({ title, icon, onClick }: { title: string; icon?: StaticImageData; onClick: () => void }) {
+function TopBarButton({ title, icon, onClick }: { title?: string; icon?: StaticImageData; onClick: () => void }) {
   return (
     <div
-      className='flex items-center gap-1 py-1 pl-2 pr-4 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
+      className='flex items-center gap-1 px-2 py-1 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
       {icon && <Icon icon={icon} />}
-      <div>{title}</div>
+      {title && <div className='pr-2'>{title}</div>}
     </div>
   )
 }

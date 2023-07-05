@@ -13,12 +13,16 @@ export default function PromptTabView({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
+  showComments,
+  setShowComments,
 }: {
   activeTab: MainViewTab
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
+  showComments: boolean
+  setShowComments: (show: boolean) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     prompt.inputs,
@@ -35,6 +39,8 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
+            showComments={showComments}
+            setShowComments={setShowComments}
           />
         )
       case 'test':

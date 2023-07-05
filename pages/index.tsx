@@ -3,7 +3,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { Project, ActivePrompt, Version, User, ActiveProject } from '@/types'
+import { Project, ActivePrompt, Version, User, ActiveProject, Comment } from '@/types'
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import PromptsGridView from '@/components/promptsGridView'
@@ -60,6 +60,7 @@ export default function Home({
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
   const [isChainMode, setChainMode] = useState(false)
+  const [showComments, setShowComments] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
@@ -185,7 +186,8 @@ export default function Home({
                   activeProject={activeProject}
                   activePrompt={activePrompt}
                   onAddPrompt={addPrompt}
-                  onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}>
+                  onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
+                  onToggleComments={() => setShowComments(!showComments)}>
                   {(activePrompt || isChainMode) && (
                     <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                       <Segment value={'play'} title='Play' />
@@ -202,6 +204,8 @@ export default function Home({
                       activeVersion={activeVersion}
                       setActiveVersion={selectVersion}
                       setModifiedVersion={setModifiedVersion}
+                      showComments={showComments}
+                      setShowComments={setShowComments}
                     />
                   )}
                   {!isChainMode && activeProject && (

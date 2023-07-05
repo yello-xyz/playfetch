@@ -12,11 +12,15 @@ export default function PlayTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
+  showComments,
+  setShowComments,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
+  showComments: boolean
+  setShowComments: (show: boolean) => void
 }) {
   const runPrompt = useRunPrompt(prompt.id)
 
@@ -37,6 +41,7 @@ export default function PlayTab({
       <div className='flex-1 p-6 pl-0'>
         <RunTimeline runs={activeVersion.runs} />
       </div>
+      {showComments && <div onClick={() => setShowComments(false)}>COMMENTS</div>}
     </>
   )
 }
