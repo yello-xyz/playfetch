@@ -1,11 +1,11 @@
 import { ActivePrompt, Version } from '@/types'
 import api from '../src/client/api'
-import PopupMenu from './popupMenu'
+import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
-import { RefObject, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRefreshProjects, useRefreshPrompt } from './refreshContext'
 import Icon from './icon'
 
@@ -22,14 +22,6 @@ export const AvailableLabelColorsForPrompt = (prompt: ActivePrompt) =>
   Object.fromEntries(
     prompt.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
-
-export const CalculatePopupOffset = (ref: RefObject<HTMLDivElement>, containerRect?: DOMRect) => {
-  const iconRect = ref.current?.getBoundingClientRect()
-  return {
-    right: (containerRect?.right ?? 0) - (iconRect?.right ?? 0),
-    top: (iconRect?.top ?? 0) - (containerRect?.top ?? 0) + 28,
-  }
-}
 
 export default function LabelPopupMenu({
   version,

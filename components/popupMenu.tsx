@@ -16,6 +16,14 @@ function useOutsideDetector(ref: RefObject<HTMLDivElement>, callback: () => void
   }, [ref, callback])
 }
 
+export const CalculatePopupOffset = (ref: RefObject<HTMLDivElement>, containerRect?: DOMRect) => {
+  const iconRect = ref.current?.getBoundingClientRect()
+  return {
+    right: (containerRect?.right ?? 0) - (iconRect?.right ?? 0),
+    top: (iconRect?.top ?? 0) - (containerRect?.top ?? 0) + 28,
+  }
+}
+
 export default function PopupMenu({
   expanded,
   collapse,

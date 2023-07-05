@@ -4,6 +4,7 @@ import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
+import CommentPopupMenu from './commentPopupMenu'
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -63,6 +64,7 @@ export default function VersionCell({
             )}
           </div>
           <div className='flex items-center gap-1'>
+            <CommentPopupMenu version={version} containerRect={containerRect} />
             {prompt.availableLabels.length > 0 && (
               <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
             )}

@@ -1,12 +1,11 @@
 import { Version } from '@/types'
 import api from '../src/client/api'
-import PopupMenu, { PopupMenuItem } from './popupMenu'
+import PopupMenu, { CalculatePopupOffset, PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
-import { CalculatePopupOffset } from './labelPopupMenu'
 
 export default function VersionPopupMenu({ version, containerRect }: { version: Version; containerRect?: DOMRect }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
