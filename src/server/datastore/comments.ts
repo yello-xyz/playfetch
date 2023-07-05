@@ -13,9 +13,9 @@ export async function migrateComments() {
         commentData.versionID,
         commentData.text,
         commentData.createdAt,
+        commentData.action,
         commentData.quote,
         commentData.runID,
-        commentData.action,
         getID(commentData)
       )
     )
@@ -27,28 +27,28 @@ export async function saveComment(
   promptID: number,
   versionID: number,
   text: string,
+  action?: CommentAction,
   quote?: string,
   runID?: number,
-  action?: CommentAction
 ) {
   await ensurePromptAccess(userID, promptID)
-  await getDatastore().save(toCommentData(userID, promptID, versionID, text, new Date(), quote, runID, action))
+  await getDatastore().save(toCommentData(userID, promptID, versionID, text, new Date(), action, quote, runID))
 }
 
-const toCommentData = (
+export const toCommentData = (
   userID: number,
   promptID: number,
   versionID: number,
   text: string,
   createdAt: Date,
+  action?: CommentAction,
   quote?: string,
   runID?: number,
-  action?: CommentAction,
   commentID?: number
 ) => ({
-  key: buildKey(Entity.RUN, commentID),
-  data: { userID, promptID, versionID, text, createdAt, quote, runID, action },
-  excludeFromIndexes: ['text', 'quote', 'runID', 'action'],
+  key: buildKey(Entity.COMMENT, commentID),
+  data: { userID, promptID, versionID, text, createdAt, action, quote, runID },
+  excludeFromIndexes: ['text', 'action', 'quote', 'runID'],
 })
 
 export const toComment = (data: any): Comment => ({
@@ -57,7 +57,7 @@ export const toComment = (data: any): Comment => ({
   versionID: data.versionID,
   text: data.text,
   timestamp: getTimestamp(data),
+  action: data.action ?? null,
   quote: data.quote ?? null,
   runID: data.runID ?? null,
-  action: data.action ?? null,
 })

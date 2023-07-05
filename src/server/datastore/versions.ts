@@ -14,12 +14,19 @@ import { toRun } from './runs'
 import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabels } from './projects'
+import { toCommentData } from './comments'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    await updateVersion({ ...versionData })
+    let timestamp = versionData.createdAt
+    for (const label of JSON.parse(versionData.labels)) {
+      timestamp = new Date(timestamp.getTime() + 1000 * 60 * 60)
+      await getDatastore().save(
+        toCommentData(versionData.userID, versionData.promptID, getID(versionData), label, timestamp, 'addLabel')
+      )
+    }
   }
 }
 

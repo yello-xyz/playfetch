@@ -45,6 +45,7 @@ export type ActivePrompt = Prompt & {
   versions: Version[]
   users: User[]
   inputs: InputValues
+  comments: Comment[]
   projectURLPath: string
   availableLabels: string[]
   availableFlavors: string[]
@@ -130,7 +131,7 @@ export type Comment = {
   versionID: number
   text: string
   timestamp: string
+  action?: CommentAction
   quote?: string
   runID?: number
-  action?: CommentAction
 }

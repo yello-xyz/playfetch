@@ -9,9 +9,9 @@ import { migrateVersions } from './versions'
 export async function runDataMigration() {
   // await migrateProjects()
   // await migratePrompts()
-  // await migrateVersions()
+  await migrateVersions()
   // await migrateRuns()
-  await migrateEndpoints()
+  // await migrateEndpoints()
   // await migrateAccess()
   // await migrateUsers()
 }
