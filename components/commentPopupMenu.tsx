@@ -2,11 +2,9 @@ import { Comment, User, Version } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
-import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/comment.svg'
 import { useEffect, useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
-import Icon from './icon'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { VersionLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
@@ -38,7 +36,7 @@ export default function CommentPopupMenu({
   const onKeyDown = (event: any) => {
     if (trimmedComment.length > 0 && event.key === 'Enter') {
       setNewComment('')
-      // api.addComment(version.promptID, version.id, text).then(_ => refreshPrompt())
+      api.addComment(version.id, version.promptID, trimmedComment).then(_ => refreshPrompt())
     }
   }
 
@@ -93,7 +91,7 @@ function CommentCell({
   }, [comment.timestamp])
 
   return comment.action ? (
-    <div className='flex flex-wrap items-center gap-1 p-3 bg-gray-100 rounded-lg'>
+    <div className='flex flex-wrap items-center gap-1 p-3 text-xs bg-gray-100 rounded-lg'>
       <UserAvatar user={user} size='sm' />
       <span className='font-medium'>{user.fullName}</span>
       {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
@@ -102,9 +100,13 @@ function CommentCell({
       <span className='text-gray-400'>{formattedDate}</span>
     </div>
   ) : (
-    <div className='flex items-center gap-1 px-2 py-1 text-xs'>
-      {comment.text}
-      <span className='text-gray-400'>{formattedDate}</span>
+    <div className='flex flex-col gap-2 text-xs'>
+      <div className='flex items-center gap-1'>
+        <UserAvatar user={user} size='sm' />
+        <span className='font-medium'>{user.fullName}</span>
+        <span className='text-gray-400'>{formattedDate}</span>
+      </div>
+      <div className='ml-5 text-gray-600'>{comment.text}</div>
     </div>
   )
 }
