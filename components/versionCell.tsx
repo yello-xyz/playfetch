@@ -19,7 +19,7 @@ export const ProviderLabel = (version: Version) => {
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
-  return selection && selection?.anchorNode?.parentElement?.closest(`div#${identifier}`)
+  return selection && selection?.anchorNode?.parentElement?.closest(`#${identifier}`)
     ? selection.toString().trim()
     : undefined
 }

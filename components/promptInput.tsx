@@ -41,7 +41,7 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerR
       const containerRect = containerRef.current.getBoundingClientRect()
       const popupPoint = {
         x: selectionRect.left - containerRect.left + selectionRect.width / 2,
-        y: selectionRect.top - containerRect.top - 42,
+        y: selectionRect.top - containerRect.top - 34,
       }
       return { text, range, popupPoint, isInput }
     }
@@ -98,7 +98,7 @@ export default function PromptInput({
       />
       {selection && (
         <div
-          className='absolute flex items-center justify-center p-2 overflow-visible text-center max-w-0'
+          className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
           style={{ top: selection.popupPoint.y, left: selection.popupPoint.x }}>
           <div className='p-1 bg-white rounded-lg shadow whitespace-nowrap'>
             <div
