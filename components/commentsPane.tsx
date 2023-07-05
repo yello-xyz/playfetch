@@ -12,11 +12,11 @@ export default function CommentsPane({ prompt, onDismiss }: { prompt: ActiveProm
   const labelColors = AvailableLabelColorsForPrompt(prompt)
   const comments = prompt.versions
     .flatMap(version => version.comments)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   return (
     <div className='flex flex-col px-3 pb-3 border-l border-gray-200 w-[280px]'>
-      <div className='flex items-center justify-between pb-3'>
+      <div className='flex items-start justify-between pb-5'>
         <span className='font-medium text-gray-800'>Comments</span>
         <IconButton icon={collapseIcon} onClick={onDismiss} />
       </div>

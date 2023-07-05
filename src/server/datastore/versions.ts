@@ -165,7 +165,7 @@ export const toVersion = (data: any, runs: any[], comments: any[]): Version => (
   config: JSON.parse(data.config),
   labels: JSON.parse(data.labels),
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
-  comments: comments.filter(comment => comment.versionID === getID(data)).map(toComment),
+  comments: comments.filter(comment => comment.versionID === getID(data)).map(toComment).reverse(),
 })
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
