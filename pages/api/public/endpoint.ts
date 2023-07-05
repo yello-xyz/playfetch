@@ -19,29 +19,17 @@ async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCa
   return output
 }
 
-const loadConfigs = async (endpoint: Endpoint, projectID: number) => {
-  const configFromVersion = (endpoint: Endpoint) => (version: Version) => ({
-    promptID: endpoint.promptID,
-    versionID: version.id,
-    prompt: version.prompt,
-    config: version.config,
-  })
-
-  if (endpoint.promptID === projectID) {
-    const chain = await getChain(endpoint.versionID)
-    return chain.map(item => ({
-      getConfig: () => getVersionWithoutRuns(item.versionID).then(configFromVersion(endpoint)),
-      mappedOutput: item.output,
-    }))
-  } else {
-    return [
-      {
-        getConfig: () => getVersionWithoutRuns(endpoint.versionID).then(configFromVersion(endpoint)),
-        mappedOutput: undefined,
-      },
-    ]
-  }
-}
+const loadConfigs = async (endpoint: Endpoint) =>
+  endpoint.chain.map(item => ({
+    getConfig: () =>
+      getVersionWithoutRuns(item.versionID).then(version => ({
+        promptID: endpoint.promptID,
+        versionID: version.id,
+        prompt: version.prompt,
+        config: version.config,
+      })),
+    mappedOutput: item.output,
+  }))
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -50,13 +38,12 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
 
-    const projectID = apiKey ? await checkProject(projectURLPath, apiKey) : undefined
-    if (projectID) {
+    if (apiKey && (await checkProject(projectURLPath, apiKey))) {
       const endpoint = await getEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         let output: string | undefined = undefined
-        for (const { getConfig, mappedOutput } of await loadConfigs(endpoint, projectID)) {
+        for (const { getConfig, mappedOutput } of await loadConfigs(endpoint)) {
           const runConfig = await getConfig()
           // TODO endpoint usage will seem off if we log multiple runs against the same endpoint
           output = await runSingleEndpoint(endpoint.id, runConfig, endpoint.useCache, inputs)

@@ -20,7 +20,7 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: Us
   await saveEndpoint(
     userID,
     version.promptID,
-    version.id,
+    [{ promptID: version.promptID, versionID }],
     urlPath,
     projectURLPath,
     flavor,

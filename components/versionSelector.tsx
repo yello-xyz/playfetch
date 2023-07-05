@@ -13,7 +13,7 @@ export default function VersionSelector({
   setActiveVersion: (version: Version) => void
 }) {
   const suffix = (version: Version) => {
-    const endpoint = endpoints.find(endpoint => endpoint.versionID === version.id)
+    const endpoint = endpoints.find(endpoint => endpoint.chain[0].versionID === version.id)
     return endpoint ? ` (${endpoint.flavor})` : ''
   }
 

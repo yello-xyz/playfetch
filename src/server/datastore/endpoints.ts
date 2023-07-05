@@ -1,4 +1,4 @@
-import { Endpoint } from '@/types'
+import { Chain, Endpoint } from '@/types'
 import { and } from '@google-cloud/datastore'
 import {
   Entity,
@@ -14,16 +14,24 @@ import {
 import { getVerifiedUserPromptData } from './prompts'
 import { saveOrResetUsage } from './usage'
 import { ensureProjectAccess } from './projects'
+import { getChain } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
+    const projectID = await getEntityID(Entity.PROJECT, 'urlPath', endpointData.projectURLPath)
+    let chain: Chain
+    if (endpointData.promptID === projectID) {
+      chain = await getChain(endpointData.versionID)
+    } else {
+      chain = [{ promptID: endpointData.promptID, versionID: endpointData.versionID }]
+    }
     await getDatastore().save(
       toEndpointData(
         endpointData.userID,
         endpointData.promptID,
-        endpointData.versionID,
+        chain,
         endpointData.urlPath,
         endpointData.projectURLPath,
         endpointData.flavor,
@@ -63,7 +71,7 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
 export async function saveEndpoint(
   userID: number,
   promptID: number,
-  versionID: number,
+  chain: Chain,
   urlPath: string,
   projectURLPath: string,
   flavor: string,
@@ -80,7 +88,7 @@ export async function saveEndpoint(
   const endpointData = toEndpointData(
     userID,
     promptID,
-    versionID,
+    chain,
     urlPath,
     projectURLPath,
     flavor,
@@ -115,7 +123,7 @@ export async function toggleEndpointCache(userID: number, endpointID: number, us
     toEndpointData(
       endpointData.userID,
       endpointData.promptID,
-      endpointData.versionID,
+      JSON.parse(endpointData.chain),
       endpointData.urlPath,
       endpointData.projectURLPath,
       endpointData.flavor,
@@ -139,7 +147,7 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
 const toEndpointData = (
   userID: number,
   promptID: number,
-  versionID: number,
+  chain: Chain,
   urlPath: string,
   projectURLPath: string,
   flavor: string,
@@ -151,20 +159,20 @@ const toEndpointData = (
   data: {
     userID,
     promptID,
-    versionID,
+    chain: JSON.stringify(chain),
     urlPath,
     projectURLPath,
     flavor,
     createdAt,
     useCache,
   },
-  excludeFromIndexes: [],
+  excludeFromIndexes: ['chain'],
 })
 
 export const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
   promptID: data.promptID,
-  versionID: data.versionID,
+  chain: JSON.parse(data.versionID),
   timestamp: getTimestamp(data),
   urlPath: data.urlPath,
   projectURLPath: data.projectURLPath,
