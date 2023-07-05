@@ -32,6 +32,7 @@ export default function CommentPopupMenu({
   }
 
   const comments = version.comments
+  const haveComments = comments.length > 0
 
   const iconRef = useRef<HTMLDivElement>(null)
 
@@ -43,8 +44,8 @@ export default function CommentPopupMenu({
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-            <div className={`flex flex-col gap-2 w-80 ${comments.length > 0 ? 'p-3' : 'px-2 py-1'}`}>
-              {comments.length > 0 && (
+            <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
+              {haveComments && (
                 <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
                   {comments.map((comment, index) => (
                     <CommentCell
@@ -56,7 +57,7 @@ export default function CommentPopupMenu({
                   ))}
                 </div>
               )}
-              <CommentInput version={version} selection={lastSelection} />
+              <CommentInput version={version} selection={lastSelection} focus={!haveComments} />
             </div>
           </PopupMenu>
         </div>
@@ -65,7 +66,7 @@ export default function CommentPopupMenu({
   )
 }
 
-export function CommentInput({ version, selection, focus }: { version: Version; selection?: string; focus?: boolean }) {
+export function CommentInput({ version, selection, focus }: { version: Version; selection?: string; focus?: boolean }) {   
   const [newComment, setNewComment] = useState('')
   const trimmedComment = newComment.trim()
   const canAddComment = trimmedComment.length > 0
