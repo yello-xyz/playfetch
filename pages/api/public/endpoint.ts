@@ -20,28 +20,26 @@ async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCa
 }
 
 const loadConfigs = async (endpoint: Endpoint, projectID: number) => {
-  const configFromVersion = (promptID: number) => (version: Version) => ({
-    promptID,
+  const configFromVersion = (endpoint: Endpoint) => (version: Version) => ({
+    promptID: endpoint.promptID,
     versionID: version.id,
     prompt: version.prompt,
     config: version.config,
   })
-  
-  const configFromEndpoint = (endpoint: Endpoint) => ({
-    promptID: endpoint.promptID,
-    versionID: endpoint.versionID,
-    prompt: endpoint.prompt,
-    config: endpoint.config,
-  })
-  
+
   if (endpoint.promptID === projectID) {
     const chain = await getChain(endpoint.versionID)
     return chain.map(item => ({
-      getConfig: () => getVersionWithoutRuns(item.versionID).then(configFromVersion(projectID)),
+      getConfig: () => getVersionWithoutRuns(item.versionID).then(configFromVersion(endpoint)),
       mappedOutput: item.output,
     }))
   } else {
-    return [{ getConfig: () => Promise.resolve(configFromEndpoint(endpoint)), mappedOutput: undefined }]
+    return [
+      {
+        getConfig: () => getVersionWithoutRuns(endpoint.versionID).then(configFromVersion(endpoint)),
+        mappedOutput: undefined,
+      },
+    ]
   }
 }
 
@@ -56,7 +54,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     if (projectID) {
       const endpoint = await getEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint) {
-        const inputs = typeof req.body === 'string' ? {} : req.body as PromptInputs
+        const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         let output: string | undefined = undefined
         for (const { getConfig, mappedOutput } of await loadConfigs(endpoint, projectID)) {
           const runConfig = await getConfig()

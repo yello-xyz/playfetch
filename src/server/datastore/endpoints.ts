@@ -1,4 +1,4 @@
-import { Endpoint, PromptConfig } from '@/types'
+import { Endpoint } from '@/types'
 import { and } from '@google-cloud/datastore'
 import {
   Entity,
@@ -12,7 +12,7 @@ import {
   getTimestamp,
   toID,
 } from './datastore'
-import { ensurePromptAccess, getVerifiedUserPromptData } from './prompts'
+import { getVerifiedUserPromptData } from './prompts'
 import { saveOrResetUsage } from './usage'
 import { ensureProjectAccess } from './projects'
 
@@ -20,7 +20,19 @@ export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    await saveOrResetUsage(getID(endpointData), endpointData.promptID)
+    await getDatastore().save(
+      toEndpointData(
+        endpointData.userID,
+        endpointData.promptID,
+        endpointData.versionID,
+        endpointData.urlPath,
+        endpointData.projectURLPath,
+        endpointData.flavor,
+        endpointData.createdAt,
+        endpointData.useCache,
+        getID(endpointData)
+      )
+    )
   }
 }
 
@@ -56,8 +68,6 @@ export async function saveEndpoint(
   urlPath: string,
   projectURLPath: string,
   flavor: string,
-  prompt: string,
-  config: PromptConfig,
   useCache: boolean
 ) {
   const projectID = await ensureEndpointAccess(userID, promptID, projectURLPath)
@@ -76,8 +86,6 @@ export async function saveEndpoint(
     projectURLPath,
     flavor,
     new Date(),
-    prompt,
-    config,
     useCache,
     previouslySaved ? getID(previouslySaved) : undefined
   )
@@ -113,8 +121,6 @@ export async function toggleEndpointCache(userID: number, endpointID: number, us
       endpointData.projectURLPath,
       endpointData.flavor,
       endpointData.createdAt,
-      endpointData.prompt,
-      JSON.parse(endpointData.config),
       useCache,
       getID(endpointData)
     )
@@ -139,8 +145,6 @@ const toEndpointData = (
   projectURLPath: string,
   flavor: string,
   createdAt: Date,
-  prompt: string,
-  config: PromptConfig,
   useCache: boolean,
   endpointID?: number
 ) => ({
@@ -153,11 +157,9 @@ const toEndpointData = (
     projectURLPath,
     flavor,
     createdAt,
-    prompt,
-    config: JSON.stringify(config),
     useCache,
   },
-  excludeFromIndexes: ['prompt', 'config'],
+  excludeFromIndexes: [],
 })
 
 export const toEndpoint = (data: any): Endpoint => ({
@@ -168,7 +170,5 @@ export const toEndpoint = (data: any): Endpoint => ({
   urlPath: data.urlPath,
   projectURLPath: data.projectURLPath,
   flavor: data.flavor,
-  prompt: data.prompt,
-  config: JSON.parse(data.config),
   useCache: data.useCache,
 })

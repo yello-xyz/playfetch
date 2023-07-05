@@ -24,8 +24,6 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: Us
     urlPath,
     projectURLPath,
     flavor,
-    version.prompt,
-    version.config,
     useCache
   )
   res.json({})
