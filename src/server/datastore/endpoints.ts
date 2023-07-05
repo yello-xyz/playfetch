@@ -57,7 +57,6 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
       throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
     }  
   }
-  return projectID
 }
 
 export async function saveEndpoint(
@@ -69,9 +68,9 @@ export async function saveEndpoint(
   flavor: string,
   useCache: boolean
 ) {
-  const projectID = await ensureEndpointAccess(userID, promptID, projectURLPath)
+  await ensureEndpointAccess(userID, promptID, projectURLPath)
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
-    throw new Error(`Endpoint ${urlPath} already used for different prompt in project with ID ${projectID}`)
+    throw new Error(`Endpoint ${urlPath} already used for different prompt in project ${projectURLPath}`)
   }
   const previouslySaved = await getFilteredEntity(
     Entity.ENDPOINT,
@@ -128,11 +127,8 @@ export async function toggleEndpointCache(userID: number, endpointID: number, us
 
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
-  const projectID = await ensureEndpointAccess(userID, endpointData.promptID, endpointData.projectURLPath)
+  await ensureEndpointAccess(userID, endpointData.promptID, endpointData.projectURLPath)
   const keysToDelete = [buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
-  if (endpointData.promptID === projectID) {
-    keysToDelete.push(buildKey(Entity.CHAIN, endpointData.versionID))
-  }
   await getDatastore().delete(keysToDelete)
 }
 
@@ -164,7 +160,7 @@ const toEndpointData = (
 export const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
   promptID: data.promptID,
-  chain: JSON.parse(data.versionID),
+  chain: JSON.parse(data.chain),
   timestamp: getTimestamp(data),
   urlPath: data.urlPath,
   projectURLPath: data.projectURLPath,

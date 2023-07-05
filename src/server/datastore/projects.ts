@@ -3,7 +3,6 @@ import {
   Entity,
   buildKey,
   getDatastore,
-  getEntities,
   getEntity,
   getEntityKeys,
   getID,
@@ -18,7 +17,6 @@ import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAc
 import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 import { getProjectInputValues } from './inputs'
-import { toChain } from './chains'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -71,11 +69,6 @@ export async function getProjectUsers(userID: number, projectID: number): Promis
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
 
-export async function loadChains(projectID: number) {
-  const chains = await getEntities(Entity.CHAIN, 'projectID', projectID)
-  return chains.map(toChain)
-}
-
 export async function getActiveProject(
   userID: number,
   projectID: number,
@@ -94,7 +87,6 @@ export async function getActiveProject(
           projectURLPath: projectData.urlPath,
           availableFlavors: JSON.parse(projectData.flavors),
           endpoints: await loadEndpoints(projectID, projectData, buildURL),
-          chains: await loadChains(projectID),
         }
       : toUserProject(userID)),
     prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],

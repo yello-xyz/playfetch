@@ -6,7 +6,6 @@ import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs, RunConfig, Version } from '@/types'
-import { getChain } from '@/src/server/datastore/chains'
 import { getVersionWithoutRuns } from '@/src/server/datastore/versions'
 
 async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCache: boolean, inputs: PromptInputs) {

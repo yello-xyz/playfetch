@@ -20,7 +20,6 @@ export type InputValues = { [name: string]: string[] }
 export type ActiveProject = (
   | UserProject
   | (ProperProject & {
-      chains: Chain[]
       endpoints: ResolvedEndpoint[]
       inputs: InputValues
       projectURLPath: string

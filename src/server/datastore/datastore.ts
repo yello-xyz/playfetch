@@ -23,7 +23,6 @@ export enum Entity {
   ACCESS = 'access',
   INPUT = 'input',
   USAGE = 'usage',
-  CHAIN = 'chain',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key

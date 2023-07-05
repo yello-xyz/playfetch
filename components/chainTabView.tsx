@@ -19,7 +19,7 @@ export default function ChainTabView({
   project: ActiveProject & ProperProject
 }) {
   // TODO generalise this and expose all previous chains in the project
-  const previousChain = (project.chains[0] ?? []).map(item => ({
+  const previousChain = (project.endpoints[0]?.chain ?? []).map(item => ({
     prompt: project.prompts.find(prompt => prompt.id === item.promptID),
     version: { id: item.versionID },
     output: item.output,
