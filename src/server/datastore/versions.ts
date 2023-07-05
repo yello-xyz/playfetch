@@ -14,19 +14,13 @@ import { toRun } from './runs'
 import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabels } from './projects'
-import { toCommentData } from './comments'
+import { toComment } from './comments'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    let timestamp = versionData.createdAt
-    for (const label of JSON.parse(versionData.labels)) {
-      timestamp = new Date(timestamp.getTime() + 1000 * 60 * 60)
-      await getDatastore().save(
-        toCommentData(versionData.userID, versionData.promptID, getID(versionData), label, timestamp, 'addLabel')
-      )
-    }
+    await updateVersion({ ...versionData })
   }
 }
 
@@ -55,9 +49,9 @@ const getVerifiedUserVersionData = async (userID: number, versionID: number) => 
   return versionData
 }
 
-export async function getVersionWithoutRuns(versionID: number) {
+export async function getVersion(versionID: number) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
-  return toVersion(versionData, [])
+  return toVersion(versionData, [], [])
 }
 
 export async function saveVersionForUser(
@@ -147,7 +141,7 @@ const toVersionData = (
   excludeFromIndexes: ['prompt', 'config', 'labels'],
 })
 
-export const toVersion = (data: any, runs: any[]): Version => ({
+export const toVersion = (data: any, runs: any[], comments: any[]): Version => ({
   id: getID(data),
   promptID: data.promptID,
   userID: data.userID,
@@ -157,6 +151,7 @@ export const toVersion = (data: any, runs: any[]): Version => ({
   config: JSON.parse(data.config),
   labels: JSON.parse(data.labels),
   runs: runs.filter(run => run.versionID === getID(data)).map(toRun),
+  comments: comments.filter(comment => comment.versionID === getID(data)).map(toComment),
 })
 
 export async function deleteVersionForUser(userID: number, versionID: number) {

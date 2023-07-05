@@ -34,3 +34,9 @@ indexes:
   - name: name
   - name: projectURLPath
   - name: flavor
+
+- kind: comment
+  properties:
+  - name: promptID
+  - name: createdAt
+    direction: desc

@@ -5,7 +5,7 @@ import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs, RunConfig } from '@/types'
-import { getVersionWithoutRuns } from '@/src/server/datastore/versions'
+import { getVersion } from '@/src/server/datastore/versions'
 import { runPromptWithConfig } from '../runChain'
 
 async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCache: boolean, inputs: PromptInputs) {
@@ -21,7 +21,7 @@ async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCa
 const loadConfigs = async (endpoint: Endpoint) =>
   endpoint.chain.map(item => ({
     getConfig: () =>
-      getVersionWithoutRuns(item.versionID).then(version => ({
+      getVersion(item.versionID).then(version => ({
         promptID: endpoint.promptID,
         versionID: version.id,
         prompt: version.prompt,

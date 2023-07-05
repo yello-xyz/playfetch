@@ -35,7 +35,7 @@ export async function saveComment(
   await getDatastore().save(toCommentData(userID, promptID, versionID, text, new Date(), action, quote, runID))
 }
 
-export const toCommentData = (
+const toCommentData = (
   userID: number,
   promptID: number,
   versionID: number,
