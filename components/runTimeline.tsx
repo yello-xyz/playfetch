@@ -3,19 +3,23 @@ import { Run } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
+import useScrollDetection from './useScrollDetection'
 
 export default function RunTimeline({ runs }: { runs: Run[] }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
   useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [])
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [scrollTop, setScrollTop] = useState(0)
+  useScrollDetection(() => setScrollTop(scrollRef.current?.scrollTop ?? 0), scrollRef)
 
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
       <div className='font-medium text-gray-600'>Results</div>
       {runs.length > 0 ? (
-        <div className='flex flex-col flex-1 gap-2 overflow-y-auto'>
+        <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map((run, index) => (
-            <RunCell key={index} run={run} containerRect={containerRect} />
+            <RunCell key={index} run={run} containerRect={containerRect} scrollTop={scrollTop} />
           ))}
         </div>
       ) : (
@@ -45,7 +49,7 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   return undefined
 }
 
-function RunCell({ run, containerRect }: { run: Run;   containerRect?: DOMRect}) {
+function RunCell({ run, containerRect, scrollTop }: { run: Run; containerRect?: DOMRect; scrollTop: number }) {
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatDate(run.timestamp))
@@ -53,6 +57,14 @@ function RunCell({ run, containerRect }: { run: Run;   containerRect?: DOMRect})
 
   const [selection, setSelection] = useState<Selection>()
   const identifier = `r${run.id}`
+
+  const [startScrollTop, setStartScrollTop] = useState(0)
+  if (!selection && startScrollTop > 0) {
+    setStartScrollTop(0)
+  }
+  if (selection && startScrollTop === 0 && scrollTop > 0) {
+    setStartScrollTop(scrollTop)
+  }
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(identifier, containerRect))
@@ -68,9 +80,11 @@ function RunCell({ run, containerRect }: { run: Run;   containerRect?: DOMRect})
       {selection && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
-          style={{ top: selection.popupPoint.y, left: selection.popupPoint.x }}>
+          style={{ top: selection.popupPoint.y - scrollTop + startScrollTop, left: selection.popupPoint.x }}>
           <div className='p-1 bg-white rounded-lg shadow'>
-            <div className='flex px-1 rounded cursor-pointer hover:bg-gray-100' onMouseDown={() => {}}>
+            <div
+              className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
+              onMouseDown={() => {}}>
               <Icon className='max-w-[24px]' icon={commentIcon} />
               <div>Comment</div>
             </div>
