@@ -33,7 +33,7 @@ export default function BuildChainTab({
       (versionID ? prompt.versions.find(version => version.id === versionID) : undefined) ?? prompt.versions[0]
     const promoteChainItem = (prompt: ActivePrompt) => (item: ChainItem) =>
       item.prompt.id === prompt.id
-        ? { prompt, version: selectPromptVersion(prompt, item.version?.id), output: item.output }
+        ? { prompt: item.prompt, version: selectPromptVersion(prompt, item.version?.id), output: item.output }
         : item
 
     const promptID = chain.find(item => !IsActiveChainItem(item))?.prompt?.id
@@ -101,8 +101,8 @@ export default function BuildChainTab({
             {IsActiveChainItem(item) && (
               <Selector>
                 <VersionSelector
-                  versions={item.prompt.versions}
-                  endpoints={item.prompt.endpoints}
+                  versions={promptCache[item.prompt.id].versions}
+                  endpoints={promptCache[item.prompt.id].endpoints}
                   activeVersion={item.version}
                   setActiveVersion={selectVersion(index)}
                 />

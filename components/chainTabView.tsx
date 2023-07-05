@@ -6,7 +6,7 @@ import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 
-export type ActiveChainItem = { prompt: ActivePrompt; version: Version; output?: string }
+export type ActiveChainItem = { prompt: Prompt; version: Version; output?: string }
 export type ChainItem = { prompt: Prompt; version: undefined | { id: number }; output?: undefined } | ActiveChainItem
 export const IsActiveChainItem = (item: ChainItem): item is ActiveChainItem =>
   !!item.version && 'prompt' in item.version
