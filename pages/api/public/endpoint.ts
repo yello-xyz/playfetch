@@ -4,7 +4,7 @@ import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
-import { Endpoint, PromptInputs, RunConfig, Version } from '@/types'
+import { Endpoint, PromptInputs, RunConfig } from '@/types'
 import { getVersionWithoutRuns } from '@/src/server/datastore/versions'
 import { runPromptWithConfig } from '../runChain'
 

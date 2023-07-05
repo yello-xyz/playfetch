@@ -121,3 +121,16 @@ export type Chain = {
   versionID: number
   output?: string
 }[]
+
+export type CommentAction = 'addLabel' | 'removeLabel'
+
+export type Comment = {
+  userID: number
+  promptID: number
+  versionID: number
+  text: string
+  timestamp: string
+  quote?: string
+  runID?: number
+  action?: CommentAction
+}
