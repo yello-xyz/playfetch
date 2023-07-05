@@ -1,13 +1,13 @@
 import { ReactNode } from 'react'
-import { ActivePrompt, PromptConfig, User, Version } from '@/types'
+import { ActivePrompt, User, Version } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import CommentPopupMenu from './commentPopupMenu'
 
-const labelForProvider = (provider: PromptConfig['provider']) => {
-  switch (provider) {
+export const ProviderLabel = (version: Version) => {
+  switch (version.config.provider) {
     case 'openai':
       return 'OpenAI GPT3.5'
     case 'anthropic':
@@ -55,7 +55,7 @@ export default function VersionCell({
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
-            <span className='font-medium'>{labelForProvider(version.config.provider)}</span>
+            <span className='font-medium'>{ProviderLabel(version)}</span>
             {version.runs.length > 0 && (
               <span>
                 {' '}
