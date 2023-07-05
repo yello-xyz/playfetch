@@ -3,6 +3,8 @@ import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import commentIcon from '@/public/comment.svg'
+import enterIcon from '@/public/enter.svg'
+import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { useEffect, useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import { FormatRelativeDate } from '@/src/common/formatting'
@@ -24,6 +26,7 @@ export default function CommentPopupMenu({
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [newComment, setNewComment] = useState('')
   const trimmedComment = newComment.trim()
+  const canAddComment = trimmedComment.length > 0
 
   const user = useLoggedInUser()
 
@@ -33,10 +36,16 @@ export default function CommentPopupMenu({
 
   const iconRef = useRef<HTMLDivElement>(null)
 
-  const onKeyDown = (event: any) => {
-    if (trimmedComment.length > 0 && event.key === 'Enter') {
+  const addComment = () => {
+    if (canAddComment) {
       setNewComment('')
       api.addComment(version.id, version.promptID, trimmedComment).then(_ => refreshPrompt())
+    }
+  }
+
+  const onKeyDown = (event: any) => {
+    if (event.key === 'Enter') {
+      addComment()
     }
   }
 
@@ -61,12 +70,19 @@ export default function CommentPopupMenu({
                 <UserAvatar user={user} size='md' />
                 <input
                   type='text'
-                  className='flex-1 text-sm border border-gray-300 outline-none rounded-lg px-3 py-1.5'
+                  className='flex-1 text-sm outline-none rounded-lg py-1.5 text-gray-600'
                   placeholder='Add a comment…'
                   value={newComment}
                   onChange={event => setNewComment(event.target.value)}
                   onKeyDown={onKeyDown}
                 />
+                {
+                  <IconButton
+                    disabled={!canAddComment}
+                    icon={canAddComment ? enterIcon : enterDisabledIcon}
+                    onClick={addComment}
+                  />
+                }
               </div>
             </div>
           </PopupMenu>

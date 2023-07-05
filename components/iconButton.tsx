@@ -1,16 +1,28 @@
 import { StaticImageData } from 'next/image'
 import { MouseEvent } from 'react'
-import Icon from './icon';
+import Icon from './icon'
 
-export default function IconButton({ icon, onClick }: { icon: StaticImageData; onClick: () => void }) {
+export default function IconButton({
+  icon,
+  onClick,
+  disabled,
+}: {
+  icon: StaticImageData
+  onClick: () => void
+  disabled?: boolean
+}) {
   return (
     <Icon
       icon={icon}
-      className='rounded cursor-pointer hover:bg-gray-100'
-      onClick={(event: MouseEvent) => {
-        event.stopPropagation()
-        onClick()
-      }}
+      className={`rounded hover:bg-gray-100 ${disabled ? '' : 'cursor-pointer'}`}
+      onClick={
+        disabled
+          ? undefined
+          : (event: MouseEvent) => {
+              event.stopPropagation()
+              onClick()
+            }
+      }
     />
   )
 }
