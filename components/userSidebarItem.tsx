@@ -29,9 +29,9 @@ export function UserAvatar({ user, size = 'md', border }: { user: User; size?: '
       alt='avatar'
     />
   ) : (
-    <div className={`${sizeClass} ${borderClass} ${textClass} ${getAvatarColor(user)} ${baseClass}`}>
+    <span className={`${sizeClass} ${borderClass} ${textClass} ${getAvatarColor(user)} ${baseClass}`}>
       {user.fullName.slice(0, 1)}
-    </div>
+    </span>
   )
 }
 

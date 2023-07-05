@@ -64,7 +64,12 @@ export default function VersionCell({
             )}
           </div>
           <div className='flex items-center gap-1'>
-            <CommentPopupMenu version={version} containerRect={containerRect} />
+            <CommentPopupMenu
+              version={version}
+              users={prompt.users}
+              labelColors={labelColors}
+              containerRect={containerRect}
+            />
             {prompt.availableLabels.length > 0 && (
               <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
             )}
@@ -75,9 +80,7 @@ export default function VersionCell({
         {version.labels.length > 0 && (
           <div className='flex gap-1'>
             {version.labels.map((label, labelIndex) => (
-              <div className={`px-1.5 py-px text-xs text-white rounded ${labelColors[label]}`} key={labelIndex}>
-                {label}
-              </div>
+              <VersionLabel label={label} colors={labelColors} key={labelIndex} />
             ))}
           </div>
         )}
@@ -87,6 +90,10 @@ export default function VersionCell({
       </div>
     </VerticalBarWrapper>
   )
+}
+
+export function VersionLabel({ label, colors }: { label: string; colors: Record<string, string> }) {
+  return <span className={`px-1.5 py-px text-xs text-white rounded ${colors[label]}`}>{label}</span>
 }
 
 function UserDetails({ user }: { user: User }) {

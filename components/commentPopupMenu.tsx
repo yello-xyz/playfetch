@@ -1,4 +1,4 @@
-import { Comment, Version } from '@/types'
+import { Comment, User, Version } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
@@ -8,8 +8,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import Icon from './icon'
 import { FormatRelativeDate } from '@/src/common/formatting'
+import { VersionLabel } from './versionCell'
+import { UserAvatar } from './userSidebarItem'
 
-export default function CommentPopupMenu({ version, containerRect }: { version: Version; containerRect?: DOMRect }) {
+export default function CommentPopupMenu({
+  version,
+  users,
+  labelColors,
+  containerRect,
+}: {
+  version: Version
+  users: User[]
+  labelColors: Record<string, string>
+  containerRect?: DOMRect
+}) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [newComment, setNewComment] = useState('')
 
@@ -33,9 +45,14 @@ export default function CommentPopupMenu({ version, containerRect }: { version: 
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-            <div className='p-3 w-80'>
+            <div className='flex flex-col gap-2 p-3 w-80'>
               {comments.map((comment, index) => (
-                <CommentCell comment={comment} key={index} />
+                <CommentCell
+                  comment={comment}
+                  user={users.find(user => user.id === comment.userID)!}
+                  labelColors={labelColors}
+                  key={index}
+                />
               ))}
               <input
                 type='text'
@@ -44,7 +61,6 @@ export default function CommentPopupMenu({ version, containerRect }: { version: 
                 value={newComment}
                 onChange={event => setNewComment(event.target.value)}
               />
-
               {newComment.trim().length > 0 && (
                 <div className='flex items-center gap-1 p-1' onClick={() => addComment(newComment.trim())}>
                   <Icon icon={addIcon} />
@@ -59,13 +75,21 @@ export default function CommentPopupMenu({ version, containerRect }: { version: 
   )
 }
 
-function CommentCell({ comment }: { comment: Comment }) {
+function CommentCell({ comment, user, labelColors }: { comment: Comment; user: User; labelColors: Record<string, string> }) {
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatRelativeDate(comment.timestamp, 1))
   }, [comment.timestamp])
 
-  return (
+  return comment.action ? (
+    <div className='flex flex-wrap items-center gap-1 p-3 bg-gray-100 rounded-lg'>
+      <UserAvatar user={user} size='xs' />
+      <span className='font-medium'>{user.fullName}</span>
+      {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
+      <VersionLabel label={comment.text} colors={labelColors} />{' • '}
+      <span className='text-gray-400'>{formattedDate}</span>
+    </div>
+  ) : (
     <div className='flex items-center gap-1 px-2 py-1 text-xs'>
       {comment.text}
       <span className='text-gray-400'>{formattedDate}</span>
