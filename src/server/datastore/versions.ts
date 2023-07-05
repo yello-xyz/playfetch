@@ -159,10 +159,9 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   if (versionCount <= 1) {
     throw new Error(`Cannot delete last version for prompt ${promptID}`)
   }
-
-  const keysToDelete = await getEntityKeys(Entity.RUN, 'versionID', versionID)
-  keysToDelete.push(buildKey(Entity.VERSION, versionID))
-  await getDatastore().delete(keysToDelete)
+  const runKeys = await getEntityKeys(Entity.RUN, 'versionID', versionID)
+  const commentKeys = await getEntityKeys(Entity.COMMENT, 'versionID', versionID)
+  await getDatastore().delete([...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
 
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
