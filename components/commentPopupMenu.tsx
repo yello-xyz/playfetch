@@ -66,7 +66,19 @@ export default function CommentPopupMenu({
   )
 }
 
-export function CommentInput({ version, selection, focus }: { version: Version; selection?: string; focus?: boolean }) {   
+export function CommentInput({
+  version,
+  selection,
+  runID,
+  focus,
+  callback,
+}: {
+  version: Version
+  selection?: string
+  runID?: number
+  focus?: boolean
+  callback?: () => void
+}) {
   const [newComment, setNewComment] = useState('')
   const trimmedComment = newComment.trim()
   const canAddComment = trimmedComment.length > 0
@@ -78,7 +90,8 @@ export function CommentInput({ version, selection, focus }: { version: Version; 
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(version.id, version.promptID, trimmedComment, selection).then(_ => refreshPrompt())
+      api.addComment(version.id, version.promptID, trimmedComment, selection, runID).then(_ => refreshPrompt())
+      callback?.()
     }
   }
 

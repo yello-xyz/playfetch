@@ -67,17 +67,16 @@ function RunCell({
   }, [run.timestamp])
 
   const [selection, setSelection] = useState<Selection>()
+  const [selectionForComment, setSelectionForComment] = useState<Selection>()
   const identifier = `r${run.id}`
 
   const [startScrollTop, setStartScrollTop] = useState(0)
-  if (!selection && startScrollTop > 0) {
+  if (!selection && !selectionForComment && startScrollTop > 0) {
     setStartScrollTop(0)
   }
   if (selection && startScrollTop === 0 && scrollTop > 0) {
     setStartScrollTop(scrollTop)
   }
-
-  const [selectionForComment, setSelectionForComment] = useState<Selection>()
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(identifier, containerRect))
@@ -87,10 +86,10 @@ function RunCell({
     }
   }, [identifier, containerRect])
 
+  const closePopup = () => setSelectionForComment(undefined)
+
   return (
-    <div
-      className='flex flex-col gap-3 p-4 whitespace-pre-wrap rounded-lg bg-sky-50'
-      onClick={() => setSelectionForComment(undefined)}>
+    <div className='flex flex-col gap-3 p-4 whitespace-pre-wrap rounded-lg bg-sky-50' onMouseDown={closePopup}>
       <div id={identifier}>{run.output}</div>
       {(selection || selectionForComment) && version && (
         <div
@@ -99,10 +98,16 @@ function RunCell({
             top: (selection || selectionForComment)!.popupPoint.y - scrollTop + startScrollTop,
             left: (selection || selectionForComment)!.popupPoint.x,
           }}>
-          <div className='p-1 bg-white rounded-lg shadow'>
+          <div className='p-1 bg-white rounded-lg shadow' onMouseDown={event => event.stopPropagation()}>
             {selectionForComment ? (
-              <div className='px-1 w-80' onClick={event => event.stopPropagation()}>
-                <CommentInput version={version} selection={selectionForComment.text} focus />
+              <div className='px-1 w-80'>
+                <CommentInput
+                  version={version}
+                  selection={selectionForComment.text}
+                  runID={run.id}
+                  callback={closePopup}
+                  focus
+                />
               </div>
             ) : (
               <div
