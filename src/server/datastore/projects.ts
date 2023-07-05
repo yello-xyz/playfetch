@@ -10,7 +10,6 @@ import {
   getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
-  toID,
 } from './datastore'
 import { ActiveProject, Project, ProperProject, User, UserProject } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
@@ -123,7 +122,7 @@ export async function addProjectForUser(userID: number, projectName: string) {
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
   const projectData = toProjectData(projectName, urlPath, [], ['default'], new Date())
   await getDatastore().save(projectData)
-  const projectID = toID(projectData)
+  const projectID = getID(projectData)
   await grantUserAccess(userID, projectID)
   return projectID
 }
@@ -232,7 +231,7 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   }
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
   for (const key of promptKeys) {
-    await deletePromptForUser(userID, toID({ key }))
+    await deletePromptForUser(userID, getID({ key }))
   }
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'promptID', projectID)

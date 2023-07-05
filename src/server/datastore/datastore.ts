@@ -26,11 +26,9 @@ export enum Entity {
   CHAIN = 'chain',
 }
 
-export const toID = ({ key }: { key: Key }) => Number(key.id)
-
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
 
-export const getID = (entity: any) => toID({ key: getKey(entity) })
+export const getID = (entity: any) => Number((entity.key ?? getKey(entity)).id)
 
 export const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date)?.toISOString()
 
@@ -76,7 +74,7 @@ export const getEntityKeys = (type: string, key: string, value: {}, limit?: numb
   getFilteredEntities(type, buildFilter(key, value), limit, undefined, true).then(entities => entities.map(getKey))
 
 export const getEntityID = (type: string, key: string, value: {}) =>
-  getEntityKeys(type, key, value, 1).then(([key]) => toID({ key }))
+  getEntityKeys(type, key, value, 1).then(([key]) => getID({ key }))
 
 export const getKeyedEntities = async (type: string, ids: number[]): Promise<any[]> =>
   ids.length

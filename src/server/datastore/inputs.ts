@@ -6,7 +6,7 @@ import {
   getDatastore,
   getEntities,
   getFilteredEntityKey,
-  toID,
+  getID,
 } from './datastore'
 import { ensureProjectAccess } from './projects'
 import { InputValues } from '@/types'
@@ -23,7 +23,7 @@ export async function saveInputValues(userID: number, projectID: number, name: s
     Entity.INPUT,
     and([buildFilter('projectID', projectID), buildFilter('name', name)])
   )
-  await getDatastore().save(toInputData(projectID, name, values, key ? toID({ key }) : undefined))
+  await getDatastore().save(toInputData(projectID, name, values, key ? getID({ key }) : undefined))
 }
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })

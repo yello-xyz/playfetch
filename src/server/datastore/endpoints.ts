@@ -10,7 +10,6 @@ import {
   getID,
   getKeyedEntity,
   getTimestamp,
-  toID,
 } from './datastore'
 import { getVerifiedUserPromptData } from './prompts'
 import { saveOrResetUsage } from './usage'
@@ -90,7 +89,7 @@ export async function saveEndpoint(
     previouslySaved ? getID(previouslySaved) : undefined
   )
   await getDatastore().save(endpointData)
-  await saveOrResetUsage(toID(endpointData), promptID)
+  await saveOrResetUsage(getID(endpointData), promptID)
 }
 
 export async function getEndpointFromPath(

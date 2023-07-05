@@ -10,7 +10,6 @@ import {
   getKeyedEntity,
   getOrderedEntities,
   getTimestamp,
-  toID,
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
@@ -100,8 +99,8 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   const createdAt = new Date()
   const promptData = toPromptData(projectID, DefaultPromptName, '', createdAt, createdAt, [])
   await getDatastore().save(promptData)
-  await saveVersionForUser(userID, toID(promptData))
-  return toID(promptData)
+  await saveVersionForUser(userID, getID(promptData))
+  return getID(promptData)
 }
 
 export async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {

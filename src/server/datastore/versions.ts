@@ -9,7 +9,6 @@ import {
   getID,
   getKeyedEntity,
   getTimestamp,
-  toID,
 } from './datastore'
 import { toRun } from './runs'
 import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
@@ -94,7 +93,7 @@ export async function saveVersionForUser(
       : promptData.name
   await updatePrompt({ ...promptData, prompt, name }, true)
 
-  return toID(versionData)
+  return getID(versionData)
 }
 
 async function updateVersion(versionData: any) {

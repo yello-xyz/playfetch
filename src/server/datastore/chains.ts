@@ -1,12 +1,12 @@
 import { Chain } from '@/types'
-import { Entity, buildKey, getDatastore, getKeyedEntity, toID } from './datastore'
+import { Entity, buildKey, getDatastore, getKeyedEntity, getID } from './datastore'
 import { ensureProjectAccess } from './projects'
 
 export async function saveChain(userID: number, projectID: number, chain: Chain) {
   await ensureProjectAccess(userID, projectID)
   const chainData = toChainData(projectID, chain, new Date())
   await getDatastore().save(chainData)
-  return toID(chainData)
+  return getID(chainData)
 }
 
 export async function getChain(chainID: number): Promise<Chain> {
