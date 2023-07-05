@@ -4,12 +4,12 @@ import { useState } from 'react'
 import Label from './label'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
-import { ActiveChainItem } from './chainTabView'
+import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
 import { InputValues, Run } from '@/types'
 
-const runChain = (chain: ActiveChainItem[], inputs: Record<string, string>[]): Promise<Run[]> => {
+const runChain = (chain: LoadedChainItem[], inputs: Record<string, string>[]): Promise<Run[]> => {
   const versions = chain.map(item => item.version)
   return versions.length
     ? api.runChain(
@@ -31,7 +31,7 @@ export default function TestChainTab({
   setInputValues,
   persistInputValuesIfNeeded,
 }: {
-  chain: ActiveChainItem[]
+  chain: LoadedChainItem[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void

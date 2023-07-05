@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Prompt, ProperProject, Version } from '@/types'
+import { ActiveProject, Prompt, ProperProject, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -6,9 +6,9 @@ import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 
-export type ActiveChainItem = { prompt: Prompt; version: Version; output?: string }
-export type ChainItem = { prompt: Prompt; version: undefined | { id: number }; output?: undefined } | ActiveChainItem
-export const IsActiveChainItem = (item: ChainItem): item is ActiveChainItem =>
+export type ChainItem = { prompt: Prompt; version: undefined | { id: number }; output?: string }
+export type LoadedChainItem = ChainItem & { version: Version }
+export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
   !!item.version && 'prompt' in item.version
 
 export default function ChainTabView({
@@ -27,7 +27,7 @@ export default function ChainTabView({
   const initialChain = previousChain.every(item => !!item.prompt) ? (previousChain as ChainItem[]) : []
   const [chain, setChain] = useState(initialChain)
 
-  const activeChain = chain.filter(IsActiveChainItem)
+  const loadedChain = chain.filter(IsLoadedChainItem)
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     project.inputs,
@@ -40,16 +40,16 @@ export default function ChainTabView({
       case 'play':
         return <BuildChainTab chain={chain} setChain={setChain} prompts={project.prompts} />
       case 'test':
-        return activeChain.length ? (
+        return loadedChain.length ? (
           <TestChainTab
-            chain={activeChain}
+            chain={loadedChain}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
         ) : null
       case 'publish':
-        return activeChain.length ? <PublishChainTab chain={activeChain} project={project} /> : null
+        return loadedChain.length ? <PublishChainTab chain={loadedChain} project={project} /> : null
     }
   }
 

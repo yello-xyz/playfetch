@@ -5,14 +5,14 @@ import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
-import { ActiveChainItem } from './chainTabView'
+import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 
 export default function PublishChainTab({
   chain,
   project,
 }: {
-  chain: ActiveChainItem[]
+  chain: LoadedChainItem[]
   project: ActiveProject & ProperProject
 }) {
   const availableFlavors = project.availableFlavors
