@@ -9,13 +9,14 @@ async function publishChain(req: NextApiRequest, res: NextApiResponse, user: Use
   const userID = user.id
   const chain = req.body.chain as Chain
   const projectID = req.body.projectID
+  const promptID = req.body.promptID
   const name = req.body.name
   const flavor = req.body.flavor
   const useCache = req.body.useCache
 
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
-  await saveEndpoint(userID, projectID, chain, urlPath, projectURLPath, flavor, useCache)
+  await saveEndpoint(userID, promptID, chain, urlPath, projectURLPath, flavor, useCache)
 
   res.json({})
 }
