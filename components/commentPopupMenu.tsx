@@ -13,11 +13,13 @@ import { CommentCell } from './commentsPane'
 
 export default function CommentPopupMenu({
   version,
+  selection,
   users,
   labelColors,
   containerRect,
 }: {
   version: Version
+  selection?: string
   users: User[]
   labelColors: Record<string, string>
   containerRect?: DOMRect
@@ -26,6 +28,11 @@ export default function CommentPopupMenu({
   const [newComment, setNewComment] = useState('')
   const trimmedComment = newComment.trim()
   const canAddComment = trimmedComment.length > 0
+
+  const [lastSelection, setLastSelection] = useState<string>()
+  if (!isMenuExpanded && selection !== lastSelection) {
+    setLastSelection(selection)
+  }
 
   const user = useLoggedInUser()
 
@@ -38,7 +45,7 @@ export default function CommentPopupMenu({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(version.id, version.promptID, trimmedComment).then(_ => refreshPrompt())
+      api.addComment(version.id, version.promptID, trimmedComment, lastSelection).then(_ => refreshPrompt())
     }
   }
 

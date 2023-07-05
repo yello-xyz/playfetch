@@ -73,13 +73,19 @@ export function CommentCell({
         <span className='font-medium'>{user.fullName}</span>
         <span className='text-gray-400'>{formattedDate}</span>
       </div>
-      {version && (
+      {(version || comment.quote) && (
         <div className='flex flex-col gap-1 pl-2 ml-6 border-l-4 border-blue-500 opacity-50'>
-          <span className='font-medium'>
-            {versionIndex} › {ProviderLabel(version)}
-          </span>
+          {version && (
+            <span className='font-medium'>
+              {versionIndex} › {ProviderLabel(version)}
+            </span>
+          )}
           <div className='line-clamp-2'>
-            <VersionComparison version={version} compareVersion={compareVersion} />
+            {comment.quote ? (
+              <span>{comment.quote}</span>
+            ) : version ? (
+              <VersionComparison version={version} compareVersion={compareVersion} />
+            ) : null}
           </div>
         </div>
       )}

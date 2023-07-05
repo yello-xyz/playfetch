@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { ActivePrompt, User, Version } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
@@ -15,6 +15,13 @@ export const ProviderLabel = (version: Version) => {
     case 'google':
       return 'Google PaLM'
   }
+}
+
+const extractSelection = (identifier: string) => {
+  const selection = document.getSelection()
+  return selection && selection?.anchorNode?.parentElement?.closest(`div#${identifier}`)
+    ? selection.toString().trim()
+    : undefined
 }
 
 export default function VersionCell({
@@ -40,11 +47,21 @@ export default function VersionCell({
   onSelect: (version: Version) => void
   containerRect?: DOMRect
 }) {
+  const identifier = `v${version.id}`
+  const [selection, setSelection] = useState<string>()
+  useEffect(() => {
+    const selectionChangeHandler = () => setSelection(extractSelection(identifier))
+    document.addEventListener('selectionchange', selectionChangeHandler)
+    return () => {
+      document.removeEventListener('selectionchange', selectionChangeHandler)
+    }
+  }, [identifier])
+
   const user = prompt.users.find(user => user.id === version.userID)
 
   return (
     <VerticalBarWrapper
-      id={version.id.toString()}
+      id={identifier}
       sequenceNumber={index + 1}
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
       strokeStyle={isLast ? 'none' : 'stroked'}>
@@ -66,6 +83,7 @@ export default function VersionCell({
           <div className='flex items-center gap-1'>
             <CommentPopupMenu
               version={version}
+              selection={selection}
               users={prompt.users}
               labelColors={labelColors}
               containerRect={containerRect}
