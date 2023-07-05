@@ -13,23 +13,57 @@ const getAvatarColor = (user: User) => {
   return avatarColors[charCodeSum % avatarColors.length]
 }
 
-export function UserAvatar({ user, size = 'md', border }: { user: User; size?: 'xs' | 'sm' | 'md'; border?: boolean }) {
-  const width = size === 'xs' ? 14 : size === 'sm' ? 18 : 28
-  const sizeClass = size === 'xs' ? 'w-3.5 h-3.5' : size === 'sm' ? 'w-[18px] h-[18px]' : 'w-7 h-7'
+type Size = 'xs' | 'sm' | 'md' | 'lg'
+
+export function UserAvatar({ user, size = 'lg', border }: { user: User; size?: Size; border?: boolean }) {
+  const width = (size: Size) => {
+    switch (size) {
+      case 'xs':
+        return 14
+      case 'sm':
+        return 18
+      case 'md':
+        return 22
+      case 'lg':
+        return 28
+    }
+  }
+  const sizeClass = (size: Size) => {
+    switch (size) {
+      case 'xs':
+        return 'w-3.5 h-3.5'
+      case 'sm':
+        return 'w-[18px] h-[18px]'
+      case 'md':
+        return 'w-[22px] h-[22px]'
+      case 'lg':
+        return 'w-7 h-7'
+    }
+  }
+  const textClass = (size: Size) => {
+    switch (size) {
+      case 'xs':
+        return 'text-[8px]'
+      case 'sm':
+        return 'text-[10px]'
+      case 'md':
+        return 'text-xs'
+      case 'lg':
+        return `font-medium ${border ? 'text-xs' : 'text-sm'}`
+    }
+  }
   const borderClass = border ? 'border-2 border-white' : ''
-  const textClass =
-    size === 'xs' ? 'text-[8px]' : size === 'sm' ? 'text-[10px]' : `font-medium ${border ? 'text-xs' : 'text-sm'}`
   const baseClass = 'rounded-full flex items-center justify-center'
   return user.imageURL.length ? (
     <Image
-      width={width}
-      height={width}
-      className={`${sizeClass} ${borderClass} rounded-full`}
+      width={width(size)}
+      height={width(size)}
+      className={`${sizeClass(size)} ${borderClass} rounded-full`}
       src={user.imageURL}
       alt='avatar'
     />
   ) : (
-    <div className={`${sizeClass} ${borderClass} ${textClass} ${getAvatarColor(user)} ${baseClass}`}>
+    <div className={`${sizeClass(size)} ${borderClass} ${textClass(size)} ${getAvatarColor(user)} ${baseClass}`}>
       {user.fullName.slice(0, 1)}
     </div>
   )
