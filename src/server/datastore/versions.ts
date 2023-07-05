@@ -14,7 +14,7 @@ import { toRun } from './runs'
 import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabel } from './projects'
-import { toComment } from './comments'
+import { saveComment, toComment } from './comments'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
@@ -115,16 +115,20 @@ async function updateVersion(versionData: any) {
 export async function toggleVersionLabel(
   userID: number,
   versionID: number,
+  promptID: number,
   projectID: number,
   label: string,
   checked: boolean
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
-  const labels = JSON.parse(versionData.labels) as string []
-  const newLabels = [...labels.filter(l => l !== label), ...(checked ? [label] : [])]
-  await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
-  if (checked) {
-    await ensureProjectLabel(userID, projectID, label)
+  const labels = JSON.parse(versionData.labels) as string[]
+  if (checked !== labels.includes(label)) {
+    const newLabels = checked ? [...labels, label] : labels.filter(l => l !== label)
+    await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
+    if (checked) {
+      await ensureProjectLabel(userID, projectID, label)
+    }
+    await saveComment(userID, promptID, versionID, label, checked ? 'addLabel' : 'removeLabel')
   }
 }
 

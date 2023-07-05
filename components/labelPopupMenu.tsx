@@ -50,7 +50,7 @@ export default function LabelPopupMenu({
     setIsMenuExpanded(false)
     setNewLabel('')
     const checked = !version.labels.includes(label)
-    api.toggleLabel(version.id, prompt.projectID, label, checked).then(() => {
+    api.toggleLabel(version.id, prompt.id, prompt.projectID, label, checked).then(() => {
       refreshPrompt()
       if (addingNewLabel) {
         refreshProjects()

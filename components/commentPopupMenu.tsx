@@ -56,7 +56,7 @@ export default function CommentPopupMenu({
               ))}
               <input
                 type='text'
-                className='w-full text-sm mb-3 border border-gray-300 outline-none rounded-lg px-3 py-1.5'
+                className='w-full text-sm border border-gray-300 outline-none rounded-lg px-3 py-1.5'
                 placeholder='Add a comment…'
                 value={newComment}
                 onChange={event => setNewComment(event.target.value)}
@@ -83,7 +83,7 @@ function CommentCell({ comment, user, labelColors }: { comment: Comment; user: U
 
   return comment.action ? (
     <div className='flex flex-wrap items-center gap-1 p-3 bg-gray-100 rounded-lg'>
-      <UserAvatar user={user} size='xs' />
+      <UserAvatar user={user} size='sm' />
       <span className='font-medium'>{user.fullName}</span>
       {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
       <VersionLabel label={comment.text} colors={labelColors} />{' • '}
