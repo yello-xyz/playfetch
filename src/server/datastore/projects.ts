@@ -186,11 +186,13 @@ export async function addProjectFlavor(userID: number, projectID: number, flavor
   await updateProject({ ...projectData, flavors: JSON.stringify([...JSON.parse(projectData.flavors), flavor]) })
 }
 
-export async function ensureProjectLabels(userID: number, projectID: number, labels: string[]) {
+export async function ensureProjectLabel(userID: number, projectID: number, label: string) {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  const oldLabels = JSON.parse(projectData.labels)
-  const newLabels = [...oldLabels, ...labels.filter(label => !oldLabels.includes(label))]
-  await updateProject({ ...projectData, labels: JSON.stringify(newLabels) })
+  const labels = JSON.parse(projectData.labels)
+  if (!labels.includes(label)) {
+    const newLabels = [...labels, label]
+    await updateProject({ ...projectData, labels: JSON.stringify(newLabels) })
+  }
 }
 
 export async function getProjectAPIKeyDev(userID: number, projectID: number): Promise<string> {

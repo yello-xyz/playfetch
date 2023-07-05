@@ -13,7 +13,7 @@ import {
 import { toRun } from './runs'
 import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/src/common/formatting'
-import { ensureProjectLabels } from './projects'
+import { ensureProjectLabel } from './projects'
 import { toComment } from './comments'
 
 export async function migrateVersions() {
@@ -112,10 +112,20 @@ async function updateVersion(versionData: any) {
   )
 }
 
-export async function saveVersionLabels(userID: number, versionID: number, projectID: number, labels: string[]) {
+export async function toggleVersionLabel(
+  userID: number,
+  versionID: number,
+  projectID: number,
+  label: string,
+  checked: boolean
+) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
-  await updateVersion({ ...versionData, labels: JSON.stringify(labels) })
-  await ensureProjectLabels(userID, projectID, labels)
+  const labels = JSON.parse(versionData.labels) as string []
+  const newLabels = [...labels.filter(l => l !== label), ...(checked ? [label] : [])]
+  await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
+  if (checked) {
+    await ensureProjectLabel(userID, projectID, label)
+  }
 }
 
 const toVersionData = (

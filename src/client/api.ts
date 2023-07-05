@@ -100,8 +100,8 @@ const api = {
   unpublishPrompt: function (endpointID: number) {
     return post(this.unpublishPrompt, { endpointID })
   },
-  updateVersionLabels: function (versionID: number, projectID: number, labels: string[]) {
-    return post(this.updateVersionLabels, { versionID, projectID, labels })
+  toggleLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
+    return post(this.toggleLabel, { versionID, projectID, label, checked })
   },
   updateInputValues: function (projectID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { projectID, name, values })
