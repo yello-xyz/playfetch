@@ -59,7 +59,7 @@ export function PopupMenuItem({
   destructive?: boolean
   separated?: boolean
 }) {
-  const baseClass = 'px-4 py-2 text-xs'
+  const baseClass = 'px-4 py-2 text-sm font-normal'
   const destructiveClass = destructive ? 'text-red-500' : ''
   const separatedClass = separated ? 'border-t border-gray-300' : ''
   const hoverClass = 'hover:bg-blue-600 hover:text-white'
