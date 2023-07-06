@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PromptConfig, PromptInputs, Version } from '@/types'
+import { InputValues, PromptConfig, PromptInputs, Version } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
@@ -21,12 +21,14 @@ export default function PromptPanel({
   version,
   setModifiedVersion,
   onRun,
+  inputValues = {},
   showLabel,
   showInputControls,
 }: {
   version: Version
   setModifiedVersion: (version: Version) => void
-  onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => void
+  onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  inputValues?: InputValues
   showLabel?: boolean
   showInputControls?: boolean
 }) {
@@ -49,9 +51,12 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompt, config)
   const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
 
-  // In the play tab, we let variables just stand for themselves rather than resolving them with test values.
-  // Once you start adding input variables in the Test tab, you are less likely to keep running in Play tab.
-  const dummyInputs = Object.fromEntries(ExtractPromptVariables(prompt).map(variable => [variable, variable]))
+  // In the play tab, we resolve each variable with any available input and otherwise let it stand for itself.
+  const inputs = Object.fromEntries(
+    ExtractPromptVariables(prompt).map(variable => [variable, inputValues[variable]?.[0] ?? variable])
+  )
+
+  console.log(inputs)
 
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
@@ -74,7 +79,7 @@ export default function PromptPanel({
             <option value={'google'}>{labelForProvider('google')}</option>
             <option value={'openai'}>{labelForProvider('openai')}</option>
           </DropdownMenu>
-          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [dummyInputs])}>
+          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>

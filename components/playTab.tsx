@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, Project } from '@/types'
+import { ActivePrompt, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 
 import dynamic from 'next/dynamic'
@@ -47,6 +47,7 @@ export default function PlayTab({
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
             onRun={runPrompt}
+            inputValues={prompt.inputs}
             showLabel
           />
         </Suspense>
