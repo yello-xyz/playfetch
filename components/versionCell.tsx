@@ -29,7 +29,6 @@ export default function VersionCell({
   labelColors,
   version,
   index,
-  isOnly,
   isLast,
   isActiveVersion,
   compareVersion,
@@ -41,7 +40,6 @@ export default function VersionCell({
   labelColors: Record<string, string>
   version: Version
   index: number
-  isOnly: boolean
   isLast: boolean
   isActiveVersion: boolean
   compareVersion?: Version

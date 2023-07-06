@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivePrompt, Version } from '@/types'
 import historyIcon from '@/public/history.svg'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
