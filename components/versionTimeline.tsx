@@ -28,8 +28,10 @@ export default function VersionTimeline({
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(() => forceStateUpdate(scrollRef.current?.scrollTop ?? 0), scrollRef)
 
+  const identifierForVersion = (version: Version) => `v${version.id}`
+
   useEffect(() => {
-    const element = document.getElementById(activeVersion.id.toString())
+    const element = document.getElementById(identifierForVersion(activeVersion))
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -64,6 +66,7 @@ export default function VersionTimeline({
               !isFocused || index <= previousIndex || index >= activeIndex ? (
                 <VersionCell
                   key={index}
+                  identifier={identifierForVersion(version)}
                   isOnly={versions.length == 1}
                   isLast={index === versionsToShow.length - 1}
                   labelColors={labelColors}

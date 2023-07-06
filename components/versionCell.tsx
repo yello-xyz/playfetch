@@ -25,6 +25,7 @@ const extractSelection = (identifier: string) => {
 }
 
 export default function VersionCell({
+  identifier,
   labelColors,
   version,
   index,
@@ -36,6 +37,7 @@ export default function VersionCell({
   onSelect,
   containerRect,
 }: {
+  identifier: string
   labelColors: Record<string, string>
   version: Version
   index: number
@@ -47,7 +49,6 @@ export default function VersionCell({
   onSelect: (version: Version) => void
   containerRect?: DOMRect
 }) {
-  const identifier = `v${version.id}`
   const [selection, setSelection] = useState<string>()
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(identifier))
