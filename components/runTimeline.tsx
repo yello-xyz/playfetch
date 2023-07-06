@@ -89,7 +89,9 @@ function RunCell({
   const closePopup = () => setSelectionForComment(undefined)
 
   return (
-    <div className='flex flex-col gap-3 p-4 whitespace-pre-wrap rounded-lg bg-blue-25' onMouseDown={closePopup}>
+    <div
+      className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
+      onMouseDown={closePopup}>
       <div id={identifier}>{run.output}</div>
       {(selection || selectionForComment) && version && (
         <div

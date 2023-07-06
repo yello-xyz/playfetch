@@ -66,8 +66,8 @@ export default function VersionCell({
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
-        className={`flex-1 border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
-          isActiveVersion ? 'bg-blue-25' : ''
+        className={`flex-1 border rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
+          isActiveVersion ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>

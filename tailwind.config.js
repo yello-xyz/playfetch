@@ -6,6 +6,7 @@ module.exports = {
   ],
   theme: {
     textColor: {
+      'transparent': 'transparent',
       'black': '#000000',
       'gray-25': '#FBFBFD',
       'gray-50': '#F3F4F6',
@@ -21,6 +22,7 @@ module.exports = {
       'white': '#FFFFFF',
     },
     backgroundColor: {
+      'transparent': 'transparent',
       'black': '#000000',
       'blue-25': '#F3F8FD',
       'blue-50': '#DCEAFA',
@@ -67,6 +69,23 @@ module.exports = {
       'yellow-300': '#F8D784',
       'yellow-400': '#F6CD65',
       'white': '#FFFFFF',
-    }
+    },
+    borderColor: {
+      'transparent': 'transparent',
+      'black': '#000000',
+      'blue-50': '#DCEAFA',
+      'blue-500': '#2C7BD8',
+      'gray-25': '#FBFBFD',
+      'gray-50': '#F5F6F7',
+      'gray-100': '#EEF0F2',
+      'gray-200': '#E3E6E9',
+      'gray-300': '#CFD3D8',
+      'gray-400': '#B8BEC5',
+      'gray-500': '#AAB0BA',
+      'gray-600': '#9AA2AD',
+      'gray-700': '#8C94A1',
+      'gray-800': '#838C9A',
+      'white': '#FFFFFF',
+    },
   },
 }
