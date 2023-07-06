@@ -42,7 +42,7 @@ export default function PublishPromptTab({
     refreshPrompt()
   }
 
-  return availableFlavors.length > 0 ? (
+  return (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <PublishSettingsPane
@@ -71,15 +71,5 @@ export default function PublishPromptTab({
         )}
       </div>
     </>
-  ) : (
-    <EmptyPublishTab />
-  )
-}
-
-function EmptyPublishTab() {
-  return (
-    <div className='flex flex-col items-center justify-center w-full p-8 m-8 bg-gray-100 rounded-lg'>
-      <span className='font-medium text-gray-600'>Move your prompt to a Project before publishing it</span>
-    </div>
   )
 }
