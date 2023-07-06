@@ -67,7 +67,6 @@ export default function VersionTimeline({
                 <VersionCell
                   key={index}
                   identifier={identifierForVersion(version)}
-                  isOnly={versions.length == 1}
                   isLast={index === versionsToShow.length - 1}
                   labelColors={labelColors}
                   version={version}

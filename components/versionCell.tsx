@@ -92,7 +92,7 @@ export default function VersionCell({
             {prompt.availableLabels.length > 0 && (
               <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
             )}
-            {!isOnly && <VersionPopupMenu containerRect={containerRect} version={version} />}
+            <VersionPopupMenu containerRect={containerRect} version={version} />
           </div>
         </div>
         {user && prompt.projectID !== user.id && <UserDetails user={user} />}
