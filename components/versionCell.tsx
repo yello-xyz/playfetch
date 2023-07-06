@@ -123,7 +123,7 @@ function UserDetails({ user }: { user: User }) {
   )
 }
 
-export function VerticalBarWrapper({
+function VerticalBarWrapper({
   id,
   sequenceNumber = undefined,
   bulletStyle = 'stroked',

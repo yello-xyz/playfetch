@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { ActivePrompt, Version } from '@/types'
-import historyIcon from '@/public/history.svg'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
-import Icon from './icon'
-import VersionCell, { VerticalBarWrapper } from './versionCell'
+import VersionCell from './versionCell'
 import useScrollDetection from './useScrollDetection'
 
 export default function VersionTimeline({
@@ -16,7 +14,6 @@ export default function VersionTimeline({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
-  const [isFocused, setFocused] = useState(true)
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
   const labelColors = AvailableLabelColorsForPrompt(prompt)
@@ -35,25 +32,19 @@ export default function VersionTimeline({
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-  }, [activeVersion, isFocused])
+  }, [activeVersion])
 
   const selectVersion = (version: Version) => {
-    setFocused(true)
     setActiveVersion(version)
-  }
-  if (filters.length && isFocused) {
-    setFocused(false)
   }
 
   const versions = prompt.versions
-  const activeIndex = versions.findIndex(version => version.id === activeVersion.id)
-  const previousIndex = versions.findIndex(version => version.id === activeVersion.previousID)
-  const versionsToShow = isFocused ? versions : versions.filter(BuildVersionFilter(filters))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
       <div ref={containerRef} className='relative flex min-h-0'>
-        <div className={`flex flex-col w-full ${versionsToShow.length > 0 ? 'overflow-hidden' : ''}`}>
+        <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
             users={prompt.users}
             labelColors={labelColors}
@@ -62,30 +53,21 @@ export default function VersionTimeline({
             setFilters={setFilters}
           />
           <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
-            {versionsToShow.map((version, index) =>
-              !isFocused || index <= previousIndex || index >= activeIndex ? (
-                <VersionCell
-                  key={index}
-                  identifier={identifierForVersion(version)}
-                  isLast={index === versionsToShow.length - 1}
-                  labelColors={labelColors}
-                  version={version}
-                  index={versions.findIndex(v => v.id === version.id)}
-                  isActiveVersion={version.id === activeVersion.id}
-                  compareVersion={versions.find(v => v.id === version.previousID)}
-                  prompt={prompt}
-                  onSelect={selectVersion}
-                  containerRect={containerRect}
-                />
-              ) : index === previousIndex + 1 ? (
-                <VerticalBarWrapper key={index} strokeStyle='dashed'>
-                  <div className='flex items-center mb-4 cursor-pointer' onClick={() => setFocused(false)}>
-                    <Icon icon={historyIcon} />
-                    View Full History
-                  </div>
-                </VerticalBarWrapper>
-              ) : null
-            )}
+            {filteredVersions.map((version, index) => (
+              <VersionCell
+                key={index}
+                identifier={identifierForVersion(version)}
+                isLast={index === filteredVersions.length - 1}
+                labelColors={labelColors}
+                version={version}
+                index={versions.findIndex(v => v.id === version.id)}
+                isActiveVersion={version.id === activeVersion.id}
+                compareVersion={versions.find(v => v.id === version.previousID)}
+                prompt={prompt}
+                onSelect={selectVersion}
+                containerRect={containerRect}
+              />
+            ))}
           </div>
         </div>
       </div>
