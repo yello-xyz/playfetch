@@ -75,7 +75,7 @@ export default function TestPromptTab({
           <VersionSelector
             versions={prompt.versions}
             endpoints={prompt.endpoints}
-            activeVersion={version}
+            activeVersion={activeVersion}
             setActiveVersion={selectVersion}
           />
         </div>

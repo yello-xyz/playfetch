@@ -110,9 +110,18 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
   return uniqueURLPath
 }
 
-export async function addProjectForUser(userID: number, projectName: string) {
+export async function addProjectForUser(userID: number, projectName: string, isUserProject = false) {
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  const projectData = toProjectData(projectName, urlPath, [], ['default'], new Date())
+  const projectData = toProjectData(
+    isUserProject ? 'Prompts' : projectName,
+    urlPath,
+    [],
+    ['default'],
+    new Date(),
+    undefined,
+    undefined,
+    isUserProject ? userID : undefined
+  )
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await grantUserAccess(userID, projectID)
