@@ -84,7 +84,6 @@ export default function TestPromptTab({
             key={activeVersion.prompt}
             version={version}
             setModifiedVersion={updateVersion}
-            showInputControls
           />
         </Suspense>
         <TestButtons

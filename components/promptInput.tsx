@@ -53,12 +53,10 @@ export default function PromptInput({
   prompt,
   setPrompt,
   showLabel,
-  showInputControls,
 }: {
   prompt: string
   setPrompt: (prompt: string) => void
   showLabel?: boolean
-  showInputControls?: boolean
 }) {
   const contentEditableRef = useRef<HTMLElement>(null)
 
@@ -67,13 +65,11 @@ export default function PromptInput({
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
-    if (showInputControls) {
-      document.addEventListener('selectionchange', selectionChangeHandler)
-    }
+    document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [showInputControls, contentEditableRef, containerRef])
+  }, [contentEditableRef, containerRef])
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
     if (isInput) {

@@ -23,14 +23,12 @@ export default function PromptPanel({
   onRun,
   inputValues = {},
   showLabel,
-  showInputControls,
 }: {
   version: Version
   setModifiedVersion: (version: Version) => void
   onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   showLabel?: boolean
-  showInputControls?: boolean
 }) {
   const [prompt, setPrompt] = useState<string>(version.prompt)
   const [config, setConfig] = useState(version.config)
@@ -56,17 +54,10 @@ export default function PromptPanel({
     ExtractPromptVariables(prompt).map(variable => [variable, inputValues[variable]?.[0] ?? variable])
   )
 
-  console.log(inputs)
-
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
       <div className='self-stretch'>
-        <PromptInput
-          prompt={prompt}
-          setPrompt={updatePrompt}
-          showLabel={showLabel}
-          showInputControls={showInputControls}
-        />
+        <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
       </div>
       {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {onRun && (
