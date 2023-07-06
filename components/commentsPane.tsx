@@ -80,7 +80,7 @@ export function CommentCell({
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
           <VersionLabel label={comment.text} colors={labelColors} />
           {version && `${comment.action === 'addLabel' ? ' to' : ' from'} version ${versionIndex}`}
-          {' • '}
+          {' · '}
           <span className='text-gray-400'>{formattedDate}</span>
         </div>
       ) : (

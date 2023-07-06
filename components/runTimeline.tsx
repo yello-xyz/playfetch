@@ -148,7 +148,7 @@ function RunCell({
         </div>
       )}
       <div className='self-end text-xs'>
-        {FormatCost(run.cost)} • {formattedDate}
+        {FormatCost(run.cost)} · {formattedDate}
       </div>
     </div>
   )
