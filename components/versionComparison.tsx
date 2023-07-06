@@ -57,9 +57,9 @@ const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: b
     case '=':
       return `${baseClassName} ${taggedClassName}`
     case '-':
-      return `bg-red-300 ${baseClassName} ${taggedClassName}`
+      return `bg-red-50 ${baseClassName} ${taggedClassName}`
     case '+':
-      return `bg-green-200 ${baseClassName} ${taggedClassName}`
+      return `bg-green-50 ${baseClassName} ${taggedClassName}`
   }
 }
 

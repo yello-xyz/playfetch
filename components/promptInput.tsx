@@ -4,7 +4,7 @@ import ContentEditable from 'react-contenteditable'
 import { useRef } from 'react'
 import Label from './label'
 
-const inputStyle = 'class="text-white rounded px-1 py-0.5 bg-violet-500 font-normal"'
+const inputStyle = 'class="text-white rounded px-1 py-0.5 bg-purple-400 font-normal"'
 const toHTML = (text: string) =>
   text
     .replace(/}}$/, '}}&nbsp;')
@@ -91,7 +91,7 @@ export default function PromptInput({
         </div>
       )}
       <ContentEditable
-        className='p-4 text-gray-800 border border-gray-300 rounded-lg selection:bg-violet-300'
+        className='p-4 text-gray-800 border border-gray-300 rounded-lg'
         onChange={event => setPrompt(fromHTML(event.currentTarget.innerHTML))}
         html={toHTML(prompt)}
         innerRef={contentEditableRef}

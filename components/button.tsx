@@ -47,7 +47,7 @@ export default function Button({
       case 'outline':
         return 'bg-gray-200 hover:bg-gray-300'
       case 'destructive':
-        return 'text-white bg-red-700 hover:bg-red-800'
+        return 'text-white bg-red-500 hover:bg-red-600'
     }
   }
 

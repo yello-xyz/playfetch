@@ -10,12 +10,12 @@ import { useRefreshProjects, useRefreshPrompt } from './refreshContext'
 import Icon from './icon'
 
 const projectLabelColors = [
-  'bg-red-500',
-  'bg-orange-500',
-  'bg-purple-500',
-  'bg-green-500',
-  'bg-blue-500',
-  'bg-yellow-500',
+  'bg-red-300',
+  'bg-orange-300',
+  'bg-purple-300',
+  'bg-green-300',
+  'bg-blue-300',
+  'bg-yellow-300',
 ]
 
 export const AvailableLabelColorsForPrompt = (prompt: ActivePrompt) =>

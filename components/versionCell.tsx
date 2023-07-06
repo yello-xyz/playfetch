@@ -67,7 +67,7 @@ export default function VersionCell({
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
         className={`flex-1 border border-gray-300 rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
-          isActiveVersion ? 'bg-sky-50' : ''
+          isActiveVersion ? 'bg-blue-25' : ''
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
@@ -145,8 +145,8 @@ export function VerticalBarWrapper({
       <div className='flex flex-col items-end w-10 gap-1'>
         {sequenceNumber !== undefined && (
           <div className='flex items-center gap-2'>
-            <span className={`${isFilled ? '' : 'text-gray-400'} text-xs`}>{sequenceNumber}</span>
-            <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-cyan-950' : 'border border-gray-400'}`} />
+            <span className={`${isFilled ? 'text-gray-800' : 'text-gray-400'} text-xs`}>{sequenceNumber}</span>
+            <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-800' : 'border border-gray-400'}`} />
           </div>
         )}
         {hasStroke && (
