@@ -11,10 +11,12 @@ export default function PublishPromptTab({
   prompt,
   activeVersion,
   setActiveVersion,
+  maxWidth,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
+  maxWidth: string
 }) {
   const availableFlavors = prompt.availableFlavors
   const endpoints = prompt.endpoints
@@ -44,7 +46,7 @@ export default function PublishPromptTab({
 
   return (
     <>
-      <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
+      <div className={`flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 ${maxWidth}`}>
         <PublishSettingsPane
           key={flavor}
           activeItem={prompt}

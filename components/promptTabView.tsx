@@ -45,9 +45,51 @@ export default function PromptTabView({
     }
   }
 
-  const sidePanels = (includeRuns: boolean) => (
-    <>
-      {includeRuns && (
+  const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
+
+  const renderTab = (tab: MainViewTab) => {
+    switch (tab) {
+      case 'play':
+        return (
+          <PlayTab
+            prompt={prompt}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            setModifiedVersion={setModifiedVersion}
+            maxWidth={maxTabWidth}
+          />
+        )
+      case 'test':
+        return (
+          <TestPromptTab
+            key={activeVersion.prompt}
+            prompt={prompt}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            setModifiedVersion={setModifiedVersion}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
+            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            maxWidth={maxTabWidth}
+          />
+        )
+      case 'publish':
+        return (
+          <PublishPromptTab
+            key={activeVersion.id}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            prompt={prompt}
+            maxWidth={maxTabWidth}
+          />
+        )
+    }
+  }
+
+  return (
+    <div className='flex items-stretch h-full'>
+      {renderTab(activeTab)}
+      {activeTab !== 'publish' && (
         <div className='flex-1 p-6 pl-0'>
           <RunTimeline runs={activeVersion.runs} version={activeVersion} activeRunID={activeRunID} />
         </div>
@@ -58,53 +100,6 @@ export default function PromptTabView({
         showComments={showComments}
         setShowComments={setShowComments}
       />
-    </>
+    </div>
   )
-
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'play':
-        return (
-          <>
-            <PlayTab
-              prompt={prompt}
-              activeVersion={activeVersion}
-              setActiveVersion={setActiveVersion}
-              setModifiedVersion={setModifiedVersion}
-            />
-            {sidePanels(true)}
-          </>
-        )
-      case 'test':
-        return (
-          <>
-            <TestPromptTab
-              key={activeVersion.prompt}
-              prompt={prompt}
-              activeVersion={activeVersion}
-              setActiveVersion={setActiveVersion}
-              setModifiedVersion={setModifiedVersion}
-              inputValues={inputValues}
-              setInputValues={setInputValues}
-              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            />
-            {sidePanels(true)}
-          </>
-        )
-      case 'publish':
-        return (
-          <>
-            <PublishPromptTab
-              key={activeVersion.id}
-              activeVersion={activeVersion}
-              setActiveVersion={setActiveVersion}
-              prompt={prompt}
-            />
-            {sidePanels(false)}
-          </>
-        )
-    }
-  }
-
-  return <div className='flex items-stretch h-full'>{renderTab()}</div>
 }

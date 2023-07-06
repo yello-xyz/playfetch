@@ -30,6 +30,7 @@ export default function TestPromptTab({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  maxWidth,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
@@ -38,6 +39,7 @@ export default function TestPromptTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
+  maxWidth: string
 }) {
   const [version, setVersion] = useState(activeVersion)
   const updateVersion = (version: Version) => {
@@ -61,7 +63,7 @@ export default function TestPromptTab({
 
   return (
     <>
-      <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
+      <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
         <div className='flex flex-col flex-grow gap-2 overflow-hidden'>
           <Label>Test Data</Label>
           <TestDataPane
