@@ -33,7 +33,7 @@ export default function RunTimeline({
 
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
-      <div className='font-medium text-gray-600'>Results</div>
+      <div className='font-medium text-gray-600'>Responses</div>
       {runs.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map(run => (
