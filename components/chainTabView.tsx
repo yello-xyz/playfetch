@@ -1,4 +1,4 @@
-import { ActiveProject, Prompt, ProperProject, Version } from '@/types'
+import { ActiveProject, Prompt, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -11,13 +11,7 @@ export type LoadedChainItem = ChainItem & { version: Version }
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
   !!item.version && 'prompt' in item.version
 
-export default function ChainTabView({
-  activeTab,
-  project,
-}: {
-  activeTab: MainViewTab
-  project: ActiveProject & ProperProject
-}) {
+export default function ChainTabView({ activeTab, project }: { activeTab: MainViewTab; project: ActiveProject }) {
   // TODO generalise this and expose all previous chains in the project
   const previousChain = (project.endpoints[0]?.chain ?? []).map(item => ({
     prompt: project.prompts.find(prompt => prompt.id === item.promptID),

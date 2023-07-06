@@ -6,7 +6,17 @@ export async function migrateUsers() {
   const datastore = getDatastore()
   const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
   for (const userData of allUsers) {
-    await addProjectForUser(getID(userData), userData.email.split('@')[0], true)
+    await getDatastore().save(
+      toUserData(
+        userData.email,
+        userData.fullName,
+        userData.avatarColor,
+        userData.isAdmin,
+        userData.createdAt,
+        userData.lastLoginAt,
+        getID(userData)
+      )
+    )
   }
 }
 

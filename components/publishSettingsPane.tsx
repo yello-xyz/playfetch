@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ActiveProject, ActivePrompt, ProperProject, ResolvedEndpoint } from '@/types'
+import { ActiveProject, ActivePrompt, ResolvedEndpoint } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import Label from './label'
@@ -17,7 +17,7 @@ export default function PublishSettingsPane({
   onPublish,
   onRefresh,
 }: {
-  activeItem: ActivePrompt | (ActiveProject & ProperProject)
+  activeItem: ActivePrompt | ActiveProject
   flavor: string
   setFlavor: (flavor: string) => void
   onPublish: (name: string, useCache: boolean) => Promise<void>

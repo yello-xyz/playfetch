@@ -69,7 +69,7 @@ export async function loadEndpoints(promptID: number, projectData: any, buildURL
   return endpoints.map(endpoint => ({
     ...toPromptEndpoint(endpoint),
     url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
-    apiKeyDev: projectData?.apiKeyDev ?? '',
+    apiKeyDev: projectData.apiKeyDev ?? '',
     usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
   }))
 }
@@ -80,11 +80,10 @@ export async function getActivePrompt(
   buildURL: (path: string) => string
 ): Promise<ActivePrompt> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
-  const projectData =
-    promptData.projectID === userID ? undefined : await getKeyedEntity(Entity.PROJECT, promptData.projectID)
+  const projectData = await getKeyedEntity(Entity.PROJECT, promptData.projectID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
-  const users = await getProjectUsers(userID, promptData.projectID)
+  const users = await getProjectUsers(promptData.projectID)
   const inputs = await getProjectInputValues(promptData.projectID)
   const endpoints = await loadEndpoints(promptID, projectData, buildURL)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
@@ -96,9 +95,9 @@ export async function getActivePrompt(
     endpoints,
     users,
     inputs,
-    projectURLPath: projectData?.urlPath ?? '',
-    availableLabels: projectData ? JSON.parse(projectData.labels) : [],
-    availableFlavors: projectData ? JSON.parse(projectData.flavors) : [],
+    projectURLPath: projectData.urlPath ?? '',
+    availableLabels: JSON.parse(projectData.labels),
+    availableFlavors: JSON.parse(projectData.flavors),
   }
 }
 

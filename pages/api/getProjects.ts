@@ -3,7 +3,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import { Project, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function getProjects(req: NextApiRequest, res: NextApiResponse<Project[]>, user: User) {
+async function getProjects(_: NextApiRequest, res: NextApiResponse<Project[]>, user: User) {
   const projects = await getProjectsForUser(user.id)
   res.json(projects)
 }

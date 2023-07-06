@@ -76,7 +76,7 @@ export default function LabelPopupMenu({
               />
 
               {addingNewLabel ? (
-                <div className='flex items-center gap-1 p-1' onClick={() => toggleLabel(trimmedLabel)}>
+                <div className='flex items-center gap-1 p-1 cursor-pointer' onClick={() => toggleLabel(trimmedLabel)}>
                   <Icon icon={addIcon} />
                   Create new label <span className='font-medium'>“{trimmedLabel}”</span>
                 </div>

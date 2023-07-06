@@ -87,9 +87,7 @@ export default function VersionCell({
               labelColors={labelColors}
               containerRect={containerRect}
             />
-            {prompt.availableLabels.length > 0 && (
-              <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
-            )}
+            <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
             <VersionPopupMenu containerRect={containerRect} version={version} />
           </div>
         </div>

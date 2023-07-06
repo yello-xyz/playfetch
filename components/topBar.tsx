@@ -10,6 +10,7 @@ import { UserAvatar } from './userSidebarItem'
 import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
+import { useLoggedInUser } from './userContext'
 
 export default function TopBar({
   projects = [],
@@ -39,6 +40,8 @@ export default function TopBar({
   const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
   const promptHasComments = (activePrompt?.versions ?? []).some(version => version.comments.length > 0)
 
+  const user = useLoggedInUser()
+
   return (
     <>
       <div className='flex flex-col'>
@@ -53,7 +56,7 @@ export default function TopBar({
                 <span className='font-medium'>{' / '}</span>
               </>
             )}
-            {activeProject && activeProject.isUserProject ? (
+            {activeProject && activeProject.id === user.id ? (
               <span className='font-medium'>{activeProject.name}</span>
             ) : (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>

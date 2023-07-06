@@ -10,7 +10,7 @@ import {
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { ActiveProject, Project, ProperProject, User, UserProject } from '@/types'
+import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
@@ -51,20 +51,13 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
-const toProject = (data: any): ProperProject => ({
+const toProject = (data: any): Project => ({
   id: getID(data),
   name: data.name,
-  isUserProject: false,
 })
 
-const toUserProject = (userID: number): UserProject => ({
-  id: userID,
-  name: 'Prompts',
-  isUserProject: true,
-})
-
-export async function getProjectUsers(userID: number, projectID: number): Promise<User[]> {
-  const userIDs = projectID === userID ? [userID] : await getUserIDsForProject(projectID)
+export async function getProjectUsers(projectID: number): Promise<User[]> {
+  const userIDs = await getUserIDsForProject(projectID)
   const users = await getKeyedEntities(Entity.USER, userIDs)
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
@@ -74,21 +67,17 @@ export async function getActiveProject(
   projectID: number,
   buildURL: (path: string) => string
 ): Promise<ActiveProject> {
-  const projectData = projectID === userID ? undefined : await getVerifiedUserProjectData(userID, projectID)
-  const promptDatas = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
-  const prompts = promptDatas.map(promptData => toPrompt(promptData, userID))
-  const users = await getProjectUsers(userID, projectID)
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
+  const prompts = promptData.map(prompt => toPrompt(prompt, userID))
+  const users = await getProjectUsers(projectID)
 
   return {
-    ...(projectData
-      ? {
-          ...toProject(projectData),
-          inputs: await getProjectInputValues(projectID),
-          projectURLPath: projectData.urlPath,
-          availableFlavors: JSON.parse(projectData.flavors),
-          endpoints: await loadEndpoints(projectID, projectData, buildURL),
-        }
-      : toUserProject(userID)),
+    ...toProject(projectData),
+    inputs: await getProjectInputValues(projectID),
+    projectURLPath: projectData.urlPath,
+    availableFlavors: JSON.parse(projectData.flavors),
+    endpoints: await loadEndpoints(projectID, projectData, buildURL),
     prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
     users,
   }
@@ -171,7 +160,7 @@ async function updateProject(projectData: any) {
 }
 
 export async function ensureProjectAccess(userID: number, projectID: number) {
-  const hasAccess = projectID === userID || (await hasUserAccess(userID, projectID))
+  const hasAccess = await hasUserAccess(userID, projectID)
   if (!hasAccess) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
@@ -186,6 +175,9 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
 }
 
 export async function updateProjectName(userID: number, projectID: number, name: string) {
+  if (projectID === userID) {
+    throw new Error('Cannot rename user project')
+  }
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   await updateProject({ ...projectData, name })
 }
@@ -219,7 +211,7 @@ async function rotateProjectAPIKey(projectData: any): Promise<string> {
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getProjectsIDsForUser(userID)
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
-  return [toUserProject(userID), ...projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)]
+  return projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)
 }
 
 export async function deleteProjectForUser(userID: number, projectID: number) {

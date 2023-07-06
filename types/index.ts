@@ -9,23 +9,15 @@ export type User = {
 export type Project = {
   id: number
   name: string
-  isUserProject: boolean
 }
-
-export type UserProject = Project & { isUserProject: true }
-export type ProperProject = Project & { isUserProject: false }
 
 export type InputValues = { [name: string]: string[] }
 
-export type ActiveProject = (
-  | UserProject
-  | (ProperProject & {
-      endpoints: ResolvedEndpoint[]
-      inputs: InputValues
-      projectURLPath: string
-      availableFlavors: string[]
-    })
-) & {
+export type ActiveProject = Project & {
+  endpoints: ResolvedEndpoint[]
+  inputs: InputValues
+  projectURLPath: string
+  availableFlavors: string[]
   prompts: Prompt[]
   users: User[]
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ProperProject, ResolvedEndpoint } from '@/types'
+import { ActiveProject, ResolvedEndpoint } from '@/types'
 import { useRefreshProject } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -8,13 +8,7 @@ import api from '@/src/client/api'
 import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 
-export default function PublishChainTab({
-  chain,
-  project,
-}: {
-  chain: LoadedChainItem[]
-  project: ActiveProject & ProperProject
-}) {
+export default function PublishChainTab({ chain, project }: { chain: LoadedChainItem[]; project: ActiveProject }) {
   const availableFlavors = project.availableFlavors
   const endpoints = project.endpoints
   const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
