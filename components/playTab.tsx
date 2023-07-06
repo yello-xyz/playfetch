@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { ActivePrompt, Version, Project } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 
@@ -23,6 +23,13 @@ export default function PlayTab({
   showComments: boolean
   setShowComments: (show: boolean) => void
 }) {
+  const [activeRunID, setActiveRunID] = useState<number>()
+
+  const onSelectComment = (version: Version, runID?: number) => {
+    setActiveVersion(version)
+    setActiveRunID(runID)
+  }
+
   const runPrompt = useRunPrompt(prompt.id)
 
   return (
@@ -40,10 +47,10 @@ export default function PlayTab({
         </Suspense>
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={activeVersion.runs} version={activeVersion} />
+        <RunTimeline runs={activeVersion.runs} version={activeVersion} activeRunID={activeRunID} />
       </div>
       {showComments && (
-        <CommentsPane prompt={prompt} setActiveVersion={setActiveVersion} onDismiss={() => setShowComments(false)} />
+        <CommentsPane prompt={prompt} onSelectComment={onSelectComment} onDismiss={() => setShowComments(false)} />
       )}
     </>
   )

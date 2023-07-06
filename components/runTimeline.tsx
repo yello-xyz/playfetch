@@ -6,7 +6,15 @@ import commentIcon from '@/public/comment.svg'
 import useScrollDetection from './useScrollDetection'
 import { CommentInput } from './commentPopupMenu'
 
-export default function RunTimeline({ runs, version }: { runs: Run[]; version?: Version }) {
+export default function RunTimeline({
+  runs,
+  version,
+  activeRunID,
+}: {
+  runs: Run[]
+  version?: Version
+  activeRunID?: number
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerRect, setContainerRect] = useState<DOMRect>()
   useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [])
@@ -14,13 +22,29 @@ export default function RunTimeline({ runs, version }: { runs: Run[]; version?: 
   const [scrollTop, setScrollTop] = useState(0)
   useScrollDetection(() => setScrollTop(scrollRef.current?.scrollTop ?? 0), scrollRef)
 
+  const identifierForRunID = (runID: number) => `r${runID}`
+
+  useEffect(() => {
+    const element = activeRunID ? document.getElementById(identifierForRunID(activeRunID)) : undefined
+    if (runs.length > 1 && element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [runs, activeRunID])
+
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
       <div className='font-medium text-gray-600'>Results</div>
       {runs.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map(run => (
-            <RunCell key={run.id} run={run} version={version} containerRect={containerRect} scrollTop={scrollTop} />
+            <RunCell
+              key={run.id}
+              identifier={identifierForRunID(run.id)}
+              run={run}
+              version={version}
+              containerRect={containerRect}
+              scrollTop={scrollTop}
+            />
           ))}
         </div>
       ) : (
@@ -51,11 +75,13 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
 }
 
 function RunCell({
+  identifier,
   run,
   version,
   containerRect,
   scrollTop,
 }: {
+  identifier: string
   run: Run
   version?: Version
   containerRect?: DOMRect
@@ -68,7 +94,6 @@ function RunCell({
 
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
-  const identifier = `r${run.id}`
 
   const [startScrollTop, setStartScrollTop] = useState(0)
   if (!selection && !selectionForComment && startScrollTop > 0) {

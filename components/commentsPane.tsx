@@ -11,11 +11,11 @@ import VersionComparison from './versionComparison'
 export default function CommentsPane({
   prompt,
   onDismiss,
-  setActiveVersion,
+  onSelectComment,
 }: {
   prompt: ActivePrompt
   onDismiss: () => void
-  setActiveVersion: (version: Version) => void
+  onSelectComment: (version: Version, runID?: number) => void
 }) {
   const users = prompt.users
   const labelColors = AvailableLabelColorsForPrompt(prompt)
@@ -37,7 +37,7 @@ export default function CommentsPane({
             user={users.find(user => user.id === comment.userID)!}
             labelColors={labelColors}
             versions={prompt.versions}
-            onSelect={setActiveVersion}
+            onSelect={onSelectComment}
           />
         ))}
       </div>
@@ -56,7 +56,7 @@ export function CommentCell({
   user: User
   labelColors: Record<string, string>
   versions?: Version[]
-  onSelect?: (version: Version) => void
+  onSelect?: (version: Version, runID?: number) => void
 }) {
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
@@ -67,7 +67,7 @@ export function CommentCell({
   const compareVersion = versions.find(v => v.id === version?.previousID)
   const versionIndex = versions.findIndex(version => version.id === comment.versionID) + 1
 
-  const selectVersion = onSelect && version ? () => onSelect(version) : undefined
+  const selectVersion = onSelect && version ? () => onSelect(version, comment.runID) : undefined
 
   return (
     <div className={selectVersion ? 'cursor-pointer' : ''} onClick={selectVersion}>
