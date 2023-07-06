@@ -1,11 +1,9 @@
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
 import { ActivePrompt, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 
 import dynamic from 'next/dynamic'
-import RunTimeline from './runTimeline'
 import { useRunPrompt } from './testPromptTab'
-import CommentsPane from './commentsPane'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
 export default function PlayTab({
@@ -13,28 +11,12 @@ export default function PlayTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
-  showComments,
-  setShowComments,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
-  showComments: boolean
-  setShowComments: (show: boolean) => void
 }) {
-  const [activeRunID, setActiveRunID] = useState<number>()
-
-  const onSelectComment = (version: Version, runID?: number) => {
-    if (version.id !== activeVersion.id) {
-      setActiveRunID(undefined)
-      setActiveVersion(version)
-      setTimeout(() => setActiveRunID(runID), 1000)
-    } else {
-      setActiveRunID(runID)
-    }
-  }
-
   const runPrompt = useRunPrompt(prompt.id)
 
   return (
@@ -52,12 +34,6 @@ export default function PlayTab({
           />
         </Suspense>
       </div>
-      <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={activeVersion.runs} version={activeVersion} activeRunID={activeRunID} />
-      </div>
-      {showComments && (
-        <CommentsPane prompt={prompt} onSelectComment={onSelectComment} onDismiss={() => setShowComments(false)} />
-      )}
     </>
   )
 }

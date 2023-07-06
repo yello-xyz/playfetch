@@ -60,7 +60,7 @@ export default function PublishPromptTab({
         )}
         {endpoint && <UsagePane endpoint={endpoint} />}
       </div>
-      <div className='flex flex-col items-start gap-4 p-6 pl-0'>
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0'>
         {endpoint && (
           <ExamplePane
             endpoint={endpoint}

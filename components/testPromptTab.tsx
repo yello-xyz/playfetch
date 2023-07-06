@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
@@ -94,9 +93,6 @@ export default function TestPromptTab({
           disabled={!version.prompt.length}
           callback={testPrompt}
         />
-      </div>
-      <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={activeVersion.runs} version={activeVersion} />
       </div>
     </>
   )

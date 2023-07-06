@@ -10,11 +10,13 @@ import VersionComparison from './versionComparison'
 
 export default function CommentsPane({
   prompt,
-  onDismiss,
+  showComments,
+  setShowComments,
   onSelectComment,
 }: {
   prompt: ActivePrompt
-  onDismiss: () => void
+  showComments: boolean
+  setShowComments: (show: boolean) => void
   onSelectComment: (version: Version, runID?: number) => void
 }) {
   const users = prompt.users
@@ -23,11 +25,11 @@ export default function CommentsPane({
     .flatMap(version => version.comments)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
-  return (
+  return showComments ? (
     <div className='flex flex-col px-3 pb-3 border-l border-gray-200 w-[280px]'>
       <div className='flex items-start justify-between pb-5'>
         <span className='font-medium text-gray-800'>Comments</span>
-        <IconButton icon={collapseIcon} onClick={onDismiss} />
+        <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
       </div>
       <div className='flex flex-col gap-2 overflow-y-auto'>
         {comments.map((comment, index) => (
@@ -42,7 +44,7 @@ export default function CommentsPane({
         ))}
       </div>
     </div>
-  )
+  ) : null
 }
 
 export function CommentCell({
