@@ -32,7 +32,7 @@ export default function CommentPopupMenu({
     setLastSelection(selection)
   }
 
-  const comments = version.comments
+  const comments = version.comments.filter(comment => !comment.action)
   const haveComments = comments.length > 0
 
   const iconRef = useRef<HTMLDivElement>(null)
