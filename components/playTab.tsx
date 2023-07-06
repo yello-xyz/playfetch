@@ -26,8 +26,13 @@ export default function PlayTab({
   const [activeRunID, setActiveRunID] = useState<number>()
 
   const onSelectComment = (version: Version, runID?: number) => {
-    setActiveVersion(version)
-    setActiveRunID(runID)
+    if (version.id !== activeVersion.id) {
+      setActiveRunID(undefined)
+      setActiveVersion(version)
+      setTimeout(() => setActiveRunID(runID), 1000)
+    } else {
+      setActiveRunID(runID)
+    }
   }
 
   const runPrompt = useRunPrompt(prompt.id)
