@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActivePrompt, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'

@@ -138,6 +138,7 @@ export default function Home({
   const addPrompt = async (projectID: number) => {
     const promptID = await api.addPrompt(projectID)
     selectPrompt(promptID)
+    setSelectedTab('play')
   }
 
   const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
