@@ -67,6 +67,7 @@ export default function TopBar({
                       isMenuExpanded={isMenuExpanded}
                       setIsMenuExpanded={setIsMenuExpanded}
                       onRefresh={onRefresh}
+                      onDelete={() => onSelectProject(activePrompt.projectID)}
                     />
                   )}
                   {activeProject && (

@@ -12,12 +12,14 @@ export default function PromptPopupMenu({
   isMenuExpanded,
   setIsMenuExpanded,
   onRefresh,
+  onDelete,
 }: {
   prompt: Prompt
   projects: Project[]
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
+  onDelete?:  () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
 
@@ -28,7 +30,7 @@ export default function PromptPopupMenu({
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to delete this prompt? This action cannot be undone.',
-      callback: () => api.deletePrompt(prompt.id).then(onRefresh),
+      callback: () => api.deletePrompt(prompt.id).then(onDelete ?? onRefresh),
       destructive: true,
     })
   }
