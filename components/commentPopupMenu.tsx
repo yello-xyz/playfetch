@@ -3,6 +3,7 @@ import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import commentIcon from '@/public/comment.svg'
+import commentBadgeIcon from '@/public/commentBadge.svg'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { useRef, useState } from 'react'
@@ -39,7 +40,10 @@ export default function CommentPopupMenu({
   return (
     <>
       <div ref={iconRef}>
-        <IconButton icon={commentIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+        <IconButton
+          icon={haveComments ? commentBadgeIcon : commentIcon}
+          onClick={() => setIsMenuExpanded(!isMenuExpanded)}
+        />
       </div>
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
