@@ -4,6 +4,7 @@ import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
 import useScrollDetection from './useScrollDetection'
+import useContainerRect from './useContainerRect'
 
 export default function VersionTimeline({
   prompt,
@@ -19,8 +20,7 @@ export default function VersionTimeline({
   const labelColors = AvailableLabelColorsForPrompt(prompt)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const [containerRect, setContainerRect] = useState<DOMRect>()
-  useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [])
+  const containerRect = useContainerRect(containerRef)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(() => forceStateUpdate(scrollRef.current?.scrollTop ?? 0), scrollRef)

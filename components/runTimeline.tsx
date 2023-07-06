@@ -5,6 +5,7 @@ import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
 import useScrollDetection from './useScrollDetection'
 import { CommentInput } from './commentPopupMenu'
+import useContainerRect from './useContainerRect'
 
 export default function RunTimeline({
   runs,
@@ -16,8 +17,7 @@ export default function RunTimeline({
   activeRunID?: number
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [containerRect, setContainerRect] = useState<DOMRect>()
-  useEffect(() => setContainerRect(containerRef.current?.getBoundingClientRect()), [])
+  const containerRect = useContainerRect(containerRef)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
   useScrollDetection(() => setScrollTop(scrollRef.current?.scrollTop ?? 0), scrollRef)
