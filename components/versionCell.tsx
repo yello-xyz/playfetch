@@ -110,7 +110,8 @@ export default function VersionCell({
 }
 
 export function VersionLabel({ label, colors }: { label: string; colors: Record<string, string> }) {
-  return <span className={`px-1.5 py-px text-xs text-white rounded ${colors[label]}`}>{label}</span>
+  const color = colors[label] ?? 'bg-gray-400'
+  return <span className={`px-1.5 py-px text-xs text-white rounded ${color}`}>{label}</span>
 }
 
 function UserDetails({ user }: { user: User }) {
