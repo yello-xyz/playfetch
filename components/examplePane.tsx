@@ -58,7 +58,7 @@ export default function ExamplePane({
 
 function CodeBlock({ children }: { children: ReactNode }) {
   return (
-    <div className='p-4 text-xs text-green-600 bg-gray-100 rounded-lg'>
+    <div className='p-4 text-xs text-[#53961F] bg-gray-100 rounded-lg'>
       <div className='relative overflow-hidden'>
         {children}
         <div className='absolute top-0 left-0'>
@@ -82,11 +82,11 @@ function MarkedUpCURLCommand({ children }: { children: ReactNode }) {
             <MarkedUpStartLine
               line={line}
               markup={[
-                ['curl', 'text-fuchsia-500'],
-                ['-X POST', 'text-blue-500'],
+                ['curl', 'text-[#FF41BE]'],
+                ['-X POST', 'text-[#0067F3]'],
               ]}>
-              <MarkedUpStartLine line={line} markup={[['  -H', 'text-blue-500']]}>
-                <MarkedUpStartLine line={line} markup={[['  -d', 'text-blue-500']]}>
+              <MarkedUpStartLine line={line} markup={[['  -H', 'text-[#0067F3]']]}>
+                <MarkedUpStartLine line={line} markup={[['  -d', 'text-[#0067F3]']]}>
                   {line}
                 </MarkedUpStartLine>
               </MarkedUpStartLine>

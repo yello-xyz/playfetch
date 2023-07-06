@@ -92,7 +92,7 @@ export default function UserSidebarItem({ user }: { user: User }) {
                   </div>
                 </div>
                 <div className='border-t border-gray-300' />
-                <span className='p-1 font-medium text-red-700' onClick={() => signOut()}>
+                <span className='p-1 font-medium text-red-500' onClick={() => signOut()}>
                   Log out
                 </span>
               </div>
