@@ -196,7 +196,7 @@ export async function ensureProjectLabel(userID: number, projectID: number, labe
   }
 }
 
-export async function getProjectAPIKeyDev(userID: number, projectID: number): Promise<string> {
+export async function ensureProjectAPIKey(userID: number, projectID: number): Promise<string> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   return projectData.apiKeyDev ?? rotateProjectAPIKey(projectData)
 }

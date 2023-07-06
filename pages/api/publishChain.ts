@@ -2,7 +2,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ToCamelCase } from '@/src/common/formatting'
 import { saveEndpoint } from '@/src/server/datastore/endpoints'
-import { getURLPathForProject } from '@/src/server/datastore/projects'
+import { ensureProjectAPIKey, getURLPathForProject } from '@/src/server/datastore/projects'
 import { Chain, User } from '@/types'
 
 async function publishChain(req: NextApiRequest, res: NextApiResponse, user: User) {
@@ -16,6 +16,7 @@ async function publishChain(req: NextApiRequest, res: NextApiResponse, user: Use
 
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
+  await ensureProjectAPIKey(projectID, userID)
   await saveEndpoint(userID, promptID, chain, urlPath, projectURLPath, flavor, useCache)
 
   res.json({})
