@@ -107,24 +107,29 @@ export function CommentInput({
   }
 
   return (
-    <div className='flex items-center gap-2'>
-      <UserAvatar user={user} size='md' />
-      <input
-        ref={inputRef}
-        type='text'
-        className='flex-1 text-sm outline-none rounded-lg py-1.5 text-gray-600'
-        placeholder='Add a comment…'
-        value={newComment}
-        onChange={event => setNewComment(event.target.value)}
-        onKeyDown={onKeyDown}
-      />
-      {
-        <IconButton
-          disabled={!canAddComment}
-          icon={canAddComment ? enterIcon : enterDisabledIcon}
-          onClick={addComment}
+    <div className='flex flex-col items-stretch gap-1'>
+      {selection && (
+        <div className='self-start p-1 my-1 italic text-left rounded bg-blue-50 line-clamp-2'>{selection}</div>
+      )}
+      <div className='flex items-center gap-2'>
+        <UserAvatar user={user} size='md' />
+        <input
+          ref={inputRef}
+          type='text'
+          className='flex-1 text-sm outline-none rounded-lg py-1.5 text-gray-600'
+          placeholder='Add a comment…'
+          value={newComment}
+          onChange={event => setNewComment(event.target.value)}
+          onKeyDown={onKeyDown}
         />
-      }
+        {
+          <IconButton
+            disabled={!canAddComment}
+            icon={canAddComment ? enterIcon : enterDisabledIcon}
+            onClick={addComment}
+          />
+        }
+      </div>
     </div>
   )
 }
