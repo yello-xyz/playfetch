@@ -13,11 +13,13 @@ export default function RunTimeline({
   version,
   prompt,
   activeRunID,
+  isRunning,
 }: {
   runs: Run[]
   version?: Version
   prompt?: ActivePrompt
   activeRunID?: number
+  isRunning?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const containerRect = useContainerRect(containerRef)
@@ -52,7 +54,7 @@ export default function RunTimeline({
           ))}
         </div>
       ) : (
-        <EmptyRuns />
+        <EmptyRuns isRunning={isRunning} />
       )}
     </div>
   )
@@ -267,10 +269,10 @@ function OutputWithComments({
   return <div id={identifier}>{spans}</div>
 }
 
-function EmptyRuns() {
+function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
   return (
     <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
-      <span className='font-medium text-gray-600'>No Responses</span>
+      <span className='font-medium text-gray-600'>{isRunning ? 'Waiting for responses…' : 'No Responses'}</span>
     </div>
   )
 }

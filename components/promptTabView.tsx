@@ -50,11 +50,14 @@ export default function PromptTabView({
   const promptID = prompt.id
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
+  const [isRunning, setRunning] = useState(false)
 
   const runPrompt = async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
+    setRunning(true)
     const versionID = await savePrompt()
     await refreshPrompt(versionID)
     await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
+    setRunning(false)
   }
 
   const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
@@ -105,7 +108,13 @@ export default function PromptTabView({
       {renderTab(activeTab)}
       {activeTab !== 'publish' && (
         <div className='flex-1 p-6 pl-0'>
-          <RunTimeline runs={activeVersion.runs} prompt={prompt} version={activeVersion} activeRunID={activeRunID} />
+          <RunTimeline
+            runs={activeVersion.runs}
+            prompt={prompt}
+            version={activeVersion}
+            activeRunID={activeRunID}
+            isRunning={isRunning}
+          />
         </div>
       )}
       <CommentsPane
