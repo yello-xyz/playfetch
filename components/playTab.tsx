@@ -22,20 +22,17 @@ export default function PlayTab({
   const runPrompt = useRunPrompt(prompt.id)
 
   return (
-    <>
-      <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6 ${maxWidth}`}>
-        <VersionTimeline prompt={prompt} activeVersion={activeVersion} setActiveVersion={setActiveVersion} />
-        <Suspense>
-          <PromptPanel
-            key={activeVersion.prompt}
-            version={activeVersion}
-            setModifiedVersion={setModifiedVersion}
-            onRun={runPrompt}
-            inputValues={prompt.inputs}
-            showLabel
-          />
-        </Suspense>
-      </div>
-    </>
+    <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6 ${maxWidth}`}>
+      <VersionTimeline prompt={prompt} activeVersion={activeVersion} setActiveVersion={setActiveVersion} />
+      <Suspense>
+        <PromptPanel
+          version={activeVersion}
+          setModifiedVersion={setModifiedVersion}
+          onRun={runPrompt}
+          inputValues={prompt.inputs}
+          showLabel
+        />
+      </Suspense>
+    </div>
   )
 }

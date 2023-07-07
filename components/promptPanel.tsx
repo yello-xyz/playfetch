@@ -57,7 +57,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
       <div className='self-stretch'>
-        <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
+        <PromptInput key={version.prompt} prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
       </div>
       {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {onRun && (
