@@ -1,22 +1,22 @@
 import { RefObject, useCallback, useEffect, useRef } from 'react'
 
-export default function useScrollDetection(callback: () => void, element: RefObject<HTMLDivElement>) {
+export default function useScrollDetection(callback: (scrollTop: number) => void, element: RefObject<HTMLDivElement>) {
   const frame = useRef(0)
   const debouncedCallback = useCallback(() => {
     if (frame.current) {
       cancelAnimationFrame(frame.current)
     }
     frame.current = requestAnimationFrame(() => {
-      callback()
+      callback(element.current?.scrollTop ?? 0)
     })
-  }, [callback, frame])
+  }, [element, callback, frame])
 
   useEffect(() => {
-    callback()
+    debouncedCallback()
     const currentElement = element.current
     currentElement?.addEventListener('scroll', debouncedCallback, { passive: true })
     return () => {
       currentElement?.removeEventListener('scroll', debouncedCallback)
     }
-  }, [element, callback, debouncedCallback])
+  }, [element, debouncedCallback])
 }

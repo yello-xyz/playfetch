@@ -23,7 +23,7 @@ export default function RunTimeline({
   const containerRect = useContainerRect(containerRef)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
-  useScrollDetection(() => setScrollTop(scrollRef.current?.scrollTop ?? 0), scrollRef)
+  useScrollDetection(setScrollTop, scrollRef)
 
   const identifierForRunID = (runID: number) => `r${runID}`
 
