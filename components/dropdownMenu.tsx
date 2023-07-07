@@ -14,10 +14,13 @@ export default function DropdownMenu({
   onChange: (value: string) => void
 }) {
   const sizeClass = size === 'small' ? 'text-xs' : 'text-sm font-medium'
+  const stateClass = disabled ? 'opacity-50' : 'cursor-pointer'
+  const appearanceClass =
+    'appearance-none border border-gray-300 rounded-md outline-none bg-no-repeat bg-[right_6px_center]'
   return (
     <select
       disabled={disabled}
-      className={`${sizeClass} appearance-none w-full py-2 pl-4 pr-8 text-gray-800 border border-gray-300 rounded-md outline-none bg-no-repeat bg-[right_6px_center]`}
+      className={`${sizeClass} ${stateClass} ${appearanceClass} w-full py-2 pl-4 pr-8 text-gray-800`}
       style={{ backgroundImage: `url('${chevronIcon.src}')` }}
       value={value}
       onChange={event => onChange(event.target.value)}>
