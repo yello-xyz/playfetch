@@ -70,11 +70,7 @@ export default function TestPromptTab({
           />
         </div>
         <Suspense>
-          <PromptPanel
-            key={activeVersion.prompt}
-            version={version}
-            setModifiedVersion={updateVersion}
-          />
+          <PromptPanel version={version} setModifiedVersion={updateVersion} />
         </Suspense>
         <TestButtons
           variables={variables}

@@ -63,6 +63,8 @@ export default function TestButtons({
 
   const setDialogPrompt = useModalDialogPrompt()
 
+  const [isRunningAllVariants, setIsRunningAllVariants] = useState(false)
+
   const testPrompt = async () => {
     const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
     const inputs = selectInputs(allInputs, testMode)
@@ -70,7 +72,11 @@ export default function TestButtons({
       setDialogPrompt({
         title: `Run ${inputs.length} times?`,
         confirmTitle: 'Run',
-        callback: async () => callback(inputs),
+        callback: async () => {
+          setIsRunningAllVariants(true)
+          await callback(inputs)
+          setIsRunningAllVariants(false)
+        }
       })
     } else {
       await callback(inputs)
@@ -89,7 +95,7 @@ export default function TestButtons({
         <option value={'random'}>Random</option>
         <option value={'all'}>All</option>
       </DropdownMenu>
-      <PendingButton disabled={disabled} onClick={testPrompt}>
+      <PendingButton disabled={disabled || isRunningAllVariants} onClick={testPrompt}>
         Run
       </PendingButton>
     </div>
