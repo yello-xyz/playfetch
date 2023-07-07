@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
+import linkIcon from '@/public/link.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
 
@@ -26,7 +27,7 @@ export default function TestDataPane({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const styleForColumn = (index: number) =>
-    (index === activeColumn ? 'text-gray-800' : 'text-gray-600 bg-gray-200 cursor-pointer hover:bg-gray-300') +
+    (index === activeColumn ? 'text-gray-800' : 'text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100') +
     ' ' +
     (index === variables.length - 1 ? 'flex-grow' : '')
 
@@ -56,28 +57,29 @@ export default function TestDataPane({
 
   return variables.length ? (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div className='flex border-l border-gray-300 border-y'>
+      <div className='flex border-l border-gray-100 border-y'>
         {variables.map((variable, index) => (
           <div
             key={index}
-            className={`font-medium border-r border-gray-300 px-3 py-2.5 ${styleForColumn(index)}`}
+            className={`flex items-center font-medium border-r border-gray-100 px-3 py-1 ${styleForColumn(index)}`}
             onClick={() => selectColumn(index)}>
+            <Icon icon={linkIcon} />
             {variable}
           </div>
         ))}
       </div>
       <div ref={containerRef} className='flex flex-col'>
         <div className='flex'>
-          <div className='border-b border-l border-gray-300 w-14' />
-          <div className='w-full px-2 py-1.5 font-medium text-gray-800 bg-white border-b border-gray-300 border-x'>
+          <div className='border-b border-l border-gray-100 w-14' />
+          <div className='w-full px-3 py-2 font-medium text-gray-800 bg-white border-b border-gray-100 border-x'>
             Value
           </div>
         </div>
         {activeInputs.map((value, index) => (
           <div key={index} className='flex'>
-            <div className='text-center py-2.5 border-b border-l border-gray-300 w-14'>{index + 1}</div>
+            <div className='py-2 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
             <ContentEditable
-              className='w-full p-2 text-sm bg-white border-b border-gray-300 outline-none border-x'
+              className='w-full px-3 py-2 text-sm bg-white border-b border-gray-100 outline-none border-x'
               html={value}
               onChange={event => updateInputs(event.target.value, index)}
             />
@@ -85,7 +87,7 @@ export default function TestDataPane({
         ))}
       </div>
       <div
-        className='flex justify-center border-b border-gray-300 border-x py-1.5 cursor-pointer items-center font-medium'
+        className='flex justify-center border-b border-gray-100 border-x py-1.5 cursor-pointer items-center font-medium'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add

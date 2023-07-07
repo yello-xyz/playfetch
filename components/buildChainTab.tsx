@@ -6,6 +6,7 @@ import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
 import { LoadedChainItem, ChainItem, IsLoadedChainItem } from './chainTabView'
+import { InputVariableClass } from './promptInput'
 
 const ExtractChainVariables = (chain: ChainItem[]) => [
   ...new Set(chain.flatMap(item => (IsLoadedChainItem(item) ? ExtractPromptVariables(item.version.prompt) : []))),
@@ -86,7 +87,7 @@ export default function BuildChainTab({
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
           {ExtractUnboundChainVariables(chain).map((variable, index) => (
-            <span key={index} className='text-white rounded px-1 py-0.5 bg-purple-400 font-normal'>
+            <span key={index} className={InputVariableClass}>
               {variable}
             </span>
           ))}

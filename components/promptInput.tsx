@@ -3,12 +3,15 @@ import sanitizeHtml from 'sanitize-html'
 import ContentEditable from 'react-contenteditable'
 import { useRef } from 'react'
 import Label from './label'
+import linkIcon from '@/public/linkWhite.svg'
 
-const inputStyle = 'class="text-white rounded px-1 py-0.5 bg-purple-400 font-normal"'
+export const InputVariableClass = 'text-white rounded px-1 py-0.5 bg-purple-400 whitespace-nowrap font-normal'
+const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
+const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
 const toHTML = (text: string) =>
   text
     .replace(/}}$/, '}}&nbsp;')
-    .replaceAll(/{{([^{]*?)}}/g, `<b ${inputStyle}>$1</b>`)
+    .replaceAll(/{{([^{]*?)}}/g, `<b class="${LinkedVariableClass}" style="${LinkedVariableStyle}">$1</b>`)
     .replaceAll(/\n(.*)$/gm, '<div>$1</div>')
     .replaceAll('<div></div>', '<div><br /></div>')
 
