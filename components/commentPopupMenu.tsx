@@ -116,7 +116,7 @@ export function CommentInput({
 
   return (
     <div className='flex flex-col items-stretch gap-1'>
-      {selection && (
+      {selection && !runID && (
         <div className='self-start p-1 my-1 italic text-left rounded bg-blue-50 line-clamp-2'>{selection}</div>
       )}
       <div className='flex items-center gap-2'>

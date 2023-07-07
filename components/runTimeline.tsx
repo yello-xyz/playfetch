@@ -59,16 +59,20 @@ type Selection = { text: string; startIndex: number; popupPoint: { x: number; y:
 const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   const selection = document.getSelection()
   if (selection && containerRect) {
-    const selectionParent = selection?.anchorNode?.parentElement?.parentElement
+    const selectionElement = selection?.anchorNode?.parentElement
+    const containerElement = selectionElement?.parentElement
     const text = selection.toString().trim()
-    if (selectionParent?.id === identifier && text.length > 0) {
+    if (containerElement?.id === identifier && selectionElement && text.length > 0) {
+      const spans = [...containerElement.children]
+      const precedingSpans = spans.slice(0, spans.indexOf(selectionElement))
+      const spanOffset = precedingSpans.reduce((len, node) => len + (node.textContent?.length ?? 0), 0)
       const range = selection.getRangeAt(0)
       const selectionRect = range.getBoundingClientRect()
       const popupPoint = {
         x: selectionRect.left - containerRect.left + selectionRect.width / 2,
         y: selectionRect.top - containerRect.top - 42,
       }
-      return { text, popupPoint, startIndex: range.startOffset }
+      return { text, popupPoint, startIndex: range.startOffset + spanOffset }
     }
   }
   return undefined
@@ -119,11 +123,14 @@ function RunCell({
       startIndex: comment.startIndex!,
       endIndex: comment.startIndex! + comment.quote!.length,
     }))
-    .sort((a, b) => a.startIndex - b.startIndex)
 
-  const existingCommentRangeForSelection = (selection: Selection) => selectionRanges.find(
-    ({ startIndex, endIndex }) => selection.startIndex >= startIndex && selection.startIndex < endIndex
-  )
+  const existingCommentRangeForSelection = (selection: Selection) => {
+    const start = selection.startIndex
+    const end = start + selection.text.length
+    return selectionRanges.find(
+      ({ startIndex, endIndex }) => (start >= startIndex && start < endIndex) || (end > startIndex && end <= endIndex)
+    )
+  }
 
   if (selectionForComment && !existingCommentRangeForSelection(selectionForComment)) {
     selectionRanges.unshift({
@@ -196,7 +203,7 @@ function OutputWithComments({
   const spans = []
 
   let index = 0
-  for (const { startIndex, endIndex } of selectionRanges) {
+  for (const { startIndex, endIndex } of selectionRanges.sort((a, b) => a.startIndex - b.startIndex)) {
     if (startIndex > index) {
       spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
     }
