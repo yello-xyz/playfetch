@@ -54,7 +54,7 @@ export default function RunTimeline({
   )
 }
 
-type Selection = { text: string; popupPoint: { x: number; y: number } }
+type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
 const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   const selection = document.getSelection()
@@ -68,7 +68,7 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
         x: selectionRect.left - containerRect.left + selectionRect.width / 2,
         y: selectionRect.top - containerRect.top - 42,
       }
-      return { text, popupPoint }
+      return { text, popupPoint, startIndex: range.startOffset }
     }
   }
   return undefined
@@ -132,6 +132,7 @@ function RunCell({
                   version={version}
                   selection={selectionForComment.text}
                   runID={run.id}
+                  startIndex={selectionForComment.startIndex}
                   callback={closePopup}
                   focus
                 />

@@ -1,11 +1,16 @@
 import { Comment, CommentAction } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp } from './datastore'
 import { ensurePromptAccess } from './prompts'
 
 export async function migrateComments() {
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   for (const commentData of allComments) {
+    let startIndex = undefined
+    if (commentData.runID ) {
+      const runData = await getKeyedEntity(Entity.RUN, commentData.runID)
+      startIndex = runData.output.indexOf(commentData.quote)
+    }
     await datastore.save(
       toCommentData(
         commentData.userID,
@@ -16,6 +21,7 @@ export async function migrateComments() {
         commentData.action,
         commentData.quote,
         commentData.runID,
+        startIndex,
         getID(commentData)
       )
     )
@@ -30,9 +36,12 @@ export async function saveComment(
   action?: CommentAction,
   quote?: string,
   runID?: number,
+  startIndex?: number
 ) {
   await ensurePromptAccess(userID, promptID)
-  await getDatastore().save(toCommentData(userID, promptID, versionID, text, new Date(), action, quote, runID))
+  await getDatastore().save(
+    toCommentData(userID, promptID, versionID, text, new Date(), action, quote, runID, startIndex)
+  )
 }
 
 const toCommentData = (
@@ -44,11 +53,12 @@ const toCommentData = (
   action?: CommentAction,
   quote?: string,
   runID?: number,
+  startIndex?: number,
   commentID?: number
 ) => ({
   key: buildKey(Entity.COMMENT, commentID),
-  data: { userID, promptID, versionID, text, createdAt, action, quote, runID },
-  excludeFromIndexes: ['text', 'action', 'quote', 'runID'],
+  data: { userID, promptID, versionID, text, createdAt, action, quote, runID, startIndex },
+  excludeFromIndexes: ['text', 'action', 'quote', 'runID', 'startIndex'],
 })
 
 export const toComment = (data: any): Comment => ({
@@ -60,4 +70,5 @@ export const toComment = (data: any): Comment => ({
   action: data.action ?? null,
   quote: data.quote ?? null,
   runID: data.runID ?? null,
+  startIndex: data.startIndex ?? null,
 })

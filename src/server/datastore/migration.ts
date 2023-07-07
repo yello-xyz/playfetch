@@ -1,4 +1,5 @@
 import { migrateAccess } from './access'
+import { migrateComments } from './comments'
 import { migrateEndpoints } from './endpoints'
 import { migrateProjects } from './projects'
 import { migratePrompts } from './prompts'
@@ -13,5 +14,6 @@ export async function runDataMigration() {
   // await migrateRuns()
   // await migrateEndpoints()
   // await migrateAccess()
-  await migrateUsers()
+  // await migrateUsers()
+  await migrateComments()
 }

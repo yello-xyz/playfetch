@@ -126,4 +126,5 @@ export type Comment = {
   action?: CommentAction
   quote?: string
   runID?: number
+  startIndex?: number
 }

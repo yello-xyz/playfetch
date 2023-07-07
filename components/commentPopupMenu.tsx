@@ -74,12 +74,14 @@ export function CommentInput({
   version,
   selection,
   runID,
+  startIndex,
   focus,
   callback,
 }: {
   version: Version
   selection?: string
   runID?: number
+  startIndex?: number
   focus?: boolean
   callback?: () => void
 }) {
@@ -94,7 +96,9 @@ export function CommentInput({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(version.id, version.promptID, trimmedComment, selection, runID).then(_ => refreshPrompt())
+      api
+        .addComment(version.id, version.promptID, trimmedComment, selection, runID, startIndex)
+        .then(_ => refreshPrompt())
       callback?.()
     }
   }
