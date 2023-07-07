@@ -45,6 +45,8 @@ indexes:
   properties:
   - name: provider
   - name: providerAccountId
+  - name: expires_at
+    direction: desc
 
 - kind: session
   properties:

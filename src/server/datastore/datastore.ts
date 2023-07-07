@@ -25,6 +25,7 @@ export enum Entity {
   USAGE = 'usage',
   COMMENT = 'comment',
   // NextAuthAdapter
+  EMAIL = 'email',
   ACCOUNT = 'account',
   SESSION = 'session',
   TOKEN = 'token',
