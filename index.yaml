@@ -40,3 +40,13 @@ indexes:
   - name: promptID
   - name: createdAt
     direction: desc
+
+- kind: account
+  properties:
+  - name: provider
+  - name: providerAccountId
+
+- kind: session
+  properties:
+  - name: identifier
+  - name: token

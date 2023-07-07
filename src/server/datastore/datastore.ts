@@ -24,6 +24,10 @@ export enum Entity {
   INPUT = 'input',
   USAGE = 'usage',
   COMMENT = 'comment',
+  // NextAuthAdapter
+  ACCOUNT = 'account',
+  SESSION = 'session',
+  TOKEN = 'token',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
@@ -72,6 +76,9 @@ export const getEntity = async (type: string, key: string, value: {}, mostRecent
 
 export const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredEntities(type, buildFilter(key, value), limit, undefined, true).then(entities => entities.map(getKey))
+
+export const getEntityKey = (type: string, key: string, value: {}) =>
+  getFilteredEntity(type, buildFilter(key, value)).then(getKey)
 
 export const getEntityID = (type: string, key: string, value: {}) =>
   getEntityKeys(type, key, value, 1).then(([key]) => getID({ key }))
