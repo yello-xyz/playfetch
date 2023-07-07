@@ -6,11 +6,6 @@ export async function migrateComments() {
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   for (const commentData of allComments) {
-    let startIndex = undefined
-    if (commentData.runID ) {
-      const runData = await getKeyedEntity(Entity.RUN, commentData.runID)
-      startIndex = runData.output.indexOf(commentData.quote)
-    }
     await datastore.save(
       toCommentData(
         commentData.userID,
@@ -21,7 +16,7 @@ export async function migrateComments() {
         commentData.action,
         commentData.quote,
         commentData.runID,
-        startIndex,
+        commentData.startIndex,
         getID(commentData)
       )
     )

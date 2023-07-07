@@ -1,13 +1,16 @@
-import { toggleVersionLabel } from '@/src/server/datastore/versions'
+import { getVersion, toggleVersionLabel } from '@/src/server/datastore/versions'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function toggleLabel(req: NextApiRequest, res: NextApiResponse, user: User) {
+  const versionID = req.body.versionID
+  const promptID = await getVersion(versionID).then(version => version.promptID)
+
   await toggleVersionLabel(
     user.id,
-    req.body.versionID,
-    req.body.promptID,
+    versionID,
+    promptID,
     req.body.projectID,
     req.body.label,
     req.body.checked

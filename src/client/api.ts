@@ -100,18 +100,11 @@ const api = {
   unpublishPrompt: function (endpointID: number) {
     return post(this.unpublishPrompt, { endpointID })
   },
-  addComment: function (
-    versionID: number,
-    promptID: number,
-    text: string,
-    quote?: string,
-    runID?: number,
-    startIndex?: number
-  ) {
-    return post(this.addComment, { versionID, promptID, text, quote, runID, startIndex })
+  addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
+    return post(this.addComment, { versionID, text, quote, runID, startIndex })
   },
-  toggleLabel: function (versionID: number, promptID: number, projectID: number, label: string, checked: boolean) {
-    return post(this.toggleLabel, { versionID, promptID, projectID, label, checked })
+  toggleLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
+    return post(this.toggleLabel, { versionID, projectID, label, checked })
   },
   updateInputValues: function (projectID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { projectID, name, values })

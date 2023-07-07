@@ -97,7 +97,7 @@ export function CommentInput({
     if (canAddComment) {
       setNewComment('')
       api
-        .addComment(version.id, version.promptID, trimmedComment, selection, runID, startIndex)
+        .addComment(version.id, trimmedComment, selection, runID, startIndex)
         .then(_ => refreshPrompt())
       callback?.()
     }
