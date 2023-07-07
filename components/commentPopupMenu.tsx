@@ -34,6 +34,11 @@ export default function CommentPopupMenu({
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const iconRef = useRef<HTMLDivElement>(null)
 
+  const [lastSelection, setLastSelection] = useState<string>()
+  if (!isMenuExpanded && selection !== lastSelection) {
+    setLastSelection(selection)
+  }
+
   return (
     <>
       <div ref={iconRef}>
@@ -68,6 +73,7 @@ export function CommentsPopup({
   labelColors,
   isMenuExpanded,
   setIsMenuExpanded,
+  callback,
   position,
 }: {
   comments: Comment[]
@@ -79,13 +85,9 @@ export function CommentsPopup({
   labelColors: Record<string, string>
   isMenuExpanded: boolean
   setIsMenuExpanded: (expanded: boolean) => void
+  callback?: () => void
   position: { top: number; left: number } | { top: number; right: number }
 }) {
-  const [lastSelection, setLastSelection] = useState<string>()
-  if (!isMenuExpanded && selection !== lastSelection) {
-    setLastSelection(selection)
-  }
-
   const haveComments = comments.length > 0
 
   return (
@@ -107,9 +109,10 @@ export function CommentsPopup({
             )}
             <CommentInput
               versionID={versionID}
-              selection={lastSelection}
+              selection={selection}
               runID={runID}
               startIndex={startIndex}
+              callback={callback}
               focus={!haveComments}
             />
           </div>

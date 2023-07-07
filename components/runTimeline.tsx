@@ -128,7 +128,12 @@ function RunCell({
     }
   }, [identifier, containerRect])
 
-  const closePopup = () => setSelectionForComment(undefined)
+  const closeInputPopup = () => setSelectionForComment(undefined)
+  const closeCommentsPopup = () => setPopupComments(undefined)
+  const closePopups = () => {
+    closeInputPopup()
+    closeCommentsPopup()
+  }
 
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
   const selectionRanges = comments.map(comment => ({
@@ -164,7 +169,7 @@ function RunCell({
   return (
     <div
       className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
-      onMouseDown={closePopup}>
+      onMouseDown={closePopups}>
       <OutputWithComments
         identifier={identifier}
         output={run.output}
@@ -182,6 +187,7 @@ function RunCell({
           labelColors={AvailableLabelColorsForPrompt(prompt)}
           isMenuExpanded={!!popupComments}
           setIsMenuExpanded={() => setPopupComments(undefined)}
+          callback={closeCommentsPopup}
           position={{
             // TODO make this smarter so it avoids the edge of the container
             top: popupPosition.top - containerRect.top + 20 - scrollTop + startScrollTop,
@@ -204,7 +210,7 @@ function RunCell({
                   selection={selectionForComment.text}
                   runID={run.id}
                   startIndex={selectionForComment.startIndex}
-                  callback={closePopup}
+                  callback={closeInputPopup}
                   focus
                 />
               </div>
