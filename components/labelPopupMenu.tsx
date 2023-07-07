@@ -64,7 +64,7 @@ export default function LabelPopupMenu({
         <IconButton icon={labelIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
       </div>
       {isMenuExpanded && (
-        <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
+        <div className='absolute' style={CalculatePopupOffset(containerRect, iconRef)}>
           <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
             <div className='p-3 w-80'>
               <input

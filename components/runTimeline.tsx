@@ -165,7 +165,7 @@ function RunCell({
             {selectionForComment ? (
               <div className='px-1 w-80'>
                 <CommentInput
-                  version={version}
+                  versionID={version.id}
                   selection={selectionForComment.text}
                   runID={run.id}
                   startIndex={selectionForComment.startIndex}
