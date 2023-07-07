@@ -87,5 +87,8 @@ module.exports = {
       'gray-800': '#838C9A',
       'white': '#FFFFFF',
     },
+    textDecorationColor: {
+      'blue-100': '#B1D1F6',
+    },
   },
 }

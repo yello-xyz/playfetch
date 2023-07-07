@@ -181,7 +181,7 @@ function OutputWithComments({
       spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
     }
     spans.push(
-      <span key={startIndex} className='bg-blue-50'>
+      <span key={startIndex} className='underline bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'>
         {output.substring(startIndex, endIndex)}
       </span>
     )
