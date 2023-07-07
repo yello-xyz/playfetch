@@ -1,4 +1,4 @@
-import { ActivePrompt, Version } from '@/types'
+import { ActivePrompt, PromptConfig, PromptInputs, Version } from '@/types'
 
 import PlayTab from './playTab'
 import PublishPromptTab from './publishPromptTab'
@@ -7,6 +7,8 @@ import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { useState } from 'react'
+import { useRefreshPrompt, useSavePrompt } from './refreshContext'
+import api from '@/src/client/api'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
@@ -45,6 +47,16 @@ export default function PromptTabView({
     }
   }
 
+  const promptID = prompt.id
+  const savePrompt = useSavePrompt()
+  const refreshPrompt = useRefreshPrompt()
+
+  const runPrompt = async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
+    const versionID = await savePrompt()
+    await refreshPrompt(versionID)
+    await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
+  }
+
   const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
 
   const renderTab = (tab: MainViewTab) => {
@@ -56,6 +68,7 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
+            runPrompt={runPrompt}
             maxWidth={maxTabWidth}
           />
         )
@@ -67,6 +80,7 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
+            runPrompt={runPrompt}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}

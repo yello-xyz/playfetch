@@ -1,9 +1,7 @@
-import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, PromptInputs, PromptConfig, InputValues } from '@/types'
+import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs } from '@/types'
 
 import dynamic from 'next/dynamic'
-import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
@@ -11,22 +9,12 @@ import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 const PromptPanel = dynamic(() => import('@/components/promptPanel'))
 
-export const useRunPrompt = (promptID: number) => {
-  const savePrompt = useSavePrompt()
-  const refreshPrompt = useRefreshPrompt()
-
-  return async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
-    const versionID = await savePrompt()
-    await refreshPrompt(versionID)
-    await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
-  }
-}
-
 export default function TestPromptTab({
   prompt,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
+  runPrompt,
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
@@ -36,6 +24,7 @@ export default function TestPromptTab({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
+  runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
@@ -55,7 +44,6 @@ export default function TestPromptTab({
     setActiveVersion(version)
   }
 
-  const runPrompt = useRunPrompt(prompt.id)
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
     return runPrompt(version.prompt, version.config, inputs)

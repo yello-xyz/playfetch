@@ -20,13 +20,13 @@ const labelForProvider = (provider: PromptConfig['provider']) => {
 export default function PromptPanel({
   version,
   setModifiedVersion,
-  onRun,
+  runPrompt,
   inputValues = {},
   showLabel,
 }: {
   version: Version
   setModifiedVersion: (version: Version) => void
-  onRun?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   showLabel?: boolean
 }) {
@@ -59,8 +59,8 @@ export default function PromptPanel({
       <div className='self-stretch'>
         <PromptInput key={version.prompt} prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
       </div>
-      {onRun && <PromptSettingsPane config={config} setConfig={updateConfig} />}
-      {onRun && (
+      {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
+      {runPrompt && (
         <div className='flex items-center self-end gap-4'>
           <DropdownMenu
             size='medium'
@@ -70,7 +70,7 @@ export default function PromptPanel({
             <option value={'google'}>{labelForProvider('google')}</option>
             <option value={'openai'}>{labelForProvider('openai')}</option>
           </DropdownMenu>
-          <PendingButton disabled={!prompt.length} onClick={() => onRun(prompt, config, [inputs])}>
+          <PendingButton disabled={!prompt.length} onClick={() => runPrompt(prompt, config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>
