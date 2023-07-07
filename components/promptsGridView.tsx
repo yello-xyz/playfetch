@@ -21,13 +21,11 @@ export default function PromptsGridView({
   onSelectPrompt: (promptID: number) => void
 }) {
   return prompts.length ? (
-    <>
-      <div className='flex flex-wrap gap-6 p-6'>
-        {prompts.map((prompt, index) => (
-          <PromptCell key={index} prompt={prompt} projects={projects} onSelectPrompt={onSelectPrompt} />
-        ))}
-      </div>
-    </>
+    <div className='flex flex-wrap content-start h-full gap-6 p-6 overflow-y-auto'>
+      {prompts.map((prompt, index) => (
+        <PromptCell key={index} prompt={prompt} projects={projects} onSelectPrompt={onSelectPrompt} />
+      ))}
+    </div>
   ) : (
     <EmptyGrid onAddPrompt={onAddPrompt} />
   )
@@ -41,11 +39,13 @@ function EmptyGrid({ onAddPrompt }: { onAddPrompt: () => void }) {
   )
 
   return (
-    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-6 bg-gray-100 rounded-lg'>
-      <span className='font-medium'>No Prompts</span>
-      <span className='text-xs text-center text-gray-400 '>
-        Create a <AddPromptLink label={'New Prompt'} /> to get started.
-      </span>
+    <div className='h-full p-6'>
+      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+        <span className='font-medium'>No Prompts</span>
+        <span className='text-xs text-center text-gray-400 '>
+          Create a <AddPromptLink label={'New Prompt'} /> to get started.
+        </span>
+      </div>
     </div>
   )
 }
