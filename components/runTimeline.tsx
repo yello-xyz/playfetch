@@ -1,19 +1,22 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
-import { Comment, Run, Version } from '@/types'
-import { useEffect, useRef, useState } from 'react'
+import { ActivePrompt, Comment, Run, Version } from '@/types'
+import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
 import useScrollDetection from './useScrollDetection'
-import { CommentInput } from './commentPopupMenu'
+import { CommentInput, CommentsPopup } from './commentPopupMenu'
 import useContainerRect from './useContainerRect'
+import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 export default function RunTimeline({
   runs,
   version,
+  prompt,
   activeRunID,
 }: {
   runs: Run[]
   version?: Version
+  prompt?: ActivePrompt
   activeRunID?: number
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -42,6 +45,7 @@ export default function RunTimeline({
               identifier={identifierForRunID(run.id)}
               run={run}
               version={version}
+              prompt={prompt}
               containerRect={containerRect}
               scrollTop={scrollTop}
             />
@@ -82,12 +86,14 @@ function RunCell({
   identifier,
   run,
   version,
+  prompt,
   containerRect,
   scrollTop,
 }: {
   identifier: string
   run: Run
   version?: Version
+  prompt?: ActivePrompt
   containerRect?: DOMRect
   scrollTop: number
 }) {
@@ -99,11 +105,18 @@ function RunCell({
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
 
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>()
+  const [popupComments, setPopupComments] = useState<Comment[]>()
+  const selectComment = (event: MouseEvent, startIndex: number) => {
+    setPopupComments(comments.filter(comment => comment.startIndex === startIndex))
+    setPopupPosition({ top: event.clientY, left: event.clientX })
+  }
+
   const [startScrollTop, setStartScrollTop] = useState(0)
-  if (!selection && !selectionForComment && startScrollTop > 0) {
+  if (!selection && !selectionForComment && !popupComments && startScrollTop > 0) {
     setStartScrollTop(0)
   }
-  if (selection && startScrollTop === 0 && scrollTop > 0) {
+  if ((selection || popupComments) && startScrollTop === 0 && scrollTop > 0) {
     setStartScrollTop(scrollTop)
   }
 
@@ -117,12 +130,11 @@ function RunCell({
 
   const closePopup = () => setSelectionForComment(undefined)
 
-  const selectionRanges = (version?.comments ?? [])
-    .filter(comment => comment.runID === run.id)
-    .map(comment => ({
-      startIndex: comment.startIndex!,
-      endIndex: comment.startIndex! + comment.quote!.length,
-    }))
+  const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
+  const selectionRanges = comments.map(comment => ({
+    startIndex: comment.startIndex!,
+    endIndex: comment.startIndex! + comment.quote!.length,
+  }))
 
   const existingCommentRangeForSelection = (selection: Selection) => {
     const start = selection.startIndex
@@ -153,8 +165,31 @@ function RunCell({
     <div
       className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
       onMouseDown={closePopup}>
-      <OutputWithComments identifier={identifier} output={run.output} selectionRanges={selectionRanges} />
-      {(selection || selectionForComment) && version && (
+      <OutputWithComments
+        identifier={identifier}
+        output={run.output}
+        selectionRanges={selectionRanges}
+        onSelectComment={selectComment}
+      />
+      {popupPosition && popupComments && containerRect && version && prompt && (
+        <CommentsPopup
+          comments={popupComments}
+          versionID={version.id}
+          selection={popupComments[0].text}
+          runID={run.id}
+          startIndex={popupComments[0].startIndex}
+          users={prompt.users}
+          labelColors={AvailableLabelColorsForPrompt(prompt)}
+          isMenuExpanded={!!popupComments}
+          setIsMenuExpanded={() => setPopupComments(undefined)}
+          position={{
+            // TODO make this smarter so it avoids the edge of the container
+            top: popupPosition.top - containerRect.top + 20 - scrollTop + startScrollTop,
+            left: popupPosition.left - containerRect.left - 200,
+          }}
+        />
+      )}
+      {(selection || selectionForComment) && version && !popupComments && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
           style={{
@@ -195,10 +230,12 @@ function OutputWithComments({
   identifier,
   output,
   selectionRanges,
+  onSelectComment,
 }: {
   identifier: string
   output: string
   selectionRanges: { startIndex: number; endIndex: number }[]
+  onSelectComment: (event: MouseEvent, startIndex: number) => void
 }) {
   const spans = []
 
@@ -208,7 +245,10 @@ function OutputWithComments({
       spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
     }
     spans.push(
-      <span key={startIndex} className='underline bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'>
+      <span
+        key={startIndex}
+        className='underline cursor-pointer bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'
+        onClick={event => onSelectComment(event, startIndex)}>
         {output.substring(startIndex, endIndex)}
       </span>
     )

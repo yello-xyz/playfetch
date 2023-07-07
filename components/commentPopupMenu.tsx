@@ -50,10 +50,9 @@ export default function CommentPopupMenu({
         startIndex={startIndex}
         users={users}
         labelColors={labelColors}
-        containerRect={containerRect}
-        iconRef={iconRef}
         isMenuExpanded={isMenuExpanded}
         setIsMenuExpanded={setIsMenuExpanded}
+        position={CalculatePopupOffset(iconRef, containerRect)}
       />
     </>
   )
@@ -67,10 +66,9 @@ export function CommentsPopup({
   startIndex,
   users,
   labelColors,
-  containerRect,
-  iconRef,
   isMenuExpanded,
   setIsMenuExpanded,
+  position,
 }: {
   comments: Comment[]
   versionID: number
@@ -79,10 +77,9 @@ export function CommentsPopup({
   startIndex?: number
   users: User[]
   labelColors: Record<string, string>
-  containerRect?: DOMRect
-  iconRef?: RefObject<HTMLDivElement>
   isMenuExpanded: boolean
   setIsMenuExpanded: (expanded: boolean) => void
+  position: { top: number; left: number } | { top: number; right: number }
 }) {
   const [lastSelection, setLastSelection] = useState<string>()
   if (!isMenuExpanded && selection !== lastSelection) {
@@ -93,7 +90,7 @@ export function CommentsPopup({
 
   return (
     <>
-      <div className='absolute' style={CalculatePopupOffset(containerRect, iconRef)}>
+      <div className='absolute' style={position}>
         <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
           <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
             {haveComments && (

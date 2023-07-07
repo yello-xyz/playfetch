@@ -91,7 +91,7 @@ export default function PromptTabView({
       {renderTab(activeTab)}
       {activeTab !== 'publish' && (
         <div className='flex-1 p-6 pl-0'>
-          <RunTimeline runs={activeVersion.runs} version={activeVersion} activeRunID={activeRunID} />
+          <RunTimeline runs={activeVersion.runs} prompt={prompt} version={activeVersion} activeRunID={activeRunID} />
         </div>
       )}
       <CommentsPane
