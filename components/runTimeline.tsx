@@ -1,5 +1,5 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
-import { Run, Version } from '@/types'
+import { Comment, Run, Version } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
@@ -59,7 +59,7 @@ type Selection = { text: string; startIndex: number; popupPoint: { x: number; y:
 const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   const selection = document.getSelection()
   if (selection && containerRect) {
-    const selectionParent = selection?.anchorNode?.parentElement
+    const selectionParent = selection?.anchorNode?.parentElement?.parentElement
     const text = selection.toString().trim()
     if (selectionParent?.id === identifier && text.length > 0) {
       const range = selection.getRangeAt(0)
@@ -92,6 +92,8 @@ function RunCell({
     setFormattedDate(FormatDate(run.timestamp))
   }, [run.timestamp])
 
+  const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
+
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
 
@@ -117,7 +119,7 @@ function RunCell({
     <div
       className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
       onMouseDown={closePopup}>
-      <div id={identifier}>{run.output}</div>
+      <OutputWithComments identifier={identifier} output={run.output} comments={comments} />
       {(selection || selectionForComment) && version && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
@@ -153,6 +155,43 @@ function RunCell({
       </div>
     </div>
   )
+}
+
+function OutputWithComments({
+  identifier,
+  output,
+  comments,
+}: {
+  identifier: string
+  output: string
+  comments: Comment[]
+}) {
+  const spans = []
+
+  const sortedComments = comments
+    .map(comment => ({
+      startIndex: comment.startIndex!,
+      endIndex: comment.startIndex! + comment.quote!.length,
+    }))
+    .sort((a, b) => a.startIndex - b.startIndex)
+
+  let index = 0
+  for (const { startIndex, endIndex } of sortedComments) {
+    if (startIndex > index) {
+      spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
+    }
+    spans.push(
+      <span key={startIndex} className='bg-blue-50'>
+        {output.substring(startIndex, endIndex)}
+      </span>
+    )
+    index = endIndex
+  }
+  if (index < output.length) {
+    spans.push(<span key={index}>{output.substring(index)}</span>)
+  }
+
+  return <div id={identifier}>{spans}</div>
 }
 
 function EmptyRuns() {
