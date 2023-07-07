@@ -30,8 +30,14 @@ export default function PromptPanel({
   inputValues?: InputValues
   showLabel?: boolean
 }) {
-  const [prompt, setPrompt] = useState<string>(version.prompt)
+  const [prompt, setPrompt] = useState(version.prompt)
   const [config, setConfig] = useState(version.config)
+
+  const [savedPrompt, setSavedPrompt] = useState(version.prompt)
+  if (version.prompt !== savedPrompt) {
+    setPrompt(version.prompt)
+    setSavedPrompt(version.prompt)
+  }
 
   const [previousVersionID, setPreviousVersionID] = useState(version.id)
   if (version.id !== previousVersionID) {
@@ -57,7 +63,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
       <div className='self-stretch'>
-        <PromptInput key={version.prompt} prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
+        <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (
