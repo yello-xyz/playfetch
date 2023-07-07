@@ -81,7 +81,8 @@ export default function VersionCell({
           </div>
           <div className='flex items-center gap-1'>
             <CommentPopupMenu
-              version={version}
+              comments={version.comments.filter(comment => !comment.action)}
+              versionID={version.id}
               selection={selection}
               users={prompt.users}
               labelColors={labelColors}

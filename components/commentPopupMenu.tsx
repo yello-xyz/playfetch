@@ -1,4 +1,4 @@
-import { User, Version } from '@/types'
+import { Comment, User, Version } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
@@ -13,14 +13,20 @@ import { useLoggedInUser } from './userContext'
 import { CommentCell } from './commentsPane'
 
 export default function CommentPopupMenu({
-  version,
+  comments,
+  versionID,
   selection,
+  runID,
+  startIndex,
   users,
   labelColors,
   containerRect,
 }: {
-  version: Version
+  comments: Comment[]
+  versionID: number
   selection?: string
+  runID?: number
+  startIndex?: number
   users: User[]
   labelColors: Record<string, string>
   containerRect?: DOMRect
@@ -32,7 +38,6 @@ export default function CommentPopupMenu({
     setLastSelection(selection)
   }
 
-  const comments = version.comments.filter(comment => !comment.action)
   const haveComments = comments.length > 0
 
   const iconRef = useRef<HTMLDivElement>(null)
@@ -61,7 +66,13 @@ export default function CommentPopupMenu({
                   ))}
                 </div>
               )}
-              <CommentInput version={version} selection={lastSelection} focus={!haveComments} />
+              <CommentInput
+                versionID={versionID}
+                selection={lastSelection}
+                runID={runID}
+                startIndex={startIndex}
+                focus={!haveComments}
+              />
             </div>
           </PopupMenu>
         </div>
@@ -71,14 +82,14 @@ export default function CommentPopupMenu({
 }
 
 export function CommentInput({
-  version,
+  versionID,
   selection,
   runID,
   startIndex,
   focus,
   callback,
 }: {
-  version: Version
+  versionID: number
   selection?: string
   runID?: number
   startIndex?: number
@@ -96,9 +107,7 @@ export function CommentInput({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api
-        .addComment(version.id, trimmedComment, selection, runID, startIndex)
-        .then(_ => refreshPrompt())
+      api.addComment(versionID, trimmedComment, selection, runID, startIndex).then(_ => refreshPrompt())
       callback?.()
     }
   }
