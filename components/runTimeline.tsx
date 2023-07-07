@@ -92,8 +92,6 @@ function RunCell({
     setFormattedDate(FormatDate(run.timestamp))
   }, [run.timestamp])
 
-  const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
-
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
 
@@ -115,11 +113,40 @@ function RunCell({
 
   const closePopup = () => setSelectionForComment(undefined)
 
+  const selectionRanges = (version?.comments ?? [])
+    .filter(comment => comment.runID === run.id)
+    .map(comment => ({
+      startIndex: comment.startIndex!,
+      endIndex: comment.startIndex! + comment.quote!.length,
+    }))
+    .sort((a, b) => a.startIndex - b.startIndex)
+
+  const existingCommentRangeForSelection = (selection: Selection) => selectionRanges.find(
+    ({ startIndex, endIndex }) => selection.startIndex >= startIndex && selection.startIndex < endIndex
+  )
+
+  if (selectionForComment && !existingCommentRangeForSelection(selectionForComment)) {
+    selectionRanges.unshift({
+      startIndex: selectionForComment.startIndex,
+      endIndex: selectionForComment.startIndex + selectionForComment.text.length,
+    })
+  }
+
+  const updateSelectionForComment = (selection?: Selection) => {
+    const existingRange = selection && existingCommentRangeForSelection(selection)
+    if (existingRange) {
+      const text = run.output.substring(existingRange.startIndex, existingRange.endIndex)
+      setSelectionForComment({ ...selection, startIndex: existingRange.startIndex, text })
+    } else {
+      setSelectionForComment(selection)
+    }
+  }
+
   return (
     <div
       className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
       onMouseDown={closePopup}>
-      <OutputWithComments identifier={identifier} output={run.output} comments={comments} />
+      <OutputWithComments identifier={identifier} output={run.output} selectionRanges={selectionRanges} />
       {(selection || selectionForComment) && version && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
@@ -142,7 +169,7 @@ function RunCell({
             ) : (
               <div
                 className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
-                onMouseDown={() => setSelectionForComment(selection)}>
+                onMouseDown={() => updateSelectionForComment(selection)}>
                 <Icon className='max-w-[24px]' icon={commentIcon} />
                 <div>Comment</div>
               </div>
@@ -160,23 +187,16 @@ function RunCell({
 function OutputWithComments({
   identifier,
   output,
-  comments,
+  selectionRanges,
 }: {
   identifier: string
   output: string
-  comments: Comment[]
+  selectionRanges: { startIndex: number; endIndex: number }[]
 }) {
   const spans = []
 
-  const sortedComments = comments
-    .map(comment => ({
-      startIndex: comment.startIndex!,
-      endIndex: comment.startIndex! + comment.quote!.length,
-    }))
-    .sort((a, b) => a.startIndex - b.startIndex)
-
   let index = 0
-  for (const { startIndex, endIndex } of sortedComments) {
+  for (const { startIndex, endIndex } of selectionRanges) {
     if (startIndex > index) {
       spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
     }
