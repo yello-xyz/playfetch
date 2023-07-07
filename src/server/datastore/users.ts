@@ -36,19 +36,28 @@ const toUserData = (
   excludeFromIndexes: ['fullName', 'imageURL', 'verifiedAt'],
 })
 
-export async function getUser(userID: number) {
-  const userData = await getKeyedEntity(Entity.USER, userID)
-  return userData ? toUser(userData) : undefined
-}
-
 export const toUser = (data: any): User => ({
   id: getID(data),
   email: data.email,
   fullName: data.fullName,
   imageURL: data.imageURL,
   isAdmin: data.isAdmin,
-  verifiedAt: data.verifiedAt ?? null,
 })
+
+type UserWithVerifiedAt = User & { verifiedAt?: Date }
+
+const toUserWithVerifiedAt = (data: any, includeVerifiedAt: boolean): UserWithVerifiedAt | undefined =>
+  data ? { ...toUser(data), verifiedAt: includeVerifiedAt ? data.verifiedAt : undefined } : undefined
+
+export async function getUser(userID: number, includeVerifiedAt = false) {
+  const userData = await getKeyedEntity(Entity.USER, userID)
+  return toUserWithVerifiedAt(userData, includeVerifiedAt)
+}
+
+export async function getUserForEmail(email: string, includeVerifiedAt = false) {
+  const userData = await getEntity(Entity.USER, 'email', email)
+  return toUserWithVerifiedAt(userData, includeVerifiedAt)
+}
 
 export async function markUserLogin(userID: number, fullName: string, imageURL: string) {
   const userData = await getKeyedEntity(Entity.USER, userID)
@@ -69,16 +78,11 @@ export async function markUserLogin(userID: number, fullName: string, imageURL: 
   return userData ? toUser(userData) : undefined
 }
 
-export async function getUserForEmail(email: string): Promise<User | undefined> {
-  const userData = await getEntity(Entity.USER, 'email', email)
-  return userData ? toUser(userData) : undefined
-}
-
 export async function saveUser(email: string, isAdmin: boolean, verifiedAt?: Date): Promise<number> {
   const previousUserData = await getEntity(Entity.USER, 'email', email)
   const userData = toUserData(
     email.toLowerCase(),
-    '',
+    email.toLowerCase(),
     '',
     isAdmin,
     previousUserData?.createdAt ?? new Date(),

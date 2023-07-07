@@ -20,20 +20,21 @@ export default function NextAuthAdapter(): Adapter {
 
   return {
     async createUser({ email, emailVerified }: { email: string; emailVerified: Date | null }) {
-      const userID = await saveUser(email, false, emailVerified ?? undefined)
-      return { email, emailVerified, id: userID.toString() }
+      const userId = await saveUser(email, false, emailVerified ?? undefined)
+      return { email, emailVerified, id: userId.toString() }
     },
     async getUser(id: string) {
-      const user = await getUserByID(Number(id))
+      const user = await getUserByID(Number(id), true)
       return user ? { email: user.email, emailVerified: user.verifiedAt ?? null, id: user.id.toString() } : null
     },
     async getUserByEmail(email) {
-      const user = await getUserForEmail(email)
+      const user = await getUserForEmail(email, true)
       return user ? { email: user.email, emailVerified: user.verifiedAt ?? null, id: user.id.toString() } : null
     },
     async getUserByAccount({ providerAccountId, provider }) {
       const account = await getFilteredEntity(Entity.ACCOUNT, accountFilter(providerAccountId, provider))
-      return account ? this.getUser(account.userID) : null
+      const user = await getUserByID(Number(account.userId), true)
+      return user ? { email: user.email, emailVerified: user.verifiedAt ?? null, id: user.id.toString() } : null
     },
     async updateUser(user) {
       const existingUser = await getUserByID(Number(user.id))
@@ -81,13 +82,16 @@ export default function NextAuthAdapter(): Adapter {
     },
     async getSessionAndUser(sessionToken) {
       const session = await getEntity(Entity.SESSION, 'sessionToken', sessionToken)
-      const user = await getUserByID(Number(session.userId))
+      if (!session) {
+        return null
+      }
+      const user = await getUserByID(Number(session.userId), true)
       if (!user) {
         throw new Error('User not found')
       }
       return {
         session: { sessionToken, userId: session.userId, expires: session.expires },
-        user: { email: user.email, emailVerified: user.verifiedAt ?? null, id: user.id.toString() },
+        user: { id: user.id.toString(), email: user.email, emailVerified: user.verifiedAt ?? null },
       }
     },
     async updateSession(session) {

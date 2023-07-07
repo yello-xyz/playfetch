@@ -49,7 +49,7 @@ export function UserAvatar({ user, size = 'lg', border }: { user: User; size?: S
       case 'md':
         return 'w-[22px] h-[22px]'
       case 'lg':
-        return 'w-7 h-7'
+        return 'w-7 h-7 min-w-[28px]'
     }
   }
   const textClass = (size: Size) => {
@@ -76,7 +76,7 @@ export function UserAvatar({ user, size = 'lg', border }: { user: User; size?: S
     />
   ) : (
     <div className={`${sizeClass(size)} ${borderClass} ${textClass(size)} ${getAvatarColor(user)} ${baseClass}`}>
-      {user.fullName.slice(0, 1)}
+      {user.fullName.slice(0, 1).toUpperCase()}
     </div>
   )
 }
@@ -98,9 +98,9 @@ export default function UserSidebarItem({ user }: { user: User }) {
               <div className='flex flex-col items-stretch gap-4 p-3'>
                 <div className='flex items-center gap-2.5'>
                   <UserAvatar user={user} />
-                  <div className='flex flex-col'>
-                    <span className='font-semibold'>{user.fullName}</span>
-                    <span className='text-xs'>{user.email}</span>
+                  <div className='flex flex-col min-w-0'>
+                    <span className='overflow-hidden font-semibold text-ellipsis'>{user.fullName}</span>
+                    <span className='overflow-hidden text-xs text-ellipsis'>{user.email}</span>
                   </div>
                 </div>
                 <div className='border-t border-gray-300' />

@@ -1,13 +1,31 @@
+import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import { getUserForEmail, markUserLogin } from '@/src/server/datastore/users'
-import NextAuth, { Session, User } from 'next-auth'
+import { GetNoReplyFromAddress } from '@/src/server/email'
+import NextAuth, { Session, SessionStrategy, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
+import EmailProvider from 'next-auth/providers/email'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 
 const getRegisteredUser = async (email?: string | null) => email ? getUserForEmail(email) : undefined
 
 export const authOptions = {
+  adapter: NextAuthAdapter(),
+  session: {
+    strategy: 'jwt' as SessionStrategy,
+  },
   providers: [
+    EmailProvider({
+      server: {
+        host: 'smtp.gmail.com',
+        port: 587,
+        auth: {
+          user: process.env.NOREPLY_EMAIL_USER,
+          pass: process.env.NOREPLY_EMAIL_PASSWORD
+        }
+      },
+      from: GetNoReplyFromAddress(),
+    }),  
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',

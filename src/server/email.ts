@@ -1,20 +1,18 @@
 import nodemailer from 'nodemailer'
 
-export async function sendMail(to: string, subject: string, text: string, html: string) {
-  const fromAddress = process.env.NOREPLY_EMAIL_USER
+export const GetNoReplyFromAddress = () => `"PlayFetch" <${process.env.NOREPLY_EMAIL_USER}>`
 
+export async function sendMail(to: string, subject: string, text: string, html: string) {
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     auth: {
-      user: fromAddress,
+      user: process.env.NOREPLY_EMAIL_USER,
       pass: process.env.NOREPLY_EMAIL_PASSWORD,
     },
     tls: { ciphers: 'SSLv3' },
   })
 
-  const from = `"PlayFetch" <${fromAddress}>`
-
-  await transporter.sendMail({ from, to, subject, text, html })
+  await transporter.sendMail({ from: GetNoReplyFromAddress(), to, subject, text, html })
 }

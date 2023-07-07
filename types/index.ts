@@ -4,7 +4,6 @@ export type User = {
   fullName: string
   imageURL: string
   isAdmin: boolean
-  verifiedAt?: Date
 }
 
 export type Project = {
