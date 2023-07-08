@@ -6,7 +6,7 @@ import { MainViewTab } from './promptTabView'
 export default function useInputValues(
   initialInputs: InputValues,
   projectID: number,
-  activeTab: MainViewTab,
+  activeTab: MainViewTab
 ): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
   const [originalInputValues, setOriginalInputValues] = useState(initialInputs)
   const [inputValues, setInputValues] = useState(originalInputValues)

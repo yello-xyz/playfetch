@@ -34,7 +34,7 @@ export default function Sidebar({
 
   const refreshProjects = useRefreshProjects()
   const refreshProject = useRefreshProject()
-  
+
   const addProject = async (name: string) => {
     const projectID = await api.addProject(name)
     await refreshProjects()

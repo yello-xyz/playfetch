@@ -76,7 +76,7 @@ export default function TestButtons({
           setIsRunningAllVariants(true)
           await callback(inputs)
           setIsRunningAllVariants(false)
-        }
+        },
       })
     } else {
       await callback(inputs)

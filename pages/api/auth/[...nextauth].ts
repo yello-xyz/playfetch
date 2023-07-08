@@ -7,7 +7,7 @@ import EmailProvider from 'next-auth/providers/email'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 
-const getRegisteredUser = async (email?: string | null) => email ? getUserForEmail(email) : undefined
+const getRegisteredUser = async (email?: string | null) => (email ? getUserForEmail(email) : undefined)
 
 export const authOptions = {
   adapter: NextAuthAdapter(),
@@ -21,11 +21,11 @@ export const authOptions = {
         port: 587,
         auth: {
           user: process.env.NOREPLY_EMAIL_USER,
-          pass: process.env.NOREPLY_EMAIL_PASSWORD
-        }
+          pass: process.env.NOREPLY_EMAIL_PASSWORD,
+        },
       },
       from: GetNoReplyFromAddress(),
-    }),  
+    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
@@ -66,7 +66,7 @@ export const authOptions = {
         isAdmin: token.isAdmin as boolean,
       }
       return session
-    },      
+    },
   },
 }
 

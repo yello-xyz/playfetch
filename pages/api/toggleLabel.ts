@@ -7,14 +7,7 @@ async function toggleLabel(req: NextApiRequest, res: NextApiResponse, user: User
   const versionID = req.body.versionID
   const promptID = await getVersion(versionID).then(version => version.promptID)
 
-  await toggleVersionLabel(
-    user.id,
-    versionID,
-    promptID,
-    req.body.projectID,
-    req.body.label,
-    req.body.checked
-  )
+  await toggleVersionLabel(user.id, versionID, promptID, req.body.projectID, req.body.label, req.body.checked)
   res.json({})
 }
 

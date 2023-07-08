@@ -42,7 +42,7 @@ export default function NextAuthAdapter(): Adapter {
     },
     async getUserByEmail(email) {
       const user = await getEntity(Entity.EMAIL, 'email', email)
-      return user ? { id: getID(user).toString(), email: user.email, emailVerified: user.emailVerified  } : null
+      return user ? { id: getID(user).toString(), email: user.email, emailVerified: user.emailVerified } : null
     },
     async getUserByAccount({ providerAccountId, provider }) {
       const account = await getAccount(providerAccountId, provider)

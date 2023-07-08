@@ -87,9 +87,7 @@ export default function BuildChainTab({
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
           {ExtractUnboundChainVariables(chain).map((variable, index) => (
-            <InputVariable key={index}>
-              {variable}
-            </InputVariable>
+            <InputVariable key={index}>{variable}</InputVariable>
           ))}
         </div>
         {chain.map((item, index) => (

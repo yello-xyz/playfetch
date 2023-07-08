@@ -20,7 +20,7 @@ export default function PromptPopupMenu({
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
-  onDelete?:  () => void
+  onDelete?: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
 

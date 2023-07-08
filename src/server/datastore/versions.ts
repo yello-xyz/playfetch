@@ -164,8 +164,14 @@ export const toVersion = (data: any, runs: any[], comments: any[]): Version => (
   prompt: data.prompt,
   config: JSON.parse(data.config),
   labels: JSON.parse(data.labels),
-  runs: runs.filter(run => run.versionID === getID(data)).map(toRun).reverse(),
-  comments: comments.filter(comment => comment.versionID === getID(data)).map(toComment).reverse(),
+  runs: runs
+    .filter(run => run.versionID === getID(data))
+    .map(toRun)
+    .reverse(),
+  comments: comments
+    .filter(comment => comment.versionID === getID(data))
+    .map(toComment)
+    .reverse(),
 })
 
 export async function deleteVersionForUser(userID: number, versionID: number) {

@@ -55,7 +55,7 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
     const promptData = await getVerifiedUserPromptData(userID, promptID)
     if (promptData?.projectID !== projectID) {
       throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
-    }  
+    }
   }
 }
 

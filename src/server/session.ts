@@ -69,7 +69,7 @@ export function withLoggedInSession(handler: LoggedInServerSideHandler): ServerS
   return withServerSideError(async context => {
     const session = await getServerSession(context.req, context.res, authOptions)
     if (session?.user?.id) {
-      return handler({ ...context,  user: session.user })
+      return handler({ ...context, user: session.user })
     } else {
       return Redirect(ClientRoute.Login)
     }

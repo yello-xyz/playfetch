@@ -6,6 +6,6 @@ export default function useContainerRect(target: RefObject<HTMLElement>) {
 
   useLayoutEffect(() => setRect(target.current?.getBoundingClientRect()), [target])
   useResizeObserver(target, _ => setRect(target.current?.getBoundingClientRect()))
-  
+
   return rect
 }

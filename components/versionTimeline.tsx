@@ -24,7 +24,7 @@ export default function VersionTimeline({
   const scrollRef = useRef<HTMLDivElement>(null)
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
-  
+
   const identifierForVersion = (version: Version) => `v${version.id}`
 
   useEffect(() => {

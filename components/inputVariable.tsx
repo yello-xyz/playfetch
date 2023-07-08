@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode } from 'react'
 
 export const InputVariableClass = 'text-white rounded px-1 py-0.5 bg-purple-400 whitespace-nowrap font-normal'
 
