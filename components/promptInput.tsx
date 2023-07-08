@@ -4,8 +4,8 @@ import ContentEditable from 'react-contenteditable'
 import { useRef } from 'react'
 import Label from './label'
 import linkIcon from '@/public/linkWhite.svg'
+import { InputVariableClass } from './inputVariable'
 
-export const InputVariableClass = 'text-white rounded px-1 py-0.5 bg-purple-400 whitespace-nowrap font-normal'
 const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
 const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
 const toHTML = (text: string) =>
