@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { InputValues, PromptConfig, PromptInputs, Version } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import PromptInput from './promptInput'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
+
+import dynamic from 'next/dynamic'
+const PromptInput = dynamic(() => import('./promptInput'))
 
 const labelForProvider = (provider: PromptConfig['provider']) => {
   switch (provider) {
@@ -63,7 +65,9 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col gap-4 text-gray-500'>
       <div className='self-stretch'>
-        <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
+        <Suspense>
+          <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
+        </Suspense>
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (

@@ -1,9 +1,6 @@
-import { Suspense } from 'react'
 import { ActivePrompt, PromptConfig, PromptInputs, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
-
-import dynamic from 'next/dynamic'
-const PromptPanel = dynamic(() => import('@/components/promptPanel'))
+import PromptPanel from './promptPanel'
 
 export default function PlayTab({
   prompt,
@@ -23,15 +20,13 @@ export default function PlayTab({
   return (
     <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6 ${maxWidth}`}>
       <VersionTimeline prompt={prompt} activeVersion={activeVersion} setActiveVersion={setActiveVersion} />
-      <Suspense>
-        <PromptPanel
-          version={activeVersion}
-          setModifiedVersion={setModifiedVersion}
-          runPrompt={runPrompt}
-          inputValues={prompt.inputs}
-          showLabel
-        />
-      </Suspense>
+      <PromptPanel
+        version={activeVersion}
+        setModifiedVersion={setModifiedVersion}
+        runPrompt={runPrompt}
+        inputValues={prompt.inputs}
+        showLabel
+      />
     </div>
   )
 }

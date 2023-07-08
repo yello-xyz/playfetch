@@ -1,13 +1,12 @@
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs } from '@/types'
 
-import dynamic from 'next/dynamic'
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
-const PromptPanel = dynamic(() => import('@/components/promptPanel'))
+import PromptPanel from './promptPanel'
 
 export default function TestPromptTab({
   prompt,
@@ -69,9 +68,7 @@ export default function TestPromptTab({
             setActiveVersion={selectVersion}
           />
         </div>
-        <Suspense>
-          <PromptPanel version={version} setModifiedVersion={updateVersion} />
-        </Suspense>
+        <PromptPanel version={version} setModifiedVersion={updateVersion} />
         <TestButtons
           variables={variables}
           inputValues={inputValues}
