@@ -8,7 +8,6 @@ import {
   getEntityKey,
   getEntityKeys,
   getFilteredEntity,
-  getFilteredEntityKey,
   getID,
   getKeyedEntity,
 } from './datastore'

@@ -65,19 +65,25 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
+  const versionsEqual = (a: Version, b: Version) =>
+    a.prompt === b.prompt &&
+    a.config.provider === b.config.provider &&
+    a.config.temperature === b.config.temperature &&
+    a.config.maxTokens === b.config.maxTokens
+
   const savePrompt = async () => {
     const versionNeedsSaving =
-      activePrompt &&
-      activeVersion &&
-      modifiedVersion &&
-      (modifiedVersion.prompt !== activeVersion.prompt ||
-        modifiedVersion.config.provider !== activeVersion.config.provider ||
-        modifiedVersion.config.temperature !== activeVersion.config.temperature ||
-        modifiedVersion.config.maxTokens !== activeVersion.config.maxTokens)
+      activePrompt && activeVersion && modifiedVersion && !versionsEqual(activeVersion, modifiedVersion)
     setModifiedVersion(undefined)
-    return versionNeedsSaving
-      ? api.updatePrompt(activePrompt.id, modifiedVersion.prompt, modifiedVersion.config, activeVersion.id)
-      : activeVersion?.id
+    if (!versionNeedsSaving) {
+      return activeVersion?.id
+    }
+    const equalPreviousVersion = activePrompt.versions.find(version => versionsEqual(version, modifiedVersion))
+    if (equalPreviousVersion) {
+      setActiveVersion(equalPreviousVersion)
+      return equalPreviousVersion.id
+    }
+    return api.updatePrompt(activePrompt.id, modifiedVersion.prompt, modifiedVersion.config, activeVersion.id)
   }
 
   const updateVersion = (version?: Version) => {
