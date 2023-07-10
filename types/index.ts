@@ -42,8 +42,10 @@ export type ActivePrompt = Prompt & {
   availableFlavors: string[]
 }
 
+export type ProviderModel = 'openai' | 'anthropic' | 'google'
+
 export type PromptConfig = {
-  provider: 'openai' | 'anthropic' | 'google'
+  provider: ProviderModel
   temperature: number
   maxTokens: number
 }

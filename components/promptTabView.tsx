@@ -1,4 +1,4 @@
-import { ActivePrompt, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActivePrompt, PromptConfig, PromptInputs, ProviderModel, Version } from '@/types'
 
 import PlayTab from './playTab'
 import PublishPromptTab from './publishPromptTab'
@@ -55,7 +55,7 @@ export default function PromptTabView({
 
   const user = useLoggedInUser()
 
-  const checkProviderAvailable = (provider: PromptConfig['provider']) => {
+  const checkProviderAvailable = (provider: ProviderModel) => {
     if (user.availableProviders.includes(provider)) {
       return true
     } else {
