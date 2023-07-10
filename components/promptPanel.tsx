@@ -1,11 +1,11 @@
 import { Suspense, useState } from 'react'
-import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version } from '@/types'
+import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 
 import dynamic from 'next/dynamic'
-import ProviderSelector from './providerSelector'
+import ModelSelector, { ProviderForModel } from './modelSelector'
 const PromptInput = dynamic(() => import('./promptInput'))
 
 export default function PromptPanel({
@@ -46,9 +46,10 @@ export default function PromptPanel({
 
   const updatePrompt = (prompt: string) => update(prompt, config)
   const updateConfig = (config: PromptConfig) => update(prompt, config)
-  const updateProvider = (provider: ModelProvider) => {
+  const updateModel = (model: LanguageModel) => {
+    const provider = ProviderForModel(model)
     if (checkProviderAvailable(provider)) {
-      updateConfig({ ...config, provider })
+      updateConfig({ ...config, provider, model })
     }
   }
 
@@ -67,7 +68,7 @@ export default function PromptPanel({
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (
         <div className='flex items-center self-end gap-4'>
-          <ProviderSelector provider={config.provider} setProvider={updateProvider} />
+          <ModelSelector model={config.model} setModel={updateModel} />
           <PendingButton disabled={!prompt.length} onClick={() => runPrompt(prompt, config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>

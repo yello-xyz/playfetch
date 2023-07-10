@@ -1,7 +1,7 @@
 import { useLoggedInUser } from './userContext'
 import Label from './label'
-import { AllProviders, LabelForProvider } from './providerSelector'
 import { DefaultProvider } from '@/src/common/defaultConfig'
+import { AllProviders, LabelForProvider } from './modelSelector'
 
 export default function UserSettingsView() {
   return (
