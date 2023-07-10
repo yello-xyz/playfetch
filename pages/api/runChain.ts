@@ -1,11 +1,13 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, User, Run, RunConfig, PromptConfig } from '@/types'
+import { PromptInputs, User, Run, RunConfig, PromptConfig, ModelProvider } from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
+import { getProviderKey } from '@/src/server/datastore/providers'
+import { DefaultProvider } from '@/src/common/defaultConfig'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -39,15 +41,17 @@ export const runPromptWithConfig = async (
     prompt
   )
 
-  const getPredictor = (provider: string) => {
+  const getPredictor = async (provider: ModelProvider) => {
+    const apiKey = provider === DefaultProvider ? '' : await getProviderKey(userID, provider)
+
     switch (provider) {
       default:
-      case 'openai':
-        return openai
-      case 'anthropic':
-        return anthropic
       case 'google':
         return vertexai
+      case 'openai':
+        return openai(apiKey, userID)
+      case 'anthropic':
+        return anthropic(apiKey)
     }
   }
 
@@ -63,13 +67,13 @@ export const runPromptWithConfig = async (
     return { output: cachedValue, cost: 0, attempts: 1, cacheHit: true }
   }
 
-  const predictor = getPredictor(config.provider)
+  const predictor = await getPredictor(config.provider)
 
   let result: PredictionResponse = { output: undefined, cost: 0 }
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens, userID)
+    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens)
     if (result.output?.length) {
       break
     }

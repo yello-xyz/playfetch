@@ -1,19 +1,19 @@
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
-import { getProviderKey } from './datastore/providers'
 
-export default async function predict(prompt: string, temperature: number, maxOutputTokens: number, userID: number) {
-  return tryCompleteChat(userID, prompt, temperature, maxOutputTokens)
+export default function predict(apiKey: string, userID: number) {
+  return (prompt: string, temperature: number, maxOutputTokens: number) =>
+    tryCompleteChat(apiKey, userID, prompt, temperature, maxOutputTokens)
 }
 
 async function tryCompleteChat(
+  apiKey: string,
   userID: number,
   prompt: string,
   temperature: number,
   maxTokens: number,
-  system?: string,
+  system?: string
 ) {
   try {
-    const apiKey = await getProviderKey(userID, 'openai')
     const api = new OpenAIApi(new Configuration({ apiKey }))
     const response = await api.createChatCompletion(
       {
