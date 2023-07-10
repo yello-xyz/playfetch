@@ -3,6 +3,9 @@ import Label from './label'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { AllProviders, LabelForProvider } from './modelSelector'
 import { AvailableProvider, ModelProvider, User } from '@/types'
+import TextInput from './textInput'
+import { useState } from 'react'
+import PickNameDialog from './pickNameDialog'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
@@ -35,13 +38,30 @@ function ProviderRow({
   provider: ModelProvider
   availableProviders: AvailableProvider[]
 }) {
-  const keyForProvider = (provider: ModelProvider) =>
-    availableProviders.find(p => p.provider === provider)?.truncatedAPIKey
+  const label = LabelForProvider(provider)
+  const truncatedAPIKey = availableProviders.find(p => p.provider === provider)?.truncatedAPIKey
+
+  const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
 
   return (
     <div className='flex items-center justify-between gap-8'>
-      <Label className='w-60'>{LabelForProvider(provider)}</Label>
-      {keyForProvider(provider)}
+      <Label className='w-60'>{label}</Label>
+      {truncatedAPIKey ?? (
+        <div className='underline cursor-pointer' onClick={() => setShowAPIKeyPrompt(true)}>
+          add key
+        </div>
+      )}
+      {showAPIKeyPrompt && (
+        <PickNameDialog
+          title={`Link API Key`}
+          confirmTitle='Save'
+          label={label}
+          onConfirm={name => {
+            // api.renamePrompt(prompt.id, name).then(onRefresh)
+          }}
+          onDismiss={() => setShowAPIKeyPrompt(false)}
+        />
+      )}
     </div>
   )
 }
