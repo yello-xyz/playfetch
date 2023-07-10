@@ -109,6 +109,7 @@ export default function Home({
     if (promptID !== activePrompt?.id) {
       savePrompt()
       await refreshPrompt(promptID)
+      setChainMode(false)
       setShowSettings(false)
       router.push(PromptRoute(promptID), undefined, { shallow: true })
     }
