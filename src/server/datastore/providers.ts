@@ -20,7 +20,7 @@ export async function saveProviderKey(userID: number, provider: ModelProvider, a
   })
 }
 
-export async function getAvailableProviders(userID: number): Promise<AvailableProvider[]> {
+export async function getAvailableProvidersForUser(userID: number): Promise<AvailableProvider[]> {
   const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
   const providerKeys: AvailableProvider[] = providerData.map(data => ({
     provider: data.provider,

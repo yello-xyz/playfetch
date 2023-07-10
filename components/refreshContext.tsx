@@ -8,6 +8,7 @@ type RefreshContextType = {
   refreshPrompt?: (focusVersionID?: number) => Promise<void>
   savePrompt?: () => Promise<number>
   selectTab?: (tab: MainViewTab) => void
+  refreshSettings?: () => Promise<void>
 }
 
 export const RefreshContext = createContext<RefreshContextType>({})
@@ -18,3 +19,4 @@ export const useRefreshProject = () => useContext(RefreshContext).refreshProject
 export const useRefreshPrompt = () => useContext(RefreshContext).refreshPrompt!
 export const useSavePrompt = () => useContext(RefreshContext).savePrompt!
 export const useSelectTab = () => useContext(RefreshContext).selectTab!
+export const useRefreshSettings = () => useContext(RefreshContext).refreshSettings!

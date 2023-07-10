@@ -18,7 +18,7 @@ import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
 import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
-import { getAvailableProviders } from '@/src/server/datastore/providers'
+import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
@@ -27,7 +27,7 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { g: projectID, p: promptID, s: initialShowSettings } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
   const buildURL = urlBuilderFromHeaders(req.headers)
@@ -35,9 +35,9 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     ? await getActivePrompt(user.id, promptID, buildURL)
     : await getActiveProject(user.id, projectID ?? user.id, buildURL)
 
-  const availableProviders = await getAvailableProviders(user.id)
+  const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
 
-  return { props: { user, initialProjects, initialActiveItem, availableProviders } }
+  return { props: { user, initialProjects, initialActiveItem, initialAvailableProviders, initialShowSettings } }
 })
 
 type ActiveItem = ActiveProject | ActivePrompt
@@ -46,12 +46,14 @@ export default function Home({
   user,
   initialProjects,
   initialActiveItem,
-  availableProviders,
+  initialAvailableProviders,
+  initialShowSettings,
 }: {
   user: User
   initialProjects: Project[]
   initialActiveItem: ActiveItem
-  availableProviders: AvailableProvider[]
+  initialAvailableProviders: AvailableProvider[]
+  initialShowSettings: boolean
 }) {
   const router = useRouter()
 
@@ -66,7 +68,7 @@ export default function Home({
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
   const [isChainMode, setChainMode] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showSettings, setShowSettings] = useState(initialShowSettings)
   const [showComments, setShowComments] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
@@ -135,7 +137,7 @@ export default function Home({
     }
     setChainMode(chainMode)
     setShowSettings(false)
-}
+  }
 
   const selectChains = () => {
     if (activePrompt) {
@@ -144,6 +146,9 @@ export default function Home({
       setChainMode(true)
     }
   }
+
+  const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
+  const refreshSettings = () => api.getAvailableProviders().then(setAvailableProviders)
 
   const selectSettings = () => {
     savePrompt()
@@ -193,6 +198,7 @@ export default function Home({
               refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
               savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
               selectTab: setSelectedTab,
+              refreshSettings,
             }}>
             <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
               <Sidebar

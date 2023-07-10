@@ -112,6 +112,9 @@ const api = {
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
+  getAvailableProviders: function () {
+    return post(this.getAvailableProviders)
+  },
   updateProviderKey: function (provider: ModelProvider, apiKey: string | null) {
     return post(this.updateProviderKey, { provider, apiKey })
   }

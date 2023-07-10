@@ -2,11 +2,11 @@ import { useLoggedInUser } from './userContext'
 import Label from './label'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { AllProviders, LabelForProvider } from './modelSelector'
-import { AvailableProvider, ModelProvider, User } from '@/types'
-import TextInput from './textInput'
+import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 import api from '@/src/client/api'
+import { useRefreshSettings } from './refreshContext'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
@@ -44,6 +44,8 @@ function ProviderRow({
 
   const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
 
+  const refreshSettings = useRefreshSettings()
+
   return (
     <div className='flex items-center justify-between gap-8'>
       <Label className='w-60'>{label}</Label>
@@ -54,10 +56,10 @@ function ProviderRow({
       )}
       {showAPIKeyPrompt && (
         <PickNameDialog
-          title={`Link API Key`}
+          title='Link API Key'
           confirmTitle='Save'
           label={label}
-          onConfirm={apiKey => api.updateProviderKey(provider, apiKey)}
+          onConfirm={apiKey => api.updateProviderKey(provider, apiKey).then(refreshSettings)}
           onDismiss={() => setShowAPIKeyPrompt(false)}
         />
       )}
