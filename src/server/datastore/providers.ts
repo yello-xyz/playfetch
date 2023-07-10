@@ -1,7 +1,6 @@
 import { and } from '@google-cloud/datastore'
 import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntity, getID } from './datastore'
-
-export const DefaultProvider = 'google'
+import { DefaultProvider } from '@/src/common/defaultConfig'
 
 const getProviderData = (userID: number, provider: string) =>
   getFilteredEntity(Entity.PROVIDER, and([buildFilter('userID', userID), buildFilter('provider', provider)]))

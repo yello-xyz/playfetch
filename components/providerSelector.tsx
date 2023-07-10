@@ -3,7 +3,7 @@ import DropdownMenu from './dropdownMenu'
 
 export const AllProviders: ProviderModel[] = ['anthropic', 'google', 'openai']
 
-const labelForProvider = (provider: ProviderModel) => {
+export const LabelForProvider = (provider: ProviderModel) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI - GPT-3.5'
@@ -25,7 +25,7 @@ export default function ProviderSelector({
     <DropdownMenu size='medium' value={provider} onChange={value => setProvider(value as ProviderModel)}>
       {AllProviders.map((provider, index) => (
         <option key={index} value={provider}>
-          {labelForProvider(provider)}
+          {LabelForProvider(provider)}
         </option>
       ))}
     </DropdownMenu>

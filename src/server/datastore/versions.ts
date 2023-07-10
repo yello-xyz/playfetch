@@ -15,7 +15,7 @@ import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updat
 import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
-import { DefaultProvider } from './providers'
+import { DefaultConfig } from '@/src/common/defaultConfig'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
@@ -33,12 +33,6 @@ const isVersionDataCompatible = (versionData: any, prompt: string, config: Promp
     versionConfig.temperature === config.temperature &&
     versionConfig.maxTokens === config.maxTokens
   )
-}
-
-const DefaultConfig: PromptConfig = {
-  provider: DefaultProvider,
-  temperature: 0.5,
-  maxTokens: 250,
 }
 
 const getVerifiedUserVersionData = async (userID: number, versionID: number) => {

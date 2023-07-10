@@ -1,5 +1,7 @@
 import { useLoggedInUser } from './userContext'
 import Label from './label'
+import { AllProviders, LabelForProvider } from './providerSelector'
+import { DefaultProvider } from '@/src/common/defaultConfig'
 
 export default function UserSettingsView() {
   return (
@@ -17,7 +19,9 @@ function ProviderSettingsPane() {
     <>
       <Label>API Keys</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        <SettingRow label='API Key' value='sk-1' />
+        {AllProviders.filter(provider => provider !== DefaultProvider).map((provider, index) => (
+          <SettingRow label={LabelForProvider(provider)} value='sk-…' />
+        ))}
       </div>
     </>
   )
