@@ -18,8 +18,8 @@ import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
 import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
-import UserSettingsPane from '@/components/userSettingsPane'
 import { getAvailableProviders } from '@/src/server/datastore/providers'
+import UserSettingsView from '@/components/userSettingsView'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -223,7 +223,7 @@ export default function Home({
                   </TopBar>
                 )}
                 <div className='flex-1 overflow-hidden'>
-                  {showSettings && <UserSettingsPane />}
+                  {showSettings && <UserSettingsView />}
                   {!showSettings && !isChainMode && activePrompt && promptProject && activeVersion && (
                     <PromptTabView
                       activeTab={selectedTab}
