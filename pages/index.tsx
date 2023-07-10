@@ -7,7 +7,7 @@ import { Project, ActivePrompt, Version, User, ActiveProject, Comment } from '@/
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import PromptsGridView from '@/components/promptsGridView'
-import { ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
+import ClientRoute, { ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject, getProjectsForUser } from '@/src/server/datastore/projects'
@@ -123,7 +123,7 @@ export default function Home({
       savePrompt()
       await refreshProject(projectID)
       setChainMode(chainMode)
-      router.push(ProjectRoute(projectID ?? undefined), undefined, { shallow: true })
+      router.push(projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID), undefined, { shallow: true })
     }
   }
 

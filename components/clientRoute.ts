@@ -9,10 +9,9 @@ export const Redirect = (route: ClientRoute): GetServerSidePropsResult<Record<st
   redirect: { destination: route, permanent: false },
 })
 
-export const ProjectRoute = (projectID?: number) =>
-  projectID ? `${ClientRoute.Home}?g=${projectID}` : ClientRoute.Home
+export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}`
 
-export const PromptRoute = (promptID?: number) => (promptID ? `${ClientRoute.Home}?p=${promptID}` : ClientRoute.Home)
+export const PromptRoute = (promptID: number) => `${ClientRoute.Home}?p=${promptID}`
 
 export function ParseQuery(query: NodeJS.Dict<string | string[]>): NodeJS.Dict<string> {
   return Object.keys(query).reduce(function (result: NodeJS.Dict<string>, key) {
