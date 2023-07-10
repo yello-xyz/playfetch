@@ -1,6 +1,5 @@
 import { Adapter } from 'next-auth/adapters'
 import {
-  Entity,
   buildFilter,
   buildKey,
   getDatastore,
@@ -12,6 +11,13 @@ import {
   getKeyedEntity,
 } from './datastore'
 import { and } from '@google-cloud/datastore'
+
+enum Entity {
+  USER = '_nextauth_user',
+  ACCOUNT = '_nextauth_account',
+  SESSION = '_nextauth_session',
+  TOKEN = '_nextauth_token',
+}
 
 export default function NextAuthAdapter(): Adapter {
   const getAccount = async (providerAccountId: string, provider: string) => {
@@ -28,7 +34,7 @@ export default function NextAuthAdapter(): Adapter {
   return {
     async createUser({ email, emailVerified }: { email: string; emailVerified: Date | null }) {
       const userData = {
-        key: buildKey(Entity.EMAIL),
+        key: buildKey(Entity.USER),
         data: { email, emailVerified },
         excludeFromIndexes: ['emailVerified'],
       }
@@ -36,11 +42,11 @@ export default function NextAuthAdapter(): Adapter {
       return { id: getID(userData).toString(), email, emailVerified }
     },
     async getUser(id: string) {
-      const user = await getKeyedEntity(Entity.EMAIL, Number(id))
+      const user = await getKeyedEntity(Entity.USER, Number(id))
       return user ? { id, email: user.email, emailVerified: user.emailVerified } : null
     },
     async getUserByEmail(email) {
-      const user = await getEntity(Entity.EMAIL, 'email', email)
+      const user = await getEntity(Entity.USER, 'email', email)
       return user ? { id: getID(user).toString(), email: user.email, emailVerified: user.emailVerified } : null
     },
     async getUserByAccount({ providerAccountId, provider }) {
@@ -48,18 +54,18 @@ export default function NextAuthAdapter(): Adapter {
       if (!account) {
         return null
       }
-      const user = await getKeyedEntity(Entity.EMAIL, Number(account.userId))
+      const user = await getKeyedEntity(Entity.USER, Number(account.userId))
       return user ? { id: getID(user).toString(), email: user.email, emailVerified: user.emailVerified } : null
     },
     async updateUser(user) {
-      const existingUser = await getKeyedEntity(Entity.EMAIL, Number(user.id))
+      const existingUser = await getKeyedEntity(Entity.USER, Number(user.id))
       if (!existingUser) {
         throw new Error('User not found')
       }
       const email = user.email ?? existingUser.email
       const emailVerified = user.emailVerified ?? existingUser.emailVerified
       await getDatastore().save({
-        key: buildKey(Entity.EMAIL, Number(user.id)),
+        key: buildKey(Entity.USER, Number(user.id)),
         data: { email, emailVerified },
         excludeFromIndexes: ['emailVerified'],
       })
@@ -69,7 +75,7 @@ export default function NextAuthAdapter(): Adapter {
       const accountKeys = await getEntityKeys(Entity.ACCOUNT, 'userId', Number(userId))
       const sessionKeys = await getEntityKeys(Entity.SESSION, 'userId', Number(userId))
       // TODO delete user project and access keys?
-      await getDatastore().delete([...accountKeys, ...sessionKeys, buildKey(Entity.EMAIL, Number(userId))])
+      await getDatastore().delete([...accountKeys, ...sessionKeys, buildKey(Entity.USER, Number(userId))])
     },
     async linkAccount(account) {
       await getDatastore().save({
@@ -103,7 +109,7 @@ export default function NextAuthAdapter(): Adapter {
       if (!session) {
         return null
       }
-      const user = await getKeyedEntity(Entity.EMAIL, Number(session.userId))
+      const user = await getKeyedEntity(Entity.USER, Number(session.userId))
       if (!user) {
         throw new Error('User not found')
       }
