@@ -6,6 +6,7 @@ import { AvailableProvider, ModelProvider, User } from '@/types'
 import TextInput from './textInput'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
+import api from '@/src/client/api'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
@@ -56,9 +57,7 @@ function ProviderRow({
           title={`Link API Key`}
           confirmTitle='Save'
           label={label}
-          onConfirm={name => {
-            // api.renamePrompt(prompt.id, name).then(onRefresh)
-          }}
+          onConfirm={apiKey => api.updateProviderKey(provider, apiKey)}
           onDismiss={() => setShowAPIKeyPrompt(false)}
         />
       )}

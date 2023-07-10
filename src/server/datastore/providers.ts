@@ -1,17 +1,17 @@
 import { and } from '@google-cloud/datastore'
 import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntity, getID } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AvailableProvider } from '@/types'
+import { AvailableProvider, ModelProvider } from '@/types'
 
-const getProviderData = (userID: number, provider: string) =>
+const getProviderData = (userID: number, provider: ModelProvider) =>
   getFilteredEntity(Entity.PROVIDER, and([buildFilter('userID', userID), buildFilter('provider', provider)]))
 
-export async function getProviderKey(userID: number, provider: string) {
+export async function getProviderKey(userID: number, provider: ModelProvider) {
   const providerData = await getProviderData(userID, provider)
   return providerData?.apiKey
 }
 
-export async function updateProviderKey(userID: number, provider: string, apiKey: string | null) {
+export async function saveProviderKey(userID: number, provider: ModelProvider, apiKey: string | null) {
   const providerData = await getProviderData(userID, provider)
   await getDatastore().save({
     key: buildKey(Entity.PROVIDER, providerData && getID(providerData)),
