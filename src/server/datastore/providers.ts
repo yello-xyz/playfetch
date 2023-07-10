@@ -39,13 +39,7 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
     const query = transaction.createQuery(Entity.PROVIDER).filter(buildProviderFilter(userID, provider)).limit(1)
     const [[providerData]] = await transaction.runQuery(query)
     transaction.save(
-      toProviderData(
-        userID,
-        provider,
-        providerData.apiKey,
-        providerData.cost + cost,
-        getID(providerData)
-      )
+      toProviderData(userID, provider, providerData.apiKey, providerData.cost + cost, getID(providerData))
     )
   })
 }

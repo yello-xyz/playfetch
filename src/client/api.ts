@@ -1,4 +1,13 @@
-import { Project, ActivePrompt, PromptConfig, PromptInputs, ActiveProject, RunConfig, Chain, ModelProvider } from '@/types'
+import {
+  Project,
+  ActivePrompt,
+  PromptConfig,
+  PromptInputs,
+  ActiveProject,
+  RunConfig,
+  Chain,
+  ModelProvider,
+} from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
 async function parseResponse(response: Response) {
@@ -117,7 +126,7 @@ const api = {
   },
   updateProviderKey: function (provider: ModelProvider, apiKey: string | null) {
     return post(this.updateProviderKey, { provider, apiKey })
-  }
+  },
 }
 
 export default api

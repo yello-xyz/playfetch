@@ -1,4 +1,4 @@
-import { PromptConfig, ModelProvider } from "@/types"
+import { PromptConfig, ModelProvider } from '@/types'
 
 export const DefaultProvider: ModelProvider = 'google'
 
@@ -10,4 +10,3 @@ export const DefaultConfig: PromptConfig = {
   temperature: 0.5,
   maxTokens: 250,
 }
-

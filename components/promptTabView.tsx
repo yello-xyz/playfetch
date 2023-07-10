@@ -71,7 +71,6 @@ export default function PromptTabView({
       await refreshPrompt(versionID)
       await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
       setRunning(false)
-  
     }
   }
 

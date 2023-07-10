@@ -86,7 +86,7 @@ export default function UserSidebarItem() {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
   const user = useLoggedInUser()
-  
+
   const selectSettings = () => {
     setIsMenuExpanded(false)
     user.showSettings()

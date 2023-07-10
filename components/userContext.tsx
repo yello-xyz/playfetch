@@ -11,9 +11,9 @@ export const UserContext = createContext<UserContextType>({})
 
 export const useLoggedInUser = () => {
   const context = useContext(UserContext)
-  return ({
+  return {
     ...context.loggedInUser!,
     availableProviders: context.availableProviders!,
     showSettings: context.showSettings!,
-  })
+  }
 }

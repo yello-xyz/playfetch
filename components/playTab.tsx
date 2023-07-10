@@ -29,7 +29,7 @@ export default function PlayTab({
         runPrompt={runPrompt}
         inputValues={prompt.inputs}
         showLabel
-        />
+      />
     </div>
   )
 }
