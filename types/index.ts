@@ -40,6 +40,7 @@ export type ActivePrompt = Prompt & {
   projectURLPath: string
   availableLabels: string[]
   availableFlavors: string[]
+  availableProviders: string[]
 }
 
 export type PromptConfig = {

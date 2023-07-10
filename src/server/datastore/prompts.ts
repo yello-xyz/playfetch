@@ -17,7 +17,7 @@ import { ActivePrompt, Prompt } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
-import { toComment } from './comments'
+import { getAvailableProviders } from './providers'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -87,6 +87,7 @@ export async function getActivePrompt(
   const inputs = await getProjectInputValues(promptData.projectID)
   const endpoints = await loadEndpoints(promptID, projectData, buildURL)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
+  const availableProviders = await getAvailableProviders(userID)
 
   return {
     ...toPrompt(promptData, userID),
@@ -98,6 +99,7 @@ export async function getActivePrompt(
     projectURLPath: projectData.urlPath ?? '',
     availableLabels: JSON.parse(projectData.labels),
     availableFlavors: JSON.parse(projectData.flavors),
+    availableProviders,
   }
 }
 
