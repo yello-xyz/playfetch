@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Icon from './icon'
+import { useLoggedInUser } from './userContext'
 
 const avatarColors = [
   'bg-orange-300',
@@ -81,12 +82,14 @@ export function UserAvatar({ user, size = 'lg', border }: { user: User; size?: S
   )
 }
 
-export default function UserSidebarItem({ user, onSelectSettings }: { user: User; onSelectSettings: () => void }) {
+export default function UserSidebarItem() {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+
+  const user = useLoggedInUser()
   
   const selectSettings = () => {
     setIsMenuExpanded(false)
-    onSelectSettings()
+    user.showSettings()
   }
 
   return (

@@ -9,6 +9,7 @@ import CommentsPane from './commentsPane'
 import { useState } from 'react'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import api from '@/src/client/api'
+import { useLoggedInUser } from './userContext'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
@@ -20,7 +21,6 @@ export default function PromptTabView({
   setModifiedVersion,
   showComments,
   setShowComments,
-  onSelectSettings,
 }: {
   activeTab: MainViewTab
   prompt: ActivePrompt
@@ -29,7 +29,6 @@ export default function PromptTabView({
   setModifiedVersion: (version: Version) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectSettings: () => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     prompt.inputs,
@@ -54,11 +53,13 @@ export default function PromptTabView({
   const refreshPrompt = useRefreshPrompt()
   const [isRunning, setRunning] = useState(false)
 
+  const user = useLoggedInUser()
+
   const checkProviderAvailable = (provider: PromptConfig['provider']) => {
-    if (prompt.availableProviders.includes(provider)) {
+    if (user.availableProviders.includes(provider)) {
       return true
     } else {
-      onSelectSettings()
+      user.showSettings()
       return false
     }
   }

@@ -21,7 +21,6 @@ export default function Sidebar({
   onAddPrompt,
   onSelectProject,
   onSelectChains,
-  onSelectSettings,
 }: {
   projects: Project[]
   activeProject?: ActiveProject
@@ -29,7 +28,6 @@ export default function Sidebar({
   onAddPrompt: () => void
   onSelectProject: (projectID: number) => void
   onSelectChains: () => void
-  onSelectSettings: () => void
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
@@ -60,7 +58,7 @@ export default function Sidebar({
     <>
       <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
         <SidebarSection>
-          <UserSidebarItem user={user} onSelectSettings={onSelectSettings} />
+          <UserSidebarItem />
         </SidebarSection>
         <SidebarSection>
           {userProject && (

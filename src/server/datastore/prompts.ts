@@ -87,7 +87,6 @@ export async function getActivePrompt(
   const inputs = await getProjectInputValues(promptData.projectID)
   const endpoints = await loadEndpoints(promptID, projectData, buildURL)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
-  const availableProviders = await getAvailableProviders(userID)
 
   return {
     ...toPrompt(promptData, userID),
@@ -99,7 +98,6 @@ export async function getActivePrompt(
     projectURLPath: projectData.urlPath ?? '',
     availableLabels: JSON.parse(projectData.labels),
     availableFlavors: JSON.parse(projectData.flavors),
-    availableProviders,
   }
 }
 

@@ -19,6 +19,7 @@ import { urlBuilderFromHeaders } from '@/src/server/routing'
 import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import UserSettingsPane from '@/components/userSettingsPane'
+import { getAvailableProviders } from '@/src/server/datastore/providers'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -34,7 +35,9 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     ? await getActivePrompt(user.id, promptID, buildURL)
     : await getActiveProject(user.id, projectID ?? user.id, buildURL)
 
-  return { props: { user, initialProjects, initialActiveItem } }
+  const availableProviders = await getAvailableProviders(user.id)
+
+  return { props: { user, initialProjects, initialActiveItem, availableProviders } }
 })
 
 type ActiveItem = ActiveProject | ActivePrompt
@@ -43,10 +46,12 @@ export default function Home({
   user,
   initialProjects,
   initialActiveItem,
+  availableProviders,
 }: {
   user: User
   initialProjects: Project[]
   initialActiveItem: ActiveItem
+  availableProviders: string[]
 }) {
   const router = useRouter()
 
@@ -179,7 +184,7 @@ export default function Home({
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user }}>
+        <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
           <RefreshContext.Provider
             value={{
               refreshProjects,
@@ -197,7 +202,6 @@ export default function Home({
                 onAddPrompt={() => addPrompt(user.id)}
                 onSelectProject={selectProject}
                 onSelectChains={selectChains}
-                onSelectSettings={selectSettings}
               />
               <div className='flex flex-col flex-1'>
                 {!showSettings && (
@@ -219,7 +223,7 @@ export default function Home({
                   </TopBar>
                 )}
                 <div className='flex-1 overflow-hidden'>
-                  {showSettings && <UserSettingsPane user={user} />}
+                  {showSettings && <UserSettingsPane />}
                   {!showSettings && !isChainMode && activePrompt && promptProject && activeVersion && (
                     <PromptTabView
                       activeTab={selectedTab}
@@ -229,7 +233,6 @@ export default function Home({
                       setModifiedVersion={setModifiedVersion}
                       showComments={showComments}
                       setShowComments={setShowComments}
-                      onSelectSettings={selectSettings}
                     />
                   )}
                   {!showSettings && !isChainMode && activeProject && (
