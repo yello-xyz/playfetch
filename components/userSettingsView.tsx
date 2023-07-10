@@ -8,25 +8,40 @@ import PickNameDialog from './pickNameDialog'
 import api from '@/src/client/api'
 import { useRefreshSettings } from './refreshContext'
 import useModalDialogPrompt from './modalDialogContext'
+import { FormatCost } from '@/src/common/formatting'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
 
+  const allProviders = AllProviders.filter(provider => provider !== DefaultProvider)
+  const availableProviders = user.availableProviders.filter(p => p.provider !== DefaultProvider)
+
   return (
     <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
       <div className='text-base font-medium text-gray-800'>Settings</div>
-      <ProviderSettingsPane user={user} />
+      <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} />
+      <CostPane availableProviders={user.availableProviders} />
     </div>
   )
 }
 
-function ProviderSettingsPane({ user }: { user: { availableProviders: AvailableProvider[] } }) {
+function ProviderSettingsPane({
+  providers,
+  availableProviders,
+}: {
+  providers: ModelProvider[]
+  availableProviders: AvailableProvider[]
+}) {
   return (
     <>
       <Label>API Keys</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        {AllProviders.filter(provider => provider !== DefaultProvider).map((provider, index) => (
-          <ProviderRow key={index} availableProviders={user.availableProviders} provider={provider} />
+        {providers.map((provider, index) => (
+          <ProviderRow
+            key={index}
+            provider={provider}
+            availableProvider={availableProviders.find(p => p.provider === provider)}
+          />
         ))}
       </div>
     </>
@@ -35,13 +50,13 @@ function ProviderSettingsPane({ user }: { user: { availableProviders: AvailableP
 
 function ProviderRow({
   provider,
-  availableProviders,
+  availableProvider,
 }: {
   provider: ModelProvider
-  availableProviders: AvailableProvider[]
+  availableProvider?: AvailableProvider
 }) {
   const label = LabelForProvider(provider)
-  const truncatedAPIKey = availableProviders.find(p => p.provider === provider)?.truncatedAPIKey ?? ''
+  const truncatedAPIKey = availableProvider?.truncatedAPIKey ?? ''
   const haveAPIKey = truncatedAPIKey.length > 0
 
   const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
@@ -77,6 +92,33 @@ function ProviderRow({
           onDismiss={() => setShowAPIKeyPrompt(false)}
         />
       )}
+    </div>
+  )
+}
+
+function CostPane({ availableProviders }: { availableProviders: AvailableProvider[] }) {
+  const nonZeroCostProviders = availableProviders.filter(p => p.cost > 0)
+
+  return nonZeroCostProviders.length ? (
+    <>
+      <Label>Running Cost</Label>
+      <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+        {nonZeroCostProviders
+          .sort((a, b) => b.cost - a.cost)
+          .filter(p => p.provider !== DefaultProvider)
+          .map((provider, index) => (
+            <CostRow key={index} availableProvider={provider} />
+          ))}
+      </div>
+    </>
+  ) : null
+}
+
+function CostRow({ availableProvider }: { availableProvider: AvailableProvider }) {
+  return (
+    <div className='flex items-center justify-between gap-4'>
+      <Label className='w-40'>{LabelForProvider(availableProvider.provider)}</Label>
+      {FormatCost(availableProvider.cost ?? 0)}
     </div>
   )
 }

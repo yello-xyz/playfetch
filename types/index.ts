@@ -54,6 +54,7 @@ export type PromptConfig = {
 
 export type AvailableProvider = {
   provider: ModelProvider
+  cost: number
   truncatedAPIKey?: string
 }
 

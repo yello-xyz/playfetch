@@ -6,7 +6,7 @@ import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
-import { getProviderKey } from '@/src/server/datastore/providers'
+import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 
 const hashValue = (object: any, seed = 0) => {
@@ -41,20 +41,6 @@ export const runPromptWithConfig = async (
     prompt
   )
 
-  const getPredictor = async (provider: ModelProvider) => {
-    const apiKey = provider === DefaultProvider ? '' : await getProviderKey(userID, provider)
-
-    switch (provider) {
-      default:
-      case 'google':
-        return vertexai
-      case 'openai':
-        return openai(apiKey, userID)
-      case 'anthropic':
-        return anthropic(apiKey)
-    }
-  }
-
   const cacheKey = hashValue({
     provider: config.provider,
     temperature: config.temperature,
@@ -67,7 +53,31 @@ export const runPromptWithConfig = async (
     return { output: cachedValue, cost: 0, attempts: 1, cacheHit: true }
   }
 
-  const predictor = await getPredictor(config.provider)
+  const getAPIKey = async (provider: ModelProvider) => {
+    switch (provider) {
+      default:
+      case 'google':
+        return null
+      case 'openai':
+      case 'anthropic':
+        return getProviderKey(userID, provider)
+    }
+  }
+
+  const getPredictor = (provider: ModelProvider, apiKey: string) => {
+    switch (provider) {
+      default:
+      case 'google':
+        return vertexai
+      case 'openai':
+        return openai(apiKey, userID)
+      case 'anthropic':
+        return anthropic(apiKey)
+    }
+  }
+
+  const apiKey = await getAPIKey(config.provider)
+  const predictor = getPredictor(config.provider, apiKey ?? '')
 
   let result: PredictionResponse = { output: undefined, cost: 0 }
   let attempts = 0
@@ -81,6 +91,10 @@ export const runPromptWithConfig = async (
 
   if (useCache && result.output?.length) {
     await cacheValue(cacheKey, result.output)
+  }
+
+  if (result.cost > 0) {
+    await incrementProviderCostForUser(userID, config.provider, result.cost)
   }
 
   return { ...result, attempts, cacheHit: false }
