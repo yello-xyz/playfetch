@@ -54,20 +54,23 @@ export default function PromptTabView({
   const refreshPrompt = useRefreshPrompt()
   const [isRunning, setRunning] = useState(false)
 
-  const runPrompt = async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
-    setRunning(true)
-    const versionID = await savePrompt()
-    await refreshPrompt(versionID)
-    await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
-    setRunning(false)
-  }
-
   const checkProviderAvailable = (provider: PromptConfig['provider']) => {
     if (prompt.availableProviders.includes(provider)) {
       return true
     } else {
       onSelectSettings()
       return false
+    }
+  }
+
+  const runPrompt = async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
+    if (checkProviderAvailable(config.provider)) {
+      setRunning(true)
+      const versionID = await savePrompt()
+      await refreshPrompt(versionID)
+      await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
+      setRunning(false)
+  
     }
   }
 
