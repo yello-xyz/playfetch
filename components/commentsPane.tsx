@@ -1,12 +1,13 @@
 import { ActivePrompt, Comment, User, Version } from '@/types'
 import { useEffect, useState } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
-import { ProviderLabel, VersionLabel } from './versionCell'
+import { VersionLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versionComparison'
+import { LabelForModel } from './modelSelector'
 
 export default function CommentsPane({
   prompt,
@@ -94,7 +95,7 @@ export function CommentCell({
             <div className='flex flex-col gap-1 pl-2 ml-6 border-l-4 border-blue-500 opacity-50'>
               {version && (
                 <span className='font-medium'>
-                  {versionIndex} › {ProviderLabel(version)}
+                  {versionIndex} › {LabelForModel(version.config.model)}
                 </span>
               )}
               <div className='line-clamp-2'>

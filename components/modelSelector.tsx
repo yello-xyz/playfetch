@@ -38,6 +38,20 @@ const labelForModel = (model: LanguageModel) => {
   }
 }
 
+const shortLabelForModel = (model: LanguageModel) => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+      return 'GPT3.5'
+    case 'claude-v1':
+      return 'Claude'
+    case 'palm-v2':
+      return 'PaLM'
+  }
+}
+
+export const LabelForModel = (model: LanguageModel) =>
+  `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model)}`
+
 const fullLabelForModel = (model: LanguageModel) =>
   `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}`
 

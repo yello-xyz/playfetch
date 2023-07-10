@@ -5,17 +5,7 @@ import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import CommentPopupMenu from './commentPopupMenu'
-
-export const ProviderLabel = (version: Version) => {
-  switch (version.config.provider) {
-    case 'openai':
-      return 'OpenAI GPT3.5'
-    case 'anthropic':
-      return 'Anthropic Claude'
-    case 'google':
-      return 'Google PaLM'
-  }
-}
+import { LabelForModel } from './modelSelector'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -71,7 +61,7 @@ export default function VersionCell({
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
-            <span className='font-medium'>{ProviderLabel(version)}</span>
+            <span className='font-medium'>{LabelForModel(version.config.model)}</span>
             {version.runs.length > 0 && (
               <span>
                 {' '}
