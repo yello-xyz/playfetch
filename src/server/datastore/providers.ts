@@ -1,6 +1,7 @@
 import { and } from '@google-cloud/datastore'
 import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntity, getID } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
+import { AvailableProvider } from '@/types'
 
 const getProviderData = (userID: number, provider: string) =>
   getFilteredEntity(Entity.PROVIDER, and([buildFilter('userID', userID), buildFilter('provider', provider)]))
@@ -19,7 +20,14 @@ export async function updateProviderKey(userID: number, provider: string, apiKey
   })
 }
 
-export async function getAvailableProviders(userID: number) {
+export async function getAvailableProviders(userID: number): Promise<AvailableProvider[]> {
   const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
-  return [...new Set([...providerData.map(data => data.provider), DefaultProvider])]
+  const providerKeys: AvailableProvider[] = providerData.map(data => ({
+    provider: data.provider,
+    truncatedAPIKey: data.apiKey.length ? `${data.apiKey.slice(0, 8)}…${data.apiKey.slice(-4)}` : data.apiKey,
+  }))
+  if (!providerKeys.find(key => key.provider === DefaultProvider)) {
+    providerKeys.push({ provider: DefaultProvider })
+  }
+  return providerKeys
 }

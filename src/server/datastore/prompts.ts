@@ -17,7 +17,6 @@ import { ActivePrompt, Prompt } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
-import { getAvailableProviders } from './providers'
 
 export async function migratePrompts() {
   const datastore = getDatastore()

@@ -3,7 +3,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { Project, ActivePrompt, Version, User, ActiveProject, Comment } from '@/types'
+import { Project, ActivePrompt, Version, User, ActiveProject, Comment, AvailableProvider } from '@/types'
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import PromptsGridView from '@/components/promptsGridView'
@@ -51,7 +51,7 @@ export default function Home({
   user: User
   initialProjects: Project[]
   initialActiveItem: ActiveItem
-  availableProviders: string[]
+  availableProviders: AvailableProvider[]
 }) {
   const router = useRouter()
 

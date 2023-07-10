@@ -52,6 +52,11 @@ export type PromptConfig = {
   maxTokens: number
 }
 
+export type AvailableProvider = {
+  provider: ModelProvider
+  truncatedAPIKey?: string
+}
+
 export type Version = {
   id: number
   promptID: number

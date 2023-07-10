@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react'
-import { User } from '@/types'
+import { AvailableProvider, User } from '@/types'
 
 type UserContextType = {
   loggedInUser?: User
-  availableProviders?: string[]
+  availableProviders?: AvailableProvider[]
   showSettings?: () => void
 }
 
