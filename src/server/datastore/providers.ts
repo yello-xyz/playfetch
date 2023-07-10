@@ -61,7 +61,7 @@ export async function getAvailableProvidersForUser(userID: number): Promise<Avai
     .filter(data => !!data.apiKey?.length)
     .map(data => ({
       provider: data.provider,
-      truncatedAPIKey: `${data.apiKey.slice(0, 8)}…${data.apiKey.slice(-4)}`,
+      truncatedAPIKey: `${data.apiKey.slice(0, 4)}…${data.apiKey.slice(-4)}`,
       cost: data.cost,
     }))
   if (!providerKeys.find(key => key.provider === DefaultProvider)) {

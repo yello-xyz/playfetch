@@ -2,7 +2,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, Run, RunConfig, PromptConfig, ModelProvider } from '@/types'
-import openai from '@/src/server/openai'
+import openai, { OpenAILanguageModel } from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
@@ -70,7 +70,7 @@ export const runPromptWithConfig = async (
       case 'google':
         return vertexai
       case 'openai':
-        return openai(apiKey, userID)
+        return openai(apiKey, userID, config.model as OpenAILanguageModel)
       case 'anthropic':
         return anthropic(apiKey)
     }

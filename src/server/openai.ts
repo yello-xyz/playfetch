@@ -1,13 +1,16 @@
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
 
-export default function predict(apiKey: string, userID: number) {
+export type OpenAILanguageModel = 'gpt-3.5-turbo'
+
+export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
   return (prompt: string, temperature: number, maxOutputTokens: number) =>
-    tryCompleteChat(apiKey, userID, prompt, temperature, maxOutputTokens)
+    tryCompleteChat(apiKey, userID, model, prompt, temperature, maxOutputTokens)
 }
 
 async function tryCompleteChat(
   apiKey: string,
   userID: number,
+  model: OpenAILanguageModel,
   prompt: string,
   temperature: number,
   maxTokens: number,
@@ -17,7 +20,7 @@ async function tryCompleteChat(
     const api = new OpenAIApi(new Configuration({ apiKey }))
     const response = await api.createChatCompletion(
       {
-        model: 'gpt-3.5-turbo',
+        model,
         messages: [
           ...(system ? [{ role: 'system' as ChatCompletionRequestMessageRoleEnum, content: system }] : []),
           { role: 'user', content: prompt },
