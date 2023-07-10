@@ -60,6 +60,7 @@ export default function Home({
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
   const [isChainMode, setChainMode] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [showComments, setShowComments] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
@@ -108,6 +109,7 @@ export default function Home({
     if (promptID !== activePrompt?.id) {
       savePrompt()
       await refreshPrompt(promptID)
+      setShowSettings(false)
       router.push(PromptRoute(promptID), undefined, { shallow: true })
     }
   }
@@ -123,18 +125,34 @@ export default function Home({
       savePrompt()
       await refreshProject(projectID)
       setChainMode(chainMode)
+      setShowSettings(false)
       router.push(projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID), undefined, { shallow: true })
     }
   }
 
+  const selectChains = () => {
+    if (activePrompt) {
+      selectProject(activePrompt.projectID, true)
+    } else {
+      setChainMode(true)
+    }
+  }
+
+  const selectSettings = () => {
+    setShowSettings(true)
+    router.push(ClientRoute.Settings, undefined, { shallow: true })
+  }
+
   const refreshProjects = () => api.getProjects().then(setProjects)
 
-  const { g: projectID, p: promptID } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const currentQuery = projectID ?? promptID
+  const { g: projectID, p: promptID, s: settings } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const currentQuery = settings ?? projectID ?? promptID
   const [query, setQuery] = useState(currentQuery)
   if (currentQuery !== query) {
     setQuery(currentQuery)
-    if (promptID) {
+    if (settings) {
+      selectSettings()
+    } else if (promptID) {
       selectPrompt(promptID)
     } else {
       selectProject(projectID ?? user.id, isChainMode)
@@ -153,14 +171,6 @@ export default function Home({
       savePrompt().then(versionID => refreshPrompt(activePrompt.id, versionID))
     }
     setSelectedTab(tab)
-  }
-
-  const selectChains = () => {
-    if (activePrompt) {
-      selectProject(activePrompt.projectID, true)
-    } else {
-      setChainMode(true)
-    }
   }
 
   return (
@@ -184,26 +194,30 @@ export default function Home({
                 onAddPrompt={() => addPrompt(user.id)}
                 onSelectProject={selectProject}
                 onSelectChains={selectChains}
+                onSelectSettings={selectSettings}
               />
               <div className='flex flex-col flex-1'>
-                <TopBar
-                  projects={projects}
-                  activeProject={activeProject}
-                  activePrompt={activePrompt}
-                  onAddPrompt={addPrompt}
-                  onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
-                  showComments={showComments}
-                  setShowComments={setShowComments}>
-                  {(activePrompt || isChainMode) && (
-                    <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
-                      <Segment value={'play'} title='Play' />
-                      <Segment value={'test'} title='Test' />
-                      <Segment value={'publish'} title='Publish' />
-                    </SegmentedControl>
-                  )}
-                </TopBar>
+                {!showSettings && (
+                  <TopBar
+                    projects={projects}
+                    activeProject={activeProject}
+                    activePrompt={activePrompt}
+                    onAddPrompt={addPrompt}
+                    onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
+                    showComments={showComments}
+                    setShowComments={setShowComments}>
+                    {(activePrompt || isChainMode) && (
+                      <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
+                        <Segment value={'play'} title='Play' />
+                        <Segment value={'test'} title='Test' />
+                        <Segment value={'publish'} title='Publish' />
+                      </SegmentedControl>
+                    )}
+                  </TopBar>
+                )}
                 <div className='flex-1 overflow-hidden'>
-                  {!isChainMode && activePrompt && promptProject && activeVersion && (
+                  {showSettings && <div>SETTINGS</div>}
+                  {!showSettings && !isChainMode && activePrompt && promptProject && activeVersion && (
                     <PromptTabView
                       activeTab={selectedTab}
                       prompt={activePrompt}
@@ -214,7 +228,7 @@ export default function Home({
                       setShowComments={setShowComments}
                     />
                   )}
-                  {!isChainMode && activeProject && (
+                  {!showSettings && !isChainMode && activeProject && (
                     <PromptsGridView
                       prompts={activeProject.prompts}
                       projects={projects}
@@ -222,7 +236,9 @@ export default function Home({
                       onSelectPrompt={selectPrompt}
                     />
                   )}
-                  {isChainMode && activeProject && <ChainTabView activeTab={selectedTab} project={activeProject} />}
+                  {!showSettings && isChainMode && activeProject && (
+                    <ChainTabView activeTab={selectedTab} project={activeProject} />
+                  )}
                 </div>
               </div>
             </main>

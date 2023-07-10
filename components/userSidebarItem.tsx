@@ -81,8 +81,13 @@ export function UserAvatar({ user, size = 'lg', border }: { user: User; size?: S
   )
 }
 
-export default function UserSidebarItem({ user }: { user: User }) {
+export default function UserSidebarItem({ user, onSelectSettings }: { user: User; onSelectSettings: () => void }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  
+  const selectSettings = () => {
+    setIsMenuExpanded(false)
+    onSelectSettings()
+  }
 
   return (
     <div
@@ -95,7 +100,7 @@ export default function UserSidebarItem({ user }: { user: User }) {
         {isMenuExpanded && (
           <div className='absolute top-0 left-0'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-              <div className='flex flex-col items-stretch gap-4 p-3'>
+              <div className='flex flex-col items-stretch gap-2.5 p-3'>
                 <div className='flex items-center gap-2.5'>
                   <UserAvatar user={user} />
                   <div className='flex flex-col min-w-0'>
@@ -103,6 +108,9 @@ export default function UserSidebarItem({ user }: { user: User }) {
                     <span className='overflow-hidden text-xs text-ellipsis'>{user.email}</span>
                   </div>
                 </div>
+                <span className='p-1 font-medium cursor-pointer' onClick={selectSettings}>
+                  Settings
+                </span>
                 <div className='border-t border-gray-300' />
                 <span className='p-1 font-medium text-red-500 cursor-pointer' onClick={() => signOut()}>
                   Log out
