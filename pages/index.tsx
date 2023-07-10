@@ -27,7 +27,7 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { g: projectID, p: promptID, s: initialShowSettings } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { g: projectID, p: promptID, s: settings } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
   const buildURL = urlBuilderFromHeaders(req.headers)
@@ -36,6 +36,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     : await getActiveProject(user.id, projectID ?? user.id, buildURL)
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
+  const initialShowSettings = settings === 1
 
   return { props: { user, initialProjects, initialActiveItem, initialAvailableProviders, initialShowSettings } }
 })

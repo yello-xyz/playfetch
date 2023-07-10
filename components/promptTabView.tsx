@@ -56,7 +56,7 @@ export default function PromptTabView({
   const user = useLoggedInUser()
 
   const checkProviderAvailable = (provider: ModelProvider) => {
-    if (user.availableProviders.includes(provider)) {
+    if (user.availableProviders.find(p => p.provider === provider)) {
       return true
     } else {
       user.showSettings()

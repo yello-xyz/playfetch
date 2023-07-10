@@ -22,10 +22,12 @@ export async function saveProviderKey(userID: number, provider: ModelProvider, a
 
 export async function getAvailableProvidersForUser(userID: number): Promise<AvailableProvider[]> {
   const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
-  const providerKeys: AvailableProvider[] = providerData.map(data => ({
-    provider: data.provider,
-    truncatedAPIKey: data.apiKey.length ? `${data.apiKey.slice(0, 8)}…${data.apiKey.slice(-4)}` : data.apiKey,
-  }))
+  const providerKeys: AvailableProvider[] = providerData
+    .filter(data => !!data.apiKey?.length)
+    .map(data => ({
+      provider: data.provider,
+      truncatedAPIKey: `${data.apiKey.slice(0, 8)}…${data.apiKey.slice(-4)}`,
+    }))
   if (!providerKeys.find(key => key.provider === DefaultProvider)) {
     providerKeys.push({ provider: DefaultProvider })
   }
