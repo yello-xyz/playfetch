@@ -71,7 +71,7 @@ export default function Sidebar({
               onClick={() => onSelectProject(userProject.id)}
             />
           )}
-          {properProjects.length > 0 && <SidebarButton title='Chains' icon={chainIcon} onClick={onSelectChains} />}
+          <SidebarButton title='Chains' icon={chainIcon} onClick={onSelectChains} />
           <SidebarButton title='New Prompt…' icon={addIcon} onClick={onAddPrompt} />
         </SidebarSection>
         <SidebarSection title='My Projects' className='flex-1'>
