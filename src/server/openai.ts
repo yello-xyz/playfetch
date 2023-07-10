@@ -1,20 +1,21 @@
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
+import { getProviderKey } from './datastore/providers'
 
-const getAPI = () => new OpenAIApi(new Configuration({ apiKey: process.env.OPENAI_API_KEY }))
-
-export default async function predict(prompt: string, temperature: number, maxOutputTokens: number) {
-  return tryCompleteChat(prompt, temperature, maxOutputTokens)
+export default async function predict(prompt: string, temperature: number, maxOutputTokens: number, userID: number) {
+  return tryCompleteChat(userID, prompt, temperature, maxOutputTokens)
 }
 
 async function tryCompleteChat(
+  userID: number,
   prompt: string,
   temperature: number,
   maxTokens: number,
   system?: string,
-  userID?: number
 ) {
   try {
-    const response = await getAPI().createChatCompletion(
+    const apiKey = await getProviderKey(userID, 'openai')
+    const api = new OpenAIApi(new Configuration({ apiKey }))
+    const response = await api.createChatCompletion(
       {
         model: 'gpt-3.5-turbo',
         messages: [
@@ -23,7 +24,7 @@ async function tryCompleteChat(
         ],
         temperature,
         max_tokens: maxTokens,
-        user: userID?.toString() ?? 'playfetch',
+        user: userID.toString(),
       },
       { timeout: 30 * 1000 }
     )

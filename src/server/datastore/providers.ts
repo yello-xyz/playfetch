@@ -8,7 +8,7 @@ const getProviderData = (userID: number, provider: ModelProvider) =>
 
 export async function getProviderKey(userID: number, provider: ModelProvider) {
   const providerData = await getProviderData(userID, provider)
-  return providerData?.apiKey
+  return providerData?.apiKey ?? ''
 }
 
 export async function saveProviderKey(userID: number, provider: ModelProvider, apiKey: string | null) {

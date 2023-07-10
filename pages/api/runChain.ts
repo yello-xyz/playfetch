@@ -28,6 +28,7 @@ type PredictionResponse = { output: string | undefined; cost: number }
 type RunResponse = PredictionResponse & { attempts: number; cacheHit: boolean }
 
 export const runPromptWithConfig = async (
+  userID: number,
   prompt: string,
   config: PromptConfig,
   inputs: PromptInputs,
@@ -68,7 +69,7 @@ export const runPromptWithConfig = async (
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens)
+    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens, userID)
     if (result.output?.length) {
       break
     }
@@ -88,7 +89,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
   const runs: Run[] = []
   for (const inputs of multipleInputs) {
     for (const runConfig of configs) {
-      const { output, cost } = await runPromptWithConfig(runConfig.prompt, runConfig.config, inputs, false)
+      const { output, cost } = await runPromptWithConfig(user.id, runConfig.prompt, runConfig.config, inputs, false)
       if (!output?.length) {
         break
       }

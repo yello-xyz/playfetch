@@ -8,13 +8,19 @@ import { Endpoint, PromptInputs, RunConfig } from '@/types'
 import { getVersion } from '@/src/server/datastore/versions'
 import { runPromptWithConfig } from '../runChain'
 
-async function runSingleEndpoint(endpointID: number, runConfig: RunConfig, useCache: boolean, inputs: PromptInputs) {
+async function runSingleEndpoint(endpoint: Endpoint, runConfig: RunConfig, inputs: PromptInputs) {
   const prompt = ExtractPromptVariables(runConfig.prompt).reduce(
     (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
     runConfig.prompt
   )
-  const { output, cost, attempts, cacheHit } = await runPromptWithConfig(prompt, runConfig.config, inputs, useCache)
-  await updateUsage(endpointID, runConfig.promptID, cost, cacheHit, attempts, !output?.length)
+  const { output, cost, attempts, cacheHit } = await runPromptWithConfig(
+    endpoint.userID,
+    prompt,
+    runConfig.config,
+    inputs,
+    endpoint.useCache
+  )
+  await updateUsage(endpoint.id, runConfig.promptID, cost, cacheHit, attempts, !output?.length)
   return output
 }
 
@@ -45,7 +51,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         for (const { getConfig, mappedOutput } of await loadConfigs(endpoint)) {
           const runConfig = await getConfig()
           // TODO endpoint usage will seem off if we log multiple runs against the same endpoint
-          output = await runSingleEndpoint(endpoint.id, runConfig, endpoint.useCache, inputs)
+          output = await runSingleEndpoint(endpoint, runConfig, inputs)
           if (!output?.length) {
             break
           }

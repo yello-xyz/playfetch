@@ -1,14 +1,16 @@
-const headers = {
-  'x-api-key': process.env.ANTHROPIC_API_KEY ?? '',
-  accept: 'application/json',
-  'content-type': 'application/json',
-}
+import { getProviderKey } from "./datastore/providers"
 
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
 
-export default async function predict(prompt: string, temperature: number, maxTokens: number) {
+export default async function predict(prompt: string, temperature: number, maxTokens: number, userID: number) {
   try {
+    const apiKey = await getProviderKey(userID, 'anthropic')
+    const headers = {
+      'x-api-key': apiKey,
+      accept: 'application/json',
+      'content-type': 'application/json',
+    }    
     const url = new URL('https://api.anthropic.com/v1/complete')
     const formattedPrompt = `\n\nHuman: ${prompt}\n\nAssistant:`
     const body = JSON.stringify({

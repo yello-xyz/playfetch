@@ -90,6 +90,7 @@ export type RunConfig = {
 
 export type Endpoint = {
   id: number
+  userID: number
   promptID: number
   chain: Chain
   timestamp: string

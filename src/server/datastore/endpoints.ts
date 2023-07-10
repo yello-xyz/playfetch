@@ -159,6 +159,7 @@ const toEndpointData = (
 
 export const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
+  userID: data.userID,
   promptID: data.promptID,
   chain: JSON.parse(data.chain),
   timestamp: getTimestamp(data),

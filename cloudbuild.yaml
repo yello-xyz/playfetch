@@ -9,7 +9,6 @@ steps:
     entrypoint: npm
     args: ['run', 'create-env']
     env:
-      - 'ANTHROPIC_API_KEY=${_ANTHROPIC_API_KEY}'
       - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
       - 'GOOGLE_CLIENT_SECRET=${_GOOGLE_CLIENT_SECRET}'
       - 'GITHUB_CLIENT_ID=${_GITHUB_CLIENT_ID}'
@@ -18,7 +17,6 @@ steps:
       - 'NEXTAUTH_URL=${_NEXTAUTH_URL}'
       - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
       - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
-      - 'OPENAI_API_KEY=${_OPENAI_API_KEY}'
   - name: node
     entrypoint: npm
     args: ['run', 'build']
