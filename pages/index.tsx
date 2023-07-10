@@ -110,10 +110,10 @@ export default function Home({
     if (promptID !== activePrompt?.id) {
       savePrompt()
       await refreshPrompt(promptID)
-      setChainMode(false)
-      setShowSettings(false)
       router.push(PromptRoute(promptID), undefined, { shallow: true })
     }
+    setChainMode(false)
+    setShowSettings(false)
   }
 
   const refreshProject = async (projectID: number) => {
@@ -126,11 +126,11 @@ export default function Home({
     if (projectID !== activeProject?.id || chainMode !== isChainMode) {
       savePrompt()
       await refreshProject(projectID)
-      setChainMode(chainMode)
-      setShowSettings(false)
       router.push(projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID), undefined, { shallow: true })
     }
-  }
+    setChainMode(chainMode)
+    setShowSettings(false)
+}
 
   const selectChains = () => {
     if (activePrompt) {
@@ -141,6 +141,7 @@ export default function Home({
   }
 
   const selectSettings = () => {
+    savePrompt()
     setShowSettings(true)
     router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
@@ -228,6 +229,7 @@ export default function Home({
                       setModifiedVersion={setModifiedVersion}
                       showComments={showComments}
                       setShowComments={setShowComments}
+                      onSelectSettings={selectSettings}
                     />
                   )}
                   {!showSettings && !isChainMode && activeProject && (

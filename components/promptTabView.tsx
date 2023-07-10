@@ -20,6 +20,7 @@ export default function PromptTabView({
   setModifiedVersion,
   showComments,
   setShowComments,
+  onSelectSettings,
 }: {
   activeTab: MainViewTab
   prompt: ActivePrompt
@@ -28,6 +29,7 @@ export default function PromptTabView({
   setModifiedVersion: (version: Version) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
+  onSelectSettings: () => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     prompt.inputs,
@@ -60,6 +62,15 @@ export default function PromptTabView({
     setRunning(false)
   }
 
+  const checkProviderAvailable = (provider: PromptConfig['provider']) => {
+    if (prompt.availableProviders.includes(provider)) {
+      return true
+    } else {
+      onSelectSettings()
+      return false
+    }
+  }
+
   const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
 
   const renderTab = (tab: MainViewTab) => {
@@ -71,6 +82,7 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
+            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             maxWidth={maxTabWidth}
           />
@@ -82,6 +94,7 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
+            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             setInputValues={setInputValues}

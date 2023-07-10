@@ -13,6 +13,7 @@ export default function TestPromptTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
+  checkProviderAvailable,
   runPrompt,
   inputValues,
   setInputValues,
@@ -23,6 +24,7 @@ export default function TestPromptTab({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
+  checkProviderAvailable: (provider: PromptConfig['provider']) => boolean
   runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
@@ -68,7 +70,11 @@ export default function TestPromptTab({
             setActiveVersion={selectVersion}
           />
         </div>
-        <PromptPanel version={version} setModifiedVersion={updateVersion} />
+        <PromptPanel
+          version={version}
+          setModifiedVersion={updateVersion}
+          checkProviderAvailable={checkProviderAvailable}
+        />
         <TestButtons
           variables={variables}
           inputValues={inputValues}

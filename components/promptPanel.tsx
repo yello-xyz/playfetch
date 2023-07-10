@@ -25,12 +25,14 @@ export default function PromptPanel({
   runPrompt,
   inputValues = {},
   showLabel,
+  checkProviderAvailable,
 }: {
   version: Version
   setModifiedVersion: (version: Version) => void
   runPrompt?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   showLabel?: boolean
+  checkProviderAvailable: (provider: PromptConfig['provider']) => boolean
 }) {
   const [prompt, setPrompt] = useState(version.prompt)
   const [config, setConfig] = useState(version.config)
@@ -55,7 +57,11 @@ export default function PromptPanel({
 
   const updatePrompt = (prompt: string) => update(prompt, config)
   const updateConfig = (config: PromptConfig) => update(prompt, config)
-  const updateProvider = (provider: PromptConfig['provider']) => updateConfig({ ...config, provider })
+  const updateProvider = (provider: PromptConfig['provider']) => {
+    if (checkProviderAvailable(provider)) {
+      updateConfig({ ...config, provider })
+    }
+  }
 
   // In the play tab, we resolve each variable with any available input and otherwise let it stand for itself.
   const inputs = Object.fromEntries(

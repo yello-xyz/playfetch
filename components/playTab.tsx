@@ -7,6 +7,7 @@ export default function PlayTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
+  checkProviderAvailable,
   runPrompt,
   maxWidth,
 }: {
@@ -14,6 +15,7 @@ export default function PlayTab({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
+  checkProviderAvailable: (provider: PromptConfig['provider']) => boolean
   runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   maxWidth: string
 }) {
@@ -23,10 +25,11 @@ export default function PlayTab({
       <PromptPanel
         version={activeVersion}
         setModifiedVersion={setModifiedVersion}
+        checkProviderAvailable={checkProviderAvailable}
         runPrompt={runPrompt}
         inputValues={prompt.inputs}
         showLabel
-      />
+        />
     </div>
   )
 }
