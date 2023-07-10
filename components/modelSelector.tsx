@@ -19,6 +19,7 @@ export const AllProviders = (['openai', 'anthropic', 'google'] as ModelProvider[
 export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-4':
       return 'openai'
     case 'claude-v1':
       return 'anthropic'
@@ -31,6 +32,8 @@ const labelForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5'
+    case 'gpt-4':
+      return 'GPT-4'
     case 'claude-v1':
       return 'Claude v1'
     case 'palm-v2':
@@ -42,6 +45,8 @@ const shortLabelForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT3.5'
+    case 'gpt-4':
+      return 'GPT4'
     case 'claude-v1':
       return 'Claude'
     case 'palm-v2':
@@ -55,7 +60,7 @@ export const LabelForModel = (model: LanguageModel) =>
 const fullLabelForModel = (model: LanguageModel) =>
   `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}`
 
-const allModels = (['gpt-3.5-turbo', 'claude-v1', 'palm-v2'] as LanguageModel[]).sort((a, b) =>
+const allModels = (['gpt-4', 'gpt-3.5-turbo', 'claude-v1', 'palm-v2'] as LanguageModel[]).sort((a, b) =>
   fullLabelForModel(a).localeCompare(fullLabelForModel(b))
 )
 

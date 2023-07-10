@@ -78,6 +78,7 @@ export default function Home({
   const versionsEqual = (a: Version, b: Version) =>
     a.prompt === b.prompt &&
     a.config.provider === b.config.provider &&
+    a.config.model === b.config.model &&
     a.config.temperature === b.config.temperature &&
     a.config.maxTokens === b.config.maxTokens
 

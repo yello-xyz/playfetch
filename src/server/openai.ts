@@ -1,6 +1,5 @@
+import { OpenAILanguageModel } from '@/types'
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
-
-export type OpenAILanguageModel = 'gpt-3.5-turbo'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
   return (prompt: string, temperature: number, maxOutputTokens: number) =>
