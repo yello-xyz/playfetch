@@ -27,10 +27,10 @@ export enum Entity {
   PROVIDER = 'provider',
 
   // NextAuthAdapter
-  EMAIL = 'email',
-  ACCOUNT = 'account',
-  SESSION = 'session',
-  TOKEN = 'token',
+  EMAIL = '_nextauth_email',
+  ACCOUNT = '_nextauth_account',
+  SESSION = '_nextauth_session',
+  TOKEN = '_nextauth_token',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
