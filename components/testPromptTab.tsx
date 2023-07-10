@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ProviderModel } from '@/types'
+import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider } from '@/types'
 
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -24,7 +24,7 @@ export default function TestPromptTab({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
-  checkProviderAvailable: (provider: ProviderModel) => boolean
+  checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void

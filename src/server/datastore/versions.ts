@@ -21,7 +21,16 @@ export async function migrateVersions() {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    await updateVersion({ ...versionData })
+    const config = JSON.parse(versionData.config) as PromptConfig
+    switch (config.provider) {
+      case 'openai':
+        config.model = 'gpt-3.5'
+      case 'anthropic':
+        config.model = 'claude-v1'
+      case 'google':
+        config.model = 'palm-v2'
+    }
+    await updateVersion({ ...versionData, config: JSON.stringify(config) })
   }
 }
 

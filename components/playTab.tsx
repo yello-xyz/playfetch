@@ -1,4 +1,4 @@
-import { ActivePrompt, PromptConfig, PromptInputs, ProviderModel, Version } from '@/types'
+import { ActivePrompt, ModelProvider, PromptConfig, PromptInputs, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 
@@ -15,7 +15,7 @@ export default function PlayTab({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
-  checkProviderAvailable: (provider: ProviderModel) => boolean
+  checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   maxWidth: string
 }) {

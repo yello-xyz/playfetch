@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react'
-import { InputValues, PromptConfig, PromptInputs, ProviderModel, Version } from '@/types'
+import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
@@ -21,7 +21,7 @@ export default function PromptPanel({
   runPrompt?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   showLabel?: boolean
-  checkProviderAvailable: (provider: ProviderModel) => boolean
+  checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
   const [prompt, setPrompt] = useState(version.prompt)
   const [config, setConfig] = useState(version.config)
@@ -46,7 +46,7 @@ export default function PromptPanel({
 
   const updatePrompt = (prompt: string) => update(prompt, config)
   const updateConfig = (config: PromptConfig) => update(prompt, config)
-  const updateProvider = (provider: ProviderModel) => {
+  const updateProvider = (provider: ModelProvider) => {
     if (checkProviderAvailable(provider)) {
       updateConfig({ ...config, provider })
     }

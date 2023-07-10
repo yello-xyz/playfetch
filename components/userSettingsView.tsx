@@ -20,7 +20,7 @@ function ProviderSettingsPane() {
       <Label>API Keys</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
         {AllProviders.filter(provider => provider !== DefaultProvider).map((provider, index) => (
-          <SettingRow label={LabelForProvider(provider)} value='sk-…' />
+          <SettingRow key={index} label={LabelForProvider(provider)} value='sk-…' />
         ))}
       </div>
     </>

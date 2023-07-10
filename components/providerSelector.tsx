@@ -1,9 +1,9 @@
-import { ProviderModel } from '@/types'
+import { ModelProvider } from '@/types'
 import DropdownMenu from './dropdownMenu'
 
-export const AllProviders: ProviderModel[] = ['anthropic', 'google', 'openai']
+export const AllProviders: ModelProvider[] = ['anthropic', 'google', 'openai']
 
-export const LabelForProvider = (provider: ProviderModel) => {
+export const LabelForProvider = (provider: ModelProvider) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI - GPT-3.5'
@@ -18,11 +18,11 @@ export default function ProviderSelector({
   provider,
   setProvider,
 }: {
-  provider: ProviderModel
-  setProvider: (provider: ProviderModel) => void
+  provider: ModelProvider
+  setProvider: (provider: ModelProvider) => void
 }) {
   return (
-    <DropdownMenu size='medium' value={provider} onChange={value => setProvider(value as ProviderModel)}>
+    <DropdownMenu size='medium' value={provider} onChange={value => setProvider(value as ModelProvider)}>
       {AllProviders.map((provider, index) => (
         <option key={index} value={provider}>
           {LabelForProvider(provider)}
