@@ -1,5 +1,17 @@
 indexes:
 
+- kind: _nextauth_account
+  properties:
+  - name: provider
+  - name: providerAccountId
+  - name: expires_at
+    direction: desc
+
+- kind: _nextauth_session
+  properties:
+  - name: identifier
+  - name: token
+
 - kind: project
   properties:
   - name: userID
@@ -40,15 +52,3 @@ indexes:
   - name: promptID
   - name: createdAt
     direction: desc
-
-- kind: account
-  properties:
-  - name: provider
-  - name: providerAccountId
-  - name: expires_at
-    direction: desc
-
-- kind: session
-  properties:
-  - name: identifier
-  - name: token
