@@ -52,3 +52,8 @@ indexes:
   - name: promptID
   - name: createdAt
     direction: desc
+
+- kind: provider
+  properties:
+  - name: userID
+  - name: provider
