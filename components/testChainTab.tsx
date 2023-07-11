@@ -7,22 +7,28 @@ import TestButtons from './testButtons'
 import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
-import { InputValues, Run } from '@/types'
+import { InputValues } from '@/types'
+import { ConsumeRunStreamReader } from './promptTabView'
 
-const runChain = (chain: LoadedChainItem[], inputs: Record<string, string>[]): Promise<Run[]> => {
+const runChain = async (
+  chain: LoadedChainItem[],
+  inputs: Record<string, string>[],
+  setPartialRuns: (runs: string[]) => void
+ ) => {
   const versions = chain.map(item => item.version)
-  return versions.length
-    ? api.runChain(
-        chain.map(item => ({
-          promptID: item.prompt.id,
-          versionID: item.version.id,
-          prompt: item.version.prompt,
-          config: item.version.config,
-          output: item.output,
-        })),
-        inputs
-      )
-    : Promise.resolve([])
+  if (versions.length > 0) {
+    const streamReader = await api.runChain(
+      chain.map(item => ({
+        promptID: item.prompt.id,
+        versionID: item.version.id,
+        prompt: item.version.prompt,
+        config: item.version.config,
+        output: item.output,
+      })),
+      inputs
+    )
+    await ConsumeRunStreamReader(streamReader, setPartialRuns)
+  }
 }
 
 export default function TestChainTab({
@@ -36,14 +42,13 @@ export default function TestChainTab({
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
 }) {
-  const [runs, setRuns] = useState<Run[]>([])
+  const [partialRuns, setPartialRuns] = useState<string[]>([])
 
   const variables = ExtractUnboundChainVariables(chain)
 
   const testChain = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    const runs = await runChain(chain, inputs)
-    setRuns(runs)
+    await runChain(chain, inputs, setPartialRuns)
   }
 
   return (
@@ -61,7 +66,7 @@ export default function TestChainTab({
         <TestButtons variables={variables} inputValues={inputValues} callback={testChain} />
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={runs} />
+        <RunTimeline partialRuns={partialRuns} />
       </div>
     </>
   )

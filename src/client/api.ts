@@ -10,7 +10,8 @@ import {
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
-type Stream = ReadableStreamDefaultReader<Uint8Array>
+export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
+
 type ResponseType = 'json' | 'stream'
 
 async function parseResponse(response: Response, responseType: ResponseType) {
@@ -93,10 +94,10 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  runPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<Stream> {
+  runPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs: [config], inputs }, 'stream')
   },
-  runChain: function (configs: RunConfig[], inputs: PromptInputs[]): Promise<Stream> {
+  runChain: function (configs: RunConfig[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
   checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {

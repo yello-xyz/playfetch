@@ -5,14 +5,14 @@ import useContainerRect from './useContainerRect'
 import RunCell, { PartialRunCell } from './runCell'
 
 export default function RunTimeline({
-  runs,
+  runs = [],
   version,
   prompt,
   activeRunID,
   isRunning,
   partialRuns = [],
 }: {
-  runs: Run[]
+  runs?: Run[]
   version?: Version
   prompt?: ActivePrompt
   activeRunID?: number

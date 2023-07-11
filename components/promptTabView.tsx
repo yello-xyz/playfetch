@@ -8,17 +8,12 @@ import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { useState } from 'react'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
-import api from '@/src/client/api'
+import api, { StreamReader } from '@/src/client/api'
 import { useLoggedInUser } from './userContext'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
-const streamPrompt = async (
-  runConfig: RunConfig,
-  inputs: PromptInputs[],
-  setPartialRuns: (runs: string[]) => void
-) => {
-  const reader = await api.runPrompt(runConfig, inputs)
+export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: string[]) => void) => {
   const runs = ['']
   while (reader) {
     const { done, value } = await reader.read()
@@ -95,7 +90,8 @@ export default function PromptTabView({
       setRunning(true)
       const versionID = await savePrompt()
       await refreshPrompt(versionID)
-      await streamPrompt({ promptID, versionID, prompt, config }, inputs, setPartialRuns)
+      const streamReader = await api.runPrompt({ promptID, versionID, prompt, config }, inputs)
+      await ConsumeRunStreamReader(streamReader, setPartialRuns)    
       await refreshPrompt(versionID)
       setPartialRuns([])
       setRunning(false)
