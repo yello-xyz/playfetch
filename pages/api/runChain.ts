@@ -72,7 +72,7 @@ export const runPromptWithConfig = async (
       case 'openai':
         return openai(apiKey, userID, config.model as OpenAILanguageModel, streamChunks)
       case 'anthropic':
-        return anthropic(apiKey)
+        return anthropic(apiKey, streamChunks)
     }
   }
 

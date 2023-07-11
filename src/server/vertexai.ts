@@ -30,7 +30,7 @@ export default async function predict(prompt: string, temperature: number, maxOu
     }
 
     const [response] = await client.predict(request)
-    return { output: response.predictions?.[0]?.structValue?.fields?.content?.stringValue, cost: 0 }
+    return { output: response.predictions?.[0]?.structValue?.fields?.content?.stringValue ?? undefined, cost: 0 }
   } catch (error) {
     console.error(error)
     return { output: undefined, cost: 0 }
