@@ -10,28 +10,39 @@ import {
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
-async function parseResponse(response: Response) {
+type ResponseType = 'json' | 'stream'
+async function parseResponse(response: Response, responseType: ResponseType) {
   if (response.ok) {
-    return response.json()
+    switch (responseType) {
+      case 'json':
+        return response.json()
+      case 'stream':
+        return response.body?.getReader()
+    }
   } else if (response.status === 401) {
     window.location.href = ClientRoute.Home
   }
   return Promise.resolve(null)
 }
 
-export async function postToAPI(apiPath: string, apiCall: string, body: Record<string, any>) {
+export async function postToAPI(
+  apiPath: string,
+  apiCall: string,
+  body: Record<string, any>,
+  responseType: ResponseType
+) {
   return fetch(`${apiPath}/${apiCall}`, {
     method: 'POST',
     headers: {
-      accept: 'application/json',
+      ...(responseType === 'json' ? { accept: 'application/json' } : undefined),
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
-  }).then(response => parseResponse(response))
+  }).then(response => parseResponse(response, responseType))
 }
 
-const post = (apiCall: Function, json: any = {}) => {
-  return postToAPI('/api', apiCall.name, json)
+const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'json') => {
+  return postToAPI('/api', apiCall.name, json, responseType)
 }
 
 const api = {
@@ -79,6 +90,9 @@ const api = {
   },
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
+  },
+  streamPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+    return post(this.streamPrompt, { configs: [config], inputs }, 'stream')
   },
   runPrompt: function (config: RunConfig, inputs: PromptInputs[]) {
     return post(this.runChain, { configs: [config], inputs })

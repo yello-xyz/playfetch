@@ -13,21 +13,8 @@ import { useLoggedInUser } from './userContext'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
-const getFetchParams = (runConfig: RunConfig, inputs: PromptInputs[]) => ({
-  method: 'POST',
-  headers: {
-    accept: 'application/json',
-    'content-type': 'application/json',
-  },
-  body: JSON.stringify({
-    configs: [runConfig],
-    inputs,
-  }),
-})
-
 const streamPrompt = async (runConfig: RunConfig, inputs: PromptInputs[]) => {
-  const response = await fetch('/api/streamPrompt', getFetchParams(runConfig, inputs))
-  const reader = response.body?.getReader()
+  const reader = await api.streamPrompt(runConfig, inputs)
   let text = ''
   while (reader) {
     try {
@@ -101,8 +88,8 @@ export default function PromptTabView({
       setRunning(true)
       const versionID = await savePrompt()
       await refreshPrompt(versionID)
-      // await api.runPrompt({ promptID, versionID, prompt, config }, inputs).then(_ => refreshPrompt(versionID))
       await streamPrompt({ promptID, versionID, prompt, config }, inputs)
+      await refreshPrompt(versionID)
       setRunning(false)
     }
   }
