@@ -30,9 +30,9 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   return undefined
 }
 
-export function PartialRunCell({ output }: { output: string }) {
+export function PartialRunCell({ output, shimmer }: { output: string; shimmer?: boolean }) {
   return (
-    <RunCellContainer shimmer>
+    <RunCellContainer shimmer={shimmer}>
       <div>{output}</div>
     </RunCellContainer>
   )

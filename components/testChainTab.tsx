@@ -44,6 +44,7 @@ export default function TestChainTab({
   persistInputValuesIfNeeded: () => void
 }) {
   const [partialRuns, setPartialRuns] = useState<string[]>([])
+  const [isRunning, setIsRunning] = useState(false)
 
   const variables = ExtractUnboundChainVariables(chain)
 
@@ -52,7 +53,9 @@ export default function TestChainTab({
   const testChain = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
     if (chain.every(item => checkProviderAvailable(item.version.config.provider))) {
+      setIsRunning(true)
       await runChain(chain, inputs, setPartialRuns)
+      setIsRunning(false)
     }
   }
 
@@ -71,7 +74,7 @@ export default function TestChainTab({
         <TestButtons variables={variables} inputValues={inputValues} callback={testChain} />
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline partialRuns={partialRuns} />
+        <RunTimeline partialRuns={partialRuns} isRunning={isRunning} />
       </div>
     </>
   )
