@@ -20,6 +20,7 @@ import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
+import { VersionsEqual } from '@/src/common/versionsEqual'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -75,21 +76,14 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
-  const versionsEqual = (a: Version, b: Version) =>
-    a.prompt === b.prompt &&
-    a.config.provider === b.config.provider &&
-    a.config.model === b.config.model &&
-    a.config.temperature === b.config.temperature &&
-    a.config.maxTokens === b.config.maxTokens
-
   const savePrompt = async () => {
     const versionNeedsSaving =
-      activePrompt && activeVersion && modifiedVersion && !versionsEqual(activeVersion, modifiedVersion)
+      activePrompt && activeVersion && modifiedVersion && !VersionsEqual(activeVersion, modifiedVersion)
     setModifiedVersion(undefined)
     if (!versionNeedsSaving) {
       return activeVersion?.id
     }
-    const equalPreviousVersion = activePrompt.versions.find(version => versionsEqual(version, modifiedVersion))
+    const equalPreviousVersion = activePrompt.versions.find(version => VersionsEqual(version, modifiedVersion))
     if (equalPreviousVersion) {
       setActiveVersion(equalPreviousVersion)
       return equalPreviousVersion.id

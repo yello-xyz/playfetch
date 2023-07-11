@@ -16,6 +16,7 @@ import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
+import { VersionsEqual } from '@/src/common/versionsEqual'
 
 export async function migrateVersions() {
   const datastore = getDatastore()
@@ -25,15 +26,8 @@ export async function migrateVersions() {
   }
 }
 
-const isVersionDataCompatible = (versionData: any, prompt: string, config: PromptConfig) => {
-  const versionConfig = JSON.parse(versionData.config) as PromptConfig
-  return (
-    versionData.prompt === prompt &&
-    versionConfig.provider === config.provider &&
-    versionConfig.temperature === config.temperature &&
-    versionConfig.maxTokens === config.maxTokens
-  )
-}
+const isVersionDataCompatible = (versionData: any, prompt: string, config: PromptConfig) =>
+  VersionsEqual({ prompt: versionData.prompt, config: JSON.parse(versionData.config) }, { prompt, config })
 
 const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
