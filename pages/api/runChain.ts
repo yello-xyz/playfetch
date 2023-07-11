@@ -7,7 +7,6 @@ import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
-import { DefaultProvider } from '@/src/common/defaultConfig'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)

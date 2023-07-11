@@ -59,6 +59,12 @@ async function streamPrompt(req: NextApiRequest, res: NextApiResponse<string>, u
     { responseType: 'stream', timeout: 30 * 1000 }
   )
 
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Content-Type', 'text/event-stream;charset=utf-8')
+  res.setHeader('Cache-Control', 'no-cache, no-transform')
+  res.setHeader('X-Accel-Buffering', 'no')
+  res.setHeader('Content-Encoding', 'none')
+
   let result = ''
   for await (const message of streamCompletion(response.data)) {
     try {
@@ -66,14 +72,15 @@ async function streamPrompt(req: NextApiRequest, res: NextApiResponse<string>, u
       const text = parsed.choices[0].delta?.content ?? ''
       result += text
 
+      res.write(text)
       process.stdout.write(text)
     } catch (error) {
       console.error('Could not JSON parse stream message', message, error)
     }
   }
-  process.stdout.write('\n')
 
-  res.json(result)
+  process.stdout.write('\n')
+  res.end()
 }
 
 export default withLoggedInUserRoute(streamPrompt)
