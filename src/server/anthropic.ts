@@ -1,3 +1,5 @@
+import Anthropic from '@anthropic-ai/sdk'
+
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
 
@@ -7,25 +9,15 @@ export default function predict(apiKey: string) {
 
 async function complete(apiKey: string, prompt: string, temperature: number, maxTokens: number) {
   try {
-    const headers = {
-      'x-api-key': apiKey,
-      accept: 'application/json',
-      'content-type': 'application/json',
-    }
-    const url = new URL('https://api.anthropic.com/v1/complete')
-    const formattedPrompt = `\n\nHuman: ${prompt}\n\nAssistant:`
-    const body = JSON.stringify({
-      prompt: formattedPrompt,
+    const anthropic = new Anthropic({ apiKey })
+    const formattedPrompt = `${Anthropic.HUMAN_PROMPT} ${prompt} ${Anthropic.AI_PROMPT}`
+    const response = await anthropic.completions.create({
+      model: 'claude-1',
       temperature,
-      stream: false,
-      model: 'claude-v1',
       max_tokens_to_sample: maxTokens,
-      stop_sequences: ['Human:'],
+      prompt: formattedPrompt,
+      stop_sequences: [Anthropic.HUMAN_PROMPT],
     })
-    const response = await fetch(url, { method: 'POST', headers, body }).then(result => result.json())
-    if (response.exception) {
-      throw new Error(response.exception)
-    }
     const cost = calculateCost(formattedPrompt, response.completion)
     return { output: response?.completion, cost }
   } catch (error) {

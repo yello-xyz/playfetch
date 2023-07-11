@@ -21,6 +21,7 @@
     "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.5.3",
     "@google-cloud/aiplatform": "^2.14.0",
     "@google-cloud/datastore": "^7.5.1",
     "@react-hook/resize-observer": "^1.2.6",
