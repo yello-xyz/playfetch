@@ -1,6 +1,7 @@
 import { OpenAILanguageModel } from '@/types'
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from './stream'
+import { encode } from 'gpt-3-encoder'
 
 export default function predict(
   apiKey: string,
@@ -10,6 +11,17 @@ export default function predict(
 ) {
   return (prompt: string, temperature: number, maxOutputTokens: number) =>
     tryCompleteChat(apiKey, userID, model, prompt, temperature, maxOutputTokens, undefined, streamChunks)
+}
+
+const costForTokensWithModel = (model: OpenAILanguageModel, input: string, output: string) => {
+  const inputTokens = encode(input).length
+  const outputTokens = encode(output).length
+  switch (model) {
+    case 'gpt-3.5-turbo':
+      return (inputTokens * 0.0015) / 1000 + (outputTokens * 0.002) / 1000
+    case 'gpt-4':
+      return (inputTokens * 0.03) / 1000 + (outputTokens * 0.06) / 1000
+  }
 }
 
 async function tryCompleteChat(
@@ -47,9 +59,7 @@ async function tryCompleteChat(
       streamChunks?.(text)
     }
 
-    // TODO calculate cost depending on model and total output tokens (unavailable in stream response)
-    const totalTokens = 0
-    const cost = (totalTokens * 0.06) / 1000
+    const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
 
     return { output, cost }
   } catch (error) {
