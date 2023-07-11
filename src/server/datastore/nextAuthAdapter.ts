@@ -141,7 +141,7 @@ export default function NextAuthAdapter(): Adapter {
       await getDatastore().save({
         key: buildKey(Entity.TOKEN),
         data: { identifier, expires, token },
-        excludeFromIndexes: ['expires'],
+        excludeFromIndexes: [],
       })
       return { identifier, expires, token }
     },
