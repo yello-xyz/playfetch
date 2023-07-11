@@ -70,9 +70,9 @@ export const runPromptWithConfig = async (
       case 'google':
         return vertexai
       case 'openai':
-        return openai(apiKey, userID, config.model as OpenAILanguageModel, streamChunks)
+        return openai(apiKey, userID, config.model as OpenAILanguageModel)
       case 'anthropic':
-        return anthropic(apiKey, streamChunks)
+        return anthropic(apiKey)
     }
   }
 
@@ -83,7 +83,7 @@ export const runPromptWithConfig = async (
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens)
+    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens, streamChunks)
     if (result.output?.length) {
       break
     }

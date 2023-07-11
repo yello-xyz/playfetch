@@ -5,7 +5,12 @@ const { PredictionServiceClient } = aiplatform.v1
 const location = 'us-central1'
 const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatform.googleapis.com` })
 
-export default async function predict(prompt: string, temperature: number, maxOutputTokens: number) {
+export default async function predict(
+  prompt: string,
+  temperature: number,
+  maxOutputTokens: number,
+  streamChunks?: (text: string) => void
+) {
   try {
     const projectID = await getProjectID()
     const request = {
@@ -30,7 +35,11 @@ export default async function predict(prompt: string, temperature: number, maxOu
     }
 
     const [response] = await client.predict(request)
-    return { output: response.predictions?.[0]?.structValue?.fields?.content?.stringValue ?? undefined, cost: 0 }
+    const output = response.predictions?.[0]?.structValue?.fields?.content?.stringValue ?? undefined
+    if (output && streamChunks) {
+      streamChunks?.(output)
+    }
+    return { output, cost: 0 }
   } catch (error) {
     console.error(error)
     return { output: undefined, cost: 0 }

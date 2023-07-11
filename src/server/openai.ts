@@ -3,13 +3,8 @@ import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from '
 import { StreamResponseData } from './stream'
 import { encode } from 'gpt-3-encoder'
 
-export default function predict(
-  apiKey: string,
-  userID: number,
-  model: OpenAILanguageModel,
-  streamChunks?: (chunk: string) => void
-) {
-  return (prompt: string, temperature: number, maxOutputTokens: number) =>
+export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
+  return (prompt: string, temperature: number, maxOutputTokens: number, streamChunks?: (chunk: string) => void) =>
     tryCompleteChat(apiKey, userID, model, prompt, temperature, maxOutputTokens, undefined, streamChunks)
 }
 

@@ -3,8 +3,8 @@ import Anthropic from '@anthropic-ai/sdk'
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
 
-export default function predict(apiKey: string, streamChunks?: (text: string) => void) {
-  return (prompt: string, temperature: number, maxTokens: number) =>
+export default function predict(apiKey: string) {
+  return (prompt: string, temperature: number, maxTokens: number, streamChunks?: (text: string) => void) =>
     complete(apiKey, prompt, temperature, maxTokens, streamChunks)
 }
 
