@@ -21,9 +21,10 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
       return 'openai'
-    case 'claude-v1':
+    case 'claude-instant-1':
+    case 'claude-2':
       return 'anthropic'
-    case 'palm-v2':
+    case 'text-bison@001':
       return 'google'
   }
 }
@@ -34,9 +35,11 @@ const labelForModel = (model: LanguageModel) => {
       return 'GPT-3.5'
     case 'gpt-4':
       return 'GPT-4'
-    case 'claude-v1':
-      return 'Claude v1'
-    case 'palm-v2':
+    case 'claude-instant-1':
+      return 'Claude Instant'
+    case 'claude-2':
+      return 'Claude v2'
+    case 'text-bison@001':
       return 'PaLM v2'
   }
 }
@@ -47,9 +50,10 @@ const shortLabelForModel = (model: LanguageModel) => {
       return 'GPT3.5'
     case 'gpt-4':
       return 'GPT4'
-    case 'claude-v1':
+    case 'claude-instant-1':
+    case 'claude-2':
       return 'Claude'
-    case 'palm-v2':
+    case 'text-bison@001':
       return 'PaLM'
   }
 }
@@ -60,9 +64,9 @@ export const LabelForModel = (model: LanguageModel) =>
 const fullLabelForModel = (model: LanguageModel) =>
   `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}`
 
-const allModels = (['gpt-4', 'gpt-3.5-turbo', 'claude-v1', 'palm-v2'] as LanguageModel[]).sort((a, b) =>
-  fullLabelForModel(a).localeCompare(fullLabelForModel(b))
-)
+const allModels: LanguageModel[] = ['gpt-4', 'gpt-3.5-turbo', 'claude-instant-1', 'claude-2', 'text-bison@001']
+
+const sortedModels = allModels.sort((a, b) => fullLabelForModel(a).localeCompare(fullLabelForModel(b)))
 
 export default function ModelSelector({
   model,
@@ -73,7 +77,7 @@ export default function ModelSelector({
 }) {
   return (
     <DropdownMenu size='medium' value={model} onChange={value => setModel(value as LanguageModel)}>
-      {allModels.map((model, index) => (
+      {sortedModels.map((model, index) => (
         <option key={index} value={model}>
           {fullLabelForModel(model)}
         </option>

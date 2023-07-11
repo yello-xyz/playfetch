@@ -1,11 +1,18 @@
 import aiplatform from '@google-cloud/aiplatform'
 import { getProjectID } from './datastore/datastore'
+import { GoogleLanguageModel } from '@/types'
 const { PredictionServiceClient } = aiplatform.v1
 
 const location = 'us-central1'
 const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatform.googleapis.com` })
 
-export default async function predict(
+export default function predict(model: GoogleLanguageModel) {
+  return (prompt: string, temperature: number, maxTokens: number, streamChunks?: (text: string) => void) =>
+    complete(model, prompt, temperature, maxTokens, streamChunks)
+}
+
+async function complete(
+  model: GoogleLanguageModel,
   prompt: string,
   temperature: number,
   maxOutputTokens: number,
@@ -14,7 +21,7 @@ export default async function predict(
   try {
     const projectID = await getProjectID()
     const request = {
-      endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/text-bison@001`,
+      endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/${model}`,
       instances: [
         {
           structValue: {

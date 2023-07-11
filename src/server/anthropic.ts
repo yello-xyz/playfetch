@@ -1,15 +1,17 @@
+import { AnthropicLanguageModel } from '@/types'
 import Anthropic from '@anthropic-ai/sdk'
 
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
 
-export default function predict(apiKey: string) {
+export default function predict(apiKey: string, model: AnthropicLanguageModel) {
   return (prompt: string, temperature: number, maxTokens: number, streamChunks?: (text: string) => void) =>
-    complete(apiKey, prompt, temperature, maxTokens, streamChunks)
+    complete(apiKey, model, prompt, temperature, maxTokens, streamChunks)
 }
 
 async function complete(
   apiKey: string,
+  model: AnthropicLanguageModel,
   prompt: string,
   temperature: number,
   maxTokens: number,
@@ -19,7 +21,7 @@ async function complete(
     const anthropic = new Anthropic({ apiKey })
     const formattedPrompt = `${Anthropic.HUMAN_PROMPT} ${prompt} ${Anthropic.AI_PROMPT}`
     const stream = await anthropic.completions.create({
-      model: 'claude-1',
+      model,
       temperature,
       max_tokens_to_sample: maxTokens,
       prompt: formattedPrompt,

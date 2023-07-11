@@ -43,8 +43,12 @@ export type ActivePrompt = Prompt & {
 }
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google'
+
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-4'
-export type LanguageModel = OpenAILanguageModel | 'claude-v1' | 'palm-v2'
+export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
+export type GoogleLanguageModel = 'text-bison@001'
+
+export type LanguageModel = OpenAILanguageModel | AnthropicLanguageModel | GoogleLanguageModel
 
 export type PromptConfig = {
   provider: ModelProvider
