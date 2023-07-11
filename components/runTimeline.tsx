@@ -10,14 +10,14 @@ export default function RunTimeline({
   prompt,
   activeRunID,
   isRunning,
-  partialRun,
+  partialRuns = [],
 }: {
   runs: Run[]
   version?: Version
   prompt?: ActivePrompt
   activeRunID?: number
   isRunning?: boolean
-  partialRun?: string
+  partialRuns?: string[]
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const containerRect = useContainerRect(containerRef)
@@ -37,7 +37,7 @@ export default function RunTimeline({
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
       <div className='font-medium text-gray-600'>Responses</div>
-      {runs.length > 0 || partialRun ? (
+      {runs.length > 0 || partialRuns.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map(run => (
             <RunCell
@@ -50,7 +50,9 @@ export default function RunTimeline({
               scrollTop={scrollTop}
             />
           ))}
-          {partialRun && <PartialRunCell partialRun={partialRun} />}
+          {partialRuns.map((run, index) => (
+            <PartialRunCell key={index} output={run} />
+          ))}
         </div>
       ) : (
         <EmptyRuns isRunning={isRunning} />

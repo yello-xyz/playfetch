@@ -30,10 +30,10 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   return undefined
 }
 
-export function PartialRunCell({ partialRun }: { partialRun: string }) {
+export function PartialRunCell({ output }: { output: string }) {
   return (
     <RunCellContainer>
-      <div>{partialRun}</div>
+      <div>{output}</div>
     </RunCellContainer>
   )
 }

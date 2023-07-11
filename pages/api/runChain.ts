@@ -105,9 +105,9 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
   const multipleInputs: PromptInputs[] = req.body.inputs
 
   const runs: Run[] = []
-  const streamChunks = (chunk: string) => res.write(chunk)
   for (const inputs of multipleInputs) {
     for (const runConfig of configs) {
+      const streamChunks = (chunk: string) => res.write(`${runs.length}:${chunk}`)
       const { output, cost } = await runPromptWithConfig(
         user.id,
         runConfig.prompt,
@@ -123,14 +123,11 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
       if (runConfig.output) {
         inputs[runConfig.output] = output
       }
+      await new Promise(resolve => setTimeout(resolve, 3000))
     }
   }
 
-  if (req.body.sendRunResponse) {
-    res.json(runs)
-  } else {
-    res.status(200).end()
-  }
+  res.end()
 }
 
 export default withLoggedInUserRoute(runChain)
