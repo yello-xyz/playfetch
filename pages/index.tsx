@@ -126,7 +126,7 @@ export default function Home({
   }
 
   const selectProject = async (projectID: number, chainMode = false) => {
-    if (projectID !== activeProject?.id || chainMode !== isChainMode) {
+    if (projectID !== activeProject?.id || chainMode !== isChainMode || showSettings) {
       savePrompt()
       await refreshProject(projectID)
       router.push(projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID), undefined, { shallow: true })
@@ -136,11 +136,8 @@ export default function Home({
   }
 
   const selectChains = () => {
-    if (activePrompt) {
-      selectProject(activePrompt.projectID, true)
-    } else {
-      setChainMode(true)
-    }
+    const project = activeProject ?? promptProject as Project
+    selectProject(project.id, true)
   }
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
