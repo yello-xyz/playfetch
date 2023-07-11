@@ -1,6 +1,6 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
 import { ActivePrompt, Comment, Run, Version } from '@/types'
-import { MouseEvent, useEffect, useState } from 'react'
+import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
 import { CommentInput, CommentsPopup } from './commentPopupMenu'
@@ -28,6 +28,14 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
     }
   }
   return undefined
+}
+
+export function PartialRunCell({ partialRun }: { partialRun: string }) {
+  return (
+    <RunCellContainer>
+      <div>{partialRun}</div>
+    </RunCellContainer>
+  )
 }
 
 export default function RunCell({
@@ -115,9 +123,7 @@ export default function RunCell({
   }
 
   return (
-    <div
-      className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
-      onMouseDown={closePopups}>
+    <RunCellContainer onMouseDown={closePopups}>
       <OutputWithComments
         identifier={identifier}
         output={run.output}
@@ -176,6 +182,22 @@ export default function RunCell({
       <div className='self-end text-xs'>
         {FormatCost(run.cost)} · {formattedDate}
       </div>
+    </RunCellContainer>
+  )
+}
+
+function RunCellContainer({
+  children,
+  onMouseDown,
+}: {
+  children: ReactNode
+  onMouseDown?: (event: MouseEvent) => void
+}) {
+  return (
+    <div
+      className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
+      onMouseDown={onMouseDown}>
+      {children}
     </div>
   )
 }

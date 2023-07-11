@@ -2,7 +2,7 @@ import { ActivePrompt, Run, Version } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
-import RunCell from './runCell'
+import RunCell, { PartialRunCell } from './runCell'
 
 export default function RunTimeline({
   runs,
@@ -10,12 +10,14 @@ export default function RunTimeline({
   prompt,
   activeRunID,
   isRunning,
+  partialRun,
 }: {
   runs: Run[]
   version?: Version
   prompt?: ActivePrompt
   activeRunID?: number
   isRunning?: boolean
+  partialRun?: string
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const containerRect = useContainerRect(containerRef)
@@ -35,7 +37,7 @@ export default function RunTimeline({
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
       <div className='font-medium text-gray-600'>Responses</div>
-      {runs.length > 0 ? (
+      {runs.length > 0 || partialRun ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map(run => (
             <RunCell
@@ -48,6 +50,7 @@ export default function RunTimeline({
               scrollTop={scrollTop}
             />
           ))}
+          {partialRun && <PartialRunCell partialRun={partialRun} />}
         </div>
       ) : (
         <EmptyRuns isRunning={isRunning} />

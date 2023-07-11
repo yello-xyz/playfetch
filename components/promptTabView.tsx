@@ -13,22 +13,21 @@ import { useLoggedInUser } from './userContext'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
-const streamPrompt = async (runConfig: RunConfig, inputs: PromptInputs[]) => {
+const streamPrompt = async (
+  runConfig: RunConfig,
+  inputs: PromptInputs[],
+  setPartialRun: (run: string | undefined) => void
+) => {
   const reader = await api.runPrompt(runConfig, inputs)
   let text = ''
   while (reader) {
-    try {
-      const { done, value } = await reader.read()
-      if (done) {
-        return
-      }
-      const res = new Response(value)
-      text += await res.text()
-      console.log(text)
-    } catch (error) {
-      console.error(error)
+    const { done, value } = await reader.read()
+    if (done) {
       return
     }
+    const res = new Response(value)
+    text += await res.text()
+    setPartialRun(text)
   }
 }
 
@@ -83,13 +82,16 @@ export default function PromptTabView({
     }
   }
 
+  const [partialRun, setPartialRun] = useState<string>()
+
   const runPrompt = async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
       const versionID = await savePrompt()
       await refreshPrompt(versionID)
-      await streamPrompt({ promptID, versionID, prompt, config }, inputs)
+      await streamPrompt({ promptID, versionID, prompt, config }, inputs, setPartialRun)
       await refreshPrompt(versionID)
+      setPartialRun(undefined)
       setRunning(false)
     }
   }
@@ -149,6 +151,7 @@ export default function PromptTabView({
             version={activeVersion}
             activeRunID={activeRunID}
             isRunning={isRunning}
+            partialRun={partialRun}
           />
         </div>
       )}
