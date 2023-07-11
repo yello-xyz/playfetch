@@ -1,7 +1,7 @@
 import { postToAPI } from '@/src/client/api'
 
 const post = (apiCall: Function, json: any = {}) => {
-  return postToAPI('/api/admin', apiCall.name, json)
+  return postToAPI('/api/admin', apiCall.name, json, 'json')
 }
 
 const api = {
