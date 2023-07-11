@@ -117,7 +117,11 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
     }
   }
 
-  res.json(runs)
+  if (req.body.sendRunResponse) {
+    res.json(runs)
+  } else {
+    res.status(200).end()
+  }
 }
 
 export default withLoggedInUserRoute(runChain)

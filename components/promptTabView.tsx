@@ -14,7 +14,7 @@ import { useLoggedInUser } from './userContext'
 export type MainViewTab = 'play' | 'test' | 'publish'
 
 const streamPrompt = async (runConfig: RunConfig, inputs: PromptInputs[]) => {
-  const reader = await api.streamPrompt(runConfig, inputs)
+  const reader = await api.runPrompt(runConfig, inputs)
   let text = ''
   while (reader) {
     try {

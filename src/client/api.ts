@@ -91,14 +91,11 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  streamPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<ReadableStreamDefaultReader<Uint8Array>> {
-    return post(this.streamPrompt, { configs: [config], inputs }, 'stream')
-  },
-  runPrompt: function (config: RunConfig, inputs: PromptInputs[]) {
-    return post(this.runChain, { configs: [config], inputs })
+  runPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+    return post(this.runChain, { configs: [config], inputs }, 'stream')
   },
   runChain: function (configs: RunConfig[], inputs: PromptInputs[]) {
-    return post(this.runChain, { configs, inputs })
+    return post(this.runChain, { configs, inputs, sendRunResponse: true })
   },
   checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {
     return post(this.checkEndpointName, { promptID, projectURLPath, name })

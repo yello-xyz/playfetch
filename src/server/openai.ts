@@ -38,6 +38,7 @@ async function tryCompleteChat(
       const parsed = JSON.parse(message)
       const text = parsed.choices[0].delta?.content ?? ''
       output += text
+      process.stdout.write(text)
       // res.write(text)
     }
 
