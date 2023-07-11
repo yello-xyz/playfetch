@@ -33,7 +33,8 @@ export const runPromptWithConfig = async (
   prompt: string,
   config: PromptConfig,
   inputs: PromptInputs,
-  useCache: boolean
+  useCache: boolean,
+  streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> => {
   const resolvedPrompt = Object.entries(inputs).reduce(
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
@@ -69,7 +70,7 @@ export const runPromptWithConfig = async (
       case 'google':
         return vertexai
       case 'openai':
-        return openai(apiKey, userID, config.model as OpenAILanguageModel)
+        return openai(apiKey, userID, config.model as OpenAILanguageModel, streamChunks)
       case 'anthropic':
         return anthropic(apiKey)
     }
@@ -104,9 +105,17 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
   const multipleInputs: PromptInputs[] = req.body.inputs
 
   const runs: Run[] = []
+  const streamChunks = (chunk: string) => res.write(chunk)
   for (const inputs of multipleInputs) {
     for (const runConfig of configs) {
-      const { output, cost } = await runPromptWithConfig(user.id, runConfig.prompt, runConfig.config, inputs, false)
+      const { output, cost } = await runPromptWithConfig(
+        user.id,
+        runConfig.prompt,
+        runConfig.config,
+        inputs,
+        false,
+        streamChunks
+      )
       if (!output?.length) {
         break
       }
