@@ -9,6 +9,7 @@ import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
 import { InputValues } from '@/types'
 import { ConsumeRunStreamReader } from './promptTabView'
+import useCheckProvider from './checkProvider'
 
 const runChain = async (
   chain: LoadedChainItem[],
@@ -46,9 +47,13 @@ export default function TestChainTab({
 
   const variables = ExtractUnboundChainVariables(chain)
 
+  const checkProviderAvailable = useCheckProvider()
+
   const testChain = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    await runChain(chain, inputs, setPartialRuns)
+    if (chain.every(item => checkProviderAvailable(item.version.config.provider))) {
+      await runChain(chain, inputs, setPartialRuns)
+    }
   }
 
   return (

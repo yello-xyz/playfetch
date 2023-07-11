@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import { useLoggedInUser } from './userContext'
+import useCheckProvider from './checkProvider'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
@@ -72,16 +73,7 @@ export default function PromptTabView({
   const refreshPrompt = useRefreshPrompt()
   const [isRunning, setRunning] = useState(false)
 
-  const user = useLoggedInUser()
-
-  const checkProviderAvailable = (provider: ModelProvider) => {
-    if (user.availableProviders.find(p => p.provider === provider)) {
-      return true
-    } else {
-      user.showSettings()
-      return false
-    }
-  }
+  const checkProviderAvailable = useCheckProvider()
 
   const [partialRuns, setPartialRuns] = useState<string[]>([])
 
