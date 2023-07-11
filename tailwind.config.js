@@ -1,13 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './pages/**/*.tsx',
-    './components/**/*.tsx',
-  ],
+  content: ['./pages/**/*.tsx', './components/**/*.tsx'],
   theme: {
     textColor: {
-      'transparent': 'transparent',
-      'black': '#000000',
+      transparent: 'transparent',
+      black: '#000000',
       'gray-25': '#FBFBFD',
       'gray-50': '#F3F4F6',
       'gray-100': '#ECECEF',
@@ -19,11 +16,11 @@ module.exports = {
       'gray-700': '#333A46',
       'gray-800': '#1D2532',
       'red-500': '#C64629',
-      'white': '#FFFFFF',
+      white: '#FFFFFF',
     },
     backgroundColor: {
-      'transparent': 'transparent',
-      'black': '#000000',
+      transparent: 'transparent',
+      black: '#000000',
       'blue-25': '#F3F8FD',
       'blue-50': '#DCEAFA',
       'blue-100': '#B1D1F6',
@@ -68,11 +65,11 @@ module.exports = {
       'yellow-200': '#FAE3A8',
       'yellow-300': '#F8D784',
       'yellow-400': '#F6CD65',
-      'white': '#FFFFFF',
+      white: '#FFFFFF',
     },
     borderColor: {
-      'transparent': 'transparent',
-      'black': '#000000',
+      transparent: 'transparent',
+      black: '#000000',
       'blue-50': '#DCEAFA',
       'blue-500': '#2C7BD8',
       'gray-25': '#FBFBFD',
@@ -85,10 +82,21 @@ module.exports = {
       'gray-600': '#9AA2AD',
       'gray-700': '#8C94A1',
       'gray-800': '#838C9A',
-      'white': '#FFFFFF',
+      white: '#FFFFFF',
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',
+    },
+    extend: {
+      animation: {
+        'shimmer': 'shimmer 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        shimmer: {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: .6 },
+        }
+      },
     },
   },
 }

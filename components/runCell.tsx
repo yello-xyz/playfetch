@@ -32,7 +32,7 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
 
 export function PartialRunCell({ output }: { output: string }) {
   return (
-    <RunCellContainer>
+    <RunCellContainer shimmer>
       <div>{output}</div>
     </RunCellContainer>
   )
@@ -189,14 +189,16 @@ export default function RunCell({
 function RunCellContainer({
   children,
   onMouseDown,
+  shimmer,
 }: {
   children: ReactNode
   onMouseDown?: (event: MouseEvent) => void
+  shimmer?: boolean
 }) {
+  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
+  const shimmerClass = shimmer ? 'animate-shimmer' : ''
   return (
-    <div
-      className='flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
-      onMouseDown={onMouseDown}>
+    <div className={`${baseClass} ${shimmerClass}`} onMouseDown={onMouseDown}>
       {children}
     </div>
   )
