@@ -7,6 +7,7 @@ import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { RunSeparator } from '@/src/common/runSeparator'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -107,14 +108,13 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
   const runs: Run[] = []
   for (const inputs of multipleInputs) {
     for (const runConfig of configs) {
-      const streamChunks = (chunk: string) => res.write(`${runs.length}:${chunk}`)
       const { output, cost } = await runPromptWithConfig(
         user.id,
         runConfig.prompt,
         runConfig.config,
         inputs,
         false,
-        streamChunks
+        chunk => res.write(chunk)
       )
       if (!output?.length) {
         break
@@ -123,7 +123,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
       if (runConfig.output) {
         inputs[runConfig.output] = output
       }
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      res.write(RunSeparator)
     }
   }
 

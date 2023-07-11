@@ -1,4 +1,4 @@
-import { ActivePrompt, PromptConfig, PromptInputs, ModelProvider, Version, RunConfig } from '@/types'
+import { ActivePrompt, PromptConfig, PromptInputs, Version } from '@/types'
 
 import PlayTab from './playTab'
 import PublishPromptTab from './publishPromptTab'
@@ -9,8 +9,8 @@ import CommentsPane from './commentsPane'
 import { useState } from 'react'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
-import { useLoggedInUser } from './userContext'
 import useCheckProvider from './checkProvider'
+import { RunSeparator } from '@/src/common/runSeparator'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
@@ -22,14 +22,13 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
       return
     }
     const text = await new Response(value).text()
-    const [runIndex, runText] = text.split(':')
+    const splits = text.split(RunSeparator)
     const currentIndex = runs.length - 1
-    if (Number(runIndex) === currentIndex) {
-      runs[currentIndex] += runText
-    } else {
-      runs.push(runText)
+    runs[currentIndex] += splits[0]
+    for (const split of splits.slice(1)) {
+      runs.push(split)
     }
-    setPartialRuns([...runs])
+    setPartialRuns(runs.filter(run => run.trim().length > 0))
   }
 }
 
