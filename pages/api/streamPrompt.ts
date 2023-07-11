@@ -3,34 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { PromptInputs, User, RunConfig } from '@/types'
 import { Configuration, OpenAIApi } from 'openai'
 import { getProviderKey } from '@/src/server/datastore/providers'
-
-async function* chunksToLines(chunksAsync: any) {
-  let previous = ''
-  for await (const chunk of chunksAsync) {
-    const bufferChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
-    previous += bufferChunk
-    let eolIndex
-    while ((eolIndex = previous.indexOf('\n')) >= 0) {
-      // line includes the EOL
-      const line = previous.slice(0, eolIndex + 1).trimEnd()
-      if (line === 'data: [DONE]') break
-      if (line.startsWith('data: ')) yield line
-      previous = previous.slice(eolIndex + 1)
-    }
-  }
-}
-
-async function* linesToMessages(linesAsync: any) {
-  for await (const line of linesAsync) {
-    const message = line.substring('data :'.length)
-
-    yield message
-  }
-}
-
-async function* streamCompletion(data: any) {
-  yield* linesToMessages(chunksToLines(data))
-}
+import { StreamResponseData } from '@/src/server/stream'
 
 async function streamPrompt(req: NextApiRequest, res: NextApiResponse<string>, user: User) {
   const configs: RunConfig[] = req.body.configs
@@ -59,14 +32,8 @@ async function streamPrompt(req: NextApiRequest, res: NextApiResponse<string>, u
     { responseType: 'stream', timeout: 30 * 1000 }
   )
 
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Content-Type', 'text/event-stream;charset=utf-8')
-  res.setHeader('Cache-Control', 'no-cache, no-transform')
-  res.setHeader('X-Accel-Buffering', 'no')
-  res.setHeader('Content-Encoding', 'none')
-
   let result = ''
-  for await (const message of streamCompletion(response.data)) {
+  for await (const message of StreamResponseData(response.data)) {
     try {
       const parsed = JSON.parse(message)
       const text = parsed.choices[0].delta?.content ?? ''

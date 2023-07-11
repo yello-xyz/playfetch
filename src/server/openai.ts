@@ -1,5 +1,6 @@
 import { OpenAILanguageModel } from '@/types'
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
+import { StreamResponseData } from './stream'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
   return (prompt: string, temperature: number, maxOutputTokens: number) =>
@@ -27,12 +28,24 @@ async function tryCompleteChat(
         temperature,
         max_tokens: maxTokens,
         user: userID.toString(),
+        stream: true,
       },
-      { timeout: 30 * 1000 }
+      { responseType: 'stream', timeout: 30 * 1000 }
     )
-    const totalTokens = response.data.usage?.total_tokens ?? 0
-    const upperBoundCost = (totalTokens * 0.06) / 1000
-    return { output: response.data.choices[0]?.message?.content?.trim(), cost: upperBoundCost }
+
+    let output = ''
+    for await (const message of StreamResponseData(response.data)) {
+      const parsed = JSON.parse(message)
+      const text = parsed.choices[0].delta?.content ?? ''
+      output += text
+      // res.write(text)
+    }
+
+    // TODO calculate cost depending on model and total output tokens (unavailable in stream response)
+    const totalTokens = 0
+    const cost = (totalTokens * 0.06) / 1000
+
+    return { output, cost }
   } catch (error) {
     console.error(error)
     return { output: undefined, cost: 0 }
