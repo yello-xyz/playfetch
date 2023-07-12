@@ -40,42 +40,43 @@ export const runPromptConfigs = async (
   callback: (version: Version, response: RunResponse & { output: string }) => Promise<any>,
   streamChunks?: (chunk: string) => void
 ) => {
+  let lastOutput = undefined as string | undefined
+
   for (const runConfig of configs) {
     const version = await getVersion(runConfig.versionID)
-    const prompt = useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
-    const runResponse = await runPromptWithConfig(userID, prompt, version.config, inputs, useCache, streamChunks)
-    const output = runResponse.output
-    if (!output?.length) {
+    const prompt = Object.entries(inputs).reduce(
+      (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
+      useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
+    )
+    const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
+    lastOutput = runResponse.output
+    if (!lastOutput?.length) {
       break
     }
     if (runConfig.output) {
       const variable = useCamelCase ? ToCamelCase(runConfig.output) : runConfig.output
-      inputs[variable] = output
+      inputs[variable] = lastOutput
     }
-    await callback(version, { ...runResponse, output })
+    await callback(version, { ...runResponse, output: lastOutput })
     streamChunks?.(RunSeparator)
   }
+
+  return lastOutput
 }
 
 const runPromptWithConfig = async (
   userID: number,
   prompt: string,
   config: PromptConfig,
-  inputs: PromptInputs,
   useCache: boolean,
   streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> => {
-  const resolvedPrompt = Object.entries(inputs).reduce(
-    (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
-    prompt
-  )
-
   const cacheKey = {
     provider: config.provider,
     model: config.model,
     temperature: config.temperature,
     maxTokens: config.maxTokens,
-    prompt: resolvedPrompt,
+    prompt,
   }
 
   const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
@@ -113,7 +114,7 @@ const runPromptWithConfig = async (
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(resolvedPrompt, config.temperature, config.maxTokens, streamChunks)
+    result = await predictor(prompt, config.temperature, config.maxTokens, streamChunks)
     if (result.output?.length) {
       break
     }
@@ -134,7 +135,6 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
   const configs: RunConfig[] = req.body.configs
   const multipleInputs: PromptInputs[] = req.body.inputs
 
-  const runs: Run[] = []
   for (const inputs of multipleInputs) {
     await runPromptConfigs(
       user.id,
@@ -142,8 +142,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
       inputs,
       false,
       false,
-      async (version, { output, cost }) =>
-        runs.push(await saveRun(user.id, version.promptID, version.id, inputs, output, cost)),
+      (version, { output, cost }) => saveRun(user.id, version.promptID, version.id, inputs, output, cost),
       chunk => res.write(chunk)
     )
   }

@@ -17,19 +17,16 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
       const endpoint = await getEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
-        let lastOutput: string | undefined = undefined
-        await runPromptConfigs(
+        const output = await runPromptConfigs(
           endpoint.userID,
           endpoint.chain,
           inputs,
           endpoint.useCache,
           true,
-          async (version: Version, { output, cost, attempts, cacheHit }) => {
-            lastOutput = output
-            await updateUsage(endpoint.id, version.promptID, cost, cacheHit, attempts, !output?.length)
-          }
+          (version: Version, { output, cost, attempts, cacheHit }) =>
+            updateUsage(endpoint.id, version.promptID, cost, cacheHit, attempts, !output?.length)
         )
-        return res.json({ output : lastOutput })
+        return res.json({ output })
       }
     }
   }
