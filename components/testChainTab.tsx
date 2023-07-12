@@ -19,7 +19,7 @@ const runChain = async (
   const versions = chain.map(item => item.version)
   if (versions.length > 0) {
     const streamReader = await api.runChain(
-      chain.map(item => ({ versionID: item.version.id, output: item.output })),
+      chain.map(item => ({ versionID: item.version.id, output: item.output, includeContext: item.includeContext })),
       inputs
     )
     await ConsumeRunStreamReader(streamReader, setPartialRuns)

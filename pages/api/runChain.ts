@@ -41,18 +41,24 @@ export const runPromptConfigs = async (
   streamChunks?: (chunk: string) => void
 ) => {
   let lastOutput = undefined as string | undefined
+  let runninContext = ''
 
   for (const runConfig of configs) {
     const version = await getVersion(runConfig.versionID)
-    const prompt = Object.entries(inputs).reduce(
+    let prompt = Object.entries(inputs).reduce(
       (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
       useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
     )
+    runninContext += prompt
+    if (runConfig.includeContext) {
+      prompt = runninContext
+    }
     const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
     lastOutput = runResponse.output
     if (!lastOutput?.length) {
       break
     }
+    runninContext += `\n\n${lastOutput}\n\n`
     if (runConfig.output) {
       const variable = useCamelCase ? ToCamelCase(runConfig.output) : runConfig.output
       inputs[variable] = lastOutput

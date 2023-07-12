@@ -7,6 +7,7 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
 import { LoadedChainItem, ChainItem, IsLoadedChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
+import Checkbox from './checkbox'
 
 const ExtractChainVariables = (chain: ChainItem[]) => [
   ...new Set(chain.flatMap(item => (IsLoadedChainItem(item) ? ExtractPromptVariables(item.version.prompt) : []))),
@@ -63,21 +64,18 @@ export default function BuildChainTab({
       : { prompt: prompts.find(prompt => prompt.id === promptID)!, version: undefined, output: undefined }
   }
 
-  const addPrompt = (promptID: number) => {
-    setChain([...chain, chainItemFromPromptID(promptID)])
-  }
+  const addPrompt = (promptID: number) => setChain([...chain, chainItemFromPromptID(promptID)])
 
-  const replacePrompt = (index: number) => (promptID: number) => {
+  const replacePrompt = (index: number) => (promptID: number) =>
     setChain([...chain.slice(0, index), chainItemFromPromptID(promptID), ...chain.slice(index + 1)])
-  }
 
-  const removePrompt = (index: number) => () => {
-    setChain([...chain.slice(0, index), ...chain.slice(index + 1)])
-  }
+  const removePrompt = (index: number) => () => setChain([...chain.slice(0, index), ...chain.slice(index + 1)])
 
-  const selectVersion = (index: number) => (version: Version) => {
+  const toggleIncludeContext = (index: number) => (includeContext: boolean) =>
+    setChain([...chain.slice(0, index), { ...chain[index], includeContext }, ...chain.slice(index + 1)])
+
+  const selectVersion = (index: number) => (version: Version) =>
     setChain([...chain.slice(0, index), { ...(chain[index] as LoadedChainItem), version }, ...chain.slice(index + 1)])
-  }
 
   const mapOutput = (index: number) => (output?: string) => {
     const resetChain = chain.map(item =>
@@ -100,7 +98,14 @@ export default function BuildChainTab({
           ))}
         </div>
         {chain.map((item, index) => (
-          <div key={index} className='flex gap-4'>
+          <div key={index} className='flex items-center gap-4'>
+            <Checkbox
+              label=''
+              id='includeContext'
+              disabled={index === 0}
+              checked={!!item.includeContext}
+              setChecked={toggleIncludeContext(index)}
+            />
             <PromptSelector
               prompts={prompts}
               selectedPrompt={promptForItem(item)}

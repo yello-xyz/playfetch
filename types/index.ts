@@ -89,6 +89,7 @@ export type Run = {
 export type RunConfig = {
   versionID: number
   output?: string
+  includeContext?: boolean
 }
 
 export type Endpoint = {
