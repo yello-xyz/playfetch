@@ -7,15 +7,15 @@ export default function Checkbox({
   checked,
   setChecked,
 }: {
-  label: string
-  id: string
+  label?: string
+  id?: string
   disabled?: boolean
   checked: boolean
   setChecked: (checked: boolean) => void
 }) {
   return (
     <div className='flex items-baseline justify-between gap-2'>
-      <Label htmlFor={id}>{label}</Label>
+      {label && <Label htmlFor={id}>{label}</Label>}
       <input
         className='w-4 h-4 cursor-pointer'
         type='checkbox'

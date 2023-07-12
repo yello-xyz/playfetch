@@ -105,8 +105,6 @@ export default function BuildChainTab({
         {chain.map((item, index) => (
           <div key={index} className='flex items-center gap-4'>
             <Checkbox
-              label=''
-              id='includeContext'
               disabled={index === 0}
               checked={!!item.includeContext}
               setChecked={toggleIncludeContext(index)}
