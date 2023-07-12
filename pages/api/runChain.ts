@@ -137,7 +137,7 @@ const runPromptWithConfig = async (
   return { ...result, attempts, cacheHit: false }
 }
 
-async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: User) {
+async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   const configs: RunConfig[] = req.body.configs
   const multipleInputs: PromptInputs[] = req.body.inputs
 
