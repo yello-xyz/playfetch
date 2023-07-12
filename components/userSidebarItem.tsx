@@ -6,6 +6,8 @@ import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Icon from './icon'
 import { useLoggedInUser } from './userContext'
+import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
+import api from '@/src/client/api'
 
 const avatarColors = [
   'bg-orange-300',
@@ -92,6 +94,8 @@ export default function UserSidebarItem() {
     user.showSettings()
   }
 
+  const logOut = async () => api.logOut().then(() => signOut())
+
   return (
     <div
       className='flex pl-4 gap-2.5 items-center relative cursor-pointer'
@@ -115,7 +119,7 @@ export default function UserSidebarItem() {
                   Settings
                 </span>
                 <div className='border-t border-gray-300' />
-                <span className='p-1 font-medium text-red-500 cursor-pointer' onClick={() => signOut()}>
+                <span className='p-1 font-medium text-red-500 cursor-pointer' onClick={logOut}>
                   Log out
                 </span>
               </div>

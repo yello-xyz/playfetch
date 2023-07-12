@@ -141,6 +141,9 @@ const api = {
   updateProviderKey: function (provider: ModelProvider, apiKey: string | null) {
     return post(this.updateProviderKey, { provider, apiKey })
   },
+  logOut: function () {
+    return post(this.logOut)
+  },
 }
 
 export default api

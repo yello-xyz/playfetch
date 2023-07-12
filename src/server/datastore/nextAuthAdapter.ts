@@ -72,8 +72,8 @@ export default function NextAuthAdapter(): Adapter {
       return { id: user.id, email, emailVerified }
     },
     async deleteUser(userId) {
-      const accountKeys = await getEntityKeys(Entity.ACCOUNT, 'userId', Number(userId))
-      const sessionKeys = await getEntityKeys(Entity.SESSION, 'userId', Number(userId))
+      const accountKeys = await getEntityKeys(Entity.ACCOUNT, 'userId', userId)
+      const sessionKeys = await getEntityKeys(Entity.SESSION, 'userId', userId)
       // TODO delete user project and access keys?
       await getDatastore().delete([...accountKeys, ...sessionKeys, buildKey(Entity.USER, Number(userId))])
     },
