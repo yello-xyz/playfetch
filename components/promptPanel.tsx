@@ -57,8 +57,8 @@ export default function PromptPanel({
   )
 
   return (
-    <div className='flex flex-col gap-4 overflow-hidden text-gray-500'>
-      <div className='self-stretch overflow-y-auto'>
+    <div className='flex flex-col gap-4 text-gray-500 min-h-[200px]'>
+      <div className='self-stretch overflow-hidden min-h-[100px]'>
         <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}

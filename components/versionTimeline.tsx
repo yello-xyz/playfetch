@@ -43,7 +43,7 @@ export default function VersionTimeline({
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <>
-      <div ref={containerRef} className='relative flex min-h-0'>
+      <div ref={containerRef} className='relative flex flex-1 min-h-[165px]'>
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
             users={prompt.users}
