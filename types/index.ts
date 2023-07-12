@@ -87,10 +87,7 @@ export type Run = {
 }
 
 export type RunConfig = {
-  promptID: number
   versionID: number
-  prompt: string
-  config: PromptConfig
   output?: string
 }
 

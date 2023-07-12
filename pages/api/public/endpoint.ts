@@ -4,23 +4,23 @@ import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
-import { Endpoint, PromptInputs, RunConfig } from '@/types'
+import { Endpoint, PromptInputs, Version } from '@/types'
 import { getVersion } from '@/src/server/datastore/versions'
 import { runPromptWithConfig } from '../runChain'
 
-async function runSingleEndpoint(endpoint: Endpoint, runConfig: RunConfig, inputs: PromptInputs) {
-  const prompt = ExtractPromptVariables(runConfig.prompt).reduce(
+async function runSingleEndpoint(endpoint: Endpoint, version: Version, inputs: PromptInputs) {
+  const prompt = ExtractPromptVariables(version.prompt).reduce(
     (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
-    runConfig.prompt
+    version.prompt
   )
   const { output, cost, attempts, cacheHit } = await runPromptWithConfig(
     endpoint.userID,
     prompt,
-    runConfig.config,
+    version.config,
     inputs,
     endpoint.useCache
   )
-  await updateUsage(endpoint.id, runConfig.promptID, cost, cacheHit, attempts, !output?.length)
+  await updateUsage(endpoint.id, version.promptID, cost, cacheHit, attempts, !output?.length)
   return output
 }
 
@@ -48,10 +48,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
       if (endpoint) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         let output: string | undefined = undefined
-        for (const getConfig of loadConfigs(endpoint)) {
-          const runConfig = await getConfig()
+        for (const runConfig of endpoint.chain) {
+          const version = await getVersion(runConfig.versionID)
           // TODO endpoint usage will seem off if we log multiple runs against the same endpoint
-          output = await runSingleEndpoint(endpoint, runConfig, inputs)
+          output = await runSingleEndpoint(endpoint, version, inputs)
           if (!output?.length) {
             break
           }

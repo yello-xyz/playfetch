@@ -15,17 +15,11 @@ const runChain = async (
   chain: LoadedChainItem[],
   inputs: Record<string, string>[],
   setPartialRuns: (runs: string[]) => void
- ) => {
+) => {
   const versions = chain.map(item => item.version)
   if (versions.length > 0) {
     const streamReader = await api.runChain(
-      chain.map(item => ({
-        promptID: item.prompt.id,
-        versionID: item.version.id,
-        prompt: item.version.prompt,
-        config: item.version.config,
-        output: item.output,
-      })),
+      chain.map(item => ({ versionID: item.version.id, output: item.output })),
       inputs
     )
     await ConsumeRunStreamReader(streamReader, setPartialRuns)

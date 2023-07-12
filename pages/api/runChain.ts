@@ -8,6 +8,7 @@ import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 import { RunSeparator } from '@/src/common/runSeparator'
+import { getVersion } from '@/src/server/datastore/versions'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -108,10 +109,11 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
   const runs: Run[] = []
   for (const inputs of multipleInputs) {
     for (const runConfig of configs) {
+      const version = await getVersion(runConfig.versionID)
       const { output, cost } = await runPromptWithConfig(
         user.id,
-        runConfig.prompt,
-        runConfig.config,
+        version.prompt,
+        version.config,
         inputs,
         false,
         chunk => res.write(chunk)
@@ -119,7 +121,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
       if (!output?.length) {
         break
       }
-      runs.push(await saveRun(user.id, runConfig.promptID, runConfig.versionID, inputs, output, cost))
+      runs.push(await saveRun(user.id, version.promptID, runConfig.versionID, inputs, output, cost))
       if (runConfig.output) {
         inputs[runConfig.output] = output
       }

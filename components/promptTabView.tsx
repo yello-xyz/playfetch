@@ -76,12 +76,12 @@ export default function PromptTabView({
 
   const [partialRuns, setPartialRuns] = useState<string[]>([])
 
-  const runPrompt = async (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => {
+  const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
       const versionID = await savePrompt()
       await refreshPrompt(versionID)
-      const streamReader = await api.runPrompt({ promptID, versionID, prompt, config }, inputs)
+      const streamReader = await api.runPrompt({ versionID }, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)    
       await refreshPrompt(versionID)
       setPartialRuns([])

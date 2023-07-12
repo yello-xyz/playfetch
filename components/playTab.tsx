@@ -16,7 +16,7 @@ export default function PlayTab({
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
-  runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   maxWidth: string
 }) {
   return (

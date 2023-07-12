@@ -25,7 +25,7 @@ export default function TestPromptTab({
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
-  runPrompt: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
@@ -54,7 +54,7 @@ export default function TestPromptTab({
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(version.prompt, version.config, inputs)
+    return runPrompt(version.config, inputs)
   }
 
   return (

@@ -18,7 +18,7 @@ export default function PromptPanel({
 }: {
   version: Version
   setModifiedVersion: (version: Version) => void
-  runPrompt?: (prompt: string, config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
@@ -69,7 +69,7 @@ export default function PromptPanel({
       {runPrompt && (
         <div className='flex items-center self-end gap-4'>
           <ModelSelector model={config.model} setModel={updateModel} />
-          <PendingButton disabled={!prompt.length} onClick={() => runPrompt(prompt, config, [inputs])}>
+          <PendingButton disabled={!prompt.length} onClick={() => runPrompt(config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>
