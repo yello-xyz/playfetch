@@ -6,6 +6,7 @@ async function stream(_: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Cache-Control', 'no-store"')
   res.setHeader('X-Accel-Buffering', 'no')
   res.setHeader('Content-Encoding', 'none')
+  res.setHeader('Connection', 'keep-alive')
 
   res.status(202).write('first chunk')
   await new Promise(resolve => setTimeout(resolve, 3000))
