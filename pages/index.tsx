@@ -136,7 +136,7 @@ export default function Home({
   }
 
   const selectChains = () => {
-    const project = activeProject ?? promptProject as Project
+    const project = activeProject ?? (promptProject as Project)
     selectProject(project.id, true)
     setSelectedTab('play')
   }

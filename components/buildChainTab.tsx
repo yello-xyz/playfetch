@@ -104,11 +104,7 @@ export default function BuildChainTab({
         </div>
         {chain.map((item, index) => (
           <div key={index} className='flex items-center gap-4'>
-            <Checkbox
-              disabled={index === 0}
-              checked={!!item.includeContext}
-              setChecked={toggleIncludeContext(index)}
-            />
+            <Checkbox disabled={index === 0} checked={!!item.includeContext} setChecked={toggleIncludeContext(index)} />
             <PromptSelector
               prompts={prompts}
               selectedPrompt={promptForItem(item)}

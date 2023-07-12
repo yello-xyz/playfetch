@@ -51,11 +51,7 @@ export default function RunTimeline({
             />
           ))}
           {partialRuns.map((run, index) => (
-            <PartialRunCell
-              key={index}
-              output={run}
-              shimmer={isRunning && index === partialRuns.length - 1}
-            />
+            <PartialRunCell key={index} output={run} shimmer={isRunning && index === partialRuns.length - 1} />
           ))}
         </div>
       ) : (
