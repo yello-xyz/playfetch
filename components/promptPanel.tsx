@@ -1,12 +1,10 @@
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
-
-import dynamic from 'next/dynamic'
 import ModelSelector, { ProviderForModel } from './modelSelector'
-const PromptInput = dynamic(() => import('./promptInput'))
+import PromptInput from './promptInput'
 
 export default function PromptPanel({
   version,
@@ -61,9 +59,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col gap-4 overflow-hidden text-gray-500'>
       <div className='self-stretch overflow-y-auto'>
-        <Suspense>
-          <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
-        </Suspense>
+        <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (

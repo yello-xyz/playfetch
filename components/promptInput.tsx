@@ -1,9 +1,11 @@
-import { RefObject, useEffect, useState } from 'react'
+import { RefObject, Suspense, useEffect, useState } from 'react'
 import { useRef } from 'react'
 import Label from './label'
 import linkIcon from '@/public/linkWhite.svg'
 import { InputVariableClass } from './inputVariable'
-import ContentEditable from './contentEditable'
+
+import dynamic from 'next/dynamic'
+const ContentEditable = dynamic(() => import('./contentEditable'))
 
 const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
 const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
@@ -92,14 +94,16 @@ export default function PromptInput({
           <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
         </div>
       )}
-      <ContentEditable
-        className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
-        htmlValue={toHTML(prompt)}
-        onChange={value => setPrompt(fromHTML(value))}
-        allowedTags={['br', 'div', 'b']}
-        allowedAttributes={{ b: ['class'] }}
-        innerRef={contentEditableRef}
-      />
+      <Suspense>
+        <ContentEditable
+          className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
+          htmlValue={toHTML(prompt)}
+          onChange={value => setPrompt(fromHTML(value))}
+          allowedTags={['br', 'div', 'b']}
+          allowedAttributes={{ b: ['class'] }}
+          innerRef={contentEditableRef}
+        />
+      </Suspense>
       {selection && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'

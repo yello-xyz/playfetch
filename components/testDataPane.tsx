@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import linkIcon from '@/public/link.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
-import ContentEditable from './contentEditable'
+
+import dynamic from 'next/dynamic'
+const ContentEditable = dynamic(() => import('./contentEditable'))
 
 export default function TestDataPane({
   variables,
@@ -78,11 +80,13 @@ export default function TestDataPane({
         {activeInputs.map((value, index) => (
           <div key={index} className='flex'>
             <div className='py-2 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
-            <ContentEditable
-              className='w-full px-3 py-2 text-sm bg-white border-b border-gray-100 outline-none border-x'
-              htmlValue={value}
-              onChange={value => updateInputs(value, index)}
-            />
+            <Suspense>
+              <ContentEditable
+                className='w-full px-3 py-2 text-sm bg-white border-b border-gray-100 outline-none border-x'
+                htmlValue={value}
+                onChange={value => updateInputs(value, index)}
+              />
+            </Suspense>
           </div>
         ))}
       </div>
