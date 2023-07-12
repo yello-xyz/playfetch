@@ -83,14 +83,14 @@ export default function PromptInput({
   }
 
   return (
-    <div ref={containerRef} className='relative flex flex-col gap-2'>
+    <div ref={containerRef} className='relative flex flex-col h-full gap-2 overflow-hidden'>
       {showLabel && (
         <div className='flex items-center block gap-2 mb-1'>
           <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
         </div>
       )}
       <ContentEditable
-        className='p-4 text-gray-800 border border-gray-300 rounded-lg'
+        className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
         onChange={event => setPrompt(fromHTML(event.currentTarget.innerHTML))}
         html={toHTML(prompt)}
         innerRef={contentEditableRef}

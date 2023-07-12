@@ -59,8 +59,8 @@ export default function PromptPanel({
   )
 
   return (
-    <div className='flex flex-col gap-4 text-gray-500'>
-      <div className='self-stretch'>
+    <div className='flex flex-col gap-4 overflow-hidden text-gray-500'>
+      <div className='self-stretch overflow-y-auto'>
         <Suspense>
           <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
         </Suspense>
