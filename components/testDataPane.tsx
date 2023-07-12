@@ -4,6 +4,7 @@ import addIcon from '@/public/add.svg'
 import linkIcon from '@/public/link.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
+import sanitizeHtml from 'sanitize-html'
 
 export default function TestDataPane({
   variables,
@@ -37,7 +38,7 @@ export default function TestDataPane({
       ...inputValues,
       [activeVariable]: [
         ...filterEmptyInputs(activeInputs.slice(0, index)),
-        value,
+        sanitizeHtml(value),
         ...filterEmptyInputs(activeInputs.slice(index + 1)),
       ],
     })
