@@ -22,6 +22,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           endpoint.userID,
           endpoint.chain,
           inputs,
+          endpoint.useCache,
           true,
           async (version: Version, { output, cost, attempts, cacheHit }) => {
             lastOutput = output

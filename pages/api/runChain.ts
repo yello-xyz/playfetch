@@ -35,6 +35,7 @@ export const runPromptConfigs = async (
   userID: number,
   configs: RunConfig[],
   inputs: PromptInputs,
+  useCache: boolean,
   useCamelCase: boolean,
   callback: (version: Version, response: RunResponse & { output: string }) => Promise<any>,
   streamChunks?: (chunk: string) => void
@@ -42,7 +43,7 @@ export const runPromptConfigs = async (
   for (const runConfig of configs) {
     const version = await getVersion(runConfig.versionID)
     const prompt = useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
-    const runResponse = await runPromptWithConfig(userID, prompt, version.config, inputs, false, streamChunks)
+    const runResponse = await runPromptWithConfig(userID, prompt, version.config, inputs, useCache, streamChunks)
     const output = runResponse.output
     if (!output?.length) {
       break
@@ -139,6 +140,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
       user.id,
       configs,
       inputs,
+      false,
       false,
       async (version, { output, cost }) =>
         runs.push(await saveRun(user.id, version.promptID, version.id, inputs, output, cost)),
