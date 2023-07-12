@@ -18,6 +18,18 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[]) => {
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
+const promptForItem = (item: ChainItem) => ('prompt' in item ? item.prompt : undefined)
+const versionIDForItem = (item: ChainItem) => ('prompt' in item ? item.version?.id : item.versionID)
+const keyForItem = (item: ChainItem) => ('prompt' in item ? item.prompt.id : item.versionID)
+
+const loadPromptForItem = (item: ChainItem) =>
+  'prompt' in item ? api.getPrompt(item.prompt.id) : api.getPromptForVersion(item.versionID)
+const promptMatchesItem = (prompt: ActivePrompt, item: ChainItem) =>
+  'prompt' in item ? item.prompt.id === prompt.id : prompt.versions.some(version => version.id === item.versionID)
+
+const selectPromptVersion = (prompt: ActivePrompt, versionID?: number) =>
+  (versionID ? prompt.versions.find(version => version.id === versionID) : undefined) ?? prompt.versions.slice(-1)[0]
+
 export default function BuildChainTab({
   chain,
   setChain,
@@ -30,18 +42,15 @@ export default function BuildChainTab({
   const [promptCache, setPromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
 
   useEffect(() => {
-    const selectPromptVersion = (prompt: ActivePrompt, versionID?: number) =>
-      (versionID ? prompt.versions.find(version => version.id === versionID) : undefined) ??
-      prompt.versions.slice(-1)[0]
     const loadChainItem = (prompt: ActivePrompt) => (item: ChainItem) =>
-      item.prompt.id === prompt.id
-        ? { prompt: item.prompt, version: selectPromptVersion(prompt, item.version?.id), output: item.output }
+      promptMatchesItem(prompt, item)
+        ? { prompt, version: selectPromptVersion(prompt, versionIDForItem(item)), output: item.output }
         : item
 
-    const promptID = chain.find(item => !IsLoadedChainItem(item))?.prompt?.id
-    if (promptID) {
-      api.getPrompt(promptID).then(prompt => {
-        setPromptCache(promptCache => ({ ...promptCache, [promptID]: prompt }))
+    const unloadedItem = chain.find(item => !IsLoadedChainItem(item))
+    if (unloadedItem) {
+      loadPromptForItem(unloadedItem).then(prompt => {
+        setPromptCache(promptCache => ({ ...promptCache, [prompt.id]: prompt }))
         setChain(chain.map(loadChainItem(prompt)))
       })
     }
@@ -94,7 +103,7 @@ export default function BuildChainTab({
           <div key={index} className='flex gap-4'>
             <PromptSelector
               prompts={prompts}
-              selectedPrompt={item.prompt}
+              selectedPrompt={promptForItem(item)}
               onSelectPrompt={replacePrompt(index)}
               onRemovePrompt={removePrompt(index)}
             />
@@ -119,7 +128,7 @@ export default function BuildChainTab({
           </div>
         ))}
         <PromptSelector
-          key={chain.map(item => item.prompt.id).join('')}
+          key={chain.map(item => keyForItem(item)).join('')}
           prompts={prompts}
           onSelectPrompt={addPrompt}
           includeAddPromptOption

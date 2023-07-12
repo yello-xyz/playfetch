@@ -1,4 +1,4 @@
-import { Chain, Endpoint } from '@/types'
+import { Endpoint, RunConfig } from '@/types'
 import { and } from '@google-cloud/datastore'
 import {
   Entity,
@@ -19,11 +19,15 @@ export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
+    const chain = JSON.parse(endpointData.chain).map((item: RunConfig) => ({
+      versionID: item.versionID,
+      output: item.output,
+    }))
     await getDatastore().save(
       toEndpointData(
         endpointData.userID,
         endpointData.promptID,
-        JSON.parse(endpointData.chain),
+        chain,
         endpointData.urlPath,
         endpointData.projectURLPath,
         endpointData.flavor,
@@ -62,7 +66,7 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
 export async function saveEndpoint(
   userID: number,
   promptID: number,
-  chain: Chain,
+  chain: RunConfig[],
   urlPath: string,
   projectURLPath: string,
   flavor: string,
@@ -135,7 +139,7 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
 const toEndpointData = (
   userID: number,
   promptID: number,
-  chain: Chain,
+  chain: RunConfig[],
   urlPath: string,
   projectURLPath: string,
   flavor: string,

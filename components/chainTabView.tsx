@@ -6,20 +6,18 @@ import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 
-export type ChainItem = { prompt: Prompt; version: undefined | { id: number }; output?: string }
-export type LoadedChainItem = ChainItem & { version: Version }
+export type ChainItem = { prompt: Prompt; version?: Version; output?: string } | { versionID: number; output?: string }
+export type LoadedChainItem = { prompt: Prompt; version: Version; output?: string }
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
-  !!item.version && 'prompt' in item.version
+  'version' in item && item.version !== undefined
 
 export default function ChainTabView({ activeTab, project }: { activeTab: MainViewTab; project: ActiveProject }) {
   // TODO generalise this and expose all previous chains in the project
-  const previousChain = (project.endpoints[0]?.chain ?? []).map(item => ({
-    prompt: project.prompts.find(prompt => prompt.id === item.promptID),
-    version: { id: item.versionID },
+  const previousChain: ChainItem[] = (project.endpoints[0]?.chain ?? []).map(item => ({
+    versionID: item.versionID,
     output: item.output,
   }))
-  const initialChain = previousChain.every(item => !!item.prompt) ? (previousChain as ChainItem[]) : []
-  const [chain, setChain] = useState(initialChain)
+  const [chain, setChain] = useState(previousChain)
 
   const loadedChain = chain.filter(IsLoadedChainItem)
 

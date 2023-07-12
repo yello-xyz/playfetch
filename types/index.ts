@@ -95,7 +95,7 @@ export type Endpoint = {
   id: number
   userID: number
   promptID: number
-  chain: Chain
+  chain: RunConfig[]
   timestamp: string
   urlPath: string
   projectURLPath: string
@@ -121,12 +121,6 @@ export type Usage = {
   attempts: number
   failures: number
 }
-
-export type Chain = {
-  promptID: number
-  versionID: number
-  output?: string
-}[]
 
 export type CommentAction = 'addLabel' | 'removeLabel'
 

@@ -22,13 +22,7 @@ export async function migrateVersions() {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    const config = JSON.parse(versionData.config)
-    if (config.model === 'palm-v2') {
-      config.model = 'text-bison@001'
-    } else if (config.model === 'claude-v1') {
-      config.model = 'claude-2'
-    }
-    await updateVersion({ ...versionData, config: JSON.stringify(config) })
+    await updateVersion({ ...versionData })
   }
 }
 

@@ -1,13 +1,4 @@
-import {
-  Project,
-  ActivePrompt,
-  PromptConfig,
-  PromptInputs,
-  ActiveProject,
-  RunConfig,
-  Chain,
-  ModelProvider,
-} from '@/types'
+import { Project, ActivePrompt, PromptConfig, PromptInputs, ActiveProject, RunConfig, ModelProvider } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
@@ -117,7 +108,7 @@ const api = {
     const chain = [{ promptID, versionID }]
     return post(this.publishChain, { chain, projectID, promptID, name, flavor, useCache })
   },
-  publishChain: function (chain: Chain, projectID: number, name: string, flavor: string, useCache: boolean) {
+  publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishChain, { chain, projectID, promptID: projectID, name, flavor, useCache })
   },
   toggleCache: function (endpointID: number, useCache: boolean) {
