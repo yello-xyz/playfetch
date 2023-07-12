@@ -110,8 +110,8 @@ export default function BuildChainTab({
             {IsLoadedChainItem(item) && (
               <Selector>
                 <VersionSelector
-                  versions={promptCache[item.prompt.id].versions}
-                  endpoints={promptCache[item.prompt.id].endpoints}
+                  versions={item.prompt.versions}
+                  endpoints={item.prompt.endpoints}
                   activeVersion={item.version}
                   setActiveVersion={selectVersion(index)}
                 />

@@ -1,4 +1,4 @@
-import { ActiveProject, Prompt, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Prompt, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -7,7 +7,7 @@ import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 
 export type ChainItem = { prompt: Prompt; version?: Version; output?: string } | { versionID: number; output?: string }
-export type LoadedChainItem = { prompt: Prompt; version: Version; output?: string }
+export type LoadedChainItem = { prompt: ActivePrompt; version: Version; output?: string }
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
   'version' in item && item.version !== undefined
 
