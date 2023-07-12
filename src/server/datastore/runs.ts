@@ -54,7 +54,7 @@ const toRunData = (
 ) => ({
   key: buildKey(Entity.RUN, runID),
   data: { promptID, versionID, inputs: JSON.stringify(inputs), output, createdAt, cost },
-  excludeFromIndexes: ['output', 'config'],
+  excludeFromIndexes: ['output', 'inputs'],
 })
 
 export const toRun = (data: any): Run => ({
