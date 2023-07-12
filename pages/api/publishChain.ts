@@ -16,7 +16,7 @@ async function publishChain(req: NextApiRequest, res: NextApiResponse, user: Use
 
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
-  await ensureProjectAPIKey(projectID, userID)
+  await ensureProjectAPIKey(userID, projectID)
   await saveEndpoint(userID, promptID, chain, urlPath, projectURLPath, flavor, useCache)
 
   res.json({})
