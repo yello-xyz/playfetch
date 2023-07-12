@@ -32,6 +32,13 @@ export default function TestPromptTab({
   maxWidth: string
 }) {
   const [version, setVersion] = useState(activeVersion)
+
+  const [savedPrompt, setSavedPrompt] = useState(activeVersion.prompt)
+  if (activeVersion.prompt !== savedPrompt) {
+    setVersion(activeVersion)
+    setSavedPrompt(activeVersion.prompt)
+  }
+
   const updateVersion = (version: Version) => {
     setVersion(version)
     setModifiedVersion(version)
