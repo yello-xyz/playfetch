@@ -60,7 +60,7 @@ export default function TestPromptTab({
   return (
     <>
       <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
-        <div className='flex flex-col flex-grow gap-2 overflow-hidden'>
+        <div className='flex flex-col flex-grow gap-2 overflow-hidden min-h-[180px]'>
           <Label>Test Data</Label>
           <TestDataPane
             variables={variables}
