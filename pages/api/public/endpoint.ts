@@ -24,17 +24,17 @@ async function runSingleEndpoint(endpoint: Endpoint, runConfig: RunConfig, input
   return output
 }
 
-const loadConfigs = async (endpoint: Endpoint) =>
-  endpoint.chain.map(item => ({
-    getConfig: () =>
+const loadConfigs = (endpoint: Endpoint) =>
+  endpoint.chain.map(
+    item => () =>
       getVersion(item.versionID).then(version => ({
         promptID: endpoint.promptID,
         versionID: version.id,
         prompt: version.prompt,
         config: version.config,
-      })),
-    mappedOutput: item.output,
-  }))
+        output: item.output,
+      }))
+  )
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -48,15 +48,15 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
       if (endpoint) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         let output: string | undefined = undefined
-        for (const { getConfig, mappedOutput } of await loadConfigs(endpoint)) {
+        for (const getConfig of loadConfigs(endpoint)) {
           const runConfig = await getConfig()
           // TODO endpoint usage will seem off if we log multiple runs against the same endpoint
           output = await runSingleEndpoint(endpoint, runConfig, inputs)
           if (!output?.length) {
             break
           }
-          if (mappedOutput) {
-            inputs[ToCamelCase(mappedOutput)] = output
+          if (runConfig.output) {
+            inputs[ToCamelCase(runConfig.output)] = output
           }
         }
         return res.json({ output })
