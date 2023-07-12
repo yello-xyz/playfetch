@@ -8,11 +8,15 @@ import { InputVariableClass } from './inputVariable'
 
 const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
 const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
+
 const toHTML = (text: string) =>
   text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
     .replace(/}}$/, '}}&nbsp;')
-    .replaceAll(/{{([^{]*?)}}/g, `<b class="${LinkedVariableClass}" style="${LinkedVariableStyle}">$1</b>`)
-    .replaceAll(/\n(.*)$/gm, '<div>$1</div>')
+    .replace(/{{([^{]*?)}}/g, `<b class="${LinkedVariableClass}" style="${LinkedVariableStyle}">$1</b>`)
+    .replace(/\n(.*)$/gm, '<div>$1</div>')
     .replaceAll('<div></div>', '<div><br /></div>')
 
 const fromHTML = (html: string) =>
@@ -22,12 +26,15 @@ const fromHTML = (html: string) =>
   })
     .replace(/}}&nbsp;$/, '}}')
     .replaceAll('<br />', '')
-    .replaceAll(/<div>(.*?)<\/div>/g, '\n$1')
-    .replaceAll(/<b[^>]*>(.*?)<\/b>/g, '{{$1}}')
+    .replace(/<div>(.*?)<\/div>/g, '\n$1')
+    .replace(/<b[^>]*>(.*?)<\/b>/g, '{{$1}}')
     .replaceAll('{{}}', '')
     .replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
-    .replaceAll(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
-    .replaceAll(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
+    .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
+    .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
 
 type Selection = { text: string; range: Range; popupPoint: { x: number; y: number }; isInput: boolean }
 
