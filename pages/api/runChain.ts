@@ -1,7 +1,18 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, User, Run, RunConfig, PromptConfig, ModelProvider, OpenAILanguageModel, GoogleLanguageModel, AnthropicLanguageModel } from '@/types'
+import {
+  PromptInputs,
+  User,
+  Run,
+  RunConfig,
+  PromptConfig,
+  ModelProvider,
+  OpenAILanguageModel,
+  GoogleLanguageModel,
+  AnthropicLanguageModel,
+  Version,
+} from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
@@ -9,6 +20,7 @@ import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 import { RunSeparator } from '@/src/common/runSeparator'
 import { getVersion } from '@/src/server/datastore/versions'
+import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 
 const hashValue = (object: any, seed = 0) => {
   const str = JSON.stringify(object)
@@ -30,7 +42,38 @@ const hashValue = (object: any, seed = 0) => {
 type PredictionResponse = { output: string | undefined; cost: number }
 type RunResponse = PredictionResponse & { attempts: number; cacheHit: boolean }
 
-export const runPromptWithConfig = async (
+const promptToCamelCase = (prompt: string) =>
+  ExtractPromptVariables(prompt).reduce(
+    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
+    prompt
+  )
+
+export const runPromptConfigs = async (
+  userID: number,
+  configs: RunConfig[],
+  inputs: PromptInputs,
+  useCamelCase: boolean,
+  callback: (version: Version, response: RunResponse & { output: string }) => Promise<any>,
+  streamChunks?: (chunk: string) => void
+) => {
+  for (const runConfig of configs) {
+    const version = await getVersion(runConfig.versionID)
+    const prompt = useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
+    const runResponse = await runPromptWithConfig(userID, prompt, version.config, inputs, false, streamChunks)
+    const output = runResponse.output
+    if (!output?.length) {
+      break
+    }
+    if (runConfig.output) {
+      const variable = useCamelCase ? ToCamelCase(runConfig.output) : runConfig.output
+      inputs[variable] = output
+    }
+    await callback(version, { ...runResponse, output })
+    streamChunks?.(RunSeparator)
+  }
+}
+
+const runPromptWithConfig = async (
   userID: number,
   prompt: string,
   config: PromptConfig,
@@ -108,25 +151,15 @@ async function runChain(req: NextApiRequest, res: NextApiResponse<Run[]>, user: 
 
   const runs: Run[] = []
   for (const inputs of multipleInputs) {
-    for (const runConfig of configs) {
-      const version = await getVersion(runConfig.versionID)
-      const { output, cost } = await runPromptWithConfig(
-        user.id,
-        version.prompt,
-        version.config,
-        inputs,
-        false,
-        chunk => res.write(chunk)
-      )
-      if (!output?.length) {
-        break
-      }
-      runs.push(await saveRun(user.id, version.promptID, runConfig.versionID, inputs, output, cost))
-      if (runConfig.output) {
-        inputs[runConfig.output] = output
-      }
-      res.write(RunSeparator)
-    }
+    await runPromptConfigs(
+      user.id,
+      configs,
+      inputs,
+      false,
+      async (version, { output, cost }) =>
+        runs.push(await saveRun(user.id, version.promptID, version.id, inputs, output, cost)),
+      chunk => res.write(chunk)
+    )
   }
 
   res.end()
