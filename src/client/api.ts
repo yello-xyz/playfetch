@@ -76,6 +76,9 @@ const api = {
   getPrompt: function (promptID: number): Promise<ActivePrompt> {
     return post(this.getPrompt, { promptID })
   },
+  getPromptForVersion: function (versionID: number): Promise<ActivePrompt> {
+    return post(this.getPrompt, { versionID })
+  },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
