@@ -1,10 +1,9 @@
 import { useRef, useState } from 'react'
-import ContentEditable from 'react-contenteditable'
 import addIcon from '@/public/add.svg'
 import linkIcon from '@/public/link.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
-import sanitizeHtml from 'sanitize-html'
+import ContentEditable from './contentEditable'
 
 export default function TestDataPane({
   variables,
@@ -38,7 +37,7 @@ export default function TestDataPane({
       ...inputValues,
       [activeVariable]: [
         ...filterEmptyInputs(activeInputs.slice(0, index)),
-        sanitizeHtml(value),
+        value,
         ...filterEmptyInputs(activeInputs.slice(index + 1)),
       ],
     })
@@ -81,8 +80,8 @@ export default function TestDataPane({
             <div className='py-2 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
             <ContentEditable
               className='w-full px-3 py-2 text-sm bg-white border-b border-gray-100 outline-none border-x'
-              html={value}
-              onChange={event => updateInputs(event.target.value, index)}
+              htmlValue={value}
+              onChange={value => updateInputs(value, index)}
             />
           </div>
         ))}

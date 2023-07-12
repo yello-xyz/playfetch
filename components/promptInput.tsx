@@ -1,10 +1,9 @@
 import { RefObject, useEffect, useState } from 'react'
-import sanitizeHtml from 'sanitize-html'
-import ContentEditable from 'react-contenteditable'
 import { useRef } from 'react'
 import Label from './label'
 import linkIcon from '@/public/linkWhite.svg'
 import { InputVariableClass } from './inputVariable'
+import ContentEditable from './contentEditable'
 
 const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
 const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
@@ -20,10 +19,7 @@ const toHTML = (text: string) =>
     .replaceAll('<div></div>', '<div><br /></div>')
 
 const fromHTML = (html: string) =>
-  sanitizeHtml(html, {
-    allowedTags: ['br', 'div', 'b'],
-    allowedAttributes: { b: ['class'] },
-  })
+  html
     .replace(/}}&nbsp;$/, '}}')
     .replaceAll('<br />', '')
     .replace(/<div>(.*?)<\/div>/g, '\n$1')
@@ -98,8 +94,10 @@ export default function PromptInput({
       )}
       <ContentEditable
         className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
-        onChange={event => setPrompt(fromHTML(event.currentTarget.innerHTML))}
-        html={toHTML(prompt)}
+        htmlValue={toHTML(prompt)}
+        onChange={value => setPrompt(fromHTML(value))}
+        allowedTags={['br', 'div', 'b']}
+        allowedAttributes={{ b: ['class'] }}
         innerRef={contentEditableRef}
       />
       {selection && (
