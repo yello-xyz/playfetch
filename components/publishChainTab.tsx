@@ -22,7 +22,12 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
 
   const publish = async (name: string, useCache: boolean) => {
     await api.publishChain(
-      chain.map(item => ({ promptID: item.version.promptID, versionID: item.version.id, output: item.output })),
+      chain.map(item => ({
+        promptID: item.version.promptID,
+        versionID: item.version.id,
+        output: item.output,
+        includeContext: item.includeContext,
+      })),
       project.id,
       name,
       flavor,

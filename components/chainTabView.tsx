@@ -16,6 +16,7 @@ export default function ChainTabView({ activeTab, project }: { activeTab: MainVi
   const previousChain: ChainItem[] = (project.endpoints[0]?.chain ?? []).map(item => ({
     versionID: item.versionID,
     output: item.output,
+    includeContext: item.includeContext,
   }))
   const [chain, setChain] = useState(previousChain)
 

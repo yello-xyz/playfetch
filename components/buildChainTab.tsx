@@ -45,7 +45,12 @@ export default function BuildChainTab({
   useEffect(() => {
     const loadChainItem = (prompt: ActivePrompt) => (item: ChainItem) =>
       promptMatchesItem(prompt, item)
-        ? { prompt, version: selectPromptVersion(prompt, versionIDForItem(item)), output: item.output }
+        ? {
+            prompt,
+            version: selectPromptVersion(prompt, versionIDForItem(item)),
+            output: item.output,
+            includeContext: item.includeContext,
+          }
         : item
 
     const unloadedItem = chain.find(item => !IsLoadedChainItem(item))
@@ -61,7 +66,7 @@ export default function BuildChainTab({
     const cachedPrompt = promptCache[promptID]
     return cachedPrompt
       ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] }
-      : { prompt: prompts.find(prompt => prompt.id === promptID)!, version: undefined, output: undefined }
+      : { prompt: prompts.find(prompt => prompt.id === promptID)! }
   }
 
   const addPrompt = (promptID: number) => setChain([...chain, chainItemFromPromptID(promptID)])
