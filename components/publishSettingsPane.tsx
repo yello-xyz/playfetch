@@ -104,7 +104,7 @@ export default function PublishSettingsPane({
 
   return (
     <>
-      <Label>Settings</Label>
+      <Label>{endpoint?.urlPath ?? 'Settings'}</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
         <div className='flex items-center gap-8'>
           <Label>Environment</Label>

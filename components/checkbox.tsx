@@ -1,4 +1,6 @@
 import Label from './label'
+import toggleOn from '@/public/toggleOn.svg'
+import toggleOff from '@/public/toggleOff.svg'
 
 export default function Checkbox({
   label,
@@ -17,7 +19,8 @@ export default function Checkbox({
     <div className='flex items-baseline justify-between gap-2'>
       {label && <Label htmlFor={id}>{label}</Label>}
       <input
-        className={`w-4 h-4 ${disabled ? '' : 'cursor-pointer'}`}
+        className={`w-[42px] h-6 ${disabled ? '' : 'cursor-pointer'} appearance-none`}
+        style={{ backgroundImage: `url('${checked ? toggleOn.src : toggleOff.src}')` }}
         type='checkbox'
         id={id}
         disabled={disabled}
