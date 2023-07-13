@@ -20,7 +20,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
 
   const refreshProject = useRefreshProject()
 
-  const publish = async (name: string, useCache: boolean) => {
+  const publish = async (name: string, flavor: string, useCache: boolean) => {
     await api.publishChain(
       chain.map(item => ({
         promptID: item.version.promptID,
@@ -40,10 +40,8 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
         <PublishSettingsPane
-          key={flavor}
           activeItem={project}
-          flavor={flavor}
-          setFlavor={setFlavor}
+          endpoint={endpoint}
           onPublish={publish}
           onRefresh={refreshProject}
         />

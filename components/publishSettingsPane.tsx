@@ -12,21 +12,18 @@ import PickNameDialog from './pickNameDialog'
 
 export default function PublishSettingsPane({
   activeItem,
-  flavor,
-  setFlavor,
+  endpoint,
   onPublish,
   onRefresh,
 }: {
   activeItem: ActivePrompt | ActiveProject
-  flavor: string
-  setFlavor: (flavor: string) => void
-  onPublish: (name: string, useCache: boolean) => Promise<void>
+  endpoint?: ResolvedEndpoint
+  onPublish: (name: string, flavor: string, useCache: boolean) => Promise<void>
   onRefresh: () => Promise<void>
 }) {
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
   const availableFlavors = activeItem.availableFlavors
   const endpoints = activeItem.endpoints
-  const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -57,6 +54,7 @@ export default function PublishSettingsPane({
   const [nameAvailable, setNameAvailable] = useState<boolean>()
   useEffect(() => updateName(initialName), [initialName, updateName])
 
+  const [flavor, setFlavor] = useState(endpoint?.flavor ?? availableFlavors[0])
   const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
 
   const setDialogPrompt = useModalDialogPrompt()
@@ -78,7 +76,7 @@ export default function PublishSettingsPane({
     if (endpoint) {
       unpublish(endpoint.id)
     } else {
-      onPublish(name, useCache)
+      onPublish(name, flavor, useCache)
     }
   }
 

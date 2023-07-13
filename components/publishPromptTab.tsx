@@ -38,7 +38,7 @@ export default function PublishPromptTab({
 
   const refreshPrompt = useRefreshPrompt()
 
-  const publish = async (name: string, useCache: boolean) => {
+  const publish = async (name: string, flavor: string, useCache: boolean) => {
     await api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache)
     refreshPrompt()
   }
@@ -57,10 +57,8 @@ export default function PublishPromptTab({
       </div>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
         <PublishSettingsPane
-          key={flavor}
           activeItem={prompt}
-          flavor={flavor}
-          setFlavor={setFlavor}
+          endpoint={endpoint}
           onPublish={publish}
           onRefresh={refreshPrompt}
         />
