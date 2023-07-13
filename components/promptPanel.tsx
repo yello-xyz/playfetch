@@ -5,6 +5,7 @@ import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
 import PromptInput from './promptInput'
+import { VersionsEqual } from '@/src/common/versionsEqual'
 
 export default function PromptPanel({
   version,
@@ -24,16 +25,11 @@ export default function PromptPanel({
   const [prompt, setPrompt] = useState(version.prompt)
   const [config, setConfig] = useState(version.config)
 
-  const [savedPrompt, setSavedPrompt] = useState(version.prompt)
-  if (version.prompt !== savedPrompt) {
+  const [savedVersion, setSavedVersion] = useState(version)
+  if (!VersionsEqual(version, savedVersion)) {
     setPrompt(version.prompt)
-    setSavedPrompt(version.prompt)
-  }
-
-  const [previousVersionID, setPreviousVersionID] = useState(version.id)
-  if (version.id !== previousVersionID) {
     setConfig(version.config)
-    setPreviousVersionID(version.id)
+    setSavedVersion(version)
   }
 
   const update = (prompt: string, config: PromptConfig) => {

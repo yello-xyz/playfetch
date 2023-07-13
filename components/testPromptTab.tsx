@@ -31,30 +31,29 @@ export default function TestPromptTab({
   persistInputValuesIfNeeded: () => void
   maxWidth: string
 }) {
-  const [version, setVersion] = useState(activeVersion)
+  const [currentPrompt, setCurrentPrompt] = useState(activeVersion.prompt)
 
   const [savedPrompt, setSavedPrompt] = useState(activeVersion.prompt)
   if (activeVersion.prompt !== savedPrompt) {
-    setVersion(activeVersion)
+    setCurrentPrompt(activeVersion.prompt)
     setSavedPrompt(activeVersion.prompt)
   }
 
   const updateVersion = (version: Version) => {
-    setVersion(version)
+    setCurrentPrompt(version.prompt)
     setModifiedVersion(version)
   }
 
-  const variables = ExtractPromptVariables(version.prompt)
+  const variables = ExtractPromptVariables(currentPrompt)
 
   const selectVersion = (version: Version) => {
     persistInputValuesIfNeeded()
-    setVersion(version)
     setActiveVersion(version)
   }
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(version.config, inputs)
+    return runPrompt(activeVersion.config, inputs)
   }
 
   return (
@@ -78,14 +77,14 @@ export default function TestPromptTab({
           />
         </div>
         <PromptPanel
-          version={version}
+          version={activeVersion}
           setModifiedVersion={updateVersion}
           checkProviderAvailable={checkProviderAvailable}
         />
         <TestButtons
           variables={variables}
           inputValues={inputValues}
-          disabled={!version.prompt.length}
+          disabled={!currentPrompt.length}
           callback={testPrompt}
         />
       </div>
