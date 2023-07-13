@@ -141,7 +141,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   const configs: RunConfig[] = req.body.configs
   const multipleInputs: PromptInputs[] = req.body.inputs
 
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('X-Accel-Buffering', 'no')
 
   for (const inputs of multipleInputs) {
     await runPromptConfigs(
