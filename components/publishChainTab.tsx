@@ -7,16 +7,12 @@ import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
 import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
+import EndpointsTable from './endpointsTable'
 
 export default function PublishChainTab({ chain, project }: { chain: LoadedChainItem[]; project: ActiveProject }) {
-  const availableFlavors = project.availableFlavors
   const endpoints = project.endpoints
-  const endpointFlavors = endpoints.map(endpoint => endpoint.flavor)
-  const initialFlavor = availableFlavors.find(flavor => endpointFlavors.includes(flavor)) ?? availableFlavors[0]
 
-  const [flavor, setFlavor] = useState(initialFlavor)
-
-  const endpoint: ResolvedEndpoint | undefined = endpoints.find(endpoint => endpoint.flavor === flavor)
+  const [activeEndpoint, setActiveEndpoint] = useState<ResolvedEndpoint>()
 
   const refreshProject = useRefreshProject()
 
@@ -38,22 +34,23 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
 
   return (
     <>
-      <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 max-w-[50%]'>
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
+        <EndpointsTable endpoints={endpoints} activeEndpoint={activeEndpoint} setActiveEndpoint={setActiveEndpoint} />
+      </div>
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
         <PublishSettingsPane
           activeItem={project}
-          endpoint={endpoint}
+          endpoint={activeEndpoint}
           onPublish={publish}
           onRefresh={refreshProject}
         />
-        {endpoint && <UsagePane endpoint={endpoint} />}
-      </div>
-      <div className='flex flex-col items-start gap-4 p-6 pl-0'>
-        {endpoint && (
+        {activeEndpoint && <UsagePane endpoint={activeEndpoint} />}
+        {activeEndpoint && (
           <ExamplePane
-            endpoint={endpoint}
+            endpoint={activeEndpoint}
             variables={ExtractUnboundChainVariables(chain)}
             inputValues={project.inputs}
-            defaultFlavor={availableFlavors[0]}
+            defaultFlavor={project.availableFlavors[0]}
           />
         )}
       </div>
