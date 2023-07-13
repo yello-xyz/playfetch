@@ -16,7 +16,7 @@ export default function Checkbox({
   setChecked: (checked: boolean) => void
 }) {
   return (
-    <div className='flex items-baseline justify-between gap-2'>
+    <div className='flex items-center justify-between gap-2'>
       {label && <Label htmlFor={id}>{label}</Label>}
       <input
         className={`w-[42px] h-6 ${disabled ? '' : 'cursor-pointer'} appearance-none`}

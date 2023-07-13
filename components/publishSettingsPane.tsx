@@ -121,16 +121,20 @@ export default function PublishSettingsPane({
         </div>
         <div className='flex items-center gap-8'>
           <Label>Environment</Label>
-          <DropdownMenu value={flavor} onChange={updateFlavor}>
-            {availableFlavors.map((flavor, index) => (
-              <option key={index} value={flavor}>
-                {flavor}
+          {endpoint ? (
+            <div className='flex-1 text-right'>{flavor}</div>
+          ) : (
+            <DropdownMenu value={flavor} onChange={updateFlavor}>
+              {availableFlavors.map((flavor, index) => (
+                <option key={index} value={flavor}>
+                  {flavor}
+                </option>
+              ))}
+              <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
+                {addNewEnvironment}
               </option>
-            ))}
-            <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
-              {addNewEnvironment}
-            </option>
-          </DropdownMenu>
+            </DropdownMenu>
+          )}
         </div>
         <Checkbox label='Cache' id='cache' checked={useCache} setChecked={toggleCache} />
       </div>

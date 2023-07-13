@@ -8,7 +8,15 @@ import api from '@/src/client/api'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import EndpointsTable from './endpointsTable'
 
-export default function PublishPromptTab({ prompt, activeVersion, setActiveVersion }: { prompt: ActivePrompt; activeVersion: Version; setActiveVersion: (version: Version) => void }) {
+export default function PublishPromptTab({
+  prompt,
+  activeVersion,
+  setActiveVersion,
+}: {
+  prompt: ActivePrompt
+  activeVersion: Version
+  setActiveVersion: (version: Version) => void
+}) {
   const endpoints = prompt.endpoints
 
   const initialActiveEndpoint = endpoints.find(endpoint => endpoint.versionID === activeVersion.id)
