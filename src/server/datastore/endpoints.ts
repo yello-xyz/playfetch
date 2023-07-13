@@ -12,22 +12,19 @@ import {
   getTimestamp,
 } from './datastore'
 import { getVerifiedUserPromptData } from './prompts'
-import { saveOrResetUsage } from './usage'
+import { saveUsage } from './usage'
 import { ensureProjectAccess } from './projects'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    const chain = JSON.parse(endpointData.chain).map((item: RunConfig) => ({
-      versionID: item.versionID,
-      output: item.output,
-    }))
     await getDatastore().save(
       toEndpointData(
+        true,
         endpointData.userID,
         endpointData.promptID,
-        chain,
+        JSON.parse(endpointData.chain),
         endpointData.urlPath,
         endpointData.projectURLPath,
         endpointData.flavor,
@@ -76,11 +73,8 @@ export async function saveEndpoint(
   if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
     throw new Error(`Endpoint ${urlPath} already used for different prompt in project ${projectURLPath}`)
   }
-  const previouslySaved = await getFilteredEntity(
-    Entity.ENDPOINT,
-    and([buildFilter('promptID', promptID), buildFilter('flavor', flavor)])
-  )
   const endpointData = toEndpointData(
+    false,
     userID,
     promptID,
     chain,
@@ -88,11 +82,10 @@ export async function saveEndpoint(
     projectURLPath,
     flavor,
     new Date(),
-    useCache,
-    previouslySaved ? getID(previouslySaved) : undefined
+    useCache
   )
   await getDatastore().save(endpointData)
-  await saveOrResetUsage(getID(endpointData), promptID)
+  await saveUsage(getID(endpointData), promptID)
 }
 
 export async function getEndpointFromPath(
@@ -111,11 +104,12 @@ export async function getEndpointFromPath(
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
-export async function toggleEndpointCache(userID: number, endpointID: number, useCache: boolean) {
+export async function toggleEndpointForUser(userID: number, endpointID: number, enabled: boolean, useCache: boolean) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData.promptID, endpointData.projectURLPath)
   await getDatastore().save(
     toEndpointData(
+      enabled,
       endpointData.userID,
       endpointData.promptID,
       JSON.parse(endpointData.chain),
@@ -137,6 +131,7 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
 }
 
 const toEndpointData = (
+  enabled: boolean,
   userID: number,
   promptID: number,
   chain: RunConfig[],
@@ -149,6 +144,7 @@ const toEndpointData = (
 ) => ({
   key: buildKey(Entity.ENDPOINT, endpointID),
   data: {
+    enabled,
     userID,
     promptID,
     chain: JSON.stringify(chain),
@@ -163,6 +159,7 @@ const toEndpointData = (
 
 export const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
+  enabled: data.enabled,
   userID: data.userID,
   promptID: data.promptID,
   chain: JSON.parse(data.chain),

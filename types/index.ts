@@ -99,6 +99,7 @@ export type RunConfig = {
 
 export type Endpoint = {
   id: number
+  enabled: boolean
   userID: number
   promptID: number
   chain: RunConfig[]

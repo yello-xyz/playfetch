@@ -1,7 +1,7 @@
 import { Usage } from '@/types'
 import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getID } from './datastore'
 
-export async function saveOrResetUsage(endpointID: number, promptID: number) {
+export async function saveUsage(endpointID: number, promptID: number) {
   await getDatastore().save(toUsageData(endpointID, promptID, 0, 0, 0, 0, 0, new Date()))
 }
 

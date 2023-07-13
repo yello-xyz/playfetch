@@ -81,7 +81,7 @@ export default function PublishSettingsPane({
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
     if (endpoint) {
-      api.toggleCache(endpoint.id, checked).then(_ => onRefresh())
+      api.toggleEndpoint(endpoint.id, endpoint.enabled, checked).then(_ => onRefresh())
     }
   }
 
