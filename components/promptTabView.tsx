@@ -7,7 +7,7 @@ import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { useState } from 'react'
-import { useRefreshPrompt, useSavePrompt } from './refreshContext'
+import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 
@@ -48,6 +48,7 @@ export default function PromptTabView({
   setModifiedVersion,
   showComments,
   setShowComments,
+  savePrompt,
 }: {
   activeTab: MainViewTab
   prompt: ActivePrompt
@@ -56,6 +57,7 @@ export default function PromptTabView({
   setModifiedVersion: (version: Version) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
+  savePrompt: () => Promise<number>
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     prompt.inputs,
@@ -75,7 +77,6 @@ export default function PromptTabView({
     }
   }
 
-  const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
   const [isRunning, setRunning] = useState(false)
 

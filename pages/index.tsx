@@ -3,7 +3,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { Project, ActivePrompt, Version, User, ActiveProject, Comment, AvailableProvider } from '@/types'
+import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider } from '@/types'
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import PromptsGridView from '@/components/promptsGridView'
@@ -190,7 +190,6 @@ export default function Home({
               resetProject: () => selectProject(user.id),
               refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
               refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
-              savePrompt: activeVersion ? () => savePrompt().then(versionID => versionID!) : undefined,
               selectTab: setSelectedTab,
               refreshSettings,
             }}>
@@ -233,6 +232,7 @@ export default function Home({
                       setModifiedVersion={setModifiedVersion}
                       showComments={showComments}
                       setShowComments={setShowComments}
+                      savePrompt={() => savePrompt().then(versionID => versionID!)}
                     />
                   )}
                   {!showSettings && !isChainMode && activeProject && (
