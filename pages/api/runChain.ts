@@ -143,7 +143,6 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
 
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Content-Type', 'text/event-stream;charset=utf-8')
-  res.setHeader('Cache-Control', 'no-cache, no-transform')
   res.setHeader('X-Accel-Buffering', 'no')
 
   for (const inputs of multipleInputs) {
