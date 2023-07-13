@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActivePrompt, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -12,12 +12,10 @@ export default function PublishPromptTab({
   prompt,
   activeVersion,
   setActiveVersion,
-  maxWidth,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
-  maxWidth: string
 }) {
   const availableFlavors = prompt.availableFlavors
   const endpoints = prompt.endpoints
@@ -45,14 +43,19 @@ export default function PublishPromptTab({
     refreshPrompt()
   }
 
-  const [activeEndpoint, setActiveEndpoint] = useState<ResolvedEndpoint>()
+  const [activeEndpoint, setActiveEndpoint] = useState<ResolvedPromptEndpoint>()
 
   return (
     <>
-      <div className={`flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 ${maxWidth}`}>
-        <EndpointsTable endpoints={endpoints} activeEndpoint={activeEndpoint} setActiveEndpoint={setActiveEndpoint} />
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
+        <EndpointsTable
+          prompt={prompt}
+          endpoints={endpoints}
+          activeEndpoint={activeEndpoint}
+          setActiveEndpoint={setActiveEndpoint}
+        />
       </div>
-      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0'>
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
         <PublishSettingsPane
           key={flavor}
           activeItem={prompt}

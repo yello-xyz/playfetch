@@ -134,7 +134,6 @@ export default function PromptTabView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             prompt={prompt}
-            maxWidth={maxTabWidth}
           />
         )
     }
