@@ -37,23 +37,23 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
         <EndpointsTable endpoints={endpoints} activeEndpoint={activeEndpoint} setActiveEndpoint={setActiveEndpoint} />
       </div>
-      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
-        <PublishSettingsPane
-          activeItem={project}
-          endpoint={activeEndpoint}
-          onPublish={publish}
-          onRefresh={refreshProject}
-        />
-        {activeEndpoint && <UsagePane endpoint={activeEndpoint} />}
-        {activeEndpoint && (
+      {activeEndpoint && (
+        <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
+          <PublishSettingsPane
+            activeItem={project}
+            endpoint={activeEndpoint}
+            onPublish={publish}
+            onRefresh={refreshProject}
+          />
+          <UsagePane endpoint={activeEndpoint} />
           <ExamplePane
             endpoint={activeEndpoint}
             variables={ExtractUnboundChainVariables(chain)}
             inputValues={project.inputs}
             defaultFlavor={project.availableFlavors[0]}
           />
-        )}
-      </div>
+        </div>
+      )}
     </>
   )
 }
