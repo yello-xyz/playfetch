@@ -17,7 +17,7 @@ export default function Checkbox({
     <div className='flex items-baseline justify-between gap-2'>
       {label && <Label htmlFor={id}>{label}</Label>}
       <input
-        className='w-4 h-4 cursor-pointer'
+        className={`w-4 h-4 ${disabled ? '' : 'cursor-pointer'}`}
         type='checkbox'
         id={id}
         disabled={disabled}
