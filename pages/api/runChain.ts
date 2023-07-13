@@ -4,7 +4,6 @@ import { saveRun } from '@/src/server/datastore/runs'
 import {
   PromptInputs,
   User,
-  Run,
   RunConfig,
   PromptConfig,
   ModelProvider,
@@ -18,7 +17,6 @@ import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
-import { RunSeparator } from '@/src/common/runSeparator'
 import { getVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 
@@ -64,7 +62,6 @@ export const runPromptConfigs = async (
       inputs[variable] = lastOutput
     }
     await callback(version, { ...runResponse, output: lastOutput })
-    streamChunks?.(RunSeparator)
   }
 
   return lastOutput
@@ -143,6 +140,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
 
   res.setHeader('X-Accel-Buffering', 'no')
 
+  let index = 0
   for (const inputs of multipleInputs) {
     await runPromptConfigs(
       user.id,
@@ -150,8 +148,11 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       inputs,
       false,
       false,
-      (version, { output, cost }) => saveRun(user.id, version.promptID, version.id, inputs, output, cost),
-      chunk => res.write(chunk)
+      (version, { output, cost }) => {
+        index++
+        return saveRun(user.id, version.promptID, version.id, inputs, output, cost)
+      },
+      message => res.write(`data: ${JSON.stringify({ index, message })}\n\n`)
     )
   }
 

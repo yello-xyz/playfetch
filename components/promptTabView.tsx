@@ -10,7 +10,6 @@ import { useState } from 'react'
 import { useRefreshPrompt, useSavePrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
-import { RunSeparator } from '@/src/common/runSeparator'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
@@ -22,11 +21,16 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
       return
     }
     const text = await new Response(value).text()
-    const splits = text.split(RunSeparator)
-    const currentIndex = runs.length - 1
-    runs[currentIndex] += splits[0]
-    for (const split of splits.slice(1)) {
-      runs.push(split)
+    const lines = text.split('\n')
+    for (const line of lines.filter(line => line.trim().length > 0)) {
+      const data = line.split('data:').slice(-1)[0]
+      const parsed = JSON.parse(data)
+      const currentIndex = runs.length - 1
+      if (parsed.index > currentIndex) {
+        runs.push(parsed.message)
+      } else {
+        runs[currentIndex] += parsed.message
+      }
     }
     setPartialRuns(runs.filter(run => run.trim().length > 0))
   }
@@ -67,7 +71,6 @@ export default function PromptTabView({
     }
   }
 
-  const promptID = prompt.id
   const savePrompt = useSavePrompt()
   const refreshPrompt = useRefreshPrompt()
   const [isRunning, setRunning] = useState(false)
