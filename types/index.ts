@@ -79,14 +79,13 @@ export type Version = {
 export type PromptInputs = { [name: string]: string }
 
 export type PartialRun = {
+  id: number
   output: string
-  id?: number
   timestamp?: string
   cost?: number
 }
 
 export type Run = PartialRun & {
-  id: number
   timestamp: string
   cost: number
   inputs: PromptInputs

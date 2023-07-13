@@ -28,9 +28,10 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
       const output = message ?? ''
       const currentIndex = runs.length - 1
       if (index > currentIndex) {
-        runs.push({ output, cost, timestamp })
+        runs.push({ id: index, output, cost, timestamp })
       } else {
         runs[currentIndex].output += output
+        runs[currentIndex].id = index
         runs[currentIndex].cost = cost
         runs[currentIndex].timestamp = timestamp
       }
@@ -81,6 +82,13 @@ export default function PromptTabView({
   const checkProviderAvailable = useCheckProvider()
 
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
+
+  const lastPartialRunID = partialRuns.slice(-1)[0]?.id
+  const [previousLastPartialRunID, setPreviousLastPartialRunID] = useState<number>()
+  if (lastPartialRunID !== previousLastPartialRunID) {
+    setActiveRunID(lastPartialRunID)
+    setPreviousLastPartialRunID(lastPartialRunID)
+  }
 
   const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {

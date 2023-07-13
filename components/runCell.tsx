@@ -8,13 +8,13 @@ import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
-const extractSelection = (selectionIdentifier: string, containerRect?: DOMRect) => {
+const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   const selection = document.getSelection()
   if (selection && containerRect) {
     const selectionElement = selection?.anchorNode?.parentElement
     const containerElement = selectionElement?.parentElement
     const text = selection.toString().trim()
-    if (containerElement?.id === selectionIdentifier && selectionElement && text.length > 0) {
+    if (containerElement?.id === identifier && selectionElement && text.length > 0) {
       const spans = [...containerElement.children]
       const precedingSpans = spans.slice(0, spans.indexOf(selectionElement))
       const spanOffset = precedingSpans.reduce((len, node) => len + (node.textContent?.length ?? 0), 0)
@@ -31,7 +31,7 @@ const extractSelection = (selectionIdentifier: string, containerRect?: DOMRect) 
 }
 
 export default function RunCell({
-  selectionIdentifier,
+  identifier,
   run,
   version,
   prompt,
@@ -39,7 +39,7 @@ export default function RunCell({
   scrollTop,
   isLast,
 }: {
-  selectionIdentifier?: string
+  identifier: string
   run: PartialRun
   version?: Version
   prompt?: ActivePrompt
@@ -72,14 +72,14 @@ export default function RunCell({
     setStartScrollTop(scrollTop)
   }
 
+  const isProperRun = 'inputs' in run
   useEffect(() => {
-    const selectionChangeHandler = () =>
-      selectionIdentifier && setSelection(extractSelection(selectionIdentifier, containerRect))
+    const selectionChangeHandler = () => isProperRun && setSelection(extractSelection(identifier, containerRect))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [selectionIdentifier, containerRect])
+  }, [isProperRun, identifier, containerRect])
 
   const closeInputPopup = () => setSelectionForComment(undefined)
   const closeCommentsPopup = () => setPopupComments(undefined)
@@ -122,7 +122,7 @@ export default function RunCell({
   return (
     <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp}>
       <OutputWithComments
-        selectionIdentifier={selectionIdentifier}
+        identifier={identifier}
         output={run.output}
         selectionRanges={selectionRanges}
         onSelectComment={selectComment}
@@ -200,12 +200,12 @@ function RunCellContainer({
 }
 
 function OutputWithComments({
-  selectionIdentifier,
+  identifier,
   output,
   selectionRanges,
   onSelectComment,
 }: {
-  selectionIdentifier?: string
+  identifier: string
   output: string
   selectionRanges: { startIndex: number; endIndex: number }[]
   onSelectComment: (event: MouseEvent, startIndex: number) => void
@@ -231,5 +231,5 @@ function OutputWithComments({
     spans.push(<span key={index}>{output.substring(index)}</span>)
   }
 
-  return <div id={selectionIdentifier}>{spans}</div>
+  return <div id={identifier}>{spans}</div>
 }

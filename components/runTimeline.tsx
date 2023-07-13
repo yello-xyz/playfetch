@@ -39,8 +39,8 @@ export default function RunTimeline({
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
           {runs.map((run, index) => (
             <RunCell
-              key={run.id ?? index}
-              selectionIdentifier={run.id ? identifierForRunID(run.id) : undefined}
+              key={run.id}
+              identifier={identifierForRunID(run.id)}
               run={run}
               version={version}
               prompt={prompt}
