@@ -43,7 +43,7 @@ export default function PublishPromptTab({ prompt, activeVersion, setActiveVersi
         />
       </div>
       {activeEndpoint && (
-        <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
+        <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>
           <PublishSettingsPane
             activeItem={prompt}
             endpoint={activeEndpoint}

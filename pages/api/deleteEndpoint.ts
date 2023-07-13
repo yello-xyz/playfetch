@@ -3,7 +3,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function unpublishPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
+async function deleteEndpoint(req: NextApiRequest, res: NextApiResponse, user: User) {
   const userID = user.id
   const endpointID = req.body.endpointID
 
@@ -12,4 +12,4 @@ async function unpublishPrompt(req: NextApiRequest, res: NextApiResponse, user: 
   res.json({})
 }
 
-export default withLoggedInUserRoute(unpublishPrompt)
+export default withLoggedInUserRoute(deleteEndpoint)

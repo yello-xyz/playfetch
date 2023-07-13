@@ -61,11 +61,9 @@ export default function PublishSettingsPane({
 
   const unpublish = (endpointID: number) => {
     setDialogPrompt({
-      title:
-        'Are you sure you want to unpublish this prompt? ' +
-        'You will no longer be able to access the API and any usage statistics will be reset.',
+      title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
       callback: async () => {
-        await api.unpublishPrompt(endpointID)
+        await api.deleteEndpoint(endpointID)
         onRefresh()
       },
       destructive: true,
@@ -106,6 +104,21 @@ export default function PublishSettingsPane({
     <>
       <Label>{endpoint?.urlPath ?? 'Settings'}</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+        <Checkbox
+          label='Enabled'
+          id='publish'
+          disabled={!endpoint && !nameAvailable}
+          checked={!!endpoint}
+          setChecked={togglePublish}
+        />
+        <div className='flex items-center gap-8'>
+          <Label className='w-32'>Name</Label>
+          {endpoint ? (
+            <div className='flex-1 text-right'>{name}</div>
+          ) : (
+            <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
+          )}
+        </div>
         <div className='flex items-center gap-8'>
           <Label>Environment</Label>
           <DropdownMenu value={flavor} onChange={updateFlavor}>
@@ -119,21 +132,6 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         </div>
-        <div className='flex items-center gap-8'>
-          <Label className='w-32'>Name</Label>
-          {endpoint ? (
-            <div className='flex-1 text-right'>{name}</div>
-          ) : (
-            <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
-          )}
-        </div>
-        <Checkbox
-          label='Publish'
-          id='publish'
-          disabled={!endpoint && !nameAvailable}
-          checked={!!endpoint}
-          setChecked={togglePublish}
-        />
         <Checkbox label='Cache' id='cache' checked={useCache} setChecked={toggleCache} />
       </div>
       {nameAvailable === false && name.length > 0 && (

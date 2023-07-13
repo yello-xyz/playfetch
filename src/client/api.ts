@@ -114,8 +114,8 @@ const api = {
   toggleCache: function (endpointID: number, useCache: boolean) {
     return post(this.toggleCache, { endpointID, useCache })
   },
-  unpublishPrompt: function (endpointID: number) {
-    return post(this.unpublishPrompt, { endpointID })
+  deleteEndpoint: function (endpointID: number) {
+    return post(this.deleteEndpoint, { endpointID })
   },
   addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
     return post(this.addComment, { versionID, text, quote, runID, startIndex })
