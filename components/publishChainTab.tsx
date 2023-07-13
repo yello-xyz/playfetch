@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ResolvedEndpoint } from '@/types'
+import { ActiveProject } from '@/types'
 import { useRefreshProject } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -12,7 +12,7 @@ import EndpointsTable from './endpointsTable'
 export default function PublishChainTab({ chain, project }: { chain: LoadedChainItem[]; project: ActiveProject }) {
   const endpoints = project.endpoints
 
-  const [activeEndpoint, setActiveEndpoint] = useState<ResolvedEndpoint>()
+  const [activeEndpoint, setActiveEndpoint] = useState(endpoints[0])
 
   const refreshProject = useRefreshProject()
 
