@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ActivePrompt, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt, useSelectTab } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
 import { ExtractPromptVariables } from '@/src/common/formatting'
+import EndpointsTable from './endpointsTable'
 
 export default function PublishPromptTab({
   prompt,
@@ -44,9 +45,14 @@ export default function PublishPromptTab({
     refreshPrompt()
   }
 
+  const [activeEndpoint, setActiveEndpoint] = useState<ResolvedEndpoint>()
+
   return (
     <>
       <div className={`flex flex-col items-start flex-1 gap-4 p-6 text-gray-500 ${maxWidth}`}>
+        <EndpointsTable endpoints={endpoints} activeEndpoint={activeEndpoint} setActiveEndpoint={setActiveEndpoint} />
+      </div>
+      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0'>
         <PublishSettingsPane
           key={flavor}
           activeItem={prompt}
@@ -61,8 +67,6 @@ export default function PublishPromptTab({
           </div>
         )}
         {endpoint && <UsagePane endpoint={endpoint} />}
-      </div>
-      <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0'>
         {endpoint && (
           <ExamplePane
             endpoint={endpoint}
