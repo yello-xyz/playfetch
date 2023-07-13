@@ -1,29 +1,30 @@
-import { ActivePrompt, ResolvedPromptEndpoint } from '@/types'
+import { ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
 
 export default function EndpointsTable({
-  prompt,
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
+  getVersionIndex,
 }: {
-  prompt: ActivePrompt
-  endpoints: ResolvedPromptEndpoint[]
-  activeEndpoint?: ResolvedPromptEndpoint
-  setActiveEndpoint: (endpoint: ResolvedPromptEndpoint) => void
+  endpoints: ResolvedEndpoint[]
+  activeEndpoint?: ResolvedEndpoint
+  setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
+  getVersionIndex?: (endpoint: ResolvedEndpoint) => number
 }) {
+  const columnsClass = getVersionIndex ? 'grid-cols-8' : 'grid-cols-7'
   return (
     <>
       <Label>Endpoints</Label>
-      <div className='grid w-full grid-cols-8 overflow-y-auto grid-flow-dense'>
+      <div className={`grid w-full overflow-y-auto grid-flow-dense ${columnsClass}`}>
         <RowCell header first wide>
           Endpoint
         </RowCell>
         <RowCell header wide>
           Environment
         </RowCell>
-        <RowCell header>Prompt</RowCell>
+        {getVersionIndex && <RowCell header>Prompt</RowCell>}
         <RowCell header>Cached</RowCell>
         <RowCell header wide>Usage</RowCell>
         {endpoints.map((endpoint, index) => (
@@ -32,7 +33,7 @@ export default function EndpointsTable({
               {endpoint.urlPath}
             </RowCell>
             <RowCell wide>{endpoint.flavor}</RowCell>
-            <RowCell>v{prompt.versions.findIndex(version => version.id === endpoint.versionID) + 1}</RowCell>
+            {getVersionIndex && <RowCell>v{getVersionIndex(endpoint) + 1}</RowCell>}
             <RowCell>{endpoint.useCache ? 'Yes' : 'No'}</RowCell>
             <RowCell wide>{endpoint.usage.requests} requests</RowCell>
           </Fragment>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, Version } from '@/types'
+import { ActivePrompt, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -26,10 +26,12 @@ export default function PublishPromptTab({ prompt, activeVersion }: { prompt: Ac
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
         <EndpointsTable
-          prompt={prompt}
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
-          setActiveEndpoint={setActiveEndpoint}
+          setActiveEndpoint={endpoint => setActiveEndpoint(endpoint as ResolvedPromptEndpoint)}
+          getVersionIndex={endpoint =>
+            prompt.versions.findIndex(version => version.id === (endpoint as ResolvedPromptEndpoint).versionID)
+          }
         />
       </div>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[35%] overflow-y-auto'>
