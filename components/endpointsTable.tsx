@@ -26,18 +26,28 @@ export default function EndpointsTable({
         </RowCell>
         {getVersionIndex && <RowCell header>Prompt</RowCell>}
         <RowCell header>Cached</RowCell>
-        <RowCell header wide>Usage</RowCell>
-        {endpoints.map((endpoint, index) => (
-          <Fragment key={index}>
-            <RowCell first wide>
-              {endpoint.urlPath}
+        <RowCell header wide>
+          Usage
+        </RowCell>
+        {endpoints.map((endpoint, index) => {
+          const active = activeEndpoint?.id === endpoint.id
+          const Cell = ({ children, first, wide }: { children: ReactNode; first?: boolean; wide?: boolean }) => (
+            <RowCell active={active} first={first} wide={wide} callback={() => setActiveEndpoint(endpoint)}>
+              {children}
             </RowCell>
-            <RowCell wide>{endpoint.flavor}</RowCell>
-            {getVersionIndex && <RowCell>v{getVersionIndex(endpoint) + 1}</RowCell>}
-            <RowCell>{endpoint.useCache ? 'Yes' : 'No'}</RowCell>
-            <RowCell wide>{endpoint.usage.requests} requests</RowCell>
-          </Fragment>
-        ))}
+          )
+          return (
+            <Fragment key={index}>
+              <Cell first wide>
+                {endpoint.urlPath}
+              </Cell>
+              <Cell wide>{endpoint.flavor}</Cell>
+              {getVersionIndex && <Cell>v{getVersionIndex(endpoint) + 1}</Cell>}
+              <Cell>{endpoint.useCache ? 'Yes' : 'No'}</Cell>
+              <Cell wide>{endpoint.usage.requests} requests</Cell>
+            </Fragment>
+          )
+        })}
       </div>
     </>
   )
@@ -48,13 +58,17 @@ function RowCell({
   header,
   first,
   wide,
+  active,
+  callback,
 }: {
   children: ReactNode
   header?: boolean
   first?: boolean
   wide?: boolean
+  active?: boolean
+  callback?: () => void
 }) {
-  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-100'
+  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-100 cursor-pointer'
   const borderClass = header
     ? first
       ? 'border'
@@ -64,5 +78,10 @@ function RowCell({
     : 'border-b border-r'
   const textClass = header ? 'font-medium text-gray-800' : ''
   const spanClass = wide ? 'col-span-2' : ''
-  return <div className={`${baseClass} ${borderClass} ${textClass} ${spanClass}`}>{children}</div>
+  const bgClass = active ? 'bg-blue-25' : ''
+  return (
+    <div className={`${baseClass} ${borderClass} ${textClass} ${spanClass} ${bgClass}`} onClick={callback}>
+      {children}
+    </div>
+  )
 }
