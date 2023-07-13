@@ -76,7 +76,7 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
-  const savePrompt = async () => {
+  const savePrompt = async (onSaved?: (versionID: number) => Promise<void>) => {
     const versionNeedsSaving =
       activePrompt && activeVersion && modifiedVersion && !VersionsEqual(activeVersion, modifiedVersion)
     setModifiedVersion(undefined)
@@ -88,7 +88,14 @@ export default function Home({
       setActiveVersion(equalPreviousVersion)
       return equalPreviousVersion.id
     }
-    return api.updatePrompt(activePrompt.id, modifiedVersion.prompt, modifiedVersion.config, activeVersion.id)
+    const versionID = await api.updatePrompt(
+      activePrompt.id,
+      modifiedVersion.prompt,
+      modifiedVersion.config,
+      activeVersion.id
+    )
+    await onSaved?.(versionID)
+    return versionID
   }
 
   const updateVersion = (version?: Version) => {
@@ -98,7 +105,7 @@ export default function Home({
 
   const selectVersion = (version: Version) => {
     if (activePrompt && activeVersion && version.id !== activeVersion.id) {
-      savePrompt().then(() => refreshPrompt(activePrompt.id, version.id))
+      savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
       updateVersion(version)
     }
   }
@@ -108,6 +115,10 @@ export default function Home({
     setActiveItem(newPrompt)
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }
+
+  const refreshActivePrompt = activePrompt
+    ? (versionID?: number) => refreshPrompt(activePrompt.id, versionID)
+    : undefined
 
   const selectPrompt = async (promptID: number) => {
     if (promptID !== activePrompt?.id) {
@@ -175,7 +186,7 @@ export default function Home({
   const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
   const updateSelectedTab = (tab: MainViewTab) => {
     if (activePrompt) {
-      savePrompt().then(versionID => refreshPrompt(activePrompt.id, versionID))
+      savePrompt(refreshActivePrompt)
     }
     setSelectedTab(tab)
   }
@@ -189,7 +200,7 @@ export default function Home({
               refreshProjects,
               resetProject: () => selectProject(user.id),
               refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
-              refreshPrompt: activePrompt ? versionID => refreshPrompt(activePrompt.id, versionID) : undefined,
+              refreshPrompt: refreshActivePrompt,
               selectTab: setSelectedTab,
               refreshSettings,
             }}>
@@ -232,7 +243,7 @@ export default function Home({
                       setModifiedVersion={setModifiedVersion}
                       showComments={showComments}
                       setShowComments={setShowComments}
-                      savePrompt={() => savePrompt().then(versionID => versionID!)}
+                      savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
                   )}
                   {!showSettings && !isChainMode && activeProject && (

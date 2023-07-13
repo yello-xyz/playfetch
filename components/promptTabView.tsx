@@ -88,7 +88,6 @@ export default function PromptTabView({
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
       const versionID = await savePrompt()
-      await refreshPrompt(versionID)
       const streamReader = await api.runPrompt({ versionID }, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)
       await refreshPrompt(versionID)
