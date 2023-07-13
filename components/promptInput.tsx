@@ -88,22 +88,24 @@ export default function PromptInput({
   }
 
   return (
-    <div ref={containerRef} className='relative flex flex-col h-full gap-2 overflow-hidden'>
-      {showLabel && (
-        <div className='flex items-center block gap-2 mb-1'>
-          <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
-        </div>
-      )}
-      <Suspense>
-        <ContentEditable
-          className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
-          htmlValue={toHTML(prompt)}
-          onChange={value => setPrompt(fromHTML(value))}
-          allowedTags={['br', 'div', 'b']}
-          allowedAttributes={{ b: ['class'] }}
-          innerRef={contentEditableRef}
-        />
-      </Suspense>
+    <div ref={containerRef} className='relative h-full'>
+      <div className='flex flex-col h-full gap-2 overflow-hidden'>
+        {showLabel && (
+          <div className='flex items-center block gap-2 mb-1'>
+            <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
+          </div>
+        )}
+        <Suspense>
+          <ContentEditable
+            className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
+            htmlValue={toHTML(prompt)}
+            onChange={value => setPrompt(fromHTML(value))}
+            allowedTags={['br', 'div', 'b']}
+            allowedAttributes={{ b: ['class'] }}
+            innerRef={contentEditableRef}
+          />
+        </Suspense>
+      </div>
       {selection && (
         <div
           className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
