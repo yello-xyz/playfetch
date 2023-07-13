@@ -25,12 +25,29 @@ export default function RunTimeline({
 
   const identifierForRunID = (runID: number) => `r${runID}`
 
-  useEffect(() => {
-    const element = activeRunID ? document.getElementById(identifierForRunID(activeRunID)) : undefined
-    if (runs.length > 1 && element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const focusRun = (focusRunID?: number) => {
+    if (focusRunID !== undefined) {
+      setTimeout(() => {
+        const element = document.getElementById(identifierForRunID(focusRunID))
+        if (runs.length > 1 && element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 0)
     }
-  }, [runs, activeRunID])
+  }
+
+  const [previousActiveRunID, setPreviousActiveRunID] = useState(activeRunID)
+  if (activeRunID !== previousActiveRunID) {
+    focusRun(activeRunID)
+    setPreviousActiveRunID(activeRunID)
+  }
+
+  const lastPartialRunID = runs.filter(run => !('inputs' in run)).slice(-1)[0]?.id
+  const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
+  if (lastPartialRunID !== previousLastRunID) {
+    focusRun(lastPartialRunID)
+    setPreviousLastRunID(lastPartialRunID)
+  }
 
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>

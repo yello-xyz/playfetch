@@ -83,13 +83,6 @@ export default function PromptTabView({
 
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
 
-  const lastPartialRunID = partialRuns.slice(-1)[0]?.id
-  const [previousLastPartialRunID, setPreviousLastPartialRunID] = useState<number>()
-  if (lastPartialRunID !== previousLastPartialRunID) {
-    setActiveRunID(lastPartialRunID)
-    setPreviousLastPartialRunID(lastPartialRunID)
-  }
-
   const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
