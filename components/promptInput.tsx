@@ -41,9 +41,10 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerR
   const selectionParent = selection?.anchorNode?.parentElement
   if (selection && selectionParent && containerRef.current) {
     const isPromptSelection = selectionParent.closest('[contenteditable=true]') === contentEditableRef.current
+    const isSingleNode = selection.anchorNode === selection.focusNode
     const isInput = selectionParent.tagName === 'B'
     const text = isInput ? selectionParent.textContent!.trim() : selection.toString().trim()
-    if (isPromptSelection && text.length > 0) {
+    if (isPromptSelection && isSingleNode && text.length > 0) {
       const range = selection.getRangeAt(0)
       const selectionRect = range.getBoundingClientRect()
       const containerRect = containerRef.current.getBoundingClientRect()
