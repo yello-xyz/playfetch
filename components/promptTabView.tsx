@@ -128,7 +128,14 @@ export default function PromptTabView({
           />
         )
       case 'publish':
-        return <PublishPromptTab key={activeVersion.id} activeVersion={activeVersion} prompt={prompt} />
+        return (
+          <PublishPromptTab
+            key={activeVersion.id}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            prompt={prompt}
+          />
+        )
     }
   }
 

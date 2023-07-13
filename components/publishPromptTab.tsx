@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -8,7 +8,7 @@ import api from '@/src/client/api'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import EndpointsTable from './endpointsTable'
 
-export default function PublishPromptTab({ prompt, activeVersion }: { prompt: ActivePrompt; activeVersion: Version }) {
+export default function PublishPromptTab({ prompt, activeVersion, setActiveVersion }: { prompt: ActivePrompt; activeVersion: Version; setActiveVersion: (version: Version) => void }) {
   const endpoints = prompt.endpoints
 
   const initialActiveEndpoint = endpoints.find(endpoint => endpoint.versionID === activeVersion.id)
@@ -22,16 +22,24 @@ export default function PublishPromptTab({ prompt, activeVersion }: { prompt: Ac
     refreshPrompt()
   }
 
+  const endPointToVersionID = (endpoint: ResolvedEndpoint) => (endpoint as ResolvedPromptEndpoint).versionID
+
+  const endpointToVersionIndex = (endpoint: ResolvedEndpoint) =>
+    prompt.versions.findIndex(version => version.id === endPointToVersionID(endpoint))
+
+  const updateActiveEndpoint = (endpoint: ResolvedEndpoint) => {
+    setActiveEndpoint(endpoint as ResolvedPromptEndpoint)
+    setActiveVersion(prompt.versions.find(version => version.id === endPointToVersionID(endpoint))!)
+  }
+
   return (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
         <EndpointsTable
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
-          setActiveEndpoint={endpoint => setActiveEndpoint(endpoint as ResolvedPromptEndpoint)}
-          getVersionIndex={endpoint =>
-            prompt.versions.findIndex(version => version.id === (endpoint as ResolvedPromptEndpoint).versionID)
-          }
+          setActiveEndpoint={updateActiveEndpoint}
+          getVersionIndex={endpointToVersionIndex}
         />
       </div>
       {activeEndpoint && (
