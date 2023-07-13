@@ -1,4 +1,4 @@
-import { ActivePrompt, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
 
 import PlayTab from './playTab'
 import PublishPromptTab from './publishPromptTab'
@@ -13,8 +13,8 @@ import useCheckProvider from './checkProvider'
 
 export type MainViewTab = 'play' | 'test' | 'publish'
 
-export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: string[]) => void) => {
-  const runs = ['']
+export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
+  const runs = [] as PartialRun[]
   while (reader) {
     const { done, value } = await reader.read()
     if (done) {
@@ -24,15 +24,18 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const parsed = JSON.parse(data)
+      const { index, message, cost, timestamp } = JSON.parse(data)
+      const output = message ?? ''
       const currentIndex = runs.length - 1
-      if (parsed.index > currentIndex) {
-        runs.push(parsed.message)
+      if (index > currentIndex) {
+        runs.push({ output, cost, timestamp })
       } else {
-        runs[currentIndex] += parsed.message
+        runs[currentIndex].output += output
+        runs[currentIndex].cost = cost
+        runs[currentIndex].timestamp = timestamp
       }
     }
-    setPartialRuns(runs.filter(run => run.trim().length > 0))
+    setPartialRuns([...runs])
   }
 }
 
@@ -77,7 +80,7 @@ export default function PromptTabView({
 
   const checkProviderAvailable = useCheckProvider()
 
-  const [partialRuns, setPartialRuns] = useState<string[]>([])
+  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
 
   const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
@@ -142,12 +145,11 @@ export default function PromptTabView({
       {activeTab !== 'publish' && (
         <div className='flex-1 p-6 pl-0'>
           <RunTimeline
-            runs={activeVersion.runs}
+            runs={[...activeVersion.runs, ...partialRuns]}
             prompt={prompt}
             version={activeVersion}
             activeRunID={activeRunID}
             isRunning={isRunning}
-            partialRuns={partialRuns}
           />
         </div>
       )}

@@ -7,14 +7,14 @@ import TestButtons from './testButtons'
 import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
-import { InputValues } from '@/types'
+import { InputValues, PartialRun } from '@/types'
 import { ConsumeRunStreamReader } from './promptTabView'
 import useCheckProvider from './checkProvider'
 
 const runChain = async (
   chain: LoadedChainItem[],
   inputs: Record<string, string>[],
-  setPartialRuns: (runs: string[]) => void
+  setPartialRuns: (runs: PartialRun[]) => void
 ) => {
   const versions = chain.map(item => item.version)
   if (versions.length > 0) {
@@ -37,7 +37,7 @@ export default function TestChainTab({
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
 }) {
-  const [partialRuns, setPartialRuns] = useState<string[]>([])
+  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
   const [isRunning, setIsRunning] = useState(false)
 
   const variables = ExtractUnboundChainVariables(chain)
@@ -68,7 +68,7 @@ export default function TestChainTab({
         <TestButtons variables={variables} inputValues={inputValues} callback={testChain} />
       </div>
       <div className='flex-1 p-6 pl-0'>
-        <RunTimeline partialRuns={partialRuns} isRunning={isRunning} />
+        <RunTimeline runs={partialRuns} isRunning={isRunning} />
       </div>
     </>
   )

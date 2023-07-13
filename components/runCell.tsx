@@ -1,5 +1,5 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
-import { ActivePrompt, Comment, Run, Version } from '@/types'
+import { ActivePrompt, Comment, PartialRun, Run, Version } from '@/types'
 import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
@@ -8,13 +8,13 @@ import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
-const extractSelection = (identifier: string, containerRect?: DOMRect) => {
+const extractSelection = (selectionIdentifier: string, containerRect?: DOMRect) => {
   const selection = document.getSelection()
   if (selection && containerRect) {
     const selectionElement = selection?.anchorNode?.parentElement
     const containerElement = selectionElement?.parentElement
     const text = selection.toString().trim()
-    if (containerElement?.id === identifier && selectionElement && text.length > 0) {
+    if (containerElement?.id === selectionIdentifier && selectionElement && text.length > 0) {
       const spans = [...containerElement.children]
       const precedingSpans = spans.slice(0, spans.indexOf(selectionElement))
       const spanOffset = precedingSpans.reduce((len, node) => len + (node.textContent?.length ?? 0), 0)
@@ -30,32 +30,28 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
   return undefined
 }
 
-export function PartialRunCell({ output, shimmer }: { output: string; shimmer?: boolean }) {
-  return (
-    <RunCellContainer shimmer={shimmer}>
-      <div>{output}</div>
-    </RunCellContainer>
-  )
-}
-
 export default function RunCell({
-  identifier,
+  selectionIdentifier,
   run,
   version,
   prompt,
   containerRect,
   scrollTop,
+  isLast,
 }: {
-  identifier: string
-  run: Run
+  selectionIdentifier?: string
+  run: PartialRun
   version?: Version
   prompt?: ActivePrompt
   containerRect?: DOMRect
   scrollTop: number
+  isLast: boolean
 }) {
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
-    setFormattedDate(FormatDate(run.timestamp))
+    if (run.timestamp) {
+      setFormattedDate(FormatDate(run.timestamp))
+    }
   }, [run.timestamp])
 
   const [selection, setSelection] = useState<Selection>()
@@ -77,12 +73,13 @@ export default function RunCell({
   }
 
   useEffect(() => {
-    const selectionChangeHandler = () => setSelection(extractSelection(identifier, containerRect))
+    const selectionChangeHandler = () =>
+      selectionIdentifier && setSelection(extractSelection(selectionIdentifier, containerRect))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [identifier, containerRect])
+  }, [selectionIdentifier, containerRect])
 
   const closeInputPopup = () => setSelectionForComment(undefined)
   const closeCommentsPopup = () => setPopupComments(undefined)
@@ -123,9 +120,9 @@ export default function RunCell({
   }
 
   return (
-    <RunCellContainer onMouseDown={closePopups}>
+    <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp}>
       <OutputWithComments
-        identifier={identifier}
+        selectionIdentifier={selectionIdentifier}
         output={run.output}
         selectionRanges={selectionRanges}
         onSelectComment={selectComment}
@@ -179,9 +176,7 @@ export default function RunCell({
           </div>
         </div>
       )}
-      <div className='self-end text-xs'>
-        {FormatCost(run.cost)} · {formattedDate}
-      </div>
+      <div className='self-end text-xs'>{run.cost !== undefined && `${FormatCost(run.cost)} · ${formattedDate}`}</div>
     </RunCellContainer>
   )
 }
@@ -205,12 +200,12 @@ function RunCellContainer({
 }
 
 function OutputWithComments({
-  identifier,
+  selectionIdentifier,
   output,
   selectionRanges,
   onSelectComment,
 }: {
-  identifier: string
+  selectionIdentifier?: string
   output: string
   selectionRanges: { startIndex: number; endIndex: number }[]
   onSelectComment: (event: MouseEvent, startIndex: number) => void
@@ -236,5 +231,5 @@ function OutputWithComments({
     spans.push(<span key={index}>{output.substring(index)}</span>)
   }
 
-  return <div id={identifier}>{spans}</div>
+  return <div id={selectionIdentifier}>{spans}</div>
 }

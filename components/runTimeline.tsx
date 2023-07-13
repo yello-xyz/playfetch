@@ -1,8 +1,8 @@
-import { ActivePrompt, Run, Version } from '@/types'
+import { ActivePrompt, PartialRun, Version } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
-import RunCell, { PartialRunCell } from './runCell'
+import RunCell from './runCell'
 
 export default function RunTimeline({
   runs = [],
@@ -10,14 +10,12 @@ export default function RunTimeline({
   prompt,
   activeRunID,
   isRunning,
-  partialRuns = [],
 }: {
-  runs?: Run[]
+  runs: PartialRun[]
   version?: Version
   prompt?: ActivePrompt
   activeRunID?: number
   isRunning?: boolean
-  partialRuns?: string[]
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const containerRect = useContainerRect(containerRef)
@@ -37,21 +35,19 @@ export default function RunTimeline({
   return (
     <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
       <div className='font-medium text-gray-600'>Responses</div>
-      {runs.length > 0 || partialRuns.length > 0 ? (
+      {runs.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
-          {runs.map(run => (
+          {runs.map((run, index) => (
             <RunCell
-              key={run.id}
-              identifier={identifierForRunID(run.id)}
+              key={run.id ?? index}
+              selectionIdentifier={run.id ? identifierForRunID(run.id) : undefined}
               run={run}
               version={version}
               prompt={prompt}
               containerRect={containerRect}
               scrollTop={scrollTop}
+              isLast={index === runs.length - 1}
             />
-          ))}
-          {partialRuns.map((run, index) => (
-            <PartialRunCell key={index} output={run} shimmer={isRunning && index === partialRuns.length - 1} />
           ))}
         </div>
       ) : (

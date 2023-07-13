@@ -139,6 +139,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   const multipleInputs: PromptInputs[] = req.body.inputs
 
   res.setHeader('X-Accel-Buffering', 'no')
+  const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
   let index = 0
   for (const inputs of multipleInputs) {
@@ -149,10 +150,11 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       false,
       false,
       (version, { output, cost }) => {
-        index++
-        return saveRun(user.id, version.promptID, version.id, inputs, output, cost)
+        const createdAt = new Date()
+        sendData({ index: index++, timestamp: createdAt.toISOString(), cost })
+        return saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
       },
-      message => res.write(`data: ${JSON.stringify({ index, message })}\n\n`)
+      message => sendData({ index, message })
     )
   }
 
