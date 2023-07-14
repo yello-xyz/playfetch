@@ -1,9 +1,50 @@
-import { ResolvedEndpoint } from '@/types'
+import { Endpoint, ResolvedEndpoint } from '@/types'
 import Label from './label'
-import { Fragment, ReactNode } from 'react'
-import { EndpointToggle } from './publishSettingsPane'
+import { Fragment, ReactNode, useState } from 'react'
 import Icon from './icon'
 import addIcon from '@/public/add.svg'
+import useModalDialogPrompt from './modalDialogContext'
+import api from '@/src/client/api'
+import Checkbox from './checkbox'
+import { CheckValidURLPath } from '@/src/common/formatting'
+
+export function EndpointToggle({
+  endpoint,
+  name,
+  onRefresh,
+}: {
+  endpoint: Endpoint
+  name: string
+  onRefresh: () => Promise<void>
+}) {
+  const [isEnabled, setEnabled] = useState(endpoint.enabled)
+
+  const [savedState, setSavedState] = useState(endpoint.enabled)
+  if (endpoint.enabled !== savedState) {
+    setEnabled(endpoint.enabled)
+    setSavedState(endpoint.enabled)
+  }
+
+  const setDialogPrompt = useModalDialogPrompt()
+
+  const togglePublish = (enabled: boolean) => {
+    const callback = () => {
+      setEnabled(enabled)
+      api.updateEndpoint({ ...endpoint, enabled, urlPath: enabled ? name : endpoint.urlPath }).then(_ => onRefresh())
+    }
+    if (isEnabled) {
+      setDialogPrompt({
+        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+        callback,
+        destructive: true,
+      })
+    } else {
+      callback()
+    }
+  }
+
+  return <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
+}
 
 export default function EndpointsTable({
   endpoints,
