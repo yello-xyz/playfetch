@@ -17,8 +17,8 @@ export default function EndpointsTable({
   getVersionIndex?: (endpoint: ResolvedEndpoint) => number
 }) {
   const columnsClass = getVersionIndex
-    ? 'grid-cols-[80px_repeat(2,minmax(0,1fr))_repeat(2,80px)_120px]'
-    : 'grid-cols-[80px_repeat(2,minmax(0,1fr))_80px_120px]'
+    ? 'grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'
+    : 'grid-cols-[80px_repeat(2,minmax(80px,1fr))_80px_120px]'
 
   const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
     <RowCell header first={first}>

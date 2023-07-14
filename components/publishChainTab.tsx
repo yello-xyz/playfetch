@@ -45,7 +45,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
         />
       </div>
       {activeEndpoint && (
-        <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>
+        <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
           <PublishSettingsPane activeItem={project} endpoint={activeEndpoint} onRefresh={refreshProject} />
           <UsagePane endpoint={activeEndpoint} />
           <ExamplePane

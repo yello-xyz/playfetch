@@ -115,7 +115,7 @@ export default function PublishSettingsPane({
   return (
     <>
       <Label>{endpoint.urlPath}</Label>
-      <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
         <EndpointToggle
           endpoint={endpoint}
           label='Enabled'
