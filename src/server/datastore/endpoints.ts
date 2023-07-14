@@ -6,6 +6,7 @@ import {
   buildKey,
   getDatastore,
   getEntityID,
+  getFilteredEntities,
   getFilteredEntity,
   getID,
   getKeyedEntity,
@@ -14,6 +15,7 @@ import {
 import { getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
 import { ensureProjectAccess } from './projects'
+import { CheckValidURLPath } from '@/src/common/formatting'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -51,24 +53,42 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
   }
 }
 
-async function checkCanSaveEndpoint(promptID: number, urlPath: string, projectURLPath: string): Promise<boolean> {
-  const endpointData = await getEndpointFromPath(urlPath, projectURLPath)
-  return !endpointData || endpointData.promptID === promptID
+const buildPathFilter = (urlPath: string, projectURLPath: string, flavor?: string) =>
+  and([
+    buildFilter('urlPath', urlPath),
+    buildFilter('projectURLPath', projectURLPath),
+    ...(flavor ? [buildFilter('flavor', flavor)] : []),
+  ])
+
+const getValidURLPath = async (promptID: number, name: string, projectURLPath: string, flavor: string) => {
+  if (!CheckValidURLPath(name)) {
+    throw new Error(`Invalid name ${name} for endpoint`)
+  }
+  let urlPath = name
+  let counter = 2
+  while (true) {
+    const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(urlPath, projectURLPath))
+    if (
+      endpoints.every(endpoint => endpoint.promptID === promptID) &&
+      !endpoints.some(endpoint => endpoint.flavor === flavor)
+    ) {
+      return urlPath
+    }
+    urlPath = `${name}-${counter++}`
+  }
 }
 
 export async function saveEndpoint(
   userID: number,
   promptID: number,
   chain: RunConfig[],
-  urlPath: string,
+  name: string,
   projectURLPath: string,
   flavor: string,
   useCache: boolean
 ) {
   await ensureEndpointAccess(userID, promptID, projectURLPath)
-  if (!(await checkCanSaveEndpoint(promptID, urlPath, projectURLPath))) {
-    throw new Error(`Endpoint ${urlPath} already used for different prompt in project ${projectURLPath}`)
-  }
+  const urlPath = await getValidURLPath(promptID, name, projectURLPath, flavor)
   const endpointData = toEndpointData(
     false,
     userID,
@@ -86,20 +106,16 @@ export async function saveEndpoint(
 
 export const DefaultEndpointFlavor = 'default'
 
-export async function getEndpointFromPath(
+export async function getActiveEndpointFromPath(
   urlPath: string,
   projectURLPath: string,
-  flavor?: string
+  flavor: string | undefined
 ): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
-    and([
-      buildFilter('urlPath', urlPath),
-      buildFilter('projectURLPath', projectURLPath),
-      buildFilter('flavor', flavor ?? DefaultEndpointFlavor),
-    ])
+    buildPathFilter(urlPath, projectURLPath, flavor ?? DefaultEndpointFlavor)
   )
-  return endpoint ? toEndpoint(endpoint) : undefined
+  return endpoint?.enabled ? toEndpoint(endpoint) : undefined
 }
 
 export async function updateEndpointForUser(

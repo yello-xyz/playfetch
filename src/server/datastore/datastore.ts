@@ -45,7 +45,7 @@ const orderQuery = (query: Query, sortKeys: string[]) =>
 const buildQuery = (type: string, filter: EntityFilter, limit: number, sortKeys: string[], keysOnly: boolean) =>
   projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), keysOnly)
 
-const getFilteredEntities = (
+export const getFilteredEntities = (
   type: string,
   filter: EntityFilter,
   limit = 100,

@@ -1,6 +1,6 @@
 import { ParseQuery } from '@/components/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getEndpointFromPath } from '@/src/server/datastore/endpoints'
+import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { PromptInputs, Version } from '@/types'
@@ -14,7 +14,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const flavor = req.headers['x-environment'] as string | undefined
 
     if (apiKey && (await checkProject(projectURLPath, apiKey))) {
-      const endpoint = await getEndpointFromPath(endpointName, projectURLPath, flavor)
+      const endpoint = await getActiveEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint && endpoint.enabled) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         const output = await runPromptConfigs(
