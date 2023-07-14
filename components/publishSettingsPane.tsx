@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ActiveProject, ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { useState } from 'react'
+import { ActiveProject, ActivePrompt, ResolvedEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import Label from './label'
@@ -7,7 +7,6 @@ import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/comm
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
-import { debounce } from 'debounce'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
 
@@ -73,31 +72,7 @@ export default function PublishSettingsPane({
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
-  const checkName = useMemo(
-    () =>
-      debounce((name: string) =>
-        api.checkEndpointName(activeItem.id, activeItem.projectURLPath, name).then(setNameAvailable)
-      ),
-    [activeItem]
-  )
-
-  const updateName = useCallback(
-    (name: string) => {
-      setName(name)
-      setNameAvailable(undefined)
-      if (CheckValidURLPath(name)) {
-        checkName(name)
-      } else {
-        setNameAvailable(false)
-      }
-    },
-    [checkName]
-  )
-
   const [name, setName] = useState(endpoint.urlPath)
-  const [nameAvailable, setNameAvailable] = useState<boolean>()
-  useEffect(() => updateName(endpoint.urlPath), [endpoint.urlPath, updateName])
-
   const [flavor, setFlavor] = useState(endpoint.flavor)
   const [useCache, setUseCache] = useState(endpoint.useCache)
 
@@ -138,9 +113,9 @@ export default function PublishSettingsPane({
       <Label>{endpoint.urlPath}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
-        <EndpointToggle endpoint={endpoint} disabled={!endpoint.enabled && !nameAvailable} onRefresh={onRefresh} />
+        <EndpointToggle endpoint={endpoint} disabled={!CheckValidURLPath(name)} onRefresh={onRefresh} />
         <Label>Name</Label>
-        {endpoint.enabled ? name : <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />}
+        {endpoint.enabled ? name : <TextInput value={name} setValue={name => setName(ToCamelCase(name))} />}
         <Label>Environment</Label>
         {endpoint.enabled ? (
           flavor
@@ -177,11 +152,6 @@ export default function PublishSettingsPane({
         <Label>Cache</Label>
         <Checkbox checked={useCache} setChecked={toggleCache} />
       </div>
-      {nameAvailable === false && name.length > 0 && (
-        <div className='font-medium text-grey-500'>
-          {CheckValidURLPath(name) ? 'Name already used for other prompt in project' : 'Invalid endpoint name'}
-        </div>
-      )}
       {showPickNamePrompt && (
         <PickNameDialog
           title='Add Project Environment'

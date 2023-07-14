@@ -94,9 +94,6 @@ const api = {
   runChain: function (configs: RunConfig[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
-  checkEndpointName: function (promptID: number, projectURLPath: string, name: string): Promise<boolean> {
-    return post(this.checkEndpointName, { promptID, projectURLPath, name })
-  },
   publishPrompt: function (
     versionID: number,
     projectID: number,

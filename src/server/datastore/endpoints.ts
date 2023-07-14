@@ -36,15 +36,6 @@ export async function migrateEndpoints() {
   }
 }
 
-export async function checkCanSaveEndpoint(
-  promptID: number,
-  urlPath: string,
-  projectURLPath: string
-): Promise<boolean> {
-  const endpointData = await getEndpointFromPath(urlPath, projectURLPath)
-  return !endpointData || endpointData.promptID === promptID
-}
-
 async function ensureEndpointAccess(userID: number, promptID: number, projectURLPath: string) {
   const projectID = await getEntityID(Entity.PROJECT, 'urlPath', projectURLPath)
   if (!projectID) {
@@ -58,6 +49,15 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
       throw new Error(`Prompt with ID ${promptID} does not belong to project with ID ${projectID}`)
     }
   }
+}
+
+async function checkCanSaveEndpoint(
+  promptID: number,
+  urlPath: string,
+  projectURLPath: string
+): Promise<boolean> {
+  const endpointData = await getEndpointFromPath(urlPath, projectURLPath)
+  return !endpointData || endpointData.promptID === promptID
 }
 
 export async function saveEndpoint(

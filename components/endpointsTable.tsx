@@ -55,7 +55,6 @@ export default function EndpointsTable({
           return (
             <Fragment key={index}>
               <RowCell active={active} center first>
-                {/* // TODO pass on accurate disabled state here (depends on name in settings pane) */}
                 <EndpointToggle endpoint={endpoint} onRefresh={onRefresh} />
               </RowCell>
               <ActiveCell>{endpoint.urlPath}</ActiveCell>
