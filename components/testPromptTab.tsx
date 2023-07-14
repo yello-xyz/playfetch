@@ -7,6 +7,7 @@ import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
+import { useInitialState } from './useInitialState'
 
 export default function TestPromptTab({
   prompt,
@@ -31,13 +32,7 @@ export default function TestPromptTab({
   persistInputValuesIfNeeded: () => void
   maxWidth: string
 }) {
-  const [currentPrompt, setCurrentPrompt] = useState(activeVersion.prompt)
-
-  const [savedPrompt, setSavedPrompt] = useState(activeVersion.prompt)
-  if (activeVersion.prompt !== savedPrompt) {
-    setCurrentPrompt(activeVersion.prompt)
-    setSavedPrompt(activeVersion.prompt)
-  }
+  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
 
   const updateVersion = (version: Version) => {
     setCurrentPrompt(version.prompt)

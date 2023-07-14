@@ -8,6 +8,7 @@ import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
 import { EndpointToggleWithName } from './endpointsTable'
+import { useInitialState } from './useInitialState'
 
 export default function PublishSettingsPane({
   activeItem,
@@ -21,15 +22,8 @@ export default function PublishSettingsPane({
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
   const availableFlavors = activeItem.availableFlavors
 
-  const [flavor, setFlavor] = useState(endpoint.flavor)
-  const [useCache, setUseCache] = useState(endpoint.useCache)
-
-  const [savedEndpoint, setSavedEndpoint] = useState(endpoint)
-  if (endpoint.flavor !== savedEndpoint.flavor || endpoint.useCache !== savedEndpoint.useCache) {
-    setFlavor(endpoint.flavor)
-    setUseCache(endpoint.useCache)
-    setSavedEndpoint(endpoint)
-  }
+  const [flavor, setFlavor] = useInitialState(endpoint.flavor)
+  const [useCache, setUseCache] = useInitialState(endpoint.useCache)
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -58,14 +52,8 @@ export default function PublishSettingsPane({
   const versions = isPrompt(activeItem) ? activeItem.versions : []
   const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
   const initialVersionID = endpoints.find(e => e.id === endpoint.id)?.versionID
-  const [versionID, setVersionID] = useState(initialVersionID)
+  const [versionID, setVersionID] = useInitialState(initialVersionID)
   const versionIndex = versions.findIndex(version => version.id === versionID)
-
-  const [savedVersionID, setSavedVersionID] = useState(initialVersionID)
-  if (initialVersionID !== savedVersionID) {
-    setVersionID(initialVersionID)
-    setSavedVersionID(initialVersionID)
-  }
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)

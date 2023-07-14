@@ -1,5 +1,5 @@
 import { ActivePrompt, PartialRun, Version } from '@/types'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
 import RunCell from './runCell'
