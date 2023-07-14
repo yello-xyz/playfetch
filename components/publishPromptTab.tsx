@@ -1,12 +1,28 @@
 import { useState } from 'react'
-import { ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActiveProject, ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import EndpointsTable from './endpointsTable'
+
+export const NewConfigFromEndpoints = (endpoints: ResolvedEndpoint[], activeItem: ActivePrompt | ActiveProject) => {
+  const availableFlavors = activeItem.availableFlavors
+  for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
+    const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
+    const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
+    const availableFlavor = availableFlavors.find(flavor => !existingFlavors.includes(flavor))
+    if (availableFlavor) {
+      return { name: existingName, flavor: availableFlavor }
+    }
+  }
+  return {
+    name: ToCamelCase(activeItem.name.split(' ').slice(0, 3).join(' ')),
+    flavor: availableFlavors[0],
+  }
+}
 
 export default function PublishPromptTab({
   prompt,
@@ -27,9 +43,8 @@ export default function PublishPromptTab({
   const refreshPrompt = useRefreshPrompt()
 
   const addEndpoint = () => {
-    const name = 'todo'
-    const flavor = 'default'
-    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false).then(refreshPrompt)    
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt)
+    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false).then(refreshPrompt)
   }
 
   const endPointToVersionID = (endpoint: ResolvedEndpoint) => (endpoint as ResolvedPromptEndpoint).versionID

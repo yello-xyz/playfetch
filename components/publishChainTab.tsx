@@ -8,6 +8,7 @@ import api from '@/src/client/api'
 import { LoadedChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
+import { NewConfigFromEndpoints } from './publishPromptTab'
 
 export default function PublishChainTab({ chain, project }: { chain: LoadedChainItem[]; project: ActiveProject }) {
   const endpoints = project.endpoints
@@ -18,8 +19,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
   const refreshProject = useRefreshProject()
 
   const addEndpoint = () => {
-    const name = 'todo'
-    const flavor = 'default'
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, project)
     api.publishChain(
       chain.map(item => ({
         versionID: item.version.id,

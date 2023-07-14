@@ -74,7 +74,7 @@ const getValidURLPath = async (promptID: number, name: string, projectURLPath: s
     ) {
       return urlPath
     }
-    urlPath = `${name}-${counter++}`
+    urlPath = `${name}${counter++}`
   }
 }
 
