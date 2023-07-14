@@ -62,7 +62,7 @@ export default function PublishPromptTab({
               defaultFlavor={prompt.availableFlavors[0]}
             />
           )}
-          <UsagePane endpoint={activeEndpoint} />
+          <UsagePane endpoint={activeEndpoint} onRefresh={refreshPrompt} />
         </div>
       )}
     </>

@@ -54,7 +54,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
               defaultFlavor={project.availableFlavors[0]}
             />
           )}
-          <UsagePane endpoint={activeEndpoint} />
+          <UsagePane endpoint={activeEndpoint} onRefresh={refreshProject} />
         </div>
       )}
     </>

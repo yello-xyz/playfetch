@@ -1,12 +1,26 @@
 import { ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { FormatCost } from '@/src/common/formatting'
+import Button from './button'
+import api from '@/src/client/api'
+import useModalDialogPrompt from './modalDialogContext'
 
-export default function UsagePane({ endpoint }: { endpoint: ResolvedEndpoint }) {
+export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedEndpoint; onRefresh: () => void }) {
   const usage = endpoint.usage
   const averageCost = usage.requests ? usage.cost / usage.requests : 0
   const averageAttempts = usage.requests ? usage.attempts / usage.requests : 0
   const cacheHitRatio = usage.requests ? usage.cacheHits / usage.requests : 0
+
+  const setDialogPrompt = useModalDialogPrompt()
+
+  const deleteEndpoint = () => {
+    setDialogPrompt({
+      title: 'Are you sure you want to delete this endpoint? You will no longer be able to access usage data.',
+      callback: () => api.deleteEndpoint(endpoint.id).then(onRefresh),
+      destructive: true,
+    })
+  }
+
   return (
     <>
       <Label>Usage</Label>
@@ -18,6 +32,8 @@ export default function UsagePane({ endpoint }: { endpoint: ResolvedEndpoint }) 
         <UsageRow label='Average Attempts' value={averageAttempts ? averageAttempts.toFixed(2) : averageAttempts} />
         <UsageRow label='Cache Hit Ratio' value={`${(100 * cacheHitRatio).toFixed(1)}%`} />
       </div>
+      <Label>Danger zone</Label>
+      <Button type='destructive' onClick={deleteEndpoint}>Delete Endpoint</Button>
     </>
   )
 }
