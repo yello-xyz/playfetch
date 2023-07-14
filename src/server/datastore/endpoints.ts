@@ -51,11 +51,7 @@ async function ensureEndpointAccess(userID: number, promptID: number, projectURL
   }
 }
 
-async function checkCanSaveEndpoint(
-  promptID: number,
-  urlPath: string,
-  projectURLPath: string
-): Promise<boolean> {
+async function checkCanSaveEndpoint(promptID: number, urlPath: string, projectURLPath: string): Promise<boolean> {
   const endpointData = await getEndpointFromPath(urlPath, projectURLPath)
   return !endpointData || endpointData.promptID === promptID
 }
@@ -88,6 +84,8 @@ export async function saveEndpoint(
   await saveUsage(getID(endpointData), promptID)
 }
 
+export const DefaultEndpointFlavor = 'default'
+
 export async function getEndpointFromPath(
   urlPath: string,
   projectURLPath: string,
@@ -98,7 +96,7 @@ export async function getEndpointFromPath(
     and([
       buildFilter('urlPath', urlPath),
       buildFilter('projectURLPath', projectURLPath),
-      ...(flavor ? [buildFilter('flavor', flavor)] : []),
+      buildFilter('flavor', flavor ?? DefaultEndpointFlavor),
     ])
   )
   return endpoint ? toEndpoint(endpoint) : undefined

@@ -17,6 +17,7 @@ import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAc
 import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 import { getProjectInputValues } from './inputs'
+import { DefaultEndpointFlavor } from './endpoints'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -105,7 +106,7 @@ export async function addProjectForUser(userID: number, projectName: string, isU
     isUserProject ? 'Prompts' : projectName,
     urlPath,
     [],
-    ['default'],
+    [DefaultEndpointFlavor],
     new Date(),
     undefined,
     undefined,
