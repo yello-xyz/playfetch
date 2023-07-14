@@ -15,7 +15,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
     if (apiKey && (await checkProject(projectURLPath, apiKey))) {
       const endpoint = await getEndpointFromPath(endpointName, projectURLPath, flavor)
-      if (endpoint) {
+      if (endpoint && endpoint.enabled) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         const output = await runPromptConfigs(
           endpoint.userID,
