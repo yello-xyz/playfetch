@@ -1,50 +1,58 @@
 import { ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
+import { EndpointToggle } from './publishSettingsPane'
 
 export default function EndpointsTable({
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
+  onRefresh,
   getVersionIndex,
 }: {
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
+  onRefresh: () => Promise<void>
   getVersionIndex?: (endpoint: ResolvedEndpoint) => number
 }) {
-  const columnsClass = getVersionIndex ? 'grid-cols-8' : 'grid-cols-7'
+  const columnsClass = getVersionIndex
+    ? 'grid-cols-[80px_repeat(2,minmax(0,1fr))_repeat(2,80px)_120px]'
+    : 'grid-cols-[80px_repeat(2,minmax(0,1fr))_80px_120px]'
+
+  const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
+    <RowCell header first={first}>
+      {children}
+    </RowCell>
+  )
+
   return (
     <>
       <Label>Endpoints</Label>
       <div className={`grid w-full overflow-y-auto grid-flow-dense ${columnsClass}`}>
-        <RowCell header first wide>
-          Endpoint
-        </RowCell>
-        <RowCell header wide>
-          Environment
-        </RowCell>
-        {getVersionIndex && <RowCell header>Prompt</RowCell>}
-        <RowCell header>Cached</RowCell>
-        <RowCell header wide>
-          Usage
-        </RowCell>
+        <HeaderCell first>Enabled</HeaderCell>
+        <HeaderCell>Endpoint</HeaderCell>
+        <HeaderCell>Environment</HeaderCell>
+        {getVersionIndex && <HeaderCell>Prompt</HeaderCell>}
+        <HeaderCell>Cached</HeaderCell>
+        <HeaderCell>Usage</HeaderCell>
         {endpoints.map((endpoint, index) => {
           const active = activeEndpoint?.id === endpoint.id
-          const Cell = ({ children, first, wide }: { children: ReactNode; first?: boolean; wide?: boolean }) => (
-            <RowCell active={active} first={first} wide={wide} callback={() => setActiveEndpoint(endpoint)}>
+          const ActiveCell = ({ children }: { children: ReactNode }) => (
+            <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
               {children}
             </RowCell>
           )
           return (
             <Fragment key={index}>
-              <Cell first wide>
-                {endpoint.urlPath}
-              </Cell>
-              <Cell wide>{endpoint.flavor}</Cell>
-              {getVersionIndex && <Cell>v{getVersionIndex(endpoint) + 1}</Cell>}
-              <Cell>{endpoint.useCache ? 'Yes' : 'No'}</Cell>
-              <Cell wide>{endpoint.usage.requests} requests</Cell>
+              <RowCell active={active} center first>
+                <EndpointToggle endpoint={endpoint} onRefresh={onRefresh} />
+              </RowCell>
+              <ActiveCell>{endpoint.urlPath}</ActiveCell>
+              <ActiveCell>{endpoint.flavor}</ActiveCell>
+              {getVersionIndex && <ActiveCell>v{getVersionIndex(endpoint) + 1}</ActiveCell>}
+              <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
+              <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
             </Fragment>
           )
         })}
@@ -57,18 +65,18 @@ function RowCell({
   children,
   header,
   first,
-  wide,
+  center,
   active,
   callback,
 }: {
   children: ReactNode
   header?: boolean
   first?: boolean
-  wide?: boolean
+  center?: boolean
   active?: boolean
   callback?: () => void
 }) {
-  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-100 cursor-pointer'
+  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-100'
   const borderClass = header
     ? first
       ? 'border'
@@ -77,10 +85,12 @@ function RowCell({
     ? 'border-b border-x'
     : 'border-b border-r'
   const textClass = header ? 'font-medium text-gray-800' : ''
-  const spanClass = wide ? 'col-span-2' : ''
   const bgClass = active ? 'bg-blue-25' : ''
+  const layoutClass = center ? 'flex justify-center' : ''
+  const cursorClass = callback ? 'cursor-pointer' : ''
+  const className = `${baseClass} ${borderClass} ${textClass} ${bgClass} ${layoutClass} ${cursorClass}`
   return (
-    <div className={`${baseClass} ${borderClass} ${textClass} ${spanClass} ${bgClass}`} onClick={callback}>
+    <div className={className} onClick={callback}>
       {children}
     </div>
   )

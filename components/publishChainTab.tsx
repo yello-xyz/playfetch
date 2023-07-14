@@ -12,7 +12,8 @@ import EndpointsTable from './endpointsTable'
 export default function PublishChainTab({ chain, project }: { chain: LoadedChainItem[]; project: ActiveProject }) {
   const endpoints = project.endpoints
 
-  const [activeEndpoint, setActiveEndpoint] = useState(endpoints[0])
+  const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
+  const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
 
   const refreshProject = useRefreshProject()
 
@@ -36,7 +37,12 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
   return (
     <>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
-        <EndpointsTable endpoints={endpoints} activeEndpoint={activeEndpoint} setActiveEndpoint={setActiveEndpoint} />
+        <EndpointsTable
+          endpoints={endpoints}
+          activeEndpoint={activeEndpoint}
+          setActiveEndpoint={endpoint => setActiveEndpointID(endpoint.id)}
+          onRefresh={refreshProject}
+        />
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>

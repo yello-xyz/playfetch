@@ -20,16 +20,15 @@ export default function PublishPromptTab({
   const endpoints = prompt.endpoints
 
   const initialActiveEndpoint = endpoints.find(endpoint => endpoint.versionID === activeVersion.id)
-  const [activeEndpoint, setActiveEndpoint] = useState(initialActiveEndpoint)
+  const [activeEndpointID, setActiveEndpointID] = useState(initialActiveEndpoint?.id)
+  const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
   const version = prompt.versions.find(version => version.id === activeEndpoint?.versionID) ?? activeVersion
 
   const refreshPrompt = useRefreshPrompt()
-  const refresh = () =>
-    refreshPrompt().then(() => setActiveEndpoint(endpoints.find(endpoint => endpoint.id === activeEndpoint?.id)))
 
   // TODO implement Add Endpoint button
   const publish = async (name: string, flavor: string, useCache: boolean) =>
-    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache).then(refresh)
+    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache).then(refreshPrompt)
 
   const endPointToVersionID = (endpoint: ResolvedEndpoint) => (endpoint as ResolvedPromptEndpoint).versionID
 
@@ -37,7 +36,7 @@ export default function PublishPromptTab({
     prompt.versions.findIndex(version => version.id === endPointToVersionID(endpoint))
 
   const updateActiveEndpoint = (endpoint: ResolvedEndpoint) => {
-    setActiveEndpoint(endpoint as ResolvedPromptEndpoint)
+    setActiveEndpointID(endpoint.id)
     setActiveVersion(prompt.versions.find(version => version.id === endPointToVersionID(endpoint))!)
   }
 
@@ -48,12 +47,13 @@ export default function PublishPromptTab({
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={updateActiveEndpoint}
+          onRefresh={refreshPrompt}
           getVersionIndex={endpointToVersionIndex}
         />
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>
-          <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refresh} />
+          <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refreshPrompt} />
           <UsagePane endpoint={activeEndpoint} />
           <ExamplePane
             endpoint={activeEndpoint}

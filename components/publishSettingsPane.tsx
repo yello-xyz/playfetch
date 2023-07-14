@@ -12,10 +12,12 @@ import PickNameDialog from './pickNameDialog'
 
 export function EndpointToggle({
   endpoint,
+  label,
   disabled,
   onRefresh,
 }: {
   endpoint: ResolvedEndpoint
+  label?: string
   disabled?: boolean
   onRefresh: () => Promise<void>
 }) {
@@ -45,7 +47,7 @@ export function EndpointToggle({
     }
   }
 
-  return <Checkbox label='Enabled' id='enabled' disabled={disabled} checked={isEnabled} setChecked={togglePublish} />
+  return <Checkbox label={label} id={label} disabled={disabled} checked={isEnabled} setChecked={togglePublish} />
 }
 
 export default function PublishSettingsPane({
@@ -114,7 +116,12 @@ export default function PublishSettingsPane({
     <>
       <Label>{endpoint.urlPath}</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        <EndpointToggle endpoint={endpoint} disabled={!endpoint.enabled && !nameAvailable} onRefresh={onRefresh} />
+        <EndpointToggle
+          endpoint={endpoint}
+          label='Enabled'
+          disabled={!endpoint.enabled && !nameAvailable}
+          onRefresh={onRefresh}
+        />
         <div className='flex items-center gap-8'>
           <Label className='w-32'>Name</Label>
           {endpoint.enabled ? (
