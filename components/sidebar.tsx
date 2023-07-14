@@ -4,6 +4,7 @@ import api from '../src/client/api'
 import projectIcon from '@/public/project.svg'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
+import feedbackIcon from '@/public/feedback.svg'
 import inviteIcon from '@/public/invite.svg'
 import chainIcon from '@/public/chain.svg'
 import { useRefreshProject, useRefreshProjects } from './refreshContext'
@@ -13,6 +14,7 @@ import InviteDialog from './inviteDialog'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import { useLoggedInUser } from './userContext'
+import Link from 'next/link'
 
 export default function Sidebar({
   projects,
@@ -88,6 +90,11 @@ export default function Sidebar({
           {properProjects.length > 0 && (
             <SidebarButton title='Invite Members' icon={inviteIcon} onClick={() => setShowInviteDialog(true)} />
           )}
+          <SidebarButton
+            title='Feedback'
+            icon={feedbackIcon}
+            link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback'
+          />
         </SidebarSection>
       </div>
       {showPickNamePrompt && (
@@ -125,19 +132,25 @@ function SidebarButton({
   icon,
   active = false,
   onClick,
+  link,
 }: {
   title: string
   icon?: StaticImageData
   active?: boolean
-  onClick: () => void
+  onClick?: () => void
+  link?: string
 }) {
   const activeClass = 'bg-gray-100 rounded-lg'
   const baseClass = 'flex gap-1 items-center px-4 py-1 cursor-pointer'
   const className = `${baseClass} ${active ? activeClass : ''} hover:${activeClass}`
+  const LinkWrapper = ({ children }: { children: ReactNode }) =>
+    link ? <Link href={link}>{children}</Link> : <>{children}</>
   return (
-    <div className={className} onClick={onClick}>
-      {icon && <Icon icon={icon} />}
-      <div className='font-normal w-36'>{title}</div>
-    </div>
+    <LinkWrapper>
+      <div className={className} onClick={onClick}>
+        {icon && <Icon icon={icon} />}
+        <div className='font-normal w-36'>{title}</div>
+      </div>
+    </LinkWrapper>
   )
 }
