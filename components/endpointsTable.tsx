@@ -2,18 +2,22 @@ import { ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
 import { EndpointToggle } from './publishSettingsPane'
+import Icon from './icon'
+import addIcon from '@/public/add.svg'
 
 export default function EndpointsTable({
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
   onRefresh,
+  onAddEndpoint,
   getVersionIndex,
 }: {
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
+  onAddEndpoint: () => void
   getVersionIndex?: (endpoint: ResolvedEndpoint) => number
 }) {
   const columnsClass = getVersionIndex
@@ -28,7 +32,12 @@ export default function EndpointsTable({
 
   return (
     <>
-      <Label>Endpoints</Label>
+      <div className='flex items-center justify-between w-full'>
+        <Label>Endpoints</Label>
+        <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={onAddEndpoint}>
+          <Icon icon={addIcon} />New Endpoint
+        </div>
+      </div>
       <div className={`grid w-full overflow-y-auto ${columnsClass}`}>
         <HeaderCell first>Enabled</HeaderCell>
         <HeaderCell>Endpoint</HeaderCell>

@@ -13,8 +13,8 @@ export default function VersionSelector({
   setActiveVersion: (version: Version) => void
 }) {
   const suffix = (version: Version) => {
-    const endpoint = endpoints.find(endpoint => endpoint.versionID === version.id)
-    return endpoint ? ` (${endpoint.flavor})` : ''
+    const flavors = endpoints.filter(endpoint => endpoint.versionID === version.id).map(endpoint => endpoint.flavor)
+    return flavors.length > 0 ? ` (${flavors.join(', ')})` : ''
   }
 
   return (

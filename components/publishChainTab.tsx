@@ -17,9 +17,10 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
 
   const refreshProject = useRefreshProject()
 
-  // TODO implement Add Endpoint button
-  const publish = async (name: string, flavor: string, useCache: boolean) => {
-    await api.publishChain(
+  const addEndpoint = () => {
+    const name = 'todo'
+    const flavor = 'default'
+    api.publishChain(
       chain.map(item => ({
         versionID: item.version.id,
         output: item.output,
@@ -28,9 +29,8 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
       project.id,
       name,
       flavor,
-      useCache
-    )
-    refreshProject()
+      false
+    ).then(refreshProject)
   }
 
   return (
@@ -41,6 +41,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={endpoint => setActiveEndpointID(endpoint.id)}
           onRefresh={refreshProject}
+          onAddEndpoint={addEndpoint}
         />
       </div>
       {activeEndpoint && (

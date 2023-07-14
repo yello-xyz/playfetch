@@ -26,9 +26,11 @@ export default function PublishPromptTab({
 
   const refreshPrompt = useRefreshPrompt()
 
-  // TODO implement Add Endpoint button
-  const publish = async (name: string, flavor: string, useCache: boolean) =>
-    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache).then(refreshPrompt)
+  const addEndpoint = () => {
+    const name = 'todo'
+    const flavor = 'default'
+    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false).then(refreshPrompt)    
+  }
 
   const endPointToVersionID = (endpoint: ResolvedEndpoint) => (endpoint as ResolvedPromptEndpoint).versionID
 
@@ -48,6 +50,7 @@ export default function PublishPromptTab({
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={updateActiveEndpoint}
           onRefresh={refreshPrompt}
+          onAddEndpoint={addEndpoint}
           getVersionIndex={endpointToVersionIndex}
         />
       </div>
