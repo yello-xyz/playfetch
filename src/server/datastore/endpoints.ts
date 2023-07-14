@@ -60,7 +60,13 @@ const buildPathFilter = (urlPath: string, projectURLPath: string, flavor?: strin
     ...(flavor ? [buildFilter('flavor', flavor)] : []),
   ])
 
-const getValidURLPath = async (promptID: number, name: string, projectURLPath: string, flavor: string) => {
+const getValidURLPath = async (
+  promptID: number,
+  name: string,
+  projectURLPath: string,
+  flavor: string,
+  endpointID?: number
+) => {
   if (!CheckValidURLPath(name)) {
     throw new Error(`Invalid name ${name} for endpoint`)
   }
@@ -70,7 +76,7 @@ const getValidURLPath = async (promptID: number, name: string, projectURLPath: s
     const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(urlPath, projectURLPath))
     if (
       endpoints.every(endpoint => endpoint.promptID === promptID) &&
-      !endpoints.some(endpoint => endpoint.flavor === flavor)
+      endpoints.filter(endpoint => endpoint.flavor === flavor).every(endpoint => getID(endpoint) === endpointID)
     ) {
       return urlPath
     }
@@ -129,6 +135,9 @@ export async function updateEndpointForUser(
 ) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData.promptID, endpointData.projectURLPath)
+  if (urlPath !== endpointData.urlPath) {
+    urlPath = await getValidURLPath(endpointData.promptID, urlPath, endpointData.projectURLPath, flavor, endpointID)
+  }
   await getDatastore().save(
     toEndpointData(
       enabled,

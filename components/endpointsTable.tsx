@@ -55,7 +55,7 @@ export default function EndpointsTable({
           return (
             <Fragment key={index}>
               <RowCell active={active} center first>
-                <EndpointToggle endpoint={endpoint} onRefresh={onRefresh} />
+                <EndpointToggle endpoint={endpoint} name={endpoint.urlPath} onRefresh={onRefresh} />
               </RowCell>
               <ActiveCell>{endpoint.urlPath}</ActiveCell>
               <ActiveCell>{endpoint.flavor}</ActiveCell>

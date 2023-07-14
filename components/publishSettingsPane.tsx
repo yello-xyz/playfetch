@@ -22,11 +22,11 @@ const updateEndpoint = (endpoint: ResolvedEndpoint) =>
 
 export function EndpointToggle({
   endpoint,
-  disabled,
+  name,
   onRefresh,
 }: {
   endpoint: ResolvedEndpoint
-  disabled?: boolean
+  name: string
   onRefresh: () => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useState(endpoint.enabled)
@@ -42,7 +42,7 @@ export function EndpointToggle({
   const togglePublish = (enabled: boolean) => {
     const callback = () => {
       setEnabled(enabled)
-      updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
+      updateEndpoint({ ...endpoint, enabled, urlPath: enabled ? name : endpoint.urlPath }).then(_ => onRefresh())
     }
     if (isEnabled) {
       setDialogPrompt({
@@ -55,7 +55,7 @@ export function EndpointToggle({
     }
   }
 
-  return <Checkbox disabled={disabled} checked={isEnabled} setChecked={togglePublish} />
+  return <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
 }
 
 export default function PublishSettingsPane({
@@ -73,6 +73,12 @@ export default function PublishSettingsPane({
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const [name, setName] = useState(endpoint.urlPath)
+  const [savedName, setSavedName] = useState(endpoint.urlPath)
+  if (endpoint.urlPath !== savedName) {
+    setName(endpoint.urlPath)
+    setSavedName(endpoint.urlPath)
+  }
+
   const [flavor, setFlavor] = useState(endpoint.flavor)
   const [useCache, setUseCache] = useState(endpoint.useCache)
 
@@ -113,7 +119,7 @@ export default function PublishSettingsPane({
       <Label>{endpoint.urlPath}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
-        <EndpointToggle endpoint={endpoint} disabled={!CheckValidURLPath(name)} onRefresh={onRefresh} />
+        <EndpointToggle endpoint={endpoint} name={name} onRefresh={onRefresh} />
         <Label>Name</Label>
         {endpoint.enabled ? name : <TextInput value={name} setValue={name => setName(ToCamelCase(name))} />}
         <Label>Environment</Label>
