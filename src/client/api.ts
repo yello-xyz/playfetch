@@ -1,4 +1,13 @@
-import { Project, ActivePrompt, PromptConfig, PromptInputs, ActiveProject, RunConfig, ModelProvider } from '@/types'
+import {
+  Project,
+  ActivePrompt,
+  PromptConfig,
+  PromptInputs,
+  ActiveProject,
+  RunConfig,
+  ModelProvider,
+  Endpoint,
+} from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
@@ -108,15 +117,15 @@ const api = {
   publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishChain, { chain, projectID, promptID: projectID, name, flavor, useCache })
   },
-  updateEndpoint: function (
-    endpointID: number,
-    enabled: boolean,
-    chain: RunConfig[],
-    name: string,
-    flavor: string,
-    useCache: boolean
-  ) {
-    return post(this.updateEndpoint, { endpointID, enabled, chain, name, flavor, useCache })
+  updateEndpoint: function (endpoint: Endpoint) {
+    return post(this.updateEndpoint, {
+      endpointID: endpoint.id,
+      enabled: endpoint.enabled,
+      chain: endpoint.chain,
+      name: endpoint.urlPath,
+      flavor: endpoint.flavor,
+      useCache: endpoint.useCache,
+    })
   },
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })

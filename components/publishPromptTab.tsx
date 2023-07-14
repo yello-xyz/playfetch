@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -8,7 +8,7 @@ import api from '@/src/client/api'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import EndpointsTable from './endpointsTable'
 
-export const NewConfigFromEndpoints = (endpoints: ResolvedEndpoint[], activeItem: ActivePrompt | ActiveProject) => {
+export const NewConfigFromEndpoints = (endpoints: Endpoint[], activeItem: ActivePrompt | ActiveProject) => {
   const availableFlavors = activeItem.availableFlavors
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
     const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
@@ -47,12 +47,12 @@ export default function PublishPromptTab({
     api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false).then(refreshPrompt)
   }
 
-  const endPointToVersionID = (endpoint: ResolvedEndpoint) => (endpoint as ResolvedPromptEndpoint).versionID
+  const endPointToVersionID = (endpoint: Endpoint) => (endpoint as ResolvedPromptEndpoint).versionID
 
-  const endpointToVersionIndex = (endpoint: ResolvedEndpoint) =>
+  const endpointToVersionIndex = (endpoint: Endpoint) =>
     prompt.versions.findIndex(version => version.id === endPointToVersionID(endpoint))
 
-  const updateActiveEndpoint = (endpoint: ResolvedEndpoint) => {
+  const updateActiveEndpoint = (endpoint: Endpoint) => {
     setActiveEndpointID(endpoint.id)
     setActiveVersion(prompt.versions.find(version => version.id === endPointToVersionID(endpoint))!)
   }

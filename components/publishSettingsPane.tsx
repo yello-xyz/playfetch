@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ActivePrompt, ResolvedEndpoint, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import Label from './label'
@@ -10,22 +10,12 @@ import TextInput from './textInput'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
 
-const updateEndpoint = (endpoint: ResolvedEndpoint) =>
-  api.updateEndpoint(
-    endpoint.id,
-    endpoint.enabled,
-    endpoint.chain,
-    endpoint.urlPath,
-    endpoint.flavor,
-    endpoint.useCache
-  )
-
 export function EndpointToggle({
   endpoint,
   name,
   onRefresh,
 }: {
-  endpoint: ResolvedEndpoint
+  endpoint: Endpoint
   name: string
   onRefresh: () => Promise<void>
 }) {
@@ -42,7 +32,7 @@ export function EndpointToggle({
   const togglePublish = (enabled: boolean) => {
     const callback = () => {
       setEnabled(enabled)
-      updateEndpoint({ ...endpoint, enabled, urlPath: enabled ? name : endpoint.urlPath }).then(_ => onRefresh())
+      api.updateEndpoint({ ...endpoint, enabled, urlPath: enabled ? name : endpoint.urlPath }).then(_ => onRefresh())
     }
     if (isEnabled) {
       setDialogPrompt({
@@ -64,7 +54,7 @@ export default function PublishSettingsPane({
   onRefresh,
 }: {
   activeItem: ActivePrompt | ActiveProject
-  endpoint: ResolvedEndpoint
+  endpoint: Endpoint
   onRefresh: () => Promise<void>
 }) {
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
@@ -84,7 +74,7 @@ export default function PublishSettingsPane({
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
-    updateEndpoint({ ...endpoint, useCache: checked }).then(_ => onRefresh())
+    api.updateEndpoint({ ...endpoint, useCache: checked }).then(_ => onRefresh())
   }
 
   const addNewEnvironment = 'Add New Environment…'
@@ -93,7 +83,7 @@ export default function PublishSettingsPane({
       setShowPickNamePrompt(true)
     } else {
       setFlavor(flavor)
-      updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
+      api.updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
     }
   }
 
@@ -111,7 +101,7 @@ export default function PublishSettingsPane({
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
-    updateEndpoint({ ...endpoint, chain: [{ versionID: version.id }] }).then(_ => onRefresh())
+    api.updateEndpoint({ ...endpoint, chain: [{ versionID: version.id }] }).then(_ => onRefresh())
   }
 
   return (
