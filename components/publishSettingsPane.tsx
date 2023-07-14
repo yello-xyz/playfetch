@@ -21,10 +21,17 @@ export default function PublishSettingsPane({
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
   const availableFlavors = activeItem.availableFlavors
 
-  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
-
   const [flavor, setFlavor] = useState(endpoint.flavor)
   const [useCache, setUseCache] = useState(endpoint.useCache)
+
+  const [savedEndpoint, setSavedEndpoint] = useState(endpoint)
+  if (endpoint.flavor !== savedEndpoint.flavor || endpoint.useCache !== savedEndpoint.useCache) {
+    setFlavor(endpoint.flavor)
+    setUseCache(endpoint.useCache)
+    setSavedEndpoint(endpoint)
+  }
+
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
@@ -50,8 +57,15 @@ export default function PublishSettingsPane({
   const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'versions' in (item as ActivePrompt)
   const versions = isPrompt(activeItem) ? activeItem.versions : []
   const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
-  const [versionID, setVersionID] = useState(endpoints.find(e => e.id === endpoint.id)?.versionID)
+  const initialVersionID = endpoints.find(e => e.id === endpoint.id)?.versionID
+  const [versionID, setVersionID] = useState(initialVersionID)
   const versionIndex = versions.findIndex(version => version.id === versionID)
+
+  const [savedVersionID, setSavedVersionID] = useState(initialVersionID)
+  if (initialVersionID !== savedVersionID) {
+    setVersionID(initialVersionID)
+    setSavedVersionID(initialVersionID)
+  }
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
