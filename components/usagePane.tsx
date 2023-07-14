@@ -15,7 +15,9 @@ export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedE
 
   const deleteEndpoint = () => {
     setDialogPrompt({
-      title: 'Are you sure you want to delete this endpoint? You will no longer be able to access usage data.',
+      title:
+        'Are you sure you want to delete this endpoint? ' +
+        `You will no longer be able to access ${endpoint.enabled ? 'the API or ' : ''}usage data.`,
       callback: () => api.deleteEndpoint(endpoint.id).then(onRefresh),
       destructive: true,
     })
@@ -33,7 +35,9 @@ export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedE
         <UsageRow label='Cache Hit Ratio' value={`${(100 * cacheHitRatio).toFixed(1)}%`} />
       </div>
       <Label>Danger zone</Label>
-      <Button type='destructive' onClick={deleteEndpoint}>Delete Endpoint</Button>
+      <Button type='destructive' onClick={deleteEndpoint}>
+        Delete Endpoint
+      </Button>
     </>
   )
 }
