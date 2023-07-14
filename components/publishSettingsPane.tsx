@@ -3,7 +3,7 @@ import { ActiveProject, ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, 
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import Label from './label'
-import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
+import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
@@ -120,7 +120,7 @@ export default function PublishSettingsPane({
   return (
     <>
       <Label>{endpoint.urlPath}</Label>
-      <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+      <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
         <EndpointToggle endpoint={endpoint} disabled={!endpoint.enabled && !nameAvailable} onRefresh={onRefresh} />
         <Label>Name</Label>
@@ -153,6 +153,9 @@ export default function PublishSettingsPane({
                 setActiveVersion={version => setVersionID(version.id)}
               />
             )}
+            <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
+              {StripPromptSentinels(versions[versionIndex].prompt)}
+            </div>
           </>
         )}
         <Label>Cache</Label>
