@@ -29,7 +29,7 @@ export default function EndpointsTable({
   return (
     <>
       <Label>Endpoints</Label>
-      <div className={`grid w-full overflow-y-auto grid-flow-dense ${columnsClass}`}>
+      <div className={`grid w-full overflow-y-auto ${columnsClass}`}>
         <HeaderCell first>Enabled</HeaderCell>
         <HeaderCell>Endpoint</HeaderCell>
         <HeaderCell>Environment</HeaderCell>

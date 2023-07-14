@@ -43,7 +43,7 @@ export default function ExamplePane({
 
   return (
     <>
-      <Label>Endpoint</Label>
+      <Label>Integration</Label>
       <CodeBlock>
         <MarkedUpCURLCommand>{curlCommand}</MarkedUpCURLCommand>
       </CodeBlock>

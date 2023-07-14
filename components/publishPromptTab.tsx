@@ -54,13 +54,13 @@ export default function PublishPromptTab({
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
           <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refreshPrompt} />
-          <UsagePane endpoint={activeEndpoint} />
           <ExamplePane
             endpoint={activeEndpoint}
             variables={ExtractPromptVariables(version.prompt)}
             inputValues={prompt.inputs}
             defaultFlavor={prompt.availableFlavors[0]}
           />
+          <UsagePane endpoint={activeEndpoint} />
         </div>
       )}
     </>

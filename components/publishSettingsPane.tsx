@@ -12,12 +12,10 @@ import PickNameDialog from './pickNameDialog'
 
 export function EndpointToggle({
   endpoint,
-  label,
   disabled,
   onRefresh,
 }: {
   endpoint: ResolvedEndpoint
-  label?: string
   disabled?: boolean
   onRefresh: () => Promise<void>
 }) {
@@ -47,7 +45,7 @@ export function EndpointToggle({
     }
   }
 
-  return <Checkbox label={label} id={label} disabled={disabled} checked={isEnabled} setChecked={togglePublish} />
+  return <Checkbox disabled={disabled} checked={isEnabled} setChecked={togglePublish} />
 }
 
 export default function PublishSettingsPane({
@@ -115,39 +113,32 @@ export default function PublishSettingsPane({
   return (
     <>
       <Label>{endpoint.urlPath}</Label>
-      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        <EndpointToggle
-          endpoint={endpoint}
-          label='Enabled'
-          disabled={!endpoint.enabled && !nameAvailable}
-          onRefresh={onRefresh}
-        />
-        <div className='flex items-center gap-8'>
-          <Label className='w-32'>Name</Label>
-          {endpoint.enabled ? (
-            <div className='flex-1 text-right'>{name}</div>
-          ) : (
-            <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
-          )}
-        </div>
-        <div className='flex items-center gap-8'>
-          <Label>Environment</Label>
-          {endpoint.enabled ? (
-            <div className='flex-1 text-right'>{flavor}</div>
-          ) : (
-            <DropdownMenu value={flavor} onChange={updateFlavor}>
-              {availableFlavors.map((flavor, index) => (
-                <option key={index} value={flavor}>
-                  {flavor}
-                </option>
-              ))}
-              <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
-                {addNewEnvironment}
+      <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+        <Label className='w-[42px]'>Enabled</Label>
+        <EndpointToggle endpoint={endpoint} disabled={!endpoint.enabled && !nameAvailable} onRefresh={onRefresh} />
+        <Label className='w-[42px]'>Name</Label>
+        {endpoint.enabled ? (
+          <div className='flex-1 text-right'>{name}</div>
+        ) : (
+          <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
+        )}
+        <Label className='w-[42px]'>Environment</Label>
+        {endpoint.enabled ? (
+          <div className='flex-1 text-right'>{flavor}</div>
+        ) : (
+          <DropdownMenu value={flavor} onChange={updateFlavor}>
+            {availableFlavors.map((flavor, index) => (
+              <option key={index} value={flavor}>
+                {flavor}
               </option>
-            </DropdownMenu>
-          )}
-        </div>
-        <Checkbox label='Cache' id='cache' checked={useCache} setChecked={toggleCache} />
+            ))}
+            <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
+              {addNewEnvironment}
+            </option>
+          </DropdownMenu>
+        )}
+        <Label className='w-[42px]'>Cache</Label>
+        <Checkbox checked={useCache} setChecked={toggleCache} />
       </div>
       {nameAvailable === false && name.length > 0 && (
         <div className='font-medium text-grey-500'>
