@@ -104,7 +104,15 @@ export async function getEndpointFromPath(
   return endpoint ? toEndpoint(endpoint) : undefined
 }
 
-export async function toggleEndpointForUser(userID: number, endpointID: number, enabled: boolean, useCache: boolean) {
+export async function updateEndpointForUser(
+  userID: number,
+  endpointID: number,
+  enabled: boolean,
+  chain: RunConfig[],
+  urlPath: string,
+  flavor: string,
+  useCache: boolean
+) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData.promptID, endpointData.projectURLPath)
   await getDatastore().save(
@@ -112,10 +120,10 @@ export async function toggleEndpointForUser(userID: number, endpointID: number, 
       enabled,
       endpointData.userID,
       endpointData.promptID,
-      JSON.parse(endpointData.chain),
-      endpointData.urlPath,
+      chain,
+      urlPath,
       endpointData.projectURLPath,
-      endpointData.flavor,
+      flavor,
       endpointData.createdAt,
       useCache,
       getID(endpointData)

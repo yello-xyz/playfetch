@@ -11,6 +11,16 @@ import { debounce } from 'debounce'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
 
+const updateEndpoint = (endpoint: ResolvedEndpoint) =>
+  api.updateEndpoint(
+    endpoint.id,
+    endpoint.enabled,
+    endpoint.chain,
+    endpoint.urlPath,
+    endpoint.flavor,
+    endpoint.useCache
+  )
+
 export function EndpointToggle({
   endpoint,
   disabled,
@@ -30,19 +40,19 @@ export function EndpointToggle({
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const togglePublish = () => {
+  const togglePublish = (enabled: boolean) => {
+    const callback = () => {
+      setEnabled(enabled)
+      updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
+    }
     if (isEnabled) {
       setDialogPrompt({
         title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback: () => {
-          setEnabled(false)
-          api.toggleEndpoint(endpoint.id, false, endpoint.useCache).then(_ => onRefresh())
-        },
+        callback,
         destructive: true,
       })
     } else {
-      setEnabled(true)
-      api.toggleEndpoint(endpoint.id, true, endpoint.useCache).then(_ => onRefresh())
+      callback()
     }
   }
 
@@ -93,7 +103,7 @@ export default function PublishSettingsPane({
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
-    api.toggleEndpoint(endpoint.id, endpoint.enabled, checked).then(_ => onRefresh())
+    updateEndpoint({ ...endpoint, useCache: checked }).then(_ => onRefresh())
   }
 
   const addNewEnvironment = 'Add New Environment…'
@@ -102,13 +112,14 @@ export default function PublishSettingsPane({
       setShowPickNamePrompt(true)
     } else {
       setFlavor(flavor)
+      updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
     }
   }
 
   const addFlavor = async (flavor: string) => {
     await api.addFlavor(projectID, flavor)
     await onRefresh()
-    setFlavor(flavor)
+    updateFlavor(flavor)
   }
 
   const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'versions' in (item as ActivePrompt)
@@ -116,6 +127,11 @@ export default function PublishSettingsPane({
   const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
   const [versionID, setVersionID] = useState(endpoints.find(e => e.id === endpoint.id)?.versionID)
   const versionIndex = versions.findIndex(version => version.id === versionID)
+
+  const updateVersion = (version: Version) => {
+    setVersionID(version.id)
+    updateEndpoint({ ...endpoint, chain: [{ versionID: version.id }] }).then(_ => onRefresh())
+  }
 
   return (
     <>
@@ -150,7 +166,7 @@ export default function PublishSettingsPane({
                 versions={versions}
                 endpoints={endpoints}
                 activeVersion={versions[versionIndex]}
-                setActiveVersion={version => setVersionID(version.id)}
+                setActiveVersion={updateVersion}
               />
             )}
             <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>

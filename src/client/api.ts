@@ -111,8 +111,15 @@ const api = {
   publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishChain, { chain, projectID, promptID: projectID, name, flavor, useCache })
   },
-  toggleEndpoint: function (endpointID: number, enabled: boolean, useCache: boolean) {
-    return post(this.toggleEndpoint, { endpointID, enabled, useCache })
+  updateEndpoint: function (
+    endpointID: number,
+    enabled: boolean,
+    chain: RunConfig[],
+    name: string,
+    flavor: string,
+    useCache: boolean
+  ) {
+    return post(this.updateEndpoint, { endpointID, enabled, chain, name, flavor, useCache })
   },
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
