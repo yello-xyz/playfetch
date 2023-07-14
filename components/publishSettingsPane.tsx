@@ -2,13 +2,12 @@ import { useState } from 'react'
 import { ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
-import { StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
+import { StripPromptSentinels } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
-import TextInput from './textInput'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
-import { EndpointToggle } from './endpointsTable'
+import { EndpointToggleWithName } from './endpointsTable'
 
 export default function PublishSettingsPane({
   activeItem,
@@ -23,13 +22,6 @@ export default function PublishSettingsPane({
   const availableFlavors = activeItem.availableFlavors
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
-
-  const [name, setName] = useState(endpoint.urlPath)
-  const [savedName, setSavedName] = useState(endpoint.urlPath)
-  if (endpoint.urlPath !== savedName) {
-    setName(endpoint.urlPath)
-    setSavedName(endpoint.urlPath)
-  }
 
   const [flavor, setFlavor] = useState(endpoint.flavor)
   const [useCache, setUseCache] = useState(endpoint.useCache)
@@ -71,9 +63,7 @@ export default function PublishSettingsPane({
       <Label>{endpoint.urlPath}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
-        <EndpointToggle endpoint={endpoint} name={name} onRefresh={onRefresh} />
-        <Label>Name</Label>
-        {endpoint.enabled ? name : <TextInput value={name} setValue={name => setName(ToCamelCase(name))} />}
+        <EndpointToggleWithName endpoint={endpoint} onRefresh={onRefresh} />
         <Label>Environment</Label>
         {endpoint.enabled ? (
           flavor

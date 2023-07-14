@@ -6,23 +6,28 @@ import addIcon from '@/public/add.svg'
 import useModalDialogPrompt from './modalDialogContext'
 import api from '@/src/client/api'
 import Checkbox from './checkbox'
-import { CheckValidURLPath } from '@/src/common/formatting'
+import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
+import TextInput from './textInput'
 
-export function EndpointToggle({
+export function EndpointToggleWithName({
   endpoint,
-  name,
   onRefresh,
+  isActive,
+  setActive,
 }: {
   endpoint: Endpoint
-  name: string
   onRefresh: () => Promise<void>
+  isActive?: boolean
+  setActive?: () => void
 }) {
   const [isEnabled, setEnabled] = useState(endpoint.enabled)
+  const [name, setName] = useState(endpoint.urlPath)
 
-  const [savedState, setSavedState] = useState(endpoint.enabled)
-  if (endpoint.enabled !== savedState) {
+  const [savedEndpoint, setSavedEndpoint] = useState(endpoint)
+  if (endpoint.enabled !== savedEndpoint.enabled || endpoint.urlPath !== savedEndpoint.urlPath) {
     setEnabled(endpoint.enabled)
-    setSavedState(endpoint.enabled)
+    setName(endpoint.urlPath)
+    setSavedEndpoint(endpoint)
   }
 
   const setDialogPrompt = useModalDialogPrompt()
@@ -30,7 +35,7 @@ export function EndpointToggle({
   const togglePublish = (enabled: boolean) => {
     const callback = () => {
       setEnabled(enabled)
-      api.updateEndpoint({ ...endpoint, enabled, urlPath: enabled ? name : endpoint.urlPath }).then(_ => onRefresh())
+      api.updateEndpoint({ ...endpoint, enabled, urlPath: name }).then(_ => onRefresh())
     }
     if (isEnabled) {
       setDialogPrompt({
@@ -43,7 +48,22 @@ export function EndpointToggle({
     }
   }
 
-  return <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
+  return setActive ? (
+    <>
+      <RowCell active={isActive} center first>
+        <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
+      </RowCell>
+      <RowCell active={isActive} callback={setActive}>
+        {endpoint.urlPath}
+      </RowCell>
+    </>
+  ) : (
+    <>
+      <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
+      <Label>Name</Label>
+      {endpoint.enabled ? name : <TextInput value={name} setValue={name => setName(ToCamelCase(name))} />}
+    </>
+  )
 }
 
 export default function EndpointsTable({
@@ -76,7 +96,8 @@ export default function EndpointsTable({
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
         <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={onAddEndpoint}>
-          <Icon icon={addIcon} />New Endpoint
+          <Icon icon={addIcon} />
+          New Endpoint
         </div>
       </div>
       <div className={`grid w-full overflow-y-auto ${columnsClass}`}>
@@ -95,10 +116,12 @@ export default function EndpointsTable({
           )
           return (
             <Fragment key={index}>
-              <RowCell active={active} center first>
-                <EndpointToggle endpoint={endpoint} name={endpoint.urlPath} onRefresh={onRefresh} />
-              </RowCell>
-              <ActiveCell>{endpoint.urlPath}</ActiveCell>
+              <EndpointToggleWithName
+                endpoint={endpoint}
+                onRefresh={onRefresh}
+                isActive={active}
+                setActive={() => setActiveEndpoint(endpoint)}
+              />
               <ActiveCell>{endpoint.flavor}</ActiveCell>
               {getVersionIndex && <ActiveCell>v{getVersionIndex(endpoint) + 1}</ActiveCell>}
               <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
