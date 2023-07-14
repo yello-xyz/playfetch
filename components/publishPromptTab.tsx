@@ -24,12 +24,12 @@ export default function PublishPromptTab({
   const version = prompt.versions.find(version => version.id === activeEndpoint?.versionID) ?? activeVersion
 
   const refreshPrompt = useRefreshPrompt()
+  const refresh = () =>
+    refreshPrompt().then(() => setActiveEndpoint(endpoints.find(endpoint => endpoint.id === activeEndpoint?.id)))
 
-    // TODO implement Add Endpoint button
-  const publish = async (name: string, flavor: string, useCache: boolean) => {
-    await api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache)
-    refreshPrompt()
-  }
+  // TODO implement Add Endpoint button
+  const publish = async (name: string, flavor: string, useCache: boolean) =>
+    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache).then(refresh)
 
   const endPointToVersionID = (endpoint: ResolvedEndpoint) => (endpoint as ResolvedPromptEndpoint).versionID
 
@@ -53,7 +53,7 @@ export default function PublishPromptTab({
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>
-          <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refreshPrompt} />
+          <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refresh} />
           <UsagePane endpoint={activeEndpoint} />
           <ExamplePane
             endpoint={activeEndpoint}
