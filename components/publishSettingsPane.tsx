@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ActiveProject, ActivePrompt, ResolvedEndpoint } from '@/types'
+import { ActiveProject, ActivePrompt, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
 import Label from './label'
@@ -9,6 +9,7 @@ import DropdownMenu from './dropdownMenu'
 import TextInput from './textInput'
 import { debounce } from 'debounce'
 import PickNameDialog from './pickNameDialog'
+import VersionSelector from './versionSelector'
 
 export function EndpointToggle({
   endpoint,
@@ -110,21 +111,23 @@ export default function PublishSettingsPane({
     setFlavor(flavor)
   }
 
+  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'versions' in (item as ActivePrompt)
+  const versions = isPrompt(activeItem) ? activeItem.versions : []
+  const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
+  const [versionID, setVersionID] = useState(endpoints.find(e => e.id === endpoint.id)?.versionID)
+  const versionIndex = versions.findIndex(version => version.id === versionID)
+
   return (
     <>
       <Label>{endpoint.urlPath}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        <Label className='w-[42px]'>Enabled</Label>
+        <Label>Enabled</Label>
         <EndpointToggle endpoint={endpoint} disabled={!endpoint.enabled && !nameAvailable} onRefresh={onRefresh} />
-        <Label className='w-[42px]'>Name</Label>
+        <Label>Name</Label>
+        {endpoint.enabled ? name : <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />}
+        <Label>Environment</Label>
         {endpoint.enabled ? (
-          <div className='flex-1 text-right'>{name}</div>
-        ) : (
-          <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
-        )}
-        <Label className='w-[42px]'>Environment</Label>
-        {endpoint.enabled ? (
-          <div className='flex-1 text-right'>{flavor}</div>
+          flavor
         ) : (
           <DropdownMenu value={flavor} onChange={updateFlavor}>
             {availableFlavors.map((flavor, index) => (
@@ -137,7 +140,22 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         )}
-        <Label className='w-[42px]'>Cache</Label>
+        {isPrompt(activeItem) && (
+          <>
+            <Label>Prompt</Label>
+            {endpoint.enabled ? (
+              `v${versionIndex + 1}`
+            ) : (
+              <VersionSelector
+                versions={versions}
+                endpoints={endpoints}
+                activeVersion={versions[versionIndex]}
+                setActiveVersion={version => setVersionID(version.id)}
+              />
+            )}
+          </>
+        )}
+        <Label>Cache</Label>
         <Checkbox checked={useCache} setChecked={toggleCache} />
       </div>
       {nameAvailable === false && name.length > 0 && (
