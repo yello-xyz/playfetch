@@ -10,6 +10,44 @@ import TextInput from './textInput'
 import { debounce } from 'debounce'
 import PickNameDialog from './pickNameDialog'
 
+export function EndpointToggle({
+  endpoint,
+  disabled,
+  onRefresh,
+}: {
+  endpoint: ResolvedEndpoint
+  disabled?: boolean
+  onRefresh: () => Promise<void>
+}) {
+  const [isEnabled, setEnabled] = useState(endpoint.enabled)
+
+  const [savedState, setSavedState] = useState(endpoint.enabled)
+  if (endpoint.enabled !== savedState) {
+    setEnabled(endpoint.enabled)
+    setSavedState(endpoint.enabled)
+  }
+
+  const setDialogPrompt = useModalDialogPrompt()
+
+  const togglePublish = () => {
+    if (isEnabled) {
+      setDialogPrompt({
+        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+        callback: () => {
+          setEnabled(false)
+          api.toggleEndpoint(endpoint.id, false, endpoint.useCache).then(_ => onRefresh())
+        },
+        destructive: true,
+      })
+    } else {
+      setEnabled(true)
+      api.toggleEndpoint(endpoint.id, true, endpoint.useCache).then(_ => onRefresh())
+    }
+  }
+
+  return <Checkbox label='Enabled' id='enabled' disabled={disabled} checked={isEnabled} setChecked={togglePublish} />
+}
+
 export default function PublishSettingsPane({
   activeItem,
   endpoint,
@@ -51,29 +89,10 @@ export default function PublishSettingsPane({
 
   const [flavor, setFlavor] = useState(endpoint.flavor)
   const [useCache, setUseCache] = useState(endpoint.useCache)
-  const [isEnabled, setEnabled] = useState(endpoint.enabled)
-
-  const setDialogPrompt = useModalDialogPrompt()
-
-  const togglePublish = () => {
-    if (isEnabled) {
-      setDialogPrompt({
-        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback: () => {
-          setEnabled(false)
-          api.toggleEndpoint(endpoint.id, false, endpoint.useCache).then(_ => onRefresh())
-        },
-        destructive: true,
-      })
-    } else {
-      setEnabled(true)
-      api.toggleEndpoint(endpoint.id, true, endpoint.useCache).then(_ => onRefresh())
-    }
-  }
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
-    api.toggleEndpoint(endpoint.id, isEnabled, checked).then(_ => onRefresh())
+    api.toggleEndpoint(endpoint.id, endpoint.enabled, checked).then(_ => onRefresh())
   }
 
   const addNewEnvironment = 'Add New Environment…'
@@ -95,16 +114,10 @@ export default function PublishSettingsPane({
     <>
       <Label>{endpoint.urlPath}</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
-        <Checkbox
-          label='Enabled'
-          id='enabled'
-          disabled={!isEnabled && !nameAvailable}
-          checked={isEnabled}
-          setChecked={togglePublish}
-        />
+        <EndpointToggle endpoint={endpoint} disabled={!endpoint.enabled && !nameAvailable} onRefresh={onRefresh} />
         <div className='flex items-center gap-8'>
           <Label className='w-32'>Name</Label>
-          {isEnabled ? (
+          {endpoint.enabled ? (
             <div className='flex-1 text-right'>{name}</div>
           ) : (
             <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
@@ -112,7 +125,7 @@ export default function PublishSettingsPane({
         </div>
         <div className='flex items-center gap-8'>
           <Label>Environment</Label>
-          {isEnabled ? (
+          {endpoint.enabled ? (
             <div className='flex-1 text-right'>{flavor}</div>
           ) : (
             <DropdownMenu value={flavor} onChange={updateFlavor}>
