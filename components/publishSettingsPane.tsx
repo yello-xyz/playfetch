@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ActiveProject, ActivePrompt, ResolvedEndpoint } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
@@ -47,27 +47,33 @@ export default function PublishSettingsPane({
 
   const [name, setName] = useState(endpoint.urlPath)
   const [nameAvailable, setNameAvailable] = useState<boolean>()
+  useEffect(() => updateName(endpoint.urlPath), [endpoint.urlPath, updateName])
 
   const [flavor, setFlavor] = useState(endpoint.flavor)
   const [useCache, setUseCache] = useState(endpoint.useCache)
+  const [isEnabled, setEnabled] = useState(endpoint.enabled)
 
   const setDialogPrompt = useModalDialogPrompt()
 
   const togglePublish = () => {
-    if (endpoint.enabled) {
+    if (isEnabled) {
       setDialogPrompt({
         title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback: () => api.toggleEndpoint(endpoint.id, false, endpoint.useCache).then(_ => onRefresh()),
+        callback: () => {
+          setEnabled(false)
+          api.toggleEndpoint(endpoint.id, false, endpoint.useCache).then(_ => onRefresh())
+        },
         destructive: true,
       })
     } else {
+      setEnabled(true)
       api.toggleEndpoint(endpoint.id, true, endpoint.useCache).then(_ => onRefresh())
     }
   }
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
-    api.toggleEndpoint(endpoint.id, endpoint.enabled, checked).then(_ => onRefresh())
+    api.toggleEndpoint(endpoint.id, isEnabled, checked).then(_ => onRefresh())
   }
 
   const addNewEnvironment = 'Add New Environment…'
@@ -92,13 +98,13 @@ export default function PublishSettingsPane({
         <Checkbox
           label='Enabled'
           id='enabled'
-          disabled={!endpoint.enabled && !nameAvailable}
-          checked={endpoint.enabled}
+          disabled={!isEnabled && !nameAvailable}
+          checked={isEnabled}
           setChecked={togglePublish}
         />
         <div className='flex items-center gap-8'>
           <Label className='w-32'>Name</Label>
-          {endpoint.enabled ? (
+          {isEnabled ? (
             <div className='flex-1 text-right'>{name}</div>
           ) : (
             <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
@@ -106,7 +112,7 @@ export default function PublishSettingsPane({
         </div>
         <div className='flex items-center gap-8'>
           <Label>Environment</Label>
-          {endpoint.enabled ? (
+          {isEnabled ? (
             <div className='flex-1 text-right'>{flavor}</div>
           ) : (
             <DropdownMenu value={flavor} onChange={updateFlavor}>
