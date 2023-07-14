@@ -105,7 +105,7 @@ const api = {
     flavor: string,
     useCache: boolean
   ) {
-    const chain = [{ promptID, versionID }]
+    const chain: RunConfig[] = [{ versionID }]
     return post(this.publishChain, { chain, projectID, promptID, name, flavor, useCache })
   },
   publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
