@@ -25,6 +25,7 @@ export default function PublishPromptTab({
 
   const refreshPrompt = useRefreshPrompt()
 
+    // TODO implement Add Endpoint button
   const publish = async (name: string, flavor: string, useCache: boolean) => {
     await api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, useCache)
     refreshPrompt()
@@ -52,12 +53,7 @@ export default function PublishPromptTab({
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>
-          <PublishSettingsPane
-            activeItem={prompt}
-            endpoint={activeEndpoint}
-            onPublish={publish}
-            onRefresh={refreshPrompt}
-          />
+          <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refreshPrompt} />
           <UsagePane endpoint={activeEndpoint} />
           <ExamplePane
             endpoint={activeEndpoint}

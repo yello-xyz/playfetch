@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ActiveProject, ActivePrompt, ResolvedEndpoint } from '@/types'
 import api from '../src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
@@ -13,17 +13,14 @@ import PickNameDialog from './pickNameDialog'
 export default function PublishSettingsPane({
   activeItem,
   endpoint,
-  onPublish,
   onRefresh,
 }: {
   activeItem: ActivePrompt | ActiveProject
-  endpoint?: ResolvedEndpoint
-  onPublish: (name: string, flavor: string, useCache: boolean) => Promise<void>
+  endpoint: ResolvedEndpoint
   onRefresh: () => Promise<void>
 }) {
   const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
   const availableFlavors = activeItem.availableFlavors
-  const endpoints = activeItem.endpoints
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -48,41 +45,29 @@ export default function PublishSettingsPane({
     [checkName]
   )
 
-  const initialName =
-    endpoint?.urlPath ?? endpoints[0]?.urlPath ?? ToCamelCase(activeItem.name.split(' ').slice(0, 3).join(' '))
-  const [name, setName] = useState(initialName)
+  const [name, setName] = useState(endpoint.urlPath)
   const [nameAvailable, setNameAvailable] = useState<boolean>()
-  useEffect(() => updateName(initialName), [initialName, updateName])
 
-  const [flavor, setFlavor] = useState(endpoint?.flavor ?? availableFlavors[0])
-  const [useCache, setUseCache] = useState(endpoint?.useCache ?? false)
+  const [flavor, setFlavor] = useState(endpoint.flavor)
+  const [useCache, setUseCache] = useState(endpoint.useCache)
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const unpublish = (endpointID: number) => {
-    setDialogPrompt({
-      title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-      callback: async () => {
-        await api.deleteEndpoint(endpointID)
-        onRefresh()
-      },
-      destructive: true,
-    })
-  }
-
   const togglePublish = () => {
-    if (endpoint) {
-      unpublish(endpoint.id)
+    if (endpoint.enabled) {
+      setDialogPrompt({
+        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+        callback: () => api.toggleEndpoint(endpoint.id, false, endpoint.useCache).then(_ => onRefresh()),
+        destructive: true,
+      })
     } else {
-      onPublish(name, flavor, useCache)
+      api.toggleEndpoint(endpoint.id, true, endpoint.useCache).then(_ => onRefresh())
     }
   }
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
-    if (endpoint) {
-      api.toggleEndpoint(endpoint.id, endpoint.enabled, checked).then(_ => onRefresh())
-    }
+    api.toggleEndpoint(endpoint.id, endpoint.enabled, checked).then(_ => onRefresh())
   }
 
   const addNewEnvironment = 'Add New Environment…'
@@ -102,18 +87,18 @@ export default function PublishSettingsPane({
 
   return (
     <>
-      <Label>{endpoint?.urlPath ?? 'Settings'}</Label>
+      <Label>{endpoint.urlPath}</Label>
       <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
         <Checkbox
           label='Enabled'
-          id='publish'
-          disabled={!endpoint && !nameAvailable}
-          checked={!!endpoint}
+          id='enabled'
+          disabled={!endpoint.enabled && !nameAvailable}
+          checked={endpoint.enabled}
           setChecked={togglePublish}
         />
         <div className='flex items-center gap-8'>
           <Label className='w-32'>Name</Label>
-          {endpoint ? (
+          {endpoint.enabled ? (
             <div className='flex-1 text-right'>{name}</div>
           ) : (
             <TextInput value={name} setValue={name => updateName(ToCamelCase(name))} />
@@ -121,7 +106,7 @@ export default function PublishSettingsPane({
         </div>
         <div className='flex items-center gap-8'>
           <Label>Environment</Label>
-          {endpoint ? (
+          {endpoint.enabled ? (
             <div className='flex-1 text-right'>{flavor}</div>
           ) : (
             <DropdownMenu value={flavor} onChange={updateFlavor}>

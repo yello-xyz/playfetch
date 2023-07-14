@@ -16,6 +16,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
 
   const refreshProject = useRefreshProject()
 
+  // TODO implement Add Endpoint button
   const publish = async (name: string, flavor: string, useCache: boolean) => {
     await api.publishChain(
       chain.map(item => ({
@@ -39,12 +40,7 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[40%] overflow-y-auto'>
-          <PublishSettingsPane
-            activeItem={project}
-            endpoint={activeEndpoint}
-            onPublish={publish}
-            onRefresh={refreshProject}
-          />
+          <PublishSettingsPane activeItem={project} endpoint={activeEndpoint} onRefresh={refreshProject} />
           <UsagePane endpoint={activeEndpoint} />
           <ExamplePane
             endpoint={activeEndpoint}
