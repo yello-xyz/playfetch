@@ -54,7 +54,7 @@ export const toPrompt = (data: any, userID: number): Prompt => ({
 })
 
 export async function loadEndpoints(promptID: number, projectData: any, buildURL: (path: string) => string) {
-  const endpoints = await getEntities(Entity.ENDPOINT, 'promptID', promptID)
+  const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'promptID', promptID)
   const usages = await getEntities(Entity.USAGE, 'promptID', promptID)
 
   const toPromptEndpoint = (endpointData: any) => {
@@ -70,7 +70,7 @@ export async function loadEndpoints(promptID: number, projectData: any, buildURL
     url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
     apiKeyDev: projectData.apiKeyDev ?? '',
     usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
-  }))
+  })).reverse()
 }
 
 export async function getActivePrompt(
