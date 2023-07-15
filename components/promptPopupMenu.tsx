@@ -5,7 +5,6 @@ import useModalDialogPrompt from './modalDialogContext'
 import PickProjectDialog from './pickProjectDialog'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
-import { useLoggedInUser } from './userContext'
 
 export default function PromptPopupMenu({
   prompt,
@@ -46,11 +45,8 @@ export default function PromptPopupMenu({
     setShowPickProjectPrompt(true)
   }
 
-  const user = useLoggedInUser()
-  const properProjects = projects.filter(project => project.id !== user.id)
-
   // TODO allow to create new project within move flow if there are no projects
-  const canMove = properProjects.length > 0
+  const canMove = projects.length > 1
 
   return (
     <>
@@ -62,7 +58,7 @@ export default function PromptPopupMenu({
       {showPickProjectPrompt && (
         <PickProjectDialog
           key={prompt.projectID}
-          projects={properProjects}
+          projects={projects}
           prompt={prompt}
           onConfirm={(projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh)}
           onDismiss={() => setShowPickProjectPrompt(false)}

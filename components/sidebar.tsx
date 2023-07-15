@@ -87,9 +87,7 @@ export default function Sidebar({
           <SidebarButton title='Add new Project…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
         </SidebarSection>
         <SidebarSection>
-          {properProjects.length > 0 && (
-            <SidebarButton title='Invite Members' icon={inviteIcon} onClick={() => setShowInviteDialog(true)} />
-          )}
+          <SidebarButton title='Invite Members' icon={inviteIcon} onClick={() => setShowInviteDialog(true)} />
           <SidebarButton
             title='Feedback'
             icon={feedbackIcon}
@@ -108,8 +106,8 @@ export default function Sidebar({
       )}
       {showInviteDialog && (
         <InviteDialog
-          projects={properProjects}
-          initialProjectID={activeProjectID !== user.id ? activeProjectID : undefined}
+          projects={projects}
+          initialProjectID={activeProjectID}
           onConfirm={inviteMembers}
           onDismiss={() => setShowInviteDialog(false)}
         />
