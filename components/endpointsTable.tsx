@@ -100,36 +100,40 @@ export default function EndpointsTable({
           New Endpoint
         </div>
       </div>
-      <div className={`grid w-full overflow-y-auto ${columnsClass}`}>
-        <HeaderCell first>Enabled</HeaderCell>
-        <HeaderCell>Endpoint</HeaderCell>
-        <HeaderCell>Environment</HeaderCell>
-        {getVersionIndex && <HeaderCell>Prompt</HeaderCell>}
-        <HeaderCell>Cached</HeaderCell>
-        <HeaderCell>Usage</HeaderCell>
-        {endpoints.map((endpoint, index) => {
-          const active = activeEndpoint?.id === endpoint.id
-          const ActiveCell = ({ children }: { children: ReactNode }) => (
-            <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
-              {children}
-            </RowCell>
-          )
-          return (
-            <Fragment key={index}>
-              <EndpointToggleWithName
-                endpoint={endpoint}
-                onRefresh={onRefresh}
-                isActive={active}
-                setActive={() => setActiveEndpoint(endpoint)}
-              />
-              <ActiveCell>{endpoint.flavor}</ActiveCell>
-              {getVersionIndex && <ActiveCell>v{getVersionIndex(endpoint) + 1}</ActiveCell>}
-              <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
-              <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
-            </Fragment>
-          )
-        })}
-      </div>
+      {endpoints.length > 0 ? (
+        <div className={`grid w-full overflow-y-auto ${columnsClass}`}>
+          <HeaderCell first>Enabled</HeaderCell>
+          <HeaderCell>Endpoint</HeaderCell>
+          <HeaderCell>Environment</HeaderCell>
+          {getVersionIndex && <HeaderCell>Prompt</HeaderCell>}
+          <HeaderCell>Cached</HeaderCell>
+          <HeaderCell>Usage</HeaderCell>
+          {endpoints.map((endpoint, index) => {
+            const active = activeEndpoint?.id === endpoint.id
+            const ActiveCell = ({ children }: { children: ReactNode }) => (
+              <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
+                {children}
+              </RowCell>
+            )
+            return (
+              <Fragment key={index}>
+                <EndpointToggleWithName
+                  endpoint={endpoint}
+                  onRefresh={onRefresh}
+                  isActive={active}
+                  setActive={() => setActiveEndpoint(endpoint)}
+                />
+                <ActiveCell>{endpoint.flavor}</ActiveCell>
+                {getVersionIndex && <ActiveCell>v{getVersionIndex(endpoint) + 1}</ActiveCell>}
+                <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
+                <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
+              </Fragment>
+            )
+          })}
+        </div>
+      ) : (
+        <EmptyTable onAddEndpoint={onAddEndpoint} />
+      )}
     </>
   )
 }
@@ -165,6 +169,25 @@ function RowCell({
   return (
     <div className={className} onClick={callback}>
       {children}
+    </div>
+  )
+}
+
+function EmptyTable({ onAddEndpoint }: { onAddEndpoint: () => void }) {
+  const AddPromptLink = ({ label }: { label: string }) => (
+    <span className='text-gray-500 underline cursor-pointer' onClick={onAddEndpoint}>
+      {label}
+    </span>
+  )
+
+  return (
+    <div className='w-full h-full'>
+      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+        <span className='font-medium'>No Endpoints</span>
+        <span className='w-56 text-xs text-center text-gray-400'>
+          Create a <AddPromptLink label={'New Endpoint'} /> to integrate this prompt in your code base.
+        </span>
+      </div>
     </div>
   )
 }
