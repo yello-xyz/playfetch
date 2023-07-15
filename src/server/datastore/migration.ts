@@ -4,6 +4,7 @@ import { migrateEndpoints } from './endpoints'
 import { migrateProjects } from './projects'
 import { migratePrompts } from './prompts'
 import { migrateRuns } from './runs'
+import { migrateUsage } from './usage'
 import { migrateUsers } from './users'
 import { migrateVersions } from './versions'
 
@@ -13,6 +14,7 @@ export async function runDataMigrations() {
   // await migrateVersions()
   // await migrateRuns()
   await migrateEndpoints()
+  await migrateUsage()
   // await migrateAccess()
   // await migrateUsers()
   // await migrateComments()

@@ -38,7 +38,7 @@ indexes:
 
 - kind: endpoint
   properties:
-  - name: promptID
+  - name: parentID
   - name: createdAt
     direction: desc
 

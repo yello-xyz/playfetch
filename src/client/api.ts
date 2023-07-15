@@ -111,11 +111,10 @@ const api = {
     flavor: string,
     useCache: boolean
   ) {
-    const chain: RunConfig[] = [{ versionID }]
-    return post(this.publishChain, { chain, projectID, promptID, name, flavor, useCache })
+    return post(this.publishChain, { chain: [{ versionID }], projectID, parentID: promptID, name, flavor, useCache })
   },
   publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
-    return post(this.publishChain, { chain, projectID, promptID: projectID, name, flavor, useCache })
+    return post(this.publishChain, { chain, projectID, parentID: projectID, name, flavor, useCache })
   },
   updateEndpoint: function (endpoint: Endpoint) {
     return post(this.updateEndpoint, {

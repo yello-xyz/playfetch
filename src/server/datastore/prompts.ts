@@ -53,9 +53,9 @@ export const toPrompt = (data: any, userID: number): Prompt => ({
   favorited: JSON.parse(data.favorited).includes(userID),
 })
 
-export async function loadEndpoints(promptID: number, projectData: any, buildURL: (path: string) => string) {
-  const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'promptID', promptID)
-  const usages = await getEntities(Entity.USAGE, 'promptID', promptID)
+export async function loadEndpoints(parentID: number, projectData: any, buildURL: (path: string) => string) {
+  const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'parentID', parentID)
+  const usages = await getEntities(Entity.USAGE, 'parentID', parentID)
 
   const toPromptEndpoint = (endpointData: any) => {
     const endpoint = toEndpoint(endpointData)
@@ -167,8 +167,8 @@ export async function deletePromptForUser(userID: number, promptID: number) {
   // TODO warn or even refuse when prompt has published endpoints
   await ensurePromptAccess(userID, promptID)
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'promptID', promptID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'promptID', promptID)
+  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', promptID)
+  const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', promptID)
   const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'promptID', promptID)
   await getDatastore().delete([

@@ -1,13 +1,34 @@
 import { Usage } from '@/types'
 import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getID } from './datastore'
 
-export async function saveUsage(endpointID: number, promptID: number) {
-  await getDatastore().save(toUsageData(endpointID, promptID, 0, 0, 0, 0, 0, new Date()))
+export async function migrateUsage() {
+  const datastore = getDatastore()
+  const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
+  for (const usageData of allUsage) {
+    const parentID = usageData.promptID
+    await getDatastore().save(
+      toUsageData(
+        getID(usageData),
+        parentID,
+        usageData.requests,
+        usageData.cost,
+        usageData.cacheHits,
+        usageData.attempts,
+        usageData.failures,
+        usageData.createdAt,
+        usageData.lastRunAt
+      )
+    )  
+  }
+}
+
+export async function saveUsage(endpointID: number, parentID: number) {
+  await getDatastore().save(toUsageData(endpointID, parentID, 0, 0, 0, 0, 0, new Date()))
 }
 
 export async function updateUsage(
   endpointID: number,
-  promptID: number,
+  parentID: number,
   incrementalCost: number,
   cacheHit: boolean,
   attempts: number,
@@ -18,7 +39,7 @@ export async function updateUsage(
     transaction.save(
       toUsageData(
         endpointID,
-        promptID,
+        parentID,
         usageData.requests + 1,
         usageData.cost + incrementalCost,
         usageData.cacheHits + (cacheHit ? 1 : 0),
@@ -33,7 +54,7 @@ export async function updateUsage(
 
 const toUsageData = (
   endpointID: number,
-  promptID: number,
+  parentID: number,
   requests: number,
   cost: number,
   cacheHits: number,
@@ -43,7 +64,7 @@ const toUsageData = (
   lastRunAt?: Date
 ) => ({
   key: buildKey(Entity.USAGE, endpointID),
-  data: { promptID, requests, cost, cacheHits, attempts, failures, createdAt, lastRunAt },
+  data: { parentID, requests, cost, cacheHits, attempts, failures, createdAt, lastRunAt },
   excludeFromIndexes: [],
 })
 

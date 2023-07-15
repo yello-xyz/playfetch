@@ -101,7 +101,7 @@ export type Endpoint = {
   id: number
   enabled: boolean
   userID: number
-  promptID: number
+  parentID: number
   chain: RunConfig[]
   timestamp: string
   urlPath: string
