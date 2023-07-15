@@ -70,12 +70,12 @@ export async function markUserLogin(userID: number, fullName: string, imageURL: 
   return userData ? toUser(userData) : undefined
 }
 
-export async function saveUser(email: string, isAdmin: boolean) {
+export async function saveUser(email: string, fullName: string, isAdmin: boolean) {
   const previousUserData = await getEntity(Entity.USER, 'email', email)
   const userData = toUserData(
     email.toLowerCase(),
     email.toLowerCase(),
-    '',
+    fullName,
     isAdmin,
     previousUserData?.createdAt ?? new Date(),
     previousUserData?.lastLoginAt,
