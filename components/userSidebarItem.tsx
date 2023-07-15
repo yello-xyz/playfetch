@@ -8,6 +8,8 @@ import Icon from './icon'
 import { useLoggedInUser } from './userContext'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import api from '@/src/client/api'
+import Link from 'next/link'
+import ClientRoute from './clientRoute'
 
 const avatarColors = [
   'bg-orange-300',
@@ -118,6 +120,11 @@ export default function UserSidebarItem() {
                 <span className='p-1 font-medium cursor-pointer' onClick={selectSettings}>
                   Settings
                 </span>
+                {user.isAdmin && (
+                  <Link href={ClientRoute.Admin}>
+                    <span className='p-1 font-medium'>Admin</span>
+                  </Link>
+                )}
                 <div className='border-t border-gray-300' />
                 <span className='p-1 font-medium text-red-500 cursor-pointer' onClick={logOut}>
                   Log out

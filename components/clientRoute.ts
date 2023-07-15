@@ -4,6 +4,7 @@ enum ClientRoute {
   Home = '/',
   Settings = `${ClientRoute.Home}?s=1`,
   Login = '/login',
+  Admin = '/admin',
 }
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}`
