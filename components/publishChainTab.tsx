@@ -10,14 +10,8 @@ import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
 import { NewConfigFromEndpoints } from './publishPromptTab'
 
-export default function PublishChainTab({
-  chain,
-  activeChain,
-}: {
-  chain: LoadedChainItem[]
-  activeChain: ActiveChain
-}) {
-  const endpoints = activeChain.endpoints
+export default function PublishChainTab({ items, chain }: { items: LoadedChainItem[]; chain: ActiveChain }) {
+  const endpoints = chain.endpoints
 
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -25,16 +19,16 @@ export default function PublishChainTab({
   const refreshProject = useRefreshProject()
 
   const addEndpoint = () => {
-    const { name, flavor } = NewConfigFromEndpoints(endpoints, activeChain)
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, chain)
     api
       .publishChain(
-        chain.map(item => ({
+        items.map(item => ({
           versionID: item.version.id,
           output: item.output,
           includeContext: item.includeContext,
         })),
-        activeChain.projectID,
-        activeChain.id,
+        chain.projectID,
+        chain.id,
         name,
         flavor,
         false
@@ -55,13 +49,13 @@ export default function PublishChainTab({
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
-          <PublishSettingsPane activeItem={activeChain} endpoint={activeEndpoint} onRefresh={refreshProject} />
+          <PublishSettingsPane activeItem={chain} endpoint={activeEndpoint} onRefresh={refreshProject} />
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              variables={ExtractUnboundChainVariables(chain)}
-              inputValues={activeChain.inputs}
-              defaultFlavor={activeChain.availableFlavors[0]}
+              variables={ExtractUnboundChainVariables(items)}
+              inputValues={chain.inputs}
+              defaultFlavor={chain.availableFlavors[0]}
             />
           )}
           <UsagePane endpoint={activeEndpoint} onRefresh={refreshProject} />

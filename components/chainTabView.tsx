@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, Prompt, RunConfig, Version } from '@/types'
+import { ActiveChain, ActivePrompt, ChainItem, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -6,42 +6,36 @@ import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 
-export type ChainItem = { prompt: Prompt; version?: Version; output?: string; includeContext?: boolean } | RunConfig
-export type LoadedChainItem = { prompt: ActivePrompt; version: Version; output?: string; includeContext?: boolean }
+export type LoadedChainItem = ChainItem & { prompt: ActivePrompt; version: Version }
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
   'version' in item && item.version !== undefined
 
-export default function ChainTabView({ activeTab, activeChain }: { activeTab: MainViewTab; activeChain: ActiveChain }) {
-  const previousChain: ChainItem[] = (activeChain.endpoints[0]?.chain ?? []).map(item => ({
-    versionID: item.versionID,
-    output: item.output,
-    includeContext: item.includeContext,
-  }))
-  const [chain, setChain] = useState(previousChain)
-
-  const loadedChain = chain.filter(IsLoadedChainItem)
+export default function ChainTabView({ activeTab, chain }: { activeTab: MainViewTab; chain: ActiveChain }) {
+  const [items, setItems] = useState(chain.items)
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    activeChain.inputs,
-    activeChain.projectID,
+    chain.inputs,
+    chain.projectID,
     activeTab
   )
+
+  const chainIsLoaded = items.every(IsLoadedChainItem)
 
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
-        return <BuildChainTab chain={chain} setChain={setChain} prompts={activeChain.prompts} />
+        return <BuildChainTab items={items} setItems={setItems} prompts={chain.prompts} />
       case 'test':
-        return loadedChain.length ? (
+        return chainIsLoaded ? (
           <TestChainTab
-            chain={loadedChain}
+            items={items}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
         ) : null
       case 'publish':
-        return loadedChain.length ? <PublishChainTab chain={loadedChain} activeChain={activeChain} /> : null
+        return chainIsLoaded ? <PublishChainTab items={items} chain={chain} /> : null
     }
   }
 

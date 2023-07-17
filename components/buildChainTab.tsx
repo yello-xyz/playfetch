@@ -1,11 +1,11 @@
-import { ActivePrompt, Prompt, Version } from '@/types'
+import { ActivePrompt, ChainItem, Prompt, Version } from '@/types'
 import { ReactNode, useEffect, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
-import { LoadedChainItem, ChainItem, IsLoadedChainItem } from './chainTabView'
+import { LoadedChainItem, IsLoadedChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
 
@@ -19,74 +19,66 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[]) => {
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
-const promptForItem = (item: ChainItem) => ('prompt' in item ? item.prompt : undefined)
-const versionIDForItem = (item: ChainItem) => ('prompt' in item ? item.version?.id : item.versionID)
-const keyForItem = (item: ChainItem) => ('prompt' in item ? item.prompt.id : item.versionID)
-
-const loadPromptForItem = (item: ChainItem) =>
-  'prompt' in item ? api.getPrompt(item.prompt.id) : api.getPromptForVersion(item.versionID)
-const promptMatchesItem = (prompt: ActivePrompt, item: ChainItem) =>
-  'prompt' in item ? item.prompt.id === prompt.id : prompt.versions.some(version => version.id === item.versionID)
-
-const selectPromptVersion = (prompt: ActivePrompt, versionID?: number) =>
-  (versionID ? prompt.versions.find(version => version.id === versionID) : undefined) ?? prompt.versions.slice(-1)[0]
-
 export default function BuildChainTab({
-  chain,
-  setChain,
+  items,
+  setItems,
   prompts,
 }: {
   prompts: Prompt[]
-  chain: ChainItem[]
-  setChain: (chain: ChainItem[]) => void
+  items: ChainItem[]
+  setItems: (items: ChainItem[]) => void
 }) {
   const [promptCache, setPromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
 
   useEffect(() => {
-    const loadChainItem = (prompt: ActivePrompt) => (item: ChainItem) =>
-      promptMatchesItem(prompt, item)
-        ? {
-            prompt,
-            version: selectPromptVersion(prompt, versionIDForItem(item)),
-            output: item.output,
-            includeContext: item.includeContext,
-          }
-        : item
-
-    const unloadedItem = chain.find(item => !IsLoadedChainItem(item))
+    const unloadedItem = items.find(item => !IsLoadedChainItem(item))
     if (unloadedItem) {
-      loadPromptForItem(unloadedItem).then(prompt => {
+      api.getPrompt(unloadedItem.promptID).then(prompt => {
         setPromptCache(promptCache => ({ ...promptCache, [prompt.id]: prompt }))
-        setChain(chain.map(loadChainItem(prompt)))
+        setItems(
+          items.map(item =>
+            item.promptID === prompt.id
+              ? {
+                  ...item,
+                  prompt,
+                  version: prompt.versions.find(version => version.id === item.versionID),
+                }
+              : item
+          )
+        )
       })
     }
-  }, [chain, setChain])
+  }, [items, setItems])
 
   const chainItemFromPromptID = (promptID: number): ChainItem => {
+    const prompt = prompts.find(prompt => prompt.id === promptID)!
+    const versionID = prompt.lastVersionID
     const cachedPrompt = promptCache[promptID]
-    return cachedPrompt
-      ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] }
-      : { prompt: prompts.find(prompt => prompt.id === promptID)! }
+    return { promptID, versionID, ...(cachedPrompt ? { version: cachedPrompt.versions.slice(-1)[0] } : {}) }
   }
 
-  const addPrompt = (promptID: number) => setChain([...chain, chainItemFromPromptID(promptID)])
+  const addPrompt = (promptID: number) => setItems([...items, chainItemFromPromptID(promptID)])
 
   const replacePrompt = (index: number) => (promptID: number) =>
-    setChain([...chain.slice(0, index), chainItemFromPromptID(promptID), ...chain.slice(index + 1)])
+    setItems([...items.slice(0, index), chainItemFromPromptID(promptID), ...items.slice(index + 1)])
 
-  const removePrompt = (index: number) => () => setChain([...chain.slice(0, index), ...chain.slice(index + 1)])
+  const removePrompt = (index: number) => () => setItems([...items.slice(0, index), ...items.slice(index + 1)])
 
   const toggleIncludeContext = (index: number) => (includeContext: boolean) =>
-    setChain([...chain.slice(0, index), { ...chain[index], includeContext }, ...chain.slice(index + 1)])
+    setItems([...items.slice(0, index), { ...items[index], includeContext }, ...items.slice(index + 1)])
 
   const selectVersion = (index: number) => (version: Version) =>
-    setChain([...chain.slice(0, index), { ...(chain[index] as LoadedChainItem), version }, ...chain.slice(index + 1)])
+    setItems([
+      ...items.slice(0, index),
+      { ...items[index], versionID: version.id, version } as LoadedChainItem,
+      ...items.slice(index + 1),
+    ])
 
   const mapOutput = (index: number) => (output?: string) => {
-    const resetChain = chain.map(item =>
+    const resetChain = items.map(item =>
       IsLoadedChainItem(item) ? { ...item, output: item.output === output ? undefined : item.output } : item
     )
-    setChain([
+    setItems([
       ...resetChain.slice(0, index),
       { ...(resetChain[index] as LoadedChainItem), output },
       ...resetChain.slice(index + 1),
@@ -98,16 +90,16 @@ export default function BuildChainTab({
       <div className='flex flex-col flex-grow h-full gap-4 p-6'>
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
-          {ExtractUnboundChainVariables(chain).map((variable, index) => (
+          {ExtractUnboundChainVariables(items).map((variable, index) => (
             <InputVariable key={index}>{variable}</InputVariable>
           ))}
         </div>
-        {chain.map((item, index) => (
+        {items.map((item, index) => (
           <div key={index} className='flex items-center gap-4'>
             <Checkbox disabled={index === 0} checked={!!item.includeContext} setChecked={toggleIncludeContext(index)} />
             <PromptSelector
               prompts={prompts}
-              selectedPrompt={promptForItem(item)}
+              selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
               onSelectPrompt={replacePrompt(index)}
               onRemovePrompt={removePrompt(index)}
             />
@@ -124,13 +116,13 @@ export default function BuildChainTab({
             <OutputMapper
               key={item.output}
               output={item.output}
-              inputs={ExtractChainVariables(chain.slice(index + 1))}
+              inputs={ExtractChainVariables(items.slice(index + 1))}
               onMapOutput={mapOutput(index)}
             />
           </div>
         ))}
         <PromptSelector
-          key={chain.map(item => keyForItem(item)).join('')}
+          key={items.map(item => item.versionID).join('')}
           prompts={prompts}
           onSelectPrompt={addPrompt}
           includeAddPromptOption

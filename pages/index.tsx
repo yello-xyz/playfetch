@@ -306,7 +306,7 @@ export default function Home({
                       savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
                   )}
-                  {!showSettings && activeChain && <ChainTabView activeTab={selectedTab} activeChain={activeChain} />}
+                  {!showSettings && activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} />}
                   {!showSettings &&
                     !isChainMode &&
                     activeProject &&

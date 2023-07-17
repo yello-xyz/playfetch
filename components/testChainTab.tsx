@@ -27,12 +27,12 @@ const runChain = async (
 }
 
 export default function TestChainTab({
-  chain,
+  items,
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
 }: {
-  chain: LoadedChainItem[]
+  items: LoadedChainItem[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
@@ -40,15 +40,15 @@ export default function TestChainTab({
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
   const [isRunning, setIsRunning] = useState(false)
 
-  const variables = ExtractUnboundChainVariables(chain)
+  const variables = ExtractUnboundChainVariables(items)
 
   const checkProviderAvailable = useCheckProvider()
 
   const testChain = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    if (chain.every(item => checkProviderAvailable(item.version.config.provider))) {
+    if (items.every(item => checkProviderAvailable(item.version.config.provider))) {
       setIsRunning(true)
-      await runChain(chain, inputs, setPartialRuns)
+      await runChain(items, inputs, setPartialRuns)
       setIsRunning(false)
     }
   }
