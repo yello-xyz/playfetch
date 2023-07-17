@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Prompt, RunConfig, Version } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Prompt, RunConfig, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -11,8 +11,12 @@ export type LoadedChainItem = { prompt: ActivePrompt; version: Version; output?:
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
   'version' in item && item.version !== undefined
 
-export default function ChainTabView({ activeTab, project }: { activeTab: MainViewTab; project: ActiveProject }) {
-  // TODO generalise this and expose all previous chains in the project
+export default function ChainTabView({ activeTab, chain }: { activeTab: MainViewTab; chain: ActiveChain }) {
+  return <div>{chain.name}</div>
+}
+
+function OldChainTabView({ activeTab, project }: { activeTab: MainViewTab; project: ActiveProject }) {
+    // TODO generalise this and expose all previous chains in the project
   const previousChain: ChainItem[] = (project.endpoints[0]?.chain ?? []).map(item => ({
     versionID: item.versionID,
     output: item.output,

@@ -3,10 +3,10 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider } from '@/types'
+import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
-import ClientRoute, { ChainsRoute, ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
+import ClientRoute, { ChainRoute, ChainsRoute, ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject, getProjectsForUser } from '@/src/server/datastore/projects'
@@ -21,6 +21,7 @@ import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
 import { VersionsEqual } from '@/src/common/versionsEqual'
 import ProjectGridView, { EmptyGridView } from '@/components/projectGridView'
+import { getActiveChain } from '@/src/server/datastore/chains'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -28,12 +29,20 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { g: projectID, p: promptID, s: settings, c: chains } = mapDictionary(ParseQuery(query), value => Number(value))
+  const {
+    g: projectID,
+    p: promptID,
+    c: chainID,
+    s: settings,
+    cs: chains,
+  } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
   const buildURL = urlBuilderFromHeaders(req.headers)
   const initialActiveItem = promptID
     ? await getActivePrompt(user.id, promptID, buildURL)
+    : chainID
+    ? await getActiveChain(user.id, chainID, buildURL)
     : await getActiveProject(user.id, projectID ?? user.id, buildURL)
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
@@ -52,7 +61,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   }
 })
 
-type ActiveItem = ActiveProject | ActivePrompt
+type ActiveItem = ActiveProject | ActivePrompt | ActiveChain
 
 export default function Home({
   user,
@@ -76,10 +85,11 @@ export default function Home({
   const [projects, setProjects] = useState(initialProjects)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'projectID' in (item as ActivePrompt)
-  const activeProject = isPrompt(activeItem) ? undefined : activeItem
+  const isProject = (item: ActiveItem): item is ActiveProject => 'prompts' in (item as ActiveProject)
+  const isPrompt = (item: ActiveItem): item is ActivePrompt => 'versions' in (item as ActivePrompt)
+  const activeProject = isProject(activeItem) ? activeItem : undefined
   const activePrompt = isPrompt(activeItem) ? activeItem : undefined
-  const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
+  const activeChain = !isProject(activeItem) && !isPrompt(activeItem) ? activeItem : undefined
 
   const [isChainMode, setChainMode] = useState(initialShowChains)
   const [showSettings, setShowSettings] = useState(initialShowSettings)
@@ -142,6 +152,20 @@ export default function Home({
     setShowSettings(false)
   }
 
+  const refreshChain = async (chainID: number) => {
+    const newChain = await api.getChain(chainID)
+    setActiveItem(newChain)
+  }
+
+  const selectChain = async (chainID: number) => {
+    if (chainID !== activeChain?.id) {
+      await refreshChain(chainID)
+      router.push(ChainRoute(chainID), undefined, { shallow: true })
+    }
+    setChainMode(false)
+    setShowSettings(false)
+  }
+
   const refreshProject = async (projectID: number) => {
     const newProject = await api.getProject(projectID)
     setActiveItem(newProject)
@@ -163,7 +187,9 @@ export default function Home({
   }
 
   const selectChains = () => {
-    const project = activeProject ?? (promptProject as Project)
+    const activePromptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
+    const activeChainProject = activeChain && projects.find(project => project.id === activeChain.projectID)
+    const project = activeProject ?? activePromptProject ?? (activeChainProject as Project)
     selectProject(project.id, true)
     setSelectedTab('play')
     router.push(ChainsRoute(project.id), undefined, { shallow: true })
@@ -183,16 +209,23 @@ export default function Home({
   const {
     g: projectID,
     p: promptID,
+    c: chainID,
     s: settings,
-    c: chains,
+    cs: chains,
   } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const currentQueryState = settings ? 'settings' : promptID ?? (projectID && chains) ? `${projectID}chains` : projectID
+  const currentQueryState = settings
+    ? 'settings'
+    : promptID ?? chainID ?? (projectID && chains)
+    ? `${projectID}chains`
+    : projectID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (settings) {
       selectSettings()
     } else if (promptID) {
       selectPrompt(promptID)
+    } else if (chainID) {
+      selectChain(chainID)
     } else {
       selectProject(projectID ?? user.id, !!chains)
     }
@@ -207,9 +240,8 @@ export default function Home({
 
   const addChain = async (projectID: number) => {
     const chainID = await api.addChain(projectID)
-    // selectChain(chainID)
-    // setSelectedTab('play')
-    refreshProject(projectID)
+    selectChain(chainID)
+    setSelectedTab('play')
   }
 
   const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
@@ -264,7 +296,7 @@ export default function Home({
                 )}
                 <div className='flex-1 overflow-hidden'>
                   {showSettings && <UserSettingsView />}
-                  {!showSettings && !isChainMode && activePrompt && promptProject && activeVersion && (
+                  {!showSettings && activePrompt && activeVersion && (
                     <PromptTabView
                       activeTab={selectedTab}
                       prompt={activePrompt}
@@ -275,6 +307,9 @@ export default function Home({
                       setShowComments={setShowComments}
                       savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
+                  )}
+                  {!showSettings && activeChain && (
+                    <ChainTabView activeTab={selectedTab} chain={activeChain} />
                   )}
                   {!showSettings &&
                     !isChainMode &&
@@ -292,7 +327,7 @@ export default function Home({
                     isChainMode &&
                     activeProject &&
                     (activeProject.chains.length > 0 ? (
-                      <ProjectGridView items={activeProject.chains} projects={projects} onSelectItem={selectPrompt} />
+                      <ProjectGridView items={activeProject.chains} projects={projects} onSelectItem={selectChain} />
                     ) : (
                       <EmptyGridView
                         title='No Chains'

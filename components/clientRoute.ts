@@ -9,7 +9,9 @@ enum ClientRoute {
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}`
 
-export const ChainsRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}&c=1`
+export const ChainsRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}&cs=1`
+
+export const ChainRoute = (chainID: number) => `${ClientRoute.Home}?c=${chainID}`
 
 export const PromptRoute = (promptID: number) => `${ClientRoute.Home}?p=${promptID}`
 

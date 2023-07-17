@@ -7,6 +7,7 @@ import {
   RunConfig,
   ModelProvider,
   Endpoint,
+  ActiveChain,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -112,6 +113,9 @@ const api = {
     useCache: boolean
   ) {
     return post(this.publishChain, { chain: [{ versionID }], projectID, parentID: promptID, name, flavor, useCache })
+  },
+  getChain: function (chainID: number): Promise<ActiveChain> {
+    return post(this.getChain, { chainID })
   },
   addChain: function (projectID: number): Promise<number> {
     return post(this.addChain, { projectID })
