@@ -1,4 +1,4 @@
-import { Version, ResolvedPromptEndpoint } from '@/types'
+import { ResolvedPromptEndpoint, Version } from '@/types'
 import DropdownMenu from './dropdownMenu'
 
 export default function VersionSelector({
@@ -12,18 +12,37 @@ export default function VersionSelector({
   activeVersion: Version
   setActiveVersion: (version: Version) => void
 }) {
-  const suffix = (version: Version) => {
-    const flavors = endpoints.filter(endpoint => endpoint.versionID === version.id).map(endpoint => endpoint.flavor)
-    return flavors.length > 0 ? ` (${flavors.join(', ')})` : ''
+  const suffixForVersionID = (versionID: number) => {
+    const flavors = endpoints.filter(endpoint => endpoint.versionID === versionID).map(endpoint => endpoint.flavor)
+    return flavors.length > 0 ? ` (${flavors.join(', ')})` : undefined
   }
 
   return (
-    <DropdownMenu
-      value={activeVersion.id}
-      onChange={value => setActiveVersion(versions.find(version => version.id === Number(value))!)}>
-      {versions.map((version, index) => (
-        <option key={index} value={version.id}>
-          {`Prompt ${index + 1}${suffix(version)}`}
+    <VersionIDSelector
+      versionIDs={versions.map(version => version.id)}
+      suffixForVersionID={suffixForVersionID}
+      activeVersionID={activeVersion.id}
+      setActiveVersionID={versionID => setActiveVersion(versions.find(version => version.id === versionID)!)}
+    />
+  )
+}
+
+function VersionIDSelector({
+  versionIDs,
+  activeVersionID,
+  setActiveVersionID,
+  suffixForVersionID,
+}: {
+  versionIDs: number[]
+  activeVersionID: number
+  setActiveVersionID: (versionID: number) => void
+  suffixForVersionID?: (versionID: number) => string | undefined
+}) {
+  return (
+    <DropdownMenu value={activeVersionID} onChange={value => setActiveVersionID(Number(value))}>
+      {versionIDs.map((versionID, index) => (
+        <option key={index} value={versionID}>
+          {`Prompt ${index + 1}${suffixForVersionID?.(versionID) ?? ''}`}
         </option>
       ))}
     </DropdownMenu>
