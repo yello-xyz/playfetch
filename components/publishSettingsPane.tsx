@@ -47,7 +47,7 @@ export default function PublishSettingsPane({
     updateFlavor(flavor)
   }
 
-  const isPrompt = (item: ActiveProject | ActiveChain): item is ActivePrompt => 'versions' in (item as ActivePrompt)
+  const isPrompt = (item: ActivePrompt | ActiveChain): item is ActivePrompt => 'versions' in (item as ActivePrompt)
   const versions = isPrompt(activeItem) ? activeItem.versions : []
   const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
   const initialVersionID = endpoints.find(e => e.id === endpoint.id)?.versionID
