@@ -5,36 +5,47 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
+  getEntity,
   getEntityID,
   getFilteredEntities,
   getFilteredEntity,
   getID,
   getKeyedEntity,
+  getProjectID,
   getTimestamp,
 } from './datastore'
 import { getVerifiedUserPromptData } from './prompts'
-import { saveUsage } from './usage'
+import { saveUsage, updateUsage } from './usage'
 import { ensureProjectAccess } from './projects'
 import { CheckValidURLPath } from '@/src/common/formatting'
+import { addChainForUser } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    await getDatastore().save(
-      toEndpointData(
-        endpointData.enabled,
-        endpointData.userID,
-        endpointData.parentID,
-        JSON.parse(endpointData.chain),
-        endpointData.urlPath,
-        endpointData.projectURLPath,
-        endpointData.flavor,
-        endpointData.createdAt,
-        endpointData.useCache,
-        getID(endpointData)
+    const chain = JSON.parse(endpointData.chain)
+    if (chain.length > 1) {
+      const projectData = await getEntity(Entity.PROJECT, 'urlPath', endpointData.projectURLPath)
+      const parentID = await addChainForUser(endpointData.userID, getID(projectData))
+
+      await getDatastore().save(
+        toEndpointData(
+          endpointData.enabled,
+          endpointData.userID,
+          parentID,
+          JSON.parse(endpointData.chain),
+          endpointData.urlPath,
+          endpointData.projectURLPath,
+          endpointData.flavor,
+          endpointData.createdAt,
+          endpointData.useCache,
+          getID(endpointData)
+        )
       )
-    )
+
+      await updateUsage(getID(endpointData), parentID, 0, false, 0, false)
+    }
   }
 }
 
