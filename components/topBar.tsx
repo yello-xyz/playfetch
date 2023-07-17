@@ -16,7 +16,8 @@ export default function TopBar({
   projects = [],
   activeProject,
   activePrompt,
-  onAddPrompt,
+  addLabel,
+  onAddItem,
   onSelectProject,
   showComments,
   setShowComments,
@@ -25,7 +26,8 @@ export default function TopBar({
   projects: Project[]
   activeProject?: ActiveProject
   activePrompt?: ActivePrompt
-  onAddPrompt: (projectID: number) => void
+  addLabel: string
+  onAddItem: (projectID: number) => void
   onSelectProject: (projectID: number) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
@@ -87,7 +89,7 @@ export default function TopBar({
           <div className='flex items-center gap-4'>
             {<UserAvatars users={activeProject?.users ?? activePrompt?.users ?? []} />}
             {activeProject && (
-              <TopBarButton title='New Prompt' icon={addIcon} onClick={() => onAddPrompt(activeProject.id)} />
+              <TopBarButton title={addLabel} icon={addIcon} onClick={() => onAddItem(activeProject.id)} />
             )}
             {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
           </div>

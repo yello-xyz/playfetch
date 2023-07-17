@@ -15,6 +15,7 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
+import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
@@ -204,6 +205,13 @@ export default function Home({
     setSelectedTab('play')
   }
 
+  const addChain = async (projectID: number) => {
+    const chainID = await api.addChain(projectID)
+    // selectChain(chainID)
+    // setSelectedTab('play')
+    refreshProject(projectID)
+  }
+
   const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
   const updateSelectedTab = (tab: MainViewTab) => {
     if (activePrompt) {
@@ -240,7 +248,8 @@ export default function Home({
                     projects={projects}
                     activeProject={activeProject}
                     activePrompt={activePrompt}
-                    onAddPrompt={addPrompt}
+                    addLabel={isChainMode ? 'New Chain' : 'New Prompt'}
+                    onAddItem={isChainMode ? addChain : addPrompt}
                     onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
                     showComments={showComments}
                     setShowComments={setShowComments}>
@@ -275,21 +284,22 @@ export default function Home({
                     ) : (
                       <EmptyGridView
                         title='No Prompts'
-                        label='New Prompt'
+                        addLabel='New Prompt'
                         onAddItem={() => addPrompt(activeProject.id)}
                       />
                     ))}
-                  {!showSettings && isChainMode && activeProject && (
-                    activeProject.chains.length > 0 ? (
+                  {!showSettings &&
+                    isChainMode &&
+                    activeProject &&
+                    (activeProject.chains.length > 0 ? (
                       <ProjectGridView items={activeProject.chains} projects={projects} onSelectItem={selectPrompt} />
                     ) : (
                       <EmptyGridView
                         title='No Chains'
-                        label='New Chain'
-                        onAddItem={() => {}}
+                        addLabel='New Chain'
+                        onAddItem={() => addChain(activeProject.id)}
                       />
-                    )
-                  )}
+                    ))}
                 </div>
               </div>
             </main>

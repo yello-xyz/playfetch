@@ -27,7 +27,15 @@ export default function ProjectGridView({
   )
 }
 
-export function EmptyGridView({ title, label, onAddItem }: { title: string; label: string; onAddItem: () => void }) {
+export function EmptyGridView({
+  title,
+  addLabel,
+  onAddItem,
+}: {
+  title: string
+  addLabel: string
+  onAddItem: () => void
+}) {
   const AddItemLink = ({ label }: { label: string }) => (
     <span className='text-gray-500 underline cursor-pointer' onClick={onAddItem}>
       {label}
@@ -39,7 +47,7 @@ export function EmptyGridView({ title, label, onAddItem }: { title: string; labe
       <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
         <span className='font-medium'>{title}</span>
         <span className='text-xs text-center text-gray-400 '>
-          Create a <AddItemLink label={label} /> to get started.
+          Create a <AddItemLink label={addLabel} /> to get started.
         </span>
       </div>
     </div>

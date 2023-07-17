@@ -113,6 +113,9 @@ const api = {
   ) {
     return post(this.publishChain, { chain: [{ versionID }], projectID, parentID: promptID, name, flavor, useCache })
   },
+  addChain: function (projectID: number): Promise<number> {
+    return post(this.addChain, { projectID })
+  },
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })
   },
