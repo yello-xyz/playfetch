@@ -1,6 +1,6 @@
 import { ActiveChain, ActivePrompt, ChainItem, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TestChainTab from './testChainTab'
 import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
@@ -22,6 +22,28 @@ export default function ChainTabView({ activeTab, chain }: { activeTab: MainView
     activeTab
   )
 
+  const [activePromptCache, setActivePromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
+
+  useEffect(() => {
+    const unloadedItem = items.find(item => !IsLoadedChainItem(item))
+    if (unloadedItem) {
+      api.getPrompt(unloadedItem.promptID).then(prompt => {
+        setActivePromptCache(cache => ({ ...cache, [prompt.id]: prompt }))
+        setItems(
+          items.map(item =>
+            item.promptID === prompt.id
+              ? {
+                  ...item,
+                  prompt,
+                  version: prompt.versions.find(version => version.id === item.versionID),
+                }
+              : item
+          )
+        )
+      })
+    }
+  }, [items, setItems])
+
   const chainIsLoaded = items.every(IsLoadedChainItem)
 
   const rawItems = items.map(item => ({
@@ -40,7 +62,14 @@ export default function ChainTabView({ activeTab, chain }: { activeTab: MainView
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
-        return <BuildChainTab items={items} setItems={setItems} prompts={chain.prompts} />
+        return (
+          <BuildChainTab
+            items={items}
+            setItems={setItems}
+            prompts={chain.prompts}
+            activePromptCache={activePromptCache}
+          />
+        )
       case 'test':
         return chainIsLoaded ? (
           <TestChainTab

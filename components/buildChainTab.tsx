@@ -23,38 +23,22 @@ export default function BuildChainTab({
   items,
   setItems,
   prompts,
+  activePromptCache,
 }: {
-  prompts: Prompt[]
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
+  prompts: Prompt[]
+  activePromptCache: Record<number, ActivePrompt>
 }) {
-  const [promptCache, setPromptCache] = useState<{ [promptID: number]: ActivePrompt }>({})
-
-  useEffect(() => {
-    const unloadedItem = items.find(item => !IsLoadedChainItem(item))
-    if (unloadedItem) {
-      api.getPrompt(unloadedItem.promptID).then(prompt => {
-        setPromptCache(promptCache => ({ ...promptCache, [prompt.id]: prompt }))
-        setItems(
-          items.map(item =>
-            item.promptID === prompt.id
-              ? {
-                  ...item,
-                  prompt,
-                  version: prompt.versions.find(version => version.id === item.versionID),
-                }
-              : item
-          )
-        )
-      })
-    }
-  }, [items, setItems])
-
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = prompts.find(prompt => prompt.id === promptID)!
     const versionID = prompt.lastVersionID
-    const cachedPrompt = promptCache[promptID]
-    return { promptID, versionID, ...(cachedPrompt ? { version: cachedPrompt.versions.slice(-1)[0] } : {}) }
+    const cachedPrompt = activePromptCache[promptID]
+    return {
+      promptID,
+      versionID,
+      ...(cachedPrompt ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] } : {}),
+    }
   }
 
   const addPrompt = (promptID: number) => setItems([...items, chainItemFromPromptID(promptID)])
