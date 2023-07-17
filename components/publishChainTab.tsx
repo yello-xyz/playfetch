@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ActiveChain, ChainItem } from '@/types'
-import { useRefreshProject } from './refreshContext'
+import { useRefreshChain } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
@@ -24,7 +24,7 @@ export default function PublishChainTab({
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
 
-  const refreshProject = useRefreshProject()
+  const refreshChain = useRefreshChain()
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, chain)
@@ -41,7 +41,7 @@ export default function PublishChainTab({
         flavor,
         false
       )
-      .then(refreshProject)
+      .then(refreshChain)
   }
 
   return (
@@ -51,13 +51,13 @@ export default function PublishChainTab({
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={endpoint => setActiveEndpointID(endpoint.id)}
-          onRefresh={refreshProject}
+          onRefresh={refreshChain}
           onAddEndpoint={addEndpoint}
         />
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
-          <PublishSettingsPane activeItem={chain} endpoint={activeEndpoint} onRefresh={refreshProject} />
+          <PublishSettingsPane activeItem={chain} endpoint={activeEndpoint} onRefresh={refreshChain} />
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
@@ -66,7 +66,7 @@ export default function PublishChainTab({
               defaultFlavor={chain.availableFlavors[0]}
             />
           )}
-          <UsagePane endpoint={activeEndpoint} onRefresh={refreshProject} />
+          <UsagePane endpoint={activeEndpoint} onRefresh={refreshChain} />
         </div>
       )}
     </>

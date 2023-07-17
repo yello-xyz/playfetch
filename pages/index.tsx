@@ -267,6 +267,7 @@ export default function Home({
               resetProject: () => selectProject(user.id),
               refreshProject: refreshActiveProject,
               refreshPrompt: refreshActivePrompt,
+              refreshChain: refreshActiveChain,
               selectTab: setSelectedTab,
               refreshSettings,
             }}>
