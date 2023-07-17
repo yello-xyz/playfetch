@@ -1,8 +1,8 @@
-import { Entity, buildKey, getDatastore, getEntityKeys, getID, getKeyedEntity, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getEntityKeys, getID, getKeyedEntity, getOrderedEntities, getTimestamp } from './datastore'
 import { ActiveChain, Chain } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
-import { getVerifiedProjectScopedData, loadEndpoints } from './prompts'
+import { getVerifiedProjectScopedData, loadEndpoints, toPrompt } from './prompts'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -44,6 +44,8 @@ export async function getActiveChain(
   const users = await getProjectUsers(chainData.projectID)
   const inputs = await getProjectInputValues(chainData.projectID)
   const endpoints = await loadEndpoints(chainID, projectData, buildURL)
+  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', chainData.projectID, ['lastEditedAt'])
+  const prompts = promptData.map(prompt => toPrompt(prompt, userID))
 
   return {
     ...toChain(chainData, userID),
@@ -52,6 +54,7 @@ export async function getActiveChain(
     endpoints,
     users,
     inputs,
+    prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
     projectURLPath: projectData.urlPath ?? '',
     availableFlavors: JSON.parse(projectData.flavors),
   }

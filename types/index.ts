@@ -57,6 +57,7 @@ export type ActiveChain = Chain & {
   // items: ChainItem[]
   users: User[]
   inputs: InputValues
+  prompts: Prompt[]
   projectURLPath: string
   availableFlavors: string[]
 }

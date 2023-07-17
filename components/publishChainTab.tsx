@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject } from '@/types'
+import { ActiveChain } from '@/types'
 import { useRefreshProject } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -10,8 +10,8 @@ import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
 import { NewConfigFromEndpoints } from './publishPromptTab'
 
-export default function PublishChainTab({ chain, project }: { chain: LoadedChainItem[]; project: ActiveProject }) {
-  const endpoints = project.endpoints
+export default function PublishChainTab({ chain, activeChain }: { chain: LoadedChainItem[]; activeChain: ActiveChain }) {
+  const endpoints = activeChain.endpoints
 
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -19,14 +19,15 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
   const refreshProject = useRefreshProject()
 
   const addEndpoint = () => {
-    const { name, flavor } = NewConfigFromEndpoints(endpoints, project)
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, activeChain)
     api.publishChain(
       chain.map(item => ({
         versionID: item.version.id,
         output: item.output,
         includeContext: item.includeContext,
       })),
-      project.id,
+      activeChain.projectID,
+      activeChain.id,
       name,
       flavor,
       false
@@ -46,13 +47,13 @@ export default function PublishChainTab({ chain, project }: { chain: LoadedChain
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
-          <PublishSettingsPane activeItem={project} endpoint={activeEndpoint} onRefresh={refreshProject} />
+          <PublishSettingsPane activeItem={activeChain} endpoint={activeEndpoint} onRefresh={refreshProject} />
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
               variables={ExtractUnboundChainVariables(chain)}
-              inputValues={project.inputs}
-              defaultFlavor={project.availableFlavors[0]}
+              inputValues={activeChain.inputs}
+              defaultFlavor={activeChain.availableFlavors[0]}
             />
           )}
           <UsagePane endpoint={activeEndpoint} onRefresh={refreshProject} />

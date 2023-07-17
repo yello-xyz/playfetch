@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { StripPromptSentinels } from '@/src/common/formatting'
@@ -15,11 +15,10 @@ export default function PublishSettingsPane({
   endpoint,
   onRefresh,
 }: {
-  activeItem: ActivePrompt | ActiveProject
+  activeItem: ActivePrompt | ActiveChain
   endpoint: Endpoint
   onRefresh: () => Promise<void>
 }) {
-  const projectID = 'projectID' in activeItem ? activeItem.projectID : activeItem.id
   const availableFlavors = activeItem.availableFlavors
 
   const [flavor, setFlavor] = useInitialState(endpoint.flavor)
@@ -43,12 +42,12 @@ export default function PublishSettingsPane({
   }
 
   const addFlavor = async (flavor: string) => {
-    await api.addFlavor(projectID, flavor)
+    await api.addFlavor(activeItem.projectID, flavor)
     await onRefresh()
     updateFlavor(flavor)
   }
 
-  const isPrompt = (item: ActiveProject | ActivePrompt): item is ActivePrompt => 'versions' in (item as ActivePrompt)
+  const isPrompt = (item: ActiveProject | ActiveChain): item is ActivePrompt => 'versions' in (item as ActivePrompt)
   const versions = isPrompt(activeItem) ? activeItem.versions : []
   const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
   const initialVersionID = endpoints.find(e => e.id === endpoint.id)?.versionID

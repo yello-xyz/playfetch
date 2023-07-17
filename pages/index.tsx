@@ -85,7 +85,7 @@ export default function Home({
   const [projects, setProjects] = useState(initialProjects)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isProject = (item: ActiveItem): item is ActiveProject => 'prompts' in (item as ActiveProject)
+  const isProject = (item: ActiveItem): item is ActiveProject => 'chains' in (item as ActiveProject)
   const isPrompt = (item: ActiveItem): item is ActivePrompt => 'versions' in (item as ActivePrompt)
   const activeProject = isProject(activeItem) ? activeItem : undefined
   const activePrompt = isPrompt(activeItem) ? activeItem : undefined
@@ -191,8 +191,6 @@ export default function Home({
     const activeChainProject = activeChain && projects.find(project => project.id === activeChain.projectID)
     const project = activeProject ?? activePromptProject ?? (activeChainProject as Project)
     selectProject(project.id, true)
-    setSelectedTab('play')
-    router.push(ChainsRoute(project.id), undefined, { shallow: true })
   }
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
@@ -285,7 +283,7 @@ export default function Home({
                     onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
                     showComments={showComments}
                     setShowComments={setShowComments}>
-                    {(activePrompt || isChainMode) && (
+                    {(activePrompt || activeChain) && (
                       <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                         <Segment value={'play'} title='Play' />
                         <Segment value={'test'} title='Test' />
@@ -309,7 +307,7 @@ export default function Home({
                     />
                   )}
                   {!showSettings && activeChain && (
-                    <ChainTabView activeTab={selectedTab} chain={activeChain} />
+                    <ChainTabView activeTab={selectedTab} activeChain={activeChain} />
                   )}
                   {!showSettings &&
                     !isChainMode &&

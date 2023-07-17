@@ -129,8 +129,15 @@ const api = {
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
   },
-  publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
-    return post(this.publishChain, { chain, projectID, parentID: projectID, name, flavor, useCache })
+  publishChain: function (
+    chain: RunConfig[],
+    projectID: number,
+    chainID: number,
+    name: string,
+    flavor: string,
+    useCache: boolean
+  ) {
+    return post(this.publishChain, { chain, projectID, parentID: chainID, name, flavor, useCache })
   },
   updateEndpoint: function (endpoint: Endpoint) {
     return post(this.updateEndpoint, {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ActivePrompt, Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActiveChain, ActivePrompt, Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -8,7 +8,7 @@ import api from '@/src/client/api'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import EndpointsTable from './endpointsTable'
 
-export const NewConfigFromEndpoints = (endpoints: Endpoint[], activeItem: ActivePrompt | ActiveProject) => {
+export const NewConfigFromEndpoints = (endpoints: Endpoint[], activeItem: ActivePrompt | ActiveChain) => {
   const availableFlavors = activeItem.availableFlavors
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
     const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
