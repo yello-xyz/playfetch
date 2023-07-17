@@ -1,16 +1,24 @@
 import { useState } from 'react'
-import { ActiveChain } from '@/types'
+import { ActiveChain, ChainItem } from '@/types'
 import { useRefreshProject } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
-import { LoadedChainItem } from './chainTabView'
+import { ActivePromptCache } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
 import { NewConfigFromEndpoints } from './publishPromptTab'
 
-export default function PublishChainTab({ items, chain }: { items: LoadedChainItem[]; chain: ActiveChain }) {
+export default function PublishChainTab({
+  items,
+  chain,
+  promptCache,
+}: {
+  items: ChainItem[]
+  chain: ActiveChain
+  promptCache: ActivePromptCache
+}) {
   const endpoints = chain.endpoints
 
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
@@ -23,7 +31,7 @@ export default function PublishChainTab({ items, chain }: { items: LoadedChainIt
     api
       .publishChain(
         items.map(item => ({
-          versionID: item.version.id,
+          versionID: item.versionID,
           output: item.output,
           includeContext: item.includeContext,
         })),
@@ -53,7 +61,7 @@ export default function PublishChainTab({ items, chain }: { items: LoadedChainIt
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              variables={ExtractUnboundChainVariables(items)}
+              variables={ExtractUnboundChainVariables(items, promptCache)}
               inputValues={chain.inputs}
               defaultFlavor={chain.availableFlavors[0]}
             />

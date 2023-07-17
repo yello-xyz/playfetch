@@ -1,20 +1,19 @@
-import { ActivePrompt, ChainItem, Prompt, Version } from '@/types'
-import { ReactNode, useEffect, useState } from 'react'
+import { ChainItem, Prompt, Version } from '@/types'
+import { ReactNode } from 'react'
 import DropdownMenu from './dropdownMenu'
-import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
-import { LoadedChainItem, IsLoadedChainItem, AsLoadedChainItem } from './chainTabView'
+import { ActivePromptCache } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
 
-const ExtractChainVariables = (chain: ChainItem[]) => [
-  ...new Set(chain.flatMap(item => (IsLoadedChainItem(item) ? ExtractPromptVariables(item.version.prompt) : []))),
+const ExtractChainVariables = (chain: ChainItem[], cache: ActivePromptCache) => [
+  ...new Set(chain.flatMap(item => ExtractPromptVariables(cache.versionForItem(item)?.prompt ?? ''))),
 ]
 
-export const ExtractUnboundChainVariables = (chain: ChainItem[]) => {
-  const allInputVariables = ExtractChainVariables(chain)
+export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ActivePromptCache) => {
+  const allInputVariables = ExtractChainVariables(chain, cache)
   const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 }
@@ -23,17 +22,17 @@ export default function BuildChainTab({
   items,
   setItems,
   prompts,
-  activePromptCache,
+  promptCache,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   prompts: Prompt[]
-  activePromptCache: Record<number, ActivePrompt>
+  promptCache: ActivePromptCache
 }) {
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = prompts.find(prompt => prompt.id === promptID)!
     const versionID = prompt.lastVersionID
-    const cachedPrompt = activePromptCache[promptID]
+    const cachedPrompt = promptCache.promptForID(promptID)
     return {
       promptID,
       versionID,
@@ -52,19 +51,13 @@ export default function BuildChainTab({
     setItems([...items.slice(0, index), { ...items[index], includeContext }, ...items.slice(index + 1)])
 
   const selectVersion = (index: number) => (version: Version) =>
-    setItems([
-      ...items.slice(0, index),
-      { ...items[index], versionID: version.id, version } as LoadedChainItem,
-      ...items.slice(index + 1),
-    ])
+    setItems([...items.slice(0, index), { ...items[index], versionID: version.id }, ...items.slice(index + 1)])
 
   const mapOutput = (index: number) => (output?: string) => {
-    const resetChain = items.map(item =>
-      IsLoadedChainItem(item) ? { ...item, output: item.output === output ? undefined : item.output } : item
-    )
+    const resetChain = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
     setItems([
       ...resetChain.slice(0, index),
-      { ...(resetChain[index] as LoadedChainItem), output },
+      { ...resetChain[index], output },
       ...resetChain.slice(index + 1),
     ])
   }
@@ -74,7 +67,7 @@ export default function BuildChainTab({
       <div className='flex flex-col flex-grow h-full gap-4 p-6'>
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
-          {ExtractUnboundChainVariables(items).map((variable, index) => (
+          {ExtractUnboundChainVariables(items, promptCache).map((variable, index) => (
             <InputVariable key={index}>{variable}</InputVariable>
           ))}
         </div>
@@ -89,16 +82,16 @@ export default function BuildChainTab({
             />
             <Selector>
               <VersionSelector
-                versions={AsLoadedChainItem(item)?.prompt?.versions ?? []}
-                endpoints={AsLoadedChainItem(item)?.prompt?.endpoints ?? []}
-                activeVersion={AsLoadedChainItem(item)?.version}
+                versions={promptCache.promptForItem(item)?.versions ?? []}
+                endpoints={promptCache.promptForItem(item)?.endpoints ?? []}
+                activeVersion={promptCache.versionForItem(item)}
                 setActiveVersion={selectVersion(index)}
               />
             </Selector>
             <OutputMapper
               key={item.output}
               output={item.output}
-              inputs={ExtractChainVariables(items.slice(index + 1))}
+              inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
               onMapOutput={mapOutput(index)}
             />
           </div>
