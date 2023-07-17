@@ -4,7 +4,6 @@ import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
-import { useRefreshProject, useRefreshPrompt } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
@@ -21,6 +20,7 @@ export default function TopBar({
   onSelectProject,
   showComments,
   setShowComments,
+  onRefresh,
   children,
 }: {
   projects: Project[]
@@ -31,13 +31,10 @@ export default function TopBar({
   onSelectProject: (projectID: number) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
+  onRefresh: () => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
-
-  const refreshProject = useRefreshProject()
-  const refreshPrompt = useRefreshPrompt()
-  const onRefresh = activeProject ? refreshProject : refreshPrompt
 
   const promptProjectName = projects.find(p => p.id === activeItem?.projectID)?.name
   const promptHasComments =

@@ -157,6 +157,8 @@ export default function Home({
     setActiveItem(newChain)
   }
 
+  const refreshActiveChain = activeChain ? () => refreshChain(activeChain.id) : undefined
+
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
       await refreshChain(chainID)
@@ -171,6 +173,8 @@ export default function Home({
     setActiveItem(newProject)
     updateVersion(undefined)
   }
+
+  const refreshActiveProject = activeProject ? () => refreshProject(activeProject.id) : undefined
 
   const selectProject = async (projectID: number, chainMode = false) => {
     if (projectID !== activeProject?.id || chainMode !== isChainMode || showSettings) {
@@ -202,6 +206,9 @@ export default function Home({
     router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
 
+  const refreshActiveItem = () => (
+    activePrompt ? refreshActivePrompt : activeChain ? refreshActiveChain : refreshActiveProject
+  )!()
   const refreshProjects = () => api.getProjects().then(setProjects)
 
   const {
@@ -258,7 +265,7 @@ export default function Home({
             value={{
               refreshProjects,
               resetProject: () => selectProject(user.id),
-              refreshProject: activeProject ? () => refreshProject(activeProject.id) : undefined,
+              refreshProject: refreshActiveProject,
               refreshPrompt: refreshActivePrompt,
               selectTab: setSelectedTab,
               refreshSettings,
@@ -282,7 +289,8 @@ export default function Home({
                     onAddItem={isChainMode ? addChain : addPrompt}
                     onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
                     showComments={showComments}
-                    setShowComments={setShowComments}>
+                    setShowComments={setShowComments}
+                    onRefresh={refreshActiveItem}>
                     {(activePrompt || activeChain) && (
                       <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                         <Segment value={'play'} title='Play' />
