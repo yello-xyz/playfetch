@@ -6,11 +6,11 @@ import commentIcon from '@/public/comment.svg'
 import commentBadgeIcon from '@/public/commentBadge.svg'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
-import { RefObject, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from './userContext'
-import { CommentCell } from './commentsPane'
+import { CommentCell, CommentQuote } from './commentsPane'
 
 export default function CommentPopupMenu({
   comments,
@@ -50,7 +50,7 @@ export default function CommentPopupMenu({
       <CommentsPopup
         comments={comments}
         versionID={versionID}
-        selection={selection}
+        selection={lastSelection}
         runID={runID}
         startIndex={startIndex}
         users={users}
@@ -92,7 +92,7 @@ export function CommentsPopup({
 
   return (
     <>
-      <div className='absolute' style={position}>
+      <div className='absolute' style={position} onMouseDown={event => event.stopPropagation()} onClick={event => event.stopPropagation()}>
         <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
           <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
             {haveComments && (
@@ -167,7 +167,7 @@ export function CommentInput({
   return (
     <div className='flex flex-col items-stretch gap-1'>
       {selection && !runID && (
-        <div className='self-start p-1 my-1 italic text-left rounded bg-blue-50 line-clamp-2'>{selection}</div>
+        <CommentQuote className='mt-2'>{selection}</CommentQuote>
       )}
       <div className='flex items-center gap-2'>
         <UserAvatar user={user} size='md' />

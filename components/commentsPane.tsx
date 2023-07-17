@@ -1,5 +1,5 @@
 import { ActivePrompt, Comment, User, Version } from '@/types'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { VersionLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
@@ -92,7 +92,7 @@ export function CommentCell({
             <span className='text-gray-400'>{formattedDate}</span>
           </div>
           {(version || comment.quote) && (
-            <div className='flex flex-col gap-1 pl-2 ml-6 border-l-4 border-blue-500 opacity-50'>
+            <CommentQuote>
               {version && (
                 <span className='font-medium'>
                   {versionIndex} › {LabelForModel(version.config.model)}
@@ -105,11 +105,20 @@ export function CommentCell({
                   <VersionComparison version={version} compareVersion={compareVersion} />
                 ) : null}
               </div>
-            </div>
+            </CommentQuote>
           )}
           <div className='ml-6 text-gray-600'>{comment.text}</div>
         </div>
       )}
+    </div>
+  )
+}
+
+export function CommentQuote({ children, className }: { children: ReactNode; className?: string }) {
+  const baseClass = 'flex flex-col gap-1 pl-2 ml-6 text-xs text-gray-600 border-l-4 border-blue-500 opacity-50'
+  return (
+    <div className={`${baseClass} ${className ?? ''}`}>
+      {children}
     </div>
   )
 }
