@@ -28,14 +28,14 @@ export default function ProjectItemPopupMenu({
 
   const isPrompt = 'prompt' in item
 
-  const deleteCall = isPrompt ? api.deletePrompt : api.deleteChain
-  const renameCall = isPrompt ? api.renamePrompt : api.renameChain
+  const deleteCall = () => (isPrompt ? api.deletePrompt(item.id) : api.deleteChain(item.id))
+  const renameCall = (name: string) => (isPrompt ? api.renamePrompt(item.id, name) : api.renameChain(item.id, name))
 
   const deleteItem = () => {
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: `Are you sure you want to delete this ${isPrompt ? 'prompt' : 'chain'}? This action cannot be undone.`,
-      callback: () => deleteCall(item.id).then(onDelete ?? onRefresh),
+      callback: () => deleteCall().then(onDelete ?? onRefresh),
       destructive: true,
     })
   }
@@ -75,7 +75,7 @@ export default function ProjectItemPopupMenu({
           confirmTitle='Rename'
           label='Name'
           initialName={item.name}
-          onConfirm={name => renameCall(item.id, name).then(onRefresh)}
+          onConfirm={name => renameCall(name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
