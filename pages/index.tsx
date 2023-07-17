@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider } from '@/types'
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
-import PromptsGridView from '@/components/promptsGridView'
 import ClientRoute, { ChainsRoute, ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
@@ -21,6 +20,7 @@ import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
 import { VersionsEqual } from '@/src/common/versionsEqual'
+import ProjectGridView, { EmptyGridView } from '@/components/projectGridView'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -268,14 +268,18 @@ export default function Home({
                       savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
                   )}
-                  {!showSettings && !isChainMode && activeProject && (
-                    <PromptsGridView
-                      prompts={activeProject.prompts}
-                      projects={projects}
-                      onAddPrompt={() => addPrompt(activeProject.id)}
-                      onSelectPrompt={selectPrompt}
-                    />
-                  )}
+                  {!showSettings &&
+                    !isChainMode &&
+                    activeProject &&
+                    (activeProject.prompts.length > 0 ? (
+                      <ProjectGridView items={activeProject.prompts} projects={projects} onSelectItem={selectPrompt} />
+                    ) : (
+                      <EmptyGridView
+                        title='No Prompts'
+                        label='New Prompt'
+                        onAddItem={() => addPrompt(activeProject.id)}
+                      />
+                    ))}
                   {!showSettings && isChainMode && activeProject && (
                     <ChainTabView activeTab={selectedTab} project={activeProject} />
                   )}
