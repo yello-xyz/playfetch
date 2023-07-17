@@ -24,7 +24,7 @@ export async function migratePrompts() {
   for (const promptData of allPrompts) {
     const lastVersionData = await getEntity(Entity.VERSION, 'promptID', getID(promptData), true)
     await updatePrompt(
-      { ...promptData, favorited: JSON.stringify(promptData.favorited ? [lastVersionData.userID] : []) },
+      { ...promptData, lastPrompt: promptData.prompt, lastVersionID: getID(lastVersionData) },
       false
     )
   }
@@ -33,21 +33,23 @@ export async function migratePrompts() {
 const toPromptData = (
   projectID: number,
   name: string,
-  prompt: string,
+  lastVersionID: number,
+  lastPrompt: string,
   createdAt: Date,
   lastEditedAt: Date,
   favorited: number[],
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, prompt, name, createdAt, lastEditedAt, favorited: JSON.stringify(favorited) },
-  excludeFromIndexes: ['name', 'prompt'],
+  data: { projectID, lastVersionID, lastPrompt, name, createdAt, lastEditedAt, favorited: JSON.stringify(favorited) },
+  excludeFromIndexes: ['name', 'lastPrompt'],
 })
 
 export const toPrompt = (data: any, userID: number): Prompt => ({
   id: getID(data),
   name: data.name,
-  prompt: StripPromptSentinels(data.prompt),
+  lastVersionID: data.lastVersionID,
+  lastPrompt: StripPromptSentinels(data.lastPrompt),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
   favorited: JSON.parse(data.favorited).includes(userID),
@@ -106,7 +108,7 @@ export const DefaultPromptName = 'New Prompt'
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const promptData = toPromptData(projectID, DefaultPromptName, '', createdAt, createdAt, [])
+  const promptData = toPromptData(projectID, DefaultPromptName, 0, '', createdAt, createdAt, [])
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, getID(promptData))
   return getID(promptData)
@@ -117,7 +119,8 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
     toPromptData(
       promptData.projectID,
       promptData.name,
-      promptData.prompt,
+      promptData.lastVersionID,
+      promptData.lastPrompt,
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
       JSON.parse(promptData.favorited),

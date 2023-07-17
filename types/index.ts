@@ -26,7 +26,8 @@ export type ActiveProject = Project & {
 export type Prompt = {
   id: number
   name: string
-  prompt: string
+  lastVersionID: number
+  lastPrompt: string
   projectID: number
   timestamp: string
   favorited: boolean

@@ -81,9 +81,10 @@ export async function saveVersionForUser(
     promptData.name === DefaultPromptName && prompt.length && !promptData.prompt.length
       ? StripPromptSentinels(prompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
-  await updatePrompt({ ...promptData, prompt, name }, true)
+  const savedVersionID = getID(versionData)
+  await updatePrompt({ ...promptData, lastVersionID: savedVersionID, lastPrompt: prompt, name }, true)
 
-  return getID(versionData)
+  return savedVersionID
 }
 
 async function updateVersion(versionData: any) {
@@ -179,5 +180,5 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  await updatePrompt({ ...promptData, prompt: lastVersionData.prompt }, true)
+  await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData), lastPrompt: lastVersionData.prompt }, true)
 }

@@ -72,7 +72,7 @@ function ProjectItemCell({
     setFormattedDate(FormatRelativeDate(item.timestamp))
   }, [item.timestamp])
 
-  const isPrompt = 'prompt' in item
+  const isPrompt = 'lastPrompt' in item
   const toggleFavorite = (id: number, favorited: boolean) =>
     isPrompt ? api.toggleFavoritePrompt(id, favorited) : api.toggleFavoriteChain(id, favorited)
 
@@ -100,7 +100,7 @@ function ProjectItemCell({
         </div>
       </div>
       <span className='text-xs text-gray-500'>Edited {formattedDate}</span>
-      {'prompt' in item && <span className='mt-3 text-xs text-gray-500 line-clamp-[9]'>{item.prompt}</span>}
+      {'lastPrompt' in item && <span className='mt-3 text-xs text-gray-500 line-clamp-[9]'>{item.lastPrompt}</span>}
     </div>
   )
 }
