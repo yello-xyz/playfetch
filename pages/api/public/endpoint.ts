@@ -23,8 +23,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           inputs,
           endpoint.useCache,
           true,
-          (version: Version, { output, cost, attempts, cacheHit }) =>
-            updateUsage(endpoint.id, version.promptID, cost, cacheHit, attempts, !output?.length)
+          (_, { output, cost, attempts, cacheHit }) =>
+            updateUsage(endpoint.id, cost, cacheHit, attempts, !output?.length)
         )
         return res.json({ output })
       }

@@ -28,7 +28,6 @@ export async function saveUsage(endpointID: number, parentID: number) {
 
 export async function updateUsage(
   endpointID: number,
-  parentID: number,
   incrementalCost: number,
   cacheHit: boolean,
   attempts: number,
@@ -39,7 +38,7 @@ export async function updateUsage(
     transaction.save(
       toUsageData(
         endpointID,
-        parentID,
+        usageData.parentID,
         usageData.requests + 1,
         usageData.cost + incrementalCost,
         usageData.cacheHits + (cacheHit ? 1 : 0),
