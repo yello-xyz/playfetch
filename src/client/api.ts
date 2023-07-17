@@ -113,6 +113,12 @@ const api = {
   ) {
     return post(this.publishChain, { chain: [{ versionID }], projectID, parentID: promptID, name, flavor, useCache })
   },
+  renameChain: function (chainID: number, name: string) {
+    return post(this.renamePrompt, { chainID, name })
+  },
+  deleteChain: function (chainID: number) {
+    return post(this.deleteChain, { chainID })
+  },
   publishChain: function (chain: RunConfig[], projectID: number, name: string, flavor: string, useCache: boolean) {
     return post(this.publishChain, { chain, projectID, parentID: projectID, name, flavor, useCache })
   },

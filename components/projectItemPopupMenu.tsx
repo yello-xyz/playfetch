@@ -26,16 +26,21 @@ export default function ProjectItemPopupMenu({
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
   const [showPickProjectPrompt, setShowPickProjectPrompt] = useState(false)
 
-  const deletePrompt = () => {
+  const isPrompt = 'prompt' in item
+
+  const deleteCall = isPrompt ? api.deletePrompt : api.deleteChain
+  const renameCall = isPrompt ? api.renamePrompt : api.renameChain
+
+  const deleteItem = () => {
     setIsMenuExpanded(false)
     setDialogPrompt({
-      title: 'Are you sure you want to delete this prompt? This action cannot be undone.',
-      callback: () => api.deletePrompt(item.id).then(onDelete ?? onRefresh),
+      title: `Are you sure you want to delete this ${isPrompt ? 'prompt' : 'chain'}? This action cannot be undone.`,
+      callback: () => deleteCall(item.id).then(onDelete ?? onRefresh),
       destructive: true,
     })
   }
 
-  const renamePrompt = () => {
+  const renameItem = () => {
     setIsMenuExpanded(false)
     setShowPickNamePrompt(true)
   }
@@ -46,14 +51,14 @@ export default function ProjectItemPopupMenu({
   }
 
   // TODO allow to create new project within move flow if there are no projects
-  const canMove = projects.length > 1
+  const canMove = isPrompt && projects.length > 1
 
   return (
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
-        <PopupMenuItem title='Rename' callback={renamePrompt} />
+        <PopupMenuItem title='Rename' callback={renameItem} />
         {canMove && <PopupMenuItem title='Move to project' callback={movePrompt} />}
-        <PopupMenuItem separated destructive title='Delete' callback={deletePrompt} />
+        <PopupMenuItem separated destructive title='Delete' callback={deleteItem} />
       </PopupMenu>
       {showPickProjectPrompt && (
         <PickProjectDialog
@@ -66,11 +71,11 @@ export default function ProjectItemPopupMenu({
       )}
       {showPickNamePrompt && (
         <PickNameDialog
-          title='Rename Prompt'
+          title={isPrompt ? 'Rename Prompt' : 'Rename Chain'}
           confirmTitle='Rename'
           label='Name'
           initialName={item.name}
-          onConfirm={name => api.renamePrompt(item.id, name).then(onRefresh)}
+          onConfirm={name => renameCall(item.id, name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
