@@ -41,9 +41,7 @@ export default function TopBar({
 
   const promptProjectName = projects.find(p => p.id === activeItem?.projectID)?.name
   const promptHasComments =
-    activeItem &&
-    'versions' in activeItem &&
-    (activeItem?.versions ?? []).some(version => version.comments.length > 0)
+    activeItem && 'versions' in activeItem && (activeItem?.versions ?? []).some(version => version.comments.length > 0)
 
   const user = useLoggedInUser()
 

@@ -10,7 +10,13 @@ import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
 import { NewConfigFromEndpoints } from './publishPromptTab'
 
-export default function PublishChainTab({ chain, activeChain }: { chain: LoadedChainItem[]; activeChain: ActiveChain }) {
+export default function PublishChainTab({
+  chain,
+  activeChain,
+}: {
+  chain: LoadedChainItem[]
+  activeChain: ActiveChain
+}) {
   const endpoints = activeChain.endpoints
 
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
@@ -20,18 +26,20 @@ export default function PublishChainTab({ chain, activeChain }: { chain: LoadedC
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, activeChain)
-    api.publishChain(
-      chain.map(item => ({
-        versionID: item.version.id,
-        output: item.output,
-        includeContext: item.includeContext,
-      })),
-      activeChain.projectID,
-      activeChain.id,
-      name,
-      flavor,
-      false
-    ).then(refreshProject)
+    api
+      .publishChain(
+        chain.map(item => ({
+          versionID: item.version.id,
+          output: item.output,
+          includeContext: item.includeContext,
+        })),
+        activeChain.projectID,
+        activeChain.id,
+        name,
+        flavor,
+        false
+      )
+      .then(refreshProject)
   }
 
   return (

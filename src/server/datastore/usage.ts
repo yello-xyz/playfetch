@@ -18,7 +18,7 @@ export async function migrateUsage() {
         usageData.createdAt,
         usageData.lastRunAt
       )
-    )  
+    )
   }
 }
 
