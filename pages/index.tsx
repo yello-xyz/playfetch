@@ -279,7 +279,7 @@ export default function Home({
                   <TopBar
                     projects={projects}
                     activeProject={activeProject}
-                    activePrompt={activePrompt}
+                    activeItem={activePrompt ?? activeChain}
                     addLabel={isChainMode ? 'New Chain' : 'New Prompt'}
                     onAddItem={isChainMode ? addChain : addPrompt}
                     onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}

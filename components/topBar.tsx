@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Project, User } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Project, User } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/commentBadge.svg'
@@ -15,7 +15,7 @@ import ProjectItemPopupMenu from './projectItemPopupMenu'
 export default function TopBar({
   projects = [],
   activeProject,
-  activePrompt,
+  activeItem,
   addLabel,
   onAddItem,
   onSelectProject,
@@ -25,7 +25,7 @@ export default function TopBar({
 }: {
   projects: Project[]
   activeProject?: ActiveProject
-  activePrompt?: ActivePrompt
+  activeItem?: ActivePrompt | ActiveChain
   addLabel: string
   onAddItem: (projectID: number) => void
   onSelectProject: (projectID: number) => void
@@ -39,8 +39,11 @@ export default function TopBar({
   const refreshPrompt = useRefreshPrompt()
   const onRefresh = activeProject ? refreshProject : refreshPrompt
 
-  const promptProjectName = projects.find(p => p.id === activePrompt?.projectID)?.name
-  const promptHasComments = (activePrompt?.versions ?? []).some(version => version.comments.length > 0)
+  const promptProjectName = projects.find(p => p.id === activeItem?.projectID)?.name
+  const promptHasComments =
+    activeItem &&
+    'versions' in activeItem &&
+    (activeItem?.versions ?? []).some(version => version.comments.length > 0)
 
   const user = useLoggedInUser()
 
@@ -50,9 +53,9 @@ export default function TopBar({
         <div className={`z-10 flex items-center justify-between gap-4 px-6 ${children ? 'pt-4' : 'py-3.5'}`}>
           <div className='relative flex gap-1 text-base justify-self-start'>
             <Icon icon={projectIcon} />
-            {activePrompt && (
+            {activeItem && (
               <>
-                <span className='cursor-pointer' onClick={() => onSelectProject(activePrompt.projectID)}>
+                <span className='cursor-pointer' onClick={() => onSelectProject(activeItem.projectID)}>
                   {promptProjectName}
                 </span>
                 <span className='font-medium'>{' / '}</span>
@@ -62,17 +65,17 @@ export default function TopBar({
               <span className='font-medium'>{activeProject.name}</span>
             ) : (
               <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-                <span className='font-medium'>{activeProject?.name ?? activePrompt?.name}</span>
+                <span className='font-medium'>{activeProject?.name ?? activeItem?.name}</span>
                 <Icon icon={chevronIcon} />
                 <div className='absolute right-0 top-8'>
-                  {activePrompt && (
+                  {activeItem && (
                     <ProjectItemPopupMenu
-                      item={activePrompt}
+                      item={activeItem}
                       projects={projects}
                       isMenuExpanded={isMenuExpanded}
                       setIsMenuExpanded={setIsMenuExpanded}
                       onRefresh={onRefresh}
-                      onDelete={() => onSelectProject(activePrompt.projectID)}
+                      onDelete={() => onSelectProject(activeItem.projectID)}
                     />
                   )}
                   {activeProject && (
@@ -87,7 +90,7 @@ export default function TopBar({
             )}
           </div>
           <div className='flex items-center gap-4'>
-            {<UserAvatars users={activeProject?.users ?? activePrompt?.users ?? []} />}
+            {<UserAvatars users={activeProject?.users ?? activeItem?.users ?? []} />}
             {activeProject && (
               <TopBarButton title={addLabel} icon={addIcon} onClick={() => onAddItem(activeProject.id)} />
             )}
