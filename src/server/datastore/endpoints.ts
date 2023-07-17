@@ -11,13 +11,13 @@ import {
   getFilteredEntity,
   getID,
   getKeyedEntity,
-  getProjectID,
   getTimestamp,
 } from './datastore'
 import { getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
 import { ensureProjectAccess } from './projects'
 import { CheckValidURLPath } from '@/src/common/formatting'
+import { getVerifiedUserChainData } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -45,13 +45,12 @@ async function ensureEndpointAccess(userID: number, parentID: number, projectURL
   if (!projectID) {
     throw new Error(`Project with URL path ${projectURLPath} does not exist`)
   }
-  if (parentID === projectID) {
-    await ensureProjectAccess(userID, parentID)
-  } else {
-    const promptData = await getVerifiedUserPromptData(userID, parentID)
-    if (promptData?.projectID !== projectID) {
-      throw new Error(`Prompt with ID ${parentID} does not belong to project with ID ${projectID}`)
-    }
+  // TODO Feels a bit ugly not knowing whether it's a chain or a prompt
+  const data = (await getKeyedEntity(Entity.PROMPT, parentID))
+    ? await getVerifiedUserPromptData(userID, parentID)
+    : await getVerifiedUserChainData(userID, parentID)
+  if (data.projectID !== projectID) {
+    throw new Error(`Item with ID ${parentID} does not belong to project with ID ${projectID}`)
   }
 }
 
