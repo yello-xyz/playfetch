@@ -121,14 +121,12 @@ export default function BuildChainTab({
                 />
               </Selector>
             )}
-            {IsLoadedChainItem(item) && (
-              <OutputMapper
-                key={item.output}
-                output={item.output}
-                inputs={ExtractChainVariables(chain.slice(index + 1))}
-                onMapOutput={mapOutput(index)}
-              />
-            )}
+            <OutputMapper
+              key={item.output}
+              output={item.output}
+              inputs={ExtractChainVariables(chain.slice(index + 1))}
+              onMapOutput={mapOutput(index)}
+            />
           </div>
         ))}
         <PromptSelector
