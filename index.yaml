@@ -24,6 +24,12 @@ indexes:
   - name: lastEditedAt
     direction: desc
 
+- kind: chain
+  properties:
+  - name: projectID
+  - name: lastEditedAt
+    direction: desc
+
 - kind: version
   properties:
   - name: promptID

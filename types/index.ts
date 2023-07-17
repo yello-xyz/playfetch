@@ -19,6 +19,7 @@ export type ActiveProject = Project & {
   projectURLPath: string
   availableFlavors: string[]
   prompts: Prompt[]
+  chains: Chain[]
   users: User[]
 }
 

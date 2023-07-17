@@ -18,6 +18,7 @@ import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor } from './endpoints'
+import { toChain } from './chains'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -71,6 +72,8 @@ export async function getActiveProject(
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
   const prompts = promptData.map(prompt => toPrompt(prompt, userID))
+  const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
+  const chains = chainData.map(chain => toChain(prompt, userID))
   const users = await getProjectUsers(projectID)
 
   return {
@@ -80,6 +83,7 @@ export async function getActiveProject(
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData, buildURL),
     prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
+    chains: [...chains.filter(chain => chain.favorited), ...chains.filter(chain => !chain.favorited)],
     users,
   }
 }

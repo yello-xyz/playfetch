@@ -15,7 +15,6 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
-import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
@@ -281,7 +280,15 @@ export default function Home({
                       />
                     ))}
                   {!showSettings && isChainMode && activeProject && (
-                    <ChainTabView activeTab={selectedTab} project={activeProject} />
+                    activeProject.chains.length > 0 ? (
+                      <ProjectGridView items={activeProject.chains} projects={projects} onSelectItem={selectPrompt} />
+                    ) : (
+                      <EmptyGridView
+                        title='No Chains'
+                        label='New Chain'
+                        onAddItem={() => {}}
+                      />
+                    )
                   )}
                 </div>
               </div>
