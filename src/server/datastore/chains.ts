@@ -2,41 +2,61 @@ import {
   Entity,
   buildKey,
   getDatastore,
+  getEntity,
   getEntityKeys,
   getID,
   getKeyedEntity,
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveChain, Chain } from '@/types'
+import { ActiveChain, Chain, ChainItem } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { getVerifiedProjectScopedData, loadEndpoints, toPrompt } from './prompts'
 
 export async function migrateChains() {
   const datastore = getDatastore()
-  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  for (const promptChain of allChains) {
-    await updateChain({ ...promptChain }, false)
+  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
+  for (const chainData of allChains) {
+    const endpointData = await getEntity(Entity.ENDPOINT, 'parentID', getID(chainData))
+    if (endpointData) {
+      const chain = JSON.parse(endpointData.chain)
+      for (const item of chain) {
+        const versionData = await getKeyedEntity(Entity.VERSION, item.versionID)
+        item.promptID = versionData.promptID
+      }
+      await updateChain({ ...chainData, items: JSON.stringify(chain) }, false)
+    } else {
+      await updateChain({ ...chainData, items: JSON.stringify([]) }, false)
+    }
   }
 }
 
 const toChainData = (
   projectID: number,
   name: string,
+  items: ChainItem[],
   createdAt: Date,
   lastEditedAt: Date,
   favorited: number[],
   chainID?: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
-  data: { projectID, name, createdAt, lastEditedAt, favorited: JSON.stringify(favorited) },
-  excludeFromIndexes: ['name'],
+  data: {
+    projectID,
+    name,
+    items: JSON.stringify(items),
+    createdAt,
+    lastEditedAt,
+    favorited: JSON.stringify(favorited),
+  },
+  excludeFromIndexes: ['name', 'items'],
 })
 
 export const toChain = (data: any, userID: number): Chain => ({
   id: getID(data),
   name: data.name,
+  items: JSON.parse(data.items),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
   favorited: JSON.parse(data.favorited).includes(userID),
@@ -74,7 +94,7 @@ export const DefaultChainName = 'New Chain'
 export async function addChainForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const chainData = toChainData(projectID, DefaultChainName, createdAt, createdAt, [])
+  const chainData = toChainData(projectID, DefaultChainName, [], createdAt, createdAt, [])
   await getDatastore().save(chainData)
   return getID(chainData)
 }
@@ -84,6 +104,7 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
     toChainData(
       chainData.projectID,
       chainData.name,
+      JSON.parse(chainData.items),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
       JSON.parse(chainData.favorited),

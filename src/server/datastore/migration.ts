@@ -1,4 +1,5 @@
 import { migrateAccess } from './access'
+import { migrateChains } from './chains'
 import { migrateComments } from './comments'
 import { migrateEndpoints } from './endpoints'
 import { migrateProjects } from './projects'
@@ -10,9 +11,10 @@ import { migrateVersions } from './versions'
 
 export async function runDataMigrations() {
   // await migrateProjects()
-  await migratePrompts()
+  // await migratePrompts()
   // await migrateVersions()
   // await migrateRuns()
+  await migrateChains()
   // await migrateEndpoints()
   // await migrateUsage()
   // await migrateAccess()

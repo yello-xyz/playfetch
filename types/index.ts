@@ -47,6 +47,7 @@ export type ActivePrompt = Prompt & {
 export type Chain = {
   id: number
   name: string
+  items: ChainItem[]
   projectID: number
   timestamp: string
   favorited: boolean
@@ -116,6 +117,10 @@ export type RunConfig = {
   versionID: number
   output?: string
   includeContext?: boolean
+}
+
+export type ChainItem = RunConfig & {
+  promptID: number
 }
 
 export type Endpoint = {
