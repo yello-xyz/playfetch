@@ -9,7 +9,7 @@ export default function VersionSelector({
 }: {
   versions: Version[]
   endpoints: ResolvedPromptEndpoint[]
-  activeVersion: Version
+  activeVersion?: Version
   setActiveVersion: (version: Version) => void
 }) {
   const suffixForVersionID = (versionID: number) => {
@@ -21,7 +21,7 @@ export default function VersionSelector({
     <VersionIDSelector
       versionIDs={versions.map(version => version.id)}
       suffixForVersionID={suffixForVersionID}
-      activeVersionID={activeVersion.id}
+      activeVersionID={activeVersion?.id ?? 0}
       setActiveVersionID={versionID => setActiveVersion(versions.find(version => version.id === versionID)!)}
     />
   )
@@ -39,7 +39,10 @@ function VersionIDSelector({
   suffixForVersionID?: (versionID: number) => string | undefined
 }) {
   return (
-    <DropdownMenu value={activeVersionID} onChange={value => setActiveVersionID(Number(value))}>
+    <DropdownMenu
+      disabled={!versionIDs.length}
+      value={activeVersionID}
+      onChange={value => setActiveVersionID(Number(value))}>
       {versionIDs.map((versionID, index) => (
         <option key={index} value={versionID}>
           {`Prompt ${index + 1}${suffixForVersionID?.(versionID) ?? ''}`}

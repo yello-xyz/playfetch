@@ -9,6 +9,8 @@ import PublishChainTab from './publishChainTab'
 export type LoadedChainItem = ChainItem & { prompt: ActivePrompt; version: Version }
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
   'version' in item && item.version !== undefined
+export const AsLoadedChainItem = (item: ChainItem): LoadedChainItem | undefined =>
+  IsLoadedChainItem(item) ? item : undefined
 
 export default function ChainTabView({ activeTab, chain }: { activeTab: MainViewTab; chain: ActiveChain }) {
   const [items, setItems] = useState(chain.items)

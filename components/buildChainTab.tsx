@@ -5,7 +5,7 @@ import api from '@/src/client/api'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
-import { LoadedChainItem, IsLoadedChainItem } from './chainTabView'
+import { LoadedChainItem, IsLoadedChainItem, AsLoadedChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
 
@@ -103,16 +103,14 @@ export default function BuildChainTab({
               onSelectPrompt={replacePrompt(index)}
               onRemovePrompt={removePrompt(index)}
             />
-            {IsLoadedChainItem(item) && (
-              <Selector>
-                <VersionSelector
-                  versions={item.prompt.versions}
-                  endpoints={item.prompt.endpoints}
-                  activeVersion={item.version}
-                  setActiveVersion={selectVersion(index)}
-                />
-              </Selector>
-            )}
+            <Selector>
+              <VersionSelector
+                versions={AsLoadedChainItem(item)?.prompt?.versions ?? []}
+                endpoints={AsLoadedChainItem(item)?.prompt?.endpoints ?? []}
+                activeVersion={AsLoadedChainItem(item)?.version}
+                setActiveVersion={selectVersion(index)}
+              />
+            </Selector>
             <OutputMapper
               key={item.output}
               output={item.output}
@@ -145,9 +143,12 @@ function OutputMapper({
   inputs: string[]
   onMapOutput: (input?: string) => void
 }) {
-  return inputs.length ? (
+  return (
     <Selector>
-      <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
+      <DropdownMenu
+        disabled={!inputs.length}
+        value={output ?? 0}
+        onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
         <option value={0}>Map Output</option>
         {inputs.map((input, index) => (
           <option key={index} value={input}>
@@ -156,7 +157,7 @@ function OutputMapper({
         ))}
       </DropdownMenu>
     </Selector>
-  ) : null
+  )
 }
 
 function PromptSelector({
