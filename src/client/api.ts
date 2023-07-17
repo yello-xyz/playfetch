@@ -91,8 +91,8 @@ const api = {
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
   },
-  toggleFavorite: function (promptID: number, favorite: boolean) {
-    return post(this.toggleFavorite, { promptID, favorite })
+  toggleFavoritePrompt: function (promptID: number, favorite: boolean) {
+    return post(this.toggleFavoritePrompt, { promptID, favorite })
   },
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
@@ -114,7 +114,10 @@ const api = {
     return post(this.publishChain, { chain: [{ versionID }], projectID, parentID: promptID, name, flavor, useCache })
   },
   renameChain: function (chainID: number, name: string) {
-    return post(this.renamePrompt, { chainID, name })
+    return post(this.renameChain, { chainID, name })
+  },
+  toggleFavoriteChain: function (chainID: number, favorite: boolean) {
+    return post(this.toggleFavoriteChain, { chainID, favorite })
   },
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })

@@ -73,7 +73,7 @@ export async function getActiveProject(
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
   const prompts = promptData.map(prompt => toPrompt(prompt, userID))
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
-  const chains = chainData.map(chain => toChain(prompt, userID))
+  const chains = chainData.map(chain => toChain(chain, userID))
   const users = await getProjectUsers(projectID)
 
   return {

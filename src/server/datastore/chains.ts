@@ -2,7 +2,7 @@ import { Entity, buildKey, getDatastore, getEntityKeys, getID, getKeyedEntity, g
 import { ActiveChain, Chain } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
-import { getVerifiedProjectScopedData, loadEndpoints, toggleFavoriteItem } from './prompts'
+import { getVerifiedProjectScopedData, loadEndpoints } from './prompts'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -92,8 +92,19 @@ export async function updateChainName(userID: number, chainID: number, name: str
   await updateChain({ ...chainData, name }, true)
 }
 
-export const toggleFavoriteChain = (userID: number, chainID: number, favorited: boolean) =>
-  toggleFavoriteItem(userID, Entity.CHAIN, chainID, favorited)
+export async function toggleFavoriteChain(userID: number, chainID: number, favorited: boolean) {
+  const chainData = await getVerifiedUserChainData(userID, chainID)
+  const oldFavorited = JSON.parse(chainData.favorited)
+  await updateChain(
+    {
+      ...chainData,
+      favorited: JSON.stringify(
+        favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
+      ),
+    },
+    false
+  )
+}
 
 export async function deleteChainForUser(userID: number, chainID: number) {
   // TODO warn or even refuse when chain has published endpoints

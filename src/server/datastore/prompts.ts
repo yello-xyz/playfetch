@@ -154,12 +154,12 @@ export async function updatePromptName(userID: number, promptID: number, name: s
   await updatePrompt({ ...promptData, name }, true)
 }
 
-export async function toggleFavoriteItem(userID: number, entity: Entity, id: number, favorited: boolean) {
-  const data = await getVerifiedProjectScopedData(userID, entity, id)
-  const oldFavorited = JSON.parse(data.favorited)
+export async function toggleFavoritePrompt(userID: number, promptID: number, favorited: boolean) {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+  const oldFavorited = JSON.parse(promptData.favorited)
   await updatePrompt(
     {
-      ...data,
+      ...promptData,
       favorited: JSON.stringify(
         favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
       ),
@@ -167,9 +167,6 @@ export async function toggleFavoriteItem(userID: number, entity: Entity, id: num
     false
   )
 }
-
-export const toggleFavoritePrompt = (userID: number, promptID: number, favorited: boolean) =>
-  toggleFavoriteItem(userID, Entity.PROMPT, promptID, favorited)
 
 export async function deletePromptForUser(userID: number, promptID: number) {
   // TODO warn or even refuse when prompt has published endpoints

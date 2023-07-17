@@ -64,6 +64,10 @@ function ProjectItemCell({
     setFormattedDate(FormatRelativeDate(item.timestamp))
   }, [item.timestamp])
 
+  const isPrompt = 'prompt' in item
+  const toggleFavorite = (id: number, favorited: boolean) =>
+    isPrompt ? api.toggleFavoritePrompt(id, favorited) : api.toggleFavoriteChain(id, favorited)
+
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
@@ -73,7 +77,7 @@ function ProjectItemCell({
         <div className='relative flex'>
           <IconButton
             icon={item.favorited ? filledStarIcon : starIcon}
-            onClick={() => api.toggleFavorite(item.id, !item.favorited).then(refreshProject)}
+            onClick={() => toggleFavorite(item.id, !item.favorited).then(refreshProject)}
           />
           <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
