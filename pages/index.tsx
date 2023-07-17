@@ -7,7 +7,7 @@ import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider 
 import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import PromptsGridView from '@/components/promptsGridView'
-import ClientRoute, { ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
+import ClientRoute, { ChainsRoute, ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject, getProjectsForUser } from '@/src/server/datastore/projects'
@@ -28,7 +28,7 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { g: projectID, p: promptID, s: settings } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { g: projectID, p: promptID, s: settings, c: chains } = mapDictionary(ParseQuery(query), value => Number(value))
 
   const initialProjects = await getProjectsForUser(user.id)
   const buildURL = urlBuilderFromHeaders(req.headers)
@@ -38,8 +38,18 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
   const initialShowSettings = settings === 1
+  const initialShowChains = chains === 1
 
-  return { props: { user, initialProjects, initialActiveItem, initialAvailableProviders, initialShowSettings } }
+  return {
+    props: {
+      user,
+      initialProjects,
+      initialActiveItem,
+      initialAvailableProviders,
+      initialShowSettings,
+      initialShowChains,
+    },
+  }
 })
 
 type ActiveItem = ActiveProject | ActivePrompt
@@ -50,12 +60,14 @@ export default function Home({
   initialActiveItem,
   initialAvailableProviders,
   initialShowSettings,
+  initialShowChains,
 }: {
   user: User
   initialProjects: Project[]
   initialActiveItem: ActiveItem
   initialAvailableProviders: AvailableProvider[]
   initialShowSettings: boolean
+  initialShowChains: boolean
 }) {
   const router = useRouter()
 
@@ -69,7 +81,7 @@ export default function Home({
   const activePrompt = isPrompt(activeItem) ? activeItem : undefined
   const promptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
 
-  const [isChainMode, setChainMode] = useState(false)
+  const [isChainMode, setChainMode] = useState(initialShowChains)
   const [showSettings, setShowSettings] = useState(initialShowSettings)
   const [showComments, setShowComments] = useState(false)
 
@@ -140,7 +152,11 @@ export default function Home({
     if (projectID !== activeProject?.id || chainMode !== isChainMode || showSettings) {
       savePrompt()
       await refreshProject(projectID)
-      router.push(projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID), undefined, { shallow: true })
+      router.push(
+        chainMode ? ChainsRoute(projectID) : projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID),
+        undefined,
+        { shallow: true }
+      )
     }
     setChainMode(chainMode)
     setShowSettings(false)
@@ -150,6 +166,7 @@ export default function Home({
     const project = activeProject ?? (promptProject as Project)
     selectProject(project.id, true)
     setSelectedTab('play')
+    router.push(ChainsRoute(project.id), undefined, { shallow: true })
   }
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
@@ -163,18 +180,23 @@ export default function Home({
 
   const refreshProjects = () => api.getProjects().then(setProjects)
 
-  const { g: projectID, p: promptID, s: settings } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const currentQuery = settings ?? projectID ?? promptID
-  const [query, setQuery] = useState(currentQuery)
-  if (currentQuery !== query) {
-    setQuery(currentQuery)
+  const {
+    g: projectID,
+    p: promptID,
+    s: settings,
+    c: chains,
+  } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const currentQueryState = settings ? 'settings' : promptID ?? (projectID && chains) ? `${projectID}chains` : projectID
+  const [query, setQuery] = useState(currentQueryState)
+  if (currentQueryState !== query) {
     if (settings) {
       selectSettings()
     } else if (promptID) {
       selectPrompt(promptID)
     } else {
-      selectProject(projectID ?? user.id, isChainMode)
+      selectProject(projectID ?? user.id, !!chains)
     }
+    setQuery(currentQueryState)
   }
 
   const addPrompt = async (projectID: number) => {

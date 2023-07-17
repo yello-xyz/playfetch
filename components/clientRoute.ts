@@ -9,6 +9,8 @@ enum ClientRoute {
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}`
 
+export const ChainsRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}&c=1`
+
 export const PromptRoute = (promptID: number) => `${ClientRoute.Home}?p=${promptID}`
 
 export const Redirect = (route: ClientRoute): GetServerSidePropsResult<Record<string, unknown>> => ({
