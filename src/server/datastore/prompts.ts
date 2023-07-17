@@ -65,12 +65,14 @@ export async function loadEndpoints(parentID: number, projectData: any, buildURL
     }
   }
 
-  return endpoints.map(endpoint => ({
-    ...toPromptEndpoint(endpoint),
-    url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
-    apiKeyDev: projectData.apiKeyDev ?? '',
-    usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
-  })).reverse()
+  return endpoints
+    .map(endpoint => ({
+      ...toPromptEndpoint(endpoint),
+      url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
+      apiKeyDev: projectData.apiKeyDev ?? '',
+      usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
+    }))
+    .reverse()
 }
 
 export async function getActivePrompt(
@@ -89,7 +91,6 @@ export async function getActivePrompt(
 
   return {
     ...toPrompt(promptData, userID),
-    projectID: promptData.projectID,
     versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
     endpoints,
     users,
@@ -125,14 +126,17 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
   )
 }
 
-export const getVerifiedUserPromptData = async (userID: number, promptID: number) => {
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  if (!promptData) {
-    throw new Error(`Prompt with ID ${promptID} does not exist or user has no access`)
+export const getVerifiedProjectScopedData = async (userID: number, entity: Entity, id: number) => {
+  const data = await getKeyedEntity(entity, id)
+  if (!data) {
+    throw new Error(`Entity with ID ${id} does not exist or user has no access`)
   }
-  await ensureProjectAccess(userID, promptData.projectID)
-  return promptData
+  await ensureProjectAccess(userID, data.projectID)
+  return data
 }
+
+export const getVerifiedUserPromptData = async (userID: number, promptID: number) =>
+  getVerifiedProjectScopedData(userID, Entity.PROMPT, promptID)
 
 export async function ensurePromptAccess(userID: number, promptID: number) {
   await getVerifiedUserPromptData(userID, promptID)
@@ -140,6 +144,7 @@ export async function ensurePromptAccess(userID: number, promptID: number) {
 
 export async function updatePromptProject(userID: number, promptID: number, projectID: number) {
   // TODO should we update the endpoints project url paths or even refuse when prompt has published endpoints?
+  // What about if the prompt is used in a chain within the project? Should we just duplicate instead of move?
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   await updatePrompt({ ...promptData, projectID }, true)
 }
@@ -149,12 +154,12 @@ export async function updatePromptName(userID: number, promptID: number, name: s
   await updatePrompt({ ...promptData, name }, true)
 }
 
-export async function toggleFavoritePrompt(userID: number, promptID: number, favorited: boolean) {
-  const promptData = await getVerifiedUserPromptData(userID, promptID)
-  const oldFavorited = JSON.parse(promptData.favorited)
+export async function toggleFavoriteItem(userID: number, entity: Entity, id: number, favorited: boolean) {
+  const data = await getVerifiedProjectScopedData(userID, entity, id)
+  const oldFavorited = JSON.parse(data.favorited)
   await updatePrompt(
     {
-      ...promptData,
+      ...data,
       favorited: JSON.stringify(
         favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
       ),
@@ -162,6 +167,9 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
     false
   )
 }
+
+export const toggleFavoritePrompt = (userID: number, promptID: number, favorited: boolean) =>
+  toggleFavoriteItem(userID, Entity.PROMPT, promptID, favorited)
 
 export async function deletePromptForUser(userID: number, promptID: number) {
   // TODO warn or even refuse when prompt has published endpoints

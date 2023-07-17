@@ -42,6 +42,24 @@ export type ActivePrompt = Prompt & {
   availableFlavors: string[]
 }
 
+export type Chain = {
+  id: number
+  name: string
+  projectID: number
+  timestamp: string
+  favorited: boolean
+}
+
+export type ActiveChain = Chain & {
+  projectID: number
+  endpoints: ResolvedPromptEndpoint[]
+  // items: ChainItem[]
+  users: User[]
+  inputs: InputValues
+  projectURLPath: string
+  availableFlavors: string[]
+}
+
 export type ModelProvider = 'openai' | 'anthropic' | 'google'
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-4'
