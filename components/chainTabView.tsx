@@ -5,6 +5,7 @@ import TestChainTab from './testChainTab'
 import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
+import api from '@/src/client/api'
 
 export type LoadedChainItem = ChainItem & { prompt: ActivePrompt; version: Version }
 export const IsLoadedChainItem = (item: ChainItem): item is LoadedChainItem =>
@@ -22,6 +23,19 @@ export default function ChainTabView({ activeTab, chain }: { activeTab: MainView
   )
 
   const chainIsLoaded = items.every(IsLoadedChainItem)
+
+  const rawItems = items.map(item => ({
+    promptID: item.promptID,
+    versionID: item.versionID,
+    output: item.output,
+    includeContext: item.includeContext,
+  }))
+  const itemsKey = JSON.stringify(rawItems)
+  const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
+  if (itemsKey !== savedItemsKey) {
+    setSavedItemsKey(itemsKey)
+    api.updateChain(chain.id, rawItems)
+  }
 
   const renderTab = () => {
     switch (activeTab) {

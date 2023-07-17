@@ -8,6 +8,7 @@ import {
   ModelProvider,
   Endpoint,
   ActiveChain,
+  ChainItem,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -116,6 +117,9 @@ const api = {
   },
   addChain: function (projectID: number): Promise<number> {
     return post(this.addChain, { projectID })
+  },
+  updateChain: function (chainID: number, items: ChainItem[]): Promise<number> {
+    return post(this.updateChain, { chainID, items })
   },
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })

@@ -120,6 +120,11 @@ export async function ensureChainAccess(userID: number, chainID: number) {
   await getVerifiedUserChainData(userID, chainID)
 }
 
+export async function updateChainItems(userID: number, chainID: number, items: ChainItem[]) {
+  const chainData = await getVerifiedUserChainData(userID, chainID)
+  await updateChain({ ...chainData, items: JSON.stringify(items) }, true)
+}
+
 export async function updateChainName(userID: number, chainID: number, name: string) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   await updateChain({ ...chainData, name }, true)
