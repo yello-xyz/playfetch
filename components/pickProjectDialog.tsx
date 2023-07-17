@@ -1,26 +1,26 @@
 import { useState } from 'react'
 import ModalDialog from './modalDialog'
-import { Project, Prompt } from '@/types'
+import { Chain, Project, Prompt } from '@/types'
 import DropdownMenu from './dropdownMenu'
 
 export default function PickProjectDialog({
   projects,
-  prompt,
+  item,
   onConfirm,
   onDismiss,
 }: {
   projects: Project[]
-  prompt: Prompt
+  item: Prompt | Chain
   onConfirm: (projectID: number) => void
   onDismiss: () => void
 }) {
-  const [projectID, setProjectID] = useState(prompt.projectID)
+  const [projectID, setProjectID] = useState(item.projectID)
 
   const dialogPrompt = {
-    title: `Move “${prompt.name}”`,
+    title: `Move “${item.name}”`,
     confirmTitle: 'Move',
     callback: () => onConfirm(projectID!),
-    disabled: projectID === prompt.projectID,
+    disabled: projectID === item.projectID,
   }
 
   return (

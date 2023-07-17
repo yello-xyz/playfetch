@@ -1,4 +1,4 @@
-import { Project, Prompt } from '@/types'
+import { Chain, Project, Prompt } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
@@ -6,15 +6,15 @@ import PickProjectDialog from './pickProjectDialog'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 
-export default function PromptPopupMenu({
-  prompt,
+export default function ProjectItemPopupMenu({
+  item,
   projects,
   isMenuExpanded,
   setIsMenuExpanded,
   onRefresh,
   onDelete,
 }: {
-  prompt: Prompt
+  item: Prompt | Chain
   projects: Project[]
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
@@ -30,7 +30,7 @@ export default function PromptPopupMenu({
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to delete this prompt? This action cannot be undone.',
-      callback: () => api.deletePrompt(prompt.id).then(onDelete ?? onRefresh),
+      callback: () => api.deletePrompt(item.id).then(onDelete ?? onRefresh),
       destructive: true,
     })
   }
@@ -57,10 +57,10 @@ export default function PromptPopupMenu({
       </PopupMenu>
       {showPickProjectPrompt && (
         <PickProjectDialog
-          key={prompt.projectID}
+          key={item.projectID}
           projects={projects}
-          prompt={prompt}
-          onConfirm={(projectID: number) => api.movePrompt(prompt.id, projectID).then(onRefresh)}
+          item={item}
+          onConfirm={(projectID: number) => api.movePrompt(item.id, projectID).then(onRefresh)}
           onDismiss={() => setShowPickProjectPrompt(false)}
         />
       )}
@@ -69,8 +69,8 @@ export default function PromptPopupMenu({
           title='Rename Prompt'
           confirmTitle='Rename'
           label='Name'
-          initialName={prompt.name}
-          onConfirm={name => api.renamePrompt(prompt.id, name).then(onRefresh)}
+          initialName={item.name}
+          onConfirm={name => api.renamePrompt(item.id, name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}

@@ -4,13 +4,13 @@ import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'
-import PromptPopupMenu from './promptPopupMenu'
 import { useRefreshProject, useRefreshPrompt } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import { useLoggedInUser } from './userContext'
+import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function TopBar({
   projects = [],
@@ -64,8 +64,8 @@ export default function TopBar({
                 <Icon icon={chevronIcon} />
                 <div className='absolute right-0 top-8'>
                   {activePrompt && (
-                    <PromptPopupMenu
-                      prompt={activePrompt}
+                    <ProjectItemPopupMenu
+                      item={activePrompt}
                       projects={projects}
                       isMenuExpanded={isMenuExpanded}
                       setIsMenuExpanded={setIsMenuExpanded}

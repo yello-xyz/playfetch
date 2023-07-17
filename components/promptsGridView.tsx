@@ -5,9 +5,9 @@ import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import api from '../src/client/api'
 import { useEffect, useState } from 'react'
-import PromptPopupMenu from './promptPopupMenu'
 import IconButton from './iconButton'
 import { useRefreshProject } from './refreshContext'
+import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function PromptsGridView({
   prompts,
@@ -81,8 +81,8 @@ function PromptCell({
           />
           <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
-            <PromptPopupMenu
-              prompt={prompt}
+            <ProjectItemPopupMenu
+              item={prompt}
               projects={projects}
               isMenuExpanded={isMenuExpanded}
               setIsMenuExpanded={setIsMenuExpanded}
