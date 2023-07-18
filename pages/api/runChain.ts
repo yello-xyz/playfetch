@@ -30,13 +30,27 @@ const promptToCamelCase = (prompt: string) =>
     prompt
   )
 
+const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boolean) =>
+  Object.entries(inputs).reduce(
+    (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
+    useCamelCase ? promptToCamelCase(prompt) : prompt
+  )
+
+const postProcess = (inputs: PromptInputs, output: string, config: RunConfig | CodeConfig, useCamelCase: boolean) => {
+  if (config.output) {
+    const variable = useCamelCase ? ToCamelCase(config.output) : config.output
+    inputs[variable] = output
+  }
+  return output
+}
+
 export const runChainConfigs = async (
   userID: number,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   useCache: boolean,
   useCamelCase: boolean,
-  callback: (version: Version, response: RunResponse & { output: string }) => Promise<any>,
+  callback: (version: Version | null, response: RunResponse & { output: string }) => Promise<any>,
   streamChunks?: (chunk: string) => void
 ) => {
   let lastOutput = undefined as string | undefined
@@ -47,27 +61,28 @@ export const runChainConfigs = async (
   for (const config of configs) {
     if (isRunConfig(config)) {
       const version = await getVersion(config.versionID)
-      let prompt = Object.entries(inputs).reduce(
-        (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
-        useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
-      )
+      let prompt = resolvePrompt(version.prompt, inputs, useCamelCase)
       runningContext += prompt
       if (config.includeContext) {
         prompt = runningContext
       }
       const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
-      lastOutput = runResponse.output
-      if (!lastOutput?.length) {
+      const output = runResponse.output
+      if (!output?.length) {
         break
       }
-      runningContext += `\n\n${lastOutput}\n\n`
-      if (config.output) {
-        const variable = useCamelCase ? ToCamelCase(config.output) : config.output
-        inputs[variable] = lastOutput
+      lastOutput = postProcess(inputs, output, config, useCamelCase)
+      runningContext += `\n\n${output}\n\n`
+      await callback(version, { ...runResponse, output })
+    } else { 
+      const code = resolvePrompt(config.code, inputs, useCamelCase)
+      const output = code.replace(code, 'output') // TODO run code
+      if (!output?.length) {
+        break
       }
-      await callback(version, { ...runResponse, output: lastOutput })
-    } else {
-      // TODO run code config
+      streamChunks?.(output)
+      lastOutput = postProcess(inputs, output, config, useCamelCase)
+      await callback(null, { output, cost: 0, attempts: 1, cacheHit: false })
     }
   }
 
@@ -159,7 +174,9 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       (version, { output, cost }) => {
         const createdAt = new Date()
         sendData({ index: index++, timestamp: createdAt.toISOString(), cost })
-        return saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
+        return version
+          ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
+          : Promise.resolve({})
       },
       message => sendData({ index, message })
     )
