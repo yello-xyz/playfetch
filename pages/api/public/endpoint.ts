@@ -4,7 +4,7 @@ import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { Endpoint, PromptInputs, RunConfig } from '@/types'
-import { runPromptConfigs } from '../runChain'
+import { runChainConfigs } from '../runChain'
 import { getChainItems } from '@/src/server/datastore/chains'
 
 const loadRunConfigsFromEndpoint = async (endpoint: Endpoint): Promise<RunConfig[]> => {
@@ -27,13 +27,14 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
       if (endpoint && endpoint.enabled) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         const runConfigs = await loadRunConfigsFromEndpoint(endpoint)
-        const output = await runPromptConfigs(
+        const output = await runChainConfigs(
           endpoint.userID,
           runConfigs,
           inputs,
           endpoint.useCache,
           true,
           (_, { output, cost, attempts, cacheHit }) =>
+            // TODO usage will seem off for chain endpoints if we update usage for each chain item
             updateUsage(endpoint.id, cost, cacheHit, attempts, !output?.length)
         )
         return res.json({ output })

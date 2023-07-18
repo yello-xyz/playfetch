@@ -30,7 +30,7 @@ const promptToCamelCase = (prompt: string) =>
     prompt
   )
 
-export const runPromptConfigs = async (
+export const runChainConfigs = async (
   userID: number,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
@@ -40,32 +40,35 @@ export const runPromptConfigs = async (
   streamChunks?: (chunk: string) => void
 ) => {
   let lastOutput = undefined as string | undefined
-  let runninContext = ''
+  let runningContext = ''
 
   const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
 
-  // TODO add support for running code configs
-  for (const runConfig of configs.filter(isRunConfig)) {
-    const version = await getVersion(runConfig.versionID)
-    let prompt = Object.entries(inputs).reduce(
-      (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
-      useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
-    )
-    runninContext += prompt
-    if (runConfig.includeContext) {
-      prompt = runninContext
+  for (const config of configs) {
+    if (isRunConfig(config)) {
+      const version = await getVersion(config.versionID)
+      let prompt = Object.entries(inputs).reduce(
+        (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
+        useCamelCase ? promptToCamelCase(version.prompt) : version.prompt
+      )
+      runningContext += prompt
+      if (config.includeContext) {
+        prompt = runningContext
+      }
+      const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
+      lastOutput = runResponse.output
+      if (!lastOutput?.length) {
+        break
+      }
+      runningContext += `\n\n${lastOutput}\n\n`
+      if (config.output) {
+        const variable = useCamelCase ? ToCamelCase(config.output) : config.output
+        inputs[variable] = lastOutput
+      }
+      await callback(version, { ...runResponse, output: lastOutput })
+    } else {
+      // TODO run code config
     }
-    const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
-    lastOutput = runResponse.output
-    if (!lastOutput?.length) {
-      break
-    }
-    runninContext += `\n\n${lastOutput}\n\n`
-    if (runConfig.output) {
-      const variable = useCamelCase ? ToCamelCase(runConfig.output) : runConfig.output
-      inputs[variable] = lastOutput
-    }
-    await callback(version, { ...runResponse, output: lastOutput })
   }
 
   return lastOutput
@@ -147,7 +150,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
 
   let index = 0
   for (const inputs of multipleInputs) {
-    await runPromptConfigs(
+    await runChainConfigs(
       user.id,
       configs,
       inputs,
