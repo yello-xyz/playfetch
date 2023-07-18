@@ -11,6 +11,7 @@ import {
   GoogleLanguageModel,
   AnthropicLanguageModel,
   Version,
+  CodeConfig,
 } from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
@@ -31,7 +32,7 @@ const promptToCamelCase = (prompt: string) =>
 
 export const runPromptConfigs = async (
   userID: number,
-  configs: RunConfig[],
+  configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   useCache: boolean,
   useCamelCase: boolean,
@@ -41,7 +42,10 @@ export const runPromptConfigs = async (
   let lastOutput = undefined as string | undefined
   let runninContext = ''
 
-  for (const runConfig of configs) {
+  const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
+
+  // TODO add support for running code configs
+  for (const runConfig of configs.filter(isRunConfig)) {
     const version = await getVersion(runConfig.versionID)
     let prompt = Object.entries(inputs).reduce(
       (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
@@ -135,7 +139,7 @@ const runPromptWithConfig = async (
 }
 
 async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
-  const configs: RunConfig[] = req.body.configs
+  const configs: (RunConfig | CodeConfig)[] = req.body.configs
   const multipleInputs: PromptInputs[] = req.body.inputs
 
   res.setHeader('X-Accel-Buffering', 'no')
