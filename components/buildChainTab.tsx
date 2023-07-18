@@ -97,7 +97,7 @@ export default function BuildChainTab({
           <div key={index} className='flex items-start gap-4'>
             {IsPromptChainItem(item) && (
               <>
-                <Column>
+                <Column wide>
                   <Checkbox
                     disabled={index === 0}
                     checked={!!item.includeContext}
@@ -123,12 +123,13 @@ export default function BuildChainTab({
             )}
             {!IsPromptChainItem(item) && (
               <>
-                <Column>
+                <Column wide>
                   <div className='w-full'>
                     <RichTextInput
                       value={index === editCodeIndex ? editedCode : item.code}
                       setValue={setEditedCode}
                       disabled={index !== editCodeIndex}
+                      focus={index === editCodeIndex}
                       preformatted
                     />
                   </div>
@@ -171,8 +172,8 @@ export default function BuildChainTab({
   )
 }
 
-function Column({ children }: { children: ReactNode }) {
-  return <div className='w-full max-w-[30%] flex gap-2'>{children}</div>
+function Column({ children, wide }: { children: ReactNode; wide?: boolean }) {
+  return <div className={`w-full ${wide ? 'max-w-[50%]' : 'max-w-[25%]'} flex gap-2`}>{children}</div>
 }
 
 function OutputMapper({

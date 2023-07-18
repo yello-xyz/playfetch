@@ -56,9 +56,9 @@ export default function ExamplePane({
   )
 }
 
-export function CodeBlock({ children }: { children: ReactNode }) {
+export function CodeBlock({ children, active }: { children: ReactNode; active?: boolean }) {
   return (
-    <div className='p-4 text-xs text-[#53961F] bg-gray-100 rounded-lg'>
+    <div className={`p-4 text-xs text-[#53961F] bg-gray-100 rounded-lg ${active ? 'border' : ''}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>

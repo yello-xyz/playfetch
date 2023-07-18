@@ -65,17 +65,31 @@ export default function RichTextInput({
   label,
   disabled,
   preformatted,
+  focus,
 }: {
   value: string
   setValue: (value: string) => void
   label?: string
   disabled?: boolean
   preformatted?: boolean
+  focus?: boolean
 }) {
-  const contentEditableRef = useRef<HTMLElement>(null)
+  const contentEditableRef = useRef<HTMLInputElement>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
+
+  const [focused, setFocused] = useState(focus)
+  if (focus !== focused) {
+    setFocused(focus)
+    if (focus) {
+      setTimeout(() => contentEditableRef.current?.focus(), 0)
+    }
+  }
+
+  if (selection && !focused) {
+    setSelection(undefined)
+  }
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
@@ -119,7 +133,7 @@ export default function RichTextInput({
             <Label onClick={() => contentEditableRef.current?.focus()}>{label}</Label>
           </div>
         )}
-        {preformatted ? <CodeBlock>{renderContentEditable()}</CodeBlock> : renderContentEditable()}
+        {preformatted ? <CodeBlock active={!disabled}>{renderContentEditable()}</CodeBlock> : renderContentEditable()}
       </div>
       {selection && (
         <div
