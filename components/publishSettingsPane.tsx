@@ -56,7 +56,7 @@ export default function PublishSettingsPane({
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
-    api.updateEndpoint({ ...endpoint, chain: [{ versionID: version.id }] }).then(_ => onRefresh())
+    api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
   }
 
   return (

@@ -130,7 +130,7 @@ export type Endpoint = {
   enabled: boolean
   userID: number
   parentID: number
-  chain: RunConfig[]
+  versionID?: number
   timestamp: string
   urlPath: string
   projectURLPath: string

@@ -111,7 +111,7 @@ const api = {
     flavor: string,
     useCache: boolean
   ) {
-    return post(this.publishChain, { chain: [{ versionID }], projectID, parentID: promptID, name, flavor, useCache })
+    return post(this.publishChain, { projectID, parentID: promptID, versionID, name, flavor, useCache })
   },
   getChain: function (chainID: number): Promise<ActiveChain> {
     return post(this.getChain, { chainID })
@@ -132,20 +132,19 @@ const api = {
     return post(this.deleteChain, { chainID })
   },
   publishChain: function (
-    chain: (RunConfig | CodeConfig)[],
     projectID: number,
     chainID: number,
     name: string,
     flavor: string,
     useCache: boolean
   ) {
-    return post(this.publishChain, { chain, projectID, parentID: chainID, name, flavor, useCache })
+    return post(this.publishChain, { projectID, parentID: chainID, name, flavor, useCache })
   },
   updateEndpoint: function (endpoint: Endpoint) {
     return post(this.updateEndpoint, {
       endpointID: endpoint.id,
       enabled: endpoint.enabled,
-      chain: endpoint.chain,
+      versionID: endpoint.versionID,
       name: endpoint.urlPath,
       flavor: endpoint.flavor,
       useCache: endpoint.useCache,

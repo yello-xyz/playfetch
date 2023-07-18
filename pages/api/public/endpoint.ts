@@ -3,8 +3,17 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
-import { PromptInputs, Version } from '@/types'
+import { Endpoint, PromptInputs, RunConfig } from '@/types'
 import { runPromptConfigs } from '../runChain'
+import { getChainItems } from '@/src/server/datastore/chains'
+
+const loadRunConfigsFromEndpoint = async (endpoint: Endpoint): Promise<RunConfig[]> => {
+  if (endpoint.versionID) {
+    return [{ versionID: endpoint.versionID }]
+  } else {
+    return getChainItems(endpoint.parentID)
+  }
+}
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -17,9 +26,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
       const endpoint = await getActiveEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint && endpoint.enabled) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
+        const runConfigs = await loadRunConfigsFromEndpoint(endpoint)
         const output = await runPromptConfigs(
           endpoint.userID,
-          endpoint.chain,
+          runConfigs,
           inputs,
           endpoint.useCache,
           true,

@@ -13,7 +13,7 @@ import {
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
-import { ActivePrompt, Prompt } from '@/types'
+import { ActivePrompt, Endpoint, Prompt } from '@/types'
 import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
@@ -55,17 +55,9 @@ export async function loadEndpoints(parentID: number, projectData: any, buildURL
   const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'parentID', parentID)
   const usages = await getEntities(Entity.USAGE, 'parentID', parentID)
 
-  const toPromptEndpoint = (endpointData: any) => {
-    const endpoint = toEndpoint(endpointData)
-    return {
-      ...endpoint,
-      versionID: endpoint.chain[0].versionID,
-    }
-  }
-
   return endpoints
     .map(endpoint => ({
-      ...toPromptEndpoint(endpoint),
+      ...(toEndpoint(endpoint) as (Endpoint & { versionID: number })),
       url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
       apiKeyDev: projectData.apiKeyDev ?? '',
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),

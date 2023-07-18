@@ -5,7 +5,7 @@ import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
-import { PromptCache, ChainItemToConfig } from './chainTabView'
+import { PromptCache } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
 import { NewConfigFromEndpoints } from './publishPromptTab'
@@ -28,7 +28,7 @@ export default function PublishChainTab({
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, chain)
-    api.publishChain(items.map(ChainItemToConfig), chain.projectID, chain.id, name, flavor, false).then(refreshChain)
+    api.publishChain(chain.projectID, chain.id, name, flavor, false).then(refreshChain)
   }
 
   return (
