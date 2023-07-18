@@ -7,6 +7,7 @@ import Label from './label'
 import { PromptCache, IsPromptChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
+import Button from './button'
 
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
   ...new Set(
@@ -44,12 +45,15 @@ export default function BuildChainTab({
     }
   }
 
+  const insertCodeBlock = (index: number) => () =>
+    setItems([...items.slice(0, index), { code: '' }, ...items.slice(index)])
+
   const addPrompt = (promptID: number) => setItems([...items, chainItemFromPromptID(promptID)])
 
   const replacePrompt = (index: number) => (promptID: number) =>
     setItems([...items.slice(0, index), chainItemFromPromptID(promptID), ...items.slice(index + 1)])
 
-  const removePrompt = (index: number) => () => setItems([...items.slice(0, index), ...items.slice(index + 1)])
+  const removeItem = (index: number) => () => setItems([...items.slice(0, index), ...items.slice(index + 1)])
 
   const toggleIncludeContext = (index: number) => (includeContext: boolean) =>
     setItems([...items.slice(0, index), { ...items[index], includeContext }, ...items.slice(index + 1)])
@@ -84,7 +88,8 @@ export default function BuildChainTab({
                   prompts={prompts}
                   selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
                   onSelectPrompt={replacePrompt(index)}
-                  onRemovePrompt={removePrompt(index)}
+                  onInsertCodeBlock={insertCodeBlock(index)}
+                  onRemovePrompt={removeItem(index)}
                 />
                 <Selector>
                   <VersionSelector
@@ -96,6 +101,13 @@ export default function BuildChainTab({
                 </Selector>
               </>
             )}
+            {!IsPromptChainItem(item) && (
+              <>
+                <Button type='destructive' onClick={removeItem(index)}>
+                  Remove
+                </Button>
+              </>
+            )}
             <OutputMapper
               key={item.output}
               output={item.output}
@@ -105,9 +117,10 @@ export default function BuildChainTab({
           </div>
         ))}
         <PromptSelector
-          key={items.map(item => (IsPromptChainItem(item) ? item.versionID : '')).join('')}
+          key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
           prompts={prompts}
           onSelectPrompt={addPrompt}
+          onInsertCodeBlock={insertCodeBlock(items.length)}
           includeAddPromptOption
         />
       </div>
@@ -150,28 +163,51 @@ function PromptSelector({
   selectedPrompt,
   onSelectPrompt,
   includeAddPromptOption,
+  onInsertCodeBlock,
   onRemovePrompt,
 }: {
   prompts: Prompt[]
   selectedPrompt?: Prompt
   onSelectPrompt: (promptID: number) => void
   includeAddPromptOption?: boolean
+  onInsertCodeBlock: () => void
   onRemovePrompt?: () => void
 }) {
+  enum Option {
+    ADD = 0,
+    REMOVE = 1,
+    CODE = 2,
+  }
+
+  const selectOption = (value: number) => {
+    switch (value) {
+      case Option.ADD:
+        return
+      case Option.REMOVE:
+        return onRemovePrompt?.()
+      case Option.CODE:
+        return onInsertCodeBlock()
+      default:
+        return onSelectPrompt(value)
+    }
+  }
+
   return (
     <Selector>
-      <DropdownMenu
-        value={selectedPrompt?.id}
-        onChange={value => (onRemovePrompt && !Number(value) ? onRemovePrompt() : onSelectPrompt(Number(value)))}>
-        {includeAddPromptOption && <option value={0}>Add Prompt to Chain</option>}
+      <DropdownMenu value={selectedPrompt?.id} onChange={value => selectOption(Number(value))}>
+        {includeAddPromptOption && <option value={Option.ADD}>Add Prompt to Chain</option>}
         {prompts.map((prompt, index) => (
           <option key={index} value={prompt.id}>
             {prompt.name}
           </option>
         ))}
-        {onRemovePrompt && <option disabled>────────────────────────────────────</option>}
-        {onRemovePrompt && <option value={0}>Remove Prompt from Chain</option>}
+        <HackyOptionSeparator />
+        <option value={Option.CODE}>Insert Code Block</option>
+        {onRemovePrompt && <HackyOptionSeparator />}
+        {onRemovePrompt && <option value={Option.REMOVE}>Remove Prompt from Chain</option>}
       </DropdownMenu>
     </Selector>
   )
 }
+
+const HackyOptionSeparator = () => <option disabled>────────────────────────────────────</option>
