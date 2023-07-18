@@ -69,7 +69,7 @@ export default function BuildChainTab({
   const [editedCode, setEditedCode] = useState<string>('')
 
   const insertCodeBlock = (index: number) => () => {
-    const code = 'return {{input}}'
+    const code = `'Hello world'`
     setItems([...items.slice(0, index), { code }, ...items.slice(index)])
     setEditCodeIndex(index)
     setEditedCode(code)
