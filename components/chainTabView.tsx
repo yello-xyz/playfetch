@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainItem, Version } from '@/types'
+import { ActiveChain, ActivePrompt, ChainItem, CodeConfig, RunConfig, Version } from '@/types'
 import BuildChainTab from './buildChainTab'
 import { useEffect, useState } from 'react'
 import TestChainTab from './testChainTab'
@@ -7,36 +7,49 @@ import useInputValues from './inputValues'
 import PublishChainTab from './publishChainTab'
 import api from '@/src/client/api'
 
-export type ActivePromptCache = {
+type PromptChainItem = RunConfig & { promptID: number }
+
+export const IsPromptChainItem = (item: ChainItem): item is PromptChainItem => 'promptID' in item
+export const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
+  IsPromptChainItem(item)
+    ? {
+        versionID: item.versionID,
+        output: item.output,
+        includeContext: item.includeContext,
+      }
+    : item
+
+export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
-  promptForItem: (item: ChainItem) => ActivePrompt | undefined
-  versionForItem: (item: ChainItem) => Version | undefined
+  promptForItem: (item: PromptChainItem) => ActivePrompt | undefined
+  versionForItem: (item: PromptChainItem) => Version | undefined
 }
 
 export default function ChainTabView({ activeTab, chain }: { activeTab: MainViewTab; chain: ActiveChain }) {
-  const [items, setItems] = useState(chain.items)
-
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     chain.inputs,
     chain.projectID,
     activeTab
   )
 
+  const [items, setItems] = useState(chain.items)
+
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
-  const promptCache: ActivePromptCache = {
+  const promptCache: PromptCache = {
     promptForID: id => activePromptCache[id],
     promptForItem: item => activePromptCache[item.promptID],
     versionForItem: item => activePromptCache[item.promptID]?.versions.find(version => version.id === item.versionID),
   }
 
   useEffect(() => {
-    const unloadedItem = items.find(item => !activePromptCache[item.promptID])
+    const promptItems = items.filter(IsPromptChainItem)
+    const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
     if (unloadedItem) {
       api.getPrompt(unloadedItem.promptID).then(prompt => {
         setActivePromptCache(cache => ({ ...cache, [prompt.id]: prompt }))
         setItems(
           items.map(item =>
-            item.promptID === prompt.id
+            IsPromptChainItem(item) && item.promptID === prompt.id
               ? {
                   ...item,
                   prompt,
@@ -49,27 +62,22 @@ export default function ChainTabView({ activeTab, chain }: { activeTab: MainView
     }
   }, [items, setItems, activePromptCache])
 
-  const chainIsLoaded = items.every(item => promptCache.promptForItem(item))
+  const chainIsLoaded = items.every(item => !IsPromptChainItem(item) || promptCache.promptForItem(item))
 
-  const rawItems = items.map(item => ({
-    promptID: item.promptID,
-    versionID: item.versionID,
-    output: item.output,
-    includeContext: item.includeContext,
-  }))
-  const itemsKey = JSON.stringify(rawItems)
+  const strippedItems = items.map(item =>
+    IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item
+  )
+  const itemsKey = JSON.stringify(strippedItems)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
   if (itemsKey !== savedItemsKey) {
     setSavedItemsKey(itemsKey)
-    api.updateChain(chain.id, rawItems)
+    api.updateChain(chain.id, strippedItems)
   }
 
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
-        return (
-          <BuildChainTab items={items} setItems={setItems} prompts={chain.prompts} promptCache={promptCache} />
-        )
+        return <BuildChainTab items={items} setItems={setItems} prompts={chain.prompts} promptCache={promptCache} />
       case 'test':
         return chainIsLoaded ? (
           <TestChainTab

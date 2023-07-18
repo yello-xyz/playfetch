@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Label from './label'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
-import { ActivePromptCache } from './chainTabView'
+import { PromptCache, ChainItemToConfig, IsPromptChainItem } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
 import RunTimeline from './runTimeline'
 import { ChainItem, InputValues, PartialRun } from '@/types'
@@ -16,12 +16,8 @@ const runChain = async (
   inputs: Record<string, string>[],
   setPartialRuns: (runs: PartialRun[]) => void
 ) => {
-  const versionIDs = chain.map(item => item.versionID)
-  if (versionIDs.length > 0) {
-    const streamReader = await api.runChain(
-      chain.map(item => ({ versionID: item.versionID, output: item.output, includeContext: item.includeContext })),
-      inputs
-    )
+  if (chain.length > 0) {
+    const streamReader = await api.runChain(chain.map(ChainItemToConfig), inputs)
     await ConsumeRunStreamReader(streamReader, setPartialRuns)
   }
 }
@@ -37,7 +33,7 @@ export default function TestChainTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
-  promptCache: ActivePromptCache
+  promptCache: PromptCache
 }) {
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
   const [isRunning, setIsRunning] = useState(false)
@@ -48,7 +44,7 @@ export default function TestChainTab({
 
   const testChain = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    const versions = items.map(item => promptCache.versionForItem(item))
+    const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
     if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
       setIsRunning(true)
       await runChain(items, inputs, setPartialRuns)

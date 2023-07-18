@@ -119,9 +119,12 @@ export type RunConfig = {
   includeContext?: boolean
 }
 
-export type ChainItem = RunConfig & {
-  promptID: number
+export type CodeConfig = {
+  code: string
+  output?: string
 }
+
+export type ChainItem = (RunConfig & { promptID: number }) | CodeConfig
 
 export type Endpoint = {
   id: number

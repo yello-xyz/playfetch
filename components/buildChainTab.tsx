@@ -4,15 +4,19 @@ import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
-import { ActivePromptCache } from './chainTabView'
+import { PromptCache, IsPromptChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
 
-const ExtractChainVariables = (chain: ChainItem[], cache: ActivePromptCache) => [
-  ...new Set(chain.flatMap(item => ExtractPromptVariables(cache.versionForItem(item)?.prompt ?? ''))),
+const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
+  ...new Set(
+    chain.flatMap(item =>
+      ExtractPromptVariables(IsPromptChainItem(item) ? cache.versionForItem(item)?.prompt ?? '' : item.code)
+    )
+  ),
 ]
 
-export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ActivePromptCache) => {
+export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) => {
   const allInputVariables = ExtractChainVariables(chain, cache)
   const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
@@ -27,7 +31,7 @@ export default function BuildChainTab({
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   prompts: Prompt[]
-  promptCache: ActivePromptCache
+  promptCache: PromptCache
 }) {
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = prompts.find(prompt => prompt.id === promptID)!
@@ -55,11 +59,7 @@ export default function BuildChainTab({
 
   const mapOutput = (index: number) => (output?: string) => {
     const resetChain = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
-    setItems([
-      ...resetChain.slice(0, index),
-      { ...resetChain[index], output },
-      ...resetChain.slice(index + 1),
-    ])
+    setItems([...resetChain.slice(0, index), { ...resetChain[index], output }, ...resetChain.slice(index + 1)])
   }
 
   return (
@@ -73,21 +73,29 @@ export default function BuildChainTab({
         </div>
         {items.map((item, index) => (
           <div key={index} className='flex items-center gap-4'>
-            <Checkbox disabled={index === 0} checked={!!item.includeContext} setChecked={toggleIncludeContext(index)} />
-            <PromptSelector
-              prompts={prompts}
-              selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
-              onSelectPrompt={replacePrompt(index)}
-              onRemovePrompt={removePrompt(index)}
-            />
-            <Selector>
-              <VersionSelector
-                versions={promptCache.promptForItem(item)?.versions ?? []}
-                endpoints={promptCache.promptForItem(item)?.endpoints ?? []}
-                activeVersion={promptCache.versionForItem(item)}
-                setActiveVersion={selectVersion(index)}
-              />
-            </Selector>
+            {IsPromptChainItem(item) && (
+              <>
+                <Checkbox
+                  disabled={index === 0}
+                  checked={!!item.includeContext}
+                  setChecked={toggleIncludeContext(index)}
+                />
+                <PromptSelector
+                  prompts={prompts}
+                  selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
+                  onSelectPrompt={replacePrompt(index)}
+                  onRemovePrompt={removePrompt(index)}
+                />
+                <Selector>
+                  <VersionSelector
+                    versions={promptCache.promptForItem(item)?.versions ?? []}
+                    endpoints={promptCache.promptForItem(item)?.endpoints ?? []}
+                    activeVersion={promptCache.versionForItem(item)}
+                    setActiveVersion={selectVersion(index)}
+                  />
+                </Selector>
+              </>
+            )}
             <OutputMapper
               key={item.output}
               output={item.output}
@@ -97,7 +105,7 @@ export default function BuildChainTab({
           </div>
         ))}
         <PromptSelector
-          key={items.map(item => item.versionID).join('')}
+          key={items.map(item => (IsPromptChainItem(item) ? item.versionID : '')).join('')}
           prompts={prompts}
           onSelectPrompt={addPrompt}
           includeAddPromptOption

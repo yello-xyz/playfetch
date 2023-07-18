@@ -9,6 +9,7 @@ import {
   Endpoint,
   ActiveChain,
   ChainItem,
+  CodeConfig,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -99,7 +100,7 @@ const api = {
   runPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs: [config], inputs }, 'stream')
   },
-  runChain: function (configs: RunConfig[], inputs: PromptInputs[]): Promise<StreamReader> {
+  runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
   publishPrompt: function (
@@ -131,7 +132,7 @@ const api = {
     return post(this.deleteChain, { chainID })
   },
   publishChain: function (
-    chain: RunConfig[],
+    chain: (RunConfig | CodeConfig)[],
     projectID: number,
     chainID: number,
     name: string,
