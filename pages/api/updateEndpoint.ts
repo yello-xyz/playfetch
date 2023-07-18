@@ -11,7 +11,7 @@ async function updateEndpoint(req: NextApiRequest, res: NextApiResponse, user: U
     user.id,
     req.body.endpointID,
     req.body.enabled,
-    req.body.chain,
+    req.body.versionID,
     urlPath,
     req.body.flavor,
     req.body.useCache

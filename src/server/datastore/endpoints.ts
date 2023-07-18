@@ -1,4 +1,4 @@
-import { Endpoint, RunConfig } from '@/types'
+import { Endpoint } from '@/types'
 import { and } from '@google-cloud/datastore'
 import {
   Entity,
@@ -21,14 +21,12 @@ export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    const chain = JSON.parse(endpointData.chain)
-    const versionID = chain.length === 1 ? chain[0].versionID : undefined
     await getDatastore().save(
       toEndpointData(
         endpointData.enabled,
         endpointData.userID,
         endpointData.parentID,
-        versionID,
+        endpointData.versionID,
         endpointData.urlPath,
         endpointData.projectURLPath,
         endpointData.flavor,

@@ -18,17 +18,7 @@ export async function migrateChains() {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    const endpointData = await getEntity(Entity.ENDPOINT, 'parentID', getID(chainData))
-    if (endpointData) {
-      const chain = JSON.parse(endpointData.chain)
-      for (const item of chain) {
-        const versionData = await getKeyedEntity(Entity.VERSION, item.versionID)
-        item.promptID = versionData.promptID
-      }
-      await updateChain({ ...chainData, items: JSON.stringify(chain) }, false)
-    } else {
-      await updateChain({ ...chainData, items: JSON.stringify([]) }, false)
-    }
+    await updateChain({ ...chainData }, false)
   }
 }
 
@@ -152,9 +142,5 @@ export async function deleteChainForUser(userID: number, chainID: number) {
   await ensureChainAccess(userID, chainID)
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', chainID)
   const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', chainID)
-  await getDatastore().delete([
-    ...usageKeys,
-    ...endpointKeys,
-    buildKey(Entity.CHAIN, chainID),
-  ])
+  await getDatastore().delete([...usageKeys, ...endpointKeys, buildKey(Entity.CHAIN, chainID)])
 }
