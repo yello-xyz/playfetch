@@ -1,13 +1,15 @@
-import { ChainItem, Prompt, Version } from '@/types'
-import { ReactNode } from 'react'
+import { ChainItem, CodeConfig, Prompt, Version } from '@/types'
+import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
 import Label from './label'
 import { PromptCache, IsPromptChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
 import Button from './button'
+import PromptInput from './promptInput'
+import { CodeBlock } from './examplePane'
 
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
   ...new Set(
@@ -45,9 +47,6 @@ export default function BuildChainTab({
     }
   }
 
-  const insertCodeBlock = (index: number) => () =>
-    setItems([...items.slice(0, index), { code: '' }, ...items.slice(index)])
-
   const addPrompt = (promptID: number) => setItems([...items, chainItemFromPromptID(promptID)])
 
   const replacePrompt = (index: number) => (promptID: number) =>
@@ -66,6 +65,26 @@ export default function BuildChainTab({
     setItems([...resetChain.slice(0, index), { ...resetChain[index], output }, ...resetChain.slice(index + 1)])
   }
 
+  const [editCodeIndex, setEditCodeIndex] = useState<number>()
+  const [editedCode, setEditedCode] = useState<string>('')
+
+  const insertCodeBlock = (index: number) => () => {
+    const code = 'return {{input}}'
+    setItems([...items.slice(0, index), { code }, ...items.slice(index)])
+    setEditCodeIndex(index)
+    setEditedCode(code)
+  }
+
+  const editCodeBlock = (index: number) => () => {
+    setEditedCode((items[index] as CodeConfig).code)
+    setEditCodeIndex(index)
+  }
+
+  const updateCodeBlock = (index: number) => () => {
+    setItems([...items.slice(0, index), { ...items[index], code: editedCode }, ...items.slice(index + 1)])
+    setEditCodeIndex(undefined)
+  }
+
   return (
     <>
       <div className='flex flex-col flex-grow h-full gap-4 p-6'>
@@ -76,36 +95,58 @@ export default function BuildChainTab({
           ))}
         </div>
         {items.map((item, index) => (
-          <div key={index} className='flex items-center gap-4'>
+          <div key={index} className='flex items-start gap-4'>
             {IsPromptChainItem(item) && (
               <>
-                <Checkbox
-                  disabled={index === 0}
-                  checked={!!item.includeContext}
-                  setChecked={toggleIncludeContext(index)}
-                />
-                <PromptSelector
-                  prompts={prompts}
-                  selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
-                  onSelectPrompt={replacePrompt(index)}
-                  onInsertCodeBlock={insertCodeBlock(index)}
-                  onRemovePrompt={removeItem(index)}
-                />
-                <Selector>
+                <Column>
+                  <Checkbox
+                    disabled={index === 0}
+                    checked={!!item.includeContext}
+                    setChecked={toggleIncludeContext(index)}
+                  />
+                  <PromptSelector
+                    prompts={prompts}
+                    selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
+                    onSelectPrompt={replacePrompt(index)}
+                    onInsertCodeBlock={insertCodeBlock(index)}
+                    onRemovePrompt={removeItem(index)}
+                  />
+                </Column>
+                <Column>
                   <VersionSelector
                     versions={promptCache.promptForItem(item)?.versions ?? []}
                     endpoints={promptCache.promptForItem(item)?.endpoints ?? []}
                     activeVersion={promptCache.versionForItem(item)}
                     setActiveVersion={selectVersion(index)}
                   />
-                </Selector>
+                </Column>
               </>
             )}
             {!IsPromptChainItem(item) && (
               <>
-                <Button type='destructive' onClick={removeItem(index)}>
-                  Remove
-                </Button>
+                <Column>
+                  <div className='w-full'>
+                    {editCodeIndex === index ? (
+                      <PromptInput prompt={editedCode} setPrompt={setEditedCode} />
+                    ) : (
+                      <CodeBlock>{StripPromptSentinels(item.code)}</CodeBlock>
+                    )}
+                  </div>
+                </Column>
+                <Column>
+                  {editCodeIndex === index ? (
+                    <Button type='outline' onClick={updateCodeBlock(index)}>
+                      Save
+                    </Button>
+                  ) : (
+                    <Button type='outline' onClick={editCodeBlock(index)}>
+                      Edit
+                    </Button>
+                  )}
+                  <Button type='destructive' onClick={removeItem(index)}>
+                    Remove
+                  </Button>
+                </Column>
               </>
             )}
             <OutputMapper
@@ -116,20 +157,22 @@ export default function BuildChainTab({
             />
           </div>
         ))}
-        <PromptSelector
-          key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
-          prompts={prompts}
-          onSelectPrompt={addPrompt}
-          onInsertCodeBlock={insertCodeBlock(items.length)}
-          includeAddPromptOption
-        />
+        <Column>
+          <PromptSelector
+            key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
+            prompts={prompts}
+            onSelectPrompt={addPrompt}
+            onInsertCodeBlock={insertCodeBlock(items.length)}
+            includeAddPromptOption
+          />
+        </Column>
       </div>
     </>
   )
 }
 
-function Selector({ children }: { children: ReactNode }) {
-  return <div className='w-full max-w-[30%]'>{children}</div>
+function Column({ children }: { children: ReactNode }) {
+  return <div className='w-full max-w-[30%] flex gap-2'>{children}</div>
 }
 
 function OutputMapper({
@@ -142,7 +185,7 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
 }) {
   return (
-    <Selector>
+    <Column>
       <DropdownMenu
         disabled={!inputs.length}
         value={output ?? 0}
@@ -154,7 +197,7 @@ function OutputMapper({
           </option>
         ))}
       </DropdownMenu>
-    </Selector>
+    </Column>
   )
 }
 
@@ -176,7 +219,7 @@ function PromptSelector({
   enum Option {
     ADD = 0,
     REMOVE = 1,
-    CODE = 2,
+    INSERT = 2,
   }
 
   const selectOption = (value: number) => {
@@ -185,7 +228,7 @@ function PromptSelector({
         return
       case Option.REMOVE:
         return onRemovePrompt?.()
-      case Option.CODE:
+      case Option.INSERT:
         return onInsertCodeBlock()
       default:
         return onSelectPrompt(value)
@@ -193,20 +236,18 @@ function PromptSelector({
   }
 
   return (
-    <Selector>
-      <DropdownMenu value={selectedPrompt?.id} onChange={value => selectOption(Number(value))}>
-        {includeAddPromptOption && <option value={Option.ADD}>Add Prompt to Chain</option>}
-        {prompts.map((prompt, index) => (
-          <option key={index} value={prompt.id}>
-            {prompt.name}
-          </option>
-        ))}
-        <HackyOptionSeparator />
-        <option value={Option.CODE}>Insert Code Block</option>
-        {onRemovePrompt && <HackyOptionSeparator />}
-        {onRemovePrompt && <option value={Option.REMOVE}>Remove Prompt from Chain</option>}
-      </DropdownMenu>
-    </Selector>
+    <DropdownMenu value={selectedPrompt?.id} onChange={value => selectOption(Number(value))}>
+      {includeAddPromptOption && <option value={Option.ADD}>Add Prompt to Chain</option>}
+      {prompts.map((prompt, index) => (
+        <option key={index} value={prompt.id}>
+          {prompt.name}
+        </option>
+      ))}
+      <HackyOptionSeparator />
+      <option value={Option.INSERT}>Insert Code Block</option>
+      {onRemovePrompt && <HackyOptionSeparator />}
+      {onRemovePrompt && <option value={Option.REMOVE}>Remove Prompt from Chain</option>}
+    </DropdownMenu>
   )
 }
 

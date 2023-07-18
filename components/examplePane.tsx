@@ -56,11 +56,11 @@ export default function ExamplePane({
   )
 }
 
-function CodeBlock({ children }: { children: ReactNode }) {
+export function CodeBlock({ children }: { children: ReactNode }) {
   return (
     <div className='p-4 text-xs text-[#53961F] bg-gray-100 rounded-lg'>
       <div className='relative overflow-hidden'>
-        {children}
+        <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>
           <pre className='w-4 text-right text-gray-400'>
             {[...Array(100).keys()].map(i => (i + 1).toString()).join('\n')}
@@ -73,7 +73,7 @@ function CodeBlock({ children }: { children: ReactNode }) {
 
 function MarkedUpCURLCommand({ children }: { children: ReactNode }) {
   return (
-    <pre className='pl-10 break-all whitespace-pre-wrap'>
+    <>
       {children
         ?.toString()
         .split('\n')
@@ -93,7 +93,7 @@ function MarkedUpCURLCommand({ children }: { children: ReactNode }) {
             </MarkedUpStartLine>
           </div>
         ))}
-    </pre>
+    </>
   )
 }
 
