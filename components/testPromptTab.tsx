@@ -3,7 +3,7 @@ import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelPr
 
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import TestDataPane from './testDataPane'
+import TestDataPane, { EmptyTestDataPane } from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
@@ -56,12 +56,16 @@ export default function TestPromptTab({
       <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
         <div className='flex flex-col flex-grow gap-2 overflow-hidden min-h-[180px]'>
           <Label>Test Data</Label>
-          <TestDataPane
-            variables={variables}
-            inputValues={inputValues}
-            setInputValues={setInputValues}
-            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-          />
+          {variables.length > 0 ? (
+            <TestDataPane
+              variables={variables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            />
+          ) : (
+            <EmptyTestDataPane />
+          )}
         </div>
         <div className='self-start'>
           <VersionSelector

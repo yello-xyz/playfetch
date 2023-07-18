@@ -97,12 +97,10 @@ export default function TestDataPane({
         Add
       </div>
     </div>
-  ) : (
-    <EmptyInputsPane />
-  )
+  ) : null
 }
 
-function EmptyInputsPane() {
+export function EmptyTestDataPane() {
   return (
     <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
       <span className='font-medium'>Create inputs for your prompt below</span>
