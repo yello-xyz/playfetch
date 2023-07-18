@@ -1,29 +1,11 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import {
-  PromptInputs,
-  User,
-  RunConfig,
-  PromptConfig,
-  ModelProvider,
-  OpenAILanguageModel,
-  GoogleLanguageModel,
-  AnthropicLanguageModel,
-  Version,
-  CodeConfig,
-} from '@/types'
-import openai from '@/src/server/openai'
-import anthropic from '@/src/server/anthropic'
-import vertexai from '@/src/server/vertexai'
-import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
-import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { PromptInputs, User, RunConfig, Version, CodeConfig } from '@/types'
 import { getVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
-import Isolated from 'isolated-vm'
-
-type PredictionResponse = { output: string | undefined; cost: number }
-type RunResponse = PredictionResponse & { attempts: number; cacheHit: boolean }
+import runCode from '@/src/server/codeEngine'
+import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractPromptVariables(prompt).reduce(
@@ -45,25 +27,10 @@ const postProcess = (inputs: PromptInputs, output: string, config: RunConfig | C
   return output
 }
 
-const codeToCamelCase = (code: string) =>
-  ExtractPromptVariables(code).reduce(
-    (code, variable) => code.replaceAll(`{{${variable}}}`, ToCamelCase(variable)),
-    code
-  )
-
-const runCode = async (code: string, inputs: PromptInputs, streamChunks?: (chunk: string) => void) => {
-  const isolated = new Isolated.Isolate({ memoryLimit: 8 })
-  const context = isolated.createContextSync()
-  try {
-    Object.entries(inputs).forEach(([variable, value]) => context.global.setSync(ToCamelCase(variable), value))
-    const result = await context.eval(codeToCamelCase(code), { timeout: 1000 })
-    return result.toString()
-  } catch (error: any) {
-    streamChunks?.(error.message)
-    console.error(error.message)
-    return undefined
-  }
-}
+type CallbackType = (
+  version: Version | null,
+  response: { output: string; cost: number; attempts: number; cacheHit: boolean }
+) => Promise<any>
 
 export const runChainConfigs = async (
   userID: number,
@@ -71,7 +38,7 @@ export const runChainConfigs = async (
   inputs: PromptInputs,
   useCache: boolean,
   useCamelCase: boolean,
-  callback: (version: Version | null, response: RunResponse & { output: string }) => Promise<any>,
+  callback: CallbackType,
   streamChunks?: (chunk: string) => void
 ) => {
   let lastOutput = undefined as string | undefined
@@ -95,7 +62,7 @@ export const runChainConfigs = async (
       lastOutput = postProcess(inputs, output, config, useCamelCase)
       runningContext += `\n\n${output}\n\n`
       await callback(version, { ...runResponse, output })
-    } else { 
+    } else {
       const output = await runCode(config.code, inputs, streamChunks)
       if (!output?.length) {
         break
@@ -107,73 +74,6 @@ export const runChainConfigs = async (
   }
 
   return lastOutput
-}
-
-const runPromptWithConfig = async (
-  userID: number,
-  prompt: string,
-  config: PromptConfig,
-  useCache: boolean,
-  streamChunks?: (chunk: string) => void
-): Promise<RunResponse> => {
-  const cacheKey = {
-    provider: config.provider,
-    model: config.model,
-    temperature: config.temperature,
-    maxTokens: config.maxTokens,
-    prompt,
-  }
-
-  const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
-  if (cachedValue) {
-    return { output: cachedValue, cost: 0, attempts: 1, cacheHit: true }
-  }
-
-  const getAPIKey = async (provider: ModelProvider) => {
-    switch (provider) {
-      default:
-      case 'google':
-        return null
-      case 'openai':
-      case 'anthropic':
-        return getProviderKey(userID, provider)
-    }
-  }
-
-  const getPredictor = (provider: ModelProvider, apiKey: string) => {
-    switch (provider) {
-      default:
-      case 'google':
-        return vertexai(config.model as GoogleLanguageModel)
-      case 'openai':
-        return openai(apiKey, userID, config.model as OpenAILanguageModel)
-      case 'anthropic':
-        return anthropic(apiKey, config.model as AnthropicLanguageModel)
-    }
-  }
-
-  const apiKey = await getAPIKey(config.provider)
-  const predictor = getPredictor(config.provider, apiKey ?? '')
-
-  let result: PredictionResponse = { output: undefined, cost: 0 }
-  let attempts = 0
-  const maxAttempts = 3
-  while (++attempts <= maxAttempts) {
-    result = await predictor(prompt, config.temperature, config.maxTokens, streamChunks)
-    if (result.output?.length) {
-      break
-    }
-  }
-
-  if (useCache && result.output?.length) {
-    await cacheValue(cacheKey, result.output)
-  }
-
-  if (result.cost > 0) {
-    await incrementProviderCostForUser(userID, config.provider, result.cost)
-  }
-
-  return { ...result, attempts, cacheHit: false }
 }
 
 async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
