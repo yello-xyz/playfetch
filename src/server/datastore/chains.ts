@@ -69,7 +69,6 @@ export async function getActiveChain(
 ): Promise<ActiveChain> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const projectData = await getKeyedEntity(Entity.PROJECT, chainData.projectID)
-  // const items = await getOrderedEntities(Entity.CHAIN_ITEM, 'chainID', chainID)
   const users = await getProjectUsers(chainData.projectID)
   const inputs = await getProjectInputValues(chainData.projectID)
   const endpoints = await loadEndpoints(chainID, projectData, buildURL)
@@ -79,7 +78,6 @@ export async function getActiveChain(
   return {
     ...toChain(chainData, userID),
     projectID: chainData.projectID,
-    // items: items.map(item => toChainItem(item)).reverse(),
     endpoints,
     users,
     inputs,
@@ -147,13 +145,11 @@ export async function toggleFavoriteChain(userID: number, chainID: number, favor
 export async function deleteChainForUser(userID: number, chainID: number) {
   // TODO warn or even refuse when chain has published endpoints
   await ensureChainAccess(userID, chainID)
-  // const itemKeys = await getEntityKeys(Entity.CHAIN_ITEM, 'chainID', chainID)
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', chainID)
   const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', chainID)
   await getDatastore().delete([
     ...usageKeys,
     ...endpointKeys,
-    // ...itemKeys,
     buildKey(Entity.CHAIN, chainID),
   ])
 }
