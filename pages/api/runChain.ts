@@ -4,7 +4,7 @@ import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, Version, CodeConfig } from '@/types'
 import { getVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
-import runCode from '@/src/server/codeEngine'
+import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
@@ -18,14 +18,6 @@ const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boole
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     useCamelCase ? promptToCamelCase(prompt) : prompt
   )
-
-const postProcess = (inputs: PromptInputs, output: string, config: RunConfig | CodeConfig, useCamelCase: boolean) => {
-  if (config.output) {
-    const variable = useCamelCase ? ToCamelCase(config.output) : config.output
-    inputs[variable] = output
-  }
-  return output
-}
 
 type CallbackType = (
   version: Version | null,
@@ -43,6 +35,7 @@ export const runChainConfigs = async (
 ) => {
   let lastOutput = undefined as string | undefined
   let runningContext = ''
+  const codeContext = CreateCodeContextWithInputs(inputs)
 
   const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
 
@@ -59,17 +52,22 @@ export const runChainConfigs = async (
       if (!output?.length) {
         break
       }
-      lastOutput = postProcess(inputs, output, config, useCamelCase)
       runningContext += `\n\n${output}\n\n`
+      lastOutput = output
       await callback(version, { ...runResponse, output })
     } else {
-      const output = await runCode(config.code, inputs, streamChunks)
-      if (!output?.length) {
+      const output = await EvaluateCode(config.code, codeContext, streamChunks)
+      if (output === undefined) {
         break
       }
       streamChunks?.(output)
-      lastOutput = postProcess(inputs, output, config, useCamelCase)
+      lastOutput = output
       await callback(null, { output, cost: 0, attempts: 1, cacheHit: false })
+    }
+    if (config.output) {
+      AugmentCodeContext(codeContext, config.output, lastOutput)
+      const variable = useCamelCase ? ToCamelCase(config.output) : config.output
+      inputs[variable] = lastOutput
     }
   }
 

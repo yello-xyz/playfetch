@@ -86,7 +86,7 @@ export default function BuildChainTab({
 
   return (
     <>
-      <div className='flex flex-col flex-grow h-full gap-4 p-6'>
+      <div className='flex flex-col flex-grow h-full gap-4 p-6 overflow-y-auto'>
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
           {ExtractUnboundChainVariables(items, promptCache).map((variable, index) => (
