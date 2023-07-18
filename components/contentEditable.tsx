@@ -9,6 +9,7 @@ export default function ContentEditable({
   innerRef,
   allowedTags = [],
   allowedAttributes = {},
+  disabled,
 }: {
   className?: string
   htmlValue: string
@@ -16,9 +17,11 @@ export default function ContentEditable({
   innerRef?: RefObject<HTMLElement>
   allowedTags?: string[]
   allowedAttributes?: Record<string, string[]>
+  disabled?: boolean
 }) {
   return (
     <ReactContentEditable
+      disabled={disabled}
       className={className}
       html={htmlValue}
       onChange={event => onChange(sanitizeHtml(event.currentTarget.innerHTML, { allowedTags, allowedAttributes }))}

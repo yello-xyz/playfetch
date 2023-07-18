@@ -4,8 +4,8 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
-import PromptInput from './promptInput'
 import { VersionsEqual } from '@/src/common/versionsEqual'
+import RichTextInput from './richTextInput'
 
 export default function PromptPanel({
   version,
@@ -55,7 +55,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col min-h-0 gap-4 text-gray-500'>
       <div className='self-stretch min-h-0'>
-        <PromptInput prompt={prompt} setPrompt={updatePrompt} showLabel={showLabel} />
+        <RichTextInput value={prompt} setValue={updatePrompt} label={showLabel ? 'Prompt' : undefined} />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (

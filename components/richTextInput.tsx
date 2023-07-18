@@ -5,6 +5,7 @@ import linkIcon from '@/public/linkWhite.svg'
 import { InputVariableClass } from './inputVariable'
 
 import dynamic from 'next/dynamic'
+import { CodeBlock } from './examplePane'
 const ContentEditable = dynamic(() => import('./contentEditable'))
 
 const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
@@ -58,14 +59,18 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerR
   return undefined
 }
 
-export default function PromptInput({
-  prompt,
-  setPrompt,
-  showLabel,
+export default function RichTextInput({
+  value,
+  setValue,
+  label,
+  disabled,
+  preformatted,
 }: {
-  prompt: string
-  setPrompt: (prompt: string) => void
-  showLabel?: boolean
+  value: string
+  setValue: (value: string) => void
+  label?: string
+  disabled?: boolean
+  preformatted?: boolean
 }) {
   const contentEditableRef = useRef<HTMLElement>(null)
 
@@ -82,30 +87,39 @@ export default function PromptInput({
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
     if (isInput) {
-      setPrompt(prompt.replaceAll(`{{${text}}}`, text))
+      setValue(value.replaceAll(`{{${text}}}`, text))
     } else {
       range.surroundContents(document.createElement('b'))
     }
   }
 
+  const contentEditableClassName = preformatted
+    ? 'outline-none'
+    : 'p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
+
+  const renderContentEditable = () => (
+    <Suspense>
+      <ContentEditable
+        disabled={disabled}
+        className={contentEditableClassName}
+        htmlValue={toHTML(value)}
+        onChange={value => setValue(fromHTML(value))}
+        allowedTags={['br', 'div', 'b']}
+        allowedAttributes={{ b: ['class'] }}
+        innerRef={contentEditableRef}
+      />
+    </Suspense>
+  )
+
   return (
     <div ref={containerRef} className='relative h-full'>
       <div className='flex flex-col h-full gap-2 overflow-hidden'>
-        {showLabel && (
+        {label && (
           <div className='flex items-center block gap-2 mb-1'>
-            <Label onClick={() => contentEditableRef.current?.focus()}>Prompt</Label>
+            <Label onClick={() => contentEditableRef.current?.focus()}>{label}</Label>
           </div>
         )}
-        <Suspense>
-          <ContentEditable
-            className='p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
-            htmlValue={toHTML(prompt)}
-            onChange={value => setPrompt(fromHTML(value))}
-            allowedTags={['br', 'div', 'b']}
-            allowedAttributes={{ b: ['class'] }}
-            innerRef={contentEditableRef}
-          />
-        </Suspense>
+        {preformatted ? <CodeBlock>{renderContentEditable()}</CodeBlock> : renderContentEditable()}
       </div>
       {selection && (
         <div

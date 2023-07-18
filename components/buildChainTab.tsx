@@ -2,14 +2,13 @@ import { ChainItem, CodeConfig, Prompt, Version } from '@/types'
 import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
-import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import Label from './label'
 import { PromptCache, IsPromptChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
 import Button from './button'
-import PromptInput from './promptInput'
-import { CodeBlock } from './examplePane'
+import RichTextInput from './richTextInput'
 
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
   ...new Set(
@@ -126,11 +125,12 @@ export default function BuildChainTab({
               <>
                 <Column>
                   <div className='w-full'>
-                    {editCodeIndex === index ? (
-                      <PromptInput prompt={editedCode} setPrompt={setEditedCode} />
-                    ) : (
-                      <CodeBlock>{StripPromptSentinels(item.code)}</CodeBlock>
-                    )}
+                    <RichTextInput
+                      value={index === editCodeIndex ? editedCode : item.code}
+                      setValue={setEditedCode}
+                      disabled={index !== editCodeIndex}
+                      preformatted
+                    />
                   </div>
                 </Column>
                 <Column>
