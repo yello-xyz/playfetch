@@ -64,7 +64,7 @@ export const runChainConfigs = async (
       }
       runningContext += `\n\n${output}\n\n`
       AugmentInputs(inputs, config.output, output, useCamelCase)
-      AugmentCodeContext(codeContext, config.output, output)
+      AugmentCodeContext(codeContext, config.output, output, true)
       await callback(version, { ...runResponse, output, failed: false })
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)

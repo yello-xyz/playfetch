@@ -8,8 +8,25 @@ const codeToCamelCase = (code: string) =>
     code
   )
 
-export const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: string) =>
-  variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
+const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
+
+const tryParse = (value: string) => {
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
+}
+
+export const AugmentCodeContext = (
+  context: Isolated.Context,
+  variable: string | undefined,
+  value: any,
+  stringified = false
+) =>
+  variable
+    ? context.global.setSync(ToCamelCase(variable), stringified ? tryParse(value) : value, { copy: true })
+    : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
@@ -22,8 +39,6 @@ type CodeResponseError = { result: undefined; output: undefined; error: any }
 type CodeResponse = { result: any; output: string; error: undefined } | CodeResponseError
 
 export const IsCodeResponseError = (response: CodeResponse): response is CodeResponseError => !!response.error
-
-const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
 
 export const EvaluateCode = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
   try {
