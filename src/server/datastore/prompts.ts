@@ -58,7 +58,7 @@ export async function loadEndpoints(parentID: number, projectData: any, buildURL
   return endpoints
     .map(endpoint => ({
       ...(toEndpoint(endpoint) as (Endpoint & { versionID: number })),
-      url: buildURL(`/${endpoint.projectURLPath}/${endpoint.urlPath}`),
+      url: buildURL(`/p/${endpoint.projectURLPath}/${endpoint.urlPath}`),
       apiKeyDev: projectData.apiKeyDev ?? '',
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     }))
