@@ -4,7 +4,12 @@ import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, Version, CodeConfig } from '@/types'
 import { getVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
-import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
+import {
+  AugmentCodeContext,
+  CreateCodeContextWithInputs,
+  EvaluateCode,
+  IsCodeResponseError,
+} from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
@@ -18,6 +23,9 @@ const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boole
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     useCamelCase ? promptToCamelCase(prompt) : prompt
   )
+
+const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
+  variable ? (inputs[useCamelCase ? ToCamelCase(variable) : variable] = value) : undefined
 
 type CallbackType = (
   version: Version | null,
@@ -50,24 +58,27 @@ export const runChainConfigs = async (
       const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
       const output = runResponse.output
       if (!output?.length) {
+        // TODO do we actually want to return previous lastOutput in this case?
+        // TODO call callback to mark as failed (without saving run probably) + same for code below
         break
       }
       runningContext += `\n\n${output}\n\n`
       lastOutput = output
+      AugmentInputs(inputs, config.output, output, useCamelCase)
+      AugmentCodeContext(codeContext, config.output, output)
       await callback(version, { ...runResponse, output })
     } else {
-      const output = await EvaluateCode(config.code, codeContext, streamChunks)
-      if (output === undefined) {
+      const codeResponse = await EvaluateCode(config.code, codeContext)
+      if (IsCodeResponseError(codeResponse)) {
+        streamChunks?.(codeResponse.error.message)
         break
       }
+      const output = codeResponse.output
       streamChunks?.(output)
       lastOutput = output
+      AugmentInputs(inputs, config.output, output, useCamelCase)
+      AugmentCodeContext(codeContext, config.output, codeResponse.result)
       await callback(null, { output, cost: 0, attempts: 1, cacheHit: false })
-    }
-    if (config.output) {
-      AugmentCodeContext(codeContext, config.output, lastOutput)
-      const variable = useCamelCase ? ToCamelCase(config.output) : config.output
-      inputs[variable] = lastOutput
     }
   }
 

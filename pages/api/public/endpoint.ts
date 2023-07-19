@@ -37,6 +37,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             // TODO usage will seem off for chain endpoints if we update usage for each chain item
             updateUsage(endpoint.id, cost, cacheHit, attempts, !output?.length)
         )
+        // TODO if there was an intermediate failure in the chain, we should return an error here?
         return res.json({ output })
       }
     }

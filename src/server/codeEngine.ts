@@ -8,8 +8,8 @@ const codeToCamelCase = (code: string) =>
     code
   )
 
-export const AugmentCodeContext = (context: Isolated.Context, variable: string, value: string) =>
-  context.global.setSync(ToCamelCase(variable), value)
+export const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: string) =>
+  variable ? context.global.setSync(ToCamelCase(variable), value) : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
@@ -18,14 +18,19 @@ export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   return context
 }
 
-export const EvaluateCode = async (code: string, context: Isolated.Context, streamChunks?: (chunk: string) => void) => {
+type CodeResponseError = { result: undefined; output: undefined; error: any }
+type CodeResponse = { result: any; output: string; error: undefined } | CodeResponseError
+
+export const IsCodeResponseError = (response: CodeResponse): response is CodeResponseError => !!response.error
+
+const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
+
+export const EvaluateCode = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
   try {
-    const result = await context.eval(codeToCamelCase(code), { timeout: 1000 }) ?? ''
-    // TODO this needs a bit more thinking, e.g. want to be able to return objects directly
-    return typeof result === 'object' ? JSON.stringify(result) : result.toString() as string
+    const result = await context.eval(codeToCamelCase(code), { timeout: 1000 })
+    const output = stringify(result)
+    return { result, output, error: undefined }
   } catch (error: any) {
-    streamChunks?.(error.message)
-    console.error(error.message)
-    return undefined
+    return { result: undefined, output: undefined, error }
   }
 }
