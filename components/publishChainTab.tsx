@@ -21,8 +21,14 @@ export default function PublishChainTab({
 }) {
   const endpoints = chain.endpoints
 
-  const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id)
+  const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
+
+  if (activeEndpointID && !activeEndpoint) {
+    setActiveEndpointID(undefined)
+  } else if (!activeEndpointID && endpoints.length === 1) {
+    setActiveEndpointID(endpoints[0].id)
+  }
 
   const refreshChain = useRefreshChain()
 

@@ -91,17 +91,6 @@ export default function EndpointsTable({
     </RowCell>
   )
 
-  const [shouldSelectFirst, setShouldSelectFirst] = useState(false)
-  const addFirstEndpoint = () => {
-    onAddEndpoint()
-    setShouldSelectFirst(true)
-  }
-
-  if (shouldSelectFirst && endpoints.length > 0) {
-    setActiveEndpoint(endpoints[0])
-    setShouldSelectFirst(false)
-  }
-
   return (
     <>
       <div className='flex items-center justify-between w-full'>
@@ -143,7 +132,7 @@ export default function EndpointsTable({
           })}
         </div>
       ) : (
-        <EmptyTable onAddEndpoint={addFirstEndpoint} itemLabel={getVersionIndex ? 'prompt' : 'chain'} />
+        <EmptyTable onAddEndpoint={onAddEndpoint} itemLabel={getVersionIndex ? 'prompt' : 'chain'} />
       )}
     </>
   )
