@@ -6,6 +6,16 @@ export type User = {
   isAdmin: boolean
 }
 
+export type Workspace = {
+  id: number
+  name: string
+}
+
+export type ActiveWorkspace = Workspace & {
+  projects: Project[]
+  users: User[]
+}
+
 export type Project = {
   id: number
   name: string

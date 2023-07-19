@@ -8,8 +8,9 @@ import {
   getFilteredEntityKey,
   getID,
 } from './datastore'
+import { getUserForEmail } from './users'
 
-type Kind = 'project'
+type Kind = 'project' | 'workspace'
 
 export async function migrateAccess() {
   const datastore = getDatastore()
@@ -17,7 +18,7 @@ export async function migrateAccess() {
   for (const accessData of allAccess) {
     datastore.save({
       key: buildKey(Entity.ACCESS, getID(accessData)),
-      data: { userID: accessData.userID, objectID: accessData.projectID, kind: 'project' },
+      data: { userID: accessData.userID, objectID: accessData.objectID, kind: accessData.kind },
       excludeFromIndexes: [],
     })
   }
@@ -63,4 +64,16 @@ export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
   return entities.map(entity => entity.userID)
+}
+
+export async function grantUsersAccess(emails: string[], objectID: number, kind: 'project' | 'workspace') {
+  for (const email of emails) {
+    const user = await getUserForEmail(email.toLowerCase())
+    if (user) {
+      await grantUserAccess(user.id, objectID, kind)
+      // TODO send notification
+    } else {
+      // TODO send invite to sign up
+    }
+  }
 }

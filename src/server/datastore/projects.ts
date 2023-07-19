@@ -13,9 +13,9 @@ import {
 import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
-import { getAccessibleObjectIDs, getAccessingUserIDs, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
+import { getAccessibleObjectIDs, getAccessingUserIDs, grantUserAccess, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
-import { getUserForEmail, toUser } from './users'
+import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor } from './endpoints'
 import { toChain } from './chains'
@@ -53,7 +53,7 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
-const toProject = (data: any): Project => ({
+export const toProject = (data: any): Project => ({
   id: getID(data),
   name: data.name,
 })
@@ -124,15 +124,7 @@ export async function addProjectForUser(userID: number, projectName: string, isU
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
   await getVerifiedUserProjectData(userID, projectID)
-  for (const email of emails) {
-    const user = await getUserForEmail(email.toLowerCase())
-    if (user) {
-      await grantUserAccess(user.id, projectID, 'project')
-      // TODO send notification
-    } else {
-      // TODO send invite to sign up
-    }
-  }
+  await grantUsersAccess(emails, projectID, 'project')
 }
 
 export async function revokeMemberAccessForProject(userID: number, projectID: number) {
@@ -172,10 +164,7 @@ export async function ensureProjectAccess(userID: number, projectID: number) {
 }
 
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
-  const hasAccess = await hasUserAccess(userID, projectID)
-  if (!hasAccess) {
-    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
-  }
+  await ensureProjectAccess(userID, projectID)
   return getKeyedEntity(Entity.PROJECT, projectID)
 }
 
@@ -225,8 +214,9 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   if (projectID === userID) {
     throw new Error('Cannot delete user project')
   }
-  const accessKeys = await getEntityKeys(Entity.ACCESS, 'projectID', projectID)
+  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
   if (accessKeys.length > 1) {
+    // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
     throw new Error('Cannot delete multi-user project')
   }
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
