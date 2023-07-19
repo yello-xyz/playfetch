@@ -35,6 +35,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           true,
           (_, { cost, attempts, cacheHit, failed }) =>
             // TODO usage will seem off for chain endpoints if we update usage for each chain item
+            // TODO log duration as well here
             updateUsage(endpoint.id, cost, cacheHit, attempts, failed)
         )
         return res.json({ output })

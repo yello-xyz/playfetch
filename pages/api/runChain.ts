@@ -29,7 +29,7 @@ const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value
 
 type CallbackType = (
   version: Version | null,
-  response: { output: string; cost: number; attempts: number; cacheHit: boolean, failed: boolean }
+  response: { output?: string; cost: number; attempts: number; cacheHit: boolean, failed: boolean }
 ) => Promise<any>
 
 export const runChainConfigs = async (
@@ -59,7 +59,7 @@ export const runChainConfigs = async (
       const output = runResponse.output
       lastOutput = output
       if (!output?.length) {
-        // TODO call callback to mark as failed (without saving run probably) + same for code below
+        await callback(null, { ...runResponse, failed: true })
         break
       }
       runningContext += `\n\n${output}\n\n`
@@ -71,6 +71,7 @@ export const runChainConfigs = async (
       lastOutput = codeResponse.output
       if (IsCodeResponseError(codeResponse)) {
         streamChunks?.(codeResponse.error.message)
+        await callback(null, { cost: 0, attempts: 1, cacheHit: false, failed: true })
         break
       }
       const output = codeResponse.output
@@ -102,7 +103,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       (version, { output, cost, failed }) => {
         const createdAt = new Date()
         sendData({ index: index++, timestamp: createdAt.toISOString(), cost, failed })
-        return version
+        return version && output && !failed
           ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
           : Promise.resolve({})
       },
