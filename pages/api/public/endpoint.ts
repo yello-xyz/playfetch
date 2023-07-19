@@ -38,6 +38,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             // TODO log duration as well here
             updateUsage(endpoint.id, cost, cacheHit, attempts, failed)
         )
+        // TODO return output object directly here if it is valid JSON (see tryParse elsewhere)
         return res.json({ output })
       }
     }
