@@ -120,7 +120,7 @@ export default function RunCell({
   }
 
   return (
-    <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp}>
+    <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp} failed={run.failed}>
       <OutputWithComments
         identifier={identifier}
         output={run.output}
@@ -185,15 +185,18 @@ function RunCellContainer({
   children,
   onMouseDown,
   shimmer,
+  failed,
 }: {
   children: ReactNode
   onMouseDown?: (event: MouseEvent) => void
   shimmer?: boolean
+  failed?: boolean
 }) {
-  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg bg-blue-25 border-blue-50'
+  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg'
+  const colorClass = failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-50'
   const shimmerClass = shimmer ? 'animate-shimmer' : ''
   return (
-    <div className={`${baseClass} ${shimmerClass}`} onMouseDown={onMouseDown}>
+    <div className={`${baseClass} ${colorClass} ${shimmerClass}`} onMouseDown={onMouseDown}>
       {children}
     </div>
   )

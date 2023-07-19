@@ -104,6 +104,7 @@ export type PartialRun = {
   output: string
   timestamp?: string
   cost?: number
+  failed?: boolean
 }
 
 export type Run = PartialRun & {
