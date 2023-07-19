@@ -57,25 +57,24 @@ export const runChainConfigs = async (
       }
       const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
       const output = runResponse.output
+      lastOutput = output
       if (!output?.length) {
-        // TODO do we actually want to return previous lastOutput in this case?
         // TODO call callback to mark as failed (without saving run probably) + same for code below
         break
       }
       runningContext += `\n\n${output}\n\n`
-      lastOutput = output
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, output)
       await callback(version, { ...runResponse, output, failed: false })
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
+      lastOutput = codeResponse.output
       if (IsCodeResponseError(codeResponse)) {
         streamChunks?.(codeResponse.error.message)
         break
       }
       const output = codeResponse.output
       streamChunks?.(output)
-      lastOutput = output
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, codeResponse.result)
       await callback(null, { output, cost: 0, attempts: 1, cacheHit: false, failed: false })
