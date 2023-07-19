@@ -23,12 +23,18 @@ export default function PublishSettingsPane({
 
   const [flavor, setFlavor] = useInitialState(endpoint.flavor)
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
+  const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
     api.updateEndpoint({ ...endpoint, useCache: checked }).then(_ => onRefresh())
+  }
+
+  const toggleStreaming = (checked: boolean) => {
+    setUseStreaming(checked)
+    api.updateEndpoint({ ...endpoint, useStreaming: checked }).then(_ => onRefresh())
   }
 
   const addNewEnvironment = 'Add New Environment…'
@@ -98,8 +104,10 @@ export default function PublishSettingsPane({
             </div>
           </>
         )}
-        <Label>Cache</Label>
+        <Label>Cache Responses</Label>
         <Checkbox checked={useCache} setChecked={toggleCache} />
+        <Label>Stream Responses</Label>
+        <Checkbox checked={useStreaming} setChecked={toggleStreaming} />
       </div>
       {showPickNamePrompt && (
         <PickNameDialog

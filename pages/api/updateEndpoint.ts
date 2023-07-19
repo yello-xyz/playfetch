@@ -14,7 +14,8 @@ async function updateEndpoint(req: NextApiRequest, res: NextApiResponse, user: U
     req.body.versionID,
     urlPath,
     req.body.flavor,
-    req.body.useCache
+    req.body.useCache,
+    req.body.useStreaming
   )
 
   res.json({})

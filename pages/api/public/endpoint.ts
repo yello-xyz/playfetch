@@ -25,7 +25,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     if (apiKey && (await checkProject(projectURLPath, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint && endpoint.enabled) {
-        const useStreaming = false //endpoint.useStreaming
+        const useStreaming = endpoint.useStreaming
         if (useStreaming) {
           res.setHeader('X-Accel-Buffering', 'no')
         }

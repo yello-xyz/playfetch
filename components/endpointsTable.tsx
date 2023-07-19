@@ -82,8 +82,8 @@ export default function EndpointsTable({
   getVersionIndex?: (endpoint: ResolvedEndpoint) => number
 }) {
   const columnsClass = getVersionIndex
-    ? 'grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'
-    : 'grid-cols-[80px_repeat(2,minmax(80px,1fr))_80px_120px]'
+    ? 'grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(3,80px)_120px]'
+    : 'grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'
 
   const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
     <RowCell header first={first}>
@@ -106,7 +106,8 @@ export default function EndpointsTable({
           <HeaderCell>Endpoint</HeaderCell>
           <HeaderCell>Environment</HeaderCell>
           {getVersionIndex && <HeaderCell>Prompt</HeaderCell>}
-          <HeaderCell>Cached</HeaderCell>
+          <HeaderCell>Cache</HeaderCell>
+          <HeaderCell>Stream</HeaderCell>
           <HeaderCell>Usage</HeaderCell>
           {endpoints.map((endpoint, index) => {
             const active = activeEndpoint?.id === endpoint.id
@@ -126,6 +127,7 @@ export default function EndpointsTable({
                 <ActiveCell>{endpoint.flavor}</ActiveCell>
                 {getVersionIndex && <ActiveCell>v{getVersionIndex(endpoint) + 1}</ActiveCell>}
                 <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
+                <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
                 <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
               </Fragment>
             )

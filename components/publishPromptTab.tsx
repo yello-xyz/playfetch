@@ -44,7 +44,7 @@ export default function PublishPromptTab({
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt)
-    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false).then(refreshPrompt)
+    api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false, false).then(refreshPrompt)
   }
 
   const endPointToVersionID = (endpoint: Endpoint) => (endpoint as ResolvedPromptEndpoint).versionID

@@ -109,9 +109,10 @@ const api = {
     promptID: number,
     name: string,
     flavor: string,
-    useCache: boolean
+    useCache: boolean,
+    useStreaming: boolean
   ) {
-    return post(this.publishChain, { projectID, parentID: promptID, versionID, name, flavor, useCache })
+    return post(this.publishChain, { projectID, parentID: promptID, versionID, name, flavor, useCache, useStreaming })
   },
   getChain: function (chainID: number): Promise<ActiveChain> {
     return post(this.getChain, { chainID })
@@ -136,9 +137,10 @@ const api = {
     chainID: number,
     name: string,
     flavor: string,
-    useCache: boolean
+    useCache: boolean,
+    useStreaming: boolean
   ) {
-    return post(this.publishChain, { projectID, parentID: chainID, name, flavor, useCache })
+    return post(this.publishChain, { projectID, parentID: chainID, name, flavor, useCache, useStreaming })
   },
   updateEndpoint: function (endpoint: Endpoint) {
     return post(this.updateEndpoint, {
@@ -148,6 +150,7 @@ const api = {
       name: endpoint.urlPath,
       flavor: endpoint.flavor,
       useCache: endpoint.useCache,
+      useStreaming: endpoint.useStreaming,
     })
   },
   deleteEndpoint: function (endpointID: number) {

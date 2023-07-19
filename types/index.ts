@@ -138,6 +138,7 @@ export type Endpoint = {
   projectURLPath: string
   flavor: string
   useCache: boolean
+  useStreaming: boolean
 }
 
 export type ResolvedEndpoint = Endpoint & {

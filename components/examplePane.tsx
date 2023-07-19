@@ -15,7 +15,7 @@ const buildCurlCommand = (
   const inputs = variables.map(variable => [variable, (inputValues[variable] ?? [])[0] ?? ''])
 
   return (
-    `curl -X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
+    `curl ${endpoint.useStreaming ? '-N ' : ''}-X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
     (endpoint.flavor !== defaultFlavor ? ` \\\n  -H "x-environment: ${endpoint.flavor}"` : '') +
     (inputs.length > 0
       ? ` \\\n  -H "content-type: application/json"` +
@@ -45,7 +45,7 @@ export default function ExamplePane({
     <>
       <Label>Integration</Label>
       <CodeBlock>
-        <MarkedUpCURLCommand>{curlCommand}</MarkedUpCURLCommand>
+        <MarkedUpCURLCommand useStreaming={endpoint.useStreaming}>{curlCommand}</MarkedUpCURLCommand>
       </CodeBlock>
       {canCopyToClipboard && (
         <div className='self-end'>
@@ -71,7 +71,7 @@ export function CodeBlock({ children, active }: { children: ReactNode; active?: 
   )
 }
 
-function MarkedUpCURLCommand({ children }: { children: ReactNode }) {
+function MarkedUpCURLCommand({ children, useStreaming }: { children: ReactNode; useStreaming: boolean }) {
   return (
     <>
       {children
@@ -83,6 +83,7 @@ function MarkedUpCURLCommand({ children }: { children: ReactNode }) {
               line={line}
               markup={[
                 ['curl', 'text-[#FF41BE]'],
+                ...(useStreaming ? [['-N', 'text-[#0067F3]']] : []),
                 ['-X POST', 'text-[#0067F3]'],
               ]}>
               <MarkedUpStartLine line={line} markup={[['  -H', 'text-[#0067F3]']]}>

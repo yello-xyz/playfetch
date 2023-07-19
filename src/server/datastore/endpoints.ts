@@ -32,6 +32,7 @@ export async function migrateEndpoints() {
         endpointData.flavor,
         endpointData.createdAt,
         endpointData.useCache,
+        false,
         getID(endpointData)
       )
     )
@@ -96,7 +97,8 @@ export async function saveEndpoint(
   name: string,
   projectURLPath: string,
   flavor: string,
-  useCache: boolean
+  useCache: boolean,
+  useStreaming: boolean
 ) {
   await ensureEndpointAccess(userID, { parentID, versionID, projectURLPath })
   const urlPath = await getValidURLPath(parentID, name, projectURLPath, flavor)
@@ -109,7 +111,8 @@ export async function saveEndpoint(
     projectURLPath,
     flavor,
     new Date(),
-    useCache
+    useCache,
+    useStreaming
   )
   await getDatastore().save(endpointData)
   await saveUsage(getID(endpointData), parentID)
@@ -136,7 +139,8 @@ export async function updateEndpointForUser(
   versionID: number | null,
   urlPath: string,
   flavor: string,
-  useCache: boolean
+  useCache: boolean,
+  useStreaming: boolean
 ) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData)
@@ -154,6 +158,7 @@ export async function updateEndpointForUser(
       flavor,
       endpointData.createdAt,
       useCache,
+      useStreaming,
       getID(endpointData)
     )
   )
@@ -176,6 +181,7 @@ const toEndpointData = (
   flavor: string,
   createdAt: Date,
   useCache: boolean,
+  useStreaming: boolean,
   endpointID?: number
 ) => ({
   key: buildKey(Entity.ENDPOINT, endpointID),
@@ -189,6 +195,7 @@ const toEndpointData = (
     flavor,
     createdAt,
     useCache,
+    useStreaming,
   },
   excludeFromIndexes: [],
 })
@@ -204,4 +211,5 @@ export const toEndpoint = (data: any): Endpoint => ({
   projectURLPath: data.projectURLPath,
   flavor: data.flavor,
   useCache: data.useCache,
+  useStreaming: data.useStreaming,
 })
