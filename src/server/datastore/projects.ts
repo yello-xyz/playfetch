@@ -13,7 +13,7 @@ import {
 import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
-import { getProjectsIDsForUser, getUserIDsForProject, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
+import { getAccessibleObjectIDs, getAccessingUserIDs, grantUserAccess, hasUserAccess, revokeUserAccess } from './access'
 import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { getUserForEmail, toUser } from './users'
 import { getProjectInputValues } from './inputs'
@@ -59,7 +59,7 @@ const toProject = (data: any): Project => ({
 })
 
 export async function getProjectUsers(projectID: number): Promise<User[]> {
-  const userIDs = await getUserIDsForProject(projectID)
+  const userIDs = await getAccessingUserIDs(projectID, 'project')
   const users = await getKeyedEntities(Entity.USER, userIDs)
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
@@ -118,7 +118,7 @@ export async function addProjectForUser(userID: number, projectName: string, isU
   )
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
-  await grantUserAccess(userID, projectID)
+  await grantUserAccess(userID, projectID, 'project')
   return projectID
 }
 
@@ -127,7 +127,7 @@ export async function inviteMembersToProject(userID: number, projectID: number, 
   for (const email of emails) {
     const user = await getUserForEmail(email.toLowerCase())
     if (user) {
-      await grantUserAccess(user.id, projectID)
+      await grantUserAccess(user.id, projectID, 'project')
       // TODO send notification
     } else {
       // TODO send invite to sign up
@@ -214,7 +214,7 @@ async function rotateProjectAPIKey(projectData: any): Promise<string> {
 }
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
-  const projectIDs = await getProjectsIDsForUser(userID)
+  const projectIDs = await getAccessibleObjectIDs(userID, 'project')
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
   return projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)
 }

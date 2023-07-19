@@ -1,5 +1,15 @@
 import { and } from '@google-cloud/datastore'
-import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityKey, getID } from './datastore'
+import {
+  Entity,
+  buildFilter,
+  buildKey,
+  getDatastore,
+  getFilteredEntities,
+  getFilteredEntityKey,
+  getID,
+} from './datastore'
+
+type Kind = 'project'
 
 export async function migrateAccess() {
   const datastore = getDatastore()
@@ -7,40 +17,50 @@ export async function migrateAccess() {
   for (const accessData of allAccess) {
     datastore.save({
       key: buildKey(Entity.ACCESS, getID(accessData)),
-      data: { userID: accessData.userID, projectID: accessData.projectID },
+      data: { userID: accessData.userID, objectID: accessData.projectID, kind: 'project' },
       excludeFromIndexes: [],
     })
   }
 }
 
-const getUserAccessKey = (userID: number, projectID: number) =>
-  getFilteredEntityKey(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('projectID', projectID)]))
+const getUserAccessKey = (userID: number, objectID: number) =>
+  getFilteredEntityKey(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
 
-export async function hasUserAccess(userID: number, projectID: number) {
-  const accessKey = await getUserAccessKey(userID, projectID)
+export async function hasUserAccess(userID: number, objectID: number) {
+  const accessKey = await getUserAccessKey(userID, objectID)
   return !!accessKey
 }
 
-export async function grantUserAccess(userID: number, projectID: number) {
-  const hasAccess = await hasUserAccess(userID, projectID)
+export async function grantUserAccess(userID: number, objectID: number, kind: Kind) {
+  const hasAccess = await hasUserAccess(userID, objectID)
   if (!hasAccess) {
-    await getDatastore().save({ key: buildKey(Entity.ACCESS), data: { userID, projectID } })
+    await getDatastore().save({
+      key: buildKey(Entity.ACCESS),
+      data: { userID, objectID, kind },
+      excludeFromIndexes: [],
+    })
   }
 }
 
-export async function revokeUserAccess(userID: number, projectID: number) {
-  const accessKey = await getUserAccessKey(userID, projectID)
+export async function revokeUserAccess(userID: number, objectID: number) {
+  const accessKey = await getUserAccessKey(userID, objectID)
   if (accessKey) {
     await getDatastore().delete(accessKey)
   }
 }
 
-export async function getProjectsIDsForUser(userID: number): Promise<number[]> {
-  const entities = await getEntities(Entity.ACCESS, 'userID', userID)
-  return entities.map(entity => entity.projectID)
+export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<number[]> {
+  const entities = await getFilteredEntities(
+    Entity.ACCESS,
+    and([buildFilter('userID', userID), buildFilter('kind', kind)])
+  )
+  return entities.map(entity => entity.objectID)
 }
 
-export async function getUserIDsForProject(projectID: number): Promise<number[]> {
-  const entities = await getEntities(Entity.ACCESS, 'projectID', projectID)
+export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<number[]> {
+  const entities = await getFilteredEntities(
+    Entity.ACCESS,
+    and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
+  )
   return entities.map(entity => entity.userID)
 }
