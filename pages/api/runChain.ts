@@ -29,7 +29,7 @@ const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value
 
 type CallbackType = (
   version: Version | null,
-  response: { output?: string; cost: number; attempts: number; cacheHit: boolean, failed: boolean }
+  response: { output?: string; cost: number; attempts: number; cacheHit: boolean; failed: boolean }
 ) => Promise<any>
 
 export const runChainConfigs = async (
@@ -41,7 +41,7 @@ export const runChainConfigs = async (
   callback: CallbackType,
   streamChunks?: (chunk: string) => void
 ) => {
-  let lastOutput = undefined as string | undefined
+  let result = undefined
   let runningContext = ''
   const codeContext = CreateCodeContextWithInputs(inputs)
 
@@ -57,18 +57,22 @@ export const runChainConfigs = async (
       }
       const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
       const output = runResponse.output
-      lastOutput = output
+      try {
+        result = output ? JSON.parse(output) : output
+      } catch {
+        result = output
+      }
       if (!output?.length) {
         await callback(null, { ...runResponse, failed: true })
         break
       }
       runningContext += `\n\n${output}\n\n`
       AugmentInputs(inputs, config.output, output, useCamelCase)
-      AugmentCodeContext(codeContext, config.output, output, true)
+      AugmentCodeContext(codeContext, config.output, result)
       await callback(version, { ...runResponse, output, failed: false })
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
-      lastOutput = codeResponse.output
+      result = codeResponse.result
       if (IsCodeResponseError(codeResponse)) {
         streamChunks?.(codeResponse.error.message)
         await callback(null, { cost: 0, attempts: 1, cacheHit: false, failed: true })
@@ -77,12 +81,12 @@ export const runChainConfigs = async (
       const output = codeResponse.output
       streamChunks?.(output)
       AugmentInputs(inputs, config.output, output, useCamelCase)
-      AugmentCodeContext(codeContext, config.output, codeResponse.result)
+      AugmentCodeContext(codeContext, config.output, result)
       await callback(null, { output, cost: 0, attempts: 1, cacheHit: false, failed: false })
     }
   }
 
-  return lastOutput
+  return result
 }
 
 async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {

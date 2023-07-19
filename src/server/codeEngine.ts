@@ -10,23 +10,8 @@ const codeToCamelCase = (code: string) =>
 
 const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
 
-const tryParse = (value: string) => {
-  try {
-    return JSON.parse(value)
-  } catch {
-    return value
-  }
-}
-
-export const AugmentCodeContext = (
-  context: Isolated.Context,
-  variable: string | undefined,
-  value: any,
-  stringified = false
-) =>
-  variable
-    ? context.global.setSync(ToCamelCase(variable), stringified ? tryParse(value) : value, { copy: true })
-    : undefined
+export const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: any) =>
+  variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
