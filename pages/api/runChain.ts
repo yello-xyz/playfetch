@@ -29,7 +29,7 @@ const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value
 
 type CallbackType = (
   version: Version | null,
-  response: { output: string; cost: number; attempts: number; cacheHit: boolean }
+  response: { output: string; cost: number; attempts: number; cacheHit: boolean, failed: boolean }
 ) => Promise<any>
 
 export const runChainConfigs = async (
@@ -66,7 +66,7 @@ export const runChainConfigs = async (
       lastOutput = output
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, output)
-      await callback(version, { ...runResponse, output })
+      await callback(version, { ...runResponse, output, failed: false })
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
       if (IsCodeResponseError(codeResponse)) {
@@ -78,7 +78,7 @@ export const runChainConfigs = async (
       lastOutput = output
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, codeResponse.result)
-      await callback(null, { output, cost: 0, attempts: 1, cacheHit: false })
+      await callback(null, { output, cost: 0, attempts: 1, cacheHit: false, failed: false })
     }
   }
 
@@ -100,9 +100,9 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       inputs,
       false,
       false,
-      (version, { output, cost }) => {
+      (version, { output, cost, failed }) => {
         const createdAt = new Date()
-        sendData({ index: index++, timestamp: createdAt.toISOString(), cost })
+        sendData({ index: index++, timestamp: createdAt.toISOString(), cost, failed })
         return version
           ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
           : Promise.resolve({})
