@@ -6,11 +6,13 @@ export default function VersionSelector({
   endpoints,
   activeVersion,
   setActiveVersion,
+  flagIfNotLatest,
 }: {
   versions: Version[]
   endpoints: ResolvedPromptEndpoint[]
   activeVersion?: Version
   setActiveVersion: (version: Version) => void
+  flagIfNotLatest?: boolean
 }) {
   const suffixForVersionID = (versionID: number) => {
     const flavors = endpoints.filter(endpoint => endpoint.versionID === versionID).map(endpoint => endpoint.flavor)
@@ -23,6 +25,7 @@ export default function VersionSelector({
       suffixForVersionID={suffixForVersionID}
       activeVersionID={activeVersion?.id ?? 0}
       setActiveVersionID={versionID => setActiveVersion(versions.find(version => version.id === versionID)!)}
+      flagIfNotLatest={flagIfNotLatest}
     />
   )
 }
@@ -32,14 +35,18 @@ function VersionIDSelector({
   activeVersionID,
   setActiveVersionID,
   suffixForVersionID,
+  flagIfNotLatest,
 }: {
   versionIDs: number[]
   activeVersionID: number
   setActiveVersionID: (versionID: number) => void
   suffixForVersionID?: (versionID: number) => string | undefined
+  flagIfNotLatest?: boolean
 }) {
+  const className = flagIfNotLatest && activeVersionID !== versionIDs.slice(-1)[0] ? 'text-red-500' : undefined
   return (
     <DropdownMenu
+      className={className}
       disabled={!versionIDs.length}
       value={activeVersionID}
       onChange={value => setActiveVersionID(Number(value))}>

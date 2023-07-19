@@ -117,6 +117,7 @@ export default function BuildChainTab({
                     endpoints={promptCache.promptForItem(item)?.endpoints ?? []}
                     activeVersion={promptCache.versionForItem(item)}
                     setActiveVersion={selectVersion(index)}
+                    flagIfNotLatest
                   />
                 </Column>
               </>
