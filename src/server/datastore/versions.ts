@@ -78,7 +78,7 @@ export async function saveVersionForUser(
   const versionData = toVersionData(userID, promptID, prompt, config, labels, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
   const name =
-    promptData.name === DefaultPromptName && prompt.length && !promptData.prompt.length
+    promptData.name === DefaultPromptName && prompt.length && !promptData.lastPrompt.length
       ? StripPromptSentinels(prompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
   const savedVersionID = getID(versionData)
