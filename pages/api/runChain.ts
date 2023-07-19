@@ -28,6 +28,7 @@ const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value
   variable ? (inputs[useCamelCase ? ToCamelCase(variable) : variable] = value) : undefined
 
 type CallbackType = (
+  index: number,
   version: Version | null,
   response: { output?: string; cost: number; attempts: number; cacheHit: boolean; failed: boolean }
 ) => Promise<any>
@@ -39,7 +40,7 @@ export const runChainConfigs = async (
   useCache: boolean,
   useCamelCase: boolean,
   callback: CallbackType,
-  streamChunks?: (chunk: string) => void
+  streamChunk?: (index: number, chunk: string) => void
 ) => {
   let result = undefined
   let runningContext = ''
@@ -47,7 +48,8 @@ export const runChainConfigs = async (
 
   const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
 
-  for (const config of configs) {
+  for (const [index, config] of configs.entries()) {
+    const stream = (chunk: string) => streamChunk?.(index, chunk)
     if (isRunConfig(config)) {
       const version = await getVersion(config.versionID)
       let prompt = resolvePrompt(version.prompt, inputs, useCamelCase)
@@ -55,7 +57,7 @@ export const runChainConfigs = async (
       if (config.includeContext) {
         prompt = runningContext
       }
-      const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, streamChunks)
+      const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, stream)
       const output = runResponse.output
       try {
         result = output ? JSON.parse(output) : output
@@ -63,26 +65,26 @@ export const runChainConfigs = async (
         result = output
       }
       if (!output?.length) {
-        await callback(null, { ...runResponse, failed: true })
+        await callback(index, null, { ...runResponse, failed: true })
         break
       }
       runningContext += `\n\n${output}\n\n`
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, result)
-      await callback(version, { ...runResponse, output, failed: false })
+      await callback(index, version, { ...runResponse, output, failed: false })
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
       result = codeResponse.result
       if (IsCodeResponseError(codeResponse)) {
-        streamChunks?.(codeResponse.error.message)
-        await callback(null, { cost: 0, attempts: 1, cacheHit: false, failed: true })
+        stream(codeResponse.error.message)
+        await callback(index, null, { cost: 0, attempts: 1, cacheHit: false, failed: true })
         break
       }
       const output = codeResponse.output
-      streamChunks?.(output)
+      stream(output)
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, result)
-      await callback(null, { output, cost: 0, attempts: 1, cacheHit: false, failed: false })
+      await callback(index, null, { output, cost: 0, attempts: 1, cacheHit: false, failed: false })
     }
   }
 
@@ -96,7 +98,6 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
-  let index = 0
   for (const inputs of multipleInputs) {
     await runChainConfigs(
       user.id,
@@ -104,14 +105,14 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       inputs,
       false,
       false,
-      (version, { output, cost, failed }) => {
+      (index, version, { output, cost, failed }) => {
         const createdAt = new Date()
-        sendData({ index: index++, timestamp: createdAt.toISOString(), cost, failed })
+        sendData({ index, timestamp: createdAt.toISOString(), cost, failed })
         return version && output && !failed
           ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
           : Promise.resolve({})
       },
-      message => sendData({ index, message })
+      (index, message) => sendData({ index, message })
     )
   }
 

@@ -25,6 +25,11 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     if (apiKey && (await checkProject(projectURLPath, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(endpointName, projectURLPath, flavor)
       if (endpoint && endpoint.enabled) {
+        const useStreaming = false //endpoint.useStreaming
+        if (useStreaming) {
+          res.setHeader('X-Accel-Buffering', 'no')
+        }
+
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         const runConfigs = await loadRunConfigsFromEndpoint(endpoint)
         const output = await runChainConfigs(
@@ -33,12 +38,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           inputs,
           endpoint.useCache,
           true,
-          (_, { cost, attempts, cacheHit, failed }) =>
+          (_index, _version, { cost, attempts, cacheHit, failed }) =>
             // TODO usage will seem off for chain endpoints if we update usage for each chain item
             // TODO log duration as well here
-            updateUsage(endpoint.id, cost, cacheHit, attempts, failed)
+            updateUsage(endpoint.id, cost, cacheHit, attempts, failed),
+          (index, message) => useStreaming && index === runConfigs.length - 1 ? res.write(message) : undefined
         )
-        return res.json({ output })
+        return useStreaming ? res.end() : res.json({ output })
       }
     }
   }
