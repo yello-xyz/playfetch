@@ -44,7 +44,7 @@ async function complete(
     const [response] = await client.predict(request)
     const output = response.predictions?.[0]?.structValue?.fields?.content?.stringValue ?? undefined
     if (output && streamChunks) {
-      streamChunks?.(output)
+      streamChunks(output)
     }
     return { output, cost: 0 }
   } catch (error) {

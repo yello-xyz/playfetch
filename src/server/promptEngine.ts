@@ -1,7 +1,8 @@
-import { PromptConfig, ModelProvider, OpenAILanguageModel, GoogleLanguageModel, AnthropicLanguageModel } from '@/types'
+import { PromptConfig, ModelProvider, OpenAILanguageModel, GoogleLanguageModel, AnthropicLanguageModel, CohereLanguageModel } from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
+import cohere from '@/src/server/cohere'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
@@ -30,24 +31,25 @@ const runPromptWithConfig = async (
 
   const getAPIKey = async (provider: ModelProvider) => {
     switch (provider) {
-      default:
       case 'google':
         return null
       case 'openai':
       case 'anthropic':
+      case 'cohere':
         return getProviderKey(userID, provider)
     }
   }
 
   const getPredictor = (provider: ModelProvider, apiKey: string) => {
     switch (provider) {
-      default:
       case 'google':
         return vertexai(config.model as GoogleLanguageModel)
       case 'openai':
         return openai(apiKey, userID, config.model as OpenAILanguageModel)
       case 'anthropic':
         return anthropic(apiKey, config.model as AnthropicLanguageModel)
+      case 'cohere':
+        return cohere(apiKey, config.model as CohereLanguageModel)
     }
   }
 

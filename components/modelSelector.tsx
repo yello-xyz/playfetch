@@ -9,10 +9,12 @@ export const LabelForProvider = (provider: ModelProvider) => {
       return 'Anthropic'
     case 'google':
       return 'Google'
+    case 'cohere':
+      return 'Cohere'
   }
 }
 
-export const AllProviders = (['openai', 'anthropic', 'google'] as ModelProvider[]).sort((a, b) =>
+export const AllProviders = (['openai', 'anthropic', 'google', 'cohere'] as ModelProvider[]).sort((a, b) =>
   LabelForProvider(a).localeCompare(LabelForProvider(b))
 )
 
@@ -26,6 +28,8 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
       return 'anthropic'
     case 'text-bison@001':
       return 'google'
+    case 'command':
+      return 'cohere'
   }
 }
 
@@ -41,6 +45,8 @@ const labelForModel = (model: LanguageModel) => {
       return 'Claude v2'
     case 'text-bison@001':
       return 'PaLM v2'
+    case 'command':
+      return 'Command'
   }
 }
 
@@ -55,6 +61,8 @@ const shortLabelForModel = (model: LanguageModel) => {
       return 'Claude'
     case 'text-bison@001':
       return 'PaLM'
+    case 'command':
+      return 'Command'
   }
 }
 
@@ -64,7 +72,14 @@ export const LabelForModel = (model: LanguageModel) =>
 const fullLabelForModel = (model: LanguageModel) =>
   `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}`
 
-const allModels: LanguageModel[] = ['gpt-4', 'gpt-3.5-turbo', 'claude-instant-1', 'claude-2', 'text-bison@001']
+const allModels: LanguageModel[] = [
+  'gpt-4',
+  'gpt-3.5-turbo',
+  'claude-instant-1',
+  'claude-2',
+  'text-bison@001',
+  'command',
+]
 
 const sortedModels = allModels.sort((a, b) => fullLabelForModel(a).localeCompare(fullLabelForModel(b)))
 
