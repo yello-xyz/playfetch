@@ -4,14 +4,12 @@ import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEn
 export async function migrateAccess() {
   const datastore = getDatastore()
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
-  const uniqueIDs = new Set<string>()
   for (const accessData of allAccess) {
-    const id = `${accessData.userID}-${accessData.projectID}`
-    if (uniqueIDs.has(id)) {
-      await datastore.delete(buildKey(Entity.ACCESS, getID(accessData)))
-    } else {
-      uniqueIDs.add(id)
-    }
+    datastore.save({
+      key: buildKey(Entity.ACCESS, getID(accessData)),
+      data: { userID: accessData.userID, projectID: accessData.projectID },
+      excludeFromIndexes: [],
+    })
   }
 }
 

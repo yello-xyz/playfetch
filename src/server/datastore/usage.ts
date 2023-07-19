@@ -5,11 +5,10 @@ export async function migrateUsage() {
   const datastore = getDatastore()
   const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
   for (const usageData of allUsage) {
-    const parentID = usageData.promptID
     await getDatastore().save(
       toUsageData(
         getID(usageData),
-        parentID,
+        usageData.parentID,
         usageData.requests,
         usageData.cost,
         usageData.cacheHits,

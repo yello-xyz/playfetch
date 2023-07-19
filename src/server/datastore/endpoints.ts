@@ -32,7 +32,7 @@ export async function migrateEndpoints() {
         endpointData.flavor,
         endpointData.createdAt,
         endpointData.useCache,
-        false,
+        endpointData.useStreaming,
         getID(endpointData)
       )
     )
