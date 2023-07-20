@@ -1,7 +1,6 @@
 import { GetServerSidePropsResult } from 'next'
 
 enum ClientRoute {
-  Workspaces = '/home', // TODO make this one Home and turn old Home into project route
   Home = '/',
   Settings = `${ClientRoute.Home}?s=1`,
   Login = '/login',
@@ -9,15 +8,15 @@ enum ClientRoute {
 }
 
 export const WorkspaceRoute = (workspaceID?: number) =>
-  workspaceID ? `${ClientRoute.Workspaces}?w=${workspaceID}` : ClientRoute.Workspaces
+  workspaceID ? `${ClientRoute.Home}?w=${workspaceID}` : ClientRoute.Home
 
-export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}`
+export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}/${projectID}`
 
-export const ChainsRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}&cs=1`
+export const ChainsRoute = (projectID: number) => `${ProjectRoute(projectID)}?cs=1`
 
-export const ChainRoute = (chainID: number) => `${ClientRoute.Home}?c=${chainID}`
+export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRoute(projectID)}?c=${chainID}`
 
-export const PromptRoute = (promptID: number) => `${ClientRoute.Home}?p=${promptID}`
+export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRoute(projectID)}?p=${promptID}`
 
 export const Redirect = (route: ClientRoute): GetServerSidePropsResult<Record<string, unknown>> => ({
   redirect: { destination: route, permanent: false },
