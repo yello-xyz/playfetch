@@ -12,8 +12,6 @@ export const WorkspaceRoute = (workspaceID?: number) =>
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}${projectID}`
 
-export const ChainsRoute = (projectID: number) => `${ProjectRoute(projectID)}?cs=1`
-
 export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRoute(projectID)}?c=${chainID}`
 
 export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRoute(projectID)}?p=${promptID}`

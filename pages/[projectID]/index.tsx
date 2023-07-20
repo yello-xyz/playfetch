@@ -22,7 +22,7 @@ import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { projectID, p: promptID, c: chainID, cs: chains } = ParseNumberQuery(query)
+  const { projectID, p: promptID, c: chainID } = ParseNumberQuery(query)
 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
@@ -35,7 +35,6 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     : null
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
-  const initialShowChains = chains === 1
 
   return {
     props: {
@@ -43,7 +42,6 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       initialActiveProject,
       initialActiveItem,
       initialAvailableProviders,
-      initialShowChains,
     },
   }
 })
@@ -55,13 +53,11 @@ export default function Home({
   initialActiveProject,
   initialActiveItem,
   initialAvailableProviders,
-  initialShowChains,
 }: {
   user: User
   initialActiveProject: ActiveProject
   initialActiveItem?: ActiveItem
   initialAvailableProviders: AvailableProvider[]
-  initialShowChains: boolean
 }) {
   const router = useRouter()
 
@@ -73,7 +69,6 @@ export default function Home({
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && !isPrompt(activeItem) ? activeItem : undefined
 
-  const [isChainMode, setChainMode] = useState(initialShowChains)
   const [showComments, setShowComments] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
@@ -131,7 +126,6 @@ export default function Home({
       await refreshPrompt(promptID)
       router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
-    setChainMode(false)
   }
 
   const refreshChain = async (chainID: number) => {
@@ -146,7 +140,6 @@ export default function Home({
       await refreshChain(chainID)
       router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
-    setChainMode(false)
   }
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
@@ -216,8 +209,6 @@ export default function Home({
                 <TopBar
                   activeProject={activeProject}
                   activeItem={activePrompt ?? activeChain}
-                  addLabel={isChainMode ? 'New Chain' : 'New Prompt'}
-                  onAddItem={isChainMode ? addChain : addPrompt}
                   onRefreshItem={refreshActiveItem}
                   onDeleteItem={() => router.push(ProjectRoute(activeProject.id))}
                   onRefreshProject={refreshProject}

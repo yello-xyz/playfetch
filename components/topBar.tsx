@@ -15,8 +15,6 @@ import InviteDialog from './inviteDialog'
 export default function TopBar({
   activeProject,
   activeItem,
-  addLabel,
-  onAddItem,
   onRefreshItem,
   onDeleteItem,
   onRefreshProject,
@@ -26,8 +24,6 @@ export default function TopBar({
 }: {
   activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain
-  addLabel: string
-  onAddItem: (projectID: number) => void
   onRefreshItem: () => void
   onDeleteItem: () => void
   onRefreshProject: () => void
@@ -83,7 +79,6 @@ export default function TopBar({
           <div className='flex items-center gap-4'>
             <UserAvatars users={activeProject.users} />
             <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
-            <TopBarButton title={addLabel} icon={addIcon} onClick={() => onAddItem(activeProject.id)} />
             {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
           </div>
         </div>
