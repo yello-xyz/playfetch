@@ -31,7 +31,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         }
 
         let totalCost = 0
-        let extraAttempts = 1
+        let extraAttempts = 0
         let anyCacheHit = false
         const startTime = process.hrtime.bigint()
         const updateAggregateUsage = async (
