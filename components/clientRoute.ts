@@ -1,11 +1,15 @@
 import { GetServerSidePropsResult } from 'next'
 
 enum ClientRoute {
+  Workspaces = '/home', // TODO make this one Home and turn old Home into project route
   Home = '/',
   Settings = `${ClientRoute.Home}?s=1`,
   Login = '/login',
   Admin = '/admin',
 }
+
+export const WorkspaceRoute = (workspaceID?: number) =>
+  workspaceID ? `${ClientRoute.Workspaces}?w=${workspaceID}` : ClientRoute.Workspaces
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}?g=${projectID}`
 

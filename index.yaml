@@ -14,7 +14,7 @@ indexes:
 
 - kind: project
   properties:
-  - name: userID
+  - name: workspaceID
   - name: createdAt
     direction: desc
 
