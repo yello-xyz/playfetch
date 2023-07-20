@@ -3,6 +3,7 @@ import { useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
 import { TopBarButton, UserAvatars } from './topBar'
+import addIcon from '@/public/add.svg'
 
 export default function WorkspaceGridView({
   workspaces,
@@ -26,12 +27,13 @@ export default function WorkspaceGridView({
 
   return (
     <>
-      <div className='flex flex-col h-full gap-6 p-6 pb-0 bg-gray-25'>
-        <div className='flex items-center justify-between'>
+      <div className='flex flex-col h-full px-6 pb-0 bg-gray-25'>
+        <div className='flex items-center justify-between py-4'>
           <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
           <div className='flex items-center gap-2'>
             <UserAvatars users={activeWorkspace.users} />
             <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
+            <TopBarButton title='New Project' icon={addIcon} onClick={onAddProject} />
           </div>
         </div>
         {activeWorkspace.projects.length > 0 ? (

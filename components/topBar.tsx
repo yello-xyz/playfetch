@@ -136,7 +136,7 @@ export function TopBarButton({ title, icon, onClick }: { title?: string; icon?: 
       className='flex items-center gap-1 px-2 py-1 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
       {icon && <Icon icon={icon} />}
-      {title && <div className={icon ? 'pr-2' : 'px-1'}>{title}</div>}
+      {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}
     </div>
   )
 }
