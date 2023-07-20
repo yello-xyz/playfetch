@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./pages/**/*.tsx', './components/**/*.tsx'],
@@ -89,14 +91,17 @@ module.exports = {
       'blue-100': '#B1D1F6',
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
+      },
       animation: {
-        'shimmer': 'shimmer 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        shimmer: 'shimmer 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         shimmer: {
           '0%, 100%': { opacity: 1 },
-          '50%': { opacity: .6 },
-        }
+          '50%': { opacity: 0.6 },
+        },
       },
     },
   },

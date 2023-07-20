@@ -1,4 +1,3 @@
-import { Inter } from 'next/font/google'
 import { withLoggedOutSession } from '@/src/server/session'
 import { getCsrfToken, signIn } from 'next-auth/react'
 import ClientRoute from '@/components/clientRoute'
@@ -9,8 +8,6 @@ import { useState } from 'react'
 import { CheckValidEmail } from '@/src/common/formatting'
 import Link from 'next/link'
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
-
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
   return { props: { tokenCSRF } }
@@ -20,7 +17,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
   const [email, setEmail] = useState('')
 
   return (
-    <main className={`bg-gray-100 h-screen flex flex-col items-center justify-center gap-6 p-10 ${inter.className}`}>
+    <main className={`bg-gray-100 h-screen flex flex-col items-center justify-center gap-6 p-10 font-sans`}>
       <div className='flex flex-col items-center gap-1.5'>
         <span className='text-2xl font-semibold'>Sign in to Play/Fetch</span>
         <span className='text-sm text-gray-600'>

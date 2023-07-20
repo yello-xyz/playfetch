@@ -1,4 +1,3 @@
-import { Inter } from 'next/font/google'
 import { withAdminSession } from '@/src/server/session'
 import TextInput from '@/components/textInput'
 import api from '@/src/client/admin/api'
@@ -6,8 +5,6 @@ import { useState } from 'react'
 import { PendingButton } from '@/components/button'
 import { CheckValidEmail } from '@/src/common/formatting'
 import Checkbox from '@/components/checkbox'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const getServerSideProps = withAdminSession(async () => ({ props: {} }))
 
@@ -21,7 +18,7 @@ export default function Admin() {
   }
 
   return (
-    <main className={`flex flex-col gap-4 p-10 items-start ${inter.className}`}>
+    <main className={`flex flex-col gap-4 p-10 items-start font-sans`}>
       <TextInput label='Email' value={email} setValue={setEmail} />
       <TextInput label='Full Name (optional)' value={fullName} setValue={setFullName} />
       <Checkbox label='Add as Admin' id='admin' checked={addAsAdmin} setChecked={setAddAsAdmin} />

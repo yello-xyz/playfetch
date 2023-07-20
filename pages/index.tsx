@@ -1,4 +1,3 @@
-import { Inter } from 'next/font/google'
 import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
@@ -22,8 +21,6 @@ import UserSettingsView from '@/components/userSettingsView'
 import { VersionsEqual } from '@/src/common/versionsEqual'
 import ProjectGridView, { EmptyGridView } from '@/components/projectGridView'
 import { getActiveChain } from '@/src/server/datastore/chains'
-
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
@@ -271,7 +268,7 @@ export default function Home({
               selectTab: setSelectedTab,
               refreshSettings,
             }}>
-            <main className={`flex items-stretch h-screen ${inter.className} text-sm`}>
+            <main className={`flex items-stretch h-screen text-sm font-sans`}>
               <Sidebar
                 projects={projects}
                 activeProject={activeProject}
