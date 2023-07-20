@@ -13,7 +13,6 @@ import PickNameDialog from './pickNameDialog'
 import InviteDialog from './inviteDialog'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
-import { useLoggedInUser } from './userContext'
 import Link from 'next/link'
 
 export default function Sidebar({
@@ -51,9 +50,9 @@ export default function Sidebar({
     }
   }
 
-  const user = useLoggedInUser()
-  const userProject = projects.find(project => project.id === user.id)
-  const properProjects = projects.filter(project => project.id !== user.id)
+  // TODO just a temporary hack while we rework the UI for workspaces
+  const userProject = projects.find(project => project.name === 'Prompts')
+  const properProjects = projects.filter(project => project.name !== 'Prompts')
   const activeProjectID = activeProject?.id ?? activePrompt?.projectID
 
   return (
