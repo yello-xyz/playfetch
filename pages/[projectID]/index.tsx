@@ -2,12 +2,12 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
+import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
-import ClientRoute, { ChainRoute, ChainsRoute, ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
+import ClientRoute, { ChainRoute, ParseNumberQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
-import { getActiveProject, getProjectsForUser } from '@/src/server/datastore/projects'
+import { getActiveProject } from '@/src/server/datastore/projects'
 import SegmentedControl, { Segment } from '@/components/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
@@ -16,17 +16,13 @@ import { urlBuilderFromHeaders } from '@/src/server/routing'
 import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
-import UserSettingsView from '@/components/userSettingsView'
 import { VersionsEqual } from '@/src/common/versionsEqual'
-import ProjectGridView, { EmptyGridView } from '@/components/projectGridView'
+import { EmptyGridView } from '@/components/projectGridView'
 import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
 
-const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
-  Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
-
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { projectID, p: promptID, c: chainID, cs: chains } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { projectID, p: promptID, c: chainID, cs: chains } = ParseNumberQuery(query)
 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const activeProject = await getActiveProject(user.id, projectID!, buildURL)
@@ -155,7 +151,7 @@ export default function Home({
 
   const refreshActiveItem = () => (activePrompt ? refreshActivePrompt : refreshActiveChain)!()
 
-  const { p: promptID, c: chainID } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const { p: promptID, c: chainID } = ParseNumberQuery(router.query)
   const currentQueryState = promptID ?? chainID ?? activeProject.prompts[0]?.id
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {

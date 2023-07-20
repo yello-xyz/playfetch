@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { User, AvailableProvider, Workspace, ActiveWorkspace } from '@/types'
-import ClientRoute, { ParseQuery, ProjectRoute, WorkspaceRoute } from '@/components/clientRoute'
+import ClientRoute, { ParseNumberQuery, ProjectRoute, WorkspaceRoute } from '@/components/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { UserContext } from '@/components/userContext'
@@ -14,11 +14,8 @@ import PickNameDialog from '@/components/pickNameDialog'
 import WorkspaceGridView from '@/components/workspaceGridView'
 import WorkspaceSidebar from '@/components/workspaceSidebar'
 
-const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
-  Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
-
-export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { w: workspaceID, s: settings } = mapDictionary(ParseQuery(query), value => Number(value))
+export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
+  const { w: workspaceID, s: settings } = ParseNumberQuery(query)
 
   const initialWorkspaces = await getWorkspacesForUser(user.id)
   const initialActiveWorkspace = await getActiveWorkspace(user.id, workspaceID ?? user.id)
@@ -90,7 +87,7 @@ export default function Home({
 
   const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
 
-  const { w: workspaceID, s: settings } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const { w: workspaceID, s: settings } = ParseNumberQuery(router.query)
   const currentQueryState = settings ? 'settings' : workspaceID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {

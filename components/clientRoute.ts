@@ -30,4 +30,10 @@ export function ParseQuery(query: NodeJS.Dict<string | string[]>): NodeJS.Dict<s
   }, {})
 }
 
+const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
+  Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
+
+export const ParseNumberQuery = (query: NodeJS.Dict<string | string[]>): NodeJS.Dict<number> =>
+  mapDictionary(ParseQuery(query), value => Number(value))
+
 export default ClientRoute
