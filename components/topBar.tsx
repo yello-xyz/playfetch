@@ -9,6 +9,8 @@ import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import ProjectItemPopupMenu from './projectItemPopupMenu'
+import api from '@/src/client/api'
+import InviteDialog from './inviteDialog'
 
 export default function TopBar({
   activeProject,
@@ -17,6 +19,7 @@ export default function TopBar({
   onAddItem,
   onRefreshItem,
   onDeleteItem,
+  onRefreshProject,
   showComments,
   setShowComments,
   children,
@@ -27,11 +30,18 @@ export default function TopBar({
   onAddItem: (projectID: number) => void
   onRefreshItem: () => void
   onDeleteItem: () => void
+  onRefreshProject: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+
+  const inviteMembers = async (emails: string[]) => {
+    await api.inviteToProject(activeProject.id, emails)
+    onRefreshProject()
+  }
 
   const promptHasComments =
     activeItem && 'versions' in activeItem && (activeItem?.versions ?? []).some(version => version.comments.length > 0)
@@ -62,7 +72,7 @@ export default function TopBar({
                   />
                 ) : (
                   <ProjectPopupMenu
-                    project={activeProject!}
+                    project={activeProject}
                     isMenuExpanded={isMenuExpanded}
                     setIsMenuExpanded={setIsMenuExpanded}
                   />
@@ -71,10 +81,9 @@ export default function TopBar({
             </div>
           </div>
           <div className='flex items-center gap-4'>
-            {<UserAvatars users={activeProject?.users ?? activeItem?.users ?? []} />}
-            {activeProject && (
-              <TopBarButton title={addLabel} icon={addIcon} onClick={() => onAddItem(activeProject.id)} />
-            )}
+            <UserAvatars users={activeProject.users} />
+            <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
+            <TopBarButton title={addLabel} icon={addIcon} onClick={() => onAddItem(activeProject.id)} />
             {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
           </div>
         </div>
@@ -84,6 +93,9 @@ export default function TopBar({
           {showComments ? <CommentDivider /> : <Divider />}
         </div>
       </div>
+      {showInviteDialog && (
+        <InviteDialog label='project' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
+      )}
     </>
   )
 }

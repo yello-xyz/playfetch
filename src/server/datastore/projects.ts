@@ -68,10 +68,16 @@ export const toProject = (data: any): Project => ({
   name: data.name,
 })
 
-export async function getProjectUsers(projectID: number): Promise<User[]> {
-  const userIDs = await getAccessingUserIDs(projectID, 'project')
-  const users = await getKeyedEntities(Entity.USER, userIDs)
+async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<User[]> {
+  const projectUserIDs = await getAccessingUserIDs(projectID, 'project')
+  const workspaceUserIDs = await getAccessingUserIDs(workspaceID, 'workspace')
+  const users = await getKeyedEntities(Entity.USER, [...new Set([...projectUserIDs, ...workspaceUserIDs])])
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
+}
+
+export async function getProjectUsers(projectID: number): Promise<User[]> {
+  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
+  return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
 export async function getActiveProject(
@@ -84,7 +90,7 @@ export async function getActiveProject(
   const prompts = promptData.map(prompt => toPrompt(prompt, userID))
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
   const chains = chainData.map(chain => toChain(chain, userID))
-  const users = await getProjectUsers(projectID)
+  const users = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
     ...toProject(projectData),

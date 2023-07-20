@@ -25,14 +25,14 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   const { projectID, p: promptID, c: chainID, cs: chains } = ParseNumberQuery(query)
 
   const buildURL = urlBuilderFromHeaders(req.headers)
-  const activeProject = await getActiveProject(user.id, projectID!, buildURL)
+  const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
   const initialActiveItem = promptID
     ? await getActivePrompt(user.id, promptID, buildURL)
     : chainID
     ? await getActiveChain(user.id, chainID, buildURL)
-    : activeProject.prompts.length > 0
-    ? await getActivePrompt(user.id, activeProject.prompts[0].id, buildURL)
-    : undefined
+    : initialActiveProject.prompts.length > 0
+    ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id, buildURL)
+    : null
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
   const initialShowChains = chains === 1
@@ -40,7 +40,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   return {
     props: {
       user,
-      activeProject,
+      initialActiveProject,
       initialActiveItem,
       initialAvailableProviders,
       initialShowChains,
@@ -52,13 +52,13 @@ type ActiveItem = ActivePrompt | ActiveChain
 
 export default function Home({
   user,
-  activeProject,
+  initialActiveProject,
   initialActiveItem,
   initialAvailableProviders,
   initialShowChains,
 }: {
   user: User
-  activeProject: ActiveProject
+  initialActiveProject: ActiveProject
   initialActiveItem?: ActiveItem
   initialAvailableProviders: AvailableProvider[]
   initialShowChains: boolean
@@ -67,6 +67,7 @@ export default function Home({
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
+  const [activeProject, setActiveProject] = useState(initialActiveProject)
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const isPrompt = (item: ActiveItem): item is ActivePrompt => 'versions' in (item as ActivePrompt)
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
@@ -77,6 +78,8 @@ export default function Home({
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
+
+  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const savePrompt = async (onSaved?: (versionID: number) => Promise<void>) => {
     const versionNeedsSaving =
@@ -217,6 +220,7 @@ export default function Home({
                   onAddItem={isChainMode ? addChain : addPrompt}
                   onRefreshItem={refreshActiveItem}
                   onDeleteItem={() => router.push(ProjectRoute(activeProject.id))}
+                  onRefreshProject={refreshProject}
                   showComments={showComments}
                   setShowComments={setShowComments}>
                   {activeItem && (
