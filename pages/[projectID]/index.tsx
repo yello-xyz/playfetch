@@ -4,7 +4,7 @@ import api from '@/src/client/api'
 import { useState } from 'react'
 import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
-import ClientRoute, { ChainRoute, ParseNumberQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
+import ClientRoute, { ChainRoute, ParseNumberQuery, ProjectRoute, PromptRoute, WorkspaceRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
@@ -204,6 +204,7 @@ export default function Home({
                 onAddChain={addChain}
                 onSelectPrompt={selectPrompt}
                 onSelectChain={selectChain}
+                onNavigateBack={() => router.push(WorkspaceRoute(activeProject.workspaceID, user.id))}
               />
               <div className='flex flex-col flex-1'>
                 <TopBar

@@ -7,8 +7,8 @@ enum ClientRoute {
   Admin = '/admin',
 }
 
-export const WorkspaceRoute = (workspaceID?: number) =>
-  workspaceID ? `${ClientRoute.Home}?w=${workspaceID}` : ClientRoute.Home
+export const WorkspaceRoute = (workspaceID: number, userID: number) =>
+  workspaceID !== userID ? `${ClientRoute.Home}?w=${workspaceID}` : ClientRoute.Home
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}${projectID}`
 

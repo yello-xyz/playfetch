@@ -17,23 +17,28 @@ import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 
 const SharedProjectsWorkspaceID = 0
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
-const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace | null =>
-  projects.length > 0
-    ? {
-        id: SharedProjectsWorkspaceID,
-        name: 'Shared Projects',
-        projects,
-        users: [],
-      }
-    : null
+const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
+  id: SharedProjectsWorkspaceID,
+  name: 'Shared Projects',
+  projects,
+  users: [],
+})
+
+const ShouldActivateSharedProjects = (workspaceID: number, workspaces: Workspace[], sharedProjects: Project[]) =>
+  sharedProjects.some(project => project.workspaceID === workspaceID) &&
+  !workspaces.some(workspace => workspace.id === workspaceID)
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
   const { w: workspaceID, s: settings } = ParseNumberQuery(query)
 
   const initialWorkspaces = await getWorkspacesForUser(user.id)
-  const initialActiveWorkspace = await getActiveWorkspace(user.id, workspaceID ?? user.id)
 
-  const sharedProjects = SharedProjectsWorkspace(await getSharedProjectsForUser(user.id))
+  const projects = await getSharedProjectsForUser(user.id)
+  const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects) : null
+  const initialActiveWorkspace =
+    workspaceID && ShouldActivateSharedProjects(workspaceID, initialWorkspaces, projects)
+      ? sharedProjects
+      : await getActiveWorkspace(user.id, workspaceID ?? user.id)
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
   const initialShowSettings = settings === 1
@@ -76,12 +81,15 @@ export default function Home({
 
   const [showSettings, setShowSettings] = useState(initialShowSettings)
 
-  const refreshWorkspace = (workspaceID: number) => api.getWorkspace(workspaceID).then(setActiveWorkspace)
+  const refreshWorkspace = (workspaceID: number) =>
+    sharedProjects && ShouldActivateSharedProjects(workspaceID, workspaces, sharedProjects.projects)
+      ? setActiveWorkspace(sharedProjects)
+      : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
     if (workspaceID !== activeWorkspace.id || showSettings) {
       await refreshWorkspace(workspaceID)
-      router.push(WorkspaceRoute(workspaceID === user.id ? undefined : workspaceID), undefined, { shallow: true })
+      router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
     }
     setShowSettings(false)
   }

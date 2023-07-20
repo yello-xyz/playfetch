@@ -19,6 +19,7 @@ export type ActiveWorkspace = Workspace & {
 export type Project = {
   id: number
   name: string
+  workspaceID: number
 }
 
 export type InputValues = { [name: string]: string[] }

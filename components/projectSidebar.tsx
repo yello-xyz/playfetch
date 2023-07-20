@@ -3,7 +3,7 @@ import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import feedbackIcon from '@/public/feedback.svg'
 import chainIcon from '@/public/chain.svg'
-import UserSidebarItem from './userSidebarItem'
+import backIcon from '@/public/back.svg'
 import Sidebar, { SidebarButton, SidebarSection } from './sidebar'
 
 export default function ProjectSidebar({
@@ -13,6 +13,7 @@ export default function ProjectSidebar({
   onAddChain,
   onSelectPrompt,
   onSelectChain,
+  onNavigateBack,
 }: {
   activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain
@@ -20,11 +21,12 @@ export default function ProjectSidebar({
   onAddChain: () => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
+  onNavigateBack: () => void
 }) {
   return (
     <Sidebar>
       <SidebarSection>
-        <UserSidebarItem />
+        <SidebarButton title='Back to overview' icon={backIcon} onClick={onNavigateBack} />
       </SidebarSection>
       <SidebarSection title='Prompts'>
         {activeProject.prompts.map((prompt, promptIndex) => (

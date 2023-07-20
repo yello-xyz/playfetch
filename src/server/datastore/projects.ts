@@ -66,6 +66,7 @@ const toProjectData = (
 export const toProject = (data: any): Project => ({
   id: getID(data),
   name: data.name,
+  workspaceID: data.workspaceID,
 })
 
 async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<User[]> {
