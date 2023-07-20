@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { User, AvailableProvider, Workspace, ActiveWorkspace } from '@/types'
-import ClientRoute, { ParseQuery, WorkspaceRoute } from '@/components/clientRoute'
+import ClientRoute, { ParseQuery, ProjectRoute, WorkspaceRoute } from '@/components/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { UserContext } from '@/components/userContext'
@@ -72,8 +72,7 @@ export default function Home({
   }
 
   const navigateToProject = async (projectID: number) => {
-    // TODO navigate to project instead
-    await refreshWorkspace(activeWorkspace.id)
+    router.push(ProjectRoute(projectID))
   }
 
   const addProject = async (name: string) => {

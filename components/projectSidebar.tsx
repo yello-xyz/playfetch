@@ -26,7 +26,7 @@ export default function ProjectSidebar({
       <SidebarSection>
         <UserSidebarItem />
       </SidebarSection>
-      <SidebarSection title='Prompts' className='flex-1'>
+      <SidebarSection title='Prompts'>
         {activeProject.prompts.map((prompt, promptIndex) => (
           <SidebarButton
             key={promptIndex}

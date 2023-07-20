@@ -46,7 +46,7 @@ export function SidebarButton({
     <LinkWrapper>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
-        <div className='font-normal w-36'>{title}</div>
+        <div className='w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap'>{title}</div>
       </div>
     </LinkWrapper>
   )
