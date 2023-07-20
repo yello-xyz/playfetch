@@ -33,14 +33,14 @@ export async function hasUserAccess(userID: number, objectID: number) {
 }
 
 export async function grantUserAccess(userID: number, objectID: number, kind: Kind) {
-  const hasAccess = await hasUserAccess(userID, objectID)
-  if (!hasAccess) {
+  // const hasAccess = await hasUserAccess(userID, objectID)
+  // if (!hasAccess) {
     await getDatastore().save({
       key: buildKey(Entity.ACCESS),
       data: { userID, objectID, kind },
       excludeFromIndexes: [],
     })
-  }
+  // }
 }
 
 export async function revokeUserAccess(userID: number, objectID: number) {
