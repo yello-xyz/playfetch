@@ -21,7 +21,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
+import { addPromptForUser, deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor } from './endpoints'
@@ -125,7 +125,9 @@ export async function addProjectForUser(userID: number, workspaceID: number, pro
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
   const projectData = toProjectData(workspaceID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
   await getDatastore().save(projectData)
-  return getID(projectData)
+  const projectID = getID(projectData)
+  await addPromptForUser(userID, projectID)
+  return projectID
 }
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
