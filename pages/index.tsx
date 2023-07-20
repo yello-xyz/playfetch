@@ -203,9 +203,8 @@ export default function Home({
     router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
 
-  const refreshActiveItem = () => (
-    activePrompt ? refreshActivePrompt : activeChain ? refreshActiveChain : refreshActiveProject
-  )!()
+  const refreshActiveItem = () =>
+    (activePrompt ? refreshActivePrompt : activeChain ? refreshActiveChain : refreshActiveProject)!()
   const refreshProjects = () => api.getProjects().then(setProjects)
 
   const {

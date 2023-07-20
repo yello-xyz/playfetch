@@ -62,7 +62,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           true,
           (index, _, { cost, attempts, cacheHit, failed }) =>
             updateAggregateUsage(isLastRun(index), cost, attempts, cacheHit, failed),
-          (index, message) => useStreaming && isLastRun(index) ? res.write(message) : undefined
+          (index, message) => (useStreaming && isLastRun(index) ? res.write(message) : undefined)
         )
         return useStreaming ? res.end() : res.json({ output })
       }

@@ -116,9 +116,5 @@ export function CommentCell({
 
 export function CommentQuote({ children, className }: { children: ReactNode; className?: string }) {
   const baseClass = 'flex flex-col gap-1 pl-2 ml-6 text-xs text-gray-600 border-l-4 border-blue-500 opacity-50'
-  return (
-    <div className={`${baseClass} ${className ?? ''}`}>
-      {children}
-    </div>
-  )
+  return <div className={`${baseClass} ${className ?? ''}`}>{children}</div>
 }

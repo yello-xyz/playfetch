@@ -5,7 +5,7 @@ import { encode } from 'gpt-3-encoder'
 const calculateCost = (input: string, output: string) => {
   const inputTokens = encode(input).length
   const outputTokens = encode(output).length
-  return (inputTokens + outputTokens) * 15 / 1000000
+  return ((inputTokens + outputTokens) * 15) / 1000000
 }
 
 export default function predict(apiKey: string, model: CohereLanguageModel) {

@@ -92,7 +92,11 @@ export function CommentsPopup({
 
   return (
     <>
-      <div className='absolute' style={position} onMouseDown={event => event.stopPropagation()} onClick={event => event.stopPropagation()}>
+      <div
+        className='absolute'
+        style={position}
+        onMouseDown={event => event.stopPropagation()}
+        onClick={event => event.stopPropagation()}>
         <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
           <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
             {haveComments && (
@@ -166,9 +170,7 @@ export function CommentInput({
 
   return (
     <div className='flex flex-col items-stretch gap-1'>
-      {selection && !runID && (
-        <CommentQuote className='mt-2'>{selection}</CommentQuote>
-      )}
+      {selection && !runID && <CommentQuote className='mt-2'>{selection}</CommentQuote>}
       <div className='flex items-center gap-2'>
         <UserAvatar user={user} size='md' />
         <input
