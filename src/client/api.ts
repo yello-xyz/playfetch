@@ -63,6 +63,9 @@ const api = {
   addWorkspace: function (name: string): Promise<number> {
     return post(this.addWorkspace, { name })
   },
+  inviteToWorkspace: function (workspaceID: number, emails: string[]) {
+    return post(this.inviteToWorkspace, { workspaceID, emails })
+  },
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
@@ -78,8 +81,8 @@ const api = {
   addFlavor: function (projectID: number, flavor: string) {
     return post(this.addFlavor, { projectID, flavor })
   },
-  inviteMembers: function (projectID: number, emails: string[]) {
-    return post(this.inviteMembers, { projectID, emails })
+  inviteToProject: function (projectID: number, emails: string[]) {
+    return post(this.inviteToProject, { projectID, emails })
   },
   leaveProject: function (projectID: number) {
     return post(this.leaveProject, { projectID })

@@ -45,7 +45,7 @@ export default function ProjectSidebar({
   }
 
   const inviteMembers = async (projectID: number, emails: string[]) => {
-    await api.inviteMembers(projectID, emails)
+    await api.inviteToProject(projectID, emails)
     await refreshProjects()
     if (activeProject) {
       refreshProject()
