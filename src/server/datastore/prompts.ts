@@ -18,11 +18,15 @@ import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
 
-export async function migratePrompts() {
+export async function migratePrompts(projectIDMap: Record<number, number>) {
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   for (const promptData of allPrompts) {
-    await updatePrompt({ ...promptData }, false)
+    const newProjectID = projectIDMap[promptData.projectID]
+    if (newProjectID) {
+      console.log('Migrated prompt', getID(promptData), 'from', promptData.projectID, 'to', newProjectID)
+      await updatePrompt({ ...promptData, projectID: newProjectID }, false)
+    }
   }
 }
 

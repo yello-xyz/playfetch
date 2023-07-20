@@ -22,19 +22,43 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
+import { deletePromptForUser, loadEndpoints, migratePrompts, toPrompt } from './prompts'
 import { toUser } from './users'
-import { getProjectInputValues } from './inputs'
+import { getProjectInputValues, migrateInputs } from './inputs'
 import { DefaultEndpointFlavor } from './endpoints'
-import { toChain } from './chains'
+import { migrateChains, toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  const projectIDMap: Record<number, number> = {}
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData })
+    const oldProjectID = getID(projectData)
+    const user = await getKeyedEntity(Entity.USER, oldProjectID)
+    if (user) {
+      const newProjectData = toProjectData(
+        projectData.workspaceID,
+        projectData.name,
+        projectData.urlPath,
+        JSON.parse(projectData.labels),
+        JSON.parse(projectData.flavors),
+        projectData.createdAt,
+        projectData.apiKeyHash,
+        projectData.apiKeyDev
+        // getID(projectData) // SAVE AS NEW PROJECT!
+      )
+      await getDatastore().save(newProjectData)
+      const newProjectID = getID(newProjectData)
+      projectIDMap[oldProjectID] = newProjectID
+      await datastore.delete(datastore.key([Entity.PROJECT, oldProjectID]))
+      console.log(`Migrated project "${projectData.name}" for user ${oldProjectID} to ${newProjectID}`)
+    }
   }
+  console.log('Project ID Map in case something goes wrong below:', projectIDMap)
+  await migrateChains(projectIDMap)
+  await migratePrompts(projectIDMap)
+  await migrateInputs(projectIDMap)
 }
 
 const hashAPIKey = (apiKey: string) => createHash('sha256').update(apiKey).digest('hex')

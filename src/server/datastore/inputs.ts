@@ -1,7 +1,21 @@
 import { and } from '@google-cloud/datastore'
-import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityID } from './datastore'
+import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityID, getID } from './datastore'
 import { ensureProjectAccess } from './projects'
 import { InputValues } from '@/types'
+
+export async function migrateInputs(projectIDMap: Record<number, number>) {
+  const datastore = getDatastore()
+  const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
+  for (const inputData of allInputs) {
+    const newProjectID = projectIDMap[inputData.projectID]
+    if (newProjectID) {
+      console.log('Migrated input', getID(inputData), 'from', inputData.projectID, 'to', newProjectID)
+      await datastore.save(
+        toInputData(newProjectID, inputData.name, JSON.parse(inputData.values), getID(inputData))
+      )
+    }
+  }
+}
 
 const toInputData = (projectID: number, name: string, values: string[], inputID?: number) => ({
   key: buildKey(Entity.INPUT, inputID),
