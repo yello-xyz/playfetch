@@ -52,7 +52,7 @@ export default function VersionFilters({
   setFilters: (filters: VersionFilter[]) => void
 }) {
   return (
-    <div className='flex items-start flex-1 gap-2'>
+    <div className='flex items-start gap-2'>
       <div className='flex flex-wrap flex-1 gap-2 pb-2 text-xs text-gray-800'>
         {filters.map((filter, index) => (
           <FilterCell
