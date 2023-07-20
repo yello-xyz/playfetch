@@ -17,7 +17,6 @@ import ShortUniqueId from 'short-unique-id'
 import {
   getAccessibleObjectIDs,
   getAccessingUserIDs,
-  grantUserAccess,
   grantUsersAccess,
   hasUserAccess,
   revokeUserAccess,
@@ -120,9 +119,7 @@ export async function addProjectForUser(userID: number, projectName: string) {
   // TODO generalise to add project in non-Drafts workspace (and verify access to workspace)
   const projectData = toProjectData(userID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
   await getDatastore().save(projectData)
-  const projectID = getID(projectData)
-  await grantUserAccess(userID, projectID, 'project')
-  return projectID
+  return getID(projectData)
 }
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
