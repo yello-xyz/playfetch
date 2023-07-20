@@ -1,5 +1,5 @@
 import { FormatRelativeDate } from '@/src/common/formatting'
-import { Chain, Project, Prompt } from '@/types'
+import { Chain, Prompt } from '@/types'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
@@ -11,17 +11,15 @@ import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function ProjectGridView({
   items,
-  projects,
   onSelectItem,
 }: {
   items: (Prompt | Chain)[]
-  projects: Project[]
   onSelectItem: (itemID: number) => void
 }) {
   return (
     <div className='flex flex-wrap content-start h-full gap-6 p-6 overflow-y-auto'>
       {items.map((item, index) => (
-        <ProjectItemCell key={index} item={item} projects={projects} onSelectItem={onSelectItem} />
+        <ProjectItemCell key={index} item={item} onSelectItem={onSelectItem} />
       ))}
     </div>
   )
@@ -54,15 +52,7 @@ export function EmptyGridView({
   )
 }
 
-function ProjectItemCell({
-  item,
-  projects,
-  onSelectItem,
-}: {
-  item: Prompt | Chain
-  projects: Project[]
-  onSelectItem: (itemID: number) => void
-}) {
+function ProjectItemCell({ item, onSelectItem }: { item: Prompt | Chain; onSelectItem: (itemID: number) => void }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
   const refreshProject = useRefreshProject()
@@ -91,7 +81,6 @@ function ProjectItemCell({
           <div className='absolute right-0 top-7'>
             <ProjectItemPopupMenu
               item={item}
-              projects={projects}
               isMenuExpanded={isMenuExpanded}
               setIsMenuExpanded={setIsMenuExpanded}
               onRefresh={refreshProject}
