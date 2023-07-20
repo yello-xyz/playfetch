@@ -14,6 +14,7 @@ import InviteDialog from './inviteDialog'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import Link from 'next/link'
+import { useLoggedInUser } from './userContext'
 
 export default function Sidebar({
   projects,
@@ -36,8 +37,11 @@ export default function Sidebar({
   const refreshProjects = useRefreshProjects()
   const refreshProject = useRefreshProject()
 
+  const user = useLoggedInUser()
+
   const addProject = async (name: string) => {
-    const projectID = await api.addProject(name)
+    // TODO generalise to add project in current workspace (not just user's Drafts workspace)
+    const projectID = await api.addProject(user.id, name)
     await refreshProjects()
     onSelectProject(projectID)
   }

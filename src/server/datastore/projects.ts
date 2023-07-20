@@ -114,10 +114,10 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
   return uniqueURLPath
 }
 
-export async function addProjectForUser(userID: number, projectName: string) {
+export async function addProjectForUser(userID: number, workspaceID: number, projectName: string) {
+  await ensureWorkspaceAccess(userID, workspaceID)
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  // TODO generalise to add project in non-Drafts workspace (and verify access to workspace)
-  const projectData = toProjectData(userID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
+  const projectData = toProjectData(workspaceID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
   await getDatastore().save(projectData)
   return getID(projectData)
 }

@@ -58,8 +58,8 @@ const api = {
   getProject: function (projectID: number): Promise<ActiveProject> {
     return post(this.getProject, { projectID })
   },
-  addProject: function (name: string): Promise<number> {
-    return post(this.addProject, { name })
+  addProject: function (workspaceID: number, name: string): Promise<number> {
+    return post(this.addProject, { workspaceID, name })
   },
   renameProject: function (projectID: number, name: string) {
     return post(this.renameProject, { projectID, name })
