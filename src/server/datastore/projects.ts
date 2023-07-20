@@ -26,28 +26,13 @@ import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor } from './endpoints'
 import { toChain } from './chains'
+import { ensureWorkspaceAccess } from './workspaces'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    const projectID = getID(projectData)
-    const userIDsWithAccess = await getAccessingUserIDs(projectID, 'project')
-    if (userIDsWithAccess.length === 1) {
-      await updateProject({ ...projectData, workspaceID: userIDsWithAccess[0] })
-      continue
-    }
-    const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
-    if (prompts.length > 0) {
-      const oldestPromptID = getID(prompts.slice(-1)[0])
-      const versions = await getOrderedEntities(Entity.VERSION, 'promptID', oldestPromptID)
-      if (versions.length > 0) {
-        const oldestVersionCreatorID = versions.slice(-1)[0].userID
-        await updateProject({ ...projectData, workspaceID: oldestVersionCreatorID })
-        continue
-      }
-    }
-    console.log('Could not find suitable owner for project', projectID)
+    await updateProject({ ...projectData })
   }
 }
 
@@ -175,15 +160,19 @@ async function updateProject(projectData: any) {
 }
 
 export async function ensureProjectAccess(userID: number, projectID: number) {
-  const hasAccess = await hasUserAccess(userID, projectID)
-  if (!hasAccess) {
-    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
-  }
+  await getVerifiedUserProjectData(userID, projectID)
 }
 
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
-  await ensureProjectAccess(userID, projectID)
-  return getKeyedEntity(Entity.PROJECT, projectID)
+  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
+  if (!projectData) {
+    throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
+  }
+  const hasAccess = await hasUserAccess(userID, projectID)
+  if (!hasAccess) {
+    await ensureWorkspaceAccess(userID, projectData.workspaceID)
+  }
+  return projectData
 }
 
 export async function updateProjectName(userID: number, projectID: number, name: string) {
