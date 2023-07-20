@@ -66,9 +66,6 @@ const api = {
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
   },
-  getProjects: function (): Promise<Project[]> {
-    return post(this.getProjects)
-  },
   getProject: function (projectID: number): Promise<ActiveProject> {
     return post(this.getProject, { projectID })
   },
