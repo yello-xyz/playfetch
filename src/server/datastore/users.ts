@@ -1,6 +1,6 @@
 import { User } from '@/types'
 import { Entity, buildKey, getDatastore, getEntity, getID, getKeyedEntity } from './datastore'
-import { addProjectForUser } from './projects'
+import { addWorkspaceForUser } from './workspaces'
 
 export async function migrateUsers() {
   const datastore = getDatastore()
@@ -83,6 +83,6 @@ export async function saveUser(email: string, fullName: string, isAdmin: boolean
   )
   await getDatastore().save(userData)
   if (!previousUserData) {
-    await addProjectForUser(getID(userData), email.split('@')[0], true)
+    await addWorkspaceForUser(getID(userData))
   }
 }

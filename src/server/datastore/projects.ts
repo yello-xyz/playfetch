@@ -13,7 +13,14 @@ import {
 import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
-import { getAccessibleObjectIDs, getAccessingUserIDs, grantUserAccess, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
+import {
+  getAccessibleObjectIDs,
+  getAccessingUserIDs,
+  grantUserAccess,
+  grantUsersAccess,
+  hasUserAccess,
+  revokeUserAccess,
+} from './access'
 import { deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
@@ -104,18 +111,9 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
   return uniqueURLPath
 }
 
-export async function addProjectForUser(userID: number, projectName: string, isUserProject = false) {
+export async function addProjectForUser(userID: number, projectName: string) {
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  const projectData = toProjectData(
-    isUserProject ? 'Prompts' : projectName,
-    urlPath,
-    [],
-    [DefaultEndpointFlavor],
-    new Date(),
-    undefined,
-    undefined,
-    isUserProject ? userID : undefined
-  )
+  const projectData = toProjectData(projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await grantUserAccess(userID, projectID, 'project')
