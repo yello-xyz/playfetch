@@ -4,7 +4,7 @@ import { StaticImageData } from 'next/image'
 import Link from 'next/link'
 
 export default function Sidebar({ children }: { children: ReactNode }) {
-  return <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>{children}</div>
+  return <div className='flex flex-col gap-6 px-2 py-4 overflow-y-auto border-r border-gray-200'>{children}</div>
 }
 
 export function SidebarSection({
