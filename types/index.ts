@@ -165,6 +165,7 @@ export type Usage = {
   endpointID: number
   requests: number
   cost: number
+  duration: number
   cacheHits: number
   attempts: number
   failures: number

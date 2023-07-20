@@ -33,6 +33,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         let totalCost = 0
         let extraAttempts = 1
         let anyCacheHit = false
+        const startTime = process.hrtime.bigint()
         const updateAggregateUsage = async (
           isLastRun: boolean,
           cost: number,
@@ -40,12 +41,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           cacheHit: boolean,
           failed: boolean
         ) => {
-          // TODO log duration as well here
           totalCost += cost
           extraAttempts += attempts - 1
           anyCacheHit = anyCacheHit || cacheHit
           if (isLastRun || failed) {
-            updateUsage(endpoint.id, totalCost, anyCacheHit, 1 + extraAttempts, failed)
+            const endTime = process.hrtime.bigint()
+            const durationInSeconds = Number(endTime - startTime) / 1_000_000_000
+            updateUsage(endpoint.id, totalCost, durationInSeconds, anyCacheHit, 1 + extraAttempts, failed)
           }
         }
 
