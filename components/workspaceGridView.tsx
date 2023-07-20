@@ -6,13 +6,11 @@ import { TopBarButton, UserAvatars } from './topBar'
 import addIcon from '@/public/add.svg'
 
 export default function WorkspaceGridView({
-  workspaces,
   activeWorkspace,
   onAddProject,
   onSelectProject,
   onRefreshWorkspace,
 }: {
-  workspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
   onAddProject: () => void
   onSelectProject: (projectID: number) => void
@@ -20,8 +18,8 @@ export default function WorkspaceGridView({
 }) {
   const [showInviteDialog, setShowInviteDialog] = useState(false)
 
-  const inviteMembers = async (workspaceID: number, emails: string[]) => {
-    await api.inviteToWorkspace(workspaceID, emails)
+  const inviteMembers = async (emails: string[]) => {
+    await api.inviteToWorkspace(activeWorkspace.id, emails)
     onRefreshWorkspace()
   }
 
@@ -47,13 +45,7 @@ export default function WorkspaceGridView({
         )}
       </div>
       {showInviteDialog && (
-        <InviteDialog
-          objects={workspaces}
-          initialObjectID={activeWorkspace.id}
-          label='workspace'
-          onConfirm={inviteMembers}
-          onDismiss={() => setShowInviteDialog(false)}
-        />
+        <InviteDialog label='workspace' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
       )}
     </>
   )
