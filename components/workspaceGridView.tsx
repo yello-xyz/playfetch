@@ -1,4 +1,4 @@
-import { ActiveWorkspace, Project, Workspace } from '@/types'
+import { ActiveWorkspace, Project } from '@/types'
 import { useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
@@ -7,11 +7,13 @@ import addIcon from '@/public/add.svg'
 
 export default function WorkspaceGridView({
   activeWorkspace,
+  isSharedProjects,
   onAddProject,
   onSelectProject,
   onRefreshWorkspace,
 }: {
   activeWorkspace: ActiveWorkspace
+  isSharedProjects: boolean
   onAddProject: () => void
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
@@ -28,11 +30,13 @@ export default function WorkspaceGridView({
       <div className='flex flex-col h-full px-6 pb-0 bg-gray-25'>
         <div className='flex items-center justify-between py-4'>
           <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
-          <div className='flex items-center gap-2'>
-            <UserAvatars users={activeWorkspace.users} />
-            <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
-            <TopBarButton title='New Project' icon={addIcon} onClick={onAddProject} />
-          </div>
+          {!isSharedProjects && (
+            <div className='flex items-center gap-2'>
+              <UserAvatars users={activeWorkspace.users} />
+              <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
+              <TopBarButton title='New Project' icon={addIcon} onClick={onAddProject} />
+            </div>
+          )}
         </div>
         {activeWorkspace.projects.length > 0 ? (
           <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>

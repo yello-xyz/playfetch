@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { User, AvailableProvider, Workspace, ActiveWorkspace } from '@/types'
+import { User, AvailableProvider, Workspace, ActiveWorkspace, Project } from '@/types'
 import ClientRoute, { ParseNumberQuery, ProjectRoute, WorkspaceRoute } from '@/components/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
@@ -13,6 +13,19 @@ import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore
 import PickNameDialog from '@/components/pickNameDialog'
 import WorkspaceGridView from '@/components/workspaceGridView'
 import WorkspaceSidebar from '@/components/workspaceSidebar'
+import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
+
+const SharedProjectsWorkspaceID = 0
+const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
+const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace | null =>
+  projects.length > 0
+    ? {
+        id: SharedProjectsWorkspaceID,
+        name: 'Shared Projects',
+        projects,
+        users: [],
+      }
+    : null
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
   const { w: workspaceID, s: settings } = ParseNumberQuery(query)
@@ -20,12 +33,15 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
   const initialWorkspaces = await getWorkspacesForUser(user.id)
   const initialActiveWorkspace = await getActiveWorkspace(user.id, workspaceID ?? user.id)
 
+  const sharedProjects = SharedProjectsWorkspace(await getSharedProjectsForUser(user.id))
+
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
   const initialShowSettings = settings === 1
 
   return {
     props: {
       user,
+      sharedProjects,
       initialWorkspaces,
       initialActiveWorkspace,
       initialAvailableProviders,
@@ -36,12 +52,14 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
 export default function Home({
   user,
+  sharedProjects,
   initialWorkspaces,
   initialActiveWorkspace,
   initialAvailableProviders,
   initialShowSettings,
 }: {
   user: User
+  sharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialActiveWorkspace: ActiveWorkspace
   initialAvailableProviders: AvailableProvider[]
@@ -107,7 +125,9 @@ export default function Home({
             <WorkspaceSidebar
               workspaces={workspaces}
               activeWorkspace={activeWorkspace}
+              sharedProjects={sharedProjects}
               onSelectWorkspace={selectWorkspace}
+              onSelectSharedProjects={sharedProjects ? () => setActiveWorkspace(sharedProjects) : undefined}
               onAddProject={() => setShowPickNamePrompt(true)}
               onRefreshWorkspaces={refreshWorkspaces}
             />
@@ -118,6 +138,7 @@ export default function Home({
                 ) : (
                   <WorkspaceGridView
                     activeWorkspace={activeWorkspace}
+                    isSharedProjects={IsSharedProjects(activeWorkspace)}
                     onAddProject={() => setShowPickNamePrompt(true)}
                     onSelectProject={navigateToProject}
                     onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}

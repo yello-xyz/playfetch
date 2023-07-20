@@ -10,7 +10,7 @@ enum ClientRoute {
 export const WorkspaceRoute = (workspaceID?: number) =>
   workspaceID ? `${ClientRoute.Home}?w=${workspaceID}` : ClientRoute.Home
 
-export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}/${projectID}`
+export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}${projectID}`
 
 export const ChainsRoute = (projectID: number) => `${ProjectRoute(projectID)}?cs=1`
 

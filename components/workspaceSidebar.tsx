@@ -13,14 +13,17 @@ import { SidebarButton, SidebarSection } from './sidebar'
 export default function WorkspaceSidebar({
   workspaces,
   activeWorkspace,
+  sharedProjects,
   onSelectWorkspace,
+  onSelectSharedProjects,
   onAddProject,
   onRefreshWorkspaces,
-
 }: {
   workspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
+  sharedProjects?: ActiveWorkspace
   onSelectWorkspace: (workspaceID: number) => void
+  onSelectSharedProjects?: () => void
   onAddProject: () => void
   onRefreshWorkspaces: () => Promise<void>
 }) {
@@ -49,6 +52,14 @@ export default function WorkspaceSidebar({
               icon={fileIcon}
               active={activeWorkspace.id === userWorkspace.id}
               onClick={() => onSelectWorkspace(userWorkspace.id)}
+            />
+          )}
+          {sharedProjects && onSelectSharedProjects && (
+            <SidebarButton
+              title={sharedProjects.name}
+              icon={projectIcon}
+              active={activeWorkspace.id === sharedProjects.id}
+              onClick={onSelectSharedProjects}
             />
           )}
           <SidebarButton title='New Project…' icon={addIcon} onClick={onAddProject} />
