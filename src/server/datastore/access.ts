@@ -7,6 +7,7 @@ import {
   getFilteredEntities,
   getFilteredEntityKey,
   getID,
+  getKeyedEntity,
 } from './datastore'
 import { getUserForEmail } from './users'
 
@@ -16,11 +17,24 @@ export async function migrateAccess() {
   const datastore = getDatastore()
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const accessData of allAccess) {
-    datastore.save({
-      key: buildKey(Entity.ACCESS, getID(accessData)),
-      data: { userID: accessData.userID, objectID: accessData.objectID, kind: accessData.kind },
-      excludeFromIndexes: [],
-    })
+    if (accessData.kind === 'project') {
+      const projectData = await getKeyedEntity(Entity.PROJECT, accessData.objectID)
+      if (
+        allAccess.some(
+          access =>
+            access.kind === 'workspace' &&
+            access.objectID === projectData.workspaceID &&
+            access.userID === accessData.userID
+        )
+      ) {
+        datastore.delete(buildKey(Entity.ACCESS, getID(accessData)))
+      }
+    }
+    // datastore.save({
+    //   key: buildKey(Entity.ACCESS, getID(accessData)),
+    //   data: { userID: accessData.userID, objectID: accessData.objectID, kind: accessData.kind },
+    //   excludeFromIndexes: [],
+    // })
   }
 }
 
