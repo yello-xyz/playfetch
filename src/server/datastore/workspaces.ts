@@ -2,6 +2,7 @@ import {
   Entity,
   buildKey,
   getDatastore,
+  getEntityIDs,
   getEntityKeys,
   getID,
   getKeyedEntities,
@@ -117,9 +118,9 @@ export async function deleteWorkspaceForUser(userID: number, workspaceID: number
   if (accessKeys.length > 1) {
     throw new Error('Cannot delete multi-user workspace')
   }
-  const projectKeys = await getEntityKeys(Entity.PROJECT, 'workspaceID', workspaceID)
-  for (const key of projectKeys) {
-    await deleteProjectForUser(userID, getID({ key }))
+  const projectIDs = await getEntityIDs(Entity.PROJECT, 'workspaceID', workspaceID)
+  for (const projectID of projectIDs) {
+    await deleteProjectForUser(userID, projectID)
   }
   await getDatastore().delete([...accessKeys, buildKey(Entity.WORKSPACE, workspaceID)])
 }

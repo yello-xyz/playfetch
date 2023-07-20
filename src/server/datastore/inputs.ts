@@ -1,5 +1,5 @@
 import { and } from '@google-cloud/datastore'
-import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityKey, getID } from './datastore'
+import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityID } from './datastore'
 import { ensureProjectAccess } from './projects'
 import { InputValues } from '@/types'
 
@@ -11,11 +11,11 @@ const toInputData = (projectID: number, name: string, values: string[], inputID?
 
 export async function saveInputValues(userID: number, projectID: number, name: string, values: string[]) {
   await ensureProjectAccess(userID, projectID)
-  const key = await getFilteredEntityKey(
+  const inputID = await getFilteredEntityID(
     Entity.INPUT,
     and([buildFilter('projectID', projectID), buildFilter('name', name)])
   )
-  await getDatastore().save(toInputData(projectID, name, values, key ? getID({ key }) : undefined))
+  await getDatastore().save(toInputData(projectID, name, values, inputID))
 }
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })

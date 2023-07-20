@@ -61,9 +61,6 @@ export const getFilteredEntities = (
 export const getFilteredEntity = (type: string, filter: EntityFilter) =>
   getFilteredEntities(type, filter, 1).then(([entity]) => entity)
 
-export const getFilteredEntityKey = (type: string, filter: EntityFilter) =>
-  getFilteredEntities(type, filter, 1, [], true).then(([entity]) => (entity ? getKey(entity) : undefined))
-
 export const getEntities = (type: string, key: string, value: {}, limit?: number, sortKey?: string[]) =>
   getFilteredEntities(type, buildFilter(key, value), limit, sortKey)
 
@@ -73,14 +70,29 @@ export const getOrderedEntities = (type: string, key: string, value: {}, sortKey
 export const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
   getEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
 
+const getFilteredEntityKeys = (type: string, filter: EntityFilter, limit?: number) =>
+  getFilteredEntities(type, filter, limit, [], true).then(entities => entities.map(getKey))
+
+export const getFilteredEntityKey = (type: string, filter: EntityFilter) =>
+  getFilteredEntityKeys(type, filter, 1).then(([key]) => key)
+
 export const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
-  getFilteredEntities(type, buildFilter(key, value), limit, undefined, true).then(entities => entities.map(getKey))
+  getFilteredEntityKeys(type, buildFilter(key, value), limit)
 
 export const getEntityKey = (type: string, key: string, value: {}) =>
-  getFilteredEntity(type, buildFilter(key, value)).then(getKey)
+  getEntityKeys(type, key, value, 1).then(([key]) => key)
+
+const getFilteredEntityIDs = (type: string, filter: EntityFilter, limit?: number) =>
+  getFilteredEntityKeys(type, filter, limit).then(keys => keys.map(key => getID({ key })))
+
+export const getFilteredEntityID = (type: string, filter: EntityFilter) =>
+  getFilteredEntityIDs(type, filter, 1).then(([id]) => id)
+
+export const getEntityIDs = (type: string, key: string, value: {}, limit?: number) =>
+  getFilteredEntityIDs(type, buildFilter(key, value), limit)
 
 export const getEntityID = (type: string, key: string, value: {}) =>
-  getEntityKeys(type, key, value, 1).then(([key]) => getID({ key }))
+  getEntityIDs(type, key, value, 1).then(([id]) => id)
 
 export const getKeyedEntities = async (type: string, ids: number[]): Promise<any[]> =>
   ids.length
