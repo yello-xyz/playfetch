@@ -18,6 +18,6 @@ export async function runDataMigrations() {
   // await migrateEndpoints()
   // await migrateUsage()
   // await migrateAccess()
-  // await migrateUsers()
+  await migrateUsers()
   // await migrateComments()
 }
