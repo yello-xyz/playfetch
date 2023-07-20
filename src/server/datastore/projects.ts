@@ -31,13 +31,30 @@ export async function migrateProjects() {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData })
+    const projectID = getID(projectData)
+    const userIDsWithAccess = await getAccessingUserIDs(projectID, 'project')
+    if (userIDsWithAccess.length === 1) {
+      await updateProject({ ...projectData, workspaceID: userIDsWithAccess[0] })
+      continue
+    }
+    const prompts = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
+    if (prompts.length > 0) {
+      const oldestPromptID = getID(prompts.slice(-1)[0])
+      const versions = await getOrderedEntities(Entity.VERSION, 'promptID', oldestPromptID)
+      if (versions.length > 0) {
+        const oldestVersionCreatorID = versions.slice(-1)[0].userID
+        await updateProject({ ...projectData, workspaceID: oldestVersionCreatorID })
+        continue
+      }
+    }
+    console.log('Could not find suitable owner for project', projectID)
   }
 }
 
 const hashAPIKey = (apiKey: string) => createHash('sha256').update(apiKey).digest('hex')
 
 const toProjectData = (
+  workspaceID: number,
   name: string,
   urlPath: string,
   labels: string[],
@@ -49,6 +66,7 @@ const toProjectData = (
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
   data: {
+    workspaceID,
     name,
     createdAt,
     labels: JSON.stringify(labels),
@@ -113,7 +131,8 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
 
 export async function addProjectForUser(userID: number, projectName: string) {
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  const projectData = toProjectData(projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
+  // TODO generalise to add project in non-Drafts workspace (and verify access to workspace)
+  const projectData = toProjectData(userID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await grantUserAccess(userID, projectID, 'project')
@@ -142,6 +161,7 @@ export async function getURLPathForProject(userID: number, projectID: number): P
 async function updateProject(projectData: any) {
   await getDatastore().save(
     toProjectData(
+      projectData.workspaceID,
       projectData.name,
       projectData.urlPath,
       JSON.parse(projectData.labels),

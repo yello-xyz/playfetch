@@ -11,8 +11,8 @@ import { migrateVersions } from './versions'
 import { migrateWorkspaces } from './workspaces'
 
 export async function runDataMigrations() {
-  await migrateWorkspaces()
-  // await migrateProjects()
+  // await migrateWorkspaces()
+  await migrateProjects()
   // await migratePrompts()
   // await migrateVersions()
   // await migrateRuns()

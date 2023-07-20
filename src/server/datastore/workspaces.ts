@@ -24,8 +24,7 @@ export async function migrateWorkspaces() {
   const datastore = getDatastore()
   const [allWorkspaces] = await datastore.runQuery(datastore.createQuery(Entity.WORKSPACE))
   for (const workspaceData of allWorkspaces) {
-    await grantUserAccess(workspaceData.userID, getID(workspaceData), 'workspace')
-    // await updateWorkspace({ ...workspaceData })
+    await updateWorkspace({ ...workspaceData })
   }
 }
 
