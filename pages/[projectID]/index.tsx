@@ -4,7 +4,13 @@ import api from '@/src/client/api'
 import { useState } from 'react'
 import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
-import ClientRoute, { ChainRoute, ParseNumberQuery, ProjectRoute, PromptRoute, WorkspaceRoute } from '@/components/clientRoute'
+import ClientRoute, {
+  ChainRoute,
+  ParseNumberQuery,
+  ProjectRoute,
+  PromptRoute,
+  WorkspaceRoute,
+} from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
@@ -165,12 +171,14 @@ export default function Home({
     const promptID = await api.addPrompt(activeProject.id)
     selectPrompt(promptID)
     setSelectedTab('play')
+    refreshProject()
   }
 
   const addChain = async () => {
     const chainID = await api.addChain(activeProject.id)
     selectChain(chainID)
     setSelectedTab('play')
+    refreshProject()
   }
 
   const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
@@ -211,7 +219,7 @@ export default function Home({
                   activeProject={activeProject}
                   activeItem={activePrompt ?? activeChain}
                   onRefreshItem={refreshActiveItem}
-                  onDeleteItem={() => router.push(ProjectRoute(activeProject.id))}
+                  onDeleteItem={() => refreshProject().then(() => router.push(ProjectRoute(activeProject.id)))}
                   onRefreshProject={refreshProject}
                   showComments={showComments}
                   setShowComments={setShowComments}>
