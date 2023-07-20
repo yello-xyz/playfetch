@@ -183,9 +183,6 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
 }
 
 export async function updateProjectName(userID: number, projectID: number, name: string) {
-  if (projectID === userID) {
-    throw new Error('Cannot rename user project')
-  }
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   await updateProject({ ...projectData, name })
 }
@@ -225,9 +222,6 @@ export async function getSharedProjectsForUser(userID: number): Promise<Project[
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectAccess(userID, projectID)
-  if (projectID === userID) {
-    throw new Error('Cannot delete user project')
-  }
   const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
   if (accessKeys.length > 1) {
     // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
