@@ -10,6 +10,8 @@ import {
   ActiveChain,
   ChainItem,
   CodeConfig,
+  ActiveWorkspace,
+  Workspace,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -52,6 +54,15 @@ const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'j
 }
 
 const api = {
+  getWorkspaces: function (): Promise<Workspace[]> {
+    return post(this.getWorkspaces)
+  },
+  getWorkspace: function (workspaceID: number): Promise<ActiveWorkspace> {
+    return post(this.getWorkspace, { workspaceID })
+  },
+  addWorkspace: function (name: string): Promise<number> {
+    return post(this.addWorkspace, { name })
+  },
   getProjects: function (): Promise<Project[]> {
     return post(this.getProjects)
   },
