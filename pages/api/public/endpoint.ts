@@ -30,19 +30,37 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('X-Accel-Buffering', 'no')
         }
 
+        let totalCost = 0
+        let extraAttempts = 1
+        let anyCacheHit = false
+        const updateAggregateUsage = async (
+          isLastRun: boolean,
+          cost: number,
+          attempts: number,
+          cacheHit: boolean,
+          failed: boolean
+        ) => {
+          // TODO log duration as well here
+          totalCost += cost
+          extraAttempts += attempts - 1
+          anyCacheHit = anyCacheHit || cacheHit
+          if (isLastRun || failed) {
+            updateUsage(endpoint.id, totalCost, anyCacheHit, 1 + extraAttempts, failed)
+          }
+        }
+
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         const runConfigs = await loadRunConfigsFromEndpoint(endpoint)
+        const isLastRun = (index: number) => index === runConfigs.length - 1
         const output = await runChainConfigs(
           endpoint.userID,
           runConfigs,
           inputs,
           endpoint.useCache,
           true,
-          (_index, _version, { cost, attempts, cacheHit, failed }) =>
-            // TODO usage will seem off for chain endpoints if we update usage for each chain item
-            // TODO log duration as well here
-            updateUsage(endpoint.id, cost, cacheHit, attempts, failed),
-          (index, message) => useStreaming && index === runConfigs.length - 1 ? res.write(message) : undefined
+          (index, _, { cost, attempts, cacheHit, failed }) =>
+            updateAggregateUsage(isLastRun(index), cost, attempts, cacheHit, failed),
+          (index, message) => useStreaming && isLastRun(index) ? res.write(message) : undefined
         )
         return useStreaming ? res.end() : res.json({ output })
       }
