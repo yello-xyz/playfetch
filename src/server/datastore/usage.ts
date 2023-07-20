@@ -11,7 +11,7 @@ export async function migrateUsage() {
         usageData.parentID,
         usageData.requests,
         usageData.cost,
-        0,
+        usageData.duration,
         usageData.cacheHits,
         usageData.attempts,
         usageData.failures,

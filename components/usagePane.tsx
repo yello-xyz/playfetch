@@ -1,6 +1,6 @@
 import { ResolvedEndpoint } from '@/types'
 import Label from './label'
-import { FormatCost } from '@/src/common/formatting'
+import { FormatCost, FormatDuration } from '@/src/common/formatting'
 import Button from './button'
 import api from '@/src/client/api'
 import useModalDialogPrompt from './modalDialogContext'
@@ -8,6 +8,7 @@ import useModalDialogPrompt from './modalDialogContext'
 export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedEndpoint; onRefresh: () => void }) {
   const usage = endpoint.usage
   const averageCost = usage.requests ? usage.cost / usage.requests : 0
+  const averageDuration = usage.requests ? usage.duration / usage.requests : 0
   const averageAttempts = usage.requests ? usage.attempts / usage.requests : 0
   const cacheHitRatio = usage.requests ? usage.cacheHits / usage.requests : 0
 
@@ -31,6 +32,7 @@ export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedE
         <UsageRow label='Failed Requests' value={usage.failures} />
         <UsageRow label='Total Cost' value={FormatCost(usage.cost)} />
         <UsageRow label='Average Cost' value={FormatCost(averageCost)} />
+        <UsageRow label='Average Duration' value={FormatDuration(averageDuration)} />
         <UsageRow label='Average Attempts' value={averageAttempts ? averageAttempts.toFixed(2) : averageAttempts} />
         <UsageRow label='Cache Hit Ratio' value={`${(100 * cacheHitRatio).toFixed(1)}%`} />
       </div>
