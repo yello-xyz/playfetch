@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { Project, ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
-import Sidebar from '@/components/sidebar'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import ClientRoute, { ChainRoute, ChainsRoute, ParseQuery, ProjectRoute, PromptRoute } from '@/components/clientRoute'
 import TopBar from '@/components/topBar'
@@ -21,6 +20,7 @@ import UserSettingsView from '@/components/userSettingsView'
 import { VersionsEqual } from '@/src/common/versionsEqual'
 import ProjectGridView, { EmptyGridView } from '@/components/projectGridView'
 import { getActiveChain } from '@/src/server/datastore/chains'
+import ProjectSidebar from '@/components/projectSidebar'
 
 const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
@@ -268,7 +268,7 @@ export default function Home({
               refreshSettings,
             }}>
             <main className={`flex items-stretch h-screen text-sm font-sans`}>
-              <Sidebar
+              <ProjectSidebar
                 projects={projects}
                 activeProject={activeProject}
                 activePrompt={activePrompt}
