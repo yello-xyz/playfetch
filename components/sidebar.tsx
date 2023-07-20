@@ -109,8 +109,9 @@ export default function Sidebar({
       )}
       {showInviteDialog && (
         <InviteDialog
-          projects={projects}
-          initialProjectID={activeProjectID}
+          objects={projects}
+          initialObjectID={activeProjectID}
+          label='project'
           onConfirm={inviteMembers}
           onDismiss={() => setShowInviteDialog(false)}
         />
