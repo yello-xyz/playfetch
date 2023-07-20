@@ -13,15 +13,11 @@ import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { getVerifiedProjectScopedData, loadEndpoints, toPrompt } from './prompts'
 
-export async function migrateChains(projectIDMap: Record<number, number>) {
+export async function migrateChains() {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    const newProjectID = projectIDMap[chainData.projectID]
-    if (newProjectID) {
-      console.log('Migrated chain', getID(chainData), 'from', chainData.projectID, 'to', newProjectID)
-      await updateChain({ ...chainData, projectID: newProjectID }, false)
-    }
+    await updateChain({ ...chainData }, false)
   }
 }
 

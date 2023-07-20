@@ -3,17 +3,13 @@ import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEn
 import { ensureProjectAccess } from './projects'
 import { InputValues } from '@/types'
 
-export async function migrateInputs(projectIDMap: Record<number, number>) {
+export async function migrateInputs() {
   const datastore = getDatastore()
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const inputData of allInputs) {
-    const newProjectID = projectIDMap[inputData.projectID]
-    if (newProjectID) {
-      console.log('Migrated input', getID(inputData), 'from', inputData.projectID, 'to', newProjectID)
-      await datastore.save(
-        toInputData(newProjectID, inputData.name, JSON.parse(inputData.values), getID(inputData))
-      )
-    }
+    await datastore.save(
+      toInputData(inputData.projectID, inputData.name, JSON.parse(inputData.values), getID(inputData))
+    )
   }
 }
 

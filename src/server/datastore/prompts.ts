@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntity,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -18,15 +17,11 @@ import { ensureProjectAccess, getProjectUsers } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
 
-export async function migratePrompts(projectIDMap: Record<number, number>) {
+export async function migratePrompts() {
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   for (const promptData of allPrompts) {
-    const newProjectID = projectIDMap[promptData.projectID]
-    if (newProjectID) {
-      console.log('Migrated prompt', getID(promptData), 'from', promptData.projectID, 'to', newProjectID)
-      await updatePrompt({ ...promptData, projectID: newProjectID }, false)
-    }
+    await updatePrompt({ ...promptData }, false)
   }
 }
 
@@ -61,7 +56,7 @@ export async function loadEndpoints(parentID: number, projectData: any, buildURL
 
   return endpoints
     .map(endpoint => ({
-      ...(toEndpoint(endpoint) as (Endpoint & { versionID: number })),
+      ...(toEndpoint(endpoint) as Endpoint & { versionID: number }),
       url: buildURL(`/p/${endpoint.projectURLPath}/${endpoint.urlPath}`),
       apiKeyDev: projectData.apiKeyDev ?? '',
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
