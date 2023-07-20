@@ -212,7 +212,13 @@ async function rotateProjectAPIKey(projectData: any): Promise<string> {
 
 export async function getProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getAccessibleObjectIDs(userID, 'project')
-  const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
+  const workspaceIDs = await getAccessibleObjectIDs(userID, 'workspace')
+  for (const workspaceID of workspaceIDs) {
+    // TODO this is inefficient but only temporary while we rework the UI for workspaces and projects.
+    const workspaceProjectIDs = await getEntityIDs(Entity.PROJECT, 'workspaceID', workspaceID)
+    projectIDs.push(...workspaceProjectIDs)
+  }
+  const projects = await getKeyedEntities(Entity.PROJECT, [...new Set(projectIDs)])
   return projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)
 }
 
