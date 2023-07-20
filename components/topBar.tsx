@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, Project, User } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, User } from '@/types'
 import projectIcon from '@/public/project.svg'
 import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/commentBadge.svg'
@@ -8,39 +8,33 @@ import { UserAvatar } from './userSidebarItem'
 import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
-import { useLoggedInUser } from './userContext'
 import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function TopBar({
-  projects = [],
   activeProject,
   activeItem,
   addLabel,
   onAddItem,
-  onSelectProject,
+  onRefreshItem,
+  onDeleteItem,
   showComments,
   setShowComments,
-  onRefresh,
   children,
 }: {
-  projects: Project[]
-  activeProject?: ActiveProject
+  activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain
   addLabel: string
   onAddItem: (projectID: number) => void
-  onSelectProject: (projectID: number) => void
+  onRefreshItem: () => void
+  onDeleteItem: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onRefresh: () => void
   children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
-  const promptProjectName = projects.find(p => p.id === activeItem?.projectID)?.name
   const promptHasComments =
     activeItem && 'versions' in activeItem && (activeItem?.versions ?? []).some(version => version.comments.length > 0)
-
-  const user = useLoggedInUser()
 
   return (
     <>
@@ -50,39 +44,31 @@ export default function TopBar({
             <Icon icon={projectIcon} />
             {activeItem && (
               <>
-                <span className='cursor-pointer' onClick={() => onSelectProject(activeItem.projectID)}>
-                  {promptProjectName}
-                </span>
+                <span className='cursor-pointer'>{activeProject.name}</span>
                 <span className='font-medium'>{' / '}</span>
               </>
             )}
-            {activeProject && activeProject.id === user.id ? (
-              <span className='font-medium'>{activeProject.name}</span>
-            ) : (
-              <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-                <span className='font-medium'>{activeProject?.name ?? activeItem?.name}</span>
-                <Icon icon={chevronIcon} />
-                <div className='absolute right-0 top-8'>
-                  {activeItem && (
-                    <ProjectItemPopupMenu
-                      item={activeItem}
-                      projects={projects}
-                      isMenuExpanded={isMenuExpanded}
-                      setIsMenuExpanded={setIsMenuExpanded}
-                      onRefresh={onRefresh}
-                      onDelete={() => onSelectProject(activeItem.projectID)}
-                    />
-                  )}
-                  {activeProject && (
-                    <ProjectPopupMenu
-                      project={activeProject!}
-                      isMenuExpanded={isMenuExpanded}
-                      setIsMenuExpanded={setIsMenuExpanded}
-                    />
-                  )}
-                </div>
+            <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
+              <span className='font-medium'>{activeItem?.name ?? activeProject.name}</span>
+              <Icon icon={chevronIcon} />
+              <div className='absolute right-0 top-8'>
+                {activeItem ? (
+                  <ProjectItemPopupMenu
+                    item={activeItem}
+                    isMenuExpanded={isMenuExpanded}
+                    setIsMenuExpanded={setIsMenuExpanded}
+                    onRefresh={onRefreshItem}
+                    onDelete={onDeleteItem}
+                  />
+                ) : (
+                  <ProjectPopupMenu
+                    project={activeProject!}
+                    isMenuExpanded={isMenuExpanded}
+                    setIsMenuExpanded={setIsMenuExpanded}
+                  />
+                )}
               </div>
-            )}
+            </div>
           </div>
           <div className='flex items-center gap-4'>
             {<UserAvatars users={activeProject?.users ?? activeItem?.users ?? []} />}
@@ -130,7 +116,15 @@ const Divider = ({ width }: { width?: string }) => (
   </div>
 )
 
-export function TopBarButton({ title, icon, onClick }: { title?: string; icon?: StaticImageData; onClick: () => void }) {
+export function TopBarButton({
+  title,
+  icon,
+  onClick,
+}: {
+  title?: string
+  icon?: StaticImageData
+  onClick: () => void
+}) {
   return (
     <div
       className='flex items-center gap-1 px-2 py-1 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'

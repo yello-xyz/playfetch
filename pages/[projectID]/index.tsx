@@ -26,70 +26,57 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
   Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const {
-    g: projectID,
-    p: promptID,
-    c: chainID,
-    s: settings,
-    cs: chains,
-  } = mapDictionary(ParseQuery(query), value => Number(value))
+  const { projectID, p: promptID, c: chainID, cs: chains } = mapDictionary(ParseQuery(query), value => Number(value))
 
-  const initialProjects = await getProjectsForUser(user.id)
   const buildURL = urlBuilderFromHeaders(req.headers)
+  const activeProject = await getActiveProject(user.id, projectID!, buildURL)
   const initialActiveItem = promptID
     ? await getActivePrompt(user.id, promptID, buildURL)
     : chainID
     ? await getActiveChain(user.id, chainID, buildURL)
-    : await getActiveProject(user.id, projectID ?? user.id, buildURL)
+    : activeProject.prompts.length > 0
+    ? await getActivePrompt(user.id, activeProject.prompts[0].id, buildURL)
+    : undefined
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
-  const initialShowSettings = settings === 1
   const initialShowChains = chains === 1
 
   return {
     props: {
       user,
-      initialProjects,
+      activeProject,
       initialActiveItem,
       initialAvailableProviders,
-      initialShowSettings,
       initialShowChains,
     },
   }
 })
 
-type ActiveItem = ActiveProject | ActivePrompt | ActiveChain
+type ActiveItem = ActivePrompt | ActiveChain
 
 export default function Home({
   user,
-  initialProjects,
+  activeProject,
   initialActiveItem,
   initialAvailableProviders,
-  initialShowSettings,
   initialShowChains,
 }: {
   user: User
-  initialProjects: Project[]
-  initialActiveItem: ActiveItem
+  activeProject: ActiveProject
+  initialActiveItem?: ActiveItem
   initialAvailableProviders: AvailableProvider[]
-  initialShowSettings: boolean
   initialShowChains: boolean
 }) {
   const router = useRouter()
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
-  const [projects, setProjects] = useState(initialProjects)
-
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isProject = (item: ActiveItem): item is ActiveProject => 'chains' in (item as ActiveProject)
   const isPrompt = (item: ActiveItem): item is ActivePrompt => 'versions' in (item as ActivePrompt)
-  const activeProject = isProject(activeItem) ? activeItem : undefined
-  const activePrompt = isPrompt(activeItem) ? activeItem : undefined
-  const activeChain = !isProject(activeItem) && !isPrompt(activeItem) ? activeItem : undefined
+  const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
+  const activeChain = activeItem && !isPrompt(activeItem) ? activeItem : undefined
 
   const [isChainMode, setChainMode] = useState(initialShowChains)
-  const [showSettings, setShowSettings] = useState(initialShowSettings)
   const [showComments, setShowComments] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
@@ -143,10 +130,9 @@ export default function Home({
     if (promptID !== activePrompt?.id) {
       savePrompt()
       await refreshPrompt(promptID)
-      router.push(PromptRoute(promptID), undefined, { shallow: true })
+      router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
     setChainMode(false)
-    setShowSettings(false)
   }
 
   const refreshChain = async (chainID: number) => {
@@ -159,88 +145,38 @@ export default function Home({
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
       await refreshChain(chainID)
-      router.push(ChainRoute(chainID), undefined, { shallow: true })
+      router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
     setChainMode(false)
-    setShowSettings(false)
-  }
-
-  const refreshProject = async (projectID: number) => {
-    const newProject = await api.getProject(projectID)
-    setActiveItem(newProject)
-    updateVersion(undefined)
-  }
-
-  const refreshActiveProject = activeProject ? () => refreshProject(activeProject.id) : undefined
-
-  const selectProject = async (projectID: number, chainMode = false) => {
-    if (projectID !== activeProject?.id || chainMode !== isChainMode || showSettings) {
-      savePrompt()
-      await refreshProject(projectID)
-      router.push(
-        chainMode ? ChainsRoute(projectID) : projectID === user.id ? ClientRoute.Home : ProjectRoute(projectID),
-        undefined,
-        { shallow: true }
-      )
-    }
-    setChainMode(chainMode)
-    setShowSettings(false)
-  }
-
-  const selectChains = () => {
-    const activePromptProject = activePrompt && projects.find(project => project.id === activePrompt.projectID)
-    const activeChainProject = activeChain && projects.find(project => project.id === activeChain.projectID)
-    const project = activeProject ?? activePromptProject ?? (activeChainProject as Project)
-    selectProject(project.id, true)
   }
 
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
   const refreshSettings = () => api.getAvailableProviders().then(setAvailableProviders)
 
-  const selectSettings = () => {
-    savePrompt()
-    setShowSettings(true)
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
-  }
+  const refreshActiveItem = () => (activePrompt ? refreshActivePrompt : refreshActiveChain)!()
 
-  const refreshActiveItem = () =>
-    (activePrompt ? refreshActivePrompt : activeChain ? refreshActiveChain : refreshActiveProject)!()
-  const refreshProjects = () => api.getProjects().then(setProjects)
-
-  const {
-    g: projectID,
-    p: promptID,
-    c: chainID,
-    s: settings,
-    cs: chains,
-  } = mapDictionary(ParseQuery(router.query), value => Number(value))
-  const currentQueryState = settings
-    ? 'settings'
-    : promptID ?? chainID ?? (projectID && chains)
-    ? `${projectID}chains`
-    : projectID
+  const { p: promptID, c: chainID } = mapDictionary(ParseQuery(router.query), value => Number(value))
+  const currentQueryState = promptID ?? chainID ?? activeProject.prompts[0]?.id
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
-    if (settings) {
-      selectSettings()
-    } else if (promptID) {
+    if (promptID) {
       selectPrompt(promptID)
     } else if (chainID) {
       selectChain(chainID)
-    } else {
-      selectProject(projectID ?? user.id, !!chains)
+    } else if (activeProject.prompts.length > 0) {
+      selectPrompt(activeProject.prompts[0].id)
     }
     setQuery(currentQueryState)
   }
 
-  const addPrompt = async (projectID: number) => {
-    const promptID = await api.addPrompt(projectID)
+  const addPrompt = async () => {
+    const promptID = await api.addPrompt(activeProject.id)
     selectPrompt(promptID)
     setSelectedTab('play')
   }
 
-  const addChain = async (projectID: number) => {
-    const chainID = await api.addChain(projectID)
+  const addChain = async () => {
+    const chainID = await api.addChain(activeProject.id)
     selectChain(chainID)
     setSelectedTab('play')
   }
@@ -253,15 +189,16 @@ export default function Home({
     setSelectedTab(tab)
   }
 
+  const selectSettings = () => {
+    router.push(ClientRoute.Settings, undefined, { shallow: true })
+  }
+
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
           <RefreshContext.Provider
             value={{
-              refreshProjects,
-              resetProject: () => selectProject(user.id),
-              refreshProject: refreshActiveProject,
               refreshPrompt: refreshActivePrompt,
               refreshChain: refreshActiveChain,
               selectTab: setSelectedTab,
@@ -269,37 +206,33 @@ export default function Home({
             }}>
             <main className={`flex items-stretch h-screen text-sm font-sans`}>
               <ProjectSidebar
-                projects={projects}
                 activeProject={activeProject}
-                activePrompt={activePrompt}
-                onAddPrompt={() => addPrompt(user.id)}
-                onSelectProject={selectProject}
-                onSelectChains={selectChains}
+                activeItem={activeItem}
+                onAddPrompt={addPrompt}
+                onAddChain={addChain}
+                onSelectPrompt={selectPrompt}
+                onSelectChain={selectChain}
               />
               <div className='flex flex-col flex-1'>
-                {!showSettings && (
-                  <TopBar
-                    projects={projects}
-                    activeProject={activeProject}
-                    activeItem={activePrompt ?? activeChain}
-                    addLabel={isChainMode ? 'New Chain' : 'New Prompt'}
-                    onAddItem={isChainMode ? addChain : addPrompt}
-                    onSelectProject={(projectID: number) => selectProject(projectID, isChainMode)}
-                    showComments={showComments}
-                    setShowComments={setShowComments}
-                    onRefresh={refreshActiveItem}>
-                    {(activePrompt || activeChain) && (
-                      <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
-                        <Segment value={'play'} title='Play' />
-                        <Segment value={'test'} title='Test' />
-                        <Segment value={'publish'} title='Publish' />
-                      </SegmentedControl>
-                    )}
-                  </TopBar>
-                )}
+                <TopBar
+                  activeProject={activeProject}
+                  activeItem={activePrompt ?? activeChain}
+                  addLabel={isChainMode ? 'New Chain' : 'New Prompt'}
+                  onAddItem={isChainMode ? addChain : addPrompt}
+                  onRefreshItem={refreshActiveItem}
+                  onDeleteItem={() => router.push(ProjectRoute(activeProject.id))}
+                  showComments={showComments}
+                  setShowComments={setShowComments}>
+                  {activeItem && (
+                    <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
+                      <Segment value={'play'} title='Play' />
+                      <Segment value={'test'} title='Test' />
+                      <Segment value={'publish'} title='Publish' />
+                    </SegmentedControl>
+                  )}
+                </TopBar>
                 <div className='flex-1 overflow-hidden'>
-                  {showSettings && <UserSettingsView />}
-                  {!showSettings && activePrompt && activeVersion && (
+                  {activePrompt && activeVersion && (
                     <PromptTabView
                       activeTab={selectedTab}
                       prompt={activePrompt}
@@ -311,31 +244,8 @@ export default function Home({
                       savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
                   )}
-                  {!showSettings && activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} />}
-                  {!showSettings &&
-                    !isChainMode &&
-                    activeProject &&
-                    (activeProject.prompts.length > 0 ? (
-                      <ProjectGridView items={activeProject.prompts} projects={projects} onSelectItem={selectPrompt} />
-                    ) : (
-                      <EmptyGridView
-                        title='No Prompts'
-                        addLabel='New Prompt'
-                        onAddItem={() => addPrompt(activeProject.id)}
-                      />
-                    ))}
-                  {!showSettings &&
-                    isChainMode &&
-                    activeProject &&
-                    (activeProject.chains.length > 0 ? (
-                      <ProjectGridView items={activeProject.chains} projects={projects} onSelectItem={selectChain} />
-                    ) : (
-                      <EmptyGridView
-                        title='No Chains'
-                        addLabel='New Chain'
-                        onAddItem={() => addChain(activeProject.id)}
-                      />
-                    ))}
+                  {activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} />}
+                  {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>
               </div>
             </main>
