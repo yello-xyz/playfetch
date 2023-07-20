@@ -79,6 +79,11 @@ export async function getActiveProject(
   projectID: number,
   buildURL: (path: string) => string
 ): Promise<ActiveProject> {
+  if (projectID === userID) {
+    // TODO temporary hack while we rework the UI!
+    const projects = await getProjectsForUser(userID)
+    projectID = projects.find(project => project.name === 'Prompts')!.id
+  }
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
   const prompts = promptData.map(prompt => toPrompt(prompt, userID))
