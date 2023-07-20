@@ -1,29 +1,59 @@
-import { ActiveWorkspace, Project } from '@/types'
+import { ActiveWorkspace, Project, Workspace } from '@/types'
+import { useState } from 'react'
+import InviteDialog from './inviteDialog'
+import api from '@/src/client/api'
+import { TopBarButton, UserAvatars } from './topBar'
 
 export default function WorkspaceGridView({
+  workspaces,
   activeWorkspace,
   onAddProject,
   onSelectProject,
+  onRefreshWorkspace,
 }: {
+  workspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
   onAddProject: () => void
   onSelectProject: (projectID: number) => void
+  onRefreshWorkspace: () => void
 }) {
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+
+  const inviteMembers = async (workspaceID: number, emails: string[]) => {
+    await api.inviteToWorkspace(workspaceID, emails)
+    onRefreshWorkspace()
+  }
+
   return (
-    <div className='flex flex-col h-full gap-6 p-6 pb-0 bg-gray-25'>
-      <div className='flex items-center justify-between'>
-        <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
-      </div>
-      {activeWorkspace.projects.length > 0 ? (
-        <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>
-          {activeWorkspace.projects.map((project, index) => (
-            <ProjectCell key={index} project={project} onSelectProject={onSelectProject} />
-          ))}
+    <>
+      <div className='flex flex-col h-full gap-6 p-6 pb-0 bg-gray-25'>
+        <div className='flex items-center justify-between'>
+          <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
+          <div className='flex items-center gap-2'>
+            <UserAvatars users={activeWorkspace.users} />
+            <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
+          </div>
         </div>
-      ) : (
-        <EmptyWorkspaceView workspace={activeWorkspace} onAddProject={onAddProject} />
+        {activeWorkspace.projects.length > 0 ? (
+          <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>
+            {activeWorkspace.projects.map((project, index) => (
+              <ProjectCell key={index} project={project} onSelectProject={onSelectProject} />
+            ))}
+          </div>
+        ) : (
+          <EmptyWorkspaceView workspace={activeWorkspace} onAddProject={onAddProject} />
+        )}
+      </div>
+      {showInviteDialog && (
+        <InviteDialog
+          objects={workspaces}
+          initialObjectID={activeWorkspace.id}
+          label='workspace'
+          onConfirm={inviteMembers}
+          onDismiss={() => setShowInviteDialog(false)}
+        />
       )}
-    </div>
+    </>
   )
 }
 
@@ -34,7 +64,7 @@ function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWork
         <span className='font-medium'>{workspace.name} is empty</span>
         <span className='text-xs text-center text-gray-400 '>
           Create a{' '}
-          <span className='text-blue-500 underline cursor-pointer' onClick={onAddProject}>
+          <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddProject}>
             New Project
           </span>{' '}
           to get started.

@@ -121,9 +121,11 @@ export default function Home({
                   <UserSettingsView />
                 ) : (
                   <WorkspaceGridView
+                    workspaces={workspaces}
                     activeWorkspace={activeWorkspace}
                     onAddProject={() => setShowPickNamePrompt(true)}
                     onSelectProject={navigateToProject}
+                    onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
                   />
                 )}
               </div>

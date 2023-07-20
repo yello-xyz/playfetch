@@ -102,7 +102,7 @@ export default function TopBar({
   )
 }
 
-function UserAvatars({ users }: { users: User[] }) {
+export function UserAvatars({ users }: { users: User[] }) {
   return users.length > 1 ? (
     <div
       className='flex flex-row-reverse space-x-reverse -space-x-[50px]'
@@ -130,13 +130,13 @@ const Divider = ({ width }: { width?: string }) => (
   </div>
 )
 
-function TopBarButton({ title, icon, onClick }: { title?: string; icon?: StaticImageData; onClick: () => void }) {
+export function TopBarButton({ title, icon, onClick }: { title?: string; icon?: StaticImageData; onClick: () => void }) {
   return (
     <div
       className='flex items-center gap-1 px-2 py-1 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
       onClick={onClick}>
       {icon && <Icon icon={icon} />}
-      {title && <div className='pr-2'>{title}</div>}
+      {title && <div className={icon ? 'pr-2' : 'px-1'}>{title}</div>}
     </div>
   )
 }
