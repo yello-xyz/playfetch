@@ -76,7 +76,7 @@ export async function getActiveChain(
   }
 }
 
-export async function getChainItems(chainID: number) {
+export async function getChainItems(chainID: number): Promise<ChainItem[]> {
   const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
   return chainData ? JSON.parse(chainData.items) : []
 }
