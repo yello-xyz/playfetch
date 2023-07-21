@@ -44,7 +44,7 @@ indexes:
 
 - kind: endpoint
   properties:
-  - name: parentID
+  - name: projectURLPath
   - name: createdAt
     direction: desc
 

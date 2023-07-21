@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
+import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt } from '@/types'
 import { useRefreshChain } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -23,27 +23,14 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
   }
 }
 
-export default function PublishChainTab({
-  endpoints,
-  project,
-}: {
-  endpoints: ResolvedEndpoint[]
-  project: ActiveProject
-}) {
+export default function PublishChainTab({ project }: { project: ActiveProject }) {
   const refreshChain = useRefreshChain()
 
-  return <EndpointsView endpoints={endpoints} project={project} onRefresh={refreshChain} />
+  return <EndpointsView project={project} onRefresh={refreshChain} />
 }
 
-export function EndpointsView({
-  endpoints,
-  project,
-  onRefresh,
-}: {
-  endpoints: ResolvedEndpoint[]
-  project: ActiveProject
-  onRefresh: () => Promise<void>
-}) {
+export function EndpointsView({ project, onRefresh }: { project: ActiveProject; onRefresh: () => Promise<void> }) {
+  const endpoints = project.endpoints
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
 
@@ -52,6 +39,13 @@ export function EndpointsView({
   } else if (!activeEndpointID && endpoints.length === 1) {
     setActiveEndpointID(endpoints[0].id)
   }
+
+  const updateActiveEndpoint = (endpoint: Endpoint) => {
+    setActiveEndpointID(endpoint.id)
+    if (endpoint.parentID !== activeEndpoint?.parentID) {
+      setActivePrompt(undefined)
+    }
+  } 
 
   const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
 
@@ -67,7 +61,6 @@ export function EndpointsView({
   const activeItem = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
   useEffect(() => {
-    setActivePrompt(undefined)
     if (isPrompt(activeItem)) {
       api.getPrompt(activeItem.id).then(setActivePrompt)
     }
@@ -87,7 +80,7 @@ export function EndpointsView({
           project={project}
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
-          setActiveEndpoint={endpoint => setActiveEndpointID(endpoint.id)}
+          setActiveEndpoint={updateActiveEndpoint}
           onRefresh={onRefresh}
           onAddEndpoint={addEndpoint}
           getVersionIndex={getVersionIndex}

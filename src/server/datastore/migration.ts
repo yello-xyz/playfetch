@@ -21,7 +21,7 @@ export async function runDataMigrations() {
   // await migrateRuns()
   // await migrateChains()
   // await migrateEndpoints()
-  await migrateUsage()
+  // await migrateUsage()
   // await migrateUsers()
   // await migrateComments()
 }

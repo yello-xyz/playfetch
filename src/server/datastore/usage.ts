@@ -12,16 +12,11 @@ export async function migrateUsage() {
   const datastore = getDatastore()
   const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
   for (const usageData of allUsage) {
-    const parentData =
-      (await getKeyedEntity(Entity.CHAIN, usageData.parentID)) ??
-      (await getKeyedEntity(Entity.PROMPT, usageData.parentID))
-    const projectData = await getKeyedEntity(Entity.PROJECT, parentData.projectID)
-    const projectURLPath = projectData.urlPath
     await getDatastore().save(
       toUsageData(
         getID(usageData),
         usageData.parentID,
-        projectURLPath,
+        usageData.projectURLPath,
         usageData.requests,
         usageData.cost,
         usageData.duration,

@@ -1,14 +1,8 @@
-import { ActiveProject, ResolvedEndpoint } from '@/types'
+import { ActiveProject } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import { EndpointsView } from './publishChainTab'
 
-export default function PublishPromptTab({
-  endpoints,
-  project,
-}: {
-  endpoints: ResolvedEndpoint[]
-  project: ActiveProject
-}) {
+export default function PublishPromptTab({ project }: { project: ActiveProject }) {
   const refreshPrompt = useRefreshPrompt()
-  return <EndpointsView endpoints={endpoints} project={project} onRefresh={refreshPrompt} />
+  return <EndpointsView project={project} onRefresh={refreshPrompt} />
 }

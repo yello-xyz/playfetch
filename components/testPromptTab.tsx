@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider } from '@/types'
+import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject } from '@/types'
 
 import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -11,6 +11,7 @@ import { useInitialState } from './useInitialState'
 
 export default function TestPromptTab({
   prompt,
+  project,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
@@ -22,6 +23,7 @@ export default function TestPromptTab({
   maxWidth,
 }: {
   prompt: ActivePrompt
+  project: ActiveProject
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -70,7 +72,7 @@ export default function TestPromptTab({
         <div className='self-start'>
           <VersionSelector
             versions={prompt.versions}
-            endpoints={prompt.endpoints}
+            endpoints={project.endpoints}
             activeVersion={activeVersion}
             setActiveVersion={selectVersion}
           />

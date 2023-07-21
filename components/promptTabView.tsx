@@ -119,6 +119,7 @@ export default function PromptTabView({
         return (
           <TestPromptTab
             prompt={prompt}
+            project={project}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={setModifiedVersion}
@@ -131,7 +132,7 @@ export default function PromptTabView({
           />
         )
       case 'publish':
-        return <PublishPromptTab endpoints={prompt.endpoints} project={project} />
+        return <PublishPromptTab project={project} />
     }
   }
 

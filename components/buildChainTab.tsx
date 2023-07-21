@@ -1,4 +1,4 @@
-import { ChainItem, CodeConfig, Prompt, Version } from '@/types'
+import { ActiveProject, ChainItem, CodeConfig, Prompt, Version } from '@/types'
 import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
@@ -29,11 +29,13 @@ export default function BuildChainTab({
   setItems,
   prompts,
   promptCache,
+  project,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   prompts: Prompt[]
   promptCache: PromptCache
+  project: ActiveProject
 }) {
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = prompts.find(prompt => prompt.id === promptID)!
@@ -114,7 +116,7 @@ export default function BuildChainTab({
                 <Column>
                   <VersionSelector
                     versions={promptCache.promptForItem(item)?.versions ?? []}
-                    endpoints={promptCache.promptForItem(item)?.endpoints ?? []}
+                    endpoints={project.endpoints}
                     activeVersion={promptCache.versionForItem(item)}
                     setActiveVersion={selectVersion(index)}
                     flagIfNotLatest

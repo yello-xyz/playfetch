@@ -37,11 +37,11 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     endpoints === 1
       ? 'endpoints'
       : promptID
-      ? await getActivePrompt(user.id, promptID, buildURL)
+      ? await getActivePrompt(user.id, promptID)
       : chainID
-      ? await getActiveChain(user.id, chainID, buildURL)
+      ? await getActiveChain(user.id, chainID)
       : initialActiveProject.prompts.length > 0
-      ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id, buildURL)
+      ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id)
       : null
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)

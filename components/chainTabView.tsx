@@ -86,7 +86,15 @@ export default function ChainTabView({
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
-        return <BuildChainTab items={items} setItems={setItems} prompts={chain.prompts} promptCache={promptCache} />
+        return (
+          <BuildChainTab
+            items={items}
+            setItems={setItems}
+            prompts={chain.prompts}
+            promptCache={promptCache}
+            project={project}
+          />
+        )
       case 'test':
         return chainIsLoaded ? (
           <TestChainTab
@@ -98,7 +106,7 @@ export default function ChainTabView({
           />
         ) : null
       case 'publish':
-        return chainIsLoaded ? <PublishChainTab endpoints={chain.endpoints} project={project} /> : null
+        return chainIsLoaded ? <PublishChainTab project={project} /> : null
     }
   }
 

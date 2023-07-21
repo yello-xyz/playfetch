@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Endpoint, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { Endpoint, ResolvedEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { StripPromptSentinels } from '@/src/common/formatting'

@@ -3,6 +3,7 @@ import {
   Entity,
   buildKey,
   getDatastore,
+  getEntities,
   getEntity,
   getEntityIDs,
   getEntityKeys,
@@ -22,12 +23,13 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, deletePromptForUser, loadEndpoints, toPrompt } from './prompts'
+import { addPromptForUser, deletePromptForUser, toPrompt } from './prompts'
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
-import { DefaultEndpointFlavor } from './endpoints'
+import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
+import { toUsage } from './usage'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -88,6 +90,20 @@ export async function getProjectUsers(projectID: number): Promise<User[]> {
   return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
+export async function loadEndpoints(projectData: any, buildURL: (path: string) => string) {
+  const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'projectURLPath', projectData.urlPath)
+  const usages = await getEntities(Entity.USAGE, 'projectURLPath', projectData.urlPath)
+
+  return endpoints
+    .map(endpoint => ({
+      ...toEndpoint(endpoint),
+      url: buildURL(`/p/${endpoint.projectURLPath}/${endpoint.urlPath}`),
+      apiKeyDev: projectData.apiKeyDev ?? '',
+      usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
+    }))
+    .reverse()
+}
+
 export async function getActiveProject(
   userID: number,
   projectID: number,
@@ -105,8 +121,7 @@ export async function getActiveProject(
     inputValues: await getProjectInputValues(projectID),
     projectURLPath: projectData.urlPath,
     availableFlavors: JSON.parse(projectData.flavors),
-    // TODO this is obsolete and currently unused (load through projectURLPath instead)
-    endpoints: await loadEndpoints(projectID, projectData, buildURL), 
+    endpoints: await loadEndpoints(projectData, buildURL), 
     prompts,
     chains,
     users,
