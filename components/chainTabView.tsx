@@ -105,8 +105,6 @@ export default function ChainTabView({
             promptCache={promptCache}
           />
         ) : null
-      case 'publish':
-        return chainIsLoaded ? <PublishChainTab project={project} /> : null
     }
   }
 

@@ -265,7 +265,6 @@ export default function Home({
                     <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                       <Segment value={'play'} title='Play' />
                       <Segment value={'test'} title='Test' />
-                      <Segment value={'publish'} title='Publish' />
                     </SegmentedControl>
                   )}
                 </TopBar>

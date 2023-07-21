@@ -11,7 +11,7 @@ import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 
-export type MainViewTab = 'play' | 'test' | 'publish'
+export type MainViewTab = 'play' | 'test'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
@@ -131,25 +131,21 @@ export default function PromptTabView({
             maxWidth={maxTabWidth}
           />
         )
-      case 'publish':
-        return <PublishPromptTab project={project} />
     }
   }
 
   return (
     <div className='flex items-stretch h-full'>
       {renderTab(activeTab)}
-      {activeTab !== 'publish' && (
-        <div className='flex-1 p-6 pl-0'>
-          <RunTimeline
-            runs={[...activeVersion.runs, ...partialRuns]}
-            prompt={prompt}
-            version={activeVersion}
-            activeRunID={activeRunID}
-            isRunning={isRunning}
-          />
-        </div>
-      )}
+      <div className='flex-1 p-6 pl-0'>
+        <RunTimeline
+          runs={[...activeVersion.runs, ...partialRuns]}
+          prompt={prompt}
+          version={activeVersion}
+          activeRunID={activeRunID}
+          isRunning={isRunning}
+        />
+      </div>
       <CommentsPane
         prompt={prompt}
         onSelectComment={onSelectComment}
