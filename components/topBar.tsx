@@ -1,6 +1,5 @@
 import { ActiveChain, ActiveProject, ActivePrompt, User } from '@/types'
 import projectIcon from '@/public/project.svg'
-import addIcon from '@/public/add.svg'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { ReactNode, useState } from 'react'

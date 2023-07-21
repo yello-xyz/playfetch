@@ -80,8 +80,6 @@ export default function Home({
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
   const [modifiedVersion, setModifiedVersion] = useState<Version>()
 
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
-
   const savePrompt = async (onSaved?: (versionID: number) => Promise<void>) => {
     const versionNeedsSaving =
       activePrompt && activeVersion && modifiedVersion && !VersionsEqual(activeVersion, modifiedVersion)
@@ -137,6 +135,7 @@ export default function Home({
   const refreshChain = async (chainID: number) => {
     const newChain = await api.getChain(chainID)
     setActiveItem(newChain)
+    updateVersion(undefined)
   }
 
   const refreshActiveChain = activeChain ? () => refreshChain(activeChain.id) : undefined
@@ -151,7 +150,30 @@ export default function Home({
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
   const refreshSettings = () => api.getAvailableProviders().then(setAvailableProviders)
 
-  const refreshActiveItem = () => (activePrompt ? refreshActivePrompt : refreshActiveChain)!()
+  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
+
+  const refreshActiveItem = () => {
+    if (activePrompt) {
+      refreshActivePrompt?.()
+    } else {
+      refreshActiveChain?.()
+    }
+    // Make sure active item is updated in sidebar too.
+    refreshProject()
+  }
+
+  const onDeleteItem = async () => {
+    const newProject = await api.getProject(activeProject.id)
+    setActiveProject(newProject)
+    const promptID = newProject.prompts[0]?.id
+    if (promptID) {
+      selectPrompt(promptID)
+    } else {
+      setActiveItem(undefined)
+      updateVersion(undefined)
+      router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
+    }
+  }  
 
   const { p: promptID, c: chainID } = ParseNumberQuery(router.query)
   const currentQueryState = promptID ?? chainID ?? activeProject.prompts[0]?.id
@@ -219,7 +241,7 @@ export default function Home({
                   activeProject={activeProject}
                   activeItem={activePrompt ?? activeChain}
                   onRefreshItem={refreshActiveItem}
-                  onDeleteItem={() => refreshProject().then(() => router.push(ProjectRoute(activeProject.id)))}
+                  onDeleteItem={onDeleteItem}
                   onRefreshProject={refreshProject}
                   showComments={showComments}
                   setShowComments={setShowComments}>
