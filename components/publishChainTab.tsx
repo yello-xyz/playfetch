@@ -58,7 +58,7 @@ export default function PublishChainTab({
             <ExamplePane
               endpoint={activeEndpoint}
               inputs={inputs}
-              inputValues={project.inputs}
+              inputValues={project.inputValues}
               defaultFlavor={project.availableFlavors[0]}
             />
           )}

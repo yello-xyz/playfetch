@@ -102,7 +102,7 @@ export async function getActiveProject(
 
   return {
     ...toProject(projectData, userID),
-    inputs: await getProjectInputValues(projectID),
+    inputValues: await getProjectInputValues(projectID),
     projectURLPath: projectData.urlPath,
     availableFlavors: JSON.parse(projectData.flavors),
     // TODO this is obsolete and currently unused (load through projectURLPath instead)

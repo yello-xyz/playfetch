@@ -28,7 +28,7 @@ export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {
   endpoints: ResolvedEndpoint[]
-  inputs: InputValues
+  inputValues: InputValues
   projectURLPath: string
   availableFlavors: string[]
   prompts: Prompt[]
@@ -49,7 +49,7 @@ export type ActivePrompt = Prompt & {
   endpoints: ResolvedPromptEndpoint[]
   versions: Version[]
   users: User[]
-  inputs: InputValues
+  inputValues: InputValues
   projectURLPath: string
   availableLabels: string[]
   availableFlavors: string[]
@@ -67,7 +67,7 @@ export type ActiveChain = Chain & {
   projectID: number
   endpoints: ResolvedEndpoint[]
   users: User[]
-  inputs: InputValues
+  inputValues: InputValues
   prompts: Prompt[]
   projectURLPath: string
   availableFlavors: string[]

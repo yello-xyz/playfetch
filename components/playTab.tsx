@@ -27,7 +27,7 @@ export default function PlayTab({
         setModifiedVersion={setModifiedVersion}
         checkProviderAvailable={checkProviderAvailable}
         runPrompt={runPrompt}
-        inputValues={prompt.inputs}
+        inputValues={prompt.inputValues}
         showLabel
       />
     </div>

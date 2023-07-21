@@ -61,7 +61,7 @@ export default function PromptTabView({
   savePrompt: () => Promise<number>
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    prompt.inputs,
+    prompt.inputValues,
     prompt.projectID,
     activeTab
   )

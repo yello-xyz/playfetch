@@ -69,7 +69,7 @@ export async function getActivePrompt(
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const users = await getProjectUsers(promptData.projectID)
-  const inputs = await getProjectInputValues(promptData.projectID)
+  const inputValues = await getProjectInputValues(promptData.projectID)
   const endpoints = await loadEndpoints(promptID, projectData, buildURL)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
 
@@ -78,7 +78,7 @@ export async function getActivePrompt(
     versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
     endpoints: endpoints as ResolvedPromptEndpoint[],
     users,
-    inputs,
+    inputValues,
     projectURLPath: projectData.urlPath ?? '',
     availableLabels: JSON.parse(projectData.labels),
     availableFlavors: JSON.parse(projectData.flavors),

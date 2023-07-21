@@ -35,7 +35,7 @@ export default function ChainTabView({
   project: ActiveProject
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    chain.inputs,
+    chain.inputValues,
     chain.projectID,
     activeTab
   )

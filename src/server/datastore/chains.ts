@@ -56,7 +56,7 @@ export async function getActiveChain(
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const projectData = await getKeyedEntity(Entity.PROJECT, chainData.projectID)
   const users = await getProjectUsers(chainData.projectID)
-  const inputs = await getProjectInputValues(chainData.projectID)
+  const inputValues = await getProjectInputValues(chainData.projectID)
   const endpoints = await loadEndpoints(chainID, projectData, buildURL)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', chainData.projectID, ['lastEditedAt'])
   const prompts = promptData.map(toPrompt)
@@ -66,7 +66,7 @@ export async function getActiveChain(
     projectID: chainData.projectID,
     endpoints,
     users,
-    inputs,
+    inputValues,
     prompts,
     projectURLPath: projectData.urlPath ?? '',
     availableFlavors: JSON.parse(projectData.flavors),

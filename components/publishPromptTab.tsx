@@ -84,7 +84,7 @@ export default function PublishPromptTab({
             <ExamplePane
               endpoint={activeEndpoint}
               inputs={ExtractPromptVariables(version.prompt)}
-              inputValues={prompt.inputs}
+              inputValues={prompt.inputValues}
               defaultFlavor={prompt.availableFlavors[0]}
             />
           )}
