@@ -1,25 +1,24 @@
 import { useState } from 'react'
-import { ActiveProject, Chain } from '@/types'
+import { ActiveProject, Chain, ResolvedEndpoint } from '@/types'
 import { useRefreshChain } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
-import { ExtractUnboundChainVariables } from './buildChainTab'
 import EndpointsTable from './endpointsTable'
 import { NewConfigFromEndpoints } from './publishPromptTab'
 
 export default function PublishChainTab({
+  endpoints,
   chain,
   project,
   variables,
 }: {
+  endpoints: ResolvedEndpoint[]
   chain: Chain
   project: ActiveProject
   variables: string[]
 }) {
-  const endpoints = project.endpoints
-
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
 
@@ -33,7 +32,7 @@ export default function PublishChainTab({
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, chain.name, project.availableFlavors)
-    api.publishChain(chain.projectID, chain.id, name, flavor, false, false).then(refreshChain)
+    api.publishChain(project.id, chain.id, name, flavor, false, false).then(refreshChain)
   }
 
   return (

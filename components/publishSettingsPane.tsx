@@ -13,8 +13,8 @@ import { useInitialState } from './useInitialState'
 export default function PublishSettingsPane({
   endpoint,
   projectID,
-  versions = [],
-  promptEndpoints = [],
+  versions,
+  promptEndpoints,
   availableFlavors,
   onRefresh,
 }: {
@@ -58,7 +58,7 @@ export default function PublishSettingsPane({
   }
 
   const [versionID, setVersionID] = useInitialState(endpoint.versionID)
-  const versionIndex = versions.findIndex(version => version.id === versionID)
+  const versionIndex = versions?.findIndex(version => version.id === versionID)
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
@@ -86,7 +86,7 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         )}
-        {versions && (
+        {versions && versionIndex && promptEndpoints && (
           <>
             <Label>Prompt</Label>
             {endpoint.enabled ? (

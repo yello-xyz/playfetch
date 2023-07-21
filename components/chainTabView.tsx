@@ -99,6 +99,7 @@ export default function ChainTabView({
       case 'publish':
         return chainIsLoaded ? (
           <PublishChainTab
+            endpoints={chain.endpoints}
             chain={chain}
             project={project}
             variables={ExtractUnboundChainVariables(items, promptCache)}
