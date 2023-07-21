@@ -12,25 +12,12 @@ import { ActiveChain, Chain, ChainItem } from '@/types'
 import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
 import { getProjectInputValues } from './inputs'
 import { getVerifiedProjectScopedData, loadEndpoints, toPrompt } from './prompts'
-import { ExtractPromptVariables } from '@/src/common/formatting'
 
 export async function migrateChains() {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    const items = JSON.parse(chainData.items) as ChainItem[]
-    const allInputs = [] as string[]
-    for (const item of items) {
-      if ('code' in item) {
-        allInputs.push(...ExtractPromptVariables(item.code))
-      } else {
-        const versionData = await getKeyedEntity(Entity.VERSION, item.versionID)
-        allInputs.push(...ExtractPromptVariables(versionData.prompt))
-      }
-    }
-    const boundInputVariables = items.map(item => item.output).filter(output => !!output) as string[]
-    const inputs = [...new Set(allInputs.filter(variable => !boundInputVariables.includes(variable)))]
-    await updateChain({ ...chainData, inputs: JSON.stringify(inputs) }, false)
+    await updateChain({ ...chainData }, false)
   }
 }
 

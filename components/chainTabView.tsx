@@ -98,14 +98,7 @@ export default function ChainTabView({
           />
         ) : null
       case 'publish':
-        return chainIsLoaded ? (
-          <PublishChainTab
-            endpoints={chain.endpoints}
-            chain={chain}
-            project={project}
-            inputs={inputs}
-          />
-        ) : null
+        return chainIsLoaded ? <PublishChainTab endpoints={chain.endpoints} chain={chain} project={project} /> : null
     }
   }
 

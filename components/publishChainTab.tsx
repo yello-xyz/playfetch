@@ -12,12 +12,10 @@ export default function PublishChainTab({
   endpoints,
   chain,
   project,
-  inputs,
 }: {
   endpoints: ResolvedEndpoint[]
   chain: Chain
   project: ActiveProject
-  inputs: string[]
 }) {
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -57,7 +55,7 @@ export default function PublishChainTab({
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              inputs={inputs}
+              inputs={chain.inputs}
               inputValues={project.inputValues}
               defaultFlavor={project.availableFlavors[0]}
             />
