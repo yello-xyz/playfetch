@@ -66,10 +66,6 @@ export function EndpointsView({ project, onRefresh }: { project: ActiveProject; 
     }
   }, [activeItem])
 
-  const getVersionIndex = activePrompt
-    ? (endpoint: Endpoint) => activePrompt.versions.findIndex(version => version.id === endpoint.versionID)
-    : undefined
-
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
   const inputs = isPrompt(activeItem) ? ExtractPromptVariables(version?.prompt ?? '') : activeItem?.inputs ?? []
 
@@ -83,7 +79,6 @@ export function EndpointsView({ project, onRefresh }: { project: ActiveProject; 
           setActiveEndpoint={updateActiveEndpoint}
           onRefresh={onRefresh}
           onAddEndpoint={addEndpoint}
-          getVersionIndex={getVersionIndex}
         />
       </div>
       {activeEndpoint && (
