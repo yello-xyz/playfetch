@@ -254,6 +254,12 @@ export async function toggleFavoriteProject(userID: number, projectID: number, f
   )
 }
 
+export async function updateProjectWorkspace(userID: number, projectID: number, workspaceID: number) {
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  await ensureWorkspaceAccess(userID, workspaceID)
+  await updateProject({ ...projectData, workspaceID }, true)
+}
+
 export async function getSharedProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getAccessibleObjectIDs(userID, 'project')
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)

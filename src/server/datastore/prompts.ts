@@ -140,6 +140,7 @@ export async function updatePromptProject(userID: number, promptID: number, proj
   // TODO should we update the endpoints project url paths or even refuse when prompt has published endpoints?
   // What about if the prompt is used in a chain within the project? Should we just duplicate instead of move?
   const promptData = await getVerifiedUserPromptData(userID, promptID)
+  await ensureProjectAccess(userID, projectID)
   await updatePrompt({ ...promptData, projectID }, true)
 }
 

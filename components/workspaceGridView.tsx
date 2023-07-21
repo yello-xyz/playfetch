@@ -1,4 +1,4 @@
-import { ActiveWorkspace, Project } from '@/types'
+import { ActiveWorkspace, Project, Workspace } from '@/types'
 import { useEffect, useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
@@ -12,6 +12,7 @@ import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
 
 export default function WorkspaceGridView({
+  workspaces,
   activeWorkspace,
   isSharedProjects,
   onAddProject,
@@ -19,6 +20,7 @@ export default function WorkspaceGridView({
   onRefreshWorkspace,
   onLeftLastSharedProject,
 }: {
+  workspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
   isSharedProjects: boolean
   onAddProject: () => void
@@ -59,6 +61,7 @@ export default function WorkspaceGridView({
                 onSelectProject={onSelectProject}
                 onRefreshWorkspace={onRefreshWorkspace}
                 onDeleteOrLeave={onDeleteOrLeave}
+                workspaces={workspaces}
               />
             ))}
           </div>
@@ -91,12 +94,14 @@ function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWork
 }
 
 function ProjectCell({
+  workspaces,
   project,
   isSharedProjects,
   onSelectProject,
   onRefreshWorkspace,
   onDeleteOrLeave,
 }: {
+  workspaces: Workspace[]
   project: Project
   isSharedProjects: boolean
   onSelectProject: (projectID: number) => void
@@ -128,6 +133,7 @@ function ProjectCell({
               project={project}
               isMenuExpanded={isMenuExpanded}
               setIsMenuExpanded={setIsMenuExpanded}
+              workspaces={workspaces}
               canLeave={isSharedProjects}
               canDelete={!isSharedProjects}
               onRefresh={onRefreshWorkspace}

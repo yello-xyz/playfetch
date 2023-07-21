@@ -151,6 +151,7 @@ export default function Home({
                   <UserSettingsView />
                 ) : (
                   <WorkspaceGridView
+                    workspaces={workspaces}
                     activeWorkspace={activeWorkspace}
                     isSharedProjects={IsSharedProjects(activeWorkspace)}
                     onAddProject={() => setShowPickNamePrompt(true)}
