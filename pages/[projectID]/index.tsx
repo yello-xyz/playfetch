@@ -262,7 +262,7 @@ export default function Home({
                   onNavigateBack={navigateBack}
                   showComments={showComments}
                   setShowComments={setShowComments}>
-                  {activeItem && (
+                  {activeItem && activeItem !== 'endpoints' && (
                     <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
                       <Segment value={'play'} title='Play' />
                       <Segment value={'test'} title='Test' />

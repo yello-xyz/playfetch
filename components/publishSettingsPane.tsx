@@ -16,7 +16,7 @@ export default function PublishSettingsPane({
   versions,
   endpoints,
   availableFlavors,
-  onRefresh
+  onRefresh,
 }: {
   endpoint: Endpoint
   projectID: number

@@ -121,7 +121,7 @@ export async function getActiveProject(
     inputValues: await getProjectInputValues(projectID),
     projectURLPath: projectData.urlPath,
     availableFlavors: JSON.parse(projectData.flavors),
-    endpoints: await loadEndpoints(projectData, buildURL), 
+    endpoints: await loadEndpoints(projectData, buildURL),
     prompts,
     chains,
     users,

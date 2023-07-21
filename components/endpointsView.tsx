@@ -22,7 +22,13 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
   }
 }
 
-export default function EndpointsView({ project, onRefresh }: { project: ActiveProject; onRefresh: () => Promise<void> }) {
+export default function EndpointsView({
+  project,
+  onRefresh,
+}: {
+  project: ActiveProject
+  onRefresh: () => Promise<void>
+}) {
   const endpoints = project.endpoints
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -38,7 +44,7 @@ export default function EndpointsView({ project, onRefresh }: { project: ActiveP
     if (endpoint.parentID !== activeEndpoint?.parentID) {
       setActivePrompt(undefined)
     }
-  } 
+  }
 
   const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
 

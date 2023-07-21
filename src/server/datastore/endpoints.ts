@@ -112,7 +112,7 @@ export async function saveEndpoint(
     flavor,
     new Date(),
     useCache,
-    useStreaming,
+    useStreaming
   )
   await getDatastore().save(endpointData)
   await saveUsage(getID(endpointData), parentID, projectURLPath)

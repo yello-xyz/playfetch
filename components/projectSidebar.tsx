@@ -31,7 +31,12 @@ export default function ProjectSidebar({
         <SidebarButton title='Back to overview' icon={backIcon} onClick={onNavigateBack} />
       </SidebarSection>
       <SidebarSection>
-        <SidebarButton title='Endpoints' icon={endpointIcon} active={activeItem === 'endpoints'} onClick={onSelectEndpoints}/>
+        <SidebarButton
+          title='Endpoints'
+          icon={endpointIcon}
+          active={activeItem === 'endpoints'}
+          onClick={onSelectEndpoints}
+        />
       </SidebarSection>
       <SidebarSection title='Prompts'>
         {activeProject.prompts.map((prompt, promptIndex) => (

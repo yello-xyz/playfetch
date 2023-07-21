@@ -9,7 +9,7 @@ export default function MoveProjectDialog({
   onConfirm,
   onDismiss,
 }: {
-  workspaces: (Workspace)[]
+  workspaces: Workspace[]
   project: Project
   onConfirm: (workspaceID: number) => void
   onDismiss: () => void
