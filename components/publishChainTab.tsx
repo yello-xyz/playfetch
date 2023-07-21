@@ -1,12 +1,27 @@
-import { useState } from 'react'
-import { ActiveProject, Chain, ResolvedEndpoint } from '@/types'
+import { useEffect, useState } from 'react'
+import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, ResolvedEndpoint, ResolvedPromptEndpoint } from '@/types'
 import { useRefreshChain } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
-import { NewConfigFromEndpoints } from './publishPromptTab'
+import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+
+const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
+  for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
+    const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
+    const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
+    const availableFlavor = availableFlavors.find(flavor => !existingFlavors.includes(flavor))
+    if (availableFlavor) {
+      return { name: existingName, flavor: availableFlavor }
+    }
+  }
+  return {
+    name: ToCamelCase(itemName.split(' ').slice(0, 3).join(' ')),
+    flavor: availableFlavors[0],
+  }
+}
 
 export default function PublishChainTab({
   endpoints,
@@ -17,6 +32,22 @@ export default function PublishChainTab({
   chain: Chain
   project: ActiveProject
 }) {
+  const refreshChain = useRefreshChain()
+
+  return <EndpointsView endpoints={endpoints} activeItem={chain} project={project} onRefresh={refreshChain} />
+}
+
+export function EndpointsView({
+  endpoints,
+  project,
+  activeItem,
+  onRefresh,
+}: {
+  endpoints: ResolvedEndpoint[]
+  project: ActiveProject
+  activeItem: Chain | Prompt
+  onRefresh: () => Promise<void>
+}) {
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
 
@@ -26,12 +57,31 @@ export default function PublishChainTab({
     setActiveEndpointID(endpoints[0].id)
   }
 
-  const refreshChain = useRefreshChain()
+  const isPrompt = (item: Chain | Prompt): item is Prompt => 'lastVersionID' in (item as Prompt)
 
   const addEndpoint = () => {
-    const { name, flavor } = NewConfigFromEndpoints(endpoints, chain.name, project.availableFlavors)
-    api.publishChain(project.id, chain.id, name, flavor, false, false).then(refreshChain)
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, activeItem.name, project.availableFlavors)
+    if (isPrompt(activeItem)) {
+      api.publishPrompt(activeItem.lastVersionID, project.id, activeItem.id, name, flavor, false, false).then(onRefresh)
+    } else {
+      api.publishChain(project.id, activeItem.id, name, flavor, false, false).then(onRefresh)
+    }
   }
+
+  const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
+  useEffect(() => {
+    setActivePrompt(undefined)
+    if (isPrompt(activeItem)) {
+      api.getPrompt(activeItem.id).then(setActivePrompt)
+    }
+  }, [activeItem])
+
+  const getVersionIndex = activePrompt
+    ? (endpoint: Endpoint) => activePrompt.versions.findIndex(version => version.id === endpoint.versionID)
+    : undefined
+
+  const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
+  const inputs = isPrompt(activeItem) ? ExtractPromptVariables(version?.prompt ?? '') : activeItem.inputs
 
   return (
     <>
@@ -40,8 +90,9 @@ export default function PublishChainTab({
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={endpoint => setActiveEndpointID(endpoint.id)}
-          onRefresh={refreshChain}
+          onRefresh={onRefresh}
           onAddEndpoint={addEndpoint}
+          getVersionIndex={getVersionIndex}
         />
       </div>
       {activeEndpoint && (
@@ -49,18 +100,20 @@ export default function PublishChainTab({
           <PublishSettingsPane
             endpoint={activeEndpoint}
             projectID={project.id}
+            versions={activePrompt?.versions}
+            endpoints={endpoints}
             availableFlavors={project.availableFlavors}
-            onRefresh={refreshChain}
+            onRefresh={onRefresh}
           />
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              inputs={chain.inputs}
+              inputs={inputs}
               inputValues={project.inputValues}
               defaultFlavor={project.availableFlavors[0]}
             />
           )}
-          <UsagePane endpoint={activeEndpoint} onRefresh={refreshChain} />
+          <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
         </div>
       )}
     </>

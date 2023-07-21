@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { Endpoint, ResolvedEndpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { StripPromptSentinels } from '@/src/common/formatting'
@@ -14,14 +14,14 @@ export default function PublishSettingsPane({
   endpoint,
   projectID,
   versions,
-  promptEndpoints,
+  endpoints,
   availableFlavors,
   onRefresh
 }: {
   endpoint: Endpoint
   projectID: number
   versions?: Version[]
-  promptEndpoints?: ResolvedPromptEndpoint[]
+  endpoints: ResolvedEndpoint[]
   availableFlavors: string[]
   onRefresh: () => Promise<void>
 }) {
@@ -86,7 +86,7 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         )}
-        {versions && versionIndex && promptEndpoints && (
+        {versions && versionIndex && (
           <>
             <Label>Prompt</Label>
             {endpoint.enabled ? (
@@ -94,7 +94,7 @@ export default function PublishSettingsPane({
             ) : (
               <VersionSelector
                 versions={versions}
-                endpoints={promptEndpoints}
+                endpoints={endpoints}
                 activeVersion={versions[versionIndex]}
                 setActiveVersion={updateVersion}
               />

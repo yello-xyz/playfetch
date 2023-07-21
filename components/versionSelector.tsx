@@ -1,4 +1,4 @@
-import { ResolvedPromptEndpoint, Version } from '@/types'
+import { ResolvedEndpoint, Version } from '@/types'
 import DropdownMenu from './dropdownMenu'
 
 export default function VersionSelector({
@@ -9,7 +9,7 @@ export default function VersionSelector({
   flagIfNotLatest,
 }: {
   versions: Version[]
-  endpoints: ResolvedPromptEndpoint[]
+  endpoints: ResolvedEndpoint[]
   activeVersion?: Version
   setActiveVersion: (version: Version) => void
   flagIfNotLatest?: boolean
