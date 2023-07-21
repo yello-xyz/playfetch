@@ -75,6 +75,9 @@ const api = {
   renameProject: function (projectID: number, name: string) {
     return post(this.renameProject, { projectID, name })
   },
+  toggleFavoriteProject: function (projectID: number, favorite: boolean) {
+    return post(this.toggleFavoriteProject, { projectID, favorite })
+  },
   addFlavor: function (projectID: number, flavor: string) {
     return post(this.addFlavor, { projectID, flavor })
   },

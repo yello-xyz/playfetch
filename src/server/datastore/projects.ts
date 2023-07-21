@@ -32,7 +32,7 @@ export async function migrateProjects() {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData })
+    await updateProject({ ...projectData, favorited: JSON.stringify([]) })
   }
 }
 
@@ -45,6 +45,7 @@ const toProjectData = (
   labels: string[],
   flavors: string[],
   createdAt: Date,
+  favorited: number[],
   apiKeyHash?: string,
   apiKeyDev?: string,
   projectID?: number
@@ -56,6 +57,7 @@ const toProjectData = (
     createdAt,
     labels: JSON.stringify(labels),
     flavors: JSON.stringify(flavors),
+    favorited: JSON.stringify(favorited),
     urlPath,
     apiKeyHash,
     apiKeyDev, // TODO do NOT store api key in datastore but show it once to user on creation
@@ -63,10 +65,11 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
-export const toProject = (data: any): Project => ({
+export const toProject = (data: any, userID: number): Project => ({
   id: getID(data),
   name: data.name,
   workspaceID: data.workspaceID,
+  favorited: JSON.parse(data.favorited).includes(userID),
 })
 
 async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<User[]> {
@@ -94,7 +97,7 @@ export async function getActiveProject(
   const users = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
-    ...toProject(projectData),
+    ...toProject(projectData, userID),
     inputs: await getProjectInputValues(projectID),
     projectURLPath: projectData.urlPath,
     availableFlavors: JSON.parse(projectData.flavors),
@@ -124,7 +127,7 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
 export async function addProjectForUser(userID: number, workspaceID: number, projectName: string) {
   await ensureWorkspaceAccess(userID, workspaceID)
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  const projectData = toProjectData(workspaceID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date())
+  const projectData = toProjectData(workspaceID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date(), [])
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await addPromptForUser(userID, projectID)
@@ -159,6 +162,7 @@ async function updateProject(projectData: any) {
       JSON.parse(projectData.labels),
       JSON.parse(projectData.flavors),
       projectData.createdAt,
+      JSON.parse(projectData.favorited),
       projectData.apiKeyHash,
       projectData.apiKeyDev,
       getID(projectData)
@@ -213,10 +217,23 @@ async function rotateProjectAPIKey(projectData: any): Promise<string> {
   return apiKey
 }
 
+export async function toggleFavoriteProject(userID: number, projectID: number, favorited: boolean) {
+  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  const oldFavorited = JSON.parse(projectData.favorited)
+  await updateProject(
+    {
+      ...projectData,
+      favorited: JSON.stringify(
+        favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
+      ),
+    }
+  )
+}
+
 export async function getSharedProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getAccessibleObjectIDs(userID, 'project')
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
-  return projects.sort((a, b) => b.createdAt - a.createdAt).map(toProject)
+  return projects.sort((a, b) => b.createdAt - a.createdAt).map(project => toProject(project, userID))
 }
 
 export async function deleteProjectForUser(userID: number, projectID: number) {

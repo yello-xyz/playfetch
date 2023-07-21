@@ -49,10 +49,14 @@ export async function getWorkspaceUsers(workspaceID: number): Promise<User[]> {
 export async function getActiveWorkspace(userID: number, workspaceID: number): Promise<ActiveWorkspace> {
   const workspaceData = await getVerifiedUserWorkspaceData(userID, workspaceID)
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID)
-  const projects = projectData.map(toProject)
+  const projects = projectData.map(project => toProject(project, userID))
   const users = await getWorkspaceUsers(workspaceID)
 
-  return { ...toWorkspace(workspaceData), projects, users }
+  return {
+    ...toWorkspace(workspaceData),
+    projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
+    users,
+  }
 }
 
 export async function addWorkspaceForUser(userID: number, workspaceName?: string) {

@@ -4,6 +4,9 @@ import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
 import { TopBarButton, UserAvatars } from './topBar'
 import addIcon from '@/public/add.svg'
+import IconButton from './iconButton'
+import starIcon from '@/public/star.svg'
+import filledStarIcon from '@/public/filledStar.svg'
 
 export default function WorkspaceGridView({
   activeWorkspace,
@@ -41,7 +44,12 @@ export default function WorkspaceGridView({
         {activeWorkspace.projects.length > 0 ? (
           <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>
             {activeWorkspace.projects.map((project, index) => (
-              <ProjectCell key={index} project={project} onSelectProject={onSelectProject} />
+              <ProjectCell
+                key={index}
+                project={project}
+                onSelectProject={onSelectProject}
+                onRefreshWorkspace={onRefreshWorkspace}
+              />
             ))}
           </div>
         ) : (
@@ -72,13 +80,25 @@ function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWork
   )
 }
 
-function ProjectCell({ project, onSelectProject }: { project: Project; onSelectProject: (projectID: number) => void }) {
+function ProjectCell({
+  project,
+  onSelectProject,
+  onRefreshWorkspace,
+}: {
+  project: Project
+  onSelectProject: (projectID: number) => void
+  onRefreshWorkspace: () => void
+}) {
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer gap-6 w-full bg-white`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 text-base font-medium line-clamp-2'>{project.name}</span>
+        <IconButton
+          icon={project.favorited ? filledStarIcon : starIcon}
+          onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
+        />
       </div>
     </div>
   )
