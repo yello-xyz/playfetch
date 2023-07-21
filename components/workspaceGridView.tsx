@@ -7,7 +7,9 @@ import addIcon from '@/public/add.svg'
 import IconButton from './iconButton'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
+import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
+import ProjectPopupMenu from './projectPopupMenu'
 
 export default function WorkspaceGridView({
   activeWorkspace,
@@ -48,6 +50,7 @@ export default function WorkspaceGridView({
               <ProjectCell
                 key={index}
                 project={project}
+                isSharedProjects={isSharedProjects}
                 onSelectProject={onSelectProject}
                 onRefreshWorkspace={onRefreshWorkspace}
               />
@@ -83,13 +86,17 @@ function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWork
 
 function ProjectCell({
   project,
+  isSharedProjects,
   onSelectProject,
   onRefreshWorkspace,
 }: {
   project: Project
+  isSharedProjects: boolean
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
 }) {
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatRelativeDate(project.timestamp))
@@ -101,12 +108,24 @@ function ProjectCell({
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 text-base font-medium line-clamp-2'>{project.name}</span>
-        <div className='flex items-center gap-2'>
+        <div className='relative flex items-center gap-2'>
           <span className='mr-5 text-xs text-gray-500'>Edited {formattedDate}</span>
           <IconButton
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
           />
+          <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+          <div className='absolute right-0 top-7'>
+            <ProjectPopupMenu
+              project={project}
+              isMenuExpanded={isMenuExpanded}
+              setIsMenuExpanded={setIsMenuExpanded}
+              canLeave={isSharedProjects}
+              canDelete={!isSharedProjects}
+              onRefresh={onRefreshWorkspace}
+              onDeleteOrLeave={onRefreshWorkspace}
+            />
+          </div>
         </div>
       </div>
     </div>

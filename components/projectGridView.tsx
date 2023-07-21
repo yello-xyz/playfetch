@@ -35,7 +35,7 @@ export function EmptyGridView({
   onAddItem: () => void
 }) {
   const AddItemLink = ({ label }: { label: string }) => (
-    <span className='text-gray-500 underline cursor-pointer' onClick={onAddItem}>
+    <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddItem}>
       {label}
     </span>
   )
