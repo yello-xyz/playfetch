@@ -72,14 +72,15 @@ export default function ChainTabView({
 
   const chainIsLoaded = items.every(item => !IsPromptChainItem(item) || promptCache.promptForItem(item))
 
+  const inputs = ExtractUnboundChainVariables(items, promptCache)
   const strippedItems = items.map(item =>
     IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item
   )
   const itemsKey = JSON.stringify(strippedItems)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
-  if (itemsKey !== savedItemsKey) {
+  if (chainIsLoaded && itemsKey !== savedItemsKey) {
     setSavedItemsKey(itemsKey)
-    api.updateChain(chain.id, strippedItems)
+    api.updateChain(chain.id, strippedItems, inputs)
   }
 
   const renderTab = () => {
@@ -102,7 +103,7 @@ export default function ChainTabView({
             endpoints={chain.endpoints}
             chain={chain}
             project={project}
-            inputs={ExtractUnboundChainVariables(items, promptCache)}
+            inputs={inputs}
           />
         ) : null
     }
