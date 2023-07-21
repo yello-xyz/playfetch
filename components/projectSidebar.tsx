@@ -1,7 +1,6 @@
 import { ActiveChain, ActiveProject, ActivePrompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
-import feedbackIcon from '@/public/feedback.svg'
 import chainIcon from '@/public/chain.svg'
 import backIcon from '@/public/back.svg'
 import Sidebar, { SidebarButton, SidebarSection } from './sidebar'
@@ -51,9 +50,6 @@ export default function ProjectSidebar({
           />
         ))}
         <SidebarButton title='Add new Chain…' icon={addIcon} onClick={onAddChain} />
-      </SidebarSection>
-      <SidebarSection>
-        <SidebarButton title='Feedback' icon={feedbackIcon} link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback' />
       </SidebarSection>
     </Sidebar>
   )

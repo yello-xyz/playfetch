@@ -4,7 +4,6 @@ import api from '../src/client/api'
 import projectIcon from '@/public/project.svg'
 import fileIcon from '@/public/file.svg'
 import addIcon from '@/public/add.svg'
-import feedbackIcon from '@/public/feedback.svg'
 import UserSidebarItem from './userSidebarItem'
 import PickNameDialog from './pickNameDialog'
 import { useLoggedInUser } from './userContext'
@@ -75,13 +74,6 @@ export default function WorkspaceSidebar({
             />
           ))}
           <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
-        </SidebarSection>
-        <SidebarSection>
-          <SidebarButton
-            title='Feedback'
-            icon={feedbackIcon}
-            link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback'
-          />
         </SidebarSection>
       </div>
       {showPickNamePrompt && (

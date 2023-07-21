@@ -2,9 +2,17 @@ import { ReactNode } from 'react'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import Link from 'next/link'
+import feedbackIcon from '@/public/feedback.svg'
 
 export default function Sidebar({ children }: { children: ReactNode }) {
-  return <div className='flex flex-col gap-6 px-2 py-4 overflow-y-auto border-r border-gray-200'>{children}</div>
+  return (
+    <div className='flex flex-col gap-6 px-2 py-4 overflow-y-auto border-r border-gray-200'>
+      {children}
+      <SidebarSection>
+        <SidebarButton title='Feedback' icon={feedbackIcon} link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback' />
+      </SidebarSection>
+    </div>
+  )
 }
 
 export function SidebarSection({
