@@ -1,4 +1,4 @@
-import { ChainItem, Endpoint } from '@/types'
+import { Endpoint } from '@/types'
 import { and } from '@google-cloud/datastore'
 import {
   Entity,
@@ -115,7 +115,7 @@ export async function saveEndpoint(
     useStreaming,
   )
   await getDatastore().save(endpointData)
-  await saveUsage(getID(endpointData), parentID)
+  await saveUsage(getID(endpointData), parentID, projectURLPath)
 }
 
 export const DefaultEndpointFlavor = 'default'
