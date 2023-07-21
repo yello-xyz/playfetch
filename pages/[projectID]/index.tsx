@@ -215,6 +215,8 @@ export default function Home({
     router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
 
+  const navigateBack = () => router.push(WorkspaceRoute(activeProject.workspaceID, user.id))
+
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
@@ -234,7 +236,7 @@ export default function Home({
                 onAddChain={addChain}
                 onSelectPrompt={selectPrompt}
                 onSelectChain={selectChain}
-                onNavigateBack={() => router.push(WorkspaceRoute(activeProject.workspaceID, user.id))}
+                onNavigateBack={navigateBack}
               />
               <div className='flex flex-col flex-1'>
                 <TopBar
@@ -243,6 +245,7 @@ export default function Home({
                   onRefreshItem={refreshActiveItem}
                   onDeleteItem={onDeleteItem}
                   onRefreshProject={refreshProject}
+                  onNavigateBack={navigateBack}
                   showComments={showComments}
                   setShowComments={setShowComments}>
                   {activeItem && (

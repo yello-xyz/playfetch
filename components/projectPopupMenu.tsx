@@ -1,43 +1,36 @@
-import { ActiveProject } from '@/types'
+import { Project } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
-import { useRefreshProject, useRefreshProjects, useResetProject } from './refreshContext'
 
 export default function ProjectPopupMenu({
   project,
   isMenuExpanded,
   setIsMenuExpanded,
+  canLeave,
+  canDelete,
+  onRefresh,
+  onDeleteOrLeave,
 }: {
-  project: ActiveProject
+  project: Project
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
+  canLeave: boolean
+  canDelete: boolean
+  onRefresh: () => void
+  onDeleteOrLeave: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
-  const refreshProjects = useRefreshProjects()
-  const refreshProject = useRefreshProject()
-  const resetProject = useResetProject()
-
-  const refresh = () => {
-    refreshProject()
-    refreshProjects()
-  }
-
-  const reset = () => {
-    resetProject()
-    refreshProjects()
-  }
-
   const leaveProject = () => {
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to leave this project?',
-      callback: () => api.leaveProject(project.id).then(reset),
+      callback: () => api.leaveProject(project.id).then(onDeleteOrLeave),
       destructive: true,
     })
   }
@@ -46,7 +39,7 @@ export default function ProjectPopupMenu({
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to delete this project and ALL its prompts? This action cannot be undone.',
-      callback: () => api.deleteProject(project.id).then(reset),
+      callback: () => api.deleteProject(project.id).then(onDeleteOrLeave),
       destructive: true,
     })
   }
@@ -60,11 +53,8 @@ export default function ProjectPopupMenu({
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
         <PopupMenuItem title='Rename Project' callback={renameProject} />
-        {project.users.length > 1 ? (
-          <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} />
-        ) : (
-          <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} />
-        )}
+        {canLeave && <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} />}
+        {canDelete && <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} />}
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog
@@ -72,7 +62,7 @@ export default function ProjectPopupMenu({
           confirmTitle='Rename'
           label='Name'
           initialName={project.name}
-          onConfirm={name => api.renameProject(project.id, name).then(refresh)}
+          onConfirm={name => api.renameProject(project.id, name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}

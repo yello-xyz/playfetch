@@ -1,8 +1,7 @@
-import { Chain, Project, Prompt } from '@/types'
+import { Chain, Prompt } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
-import PickProjectDialog from './pickProjectDialog'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 

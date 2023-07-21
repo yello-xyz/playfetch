@@ -17,6 +17,7 @@ export default function TopBar({
   onRefreshItem,
   onDeleteItem,
   onRefreshProject,
+  onNavigateBack,
   showComments,
   setShowComments,
   children,
@@ -26,6 +27,7 @@ export default function TopBar({
   onRefreshItem: () => void
   onDeleteItem: () => void
   onRefreshProject: () => void
+  onNavigateBack: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
   children?: ReactNode
@@ -70,6 +72,10 @@ export default function TopBar({
                     project={activeProject}
                     isMenuExpanded={isMenuExpanded}
                     setIsMenuExpanded={setIsMenuExpanded}
+                    canLeave={activeProject.users.length > 1}
+                    canDelete={activeProject.users.length === 1}
+                    onRefresh={onRefreshProject}
+                    onDeleteOrLeave={onNavigateBack}
                   />
                 )}
               </div>
