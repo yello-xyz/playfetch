@@ -65,7 +65,7 @@ export type Chain = {
 
 export type ActiveChain = Chain & {
   projectID: number
-  endpoints: ResolvedPromptEndpoint[]
+  endpoints: ResolvedEndpoint[]
   users: User[]
   inputs: InputValues
   prompts: Prompt[]

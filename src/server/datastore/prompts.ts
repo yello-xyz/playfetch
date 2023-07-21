@@ -11,7 +11,7 @@ import {
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
-import { ActivePrompt, Endpoint, Prompt } from '@/types'
+import { ActivePrompt, Endpoint, Prompt, ResolvedPromptEndpoint } from '@/types'
 import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
@@ -51,7 +51,7 @@ export async function loadEndpoints(parentID: number, projectData: any, buildURL
 
   return endpoints
     .map(endpoint => ({
-      ...(toEndpoint(endpoint) as Endpoint & { versionID: number }),
+      ...toEndpoint(endpoint),
       url: buildURL(`/p/${endpoint.projectURLPath}/${endpoint.urlPath}`),
       apiKeyDev: projectData.apiKeyDev ?? '',
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
@@ -76,7 +76,7 @@ export async function getActivePrompt(
   return {
     ...toPrompt(promptData),
     versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
-    endpoints,
+    endpoints: endpoints as ResolvedPromptEndpoint[],
     users,
     inputs,
     projectURLPath: projectData.urlPath ?? '',
