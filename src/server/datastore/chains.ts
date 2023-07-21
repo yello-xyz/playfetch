@@ -27,7 +27,6 @@ const toChainData = (
   items: ChainItem[],
   createdAt: Date,
   lastEditedAt: Date,
-  favorited: number[],
   chainID?: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
@@ -37,18 +36,16 @@ const toChainData = (
     items: JSON.stringify(items),
     createdAt,
     lastEditedAt,
-    favorited: JSON.stringify(favorited),
   },
-  excludeFromIndexes: ['name', 'items', 'favorited'],
+  excludeFromIndexes: ['name', 'items'],
 })
 
-export const toChain = (data: any, userID: number): Chain => ({
+export const toChain = (data: any): Chain => ({
   id: getID(data),
   name: data.name,
   items: JSON.parse(data.items),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
-  favorited: JSON.parse(data.favorited).includes(userID),
 })
 
 export async function getActiveChain(
@@ -62,15 +59,15 @@ export async function getActiveChain(
   const inputs = await getProjectInputValues(chainData.projectID)
   const endpoints = await loadEndpoints(chainID, projectData, buildURL)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', chainData.projectID, ['lastEditedAt'])
-  const prompts = promptData.map(prompt => toPrompt(prompt, userID))
+  const prompts = promptData.map(toPrompt)
 
   return {
-    ...toChain(chainData, userID),
+    ...toChain(chainData),
     projectID: chainData.projectID,
     endpoints,
     users,
     inputs,
-    prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
+    prompts,
     projectURLPath: projectData.urlPath ?? '',
     availableFlavors: JSON.parse(projectData.flavors),
   }
@@ -86,7 +83,7 @@ export const DefaultChainName = 'New Chain'
 export async function addChainForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const chainData = toChainData(projectID, DefaultChainName, [], createdAt, createdAt, [])
+  const chainData = toChainData(projectID, DefaultChainName, [], createdAt, createdAt)
   await getDatastore().save(chainData)
   await updateProjectLastEditedAt(projectID)
   return getID(chainData)
@@ -100,7 +97,6 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       JSON.parse(chainData.items),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
-      JSON.parse(chainData.favorited),
       getID(chainData)
     )
   )
@@ -124,20 +120,6 @@ export async function updateChainItems(userID: number, chainID: number, items: C
 export async function updateChainName(userID: number, chainID: number, name: string) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   await updateChain({ ...chainData, name }, true)
-}
-
-export async function toggleFavoriteChain(userID: number, chainID: number, favorited: boolean) {
-  const chainData = await getVerifiedUserChainData(userID, chainID)
-  const oldFavorited = JSON.parse(chainData.favorited)
-  await updateChain(
-    {
-      ...chainData,
-      favorited: JSON.stringify(
-        favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
-      ),
-    },
-    false
-  )
 }
 
 export async function deleteChainForUser(userID: number, chainID: number) {

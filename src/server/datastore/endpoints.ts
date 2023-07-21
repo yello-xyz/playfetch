@@ -16,7 +16,6 @@ import { getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import { getVerifiedUserChainData } from './chains'
-import { updateProjectLastEditedAt } from './projects'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()

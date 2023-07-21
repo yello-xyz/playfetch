@@ -32,12 +32,11 @@ const toPromptData = (
   lastPrompt: string,
   createdAt: Date,
   lastEditedAt: Date,
-  favorited: number[],
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, lastVersionID, lastPrompt, name, createdAt, lastEditedAt, favorited: JSON.stringify(favorited) },
-  excludeFromIndexes: ['name', 'lastPrompt', 'favorited'],
+  data: { projectID, lastVersionID, lastPrompt, name, createdAt, lastEditedAt },
+  excludeFromIndexes: ['name', 'lastPrompt'],
 })
 
 export const toPrompt = (data: any, userID: number): Prompt => ({
@@ -47,7 +46,6 @@ export const toPrompt = (data: any, userID: number): Prompt => ({
   lastPrompt: StripPromptSentinels(data.lastPrompt),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
-  favorited: JSON.parse(data.favorited).includes(userID),
 })
 
 export async function loadEndpoints(parentID: number, projectData: any, buildURL: (path: string) => string) {
@@ -95,7 +93,7 @@ export const DefaultPromptName = 'New Prompt'
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const promptData = toPromptData(projectID, DefaultPromptName, 0, '', createdAt, createdAt, [])
+  const promptData = toPromptData(projectID, DefaultPromptName, 0, '', createdAt, createdAt)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, getID(promptData))
   await updateProjectLastEditedAt(projectID)
@@ -111,7 +109,6 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
       promptData.lastPrompt,
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
-      JSON.parse(promptData.favorited),
       getID(promptData)
     )
   )
@@ -139,20 +136,6 @@ export async function ensurePromptAccess(userID: number, promptID: number) {
 export async function updatePromptName(userID: number, promptID: number, name: string) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   await updatePrompt({ ...promptData, name }, true)
-}
-
-export async function toggleFavoritePrompt(userID: number, promptID: number, favorited: boolean) {
-  const promptData = await getVerifiedUserPromptData(userID, promptID)
-  const oldFavorited = JSON.parse(promptData.favorited)
-  await updatePrompt(
-    {
-      ...promptData,
-      favorited: JSON.stringify(
-        favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
-      ),
-    },
-    false
-  )
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {

@@ -33,7 +33,7 @@ export async function migrateProjects() {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData, lastEditedAt: projectData.createdAt }, false)
+    await updateProject({ ...projectData }, false)
   }
 }
 
@@ -95,9 +95,9 @@ export async function getActiveProject(
 ): Promise<ActiveProject> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
-  const prompts = promptData.map(prompt => toPrompt(prompt, userID))
+  const prompts = promptData.map(toPrompt)
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
-  const chains = chainData.map(chain => toChain(chain, userID))
+  const chains = chainData.map(toChain)
   const users = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
@@ -106,8 +106,8 @@ export async function getActiveProject(
     projectURLPath: projectData.urlPath,
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData, buildURL),
-    prompts: [...prompts.filter(prompt => prompt.favorited), ...prompts.filter(prompt => !prompt.favorited)],
-    chains: [...chains.filter(chain => chain.favorited), ...chains.filter(chain => !chain.favorited)],
+    prompts,
+    chains,
     users,
   }
 }

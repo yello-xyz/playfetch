@@ -43,7 +43,6 @@ export type Prompt = {
   lastPrompt: string
   projectID: number
   timestamp: string
-  favorited: boolean
 }
 
 export type ActivePrompt = Prompt & {
@@ -63,7 +62,6 @@ export type Chain = {
   items: ChainItem[]
   projectID: number
   timestamp: string
-  favorited: boolean
 }
 
 export type ActiveChain = Chain & {

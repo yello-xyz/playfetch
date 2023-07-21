@@ -1,9 +1,6 @@
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { Chain, Prompt } from '@/types'
-import starIcon from '@/public/star.svg'
-import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
-import api from '../src/client/api'
 import { useEffect, useState } from 'react'
 import IconButton from './iconButton'
 import { useRefreshProject } from './refreshContext'
@@ -62,10 +59,6 @@ function ProjectItemCell({ item, onSelectItem }: { item: Prompt | Chain; onSelec
     setFormattedDate(FormatRelativeDate(item.timestamp))
   }, [item.timestamp])
 
-  const isPrompt = 'lastPrompt' in item
-  const toggleFavorite = (id: number, favorited: boolean) =>
-    isPrompt ? api.toggleFavoritePrompt(id, favorited) : api.toggleFavoriteChain(id, favorited)
-
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer w-96 h-60`}
@@ -73,10 +66,6 @@ function ProjectItemCell({ item, onSelectItem }: { item: Prompt | Chain; onSelec
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 font-medium line-clamp-2'>{item.name}</span>
         <div className='relative flex'>
-          <IconButton
-            icon={item.favorited ? filledStarIcon : starIcon}
-            onClick={() => toggleFavorite(item.id, !item.favorited).then(refreshProject)}
-          />
           <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
             <ProjectItemPopupMenu

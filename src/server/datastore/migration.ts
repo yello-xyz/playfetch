@@ -13,13 +13,13 @@ import { migrateWorkspaces } from './workspaces'
 
 export async function runDataMigrations() {
   // await migrateWorkspaces()
-  await migrateProjects()
+  // await migrateProjects()
   // await migrateInputs()
   // await migrateAccess()
-  // await migratePrompts()
+  await migratePrompts()
   // await migrateVersions()
   // await migrateRuns()
-  // await migrateChains()
+  await migrateChains()
   // await migrateEndpoints()
   // await migrateUsage()
   // await migrateUsers()
