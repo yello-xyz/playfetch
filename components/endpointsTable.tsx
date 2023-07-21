@@ -1,4 +1,4 @@
-import { Endpoint, ResolvedEndpoint } from '@/types'
+import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode, useState } from 'react'
 import Icon from './icon'
@@ -67,6 +67,7 @@ export function EndpointToggleWithName({
 }
 
 export default function EndpointsTable({
+  project,
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
@@ -74,11 +75,12 @@ export default function EndpointsTable({
   onAddEndpoint,
   getVersionIndex,
 }: {
+  project: ActiveProject
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
-  onAddEndpoint: () => void
+  onAddEndpoint: (parent: Chain | Prompt) => void
   getVersionIndex?: (endpoint: ResolvedEndpoint) => number
 }) {
   const columnsClass = getVersionIndex
@@ -91,14 +93,19 @@ export default function EndpointsTable({
     </RowCell>
   )
 
+  // TODO if we can only add a new endpoint for the first prompt, we really need a selector in the settings pane.
+  const addNewEndpoint = project.prompts.length > 0 ? () => onAddEndpoint(project.prompts[0]) : undefined
+
   return (
     <>
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
-        <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={onAddEndpoint}>
-          <Icon icon={addIcon} />
-          New Endpoint
-        </div>
+        {addNewEndpoint && (
+          <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={addNewEndpoint}>
+            <Icon icon={addIcon} />
+            New Endpoint
+          </div>
+        )}
       </div>
       {endpoints.length > 0 ? (
         <div className={`grid w-full overflow-y-auto ${columnsClass}`}>
@@ -134,7 +141,7 @@ export default function EndpointsTable({
           })}
         </div>
       ) : (
-        <EmptyTable onAddEndpoint={onAddEndpoint} itemLabel={getVersionIndex ? 'prompt' : 'chain'} />
+        <EmptyTable onAddEndpoint={addNewEndpoint} />
       )}
     </>
   )
@@ -175,7 +182,7 @@ function RowCell({
   )
 }
 
-function EmptyTable({ onAddEndpoint, itemLabel }: { onAddEndpoint: () => void; itemLabel: string }) {
+function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
   const AddPromptLink = ({ label }: { label: string }) => (
     <span className='text-gray-500 underline cursor-pointer' onClick={onAddEndpoint}>
       {label}
@@ -186,9 +193,11 @@ function EmptyTable({ onAddEndpoint, itemLabel }: { onAddEndpoint: () => void; i
     <div className='w-full h-full'>
       <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
         <span className='font-medium'>No Endpoints</span>
-        <span className='w-56 text-xs text-center text-gray-400'>
-          Create a <AddPromptLink label={'New Endpoint'} /> to integrate this {itemLabel} in your code base.
-        </span>
+        {onAddEndpoint && (
+          <span className='w-56 text-xs text-center text-gray-400'>
+            Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
+          </span>
+        )}
       </div>
     </div>
   )
