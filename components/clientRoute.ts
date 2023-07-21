@@ -12,9 +12,11 @@ export const WorkspaceRoute = (workspaceID: number, userID: number) =>
 
 export const ProjectRoute = (projectID: number) => `${ClientRoute.Home}${projectID}`
 
+export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRoute(projectID)}?p=${promptID}`
+
 export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRoute(projectID)}?c=${chainID}`
 
-export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRoute(projectID)}?p=${promptID}`
+export const EndpointsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1`
 
 export const Redirect = (route: ClientRoute): GetServerSidePropsResult<Record<string, unknown>> => ({
   redirect: { destination: route, permanent: false },

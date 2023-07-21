@@ -2,10 +2,11 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
+import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain, ResolvedEndpoint } from '@/types'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import ClientRoute, {
   ChainRoute,
+  EndpointsRoute,
   ParseNumberQuery,
   ProjectRoute,
   PromptRoute,
@@ -28,17 +29,20 @@ import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { projectID, p: promptID, c: chainID } = ParseNumberQuery(query)
+  const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
-  const initialActiveItem = promptID
-    ? await getActivePrompt(user.id, promptID, buildURL)
-    : chainID
-    ? await getActiveChain(user.id, chainID, buildURL)
-    : initialActiveProject.prompts.length > 0
-    ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id, buildURL)
-    : null
+  const initialActiveItem =
+    endpoints === 1
+      ? 'endpoints'
+      : promptID
+      ? await getActivePrompt(user.id, promptID, buildURL)
+      : chainID
+      ? await getActiveChain(user.id, chainID, buildURL)
+      : initialActiveProject.prompts.length > 0
+      ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id, buildURL)
+      : null
 
   const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
 
@@ -52,7 +56,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   }
 })
 
-type ActiveItem = ActivePrompt | ActiveChain
+type ActiveItem = ActivePrompt | ActiveChain | 'endpoints'
 
 export default function Home({
   user,
@@ -71,9 +75,12 @@ export default function Home({
 
   const [activeProject, setActiveProject] = useState(initialActiveProject)
   const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isPrompt = (item: ActiveItem): item is ActivePrompt => 'versions' in (item as ActivePrompt)
+  const isPrompt = (item: ActiveItem): item is ActivePrompt =>
+    item !== 'endpoints' && 'lastVersionID' in (item as ActivePrompt)
+  const isChain = (item: ActiveItem): item is ActiveChain => item !== 'endpoints' && 'items' in (item as ActiveChain)
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
-  const activeChain = activeItem && !isPrompt(activeItem) ? activeItem : undefined
+  const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
+  const activeEndpoints = activeItem === 'endpoints' ? activeProject.endpoints : undefined
 
   const [showComments, setShowComments] = useState(false)
 
@@ -147,18 +154,21 @@ export default function Home({
     }
   }
 
+  const selectEndpoints = () => {
+    setActiveItem('endpoints')
+    updateVersion(undefined)
+    router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
+  }
+
   const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
   const refreshSettings = () => api.getAvailableProviders().then(setAvailableProviders)
 
   const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const refreshActiveItem = () => {
-    if (activePrompt) {
-      refreshActivePrompt?.()
-    } else {
-      refreshActiveChain?.()
-    }
-    // Make sure active item is updated in sidebar too.
+    refreshActivePrompt?.()
+    refreshActiveChain?.()
+    // Make sure active item is updated in sidebar too (and this will also update active endpoints).
     refreshProject()
   }
 
@@ -173,13 +183,15 @@ export default function Home({
       updateVersion(undefined)
       router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
     }
-  }  
+  }
 
-  const { p: promptID, c: chainID } = ParseNumberQuery(router.query)
-  const currentQueryState = promptID ?? chainID ?? activeProject.prompts[0]?.id
+  const { p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(router.query)
+  const currentQueryState = endpoints ? 'endpoints' : promptID ?? chainID ?? activeProject.prompts[0]?.id
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
-    if (promptID) {
+    if (endpoints) {
+      selectEndpoints()
+    } else if (promptID) {
       selectPrompt(promptID)
     } else if (chainID) {
       selectChain(chainID)
@@ -236,6 +248,7 @@ export default function Home({
                 onAddChain={addChain}
                 onSelectPrompt={selectPrompt}
                 onSelectChain={selectChain}
+                onSelectEndpoints={selectEndpoints}
                 onNavigateBack={navigateBack}
               />
               <div className='flex flex-col flex-1'>
@@ -270,6 +283,7 @@ export default function Home({
                     />
                   )}
                   {activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} />}
+                  {activeEndpoints && <div />}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>
               </div>

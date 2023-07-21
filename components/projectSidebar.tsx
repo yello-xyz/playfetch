@@ -2,6 +2,7 @@ import { ActiveChain, ActiveProject, ActivePrompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
+import endpointIcon from '@/public/endpoint.svg'
 import backIcon from '@/public/back.svg'
 import Sidebar, { SidebarButton, SidebarSection } from './sidebar'
 
@@ -12,14 +13,16 @@ export default function ProjectSidebar({
   onAddChain,
   onSelectPrompt,
   onSelectChain,
+  onSelectEndpoints,
   onNavigateBack,
 }: {
   activeProject: ActiveProject
-  activeItem?: ActivePrompt | ActiveChain
+  activeItem?: ActivePrompt | ActiveChain | 'endpoints'
   onAddPrompt: () => void
   onAddChain: () => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
+  onSelectEndpoints: () => void
   onNavigateBack: () => void
 }) {
   return (
@@ -27,13 +30,16 @@ export default function ProjectSidebar({
       <SidebarSection>
         <SidebarButton title='Back to overview' icon={backIcon} onClick={onNavigateBack} />
       </SidebarSection>
+      <SidebarSection>
+        <SidebarButton title='Endpoints' icon={endpointIcon} active={activeItem === 'endpoints'} onClick={onSelectEndpoints}/>
+      </SidebarSection>
       <SidebarSection title='Prompts'>
         {activeProject.prompts.map((prompt, promptIndex) => (
           <SidebarButton
             key={promptIndex}
             title={prompt.name}
             icon={promptIcon}
-            active={activeItem?.id === prompt.id}
+            active={activeItem !== 'endpoints' && activeItem?.id === prompt.id}
             onClick={() => onSelectPrompt(prompt.id)}
           />
         ))}
@@ -45,7 +51,7 @@ export default function ProjectSidebar({
             key={chainIndex}
             title={chain.name}
             icon={chainIcon}
-            active={activeItem?.id === chain.id}
+            active={activeItem !== 'endpoints' && activeItem?.id === chain.id}
             onClick={() => onSelectChain(chain.id)}
           />
         ))}
