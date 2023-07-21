@@ -81,12 +81,6 @@ export default function EndpointsTable({
   onRefresh: () => Promise<void>
   onAddEndpoint: (parent: Chain | Prompt) => void
 }) {
-  const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
-    <RowCell header first={first}>
-      {children}
-    </RowCell>
-  )
-
   // TODO if we can only add a new endpoint for the first prompt, we really need a selector in the settings pane.
   const addNewEndpoint = project.prompts.length > 0 ? () => onAddEndpoint(project.prompts[0]) : undefined
 
@@ -102,40 +96,70 @@ export default function EndpointsTable({
         )}
       </div>
       {endpoints.length > 0 ? (
-        <div className={`grid w-full overflow-y-auto grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
-          <HeaderCell first>Enabled</HeaderCell>
-          <HeaderCell>Endpoint</HeaderCell>
-          <HeaderCell>Environment</HeaderCell>
-          <HeaderCell>Cache</HeaderCell>
-          <HeaderCell>Stream</HeaderCell>
-          <HeaderCell>Usage</HeaderCell>
-          {endpoints.map((endpoint, index) => {
-            const active = activeEndpoint?.id === endpoint.id
-            const ActiveCell = ({ children }: { children: ReactNode }) => (
-              <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
-                {children}
-              </RowCell>
-            )
-            return (
-              <Fragment key={index}>
-                <EndpointToggleWithName
-                  endpoint={endpoint}
-                  onRefresh={onRefresh}
-                  isActive={active}
-                  setActive={() => setActiveEndpoint(endpoint)}
-                />
-                <ActiveCell>{endpoint.flavor}</ActiveCell>
-                <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
-                <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
-                <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
-              </Fragment>
-            )
-          })}
-        </div>
+        [...new Set(endpoints.map(endpoint => endpoint.parentID))].map((parentID, index) => (
+          <EndpointsGroup
+            key={index}
+            endpoints={endpoints.filter(endpoint => endpoint.parentID === parentID)}
+            activeEndpoint={activeEndpoint}
+            setActiveEndpoint={setActiveEndpoint}
+            onRefresh={onRefresh}
+          />
+        ))
       ) : (
         <EmptyTable onAddEndpoint={addNewEndpoint} />
       )}
     </>
+  )
+}
+
+function EndpointsGroup({
+  endpoints,
+  activeEndpoint,
+  setActiveEndpoint,
+  onRefresh,
+}: {
+  endpoints: ResolvedEndpoint[]
+  activeEndpoint?: ResolvedEndpoint
+  setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
+  onRefresh: () => Promise<void>
+}) {
+  const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
+    <RowCell header first={first}>
+      {children}
+    </RowCell>
+  )
+
+  return (
+    <div className={`grid w-full overflow-y-auto grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
+      <HeaderCell first>Enabled</HeaderCell>
+      <HeaderCell>Endpoint</HeaderCell>
+      <HeaderCell>Environment</HeaderCell>
+      <HeaderCell>Cache</HeaderCell>
+      <HeaderCell>Stream</HeaderCell>
+      <HeaderCell>Usage</HeaderCell>
+      {endpoints.map((endpoint, index) => {
+        const active = activeEndpoint?.id === endpoint.id
+        const ActiveCell = ({ children }: { children: ReactNode }) => (
+          <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
+            {children}
+          </RowCell>
+        )
+        return (
+          <Fragment key={index}>
+            <EndpointToggleWithName
+              endpoint={endpoint}
+              onRefresh={onRefresh}
+              isActive={active}
+              setActive={() => setActiveEndpoint(endpoint)}
+            />
+            <ActiveCell>{endpoint.flavor}</ActiveCell>
+            <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
+            <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
+            <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
+          </Fragment>
+        )
+      })}
+    </div>
   )
 }
 
