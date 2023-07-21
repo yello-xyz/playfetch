@@ -1,5 +1,5 @@
-import { ActiveChain, ActivePrompt, ChainItem, CodeConfig, RunConfig, Version } from '@/types'
-import BuildChainTab from './buildChainTab'
+import { ActiveChain, ActiveProject, ActivePrompt, ChainItem, CodeConfig, RunConfig, Version } from '@/types'
+import BuildChainTab, { ExtractUnboundChainVariables } from './buildChainTab'
 import { useEffect, useState } from 'react'
 import TestChainTab from './testChainTab'
 import { MainViewTab } from './promptTabView'
@@ -25,7 +25,15 @@ export type PromptCache = {
   versionForItem: (item: PromptChainItem) => Version | undefined
 }
 
-export default function ChainTabView({ activeTab, chain }: { activeTab: MainViewTab; chain: ActiveChain }) {
+export default function ChainTabView({
+  activeTab,
+  chain,
+  project,
+}: {
+  activeTab: MainViewTab
+  chain: ActiveChain
+  project: ActiveProject
+}) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     chain.inputs,
     chain.projectID,
@@ -89,7 +97,13 @@ export default function ChainTabView({ activeTab, chain }: { activeTab: MainView
           />
         ) : null
       case 'publish':
-        return chainIsLoaded ? <PublishChainTab items={items} chain={chain} promptCache={promptCache} /> : null
+        return chainIsLoaded ? (
+          <PublishChainTab
+            chain={chain}
+            project={project}
+            variables={ExtractUnboundChainVariables(items, promptCache)}
+          />
+        ) : null
     }
   }
 

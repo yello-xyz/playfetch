@@ -282,7 +282,7 @@ export default function Home({
                       savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
                   )}
-                  {activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} />}
+                  {activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} project={activeProject} />}
                   {activeEndpoints && <div />}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>

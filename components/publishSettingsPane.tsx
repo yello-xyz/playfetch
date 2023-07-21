@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveChain, ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
+import { Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { StripPromptSentinels } from '@/src/common/formatting'
@@ -11,16 +11,20 @@ import { EndpointToggleWithName } from './endpointsTable'
 import { useInitialState } from './useInitialState'
 
 export default function PublishSettingsPane({
-  activeItem,
   endpoint,
+  projectID,
+  versions = [],
+  promptEndpoints = [],
+  availableFlavors,
   onRefresh,
 }: {
-  activeItem: ActivePrompt | ActiveChain
   endpoint: Endpoint
+  projectID: number
+  versions?: Version[]
+  promptEndpoints?: ResolvedPromptEndpoint[]
+  availableFlavors: string[]
   onRefresh: () => Promise<void>
 }) {
-  const availableFlavors = activeItem.availableFlavors
-
   const [flavor, setFlavor] = useInitialState(endpoint.flavor)
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
   const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
@@ -48,16 +52,12 @@ export default function PublishSettingsPane({
   }
 
   const addFlavor = async (flavor: string) => {
-    await api.addFlavor(activeItem.projectID, flavor)
+    await api.addFlavor(projectID, flavor)
     await onRefresh()
     updateFlavor(flavor)
   }
 
-  const isPrompt = (item: ActivePrompt | ActiveChain): item is ActivePrompt => 'versions' in (item as ActivePrompt)
-  const versions = isPrompt(activeItem) ? activeItem.versions : []
-  const endpoints = isPrompt(activeItem) ? activeItem.endpoints : []
-  const initialVersionID = endpoints.find(e => e.id === endpoint.id)?.versionID
-  const [versionID, setVersionID] = useInitialState(initialVersionID)
+  const [versionID, setVersionID] = useInitialState(endpoint.versionID)
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
   const updateVersion = (version: Version) => {
@@ -86,7 +86,7 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         )}
-        {isPrompt(activeItem) && (
+        {versions && (
           <>
             <Label>Prompt</Label>
             {endpoint.enabled ? (
@@ -94,7 +94,7 @@ export default function PublishSettingsPane({
             ) : (
               <VersionSelector
                 versions={versions}
-                endpoints={endpoints}
+                endpoints={promptEndpoints}
                 activeVersion={versions[versionIndex]}
                 setActiveVersion={updateVersion}
               />

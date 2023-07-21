@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveChain, ActivePrompt, Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import { ActivePrompt, Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -8,8 +8,7 @@ import api from '@/src/client/api'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import EndpointsTable from './endpointsTable'
 
-export const NewConfigFromEndpoints = (endpoints: Endpoint[], activeItem: ActivePrompt | ActiveChain) => {
-  const availableFlavors = activeItem.availableFlavors
+export const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
     const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
     const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
@@ -19,7 +18,7 @@ export const NewConfigFromEndpoints = (endpoints: Endpoint[], activeItem: Active
     }
   }
   return {
-    name: ToCamelCase(activeItem.name.split(' ').slice(0, 3).join(' ')),
+    name: ToCamelCase(itemName.split(' ').slice(0, 3).join(' ')),
     flavor: availableFlavors[0],
   }
 }
@@ -43,7 +42,7 @@ export default function PublishPromptTab({
   const refreshPrompt = useRefreshPrompt()
 
   const addEndpoint = () => {
-    const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt)
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, prompt.availableFlavors)
     api.publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false, false).then(refreshPrompt)
   }
 
@@ -71,7 +70,14 @@ export default function PublishPromptTab({
       </div>
       {activeEndpoint && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
-          <PublishSettingsPane activeItem={prompt} endpoint={activeEndpoint} onRefresh={refreshPrompt} />
+          <PublishSettingsPane
+            endpoint={activeEndpoint}
+            projectID={prompt.projectID}
+            versions={prompt.versions}
+            promptEndpoints={prompt.endpoints}
+            availableFlavors={prompt.availableFlavors}
+            onRefresh={refreshPrompt}
+          />
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
