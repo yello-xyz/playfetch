@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain, ResolvedEndpoint } from '@/types'
+import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
 import PromptTabView, { MainViewTab } from '@/components/promptTabView'
 import ClientRoute, {
   ChainRoute,
@@ -24,10 +24,10 @@ import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import { VersionsEqual } from '@/src/common/versionsEqual'
-import { EmptyGridView } from '@/components/projectGridView'
 import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
 import EndpointsView from '@/components/endpointsView'
+import { EmptyGridView } from '@/components/emptyGridView'
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
