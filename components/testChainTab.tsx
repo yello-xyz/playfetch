@@ -1,26 +1,9 @@
-import api from '@/src/client/api'
-import { useState } from 'react'
-
 import Label from './label'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
-import { PromptCache, ChainItemToConfig, IsPromptChainItem } from './chainTabView'
+import { PromptCache } from './chainTabView'
 import { ExtractUnboundChainVariables } from './buildChainTab'
-import RunTimeline from './runTimeline'
-import { ChainItem, InputValues, PartialRun } from '@/types'
-import { ConsumeRunStreamReader } from './promptTabView'
-import useCheckProvider from './checkProvider'
-
-const runChain = async (
-  chain: ChainItem[],
-  inputs: Record<string, string>[],
-  setPartialRuns: (runs: PartialRun[]) => void
-) => {
-  if (chain.length > 0) {
-    const streamReader = await api.runChain(chain.map(ChainItemToConfig), inputs)
-    await ConsumeRunStreamReader(streamReader, setPartialRuns)
-  }
-}
+import { ChainItem, InputValues, PromptInputs } from '@/types'
 
 export default function TestChainTab({
   items,
@@ -28,32 +11,18 @@ export default function TestChainTab({
   setInputValues,
   persistInputValuesIfNeeded,
   promptCache,
+  runChain,
 }: {
   items: ChainItem[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
   promptCache: PromptCache
+  runChain: (inputs: PromptInputs[]) => Promise<void>
 }) {
-  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-  const [isRunning, setIsRunning] = useState(false)
-
   const variables = ExtractUnboundChainVariables(items, promptCache)
 
-  const checkProviderAvailable = useCheckProvider()
-
-  const testChain = async (inputs: Record<string, string>[]) => {
-    persistInputValuesIfNeeded()
-    const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
-    if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
-      setIsRunning(true)
-      await runChain(items, inputs, setPartialRuns)
-      setIsRunning(false)
-    }
-  }
-
   return (
-    <>
       <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
         <div className='flex flex-col flex-grow gap-2'>
           <Label>Test Data</Label>
@@ -64,11 +33,7 @@ export default function TestChainTab({
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
         </div>
-        <TestButtons variables={variables} inputValues={inputValues} callback={testChain} />
+        <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />
       </div>
-      <div className='flex-1 p-6 pl-0'>
-        <RunTimeline runs={partialRuns} isRunning={isRunning} />
-      </div>
-    </>
   )
 }

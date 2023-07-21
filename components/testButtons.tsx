@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import useModalDialogPrompt from './modalDialogContext'
-import { InputValues } from '@/types'
+import { InputValues, PromptInputs } from '@/types'
 
 type TestMode = 'first' | 'last' | 'random' | 'all'
 
@@ -57,7 +57,7 @@ export default function TestButtons({
   variables: string[]
   inputValues: InputValues
   disabled?: boolean
-  callback: (inputs: Record<string, string>[]) => Promise<void>
+  callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
   const [testMode, setTestMode] = useState<TestMode>('first')
 

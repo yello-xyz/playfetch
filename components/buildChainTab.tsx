@@ -88,7 +88,7 @@ export default function BuildChainTab({
 
   return (
     <>
-      <div className='flex flex-col flex-grow h-full gap-2 p-6 overflow-y-auto'>
+      <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto'>
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
           {ExtractUnboundChainVariables(items, promptCache).map((variable, index) => (
@@ -176,7 +176,7 @@ export default function BuildChainTab({
 }
 
 function Column({ children, wide }: { children: ReactNode; wide?: boolean }) {
-  return <div className={`w-full ${wide ? 'max-w-[25%]' : 'max-w-[15%]'} flex gap-2`}>{children}</div>
+  return <div className={`w-full ${wide ? 'max-w-[50%]' : 'max-w-[25%]'} flex gap-2`}>{children}</div>
 }
 
 function OutputMapper({

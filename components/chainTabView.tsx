@@ -1,10 +1,22 @@
-import { ActiveChain, ActiveProject, ActivePrompt, ChainItem, CodeConfig, RunConfig, Version } from '@/types'
+import {
+  ActiveChain,
+  ActiveProject,
+  ActivePrompt,
+  ChainItem,
+  CodeConfig,
+  PartialRun,
+  PromptInputs,
+  RunConfig,
+  Version,
+} from '@/types'
 import BuildChainTab, { ExtractUnboundChainVariables } from './buildChainTab'
 import { useEffect, useState } from 'react'
 import TestChainTab from './testChainTab'
-import { MainViewTab } from './promptTabView'
+import { ConsumeRunStreamReader, MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
 import api from '@/src/client/api'
+import useCheckProvider from './checkProvider'
+import RunTimeline from './runTimeline'
 
 type PromptChainItem = RunConfig & { promptID: number }
 
@@ -82,6 +94,24 @@ export default function ChainTabView({
     api.updateChain(chain.id, strippedItems, inputs)
   }
 
+  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
+  const [isRunning, setIsRunning] = useState(false)
+
+  const checkProviderAvailable = useCheckProvider()
+
+  const runChain = async (inputs: PromptInputs[]) => {
+    persistInputValuesIfNeeded()
+    const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
+    if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
+      setIsRunning(true)
+      if (items.length > 0) {
+        const streamReader = await api.runChain(items.map(ChainItemToConfig), inputs)
+        await ConsumeRunStreamReader(streamReader, setPartialRuns)
+      }
+      setIsRunning(false)
+    }
+  }
+
   const renderTab = () => {
     switch (activeTab) {
       case 'play':
@@ -102,10 +132,18 @@ export default function ChainTabView({
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             promptCache={promptCache}
+            runChain={runChain}
           />
         ) : null
     }
   }
 
-  return <div className='flex items-stretch h-full'>{renderTab()}</div>
+  return (
+    <div className='flex items-stretch h-full'>
+      {renderTab()}
+      <div className='flex-1 p-6 pl-0'>
+        <RunTimeline runs={partialRuns} isRunning={isRunning} />
+      </div>
+    </div>
+  )
 }
