@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { ActivePrompt, Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
+import {
+  ActiveProject,
+  ActivePrompt,
+  Endpoint,
+  Prompt,
+  ResolvedEndpoint,
+  ResolvedPromptEndpoint,
+  Version,
+} from '@/types'
 import { useRefreshPrompt } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -24,39 +32,30 @@ export const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, 
 }
 
 export default function PublishPromptTab({
+  endpoints,
   prompt,
-  activeVersion,
-  setActiveVersion,
+  project,
+  activePrompt,
 }: {
-  prompt: ActivePrompt
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
+  endpoints: ResolvedEndpoint[]
+  prompt: Prompt
+  project: ActiveProject
+  activePrompt?: ActivePrompt
 }) {
-  const endpoints = prompt.endpoints
-
-  const initialActiveEndpoint = endpoints.find(endpoint => endpoint.versionID === activeVersion.id)
-  const [activeEndpointID, setActiveEndpointID] = useState(initialActiveEndpoint?.id)
+  const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
-  const version = prompt.versions.find(version => version.id === activeEndpoint?.versionID) ?? activeVersion
 
   const refreshPrompt = useRefreshPrompt()
 
   const addEndpoint = () => {
-    const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, prompt.availableFlavors)
-    api
-      .publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false, false)
-      .then(refreshPrompt)
+    const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, project.availableFlavors)
+    api.publishPrompt(prompt.lastVersionID, project.id, prompt.id, name, flavor, false, false).then(refreshPrompt)
   }
 
-  const endPointToVersionID = (endpoint: Endpoint) => (endpoint as ResolvedPromptEndpoint).versionID
-
-  const endpointToVersionIndex = (endpoint: Endpoint) =>
-    prompt.versions.findIndex(version => version.id === endPointToVersionID(endpoint))
-
-  const updateActiveEndpoint = (endpoint: Endpoint) => {
-    setActiveEndpointID(endpoint.id)
-    setActiveVersion(prompt.versions.find(version => version.id === endPointToVersionID(endpoint))!)
-  }
+  const endpointToVersionIndex = activePrompt
+    ? (endpoint: Endpoint) =>
+        activePrompt.versions.findIndex(version => version.id === (endpoint as ResolvedPromptEndpoint).versionID)
+    : undefined
 
   return (
     <>
@@ -64,28 +63,30 @@ export default function PublishPromptTab({
         <EndpointsTable
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
-          setActiveEndpoint={updateActiveEndpoint}
+          setActiveEndpoint={endpoint => setActiveEndpointID(endpoint.id)}
           onRefresh={refreshPrompt}
           onAddEndpoint={addEndpoint}
           getVersionIndex={endpointToVersionIndex}
         />
       </div>
-      {activeEndpoint && (
+      {activeEndpoint && activePrompt && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
           <PublishSettingsPane
             endpoint={activeEndpoint}
-            projectID={prompt.projectID}
-            versions={prompt.versions}
-            promptEndpoints={prompt.endpoints}
-            availableFlavors={prompt.availableFlavors}
+            projectID={project.id}
+            versions={activePrompt.versions}
+            promptEndpoints={endpoints as ResolvedPromptEndpoint[]}
+            availableFlavors={project.availableFlavors}
             onRefresh={refreshPrompt}
           />
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              inputs={ExtractPromptVariables(version.prompt)}
-              inputValues={prompt.inputValues}
-              defaultFlavor={prompt.availableFlavors[0]}
+              inputs={ExtractPromptVariables(
+                activePrompt.versions.find(v => v.id === activeEndpoint.versionID)!.prompt
+              )}
+              inputValues={project.inputValues}
+              defaultFlavor={project.availableFlavors[0]}
             />
           )}
           <UsagePane endpoint={activeEndpoint} onRefresh={refreshPrompt} />

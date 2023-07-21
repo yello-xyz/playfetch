@@ -1,4 +1,4 @@
-import { ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
 
 import PlayTab from './playTab'
 import PublishPromptTab from './publishPromptTab'
@@ -44,6 +44,7 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
 export default function PromptTabView({
   activeTab,
   prompt,
+  project,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
@@ -53,6 +54,7 @@ export default function PromptTabView({
 }: {
   activeTab: MainViewTab
   prompt: ActivePrompt
+  project: ActiveProject
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -129,7 +131,7 @@ export default function PromptTabView({
           />
         )
       case 'publish':
-        return <PublishPromptTab activeVersion={activeVersion} setActiveVersion={setActiveVersion} prompt={prompt} />
+        return <PublishPromptTab endpoints={prompt.endpoints} project={project} prompt={prompt} activePrompt={prompt} />
     }
   }
 
