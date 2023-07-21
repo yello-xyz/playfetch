@@ -102,7 +102,7 @@ export default function ChainTabView({
             endpoints={chain.endpoints}
             chain={chain}
             project={project}
-            variables={ExtractUnboundChainVariables(items, promptCache)}
+            inputs={ExtractUnboundChainVariables(items, promptCache)}
           />
         ) : null
     }

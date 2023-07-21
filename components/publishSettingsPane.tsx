@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
-import { StripPromptSentinels } from '@/src/common/formatting'
+import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
@@ -16,7 +16,7 @@ export default function PublishSettingsPane({
   versions,
   promptEndpoints,
   availableFlavors,
-  onRefresh,
+  onRefresh
 }: {
   endpoint: Endpoint
   projectID: number
@@ -62,7 +62,8 @@ export default function PublishSettingsPane({
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
-    api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
+    const inputs = ExtractPromptVariables(version.prompt)
+    api.updateEndpoint({ ...endpoint, versionID: version.id, inputs }).then(_ => onRefresh())
   }
 
   return (

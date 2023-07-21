@@ -12,12 +12,12 @@ export default function PublishChainTab({
   endpoints,
   chain,
   project,
-  variables,
+  inputs,
 }: {
   endpoints: ResolvedEndpoint[]
   chain: Chain
   project: ActiveProject
-  variables: string[]
+  inputs: string[]
 }) {
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -32,7 +32,7 @@ export default function PublishChainTab({
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, chain.name, project.availableFlavors)
-    api.publishChain(project.id, chain.id, name, flavor, false, false).then(refreshChain)
+    api.publishChain(project.id, chain.id, name, flavor, false, false, inputs).then(refreshChain)
   }
 
   return (
@@ -57,7 +57,7 @@ export default function PublishChainTab({
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              variables={variables}
+              inputs={inputs}
               inputValues={project.inputs}
               defaultFlavor={project.availableFlavors[0]}
             />

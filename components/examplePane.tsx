@@ -26,16 +26,16 @@ const buildCurlCommand = (
 
 export default function ExamplePane({
   endpoint,
-  variables,
+  inputs,
   inputValues,
   defaultFlavor,
 }: {
   endpoint: ResolvedEndpoint
-  variables: string[]
+  inputs: string[]
   inputValues: InputValues
   defaultFlavor: string
 }) {
-  const curlCommand = buildCurlCommand(endpoint, variables, inputValues, defaultFlavor)
+  const curlCommand = buildCurlCommand(endpoint, inputs, inputValues, defaultFlavor)
 
   const [canCopyToClipboard, setCanCopyToClipboard] = useState(false)
   useEffect(() => setCanCopyToClipboard(!!navigator.clipboard?.writeText), [])
