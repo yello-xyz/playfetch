@@ -84,7 +84,7 @@ async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: numbe
 }
 
 export async function getProjectUsers(projectID: number): Promise<User[]> {
-  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
+  const projectData = await getTrustedProjectData(projectID)
   return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
@@ -189,8 +189,10 @@ export async function ensureProjectAccess(userID: number, projectID: number) {
   await getVerifiedUserProjectData(userID, projectID)
 }
 
+const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
+
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
-  const projectData = await getKeyedEntity(Entity.PROJECT, projectID)
+  const projectData = await getTrustedProjectData(projectID)
   if (!projectData) {
     throw new Error(`Project with ID ${projectID} does not exist or user has no access`)
   }
@@ -199,6 +201,12 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
     await ensureWorkspaceAccess(userID, projectData.workspaceID)
   }
   return projectData
+}
+
+// TODO Also call this when deleting prompts/chains or updating endpoints etc.
+export async function updateProjectLastEditedAt(projectID: number) {
+  const projectData = await getTrustedProjectData(projectID)
+  await updateProject(projectData, true)
 }
 
 export async function updateProjectName(userID: number, projectID: number, name: string) {

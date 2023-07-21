@@ -13,7 +13,7 @@ import {
 import { saveVersionForUser, toVersion } from './versions'
 import { toEndpoint } from './endpoints'
 import { ActivePrompt, Endpoint, Prompt } from '@/types'
-import { ensureProjectAccess, getProjectUsers } from './projects'
+import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
 import { getProjectInputValues } from './inputs'
 import { toUsage } from './usage'
 
@@ -98,6 +98,7 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   const promptData = toPromptData(projectID, DefaultPromptName, 0, '', createdAt, createdAt, [])
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, getID(promptData))
+  await updateProjectLastEditedAt(projectID)
   return getID(promptData)
 }
 
@@ -114,6 +115,9 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
       getID(promptData)
     )
   )
+  if (updateLastEditedTimestamp) {
+    await updateProjectLastEditedAt(promptData.projectID)
+  }
 }
 
 export const getVerifiedProjectScopedData = async (userID: number, entity: Entity, id: number) => {

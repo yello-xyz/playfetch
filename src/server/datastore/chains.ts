@@ -9,7 +9,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { ActiveChain, Chain, ChainItem } from '@/types'
-import { ensureProjectAccess, getProjectUsers } from './projects'
+import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
 import { getProjectInputValues } from './inputs'
 import { getVerifiedProjectScopedData, loadEndpoints, toPrompt } from './prompts'
 
@@ -88,6 +88,7 @@ export async function addChainForUser(userID: number, projectID: number): Promis
   const createdAt = new Date()
   const chainData = toChainData(projectID, DefaultChainName, [], createdAt, createdAt, [])
   await getDatastore().save(chainData)
+  await updateProjectLastEditedAt(projectID)
   return getID(chainData)
 }
 
@@ -103,6 +104,9 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       getID(chainData)
     )
   )
+  if (updateLastEditedTimestamp) {
+    await updateProjectLastEditedAt(chainData.projectID)
+  }
 }
 
 export const getVerifiedUserChainData = async (userID: number, chainID: number) =>
