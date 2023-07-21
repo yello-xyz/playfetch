@@ -136,14 +136,6 @@ export async function ensurePromptAccess(userID: number, promptID: number) {
   await getVerifiedUserPromptData(userID, promptID)
 }
 
-export async function updatePromptProject(userID: number, promptID: number, projectID: number) {
-  // TODO should we update the endpoints project url paths or even refuse when prompt has published endpoints?
-  // What about if the prompt is used in a chain within the project? Should we just duplicate instead of move?
-  const promptData = await getVerifiedUserPromptData(userID, promptID)
-  await ensureProjectAccess(userID, projectID)
-  await updatePrompt({ ...promptData, projectID }, true)
-}
-
 export async function updatePromptName(userID: number, promptID: number, name: string) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
   await updatePrompt({ ...promptData, name }, true)
@@ -164,7 +156,7 @@ export async function toggleFavoritePrompt(userID: number, promptID: number, fav
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
-  // TODO warn or even refuse when prompt has published endpoints
+  // TODO warn or even refuse when prompt has published endpoints or is used in chain.
   await ensurePromptAccess(userID, promptID)
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', promptID)

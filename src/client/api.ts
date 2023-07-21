@@ -105,9 +105,6 @@ const api = {
   updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID?: number): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, config, versionID })
   },
-  movePrompt: function (promptID: number, projectID: number) {
-    return post(this.movePrompt, { promptID, projectID })
-  },
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
   },
