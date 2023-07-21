@@ -38,14 +38,13 @@ export default function PublishPromptTab({
   const [activeEndpointID, setActiveEndpointID] = useState(initialActiveEndpoint?.id)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
   const version = prompt.versions.find(version => version.id === activeEndpoint?.versionID) ?? activeVersion
-  const inputs = ExtractPromptVariables(version.prompt)
 
   const refreshPrompt = useRefreshPrompt()
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, prompt.availableFlavors)
     api
-      .publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false, false, inputs)
+      .publishPrompt(version.id, prompt.projectID, prompt.id, name, flavor, false, false)
       .then(refreshPrompt)
   }
 
@@ -84,7 +83,7 @@ export default function PublishPromptTab({
           {activeEndpoint.enabled && (
             <ExamplePane
               endpoint={activeEndpoint}
-              inputs={inputs}
+              inputs={ExtractPromptVariables(version.prompt)}
               inputValues={prompt.inputs}
               defaultFlavor={prompt.availableFlavors[0]}
             />

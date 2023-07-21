@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Endpoint, ResolvedPromptEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
-import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
+import { StripPromptSentinels } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
@@ -62,8 +62,7 @@ export default function PublishSettingsPane({
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
-    const inputs = ExtractPromptVariables(version.prompt)
-    api.updateEndpoint({ ...endpoint, versionID: version.id, inputs }).then(_ => onRefresh())
+    api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
   }
 
   return (

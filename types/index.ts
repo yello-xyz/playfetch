@@ -149,7 +149,6 @@ export type Endpoint = {
   flavor: string
   useCache: boolean
   useStreaming: boolean
-  inputs: string[]
 }
 
 export type ResolvedEndpoint = Endpoint & {

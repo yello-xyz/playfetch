@@ -32,7 +32,7 @@ export default function PublishChainTab({
 
   const addEndpoint = () => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, chain.name, project.availableFlavors)
-    api.publishChain(project.id, chain.id, name, flavor, false, false, inputs).then(refreshChain)
+    api.publishChain(project.id, chain.id, name, flavor, false, false).then(refreshChain)
   }
 
   return (

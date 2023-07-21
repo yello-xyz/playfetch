@@ -14,32 +14,13 @@ import {
 } from './datastore'
 import { getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
-import { CheckValidURLPath, ExtractPromptVariables } from '@/src/common/formatting'
+import { CheckValidURLPath } from '@/src/common/formatting'
 import { getVerifiedUserChainData } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    let inputs
-    if (endpointData.versionID) {
-      const versionData = await getKeyedEntity(Entity.VERSION, endpointData.versionID)
-      inputs = ExtractPromptVariables(versionData.prompt)
-    } else {
-      const chainData = await getKeyedEntity(Entity.CHAIN, endpointData.parentID)
-      const items = JSON.parse(chainData.items) as ChainItem[]
-      const allInputs = [] as string[]
-      for (const item of items) {
-        if ('code' in item) {
-          allInputs.push(...ExtractPromptVariables(item.code))
-        } else {
-          const versionData = await getKeyedEntity(Entity.VERSION, item.versionID)
-          allInputs.push(...ExtractPromptVariables(versionData.prompt))
-        }
-      }
-      const boundInputVariables = items.map(item => item.output).filter(output => !!output) as string[]
-      inputs  = [...new Set(allInputs.filter(variable => !boundInputVariables.includes(variable)))]
-    }
     await getDatastore().save(
       toEndpointData(
         endpointData.enabled,
@@ -52,7 +33,6 @@ export async function migrateEndpoints() {
         endpointData.createdAt,
         endpointData.useCache,
         endpointData.useStreaming,
-        inputs,
         getID(endpointData)
       )
     )
@@ -118,8 +98,7 @@ export async function saveEndpoint(
   projectURLPath: string,
   flavor: string,
   useCache: boolean,
-  useStreaming: boolean,
-  inputs: string[]
+  useStreaming: boolean
 ) {
   await ensureEndpointAccess(userID, { parentID, versionID, projectURLPath })
   const urlPath = await getValidURLPath(parentID, name, projectURLPath, flavor)
@@ -134,7 +113,6 @@ export async function saveEndpoint(
     new Date(),
     useCache,
     useStreaming,
-    inputs
   )
   await getDatastore().save(endpointData)
   await saveUsage(getID(endpointData), parentID)
@@ -162,8 +140,7 @@ export async function updateEndpointForUser(
   urlPath: string,
   flavor: string,
   useCache: boolean,
-  useStreaming: boolean,
-  inputs: string[]
+  useStreaming: boolean
 ) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData)
@@ -182,7 +159,6 @@ export async function updateEndpointForUser(
       endpointData.createdAt,
       useCache,
       useStreaming,
-      inputs,
       getID(endpointData)
     )
   )
@@ -206,7 +182,6 @@ const toEndpointData = (
   createdAt: Date,
   useCache: boolean,
   useStreaming: boolean,
-  inputs: string[],
   endpointID?: number
 ) => ({
   key: buildKey(Entity.ENDPOINT, endpointID),
@@ -221,9 +196,8 @@ const toEndpointData = (
     createdAt,
     useCache,
     useStreaming,
-    inputs: JSON.stringify(inputs),
   },
-  excludeFromIndexes: ['inputs'],
+  excludeFromIndexes: [],
 })
 
 export const toEndpoint = (data: any): Endpoint => ({
@@ -238,5 +212,4 @@ export const toEndpoint = (data: any): Endpoint => ({
   flavor: data.flavor,
   useCache: data.useCache,
   useStreaming: data.useStreaming,
-  inputs: JSON.parse(data.inputs),
 })

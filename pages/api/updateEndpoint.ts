@@ -16,7 +16,6 @@ async function updateEndpoint(req: NextApiRequest, res: NextApiResponse, user: U
     req.body.flavor,
     req.body.useCache,
     req.body.useStreaming,
-    req.body.inputs
   )
 
   res.json({})

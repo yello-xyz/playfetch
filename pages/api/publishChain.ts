@@ -14,12 +14,11 @@ async function publishChain(req: NextApiRequest, res: NextApiResponse, user: Use
   const flavor = req.body.flavor
   const useCache = req.body.useCache
   const useStreaming = req.body.useStreaming
-  const inputs = req.body.inputs
 
   const urlPath = ToCamelCase(name)
   const projectURLPath = await getURLPathForProject(userID, projectID)
   await ensureProjectAPIKey(userID, projectID)
-  await saveEndpoint(userID, parentID, versionID, urlPath, projectURLPath, flavor, useCache, useStreaming, inputs)
+  await saveEndpoint(userID, parentID, versionID, urlPath, projectURLPath, flavor, useCache, useStreaming)
 
   res.json({})
 }
