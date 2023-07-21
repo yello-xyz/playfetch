@@ -39,7 +39,7 @@ const toChainData = (
     lastEditedAt,
     favorited: JSON.stringify(favorited),
   },
-  excludeFromIndexes: ['name', 'items'],
+  excludeFromIndexes: ['name', 'items', 'favorited'],
 })
 
 export const toChain = (data: any, userID: number): Chain => ({
@@ -47,7 +47,7 @@ export const toChain = (data: any, userID: number): Chain => ({
   name: data.name,
   items: JSON.parse(data.items),
   projectID: data.projectID,
-  timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
+  timestamp: getTimestamp(data, 'lastEditedAt'),
   favorited: JSON.parse(data.favorited).includes(userID),
 })
 

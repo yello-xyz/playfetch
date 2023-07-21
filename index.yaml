@@ -15,7 +15,7 @@ indexes:
 - kind: project
   properties:
   - name: workspaceID
-  - name: createdAt
+  - name: lastEditedAt
     direction: desc
 
 - kind: prompt

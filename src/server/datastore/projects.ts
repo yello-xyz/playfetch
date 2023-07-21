@@ -10,6 +10,7 @@ import {
   getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
+  getTimestamp,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
 import { CheckValidURLPath } from '@/src/common/formatting'
@@ -32,7 +33,7 @@ export async function migrateProjects() {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData, favorited: JSON.stringify([]) })
+    await updateProject({ ...projectData, lastEditedAt: projectData.createdAt }, false)
   }
 }
 
@@ -45,6 +46,7 @@ const toProjectData = (
   labels: string[],
   flavors: string[],
   createdAt: Date,
+  lastEditedAt: Date,
   favorited: number[],
   apiKeyHash?: string,
   apiKeyDev?: string,
@@ -55,6 +57,7 @@ const toProjectData = (
     workspaceID,
     name,
     createdAt,
+    lastEditedAt,
     labels: JSON.stringify(labels),
     flavors: JSON.stringify(flavors),
     favorited: JSON.stringify(favorited),
@@ -69,6 +72,7 @@ export const toProject = (data: any, userID: number): Project => ({
   id: getID(data),
   name: data.name,
   workspaceID: data.workspaceID,
+  timestamp: getTimestamp(data, 'lastEditedAt'),
   favorited: JSON.parse(data.favorited).includes(userID),
 })
 
@@ -127,7 +131,17 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
 export async function addProjectForUser(userID: number, workspaceID: number, projectName: string) {
   await ensureWorkspaceAccess(userID, workspaceID)
   const urlPath = await getUniqueURLPathFromProjectName(projectName)
-  const projectData = toProjectData(workspaceID, projectName, urlPath, [], [DefaultEndpointFlavor], new Date(), [])
+  const createdAt = new Date()
+  const projectData = toProjectData(
+    workspaceID,
+    projectName,
+    urlPath,
+    [],
+    [DefaultEndpointFlavor],
+    createdAt,
+    createdAt,
+    []
+  )
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await addPromptForUser(userID, projectID)
@@ -153,7 +167,7 @@ export async function getURLPathForProject(userID: number, projectID: number): P
   return projectData.urlPath
 }
 
-async function updateProject(projectData: any) {
+async function updateProject(projectData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toProjectData(
       projectData.workspaceID,
@@ -162,6 +176,7 @@ async function updateProject(projectData: any) {
       JSON.parse(projectData.labels),
       JSON.parse(projectData.flavors),
       projectData.createdAt,
+      updateLastEditedTimestamp ? new Date() : projectData.lastEditedAt,
       JSON.parse(projectData.favorited),
       projectData.apiKeyHash,
       projectData.apiKeyDev,
@@ -188,12 +203,12 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
 
 export async function updateProjectName(userID: number, projectID: number, name: string) {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  await updateProject({ ...projectData, name })
+  await updateProject({ ...projectData, name }, true)
 }
 
 export async function addProjectFlavor(userID: number, projectID: number, flavor: string) {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  await updateProject({ ...projectData, flavors: JSON.stringify([...JSON.parse(projectData.flavors), flavor]) })
+  await updateProject({ ...projectData, flavors: JSON.stringify([...JSON.parse(projectData.flavors), flavor]) }, true)
 }
 
 export async function ensureProjectLabel(userID: number, projectID: number, label: string) {
@@ -201,7 +216,7 @@ export async function ensureProjectLabel(userID: number, projectID: number, labe
   const labels = JSON.parse(projectData.labels)
   if (!labels.includes(label)) {
     const newLabels = [...labels, label]
-    await updateProject({ ...projectData, labels: JSON.stringify(newLabels) })
+    await updateProject({ ...projectData, labels: JSON.stringify(newLabels) }, true)
   }
 }
 
@@ -213,7 +228,7 @@ export async function ensureProjectAPIKey(userID: number, projectID: number): Pr
 async function rotateProjectAPIKey(projectData: any): Promise<string> {
   const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
   const apiKeyHash = hashAPIKey(apiKey)
-  await updateProject({ ...projectData, apiKeyHash, apiKeyDev: apiKey })
+  await updateProject({ ...projectData, apiKeyHash, apiKeyDev: apiKey }, true)
   return apiKey
 }
 
@@ -226,14 +241,15 @@ export async function toggleFavoriteProject(userID: number, projectID: number, f
       favorited: JSON.stringify(
         favorited ? [...oldFavorited, userID] : oldFavorited.filter((id: number) => id !== userID)
       ),
-    }
+    },
+    false
   )
 }
 
 export async function getSharedProjectsForUser(userID: number): Promise<Project[]> {
   const projectIDs = await getAccessibleObjectIDs(userID, 'project')
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
-  return projects.sort((a, b) => b.createdAt - a.createdAt).map(project => toProject(project, userID))
+  return projects.sort((a, b) => b.lastEditedAt - a.lastEditedAt).map(project => toProject(project, userID))
 }
 
 export async function deleteProjectForUser(userID: number, projectID: number) {

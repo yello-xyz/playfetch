@@ -20,6 +20,7 @@ export type Project = {
   id: number
   name: string
   workspaceID: number
+  timestamp: string
   favorited: boolean
 }
 

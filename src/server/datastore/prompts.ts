@@ -37,7 +37,7 @@ const toPromptData = (
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
   data: { projectID, lastVersionID, lastPrompt, name, createdAt, lastEditedAt, favorited: JSON.stringify(favorited) },
-  excludeFromIndexes: ['name', 'lastPrompt'],
+  excludeFromIndexes: ['name', 'lastPrompt', 'favorited'],
 })
 
 export const toPrompt = (data: any, userID: number): Prompt => ({
@@ -46,7 +46,7 @@ export const toPrompt = (data: any, userID: number): Prompt => ({
   lastVersionID: data.lastVersionID,
   lastPrompt: StripPromptSentinels(data.lastPrompt),
   projectID: data.projectID,
-  timestamp: getTimestamp(data, 'lastEditedAt') ?? getTimestamp(data),
+  timestamp: getTimestamp(data, 'lastEditedAt'),
   favorited: JSON.parse(data.favorited).includes(userID),
 })
 

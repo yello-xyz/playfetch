@@ -48,7 +48,7 @@ export async function getWorkspaceUsers(workspaceID: number): Promise<User[]> {
 
 export async function getActiveWorkspace(userID: number, workspaceID: number): Promise<ActiveWorkspace> {
   const workspaceData = await getVerifiedUserWorkspaceData(userID, workspaceID)
-  const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID)
+  const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID, ['lastEditedAt'])
   const projects = projectData.map(project => toProject(project, userID))
   const users = await getWorkspaceUsers(workspaceID)
 
