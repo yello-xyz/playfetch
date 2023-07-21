@@ -1,7 +1,6 @@
 import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
 
 import PlayTab from './playTab'
-import PublishPromptTab from './publishPromptTab'
 import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'

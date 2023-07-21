@@ -86,7 +86,7 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         )}
-        {versions && versionIndex && (
+        {versions && versionIndex && versionIndex >= 0 && (
           <>
             <Label>Prompt</Label>
             {endpoint.enabled ? (

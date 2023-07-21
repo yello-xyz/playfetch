@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt } from '@/types'
-import { useRefreshChain } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
@@ -23,13 +22,7 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
   }
 }
 
-export default function PublishChainTab({ project }: { project: ActiveProject }) {
-  const refreshChain = useRefreshChain()
-
-  return <EndpointsView project={project} onRefresh={refreshChain} />
-}
-
-export function EndpointsView({ project, onRefresh }: { project: ActiveProject; onRefresh: () => Promise<void> }) {
+export default function EndpointsView({ project, onRefresh }: { project: ActiveProject; onRefresh: () => Promise<void> }) {
   const endpoints = project.endpoints
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -70,7 +63,7 @@ export function EndpointsView({ project, onRefresh }: { project: ActiveProject; 
   const inputs = isPrompt(activeItem) ? ExtractPromptVariables(version?.prompt ?? '') : activeItem?.inputs ?? []
 
   return (
-    <>
+    <div className='flex items-stretch h-full'>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
         <EndpointsTable
           project={project}
@@ -102,6 +95,6 @@ export function EndpointsView({ project, onRefresh }: { project: ActiveProject; 
           <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
         </div>
       )}
-    </>
+    </div>
   )
 }

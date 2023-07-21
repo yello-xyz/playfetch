@@ -27,6 +27,7 @@ import { VersionsEqual } from '@/src/common/versionsEqual'
 import { EmptyGridView } from '@/components/projectGridView'
 import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
+import EndpointsView from '@/components/endpointsView'
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
@@ -283,7 +284,7 @@ export default function Home({
                     />
                   )}
                   {activeChain && <ChainTabView activeTab={selectedTab} chain={activeChain} project={activeProject} />}
-                  {activeEndpoints && <div />}
+                  {activeEndpoints && <EndpointsView project={activeProject} onRefresh={refreshProject} />}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>
               </div>

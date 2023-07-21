@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import TestChainTab from './testChainTab'
 import { MainViewTab } from './promptTabView'
 import useInputValues from './inputValues'
-import PublishChainTab from './publishChainTab'
 import api from '@/src/client/api'
 
 type PromptChainItem = RunConfig & { promptID: number }
