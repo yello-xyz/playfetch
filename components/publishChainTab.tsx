@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, ResolvedEndpoint, ResolvedPromptEndpoint } from '@/types'
+import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
 import { useRefreshChain } from './refreshContext'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -25,27 +25,23 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
 
 export default function PublishChainTab({
   endpoints,
-  chain,
   project,
 }: {
   endpoints: ResolvedEndpoint[]
-  chain: Chain
   project: ActiveProject
 }) {
   const refreshChain = useRefreshChain()
 
-  return <EndpointsView endpoints={endpoints} activeItem={chain} project={project} onRefresh={refreshChain} />
+  return <EndpointsView endpoints={endpoints} project={project} onRefresh={refreshChain} />
 }
 
 export function EndpointsView({
   endpoints,
   project,
-  activeItem,
   onRefresh,
 }: {
   endpoints: ResolvedEndpoint[]
   project: ActiveProject
-  activeItem: Chain | Prompt
   onRefresh: () => Promise<void>
 }) {
   const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
@@ -57,7 +53,7 @@ export function EndpointsView({
     setActiveEndpointID(endpoints[0].id)
   }
 
-  const isPrompt = (item: Chain | Prompt): item is Prompt => 'lastVersionID' in (item as Prompt)
+  const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
 
   const addEndpoint = (item: Chain | Prompt) => {
     const { name, flavor } = NewConfigFromEndpoints(endpoints, item.name, project.availableFlavors)
@@ -68,6 +64,7 @@ export function EndpointsView({
     }
   }
 
+  const activeItem = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
   useEffect(() => {
     setActivePrompt(undefined)
@@ -81,7 +78,7 @@ export function EndpointsView({
     : undefined
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
-  const inputs = isPrompt(activeItem) ? ExtractPromptVariables(version?.prompt ?? '') : activeItem.inputs
+  const inputs = isPrompt(activeItem) ? ExtractPromptVariables(version?.prompt ?? '') : activeItem?.inputs ?? []
 
   return (
     <>

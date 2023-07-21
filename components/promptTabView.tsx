@@ -131,7 +131,7 @@ export default function PromptTabView({
           />
         )
       case 'publish':
-        return <PublishPromptTab endpoints={prompt.endpoints} project={project} prompt={prompt} activePrompt={prompt} />
+        return <PublishPromptTab endpoints={prompt.endpoints} project={project} />
     }
   }
 
