@@ -1,4 +1,4 @@
-import { ActiveProject, ChainItem, CodeConfig, Prompt, Version } from '@/types'
+import { ActiveProject, ChainItem, CodeConfig, InputValues, Prompt, PromptInputs, Version } from '@/types'
 import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
@@ -7,7 +7,7 @@ import Label from './label'
 import { PromptCache, IsPromptChainItem } from './chainTabView'
 import InputVariable from './inputVariable'
 import Checkbox from './checkbox'
-import Button from './button'
+import Button, { PendingButton } from './button'
 import RichTextInput from './richTextInput'
 
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
@@ -30,12 +30,16 @@ export default function BuildChainTab({
   prompts,
   promptCache,
   project,
+  inputValues,
+  runChain,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   prompts: Prompt[]
   promptCache: PromptCache
   project: ActiveProject
+  inputValues: InputValues
+  runChain: (inputs: PromptInputs[]) => Promise<void>
 }) {
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = prompts.find(prompt => prompt.id === promptID)!
@@ -85,6 +89,11 @@ export default function BuildChainTab({
     setItems([...items.slice(0, index), { ...items[index], code: editedCode }, ...items.slice(index + 1)])
     setEditCodeIndex(undefined)
   }
+
+  // In the build tab, we resolve each variable with any available input and otherwise let it stand for itself.
+  const inputs = Object.fromEntries(
+    ExtractUnboundChainVariables(items, promptCache).map(variable => [variable, inputValues[variable]?.[0] ?? variable])
+  )
 
   return (
     <>
@@ -138,18 +147,18 @@ export default function BuildChainTab({
                   </div>
                 </Column>
                 <Column>
-                    {editCodeIndex === index ? (
-                      <Button type='outline' onClick={updateCodeBlock(index)}>
-                        Save
-                      </Button>
-                    ) : (
-                      <Button type='outline' onClick={editCodeBlock(index)}>
-                        Edit
-                      </Button>
-                    )}
-                    <Button type='destructive' onClick={removeItem(index)}>
-                      Remove
+                  {editCodeIndex === index ? (
+                    <Button type='outline' onClick={updateCodeBlock(index)}>
+                      Save
                     </Button>
+                  ) : (
+                    <Button type='outline' onClick={editCodeBlock(index)}>
+                      Edit
+                    </Button>
+                  )}
+                  <Button type='destructive' onClick={removeItem(index)}>
+                    Remove
+                  </Button>
                 </Column>
               </>
             )}
@@ -170,6 +179,11 @@ export default function BuildChainTab({
             includeAddPromptOption
           />
         </Column>
+        <div className='flex flex-col self-end justify-end flex-1'>
+          <PendingButton disabled={!items.length} onClick={() => runChain([inputs])}>
+            Run Chain
+          </PendingButton>
+        </div>
       </div>
     </>
   )

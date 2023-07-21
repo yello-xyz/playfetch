@@ -122,6 +122,8 @@ export default function ChainTabView({
             prompts={chain.prompts}
             promptCache={promptCache}
             project={project}
+            inputValues={inputValues}
+            runChain={runChain}
           />
         )
       case 'test':
