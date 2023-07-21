@@ -22,7 +22,7 @@ export default function ProjectItemPopupMenu({
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
-  const isPrompt = 'lastPrompt' in item
+  const isPrompt = 'lastVersionID' in item
 
   const deleteCall = () => (isPrompt ? api.deletePrompt(item.id) : api.deleteChain(item.id))
   const renameCall = (name: string) => (isPrompt ? api.renamePrompt(item.id, name) : api.renameChain(item.id, name))

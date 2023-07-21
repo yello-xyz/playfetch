@@ -77,12 +77,15 @@ export async function saveVersionForUser(
   const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
   const versionData = toVersionData(userID, promptID, prompt, config, labels, createdAt, previousVersionID, versionID)
   await datastore.save(versionData)
+  const savedVersionID = getID(versionData)
+
+  const lastPrompt = currentVersion ? currentVersion.prompt : ''
   const name =
-    promptData.name === DefaultPromptName && prompt.length && !promptData.lastPrompt.length
+    promptData.name === DefaultPromptName && prompt.length && !lastPrompt.length
       ? StripPromptSentinels(prompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
-  const savedVersionID = getID(versionData)
-  await updatePrompt({ ...promptData, lastVersionID: savedVersionID, lastPrompt: prompt, name }, true)
+
+  await updatePrompt({ ...promptData, lastVersionID: savedVersionID, name }, true)
 
   return savedVersionID
 }
@@ -180,5 +183,5 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 
   const lastVersionData = await getEntity(Entity.VERSION, 'promptID', promptID, true)
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData), lastPrompt: lastVersionData.prompt }, true)
+  await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData) }, true)
 }

@@ -29,21 +29,19 @@ const toPromptData = (
   projectID: number,
   name: string,
   lastVersionID: number,
-  lastPrompt: string,
   createdAt: Date,
   lastEditedAt: Date,
   promptID?: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, lastVersionID, lastPrompt, name, createdAt, lastEditedAt },
-  excludeFromIndexes: ['name', 'lastPrompt'],
+  data: { projectID, lastVersionID, name, createdAt, lastEditedAt },
+  excludeFromIndexes: ['name'],
 })
 
-export const toPrompt = (data: any, userID: number): Prompt => ({
+export const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   lastVersionID: data.lastVersionID,
-  lastPrompt: StripPromptSentinels(data.lastPrompt),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
@@ -77,7 +75,7 @@ export async function getActivePrompt(
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
 
   return {
-    ...toPrompt(promptData, userID),
+    ...toPrompt(promptData),
     versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
     endpoints,
     users,
@@ -93,7 +91,7 @@ export const DefaultPromptName = 'New Prompt'
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const createdAt = new Date()
-  const promptData = toPromptData(projectID, DefaultPromptName, 0, '', createdAt, createdAt)
+  const promptData = toPromptData(projectID, DefaultPromptName, 0, createdAt, createdAt)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, getID(promptData))
   await updateProjectLastEditedAt(projectID)
@@ -106,7 +104,6 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
       promptData.projectID,
       promptData.name,
       promptData.lastVersionID,
-      promptData.lastPrompt,
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
       getID(promptData)

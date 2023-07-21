@@ -78,7 +78,6 @@ function ProjectItemCell({ item, onSelectItem }: { item: Prompt | Chain; onSelec
         </div>
       </div>
       <span className='text-xs text-gray-500'>Edited {formattedDate}</span>
-      {'lastPrompt' in item && <span className='mt-3 text-xs text-gray-500 line-clamp-[9]'>{item.lastPrompt}</span>}
     </div>
   )
 }

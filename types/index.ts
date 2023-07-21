@@ -40,7 +40,6 @@ export type Prompt = {
   id: number
   name: string
   lastVersionID: number
-  lastPrompt: string
   projectID: number
   timestamp: string
 }
