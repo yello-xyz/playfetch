@@ -60,6 +60,9 @@ const api = {
   getWorkspace: function (workspaceID: number): Promise<ActiveWorkspace> {
     return post(this.getWorkspace, { workspaceID })
   },
+  getSharedProjects: function (): Promise<Project[]> {
+    return post(this.getSharedProjects)
+  },
   addWorkspace: function (name: string): Promise<number> {
     return post(this.addWorkspace, { name })
   },

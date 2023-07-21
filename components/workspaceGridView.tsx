@@ -17,12 +17,14 @@ export default function WorkspaceGridView({
   onAddProject,
   onSelectProject,
   onRefreshWorkspace,
+  onLeftLastSharedProject,
 }: {
   activeWorkspace: ActiveWorkspace
   isSharedProjects: boolean
   onAddProject: () => void
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
+  onLeftLastSharedProject: () => void
 }) {
   const [showInviteDialog, setShowInviteDialog] = useState(false)
 
@@ -30,6 +32,9 @@ export default function WorkspaceGridView({
     await api.inviteToWorkspace(activeWorkspace.id, emails)
     onRefreshWorkspace()
   }
+
+  const onDeleteOrLeave =
+    isSharedProjects && activeWorkspace.projects.length === 1 ? onLeftLastSharedProject : onRefreshWorkspace
 
   return (
     <>
@@ -53,6 +58,7 @@ export default function WorkspaceGridView({
                 isSharedProjects={isSharedProjects}
                 onSelectProject={onSelectProject}
                 onRefreshWorkspace={onRefreshWorkspace}
+                onDeleteOrLeave={onDeleteOrLeave}
               />
             ))}
           </div>
@@ -89,11 +95,13 @@ function ProjectCell({
   isSharedProjects,
   onSelectProject,
   onRefreshWorkspace,
+  onDeleteOrLeave,
 }: {
   project: Project
   isSharedProjects: boolean
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
+  onDeleteOrLeave: () => void
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
@@ -123,7 +131,7 @@ function ProjectCell({
               canLeave={isSharedProjects}
               canDelete={!isSharedProjects}
               onRefresh={onRefreshWorkspace}
-              onDeleteOrLeave={onRefreshWorkspace}
+              onDeleteOrLeave={onDeleteOrLeave}
             />
           </div>
         </div>

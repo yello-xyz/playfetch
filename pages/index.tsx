@@ -15,7 +15,7 @@ import WorkspaceGridView from '@/components/workspaceGridView'
 import WorkspaceSidebar from '@/components/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 
-const SharedProjectsWorkspaceID = 0
+const SharedProjectsWorkspaceID = 1
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
   id: SharedProjectsWorkspaceID,
@@ -25,8 +25,9 @@ const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
 })
 
 const ShouldActivateSharedProjects = (workspaceID: number, workspaces: Workspace[], sharedProjects: Project[]) =>
-  sharedProjects.some(project => project.workspaceID === workspaceID) &&
-  !workspaces.some(workspace => workspace.id === workspaceID)
+  workspaceID === SharedProjectsWorkspaceID ||
+  (sharedProjects.some(project => project.workspaceID === workspaceID) &&
+    !workspaces.some(workspace => workspace.id === workspaceID))
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
   const { w: workspaceID, s: settings } = ParseNumberQuery(query)
@@ -82,8 +83,8 @@ export default function Home({
   const [showSettings, setShowSettings] = useState(initialShowSettings)
 
   const refreshWorkspace = (workspaceID: number) =>
-    sharedProjects && ShouldActivateSharedProjects(workspaceID, workspaces, sharedProjects.projects)
-      ? setActiveWorkspace(sharedProjects)
+    ShouldActivateSharedProjects(workspaceID, workspaces, sharedProjects?.projects ?? [])
+      ? api.getSharedProjects().then(projects => setActiveWorkspace(SharedProjectsWorkspace(projects)))
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
@@ -113,6 +114,11 @@ export default function Home({
 
   const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
 
+  const onLeftLastSharedProject = () => {
+    selectWorkspace(user.id)
+    refreshWorkspaces()
+  }
+
   const { w: workspaceID, s: settings } = ParseNumberQuery(router.query)
   const currentQueryState = settings ? 'settings' : workspaceID
   const [query, setQuery] = useState(currentQueryState)
@@ -135,7 +141,7 @@ export default function Home({
               activeWorkspace={activeWorkspace}
               sharedProjects={sharedProjects}
               onSelectWorkspace={selectWorkspace}
-              onSelectSharedProjects={sharedProjects ? () => setActiveWorkspace(sharedProjects) : undefined}
+              onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
               onAddProject={() => setShowPickNamePrompt(true)}
               onRefreshWorkspaces={refreshWorkspaces}
             />
@@ -150,6 +156,7 @@ export default function Home({
                     onAddProject={() => setShowPickNamePrompt(true)}
                     onSelectProject={navigateToProject}
                     onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                    onLeftLastSharedProject={onLeftLastSharedProject}
                   />
                 )}
               </div>
