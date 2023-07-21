@@ -1,5 +1,5 @@
 import { ActiveWorkspace, Project } from '@/types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
 import { TopBarButton, UserAvatars } from './topBar'
@@ -7,6 +7,7 @@ import addIcon from '@/public/add.svg'
 import IconButton from './iconButton'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
+import { FormatRelativeDate } from '@/src/common/formatting'
 
 export default function WorkspaceGridView({
   activeWorkspace,
@@ -89,16 +90,24 @@ function ProjectCell({
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
 }) {
+  const [formattedDate, setFormattedDate] = useState<string>()
+  useEffect(() => {
+    setFormattedDate(FormatRelativeDate(project.timestamp))
+  }, [project.timestamp])
+
   return (
     <div
       className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer gap-6 w-full bg-white`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 text-base font-medium line-clamp-2'>{project.name}</span>
-        <IconButton
-          icon={project.favorited ? filledStarIcon : starIcon}
-          onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
-        />
+        <div className='flex items-center gap-2'>
+          <span className='mr-5 text-xs text-gray-500'>Edited {formattedDate}</span>
+          <IconButton
+            icon={project.favorited ? filledStarIcon : starIcon}
+            onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
+          />
+        </div>
       </div>
     </div>
   )
