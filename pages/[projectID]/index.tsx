@@ -45,14 +45,14 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id)
       : null
 
-  const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
+  const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
     props: {
       user,
       initialActiveProject,
       initialActiveItem,
-      initialAvailableProviders,
+      availableProviders,
     },
   }
 })
@@ -63,12 +63,12 @@ export default function Home({
   user,
   initialActiveProject,
   initialActiveItem,
-  initialAvailableProviders,
+  availableProviders,
 }: {
   user: User
   initialActiveProject: ActiveProject
   initialActiveItem?: ActiveItem
-  initialAvailableProviders: AvailableProvider[]
+  availableProviders: AvailableProvider[]
 }) {
   const router = useRouter()
 
@@ -161,9 +161,6 @@ export default function Home({
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
-  const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
-  const refreshSettings = () => api.getAvailableProviders().then(setAvailableProviders)
-
   const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const refreshActiveItem = () => {
@@ -224,9 +221,7 @@ export default function Home({
     setSelectedTab(tab)
   }
 
-  const selectSettings = () => {
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
-  }
+  const selectSettings = () => router.push(ClientRoute.Settings, undefined, { shallow: true })
 
   const navigateBack = () => router.push(WorkspaceRoute(activeProject.workspaceID, user.id))
 
@@ -234,7 +229,7 @@ export default function Home({
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-          <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt, refreshSettings }}>
+          <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
             <main className={`flex items-stretch h-screen text-sm font-sans`}>
               <ProjectSidebar
                 activeProject={activeProject}

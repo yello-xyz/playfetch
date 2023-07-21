@@ -41,7 +41,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       ? sharedProjects
       : await getActiveWorkspace(user.id, workspaceID ?? user.id)
 
-  const initialAvailableProviders = await getAvailableProvidersForUser(user.id)
+  const availableProviders = await getAvailableProvidersForUser(user.id)
   const initialShowSettings = settings === 1
 
   return {
@@ -50,7 +50,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       sharedProjects,
       initialWorkspaces,
       initialActiveWorkspace,
-      initialAvailableProviders,
+      availableProviders,
       initialShowSettings,
     },
   }
@@ -61,14 +61,14 @@ export default function Home({
   sharedProjects,
   initialWorkspaces,
   initialActiveWorkspace,
-  initialAvailableProviders,
+  availableProviders,
   initialShowSettings,
 }: {
   user: User
   sharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialActiveWorkspace: ActiveWorkspace
-  initialAvailableProviders: AvailableProvider[]
+  availableProviders: AvailableProvider[]
   initialShowSettings: boolean
 }) {
   const router = useRouter()
@@ -103,9 +103,6 @@ export default function Home({
     const projectID = await api.addProject(activeWorkspace.id, name)
     navigateToProject(projectID)
   }
-
-  const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
-  const refreshSettings = () => api.getAvailableProviders().then(setAvailableProviders)
 
   const selectSettings = () => {
     setShowSettings(true)

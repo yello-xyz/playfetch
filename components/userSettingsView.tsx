@@ -6,7 +6,6 @@ import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 import api from '@/src/client/api'
-import { useRefreshSettings } from './refreshContext'
 import useModalDialogPrompt from './modalDialogContext'
 import { FormatCost } from '@/src/common/formatting'
 
@@ -14,12 +13,14 @@ export default function UserSettingsView() {
   const user = useLoggedInUser()
 
   const allProviders = AllProviders.filter(provider => provider !== DefaultProvider)
-  const availableProviders = user.availableProviders.filter(p => p.provider !== DefaultProvider)
+  const [availableProviders, setAvailableProviders]= useState(user.availableProviders)
+
+  const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
 
   return (
     <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
       <div className='text-base font-medium text-gray-800'>Settings</div>
-      <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} />
+      <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} onRefresh={refresh} />
       <CostPane availableProviders={user.availableProviders} />
     </div>
   )
@@ -28,9 +29,11 @@ export default function UserSettingsView() {
 function ProviderSettingsPane({
   providers,
   availableProviders,
+  onRefresh,
 }: {
   providers: ModelProvider[]
   availableProviders: AvailableProvider[]
+  onRefresh: () => void
 }) {
   return (
     <>
@@ -41,6 +44,7 @@ function ProviderSettingsPane({
             key={index}
             provider={provider}
             availableProvider={availableProviders.find(p => p.provider === provider)}
+            onRefresh={onRefresh}
           />
         ))}
       </div>
@@ -51,9 +55,11 @@ function ProviderSettingsPane({
 function ProviderRow({
   provider,
   availableProvider,
+  onRefresh
 }: {
   provider: ModelProvider
   availableProvider?: AvailableProvider
+  onRefresh: () => void
 }) {
   const label = LabelForProvider(provider)
   const truncatedAPIKey = availableProvider?.truncatedAPIKey ?? ''
@@ -62,11 +68,8 @@ function ProviderRow({
   const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
 
   const setDialogPrompt = useModalDialogPrompt()
-  const refreshSettings = useRefreshSettings()
 
-  const updateKey = (apiKey: string | null) => {
-    api.updateProviderKey(provider, apiKey).then(refreshSettings)
-  }
+  const updateKey = (apiKey: string | null) => api.updateProviderKey(provider, apiKey).then(onRefresh)
 
   const removeKey = () => {
     setDialogPrompt({
