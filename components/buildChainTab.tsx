@@ -97,7 +97,7 @@ export default function BuildChainTab({
 
   return (
     <>
-      <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto'>
+      <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto min-w-[680px]'>
         <div className='flex flex-wrap gap-2'>
           <Label>Inputs:</Label>
           {ExtractUnboundChainVariables(items, promptCache).map((variable, index) => (
@@ -171,13 +171,15 @@ export default function BuildChainTab({
           </div>
         ))}
         <Column>
-          <PromptSelector
-            key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
-            prompts={prompts}
-            onSelectPrompt={addPrompt}
-            onInsertCodeBlock={insertCodeBlock(items.length)}
-            includeAddPromptOption
-          />
+          <div className='min-w-[200px]'>
+            <PromptSelector
+              key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
+              prompts={prompts}
+              onSelectPrompt={addPrompt}
+              onInsertCodeBlock={insertCodeBlock(items.length)}
+              includeAddPromptOption
+            />
+          </div>
         </Column>
         <div className='flex flex-col self-end justify-end flex-1'>
           <PendingButton disabled={!items.length} onClick={() => runChain([inputs])}>
