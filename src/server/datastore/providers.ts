@@ -46,7 +46,8 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
 
 export async function saveProviderKey(userID: number, provider: ModelProvider, apiKey: string | null) {
   const providerData = await getProviderData(userID, provider)
-  await getDatastore().save(toProviderData(userID, provider, apiKey, providerData?.cost ?? 0, providerData?.id))
+  const providerID = providerData ? getID(providerData) : undefined
+  await getDatastore().save(toProviderData(userID, provider, apiKey, providerData?.cost ?? 0, providerID))
 }
 
 export async function getAvailableProvidersForUser(userID: number): Promise<AvailableProvider[]> {
