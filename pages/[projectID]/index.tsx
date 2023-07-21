@@ -234,13 +234,7 @@ export default function Home({
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-          <RefreshContext.Provider
-            value={{
-              refreshPrompt: refreshActivePrompt,
-              refreshChain: refreshActiveChain,
-              selectTab: setSelectedTab,
-              refreshSettings,
-            }}>
+          <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt, refreshSettings }}>
             <main className={`flex items-stretch h-screen text-sm font-sans`}>
               <ProjectSidebar
                 activeProject={activeProject}

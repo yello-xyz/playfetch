@@ -3,7 +3,6 @@ import { Chain, Prompt } from '@/types'
 import dotsIcon from '@/public/dots.svg'
 import { useEffect, useState } from 'react'
 import IconButton from './iconButton'
-import { useRefreshProject } from './refreshContext'
 import ProjectItemPopupMenu from './projectItemPopupMenu'
 
 export default function ProjectGridView({
@@ -52,8 +51,6 @@ export function EmptyGridView({
 function ProjectItemCell({ item, onSelectItem }: { item: Prompt | Chain; onSelectItem: (itemID: number) => void }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
-  const refreshProject = useRefreshProject()
-
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
     setFormattedDate(FormatRelativeDate(item.timestamp))
@@ -72,7 +69,7 @@ function ProjectItemCell({ item, onSelectItem }: { item: Prompt | Chain; onSelec
               item={item}
               isMenuExpanded={isMenuExpanded}
               setIsMenuExpanded={setIsMenuExpanded}
-              onRefresh={refreshProject}
+              onRefresh={() => {}}
             />
           </div>
         </div>
