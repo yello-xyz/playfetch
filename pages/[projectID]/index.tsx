@@ -227,29 +227,29 @@ export default function Home({
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
           <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
-            <main className={`flex items-stretch h-screen text-sm font-sans`}>
-              <ProjectSidebar
+            <main className={`flex flex-col h-screen text-sm font-sans`}>
+              <TopBar
                 activeProject={activeProject}
-                activeItem={activeItem}
-                onAddPrompt={addPrompt}
-                onAddChain={addChain}
-                onSelectPrompt={selectPrompt}
-                onSelectChain={selectChain}
-                onSelectEndpoints={selectEndpoints}
+                activeItem={activePrompt ?? activeChain}
+                onRefreshItem={refreshActiveItem}
+                onDeleteItem={onDeleteItem}
+                onRefreshProject={refreshProject}
                 onNavigateBack={navigateBack}
+                showComments={showComments}
+                setShowComments={setShowComments}
               />
-              <div className='flex flex-col flex-1'>
-                <TopBar
+              <div className='flex items-stretch flex-1 overflow-hidden'>
+                <ProjectSidebar
                   activeProject={activeProject}
-                  activeItem={activePrompt ?? activeChain}
-                  onRefreshItem={refreshActiveItem}
-                  onDeleteItem={onDeleteItem}
-                  onRefreshProject={refreshProject}
+                  activeItem={activeItem}
+                  onAddPrompt={addPrompt}
+                  onAddChain={addChain}
+                  onSelectPrompt={selectPrompt}
+                  onSelectChain={selectChain}
+                  onSelectEndpoints={selectEndpoints}
                   onNavigateBack={navigateBack}
-                  showComments={showComments}
-                  setShowComments={setShowComments}
                 />
-                <div className='flex-1 overflow-hidden'>
+                <div className='flex-1'>
                   {activePrompt && activeVersion && (
                     <PromptTabView
                       prompt={activePrompt}
