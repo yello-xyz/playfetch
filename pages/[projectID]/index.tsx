@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
+import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain, Workspace } from '@/types'
 import PromptTabView from '@/components/promptTabView'
 import ClientRoute, {
   ChainRoute,
@@ -27,9 +27,12 @@ import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
 import EndpointsView from '@/components/endpointsView'
 import { EmptyGridView } from '@/components/emptyGridView'
+import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
+
+  const workspaces = await getWorkspacesForUser(user.id)
 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
@@ -49,6 +52,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   return {
     props: {
       user,
+      workspaces,
       initialActiveProject,
       initialActiveItem,
       availableProviders,
@@ -60,11 +64,13 @@ type ActiveItem = ActivePrompt | ActiveChain | 'endpoints'
 
 export default function Home({
   user,
+  workspaces,
   initialActiveProject,
   initialActiveItem,
   availableProviders,
 }: {
   user: User
+  workspaces: Workspace[]
   initialActiveProject: ActiveProject
   initialActiveItem?: ActiveItem
   availableProviders: AvailableProvider[]
@@ -212,7 +218,9 @@ export default function Home({
 
   const selectSettings = () => router.push(ClientRoute.Settings, undefined, { shallow: true })
 
-  const navigateBack = () => router.push(WorkspaceRoute(activeProject.workspaceID, user.id))
+  const isSharedProject = !workspaces.find(workspace => workspace.id === activeProject.workspaceID)
+  const navigateBack = () =>
+    router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
 
   return (
     <>

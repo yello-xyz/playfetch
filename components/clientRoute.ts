@@ -1,7 +1,10 @@
 import { GetServerSidePropsResult } from 'next'
 
+export const SharedProjectsWorkspaceID = 1
+
 enum ClientRoute {
   Home = '/',
+  SharedProjects = `${ClientRoute.Home}?w=${SharedProjectsWorkspaceID}`,
   Settings = `${ClientRoute.Home}?s=1`,
   Login = '/login',
   Admin = '/admin',
