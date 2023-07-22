@@ -17,8 +17,9 @@ export default function WorkspaceGridView({
   isSharedProjects,
   onAddProject,
   onSelectProject,
+  onSelectUserWorkspace,
   onRefreshWorkspace,
-  onLeftLastSharedProject,
+  onRefreshWorkspaces,
 }: {
   workspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
@@ -26,8 +27,9 @@ export default function WorkspaceGridView({
   isSharedProjects: boolean
   onAddProject: () => void
   onSelectProject: (projectID: number) => void
+  onSelectUserWorkspace: () => void
   onRefreshWorkspace: () => void
-  onLeftLastSharedProject: () => void
+  onRefreshWorkspaces: () => void
 }) {
   const [showInviteDialog, setShowInviteDialog] = useState(false)
 
@@ -36,8 +38,18 @@ export default function WorkspaceGridView({
     onRefreshWorkspace()
   }
 
+  const resetWorkspaces = () => {
+    onSelectUserWorkspace()
+    onRefreshWorkspaces()
+  }
+
+  const refresh = () => {
+    onRefreshWorkspace()
+    onRefreshWorkspaces()
+  }
+
   const onDeleteOrLeave =
-    isSharedProjects && activeWorkspace.projects.length === 1 ? onLeftLastSharedProject : onRefreshWorkspace
+    isSharedProjects && activeWorkspace.projects.length === 1 ? resetWorkspaces : onRefreshWorkspace
 
   return (
     <>
@@ -48,6 +60,8 @@ export default function WorkspaceGridView({
           isSharedProjects={isSharedProjects}
           onAddProject={onAddProject}
           setShowInviteDialog={setShowInviteDialog}
+          onRenamed={refresh}
+          onDeleted={resetWorkspaces}
         />
         {activeWorkspace.projects.length > 0 ? (
           <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>

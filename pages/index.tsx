@@ -110,11 +110,6 @@ export default function Home({
 
   const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
 
-  const onLeftLastSharedProject = () => {
-    selectWorkspace(user.id)
-    refreshWorkspaces()
-  }
-
   const { w: workspaceID, s: settings } = ParseNumberQuery(router.query)
   const currentQueryState = settings ? 'settings' : workspaceID
   const [query, setQuery] = useState(currentQueryState)
@@ -153,8 +148,9 @@ export default function Home({
                     isSharedProjects={IsSharedProjects(activeWorkspace)}
                     onAddProject={() => setShowPickNamePrompt(true)}
                     onSelectProject={navigateToProject}
+                    onSelectUserWorkspace={() => selectWorkspace(user.id)}
                     onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                    onLeftLastSharedProject={onLeftLastSharedProject}
+                    onRefreshWorkspaces={refreshWorkspaces}
                   />
                 )}
               </div>
