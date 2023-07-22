@@ -155,6 +155,7 @@ const api = {
     return post(this.updateEndpoint, {
       endpointID: endpoint.id,
       enabled: endpoint.enabled,
+      parentID: endpoint.parentID,
       versionID: endpoint.versionID,
       name: endpoint.urlPath,
       flavor: endpoint.flavor,

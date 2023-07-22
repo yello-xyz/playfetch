@@ -69,7 +69,8 @@ export default function PublishSettingsPane({
 
   const updateParent = (parentID: number) => {
     setParentID(parentID)
-    // api.updateEndpoint({ ...endpoint, parentID: parent.id }).then(_ => onRefresh())
+    const prompt = project.prompts.find(prompt => prompt.id === parentID)
+    api.updateEndpoint({ ...endpoint, parentID, versionID: prompt?.lastVersionID }).then(_ => onRefresh())
   }
 
   return (

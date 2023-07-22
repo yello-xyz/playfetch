@@ -136,6 +136,7 @@ export async function updateEndpointForUser(
   userID: number,
   endpointID: number,
   enabled: boolean,
+  parentID: number,
   versionID: number | null,
   urlPath: string,
   flavor: string,
@@ -145,13 +146,13 @@ export async function updateEndpointForUser(
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData)
   if (urlPath !== endpointData.urlPath) {
-    urlPath = await getValidURLPath(endpointData.parentID, urlPath, endpointData.projectURLPath, flavor, endpointID)
+    urlPath = await getValidURLPath(parentID, urlPath, endpointData.projectURLPath, flavor, endpointID)
   }
   await getDatastore().save(
     toEndpointData(
       enabled,
       endpointData.userID,
-      endpointData.parentID,
+      parentID,
       versionID,
       urlPath,
       endpointData.projectURLPath,
