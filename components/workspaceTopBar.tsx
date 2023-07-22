@@ -3,7 +3,7 @@ import { TopBarButton, UserAvatars } from './topBarButton'
 import addIcon from '@/public/add.svg'
 import chevronIcon from '@/public/chevron.svg'
 import fileIcon from '@/public/file.svg'
-import projectIcon from '@/public/project.svg'
+import folderIcon from '@/public/folder.svg'
 import Icon from './icon'
 import { useState } from 'react'
 import WorkspacePopupMenu from './workspacePopupMenu'
@@ -34,7 +34,7 @@ export default function WorkspaceTopBar({
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
-        <Icon icon={isUserWorkspace ? fileIcon : projectIcon} />
+        <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />
         <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
         {hasPopupMenu && (
           <>

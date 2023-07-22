@@ -48,8 +48,7 @@ export default function WorkspaceGridView({
     onRefreshWorkspaces()
   }
 
-  const onDeleted =
-    isSharedProjects && activeWorkspace.projects.length === 1 ? resetWorkspaces : onRefreshWorkspace
+  const onDeleted = isSharedProjects && activeWorkspace.projects.length === 1 ? resetWorkspaces : onRefreshWorkspace
 
   return (
     <>

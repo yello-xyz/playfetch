@@ -88,7 +88,7 @@ function ProjectItemActionButton({
 
   return (
     <div className='relative'>
-      <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)}/>
+      <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           item={item}

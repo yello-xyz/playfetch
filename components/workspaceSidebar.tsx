@@ -1,7 +1,7 @@
 import { ActiveWorkspace, Workspace } from '@/types'
 import { useState } from 'react'
 import api from '../src/client/api'
-import projectIcon from '@/public/project.svg'
+import folderIcon from '@/public/folder.svg'
 import fileIcon from '@/public/file.svg'
 import addIcon from '@/public/add.svg'
 import UserSidebarItem from './userSidebarItem'
@@ -56,7 +56,7 @@ export default function WorkspaceSidebar({
           {sharedProjects && onSelectSharedProjects && (
             <SidebarButton
               title={sharedProjects.name}
-              icon={projectIcon}
+              icon={folderIcon}
               active={activeWorkspace.id === sharedProjects.id}
               onClick={onSelectSharedProjects}
             />
@@ -68,7 +68,7 @@ export default function WorkspaceSidebar({
             <SidebarButton
               key={workspaceIndex}
               title={workspace.name}
-              icon={projectIcon}
+              icon={folderIcon}
               active={activeWorkspace.id === workspace.id}
               onClick={() => onSelectWorkspace(workspace.id)}
             />
