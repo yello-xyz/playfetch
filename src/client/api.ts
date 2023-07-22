@@ -118,17 +118,17 @@ const api = {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
   publishPrompt: function (
-    versionID: number,
     projectID: number,
-    promptID: number,
+    parentID: number,
+    versionID: number,
     name: string,
     flavor: string,
     useCache: boolean,
     useStreaming: boolean
   ) {
-    return post(this.publishChain, {
+    return post(this.publishPrompt, {
       projectID,
-      parentID: promptID,
+      parentID,
       versionID,
       name,
       flavor,
@@ -150,16 +150,6 @@ const api = {
   },
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
-  },
-  publishChain: function (
-    projectID: number,
-    chainID: number,
-    name: string,
-    flavor: string,
-    useCache: boolean,
-    useStreaming: boolean
-  ) {
-    return post(this.publishChain, { projectID, parentID: chainID, name, flavor, useCache, useStreaming })
   },
   updateEndpoint: function (endpoint: Endpoint) {
     return post(this.updateEndpoint, {

@@ -1,4 +1,4 @@
-import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
+import { Endpoint, ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode, useState } from 'react'
 import Icon from './icon'
@@ -67,29 +67,24 @@ export function EndpointToggleWithName({
 }
 
 export default function EndpointsTable({
-  project,
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
   onRefresh,
   onAddEndpoint,
 }: {
-  project: ActiveProject
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
-  onAddEndpoint: (parent: Chain | Prompt) => void
+  onAddEndpoint?: () => void
 }) {
-  // TODO if we can only add a new endpoint for the first prompt, we really need a selector in the settings pane.
-  const addNewEndpoint = project.prompts.length > 0 ? () => onAddEndpoint(project.prompts[0]) : undefined
-
   return (
     <>
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
-        {addNewEndpoint && (
-          <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={addNewEndpoint}>
+        {onAddEndpoint && (
+          <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={onAddEndpoint}>
             <Icon icon={addIcon} />
             New Endpoint
           </div>
@@ -106,7 +101,7 @@ export default function EndpointsTable({
           />
         ))
       ) : (
-        <EmptyTable onAddEndpoint={addNewEndpoint} />
+        <EmptyTable onAddEndpoint={onAddEndpoint} />
       )}
     </>
   )

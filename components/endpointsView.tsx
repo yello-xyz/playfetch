@@ -48,14 +48,14 @@ export default function EndpointsView({
 
   const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
 
-  const addEndpoint = (item: Chain | Prompt) => {
-    const { name, flavor } = NewConfigFromEndpoints(endpoints, item.name, project.availableFlavors)
-    if (isPrompt(item)) {
-      api.publishPrompt(item.lastVersionID, project.id, item.id, name, flavor, false, false).then(onRefresh)
-    } else {
-      api.publishChain(project.id, item.id, name, flavor, false, false).then(onRefresh)
-    }
-  }
+  const addEndpoint =
+    project.prompts.length > 0
+      ? () => {
+          const prompt = project.prompts[0]
+          const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, project.availableFlavors)
+          api.publishPrompt(project.id, prompt.id, prompt.lastVersionID, name, flavor, false, false).then(onRefresh)
+        }
+      : undefined
 
   const parent = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
@@ -72,7 +72,6 @@ export default function EndpointsView({
     <div className='flex items-stretch h-full'>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
         <EndpointsTable
-          project={project}
           endpoints={endpoints}
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={updateActiveEndpoint}
