@@ -59,14 +59,14 @@ export default function TestDataPane({
 
   return variables.length ? (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div className='flex border-l border-gray-100 border-y'>
+      <div className='flex overflow-x-auto border-l border-gray-100 border-y'>
         {variables.map((variable, index) => (
           <div
             key={index}
-            className={`flex items-center font-medium border-r border-gray-100 px-3 py-1 ${styleForColumn(index)}`}
+            className={`flex items-center border-r border-gray-100 px-3 py-1 ${styleForColumn(index)}`}
             onClick={() => selectColumn(index)}>
             <Icon icon={linkIcon} />
-            {variable}
+            <span className='flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis'>{variable}</span>
           </div>
         ))}
       </div>
