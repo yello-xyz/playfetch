@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject } from '@/types'
 
 import Label from './label'
@@ -21,6 +21,7 @@ export default function TestPromptTab({
   setInputValues,
   persistInputValuesIfNeeded,
   maxWidth,
+  tabSelector,
 }: {
   prompt: ActivePrompt
   project: ActiveProject
@@ -33,6 +34,7 @@ export default function TestPromptTab({
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
   maxWidth: string
+  tabSelector: ReactNode
 }) {
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
 
@@ -57,7 +59,7 @@ export default function TestPromptTab({
     <>
       <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
         <div className='flex flex-col flex-grow gap-2 overflow-hidden min-h-[50%]'>
-          <Label>Test Data</Label>
+          {tabSelector}
           {variables.length > 0 ? (
             <TestDataPane
               variables={variables}

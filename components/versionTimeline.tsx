@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { ActivePrompt, Version } from '@/types'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
@@ -10,10 +10,12 @@ export default function VersionTimeline({
   prompt,
   activeVersion,
   setActiveVersion,
+  tabSelector,
 }: {
   prompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
+  tabSelector: ReactNode
 }) {
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
@@ -51,6 +53,7 @@ export default function VersionTimeline({
             versions={versions}
             filters={filters}
             setFilters={setFilters}
+            tabSelector={tabSelector}
           />
           <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
             {filteredVersions.map((version, index) => (

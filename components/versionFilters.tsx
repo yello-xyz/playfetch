@@ -44,15 +44,27 @@ export default function VersionFilters({
   versions,
   filters,
   setFilters,
+  tabSelector,
 }: {
   users: User[]
   labelColors: Record<string, string>
   versions: Version[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
+  tabSelector: ReactNode
 }) {
   return (
-    <div className='flex items-start gap-2'>
+    <div className='flex flex-col gap-2 -mt-0.5'>
+      <div className='flex items-center justify-between'>
+        {tabSelector}
+        <FilterButton
+          users={users}
+          labelColors={labelColors}
+          versions={versions}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      </div>
       <div className='flex flex-wrap flex-1 gap-2 pb-2 text-xs text-gray-800'>
         {filters.map((filter, index) => (
           <FilterCell
@@ -71,13 +83,6 @@ export default function VersionFilters({
           </div>
         )}
       </div>
-      <FilterButton
-        users={users}
-        labelColors={labelColors}
-        versions={versions}
-        filters={filters}
-        setFilters={setFilters}
-      />
     </div>
   )
 }
@@ -179,7 +184,7 @@ function FilterButton({
   return (
     <div className='relative flex overflow-visible'>
       <div
-        className='flex items-center gap-1 px-2 pb-1.5 -mt-0.5 cursor-pointer'
+        className='flex items-center gap-1 px-2 cursor-pointer'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
         <Icon icon={filterIcon} />
         Filter

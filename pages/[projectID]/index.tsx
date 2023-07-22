@@ -261,7 +261,6 @@ export default function Home({
                 <div className='flex-1 overflow-hidden'>
                   {activePrompt && activeVersion && (
                     <PromptTabView
-                      activeTab={selectedTab}
                       prompt={activePrompt}
                       project={activeProject}
                       activeVersion={activeVersion}
