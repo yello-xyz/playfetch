@@ -53,7 +53,7 @@ export default function EndpointsView({
       ? () => {
           const prompt = project.prompts[0]
           const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, project.availableFlavors)
-          api.publishPrompt(project.id, prompt.id, prompt.lastVersionID, name, flavor, false, false).then(onRefresh)
+          api.publishEndpoint(project.id, prompt.id, prompt.lastVersionID, name, flavor, false, false).then(onRefresh)
         }
       : undefined
 

@@ -117,7 +117,7 @@ const api = {
   runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
-  publishPrompt: function (
+  publishEndpoint: function (
     projectID: number,
     parentID: number,
     versionID: number,
@@ -126,7 +126,7 @@ const api = {
     useCache: boolean,
     useStreaming: boolean
   ) {
-    return post(this.publishPrompt, {
+    return post(this.publishEndpoint, {
       projectID,
       parentID,
       versionID,

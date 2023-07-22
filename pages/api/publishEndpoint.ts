@@ -5,7 +5,7 @@ import { saveEndpoint } from '@/src/server/datastore/endpoints'
 import { ensureProjectAPIKey, getURLPathForProject } from '@/src/server/datastore/projects'
 import { User } from '@/types'
 
-async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: User) {
+async function publishEndpoint(req: NextApiRequest, res: NextApiResponse, user: User) {
   const userID = user.id
   const projectID = req.body.projectID
   const parentID = req.body.parentID
@@ -23,4 +23,4 @@ async function publishPrompt(req: NextApiRequest, res: NextApiResponse, user: Us
   res.json({})
 }
 
-export default withLoggedInUserRoute(publishPrompt)
+export default withLoggedInUserRoute(publishEndpoint)
