@@ -149,6 +149,7 @@ export default function Home({
                   <WorkspaceGridView
                     workspaces={workspaces}
                     activeWorkspace={activeWorkspace}
+                    isUserWorkspace={activeWorkspace.id === user.id}
                     isSharedProjects={IsSharedProjects(activeWorkspace)}
                     onAddProject={() => setShowPickNamePrompt(true)}
                     onSelectProject={navigateToProject}

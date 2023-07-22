@@ -14,6 +14,7 @@ import ProjectPopupMenu from './projectPopupMenu'
 export default function WorkspaceGridView({
   workspaces,
   activeWorkspace,
+  isUserWorkspace,
   isSharedProjects,
   onAddProject,
   onSelectProject,
@@ -22,6 +23,7 @@ export default function WorkspaceGridView({
 }: {
   workspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
+  isUserWorkspace: boolean
   isSharedProjects: boolean
   onAddProject: () => void
   onSelectProject: (projectID: number) => void
@@ -46,7 +48,7 @@ export default function WorkspaceGridView({
           {!isSharedProjects && (
             <div className='flex items-center gap-2'>
               <UserAvatars users={activeWorkspace.users} />
-              <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
+              {!isUserWorkspace && <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />}
               <TopBarButton title='New Project' icon={addIcon} onClick={onAddProject} />
             </div>
           )}

@@ -73,6 +73,9 @@ export async function addWorkspaceForUser(userID: number, workspaceName?: string
 }
 
 export async function inviteMembersToWorkspace(userID: number, workspaceID: number, emails: string[]) {
+  if (workspaceID === userID) {
+    throw new Error('Cannot invite to Drafts workspace')
+  }
   await getVerifiedUserWorkspaceData(userID, workspaceID)
   await grantUsersAccess(emails, workspaceID, 'workspace')
 }
