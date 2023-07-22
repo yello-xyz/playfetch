@@ -66,6 +66,12 @@ const api = {
   addWorkspace: function (name: string): Promise<number> {
     return post(this.addWorkspace, { name })
   },
+  renameWorkspace: function (workspaceID: number, name: string) {
+    return post(this.renameWorkspace, { workspaceID, name })
+  },
+  deleteWorkspace: function (workspaceID: number) {
+    return post(this.deleteWorkspace, { workspaceID })
+  },
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
   },
