@@ -12,7 +12,6 @@ import ClientRoute, {
   PromptRoute,
   WorkspaceRoute,
 } from '@/components/clientRoute'
-import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
@@ -28,6 +27,7 @@ import ProjectSidebar from '@/components/projectSidebar'
 import EndpointsView from '@/components/endpointsView'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
+import ProjectTopBar from '@/components/projectTopBar'
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
@@ -228,7 +228,7 @@ export default function Home({
         <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
           <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
             <main className={`flex flex-col h-screen text-sm font-sans`}>
-              <TopBar
+              <ProjectTopBar
                 activeProject={activeProject}
                 activeItem={activePrompt ?? activeChain}
                 onRefreshItem={refreshActiveItem}

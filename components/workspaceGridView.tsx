@@ -2,14 +2,13 @@ import { ActiveWorkspace, Project, Workspace } from '@/types'
 import { useEffect, useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
-import { TopBarButton, UserAvatars } from './topBar'
-import addIcon from '@/public/add.svg'
 import IconButton from './iconButton'
 import starIcon from '@/public/star.svg'
 import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
+import WorkspaceTopBar from './workspaceTopBar'
 
 export default function WorkspaceGridView({
   workspaces,
@@ -43,16 +42,13 @@ export default function WorkspaceGridView({
   return (
     <>
       <div className='flex flex-col h-full px-6 pb-0 bg-gray-25'>
-        <div className='flex items-center justify-between py-4'>
-          <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
-          {!isSharedProjects && (
-            <div className='flex items-center gap-2'>
-              <UserAvatars users={activeWorkspace.users} />
-              {!isUserWorkspace && <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />}
-              <TopBarButton title='New Project' icon={addIcon} onClick={onAddProject} />
-            </div>
-          )}
-        </div>
+        <WorkspaceTopBar
+          activeWorkspace={activeWorkspace}
+          isUserWorkspace={isUserWorkspace}
+          isSharedProjects={isSharedProjects}
+          onAddProject={onAddProject}
+          setShowInviteDialog={setShowInviteDialog}
+        />
         {activeWorkspace.projects.length > 0 ? (
           <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>
             {activeWorkspace.projects.map((project, index) => (
