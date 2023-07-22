@@ -84,16 +84,16 @@ function ProjectItemActionButton({
   onRefresh: () => void
   onDelete: () => void
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   return (
     <div className='relative'>
-      <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)}/>
+      <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)}/>
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           item={item}
           isMenuExpanded={isMenuExpanded}
-          setIsMenuExpanded={setIsMenuExpanded}
+          setMenuExpanded={setMenuExpanded}
           onRefresh={onRefresh}
           onDelete={onDelete}
         />

@@ -26,7 +26,7 @@ export default function ProjectTopBar({
   showComments: boolean
   setShowComments: (show: boolean) => void
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
 
   const inviteMembers = async (emails: string[]) => {
@@ -53,14 +53,14 @@ export default function ProjectTopBar({
               <span className='font-medium'>{' / '}</span>
             </span>
           )}
-          <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
+          <div className='relative flex cursor-pointer' onClick={() => setMenuExpanded(!isMenuExpanded)}>
             <span className='font-medium'>{activeProject.name}</span>
             <Icon icon={chevronIcon} />
             <div className='absolute right-0 top-8'>
               <ProjectPopupMenu
                 project={activeProject}
                 isMenuExpanded={isMenuExpanded}
-                setIsMenuExpanded={setIsMenuExpanded}
+                setMenuExpanded={setMenuExpanded}
                 workspaces={workspaces}
                 isSharedProject={!workspace}
                 onRefresh={onRefreshProject}

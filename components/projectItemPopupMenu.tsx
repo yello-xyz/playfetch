@@ -8,13 +8,13 @@ import PickNameDialog from './pickNameDialog'
 export default function ProjectItemPopupMenu({
   item,
   isMenuExpanded,
-  setIsMenuExpanded,
+  setMenuExpanded,
   onRefresh,
   onDelete,
 }: {
   item: Prompt | Chain
   isMenuExpanded: boolean
-  setIsMenuExpanded: (isExpanded: boolean) => void
+  setMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
   onDelete?: () => void
 }) {
@@ -28,7 +28,7 @@ export default function ProjectItemPopupMenu({
   const renameCall = (name: string) => (isPrompt ? api.renamePrompt(item.id, name) : api.renameChain(item.id, name))
 
   const deleteItem = () => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     setDialogPrompt({
       title: `Are you sure you want to delete this ${isPrompt ? 'prompt' : 'chain'}? This action cannot be undone.`,
       callback: () => deleteCall().then(onDelete ?? onRefresh),
@@ -37,13 +37,13 @@ export default function ProjectItemPopupMenu({
   }
 
   const renameItem = () => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     setShowPickNamePrompt(true)
   }
 
   return (
     <>
-      <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+      <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename' callback={renameItem} />
         <PopupMenuItem separated destructive title='Delete' callback={deleteItem} />
       </PopupMenu>

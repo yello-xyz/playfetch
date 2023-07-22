@@ -25,7 +25,7 @@ export default function WorkspaceTopBar({
   onRenamed: () => void
   onDeleted: () => void
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const hasPopupMenu = !isUserWorkspace && !isSharedProjects
 
@@ -33,7 +33,7 @@ export default function WorkspaceTopBar({
     <div className='flex items-center justify-between py-4'>
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
-        onClick={hasPopupMenu ? () => setIsMenuExpanded(!isMenuExpanded) : undefined}>
+        onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
         <Icon icon={isUserWorkspace ? fileIcon : projectIcon} />
         <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
         {hasPopupMenu && (
@@ -44,7 +44,7 @@ export default function WorkspaceTopBar({
                 workspace={activeWorkspace}
                 isOnlyUser={activeWorkspace.users.length === 1}
                 isMenuExpanded={isMenuExpanded}
-                setIsMenuExpanded={setIsMenuExpanded}
+                setMenuExpanded={setMenuExpanded}
                 onRenamed={onRenamed}
                 onDeleted={onDeleted}
               />

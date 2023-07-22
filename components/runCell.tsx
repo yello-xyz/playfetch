@@ -137,7 +137,7 @@ export default function RunCell({
           users={prompt.users}
           labelColors={AvailableLabelColorsForPrompt(prompt)}
           isMenuExpanded={!!popupComments}
-          setIsMenuExpanded={() => setPopupComments(undefined)}
+          setMenuExpanded={() => setPopupComments(undefined)}
           callback={closeCommentsPopup}
           position={{
             // TODO make this smarter so it avoids the edge of the container

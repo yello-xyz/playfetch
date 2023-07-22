@@ -87,12 +87,12 @@ export function UserAvatar({ user, size = 'lg', border }: { user: User; size?: S
 }
 
 export default function UserSidebarItem() {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const user = useLoggedInUser()
 
   const selectSettings = () => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     user.showSettings()
   }
 
@@ -101,14 +101,14 @@ export default function UserSidebarItem() {
   return (
     <div
       className='flex pl-4 gap-2.5 items-center relative cursor-pointer'
-      onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
+      onClick={() => setMenuExpanded(!isMenuExpanded)}>
       <UserAvatar user={user} />
       <span className='flex-1 font-semibold'>{user.fullName}</span>
       <div className='flex'>
         <Icon icon={chevronIcon} />
         {isMenuExpanded && (
           <div className='absolute top-0 left-0'>
-            <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+            <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
               <div className='flex flex-col items-stretch gap-2.5 p-3'>
                 <div className='flex items-center gap-2.5'>
                   <UserAvatar user={user} />

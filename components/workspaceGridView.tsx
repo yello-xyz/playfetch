@@ -120,7 +120,7 @@ function ProjectCell({
   onRefreshWorkspace: () => void
   onDeleted: () => void
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => {
@@ -139,12 +139,12 @@ function ProjectCell({
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
           />
-          <IconButton icon={dotsIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+          <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
             <ProjectPopupMenu
               project={project}
               isMenuExpanded={isMenuExpanded}
-              setIsMenuExpanded={setIsMenuExpanded}
+              setMenuExpanded={setMenuExpanded}
               workspaces={workspaces}
               isSharedProject={isSharedProjects}
               onRefresh={onRefreshWorkspace}

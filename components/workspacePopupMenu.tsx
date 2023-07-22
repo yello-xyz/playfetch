@@ -9,14 +9,14 @@ export default function WorkspacePopupMenu({
   workspace,
   isOnlyUser,
   isMenuExpanded,
-  setIsMenuExpanded,
+  setMenuExpanded,
   onRenamed,
   onDeleted,
 }: {
   workspace: Workspace
   isOnlyUser: boolean
   isMenuExpanded: boolean
-  setIsMenuExpanded: (isExpanded: boolean) => void
+  setMenuExpanded: (isExpanded: boolean) => void
   onRenamed: () => void
   onDeleted: () => void
 }) {
@@ -25,7 +25,7 @@ export default function WorkspacePopupMenu({
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const deleteWorkspace = () => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to delete this workspace and ALL its projects? This action cannot be undone.',
       callback: () => api.deleteWorkspace(workspace.id).then(onDeleted),
@@ -34,7 +34,7 @@ export default function WorkspacePopupMenu({
   }
 
   const leaveWorkspace = () => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to leave this workspace?',
       callback: () => api.leaveWorkspace(workspace.id).then(onDeleted),
@@ -43,13 +43,13 @@ export default function WorkspacePopupMenu({
   }
 
   const renameWorkspace = () => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     setShowPickNamePrompt(true)
   }
 
   return (
     <>
-      <PopupMenu className='w-44' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+      <PopupMenu className='w-44' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename Workspace' callback={renameWorkspace} />
         {!isOnlyUser && <PopupMenuItem separated destructive title='Leave Workspace' callback={leaveWorkspace} />}
         {isOnlyUser && <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} />}

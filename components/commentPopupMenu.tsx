@@ -31,7 +31,7 @@ export default function CommentPopupMenu({
   labelColors: Record<string, string>
   containerRect?: DOMRect
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
   const iconRef = useRef<HTMLDivElement>(null)
 
   const [lastSelection, setLastSelection] = useState<string>()
@@ -44,7 +44,7 @@ export default function CommentPopupMenu({
       <div ref={iconRef}>
         <IconButton
           icon={comments.length > 0 ? commentBadgeIcon : commentIcon}
-          onClick={() => setIsMenuExpanded(!isMenuExpanded)}
+          onClick={() => setMenuExpanded(!isMenuExpanded)}
         />
       </div>
       <CommentsPopup
@@ -56,7 +56,7 @@ export default function CommentPopupMenu({
         users={users}
         labelColors={labelColors}
         isMenuExpanded={isMenuExpanded}
-        setIsMenuExpanded={setIsMenuExpanded}
+        setMenuExpanded={setMenuExpanded}
         position={CalculatePopupOffset(iconRef, containerRect)}
       />
     </>
@@ -72,7 +72,7 @@ export function CommentsPopup({
   users,
   labelColors,
   isMenuExpanded,
-  setIsMenuExpanded,
+  setMenuExpanded,
   callback,
   position,
 }: {
@@ -84,7 +84,7 @@ export function CommentsPopup({
   users: User[]
   labelColors: Record<string, string>
   isMenuExpanded: boolean
-  setIsMenuExpanded: (expanded: boolean) => void
+  setMenuExpanded: (expanded: boolean) => void
   callback?: () => void
   position: { top: number; left: number } | { top: number; right: number }
 }) {
@@ -97,7 +97,7 @@ export function CommentsPopup({
         style={position}
         onMouseDown={event => event.stopPropagation()}
         onClick={event => event.stopPropagation()}>
-        <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+        <PopupMenu expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
           <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
             {haveComments && (
               <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>

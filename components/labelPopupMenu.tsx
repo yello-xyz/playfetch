@@ -32,7 +32,7 @@ export default function LabelPopupMenu({
   prompt: ActivePrompt
   containerRect?: DOMRect
 }) {
-  const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [isMenuExpanded, setMenuExpanded] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const trimmedLabel = newLabel.trim()
 
@@ -46,7 +46,7 @@ export default function LabelPopupMenu({
   const iconRef = useRef<HTMLDivElement>(null)
 
   const toggleLabel = (label: string) => {
-    setIsMenuExpanded(false)
+    setMenuExpanded(false)
     setNewLabel('')
     const checked = !version.labels.includes(label)
     api.toggleLabel(version.id, prompt.projectID, label, checked).then(() => {
@@ -57,11 +57,11 @@ export default function LabelPopupMenu({
   return (
     <>
       <div ref={iconRef}>
-        <IconButton icon={labelIcon} onClick={() => setIsMenuExpanded(!isMenuExpanded)} />
+        <IconButton icon={labelIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
       </div>
       {isMenuExpanded && (
         <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
-          <PopupMenu expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
+          <PopupMenu expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
             <div className='p-3 w-80'>
               <input
                 type='text'
