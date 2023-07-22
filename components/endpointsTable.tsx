@@ -1,4 +1,4 @@
-import { Endpoint, ResolvedEndpoint } from '@/types'
+import { ActiveProject, Endpoint, ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode, useState } from 'react'
 import Icon from './icon'
@@ -67,18 +67,21 @@ export function EndpointToggleWithName({
 }
 
 export default function EndpointsTable({
-  endpoints,
+  project,
   activeEndpoint,
   setActiveEndpoint,
   onRefresh,
   onAddEndpoint,
 }: {
-  endpoints: ResolvedEndpoint[]
+  project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
   onAddEndpoint?: () => void
 }) {
+  const groups = [...project.prompts, ...project.chains]
+    .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
+    .filter(group => group.length > 0)
   return (
     <>
       <div className='flex items-center justify-between w-full'>
@@ -90,11 +93,11 @@ export default function EndpointsTable({
           </div>
         )}
       </div>
-      {endpoints.length > 0 ? (
-        [...new Set(endpoints.map(endpoint => endpoint.parentID))].map((parentID, index) => (
+      {groups.length > 0 ? (
+        groups.map((group, index) => (
           <EndpointsGroup
             key={index}
-            endpoints={endpoints.filter(endpoint => endpoint.parentID === parentID)}
+            endpoints={group}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={setActiveEndpoint}
             onRefresh={onRefresh}

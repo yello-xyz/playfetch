@@ -72,7 +72,7 @@ export default function EndpointsView({
     <div className='flex items-stretch h-full'>
       <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
         <EndpointsTable
-          endpoints={endpoints}
+          project={project}
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={updateActiveEndpoint}
           onRefresh={onRefresh}
