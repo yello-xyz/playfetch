@@ -34,6 +34,9 @@ export default function ProjectSidebar({
     <ProjectItemActionButton item={item} onRefresh={onRefreshItem} onDelete={onDeleteItem} />
   )
 
+  const addPromptButton = <IconButton className='opacity-50' icon={addIcon} onClick={onAddPrompt} />
+  const addChainButton = <IconButton className='opacity-50' icon={addIcon} onClick={onAddChain} />
+
   return (
     <Sidebar>
       <SidebarSection>
@@ -44,7 +47,7 @@ export default function ProjectSidebar({
           onClick={onSelectEndpoints}
         />
       </SidebarSection>
-      <SidebarSection title='Prompts'>
+      <SidebarSection title='Prompts' actionComponent={addPromptButton}>
         {activeProject.prompts.map((prompt, promptIndex) => (
           <SidebarButton
             key={promptIndex}
@@ -55,9 +58,8 @@ export default function ProjectSidebar({
             actionComponent={actionButtonForProjectItem(prompt)}
           />
         ))}
-        <SidebarButton title='Add new Prompt…' icon={addIcon} onClick={onAddPrompt} />
       </SidebarSection>
-      <SidebarSection title='Chains' className='flex-1'>
+      <SidebarSection title='Chains' className='flex-1' actionComponent={addChainButton}>
         {activeProject.chains.map((chain, chainIndex) => (
           <SidebarButton
             key={chainIndex}
@@ -68,7 +70,6 @@ export default function ProjectSidebar({
             actionComponent={actionButtonForProjectItem(chain)}
           />
         ))}
-        <SidebarButton title='Add new Chain…' icon={addIcon} onClick={onAddChain} />
       </SidebarSection>
     </Sidebar>
   )

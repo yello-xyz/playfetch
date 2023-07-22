@@ -3,10 +3,12 @@ import { MouseEvent } from 'react'
 import Icon from './icon'
 
 export default function IconButton({
+  className,
   icon,
   onClick,
   disabled,
 }: {
+  className?: string
   icon: StaticImageData
   onClick: () => void
   disabled?: boolean
@@ -14,7 +16,7 @@ export default function IconButton({
   return (
     <Icon
       icon={icon}
-      className={`rounded hover:bg-gray-100 ${disabled ? '' : 'cursor-pointer'}`}
+      className={`${className} rounded hover:bg-gray-100 ${disabled ? '' : 'cursor-pointer'}`}
       onClick={
         disabled
           ? undefined

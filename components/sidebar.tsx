@@ -19,14 +19,21 @@ export function SidebarSection({
   className,
   title,
   children,
+  actionComponent,
 }: {
   className?: string
   title?: string
   children: ReactNode
+  actionComponent?: ReactNode
 }) {
   return (
     <div className={`${className ?? ''} flex flex-col gap-0.5`}>
-      {title && <div className='px-4 py-1 text-xs font-medium text-gray-400'>{title}</div>}
+      {title && (
+        <div className='flex items-center justify-between p-1 pl-4 text-xs font-medium text-gray-400'>
+          {title}
+          {actionComponent}
+        </div>
+      )}
       {children}
     </div>
   )
