@@ -5,10 +5,11 @@ import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
+import TabSelector, { TabButton } from './tabSelector'
 
 export type MainViewTab = 'play' | 'test'
 
@@ -101,7 +102,12 @@ export default function PromptTabView({
   }
 
   const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
-  const tabSelector = <TabSelector activeTab={activeTab} setActiveTab={setActiveTab} />
+  const tabSelector = (
+    <TabSelector>
+      <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={setActiveTab} />
+      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={setActiveTab} />
+    </TabSelector>
+  )
 
   const renderTab = (tab: ActiveTab) => {
     switch (tab) {
@@ -156,35 +162,6 @@ export default function PromptTabView({
         showComments={showComments}
         setShowComments={setShowComments}
       />
-    </div>
-  )
-}
-
-function TabSelector({ activeTab, setActiveTab }: { activeTab: ActiveTab; setActiveTab: (tab: ActiveTab) => void }) {
-  return (
-    <div className='flex items-center gap-1 font-medium'>
-      <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={setActiveTab} /> 
-      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={setActiveTab} /> 
-    </div>
-  )
-}
-
-function TabButton({
-  title,
-  tab,
-  activeTab,
-  setActiveTab,
-}: {
-  title: string
-  tab: ActiveTab
-  activeTab: ActiveTab
-  setActiveTab: (tab: ActiveTab) => void
-}) {
-  return (
-    <div
-      className={`px-2 cursor-pointer ${activeTab === tab ? 'text-gray-700' : 'text-gray-300'}`}
-      onClick={() => setActiveTab(tab)}>
-      {title}
     </div>
   )
 }
