@@ -214,7 +214,7 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
               Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
             </span>
           ) : (
-            <span>Create some prompts before integrating this project in your code base.</span>
+            <span>Create some prompts or chains first to integrate this project into your code base.</span>
           )}
         </span>
       </div>

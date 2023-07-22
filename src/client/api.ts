@@ -120,7 +120,7 @@ const api = {
   publishEndpoint: function (
     projectID: number,
     parentID: number,
-    versionID: number,
+    versionID: number | undefined,
     name: string,
     flavor: string,
     useCache: boolean,

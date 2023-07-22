@@ -49,11 +49,12 @@ export default function EndpointsView({
   const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
 
   const addEndpoint =
-    project.prompts.length > 0
+    project.prompts.length > 0 || project.chains.length > 0
       ? () => {
-          const prompt = project.prompts[0]
-          const { name, flavor } = NewConfigFromEndpoints(endpoints, prompt.name, project.availableFlavors)
-          api.publishEndpoint(project.id, prompt.id, prompt.lastVersionID, name, flavor, false, false).then(onRefresh)
+          const prompt = project.prompts[0] as Prompt | undefined
+          const parent = prompt ?? project.chains[0]
+          const { name, flavor } = NewConfigFromEndpoints(endpoints, parent.name, project.availableFlavors)
+          api.publishEndpoint(project.id, parent.id, prompt?.lastVersionID, name, flavor, false, false).then(onRefresh)
         }
       : undefined
 
