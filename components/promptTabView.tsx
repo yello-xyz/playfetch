@@ -62,7 +62,7 @@ export default function PromptTabView({
   setShowComments: (show: boolean) => void
   savePrompt: () => Promise<number>
 }) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('testdata')
+  const [activeTab, setActiveTab] = useState<ActiveTab>('versions')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     prompt.inputValues,

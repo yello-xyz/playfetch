@@ -32,6 +32,7 @@ export default function BuildChainTab({
   project,
   inputValues,
   runChain,
+  tabSelector,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
@@ -40,6 +41,7 @@ export default function BuildChainTab({
   project: ActiveProject
   inputValues: InputValues
   runChain: (inputs: PromptInputs[]) => Promise<void>
+  tabSelector: ReactNode
 }) {
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = prompts.find(prompt => prompt.id === promptID)!
@@ -97,10 +99,11 @@ export default function BuildChainTab({
   return (
     <>
       <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto min-w-[680px]'>
+        {tabSelector}
         <div className='flex flex-wrap gap-2'>
           {variables.length > 0 && (
             <>
-              <Label>Inputs:</Label>
+              <Label className='pl-2'>Inputs:</Label>
               {variables.map((variable, index) => (
                 <InputVariable key={index}>{variable}</InputVariable>
               ))}

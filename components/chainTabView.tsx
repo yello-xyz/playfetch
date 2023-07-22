@@ -17,6 +17,7 @@ import useInputValues from './inputValues'
 import api from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import RunTimeline from './runTimeline'
+import TabSelector, { TabButton } from './tabSelector'
 
 type PromptChainItem = RunConfig & { promptID: number }
 
@@ -36,15 +37,17 @@ export type PromptCache = {
   versionForItem: (item: PromptChainItem) => Version | undefined
 }
 
+type ActiveTab = 'buildchain' | 'testdata'
+
 export default function ChainTabView({
-  activeTab,
   chain,
   project,
 }: {
-  activeTab: MainViewTab
   chain: ActiveChain
   project: ActiveProject
 }) {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('buildchain')
+
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     chain.inputValues,
     chain.projectID,
@@ -112,9 +115,16 @@ export default function ChainTabView({
     }
   }
 
+  const tabSelector = (
+    <TabSelector>
+      <TabButton title='Build chain' tab='buildchain' activeTab={activeTab} setActiveTab={setActiveTab} />
+      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={setActiveTab} />
+    </TabSelector>
+  )
+
   const renderTab = () => {
     switch (activeTab) {
-      case 'play':
+      case 'buildchain':
         return (
           <BuildChainTab
             items={items}
@@ -124,9 +134,10 @@ export default function ChainTabView({
             project={project}
             inputValues={inputValues}
             runChain={runChain}
+            tabSelector={tabSelector}
           />
         )
-      case 'test':
+      case 'testdata':
         return chainIsLoaded ? (
           <TestChainTab
             items={items}
@@ -135,6 +146,7 @@ export default function ChainTabView({
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             promptCache={promptCache}
             runChain={runChain}
+            tabSelector={tabSelector}
           />
         ) : null
     }

@@ -1,7 +1,6 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject } from '@/types'
 
-import Label from './label'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane, { EmptyTestDataPane } from './testDataPane'
 import VersionSelector from './versionSelector'
