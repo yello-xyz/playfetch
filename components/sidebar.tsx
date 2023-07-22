@@ -38,15 +38,17 @@ export function SidebarButton({
   active = false,
   onClick,
   link,
+  actionComponent,
 }: {
   title: string
   icon?: StaticImageData
   active?: boolean
   onClick?: () => void
   link?: string
+  actionComponent?: ReactNode
 }) {
   const activeClass = 'bg-gray-100 rounded-lg'
-  const baseClass = 'flex gap-1 items-center px-4 py-1 cursor-pointer'
+  const baseClass = 'flex gap-1 items-center pl-4 p-1 cursor-pointer'
   const className = `${baseClass} ${active ? activeClass : ''} hover:${activeClass}`
   const LinkWrapper = ({ children }: { children: ReactNode }) =>
     link ? <Link href={link}>{children}</Link> : <>{children}</>
@@ -54,7 +56,8 @@ export function SidebarButton({
     <LinkWrapper>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
-        <div className='w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap'>{title}</div>
+        <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap'>{title}</div>
+        {actionComponent}
       </div>
     </LinkWrapper>
   )

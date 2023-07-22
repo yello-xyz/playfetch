@@ -243,6 +243,8 @@ export default function Home({
                   activeItem={activeItem}
                   onAddPrompt={addPrompt}
                   onAddChain={addChain}
+                  onDeleteItem={onDeleteItem}
+                  onRefreshItem={refreshActiveItem}
                   onSelectPrompt={selectPrompt}
                   onSelectChain={selectChain}
                   onSelectEndpoints={selectEndpoints}
