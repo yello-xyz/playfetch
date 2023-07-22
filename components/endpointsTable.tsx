@@ -198,7 +198,7 @@ function RowCell({
 
 function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
   const AddPromptLink = ({ label }: { label: string }) => (
-    <span className='text-gray-500 underline cursor-pointer' onClick={onAddEndpoint}>
+    <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddEndpoint}>
       {label}
     </span>
   )
@@ -207,11 +207,16 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
     <div className='w-full h-full'>
       <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
         <span className='font-medium'>No Endpoints</span>
-        {onAddEndpoint && (
-          <span className='w-56 text-xs text-center text-gray-400'>
-            Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
-          </span>
-        )}
+
+        <span className='text-xs text-center text-gray-400 w-60'>
+          {onAddEndpoint ? (
+            <span>
+              Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
+            </span>
+          ) : (
+            <span>Create some prompts before integrating this project in your code base.</span>
+          )}
+        </span>
       </div>
     </div>
   )
