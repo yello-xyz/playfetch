@@ -63,7 +63,7 @@ export default function TestButtons({
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const [isRunningAllVariants, setIsRunningAllVariants] = useState(false)
+  const [isRunningAllVariants, setRunningAllVariants] = useState(false)
 
   const testPrompt = async () => {
     const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
@@ -73,9 +73,9 @@ export default function TestButtons({
         title: `Run ${inputs.length} times?`,
         confirmTitle: 'Run',
         callback: async () => {
-          setIsRunningAllVariants(true)
+          setRunningAllVariants(true)
           await callback(inputs)
-          setIsRunningAllVariants(false)
+          setRunningAllVariants(false)
         },
       })
     } else {

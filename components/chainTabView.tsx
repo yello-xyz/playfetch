@@ -92,7 +92,7 @@ export default function ChainTabView({ chain, project }: { chain: ActiveChain; p
   }
 
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-  const [isRunning, setIsRunning] = useState(false)
+  const [isRunning, setRunning] = useState(false)
 
   const checkProviderAvailable = useCheckProvider()
 
@@ -100,12 +100,12 @@ export default function ChainTabView({ chain, project }: { chain: ActiveChain; p
     persistInputValuesIfNeeded()
     const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
     if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
-      setIsRunning(true)
+      setRunning(true)
       if (items.length > 0) {
         const streamReader = await api.runChain(items.map(ChainItemToConfig), inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
       }
-      setIsRunning(false)
+      setRunning(false)
     }
   }
 
