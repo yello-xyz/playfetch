@@ -1,30 +1,26 @@
-import { ActiveChain, ActiveProject, ActivePrompt } from '@/types'
-import projectIcon from '@/public/project.svg'
+import { ActiveChain, ActiveProject, ActivePrompt, Workspace } from '@/types'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
 import ProjectPopupMenu from './projectPopupMenu'
 import Icon from './icon'
-import ProjectItemPopupMenu from './projectItemPopupMenu'
 import api from '@/src/client/api'
 import InviteDialog from './inviteDialog'
 import { TopBarButton, UserAvatars } from './topBarButton'
 import backIcon from '@/public/back.svg'
 
 export default function ProjectTopBar({
+  workspaces,
   activeProject,
   activeItem,
-  onRefreshItem,
-  onDeleteItem,
   onRefreshProject,
   onNavigateBack,
   showComments,
   setShowComments,
 }: {
+  workspaces: Workspace[]
   activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain
-  onRefreshItem: () => void
-  onDeleteItem: () => void
   onRefreshProject: () => void
   onNavigateBack: () => void
   showComments: boolean
@@ -38,6 +34,8 @@ export default function ProjectTopBar({
     onRefreshProject()
   }
 
+  const workspace = workspaces.find(workspace => workspace.id === activeProject.workspaceID)
+
   const promptHasComments =
     activeItem && 'versions' in activeItem && (activeItem?.versions ?? []).some(version => version.comments.length > 0)
 
@@ -49,36 +47,25 @@ export default function ProjectTopBar({
           Back to overview
         </div>
         <div className='relative flex gap-1 text-base justify-self-start'>
-          <Icon icon={projectIcon} />
-          {activeItem && (
-            <>
-              <span className='cursor-pointer'>{activeProject.name}</span>
+          {workspace && (
+            <span>
+              {workspace.name}
               <span className='font-medium'>{' / '}</span>
-            </>
+            </span>
           )}
           <div className='relative flex cursor-pointer' onClick={() => setIsMenuExpanded(!isMenuExpanded)}>
-            <span className='font-medium'>{activeItem?.name ?? activeProject.name}</span>
+            <span className='font-medium'>{activeProject.name}</span>
             <Icon icon={chevronIcon} />
             <div className='absolute right-0 top-8'>
-              {activeItem ? (
-                <ProjectItemPopupMenu
-                  item={activeItem}
-                  isMenuExpanded={isMenuExpanded}
-                  setIsMenuExpanded={setIsMenuExpanded}
-                  onRefresh={onRefreshItem}
-                  onDelete={onDeleteItem}
-                />
-              ) : (
-                <ProjectPopupMenu
-                  project={activeProject}
-                  isMenuExpanded={isMenuExpanded}
-                  setIsMenuExpanded={setIsMenuExpanded}
-                  canLeave={activeProject.users.length > 1}
-                  canDelete={activeProject.users.length === 1}
-                  onRefresh={onRefreshProject}
-                  onDeleteOrLeave={onNavigateBack}
-                />
-              )}
+              <ProjectPopupMenu
+                project={activeProject}
+                isMenuExpanded={isMenuExpanded}
+                setIsMenuExpanded={setIsMenuExpanded}
+                canLeave={!workspace}
+                canDelete={!!workspace}
+                onRefresh={onRefreshProject}
+                onDeleteOrLeave={onNavigateBack}
+              />
             </div>
           </div>
         </div>

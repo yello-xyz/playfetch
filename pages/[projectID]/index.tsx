@@ -229,10 +229,9 @@ export default function Home({
           <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
             <main className={`flex flex-col h-screen text-sm font-sans`}>
               <ProjectTopBar
+                workspaces={workspaces}
                 activeProject={activeProject}
                 activeItem={activePrompt ?? activeChain}
-                onRefreshItem={refreshActiveItem}
-                onDeleteItem={onDeleteItem}
                 onRefreshProject={refreshProject}
                 onNavigateBack={navigateBack}
                 showComments={showComments}
