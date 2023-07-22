@@ -132,8 +132,7 @@ function ProjectCell({
               isMenuExpanded={isMenuExpanded}
               setIsMenuExpanded={setIsMenuExpanded}
               workspaces={workspaces}
-              canLeave={isSharedProjects}
-              canDelete={!isSharedProjects}
+              isSharedProject={isSharedProjects}
               onRefresh={onRefreshWorkspace}
               onDeleteOrLeave={onDeleteOrLeave}
             />

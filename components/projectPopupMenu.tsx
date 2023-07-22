@@ -11,17 +11,15 @@ export default function ProjectPopupMenu({
   isMenuExpanded,
   setIsMenuExpanded,
   workspaces,
-  canLeave,
-  canDelete,
+  isSharedProject,
   onRefresh,
   onDeleteOrLeave,
 }: {
   project: Project
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
-  workspaces?: Workspace[]
-  canLeave: boolean
-  canDelete: boolean
+  workspaces: Workspace[]
+  isSharedProject: boolean
   onRefresh: () => void
   onDeleteOrLeave: () => void
 }) {
@@ -62,9 +60,9 @@ export default function ProjectPopupMenu({
     <>
       <PopupMenu className='w-44' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
         <PopupMenuItem title='Rename Project' callback={renameProject} />
-        {workspaces && <PopupMenuItem title='Move to Workspace' callback={moveProject} />}
-        {canLeave && <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} />}
-        {canDelete && <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} />}
+        {!isSharedProject && <PopupMenuItem title='Move to Workspace' callback={moveProject} />}
+        {isSharedProject && <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} />}
+        {!isSharedProject && <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} />}
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog

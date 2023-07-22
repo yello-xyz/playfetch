@@ -61,8 +61,8 @@ export default function ProjectTopBar({
                 project={activeProject}
                 isMenuExpanded={isMenuExpanded}
                 setIsMenuExpanded={setIsMenuExpanded}
-                canLeave={!workspace}
-                canDelete={!!workspace}
+                workspaces={workspaces}
+                isSharedProject={!workspace}
                 onRefresh={onRefreshProject}
                 onDeleteOrLeave={onNavigateBack}
               />
