@@ -247,7 +247,6 @@ export default function Home({
                   onSelectPrompt={selectPrompt}
                   onSelectChain={selectChain}
                   onSelectEndpoints={selectEndpoints}
-                  onNavigateBack={navigateBack}
                 />
                 <div className='flex-1'>
                   {activePrompt && activeVersion && (

@@ -3,7 +3,6 @@ import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
 import endpointIcon from '@/public/endpoint.svg'
-import backIcon from '@/public/back.svg'
 import Sidebar, { SidebarButton, SidebarSection } from './sidebar'
 
 export default function ProjectSidebar({
@@ -14,7 +13,6 @@ export default function ProjectSidebar({
   onSelectPrompt,
   onSelectChain,
   onSelectEndpoints,
-  onNavigateBack,
 }: {
   activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain | 'endpoints'
@@ -23,13 +21,9 @@ export default function ProjectSidebar({
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
   onSelectEndpoints: () => void
-  onNavigateBack: () => void
 }) {
   return (
     <Sidebar>
-      <SidebarSection>
-        <SidebarButton title='Back to overview' icon={backIcon} onClick={onNavigateBack} />
-      </SidebarSection>
       <SidebarSection>
         <SidebarButton
           title='Endpoints'
