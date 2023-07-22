@@ -7,12 +7,14 @@ import PickNameDialog from './pickNameDialog'
 
 export default function WorkspacePopupMenu({
   workspace,
+  isOnlyUser,
   isMenuExpanded,
   setIsMenuExpanded,
   onRenamed,
   onDeleted,
 }: {
   workspace: Workspace
+  isOnlyUser: boolean
   isMenuExpanded: boolean
   setIsMenuExpanded: (isExpanded: boolean) => void
   onRenamed: () => void
@@ -31,6 +33,15 @@ export default function WorkspacePopupMenu({
     })
   }
 
+  const leaveWorkspace = () => {
+    setIsMenuExpanded(false)
+    setDialogPrompt({
+      title: 'Are you sure you want to leave this workspace?',
+      callback: () => api.leaveWorkspace(workspace.id).then(onDeleted),
+      destructive: true,
+    })
+  }
+
   const renameWorkspace = () => {
     setIsMenuExpanded(false)
     setShowPickNamePrompt(true)
@@ -40,7 +51,8 @@ export default function WorkspacePopupMenu({
     <>
       <PopupMenu className='w-44' expanded={isMenuExpanded} collapse={() => setIsMenuExpanded(false)}>
         <PopupMenuItem title='Rename Workspace' callback={renameWorkspace} />
-        <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} />
+        {!isOnlyUser && <PopupMenuItem separated destructive title='Leave Workspace' callback={leaveWorkspace} />}
+        {isOnlyUser && <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} />}
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog

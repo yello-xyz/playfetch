@@ -48,7 +48,7 @@ export default function WorkspaceGridView({
     onRefreshWorkspaces()
   }
 
-  const onDeleteOrLeave =
+  const onDeleted =
     isSharedProjects && activeWorkspace.projects.length === 1 ? resetWorkspaces : onRefreshWorkspace
 
   return (
@@ -72,7 +72,7 @@ export default function WorkspaceGridView({
                 isSharedProjects={isSharedProjects}
                 onSelectProject={onSelectProject}
                 onRefreshWorkspace={onRefreshWorkspace}
-                onDeleteOrLeave={onDeleteOrLeave}
+                onDeleted={onDeleted}
                 workspaces={workspaces}
               />
             ))}
@@ -111,14 +111,14 @@ function ProjectCell({
   isSharedProjects,
   onSelectProject,
   onRefreshWorkspace,
-  onDeleteOrLeave,
+  onDeleted,
 }: {
   workspaces: Workspace[]
   project: Project
   isSharedProjects: boolean
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
-  onDeleteOrLeave: () => void
+  onDeleted: () => void
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
@@ -148,7 +148,7 @@ function ProjectCell({
               workspaces={workspaces}
               isSharedProject={isSharedProjects}
               onRefresh={onRefreshWorkspace}
-              onDeleteOrLeave={onDeleteOrLeave}
+              onDeleted={onDeleted}
             />
           </div>
         </div>

@@ -72,6 +72,9 @@ const api = {
   deleteWorkspace: function (workspaceID: number) {
     return post(this.deleteWorkspace, { workspaceID })
   },
+  leaveWorkspace: function (workspaceID: number) {
+    return post(this.leaveWorkspace, { workspaceID })
+  },
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
   },

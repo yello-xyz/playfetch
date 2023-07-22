@@ -64,7 +64,7 @@ export default function ProjectTopBar({
                 workspaces={workspaces}
                 isSharedProject={!workspace}
                 onRefresh={onRefreshProject}
-                onDeleteOrLeave={onNavigateBack}
+                onDeleted={onNavigateBack}
               />
             </div>
           </div>

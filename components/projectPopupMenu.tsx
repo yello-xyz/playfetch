@@ -13,7 +13,7 @@ export default function ProjectPopupMenu({
   workspaces,
   isSharedProject,
   onRefresh,
-  onDeleteOrLeave,
+  onDeleted,
 }: {
   project: Project
   isMenuExpanded: boolean
@@ -21,7 +21,7 @@ export default function ProjectPopupMenu({
   workspaces: Workspace[]
   isSharedProject: boolean
   onRefresh: () => void
-  onDeleteOrLeave: () => void
+  onDeleted: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
 
@@ -32,7 +32,7 @@ export default function ProjectPopupMenu({
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to leave this project?',
-      callback: () => api.leaveProject(project.id).then(onDeleteOrLeave),
+      callback: () => api.leaveProject(project.id).then(onDeleted),
       destructive: true,
     })
   }
@@ -41,7 +41,7 @@ export default function ProjectPopupMenu({
     setIsMenuExpanded(false)
     setDialogPrompt({
       title: 'Are you sure you want to delete this project and ALL its prompts? This action cannot be undone.',
-      callback: () => api.deleteProject(project.id).then(onDeleteOrLeave),
+      callback: () => api.deleteProject(project.id).then(onDeleted),
       destructive: true,
     })
   }
