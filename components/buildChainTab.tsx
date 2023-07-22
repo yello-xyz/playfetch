@@ -91,18 +91,21 @@ export default function BuildChainTab({
   }
 
   // In the build tab, we resolve each variable with any available input and otherwise let it stand for itself.
-  const inputs = Object.fromEntries(
-    ExtractUnboundChainVariables(items, promptCache).map(variable => [variable, inputValues[variable]?.[0] ?? variable])
-  )
+  const variables = ExtractUnboundChainVariables(items, promptCache)
+  const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable]?.[0] ?? variable]))
 
   return (
     <>
       <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto min-w-[680px]'>
         <div className='flex flex-wrap gap-2'>
-          <Label>Inputs:</Label>
-          {ExtractUnboundChainVariables(items, promptCache).map((variable, index) => (
-            <InputVariable key={index}>{variable}</InputVariable>
-          ))}
+          {variables.length > 0 && (
+            <>
+              <Label>Inputs:</Label>
+              {variables.map((variable, index) => (
+                <InputVariable key={index}>{variable}</InputVariable>
+              ))}
+            </>
+          )}
         </div>
         {items.map((item, index) => (
           <div key={index} className='flex items-start gap-2'>
