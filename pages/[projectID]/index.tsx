@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain } from '@/types'
-import PromptTabView, { MainViewTab } from '@/components/promptTabView'
+import PromptTabView from '@/components/promptTabView'
 import ClientRoute, {
   ChainRoute,
   EndpointsRoute,
@@ -15,7 +15,6 @@ import ClientRoute, {
 import TopBar from '@/components/topBar'
 import { getActivePrompt } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
-import SegmentedControl, { Segment } from '@/components/segmentedControl'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { RefreshContext } from '@/components/refreshContext'
@@ -202,23 +201,13 @@ export default function Home({
   const addPrompt = async () => {
     const promptID = await api.addPrompt(activeProject.id)
     selectPrompt(promptID)
-    setSelectedTab('play')
     refreshProject()
   }
 
   const addChain = async () => {
     const chainID = await api.addChain(activeProject.id)
     selectChain(chainID)
-    setSelectedTab('play')
     refreshProject()
-  }
-
-  const [selectedTab, setSelectedTab] = useState<MainViewTab>('play')
-  const updateSelectedTab = (tab: MainViewTab) => {
-    if (activePrompt) {
-      savePrompt(refreshActivePrompt)
-    }
-    setSelectedTab(tab)
   }
 
   const selectSettings = () => router.push(ClientRoute.Settings, undefined, { shallow: true })
@@ -250,14 +239,8 @@ export default function Home({
                   onRefreshProject={refreshProject}
                   onNavigateBack={navigateBack}
                   showComments={showComments}
-                  setShowComments={setShowComments}>
-                  {activeItem && activeItem !== 'endpoints' && (
-                    <SegmentedControl selected={selectedTab} callback={updateSelectedTab}>
-                      <Segment value={'play'} title='Play' />
-                      <Segment value={'test'} title='Test' />
-                    </SegmentedControl>
-                  )}
-                </TopBar>
+                  setShowComments={setShowComments}
+                />
                 <div className='flex-1 overflow-hidden'>
                   {activePrompt && activeVersion && (
                     <PromptTabView

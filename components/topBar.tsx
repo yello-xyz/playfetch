@@ -20,7 +20,6 @@ export default function TopBar({
   onNavigateBack,
   showComments,
   setShowComments,
-  children,
 }: {
   activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain
@@ -30,7 +29,6 @@ export default function TopBar({
   onNavigateBack: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
-  children?: ReactNode
 }) {
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
@@ -46,7 +44,7 @@ export default function TopBar({
   return (
     <>
       <div className='flex flex-col'>
-        <div className={`z-10 flex items-center justify-between gap-4 px-6 ${children ? 'pt-4' : 'py-3.5'}`}>
+        <div className='z-10 flex items-center justify-between gap-4 px-6 py-3'>
           <div className='relative flex gap-1 text-base justify-self-start'>
             <Icon icon={projectIcon} />
             {activeItem && (
@@ -87,11 +85,7 @@ export default function TopBar({
             {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
           </div>
         </div>
-        <div className='flex items-center'>
-          <Divider />
-          {children}
-          {showComments ? <CommentDivider /> : <Divider />}
-        </div>
+        <Divider />
       </div>
       {showInviteDialog && (
         <InviteDialog label='project' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
@@ -113,13 +107,6 @@ export function UserAvatars({ users }: { users: User[] }) {
     </div>
   ) : null
 }
-
-const CommentDivider = () => (
-  <div className='flex flex-1 h-full'>
-    <Divider />
-    <Divider width='w-[280px]' />
-  </div>
-)
 
 const Divider = ({ width }: { width?: string }) => (
   <div className={`h-full ${width ?? 'flex-1'}`}>

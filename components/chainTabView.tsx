@@ -12,7 +12,7 @@ import {
 import BuildChainTab, { ExtractUnboundChainVariables } from './buildChainTab'
 import { useEffect, useState } from 'react'
 import TestChainTab from './testChainTab'
-import { ConsumeRunStreamReader, MainViewTab } from './promptTabView'
+import { ConsumeRunStreamReader } from './promptTabView'
 import useInputValues from './inputValues'
 import api from '@/src/client/api'
 import useCheckProvider from './checkProvider'
@@ -39,13 +39,7 @@ export type PromptCache = {
 
 type ActiveTab = 'buildchain' | 'testdata'
 
-export default function ChainTabView({
-  chain,
-  project,
-}: {
-  chain: ActiveChain
-  project: ActiveProject
-}) {
+export default function ChainTabView({ chain, project }: { chain: ActiveChain; project: ActiveProject }) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('buildchain')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
@@ -155,7 +149,7 @@ export default function ChainTabView({
   return (
     <div className='flex items-stretch h-full'>
       {renderTab()}
-      <div className='flex-1 p-6 pl-0'>
+      <div className='flex-1 p-6 pl-0 min-w-[30%]'>
         <RunTimeline runs={partialRuns} isRunning={isRunning} />
       </div>
     </div>

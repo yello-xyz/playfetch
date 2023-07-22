@@ -5,13 +5,11 @@ import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector, { TabButton } from './tabSelector'
-
-export type MainViewTab = 'play' | 'test'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]

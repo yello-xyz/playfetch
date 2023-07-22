@@ -28,7 +28,7 @@ export default function CommentsPane({
 
   return showComments ? (
     <div className='flex flex-col px-3 pb-3 border-l border-gray-200 w-[280px]'>
-      <div className='flex items-start justify-between pb-5'>
+      <div className='flex items-start justify-between py-5'>
         <span className='font-medium text-gray-800'>Comments</span>
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
       </div>

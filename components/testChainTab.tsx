@@ -25,17 +25,17 @@ export default function TestChainTab({
   const variables = ExtractUnboundChainVariables(items, promptCache)
 
   return (
-      <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
-        <div className='flex flex-col flex-grow gap-2'>
-          {tabSelector}
-          <TestDataPane
-            variables={variables}
-            inputValues={inputValues}
-            setInputValues={setInputValues}
-            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-          />
-        </div>
-        <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />
+    <div className='flex flex-col justify-between flex-grow h-full gap-4 p-6 max-w-[50%]'>
+      <div className='flex flex-col flex-grow gap-2'>
+        {tabSelector}
+        <TestDataPane
+          variables={variables}
+          inputValues={inputValues}
+          setInputValues={setInputValues}
+          persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+        />
       </div>
+      <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />
+    </div>
   )
 }

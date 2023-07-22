@@ -13,7 +13,7 @@ export default function UserSettingsView() {
   const user = useLoggedInUser()
 
   const allProviders = AllProviders.filter(provider => provider !== DefaultProvider)
-  const [availableProviders, setAvailableProviders]= useState(user.availableProviders)
+  const [availableProviders, setAvailableProviders] = useState(user.availableProviders)
 
   const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
 
@@ -55,7 +55,7 @@ function ProviderSettingsPane({
 function ProviderRow({
   provider,
   availableProvider,
-  onRefresh
+  onRefresh,
 }: {
   provider: ModelProvider
   availableProvider?: AvailableProvider
