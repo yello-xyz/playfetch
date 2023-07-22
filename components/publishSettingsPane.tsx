@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Endpoint, ResolvedEndpoint, Version } from '@/types'
+import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { StripPromptSentinels } from '@/src/common/formatting'
@@ -12,16 +12,14 @@ import { useInitialState } from './useInitialState'
 
 export default function PublishSettingsPane({
   endpoint,
-  projectID,
+  project,
   versions,
-  endpoints,
   availableFlavors,
   onRefresh,
 }: {
   endpoint: Endpoint
-  projectID: number
+  project: ActiveProject
   versions?: Version[]
-  endpoints: ResolvedEndpoint[]
   availableFlavors: string[]
   onRefresh: () => Promise<void>
 }) {
@@ -52,17 +50,26 @@ export default function PublishSettingsPane({
   }
 
   const addFlavor = async (flavor: string) => {
-    await api.addFlavor(projectID, flavor)
+    await api.addFlavor(project.id, flavor)
     await onRefresh()
     updateFlavor(flavor)
   }
 
+  const [parentID, setParentID] = useInitialState(endpoint.parentID)
   const [versionID, setVersionID] = useInitialState(endpoint.versionID)
   const versionIndex = versions?.findIndex(version => version.id === versionID)
 
   const updateVersion = (version: Version) => {
     setVersionID(version.id)
     api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
+  }
+
+  const parents = [...project.prompts, ...project.chains]
+  const currentParent = parents.find(item => item.id === parentID)!
+
+  const updateParent = (parentID: number) => {
+    setParentID(parentID)
+    // api.updateEndpoint({ ...endpoint, parentID: parent.id }).then(_ => onRefresh())
   }
 
   return (
@@ -86,6 +93,18 @@ export default function PublishSettingsPane({
             </option>
           </DropdownMenu>
         )}
+        <Label>Prompt / Chain</Label>
+        {endpoint.enabled ? (
+          currentParent?.name
+        ) : (
+          <DropdownMenu value={parentID} onChange={value => updateParent(Number(value))}>
+            {parents.map((parent, index) => (
+              <option key={index} value={parent.id}>
+                {parent.name}
+              </option>
+            ))}
+          </DropdownMenu>
+        )}
         {versions && versionIndex && versionIndex >= 0 && (
           <>
             <Label>Prompt</Label>
@@ -94,7 +113,7 @@ export default function PublishSettingsPane({
             ) : (
               <VersionSelector
                 versions={versions}
-                endpoints={endpoints}
+                endpoints={project.endpoints}
                 activeVersion={versions[versionIndex]}
                 setActiveVersion={updateVersion}
               />

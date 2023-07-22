@@ -57,16 +57,16 @@ export default function EndpointsView({
     }
   }
 
-  const activeItem = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
+  const parent = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
   useEffect(() => {
-    if (isPrompt(activeItem)) {
-      api.getPrompt(activeItem.id).then(setActivePrompt)
+    if (isPrompt(parent)) {
+      api.getPrompt(parent.id).then(setActivePrompt)
     }
-  }, [activeItem])
+  }, [parent])
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
-  const inputs = isPrompt(activeItem) ? ExtractPromptVariables(version?.prompt ?? '') : activeItem?.inputs ?? []
+  const inputs = isPrompt(parent) ? ExtractPromptVariables(version?.prompt ?? '') : parent?.inputs ?? []
 
   return (
     <div className='flex items-stretch h-full'>
@@ -80,13 +80,12 @@ export default function EndpointsView({
           onAddEndpoint={addEndpoint}
         />
       </div>
-      {activeEndpoint && (
+      {activeEndpoint && parent && (
         <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
           <PublishSettingsPane
             endpoint={activeEndpoint}
-            projectID={project.id}
+            project={project}
             versions={activePrompt?.versions}
-            endpoints={endpoints}
             availableFlavors={project.availableFlavors}
             onRefresh={onRefresh}
           />
