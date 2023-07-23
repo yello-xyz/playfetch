@@ -84,7 +84,7 @@ export default function VersionCell({
         </div>
         {user && prompt.projectID !== user.id && <UserDetails user={user} />}
         {version.labels.length > 0 && (
-          <div className='flex gap-1'>
+          <div className='flex flex-wrap gap-1'>
             {version.labels.map((label, labelIndex) => (
               <VersionLabel label={label} colors={labelColors} key={labelIndex} />
             ))}
