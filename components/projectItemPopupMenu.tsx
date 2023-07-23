@@ -1,4 +1,4 @@
-import { Chain, Prompt } from '@/types'
+import { Chain, Endpoint, Prompt } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
@@ -7,12 +7,14 @@ import PickNameDialog from './pickNameDialog'
 
 export default function ProjectItemPopupMenu({
   item,
+  reference,
   isMenuExpanded,
   setMenuExpanded,
   onRefresh,
   onDelete,
 }: {
   item: Prompt | Chain
+  reference: Chain | Endpoint | undefined
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
   onRefresh: () => void
@@ -29,11 +31,21 @@ export default function ProjectItemPopupMenu({
 
   const deleteItem = () => {
     setMenuExpanded(false)
-    setDialogPrompt({
-      title: `Are you sure you want to delete this ${isPrompt ? 'prompt' : 'chain'}? This action cannot be undone.`,
-      callback: () => deleteCall().then(onDelete ?? onRefresh),
-      destructive: true,
-    })
+    const label = isPrompt ? 'prompt' : 'chain'
+    if (reference) {
+      const reason = 'name' in reference ? `it is referenced by chain “${reference.name}”` : `has published endpoints`
+      setDialogPrompt({
+        title: `Cannot delete ${label} because ${reason}.`,
+        confirmTitle: 'OK',
+        cancellable: false
+      })
+    } else {
+      setDialogPrompt({
+        title: `Are you sure you want to delete this ${label}? This action cannot be undone.`,
+        callback: () => deleteCall().then(onDelete ?? onRefresh),
+        destructive: true,
+      })
+    }
   }
 
   const renameItem = () => {

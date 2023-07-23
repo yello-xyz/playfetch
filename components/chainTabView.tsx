@@ -39,7 +39,15 @@ export type PromptCache = {
 
 type ActiveTab = 'buildchain' | 'testdata'
 
-export default function ChainTabView({ chain, project }: { chain: ActiveChain; project: ActiveProject }) {
+export default function ChainTabView({
+  chain,
+  project,
+  onRefresh,
+}: {
+  chain: ActiveChain
+  project: ActiveProject
+  onRefresh: () => void
+}) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('buildchain')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
@@ -88,7 +96,7 @@ export default function ChainTabView({ chain, project }: { chain: ActiveChain; p
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
   if (chainIsLoaded && itemsKey !== savedItemsKey) {
     setSavedItemsKey(itemsKey)
-    api.updateChain(chain.id, strippedItems, inputs)
+    api.updateChain(chain.id, strippedItems, inputs).then(onRefresh)
   }
 
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])

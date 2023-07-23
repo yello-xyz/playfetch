@@ -262,7 +262,14 @@ export default function Home({
                       savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
                     />
                   )}
-                  {activeChain && <ChainTabView key={activeChain.id} chain={activeChain} project={activeProject} />}
+                  {activeChain && (
+                    <ChainTabView
+                      key={activeChain.id}
+                      chain={activeChain}
+                      project={activeProject}
+                      onRefresh={refreshProject}
+                    />
+                  )}
                   {activeEndpoints && <EndpointsView project={activeProject} onRefresh={refreshProject} />}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>

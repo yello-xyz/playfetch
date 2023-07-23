@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, Chain, Prompt } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -30,8 +30,14 @@ export default function ProjectSidebar({
   onSelectChain: (chainID: number) => void
   onSelectEndpoints: () => void
 }) {
+  const reference = (item: Prompt | Chain) =>
+    activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
+    activeProject.chains.find(chain =>
+      chain.items.some(chainItem => 'promptID' in chainItem && chainItem.promptID === item.id)
+    )
+
   const actionButtonForProjectItem = (item: Prompt | Chain) => (
-    <ProjectItemActionButton item={item} onRefresh={onRefreshItem} onDelete={onDeleteItem} />
+    <ProjectItemActionButton item={item} reference={reference(item)} onRefresh={onRefreshItem} onDelete={onDeleteItem} />
   )
 
   const addPromptButton = <IconButton className='opacity-50' icon={addIcon} onClick={onAddPrompt} />
@@ -77,10 +83,12 @@ export default function ProjectSidebar({
 
 function ProjectItemActionButton({
   item,
+  reference,
   onRefresh,
   onDelete,
 }: {
   item: Prompt | Chain
+  reference: Chain | Endpoint | undefined
   onRefresh: () => void
   onDelete: () => void
 }) {
@@ -94,6 +102,7 @@ function ProjectItemActionButton({
           item={item}
           isMenuExpanded={isMenuExpanded}
           setMenuExpanded={setMenuExpanded}
+          reference={reference}
           onRefresh={onRefresh}
           onDelete={onDelete}
         />

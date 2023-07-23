@@ -7,6 +7,7 @@ export type DialogPrompt = {
   callback?: () => void
   destructive?: boolean
   disabled?: boolean
+  cancellable?: boolean
 }
 
 export default function ModalDialog({
@@ -37,9 +38,11 @@ export default function ModalDialog({
           <h3 className='text-base font-semibold'>{prompt.title ?? 'Are you sure?'}</h3>
           <div className='text-left'>{children}</div>
           <div className='flex justify-end gap-4'>
-            <Button type='outline' onClick={onDismiss}>
-              Cancel
-            </Button>
+            {prompt.cancellable !== false && (
+              <Button type='outline' onClick={onDismiss}>
+                Cancel
+              </Button>
+            )}
             <Button type={prompt.destructive ? 'destructive' : 'primary'} disabled={prompt.disabled} onClick={confirm}>
               {prompt.confirmTitle ?? 'Confirm'}
             </Button>
