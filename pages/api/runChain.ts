@@ -71,7 +71,7 @@ export const runChainConfigs = async (
         break
       } else {
         runningContext += `\n\n${output}\n\n`
-        AugmentInputs(inputs, config.output, output ?? '', useCamelCase)
+        AugmentInputs(inputs, config.output, output!, useCamelCase)
         AugmentCodeContext(codeContext, config.output, result)
       }
     } else {
@@ -107,11 +107,11 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       inputs,
       false,
       false,
-      (index, version, { output, cost, failed }) => {
+      (index, version, { output, cost, duration, failed }) => {
         const createdAt = new Date()
         sendData({ index, timestamp: createdAt.toISOString(), cost, failed })
         return version && output && !failed
-          ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost)
+          ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost, duration)
           : Promise.resolve({})
       },
       (index, message) => sendData({ index, message })

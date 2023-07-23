@@ -14,6 +14,7 @@ export async function migrateRuns() {
         runData.output,
         runData.createdAt,
         runData.cost,
+        0,
         getID(runData)
       )
     )
@@ -27,17 +28,19 @@ export async function saveRun(
   inputs: PromptInputs,
   output: string,
   createdAt: Date,
-  cost: number
+  cost: number,
+  duration: number
 ): Promise<Run> {
   await ensurePromptAccess(userID, promptID)
-  const runData = toRunData(promptID, versionID, inputs, output, createdAt, cost)
+  const runData = toRunData(promptID, versionID, inputs, output, createdAt, cost, duration)
   await getDatastore().save(runData)
   return {
     id: getID(runData),
     timestamp: getTimestamp(runData.data),
-    inputs: inputs,
-    output: output,
-    cost: cost,
+    inputs,
+    output,
+    cost,
+    duration,
   }
 }
 
@@ -48,10 +51,11 @@ const toRunData = (
   output: string,
   createdAt: Date,
   cost: number,
+  duration: number,
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
-  data: { promptID, versionID, inputs: JSON.stringify(inputs), output, createdAt, cost },
+  data: { promptID, versionID, inputs: JSON.stringify(inputs), output, createdAt, cost, duration },
   excludeFromIndexes: ['output', 'inputs'],
 })
 
@@ -61,4 +65,5 @@ export const toRun = (data: any): Run => ({
   inputs: JSON.parse(data.inputs),
   output: data.output,
   cost: data.cost,
+  duration: data.duration,
 })

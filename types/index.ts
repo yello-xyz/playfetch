@@ -120,6 +120,7 @@ export type PartialRun = {
 export type Run = PartialRun & {
   timestamp: string
   cost: number
+  duration: number
   inputs: PromptInputs
 }
 
