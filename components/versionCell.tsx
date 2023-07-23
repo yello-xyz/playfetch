@@ -83,19 +83,23 @@ export default function VersionCell({
           </div>
         </div>
         {user && prompt.projectID !== user.id && <UserDetails user={user} />}
-        {version.labels.length > 0 && (
-          <div className='flex flex-wrap gap-1'>
-            {version.labels.map((label, labelIndex) => (
-              <ItemLabel label={label} colors={labelColors} key={labelIndex} />
-            ))}
-          </div>
-        )}
+        <ItemLabels labels={version.labels} colors={labelColors} />
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </div>
     </VerticalBarWrapper>
   )
+}
+
+export function ItemLabels({ labels, colors }: { labels: string[]; colors: Record<string, string> }) {
+  return labels.length > 0 ? (
+    <div className='flex flex-wrap gap-1'>
+      {labels.map((label, labelIndex) => (
+        <ItemLabel label={label} colors={colors} key={labelIndex} />
+      ))}
+    </div>
+  ) : null
 }
 
 export function ItemLabel({ label, colors }: { label: string; colors: Record<string, string> }) {

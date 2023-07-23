@@ -4,7 +4,8 @@ import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
 import { CommentInput, CommentsPopup } from './commentPopupMenu'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import LabelPopupMenu, { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { ItemLabels } from './versionCell'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -82,7 +83,7 @@ export default function RunCell({
   }
 
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
-  const selectionRanges = comments.map(comment => ({
+  const selectionRanges = comments.filter(comment => comment.startIndex && comment.quote).map(comment => ({
     startIndex: comment.startIndex!,
     endIndex: comment.startIndex! + comment.quote!.length,
   }))
@@ -114,6 +115,7 @@ export default function RunCell({
 
   return (
     <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp} failed={run.failed}>
+      <RunHeader run={run} prompt={prompt} containerRect={containerRect} />
       <OutputWithComments
         identifier={identifier}
         output={run.output}
@@ -172,6 +174,27 @@ export default function RunCell({
       <RunAttributes run={run} />
     </RunCellContainer>
   )
+}
+
+function RunHeader({
+  run,
+  prompt,
+  containerRect,
+}: {
+  run: PartialRun
+  prompt?: ActivePrompt
+  containerRect?: DOMRect
+}) {
+  const isRun = (item: PartialRun): item is Run => 'labels' in (item as Run)
+
+  return prompt && isRun(run) ? (
+    <div className='flex items-center justify-between gap-2 text-sm'>
+      <div className='flex flex-col'>
+        <ItemLabels labels={run.labels} colors={AvailableLabelColorsForPrompt(prompt)} />
+      </div>
+      <LabelPopupMenu containerRect={containerRect} prompt={prompt} item={run} />
+    </div>
+  ) : null
 }
 
 function RunAttributes({ run }: { run: PartialRun }) {
