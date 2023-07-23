@@ -31,23 +31,23 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         }
 
         let totalCost = 0
+        let totalDuration = 0
         let extraAttempts = 0
         let anyCacheHit = false
-        const startTime = process.hrtime.bigint()
         const updateAggregateUsage = async (
           isLastRun: boolean,
           cost: number,
+          duration: number,
           attempts: number,
           cacheHit: boolean,
           failed: boolean
         ) => {
           totalCost += cost
+          totalDuration += duration
           extraAttempts += attempts - 1
           anyCacheHit = anyCacheHit || cacheHit
           if (isLastRun || failed) {
-            const endTime = process.hrtime.bigint()
-            const durationInSeconds = Number(endTime - startTime) / 1_000_000_000
-            updateUsage(endpoint.id, totalCost, durationInSeconds, anyCacheHit, 1 + extraAttempts, failed)
+            updateUsage(endpoint.id, totalCost, totalDuration, anyCacheHit, 1 + extraAttempts, failed)
           }
         }
 
@@ -60,8 +60,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           inputs,
           endpoint.useCache,
           true,
-          (index, _, { cost, attempts, cacheHit, failed }) =>
-            updateAggregateUsage(isLastRun(index), cost, attempts, cacheHit, failed),
+          (index, _, { cost, duration, attempts, cacheHit, failed }) =>
+            updateAggregateUsage(isLastRun(index), cost, duration, attempts, cacheHit, failed),
           (index, message) => (useStreaming && isLastRun(index) ? res.write(message) : undefined)
         )
         return useStreaming ? res.end() : res.json({ output })

@@ -22,10 +22,17 @@ const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boole
 const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
   variable ? (inputs[useCamelCase ? ToCamelCase(variable) : variable] = value) : undefined
 
+const runWithTimer = async <T>(operation: Promise<T>) => {
+  const startTime = process.hrtime.bigint()
+  const result = await operation
+  const duration = Number(process.hrtime.bigint() - startTime) / 1_000_000_000
+  return { ...result, duration }
+}
+
 type CallbackType = (
   index: number,
   version: Version | null,
-  response: { output?: string; cost: number; attempts: number; cacheHit: boolean; failed: boolean }
+  response: { output?: string; cost: number; duration: number; attempts: number; cacheHit: boolean; failed: boolean }
 ) => Promise<any>
 
 export const runChainConfigs = async (
@@ -52,7 +59,7 @@ export const runChainConfigs = async (
       if (config.includeContext) {
         prompt = runningContext
       }
-      const runResponse = await runPromptWithConfig(userID, prompt, version.config, useCache, stream)
+      const runResponse = await runWithTimer(runPromptWithConfig(userID, prompt, version.config, useCache, stream))
       const output = runResponse.output
       try {
         result = output ? JSON.parse(output) : output
@@ -65,10 +72,10 @@ export const runChainConfigs = async (
       } else {
         runningContext += `\n\n${output}\n\n`
         AugmentInputs(inputs, config.output, output ?? '', useCamelCase)
-        AugmentCodeContext(codeContext, config.output, result)  
+        AugmentCodeContext(codeContext, config.output, result)
       }
     } else {
-      const codeResponse = await EvaluateCode(config.code, codeContext)
+      const codeResponse = await runWithTimer(EvaluateCode(config.code, codeContext))
       result = codeResponse.result
       await callback(index, null, codeResponse)
       if (codeResponse.failed) {
@@ -78,7 +85,7 @@ export const runChainConfigs = async (
         const output = codeResponse.output
         stream(output)
         AugmentInputs(inputs, config.output, output, useCamelCase)
-        AugmentCodeContext(codeContext, config.output, result)  
+        AugmentCodeContext(codeContext, config.output, result)
       }
     }
   }
