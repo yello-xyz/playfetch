@@ -22,15 +22,16 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { index, message, cost, timestamp, failed } = JSON.parse(data)
+      const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
       const output = message ?? ''
       const currentIndex = runs.length - 1
       if (index > currentIndex) {
-        runs.push({ id: index, output, cost, timestamp, failed })
+        runs.push({ id: index, output, cost, duration, timestamp, failed })
       } else {
         runs[currentIndex].output += output
         runs[currentIndex].id = index
         runs[currentIndex].cost = cost
+        runs[currentIndex].duration = duration
         runs[currentIndex].timestamp = timestamp
         runs[currentIndex].failed = failed
       }

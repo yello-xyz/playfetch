@@ -114,6 +114,7 @@ export type PartialRun = {
   output: string
   timestamp?: string
   cost?: number
+  duration?: number
   failed?: boolean
 }
 

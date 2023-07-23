@@ -1,4 +1,4 @@
-import { FormatCost, FormatDate } from '@/src/common/formatting'
+import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { ActivePrompt, Comment, PartialRun, Run, Version } from '@/types'
 import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import Icon from './icon'
@@ -47,13 +47,6 @@ export default function RunCell({
   scrollTop: number
   isLast: boolean
 }) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    if (run.timestamp) {
-      setFormattedDate(FormatDate(run.timestamp))
-    }
-  }, [run.timestamp])
-
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
 
@@ -176,9 +169,31 @@ export default function RunCell({
           </div>
         </div>
       )}
-      <div className='self-end text-xs'>{run.cost !== undefined && `${FormatCost(run.cost)} · ${formattedDate}`}</div>
+      <RunAttributes run={run} />
     </RunCellContainer>
   )
+}
+
+function RunAttributes({ run }: { run: PartialRun }) {
+  const [formattedDate, setFormattedDate] = useState<string>()
+  useEffect(() => {
+    if (run.timestamp) {
+      setFormattedDate(FormatDate(run.timestamp))
+    }
+  }, [run.timestamp])
+
+  const attributes = [] as string[]
+  if (run.duration) {
+    attributes.push(FormatDuration(run.duration))
+  }
+  if (run.cost) {
+    attributes.push(FormatCost(run.cost))
+  }
+  if (formattedDate) {
+    attributes.push(formattedDate)
+  }
+
+  return attributes.length > 0 ? <div className='self-end text-xs'>{attributes.join(' · ')}</div> : null
 }
 
 function RunCellContainer({
