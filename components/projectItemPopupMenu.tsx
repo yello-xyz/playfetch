@@ -10,8 +10,6 @@ export default function ProjectItemPopupMenu({
   reference,
   isMenuExpanded,
   setMenuExpanded,
-  onSelectPrompt,
-  onSelectChain,
   onRefresh,
   onDelete,
 }: {
@@ -19,9 +17,7 @@ export default function ProjectItemPopupMenu({
   reference: Chain | Endpoint | undefined
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
-  onSelectPrompt: (promptID: number) => void
-  onSelectChain: (chainID: number) => void
-  onRefresh: () => Promise<void>
+  onRefresh: () => void
   onDelete?: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
@@ -32,7 +28,6 @@ export default function ProjectItemPopupMenu({
 
   const deleteCall = () => (isPrompt ? api.deletePrompt(item.id) : api.deleteChain(item.id))
   const duplicateCall = () => (isPrompt ? api.duplicatePrompt(item.id) : api.duplicateChain(item.id))
-  const onDuplicated = (itemID: number) => (isPrompt ? onSelectPrompt(itemID) : onSelectChain(itemID))
   const renameCall = (name: string) => (isPrompt ? api.renamePrompt(item.id, name) : api.renameChain(item.id, name))
 
   const deleteItem = () => {
@@ -61,9 +56,7 @@ export default function ProjectItemPopupMenu({
 
   const duplicateItem = async () => {
     setMenuExpanded(false)
-    const newItemID = await duplicateCall()
-    await onRefresh()
-    onDuplicated(newItemID)
+    duplicateCall().then(onRefresh)
   }
 
   return (

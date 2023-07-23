@@ -25,7 +25,7 @@ export default function ProjectSidebar({
   onAddPrompt: () => void
   onAddChain: () => void
   onDeleteItem: () => void
-  onRefreshItem: () => Promise<void>
+  onRefreshItem: () => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
   onSelectEndpoints: () => void
@@ -40,8 +40,6 @@ export default function ProjectSidebar({
     <ProjectItemActionButton
       item={item}
       reference={reference(item)}
-      onSelectPrompt={onSelectPrompt}
-      onSelectChain={onSelectChain}
       onRefresh={onRefreshItem}
       onDelete={onDeleteItem}
     />
@@ -91,16 +89,12 @@ export default function ProjectSidebar({
 function ProjectItemActionButton({
   item,
   reference,
-  onSelectPrompt,
-  onSelectChain,
   onRefresh,
   onDelete,
 }: {
   item: Prompt | Chain
   reference: Chain | Endpoint | undefined
-  onSelectPrompt: (promptID: number) => void
-  onSelectChain: (chainID: number) => void
-  onRefresh: () => Promise<void>
+  onRefresh: () => void
   onDelete: () => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
@@ -114,8 +108,6 @@ function ProjectItemActionButton({
           isMenuExpanded={isMenuExpanded}
           setMenuExpanded={setMenuExpanded}
           reference={reference}
-          onSelectPrompt={onSelectPrompt}
-          onSelectChain={onSelectChain}
           onRefresh={onRefresh}
           onDelete={onDelete}
         />

@@ -172,7 +172,7 @@ export default function Home({
     refreshActivePrompt?.()
     refreshActiveChain?.()
     // Make sure active item is updated in sidebar too (and this will also update active endpoints).
-    return refreshProject()
+    refreshProject()
   }
 
   const onDeleteItem = async () => {
