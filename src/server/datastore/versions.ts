@@ -105,6 +105,27 @@ async function updateVersion(versionData: any) {
   )
 }
 
+export async function processLabels(
+  labels: string[],
+  userID: number,
+  versionID: number,
+  promptID: number,
+  projectID: number,
+  label: string,
+  checked: boolean,
+  runID?: number
+) {
+  if (checked !== labels.includes(label)) {
+    const newLabels = checked ? [...labels, label] : labels.filter(l => l !== label)
+    if (checked) {
+      await ensureProjectLabel(userID, projectID, label)
+    }
+    await saveComment(userID, promptID, versionID, label, checked ? 'addLabel' : 'removeLabel', runID)
+    return newLabels
+  }
+  return undefined
+}
+
 export async function toggleVersionLabel(
   userID: number,
   versionID: number,
@@ -115,13 +136,9 @@ export async function toggleVersionLabel(
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
   const labels = JSON.parse(versionData.labels) as string[]
-  if (checked !== labels.includes(label)) {
-    const newLabels = checked ? [...labels, label] : labels.filter(l => l !== label)
+  const newLabels = await processLabels(labels, userID, versionID, promptID, projectID, label, checked)
+  if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
-    if (checked) {
-      await ensureProjectLabel(userID, projectID, label)
-    }
-    await saveComment(userID, promptID, versionID, label, checked ? 'addLabel' : 'removeLabel')
   }
 }
 

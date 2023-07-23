@@ -29,8 +29,8 @@ export async function saveComment(
   versionID: number,
   text: string,
   action?: CommentAction,
-  quote?: string,
   runID?: number,
+  quote?: string,
   startIndex?: number
 ) {
   await ensurePromptAccess(userID, promptID)

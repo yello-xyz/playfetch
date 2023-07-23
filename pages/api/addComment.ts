@@ -14,8 +14,8 @@ async function addComment(req: NextApiRequest, res: NextApiResponse, user: User)
     versionID,
     req.body.text,
     undefined,
-    req.body.quote,
     req.body.runID,
+    req.body.quote,
     req.body.startIndex
   )
 
