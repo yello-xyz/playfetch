@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -12,6 +12,7 @@ import IconButton from './iconButton'
 export default function ProjectSidebar({
   activeProject,
   activeItem,
+  workspaces,
   onAddPrompt,
   onAddChain,
   onDeleteItem,
@@ -22,6 +23,7 @@ export default function ProjectSidebar({
 }: {
   activeProject: ActiveProject
   activeItem?: ActivePrompt | ActiveChain | 'endpoints'
+  workspaces: Workspace[]
   onAddPrompt: () => void
   onAddChain: () => void
   onDeleteItem: () => void
@@ -39,6 +41,7 @@ export default function ProjectSidebar({
   const actionButtonForProjectItem = (item: Prompt | Chain) => (
     <ProjectItemActionButton
       item={item}
+      workspaces={workspaces}
       reference={reference(item)}
       onRefresh={onRefreshItem}
       onDelete={onDeleteItem}
@@ -88,11 +91,13 @@ export default function ProjectSidebar({
 
 function ProjectItemActionButton({
   item,
+  workspaces,
   reference,
   onRefresh,
   onDelete,
 }: {
   item: Prompt | Chain
+  workspaces: Workspace[]
   reference: Chain | Endpoint | undefined
   onRefresh: () => void
   onDelete: () => void
@@ -104,12 +109,7 @@ function ProjectItemActionButton({
       <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
-          item={item}
-          isMenuExpanded={isMenuExpanded}
-          setMenuExpanded={setMenuExpanded}
-          reference={reference}
-          onRefresh={onRefresh}
-          onDelete={onDelete}
+          {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
         />
       </div>
     </div>

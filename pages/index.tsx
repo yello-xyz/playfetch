@@ -21,7 +21,7 @@ import WorkspaceSidebar from '@/components/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
-const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
+export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
   id: SharedProjectsWorkspaceID,
   name: 'Shared Projects',
   projects,

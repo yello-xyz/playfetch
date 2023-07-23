@@ -1,12 +1,16 @@
-import { Chain, Endpoint, Prompt } from '@/types'
+import { Chain, Endpoint, Project, Prompt, Workspace } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
+import MovePromptDialog from './movePromptDialog'
+import { useLoggedInUser } from './userContext'
+import { SharedProjectsWorkspace } from '@/pages'
 
 export default function ProjectItemPopupMenu({
   item,
+  workspaces,
   reference,
   isMenuExpanded,
   setMenuExpanded,
@@ -14,6 +18,7 @@ export default function ProjectItemPopupMenu({
   onDelete,
 }: {
   item: Prompt | Chain
+  workspaces: Workspace[]
   reference: Chain | Endpoint | undefined
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
@@ -23,6 +28,8 @@ export default function ProjectItemPopupMenu({
   const setDialogPrompt = useModalDialogPrompt()
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+  const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
+  const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
   const isPrompt = 'lastVersionID' in item
 
@@ -38,7 +45,7 @@ export default function ProjectItemPopupMenu({
       setDialogPrompt({
         title: `Cannot delete ${label} because ${reason}.`,
         confirmTitle: 'OK',
-        cancellable: false
+        cancellable: false,
       })
     } else {
       setDialogPrompt({
@@ -59,11 +66,26 @@ export default function ProjectItemPopupMenu({
     duplicateCall().then(onRefresh)
   }
 
+  const copyPromptToProject = () => {
+    setMenuExpanded(false)
+    api.getSharedProjects().then(setSharedProjects)
+    setShowMovePromptDialog(true)
+  }
+
+  const user = useLoggedInUser()
+
+  const allWorkspaces = [
+    ...workspaces.filter(workspace => workspace.id === user.id),
+    ...(sharedProjects.length > 0 ? [SharedProjectsWorkspace(sharedProjects)] : []),
+    ...workspaces.filter(workspace => workspace.id !== user.id),
+  ]
+
   return (
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename' callback={renameItem} />
+        <PopupMenuItem title='Rename…' callback={renameItem} />
         <PopupMenuItem title='Duplicate' callback={duplicateItem} />
+        {isPrompt && <PopupMenuItem title='Copy to Project…' callback={copyPromptToProject} />}
         <PopupMenuItem separated destructive title='Delete' callback={deleteItem} />
       </PopupMenu>
       {showPickNamePrompt && (
@@ -74,6 +96,14 @@ export default function ProjectItemPopupMenu({
           initialName={item.name}
           onConfirm={name => renameCall(name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
+        />
+      )}
+      {isPrompt && showMovePromptDialog && (
+        <MovePromptDialog
+          item={item}
+          workspaces={allWorkspaces}
+          onConfirm={projectID => api.duplicatePrompt(item.id, projectID).then(onRefresh)}
+          onDismiss={() => setShowMovePromptDialog(false)}
         />
       )}
     </>

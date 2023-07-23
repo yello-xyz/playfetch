@@ -241,6 +241,7 @@ export default function Home({
                 <ProjectSidebar
                   activeProject={activeProject}
                   activeItem={activeItem}
+                  workspaces={workspaces}
                   onAddPrompt={addPrompt}
                   onAddChain={addChain}
                   onDeleteItem={onDeleteItem}
