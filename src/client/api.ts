@@ -154,6 +154,9 @@ const api = {
   addChain: function (projectID: number): Promise<number> {
     return post(this.addChain, { projectID })
   },
+  duplicateChain: function (chainID: number): Promise<number> {
+    return post(this.duplicateChain, { chainID })
+  },
   updateChain: function (chainID: number, items: ChainItem[], inputs: string[]): Promise<number> {
     return post(this.updateChain, { chainID, items, inputs })
   },

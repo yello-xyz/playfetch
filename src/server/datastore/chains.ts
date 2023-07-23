@@ -89,6 +89,13 @@ export async function addChainForUser(userID: number, projectID: number): Promis
   return getID(chainData)
 }
 
+export async function duplicateChainForUser(userID: number, chainID: number): Promise<number> {
+  const chainData = await getVerifiedUserChainData(userID, chainID)
+  const newChainID = await addChainForUser(userID, chainData.projectID)
+  await updateChainItems(userID, newChainID, JSON.parse(chainData.items), JSON.parse(chainData.inputs))
+  return newChainID
+}
+
 export async function updateChain(chainData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toChainData(
