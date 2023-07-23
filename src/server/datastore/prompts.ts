@@ -86,23 +86,23 @@ export const getUniqueName = (name: string, existingNames: string[]) =>
 const DefaultPromptName = 'New Prompt'
 export const matchesDefaultPromptName = (name: string) => name.match(new RegExp(`^${DefaultPromptName}( \\d+)?$`))
 
-export async function addPromptForUser(userID: number, projectID: number, name = DefaultPromptName): Promise<number> {
+export async function addPromptForUser(userID: number, projectID: number, name = DefaultPromptName) {
   await ensureProjectAccess(userID, projectID)
   const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
   const uniqueName = await getUniqueName(name, promptNames.map(prompt => prompt.name))
   const createdAt = new Date()
   const promptData = toPromptData(projectID, uniqueName, 0, createdAt, createdAt)
   await getDatastore().save(promptData)
-  await saveVersionForUser(userID, getID(promptData))
+  const versionID = await saveVersionForUser(userID, getID(promptData))
   await updateProjectLastEditedAt(projectID)
-  return getID(promptData)
+  return { promptID: getID(promptData), versionID }
 }
 
 export async function duplicatePromptForUser(userID: number, promptID: number): Promise<number> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
-  const newPromptID = await addPromptForUser(userID, promptData.projectID, promptData.name)
+  const { promptID: newPromptID, versionID } = await addPromptForUser(userID, promptData.projectID, promptData.name)
   const lastVersion = await getKeyedEntity(Entity.VERSION, promptData.lastVersionID)
-  await saveVersionForUser(userID, newPromptID, lastVersion.prompt, JSON.parse(lastVersion.config))
+  await saveVersionForUser(userID, newPromptID, lastVersion.prompt, JSON.parse(lastVersion.config), versionID)
   return newPromptID
 }
 
