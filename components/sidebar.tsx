@@ -57,10 +57,8 @@ export function SidebarButton({
   const activeClass = 'bg-gray-100 rounded-lg'
   const baseClass = 'flex gap-1 items-center pl-4 p-1 cursor-pointer'
   const className = `${baseClass} ${active ? activeClass : ''} hover:${activeClass}`
-  const LinkWrapper = ({ children }: { children: ReactNode }) =>
-    link ? <Link href={link}>{children}</Link> : <>{children}</>
   return (
-    <LinkWrapper>
+    <LinkWrapper link={link}>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
         <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap'>{title}</div>
@@ -68,4 +66,8 @@ export function SidebarButton({
       </div>
     </LinkWrapper>
   )
+}
+
+function LinkWrapper({ link, children }: { link?: string; children: ReactNode }) {
+  return link ? <Link href={link}>{children}</Link> : <>{children}</>
 }
