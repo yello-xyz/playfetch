@@ -1,7 +1,7 @@
 import { ActivePrompt, Comment, User, Version } from '@/types'
 import { ReactNode, useEffect, useState } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
-import { VersionLabel } from './versionCell'
+import { ItemLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import collapseIcon from '@/public/collapse.svg'
@@ -79,7 +79,7 @@ export function CommentCell({
           <UserAvatar user={user} size='sm' />
           <span className='font-medium'>{user.fullName}</span>
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
-          <VersionLabel label={comment.text} colors={labelColors} />
+          <ItemLabel label={comment.text} colors={labelColors} />
           {version &&
             `${comment.action === 'addLabel' ? ' to' : ' from'} ${
               comment.runID ? 'response in ' : ''

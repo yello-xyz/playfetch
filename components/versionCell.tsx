@@ -86,7 +86,7 @@ export default function VersionCell({
         {version.labels.length > 0 && (
           <div className='flex flex-wrap gap-1'>
             {version.labels.map((label, labelIndex) => (
-              <VersionLabel label={label} colors={labelColors} key={labelIndex} />
+              <ItemLabel label={label} colors={labelColors} key={labelIndex} />
             ))}
           </div>
         )}
@@ -98,7 +98,7 @@ export default function VersionCell({
   )
 }
 
-export function VersionLabel({ label, colors }: { label: string; colors: Record<string, string> }) {
+export function ItemLabel({ label, colors }: { label: string; colors: Record<string, string> }) {
   const color = colors[label] ?? 'bg-gray-400'
   return <span className={`px-1.5 py-px text-xs text-white rounded ${color}`}>{label}</span>
 }
