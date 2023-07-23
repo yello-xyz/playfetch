@@ -10,6 +10,8 @@ export default function ProjectItemPopupMenu({
   reference,
   isMenuExpanded,
   setMenuExpanded,
+  onSelectPrompt,
+  onSelectChain,
   onRefresh,
   onDelete,
 }: {
@@ -17,7 +19,9 @@ export default function ProjectItemPopupMenu({
   reference: Chain | Endpoint | undefined
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
-  onRefresh: () => void
+  onSelectPrompt: (promptID: number) => void
+  onSelectChain: (chainID: number) => void
+  onRefresh: () => Promise<void>
   onDelete?: () => void
 }) {
   const setDialogPrompt = useModalDialogPrompt()
@@ -27,6 +31,8 @@ export default function ProjectItemPopupMenu({
   const isPrompt = 'lastVersionID' in item
 
   const deleteCall = () => (isPrompt ? api.deletePrompt(item.id) : api.deleteChain(item.id))
+  const duplicateCall = () => (isPrompt ? api.duplicatePrompt(item.id) : api.duplicateChain(item.id))
+  const onDuplicated = (itemID: number) => (isPrompt ? onSelectPrompt(itemID) : onSelectChain(itemID))
   const renameCall = (name: string) => (isPrompt ? api.renamePrompt(item.id, name) : api.renameChain(item.id, name))
 
   const deleteItem = () => {
@@ -53,10 +59,18 @@ export default function ProjectItemPopupMenu({
     setShowPickNamePrompt(true)
   }
 
+  const duplicateItem = async () => {
+    setMenuExpanded(false)
+    const newItemID = await duplicateCall()
+    await onRefresh()
+    onDuplicated(newItemID)
+  }
+
   return (
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename' callback={renameItem} />
+        <PopupMenuItem title='Duplicate' callback={duplicateItem} />
         <PopupMenuItem separated destructive title='Delete' callback={deleteItem} />
       </PopupMenu>
       {showPickNamePrompt && (
