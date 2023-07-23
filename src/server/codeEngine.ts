@@ -20,17 +20,16 @@ export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   return context
 }
 
-type CodeResponseError = { result: undefined; output: undefined; error: any }
-type CodeResponse = { result: any; output: string; error: undefined } | CodeResponseError
-
-export const IsCodeResponseError = (response: CodeResponse): response is CodeResponseError => !!response.error
+type CodeResponse =
+  | { result: any; output: string; error: undefined; failed: false }
+  | { result: undefined; output: undefined; error: any; failed: true }
 
 export const EvaluateCode = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
   try {
     const result = await context.eval(codeToCamelCase(code), { timeout: 1000, copy: true })
     const output = stringify(result)
-    return { result, output, error: undefined }
+    return { result, output, error: undefined, failed: false }
   } catch (error: any) {
-    return { result: undefined, output: undefined, error }
+    return { result: undefined, output: undefined, error, failed: true }
   }
 }

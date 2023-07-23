@@ -70,7 +70,7 @@ export const runChainConfigs = async (
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
       result = codeResponse.result
-      if (IsCodeResponseError(codeResponse)) {
+      if (codeResponse.failed) {
         stream(codeResponse.error.message)
         await callback(index, null, { cost: 0, attempts: 1, cacheHit: false, failed: true })
         break
