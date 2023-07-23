@@ -25,7 +25,7 @@ export default function MoveProjectDialog({
 
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <DropdownMenu value={workspaceID.toString()} onChange={value => setWorkspaceID(Number(value))}>
+      <DropdownMenu value={workspaceID} onChange={value => setWorkspaceID(Number(value))}>
         {workspaces.map((workspace, index) => (
           <option key={index} value={workspace.id}>
             {workspace.name}
