@@ -58,9 +58,9 @@ export default function ProjectPopupMenu({
 
   return (
     <>
-      <PopupMenu className='w-44' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename Project' callback={renameProject} />
-        {!isSharedProject && <PopupMenuItem title='Move to Workspace' callback={moveProject} />}
+      <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
+        <PopupMenuItem title='Rename Project…' callback={renameProject} />
+        {!isSharedProject && <PopupMenuItem title='Move to Workspace…' callback={moveProject} />}
         {isSharedProject && <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} />}
         {!isSharedProject && <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} />}
       </PopupMenu>
