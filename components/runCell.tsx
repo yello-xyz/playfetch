@@ -1,12 +1,11 @@
 import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
-import { ActivePrompt, Comment, PartialRun, PromptInputs, Run, Version } from '@/types'
+import { ActivePrompt, Comment, PartialRun, Version } from '@/types'
 import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import Icon from './icon'
 import commentIcon from '@/public/comment.svg'
-import chevronIcon from '@/public/chevron.svg'
 import { CommentInput, CommentsPopup } from './commentPopupMenu'
-import LabelPopupMenu, { AvailableLabelColorsForPrompt } from './labelPopupMenu'
-import { ItemLabels } from './versionCell'
+import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import RunCellHeader from './runCellHeader'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -118,7 +117,7 @@ export default function RunCell({
 
   return (
     <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp} failed={run.failed}>
-      <RunHeader run={run} prompt={prompt} containerRect={containerRect} />
+      <RunCellHeader run={run} prompt={prompt} containerRect={containerRect} />
       <OutputWithComments
         identifier={identifier}
         output={run.output}
@@ -176,74 +175,6 @@ export default function RunCell({
       )}
       <RunAttributes run={run} />
     </RunCellContainer>
-  )
-}
-
-function RunHeader({
-  run,
-  prompt,
-  containerRect,
-}: {
-  run: PartialRun
-  prompt?: ActivePrompt
-  containerRect?: DOMRect
-}) {
-  const isProperRun = (item: PartialRun): item is Run => 'labels' in (item as Run)
-
-  return prompt && isProperRun(run) ? (
-    <div className='flex items-start justify-between gap-2 text-sm'>
-      <div className='flex flex-col flex-1 gap-1'>
-        <ItemLabels labels={run.labels} colors={AvailableLabelColorsForPrompt(prompt)} />
-        <RunInputs inputs={run.inputs} />
-      </div>
-      <LabelPopupMenu containerRect={containerRect} prompt={prompt} item={run} />
-    </div>
-  ) : null
-}
-
-function RunInputs({ inputs }: { inputs: PromptInputs }) {
-  return Object.entries(inputs).length > 0 ? (
-    <CollapsibleRunHeader title='Inputs' margin='-ml-1' bold>
-      {Object.entries(inputs).map(([variable, value]) => (
-        <RunInput key={variable} variable={variable} value={value} />
-      ))}
-    </CollapsibleRunHeader>
-  ) : null
-}
-
-function RunInput({ variable, value }: { variable: string; value: string }) {
-  return (
-    <div className='flex-col'>
-      <CollapsibleRunHeader title={variable} margin='ml-2' expanded>
-        <div className='ml-8 text-gray-500'>{value}</div>
-      </CollapsibleRunHeader>
-    </div>
-  )
-}
-
-function CollapsibleRunHeader({
-  title,
-  margin,
-  bold,
-  expanded,
-  children,
-}: {
-  title: string
-  margin: string
-  bold?: boolean
-  expanded?: boolean
-  children: ReactNode
-}) {
-  const [isExpanded, setExpanded] = useState(expanded)
-
-  return (
-    <>
-      <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
-        <Icon className={`${margin} ${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
-        <span className={`${bold ? 'font-medium' : ''} text-gray-700`}>{title}</span>
-      </div>
-      {isExpanded && children}
-    </>
   )
 }
 
