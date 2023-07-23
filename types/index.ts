@@ -123,6 +123,7 @@ export type Run = PartialRun & {
   cost: number
   duration: number
   inputs: PromptInputs
+  labels: string[]
 }
 
 export type RunConfig = {
