@@ -299,10 +299,5 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   }
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
   const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', projectID)
-  await getDatastore().delete([
-    ...accessKeys,
-    ...usageKeys,
-    ...inputKeys,
-    buildKey(Entity.PROJECT, projectID),
-  ])
+  await getDatastore().delete([...accessKeys, ...usageKeys, ...inputKeys, buildKey(Entity.PROJECT, projectID)])
 }

@@ -62,7 +62,7 @@ export function PopupMenuItem({
   const baseClass = 'px-4 py-2 text-sm font-normal'
   const destructiveClass = destructive ? 'text-red-500' : ''
   const separatedClass = separated ? 'border-t border-gray-300' : ''
-  const hoverClass = 'hover:bg-blue-600 hover:text-white'
+  const hoverClass = destructive ? 'hover:bg-red-500 hover:text-white' : 'hover:bg-blue-600 hover:text-white'
 
   return (
     <div onClick={callback} className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass}`}>

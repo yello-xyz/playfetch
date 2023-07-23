@@ -81,7 +81,10 @@ const DefaultChainName = 'New Chain'
 export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName): Promise<number> {
   await ensureProjectAccess(userID, projectID)
   const chainNames = await getEntities(Entity.CHAIN, 'projectID', projectID)
-  const uniqueName = await getUniqueName(name, chainNames.map(chain => chain.name))
+  const uniqueName = await getUniqueName(
+    name,
+    chainNames.map(chain => chain.name)
+  )
   const createdAt = new Date()
   const chainData = toChainData(projectID, uniqueName, [], [], createdAt, createdAt)
   await getDatastore().save(chainData)
