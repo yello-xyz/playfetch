@@ -39,39 +39,48 @@ export const buildKey = (type: string, id?: number) => getDatastore().key([type,
 
 export const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
 
-const projectQuery = (query: Query, keysOnly: boolean) => (keysOnly ? query.select('__key__') : query)
+const projectQuery = (query: Query, keys: string[]) => (keys.length > 0 ? query.select(keys) : query)
 
 const orderQuery = (query: Query, sortKeys: string[]) =>
   sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
-const buildQuery = (type: string, filter: EntityFilter, limit: number, sortKeys: string[], keysOnly: boolean) =>
-  projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), keysOnly)
+const buildQuery = (type: string, filter: EntityFilter, limit: number, sortKeys: string[], selectKeys: string[]) =>
+  projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), selectKeys)
 
-export const getFilteredEntities = (
+const getInternalFilteredEntities = (
   type: string,
   filter: EntityFilter,
   limit = 100,
   sortKeys = [] as string[],
-  keysOnly = false
+  selectKeys = [] as string[]
 ) =>
   getDatastore()
-    .runQuery(buildQuery(type, filter, limit, sortKeys, keysOnly))
+    .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
-export const getFilteredEntity = (type: string, filter: EntityFilter) =>
-  getFilteredEntities(type, filter, 1).then(([entity]) => entity)
+export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
+  getInternalFilteredEntities(type, filter, limit)
 
-export const getEntities = (type: string, key: string, value: {}, limit?: number, sortKey?: string[]) =>
-  getFilteredEntities(type, buildFilter(key, value), limit, sortKey)
+export const getFilteredEntity = (type: string, filter: EntityFilter) =>
+  getInternalFilteredEntities(type, filter, 1).then(([entity]) => entity)
+
+const getInternalEntities = (type: string, key: string, value: {}, limit?: number, sortKeys?: string[]) =>
+  getInternalFilteredEntities(type, buildFilter(key, value), limit, sortKeys)
+
+export const getEntities = (type: string, key: string, value: {}, limit?: number) =>
+  getInternalEntities(type, key, value, limit)
+
+export const getProjectedEntities = (type: string, key: string, value: {}, selectKeys: string[], limit?: number) =>
+  getInternalFilteredEntities(type, buildFilter(key, value), limit, [], selectKeys)
 
 export const getOrderedEntities = (type: string, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
-  getEntities(type, key, value, limit, sortKeys)
+  getInternalEntities(type, key, value, limit, sortKeys)
 
 export const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
-  getEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
+  getInternalEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
 
 const getFilteredEntityKeys = (type: string, filter: EntityFilter, limit?: number) =>
-  getFilteredEntities(type, filter, limit, [], true).then(entities => entities.map(getKey))
+  getInternalFilteredEntities(type, filter, limit, [], ['__key__']).then(entities => entities.map(getKey))
 
 export const getFilteredEntityKey = (type: string, filter: EntityFilter) =>
   getFilteredEntityKeys(type, filter, 1).then(([key]) => key)
