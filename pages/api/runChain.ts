@@ -4,12 +4,7 @@ import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, Version, CodeConfig } from '@/types'
 import { getVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
-import {
-  AugmentCodeContext,
-  CreateCodeContextWithInputs,
-  EvaluateCode,
-  IsCodeResponseError,
-} from '@/src/server/codeEngine'
+import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
@@ -64,14 +59,14 @@ export const runChainConfigs = async (
       } catch {
         result = output
       }
-      if (!output?.length) {
-        await callback(index, null, { ...runResponse, failed: true })
+      if (result.failed) {
+        await callback(index, null, runResponse)
         break
       }
       runningContext += `\n\n${output}\n\n`
-      AugmentInputs(inputs, config.output, output, useCamelCase)
+      AugmentInputs(inputs, config.output, output ?? '', useCamelCase)
       AugmentCodeContext(codeContext, config.output, result)
-      await callback(index, version, { ...runResponse, failed: false })
+      await callback(index, version, runResponse)
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
       result = codeResponse.result

@@ -14,7 +14,7 @@ import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
 type PredictionResponse = { output: string | undefined; cost: number }
-type RunResponse = PredictionResponse & { attempts: number; cacheHit: boolean }
+type RunResponse = PredictionResponse & { failed: boolean; attempts: number; cacheHit: boolean }
 
 const runPromptWithConfig = async (
   userID: number,
@@ -33,7 +33,7 @@ const runPromptWithConfig = async (
 
   const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
   if (cachedValue) {
-    return { output: cachedValue, cost: 0, attempts: 1, cacheHit: true }
+    return { output: cachedValue, cost: 0, failed: false, attempts: 1, cacheHit: true }
   }
 
   const getAPIKey = async (provider: ModelProvider) => {
@@ -66,9 +66,10 @@ const runPromptWithConfig = async (
   let result: PredictionResponse = { output: undefined, cost: 0 }
   let attempts = 0
   const maxAttempts = 3
+  const hasFailed = (result: PredictionResponse) => !result.output?.length
   while (++attempts <= maxAttempts) {
     result = await predictor(prompt, config.temperature, config.maxTokens, streamChunks)
-    if (result.output?.length) {
+    if (hasFailed(result)) {
       break
     }
   }
@@ -81,7 +82,7 @@ const runPromptWithConfig = async (
     await incrementProviderCostForUser(userID, config.provider, result.cost)
   }
 
-  return { ...result, attempts, cacheHit: false }
+  return { ...result, failed: hasFailed(result), attempts, cacheHit: false }
 }
 
 export default runPromptWithConfig
