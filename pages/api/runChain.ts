@@ -60,7 +60,7 @@ export const runChainConfigs = async (
         result = output
       }
       if (result.failed) {
-        await callback(index, null, runResponse)
+        await callback(index, version, runResponse)
         break
       }
       runningContext += `\n\n${output}\n\n`
