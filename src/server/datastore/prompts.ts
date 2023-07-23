@@ -98,6 +98,14 @@ export async function addPromptForUser(userID: number, projectID: number): Promi
   return getID(promptData)
 }
 
+export async function duplicatePromptForUser(userID: number, promptID: number): Promise<number> {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+  const newPromptID = await addPromptForUser(userID, promptData.projectID)
+  const lastVersion = await getKeyedEntity(Entity.VERSION, promptData.lastVersionID)
+  await saveVersionForUser(userID, newPromptID, lastVersion.prompt, JSON.parse(lastVersion.config))
+  return newPromptID
+}
+
 export async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(

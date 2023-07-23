@@ -111,6 +111,9 @@ const api = {
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
   },
+  duplicatePrompt: function (promptID: number): Promise<number> {
+    return post(this.duplicatePrompt, { promptID })
+  },
   updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID?: number): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, config, versionID })
   },
