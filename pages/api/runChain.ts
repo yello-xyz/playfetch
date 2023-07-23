@@ -59,27 +59,27 @@ export const runChainConfigs = async (
       } catch {
         result = output
       }
-      if (result.failed) {
-        await callback(index, version, runResponse)
-        break
-      }
-      runningContext += `\n\n${output}\n\n`
-      AugmentInputs(inputs, config.output, output ?? '', useCamelCase)
-      AugmentCodeContext(codeContext, config.output, result)
       await callback(index, version, runResponse)
+      if (result.failed) {
+        break
+      } else {
+        runningContext += `\n\n${output}\n\n`
+        AugmentInputs(inputs, config.output, output ?? '', useCamelCase)
+        AugmentCodeContext(codeContext, config.output, result)  
+      }
     } else {
       const codeResponse = await EvaluateCode(config.code, codeContext)
       result = codeResponse.result
+      await callback(index, null, codeResponse)
       if (codeResponse.failed) {
         stream(codeResponse.error)
-        await callback(index, null, codeResponse)
         break
+      } else {
+        const output = codeResponse.output
+        stream(output)
+        AugmentInputs(inputs, config.output, output, useCamelCase)
+        AugmentCodeContext(codeContext, config.output, result)  
       }
-      const output = codeResponse.output
-      stream(output)
-      AugmentInputs(inputs, config.output, output, useCamelCase)
-      AugmentCodeContext(codeContext, config.output, result)
-      await callback(index, null, codeResponse)
     }
   }
 
