@@ -178,8 +178,8 @@ const api = {
   addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
     return post(this.addComment, { versionID, text, quote, runID, startIndex })
   },
-  toggleLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
-    return post(this.toggleLabel, { versionID, projectID, label, checked })
+  toggleVersionLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
+    return post(this.toggleVersionLabel, { versionID, projectID, label, checked })
   },
   updateInputValues: function (projectID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { projectID, name, values })

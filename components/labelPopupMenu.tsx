@@ -49,9 +49,7 @@ export default function LabelPopupMenu({
     setMenuExpanded(false)
     setNewLabel('')
     const checked = !version.labels.includes(label)
-    api.toggleLabel(version.id, prompt.projectID, label, checked).then(() => {
-      refreshPrompt()
-    })
+    api.toggleVersionLabel(version.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
   }
 
   return (

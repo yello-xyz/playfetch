@@ -126,17 +126,16 @@ export async function processLabels(
   return undefined
 }
 
-export async function toggleVersionLabel(
+export async function updateVersionLabel(
   userID: number,
   versionID: number,
-  promptID: number,
   projectID: number,
   label: string,
   checked: boolean
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
   const labels = JSON.parse(versionData.labels) as string[]
-  const newLabels = await processLabels(labels, userID, versionID, promptID, projectID, label, checked)
+  const newLabels = await processLabels(labels, userID, versionID, versionData.promptID, projectID, label, checked)
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
   }
