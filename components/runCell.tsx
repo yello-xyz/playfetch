@@ -1,12 +1,10 @@
-import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { ActivePrompt, Comment, PartialRun, Version } from '@/types'
 import { MouseEvent, ReactNode, useEffect, useState } from 'react'
-import Icon from './icon'
-import commentIcon from '@/public/comment.svg'
-import { CommentInput, CommentsPopup } from './commentPopupMenu'
+import { CommentsPopup } from './commentPopupMenu'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
+import RunCellCommentInputPopup from './runCellCommentInputPopup'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -145,34 +143,15 @@ export default function RunCell({
         />
       )}
       {(selection || selectionForComment) && version && !popupComments && (
-        <div
-          className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
-          style={{
-            top: (selection || selectionForComment)!.popupPoint.y - scrollTop + startScrollTop,
-            left: (selection || selectionForComment)!.popupPoint.x,
-          }}>
-          <div className='p-1 bg-white rounded-lg shadow' onMouseDown={event => event.stopPropagation()}>
-            {selectionForComment ? (
-              <div className='px-1 w-80'>
-                <CommentInput
-                  versionID={version.id}
-                  selection={selectionForComment.text}
-                  runID={run.id}
-                  startIndex={selectionForComment.startIndex}
-                  callback={closeInputPopup}
-                  focus
-                />
-              </div>
-            ) : (
-              <div
-                className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
-                onMouseDown={() => updateSelectionForComment(selection)}>
-                <Icon className='max-w-[24px]' icon={commentIcon} />
-                <div>Comment</div>
-              </div>
-            )}
-          </div>
-        </div>
+        <RunCellCommentInputPopup
+          selection={selection}
+          selectionForComment={selectionForComment}
+          versionID={version.id}
+          runID={run.id}
+          onClose={closeInputPopup}
+          onUpdateSelectionForComment={updateSelectionForComment}
+          scrollTop={scrollTop - startScrollTop}
+        />
       )}
       <RunCellFooter run={run} />
     </RunCellContainer>
