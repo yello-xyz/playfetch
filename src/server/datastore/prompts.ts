@@ -2,6 +2,7 @@ import {
   Entity,
   buildKey,
   getDatastore,
+  getEntities,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -62,12 +63,35 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
   }
 }
 
-export const DefaultPromptName = 'New Prompt'
+export const getUniqueNameWithFormat = async (
+  name: string,
+  nameExists: (name: string) => Promise<boolean> | boolean,
+  format: (name: string, suffix: number) => string
+) => {
+  let uniqueName = name
+  let counter = 2
+  while (await nameExists(uniqueName)) {
+    uniqueName = format(name, counter++)
+  }
+  return uniqueName
+}
+
+export const getUniqueName = (name: string, existingNames: string[]) =>
+  getUniqueNameWithFormat(
+    name,
+    name => existingNames.includes(name),
+    (name, counter) => `${name} ${counter}`
+  )
+
+const DefaultPromptName = 'New Prompt'
+export const matchesDefaultPromptName = (name: string) => name.match(new RegExp(`^${DefaultPromptName}( \\d+)?$`))
 
 export async function addPromptForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
+  const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
+  const name = await getUniqueName(DefaultPromptName, promptNames.map(prompt => prompt.name))
   const createdAt = new Date()
-  const promptData = toPromptData(projectID, DefaultPromptName, 0, createdAt, createdAt)
+  const promptData = toPromptData(projectID, name, 0, createdAt, createdAt)
   await getDatastore().save(promptData)
   await saveVersionForUser(userID, getID(promptData))
   await updateProjectLastEditedAt(projectID)

@@ -23,7 +23,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, deletePromptForUser, toPrompt } from './prompts'
+import { addPromptForUser, deletePromptForUser, getUniqueNameWithFormat, toPrompt } from './prompts'
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
@@ -136,12 +136,11 @@ const getUniqueURLPathFromProjectName = async (projectName: string) => {
   if (!CheckValidURLPath(urlPath)) {
     urlPath = `project-${urlPath}`
   }
-  let uniqueURLPath = urlPath
-  let counter = 2
-  while (await checkProject(uniqueURLPath)) {
-    uniqueURLPath = `${urlPath}-${counter++}`
-  }
-  return uniqueURLPath
+  return getUniqueNameWithFormat(
+    urlPath,
+    urlPath => checkProject(urlPath).then(projectID => !!projectID),
+    (name, suffix) => `${name}-${suffix}`
+  )
 }
 
 export async function addProjectForUser(userID: number, workspaceID: number, projectName: string) {

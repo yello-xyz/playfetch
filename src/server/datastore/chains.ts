@@ -2,6 +2,7 @@ import {
   Entity,
   buildKey,
   getDatastore,
+  getEntities,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -11,7 +12,7 @@ import {
 import { ActiveChain, Chain, ChainItem } from '@/types'
 import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
 import { getProjectInputValues } from './inputs'
-import { getVerifiedProjectScopedData, toPrompt } from './prompts'
+import { getUniqueName, getVerifiedProjectScopedData, toPrompt } from './prompts'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -75,12 +76,14 @@ export async function getChainItems(chainID: number): Promise<ChainItem[]> {
   return chainData ? JSON.parse(chainData.items) : []
 }
 
-export const DefaultChainName = 'New Chain'
+const DefaultChainName = 'New Chain'
 
 export async function addChainForUser(userID: number, projectID: number): Promise<number> {
   await ensureProjectAccess(userID, projectID)
+  const chainNames = await getEntities(Entity.CHAIN, 'projectID', projectID)
+  const name = await getUniqueName(DefaultChainName, chainNames.map(chain => chain.name))
   const createdAt = new Date()
-  const chainData = toChainData(projectID, DefaultChainName, [], [], createdAt, createdAt)
+  const chainData = toChainData(projectID, name, [], [], createdAt, createdAt)
   await getDatastore().save(chainData)
   await updateProjectLastEditedAt(projectID)
   return getID(chainData)

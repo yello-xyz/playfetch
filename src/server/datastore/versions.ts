@@ -11,7 +11,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { toRun } from './runs'
-import { DefaultPromptName, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
+import { ensurePromptAccess, getVerifiedUserPromptData, matchesDefaultPromptName, updatePrompt } from './prompts'
 import { StripPromptSentinels } from '@/src/common/formatting'
 import { ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
@@ -81,7 +81,7 @@ export async function saveVersionForUser(
 
   const lastPrompt = currentVersion ? currentVersion.prompt : ''
   const name =
-    promptData.name === DefaultPromptName && prompt.length && !lastPrompt.length
+    matchesDefaultPromptName(promptData.name) && prompt.length && !lastPrompt.length
       ? StripPromptSentinels(prompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
 

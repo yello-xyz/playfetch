@@ -70,9 +70,6 @@ const getInternalEntities = (type: string, key: string, value: {}, limit?: numbe
 export const getEntities = (type: string, key: string, value: {}, limit?: number) =>
   getInternalEntities(type, key, value, limit)
 
-export const getProjectedEntities = (type: string, key: string, value: {}, selectKeys: string[], limit?: number) =>
-  getInternalFilteredEntities(type, buildFilter(key, value), limit, [], selectKeys)
-
 export const getOrderedEntities = (type: string, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
   getInternalEntities(type, key, value, limit, sortKeys)
 

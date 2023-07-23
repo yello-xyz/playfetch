@@ -12,7 +12,7 @@ import {
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
-import { getVerifiedUserPromptData } from './prompts'
+import { getUniqueNameWithFormat, getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import { getVerifiedUserChainData } from './chains'
@@ -76,18 +76,17 @@ const getValidURLPath = async (
   if (!CheckValidURLPath(name)) {
     throw new Error(`Invalid name ${name} for endpoint`)
   }
-  let urlPath = name
-  let counter = 2
-  while (true) {
-    const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(urlPath, projectURLPath))
-    if (
-      endpoints.every(endpoint => endpoint.parentID === parentID) &&
-      endpoints.filter(endpoint => endpoint.flavor === flavor).every(endpoint => getID(endpoint) === endpointID)
-    ) {
-      return urlPath
-    }
-    urlPath = `${name}${counter++}`
-  }
+  return getUniqueNameWithFormat(
+    name,
+    async urlPath => {
+      const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(urlPath, projectURLPath))
+      return (
+        endpoints.some(endpoint => endpoint.parentID !== parentID) ||
+        endpoints.filter(endpoint => endpoint.flavor === flavor).some(endpoint => getID(endpoint) !== endpointID)
+      )
+    },
+    (name, counter) => `${name}${counter}`
+  )
 }
 
 export async function saveEndpoint(
