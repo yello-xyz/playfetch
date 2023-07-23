@@ -69,7 +69,7 @@ const runPromptWithConfig = async (
   const hasFailed = (result: PredictionResponse) => !result.output?.length
   while (++attempts <= maxAttempts) {
     result = await predictor(prompt, config.temperature, config.maxTokens, streamChunks)
-    if (hasFailed(result)) {
+    if (!hasFailed(result)) {
       break
     }
   }
