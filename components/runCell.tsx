@@ -1,10 +1,11 @@
 import { ActivePrompt, Comment, PartialRun, Version } from '@/types'
-import { MouseEvent, ReactNode, useEffect, useState } from 'react'
+import { MouseEvent, useEffect, useState } from 'react'
 import { CommentsPopup } from './commentPopupMenu'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellCommentInputPopup from './runCellCommentInputPopup'
+import RunCellBody from './runCellBody'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -114,10 +115,14 @@ export default function RunCell({
     }
   }
 
+  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg'
+  const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-50'
+  const shimmerClass = isLast && !run.timestamp ? 'animate-shimmer' : ''
+
   return (
-    <RunCellContainer onMouseDown={closePopups} shimmer={isLast && !run.timestamp} failed={run.failed}>
+    <div className={`${baseClass} ${colorClass} ${shimmerClass}`} onMouseDown={closePopups}>
       <RunCellHeader run={run} prompt={prompt} containerRect={containerRect} />
-      <OutputWithComments
+      <RunCellBody
         identifier={identifier}
         output={run.output}
         selectionRanges={selectionRanges}
@@ -154,62 +159,6 @@ export default function RunCell({
         />
       )}
       <RunCellFooter run={run} />
-    </RunCellContainer>
-  )
-}
-
-function RunCellContainer({
-  children,
-  onMouseDown,
-  shimmer,
-  failed,
-}: {
-  children: ReactNode
-  onMouseDown?: (event: MouseEvent) => void
-  shimmer?: boolean
-  failed?: boolean
-}) {
-  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg'
-  const colorClass = failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-50'
-  const shimmerClass = shimmer ? 'animate-shimmer' : ''
-  return (
-    <div className={`${baseClass} ${colorClass} ${shimmerClass}`} onMouseDown={onMouseDown}>
-      {children}
     </div>
   )
-}
-
-function OutputWithComments({
-  identifier,
-  output,
-  selectionRanges,
-  onSelectComment,
-}: {
-  identifier: string
-  output: string
-  selectionRanges: { startIndex: number; endIndex: number }[]
-  onSelectComment: (event: MouseEvent, startIndex: number) => void
-}) {
-  const spans = []
-
-  let index = 0
-  for (const { startIndex, endIndex } of selectionRanges.sort((a, b) => a.startIndex - b.startIndex)) {
-    if (startIndex > index) {
-      spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
-    }
-    spans.push(
-      <span
-        key={startIndex}
-        className='underline cursor-pointer bg-blue-50 decoration-blue-100 decoration-2 underline-offset-2'
-        onClick={event => onSelectComment(event, startIndex)}>
-        {output.substring(startIndex, endIndex)}
-      </span>
-    )
-    index = endIndex
-  }
-  if (index < output.length) {
-    spans.push(<span key={index}>{output.substring(index)}</span>)
-  }
-
-  return <div id={identifier}>{spans}</div>
 }
