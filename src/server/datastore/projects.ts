@@ -27,7 +27,7 @@ import { addPromptForUser, deletePromptForUser, getUniqueNameWithFormat, toPromp
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
-import { toChain } from './chains'
+import { deleteChainForUser, toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
 
@@ -289,17 +289,19 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
     // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
     throw new Error('Cannot delete multi-user project')
   }
+  const chainIDs = await getEntityIDs(Entity.CHAIN, 'projectID', projectID)
+  for (const chainID of chainIDs) {
+    await deleteChainForUser(userID, chainID)
+  }
   const promptIDs = await getEntityIDs(Entity.PROMPT, 'projectID', projectID)
   for (const promptID of promptIDs) {
     await deletePromptForUser(userID, promptID)
   }
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', projectID)
   const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', projectID)
   await getDatastore().delete([
     ...accessKeys,
     ...usageKeys,
-    ...endpointKeys,
     ...inputKeys,
     buildKey(Entity.PROJECT, projectID),
   ])
