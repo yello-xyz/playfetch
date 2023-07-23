@@ -71,15 +71,15 @@ export const runChainConfigs = async (
       const codeResponse = await EvaluateCode(config.code, codeContext)
       result = codeResponse.result
       if (codeResponse.failed) {
-        stream(codeResponse.error.message)
-        await callback(index, null, { cost: 0, attempts: 1, cacheHit: false, failed: true })
+        stream(codeResponse.error)
+        await callback(index, null, codeResponse)
         break
       }
       const output = codeResponse.output
       stream(output)
       AugmentInputs(inputs, config.output, output, useCamelCase)
       AugmentCodeContext(codeContext, config.output, result)
-      await callback(index, null, { output, cost: 0, attempts: 1, cacheHit: false, failed: false })
+      await callback(index, null, codeResponse)
     }
   }
 
