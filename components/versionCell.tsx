@@ -78,7 +78,7 @@ export default function VersionCell({
               labelColors={labelColors}
               containerRect={containerRect}
             />
-            <LabelPopupMenu containerRect={containerRect} prompt={prompt} version={version} />
+            <LabelPopupMenu containerRect={containerRect} prompt={prompt} item={version} />
             <VersionPopupMenu containerRect={containerRect} version={version} />
           </div>
         </div>

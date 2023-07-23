@@ -1,4 +1,4 @@
-import { ActivePrompt, Version } from '@/types'
+import { ActivePrompt, Run, Version } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
@@ -24,11 +24,11 @@ export const AvailableLabelColorsForPrompt = (prompt: ActivePrompt) =>
   )
 
 export default function LabelPopupMenu({
-  version,
+  item,
   prompt,
   containerRect,
 }: {
-  version: Version
+  item: Version | Run
   prompt: ActivePrompt
   containerRect?: DOMRect
 }) {
@@ -48,8 +48,13 @@ export default function LabelPopupMenu({
   const toggleLabel = (label: string) => {
     setMenuExpanded(false)
     setNewLabel('')
-    const checked = !version.labels.includes(label)
-    api.toggleVersionLabel(version.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+    const checked = !item.labels.includes(label)
+    const itemIsVersion = 'runs' in item
+    if (itemIsVersion) {
+      api.toggleVersionLabel(item.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+    } else {
+      api.toggleRunLabel(item.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+    }
   }
 
   return (
@@ -82,7 +87,7 @@ export default function LabelPopupMenu({
                     onClick={() => toggleLabel(label)}>
                     <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${colors[label]}`} />
                     <div className='flex-1'>{label}</div>
-                    {version.labels.includes(label) && <Icon icon={checkIcon} />}
+                    {item.labels.includes(label) && <Icon icon={checkIcon} />}
                   </div>
                 ))
               )}
