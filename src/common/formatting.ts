@@ -55,7 +55,9 @@ export const FormatCost = (cost: number) =>
   cost ? `${cost < 0.005 ? '<' : ''}$${Math.max(cost, 0.01).toFixed(2)}` : '$0.00'
 
 export const FormatDuration = (durationInSeconds: number) =>
-  durationInSeconds < 1 ? (durationInSeconds * 1000).toFixed(0) + 'ms' : durationInSeconds.toFixed(2) + 's'
+  durationInSeconds < 1
+    ? `${durationInSeconds < 0.0005 ? '<' : ''}${Math.max(durationInSeconds * 1000, 1).toFixed(0)}ms`
+    : durationInSeconds.toFixed(2) + 's'
 
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
