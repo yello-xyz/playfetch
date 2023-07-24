@@ -62,7 +62,6 @@ export type Chain = {
 
 export type ActiveChain = Chain & {
   projectID: number
-  users: User[]
   prompts: Prompt[]
 }
 
