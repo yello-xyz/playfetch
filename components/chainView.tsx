@@ -119,6 +119,7 @@ export default function ChainView({
         activeNode={nodes[activeNodeIndex]}
         promptCache={promptCache}
         project={project}
+        onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
       />
     </div>
   )

@@ -51,6 +51,7 @@ export default function ChainNodeEditor({
   activeNode,
   promptCache,
   project,
+  onRun,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
@@ -58,6 +59,7 @@ export default function ChainNodeEditor({
   activeNode: ChainNode
   promptCache: PromptCache
   project: ActiveProject
+  onRun: () => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     project.inputValues,
@@ -71,14 +73,16 @@ export default function ChainNodeEditor({
   const checkProviderAvailable = useCheckProvider()
 
   const runChain = async (inputs: PromptInputs[]) => {
+    if (isEditing) {
+      toggleEditing()
+    }
     persistInputValuesIfNeeded()
     const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
-    if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
+    if (items.length > 0 && versions.every(version => version && checkProviderAvailable(version.config.provider))) {
       setRunning(true)
-      if (items.length > 0) {
-        const streamReader = await api.runChain(items.map(ChainItemToConfig), inputs)
-        await ConsumeRunStreamReader(streamReader, setPartialRuns)
-      }
+      onRun()
+      const streamReader = await api.runChain(items.map(ChainItemToConfig), inputs)
+      await ConsumeRunStreamReader(streamReader, setPartialRuns)
       setRunning(false)
     }
   }
