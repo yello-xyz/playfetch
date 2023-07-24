@@ -73,17 +73,17 @@ export default function ChainNodeEditor({
   const checkProviderAvailable = useCheckProvider()
 
   const runChain = async (inputs: PromptInputs[]) => {
-    if (isEditing) {
-      toggleEditing()
-    }
     persistInputValuesIfNeeded()
-    const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
-    if (items.length > 0 && versions.every(version => version && checkProviderAvailable(version.config.provider))) {
-      setRunning(true)
-      onRun()
-      const streamReader = await api.runChain(items.map(ChainItemToConfig), inputs)
-      await ConsumeRunStreamReader(streamReader, setPartialRuns)
-      setRunning(false)
+    const currentItems = items.map((item, index) => index === editingIndex ? { ...item, code: editedCode } : item)
+    if (currentItems.length > 0) {
+      const versions = currentItems.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
+      if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
+        setRunning(true)
+        onRun()
+        const streamReader = await api.runChain(currentItems.map(ChainItemToConfig), inputs)
+        await ConsumeRunStreamReader(streamReader, setPartialRuns)
+        setRunning(false)
+      }  
     }
   }
 
@@ -101,7 +101,13 @@ export default function ChainNodeEditor({
   const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
 
+  const updateCodeBlock = (index: number) => 
+    setItems([...items.slice(0, index), { ...items[index], code: editedCode }, ...items.slice(index + 1)])
+
   const toggleEditing = (code?: string) => {
+    if (isEditing && editedCode !== (items[editingIndex!] as CodeConfig).code) {
+      setTimeout(() => updateCodeBlock(editingIndex!), 0)
+    }
     const editing = !isEditing
     setEditing(editing)
     setEditingIndex(editing ? activeItemIndex : undefined)
@@ -111,21 +117,14 @@ export default function ChainNodeEditor({
   if (isEditing && editingIndex !== activeItemIndex) {
     toggleEditing()
   }
+  if (!isEditing && IsCodeChainItem(activeNode)) {
+    toggleEditing()
+  }
 
   const insertCodeBlock = (index: number) => () => {
     const code = `'Hello world'`
     setItems([...items.slice(0, index), { code }, ...items.slice(index)])
     toggleEditing(code)
-  }
-
-  const editCodeBlock = (index: number) => () => {
-    setEditedCode((items[index] as CodeConfig).code)
-    toggleEditing()
-  }
-
-  const updateCodeBlock = (index: number) => () => {
-    setItems([...items.slice(0, index), { ...items[index], code: editedCode }, ...items.slice(index + 1)])
-    toggleEditing()
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
@@ -159,15 +158,14 @@ export default function ChainNodeEditor({
           )}
           {IsCodeChainItem(activeNode) && (
             <>
-              <div className='w-full'>
-                <RichTextInput
-                  value={isEditing ? editedCode : activeNode.code}
-                  setValue={setEditedCode}
-                  disabled={!isEditing}
-                  focus={isEditing}
-                  preformatted
-                />
-              </div>
+              <Label>Code Editor</Label>
+              <RichTextInput
+                value={isEditing ? editedCode : activeNode.code}
+                setValue={setEditedCode}
+                disabled={!isEditing}
+                focus={isEditing}
+                preformatted
+              />
               <div className='flex items-center gap-4'>
                 <Label className='whitespace-nowrap'>Mapped output</Label>
                 <OutputMapper
@@ -182,16 +180,6 @@ export default function ChainNodeEditor({
           {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
         </div>
         <div className='flex justify-end gap-4'>
-          {IsCodeChainItem(activeNode) &&
-            (isEditing ? (
-              <Button type='primary' onClick={updateCodeBlock(activeItemIndex)}>
-                Save
-              </Button>
-            ) : (
-              <Button type='primary' onClick={editCodeBlock(activeItemIndex)}>
-                Edit
-              </Button>
-            ))}
           {activeItemIndex >= 0 && (
             <>
               {activeNode !== OutputNode && (
