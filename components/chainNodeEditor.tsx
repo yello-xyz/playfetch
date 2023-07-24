@@ -43,7 +43,7 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
-export default function BuildChainTab({
+export default function ChainNodeEditor({
   items,
   setItems,
   activeNode,

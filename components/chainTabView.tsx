@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
-import BuildChainTab, { ChainNode, ExtractUnboundChainVariables, InputNode, OutputNode } from './buildChainTab'
+import ChainNodeEditor, { ChainNode, ExtractUnboundChainVariables, InputNode, OutputNode } from './chainNodeEditor'
 
 const IsChainItem = (item: ChainNode): item is ChainItem => item !== InputNode && item !== OutputNode
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
@@ -86,7 +86,7 @@ export default function ChainTabView({
 
   return (
     <div className='flex items-stretch h-full'>
-      <BuildChainTab
+      <ChainNodeEditor
         items={items}
         setItems={items => setNodes([InputNode, ...items, OutputNode])}
         activeNode={activeNode}
