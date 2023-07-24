@@ -67,7 +67,6 @@ export async function getActiveChain(userID: number, chainID: number): Promise<A
     inputValues,
     prompts,
     projectURLPath: projectData.urlPath ?? '',
-    availableFlavors: JSON.parse(projectData.flavors),
   }
 }
 

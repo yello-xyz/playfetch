@@ -51,7 +51,6 @@ export type ActivePrompt = Prompt & {
   inputValues: InputValues
   projectURLPath: string
   availableLabels: string[]
-  availableFlavors: string[]
 }
 
 export type Chain = {
@@ -69,7 +68,6 @@ export type ActiveChain = Chain & {
   inputValues: InputValues
   prompts: Prompt[]
   projectURLPath: string
-  availableFlavors: string[]
 }
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'

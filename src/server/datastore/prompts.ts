@@ -59,7 +59,6 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
     inputValues,
     projectURLPath: projectData.urlPath ?? '',
     availableLabels: JSON.parse(projectData.labels),
-    availableFlavors: JSON.parse(projectData.flavors),
   }
 }
 
