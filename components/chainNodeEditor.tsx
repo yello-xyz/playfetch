@@ -2,7 +2,7 @@ import {
   ActiveProject,
   ChainItem,
   CodeChainItem,
-  CodeConfig,
+  ModelProvider,
   PartialRun,
   Prompt,
   PromptChainItem,
@@ -11,8 +11,7 @@ import {
 } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
-import VersionSelector from './versionSelector'
-import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache, IsPromptChainItem, ChainItemToConfig, IsCodeChainItem } from './chainView'
 import Checkbox from './checkbox'
 import Button from './button'
@@ -25,6 +24,8 @@ import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
 import Label from './label'
+import VersionTimeline from './versionTimeline'
+import PromptPanel from './promptPanel'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
@@ -158,20 +159,13 @@ export default function ChainNodeEditor({
               project={project}
               promptCache={promptCache}
               onMapOutput={mapOutput}
+              checkProviderAvailable={checkProviderAvailable}
             />
           )}
           {IsCodeChainItem(activeNode) && (
             <>
-              <Label>Code Editor</Label>
-              <RichTextInput
-                value={isEditing ? editedCode : activeNode.code}
-                setValue={setEditedCode}
-                disabled={!isEditing}
-                focus={isEditing}
-                preformatted
-              />
-              <div className='flex items-center gap-4'>
-                <Label className='whitespace-nowrap'>Mapped output</Label>
+              <div className='flex items-center justify-between gap-4'>
+                <Label className='py-2'>Code Editor</Label>
                 <OutputMapper
                   key={activeNode.output}
                   output={activeNode.output}
@@ -179,6 +173,13 @@ export default function ChainNodeEditor({
                   onMapOutput={mapOutput}
                 />
               </div>
+              <RichTextInput
+                value={isEditing ? editedCode : activeNode.code}
+                setValue={setEditedCode}
+                disabled={!isEditing}
+                focus={isEditing}
+                preformatted
+              />
             </>
           )}
           {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
@@ -216,6 +217,7 @@ function PromptChainNodeEditor({
   project,
   promptCache,
   onMapOutput,
+  checkProviderAvailable,
 }: {
   node: PromptChainItem
   index: number
@@ -224,47 +226,54 @@ function PromptChainNodeEditor({
   project: ActiveProject
   promptCache: PromptCache
   onMapOutput: (output?: string) => void
+  checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
-  const loadedVersions = promptCache.promptForItem(node)?.versions ?? []
-  const version = promptCache.versionForItem(node)
+  const loadedPrompt = promptCache.promptForItem(node)
+  const activeVersion = promptCache.versionForItem(node)
 
   const replacePrompt = (promptID: number) => updateItem(promptCache.promptItemForID(promptID))
   const toggleIncludeContext = (includeContext: boolean) => updateItem({ ...items[index], includeContext })
   const selectVersion = (version: Version) => updateItem({ ...items[index], versionID: version.id })
 
   return (
-    <div className='grid grid-cols-[260px_minmax(0,1fr)] items-center gap-4 p-6 bg-gray-50 rounded-lg'>
+    <div className='flex flex-col justify-between flex-grow h-full gap-4'>
+      <div className='flex items-center justify-between gap-4'>
+        <PromptSelector
+          prompts={project.prompts}
+          selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
+          onSelectPrompt={replacePrompt}
+        />
+        <OutputMapper
+          key={node.output}
+          output={node.output}
+          inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
+          onMapOutput={onMapOutput}
+        />
+      </div>
       {items.slice(0, index).some(IsPromptChainItem) && (
-        <>
-          <Label>Include previous context into prompt</Label>
-          <Checkbox disabled={index === 0} checked={!!node.includeContext} setChecked={toggleIncludeContext} />
-        </>
-      )}
-      <PromptSelector
-        prompts={project.prompts}
-        selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
-        onSelectPrompt={replacePrompt}
-      />
-      <Label>Version</Label>
-      <VersionSelector
-        versions={loadedVersions}
-        endpoints={project.endpoints}
-        activeVersion={version}
-        setActiveVersion={selectVersion}
-        flagIfNotLatest
-      />
-      {version && (
-        <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
-          {StripPromptSentinels(version.prompt)}
+        <div className='self-start'>
+          <Checkbox
+            label='Include previous context into prompt'
+            checked={!!node.includeContext}
+            setChecked={toggleIncludeContext}
+          />
         </div>
       )}
-      <Label>Mapped output</Label>
-      <OutputMapper
-        key={node.output}
-        output={node.output}
-        inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
-        onMapOutput={onMapOutput}
-      />
+      {loadedPrompt && activeVersion && (
+        <>
+          <VersionTimeline
+            prompt={loadedPrompt}
+            activeVersion={activeVersion}
+            setActiveVersion={selectVersion}
+            tabSelector={<Label>Prompt Version</Label>}
+          />
+          <PromptPanel
+            version={activeVersion}
+            setModifiedVersion={() => {}} // TODO save prompt!
+            checkProviderAvailable={checkProviderAvailable}
+          />
+        </>
+      )}
     </div>
   )
 }
@@ -279,17 +288,20 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
 }) {
   return (
-    <DropdownMenu
-      disabled={!inputs.length}
-      value={output ?? 0}
-      onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
-      <option value={0}>Map Output</option>
-      {inputs.map((input, index) => (
-        <option key={index} value={input}>
-          {input}
-        </option>
-      ))}
-    </DropdownMenu>
+    <div className='flex items-center self-start gap-4'>
+      <Label className='whitespace-nowrap'>Map output to</Label>
+      <DropdownMenu
+        disabled={!inputs.length}
+        value={output ?? 0}
+        onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
+        <option value={0}>Map Output</option>
+        {inputs.map((input, index) => (
+          <option key={index} value={input}>
+            {input}
+          </option>
+        ))}
+      </DropdownMenu>
+    </div>
   )
 }
 
@@ -303,7 +315,7 @@ function PromptSelector({
   onSelectPrompt: (promptID: number) => void
 }) {
   return (
-    <>
+    <div className='flex items-center self-start gap-4'>
       <Label>Prompt</Label>
       <DropdownMenu value={selectedPrompt?.id} onChange={value => onSelectPrompt(Number(value))}>
         {prompts.map((prompt, index) => (
@@ -312,6 +324,6 @@ function PromptSelector({
           </option>
         ))}
       </DropdownMenu>
-    </>
+    </div>
   )
 }
