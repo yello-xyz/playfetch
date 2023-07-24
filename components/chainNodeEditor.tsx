@@ -9,7 +9,7 @@ import {
   PromptInputs,
   Version,
 } from '@/types'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
@@ -83,19 +83,11 @@ export default function ChainNodeEditor({
     }
   }
 
+
   const insertPrompt = (index: number, promptID: number) => () =>
     setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index)])
 
-  const replacePrompt = (index: number) => (promptID: number) =>
-    setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index + 1)])
-
   const removeItem = (index: number) => () => setItems([...items.slice(0, index), ...items.slice(index + 1)])
-
-  const toggleIncludeContext = (index: number) => (includeContext: boolean) =>
-    setItems([...items.slice(0, index), { ...items[index], includeContext }, ...items.slice(index + 1)])
-
-  const selectVersion = (index: number) => (version: Version) =>
-    setItems([...items.slice(0, index), { ...items[index], versionID: version.id }, ...items.slice(index + 1)])
 
   const mapOutput = (index: number) => (output?: string) => {
     const resetChain = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
@@ -109,8 +101,8 @@ export default function ChainNodeEditor({
   const toggleEditing = (code?: string) => {
     const editing = !isEditing
     setEditing(editing)
-    setEditedCode(editing ? code ?? (items[editingIndex!] as CodeConfig).code : '')
     setEditingIndex(editing ? activeItemIndex : undefined)
+    setEditedCode(editing ? code ?? (items[activeItemIndex] as CodeConfig).code : '')
   }
 
   if (isEditing && editingIndex !== activeItemIndex) {
@@ -134,7 +126,6 @@ export default function ChainNodeEditor({
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
-  const activeVersion = IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined
 
   return (
     <>
@@ -153,43 +144,15 @@ export default function ChainNodeEditor({
             </>
           )}
           {IsPromptChainItem(activeNode) && (
-            <div className='grid grid-cols-[260px_minmax(0,1fr)] items-center gap-4 p-6 bg-gray-50 rounded-lg'>
-              {items.slice(0, activeItemIndex).some(IsPromptChainItem) && (
-                <>
-                  <Label>Include previous context into prompt</Label>
-                  <Checkbox
-                    disabled={activeItemIndex === 0}
-                    checked={!!activeNode.includeContext}
-                    setChecked={toggleIncludeContext(activeItemIndex)}
-                  />
-                </>
-              )}
-              <PromptSelector
-                prompts={project.prompts}
-                selectedPrompt={project.prompts.find(prompt => prompt.id === activeNode.promptID)}
-                onSelectPrompt={replacePrompt(activeItemIndex)}
-              />
-              <Label>Version</Label>
-              <VersionSelector
-                versions={promptCache.promptForItem(activeNode)?.versions ?? []}
-                endpoints={project.endpoints}
-                activeVersion={activeVersion}
-                setActiveVersion={selectVersion(activeItemIndex)}
-                flagIfNotLatest
-              />
-              {activeVersion && (
-                <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
-                  {StripPromptSentinels(activeVersion.prompt)}
-                </div>
-              )}
-              <Label>Mapped output</Label>
-              <OutputMapper
-                key={activeNode.output}
-                output={activeNode.output}
-                inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
-                onMapOutput={mapOutput(activeItemIndex)}
-              />
-            </div>
+            <PromptChainNodeEditor
+              node={activeNode}
+              index={activeItemIndex}
+              items={items}
+              setItems={setItems}
+              project={project}
+              promptCache={promptCache}
+              onMapOutput={mapOutput(activeItemIndex)}
+            />
           )}
           {IsCodeChainItem(activeNode) && (
             <>
@@ -247,6 +210,72 @@ export default function ChainNodeEditor({
         </div>
       </div>
     </>
+  )
+}
+
+function PromptChainNodeEditor({
+  node,
+  index,
+  items,
+  setItems,
+  project,
+  promptCache,
+  onMapOutput,
+}: {
+  node: PromptChainItem
+  index: number
+  items: ChainItem[]
+  setItems: (items: ChainItem[]) => void
+  project: ActiveProject
+  promptCache: PromptCache
+  onMapOutput: (output?: string) => void
+}) {
+  const loadedVersions = promptCache.promptForItem(node)?.versions ?? []
+  const version = promptCache.versionForItem(node)
+
+  const replacePrompt = (index: number) => (promptID: number) =>
+    setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index + 1)])
+
+  const toggleIncludeContext = (index: number) => (includeContext: boolean) =>
+    setItems([...items.slice(0, index), { ...items[index], includeContext }, ...items.slice(index + 1)])
+
+  const selectVersion = (index: number) => (version: Version) =>
+    setItems([...items.slice(0, index), { ...items[index], versionID: version.id }, ...items.slice(index + 1)])
+
+  return (
+    <div className='grid grid-cols-[260px_minmax(0,1fr)] items-center gap-4 p-6 bg-gray-50 rounded-lg'>
+      {items.slice(0, index).some(IsPromptChainItem) && (
+        <>
+          <Label>Include previous context into prompt</Label>
+          <Checkbox disabled={index === 0} checked={!!node.includeContext} setChecked={toggleIncludeContext(index)} />
+        </>
+      )}
+      <PromptSelector
+        prompts={project.prompts}
+        selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
+        onSelectPrompt={replacePrompt(index)}
+      />
+      <Label>Version</Label>
+      <VersionSelector
+        versions={loadedVersions}
+        endpoints={project.endpoints}
+        activeVersion={version}
+        setActiveVersion={selectVersion(index)}
+        flagIfNotLatest
+      />
+      {version && (
+        <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
+          {StripPromptSentinels(version.prompt)}
+        </div>
+      )}
+      <Label>Mapped output</Label>
+      <OutputMapper
+        key={node.output}
+        output={node.output}
+        inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
+        onMapOutput={onMapOutput}
+      />
+    </div>
   )
 }
 
