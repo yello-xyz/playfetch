@@ -57,7 +57,6 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
     versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
     users,
     inputValues,
-    projectURLPath: projectData.urlPath ?? '',
     availableLabels: JSON.parse(projectData.labels),
   }
 }

@@ -49,7 +49,6 @@ export type ActivePrompt = Prompt & {
   versions: Version[]
   users: User[]
   inputValues: InputValues
-  projectURLPath: string
   availableLabels: string[]
 }
 
@@ -67,7 +66,6 @@ export type ActiveChain = Chain & {
   users: User[]
   inputValues: InputValues
   prompts: Prompt[]
-  projectURLPath: string
 }
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'

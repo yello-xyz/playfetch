@@ -54,7 +54,6 @@ export const toChain = (data: any): Chain => ({
 
 export async function getActiveChain(userID: number, chainID: number): Promise<ActiveChain> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
-  const projectData = await getKeyedEntity(Entity.PROJECT, chainData.projectID)
   const users = await getProjectUsers(chainData.projectID)
   const inputValues = await getProjectInputValues(chainData.projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', chainData.projectID, ['lastEditedAt'])
@@ -66,7 +65,6 @@ export async function getActiveChain(userID: number, chainID: number): Promise<A
     users,
     inputValues,
     prompts,
-    projectURLPath: projectData.urlPath ?? '',
   }
 }
 
