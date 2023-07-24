@@ -48,15 +48,6 @@ export default function PromptChainNodeEditor({
           />
           {outputMapper(node)}
         </div>
-        {items.slice(0, index).some(IsPromptChainItem) && (
-          <div className='self-start'>
-            <Checkbox
-              label='Include previous context into prompt'
-              checked={!!node.includeContext}
-              setChecked={toggleIncludeContext}
-            />
-          </div>
-        )}
         {loadedPrompt && activeVersion && (
           <>
             <VersionTimeline
@@ -65,6 +56,15 @@ export default function PromptChainNodeEditor({
               setActiveVersion={selectVersion}
               tabSelector={<Label>Prompt Version</Label>}
             />
+            {items.slice(0, index).some(IsPromptChainItem) && (
+              <div className='self-start'>
+                <Checkbox
+                  label='Include previous chain context into prompt'
+                  checked={!!node.includeContext}
+                  setChecked={toggleIncludeContext}
+                />
+              </div>
+            )}
             <PromptPanel
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}

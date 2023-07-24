@@ -90,7 +90,7 @@ export default function ChainView({
     if (unloadedItem) {
       promptCache.refreshPrompt(unloadedItem.promptID)
     }
-  }, [project, items, nodes, setNodes, activePromptCache])
+  }, [project, items, nodes, setNodes, activePromptCache, promptCache])
 
   const activeNode = nodes[activeNodeIndex]
   const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
