@@ -33,6 +33,7 @@ export default function TestChainTab({
           inputValues={inputValues}
           setInputValues={setInputValues}
           persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+          emptyMessage='Chain has no unbound inputs'
         />
       </div>
       <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />

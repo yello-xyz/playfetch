@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject } from '@/types'
 
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import TestDataPane, { EmptyTestDataPane } from './testDataPane'
+import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
@@ -59,16 +59,13 @@ export default function TestPromptTab({
       <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
         <div className='flex flex-col flex-grow gap-2 overflow-hidden min-h-[50%]'>
           {tabSelector}
-          {variables.length > 0 ? (
-            <TestDataPane
-              variables={variables}
-              inputValues={inputValues}
-              setInputValues={setInputValues}
-              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            />
-          ) : (
-            <EmptyTestDataPane />
-          )}
+          <TestDataPane
+            variables={variables}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
+            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            emptyMessage='Create inputs for your prompt below'
+          />
         </div>
         <div className='self-start'>
           <VersionSelector

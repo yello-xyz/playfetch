@@ -12,11 +12,13 @@ export default function TestDataPane({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  emptyMessage,
 }: {
   variables: string[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
+  emptyMessage: string
 }) {
   const [activeColumn, setActiveColumn] = useState(0)
   if (activeColumn > 0 && activeColumn >= variables.length) {
@@ -97,13 +99,13 @@ export default function TestDataPane({
         Add
       </div>
     </div>
-  ) : null
+  ) : <EmptyTestDataPane message={emptyMessage} />
 }
 
-export function EmptyTestDataPane() {
+function EmptyTestDataPane({ message }: { message: string }) {
   return (
     <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
-      <span className='font-medium'>Create inputs for your prompt below</span>
+      <span className='font-medium'>{message}</span>
     </div>
   )
 }
