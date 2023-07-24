@@ -60,11 +60,6 @@ export type Chain = {
   timestamp: string
 }
 
-export type ActiveChain = Chain & {
-  projectID: number
-  prompts: Prompt[]
-}
-
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-4'

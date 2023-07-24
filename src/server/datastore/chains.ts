@@ -6,12 +6,10 @@ import {
   getEntityKeys,
   getID,
   getKeyedEntity,
-  getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveChain, Chain, ChainItem } from '@/types'
-import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
-import { getProjectInputValues } from './inputs'
+import { Chain, ChainItem } from '@/types'
+import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData, toPrompt } from './prompts'
 
 export async function migrateChains() {
@@ -52,16 +50,9 @@ export const toChain = (data: any): Chain => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getActiveChain(userID: number, chainID: number): Promise<ActiveChain> {
+export async function getActiveChain(userID: number, chainID: number): Promise<Chain> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
-  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', chainData.projectID, ['lastEditedAt'])
-  const prompts = promptData.map(toPrompt)
-
-  return {
-    ...toChain(chainData),
-    projectID: chainData.projectID,
-    prompts,
-  }
+  return toChain(chainData)
 }
 
 export async function getChainItems(chainID: number): Promise<ChainItem[]> {

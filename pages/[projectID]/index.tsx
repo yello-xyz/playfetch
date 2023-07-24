@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, ActiveChain, Workspace } from '@/types'
+import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, Workspace, Chain } from '@/types'
 import PromptTabView from '@/components/promptTabView'
 import ClientRoute, {
   ChainRoute,
@@ -22,7 +22,6 @@ import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import { VersionsEqual } from '@/src/common/versionsEqual'
-import { getActiveChain } from '@/src/server/datastore/chains'
 import ProjectSidebar from '@/components/projectSidebar'
 import EndpointsView from '@/components/endpointsView'
 import { EmptyGridView } from '@/components/emptyGridView'
@@ -36,16 +35,16 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
-  const initialActiveItem =
+  let activeItem =
     endpoints === 1
       ? 'endpoints'
       : promptID
       ? await getActivePrompt(user.id, promptID)
       : chainID
-      ? await getActiveChain(user.id, chainID)
+      ? initialActiveProject.chains.find(chain => chain.id === chainID)
       : initialActiveProject.prompts.length > 0
       ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id)
-      : null
+      : undefined
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
@@ -54,13 +53,13 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       user,
       workspaces,
       initialActiveProject,
-      initialActiveItem,
+      initialActiveItem: activeItem ?? null,
       availableProviders,
     },
   }
 })
 
-type ActiveItem = ActivePrompt | ActiveChain | 'endpoints'
+type ActiveItem = ActivePrompt | Chain | 'endpoints'
 
 export default function Home({
   user,
@@ -83,7 +82,7 @@ export default function Home({
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const isPrompt = (item: ActiveItem): item is ActivePrompt =>
     item !== 'endpoints' && 'lastVersionID' in (item as ActivePrompt)
-  const isChain = (item: ActiveItem): item is ActiveChain => item !== 'endpoints' && 'items' in (item as ActiveChain)
+  const isChain = (item: ActiveItem): item is Chain => item !== 'endpoints' && 'items' in (item as Chain)
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
   const activeEndpoints = activeItem === 'endpoints' ? activeProject.endpoints : undefined

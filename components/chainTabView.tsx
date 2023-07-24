@@ -1,7 +1,7 @@
 import {
-  ActiveChain,
   ActiveProject,
   ActivePrompt,
+  Chain,
   ChainItem,
   CodeConfig,
   PartialRun,
@@ -44,7 +44,7 @@ export default function ChainTabView({
   project,
   onRefresh,
 }: {
-  chain: ActiveChain
+  chain: Chain
   project: ActiveProject
   onRefresh: () => void
 }) {
@@ -131,7 +131,7 @@ export default function ChainTabView({
           <BuildChainTab
             items={items}
             setItems={setItems}
-            prompts={chain.prompts}
+            prompts={project.prompts}
             promptCache={promptCache}
             project={project}
             inputValues={inputValues}

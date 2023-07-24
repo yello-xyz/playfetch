@@ -7,7 +7,7 @@ import {
   RunConfig,
   ModelProvider,
   Endpoint,
-  ActiveChain,
+  Chain,
   ChainItem,
   CodeConfig,
   ActiveWorkspace,
@@ -148,7 +148,7 @@ const api = {
       useStreaming,
     })
   },
-  getChain: function (chainID: number): Promise<ActiveChain> {
+  getChain: function (chainID: number): Promise<Chain> {
     return post(this.getChain, { chainID })
   },
   addChain: function (projectID: number): Promise<number> {

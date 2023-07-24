@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, Workspace } from '@/types'
+import { ActiveProject, ActivePrompt, Chain, Workspace } from '@/types'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
@@ -20,7 +20,7 @@ export default function ProjectTopBar({
 }: {
   workspaces: Workspace[]
   activeProject: ActiveProject
-  activeItem?: ActivePrompt | ActiveChain
+  activeItem?: ActivePrompt | Chain
   onRefreshProject: () => void
   onNavigateBack: () => void
   showComments: boolean

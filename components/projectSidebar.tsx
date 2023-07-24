@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -22,7 +22,7 @@ export default function ProjectSidebar({
   onSelectEndpoints,
 }: {
   activeProject: ActiveProject
-  activeItem?: ActivePrompt | ActiveChain | 'endpoints'
+  activeItem?: ActivePrompt | Chain | 'endpoints'
   workspaces: Workspace[]
   onAddPrompt: () => void
   onAddChain: () => void
