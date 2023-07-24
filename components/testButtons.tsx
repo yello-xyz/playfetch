@@ -49,11 +49,13 @@ const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: str
 }
 
 export default function TestButtons({
+  runTitle,
   variables,
   inputValues,
   disabled,
   callback,
 }: {
+  runTitle?: string
   variables: string[]
   inputValues: InputValues
   disabled?: boolean
@@ -96,7 +98,7 @@ export default function TestButtons({
         <option value={'all'}>All</option>
       </DropdownMenu>
       <PendingButton disabled={disabled || isRunningAllVariants} onClick={testPrompt}>
-        Run
+        {runTitle ?? 'Run'}
       </PendingButton>
     </div>
   )
