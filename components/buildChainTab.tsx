@@ -1,14 +1,33 @@
-import { ActiveProject, ChainItem, CodeConfig, InputValues, Prompt, PromptInputs, Version } from '@/types'
+import {
+  ActiveProject,
+  ChainItem,
+  CodeChainItem,
+  CodeConfig,
+  PartialRun,
+  Prompt,
+  PromptChainItem,
+  PromptInputs,
+  Version,
+} from '@/types'
 import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import Label from './label'
-import { PromptCache, IsPromptChainItem } from './chainTabView'
-import InputVariable from './inputVariable'
+import { PromptCache, IsPromptChainItem, ChainItemToConfig } from './chainTabView'
 import Checkbox from './checkbox'
-import Button, { PendingButton } from './button'
+import Button from './button'
 import RichTextInput from './richTextInput'
+import useInputValues from './inputValues'
+import useCheckProvider from './checkProvider'
+import { ConsumeRunStreamReader } from './promptTabView'
+import api from '@/src/client/api'
+import RunTimeline from './runTimeline'
+import TestDataPane from './testDataPane'
+import TestButtons from './testButtons'
+
+export const InputNode = 'input'
+export const OutputNode = 'output'
+export type ChainNode = PromptChainItem | CodeChainItem | typeof InputNode | typeof OutputNode
 
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
   ...new Set(
@@ -27,20 +46,40 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
 export default function BuildChainTab({
   items,
   setItems,
+  activeNode,
   promptCache,
   project,
-  inputValues,
-  runChain,
-  tabSelector,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
+  activeNode: ChainNode
   promptCache: PromptCache
   project: ActiveProject
-  inputValues: InputValues
-  runChain: (inputs: PromptInputs[]) => Promise<void>
-  tabSelector: ReactNode
 }) {
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
+    project.inputValues,
+    project.id,
+    JSON.stringify(activeNode)
+  )
+
+  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
+  const [isRunning, setRunning] = useState(false)
+
+  const checkProviderAvailable = useCheckProvider()
+
+  const runChain = async (inputs: PromptInputs[]) => {
+    persistInputValuesIfNeeded()
+    const versions = items.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
+    if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
+      setRunning(true)
+      if (items.length > 0) {
+        const streamReader = await api.runChain(items.map(ChainItemToConfig), inputs)
+        await ConsumeRunStreamReader(streamReader, setPartialRuns)
+      }
+      setRunning(false)
+    }
+  }
+
   const chainItemFromPromptID = (promptID: number): ChainItem => {
     const prompt = project.prompts.find(prompt => prompt.id === promptID)!
     const versionID = prompt.lastVersionID
@@ -90,24 +129,20 @@ export default function BuildChainTab({
     setEditCodeIndex(undefined)
   }
 
-  // In the build tab, we resolve each variable with any available input and otherwise let it stand for itself.
   const variables = ExtractUnboundChainVariables(items, promptCache)
-  const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable]?.[0] ?? variable]))
 
   return (
     <>
       <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto min-w-[680px]'>
-        {tabSelector}
-        <div className='flex flex-wrap gap-2'>
-          {variables.length > 0 && (
-            <>
-              <Label className='pl-2'>Inputs:</Label>
-              {variables.map((variable, index) => (
-                <InputVariable key={index}>{variable}</InputVariable>
-              ))}
-            </>
-          )}
-        </div>
+        {activeNode === InputNode && (
+          <TestDataPane
+            variables={variables}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
+            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            emptyMessage='Chain has no unbound inputs'
+          />
+        )}
         {items.map((item, index) => (
           <div key={index} className='flex items-start gap-2'>
             {IsPromptChainItem(item) && (
@@ -174,6 +209,11 @@ export default function BuildChainTab({
             />
           </div>
         ))}
+        {activeNode === OutputNode && (
+          <div className='flex-1 p-6 pl-0 min-w-[30%]'>
+            <RunTimeline runs={partialRuns} isRunning={isRunning} />
+          </div>
+        )}
         <Column>
           <div className='min-w-[200px]'>
             <PromptSelector
@@ -185,11 +225,7 @@ export default function BuildChainTab({
             />
           </div>
         </Column>
-        <div className='flex flex-col self-end justify-end flex-1'>
-          <PendingButton disabled={!items.length} onClick={() => runChain([inputs])}>
-            Run Chain
-          </PendingButton>
-        </div>
+        <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />
       </div>
     </>
   )
