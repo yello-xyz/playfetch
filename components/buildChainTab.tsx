@@ -27,7 +27,6 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
 export default function BuildChainTab({
   items,
   setItems,
-  prompts,
   promptCache,
   project,
   inputValues,
@@ -36,7 +35,6 @@ export default function BuildChainTab({
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
-  prompts: Prompt[]
   promptCache: PromptCache
   project: ActiveProject
   inputValues: InputValues
@@ -44,7 +42,7 @@ export default function BuildChainTab({
   tabSelector: ReactNode
 }) {
   const chainItemFromPromptID = (promptID: number): ChainItem => {
-    const prompt = prompts.find(prompt => prompt.id === promptID)!
+    const prompt = project.prompts.find(prompt => prompt.id === promptID)!
     const versionID = prompt.lastVersionID
     const cachedPrompt = promptCache.promptForID(promptID)
     return {
@@ -121,8 +119,8 @@ export default function BuildChainTab({
                     setChecked={toggleIncludeContext(index)}
                   />
                   <PromptSelector
-                    prompts={prompts}
-                    selectedPrompt={prompts.find(prompt => prompt.id === item.promptID)}
+                    prompts={project.prompts}
+                    selectedPrompt={project.prompts.find(prompt => prompt.id === item.promptID)}
                     onSelectPrompt={replacePrompt(index)}
                     onInsertCodeBlock={insertCodeBlock(index)}
                     onRemovePrompt={removeItem(index)}
@@ -180,7 +178,7 @@ export default function BuildChainTab({
           <div className='min-w-[200px]'>
             <PromptSelector
               key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
-              prompts={prompts}
+              prompts={project.prompts}
               onSelectPrompt={addPrompt}
               onInsertCodeBlock={insertCodeBlock(items.length)}
               includeAddPromptOption

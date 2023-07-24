@@ -24,7 +24,7 @@ import { toActivePrompt } from '@/pages/[projectID]'
 
 const InputNode = 'input'
 const OutputNode = 'output'
-type ChainNode = PromptChainItem | CodeChainItem | typeof InputNode | typeof OutputNode
+export type ChainNode = PromptChainItem | CodeChainItem | typeof InputNode | typeof OutputNode
 
 const IsChainItem = (item: ChainNode): item is ChainItem => item !== 'input' && item !== 'output'
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
@@ -139,7 +139,6 @@ export default function ChainTabView({
           <BuildChainTab
             items={items}
             setItems={items => setNodes([InputNode, ...items, OutputNode])}
-            prompts={project.prompts}
             promptCache={promptCache}
             project={project}
             inputValues={inputValues}
