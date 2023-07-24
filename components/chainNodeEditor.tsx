@@ -1,19 +1,8 @@
-import {
-  ActiveProject,
-  ChainItem,
-  CodeChainItem,
-  ModelProvider,
-  PartialRun,
-  Prompt,
-  PromptChainItem,
-  PromptInputs,
-  Version,
-} from '@/types'
+import { ActiveProject, ChainItem, CodeChainItem, PartialRun, PromptChainItem, PromptInputs, Version } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache, IsPromptChainItem, ChainItemToConfig, IsCodeChainItem } from './chainView'
-import Checkbox from './checkbox'
 import Button from './button'
 import RichTextInput from './richTextInput'
 import useInputValues from './inputValues'
@@ -24,10 +13,8 @@ import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
 import Label from './label'
-import VersionTimeline from './versionTimeline'
-import PromptPanel from './promptPanel'
 import useSavePrompt from './useSavePrompt'
-import { RefreshContext } from './refreshContext'
+import PromptChainNodeEditor from './promptChainNodeEditor'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
@@ -168,6 +155,15 @@ export default function ChainNodeEditor({
     selectVersion(activePrompt.versions.slice(-1)[0])
   }
 
+  const outputMapper = (node: PromptChainItem | CodeChainItem) => (
+    <OutputMapper
+      key={node.output}
+      output={node.output}
+      inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
+      onMapOutput={mapOutput}
+    />
+  )
+
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
@@ -192,7 +188,7 @@ export default function ChainNodeEditor({
               updateItem={updateItem}
               project={project}
               promptCache={promptCache}
-              onMapOutput={mapOutput}
+              outputMapper={outputMapper}
               checkProviderAvailable={checkProviderAvailable}
               selectVersion={selectVersion}
               setModifiedVersion={setModifiedVersion}
@@ -202,12 +198,7 @@ export default function ChainNodeEditor({
             <>
               <div className='flex items-center justify-between gap-4'>
                 <Label className='py-2'>Code Editor</Label>
-                <OutputMapper
-                  key={activeNode.output}
-                  output={activeNode.output}
-                  inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
-                  onMapOutput={mapOutput}
-                />
+                {outputMapper(activeNode)}
               </div>
               <RichTextInput
                 value={isEditing ? editedCode : activeNode.code}
@@ -245,80 +236,6 @@ export default function ChainNodeEditor({
   )
 }
 
-function PromptChainNodeEditor({
-  node,
-  index,
-  items,
-  updateItem,
-  project,
-  promptCache,
-  onMapOutput,
-  checkProviderAvailable,
-  selectVersion,
-  setModifiedVersion,
-}: {
-  node: PromptChainItem
-  index: number
-  items: ChainItem[]
-  updateItem: (item: ChainItem) => void
-  project: ActiveProject
-  promptCache: PromptCache
-  onMapOutput: (output?: string) => void
-  checkProviderAvailable: (provider: ModelProvider) => boolean
-  selectVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
-}) {
-  const loadedPrompt = promptCache.promptForItem(node)
-  const activeVersion = promptCache.versionForItem(node)
-
-  const replacePrompt = (promptID: number) => updateItem(promptCache.promptItemForID(promptID))
-  const toggleIncludeContext = (includeContext: boolean) => updateItem({ ...items[index], includeContext })
-
-  return (
-    <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
-      <div className='flex flex-col justify-between flex-grow h-full gap-4'>
-        <div className='flex items-center justify-between gap-4'>
-          <PromptSelector
-            prompts={project.prompts}
-            selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
-            onSelectPrompt={replacePrompt}
-          />
-          <OutputMapper
-            key={node.output}
-            output={node.output}
-            inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
-            onMapOutput={onMapOutput}
-          />
-        </div>
-        {items.slice(0, index).some(IsPromptChainItem) && (
-          <div className='self-start'>
-            <Checkbox
-              label='Include previous context into prompt'
-              checked={!!node.includeContext}
-              setChecked={toggleIncludeContext}
-            />
-          </div>
-        )}
-        {loadedPrompt && activeVersion && (
-          <>
-            <VersionTimeline
-              prompt={loadedPrompt}
-              activeVersion={activeVersion}
-              setActiveVersion={selectVersion}
-              tabSelector={<Label>Prompt Version</Label>}
-            />
-            <PromptPanel
-              version={activeVersion}
-              setModifiedVersion={setModifiedVersion}
-              checkProviderAvailable={checkProviderAvailable}
-            />
-          </>
-        )}
-      </div>
-    </RefreshContext.Provider>
-  )
-}
-
 function OutputMapper({
   output,
   inputs,
@@ -339,29 +256,6 @@ function OutputMapper({
         {inputs.map((input, index) => (
           <option key={index} value={input}>
             {input}
-          </option>
-        ))}
-      </DropdownMenu>
-    </div>
-  )
-}
-
-function PromptSelector({
-  prompts,
-  selectedPrompt,
-  onSelectPrompt,
-}: {
-  prompts: Prompt[]
-  selectedPrompt?: Prompt
-  onSelectPrompt: (promptID: number) => void
-}) {
-  return (
-    <div className='flex items-center self-start gap-4'>
-      <Label>Prompt</Label>
-      <DropdownMenu value={selectedPrompt?.id} onChange={value => onSelectPrompt(Number(value))}>
-        {prompts.map((prompt, index) => (
-          <option key={index} value={prompt.id}>
-            {prompt.name}
           </option>
         ))}
       </DropdownMenu>
