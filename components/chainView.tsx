@@ -3,7 +3,9 @@ import {
   ActivePrompt,
   Chain,
   ChainItem,
+  CodeChainItem,
   CodeConfig,
+  Prompt,
   PromptChainItem,
   RunConfig,
   Version,
@@ -15,6 +17,7 @@ import ChainNodeEditor, { ChainNode, ExtractUnboundChainVariables, InputNode, Ou
 
 const IsChainItem = (item: ChainNode): item is ChainItem => item !== InputNode && item !== OutputNode
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
+export const IsCodeChainItem = (item: ChainNode): item is CodeChainItem => IsChainItem(item) && 'code' in item
 export const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
   IsPromptChainItem(item)
     ? {
@@ -40,7 +43,7 @@ export default function ChainView({
   onRefresh: () => void
 }) {
   const [nodes, setNodes] = useState([InputNode, ...chain.items, OutputNode] as ChainNode[])
-  const [activeNode, setActiveNode] = useState(nodes.slice(1)[0])
+  const [activeNodeIndex, setActiveNodeIndex] = useState(1)
   const items = nodes.filter(IsChainItem)
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
@@ -86,13 +89,55 @@ export default function ChainView({
 
   return (
     <div className='flex items-stretch h-full'>
+      <div className='flex flex-col items-center w-1/3 h-full p-8 pr-0 overflow-y-auto'>
+        {nodes.map((node, index) => (
+          <ChainNodeBox
+            key={index}
+            chainNode={node}
+            isFirst={index === 0}
+            isActive={index === activeNodeIndex}
+            callback={() => setActiveNodeIndex(index)}
+            prompts={project.prompts}
+          />
+        ))}
+      </div>
       <ChainNodeEditor
         items={items}
         setItems={items => setNodes([InputNode, ...items, OutputNode])}
-        activeNode={activeNode}
+        activeIndex={activeNodeIndex}
+        activeNode={nodes[activeNodeIndex]}
         promptCache={promptCache}
         project={project}
       />
     </div>
+  )
+}
+
+function ChainNodeBox({
+  chainNode,
+  isFirst,
+  isActive,
+  callback,
+  prompts,
+}: {
+  chainNode: ChainNode
+  isFirst: boolean
+  isActive: boolean
+  callback: () => void
+  prompts: Prompt[]
+}) {
+  const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
+  return (
+    <>
+    {!isFirst && <div className='w-px h-8 border-l border-gray-300' />}
+    <div
+      className={`text-center border p-4 rounded-lg cursor-pointer ${colorClass}`}
+      onClick={callback}>
+      {chainNode === InputNode && 'Input'}
+      {chainNode === OutputNode && 'Output'}
+      {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
+      {IsCodeChainItem(chainNode) && 'Code block'}
+    </div>
+    </>
   )
 }

@@ -13,7 +13,7 @@ import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import { PromptCache, IsPromptChainItem, ChainItemToConfig } from './chainView'
+import { PromptCache, IsPromptChainItem, ChainItemToConfig, IsCodeChainItem } from './chainView'
 import Checkbox from './checkbox'
 import Button from './button'
 import RichTextInput from './richTextInput'
@@ -46,12 +46,14 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
 export default function ChainNodeEditor({
   items,
   setItems,
+  activeIndex,
   activeNode,
   promptCache,
   project,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
+  activeIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
   project: ActiveProject
@@ -133,7 +135,7 @@ export default function ChainNodeEditor({
 
   return (
     <>
-      <div className='flex flex-col h-full gap-2 p-6 overflow-y-auto min-w-[680px]'>
+      <div className='flex flex-col flex-1 h-full gap-2 p-6 overflow-y-auto'>
         {activeNode === InputNode && (
           <TestDataPane
             variables={variables}
@@ -143,72 +145,78 @@ export default function ChainNodeEditor({
             emptyMessage='Chain has no unbound inputs'
           />
         )}
-        {items.map((item, index) => (
-          <div key={index} className='flex items-start gap-2'>
-            {IsPromptChainItem(item) && (
-              <>
-                <Column wide>
-                  <Checkbox
-                    disabled={index === 0}
-                    checked={!!item.includeContext}
-                    setChecked={toggleIncludeContext(index)}
-                  />
-                  <PromptSelector
-                    prompts={project.prompts}
-                    selectedPrompt={project.prompts.find(prompt => prompt.id === item.promptID)}
-                    onSelectPrompt={replacePrompt(index)}
-                    onInsertCodeBlock={insertCodeBlock(index)}
-                    onRemovePrompt={removeItem(index)}
-                  />
-                </Column>
-                <Column>
-                  <VersionSelector
-                    versions={promptCache.promptForItem(item)?.versions ?? []}
-                    endpoints={project.endpoints}
-                    activeVersion={promptCache.versionForItem(item)}
-                    setActiveVersion={selectVersion(index)}
-                    flagIfNotLatest
-                  />
-                </Column>
-              </>
-            )}
-            {!IsPromptChainItem(item) && (
-              <>
-                <Column wide>
-                  <div className='w-full'>
-                    <RichTextInput
-                      value={index === editCodeIndex ? editedCode : item.code}
-                      setValue={setEditedCode}
-                      disabled={index !== editCodeIndex}
-                      focus={index === editCodeIndex}
-                      preformatted
-                    />
-                  </div>
-                </Column>
-                <Column>
-                  {editCodeIndex === index ? (
-                    <Button type='outline' onClick={updateCodeBlock(index)}>
-                      Save
-                    </Button>
-                  ) : (
-                    <Button type='outline' onClick={editCodeBlock(index)}>
-                      Edit
-                    </Button>
-                  )}
-                  <Button type='destructive' onClick={removeItem(index)}>
-                    Remove
-                  </Button>
-                </Column>
-              </>
-            )}
-            <OutputMapper
-              key={item.output}
-              output={item.output}
-              inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
-              onMapOutput={mapOutput(index)}
-            />
-          </div>
-        ))}
+        {IsPromptChainItem(activeNode) && (
+          <>
+            <Column wide>
+              <Checkbox
+                disabled={activeIndex === 0}
+                checked={!!activeNode.includeContext}
+                setChecked={toggleIncludeContext(activeIndex)}
+              />
+              <PromptSelector
+                prompts={project.prompts}
+                selectedPrompt={project.prompts.find(prompt => prompt.id === activeNode.promptID)}
+                onSelectPrompt={replacePrompt(activeIndex)}
+                onInsertCodeBlock={insertCodeBlock(activeIndex)}
+                onRemovePrompt={removeItem(activeIndex)}
+              />
+            </Column>
+            <Column>
+              <VersionSelector
+                versions={promptCache.promptForItem(activeNode)?.versions ?? []}
+                endpoints={project.endpoints}
+                activeVersion={promptCache.versionForItem(activeNode)}
+                setActiveVersion={selectVersion(activeIndex)}
+                flagIfNotLatest
+              />
+            </Column>
+            <Column>
+              <OutputMapper
+                key={activeNode.output}
+                output={activeNode.output}
+                inputs={ExtractChainVariables(items.slice(activeIndex + 1), promptCache)}
+                onMapOutput={mapOutput(activeIndex)}
+              />
+            </Column>
+          </>
+        )}
+        {IsCodeChainItem(activeNode) && (
+          <>
+            <Column wide>
+              <div className='w-full'>
+                <RichTextInput
+                  value={activeIndex === editCodeIndex ? editedCode : activeNode.code}
+                  setValue={setEditedCode}
+                  disabled={activeIndex !== editCodeIndex}
+                  focus={activeIndex === editCodeIndex}
+                  preformatted
+                />
+              </div>
+            </Column>
+            <Column>
+              {editCodeIndex === activeIndex ? (
+                <Button type='outline' onClick={updateCodeBlock(activeIndex)}>
+                  Save
+                </Button>
+              ) : (
+                <Button type='outline' onClick={editCodeBlock(activeIndex)}>
+                  Edit
+                </Button>
+              )}
+              <Button type='destructive' onClick={removeItem(activeIndex)}>
+                Remove
+              </Button>
+            </Column>
+            <Column>
+              <OutputMapper
+                key={activeNode.output}
+                output={activeNode.output}
+                inputs={ExtractChainVariables(items.slice(activeIndex + 1), promptCache)}
+                onMapOutput={mapOutput(activeIndex)}
+              />
+            </Column>
+          </>
+        )}
         {activeNode === OutputNode && (
           <div className='flex-1 p-6 pl-0 min-w-[30%]'>
             <RunTimeline runs={partialRuns} isRunning={isRunning} />
@@ -245,19 +253,17 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
 }) {
   return (
-    <Column>
-      <DropdownMenu
-        disabled={!inputs.length}
-        value={output ?? 0}
-        onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
-        <option value={0}>Map Output</option>
-        {inputs.map((input, index) => (
-          <option key={index} value={input}>
-            {input}
-          </option>
-        ))}
-      </DropdownMenu>
-    </Column>
+    <DropdownMenu
+      disabled={!inputs.length}
+      value={output ?? 0}
+      onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
+      <option value={0}>Map Output</option>
+      {inputs.map((input, index) => (
+        <option key={index} value={input}>
+          {input}
+        </option>
+      ))}
+    </DropdownMenu>
   )
 }
 
