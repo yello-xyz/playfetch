@@ -104,7 +104,7 @@ export default function ChainView({
       <ChainNodeEditor
         items={items}
         setItems={items => setNodes([InputNode, ...items, OutputNode])}
-        activeIndex={activeNodeIndex}
+        activeItemIndex={activeNodeIndex - 1}
         activeNode={nodes[activeNodeIndex]}
         promptCache={promptCache}
         project={project}

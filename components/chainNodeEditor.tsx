@@ -46,14 +46,14 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
 export default function ChainNodeEditor({
   items,
   setItems,
-  activeIndex,
+  activeItemIndex,
   activeNode,
   promptCache,
   project,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
-  activeIndex: number
+  activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
   project: ActiveProject
@@ -93,7 +93,8 @@ export default function ChainNodeEditor({
     }
   }
 
-  const addPrompt = (promptID: number) => setItems([...items, chainItemFromPromptID(promptID)])
+  const insertPrompt = (index: number, promptID: number) => () =>
+    setItems([...items.slice(0, index), chainItemFromPromptID(promptID), ...items.slice(index)])
 
   const replacePrompt = (index: number) => (promptID: number) =>
     setItems([...items.slice(0, index), chainItemFromPromptID(promptID), ...items.slice(index + 1)])
@@ -149,16 +150,14 @@ export default function ChainNodeEditor({
           <>
             <Column wide>
               <Checkbox
-                disabled={activeIndex === 0}
+                disabled={activeItemIndex === 0} // TODO should consider if there are previous prompt items
                 checked={!!activeNode.includeContext}
-                setChecked={toggleIncludeContext(activeIndex)}
+                setChecked={toggleIncludeContext(activeItemIndex)}
               />
               <PromptSelector
                 prompts={project.prompts}
                 selectedPrompt={project.prompts.find(prompt => prompt.id === activeNode.promptID)}
-                onSelectPrompt={replacePrompt(activeIndex)}
-                onInsertCodeBlock={insertCodeBlock(activeIndex)}
-                onRemovePrompt={removeItem(activeIndex)}
+                onSelectPrompt={replacePrompt(activeItemIndex)}
               />
             </Column>
             <Column>
@@ -166,7 +165,7 @@ export default function ChainNodeEditor({
                 versions={promptCache.promptForItem(activeNode)?.versions ?? []}
                 endpoints={project.endpoints}
                 activeVersion={promptCache.versionForItem(activeNode)}
-                setActiveVersion={selectVersion(activeIndex)}
+                setActiveVersion={selectVersion(activeItemIndex)}
                 flagIfNotLatest
               />
             </Column>
@@ -174,8 +173,8 @@ export default function ChainNodeEditor({
               <OutputMapper
                 key={activeNode.output}
                 output={activeNode.output}
-                inputs={ExtractChainVariables(items.slice(activeIndex + 1), promptCache)}
-                onMapOutput={mapOutput(activeIndex)}
+                inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
+                onMapOutput={mapOutput(activeItemIndex)}
               />
             </Column>
           </>
@@ -185,25 +184,25 @@ export default function ChainNodeEditor({
             <Column wide>
               <div className='w-full'>
                 <RichTextInput
-                  value={activeIndex === editCodeIndex ? editedCode : activeNode.code}
+                  value={activeItemIndex === editCodeIndex ? editedCode : activeNode.code}
                   setValue={setEditedCode}
-                  disabled={activeIndex !== editCodeIndex}
-                  focus={activeIndex === editCodeIndex}
+                  disabled={activeItemIndex !== editCodeIndex}
+                  focus={activeItemIndex === editCodeIndex}
                   preformatted
                 />
               </div>
             </Column>
             <Column>
-              {editCodeIndex === activeIndex ? (
-                <Button type='outline' onClick={updateCodeBlock(activeIndex)}>
+              {editCodeIndex === activeItemIndex ? (
+                <Button type='outline' onClick={updateCodeBlock(activeItemIndex)}>
                   Save
                 </Button>
               ) : (
-                <Button type='outline' onClick={editCodeBlock(activeIndex)}>
+                <Button type='outline' onClick={editCodeBlock(activeItemIndex)}>
                   Edit
                 </Button>
               )}
-              <Button type='destructive' onClick={removeItem(activeIndex)}>
+              <Button type='destructive' onClick={removeItem(activeItemIndex)}>
                 Remove
               </Button>
             </Column>
@@ -211,8 +210,8 @@ export default function ChainNodeEditor({
               <OutputMapper
                 key={activeNode.output}
                 output={activeNode.output}
-                inputs={ExtractChainVariables(items.slice(activeIndex + 1), promptCache)}
-                onMapOutput={mapOutput(activeIndex)}
+                inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
+                onMapOutput={mapOutput(activeItemIndex)}
               />
             </Column>
           </>
@@ -222,18 +221,26 @@ export default function ChainNodeEditor({
             <RunTimeline runs={partialRuns} isRunning={isRunning} />
           </div>
         )}
-        <Column>
-          <div className='min-w-[200px]'>
-            <PromptSelector
-              key={items.map(item => (IsPromptChainItem(item) ? item.versionID : 'code')).join('')}
-              prompts={project.prompts}
-              onSelectPrompt={addPrompt}
-              onInsertCodeBlock={insertCodeBlock(items.length)}
-              includeAddPromptOption
-            />
-          </div>
-        </Column>
-        <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />
+        <div className='flex justify-end gap-4'>
+          {activeItemIndex >= 0 && (
+            <>
+              {activeNode !== OutputNode && (
+                <Button type='outline' onClick={removeItem(activeItemIndex)}>
+                  Remove
+                </Button>
+              )}
+              {project.prompts.length > 0 && (
+                <Button type='outline' onClick={insertPrompt(activeItemIndex, project.prompts[0].id)}>
+                  Insert Prompt
+                </Button>
+              )}
+              <Button type='outline' onClick={insertCodeBlock(activeItemIndex)}>
+                Insert Code Block
+              </Button>
+            </>
+          )}
+          <TestButtons variables={variables} inputValues={inputValues} callback={runChain} />
+        </div>
       </div>
     </>
   )
@@ -271,50 +278,18 @@ function PromptSelector({
   prompts,
   selectedPrompt,
   onSelectPrompt,
-  includeAddPromptOption,
-  onInsertCodeBlock,
-  onRemovePrompt,
 }: {
   prompts: Prompt[]
   selectedPrompt?: Prompt
   onSelectPrompt: (promptID: number) => void
-  includeAddPromptOption?: boolean
-  onInsertCodeBlock: () => void
-  onRemovePrompt?: () => void
 }) {
-  enum Option {
-    ADD = 0,
-    REMOVE = 1,
-    INSERT = 2,
-  }
-
-  const selectOption = (value: number) => {
-    switch (value) {
-      case Option.ADD:
-        return
-      case Option.REMOVE:
-        return onRemovePrompt?.()
-      case Option.INSERT:
-        return onInsertCodeBlock()
-      default:
-        return onSelectPrompt(value)
-    }
-  }
-
   return (
-    <DropdownMenu value={selectedPrompt?.id} onChange={value => selectOption(Number(value))}>
-      {includeAddPromptOption && <option value={Option.ADD}>Add Prompt to Chain</option>}
+    <DropdownMenu value={selectedPrompt?.id} onChange={value => onSelectPrompt(Number(value))}>
       {prompts.map((prompt, index) => (
         <option key={index} value={prompt.id}>
           {prompt.name}
         </option>
       ))}
-      <HackyOptionSeparator />
-      <option value={Option.INSERT}>Insert Code Block</option>
-      {onRemovePrompt && <HackyOptionSeparator />}
-      {onRemovePrompt && <option value={Option.REMOVE}>Remove Prompt from Chain</option>}
     </DropdownMenu>
   )
 }
-
-const HackyOptionSeparator = () => <option disabled>────────────────────────────────────</option>
