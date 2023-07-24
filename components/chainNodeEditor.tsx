@@ -44,6 +44,12 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
+const updatedItems = (items: ChainItem[], item: ChainItem | null, index: number, insert = false) => [
+  ...items.slice(0, index),
+  ...(item ? [item] : []),
+  ...items.slice(index + (insert ? 0 : 1)),
+]
+
 export default function ChainNodeEditor({
   items,
   setItems,
@@ -74,7 +80,7 @@ export default function ChainNodeEditor({
 
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
-    const currentItems = items.map((item, index) => index === editingIndex ? { ...item, code: editedCode } : item)
+    const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
     if (currentItems.length > 0) {
       const versions = currentItems.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
@@ -83,35 +89,36 @@ export default function ChainNodeEditor({
         const streamReader = await api.runChain(currentItems.map(ChainItemToConfig), inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
         setRunning(false)
-      }  
+      }
     }
   }
 
-  const insertPrompt = (index: number, promptID: number) => () =>
-    setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index)])
+  const updateItem = (item: ChainItem | null, sourceItems = items, index = activeItemIndex, insert = false) =>
+    setItems(updatedItems(sourceItems, item, index, insert))
+  const insertItem = (item: ChainItem) => updateItem(item, items, activeItemIndex, true)
 
-  const removeItem = (index: number) => () => setItems([...items.slice(0, index), ...items.slice(index + 1)])
+  const removeItem = () => updateItem(null)
+  const insertPrompt = () => insertItem(promptCache.promptItemForID(project.prompts[0].id))
 
-  const mapOutput = (index: number) => (output?: string) => {
+  const mapOutput = (output?: string) => {
     const resetChain = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
-    setItems([...resetChain.slice(0, index), { ...resetChain[index], output }, ...resetChain.slice(index + 1)])
+    updateItem({ ...resetChain[activeItemIndex], output }, resetChain)
   }
 
   const [isEditing, setEditing] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
 
-  const updateCodeBlock = (index: number) => 
-    setItems([...items.slice(0, index), { ...items[index], code: editedCode }, ...items.slice(index + 1)])
+  const codeForItemAtIndex = (index: number) => (items[index] as CodeChainItem).code
 
   const toggleEditing = (code?: string) => {
-    if (isEditing && editedCode !== (items[editingIndex!] as CodeConfig).code) {
-      setTimeout(() => updateCodeBlock(editingIndex!), 0)
+    if (isEditing && editingIndex !== undefined && editedCode !== codeForItemAtIndex(editingIndex)) {
+      setTimeout(() => updateItem({ ...items[editingIndex], code: editedCode }, items, editingIndex), 0)
     }
     const editing = !isEditing
     setEditing(editing)
     setEditingIndex(editing ? activeItemIndex : undefined)
-    setEditedCode(editing ? code ?? (items[activeItemIndex] as CodeConfig).code : '')
+    setEditedCode(editing ? code ?? codeForItemAtIndex(activeItemIndex) : '')
   }
 
   if (isEditing && editingIndex !== activeItemIndex) {
@@ -121,9 +128,9 @@ export default function ChainNodeEditor({
     toggleEditing()
   }
 
-  const insertCodeBlock = (index: number) => () => {
+  const insertCodeBlock = () => {
     const code = `'Hello world'`
-    setItems([...items.slice(0, index), { code }, ...items.slice(index)])
+    insertItem({ code })
     toggleEditing(code)
   }
 
@@ -150,10 +157,10 @@ export default function ChainNodeEditor({
               node={activeNode}
               index={activeItemIndex}
               items={items}
-              setItems={setItems}
+              updateItem={updateItem}
               project={project}
               promptCache={promptCache}
-              onMapOutput={mapOutput(activeItemIndex)}
+              onMapOutput={mapOutput}
             />
           )}
           {IsCodeChainItem(activeNode) && (
@@ -172,7 +179,7 @@ export default function ChainNodeEditor({
                   key={activeNode.output}
                   output={activeNode.output}
                   inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
-                  onMapOutput={mapOutput(activeItemIndex)}
+                  onMapOutput={mapOutput}
                 />
               </div>
             </>
@@ -183,16 +190,16 @@ export default function ChainNodeEditor({
           {activeItemIndex >= 0 && (
             <>
               {activeNode !== OutputNode && (
-                <Button type='destructive' onClick={removeItem(activeItemIndex)}>
+                <Button type='destructive' onClick={removeItem}>
                   Remove
                 </Button>
               )}
               {project.prompts.length > 0 && (
-                <Button type='outline' onClick={insertPrompt(activeItemIndex, project.prompts[0].id)}>
+                <Button type='outline' onClick={insertPrompt}>
                   Insert Prompt
                 </Button>
               )}
-              <Button type='outline' onClick={insertCodeBlock(activeItemIndex)}>
+              <Button type='outline' onClick={insertCodeBlock}>
                 Insert Code Block
               </Button>
             </>
@@ -208,7 +215,7 @@ function PromptChainNodeEditor({
   node,
   index,
   items,
-  setItems,
+  updateItem,
   project,
   promptCache,
   onMapOutput,
@@ -216,7 +223,7 @@ function PromptChainNodeEditor({
   node: PromptChainItem
   index: number
   items: ChainItem[]
-  setItems: (items: ChainItem[]) => void
+  updateItem: (item: ChainItem) => void
   project: ActiveProject
   promptCache: PromptCache
   onMapOutput: (output?: string) => void
@@ -224,34 +231,29 @@ function PromptChainNodeEditor({
   const loadedVersions = promptCache.promptForItem(node)?.versions ?? []
   const version = promptCache.versionForItem(node)
 
-  const replacePrompt = (index: number) => (promptID: number) =>
-    setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index + 1)])
-
-  const toggleIncludeContext = (index: number) => (includeContext: boolean) =>
-    setItems([...items.slice(0, index), { ...items[index], includeContext }, ...items.slice(index + 1)])
-
-  const selectVersion = (index: number) => (version: Version) =>
-    setItems([...items.slice(0, index), { ...items[index], versionID: version.id }, ...items.slice(index + 1)])
+  const replacePrompt = (promptID: number) => updateItem(promptCache.promptItemForID(promptID))
+  const toggleIncludeContext = (includeContext: boolean) => updateItem({ ...items[index], includeContext })
+  const selectVersion = (version: Version) => updateItem({ ...items[index], versionID: version.id })
 
   return (
     <div className='grid grid-cols-[260px_minmax(0,1fr)] items-center gap-4 p-6 bg-gray-50 rounded-lg'>
       {items.slice(0, index).some(IsPromptChainItem) && (
         <>
           <Label>Include previous context into prompt</Label>
-          <Checkbox disabled={index === 0} checked={!!node.includeContext} setChecked={toggleIncludeContext(index)} />
+          <Checkbox disabled={index === 0} checked={!!node.includeContext} setChecked={toggleIncludeContext} />
         </>
       )}
       <PromptSelector
         prompts={project.prompts}
         selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
-        onSelectPrompt={replacePrompt(index)}
+        onSelectPrompt={replacePrompt}
       />
       <Label>Version</Label>
       <VersionSelector
         versions={loadedVersions}
         endpoints={project.endpoints}
         activeVersion={version}
-        setActiveVersion={selectVersion(index)}
+        setActiveVersion={selectVersion}
         flagIfNotLatest
       />
       {version && (
