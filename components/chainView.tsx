@@ -129,7 +129,7 @@ function ChainNodeBox({
   const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
   return (
     <>
-    {!isFirst && <div className='w-px h-8 border-l border-gray-300' />}
+    {!isFirst && <div className='w-px h-4 border-l border-gray-300 min-h-[16px]' />}
     <div
       className={`text-center border p-4 rounded-lg cursor-pointer ${colorClass}`}
       onClick={callback}>

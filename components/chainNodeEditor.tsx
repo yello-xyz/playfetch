@@ -12,7 +12,7 @@ import {
 import { ReactNode, useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import VersionSelector from './versionSelector'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, StripPromptSentinels } from '@/src/common/formatting'
 import { PromptCache, IsPromptChainItem, ChainItemToConfig, IsCodeChainItem } from './chainView'
 import Checkbox from './checkbox'
 import Button from './button'
@@ -24,6 +24,7 @@ import api from '@/src/client/api'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
+import Label from './label'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
@@ -133,55 +134,65 @@ export default function ChainNodeEditor({
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
+  const activeVersion = IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined
 
   return (
     <>
-      <div className='flex flex-col flex-1 h-full gap-2 p-6 overflow-y-auto'>
-        {activeNode === InputNode && (
-          <TestDataPane
-            variables={variables}
-            inputValues={inputValues}
-            setInputValues={setInputValues}
-            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            emptyMessage='Chain has no unbound inputs'
-          />
-        )}
-        {IsPromptChainItem(activeNode) && (
-          <>
-            <Column wide>
-              <Checkbox
-                disabled={activeItemIndex === 0} // TODO should consider if there are previous prompt items
-                checked={!!activeNode.includeContext}
-                setChecked={toggleIncludeContext(activeItemIndex)}
+      <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
+        <div className='flex flex-col flex-1 w-full gap-2 overflow-y-auto'>
+          {activeNode === InputNode && (
+            <>
+              <Label>Test data</Label>
+              <TestDataPane
+                variables={variables}
+                inputValues={inputValues}
+                setInputValues={setInputValues}
+                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+                emptyMessage='Chain has no unbound inputs'
               />
+            </>
+          )}
+          {IsPromptChainItem(activeNode) && (
+            <div className='grid grid-cols-[260px_minmax(0,1fr)] items-center gap-4 p-6 bg-gray-50 rounded-lg'>
+              {items.slice(0, activeItemIndex).some(IsPromptChainItem) && (
+                <>
+                  <Label>Include previous context into prompt</Label>
+                  <Checkbox
+                    disabled={activeItemIndex === 0}
+                    checked={!!activeNode.includeContext}
+                    setChecked={toggleIncludeContext(activeItemIndex)}
+                  />
+                </>
+              )}
               <PromptSelector
                 prompts={project.prompts}
                 selectedPrompt={project.prompts.find(prompt => prompt.id === activeNode.promptID)}
                 onSelectPrompt={replacePrompt(activeItemIndex)}
               />
-            </Column>
-            <Column>
+              <Label>Version</Label>
               <VersionSelector
                 versions={promptCache.promptForItem(activeNode)?.versions ?? []}
                 endpoints={project.endpoints}
-                activeVersion={promptCache.versionForItem(activeNode)}
+                activeVersion={activeVersion}
                 setActiveVersion={selectVersion(activeItemIndex)}
                 flagIfNotLatest
               />
-            </Column>
-            <Column>
+              {activeVersion && (
+                <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
+                  {StripPromptSentinels(activeVersion.prompt)}
+                </div>
+              )}
+              <Label>Mapped output</Label>
               <OutputMapper
                 key={activeNode.output}
                 output={activeNode.output}
                 inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
                 onMapOutput={mapOutput(activeItemIndex)}
               />
-            </Column>
-          </>
-        )}
-        {IsCodeChainItem(activeNode) && (
-          <>
-            <Column wide>
+            </div>
+          )}
+          {IsCodeChainItem(activeNode) && (
+            <>
               <div className='w-full'>
                 <RichTextInput
                   value={activeItemIndex === editCodeIndex ? editedCode : activeNode.code}
@@ -191,8 +202,6 @@ export default function ChainNodeEditor({
                   preformatted
                 />
               </div>
-            </Column>
-            <Column>
               {editCodeIndex === activeItemIndex ? (
                 <Button type='outline' onClick={updateCodeBlock(activeItemIndex)}>
                   Save
@@ -205,22 +214,19 @@ export default function ChainNodeEditor({
               <Button type='destructive' onClick={removeItem(activeItemIndex)}>
                 Remove
               </Button>
-            </Column>
-            <Column>
-              <OutputMapper
-                key={activeNode.output}
-                output={activeNode.output}
-                inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
-                onMapOutput={mapOutput(activeItemIndex)}
-              />
-            </Column>
-          </>
-        )}
-        {activeNode === OutputNode && (
-          <div className='flex-1 p-6 pl-0 min-w-[30%]'>
-            <RunTimeline runs={partialRuns} isRunning={isRunning} />
-          </div>
-        )}
+              <div className='flex items-center gap-4'>
+                <Label className='whitespace-nowrap'>Mapped output</Label>
+                <OutputMapper
+                  key={activeNode.output}
+                  output={activeNode.output}
+                  inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
+                  onMapOutput={mapOutput(activeItemIndex)}
+                />
+              </div>
+            </>
+          )}
+          {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
+        </div>
         <div className='flex justify-end gap-4'>
           {activeItemIndex >= 0 && (
             <>
@@ -244,10 +250,6 @@ export default function ChainNodeEditor({
       </div>
     </>
   )
-}
-
-function Column({ children, wide }: { children: ReactNode; wide?: boolean }) {
-  return <div className={`w-full ${wide ? 'max-w-[50%]' : 'max-w-[25%]'} flex gap-2`}>{children}</div>
 }
 
 function OutputMapper({
@@ -284,12 +286,15 @@ function PromptSelector({
   onSelectPrompt: (promptID: number) => void
 }) {
   return (
-    <DropdownMenu value={selectedPrompt?.id} onChange={value => onSelectPrompt(Number(value))}>
-      {prompts.map((prompt, index) => (
-        <option key={index} value={prompt.id}>
-          {prompt.name}
-        </option>
-      ))}
-    </DropdownMenu>
+    <>
+      <Label>Prompt</Label>
+      <DropdownMenu value={selectedPrompt?.id} onChange={value => onSelectPrompt(Number(value))}>
+        {prompts.map((prompt, index) => (
+          <option key={index} value={prompt.id}>
+            {prompt.name}
+          </option>
+        ))}
+      </DropdownMenu>
+    </>
   )
 }
