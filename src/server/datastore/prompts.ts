@@ -49,14 +49,12 @@ export async function getActivePrompt(userID: number, promptID: number): Promise
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const users = await getProjectUsers(promptData.projectID)
-  const inputValues = await getProjectInputValues(promptData.projectID)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
 
   return {
     ...toPrompt(promptData),
     versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
     users,
-    inputValues,
     availableLabels: JSON.parse(projectData.labels),
   }
 }

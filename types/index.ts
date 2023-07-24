@@ -48,7 +48,6 @@ export type ActivePrompt = Prompt & {
   projectID: number
   versions: Version[]
   users: User[]
-  inputValues: InputValues
   availableLabels: string[]
 }
 
@@ -64,7 +63,6 @@ export type Chain = {
 export type ActiveChain = Chain & {
   projectID: number
   users: User[]
-  inputValues: InputValues
   prompts: Prompt[]
 }
 

@@ -1,4 +1,4 @@
-import { ActivePrompt, ModelProvider, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode } from 'react'
@@ -10,6 +10,7 @@ export default function PlayTab({
   setModifiedVersion,
   checkProviderAvailable,
   runPrompt,
+  inputValues,
   maxWidth,
   tabSelector,
 }: {
@@ -19,6 +20,7 @@ export default function PlayTab({
   setModifiedVersion: (version: Version) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  inputValues: InputValues
   maxWidth: string
   tabSelector: ReactNode
 }) {
@@ -35,7 +37,7 @@ export default function PlayTab({
         setModifiedVersion={setModifiedVersion}
         checkProviderAvailable={checkProviderAvailable}
         runPrompt={runPrompt}
-        inputValues={prompt.inputValues}
+        inputValues={inputValues}
         showLabel
       />
     </div>

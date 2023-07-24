@@ -64,8 +64,8 @@ export default function PromptTabView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('versions')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    prompt.inputValues,
-    prompt.projectID,
+    project.inputValues,
+    project.id,
     activeTab
   )
 
@@ -119,6 +119,7 @@ export default function PromptTabView({
             setModifiedVersion={setModifiedVersion}
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
+            inputValues={inputValues}
             maxWidth={maxTabWidth}
             tabSelector={tabSelector}
           />

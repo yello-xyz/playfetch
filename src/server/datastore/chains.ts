@@ -55,7 +55,6 @@ export const toChain = (data: any): Chain => ({
 export async function getActiveChain(userID: number, chainID: number): Promise<ActiveChain> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const users = await getProjectUsers(chainData.projectID)
-  const inputValues = await getProjectInputValues(chainData.projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', chainData.projectID, ['lastEditedAt'])
   const prompts = promptData.map(toPrompt)
 
@@ -63,7 +62,6 @@ export async function getActiveChain(userID: number, chainID: number): Promise<A
     ...toChain(chainData),
     projectID: chainData.projectID,
     users,
-    inputValues,
     prompts,
   }
 }

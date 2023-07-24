@@ -51,8 +51,8 @@ export default function ChainTabView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('buildchain')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    chain.inputValues,
-    chain.projectID,
+    project.inputValues,
+    project.id,
     activeTab
   )
 
