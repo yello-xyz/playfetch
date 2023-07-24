@@ -1,9 +1,8 @@
 import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, Workspace, Chain } from '@/types'
-import PromptTabView from '@/components/promptTabView'
 import ClientRoute, {
   ChainRoute,
   EndpointsRoute,
@@ -18,7 +17,6 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
 import { RefreshContext } from '@/components/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
-import ChainTabView from '@/components/chainTabView'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import { VersionsEqual } from '@/src/common/versionsEqual'
@@ -27,6 +25,10 @@ import EndpointsView from '@/components/endpointsView'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
+
+import dynamic from 'next/dynamic'
+const PromptTabView = dynamic(() => import('@/components/promptTabView'))
+const ChainTabView = dynamic(() => import('@/components/chainTabView'))
 
 export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
   ...project.prompts.find(prompt => prompt.id === promptID)!,
@@ -265,24 +267,28 @@ export default function Home({
                 />
                 <div className='flex-1'>
                   {activePrompt && activeVersion && (
-                    <PromptTabView
-                      prompt={activePrompt}
-                      project={activeProject}
-                      activeVersion={activeVersion}
-                      setActiveVersion={selectVersion}
-                      setModifiedVersion={setModifiedVersion}
-                      showComments={showComments}
-                      setShowComments={setShowComments}
-                      savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
-                    />
+                    <Suspense>
+                      <PromptTabView
+                        prompt={activePrompt}
+                        project={activeProject}
+                        activeVersion={activeVersion}
+                        setActiveVersion={selectVersion}
+                        setModifiedVersion={setModifiedVersion}
+                        showComments={showComments}
+                        setShowComments={setShowComments}
+                        savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
+                      />
+                    </Suspense>
                   )}
                   {activeChain && (
-                    <ChainTabView
-                      key={activeChain.id}
-                      chain={activeChain}
-                      project={activeProject}
-                      onRefresh={refreshProject}
-                    />
+                    <Suspense>
+                      <ChainTabView
+                        key={activeChain.id}
+                        chain={activeChain}
+                        project={activeProject}
+                        onRefresh={refreshProject}
+                      />
+                    </Suspense>
                   )}
                   {activeEndpoints && <EndpointsView project={activeProject} onRefresh={refreshProject} />}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
