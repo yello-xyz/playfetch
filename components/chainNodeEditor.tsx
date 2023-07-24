@@ -78,9 +78,26 @@ export default function ChainNodeEditor({
 
   const checkProviderAvailable = useCheckProvider()
 
+  const [isEditing, setEditing] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number>()
+  const [editedCode, setEditedCode] = useState<string>('')
+  const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
+
+  const toggleEditing = () => {
+    const editing = !isEditing
+    setEditing(editing)
+    setEditingIndex(editing ? activeItemIndex : undefined)
+    setEditedCode(editing ? (items[activeItemIndex] as CodeChainItem).code : '')
+  }
+  if (editingIndex !== undefined && editingIndex !== activeItemIndex) {
+    setTimeout(() => updateItem(currentItems[editingIndex], items, editingIndex), 0)
+  }
+  if (!isEditing && IsCodeChainItem(activeNode)) {
+    toggleEditing()
+  }
+
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
-    const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
     if (currentItems.length > 0) {
       const versions = currentItems.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
@@ -93,45 +110,25 @@ export default function ChainNodeEditor({
     }
   }
 
-  const updateItem = (item: ChainItem | null, sourceItems = items, index = activeItemIndex, insert = false) =>
-    setItems(updatedItems(sourceItems, item, index, insert))
-  const insertItem = (item: ChainItem) => updateItem(item, items, activeItemIndex, true)
-
-  const removeItem = () => updateItem(null)
-  const insertPrompt = () => insertItem(promptCache.promptItemForID(project.prompts[0].id))
-
-  const mapOutput = (output?: string) => {
-    const resetChain = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
-    updateItem({ ...resetChain[activeItemIndex], output }, resetChain)
-  }
-
-  const [isEditing, setEditing] = useState(false)
-  const [editingIndex, setEditingIndex] = useState<number>()
-  const [editedCode, setEditedCode] = useState<string>('')
-
-  const codeForItemAtIndex = (index: number) => (items[index] as CodeChainItem).code
-
-  const toggleEditing = (code?: string) => {
-    if (isEditing && editingIndex !== undefined && editedCode !== codeForItemAtIndex(editingIndex)) {
-      setTimeout(() => updateItem({ ...items[editingIndex], code: editedCode }, items, editingIndex), 0)
+  const updateItem = (item: ChainItem | null, items = currentItems, index = activeItemIndex, insert = false) => {
+    setItems(updatedItems(items, item, index, insert))
+    if (isEditing) {
+      toggleEditing()
     }
-    const editing = !isEditing
-    setEditing(editing)
-    setEditingIndex(editing ? activeItemIndex : undefined)
-    setEditedCode(editing ? code ?? codeForItemAtIndex(activeItemIndex) : '')
   }
+  const removeItem = () => updateItem(null)
+  const insertItem = (item: ChainItem) => updateItem(item, currentItems, activeItemIndex, true)
 
-  if (isEditing && editingIndex !== activeItemIndex) {
-    toggleEditing()
-  }
-  if (!isEditing && IsCodeChainItem(activeNode)) {
-    toggleEditing()
-  }
+  const insertPrompt = () => insertItem(promptCache.promptItemForID(project.prompts[0].id))
 
   const insertCodeBlock = () => {
     const code = `'Hello world'`
     insertItem({ code })
-    toggleEditing(code)
+  }
+
+  const mapOutput = (output?: string) => {
+    const resetChain = currentItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
+    updateItem({ ...resetChain[activeItemIndex], output }, resetChain)
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
