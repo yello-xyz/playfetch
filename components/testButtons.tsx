@@ -67,8 +67,10 @@ export default function TestButtons({
 
   const [isRunningAllVariants, setRunningAllVariants] = useState(false)
 
+  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+  const multipleInputs = selectInputs(allInputs, 'all').length > 1
+
   const testPrompt = async () => {
-    const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
     const inputs = selectInputs(allInputs, testMode)
     if (inputs.length > 1) {
       setDialogPrompt({
@@ -88,7 +90,7 @@ export default function TestButtons({
   return (
     <div className='flex items-center self-end gap-4'>
       <DropdownMenu
-        disabled={!variables.length}
+        disabled={!multipleInputs}
         size='medium'
         value={testMode}
         onChange={value => setTestMode(value as TestMode)}>
