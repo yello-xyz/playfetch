@@ -9,6 +9,9 @@ import ProjectItemPopupMenu from './projectItemPopupMenu'
 import { useState } from 'react'
 import IconButton from './iconButton'
 
+const Endpoints = 'endpoints'
+type ActiveItem = ActivePrompt | Chain | typeof Endpoints
+
 export default function ProjectSidebar({
   activeProject,
   activeItem,
@@ -22,7 +25,7 @@ export default function ProjectSidebar({
   onSelectEndpoints,
 }: {
   activeProject: ActiveProject
-  activeItem?: ActivePrompt | Chain | 'endpoints'
+  activeItem?: ActiveItem
   workspaces: Workspace[]
   onAddPrompt: () => void
   onAddChain: () => void
@@ -57,7 +60,7 @@ export default function ProjectSidebar({
         <SidebarButton
           title='Endpoints'
           icon={endpointIcon}
-          active={activeItem === 'endpoints'}
+          active={activeItem === Endpoints}
           onClick={onSelectEndpoints}
         />
       </SidebarSection>
@@ -67,7 +70,7 @@ export default function ProjectSidebar({
             key={promptIndex}
             title={prompt.name}
             icon={promptIcon}
-            active={activeItem !== 'endpoints' && activeItem?.id === prompt.id}
+            active={activeItem !== Endpoints && activeItem?.id === prompt.id}
             onClick={() => onSelectPrompt(prompt.id)}
             actionComponent={actionButtonForProjectItem(prompt)}
           />
@@ -79,7 +82,7 @@ export default function ProjectSidebar({
             key={chainIndex}
             title={chain.name}
             icon={chainIcon}
-            active={activeItem !== 'endpoints' && activeItem?.id === chain.id}
+            active={activeItem !== Endpoints && activeItem?.id === chain.id}
             onClick={() => onSelectChain(chain.id)}
             actionComponent={actionButtonForProjectItem(chain)}
           />

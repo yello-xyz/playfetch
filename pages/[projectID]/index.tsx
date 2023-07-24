@@ -37,6 +37,9 @@ export const toActivePrompt = (promptID: number, versions: Version[], project: A
   availableLabels: project.availableLabels,
 })
 
+const Endpoints = 'endpoints'
+type ActiveItem = ActivePrompt | Chain | typeof Endpoints
+
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
 
@@ -52,7 +55,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
 
   let activeItem =
     endpoints === 1
-      ? 'endpoints'
+      ? Endpoints
       : promptID
       ? await getActivePrompt(promptID)
       : chainID
@@ -74,8 +77,6 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   }
 })
 
-type ActiveItem = ActivePrompt | Chain | 'endpoints'
-
 export default function Home({
   user,
   workspaces,
@@ -96,11 +97,11 @@ export default function Home({
   const [activeProject, setActiveProject] = useState(initialActiveProject)
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const isPrompt = (item: ActiveItem): item is ActivePrompt =>
-    item !== 'endpoints' && 'lastVersionID' in (item as ActivePrompt)
-  const isChain = (item: ActiveItem): item is Chain => item !== 'endpoints' && 'items' in (item as Chain)
+    item !== Endpoints && 'lastVersionID' in (item as ActivePrompt)
+  const isChain = (item: ActiveItem): item is Chain => item !== Endpoints && 'items' in (item as Chain)
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
-  const activeEndpoints = activeItem === 'endpoints' ? activeProject.endpoints : undefined
+  const activeEndpoints = activeItem === Endpoints ? activeProject.endpoints : undefined
 
   const [showComments, setShowComments] = useState(false)
 
@@ -176,7 +177,7 @@ export default function Home({
   }
 
   const selectEndpoints = () => {
-    setActiveItem('endpoints')
+    setActiveItem(Endpoints)
     updateVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
@@ -204,7 +205,7 @@ export default function Home({
   }
 
   const { p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(router.query)
-  const currentQueryState = endpoints ? 'endpoints' : promptID ?? chainID ?? activeProject.prompts[0]?.id
+  const currentQueryState = endpoints ? Endpoints : promptID ?? chainID ?? activeProject.prompts[0]?.id
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (endpoints) {
