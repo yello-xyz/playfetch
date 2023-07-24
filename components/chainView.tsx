@@ -30,7 +30,7 @@ export type PromptCache = {
   versionForItem: (item: PromptChainItem) => Version | undefined
 }
 
-export default function ChainTabView({
+export default function ChainView({
   chain,
   project,
   onRefresh,

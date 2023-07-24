@@ -27,8 +27,8 @@ import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
 
 import dynamic from 'next/dynamic'
-const PromptTabView = dynamic(() => import('@/components/promptTabView'))
-const ChainTabView = dynamic(() => import('@/components/chainTabView'))
+const PromptView = dynamic(() => import('@/components/promptView'))
+const ChainView = dynamic(() => import('@/components/chainView'))
 
 export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
   ...project.prompts.find(prompt => prompt.id === promptID)!,
@@ -269,7 +269,7 @@ export default function Home({
                 <div className='flex-1'>
                   {activePrompt && activeVersion && (
                     <Suspense>
-                      <PromptTabView
+                      <PromptView
                         prompt={activePrompt}
                         project={activeProject}
                         activeVersion={activeVersion}
@@ -283,7 +283,7 @@ export default function Home({
                   )}
                   {activeChain && (
                     <Suspense>
-                      <ChainTabView
+                      <ChainView
                         key={activeChain.id}
                         chain={activeChain}
                         project={activeProject}

@@ -42,7 +42,7 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
 
 type ActiveTab = 'versions' | 'testdata'
 
-export default function PromptTabView({
+export default function PromptView({
   prompt,
   project,
   activeVersion,
