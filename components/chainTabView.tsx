@@ -3,8 +3,10 @@ import {
   ActivePrompt,
   Chain,
   ChainItem,
+  CodeChainItem,
   CodeConfig,
   PartialRun,
+  PromptChainItem,
   PromptInputs,
   RunConfig,
   Version,
@@ -20,9 +22,9 @@ import RunTimeline from './runTimeline'
 import TabSelector, { TabButton } from './tabSelector'
 import { toActivePrompt } from '@/pages/[projectID]'
 
-type PromptChainItem = RunConfig & { promptID: number }
-
-export const IsPromptChainItem = (item: ChainItem): item is PromptChainItem => 'promptID' in item
+type ChainNode = PromptChainItem | CodeChainItem | 'input' | 'output'
+const IsChainItem = (item: ChainNode): item is ChainItem => item !== 'input' && item !== 'output'
+export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
 export const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
   IsPromptChainItem(item)
     ? {
@@ -57,7 +59,8 @@ export default function ChainTabView({
     activeTab
   )
 
-  const [items, setItems] = useState(chain.items)
+  const [nodes, setNodes] = useState(['input', ...chain.items, 'output'] as ChainNode[])
+  const items = nodes.filter(IsChainItem)
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
   const promptCache: PromptCache = {
@@ -65,6 +68,7 @@ export default function ChainTabView({
     promptForItem: item => activePromptCache[item.promptID],
     versionForItem: item => activePromptCache[item.promptID]?.versions.find(version => version.id === item.versionID),
   }
+  const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
 
   useEffect(() => {
     const promptItems = items.filter(IsPromptChainItem)
@@ -73,22 +77,20 @@ export default function ChainTabView({
       api.getPromptVersions(unloadedItem.promptID).then(versions => {
         const prompt = toActivePrompt(unloadedItem.promptID, versions, project)
         setActivePromptCache(cache => ({ ...cache, [prompt.id]: prompt }))
-        setItems(
-          items.map(item =>
-            IsPromptChainItem(item) && item.promptID === prompt.id
+        setNodes(
+          nodes.map(node =>
+            IsPromptChainItem(node) && node.promptID === prompt.id
               ? {
-                  ...item,
+                  ...node,
                   prompt,
-                  version: prompt.versions.find(version => version.id === item.versionID),
+                  version: prompt.versions.find(version => version.id === node.versionID),
                 }
-              : item
+              : node
           )
         )
       })
     }
-  }, [project, items, setItems, activePromptCache])
-
-  const chainIsLoaded = items.every(item => !IsPromptChainItem(item) || promptCache.promptForItem(item))
+  }, [project, nodes, setNodes, activePromptCache])
 
   const inputs = ExtractUnboundChainVariables(items, promptCache)
   const strippedItems = items.map(item =>
@@ -132,7 +134,7 @@ export default function ChainTabView({
         return (
           <BuildChainTab
             items={items}
-            setItems={setItems}
+            setItems={items => setNodes(['input', ...items, 'output'])}
             prompts={project.prompts}
             promptCache={promptCache}
             project={project}
