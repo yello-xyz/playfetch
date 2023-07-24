@@ -18,6 +18,7 @@ import api from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import RunTimeline from './runTimeline'
 import TabSelector, { TabButton } from './tabSelector'
+import { toActivePrompt } from '@/pages/[projectID]'
 
 type PromptChainItem = RunConfig & { promptID: number }
 
@@ -69,7 +70,8 @@ export default function ChainTabView({
     const promptItems = items.filter(IsPromptChainItem)
     const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
     if (unloadedItem) {
-      api.getPrompt(unloadedItem.promptID).then(prompt => {
+      api.getPromptVersions(unloadedItem.promptID).then(versions => {
+        const prompt = toActivePrompt(unloadedItem.promptID, versions, project)
         setActivePromptCache(cache => ({ ...cache, [prompt.id]: prompt }))
         setItems(
           items.map(item =>
@@ -84,7 +86,7 @@ export default function ChainTabView({
         )
       })
     }
-  }, [items, setItems, activePromptCache])
+  }, [project, items, setItems, activePromptCache])
 
   const chainIsLoaded = items.every(item => !IsPromptChainItem(item) || promptCache.promptForItem(item))
 

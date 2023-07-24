@@ -10,9 +10,8 @@ import {
   getTimestamp,
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
-import { ActivePrompt, Prompt } from '@/types'
-import { ensureProjectAccess, getProjectUsers, updateProjectLastEditedAt } from './projects'
-import { getProjectInputValues } from './inputs'
+import { Prompt, Version } from '@/types'
+import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -43,20 +42,13 @@ export const toPrompt = (data: any): Prompt => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getActivePrompt(userID: number, promptID: number): Promise<ActivePrompt> {
-  const promptData = await getVerifiedUserPromptData(userID, promptID)
-  const projectData = await getKeyedEntity(Entity.PROJECT, promptData.projectID)
+export async function getPromptVersionsForUser(userID: number, promptID: number): Promise<Version[]> {
+  await ensurePromptAccess(userID, promptID)
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
-  const users = await getProjectUsers(promptData.projectID)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
 
-  return {
-    ...toPrompt(promptData),
-    versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
-    users,
-    availableLabels: JSON.parse(projectData.labels),
-  }
+  return versions.map(version => toVersion(version, runs, comments)).reverse()
 }
 
 export const getUniqueNameWithFormat = async (

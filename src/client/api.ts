@@ -12,6 +12,7 @@ import {
   CodeConfig,
   ActiveWorkspace,
   Workspace,
+  Version,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -105,8 +106,8 @@ const api = {
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },
-  getPrompt: function (promptID: number): Promise<ActivePrompt> {
-    return post(this.getPrompt, { promptID })
+  getPromptVersions: function (promptID: number): Promise<Version[]> {
+    return post(this.getPromptVersions, { promptID })
   },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })

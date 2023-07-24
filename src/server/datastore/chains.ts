@@ -50,7 +50,7 @@ export const toChain = (data: any): Chain => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getActiveChain(userID: number, chainID: number): Promise<Chain> {
+export async function getChainForUser(userID: number, chainID: number): Promise<Chain> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   return toChain(chainData)
 }

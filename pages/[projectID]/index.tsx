@@ -12,7 +12,7 @@ import ClientRoute, {
   PromptRoute,
   WorkspaceRoute,
 } from '@/components/clientRoute'
-import { getActivePrompt } from '@/src/server/datastore/prompts'
+import { getPromptVersionsForUser } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
@@ -28,22 +28,35 @@ import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
 
+export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
+  ...project.prompts.find(prompt => prompt.id === promptID)!,
+  versions,
+  users: project.users,
+  availableLabels: project.availableLabels,
+})
+
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
 
   const workspaces = await getWorkspacesForUser(user.id)
 
   const buildURL = urlBuilderFromHeaders(req.headers)
-  const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
+  const activeProject = await getActiveProject(user.id, projectID!, buildURL)
+
+  const getActivePrompt = async (promptID: number): Promise<ActivePrompt | undefined> => {
+    const versions = await getPromptVersionsForUser(user.id, promptID)
+    return toActivePrompt(promptID, versions, activeProject)
+  }
+
   let activeItem =
     endpoints === 1
       ? 'endpoints'
       : promptID
-      ? await getActivePrompt(user.id, promptID)
+      ? await getActivePrompt(promptID)
       : chainID
-      ? initialActiveProject.chains.find(chain => chain.id === chainID)
-      : initialActiveProject.prompts.length > 0
-      ? await getActivePrompt(user.id, initialActiveProject.prompts[0].id)
+      ? activeProject.chains.find(chain => chain.id === chainID)
+      : activeProject.prompts.length > 0
+      ? await getActivePrompt(activeProject.prompts[0].id)
       : undefined
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
@@ -52,7 +65,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     props: {
       user,
       workspaces,
-      initialActiveProject,
+      initialActiveProject: activeProject,
       initialActiveItem: activeItem ?? null,
       availableProviders,
     },
@@ -127,7 +140,8 @@ export default function Home({
   }
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
-    const newPrompt = await api.getPrompt(promptID)
+    const newVersions = await api.getPromptVersions(promptID)
+    const newPrompt = toActivePrompt(promptID, newVersions, activeProject)
     setActiveItem(newPrompt)
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }

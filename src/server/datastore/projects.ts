@@ -125,6 +125,7 @@ export async function getActiveProject(
     prompts,
     chains,
     users,
+    availableLabels: JSON.parse(projectData.labels),
   }
 }
 

@@ -34,6 +34,7 @@ export type ActiveProject = Project & {
   prompts: Prompt[]
   chains: Chain[]
   users: User[]
+  availableLabels: string[]
 }
 
 export type Prompt = {
@@ -45,7 +46,6 @@ export type Prompt = {
 }
 
 export type ActivePrompt = Prompt & {
-  projectID: number
   versions: Version[]
   users: User[]
   availableLabels: string[]
