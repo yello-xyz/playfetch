@@ -32,6 +32,7 @@ export type PromptCache = {
   promptForItem: (item: PromptChainItem) => ActivePrompt | undefined
   versionForItem: (item: PromptChainItem) => Version | undefined
   promptItemForID: (promptID: number) => ChainItem
+  refreshPrompt: (promptID: number) => Promise<ActivePrompt>
 }
 
 export default function ChainView({
@@ -62,16 +63,10 @@ export default function ChainView({
         ...(cachedPrompt ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] } : {}),
       }
     },
-  }
-  const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
-
-  useEffect(() => {
-    const promptItems = items.filter(IsPromptChainItem)
-    const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
-    if (unloadedItem) {
-      api.getPromptVersions(unloadedItem.promptID).then(versions => {
-        const prompt = toActivePrompt(unloadedItem.promptID, versions, project)
-        setActivePromptCache(cache => ({ ...cache, [prompt.id]: prompt }))
+    refreshPrompt: async (promptID: number) =>
+      api.getPromptVersions(promptID).then(versions => {
+        const prompt = toActivePrompt(promptID, versions, project)
+        setActivePromptCache(cache => ({ ...cache, [promptID]: prompt }))
         setNodes(
           nodes.map(node =>
             IsPromptChainItem(node) && node.promptID === prompt.id
@@ -83,7 +78,16 @@ export default function ChainView({
               : node
           )
         )
-      })
+        return prompt
+      }),
+  }
+  const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
+
+  useEffect(() => {
+    const promptItems = items.filter(IsPromptChainItem)
+    const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
+    if (unloadedItem) {
+      promptCache.refreshPrompt(unloadedItem.promptID)
     }
   }, [project, items, nodes, setNodes, activePromptCache])
 
@@ -142,7 +146,7 @@ function ChainNodeBox({
   return (
     <>
       {!isFirst && <div className='w-px h-4 border-l border-gray-300 min-h-[16px]' />}
-      <div className={`text-center border p-4 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
+      <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
         {chainNode === InputNode && 'Input'}
         {chainNode === OutputNode && 'Output'}
         {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}

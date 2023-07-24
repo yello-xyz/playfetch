@@ -26,6 +26,8 @@ import TestButtons from './testButtons'
 import Label from './label'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
+import useSavePrompt from './useSavePrompt'
+import { RefreshContext } from './refreshContext'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
@@ -100,11 +102,23 @@ export default function ChainNodeEditor({
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (currentItems.length > 0) {
-      const versions = currentItems.filter(IsPromptChainItem).map(item => promptCache.versionForItem(item))
+      let chainItems = currentItems
+      let versionForItem = promptCache.versionForItem
+      if (IsPromptChainItem(activeNode)) {
+        const versionID = (await savePrompt())!
+        const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
+        chainItems = updatedItems(currentItems, { ...activeNode, versionID }, activeItemIndex)
+        versionForItem = item =>
+          item.promptID === activePrompt.id
+            ? activePrompt.versions.find(version => version.id === item.versionID)
+            : promptCache.versionForItem(item)
+        setItems(chainItems)
+      }
+      const versions = chainItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
         onRun()
-        const streamReader = await api.runChain(currentItems.map(ChainItemToConfig), inputs)
+        const streamReader = await api.runChain(chainItems.map(ChainItemToConfig), inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
         setRunning(false)
       }
@@ -134,6 +148,25 @@ export default function ChainNodeEditor({
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
 
+  const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
+  const [activeVersion, setActiveVersion] = useState<Version>()
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+
+  const selectVersion = (version?: Version) => {
+    savePrompt()
+    setActiveVersion(version)
+    setModifiedVersion(undefined)
+    if (version) {
+      setTimeout(() => updateItem({ ...items[activeItemIndex], versionID: version.id }), 0)
+    }
+  }
+
+  if (activeVersion?.promptID !== activePrompt?.id) {
+    selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
+  } else if (activeVersion && activePrompt && !activePrompt.versions.some(version => version.id === activeVersion.id)) {
+    selectVersion(activePrompt.versions.slice(-1)[0])
+  }
+
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
@@ -160,6 +193,8 @@ export default function ChainNodeEditor({
               promptCache={promptCache}
               onMapOutput={mapOutput}
               checkProviderAvailable={checkProviderAvailable}
+              selectVersion={selectVersion}
+              setModifiedVersion={setModifiedVersion}
             />
           )}
           {IsCodeChainItem(activeNode) && (
@@ -218,6 +253,8 @@ function PromptChainNodeEditor({
   promptCache,
   onMapOutput,
   checkProviderAvailable,
+  selectVersion,
+  setModifiedVersion,
 }: {
   node: PromptChainItem
   index: number
@@ -227,54 +264,57 @@ function PromptChainNodeEditor({
   promptCache: PromptCache
   onMapOutput: (output?: string) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
+  selectVersion: (version: Version) => void
+  setModifiedVersion: (version: Version) => void
 }) {
   const loadedPrompt = promptCache.promptForItem(node)
   const activeVersion = promptCache.versionForItem(node)
 
   const replacePrompt = (promptID: number) => updateItem(promptCache.promptItemForID(promptID))
   const toggleIncludeContext = (includeContext: boolean) => updateItem({ ...items[index], includeContext })
-  const selectVersion = (version: Version) => updateItem({ ...items[index], versionID: version.id })
 
   return (
-    <div className='flex flex-col justify-between flex-grow h-full gap-4'>
-      <div className='flex items-center justify-between gap-4'>
-        <PromptSelector
-          prompts={project.prompts}
-          selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
-          onSelectPrompt={replacePrompt}
-        />
-        <OutputMapper
-          key={node.output}
-          output={node.output}
-          inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
-          onMapOutput={onMapOutput}
-        />
-      </div>
-      {items.slice(0, index).some(IsPromptChainItem) && (
-        <div className='self-start'>
-          <Checkbox
-            label='Include previous context into prompt'
-            checked={!!node.includeContext}
-            setChecked={toggleIncludeContext}
+    <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
+      <div className='flex flex-col justify-between flex-grow h-full gap-4'>
+        <div className='flex items-center justify-between gap-4'>
+          <PromptSelector
+            prompts={project.prompts}
+            selectedPrompt={project.prompts.find(prompt => prompt.id === node.promptID)}
+            onSelectPrompt={replacePrompt}
+          />
+          <OutputMapper
+            key={node.output}
+            output={node.output}
+            inputs={ExtractChainVariables(items.slice(index + 1), promptCache)}
+            onMapOutput={onMapOutput}
           />
         </div>
-      )}
-      {loadedPrompt && activeVersion && (
-        <>
-          <VersionTimeline
-            prompt={loadedPrompt}
-            activeVersion={activeVersion}
-            setActiveVersion={selectVersion}
-            tabSelector={<Label>Prompt Version</Label>}
-          />
-          <PromptPanel
-            version={activeVersion}
-            setModifiedVersion={() => {}} // TODO save prompt!
-            checkProviderAvailable={checkProviderAvailable}
-          />
-        </>
-      )}
-    </div>
+        {items.slice(0, index).some(IsPromptChainItem) && (
+          <div className='self-start'>
+            <Checkbox
+              label='Include previous context into prompt'
+              checked={!!node.includeContext}
+              setChecked={toggleIncludeContext}
+            />
+          </div>
+        )}
+        {loadedPrompt && activeVersion && (
+          <>
+            <VersionTimeline
+              prompt={loadedPrompt}
+              activeVersion={activeVersion}
+              setActiveVersion={selectVersion}
+              tabSelector={<Label>Prompt Version</Label>}
+            />
+            <PromptPanel
+              version={activeVersion}
+              setModifiedVersion={setModifiedVersion}
+              checkProviderAvailable={checkProviderAvailable}
+            />
+          </>
+        )}
+      </div>
+    </RefreshContext.Provider>
   )
 }
 
