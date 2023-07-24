@@ -201,6 +201,11 @@ export default function ChainNodeEditor({
         <div className='flex justify-end gap-4'>
           {activeItemIndex >= 0 && (
             <>
+              {activeNode !== OutputNode && (
+                <Button type='destructive' onClick={removeItem}>
+                  Remove Node
+                </Button>
+              )}
               {project.prompts.length > 0 && (
                 <Button type='outline' onClick={insertPrompt}>
                   Insert Prompt
@@ -209,11 +214,6 @@ export default function ChainNodeEditor({
               <Button type='outline' onClick={insertCodeBlock}>
                 Insert Code Block
               </Button>
-              {activeNode !== OutputNode && (
-                <Button type='destructive' onClick={removeItem}>
-                  Remove
-                </Button>
-              )}
             </>
           )}
           <TestButtons runTitle='Run Chain' variables={variables} inputValues={inputValues} callback={runChain} />

@@ -54,7 +54,7 @@ export default function PromptChainNodeEditor({
               prompt={loadedPrompt}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
-              tabSelector={<Label>Prompt Version</Label>}
+              tabSelector={<Label>Versions</Label>}
             />
             {items.slice(0, index).some(IsPromptChainItem) && (
               <div className='self-start'>
