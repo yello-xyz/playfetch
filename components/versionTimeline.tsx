@@ -76,6 +76,6 @@ export default function VersionTimeline({
       </div>
     </>
   ) : (
-    <div />
+    <>{tabSelector}</>
   )
 }
