@@ -117,6 +117,7 @@ export default function ChainNodeEditor({
       const versions = chainItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
+        setPartialRuns([])
         onRun()
         const streamReader = await api.runChain(chainItems.map(ChainItemToConfig), inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
