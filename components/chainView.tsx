@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
 import ChainNodeEditor, { ChainNode, ExtractUnboundChainVariables, InputNode, OutputNode } from './chainNodeEditor'
+import useSavePrompt from './useSavePrompt'
 
 const IsChainItem = (item: ChainNode): item is ChainItem => item !== InputNode && item !== OutputNode
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
@@ -91,6 +92,36 @@ export default function ChainView({
     }
   }, [project, items, nodes, setNodes, activePromptCache])
 
+  const activeNode = nodes[activeNodeIndex]
+  const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
+  const [activeVersion, setActiveVersion] = useState<Version>()
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+
+  const selectVersion = (version?: Version) => {
+    savePrompt()
+    setActiveVersion(version)
+    if (version && IsPromptChainItem(activeNode)) {
+      setNodes([
+        ...nodes.slice(0, activeNodeIndex),
+        { ...activeNode, versionID: version.id },
+        ...nodes.slice(activeNodeIndex + 1),
+      ])
+    }
+  }
+
+  if (activeVersion?.promptID !== activePrompt?.id) {
+    selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
+  } else if (activeVersion && activePrompt && !activePrompt.versions.some(version => version.id === activeVersion.id)) {
+    selectVersion(activePrompt.versions.slice(-1)[0])
+  }
+
+  const updateActiveNodeIndex = (index: number) => {
+    if (activePrompt) {
+      savePrompt().then(_ => promptCache.refreshPrompt(activePrompt.id))
+    }
+    setActiveNodeIndex(index)
+  }
+
   const inputs = ExtractUnboundChainVariables(items, promptCache)
   const strippedItems = items.map(item =>
     IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item
@@ -111,7 +142,7 @@ export default function ChainView({
             chainNode={node}
             isFirst={index === 0}
             isActive={index === activeNodeIndex}
-            callback={() => setActiveNodeIndex(index)}
+            callback={() => updateActiveNodeIndex(index)}
             prompts={project.prompts}
           />
         ))}
@@ -120,10 +151,13 @@ export default function ChainView({
         items={items}
         setItems={items => setNodes([InputNode, ...items, OutputNode])}
         activeItemIndex={activeNodeIndex - 1}
-        activeNode={nodes[activeNodeIndex]}
+        activeNode={activeNode}
         promptCache={promptCache}
         project={project}
         onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
+        savePrompt={() => savePrompt().then(versionID => versionID!)}
+        selectVersion={selectVersion}
+        setModifiedVersion={setModifiedVersion}
       />
     </div>
   )

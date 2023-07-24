@@ -48,6 +48,9 @@ export default function ChainNodeEditor({
   promptCache,
   project,
   onRun,
+  savePrompt,
+  selectVersion,
+  setModifiedVersion,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
@@ -56,6 +59,9 @@ export default function ChainNodeEditor({
   promptCache: PromptCache
   project: ActiveProject
   onRun: () => void
+  savePrompt: () => Promise<number>
+  selectVersion: (version: Version) => void
+  setModifiedVersion: (version: Version) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     project.inputValues,
@@ -92,7 +98,7 @@ export default function ChainNodeEditor({
       let chainItems = currentItems
       let versionForItem = promptCache.versionForItem
       if (IsPromptChainItem(activeNode)) {
-        const versionID = (await savePrompt())!
+        const versionID = await savePrompt()
         const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
         chainItems = updatedItems(currentItems, { ...activeNode, versionID }, activeItemIndex)
         versionForItem = item =>
@@ -135,25 +141,6 @@ export default function ChainNodeEditor({
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
-
-  const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
-  const [activeVersion, setActiveVersion] = useState<Version>()
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
-
-  const selectVersion = (version?: Version) => {
-    savePrompt()
-    setActiveVersion(version)
-    setModifiedVersion(undefined)
-    if (version) {
-      setTimeout(() => updateItem({ ...items[activeItemIndex], versionID: version.id }), 0)
-    }
-  }
-
-  if (activeVersion?.promptID !== activePrompt?.id) {
-    selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
-  } else if (activeVersion && activePrompt && !activePrompt.versions.some(version => version.id === activeVersion.id)) {
-    selectVersion(activePrompt.versions.slice(-1)[0])
-  }
 
   const outputMapper = (node: PromptChainItem | CodeChainItem) => (
     <OutputMapper
