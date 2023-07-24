@@ -83,22 +83,11 @@ export default function ChainNodeEditor({
     }
   }
 
-  const chainItemFromPromptID = (promptID: number): ChainItem => {
-    const prompt = project.prompts.find(prompt => prompt.id === promptID)!
-    const versionID = prompt.lastVersionID
-    const cachedPrompt = promptCache.promptForID(promptID)
-    return {
-      promptID,
-      versionID,
-      ...(cachedPrompt ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] } : {}),
-    }
-  }
-
   const insertPrompt = (index: number, promptID: number) => () =>
-    setItems([...items.slice(0, index), chainItemFromPromptID(promptID), ...items.slice(index)])
+    setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index)])
 
   const replacePrompt = (index: number) => (promptID: number) =>
-    setItems([...items.slice(0, index), chainItemFromPromptID(promptID), ...items.slice(index + 1)])
+    setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index + 1)])
 
   const removeItem = (index: number) => () => setItems([...items.slice(0, index), ...items.slice(index + 1)])
 

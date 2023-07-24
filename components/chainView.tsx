@@ -31,6 +31,7 @@ export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
   promptForItem: (item: PromptChainItem) => ActivePrompt | undefined
   versionForItem: (item: PromptChainItem) => Version | undefined
+  promptItemForID: (promptID: number) => ChainItem
 }
 
 export default function ChainView({
@@ -51,6 +52,16 @@ export default function ChainView({
     promptForID: id => activePromptCache[id],
     promptForItem: item => activePromptCache[item.promptID],
     versionForItem: item => activePromptCache[item.promptID]?.versions.find(version => version.id === item.versionID),
+    promptItemForID: (promptID: number) => {
+      const prompt = project.prompts.find(prompt => prompt.id === promptID)!
+      const versionID = prompt.lastVersionID
+      const cachedPrompt = promptCache.promptForID(promptID)
+      return {
+        promptID,
+        versionID,
+        ...(cachedPrompt ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] } : {}),
+      }
+    },
   }
   const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
 
@@ -129,15 +140,13 @@ function ChainNodeBox({
   const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
   return (
     <>
-    {!isFirst && <div className='w-px h-4 border-l border-gray-300 min-h-[16px]' />}
-    <div
-      className={`text-center border p-4 rounded-lg cursor-pointer ${colorClass}`}
-      onClick={callback}>
-      {chainNode === InputNode && 'Input'}
-      {chainNode === OutputNode && 'Output'}
-      {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-      {IsCodeChainItem(chainNode) && 'Code block'}
-    </div>
+      {!isFirst && <div className='w-px h-4 border-l border-gray-300 min-h-[16px]' />}
+      <div className={`text-center border p-4 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
+        {chainNode === InputNode && 'Input'}
+        {chainNode === OutputNode && 'Output'}
+        {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
+        {IsCodeChainItem(chainNode) && 'Code block'}
+      </div>
     </>
   )
 }
