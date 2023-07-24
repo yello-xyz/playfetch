@@ -27,6 +27,7 @@ import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
 
 import dynamic from 'next/dynamic'
+import useSavePrompt from '@/components/useSavePrompt'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 
@@ -106,29 +107,7 @@ export default function Home({
   const [showComments, setShowComments] = useState(false)
 
   const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
-  const [modifiedVersion, setModifiedVersion] = useState<Version>()
-
-  const savePrompt = async (onSaved?: (versionID: number) => Promise<void>) => {
-    const versionNeedsSaving =
-      activePrompt && activeVersion && modifiedVersion && !VersionsEqual(activeVersion, modifiedVersion)
-    setModifiedVersion(undefined)
-    if (!versionNeedsSaving) {
-      return activeVersion?.id
-    }
-    const equalPreviousVersion = activePrompt.versions.find(version => VersionsEqual(version, modifiedVersion))
-    if (equalPreviousVersion) {
-      setActiveVersion(equalPreviousVersion)
-      return equalPreviousVersion.id
-    }
-    const versionID = await api.updatePrompt(
-      activePrompt.id,
-      modifiedVersion.prompt,
-      modifiedVersion.config,
-      activeVersion.id
-    )
-    await onSaved?.(versionID)
-    return versionID
-  }
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
   const updateVersion = (version?: Version) => {
     setActiveVersion(version)
