@@ -22,7 +22,10 @@ import RunTimeline from './runTimeline'
 import TabSelector, { TabButton } from './tabSelector'
 import { toActivePrompt } from '@/pages/[projectID]'
 
-type ChainNode = PromptChainItem | CodeChainItem | 'input' | 'output'
+const InputNode = 'input'
+const OutputNode = 'output'
+type ChainNode = PromptChainItem | CodeChainItem | typeof InputNode | typeof OutputNode
+
 const IsChainItem = (item: ChainNode): item is ChainItem => item !== 'input' && item !== 'output'
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
 export const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
@@ -59,7 +62,8 @@ export default function ChainTabView({
     activeTab
   )
 
-  const [nodes, setNodes] = useState(['input', ...chain.items, 'output'] as ChainNode[])
+  const [nodes, setNodes] = useState([InputNode, ...chain.items, OutputNode] as ChainNode[])
+  const [activeNode, setActiveNode] = useState(nodes.slice(1)[0])
   const items = nodes.filter(IsChainItem)
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
@@ -134,7 +138,7 @@ export default function ChainTabView({
         return (
           <BuildChainTab
             items={items}
-            setItems={items => setNodes(['input', ...items, 'output'])}
+            setItems={items => setNodes([InputNode, ...items, OutputNode])}
             prompts={project.prompts}
             promptCache={promptCache}
             project={project}
