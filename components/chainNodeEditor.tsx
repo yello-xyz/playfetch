@@ -113,24 +113,35 @@ export default function ChainNodeEditor({
     setItems([...resetChain.slice(0, index), { ...resetChain[index], output }, ...resetChain.slice(index + 1)])
   }
 
-  const [editCodeIndex, setEditCodeIndex] = useState<number>()
+  const [isEditing, setEditing] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
+
+  const toggleEditing = (code?: string) => {
+    const editing = !isEditing
+    setEditing(editing)
+    setEditedCode(editing ? code ?? (items[editingIndex!] as CodeConfig).code : '')
+    setEditingIndex(editing ? activeItemIndex : undefined)
+  }
+
+  if (isEditing && editingIndex !== activeItemIndex) {
+    toggleEditing()
+  }
 
   const insertCodeBlock = (index: number) => () => {
     const code = `'Hello world'`
     setItems([...items.slice(0, index), { code }, ...items.slice(index)])
-    setEditCodeIndex(index)
-    setEditedCode(code)
+    toggleEditing(code)
   }
 
   const editCodeBlock = (index: number) => () => {
     setEditedCode((items[index] as CodeConfig).code)
-    setEditCodeIndex(index)
+    toggleEditing()
   }
 
   const updateCodeBlock = (index: number) => () => {
     setItems([...items.slice(0, index), { ...items[index], code: editedCode }, ...items.slice(index + 1)])
-    setEditCodeIndex(undefined)
+    toggleEditing()
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
@@ -195,25 +206,13 @@ export default function ChainNodeEditor({
             <>
               <div className='w-full'>
                 <RichTextInput
-                  value={activeItemIndex === editCodeIndex ? editedCode : activeNode.code}
+                  value={isEditing ? editedCode : activeNode.code}
                   setValue={setEditedCode}
-                  disabled={activeItemIndex !== editCodeIndex}
-                  focus={activeItemIndex === editCodeIndex}
+                  disabled={!isEditing}
+                  focus={isEditing}
                   preformatted
                 />
               </div>
-              {editCodeIndex === activeItemIndex ? (
-                <Button type='outline' onClick={updateCodeBlock(activeItemIndex)}>
-                  Save
-                </Button>
-              ) : (
-                <Button type='outline' onClick={editCodeBlock(activeItemIndex)}>
-                  Edit
-                </Button>
-              )}
-              <Button type='destructive' onClick={removeItem(activeItemIndex)}>
-                Remove
-              </Button>
               <div className='flex items-center gap-4'>
                 <Label className='whitespace-nowrap'>Mapped output</Label>
                 <OutputMapper
@@ -228,10 +227,20 @@ export default function ChainNodeEditor({
           {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
         </div>
         <div className='flex justify-end gap-4'>
+          {IsCodeChainItem(activeNode) &&
+            (isEditing ? (
+              <Button type='primary' onClick={updateCodeBlock(activeItemIndex)}>
+                Save
+              </Button>
+            ) : (
+              <Button type='primary' onClick={editCodeBlock(activeItemIndex)}>
+                Edit
+              </Button>
+            ))}
           {activeItemIndex >= 0 && (
             <>
               {activeNode !== OutputNode && (
-                <Button type='outline' onClick={removeItem(activeItemIndex)}>
+                <Button type='destructive' onClick={removeItem(activeItemIndex)}>
                   Remove
                 </Button>
               )}
