@@ -83,7 +83,6 @@ export default function ChainNodeEditor({
     }
   }
 
-
   const insertPrompt = (index: number, promptID: number) => () =>
     setItems([...items.slice(0, index), promptCache.promptItemForID(promptID), ...items.slice(index)])
 
