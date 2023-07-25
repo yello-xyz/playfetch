@@ -1,12 +1,13 @@
 import { ActiveProject, ChainItem, ModelProvider, Prompt, PromptChainItem, Version } from '@/types'
 import { ReactNode } from 'react'
 import DropdownMenu from './dropdownMenu'
-import { PromptCache, IsPromptChainItem } from './chainView'
+import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import Label from './label'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
 import { RefreshContext } from './refreshContext'
+import { IsPromptChainItem } from './chainNode'
 
 export default function PromptChainNodeEditor({
   node,

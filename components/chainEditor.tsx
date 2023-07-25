@@ -1,6 +1,5 @@
 import { Prompt } from '@/types'
-import { ChainNode, InputNode, OutputNode } from './chainNodeEditor'
-import { IsCodeChainItem, IsPromptChainItem } from './chainView'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 
 export default function ChainEditor({
   nodes,

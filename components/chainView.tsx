@@ -3,30 +3,16 @@ import {
   ActivePrompt,
   Chain,
   ChainItem,
-  CodeChainItem,
-  CodeConfig,
   PromptChainItem,
-  RunConfig,
   Version,
 } from '@/types'
 import { useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
-import ChainNodeEditor, { ChainNode, ExtractUnboundChainVariables, InputNode, OutputNode } from './chainNodeEditor'
+import ChainNodeEditor, { ExtractUnboundChainVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
-
-const IsChainItem = (item: ChainNode): item is ChainItem => item !== InputNode && item !== OutputNode
-export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
-export const IsCodeChainItem = (item: ChainNode): item is CodeChainItem => IsChainItem(item) && 'code' in item
-export const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
-  IsPromptChainItem(item)
-    ? {
-        versionID: item.versionID,
-        output: item.output,
-        includeContext: item.includeContext,
-      }
-    : item
+import { ChainItemToConfig, ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined

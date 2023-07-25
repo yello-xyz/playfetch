@@ -2,7 +2,7 @@ import { ActiveProject, ChainItem, CodeChainItem, PartialRun, PromptChainItem, P
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import { PromptCache, IsPromptChainItem, ChainItemToConfig, IsCodeChainItem } from './chainView'
+import { PromptCache } from './chainView'
 import Button from './button'
 import RichTextInput from './richTextInput'
 import useInputValues from './inputValues'
@@ -13,12 +13,8 @@ import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
 import Label from './label'
-import useSavePrompt from './useSavePrompt'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-
-export const InputNode = 'input'
-export const OutputNode = 'output'
-export type ChainNode = PromptChainItem | CodeChainItem | typeof InputNode | typeof OutputNode
+import { ChainItemToConfig, ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
   ...new Set(
