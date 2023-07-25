@@ -21,7 +21,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, deletePromptForUser, getUniqueNameWithFormat, toPrompt } from './prompts'
+import { addPromptForUser, deletePromptForUser, getUniqueName, toPrompt } from './prompts'
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
@@ -124,18 +124,21 @@ export async function getActiveProject(
   }
 }
 
-export async function addProjectForUser(userID: number, workspaceID: number, projectName: string) {
+const DefaultProjectName = 'New Project'
+
+export async function addProjectForUser(
+  userID: number,
+  workspaceID: number,
+  name = DefaultProjectName
+): Promise<number> {
   await ensureWorkspaceAccess(userID, workspaceID)
-  const createdAt = new Date()
-  const projectData = toProjectData(
-    workspaceID,
-    projectName,
-    [],
-    [DefaultEndpointFlavor],
-    createdAt,
-    createdAt,
-    []
+  const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
+  const uniqueName = await getUniqueName(
+    name,
+    projectNames.map(project => project.name)
   )
+  const createdAt = new Date()
+  const projectData = toProjectData(workspaceID, uniqueName, [], [DefaultEndpointFlavor], createdAt, createdAt, [])
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await addPromptForUser(userID, projectID)
