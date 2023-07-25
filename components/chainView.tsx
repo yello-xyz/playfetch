@@ -5,7 +5,6 @@ import {
   ChainItem,
   CodeChainItem,
   CodeConfig,
-  Prompt,
   PromptChainItem,
   RunConfig,
   Version,
@@ -15,6 +14,7 @@ import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
 import ChainNodeEditor, { ChainNode, ExtractUnboundChainVariables, InputNode, OutputNode } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
+import ChainEditor from './chainEditor'
 
 const IsChainItem = (item: ChainNode): item is ChainItem => item !== InputNode && item !== OutputNode
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
@@ -135,18 +135,12 @@ export default function ChainView({
 
   return (
     <div className='flex items-stretch h-full'>
-      <div className='flex flex-col items-center w-1/3 h-full p-8 pr-0 overflow-y-auto'>
-        {nodes.map((node, index) => (
-          <ChainNodeBox
-            key={index}
-            chainNode={node}
-            isFirst={index === 0}
-            isActive={index === activeNodeIndex}
-            callback={() => updateActiveNodeIndex(index)}
-            prompts={project.prompts}
-          />
-        ))}
-      </div>
+      <ChainEditor
+        nodes={nodes}
+        activeIndex={activeNodeIndex}
+        setActiveIndex={updateActiveNodeIndex}
+        prompts={project.prompts}
+      />
       <ChainNodeEditor
         items={items}
         setItems={items => setNodes([InputNode, ...items, OutputNode])}
@@ -160,32 +154,5 @@ export default function ChainView({
         setModifiedVersion={setModifiedVersion}
       />
     </div>
-  )
-}
-
-function ChainNodeBox({
-  chainNode,
-  isFirst,
-  isActive,
-  callback,
-  prompts,
-}: {
-  chainNode: ChainNode
-  isFirst: boolean
-  isActive: boolean
-  callback: () => void
-  prompts: Prompt[]
-}) {
-  const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
-  return (
-    <>
-      {!isFirst && <div className='w-px h-4 border-l border-gray-300 min-h-[16px]' />}
-      <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
-        {chainNode === InputNode && 'Input'}
-        {chainNode === OutputNode && 'Output'}
-        {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-        {IsCodeChainItem(chainNode) && 'Code block'}
-      </div>
-    </>
   )
 }
