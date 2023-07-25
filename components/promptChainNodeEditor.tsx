@@ -14,7 +14,6 @@ export default function PromptChainNodeEditor({
   items,
   toggleIncludeContext,
   promptCache,
-  outputMapper,
   checkProviderAvailable,
   selectVersion,
   setModifiedVersion,
@@ -24,7 +23,6 @@ export default function PromptChainNodeEditor({
   items: ChainItem[]
   toggleIncludeContext: (includeContext: boolean) => void
   promptCache: PromptCache
-  outputMapper: (node: PromptChainItem) => ReactNode
   checkProviderAvailable: (provider: ModelProvider) => boolean
   selectVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -35,7 +33,6 @@ export default function PromptChainNodeEditor({
   return (
     <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
       <div className='flex flex-col justify-between flex-grow h-full gap-4'>
-        {outputMapper(node)}
         {loadedPrompt && activeVersion && (
           <>
             <VersionTimeline

@@ -135,15 +135,6 @@ export default function ChainNodeEditor({
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
 
-  const outputMapper = (node: PromptChainItem | CodeChainItem) => (
-    <OutputMapper
-      key={node.output}
-      output={node.output}
-      inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
-      onMapOutput={mapOutput}
-    />
-  )
-
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
@@ -167,7 +158,6 @@ export default function ChainNodeEditor({
               items={items}
               toggleIncludeContext={toggleIncludeContext}
               promptCache={promptCache}
-              outputMapper={outputMapper}
               checkProviderAvailable={checkProviderAvailable}
               selectVersion={selectVersion}
               setModifiedVersion={setModifiedVersion}
@@ -175,7 +165,6 @@ export default function ChainNodeEditor({
           )}
           {IsCodeChainItem(activeNode) && (
             <>
-              {outputMapper(activeNode)}
               <Label>Code Editor</Label>
               <RichTextInput
                 value={isEditing ? editedCode : activeNode.code}
@@ -188,7 +177,15 @@ export default function ChainNodeEditor({
           )}
           {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
         </div>
-        <div className='flex justify-end gap-4'>
+        <div className='flex items-center justify-between w-full gap-4'>
+          {(IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode)) && (
+            <OutputMapper
+              key={activeNode.output}
+              output={activeNode.output}
+              inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
+              onMapOutput={mapOutput}
+            />
+          )}
           <TestButtons runTitle='Run Chain' variables={variables} inputValues={inputValues} callback={runChain} />
         </div>
       </div>
@@ -206,12 +203,9 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
 }) {
   return inputs.length ? (
-    <div className='flex items-center self-start gap-4'>
-      <Label className='whitespace-nowrap'>Map output to</Label>
-      <DropdownMenu
-        value={output ?? 0}
-        onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
-        <option value={0}>Map Output</option>
+    <div className='self-start py-0.5'>
+      <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
+        <option value={0}>Map Output To</option>
         {inputs.map((input, index) => (
           <option key={index} value={input}>
             {input}
