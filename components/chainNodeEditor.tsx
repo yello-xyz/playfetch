@@ -176,6 +176,7 @@ export default function ChainNodeEditor({
           {IsCodeChainItem(activeNode) && (
             <>
               {outputMapper(activeNode)}
+              <Label>Code Editor</Label>
               <RichTextInput
                 value={isEditing ? editedCode : activeNode.code}
                 setValue={setEditedCode}
@@ -204,11 +205,10 @@ function OutputMapper({
   inputs: string[]
   onMapOutput: (input?: string) => void
 }) {
-  return (
+  return inputs.length ? (
     <div className='flex items-center self-start gap-4'>
       <Label className='whitespace-nowrap'>Map output to</Label>
       <DropdownMenu
-        disabled={!inputs.length}
         value={output ?? 0}
         onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
         <option value={0}>Map Output</option>
@@ -219,5 +219,5 @@ function OutputMapper({
         ))}
       </DropdownMenu>
     </div>
-  )
+  ) : null
 }
