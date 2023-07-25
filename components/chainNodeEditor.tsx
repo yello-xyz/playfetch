@@ -61,15 +61,17 @@ export default function ChainNodeEditor({
 
   const checkProviderAvailable = useCheckProvider()
 
-  const updateItem = (item: ChainItem, items = currentItems, index = activeItemIndex) => {
-    setItems([...items.slice(0, index), item, ...items.slice(index + 1)])
-  }
-
   const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
   const [editingItemsCount, setEditingItemsCount] = useState(items.length)
-  const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
   const isEditing = editingIndex !== undefined
+
+  const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
+  const updatedItems = (items: ChainItem[], index: number, item: ChainItem) => [
+    ...items.slice(0, index),
+    item,
+    ...items.slice(index + 1),
+  ]
 
   const toggleEditing = () => {
     setEditingIndex(isEditing ? undefined : activeItemIndex)
@@ -84,7 +86,9 @@ export default function ChainNodeEditor({
     if (items.length === editingIndex + 1) {
       // This means an item was inserted at the position of the item we were editing, so we
       // need to persist the edit to the item which now has a index one higher than before.
-      setTimeout(() => updateItem({ ...items[editingIndex + 1], code: editedCode }, items, editingIndex + 1))
+      setTimeout(() =>
+        setItems(updatedItems(items, editingIndex + 1, { ...items[editingIndex + 1], code: editedCode }))
+      )
     }
     toggleEditing()
   } else if (!isEditing && IsCodeChainItem(activeNode)) {
@@ -102,11 +106,7 @@ export default function ChainNodeEditor({
       if (IsPromptChainItem(activeNode)) {
         const versionID = await savePrompt()
         const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
-        newItems = [
-          ...currentItems.slice(0, activeItemIndex),
-          { ...activeNode, versionID },
-          ...currentItems.slice(activeItemIndex + 1),
-        ]
+        newItems = updatedItems(currentItems, activeItemIndex, { ...activeNode, versionID })
         versionForItem = item =>
           item.promptID === activePrompt.id
             ? activePrompt.versions.find(version => version.id === item.versionID)
@@ -127,7 +127,7 @@ export default function ChainNodeEditor({
 
   const mapOutput = (output?: string) => {
     const newItems = currentItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
-    updateItem({ ...newItems[activeItemIndex], output }, newItems)
+    setItems(updatedItems(newItems, activeItemIndex, { ...newItems[activeItemIndex], output }))
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
@@ -162,7 +162,7 @@ export default function ChainNodeEditor({
               node={activeNode}
               index={activeItemIndex}
               items={items}
-              updateItem={updateItem}
+              updateItem={item => setItems(updatedItems(items, activeItemIndex, item))}
               project={project}
               promptCache={promptCache}
               outputMapper={outputMapper}
