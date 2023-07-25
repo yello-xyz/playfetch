@@ -73,7 +73,6 @@ export default function Home({
   const router = useRouter()
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const [workspaces, setWorkspaces] = useState(initialWorkspaces)
 
@@ -98,8 +97,8 @@ export default function Home({
     router.push(ProjectRoute(projectID))
   }
 
-  const addProject = async (name: string) => {
-    const projectID = await api.addProject(activeWorkspace.id, name)
+  const addProject = async () => {
+    const projectID = await api.addProject(activeWorkspace.id)
     navigateToProject(projectID)
   }
 
@@ -133,7 +132,7 @@ export default function Home({
               sharedProjects={sharedProjects}
               onSelectWorkspace={selectWorkspace}
               onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
-              onAddProject={() => setShowPickNamePrompt(true)}
+              onAddProject={addProject}
               onRefreshWorkspaces={refreshWorkspaces}
             />
             <div className='flex flex-col flex-1'>
@@ -146,7 +145,7 @@ export default function Home({
                     activeWorkspace={activeWorkspace}
                     isUserWorkspace={activeWorkspace.id === user.id}
                     isSharedProjects={IsSharedProjects(activeWorkspace)}
-                    onAddProject={() => setShowPickNamePrompt(true)}
+                    onAddProject={addProject}
                     onSelectProject={navigateToProject}
                     onSelectUserWorkspace={() => selectWorkspace(user.id)}
                     onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
@@ -159,15 +158,6 @@ export default function Home({
         </UserContext.Provider>
       </ModalDialogContext.Provider>
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
-      {showPickNamePrompt && (
-        <PickNameDialog
-          title='Add a new project'
-          confirmTitle='Add'
-          label='Project name'
-          onConfirm={addProject}
-          onDismiss={() => setShowPickNamePrompt(false)}
-        />
-      )}
     </>
   )
 }
