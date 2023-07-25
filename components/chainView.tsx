@@ -123,6 +123,7 @@ export default function ChainView({
     <div className='flex items-stretch h-full'>
       <ChainEditor
         nodes={nodes}
+        setNodes={setNodes}
         activeIndex={activeNodeIndex}
         setActiveIndex={updateActiveNodeIndex}
         prompts={project.prompts}

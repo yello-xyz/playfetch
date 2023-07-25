@@ -30,12 +30,6 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCa
   return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
-const updatedItems = (items: ChainItem[], item: ChainItem | null, index: number, insert = false) => [
-  ...items.slice(0, index),
-  ...(item ? [item] : []),
-  ...items.slice(index + (insert ? 0 : 1)),
-]
-
 export default function ChainNodeEditor({
   items,
   setItems,
@@ -65,9 +59,6 @@ export default function ChainNodeEditor({
     JSON.stringify(activeNode)
   )
 
-  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-  const [isRunning, setRunning] = useState(false)
-
   const checkProviderAvailable = useCheckProvider()
 
   const [isEditing, setEditing] = useState(false)
@@ -81,59 +72,54 @@ export default function ChainNodeEditor({
     setEditingIndex(editing ? activeItemIndex : undefined)
     setEditedCode(editing ? (items[activeItemIndex] as CodeChainItem).code : '')
   }
-  if (editingIndex !== undefined && editingIndex !== activeItemIndex) {
+  if (isEditing && editingIndex !== undefined && editingIndex !== activeItemIndex) {
     setTimeout(() => updateItem(currentItems[editingIndex], items, editingIndex), 0)
   }
   if (!isEditing && IsCodeChainItem(activeNode)) {
     toggleEditing()
   }
 
+  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
+  const [isRunning, setRunning] = useState(false)
+
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (currentItems.length > 0) {
-      let chainItems = currentItems
+      let newItems = currentItems
       let versionForItem = promptCache.versionForItem
       if (IsPromptChainItem(activeNode)) {
         const versionID = await savePrompt()
         const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
-        chainItems = updatedItems(currentItems, { ...activeNode, versionID }, activeItemIndex)
+        newItems = [
+          ...currentItems.slice(0, activeItemIndex),
+          { ...activeNode, versionID },
+          ...currentItems.slice(activeItemIndex + 1),
+        ]
         versionForItem = item =>
           item.promptID === activePrompt.id
             ? activePrompt.versions.find(version => version.id === item.versionID)
             : promptCache.versionForItem(item)
-        setItems(chainItems)
+        setItems(newItems)
       }
-      const versions = chainItems.filter(IsPromptChainItem).map(versionForItem)
+      const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
         setPartialRuns([])
         onRun()
-        const streamReader = await api.runChain(chainItems.map(ChainItemToConfig), inputs)
+        const streamReader = await api.runChain(newItems.map(ChainItemToConfig), inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
         setRunning(false)
       }
     }
   }
 
-  const updateItem = (item: ChainItem | null, items = currentItems, index = activeItemIndex, insert = false) => {
-    setItems(updatedItems(items, item, index, insert))
-    if (isEditing) {
-      toggleEditing()
-    }
-  }
-  const removeItem = () => updateItem(null)
-  const insertItem = (item: ChainItem) => updateItem(item, currentItems, activeItemIndex, true)
-
-  const insertPrompt = () => insertItem(promptCache.promptItemForID(project.prompts[0].id))
-
-  const insertCodeBlock = () => {
-    const code = `'Hello world'`
-    insertItem({ code })
+  const updateItem = (item: ChainItem, items = currentItems, index = activeItemIndex) => {
+    setItems([...items.slice(0, index), item, ...items.slice(index + 1)])
   }
 
   const mapOutput = (output?: string) => {
-    const resetChain = currentItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
-    updateItem({ ...resetChain[activeItemIndex], output }, resetChain)
+    const newItems = currentItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
+    updateItem({ ...newItems[activeItemIndex], output }, newItems)
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
@@ -195,23 +181,6 @@ export default function ChainNodeEditor({
           {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
         </div>
         <div className='flex justify-end gap-4'>
-          {activeItemIndex >= 0 && (
-            <>
-              {activeNode !== OutputNode && (
-                <Button type='destructive' onClick={removeItem}>
-                  Remove Node
-                </Button>
-              )}
-              {project.prompts.length > 0 && (
-                <Button type='outline' onClick={insertPrompt}>
-                  Insert Prompt
-                </Button>
-              )}
-              <Button type='outline' onClick={insertCodeBlock}>
-                Insert Code Block
-              </Button>
-            </>
-          )}
           <TestButtons runTitle='Run Chain' variables={variables} inputValues={inputValues} callback={runChain} />
         </div>
       </div>

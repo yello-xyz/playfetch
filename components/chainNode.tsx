@@ -1,4 +1,4 @@
-import { ActivePrompt, ChainItem, CodeChainItem, CodeConfig, PromptChainItem, RunConfig, Version } from '@/types'
+import { ChainItem, CodeChainItem, CodeConfig, PromptChainItem, RunConfig } from '@/types'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
