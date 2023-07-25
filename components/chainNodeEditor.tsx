@@ -130,6 +130,9 @@ export default function ChainNodeEditor({
     setItems(updatedItems(newItems, activeItemIndex, { ...newItems[activeItemIndex], output }))
   }
 
+  const toggleIncludeContext = (includeContext: boolean) =>
+    setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], includeContext }))
+
   const variables = ExtractUnboundChainVariables(items, promptCache)
 
   const outputMapper = (node: PromptChainItem | CodeChainItem) => (
@@ -162,8 +165,7 @@ export default function ChainNodeEditor({
               node={activeNode}
               index={activeItemIndex}
               items={items}
-              updateItem={item => setItems(updatedItems(items, activeItemIndex, item))}
-              project={project}
+              toggleIncludeContext={toggleIncludeContext}
               promptCache={promptCache}
               outputMapper={outputMapper}
               checkProviderAvailable={checkProviderAvailable}
@@ -173,10 +175,7 @@ export default function ChainNodeEditor({
           )}
           {IsCodeChainItem(activeNode) && (
             <>
-              <div className='flex items-center justify-between gap-4'>
-                <Label className='py-2'>Code Editor</Label>
-                {outputMapper(activeNode)}
-              </div>
+              {outputMapper(activeNode)}
               <RichTextInput
                 value={isEditing ? editedCode : activeNode.code}
                 setValue={setEditedCode}

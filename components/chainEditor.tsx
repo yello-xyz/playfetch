@@ -1,6 +1,7 @@
 import { ChainItem, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import Button from './button'
+import DropdownMenu from './dropdownMenu'
 
 export default function ChainEditor({
   nodes,
@@ -17,7 +18,8 @@ export default function ChainEditor({
 }) {
   const removeItem = () => setNodes([...nodes.slice(0, activeIndex), ...nodes.slice(activeIndex + 1)])
   const insertItem = (item: ChainItem) => setNodes([...nodes.slice(0, activeIndex), item, ...nodes.slice(activeIndex)])
-  const insertPrompt = () => insertItem({ promptID: prompts[0].id, versionID: prompts[0].lastVersionID })
+  const insertPrompt = (promptID: number) =>
+    insertItem({ promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
 
   const insertCodeBlock = () => {
     const code = `'Hello world'`
@@ -25,7 +27,7 @@ export default function ChainEditor({
   }
 
   return (
-    <div className='flex flex-col items-center justify-between'>
+    <div className='flex flex-col items-center justify-between min-w-[500px]'>
       <div className='flex flex-col items-center h-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
@@ -38,26 +40,43 @@ export default function ChainEditor({
           />
         ))}
       </div>
-      <div className='flex gap-4 p-6'>
+      <div className='flex self-start gap-4 p-6'>
         {activeIndex > 0 && (
           <>
+            {prompts.length > 0 && <PromptSelector prompts={prompts} onSelectPrompt={insertPrompt} />}
+            <Button type='outline' onClick={insertCodeBlock}>
+              Insert Code
+            </Button>
             {activeIndex !== nodes.length - 1 && (
               <Button type='destructive' onClick={removeItem}>
                 Remove Node
               </Button>
             )}
-            {prompts.length > 0 && (
-              <Button type='outline' onClick={insertPrompt}>
-                Insert Prompt
-              </Button>
-            )}
-            <Button type='outline' onClick={insertCodeBlock}>
-              Insert Code Block
-            </Button>
           </>
         )}
       </div>
     </div>
+  )
+}
+
+function PromptSelector({
+  prompts,
+  onSelectPrompt,
+}: {
+  prompts: Prompt[]
+  onSelectPrompt: (promptID: number) => void
+}) {
+  return (
+    <DropdownMenu value={0} onChange={value => onSelectPrompt(Number(value))}>
+      <option value={0} disabled>
+        Insert Prompt
+      </option>
+      {prompts.map((prompt, index) => (
+        <option key={index} value={prompt.id}>
+          {prompt.name}
+        </option>
+      ))}
+    </DropdownMenu>
   )
 }
 
