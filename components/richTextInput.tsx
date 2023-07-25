@@ -106,7 +106,7 @@ export default function RichTextInput({
   }
 
   const contentEditableClassName = preformatted
-    ? `outline-none ${disabled ? '' : ' min-h-[160px]'}`
+    ? 'outline-none'
     : 'p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
 
   const renderContentEditable = () => (
