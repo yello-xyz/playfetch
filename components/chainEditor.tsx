@@ -43,10 +43,9 @@ export default function ChainEditor({
       <div className='flex self-start gap-4 p-6'>
         {activeIndex > 0 && (
           <>
-            {prompts.length > 0 && <PromptSelector prompts={prompts} onSelectPrompt={insertPrompt} />}
-            <Button type='outline' onClick={insertCodeBlock}>
-              Insert Code
-            </Button>
+            {prompts.length > 0 && (
+              <PromptSelector prompts={prompts} insertPrompt={insertPrompt} insertCodeBlock={insertCodeBlock} />
+            )}
             {activeIndex !== nodes.length - 1 && (
               <Button type='destructive' onClick={removeItem}>
                 Remove Node
@@ -61,19 +60,26 @@ export default function ChainEditor({
 
 function PromptSelector({
   prompts,
-  onSelectPrompt,
+  insertPrompt,
+  insertCodeBlock,
 }: {
   prompts: Prompt[]
-  onSelectPrompt: (promptID: number) => void
+  insertPrompt: (promptID: number) => void
+  insertCodeBlock: () => void
 }) {
+  const CODE_BLOCK = 1
+
   return (
-    <DropdownMenu value={0} onChange={value => onSelectPrompt(Number(value))}>
+    <DropdownMenu
+      value={0}
+      onChange={value => (Number(value) === CODE_BLOCK ? insertCodeBlock() : insertPrompt(Number(value)))}>
       <option value={0} disabled>
-        Insert Prompt
+        Insert Node
       </option>
+      <option value={CODE_BLOCK}>Code block</option>
       {prompts.map((prompt, index) => (
         <option key={index} value={prompt.id}>
-          {prompt.name}
+          Prompt “{prompt.name}”
         </option>
       ))}
     </DropdownMenu>
@@ -102,9 +108,7 @@ function ChainNodeBox({
           <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
         </>
       )}
-      <div
-        className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`}
-        onClick={callback}>
+      <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
         {chainNode === InputNode && 'Input'}
         {chainNode === OutputNode && 'Output'}
         {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}

@@ -178,13 +178,15 @@ export default function ChainNodeEditor({
           {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
         </div>
         <div className='flex items-center justify-between w-full gap-4'>
-          {(IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode)) && (
+          {IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode) ? (
             <OutputMapper
               key={activeNode.output}
               output={activeNode.output}
               inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
               onMapOutput={mapOutput}
             />
+          ) : (
+            <div />
           )}
           <TestButtons runTitle='Run Chain' variables={variables} inputValues={inputValues} callback={runChain} />
         </div>
@@ -202,7 +204,7 @@ function OutputMapper({
   inputs: string[]
   onMapOutput: (input?: string) => void
 }) {
-  return inputs.length ? (
+  return inputs.length > 0 ? (
     <div className='self-start py-0.5'>
       <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
         <option value={0}>Map Output To</option>
@@ -213,5 +215,7 @@ function OutputMapper({
         ))}
       </DropdownMenu>
     </div>
-  ) : null
+  ) : (
+    <div />
+  )
 }
