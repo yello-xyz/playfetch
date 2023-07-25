@@ -61,18 +61,16 @@ export default function ChainNodeEditor({
 
   const checkProviderAvailable = useCheckProvider()
 
-  const [isEditing, setEditing] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
   const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
+  const isEditing = editingIndex !== undefined
 
   const toggleEditing = () => {
-    const editing = !isEditing
-    setEditing(editing)
-    setEditingIndex(editing ? activeItemIndex : undefined)
-    setEditedCode(editing ? (items[activeItemIndex] as CodeChainItem).code : '')
+    setEditingIndex(isEditing ? undefined : activeItemIndex)
+    setEditedCode(isEditing ? '' : (items[activeItemIndex] as CodeChainItem).code)
   }
-  if (isEditing && editingIndex !== undefined && editingIndex !== activeItemIndex) {
+  if (isEditing && editingIndex !== activeItemIndex) {
     setTimeout(() => updateItem(currentItems[editingIndex], items, editingIndex), 0)
   }
   if (!isEditing && IsCodeChainItem(activeNode)) {
