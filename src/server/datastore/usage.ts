@@ -5,18 +5,19 @@ import {
   buildKey,
   getDatastore,
   getID,
-  getKeyedEntity,
+  getEntityID,
 } from './datastore'
 
 export async function migrateUsage() {
   const datastore = getDatastore()
   const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
   for (const usageData of allUsage) {
+    const projectID = await getEntityID(Entity.PROJECT, 'urlPath', usageData.projectURLPath)
     await getDatastore().save(
       toUsageData(
         getID(usageData),
+        projectID,
         usageData.parentID,
-        usageData.projectURLPath,
         usageData.requests,
         usageData.cost,
         usageData.duration,
@@ -30,8 +31,8 @@ export async function migrateUsage() {
   }
 }
 
-export async function saveUsage(endpointID: number, parentID: number, projectURLPath: string) {
-  await getDatastore().save(toUsageData(endpointID, parentID, projectURLPath, 0, 0, 0, 0, 0, 0, new Date()))
+export async function saveUsage(endpointID: number, projectID: number, parentID: number) {
+  await getDatastore().save(toUsageData(endpointID, projectID, parentID, 0, 0, 0, 0, 0, 0, new Date()))
 }
 
 export async function updateUsage(
@@ -47,8 +48,8 @@ export async function updateUsage(
     transaction.save(
       toUsageData(
         endpointID,
+        usageData.projectID,
         usageData.parentID,
-        usageData.projectURLPath,
         usageData.requests + 1,
         usageData.cost + incrementalCost,
         usageData.duration + incrementalDuration,
@@ -64,8 +65,8 @@ export async function updateUsage(
 
 const toUsageData = (
   endpointID: number,
+  projectID: number,
   parentID: number,
-  projectURLPath: string,
   requests: number,
   cost: number,
   duration: number,
@@ -76,7 +77,7 @@ const toUsageData = (
   lastRunAt?: Date
 ) => ({
   key: buildKey(Entity.USAGE, endpointID),
-  data: { parentID, projectURLPath, requests, cost, duration, cacheHits, attempts, failures, createdAt, lastRunAt },
+  data: { projectID, parentID, requests, cost, duration, cacheHits, attempts, failures, createdAt, lastRunAt },
   excludeFromIndexes: [],
 })
 

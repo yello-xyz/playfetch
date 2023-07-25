@@ -44,14 +44,14 @@ indexes:
 
 - kind: endpoint
   properties:
-  - name: projectURLPath
+  - name: projectID
   - name: createdAt
     direction: desc
 
 - kind: endpoint
   properties:
+  - name: projectID
   - name: name
-  - name: projectURLPath
   - name: flavor
 
 - kind: comment

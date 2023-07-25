@@ -2,7 +2,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { ToCamelCase } from '@/src/common/formatting'
 import { saveEndpoint } from '@/src/server/datastore/endpoints'
-import { ensureProjectAPIKey, getURLPathForProject } from '@/src/server/datastore/projects'
+import { ensureProjectAPIKey } from '@/src/server/datastore/projects'
 import { User } from '@/types'
 
 async function publishEndpoint(req: NextApiRequest, res: NextApiResponse, user: User) {
@@ -16,9 +16,8 @@ async function publishEndpoint(req: NextApiRequest, res: NextApiResponse, user: 
   const useStreaming = req.body.useStreaming
 
   const urlPath = ToCamelCase(name)
-  const projectURLPath = await getURLPathForProject(userID, projectID)
   await ensureProjectAPIKey(userID, projectID)
-  await saveEndpoint(userID, parentID, versionID, urlPath, projectURLPath, flavor, useCache, useStreaming)
+  await saveEndpoint(userID, projectID, parentID, versionID, urlPath, flavor, useCache, useStreaming)
 
   res.json({})
 }

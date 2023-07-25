@@ -16,14 +16,15 @@ const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig |
 }
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
-  const { project: projectURLPath, endpoint: endpointName } = ParseQuery(req.query)
+  const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
+  const projectID = Number(projectIDFromPath)
 
-  if (projectURLPath && endpointName) {
+  if (projectID && endpointName) {
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
 
-    if (apiKey && (await checkProject(projectURLPath, apiKey))) {
-      const endpoint = await getActiveEndpointFromPath(endpointName, projectURLPath, flavor)
+    if (apiKey && (await checkProject(projectID, apiKey))) {
+      const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
       if (endpoint && endpoint.enabled) {
         const useStreaming = endpoint.useStreaming
         if (useStreaming) {

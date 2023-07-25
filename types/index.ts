@@ -29,7 +29,6 @@ export type InputValues = { [name: string]: string[] }
 export type ActiveProject = Project & {
   endpoints: ResolvedEndpoint[]
   inputValues: InputValues
-  projectURLPath: string
   availableFlavors: string[]
   prompts: Prompt[]
   chains: Chain[]
@@ -133,11 +132,11 @@ export type Endpoint = {
   id: number
   enabled: boolean
   userID: number
+  projectID: number
   parentID: number
   versionID?: number
   timestamp: string
   urlPath: string
-  projectURLPath: string
   flavor: string
   useCache: boolean
   useStreaming: boolean

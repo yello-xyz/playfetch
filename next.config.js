@@ -9,7 +9,7 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/p/:project/:endpoint',
+        source: '/:projectID/:endpoint',
         has: [
           {
             type: 'header',

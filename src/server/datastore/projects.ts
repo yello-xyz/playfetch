@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntity,
   getEntityIDs,
   getEntityKeys,
   getID,
@@ -14,7 +13,6 @@ import {
   getTimestamp,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
-import { CheckValidURLPath } from '@/src/common/formatting'
 import ShortUniqueId from 'short-unique-id'
 import {
   getAccessibleObjectIDs,
@@ -44,7 +42,6 @@ const hashAPIKey = (apiKey: string) => createHash('sha256').update(apiKey).diges
 const toProjectData = (
   workspaceID: number,
   name: string,
-  urlPath: string,
   labels: string[],
   flavors: string[],
   createdAt: Date,
@@ -63,7 +60,6 @@ const toProjectData = (
     labels: JSON.stringify(labels),
     flavors: JSON.stringify(flavors),
     favorited: JSON.stringify(favorited),
-    urlPath,
     apiKeyHash,
     apiKeyDev, // TODO do NOT store api key in datastore but show it once to user on creation
   },
@@ -90,15 +86,15 @@ export async function getProjectUsers(projectID: number): Promise<User[]> {
   return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
-export async function loadEndpoints(projectData: any, buildURL: (path: string) => string) {
-  const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'projectURLPath', projectData.urlPath)
-  const usages = await getEntities(Entity.USAGE, 'projectURLPath', projectData.urlPath)
+async function loadEndpoints(projectID: number, apiKeyDev: string, buildURL: (path: string) => string) {
+  const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'projectID', projectID)
+  const usages = await getEntities(Entity.USAGE, 'projectID', projectID)
 
   return endpoints
     .map(endpoint => ({
       ...toEndpoint(endpoint),
-      url: buildURL(`/p/${endpoint.projectURLPath}/${endpoint.urlPath}`),
-      apiKeyDev: projectData.apiKeyDev ?? '',
+      url: buildURL(`/${projectID}/${endpoint.urlPath}`),
+      apiKeyDev,
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     }))
     .reverse()
@@ -119,9 +115,8 @@ export async function getActiveProject(
   return {
     ...toProject(projectData, userID),
     inputValues: await getProjectInputValues(projectID),
-    projectURLPath: projectData.urlPath,
     availableFlavors: JSON.parse(projectData.flavors),
-    endpoints: await loadEndpoints(projectData, buildURL),
+    endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? '', buildURL),
     prompts,
     chains,
     users,
@@ -129,29 +124,12 @@ export async function getActiveProject(
   }
 }
 
-const getUniqueURLPathFromProjectName = async (projectName: string) => {
-  let urlPath = projectName
-    .replace(/\s+/g, '-')
-    .toLowerCase()
-    .replace(/[^a-z0-9\-]/gim, '')
-  if (!CheckValidURLPath(urlPath)) {
-    urlPath = `project-${urlPath}`
-  }
-  return getUniqueNameWithFormat(
-    urlPath,
-    urlPath => checkProject(urlPath).then(projectID => !!projectID),
-    (name, suffix) => `${name}-${suffix}`
-  )
-}
-
 export async function addProjectForUser(userID: number, workspaceID: number, projectName: string) {
   await ensureWorkspaceAccess(userID, workspaceID)
-  const urlPath = await getUniqueURLPathFromProjectName(projectName)
   const createdAt = new Date()
   const projectData = toProjectData(
     workspaceID,
     projectName,
-    urlPath,
     [],
     [DefaultEndpointFlavor],
     createdAt,
@@ -173,14 +151,9 @@ export async function revokeMemberAccessForProject(userID: number, projectID: nu
   await revokeUserAccess(userID, projectID)
 }
 
-export async function checkProject(urlPath: string, apiKey?: string): Promise<number | undefined> {
-  const projectData = await getEntity(Entity.PROJECT, 'urlPath', urlPath)
+export async function checkProject(projectID: number, apiKey?: string): Promise<number | undefined> {
+  const projectData = await getTrustedProjectData(projectID)
   return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey))
-}
-
-export async function getURLPathForProject(userID: number, projectID: number): Promise<string> {
-  const projectData = await getVerifiedUserProjectData(userID, projectID)
-  return projectData.urlPath
 }
 
 async function updateProject(projectData: any, updateLastEditedTimestamp: boolean) {
@@ -188,7 +161,6 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
     toProjectData(
       projectData.workspaceID,
       projectData.name,
-      projectData.urlPath,
       JSON.parse(projectData.labels),
       JSON.parse(projectData.flavors),
       projectData.createdAt,

@@ -21,14 +21,15 @@ export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
+    const projectID = await getEntityID(Entity.PROJECT, 'urlPath', endpointData.projectURLPath)
     await getDatastore().save(
       toEndpointData(
         endpointData.enabled,
         endpointData.userID,
+        projectID,
         endpointData.parentID,
         endpointData.versionID,
         endpointData.urlPath,
-        endpointData.projectURLPath,
         endpointData.flavor,
         endpointData.createdAt,
         endpointData.useCache,
@@ -42,34 +43,32 @@ export async function migrateEndpoints() {
 async function ensureEndpointAccess(
   userID: number,
   endpointData: {
+    projectID: number
     parentID: number
     versionID: number | null
-    projectURLPath: string
   }
 ) {
-  const projectID = await getEntityID(Entity.PROJECT, 'urlPath', endpointData.projectURLPath)
-  if (!projectID) {
-    throw new Error(`Project with URL path ${endpointData.projectURLPath} does not exist`)
-  }
   const data = endpointData.versionID
     ? await getVerifiedUserPromptData(userID, endpointData.parentID)
     : await getVerifiedUserChainData(userID, endpointData.parentID)
-  if (data.projectID !== projectID) {
-    throw new Error(`Item with ID ${endpointData.parentID} does not belong to project with ID ${projectID}`)
+  if (data.projectID !== endpointData.projectID) {
+    throw new Error(
+      `Item with ID ${endpointData.parentID} does not belong to project with ID ${endpointData.projectID}`
+    )
   }
 }
 
-const buildPathFilter = (urlPath: string, projectURLPath: string, flavor?: string) =>
+const buildPathFilter = (projectID: number, urlPath: string, flavor?: string) =>
   and([
+    buildFilter('projectID', projectID),
     buildFilter('urlPath', urlPath),
-    buildFilter('projectURLPath', projectURLPath),
     ...(flavor ? [buildFilter('flavor', flavor)] : []),
   ])
 
 const getValidURLPath = async (
+  projectID: number,
   parentID: number,
   name: string,
-  projectURLPath: string,
   flavor: string,
   endpointID?: number
 ) => {
@@ -79,7 +78,7 @@ const getValidURLPath = async (
   return getUniqueNameWithFormat(
     name,
     async urlPath => {
-      const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(urlPath, projectURLPath))
+      const endpoints = await getFilteredEntities(Entity.ENDPOINT, buildPathFilter(projectID, urlPath))
       return (
         endpoints.some(endpoint => endpoint.parentID !== parentID) ||
         endpoints.filter(endpoint => endpoint.flavor === flavor).some(endpoint => getID(endpoint) !== endpointID)
@@ -91,42 +90,42 @@ const getValidURLPath = async (
 
 export async function saveEndpoint(
   userID: number,
+  projectID: number,
   parentID: number,
   versionID: number | null,
   name: string,
-  projectURLPath: string,
   flavor: string,
   useCache: boolean,
   useStreaming: boolean
 ) {
-  await ensureEndpointAccess(userID, { parentID, versionID, projectURLPath })
-  const urlPath = await getValidURLPath(parentID, name, projectURLPath, flavor)
+  await ensureEndpointAccess(userID, { projectID, parentID, versionID })
+  const urlPath = await getValidURLPath(projectID, parentID, name, flavor)
   const endpointData = toEndpointData(
     false,
     userID,
+    projectID,
     parentID,
     versionID,
     urlPath,
-    projectURLPath,
     flavor,
     new Date(),
     useCache,
     useStreaming
   )
   await getDatastore().save(endpointData)
-  await saveUsage(getID(endpointData), parentID, projectURLPath)
+  await saveUsage(getID(endpointData), projectID, parentID)
 }
 
 export const DefaultEndpointFlavor = 'default'
 
 export async function getActiveEndpointFromPath(
+  projectID: number,
   urlPath: string,
-  projectURLPath: string,
   flavor: string | undefined
 ): Promise<Endpoint | undefined> {
   const endpoint = await getFilteredEntity(
     Entity.ENDPOINT,
-    buildPathFilter(urlPath, projectURLPath, flavor ?? DefaultEndpointFlavor)
+    buildPathFilter(projectID, urlPath, flavor ?? DefaultEndpointFlavor)
   )
   return endpoint?.enabled ? toEndpoint(endpoint) : undefined
 }
@@ -145,16 +144,16 @@ export async function updateEndpointForUser(
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData)
   if (urlPath !== endpointData.urlPath) {
-    urlPath = await getValidURLPath(parentID, urlPath, endpointData.projectURLPath, flavor, endpointID)
+    urlPath = await getValidURLPath(endpointData.projectID, parentID, urlPath, flavor, endpointID)
   }
   await getDatastore().save(
     toEndpointData(
       enabled,
       endpointData.userID,
+      endpointData.projectID,
       parentID,
       versionID,
       urlPath,
-      endpointData.projectURLPath,
       flavor,
       endpointData.createdAt,
       useCache,
@@ -174,10 +173,10 @@ export async function deleteEndpointForUser(userID: number, endpointID: number) 
 const toEndpointData = (
   enabled: boolean,
   userID: number,
+  projectID: number,
   parentID: number,
   versionID: number | null,
   urlPath: string,
-  projectURLPath: string,
   flavor: string,
   createdAt: Date,
   useCache: boolean,
@@ -188,10 +187,10 @@ const toEndpointData = (
   data: {
     enabled,
     userID,
+    projectID,
     parentID,
     versionID,
     urlPath,
-    projectURLPath,
     flavor,
     createdAt,
     useCache,
@@ -204,11 +203,11 @@ export const toEndpoint = (data: any): Endpoint => ({
   id: getID(data),
   enabled: data.enabled,
   userID: data.userID,
+  projectID: data.projectID,
   parentID: data.parentID,
   versionID: data.versionID ?? null,
   timestamp: getTimestamp(data),
   urlPath: data.urlPath,
-  projectURLPath: data.projectURLPath,
   flavor: data.flavor,
   useCache: data.useCache,
   useStreaming: data.useStreaming,
