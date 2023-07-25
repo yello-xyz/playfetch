@@ -27,8 +27,8 @@ export default function ChainEditor({
   }
 
   return (
-    <div className='flex flex-col items-center justify-between min-w-[500px]'>
-      <div className='flex flex-col items-center h-full p-8 pr-0 overflow-y-auto'>
+    <div className='flex flex-col items-center justify-between min-w-[500px] border-r border-gray-300 bg-gray-25'>
+      <div className='flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}
@@ -93,7 +93,7 @@ function ChainNodeBox({
   callback: () => void
   prompts: Prompt[]
 }) {
-  const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-400'
+  const colorClass = isActive ? 'bg-blue-50 border-blue-100' : 'bg-white border-gray-400'
   return (
     <>
       {!isFirst && (
@@ -102,7 +102,9 @@ function ChainNodeBox({
           <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
         </>
       )}
-      <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
+      <div
+        className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`}
+        onClick={callback}>
         {chainNode === InputNode && 'Input'}
         {chainNode === OutputNode && 'Output'}
         {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
