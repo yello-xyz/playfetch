@@ -93,10 +93,15 @@ function ChainNodeBox({
   callback: () => void
   prompts: Prompt[]
 }) {
-  const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
+  const colorClass = isActive ? 'bg-blue-25 border-blue-50' : 'border-gray-400'
   return (
     <>
-      {!isFirst && <div className='w-px h-4 border-l border-gray-300 min-h-[16px]' />}
+      {!isFirst && (
+        <>
+          <div className='w-px h-4 border-l border-gray-400 min-h-[32px]' />
+          <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
+        </>
+      )}
       <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
         {chainNode === InputNode && 'Input'}
         {chainNode === OutputNode && 'Output'}
