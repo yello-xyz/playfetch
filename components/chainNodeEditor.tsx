@@ -61,19 +61,33 @@ export default function ChainNodeEditor({
 
   const checkProviderAvailable = useCheckProvider()
 
+  const updateItem = (item: ChainItem, items = currentItems, index = activeItemIndex) => {
+    setItems([...items.slice(0, index), item, ...items.slice(index + 1)])
+  }
+
   const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
+  const [editingItemsCount, setEditingItemsCount] = useState(items.length)
   const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
   const isEditing = editingIndex !== undefined
 
   const toggleEditing = () => {
     setEditingIndex(isEditing ? undefined : activeItemIndex)
     setEditedCode(isEditing ? '' : (items[activeItemIndex] as CodeChainItem).code)
+    setEditingItemsCount(items.length)
   }
+
   if (isEditing && editingIndex !== activeItemIndex) {
-    setTimeout(() => updateItem(currentItems[editingIndex], items, editingIndex))
-  }
-  if (!isEditing && IsCodeChainItem(activeNode)) {
+    setTimeout(() => setItems(currentItems))
+    toggleEditing()
+  } else if (isEditing && items.length !== editingItemsCount) {
+    if (items.length === editingIndex + 1) {
+      // This means an item was inserted at the position of the item we were editing, so we
+      // need to persist the edit to the item which now has a index one higher than before.
+      setTimeout(() => updateItem({ ...items[editingIndex + 1], code: editedCode }, items, editingIndex + 1))
+    }
+    toggleEditing()
+  } else if (!isEditing && IsCodeChainItem(activeNode)) {
     toggleEditing()
   }
 
@@ -109,10 +123,6 @@ export default function ChainNodeEditor({
         setRunning(false)
       }
     }
-  }
-
-  const updateItem = (item: ChainItem, items = currentItems, index = activeItemIndex) => {
-    setItems([...items.slice(0, index), item, ...items.slice(index + 1)])
   }
 
   const mapOutput = (output?: string) => {
