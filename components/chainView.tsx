@@ -1,12 +1,5 @@
-import {
-  ActiveProject,
-  ActivePrompt,
-  Chain,
-  ChainItem,
-  PromptChainItem,
-  Version,
-} from '@/types'
-import { useEffect, useState } from 'react'
+import { ActiveProject, ActivePrompt, Chain, ChainItem, PromptChainItem, Version } from '@/types'
+import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
 import ChainNodeEditor, { ExtractUnboundChainVariables } from './chainNodeEditor'
@@ -36,21 +29,9 @@ export default function ChainView({
   const items = nodes.filter(IsChainItem)
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
-  const promptCache: PromptCache = {
-    promptForID: id => activePromptCache[id],
-    promptForItem: item => activePromptCache[item.promptID],
-    versionForItem: item => activePromptCache[item.promptID]?.versions.find(version => version.id === item.versionID),
-    promptItemForID: (promptID: number) => {
-      const prompt = project.prompts.find(prompt => prompt.id === promptID)!
-      const versionID = prompt.lastVersionID
-      const cachedPrompt = promptCache.promptForID(promptID)
-      return {
-        promptID,
-        versionID,
-        ...(cachedPrompt ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] } : {}),
-      }
-    },
-    refreshPrompt: async (promptID: number) =>
+
+  const refreshPrompt = useCallback(
+    async (promptID: number) =>
       api.getPromptVersions(promptID).then(versions => {
         const prompt = toActivePrompt(promptID, versions, project)
         setActivePromptCache(cache => ({ ...cache, [promptID]: prompt }))
@@ -67,16 +48,35 @@ export default function ChainView({
         )
         return prompt
       }),
+    [nodes, project]
+  )
+
+  const promptCache: PromptCache = {
+    promptForID: id => activePromptCache[id],
+    promptForItem: item => activePromptCache[item.promptID],
+    versionForItem: item => activePromptCache[item.promptID]?.versions.find(version => version.id === item.versionID),
+    promptItemForID: (promptID: number) => {
+      const prompt = project.prompts.find(prompt => prompt.id === promptID)!
+      const versionID = prompt.lastVersionID
+      const cachedPrompt = promptCache.promptForID(promptID)
+      return {
+        promptID,
+        versionID,
+        ...(cachedPrompt ? { prompt: cachedPrompt, version: cachedPrompt.versions.slice(-1)[0] } : {}),
+      }
+    },
+    refreshPrompt,
   }
+
   const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
 
   useEffect(() => {
     const promptItems = items.filter(IsPromptChainItem)
     const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
     if (unloadedItem) {
-      promptCache.refreshPrompt(unloadedItem.promptID)
+      refreshPrompt(unloadedItem.promptID)
     }
-  }, [project, items, nodes, setNodes, activePromptCache, promptCache])
+  }, [project, items, nodes, setNodes, activePromptCache, refreshPrompt])
 
   const activeNode = nodes[activeNodeIndex]
   const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined

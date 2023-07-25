@@ -125,7 +125,7 @@ export type CodeConfig = {
   output?: string
 }
 
-export type PromptChainItem = (RunConfig & { promptID: number })
+export type PromptChainItem = RunConfig & { promptID: number }
 export type CodeChainItem = CodeConfig
 export type ChainItem = PromptChainItem | CodeChainItem
 

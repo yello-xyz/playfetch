@@ -99,7 +99,9 @@ export default function TestDataPane({
         Add
       </div>
     </div>
-  ) : <EmptyTestDataPane message={emptyMessage} />
+  ) : (
+    <EmptyTestDataPane message={emptyMessage} />
+  )
 }
 
 function EmptyTestDataPane({ message }: { message: string }) {
