@@ -20,14 +20,11 @@ export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    const data = endpointData.versionID
-    ? await getVerifiedUserPromptData(endpointData.userID, endpointData.parentID)
-    : await getVerifiedUserChainData(endpointData.userID, endpointData.parentID)
     await getDatastore().save(
       toEndpointData(
         endpointData.enabled,
         endpointData.userID,
-        data.projectID,
+        endpointData.projectID,
         endpointData.parentID,
         endpointData.versionID,
         endpointData.urlPath,

@@ -126,7 +126,7 @@ export const getVerifiedProjectScopedData = async (userID: number, entity: Entit
   if (!data) {
     throw new Error(`Entity with ID ${id} does not exist or user has no access`)
   }
-  // await ensureProjectAccess(userID, data.projectID)
+  await ensureProjectAccess(userID, data.projectID)
   return data
 }
 

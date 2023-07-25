@@ -1,27 +1,14 @@
 import { Usage } from '@/types'
-import {
-  Entity,
-  runTransactionWithExponentialBackoff,
-  buildKey,
-  getDatastore,
-  getID,
-  getKeyedEntity,
-} from './datastore'
-import { getVerifiedUserPromptData } from './prompts'
-import { getVerifiedUserChainData } from './chains'
+import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getID } from './datastore'
 
 export async function migrateUsage() {
   const datastore = getDatastore()
   const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
   for (const usageData of allUsage) {
-    const endpointData = await getKeyedEntity(Entity.ENDPOINT, getID(usageData))
-    const data = endpointData.versionID
-    ? await getVerifiedUserPromptData(endpointData.userID, endpointData.parentID)
-    : await getVerifiedUserChainData(endpointData.userID, endpointData.parentID)
     await getDatastore().save(
       toUsageData(
         getID(usageData),
-        data.projectID,
+        usageData.projectID,
         usageData.parentID,
         usageData.requests,
         usageData.cost,
