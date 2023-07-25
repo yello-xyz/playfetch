@@ -76,7 +76,7 @@ function PromptSelector({
       <option value={0} disabled>
         Insert Node
       </option>
-      <option value={CODE_BLOCK}>Code block</option>
+      <option value={CODE_BLOCK}>Code Block</option>
       {prompts.map((prompt, index) => (
         <option key={index} value={prompt.id}>
           Prompt “{prompt.name}”

@@ -210,7 +210,7 @@ function OutputMapper({
         <option value={0}>Map Output To</option>
         {inputs.map((input, index) => (
           <option key={index} value={input}>
-            {input}
+            Input “{input}”
           </option>
         ))}
       </DropdownMenu>
