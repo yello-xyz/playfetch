@@ -5,18 +5,23 @@ import {
   buildKey,
   getDatastore,
   getID,
-  getEntityID,
+  getKeyedEntity,
 } from './datastore'
+import { getVerifiedUserPromptData } from './prompts'
+import { getVerifiedUserChainData } from './chains'
 
 export async function migrateUsage() {
   const datastore = getDatastore()
   const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
   for (const usageData of allUsage) {
-    const projectID = await getEntityID(Entity.PROJECT, 'urlPath', usageData.projectURLPath)
+    const endpointData = await getKeyedEntity(Entity.ENDPOINT, getID(usageData))
+    const data = endpointData.versionID
+    ? await getVerifiedUserPromptData(endpointData.userID, endpointData.parentID)
+    : await getVerifiedUserChainData(endpointData.userID, endpointData.parentID)
     await getDatastore().save(
       toUsageData(
         getID(usageData),
-        projectID,
+        data.projectID,
         usageData.parentID,
         usageData.requests,
         usageData.cost,

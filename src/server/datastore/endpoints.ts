@@ -5,7 +5,6 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
-  getEntityID,
   getFilteredEntities,
   getFilteredEntity,
   getID,
@@ -21,12 +20,14 @@ export async function migrateEndpoints() {
   const datastore = getDatastore()
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   for (const endpointData of allEndpoints) {
-    const projectID = await getEntityID(Entity.PROJECT, 'urlPath', endpointData.projectURLPath)
+    const data = endpointData.versionID
+    ? await getVerifiedUserPromptData(endpointData.userID, endpointData.parentID)
+    : await getVerifiedUserChainData(endpointData.userID, endpointData.parentID)
     await getDatastore().save(
       toEndpointData(
         endpointData.enabled,
         endpointData.userID,
-        projectID,
+        data.projectID,
         endpointData.parentID,
         endpointData.versionID,
         endpointData.urlPath,
