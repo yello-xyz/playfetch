@@ -71,7 +71,7 @@ export default function ChainNodeEditor({
     setEditedCode(isEditing ? '' : (items[activeItemIndex] as CodeChainItem).code)
   }
   if (isEditing && editingIndex !== activeItemIndex) {
-    setTimeout(() => updateItem(currentItems[editingIndex], items, editingIndex), 0)
+    setTimeout(() => updateItem(currentItems[editingIndex], items, editingIndex))
   }
   if (!isEditing && IsCodeChainItem(activeNode)) {
     toggleEditing()

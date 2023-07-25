@@ -83,7 +83,7 @@ export default function RichTextInput({
   if (focus !== focused) {
     setFocused(focus)
     if (focus) {
-      setTimeout(() => contentEditableRef.current?.focus(), 0)
+      setTimeout(() => contentEditableRef.current?.focus())
     } else if (selection) {
       setSelection(undefined)
     }

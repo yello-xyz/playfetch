@@ -165,7 +165,7 @@ export function CommentInput({
 
   const inputRef = useRef<HTMLInputElement>(null)
   if (focus && !inputRef.current) {
-    setTimeout(() => inputRef.current?.focus(), 0)
+    setTimeout(() => inputRef.current?.focus())
   }
 
   return (

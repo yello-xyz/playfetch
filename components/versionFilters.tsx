@@ -170,7 +170,7 @@ function FilterButton({
 
   const inputRef = useRef<HTMLInputElement>(null)
   if (menuState === 'text' && !inputRef.current) {
-    setTimeout(() => inputRef.current?.focus(), 0)
+    setTimeout(() => inputRef.current?.focus())
   }
 
   const updateText = (newText: string) => {

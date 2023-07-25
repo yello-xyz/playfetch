@@ -51,7 +51,7 @@ export default function TestDataPane({
       const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
       const lastChild = editables[editables.length - 1] as HTMLElement
       lastChild?.focus()
-    }, 0)
+    })
   }
 
   const selectColumn = (index: number) => {

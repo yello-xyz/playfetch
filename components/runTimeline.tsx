@@ -32,7 +32,7 @@ export default function RunTimeline({
         if (runs.length > 1 && element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
-      }, 0)
+      })
     }
   }
 
