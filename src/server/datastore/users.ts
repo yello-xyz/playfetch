@@ -75,7 +75,7 @@ export async function saveUser(email: string, fullName: string, isAdmin: boolean
   const userData = toUserData(
     email.toLowerCase(),
     fullName,
-    previousUserData?.imageURL,
+    previousUserData?.imageURL ?? '',
     isAdmin,
     previousUserData?.createdAt ?? new Date(),
     previousUserData?.lastLoginAt,
