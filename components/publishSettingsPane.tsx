@@ -75,7 +75,7 @@ export default function PublishSettingsPane({
 
   return (
     <>
-      <Label>{endpoint.urlPath}</Label>
+      <Label>{currentParent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
         <EndpointToggleWithName endpoint={endpoint} onRefresh={onRefresh} />
