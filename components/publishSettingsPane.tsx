@@ -9,6 +9,7 @@ import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
 import { EndpointToggleWithName } from './endpointsTable'
 import { useInitialState } from './useInitialState'
+import useModalDialogPrompt from './modalDialogContext'
 
 export default function PublishSettingsPane({
   endpoint,
@@ -39,13 +40,30 @@ export default function PublishSettingsPane({
     api.updateEndpoint({ ...endpoint, useStreaming: checked }).then(_ => onRefresh())
   }
 
+  const setDialogPrompt = useModalDialogPrompt()
+
+  const showUpdatePrompt = (callback: () => void) => {
+    if (endpoint.enabled) {
+      setDialogPrompt({
+        title: 'Updating a published endpoint may break existing integrations',
+        confirmTitle: 'Proceed',
+        callback,
+        destructive: true,
+      })
+    } else {
+      callback()
+    }
+  }
+
   const addNewEnvironment = 'Add New Environment…'
   const updateFlavor = (flavor: string) => {
     if (flavor === addNewEnvironment) {
       setShowPickNamePrompt(true)
     } else {
-      setFlavor(flavor)
-      api.updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
+      showUpdatePrompt(() => {
+        setFlavor(flavor)
+        api.updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
+      })
     }
   }
 
@@ -59,8 +77,10 @@ export default function PublishSettingsPane({
   const versionIndex = versions?.findIndex(version => version.id === versionID)
 
   const updateVersion = (version: Version) => {
-    setVersionID(version.id)
-    api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
+    showUpdatePrompt(() => {
+      setVersionID(version.id)
+      api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
+    })
   }
 
   const parents = [...project.prompts, ...project.chains]
@@ -73,33 +93,25 @@ export default function PublishSettingsPane({
         <Label>Enabled</Label>
         <EndpointToggleWithName endpoint={endpoint} onRefresh={onRefresh} />
         <Label>Environment</Label>
-        {endpoint.enabled ? (
-          flavor
-        ) : (
-          <DropdownMenu value={flavor} onChange={updateFlavor}>
-            {availableFlavors.map((flavor, index) => (
-              <option key={index} value={flavor}>
-                {flavor}
-              </option>
-            ))}
-            <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
-              {addNewEnvironment}
+        <DropdownMenu value={flavor} onChange={updateFlavor}>
+          {availableFlavors.map((flavor, index) => (
+            <option key={index} value={flavor}>
+              {flavor}
             </option>
-          </DropdownMenu>
-        )}
+          ))}
+          <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
+            {addNewEnvironment}
+          </option>
+        </DropdownMenu>
         {versions && !!versionIndex && versionIndex >= 0 && (
           <>
             <Label>Prompt</Label>
-            {endpoint.enabled ? (
-              `v${versionIndex + 1}`
-            ) : (
-              <VersionSelector
-                versions={versions}
-                endpoints={project.endpoints}
-                activeVersion={versions[versionIndex]}
-                setActiveVersion={updateVersion}
-              />
-            )}
+            <VersionSelector
+              versions={versions}
+              endpoints={project.endpoints}
+              activeVersion={versions[versionIndex]}
+              setActiveVersion={updateVersion}
+            />
             <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
               {StripPromptSentinels(versions[versionIndex].prompt)}
             </div>
