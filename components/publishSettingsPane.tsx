@@ -55,7 +55,6 @@ export default function PublishSettingsPane({
     updateFlavor(flavor)
   }
 
-  const [parentID, setParentID] = useInitialState(endpoint.parentID)
   const [versionID, setVersionID] = useInitialState(endpoint.versionID)
   const versionIndex = versions?.findIndex(version => version.id === versionID)
 
@@ -65,17 +64,11 @@ export default function PublishSettingsPane({
   }
 
   const parents = [...project.prompts, ...project.chains]
-  const currentParent = parents.find(item => item.id === parentID)!
-
-  const updateParent = (parentID: number) => {
-    setParentID(parentID)
-    const prompt = project.prompts.find(prompt => prompt.id === parentID)
-    api.updateEndpoint({ ...endpoint, parentID, versionID: prompt?.lastVersionID }).then(_ => onRefresh())
-  }
+  const parent = parents.find(item => item.id === endpoint.parentID)!
 
   return (
     <>
-      <Label>{currentParent.name}</Label>
+      <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
         <EndpointToggleWithName endpoint={endpoint} onRefresh={onRefresh} />
@@ -92,18 +85,6 @@ export default function PublishSettingsPane({
             <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
               {addNewEnvironment}
             </option>
-          </DropdownMenu>
-        )}
-        <Label>Prompt / Chain</Label>
-        {endpoint.enabled ? (
-          currentParent?.name
-        ) : (
-          <DropdownMenu value={parentID} onChange={value => updateParent(Number(value))}>
-            {parents.map((parent, index) => (
-              <option key={index} value={parent.id}>
-                {parent.name}
-              </option>
-            ))}
           </DropdownMenu>
         )}
         {versions && !!versionIndex && versionIndex >= 0 && (
