@@ -1,4 +1,4 @@
-import { ActiveProject, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
+import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode, useState } from 'react'
 import Icon from './icon'
@@ -8,6 +8,7 @@ import api from '@/src/client/api'
 import Checkbox from './checkbox'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
 import TextInput from './textInput'
+import DropdownMenu from './dropdownMenu'
 
 export function EndpointToggleWithName({
   endpoint,
@@ -92,15 +93,16 @@ export default function EndpointsTable({
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
 }) {
-  const addEndpoint =
-  project.prompts.length > 0 || project.chains.length > 0
-    ? () => {
-        const prompt = project.prompts[0] as Prompt | undefined
-        const parent = prompt ?? project.chains[0]
-        const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
-        api.publishEndpoint(project.id, parent.id, prompt?.lastVersionID, name, flavor, false, false).then(onRefresh)
-      }
-    : undefined
+  const parents = [...project.prompts, ...project.chains]
+  const canAddNewEndpoint = parents.length > 0
+
+  const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in (parent as Prompt)
+  const addEndpoint = (parentID: number) => {
+    const parent = parents.find(parent => parent.id === parentID)!
+    const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
+    const versionID = isPrompt(parent) ? parent.lastVersionID : undefined
+    api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
+  }
 
   const groups = [...project.prompts, ...project.chains]
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
@@ -109,10 +111,18 @@ export default function EndpointsTable({
     <>
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
-        {addEndpoint && (
-          <div className='flex items-center gap-0.5 text-gray-800 cursor-pointer' onClick={addEndpoint}>
-            <Icon icon={addIcon} />
-            New Endpoint
+        {canAddNewEndpoint && (
+          <div className='flex-end'>
+            <DropdownMenu value={0} onChange={value => addEndpoint(Number(value))}>
+              <option value={0} disabled>
+                Add New Endpoint
+              </option>
+              {parents.map((parent, index) => (
+                <option key={index} value={parent.id}>
+                  {isPrompt(parent) ? 'Prompt' : 'Chain'} “{parent.name}”
+                </option>
+              ))}
+            </DropdownMenu>
           </div>
         )}
       </div>
@@ -127,7 +137,7 @@ export default function EndpointsTable({
           />
         ))
       ) : (
-        <EmptyTable onAddEndpoint={addEndpoint} />
+        <EmptyTable canAddNewEndpoint={canAddNewEndpoint} />
       )}
     </>
   )
@@ -219,26 +229,15 @@ function RowCell({
   )
 }
 
-function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
-  const AddPromptLink = ({ label }: { label: string }) => (
-    <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddEndpoint}>
-      {label}
-    </span>
-  )
-
+function EmptyTable({ canAddNewEndpoint }: { canAddNewEndpoint: boolean }) {
   return (
     <div className='w-full h-full'>
       <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
         <span className='font-medium'>No Endpoints</span>
 
         <span className='text-xs text-center text-gray-400 w-60'>
-          {onAddEndpoint ? (
-            <span>
-              Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
-            </span>
-          ) : (
-            <span>Create some prompts or chains first to integrate this project into your code base.</span>
-          )}
+          {canAddNewEndpoint ? 'Add a new endpoint' : 'Create some prompts or chains first'} to integrate this project
+          into your code base.
         </span>
       </div>
     </div>
