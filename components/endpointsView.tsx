@@ -5,24 +5,9 @@ import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
 import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
-import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
-
-const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
-  for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
-    const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
-    const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
-    const availableFlavor = availableFlavors.find(flavor => !existingFlavors.includes(flavor))
-    if (availableFlavor) {
-      return { name: existingName, flavor: availableFlavor }
-    }
-  }
-  return {
-    name: ToCamelCase(itemName.split(' ').slice(0, 3).join(' ')),
-    flavor: availableFlavors[0],
-  }
-}
 
 export default function EndpointsView({
   project,
@@ -50,16 +35,6 @@ export default function EndpointsView({
 
   const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
 
-  const addEndpoint =
-    project.prompts.length > 0 || project.chains.length > 0
-      ? () => {
-          const prompt = project.prompts[0] as Prompt | undefined
-          const parent = prompt ?? project.chains[0]
-          const { name, flavor } = NewConfigFromEndpoints(endpoints, parent.name, project.availableFlavors)
-          api.publishEndpoint(project.id, parent.id, prompt?.lastVersionID, name, flavor, false, false).then(onRefresh)
-        }
-      : undefined
-
   const parent = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
   useEffect(() => {
@@ -83,7 +58,6 @@ export default function EndpointsView({
           activeEndpoint={activeEndpoint}
           setActiveEndpoint={updateActiveEndpoint}
           onRefresh={onRefresh}
-          onAddEndpoint={addEndpoint}
         />
       </div>
       {activeEndpoint && parent && (
