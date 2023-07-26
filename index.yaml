@@ -1,0 +1,66 @@
+indexes:
+
+- kind: _nextauth_account
+  properties:
+  - name: provider
+  - name: providerAccountId
+  - name: expires_at
+    direction: desc
+
+- kind: _nextauth_session
+  properties:
+  - name: identifier
+  - name: token
+
+- kind: project
+  properties:
+  - name: workspaceID
+  - name: lastEditedAt
+    direction: desc
+
+- kind: prompt
+  properties:
+  - name: projectID
+  - name: lastEditedAt
+    direction: desc
+
+- kind: chain
+  properties:
+  - name: projectID
+  - name: lastEditedAt
+    direction: desc
+
+- kind: version
+  properties:
+  - name: promptID
+  - name: createdAt
+    direction: desc
+
+- kind: run
+  properties:
+  - name: promptID
+  - name: createdAt
+    direction: desc
+
+- kind: endpoint
+  properties:
+  - name: projectID
+  - name: createdAt
+    direction: desc
+
+- kind: endpoint
+  properties:
+  - name: projectID
+  - name: name
+  - name: flavor
+
+- kind: comment
+  properties:
+  - name: promptID
+  - name: createdAt
+    direction: desc
+
+- kind: provider
+  properties:
+  - name: userID
+  - name: provider

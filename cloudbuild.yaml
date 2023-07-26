@@ -1,0 +1,25 @@
+steps:
+  - name: node
+    entrypoint: npm
+    args: ['install']
+  - name: node
+    entrypoint: npm
+    args: ['run', 'clean']
+  - name: node
+    entrypoint: npm
+    args: ['run', 'create-env']
+    env:
+      - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
+      - 'GOOGLE_CLIENT_SECRET=${_GOOGLE_CLIENT_SECRET}'
+      - 'GITHUB_CLIENT_ID=${_GITHUB_CLIENT_ID}'
+      - 'GITHUB_CLIENT_SECRET=${_GITHUB_CLIENT_SECRET}'
+      - 'NEXTAUTH_SECRET=${_NEXTAUTH_SECRET}'
+      - 'NEXTAUTH_URL=${_NEXTAUTH_URL}'
+      - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
+      - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
+  - name: node
+    entrypoint: npm
+    args: ['run', 'build']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['app', 'deploy']
+timeout: '1600s'

@@ -1,0 +1,57 @@
+{
+  "name": "playfetch",
+  "version": "0.1.0",
+  "author": "Yello XYZ Ltd",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yello-xyz/playfetch.git"
+  },
+  "homepage": "https://github.com/yello-xyz/playfetch#readme",
+  "bugs": {
+    "url": "https://github.com/yello-xyz/playfetch/issues"
+  },
+  "scripts": {
+    "clean": "npx next telemetry disable && rm -rf ./build",
+    "build": "next build",
+    "create-env": "printenv > .env.local",
+    "start": "next start",
+    "dev": "next dev",
+    "lint": "next lint",
+    "format": "npx prettier -w '**/*.ts' '**/*.tsx' '**/*.css'"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.5.3",
+    "@google-cloud/aiplatform": "^2.14.0",
+    "@google-cloud/datastore": "^7.5.1",
+    "@react-hook/resize-observer": "^1.2.6",
+    "@types/node": "20.2.3",
+    "@types/react": "18.2.6",
+    "@types/react-dom": "18.2.4",
+    "autoprefixer": "10.4.14",
+    "cohere-ai": "^6.2.2",
+    "debounce": "^1.2.1",
+    "eslint": "8.41.0",
+    "eslint-config-next": "13.4.3",
+    "gpt-3-encoder": "^1.1.4",
+    "isolated-vm": "^4.5.0",
+    "next": "13.4.3",
+    "next-auth": "^4.22.1",
+    "nodemailer": "^6.9.2",
+    "openai": "^3.2.1",
+    "react": "18.2.0",
+    "react-contenteditable": "^3.3.7",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.9.0",
+    "sanitize-html": "^2.10.0",
+    "short-unique-id": "^4.4.4",
+    "simplediff": "^0.1.1",
+    "tailwindcss": "3.3.2",
+    "typescript": "5.0.4"
+  },
+  "devDependencies": {
+    "@types/debounce": "^1.2.1",
+    "@types/nodemailer": "^6.4.8",
+    "@types/sanitize-html": "^2.9.0"
+  }
+}
