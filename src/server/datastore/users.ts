@@ -74,7 +74,7 @@ export async function saveUser(email: string, fullName: string, isAdmin: boolean
   const previousUserData = await getEntity(Entity.USER, 'email', email)
   const userData = toUserData(
     email.toLowerCase(),
-    fullName,
+    fullName.length ? fullName : email.toLowerCase(),
     previousUserData?.imageURL ?? '',
     isAdmin,
     previousUserData?.createdAt ?? new Date(),
