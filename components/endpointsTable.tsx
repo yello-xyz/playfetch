@@ -144,7 +144,7 @@ function EndpointsGroup({
   return (
     <div className={`grid w-full overflow-y-auto grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
       <HeaderCell first>Enabled</HeaderCell>
-      <HeaderCell>URL Path</HeaderCell>
+      <HeaderCell>Endpoint</HeaderCell>
       <HeaderCell>Environment</HeaderCell>
       <HeaderCell>Cache</HeaderCell>
       <HeaderCell>Stream</HeaderCell>
