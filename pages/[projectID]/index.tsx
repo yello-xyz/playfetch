@@ -200,14 +200,12 @@ export default function Home({
 
   const addPrompt = async () => {
     const promptID = await api.addPrompt(activeProject.id)
-    selectPrompt(promptID)
-    refreshProject()
+    refreshProject().then(() => selectPrompt(promptID))
   }
 
   const addChain = async () => {
-    const chainID = await api.addChain(activeProject.id)
-    selectChain(chainID)
-    refreshProject()
+    const chainID = await api.addChain(activeProject.id)    
+    refreshProject().then(() => selectChain(chainID))
   }
 
   const selectSettings = () => router.push(ClientRoute.Settings, undefined, { shallow: true })
