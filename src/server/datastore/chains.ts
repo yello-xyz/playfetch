@@ -8,34 +8,15 @@ import {
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
-import { Chain, ChainItem, ChainItemWithInputs } from '@/types'
+import { Chain, ChainItemWithInputs } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
-import { IsCodeChainItem } from '@/components/chainNode'
-import { ExtractPromptVariables } from '@/src/common/formatting'
-import { getTrustedVersion } from './versions'
 
 export async function migrateChains() {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    const allInputs = [] as string[]
-    const items = JSON.parse(chainData.items) as ChainItem[]
-    const itemsWithInputs = [] as ChainItemWithInputs[]
-    for (const item of items) {
-      if (IsCodeChainItem(item)) {
-        itemsWithInputs.push({ ...item, inputs: ExtractPromptVariables(item.code) })
-        allInputs.push(...ExtractPromptVariables(item.code))
-      } else {
-        const version = await getTrustedVersion(item.versionID)
-        itemsWithInputs.push({ ...item, inputs: ExtractPromptVariables(version.prompt) })
-        allInputs.push(...ExtractPromptVariables(version.prompt))
-      }
-    }
-    const boundInputVariables = items.map(item => item.output).filter(output => !!output) as string[]
-    const unboundInputs = allInputs.filter(variable => !boundInputVariables.includes(variable))
-    console.log([... new Set(unboundInputs)], JSON.parse(chainData.inputs))
-    await updateChain({ ...chainData, items: JSON.stringify(itemsWithInputs) }, false)
+    await updateChain({ ...chainData }, false)
   }
 }
 
@@ -122,11 +103,7 @@ export async function ensureChainAccess(userID: number, chainID: number) {
   await getVerifiedUserChainData(userID, chainID)
 }
 
-export async function updateChainItems(
-  userID: number,
-  chainID: number,
-  items: ChainItemWithInputs[],
-) {
+export async function updateChainItems(userID: number, chainID: number, items: ChainItemWithInputs[]) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   await updateChain({ ...chainData, items: JSON.stringify(items) }, true)
 }

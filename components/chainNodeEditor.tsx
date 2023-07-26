@@ -1,4 +1,12 @@
-import { ActiveProject, ChainItem, ChainItemWithInputs, CodeChainItem, PartialRun, PromptInputs, Version } from '@/types'
+import {
+  ActiveProject,
+  ChainItem,
+  ChainItemWithInputs,
+  CodeChainItem,
+  PartialRun,
+  PromptInputs,
+  Version,
+} from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'

@@ -1,5 +1,5 @@
 import { Comment, CommentAction } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getTimestamp } from './datastore'
 import { ensurePromptAccess } from './prompts'
 
 export async function migrateComments() {
