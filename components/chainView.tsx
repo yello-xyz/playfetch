@@ -1,8 +1,8 @@
-import { ActiveProject, ActivePrompt, Chain, ChainItem, PromptChainItem, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Chain, ChainItem, ChainItemWithInputs, PromptChainItem, Version } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
-import ChainNodeEditor, { ExtractUnboundChainVariables } from './chainNodeEditor'
+import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainItemToConfig, ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
@@ -108,15 +108,14 @@ export default function ChainView({
     setActiveNodeIndex(index)
   }
 
-  const inputs = ExtractUnboundChainVariables(items, promptCache)
-  const strippedItems = items.map(item =>
-    IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item
-  )
-  const itemsKey = JSON.stringify(strippedItems)
+  const itemsWithInputs = items
+    .map(item => (IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item))
+    .map(item => ({ ...item, inputs: ExtractChainItemVariables(item, promptCache) })) as ChainItemWithInputs[]
+  const itemsKey = JSON.stringify(itemsWithInputs)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
   if (chainIsLoaded && itemsKey !== savedItemsKey) {
     setSavedItemsKey(itemsKey)
-    api.updateChain(chain.id, strippedItems, inputs).then(onRefresh)
+    api.updateChain(chain.id, itemsWithInputs).then(onRefresh)
   }
 
   return (

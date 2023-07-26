@@ -1,9 +1,8 @@
-import { ActiveProject, ChainItem, CodeChainItem, PartialRun, PromptChainItem, PromptInputs, Version } from '@/types'
+import { ActiveProject, ChainItem, ChainItemWithInputs, CodeChainItem, PartialRun, PromptInputs, Version } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
-import Button from './button'
 import RichTextInput from './richTextInput'
 import useInputValues from './inputValues'
 import useCheckProvider from './checkProvider'
@@ -16,18 +15,31 @@ import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainItemToConfig, ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 
+export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
+  const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
+  return ExcludeBoundChainVariables(allChainInputs, chainWithInputs)
+}
+
+export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache) => {
+  if (IsCodeChainItem(item)) {
+    return ExtractPromptVariables(item.code)
+  }
+  const version = cache.versionForItem(item)
+  return version ? ExtractPromptVariables(version.prompt) : item.inputs ?? []
+}
+
+const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainItem[]) => {
+  const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
+  return allChainVariables.filter(variable => !boundInputVariables.includes(variable))
+}
+
 const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
-  ...new Set(
-    chain.flatMap(item =>
-      ExtractPromptVariables(IsPromptChainItem(item) ? cache.versionForItem(item)?.prompt ?? '' : item.code)
-    )
-  ),
+  ...new Set(chain.flatMap(item => ExtractChainItemVariables(item, cache))),
 ]
 
-export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) => {
+const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) => {
   const allInputVariables = ExtractChainVariables(chain, cache)
-  const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
-  return allInputVariables.filter(variable => !boundInputVariables.includes(variable))
+  return ExcludeBoundChainVariables(allInputVariables, chain)
 }
 
 export default function ChainNodeEditor({
@@ -208,7 +220,9 @@ function OutputMapper({
     <div className='self-start py-0.5 flex items-center gap-2'>
       <Label className='whitespace-nowrap'>Map output to</Label>
       <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
-        <option value={0} disabled>Select Input</option>
+        <option value={0} disabled>
+          Select Input
+        </option>
         {inputs.map((input, index) => (
           <option key={index} value={input}>
             Input “{input}”

@@ -50,11 +50,12 @@ export type ActivePrompt = Prompt & {
   availableLabels: string[]
 }
 
+export type ChainItemWithInputs = ChainItem & { inputs: string[] }
+
 export type Chain = {
   id: number
   name: string
-  items: ChainItem[]
-  inputs: string[]
+  items: ChainItemWithInputs[]
   projectID: number
   timestamp: string
 }
@@ -124,8 +125,8 @@ export type CodeConfig = {
   output?: string
 }
 
-export type PromptChainItem = RunConfig & { promptID: number }
-export type CodeChainItem = CodeConfig
+export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[] }
+export type CodeChainItem = CodeConfig & { inputs?: string[] }
 export type ChainItem = PromptChainItem | CodeChainItem
 
 export type Endpoint = {

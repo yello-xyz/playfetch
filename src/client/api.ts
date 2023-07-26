@@ -1,6 +1,5 @@
 import {
   Project,
-  ActivePrompt,
   PromptConfig,
   PromptInputs,
   ActiveProject,
@@ -8,11 +7,11 @@ import {
   ModelProvider,
   Endpoint,
   Chain,
-  ChainItem,
   CodeConfig,
   ActiveWorkspace,
   Workspace,
   Version,
+  ChainItemWithInputs,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -158,8 +157,8 @@ const api = {
   duplicateChain: function (chainID: number): Promise<number> {
     return post(this.duplicateChain, { chainID })
   },
-  updateChain: function (chainID: number, items: ChainItem[], inputs: string[]): Promise<number> {
-    return post(this.updateChain, { chainID, items, inputs })
+  updateChain: function (chainID: number, items: ChainItemWithInputs[]): Promise<number> {
+    return post(this.updateChain, { chainID, items })
   },
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })

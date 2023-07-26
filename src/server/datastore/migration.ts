@@ -19,7 +19,7 @@ export async function runDataMigrations() {
   // await migratePrompts()
   // await migrateVersions()
   // await migrateRuns()
-  // await migrateChains()
+  await migrateChains()
   // await migrateEndpoints()
   // await migrateUsage()
   // await migrateUsers()

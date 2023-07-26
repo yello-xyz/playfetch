@@ -8,23 +8,41 @@ import {
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
-import { Chain, ChainItem } from '@/types'
+import { Chain, ChainItem, ChainItemWithInputs } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { getUniqueName, getVerifiedProjectScopedData, toPrompt } from './prompts'
+import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
+import { IsCodeChainItem } from '@/components/chainNode'
+import { ExtractPromptVariables } from '@/src/common/formatting'
+import { getTrustedVersion } from './versions'
 
 export async function migrateChains() {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    await updateChain({ ...chainData }, false)
+    const allInputs = [] as string[]
+    const items = JSON.parse(chainData.items) as ChainItem[]
+    const itemsWithInputs = [] as ChainItemWithInputs[]
+    for (const item of items) {
+      if (IsCodeChainItem(item)) {
+        itemsWithInputs.push({ ...item, inputs: ExtractPromptVariables(item.code) })
+        allInputs.push(...ExtractPromptVariables(item.code))
+      } else {
+        const version = await getTrustedVersion(item.versionID)
+        itemsWithInputs.push({ ...item, inputs: ExtractPromptVariables(version.prompt) })
+        allInputs.push(...ExtractPromptVariables(version.prompt))
+      }
+    }
+    const boundInputVariables = items.map(item => item.output).filter(output => !!output) as string[]
+    const unboundInputs = allInputs.filter(variable => !boundInputVariables.includes(variable))
+    console.log([... new Set(unboundInputs)], JSON.parse(chainData.inputs))
+    await updateChain({ ...chainData, items: JSON.stringify(itemsWithInputs) }, false)
   }
 }
 
 const toChainData = (
   projectID: number,
   name: string,
-  items: ChainItem[],
-  inputs: string[],
+  items: ChainItemWithInputs[],
   createdAt: Date,
   lastEditedAt: Date,
   chainID?: number
@@ -34,18 +52,16 @@ const toChainData = (
     projectID,
     name,
     items: JSON.stringify(items),
-    inputs: JSON.stringify(inputs),
     createdAt,
     lastEditedAt,
   },
-  excludeFromIndexes: ['name', 'items', 'inputs'],
+  excludeFromIndexes: ['name', 'items'],
 })
 
 export const toChain = (data: any): Chain => ({
   id: getID(data),
   name: data.name,
   items: JSON.parse(data.items),
-  inputs: JSON.parse(data.inputs),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
@@ -55,7 +71,7 @@ export async function getChainForUser(userID: number, chainID: number): Promise<
   return toChain(chainData)
 }
 
-export async function getChainItems(chainID: number): Promise<ChainItem[]> {
+export async function getChainItems(chainID: number): Promise<ChainItemWithInputs[]> {
   const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
   return chainData ? JSON.parse(chainData.items) : []
 }
@@ -70,7 +86,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
     chainNames.map(chain => chain.name)
   )
   const createdAt = new Date()
-  const chainData = toChainData(projectID, uniqueName, [], [], createdAt, createdAt)
+  const chainData = toChainData(projectID, uniqueName, [], createdAt, createdAt)
   await getDatastore().save(chainData)
   await updateProjectLastEditedAt(projectID)
   return getID(chainData)
@@ -79,7 +95,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
 export async function duplicateChainForUser(userID: number, chainID: number): Promise<number> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const newChainID = await addChainForUser(userID, chainData.projectID, chainData.name)
-  await updateChainItems(userID, newChainID, JSON.parse(chainData.items), JSON.parse(chainData.inputs))
+  await updateChainItems(userID, newChainID, JSON.parse(chainData.items))
   return newChainID
 }
 
@@ -89,7 +105,6 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       chainData.projectID,
       chainData.name,
       JSON.parse(chainData.items),
-      JSON.parse(chainData.inputs),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
       getID(chainData)
@@ -107,9 +122,13 @@ export async function ensureChainAccess(userID: number, chainID: number) {
   await getVerifiedUserChainData(userID, chainID)
 }
 
-export async function updateChainItems(userID: number, chainID: number, items: ChainItem[], inputs: string[]) {
+export async function updateChainItems(
+  userID: number,
+  chainID: number,
+  items: ChainItemWithInputs[],
+) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
-  await updateChain({ ...chainData, items: JSON.stringify(items), inputs: JSON.stringify(inputs) }, true)
+  await updateChain({ ...chainData, items: JSON.stringify(items) }, true)
 }
 
 export async function updateChainName(userID: number, chainID: number, name: string) {

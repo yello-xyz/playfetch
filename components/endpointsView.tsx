@@ -7,6 +7,7 @@ import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
+import { ExtractUnboundChainInputs } from './chainNodeEditor'
 
 const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
@@ -68,7 +69,11 @@ export default function EndpointsView({
   }, [parent, project])
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
-  const inputs = isPrompt(parent) ? ExtractPromptVariables(version?.prompt ?? '') : parent?.inputs ?? []
+  const inputs = parent
+    ? isPrompt(parent)
+      ? ExtractPromptVariables(version?.prompt ?? '')
+      : ExtractUnboundChainInputs(parent.items)
+    : []
 
   return (
     <div className='flex items-stretch h-full'>

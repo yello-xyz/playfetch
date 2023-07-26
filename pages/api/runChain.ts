@@ -2,7 +2,7 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, Version, CodeConfig } from '@/types'
-import { getVersion } from '@/src/server/datastore/versions'
+import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
@@ -53,7 +53,7 @@ export const runChainConfigs = async (
   for (const [index, config] of configs.entries()) {
     const stream = (chunk: string) => streamChunk?.(index, chunk)
     if (isRunConfig(config)) {
-      const version = await getVersion(config.versionID)
+      const version = await getTrustedVersion(config.versionID)
       let prompt = resolvePrompt(version.prompt, inputs, useCamelCase)
       runningContext += prompt
       if (config.includeContext) {
