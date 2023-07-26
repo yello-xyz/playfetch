@@ -100,11 +100,17 @@ export default function PromptView({
     }
   }
 
+  const selectTab = (tab: ActiveTab) => {
+    setActiveTab(tab)
+    persistInputValuesIfNeeded()
+    savePrompt()
+  }
+
   const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
   const tabSelector = (
     <TabSelector>
-      <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={setActiveTab} />
-      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={setActiveTab} />
+      <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={selectTab} />
+      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />
     </TabSelector>
   )
 
