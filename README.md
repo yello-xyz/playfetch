@@ -38,21 +38,27 @@ Or just **Open with GitHub Desktop** and clone to a local directory (recommended
 
 In order to run the app locally, you will need to add some additional variables to your local `.env.local` file (this file is ignored by source control to avoid leaking keys). For most of these you should avoid using the same values as used in the production environment (e.g. generate your own API free keys so you don't risk messing up analytics or rate limits while testing locally):
 
-`GITHUB_CLIENT_ID=` *[See https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
-
-`GITHUB_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
-
-`GOOGLE_CLIENT_ID=` *[Copy this from Google Cloud Dev project → APIs & Services → Credentials → OAuth 2.0 Client IDs]*
-
-`GOOGLE_CLIENT_SECRET=` *[Copy this from Google Cloud Dev project → APIs & Services → Credentials → OAuth 2.0 Client IDs]*
-
 `NEXTAUTH_URL=http://localhost:3000`
 
 `NEXTAUTH_SECRET=` *[random string of at least 32 characters]*
 
+- **To use Email authentication:**
+
 `NOREPLY_EMAIL_USER=no-reply@yello.xyz`
 
 `NOREPLY_EMAIL_PASSWORD=` *[see "Gmail Service Account" in the 1Password Engineering vault]*
+
+- **To use Github authentication:**
+
+`GITHUB_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+
+`GITHUB_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+
+- **To use Google authentication:**
+
+`GOOGLE_CLIENT_ID=` *[Copy this from Google Cloud Dev project → APIs & Services → Credentials → OAuth 2.0 Client IDs]*
+
+`GOOGLE_CLIENT_SECRET=` *[Copy this from Google Cloud Dev project → APIs & Services → Credentials → OAuth 2.0 Client IDs]*
 
 In order to access the Google Cloud Datastore from your local machine, you will need to install the Google Cloud CLI initialize it as explained [here](https://cloud.google.com/sdk/docs/install-sdk) (you can skip the other steps). Run the following commands to log in with your individual Google account (which should be added to the dev@yello.xyz group).
 
