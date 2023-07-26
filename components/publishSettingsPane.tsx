@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { ActiveProject, Endpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
-import { StripPromptSentinels } from '@/src/common/formatting'
+import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
-import { EndpointToggleWithName } from './endpointsTable'
+import { PublishToggle } from './endpointsTable'
 import { useInitialState } from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
+import TextInput from './textInput'
+import IconButton from './iconButton'
+import enterIcon from '@/public/enter.svg'
+import enterDisabledIcon from '@/public/enterDisabled.svg'
 
 export default function PublishSettingsPane({
   endpoint,
@@ -83,6 +87,14 @@ export default function PublishSettingsPane({
     })
   }
 
+  const [urlPath, setURLPath] = useInitialState(endpoint.urlPath)
+  const canUpdateURLPath = urlPath !== endpoint.urlPath && CheckValidURLPath(urlPath)
+  const updateURLPath = () => {
+    showUpdatePrompt(() => {
+      api.updateEndpoint({ ...endpoint, urlPath }).then(_ => onRefresh())
+    })
+  }
+
   const parents = [...project.prompts, ...project.chains]
   const parent = parents.find(item => item.id === endpoint.parentID)!
 
@@ -91,7 +103,16 @@ export default function PublishSettingsPane({
       <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
-        <EndpointToggleWithName endpoint={endpoint} onRefresh={onRefresh} />
+        <PublishToggle endpoint={endpoint} onRefresh={onRefresh} />
+        <Label>URL Path</Label>
+        <div className='flex items-center gap-2'>
+          <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
+          <IconButton
+            disabled={!canUpdateURLPath}
+            icon={canUpdateURLPath ? enterIcon : enterDisabledIcon}
+            onClick={updateURLPath}
+          />
+        </div>
         <Label>Environment</Label>
         <DropdownMenu value={flavor} onChange={updateFlavor}>
           {availableFlavors.map((flavor, index) => (

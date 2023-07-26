@@ -1,16 +1,14 @@
 import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
 import Label from './label'
-import { Fragment, ReactNode, useState } from 'react'
-import Icon from './icon'
-import addIcon from '@/public/add.svg'
+import { Fragment, ReactNode } from 'react'
 import useModalDialogPrompt from './modalDialogContext'
 import api from '@/src/client/api'
 import Checkbox from './checkbox'
-import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
-import TextInput from './textInput'
+import { ToCamelCase } from '@/src/common/formatting'
 import DropdownMenu from './dropdownMenu'
+import { useInitialState } from './useInitialState'
 
-export function EndpointToggleWithName({
+export function PublishToggle({
   endpoint,
   onRefresh,
   isActive,
@@ -21,22 +19,14 @@ export function EndpointToggleWithName({
   isActive?: boolean
   setActive?: () => void
 }) {
-  const [isEnabled, setEnabled] = useState(endpoint.enabled)
-  const [name, setName] = useState(endpoint.urlPath)
-
-  const [savedEndpoint, setSavedEndpoint] = useState(endpoint)
-  if (endpoint.enabled !== savedEndpoint.enabled || endpoint.urlPath !== savedEndpoint.urlPath) {
-    setEnabled(endpoint.enabled)
-    setName(endpoint.urlPath)
-    setSavedEndpoint(endpoint)
-  }
+  const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
 
   const setDialogPrompt = useModalDialogPrompt()
 
   const togglePublish = (enabled: boolean) => {
     const callback = () => {
       setEnabled(enabled)
-      api.updateEndpoint({ ...endpoint, enabled, urlPath: name }).then(_ => onRefresh())
+      api.updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
     }
     if (isEnabled) {
       setDialogPrompt({
@@ -50,20 +40,11 @@ export function EndpointToggleWithName({
   }
 
   return setActive ? (
-    <>
-      <RowCell active={isActive} center first>
-        <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
-      </RowCell>
-      <RowCell active={isActive} callback={setActive}>
-        {endpoint.urlPath}
-      </RowCell>
-    </>
+    <RowCell active={isActive} center first>
+      <Checkbox checked={isEnabled} setChecked={togglePublish} />
+    </RowCell>
   ) : (
-    <>
-      <Checkbox disabled={!CheckValidURLPath(name)} checked={isEnabled} setChecked={togglePublish} />
-      <Label>Name</Label>
-      {endpoint.enabled ? name : <TextInput value={name} setValue={name => setName(ToCamelCase(name))} />}
-    </>
+    <Checkbox checked={isEnabled} setChecked={togglePublish} />
   )
 }
 
@@ -163,7 +144,7 @@ function EndpointsGroup({
   return (
     <div className={`grid w-full overflow-y-auto grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
       <HeaderCell first>Enabled</HeaderCell>
-      <HeaderCell>Endpoint</HeaderCell>
+      <HeaderCell>URL Path</HeaderCell>
       <HeaderCell>Environment</HeaderCell>
       <HeaderCell>Cache</HeaderCell>
       <HeaderCell>Stream</HeaderCell>
@@ -177,12 +158,13 @@ function EndpointsGroup({
         )
         return (
           <Fragment key={index}>
-            <EndpointToggleWithName
+            <PublishToggle
               endpoint={endpoint}
               onRefresh={onRefresh}
               isActive={active}
               setActive={() => setActiveEndpoint(endpoint)}
             />
+            <ActiveCell>{endpoint.urlPath}</ActiveCell>
             <ActiveCell>{endpoint.flavor}</ActiveCell>
             <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
             <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
