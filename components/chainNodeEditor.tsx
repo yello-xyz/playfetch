@@ -205,9 +205,10 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
 }) {
   return inputs.length > 0 ? (
-    <div className='self-start py-0.5'>
+    <div className='self-start py-0.5 flex items-center gap-2'>
+      <Label className='whitespace-nowrap'>Map output to</Label>
       <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
-        <option value={0}>Map Output To</option>
+        <option value={0} disabled>Select Input</option>
         {inputs.map((input, index) => (
           <option key={index} value={input}>
             Input “{input}”
