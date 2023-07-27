@@ -20,15 +20,15 @@ import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import ProjectSidebar from '@/components/projectSidebar'
-import EndpointsView from '@/components/endpointsView'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
+import useSavePrompt from '@/components/useSavePrompt'
 
 import dynamic from 'next/dynamic'
-import useSavePrompt from '@/components/useSavePrompt'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
+const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
   ...project.prompts.find(prompt => prompt.id === promptID)!,
@@ -204,7 +204,7 @@ export default function Home({
   }
 
   const addChain = async () => {
-    const chainID = await api.addChain(activeProject.id)    
+    const chainID = await api.addChain(activeProject.id)
     refreshProject().then(() => selectChain(chainID))
   }
 
@@ -267,7 +267,11 @@ export default function Home({
                       />
                     </Suspense>
                   )}
-                  {activeEndpoints && <EndpointsView project={activeProject} onRefresh={refreshProject} />}
+                  {activeEndpoints && (
+                    <Suspense>
+                      <EndpointsView project={activeProject} onRefresh={refreshProject} />
+                    </Suspense>
+                  )}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>
               </div>
