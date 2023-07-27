@@ -11,7 +11,7 @@ const ContentEditable = dynamic(() => import('./contentEditable'))
 const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
 const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
 
-const toHTML = (text: string) =>
+export const RichTextToHTML = (text: string) =>
   text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -21,7 +21,7 @@ const toHTML = (text: string) =>
     .replace(/\n(.*)$/gm, '<div>$1</div>')
     .replaceAll('<div></div>', '<div><br /></div>')
 
-const fromHTML = (html: string) =>
+export const RichTextFromHTML = (html: string) =>
   html
     .replace(/}}&nbsp;$/, '}}')
     .replaceAll('<br />', '')
@@ -114,8 +114,8 @@ export default function RichTextInput({
       <ContentEditable
         disabled={disabled}
         className={contentEditableClassName}
-        htmlValue={toHTML(value)}
-        onChange={value => setValue(fromHTML(value))}
+        htmlValue={RichTextToHTML(value)}
+        onChange={value => setValue(RichTextFromHTML(value))}
         allowedTags={['br', 'div', 'b']}
         allowedAttributes={{ b: ['class'] }}
         innerRef={contentEditableRef}
