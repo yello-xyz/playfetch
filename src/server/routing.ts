@@ -16,18 +16,8 @@ function buildURLForClientRoute(clientRoute: string, headers: IncomingHttpHeader
   const getHeader = (key: string) => (headers[key] as string | undefined) ?? null
   const host = GetHost(getHeader)
   const protocol =
-    GetSecureHeader(getHeader) || headers.referer?.split('://')[0] || IsLocalHost(getHeader) ? HTTP : HTTTPS
+    GetSecureHeader(getHeader) || headers.referer?.split('://')?.[0] || (IsLocalHost(getHeader) ? HTTP : HTTTPS)
 
-  console.log('host', headers.host)
-  console.log('GetHost', GetHost(getHeader))
-  console.log('GetSecureHeader', GetSecureHeader(getHeader))
-  console.log('referer', headers.referer?.split('://')[0])
-  console.log('IsLocalHost', IsLocalHost(getHeader))
-  console.log('protocol', protocol)
-  console.log('IsSecure', IsSecure(getHeader))
-  console.log('GetSecureURL', GetSecureURL(getHeader))
-  console.log('buildURL', `${protocol}://${host}${clientRoute}`)
-  
   return `${protocol}://${host}${clientRoute}`
 }
 

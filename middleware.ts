@@ -7,10 +7,8 @@ export function middleware(request: NextRequest) {
   const getHeader = (key: string) => headers.get(key)
 
   if (!IsSecure(getHeader) && !IsLocalHost(getHeader)) {
-    console.log('redirecting', GetSecureURL(getHeader).href)
     return NextResponse.redirect(GetSecureURL(getHeader).href, 301)
   } else {
-    console.log('not redirecting')
     return NextResponse.next()
   }
 }
