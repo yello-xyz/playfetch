@@ -24,7 +24,7 @@ const printVariables = (text: string) =>
 
 const parseVariables = (html: string) =>
   html
-    .replace(/<b[^>]*>(.*?)<\/b>/g, '{{$1}}')
+    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '{{$1}}')
     .replace(/}}&nbsp;$/, '}}')
     .replaceAll('{{}}', '')
     .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
