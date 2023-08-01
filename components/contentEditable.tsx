@@ -1,4 +1,4 @@
-import { RefObject } from 'react'
+import { RefObject, useState } from 'react'
 import ReactContentEditable from 'react-contenteditable'
 import sanitizeHtml from 'sanitize-html'
 
@@ -19,12 +19,24 @@ export default function ContentEditable({
   allowedAttributes?: Record<string, string[]>
   disabled?: boolean
 }) {
+  const sanitize = (html: string) => sanitizeHtml(html, { allowedTags, allowedAttributes })
+
+  const [rawHTML, setRawHTML] = useState(htmlValue)
+  if (sanitize(htmlValue) !== sanitize(rawHTML)) {
+    setRawHTML(htmlValue)
+  }
+
+  const updateRawHTML = (value: string) => {
+    setRawHTML(value)
+    onChange(sanitize(value))
+  }
+
   return (
     <ReactContentEditable
       disabled={disabled}
       className={className}
-      html={htmlValue}
-      onChange={event => onChange(sanitizeHtml(event.currentTarget.innerHTML, { allowedTags, allowedAttributes }))}
+      html={rawHTML}
+      onChange={event => updateRawHTML(event.currentTarget.innerHTML)}
       innerRef={innerRef}
     />
   )

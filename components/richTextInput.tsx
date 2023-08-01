@@ -155,7 +155,7 @@ export default function RichTextInput({
         htmlValue={htmlValue}
         onChange={updateHTMLValue}
         allowedTags={['br', 'div', 'b']}
-        allowedAttributes={{ b: ['class'] }}
+        allowedAttributes={{ b: ['class', 'style'] }}
         innerRef={contentEditableRef}
       />
     </Suspense>
