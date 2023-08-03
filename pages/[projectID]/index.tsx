@@ -253,9 +253,7 @@ export default function Home({
                         setModifiedVersion={setModifiedVersion}
                         showComments={showComments}
                         setShowComments={setShowComments}
-                        savePrompt={() =>
-                          savePrompt(_ => Promise.resolve(refreshActiveItem())).then(versionID => versionID!)
-                        }
+                        savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
                       />
                     </Suspense>
                   )}
