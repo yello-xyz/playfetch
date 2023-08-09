@@ -187,6 +187,7 @@ export default function ChainNodeEditor({
             <>
               <Label>Code Editor</Label>
               <RichTextInput
+                key={activeItemIndex}
                 value={isEditing ? editedCode : activeNode.code}
                 setValue={setEditedCode}
                 disabled={!isEditing}

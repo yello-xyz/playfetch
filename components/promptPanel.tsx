@@ -55,7 +55,13 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col min-h-0 gap-4 text-gray-500'>
       <div className='self-stretch min-h-0'>
-        <RichTextInput value={prompt} setValue={updatePrompt} label={showLabel ? 'Prompt' : undefined} />
+        <RichTextInput
+          key={version.id}
+          value={prompt}
+          setValue={updatePrompt}
+          label={showLabel ? 'Prompt' : undefined}
+          focus
+        />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (

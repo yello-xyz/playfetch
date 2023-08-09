@@ -86,13 +86,37 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>, containerR
   return undefined
 }
 
+const endRangeForNode = (node: ChildNode): Range => {
+  if (node.nodeType === Node.TEXT_NODE || node.childNodes.length === 0) {
+    const range = document.createRange()
+    range.selectNode(node)
+    range.setStart(node, 0)
+    range.setEnd(node, node.textContent?.length ?? 0)
+    return range
+  } else {
+    const childCount = node.childNodes.length
+    return endRangeForNode(node.childNodes[childCount - 1])
+  }
+}
+
+const moveCursorToEndOfNode = (node: ChildNode) => {
+  const selection = node.ownerDocument?.getSelection()
+  if (selection) {
+    const range = endRangeForNode(node)
+    range.collapse(false)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
+}
+
 export default function RichTextInput({
   value,
   setValue,
   label,
   disabled,
   preformatted,
-  focus,
+  focus = false,
 }: {
   value: string
   setValue: (value: string) => void
@@ -106,11 +130,16 @@ export default function RichTextInput({
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
 
-  const [focused, setFocused] = useState(focus)
+  const [focused, setFocused] = useState(false)
   if (focus !== focused) {
     setFocused(focus)
     if (focus) {
-      setTimeout(() => contentEditableRef.current?.focus())
+      setTimeout(() => {
+        if (contentEditableRef.current) {
+          contentEditableRef.current.focus()
+          moveCursorToEndOfNode(contentEditableRef.current)
+        }
+      })
     } else if (selection) {
       setSelection(undefined)
     }
