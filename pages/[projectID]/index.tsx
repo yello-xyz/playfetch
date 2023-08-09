@@ -149,12 +149,14 @@ export default function Home({
 
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
+      savePrompt()
       await refreshChain(chainID)
       router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
   }
 
   const selectEndpoints = () => {
+    savePrompt()
     setActiveItem(Endpoints)
     updateVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
@@ -208,11 +210,16 @@ export default function Home({
     refreshProject().then(() => selectChain(chainID))
   }
 
-  const selectSettings = () => router.push(ClientRoute.Settings, undefined, { shallow: true })
+  const selectSettings = () => {
+    savePrompt()
+    router.push(ClientRoute.Settings, undefined, { shallow: true })
+  }
 
   const isSharedProject = !workspaces.find(workspace => workspace.id === activeProject.workspaceID)
-  const navigateBack = () =>
+  const navigateBack = () => {
+    savePrompt()
     router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
+  }
 
   return (
     <>
