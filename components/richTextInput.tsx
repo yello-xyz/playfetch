@@ -162,6 +162,7 @@ export default function RichTextInput({
     setHTMLValue(printVariables(parseVariables(htmlValue)))
   }
   const updateHTMLValue = (html: string) => {
+    setSelection(undefined)
     setHTMLValue(html)
     setValue(RichTextFromHTML(html))
   }
