@@ -103,7 +103,7 @@ export default function ChainNodeEditor({
     setTimeout(() => setItems(currentItems))
     toggleEditing()
   } else if (isEditing && items.length !== editingItemsCount) {
-    if (items.length === editingIndex + 1) {
+    if (items.length === editingItemsCount + 1) {
       // This means an item was inserted at the position of the item we were editing, so we
       // need to persist the edit to the item which now has a index one higher than before.
       setTimeout(() =>
