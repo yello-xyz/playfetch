@@ -190,8 +190,6 @@ export default function ChainNodeEditor({
                 key={activeItemIndex}
                 value={isEditing ? editedCode : activeNode.code}
                 setValue={setEditedCode}
-                disabled={!isEditing}
-                focus={isEditing}
                 preformatted
               />
             </>

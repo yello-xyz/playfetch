@@ -60,7 +60,6 @@ export default function PromptPanel({
           value={prompt}
           setValue={updatePrompt}
           label={showLabel ? 'Prompt' : undefined}
-          focus
         />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}

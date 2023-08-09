@@ -116,34 +116,24 @@ export default function RichTextInput({
   label,
   disabled,
   preformatted,
-  focus = false,
 }: {
   value: string
   setValue: (value: string) => void
   label?: string
   disabled?: boolean
   preformatted?: boolean
-  focus?: boolean
 }) {
   const contentEditableRef = useRef<HTMLInputElement>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
 
-  const [focused, setFocused] = useState(false)
-  if (focus !== focused) {
-    setFocused(focus)
-    if (focus) {
-      setTimeout(() => {
-        if (contentEditableRef.current) {
-          contentEditableRef.current.focus()
-          moveCursorToEndOfNode(contentEditableRef.current)
-        }
-      })
-    } else if (selection) {
-      setSelection(undefined)
+  useEffect(() => {
+    if (contentEditableRef.current) {
+      contentEditableRef.current.focus()
+      moveCursorToEndOfNode(contentEditableRef.current)
     }
-  }
+  }, [contentEditableRef])
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
