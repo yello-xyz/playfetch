@@ -71,8 +71,11 @@ export const getUniqueName = (name: string, existingNames: string[]) =>
     (name, counter) => `${name} ${counter}`
   )
 
+export const matchesDefaultName = (name: string, defaultName: string) =>
+  name.match(new RegExp(`^${defaultName}( \\d+)?$`))
+
 const DefaultPromptName = 'New Prompt'
-export const matchesDefaultPromptName = (name: string) => name.match(new RegExp(`^${DefaultPromptName}( \\d+)?$`))
+export const matchesDefaultPromptName = (name: string) => matchesDefaultName(name, DefaultPromptName)
 
 export async function addPromptForUser(userID: number, projectID: number, name = DefaultPromptName) {
   await ensureProjectAccess(userID, projectID)

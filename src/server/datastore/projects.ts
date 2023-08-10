@@ -21,7 +21,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, deletePromptForUser, getUniqueName, toPrompt } from './prompts'
+import { addPromptForUser, deletePromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { toUser } from './users'
 import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
@@ -125,6 +125,7 @@ export async function getActiveProject(
 }
 
 const DefaultProjectName = 'New Project'
+export const matchesDefaultProjectName = (name: string) => matchesDefaultName(name, DefaultProjectName)
 
 export async function addProjectForUser(
   userID: number,
