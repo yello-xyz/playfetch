@@ -75,9 +75,15 @@ export default function RunTimeline({
 }
 
 function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
-  return (
+  return isRunning ? (
     <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
-      <span className='font-medium text-gray-600'>{isRunning ? 'Waiting for responses…' : 'No Responses'}</span>
+      <span className='font-medium text-gray-600'>Waiting for responses…</span>
+    </div>
+  ) : (
+    <div className='flex flex-col gap-4 overflow-y-hidden'>
+      {Array.from({ length: 3 }).map(_ => (
+        <div className='min-h-[320px] bg-gray-25 rounded-lg'></div>
+      ))}
     </div>
   )
 }
