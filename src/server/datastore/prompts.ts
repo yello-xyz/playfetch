@@ -12,6 +12,7 @@ import {
 import { saveVersionForUser, toVersion } from './versions'
 import { Prompt, Version } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
+import { StripPromptSentinels } from '@/src/common/formatting'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -75,7 +76,6 @@ export const matchesDefaultName = (name: string, defaultName: string) =>
   name.match(new RegExp(`^${defaultName}( \\d+)?$`))
 
 const DefaultPromptName = 'New Prompt'
-export const matchesDefaultPromptName = (name: string) => matchesDefaultName(name, DefaultPromptName)
 
 export async function addPromptForUser(userID: number, projectID: number, name = DefaultPromptName) {
   await ensureProjectAccess(userID, projectID)
@@ -122,6 +122,20 @@ export async function updatePrompt(promptData: any, updateLastEditedTimestamp: b
   if (updateLastEditedTimestamp) {
     await updateProjectLastEditedAt(promptData.projectID)
   }
+}
+
+export async function augmentPromptDataWithNewVersion(
+  promptData: any,
+  newVersionID: number,
+  newVersionPrompt: string,
+  previousVersionPrompt: string
+) {
+  const newPromptName =
+    matchesDefaultName(promptData.name, DefaultPromptName) && !previousVersionPrompt.length && newVersionPrompt.length
+      ? StripPromptSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
+      : promptData.name
+
+  await updatePrompt({ ...promptData, lastVersionID: newVersionID, name: newPromptName }, true)
 }
 
 export const getVerifiedProjectScopedData = async (userID: number, entity: Entity, id: number) => {
