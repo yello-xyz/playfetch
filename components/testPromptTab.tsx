@@ -9,6 +9,7 @@ import PromptPanel from './promptPanel'
 
 export default function TestPromptTab({
   currentPrompt,
+  currentConfig,
   activeProject,
   activePrompt,
   activeVersion,
@@ -23,6 +24,7 @@ export default function TestPromptTab({
   tabSelector,
 }: {
   currentPrompt: string
+  currentConfig: PromptConfig
   activeProject: ActiveProject
   activePrompt: ActivePrompt
   activeVersion: Version
@@ -45,7 +47,7 @@ export default function TestPromptTab({
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(activeVersion.config, inputs)
+    return runPrompt(currentConfig, inputs)
   }
 
   return (
@@ -70,6 +72,8 @@ export default function TestPromptTab({
           />
         </div>
         <PromptPanel
+          initialPrompt={currentPrompt}
+          initialConfig={currentConfig}
           version={activeVersion}
           setModifiedVersion={setModifiedVersion}
           checkProviderAvailable={checkProviderAvailable}

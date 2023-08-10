@@ -11,6 +11,7 @@ import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector, { TabButton } from './tabSelector'
 import { useInitialState } from './useInitialState'
+import { ConfigsEqual } from '@/src/common/versionsEqual'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
@@ -71,9 +72,11 @@ export default function PromptView({
   )
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
+  const [currentConfig, setCurrentConfig] = useInitialState(activeVersion.config, ConfigsEqual)
 
   const updateVersion = (version: Version) => {
     setCurrentPrompt(version.prompt)
+    setCurrentConfig(version.config)
     setModifiedVersion(version)
   }
 
@@ -111,7 +114,6 @@ export default function PromptView({
   const selectTab = (tab: ActiveTab) => {
     setActiveTab(tab)
     persistInputValuesIfNeeded()
-    savePrompt()
   }
 
   const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
@@ -128,6 +130,7 @@ export default function PromptView({
         return (
           <RunPromptTab
             currentPrompt={currentPrompt}
+            currentConfig={currentConfig}
             activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
@@ -143,6 +146,7 @@ export default function PromptView({
         return (
           <TestPromptTab
             currentPrompt={currentPrompt}
+            currentConfig={currentConfig}
             activeProject={project}
             activePrompt={prompt}
             activeVersion={activeVersion}

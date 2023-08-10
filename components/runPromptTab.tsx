@@ -5,6 +5,7 @@ import { ReactNode } from 'react'
 
 export default function RunPromptTab({
   currentPrompt,
+  currentConfig,
   activePrompt,
   activeVersion,
   setActiveVersion,
@@ -16,6 +17,7 @@ export default function RunPromptTab({
   tabSelector,
 }: {
   currentPrompt: string
+  currentConfig: PromptConfig
   activePrompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
@@ -35,6 +37,8 @@ export default function RunPromptTab({
         tabSelector={tabSelector}
       />
       <PromptPanel
+        initialPrompt={currentPrompt}
+        initialConfig={currentConfig}
         version={activeVersion}
         setModifiedVersion={setModifiedVersion}
         checkProviderAvailable={checkProviderAvailable}
