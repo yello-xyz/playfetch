@@ -1,4 +1,4 @@
-import { RefObject, Suspense, useEffect, useState } from 'react'
+import { RefObject, Suspense, useCallback, useEffect, useState } from 'react'
 import { useRef } from 'react'
 import Label from './label'
 import linkIcon from '@/public/linkWhite.svg'
@@ -129,12 +129,12 @@ export default function RichTextInput({
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
 
-  useEffect(() => {
-    if (contentEditableRef.current) {
+  const onSuspenseLoaded = useCallback((node: any) => {
+    if (node && contentEditableRef.current) {
       contentEditableRef.current.focus()
       moveCursorToEndOfNode(contentEditableRef.current)
     }
-  }, [contentEditableRef])
+  }, [])
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
@@ -142,7 +142,7 @@ export default function RichTextInput({
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [contentEditableRef, containerRef])
+  }, [])
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
     if (isInput) {
@@ -180,6 +180,7 @@ export default function RichTextInput({
         allowedTags={['br', 'div', 'b']}
         allowedAttributes={{ b: ['class', 'style'] }}
         innerRef={contentEditableRef}
+        onLoadedRef={onSuspenseLoaded}
       />
     </Suspense>
   )

@@ -6,6 +6,7 @@ export default function ContentEditable({
   className,
   htmlValue,
   onChange,
+  onLoadedRef,
   innerRef,
   allowedTags = [],
   allowedAttributes = {},
@@ -15,6 +16,7 @@ export default function ContentEditable({
   className?: string
   htmlValue: string
   onChange: (sanitizedHTMLValue: string) => void
+  onLoadedRef?: (node: ReactContentEditable | HTMLDivElement | null) => void
   innerRef?: RefObject<HTMLElement>
   allowedTags?: string[]
   allowedAttributes?: Record<string, string[]>
@@ -42,6 +44,7 @@ export default function ContentEditable({
       html={rawHTML}
       onChange={event => updateRawHTML(event.currentTarget.innerHTML)}
       innerRef={innerRef}
+      ref={onLoadedRef}
     />
   )
 }
