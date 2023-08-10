@@ -8,6 +8,8 @@ import { VersionsEqual } from '@/src/common/versionsEqual'
 import RichTextInput from './richTextInput'
 
 export default function PromptPanel({
+  initialPrompt,
+  initialConfig,
   version,
   setModifiedVersion,
   runPrompt,
@@ -15,6 +17,8 @@ export default function PromptPanel({
   showLabel,
   checkProviderAvailable,
 }: {
+  initialPrompt?: string
+  initialConfig?: PromptConfig
   version: Version
   setModifiedVersion: (version: Version) => void
   runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
@@ -22,8 +26,8 @@ export default function PromptPanel({
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
-  const [prompt, setPrompt] = useState(version.prompt)
-  const [config, setConfig] = useState(version.config)
+  const [prompt, setPrompt] = useState(initialPrompt !== undefined ? initialPrompt : version.prompt)
+  const [config, setConfig] = useState(initialConfig !== undefined ? initialConfig : version.config)
 
   const [savedVersion, setSavedVersion] = useState(version)
   if (!VersionsEqual(version, savedVersion)) {
