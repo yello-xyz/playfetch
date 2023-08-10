@@ -127,7 +127,8 @@ export default function PromptView({
       case 'versions':
         return (
           <RunPromptTab
-            prompt={prompt}
+            currentPrompt={currentPrompt}
+            activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={updateVersion}
