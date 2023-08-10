@@ -12,13 +12,11 @@ export default function TestDataPane({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
-  emptyMessage,
 }: {
   variables: string[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
-  emptyMessage: string
 }) {
   const [activeColumn, setActiveColumn] = useState(0)
   if (activeColumn > 0 && activeColumn >= variables.length) {
@@ -59,7 +57,7 @@ export default function TestDataPane({
     setActiveColumn(index)
   }
 
-  return variables.length ? (
+  return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div className='flex overflow-x-auto border-l border-gray-100 shrink-0 border-y'>
         {variables.map((variable, index) => (
@@ -98,16 +96,6 @@ export default function TestDataPane({
         <Icon icon={addIcon} />
         Add
       </div>
-    </div>
-  ) : (
-    <EmptyTestDataPane message={emptyMessage} />
-  )
-}
-
-function EmptyTestDataPane({ message }: { message: string }) {
-  return (
-    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
-      <span className='font-medium'>{message}</span>
     </div>
   )
 }

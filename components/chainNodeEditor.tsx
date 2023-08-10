@@ -159,7 +159,7 @@ export default function ChainNodeEditor({
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
         <div className='flex flex-col flex-1 w-full gap-2 overflow-y-auto'>
-          {activeNode === InputNode && (
+          {activeNode === InputNode && variables.length > 0 && (
             <>
               <Label>Test data</Label>
               <TestDataPane
@@ -167,7 +167,6 @@ export default function ChainNodeEditor({
                 inputValues={inputValues}
                 setInputValues={setInputValues}
                 persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                emptyMessage='Chain has no unbound inputs'
               />
             </>
           )}

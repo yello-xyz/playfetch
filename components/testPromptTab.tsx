@@ -60,7 +60,6 @@ export default function TestPromptTab({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            emptyMessage='Create inputs for your prompt below'
           />
         </div>
         <div className='self-start'>

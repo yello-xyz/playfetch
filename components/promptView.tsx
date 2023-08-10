@@ -12,6 +12,7 @@ import useCheckProvider from './checkProvider'
 import TabSelector, { TabButton } from './tabSelector'
 import { useInitialState } from './useInitialState'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
@@ -116,14 +117,19 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
+  const showTestData = ExtractPromptVariables(currentPrompt).length > 0
   const tabSelector = (
     <TabSelector>
       <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={selectTab} />
-      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />
+      {showTestData && <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />}
     </TabSelector>
   )
 
+  if (activeTab === 'testdata' && !showTestData) {
+    setActiveTab('versions')
+  }
+
+  const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
   const renderTab = (tab: ActiveTab) => {
     switch (tab) {
       case 'versions':
