@@ -4,8 +4,9 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
-import { VersionsEqual } from '@/src/common/versionsEqual'
+import { ConfigsEqual } from '@/src/common/versionsEqual'
 import RichTextInput from './richTextInput'
+import { useInitialState } from './useInitialState'
 
 export default function PromptPanel({
   initialPrompt,
@@ -26,15 +27,8 @@ export default function PromptPanel({
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
-  const [prompt, setPrompt] = useState(initialPrompt !== undefined ? initialPrompt : version.prompt)
-  const [config, setConfig] = useState(initialConfig !== undefined ? initialConfig : version.config)
-
-  const [savedVersion, setSavedVersion] = useState(version)
-  if (!VersionsEqual(version, savedVersion)) {
-    setPrompt(version.prompt)
-    setConfig(version.config)
-    setSavedVersion(version)
-  }
+  const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
+  const [config, setConfig] = useInitialState(initialConfig !== undefined ? initialConfig : version.config, ConfigsEqual)
 
   const update = (prompt: string, config: PromptConfig) => {
     setPrompt(prompt)
