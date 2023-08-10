@@ -133,7 +133,7 @@ export default function Home({
 
   const selectPrompt = async (promptID: number) => {
     if (promptID !== activePrompt?.id) {
-      savePrompt()
+      savePrompt(refreshProject)
       await refreshPrompt(promptID)
       router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
@@ -149,14 +149,14 @@ export default function Home({
 
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
-      savePrompt()
+      savePrompt(refreshProject)
       await refreshChain(chainID)
       router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
   }
 
   const selectEndpoints = () => {
-    savePrompt()
+    savePrompt(refreshProject)
     setActiveItem(Endpoints)
     updateVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
