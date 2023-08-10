@@ -3,7 +3,7 @@ import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode } from 'react'
 
-export default function PlayTab({
+export default function RunPromptTab({
   prompt,
   activeVersion,
   setActiveVersion,

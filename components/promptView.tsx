@@ -1,6 +1,6 @@
 import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
 
-import PlayTab from './playTab'
+import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'
@@ -118,7 +118,7 @@ export default function PromptView({
     switch (tab) {
       case 'versions':
         return (
-          <PlayTab
+          <RunPromptTab
             prompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
