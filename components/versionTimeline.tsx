@@ -21,8 +21,7 @@ export default function VersionTimeline({
 
   const labelColors = AvailableLabelColorsForPrompt(prompt)
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const containerRect = useContainerRect(containerRef)
+  const [containerRect, containerRef] = useContainerRect()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
