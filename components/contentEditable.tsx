@@ -27,7 +27,8 @@ export default function ContentEditable({
   }
 
   const updateRawHTML = (value: string) => {
-    setRawHTML(value)
+    const baseTags = ['br', 'div', 'span']
+    setRawHTML(sanitizeHtml(value, { allowedTags: baseTags }))
     onChange(sanitize(value))
   }
 
