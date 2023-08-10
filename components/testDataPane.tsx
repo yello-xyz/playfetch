@@ -61,7 +61,7 @@ export default function TestDataPane({
 
   return variables.length ? (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div className='flex overflow-x-auto border-l border-gray-100 border-y'>
+      <div className='flex overflow-x-auto border-l border-gray-100 shrink-0 border-y'>
         {variables.map((variable, index) => (
           <div
             key={index}
