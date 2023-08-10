@@ -107,19 +107,20 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
     selection.removeAllRanges()
     selection.addRange(range)
   }
-
 }
 
 export default function RichTextInput({
   value,
   setValue,
   label,
+  placeholder,
   disabled,
   preformatted,
 }: {
   value: string
   setValue: (value: string) => void
   label?: string
+  placeholder?: string
   disabled?: boolean
   preformatted?: boolean
 }) {
@@ -151,9 +152,10 @@ export default function RichTextInput({
     }
   }
 
+  const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
   const contentEditableClassName = preformatted
-    ? 'outline-none'
-    : 'p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg'
+    ? `outline-none ${placeholderClassName}`
+    : `p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg ${placeholderClassName}`
 
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== RichTextFromHTML(htmlValue)) {
@@ -170,6 +172,7 @@ export default function RichTextInput({
   const renderContentEditable = () => (
     <Suspense>
       <ContentEditable
+        placeholder={placeholder}
         disabled={disabled}
         className={contentEditableClassName}
         htmlValue={htmlValue}

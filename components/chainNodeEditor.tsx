@@ -188,6 +188,7 @@ export default function ChainNodeEditor({
               <Label>Code Editor</Label>
               <RichTextInput
                 key={activeItemIndex}
+                placeholder={`'Hello World!'`}
                 value={isEditing ? editedCode : activeNode.code}
                 setValue={setEditedCode}
                 preformatted

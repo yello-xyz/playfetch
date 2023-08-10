@@ -60,6 +60,7 @@ export default function PromptPanel({
           value={prompt}
           setValue={updatePrompt}
           label={showLabel ? 'Prompt' : undefined}
+          placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
         />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}

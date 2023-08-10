@@ -9,6 +9,7 @@ export default function ContentEditable({
   innerRef,
   allowedTags = [],
   allowedAttributes = {},
+  placeholder,
   disabled,
 }: {
   className?: string
@@ -17,6 +18,7 @@ export default function ContentEditable({
   innerRef?: RefObject<HTMLElement>
   allowedTags?: string[]
   allowedAttributes?: Record<string, string[]>
+  placeholder?: string
   disabled?: boolean
 }) {
   const sanitize = (html: string) => sanitizeHtml(html, { allowedTags, allowedAttributes })
@@ -36,6 +38,7 @@ export default function ContentEditable({
     <ReactContentEditable
       disabled={disabled}
       className={className}
+      placeholder={placeholder}
       html={rawHTML}
       onChange={event => updateRawHTML(event.currentTarget.innerHTML)}
       innerRef={innerRef}
