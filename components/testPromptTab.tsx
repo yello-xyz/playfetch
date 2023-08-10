@@ -6,11 +6,11 @@ import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
-import { useInitialState } from './useInitialState'
 
 export default function TestPromptTab({
-  prompt,
-  project,
+  currentPrompt,
+  activeProject,
+  activePrompt,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
@@ -22,8 +22,9 @@ export default function TestPromptTab({
   maxWidth,
   tabSelector,
 }: {
-  prompt: ActivePrompt
-  project: ActiveProject
+  currentPrompt: string
+  activeProject: ActiveProject
+  activePrompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -35,13 +36,6 @@ export default function TestPromptTab({
   maxWidth: string
   tabSelector: ReactNode
 }) {
-  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-
-  const updateVersion = (version: Version) => {
-    setCurrentPrompt(version.prompt)
-    setModifiedVersion(version)
-  }
-
   const variables = ExtractPromptVariables(currentPrompt)
 
   const selectVersion = (version: Version) => {
@@ -69,15 +63,15 @@ export default function TestPromptTab({
         </div>
         <div className='self-start'>
           <VersionSelector
-            versions={prompt.versions}
-            endpoints={project.endpoints}
+            versions={activePrompt.versions}
+            endpoints={activeProject.endpoints}
             activeVersion={activeVersion}
             setActiveVersion={selectVersion}
           />
         </div>
         <PromptPanel
           version={activeVersion}
-          setModifiedVersion={updateVersion}
+          setModifiedVersion={setModifiedVersion}
           checkProviderAvailable={checkProviderAvailable}
         />
         <TestButtons

@@ -10,6 +10,7 @@ import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector, { TabButton } from './tabSelector'
+import { useInitialState } from './useInitialState'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
@@ -69,6 +70,13 @@ export default function PromptView({
     activeTab
   )
 
+  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
+
+  const updateVersion = (version: Version) => {
+    setCurrentPrompt(version.prompt)
+    setModifiedVersion(version)
+  }
+
   const [activeRunID, setActiveRunID] = useState<number>()
 
   const onSelectComment = (version: Version, runID?: number) => {
@@ -122,7 +130,7 @@ export default function PromptView({
             prompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
-            setModifiedVersion={setModifiedVersion}
+            setModifiedVersion={updateVersion}
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
@@ -133,11 +141,12 @@ export default function PromptView({
       case 'testdata':
         return (
           <TestPromptTab
-            prompt={prompt}
-            project={project}
+            currentPrompt={currentPrompt}
+            activeProject={project}
+            activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
-            setModifiedVersion={setModifiedVersion}
+            setModifiedVersion={updateVersion}
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}

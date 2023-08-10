@@ -1,5 +1,4 @@
 import { ChainItem, ModelProvider, PromptChainItem, Version } from '@/types'
-import { ReactNode } from 'react'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import Label from './label'
