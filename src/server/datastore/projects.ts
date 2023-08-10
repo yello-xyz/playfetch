@@ -28,6 +28,7 @@ import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { deleteChainForUser, toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
+import { StripPromptSentinels } from '@/src/common/formatting'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -125,7 +126,6 @@ export async function getActiveProject(
 }
 
 const DefaultProjectName = 'New Project'
-export const matchesDefaultProjectName = (name: string) => matchesDefaultName(name, DefaultProjectName)
 
 export async function addProjectForUser(
   userID: number,
@@ -144,6 +144,22 @@ export async function addProjectForUser(
   const projectID = getID(projectData)
   await addPromptForUser(userID, projectID)
   return projectID
+}
+
+export async function augmentProjectWithNewVersion(
+  projectID: number,
+  newVersionPrompt: string,
+  previousVersionPrompt: string
+) {
+  const projectData = await getTrustedProjectData(projectID)
+  if (
+    matchesDefaultName(projectData.name, DefaultProjectName) &&
+    !previousVersionPrompt.length &&
+    newVersionPrompt.length
+  ) {
+    const newProjectName = StripPromptSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
+    await updateProject({ ...projectData, name: newProjectName }, true)
+  }
 }
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {

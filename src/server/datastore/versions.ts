@@ -12,7 +12,7 @@ import {
 } from './datastore'
 import { toRun } from './runs'
 import { augmentPromptDataWithNewVersion, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
-import { ensureProjectLabel } from './projects'
+import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
 import { VersionsEqual } from '@/src/common/versionsEqual'
@@ -80,6 +80,7 @@ export async function saveVersionForUser(
 
   const lastPrompt = currentVersion ? currentVersion.prompt : ''
   await augmentPromptDataWithNewVersion(promptData, savedVersionID, prompt, lastPrompt)
+  await augmentProjectWithNewVersion(promptData.projectID, prompt, lastPrompt)
 
   return savedVersionID
 }
