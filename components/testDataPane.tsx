@@ -79,10 +79,10 @@ export default function TestDataPane({
         </div>
         {activeInputs.map((value, index) => (
           <div key={index} className='flex'>
-            <div className='py-2 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
+            <div className='py-1 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
             <Suspense>
               <ContentEditable
-                className='w-full px-3 py-2 text-sm bg-white border-b border-gray-100 outline-none border-x line-clamp-2 focus:line-clamp-none'
+                className='w-full px-3 py-1 text-sm bg-white border-b border-gray-100 outline-none border-x line-clamp-2 focus:line-clamp-none'
                 htmlValue={value}
                 onChange={value => updateInputs(value, index)}
               />
