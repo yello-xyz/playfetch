@@ -16,6 +16,7 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
+  setPartialRuns(runs)
   while (reader) {
     const { done, value } = await reader.read()
     if (done) {
@@ -107,7 +108,7 @@ export default function PromptView({
       const streamReader = await api.runPrompt({ versionID }, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)
       await refreshPrompt(versionID)
-      setPartialRuns([])
+      setPartialRuns(runs => runs.filter(run => run.failed))
       setRunning(false)
     }
   }
