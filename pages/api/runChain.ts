@@ -66,6 +66,9 @@ export const runChainConfigs = async (
       } catch {
         result = output
       }
+      if (runResponse.failed) {
+        stream(runResponse.error)
+      }
       await callback(index, version, runResponse)
       if (result.failed) {
         break
