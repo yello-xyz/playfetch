@@ -3,6 +3,8 @@ import { InputValues, ResolvedEndpoint } from '@/types'
 import Button from './button'
 import Label from './label'
 import { ToCamelCase } from '@/src/common/formatting'
+import Icon from './icon'
+import clipboardIcon from '@/public/clipboard.svg'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,
@@ -43,15 +45,18 @@ export default function ExamplePane({
 
   return (
     <>
-      <Label>Integration</Label>
+      <div className='flex justify-between w-full gap-2'>
+        <Label>Integration</Label>
+        {canCopyToClipboard && (
+          <div className='flex items-center gap-1 cursor-pointer' onClick={() => copyToClipboard(curlCommand)}>
+            <Icon icon={clipboardIcon} />
+            <span>Copy to clipboard</span>
+          </div>
+        )}
+      </div>
       <CodeBlock>
         <MarkedUpCURLCommand useStreaming={endpoint.useStreaming}>{curlCommand}</MarkedUpCURLCommand>
       </CodeBlock>
-      {canCopyToClipboard && (
-        <div className='self-end'>
-          <Button onClick={() => copyToClipboard(curlCommand)}>Copy</Button>
-        </div>
-      )}
     </>
   )
 }
