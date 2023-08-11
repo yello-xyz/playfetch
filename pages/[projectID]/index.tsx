@@ -47,7 +47,7 @@ export const toActivePrompt = (promptID: number, versions: Version[], project: A
     .filter(IsPromptChainItem)
     .map(item => item.versionID)
 
-  const versionIDsUsedInEndpoints = project.endpoints
+  const versionIDsUsedAsEndpoints = project.endpoints
     .map(endpoint => endpoint.versionID)
     .filter(versionID => !!versionID)
   
@@ -56,7 +56,7 @@ export const toActivePrompt = (promptID: number, versions: Version[], project: A
     versions: versions.map(version => ({
       ...version,
       usedInChain: versionIDsUsedInChains.includes(version.id),
-      usedInEndpoint: versionIDsUsedInEndpoints.includes(version.id),
+      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
     })),
     users: project.users,
     availableLabels: project.availableLabels,

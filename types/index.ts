@@ -44,7 +44,7 @@ export type Prompt = {
   timestamp: string
 }
 
-export type VersionWithReferences = Version & { usedInChain: boolean; usedInEndpoint: boolean }
+export type VersionWithReferences = Version & { usedInChain: boolean; usedAsEndpoint: boolean }
 
 export type ActivePrompt = Prompt & {
   versions: VersionWithReferences[]

@@ -52,13 +52,13 @@ export default function VersionCell({
   const user = prompt.users.find(user => user.id === version.userID)
 
   const usedInChain = 'used in chain'
-  const usedInEndpoint = 'used as endpoint'
+  const usedAsEndpoint = 'used as endpoint'
   const extraColor = 'bg-pink-100 text-black'
-  const extraColors = { [usedInChain]: extraColor, [usedInEndpoint]: extraColor }
-  const extraIcons = { [usedInChain]: chainIcon, [usedInEndpoint]: endpointIcon }
+  const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
+  const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
   const extraLabels = [
     ...(version.usedInChain ? [usedInChain] : []),
-    ...(version.usedInEndpoint ? [usedInEndpoint] : []),
+    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
   ]
 
   return (
