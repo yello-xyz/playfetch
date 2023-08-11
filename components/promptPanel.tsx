@@ -28,7 +28,10 @@ export default function PromptPanel({
   checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
   const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
-  const [config, setConfig] = useInitialState(initialConfig !== undefined ? initialConfig : version.config, ConfigsEqual)
+  const [config, setConfig] = useInitialState(
+    initialConfig !== undefined ? initialConfig : version.config,
+    ConfigsEqual
+  )
 
   const update = (prompt: string, config: PromptConfig) => {
     setPrompt(prompt)

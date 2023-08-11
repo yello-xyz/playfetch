@@ -1,11 +1,14 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { ActivePrompt, User, Version } from '@/types'
+import { ActivePrompt, User, Version, VersionWithReferences } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import CommentPopupMenu from './commentPopupMenu'
 import { LabelForModel } from './modelSelector'
+import chainIcon from '@/public/chain.svg'
+import endpointIcon from '@/public/endpoint.svg'
+import Icon from './icon'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -28,7 +31,7 @@ export default function VersionCell({
 }: {
   identifier: string
   labelColors: Record<string, string>
-  version: Version
+  version: VersionWithReferences
   index: number
   isLast: boolean
   isActiveVersion: boolean
@@ -47,6 +50,16 @@ export default function VersionCell({
   }, [identifier])
 
   const user = prompt.users.find(user => user.id === version.userID)
+
+  const usedInChain = 'used in chain'
+  const usedAsEndpoint = 'used as endpoint'
+  const extraColor = 'bg-pink-100 text-black'
+  const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
+  const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
+  const extraLabels = [
+    ...(version.usedInChain ? [usedInChain] : []),
+    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
+  ]
 
   return (
     <VerticalBarWrapper
@@ -83,7 +96,11 @@ export default function VersionCell({
           </div>
         </div>
         {user && prompt.projectID !== user.id && <UserDetails user={user} />}
-        <ItemLabels labels={version.labels} colors={labelColors} />
+        <ItemLabels
+          labels={[...version.labels, ...extraLabels]}
+          colors={{ ...labelColors, ...extraColors }}
+          icons={extraIcons}
+        />
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
@@ -92,19 +109,41 @@ export default function VersionCell({
   )
 }
 
-export function ItemLabels({ labels, colors }: { labels: string[]; colors: Record<string, string> }) {
+export function ItemLabels({
+  labels,
+  colors,
+  icons = {},
+}: {
+  labels: string[]
+  colors: Record<string, string>
+  icons?: Record<string, any>
+}) {
   return labels.length > 0 ? (
     <div className='flex flex-wrap gap-1'>
       {labels.map((label, labelIndex) => (
-        <ItemLabel label={label} colors={colors} key={labelIndex} />
+        <ItemLabel label={label} colors={colors} icons={icons} key={labelIndex} />
       ))}
     </div>
   ) : null
 }
 
-export function ItemLabel({ label, colors }: { label: string; colors: Record<string, string> }) {
+export function ItemLabel({
+  label,
+  colors,
+  icons = {},
+}: {
+  label: string
+  colors: Record<string, string>
+  icons?: Record<string, any>
+}) {
   const color = colors[label] ?? 'bg-gray-400'
-  return <span className={`px-1.5 py-px text-xs text-white rounded ${color}`}>{label}</span>
+  const icon = icons[label]
+  return (
+    <span className={`px-1.5 py-px text-xs flex items-center rounded ${color}`}>
+      {label}
+      {icon ? <Icon icon={icon} className='-my-0.5' /> : null}
+    </span>
+  )
 }
 
 function UserDetails({ user }: { user: User }) {

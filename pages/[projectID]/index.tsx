@@ -2,7 +2,17 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, Workspace, Chain } from '@/types'
+import {
+  ActivePrompt,
+  Version,
+  User,
+  ActiveProject,
+  AvailableProvider,
+  Workspace,
+  Chain,
+  PromptChainItem,
+  ChainItem,
+} from '@/types'
 import ClientRoute, {
   ChainRoute,
   EndpointsRoute,
@@ -26,16 +36,32 @@ import ProjectTopBar from '@/components/projectTopBar'
 import useSavePrompt from '@/components/useSavePrompt'
 
 import dynamic from 'next/dynamic'
+import { IsPromptChainItem } from '@/components/chainNode'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
-export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
-  ...project.prompts.find(prompt => prompt.id === promptID)!,
-  versions,
-  users: project.users,
-  availableLabels: project.availableLabels,
-})
+export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => {
+  const versionIDsUsedInChains = project.chains
+    .flatMap(chain => chain.items as ChainItem[])
+    .filter(IsPromptChainItem)
+    .map(item => item.versionID)
+
+  const versionIDsUsedAsEndpoints = project.endpoints
+    .map(endpoint => endpoint.versionID)
+    .filter(versionID => !!versionID)
+
+  return {
+    ...project.prompts.find(prompt => prompt.id === promptID)!,
+    versions: versions.map(version => ({
+      ...version,
+      usedInChain: versionIDsUsedInChains.includes(version.id),
+      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
+    })),
+    users: project.users,
+    availableLabels: project.availableLabels,
+  }
+}
 
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | Chain | typeof Endpoints
@@ -104,7 +130,7 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
+  const [activeVersion, setActiveVersion] = useState<Version | undefined>(activePrompt?.versions?.slice(-1)?.[0])
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
   const updateVersion = (version?: Version) => {
