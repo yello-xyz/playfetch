@@ -70,7 +70,7 @@ export const runChainConfigs = async (
         stream(runResponse.error)
       }
       await callback(index, version, runResponse)
-      if (result.failed) {
+      if (runResponse.failed) {
         break
       } else {
         runningContext += `\n\n${output}\n\n`
