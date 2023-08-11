@@ -32,7 +32,7 @@ const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
   ...project.prompts.find(prompt => prompt.id === promptID)!,
-  versions,
+  versions: versions.map(version => ({ ...version, usedInChain: false, usedInEndpoint: false })),
   users: project.users,
   availableLabels: project.availableLabels,
 })
@@ -104,7 +104,7 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
+  const [activeVersion, setActiveVersion] = useState<Version | undefined>(activePrompt?.versions?.slice(-1)?.[0])
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
   const updateVersion = (version?: Version) => {
