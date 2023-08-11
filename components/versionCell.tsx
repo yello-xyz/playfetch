@@ -139,7 +139,7 @@ export function ItemLabel({
   const color = colors[label] ?? 'bg-gray-400'
   const icon = icons[label]
   return (
-    <span className={`px-1.5 py-px text-xs text-white flex items-center rounded ${color}`}>
+    <span className={`px-1.5 py-px text-xs flex items-center rounded ${color}`}>
       {label}
       {icon ? <Icon icon={icon} className='-my-0.5' /> : null}
     </span>
