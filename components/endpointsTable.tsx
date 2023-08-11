@@ -7,6 +7,9 @@ import Checkbox from './checkbox'
 import { ToCamelCase } from '@/src/common/formatting'
 import DropdownMenu from './dropdownMenu'
 import { useInitialState } from './useInitialState'
+import promptIcon from '@/public/prompt.svg'
+import chainIcon from '@/public/chain.svg'
+import Icon from './icon'
 
 export function PublishToggle({
   endpoint,
@@ -63,6 +66,8 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
   }
 }
 
+const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
+
 export default function EndpointsTable({
   project,
   activeEndpoint,
@@ -77,7 +82,6 @@ export default function EndpointsTable({
   const parents = [...project.prompts, ...project.chains]
   const canAddNewEndpoint = parents.length > 0
 
-  const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
   const addEndpoint = (parentID: number) => {
     const parent = parents.find(parent => parent.id === parentID)!
     const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
@@ -111,6 +115,7 @@ export default function EndpointsTable({
         groups.map((group, index) => (
           <EndpointsGroup
             key={index}
+            parent={parents.find(parent => parent.id === group[0].parentID)!}
             endpoints={group}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={setActiveEndpoint}
@@ -125,11 +130,13 @@ export default function EndpointsTable({
 }
 
 function EndpointsGroup({
+  parent,
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
   onRefresh,
 }: {
+  parent: Chain | Prompt
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
@@ -142,37 +149,43 @@ function EndpointsGroup({
   )
 
   return (
-    <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
-      <HeaderCell first>Enabled</HeaderCell>
-      <HeaderCell>Endpoint</HeaderCell>
-      <HeaderCell>Environment</HeaderCell>
-      <HeaderCell>Cache</HeaderCell>
-      <HeaderCell>Stream</HeaderCell>
-      <HeaderCell>Usage</HeaderCell>
-      {endpoints.map((endpoint, index) => {
-        const active = activeEndpoint?.id === endpoint.id
-        const ActiveCell = ({ children }: { children: ReactNode }) => (
-          <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
-            {children}
-          </RowCell>
-        )
-        return (
-          <Fragment key={index}>
-            <PublishToggle
-              endpoint={endpoint}
-              onRefresh={onRefresh}
-              isActive={active}
-              setActive={() => setActiveEndpoint(endpoint)}
-            />
-            <ActiveCell>{endpoint.urlPath}</ActiveCell>
-            <ActiveCell>{endpoint.flavor}</ActiveCell>
-            <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
-            <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
-            <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
-          </Fragment>
-        )
-      })}
-    </div>
+    <>
+      <div className='flex items-center gap-1 mt-4 text-gray-700'>
+        <Icon icon={isPrompt(parent) ? promptIcon : chainIcon} />
+        {parent.name}
+      </div>
+      <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
+        <HeaderCell first>Enabled</HeaderCell>
+        <HeaderCell>Endpoint</HeaderCell>
+        <HeaderCell>Environment</HeaderCell>
+        <HeaderCell>Cache</HeaderCell>
+        <HeaderCell>Stream</HeaderCell>
+        <HeaderCell>Usage</HeaderCell>
+        {endpoints.map((endpoint, index) => {
+          const active = activeEndpoint?.id === endpoint.id
+          const ActiveCell = ({ children }: { children: ReactNode }) => (
+            <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
+              {children}
+            </RowCell>
+          )
+          return (
+            <Fragment key={index}>
+              <PublishToggle
+                endpoint={endpoint}
+                onRefresh={onRefresh}
+                isActive={active}
+                setActive={() => setActiveEndpoint(endpoint)}
+              />
+              <ActiveCell>{endpoint.urlPath}</ActiveCell>
+              <ActiveCell>{endpoint.flavor}</ActiveCell>
+              <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
+              <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
+              <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
+            </Fragment>
+          )
+        })}
+      </div>
+    </>
   )
 }
 

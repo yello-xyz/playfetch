@@ -56,7 +56,7 @@ export default function EndpointsView({
   return (
     <Allotment>
       <Allotment.Pane minSize={minWidth}>
-        <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto text-gray-500'>
+        <div className='flex flex-col items-start h-full gap-2 p-6 overflow-y-auto text-gray-500'>
           <EndpointsTable
             project={project}
             activeEndpoint={activeEndpoint}
