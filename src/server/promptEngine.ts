@@ -13,16 +13,27 @@ import cohere from '@/src/server/cohere'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
-type PredictionResponse = { output: string | undefined; cost: number }
-type RunResponse = PredictionResponse & { failed: boolean; attempts: number; cacheHit: boolean }
+type ValidPredictionResponse = { output: string; cost: number }
+type ErrorPredictionResponse = { error: string }
+type PredictionResponse = { output: string | undefined; cost: number } | ErrorPredictionResponse
 
-const runPromptWithConfig = async (
+const isValidPredictionResponse = (response: PredictionResponse): response is ValidPredictionResponse =>
+  'output' in response && !!response.output && response.output.length > 0
+const isErrorPredictionResponse = (response: PredictionResponse): response is ErrorPredictionResponse =>
+  'error' in response
+
+type RunResponse = (
+  | { output: string; error: undefined; failed: false }
+  | { output: undefined; error: string; failed: true }
+) & { cost: number; attempts: number; cacheHit: boolean }
+
+export default async function runPromptWithConfig(
   userID: number,
   prompt: string,
   config: PromptConfig,
   useCache: boolean,
   streamChunks?: (chunk: string) => void
-): Promise<RunResponse> => {
+): Promise<RunResponse> {
   const cacheKey = {
     provider: config.provider,
     model: config.model,
@@ -33,7 +44,7 @@ const runPromptWithConfig = async (
 
   const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
   if (cachedValue) {
-    return { output: cachedValue, cost: 0, failed: false, attempts: 1, cacheHit: true }
+    return { output: cachedValue, error: undefined, cost: 0, failed: false, attempts: 1, cacheHit: true }
   }
 
   const getAPIKey = async (provider: ModelProvider) => {
@@ -66,23 +77,28 @@ const runPromptWithConfig = async (
   let result: PredictionResponse = { output: undefined, cost: 0 }
   let attempts = 0
   const maxAttempts = 3
-  const hasFailed = (result: PredictionResponse) => !result.output?.length
   while (++attempts <= maxAttempts) {
     result = await predictor(prompt, config.temperature, config.maxTokens, streamChunks)
-    if (!hasFailed(result)) {
+    if (isValidPredictionResponse(result)) {
       break
     }
   }
 
-  if (useCache && result.output?.length) {
+  if (useCache && isValidPredictionResponse(result)) {
     await cacheValue(cacheKey, result.output)
   }
 
-  if (result.cost > 0) {
+  if (!isErrorPredictionResponse(result)) {
     await incrementProviderCostForUser(userID, config.provider, result.cost)
   }
 
-  return { ...result, failed: hasFailed(result), attempts, cacheHit: false }
+  return {
+    ...(isErrorPredictionResponse(result)
+      ? { error: result.error, output: undefined, cost: 0, failed: true }
+      : isValidPredictionResponse(result)
+      ? { ...result, error: undefined, failed: false }
+      : { ...result, output: undefined, error: 'Received empty prediction response', failed: true }),
+    attempts,
+    cacheHit: false,
+  }
 }
-
-export default runPromptWithConfig
