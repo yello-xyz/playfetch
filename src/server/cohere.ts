@@ -39,7 +39,6 @@ async function complete(
 
     return { output, cost }
   } catch (error: any) {
-    console.error(error)
-    return { error: error.message }
+    return { error: error?.message ?? 'Unknown error' }
   }
 }
