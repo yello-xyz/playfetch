@@ -14,7 +14,7 @@ export function TopBarButton({
 }) {
   return (
     <div
-      className='flex items-center gap-1 px-2 py-1 font-medium border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100'
+      className='flex items-center gap-1 px-2 py-1 font-regular border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-25 hover:border-gray-300'
       onClick={onClick}>
       {icon && <Icon icon={icon} />}
       {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}

@@ -155,7 +155,7 @@ export default function RichTextInput({
   const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
   const contentEditableClassName = preformatted
     ? `outline-none ${placeholderClassName}`
-    : `h-full p-4 overflow-y-auto text-gray-800 border border-gray-300 rounded-lg ${placeholderClassName}`
+    : `h-full p-4 overflow-y-auto text-gray-700 border border-gray-300 focus:border-blue-400 focus:ring-0 focus:outline-none  rounded-lg ${placeholderClassName}`
 
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== RichTextFromHTML(htmlValue)) {

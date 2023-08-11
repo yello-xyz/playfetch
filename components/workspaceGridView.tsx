@@ -63,7 +63,7 @@ export default function WorkspaceGridView({
           onDeleted={resetWorkspaces}
         />
         {activeWorkspace.projects.length > 0 ? (
-          <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>
+          <div className='flex flex-col items-stretch h-full gap-3 overflow-y-auto'>
             {activeWorkspace.projects.map((project, index) => (
               <ProjectCell
                 key={index}
@@ -128,12 +128,12 @@ function ProjectCell({
 
   return (
     <div
-      className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer gap-6 w-full bg-white`}
+      className={`flex flex-col gap-1 p-4 border border-gray-200 rounded-lg cursor-pointer gap-6 w-full bg-white`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 text-base font-medium line-clamp-2'>{project.name}</span>
         <div className='relative flex items-center gap-2'>
-          <span className='mr-5 text-xs text-gray-500'>Edited {formattedDate}</span>
+          <span className='mr-5 text-xs text-gray-400'>Edited {formattedDate}</span>
           <IconButton
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}

@@ -63,7 +63,7 @@ export default function PromptPanel({
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (
-        <div className='flex items-center self-end gap-4'>
+        <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />
           <PendingButton disabled={!prompt.length} onClick={() => runPrompt(config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}

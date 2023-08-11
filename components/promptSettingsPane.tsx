@@ -5,7 +5,7 @@ import Icon from './icon'
 
 const SettingsRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className='flex items-center w-full gap-4'>
-    <div className='w-1/3 font-medium text-gray600'>{label}</div>
+    <div className='w-1/3 font-regular text-gray700'>{label}</div>
     {children}
   </div>
 )
@@ -31,10 +31,10 @@ export default function PromptSettingsPane({
         Advanced Settings
       </div>
       {areOptionsExpanded && (
-        <div className='flex flex-col gap-2 px-6 py-4 -mt-1 bg-gray-100 rounded-lg'>
+        <div className='flex flex-col gap-2 px-6 py-4 -mt-1 bg-gray-25 rounded-lg border-solid border-gray-200 border'>
           <SettingsRow label='Temperature'>
             <input
-              className='w-1/3 accent-gray-500'
+              className='w-1/3 accent-gray-700 border border-gray-300 focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'
               type='range'
               min={0}
               max={1}
@@ -43,7 +43,7 @@ export default function PromptSettingsPane({
               onChange={event => updateTemperature(Number(event.target.value))}
             />
             <input
-              className='p-2 text-sm rounded-lg w-18'
+              className='p-2 text-sm rounded-lg w-18 border border-gray-300 focus:border-solid focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'
               type='number'
               min={0}
               max={1}
@@ -54,7 +54,7 @@ export default function PromptSettingsPane({
           </SettingsRow>
           <SettingsRow label='Maximum tokens'>
             <input
-              className='w-20 p-2 text-sm rounded-lg'
+              className='w-20 p-2 text-sm rounded-lg border border-gray-300 focus:border-blue-400 focus:border focus:ring-0 focus:outline-none'
               type='text'
               value={config.maxTokens}
               onChange={event => updateMaxTokens(Number(event.target.value))}

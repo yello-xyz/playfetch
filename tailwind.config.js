@@ -75,6 +75,7 @@ module.exports = {
       black: '#000000',
       'blue-50': '#DCEAFA',
       'blue-100': '#B1D1F6',
+      'blue-400': '#3B8CEB',
       'blue-500': '#2C7BD8',
       'blue-600': '#226FCA',
       'gray-25': '#FBFBFD',
@@ -89,6 +90,10 @@ module.exports = {
       'gray-800': '#838C9A',
       'red-50': '#FDE5E0',
       white: '#FFFFFF',
+    },
+    fontSize: {
+      sm: '0.79rem',
+      base: '.92rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',
