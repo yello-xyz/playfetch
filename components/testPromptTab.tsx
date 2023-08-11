@@ -65,30 +65,30 @@ export default function TestPromptTab({
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={minHeight}>
-      <div className='h-full p-6'>
-        <div className='flex flex-col h-full gap-4'>
-          <div className='self-start'>
-            <VersionSelector
-              versions={activePrompt.versions}
-              endpoints={activeProject.endpoints}
-              activeVersion={activeVersion}
-              setActiveVersion={selectVersion}
+        <div className='h-full p-6'>
+          <div className='flex flex-col h-full gap-4'>
+            <div className='self-start'>
+              <VersionSelector
+                versions={activePrompt.versions}
+                endpoints={activeProject.endpoints}
+                activeVersion={activeVersion}
+                setActiveVersion={selectVersion}
+              />
+            </div>
+            <PromptPanel
+              initialPrompt={currentPrompt}
+              initialConfig={currentConfig}
+              version={activeVersion}
+              setModifiedVersion={setModifiedVersion}
+              checkProviderAvailable={checkProviderAvailable}
+            />
+            <TestButtons
+              variables={variables}
+              inputValues={inputValues}
+              disabled={!currentPrompt.length}
+              callback={testPrompt}
             />
           </div>
-          <PromptPanel
-            initialPrompt={currentPrompt}
-            initialConfig={currentConfig}
-            version={activeVersion}
-            setModifiedVersion={setModifiedVersion}
-            checkProviderAvailable={checkProviderAvailable}
-          />
-          <TestButtons
-            variables={variables}
-            inputValues={inputValues}
-            disabled={!currentPrompt.length}
-            callback={testPrompt}
-          />
-        </div>
         </div>
       </Allotment.Pane>
     </Allotment>

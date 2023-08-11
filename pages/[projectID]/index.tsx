@@ -50,7 +50,7 @@ export const toActivePrompt = (promptID: number, versions: Version[], project: A
   const versionIDsUsedAsEndpoints = project.endpoints
     .map(endpoint => endpoint.versionID)
     .filter(versionID => !!versionID)
-  
+
   return {
     ...project.prompts.find(prompt => prompt.id === promptID)!,
     versions: versions.map(version => ({

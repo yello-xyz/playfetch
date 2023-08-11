@@ -10,7 +10,7 @@ const GetSecureHeader = (getHeader: GetHeader) => getHeader('x-forwarded-proto')
 
 export const IsLocalHost = (getHeader: GetHeader) => GetHost(getHeader).includes('localhost')
 export const IsSecure = (getHeader: GetHeader) => GetSecureHeader(getHeader) === HTTTPS
-export const GetSecureURL = (getHeader: GetHeader) =>  new URL(`${HTTTPS}://${GetHost(getHeader)}`)
+export const GetSecureURL = (getHeader: GetHeader) => new URL(`${HTTTPS}://${GetHost(getHeader)}`)
 
 function buildURLForClientRoute(clientRoute: string, headers: IncomingHttpHeaders) {
   const getHeader = (key: string) => (headers[key] as string | undefined) ?? null
