@@ -13,7 +13,6 @@ export default function RunPromptTab({
   checkProviderAvailable,
   runPrompt,
   inputValues,
-  maxWidth,
   tabSelector,
 }: {
   currentPrompt: string
@@ -25,11 +24,10 @@ export default function RunPromptTab({
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
-  maxWidth: string
   tabSelector: ReactNode
 }) {
   return (
-    <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6 ${maxWidth}`}>
+    <div className='flex flex-col justify-between h-full gap-4 p-6'>
       <VersionTimeline
         prompt={activePrompt}
         activeVersion={activeVersion}

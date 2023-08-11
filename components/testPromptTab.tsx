@@ -20,7 +20,6 @@ export default function TestPromptTab({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
-  maxWidth,
   tabSelector,
 }: {
   currentPrompt: string
@@ -35,7 +34,6 @@ export default function TestPromptTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
-  maxWidth: string
   tabSelector: ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompt)
@@ -52,7 +50,7 @@ export default function TestPromptTab({
 
   return (
     <>
-      <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
+      <div className='flex flex-col justify-between h-full gap-4 p-6'>
         <div className='flex flex-col flex-grow gap-2 overflow-hidden min-h-[50%]'>
           {tabSelector}
           <TestDataPane

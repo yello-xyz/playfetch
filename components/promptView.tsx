@@ -13,6 +13,8 @@ import TabSelector, { TabButton } from './tabSelector'
 import { useInitialState } from './useInitialState'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
+import { Allotment, LayoutPriority } from 'allotment'
+import 'allotment/dist/style.css'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
@@ -130,7 +132,6 @@ export default function PromptView({
     setActiveTab('versions')
   }
 
-  const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
   const renderTab = (tab: ActiveTab) => {
     switch (tab) {
       case 'versions':
@@ -145,7 +146,6 @@ export default function PromptView({
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
-            maxWidth={maxTabWidth}
             tabSelector={tabSelector}
           />
         )
@@ -164,31 +164,37 @@ export default function PromptView({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            maxWidth={maxTabWidth}
             tabSelector={tabSelector}
           />
         )
     }
   }
 
+  const minWidth = 280
   return (
-    <div className='flex items-stretch h-full'>
-      {renderTab(activeTab)}
-      <div className='flex-1 p-6 pl-0'>
-        <RunTimeline
-          runs={[...activeVersion.runs, ...partialRuns]}
+    <Allotment>
+      <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+        {renderTab(activeTab)}
+      </Allotment.Pane>
+      <Allotment.Pane minSize={minWidth}>
+        <div className='h-full p-6'>
+          <RunTimeline
+            runs={[...activeVersion.runs, ...partialRuns]}
+            prompt={prompt}
+            version={activeVersion}
+            activeRunID={activeRunID}
+            isRunning={isRunning}
+          />
+        </div>
+      </Allotment.Pane>
+      <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
+        <CommentsPane
           prompt={prompt}
-          version={activeVersion}
-          activeRunID={activeRunID}
-          isRunning={isRunning}
+          onSelectComment={onSelectComment}
+          showComments={showComments}
+          setShowComments={setShowComments}
         />
-      </div>
-      <CommentsPane
-        prompt={prompt}
-        onSelectComment={onSelectComment}
-        showComments={showComments}
-        setShowComments={setShowComments}
-      />
-    </div>
+      </Allotment.Pane>
+    </Allotment>
   )
 }
