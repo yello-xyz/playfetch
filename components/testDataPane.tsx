@@ -82,7 +82,7 @@ export default function TestDataPane({
             <div className='py-1 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
             <Suspense>
               <ContentEditable
-                className='w-full px-3 py-1 text-sm bg-white border-b border-gray-100 outline-none border-x line-clamp-2 focus:line-clamp-none'
+                className='w-full px-3 py-1 text-sm bg-white border-b border-gray-100 outline-none border-x line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border-t'
                 htmlValue={value}
                 onChange={value => updateInputs(value, index)}
               />
