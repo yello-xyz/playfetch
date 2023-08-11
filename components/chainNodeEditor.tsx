@@ -157,46 +157,48 @@ export default function ChainNodeEditor({
 
   return (
     <>
-      <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
-        <div className='flex flex-col flex-1 w-full gap-2 overflow-y-auto'>
-          {activeNode === InputNode && variables.length > 0 && (
-            <>
-              <Label>Test data</Label>
-              <TestDataPane
-                variables={variables}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-              />
-            </>
-          )}
-          {IsPromptChainItem(activeNode) && (
-            <PromptChainNodeEditor
-              node={activeNode}
-              index={activeItemIndex}
-              items={items}
-              toggleIncludeContext={toggleIncludeContext}
-              promptCache={promptCache}
-              checkProviderAvailable={checkProviderAvailable}
-              selectVersion={selectVersion}
-              setModifiedVersion={setModifiedVersion}
+      <div className='flex flex-col items-end flex-1 h-full gap-4 py-6 overflow-hidden'>
+        {activeNode === InputNode && variables.length > 0 && (
+          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+            <Label>Test data</Label>
+            <TestDataPane
+              variables={variables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             />
-          )}
-          {IsCodeChainItem(activeNode) && (
-            <>
-              <Label>Code Editor</Label>
-              <RichTextInput
-                key={activeItemIndex}
-                placeholder={`'Hello World!'`}
-                value={isEditing ? editedCode : activeNode.code}
-                setValue={setEditedCode}
-                preformatted
-              />
-            </>
-          )}
-          {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
-        </div>
-        <div className='flex items-center justify-between w-full gap-4'>
+          </div>
+        )}
+        {IsPromptChainItem(activeNode) && (
+          <PromptChainNodeEditor
+            node={activeNode}
+            index={activeItemIndex}
+            items={items}
+            toggleIncludeContext={toggleIncludeContext}
+            promptCache={promptCache}
+            checkProviderAvailable={checkProviderAvailable}
+            selectVersion={selectVersion}
+            setModifiedVersion={setModifiedVersion}
+          />
+        )}
+        {IsCodeChainItem(activeNode) && (
+          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+            <Label>Code Editor</Label>
+            <RichTextInput
+              key={activeItemIndex}
+              placeholder={`'Hello World!'`}
+              value={isEditing ? editedCode : activeNode.code}
+              setValue={setEditedCode}
+              preformatted
+            />
+          </div>
+        )}
+        {activeNode === OutputNode && (
+          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+            <RunTimeline runs={partialRuns} isRunning={isRunning} />
+          </div>
+        )}
+        <div className='flex items-center justify-between w-full gap-4 px-6'>
           {IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode) ? (
             <OutputMapper
               key={activeNode.output}

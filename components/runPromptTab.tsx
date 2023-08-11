@@ -2,6 +2,8 @@ import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, V
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode } from 'react'
+import { Allotment } from 'allotment'
+import 'allotment/dist/style.css'
 
 export default function RunPromptTab({
   currentPrompt,
@@ -26,24 +28,33 @@ export default function RunPromptTab({
   inputValues: InputValues
   tabSelector: ReactNode
 }) {
+  const minHeight = 230
   return (
-    <div className='flex flex-col justify-between h-full gap-4 p-6'>
-      <VersionTimeline
-        prompt={activePrompt}
-        activeVersion={activeVersion}
-        setActiveVersion={setActiveVersion}
-        tabSelector={tabSelector}
-      />
-      <PromptPanel
-        initialPrompt={currentPrompt}
-        initialConfig={currentConfig}
-        version={activeVersion}
-        setModifiedVersion={setModifiedVersion}
-        checkProviderAvailable={checkProviderAvailable}
-        runPrompt={runPrompt}
-        inputValues={inputValues}
-        showLabel
-      />
-    </div>
+    <Allotment vertical>
+      <Allotment.Pane minSize={minHeight} preferredSize='50%'>
+        <div className='h-full p-6'>
+          <VersionTimeline
+            prompt={activePrompt}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            tabSelector={tabSelector}
+          />
+        </div>
+      </Allotment.Pane>
+      <Allotment.Pane minSize={minHeight}>
+        <div className='h-full p-6'>
+          <PromptPanel
+            initialPrompt={currentPrompt}
+            initialConfig={currentConfig}
+            version={activeVersion}
+            setModifiedVersion={setModifiedVersion}
+            checkProviderAvailable={checkProviderAvailable}
+            runPrompt={runPrompt}
+            inputValues={inputValues}
+            showLabel
+          />
+        </div>
+      </Allotment.Pane>
+    </Allotment>
   )
 }

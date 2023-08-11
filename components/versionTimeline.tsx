@@ -43,7 +43,7 @@ export default function VersionTimeline({
   const filteredVersions = versions.filter(BuildVersionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
-    <div ref={containerRef} className='relative flex flex-1 min-h-[50%]'>
+    <div ref={containerRef} className='relative flex h-full'>
       <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
         <VersionFilters
           users={prompt.users}
@@ -73,7 +73,7 @@ export default function VersionTimeline({
       </div>
     </div>
   ) : (
-    <div className='flex flex-1 min-h-[25%]'>
+    <div className='flex h-full'>
       <div className='flex flex-col w-full gap-4'>
         {tabSelector}
         <div className='flex flex-col gap-4 overflow-y-hidden'>
