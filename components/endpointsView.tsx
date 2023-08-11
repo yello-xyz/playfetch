@@ -8,6 +8,8 @@ import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
+import { Allotment } from 'allotment'
+import 'allotment/dist/style.css'
 
 export default function EndpointsView({
   project,
@@ -50,36 +52,41 @@ export default function EndpointsView({
       : ExtractUnboundChainInputs(parent.items)
     : []
 
+  const minWidth = 460
   return (
-    <div className='flex items-stretch h-full'>
-      <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
-        <EndpointsTable
-          project={project}
-          activeEndpoint={activeEndpoint}
-          setActiveEndpoint={updateActiveEndpoint}
-          onRefresh={onRefresh}
-        />
-      </div>
-      {activeEndpoint && parent && (
-        <div className='flex flex-col items-start flex-1 gap-4 p-6 pl-0 max-w-[460px] overflow-y-auto'>
-          <PublishSettingsPane
-            endpoint={activeEndpoint}
+    <Allotment>
+      <Allotment.Pane minSize={minWidth}>
+        <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto text-gray-500'>
+          <EndpointsTable
             project={project}
-            versions={activePrompt?.versions}
-            availableFlavors={project.availableFlavors}
+            activeEndpoint={activeEndpoint}
+            setActiveEndpoint={updateActiveEndpoint}
             onRefresh={onRefresh}
           />
-          {activeEndpoint.enabled && (
-            <ExamplePane
-              endpoint={activeEndpoint}
-              inputs={inputs}
-              inputValues={project.inputValues}
-              defaultFlavor={project.availableFlavors[0]}
-            />
-          )}
-          <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
         </div>
+      </Allotment.Pane>
+      {activeEndpoint && parent && (
+        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
+          <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
+            <PublishSettingsPane
+              endpoint={activeEndpoint}
+              project={project}
+              versions={activePrompt?.versions}
+              availableFlavors={project.availableFlavors}
+              onRefresh={onRefresh}
+            />
+            {activeEndpoint.enabled && (
+              <ExamplePane
+                endpoint={activeEndpoint}
+                inputs={inputs}
+                inputValues={project.inputValues}
+                defaultFlavor={project.availableFlavors[0]}
+              />
+            )}
+            <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
+          </div>
+        </Allotment.Pane>
       )}
-    </div>
+    </Allotment>
   )
 }
