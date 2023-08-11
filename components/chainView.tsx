@@ -6,6 +6,8 @@ import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainItemToConfig, ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { Allotment } from 'allotment'
+import 'allotment/dist/style.css'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -118,27 +120,32 @@ export default function ChainView({
     api.updateChain(chain.id, itemsWithInputs).then(onRefresh)
   }
 
+  const minWidth = 320
   return (
-    <div className='flex items-stretch h-full'>
-      <ChainEditor
-        nodes={nodes}
-        setNodes={setNodes}
-        activeIndex={activeNodeIndex}
-        setActiveIndex={updateActiveNodeIndex}
-        prompts={project.prompts}
-      />
-      <ChainNodeEditor
-        items={items}
-        setItems={items => setNodes([InputNode, ...items, OutputNode])}
-        activeItemIndex={activeNodeIndex - 1}
-        activeNode={activeNode}
-        promptCache={promptCache}
-        project={project}
-        onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
-        savePrompt={() => savePrompt().then(versionID => versionID!)}
-        selectVersion={selectVersion}
-        setModifiedVersion={setModifiedVersion}
-      />
-    </div>
+    <Allotment>
+      <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+        <ChainEditor
+          nodes={nodes}
+          setNodes={setNodes}
+          activeIndex={activeNodeIndex}
+          setActiveIndex={updateActiveNodeIndex}
+          prompts={project.prompts}
+        />
+      </Allotment.Pane>
+      <Allotment.Pane minSize={minWidth}>
+        <ChainNodeEditor
+          items={items}
+          setItems={items => setNodes([InputNode, ...items, OutputNode])}
+          activeItemIndex={activeNodeIndex - 1}
+          activeNode={activeNode}
+          promptCache={promptCache}
+          project={project}
+          onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
+          savePrompt={() => savePrompt().then(versionID => versionID!)}
+          selectVersion={selectVersion}
+          setModifiedVersion={setModifiedVersion}
+        />
+      </Allotment.Pane>
+    </Allotment>
   )
 }

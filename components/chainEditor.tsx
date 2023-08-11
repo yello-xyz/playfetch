@@ -23,8 +23,8 @@ export default function ChainEditor({
   const insertCodeBlock = () => insertItem({ code: '' })
 
   return (
-    <div className='flex flex-col items-center justify-between min-w-[500px] border-r border-gray-300 bg-gray-25'>
-      <div className='flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
+    <div className='flex flex-col items-center justify-between h-full bg-gray-25'>
+      <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}
