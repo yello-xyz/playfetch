@@ -26,7 +26,7 @@ export default function RunCellCommentInputPopup({
       className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
       style={{
         top: (selection || selectionForComment)!.popupPoint.y - scrollTop,
-        left: (selection || selectionForComment)!.popupPoint.x,
+        left: Math.max(selectionForComment ? 150 : 40, (selection || selectionForComment)!.popupPoint.x),
       }}>
       <div className='p-1 bg-white rounded-lg shadow' onMouseDown={event => event.stopPropagation()}>
         {selectionForComment ? (
