@@ -33,7 +33,7 @@ export default function EndpointsView({
     }
   }
 
-  const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in (item as Prompt)
+  const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in item
 
   const parent = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()

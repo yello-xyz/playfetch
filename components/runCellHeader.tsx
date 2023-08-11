@@ -14,7 +14,7 @@ export default function RunCellHeader({
   prompt?: ActivePrompt
   containerRect?: DOMRect
 }) {
-  const isProperRun = (item: PartialRun): item is Run => 'labels' in (item as Run)
+  const isProperRun = (item: PartialRun): item is Run => 'labels' in item
 
   return prompt && isProperRun(run) ? (
     <div className='flex items-start justify-between gap-2 text-sm'>

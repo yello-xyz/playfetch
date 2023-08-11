@@ -77,7 +77,7 @@ export default function EndpointsTable({
   const parents = [...project.prompts, ...project.chains]
   const canAddNewEndpoint = parents.length > 0
 
-  const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in (parent as Prompt)
+  const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
   const addEndpoint = (parentID: number) => {
     const parent = parents.find(parent => parent.id === parentID)!
     const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
