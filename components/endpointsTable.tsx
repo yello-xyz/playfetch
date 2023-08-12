@@ -1,4 +1,13 @@
-import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
+import {
+  ActiveProject,
+  Chain,
+  Endpoint,
+  EndpointParentIsPrompt,
+  EndpointParentsInProject,
+  FindParentInProject,
+  Prompt,
+  ResolvedEndpoint,
+} from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
 import api from '@/src/client/api'
@@ -24,8 +33,6 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
   }
 }
 
-const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
-
 export default function EndpointsTable({
   project,
   activeEndpoint,
@@ -37,17 +44,17 @@ export default function EndpointsTable({
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
 }) {
-  const parents = [...project.prompts, ...project.chains]
+  const parents = EndpointParentsInProject(project)
   const canAddNewEndpoint = parents.length > 0
 
   const addEndpoint = (parentID: number) => {
-    const parent = parents.find(parent => parent.id === parentID)!
+    const parent = FindParentInProject(parentID, project)
     const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
-    const versionID = isPrompt(parent) ? parent.lastVersionID : undefined
+    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
   }
 
-  const groups = [...project.prompts, ...project.chains]
+  const groups = parents
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
@@ -62,7 +69,7 @@ export default function EndpointsTable({
               </option>
               {parents.map((parent, index) => (
                 <option key={index} value={parent.id}>
-                  {isPrompt(parent) ? 'Prompt' : 'Chain'} “{parent.name}”
+                  {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'} “{parent.name}”
                 </option>
               ))}
             </DropdownMenu>
@@ -73,7 +80,7 @@ export default function EndpointsTable({
         groups.map((group, index) => (
           <EndpointsGroup
             key={index}
-            parent={parents.find(parent => parent.id === group[0].parentID)!}
+            parent={FindParentInProject(group[0].parentID, project)}
             endpoints={group}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={setActiveEndpoint}
@@ -106,7 +113,7 @@ function EndpointsGroup({
   return (
     <>
       <div className='flex items-center gap-1 mt-4 text-gray-700'>
-        <Icon icon={isPrompt(parent) ? promptIcon : chainIcon} />
+        <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
         {parent.name}
       </div>
       <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>

@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Version } from '@/types'
+import {
+  ActiveProject,
+  ActivePrompt,
+  Endpoint,
+  EndpointParentIsPrompt,
+  EndpointParentsInProject,
+  FindParentInProject,
+  Version,
+} from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
@@ -14,8 +22,6 @@ import IconButton from './iconButton'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
-
-const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
 
 export default function PublishSettingsPane({
   endpoint,
@@ -100,13 +106,13 @@ export default function PublishSettingsPane({
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
-  const parents = [...project.prompts, ...project.chains]
-  const parentFromID = (id: number) => parents.find(item => item.id === id)!
+  const parents = EndpointParentsInProject(project)
+  const parent = FindParentInProject(parentID, project)
 
   const updateParentID = (parentID: number) => {
     showUpdatePrompt(() => {
-      const parent = parentFromID(parentID)
-      const versionID = isPrompt(parent) ? parent.lastVersionID : undefined
+      const parent = FindParentInProject(parentID, project)
+      const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
       setParentID(parentID)
       setVersionID(versionID)
       api.updateEndpoint({ ...endpoint, parentID, versionID }).then(_ => onRefresh())
@@ -129,7 +135,7 @@ export default function PublishSettingsPane({
 
   return (
     <>
-      <Label>{parentFromID(parentID).name}</Label>
+      <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
         <Checkbox checked={isEnabled} setChecked={togglePublish} />

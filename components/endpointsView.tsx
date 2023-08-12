@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt } from '@/types'
+import { ActiveProject, ActivePrompt, Endpoint, FindParentInProject, EndpointParentIsPrompt } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import PublishSettingsPane from './publishSettingsPane'
@@ -35,19 +35,17 @@ export default function EndpointsView({
     }
   }
 
-  const isPrompt = (item: Chain | Prompt | undefined): item is Prompt => !!item && 'lastVersionID' in item
-
-  const parent = [...project.chains, ...project.prompts].find(item => item.id === activeEndpoint?.parentID)
+  const parent = activeEndpoint ? FindParentInProject(activeEndpoint.parentID, project) : undefined
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
   useEffect(() => {
-    if (isPrompt(parent)) {
+    if (EndpointParentIsPrompt(parent)) {
       api.getPromptVersions(parent.id).then(versions => setActivePrompt(toActivePrompt(parent.id, versions, project)))
     }
   }, [parent, project])
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
   const inputs = parent
-    ? isPrompt(parent)
+    ? EndpointParentIsPrompt(parent)
       ? ExtractPromptVariables(version?.prompt ?? '')
       : ExtractUnboundChainInputs(parent.items)
     : []
