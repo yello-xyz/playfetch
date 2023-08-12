@@ -91,31 +91,14 @@ export default function PublishSettingsPane({
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
         <Checkbox checked={isEnabled} setChecked={setEnabled} />
-        <Label>URL Path</Label>
-        <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
-        <Label>Environment</Label>
-        <DropdownMenu value={flavor} onChange={updateFlavor}>
-          {project.availableFlavors.map((flavor, index) => (
-            <option key={index} value={flavor}>
-              {flavor}
+        <Label>Prompt / Chain</Label>
+        <DropdownMenu value={parentID} onChange={value => updateParentID(Number(value))}>
+          {parents.map((parent, index) => (
+            <option key={index} value={parent.id}>
+              {parent.name}
             </option>
           ))}
-          <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
-            {addNewEnvironment}
-          </option>
         </DropdownMenu>
-        {
-          <>
-            <Label>Prompt / Chain</Label>
-            <DropdownMenu value={parentID} onChange={value => updateParentID(Number(value))}>
-              {parents.map((parent, index) => (
-                <option key={index} value={parent.id}>
-                  {parent.name}
-                </option>
-              ))}
-            </DropdownMenu>
-          </>
-        }
         {prompt && versionIndex >= 0 && (
           <>
             <Label className='self-start mt-2'>Version</Label>
@@ -131,6 +114,19 @@ export default function PublishSettingsPane({
             </div>
           </>
         )}
+        <Label>Name</Label>
+        <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
+        <Label>Environment</Label>
+        <DropdownMenu value={flavor} onChange={updateFlavor}>
+          {project.availableFlavors.map((flavor, index) => (
+            <option key={index} value={flavor}>
+              {flavor}
+            </option>
+          ))}
+          <option value={addNewEnvironment} onClick={() => setShowPickNamePrompt(true)}>
+            {addNewEnvironment}
+          </option>
+        </DropdownMenu>
         <Label>Cache Responses</Label>
         <Checkbox checked={useCache} setChecked={setUseCache} />
         <Label>Stream Responses</Label>
