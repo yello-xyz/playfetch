@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, Endpoint, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
@@ -18,14 +18,12 @@ import enterDisabledIcon from '@/public/enterDisabled.svg'
 export default function PublishSettingsPane({
   endpoint,
   project,
-  versions = [],
-  availableFlavors,
+  prompt,
   onRefresh,
 }: {
   endpoint: Endpoint
   project: ActiveProject
-  versions?: Version[]
-  availableFlavors: string[]
+  prompt?: ActivePrompt
   onRefresh: () => Promise<void>
 }) {
   const [flavor, setFlavor] = useInitialState(endpoint.flavor)
@@ -78,6 +76,7 @@ export default function PublishSettingsPane({
   }
 
   const [versionID, setVersionID] = useInitialState(endpoint.versionID)
+  const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
   const updateVersion = (version: Version) => {
@@ -115,7 +114,7 @@ export default function PublishSettingsPane({
         </div>
         <Label>Environment</Label>
         <DropdownMenu value={flavor} onChange={updateFlavor}>
-          {availableFlavors.map((flavor, index) => (
+          {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
             </option>
@@ -148,7 +147,7 @@ export default function PublishSettingsPane({
           title='Add Project Environment'
           confirmTitle='Add'
           label='Name'
-          initialName={availableFlavors.includes('production') ? '' : 'production'}
+          initialName={project.availableFlavors.includes('production') ? '' : 'production'}
           onConfirm={addFlavor}
           onDismiss={() => setShowPickNamePrompt(false)}
         />

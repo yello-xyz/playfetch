@@ -71,8 +71,7 @@ export default function EndpointsView({
             <PublishSettingsPane
               endpoint={activeEndpoint}
               project={project}
-              versions={activePrompt?.versions}
-              availableFlavors={project.availableFlavors}
+              prompt={activePrompt}
               onRefresh={onRefresh}
             />
             {activeEndpoint.enabled && (
