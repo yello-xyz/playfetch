@@ -7,7 +7,6 @@ import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
-import { PublishToggle } from './endpointsTable'
 import { useInitialState } from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
@@ -27,11 +26,28 @@ export default function PublishSettingsPane({
   prompt?: ActivePrompt
   onRefresh: () => Promise<void>
 }) {
+  const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
   const [flavor, setFlavor] = useInitialState(endpoint.flavor)
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
   const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+
+  const togglePublish = (enabled: boolean) => {
+    const callback = () => {
+      setEnabled(enabled)
+      api.updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
+    }
+    if (isEnabled) {
+      setDialogPrompt({
+        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
+        callback,
+        destructive: true,
+      })
+    } else {
+      callback()
+    }
+  }
 
   const toggleCache = (checked: boolean) => {
     setUseCache(checked)
@@ -103,7 +119,7 @@ export default function PublishSettingsPane({
       <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
-        <PublishToggle endpoint={endpoint} onRefresh={onRefresh} />
+        <Checkbox checked={isEnabled} setChecked={togglePublish} />
         <Label>URL Path</Label>
         <div className='flex items-center gap-2'>
           <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />

@@ -1,55 +1,13 @@
 import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
-import useModalDialogPrompt from './modalDialogContext'
 import api from '@/src/client/api'
 import Checkbox from './checkbox'
 import { ToCamelCase } from '@/src/common/formatting'
 import DropdownMenu from './dropdownMenu'
-import { useInitialState } from './useInitialState'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
-
-export function PublishToggle({
-  endpoint,
-  onRefresh,
-  isActive,
-  setActive,
-}: {
-  endpoint: Endpoint
-  onRefresh: () => Promise<void>
-  isActive?: boolean
-  setActive?: () => void
-}) {
-  const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
-
-  const setDialogPrompt = useModalDialogPrompt()
-
-  const togglePublish = (enabled: boolean) => {
-    const callback = () => {
-      setEnabled(enabled)
-      api.updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
-    }
-    if (isEnabled) {
-      setDialogPrompt({
-        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback,
-        destructive: true,
-      })
-    } else {
-      callback()
-    }
-  }
-
-  return setActive ? (
-    <RowCell active={isActive} center first>
-      <Checkbox checked={isEnabled} setChecked={togglePublish} />
-    </RowCell>
-  ) : (
-    <Checkbox checked={isEnabled} setChecked={togglePublish} />
-  )
-}
 
 const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
@@ -119,7 +77,6 @@ export default function EndpointsTable({
             endpoints={group}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={setActiveEndpoint}
-            onRefresh={onRefresh}
           />
         ))
       ) : (
@@ -134,13 +91,11 @@ function EndpointsGroup({
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
-  onRefresh,
 }: {
   parent: Chain | Prompt
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
-  onRefresh: () => Promise<void>
 }) {
   const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
     <RowCell header first={first}>
