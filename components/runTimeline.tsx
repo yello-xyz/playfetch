@@ -49,10 +49,10 @@ export default function RunTimeline({
   }
 
   return (
-    <div ref={containerRef} className='relative flex flex-col h-full gap-4'>
-      <div className='font-medium text-gray-600'>Responses</div>
+    <div ref={containerRef} className='relative flex flex-col h-full'>
+      <div className='font-medium text-gray-700 bg-white py-2.5 px-3 leading-6 border-b border-gray-200'>Responses</div>
       {runs.length > 0 ? (
-        <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
+        <div ref={scrollRef} className='flex flex-col flex-1 gap-3 px-5 pt-5 overflow-y-auto'>
           {runs.map((run, index) => (
             <RunCell
               key={run.id}
@@ -79,9 +79,9 @@ function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
       <span className='font-medium text-gray-600'>Waiting for responses…</span>
     </div>
   ) : (
-    <div className='flex flex-col gap-4 overflow-y-hidden'>
+    <div className='flex flex-col gap-3 overflow-y-hidden px-5 pt-5'>
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className='min-h-[320px] bg-gray-25 rounded-lg'></div>
+        <div key={index} className='min-h-[320px] bg-gray-50 rounded-lg'></div>
       ))}
     </div>
   )

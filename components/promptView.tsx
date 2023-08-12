@@ -173,11 +173,11 @@ export default function PromptView({
   const minWidth = 280
   return (
     <Allotment>
-      <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+      <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
         {renderTab(activeTab)}
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
-        <div className='h-full p-6'>
+        <div className='h-full bg-gray-25'>
           <RunTimeline
             runs={[...activeVersion.runs, ...partialRuns]}
             prompt={prompt}
