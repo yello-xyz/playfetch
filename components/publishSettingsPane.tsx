@@ -39,6 +39,15 @@ export default function PublishSettingsPane({
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
   const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
 
+  const isDirty =
+    isEnabled !== endpoint.enabled ||
+    parentID !== endpoint.parentID ||
+    versionID !== endpoint.versionID ||
+    urlPath !== endpoint.urlPath ||
+    flavor !== endpoint.flavor ||
+    useCache !== endpoint.useCache ||
+    useStreaming !== endpoint.useStreaming
+
   const setDialogPrompt = useModalDialogPrompt()
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -139,7 +148,7 @@ export default function PublishSettingsPane({
               <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
                 Cancel
               </Button>
-              <PendingButton disabled={isSaving || !CheckValidURLPath(urlPath)} onClick={saveChanges}>
+              <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
                 Save Changes
               </PendingButton>
             </div>
