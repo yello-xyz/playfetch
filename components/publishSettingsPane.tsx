@@ -48,6 +48,19 @@ export default function PublishSettingsPane({
     useCache !== endpoint.useCache ||
     useStreaming !== endpoint.useStreaming
 
+  const [isEditing, setEditing] = useState(false)
+  const [isSaving, setSaving] = useState(false)
+
+  if (isDirty && !isSaving && !isEditing) {
+    setEnabled(endpoint.enabled)
+    setParentID(endpoint.parentID)
+    setVersionID(endpoint.versionID)
+    setURLPath(endpoint.urlPath)
+    setFlavor(endpoint.flavor)
+    setUseCache(endpoint.useCache)
+    setUseStreaming(endpoint.useStreaming)
+  }
+
   const setDialogPrompt = useModalDialogPrompt()
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
@@ -79,8 +92,6 @@ export default function PublishSettingsPane({
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
-  const [isEditing, setEditing] = useState(false)
-  const [isSaving, setSaving] = useState(false)
   const saveChanges = () => {
     setDialogPrompt({
       title: 'Updating a published endpoint may break existing integrations',
