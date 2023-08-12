@@ -10,25 +10,28 @@ export default function Checkbox({
   disabled,
   checked,
   setChecked,
+  onClick,
 }: {
   label?: string
   id?: string
   disabled?: boolean
   checked: boolean
   setChecked?: (checked: boolean) => void
+  onClick?: () => void
 }) {
   const backgroundImage = disabled ? (checked ? toggleOnDisabled : toggleOffDisabled) : checked ? toggleOn : toggleOff
   return (
     <div className='flex items-center justify-between gap-2'>
       {label && <Label htmlFor={id}>{label}</Label>}
       <input
-        className={`w-[42px] h-6 ${disabled ? '' : 'cursor-pointer'} appearance-none`}
+        className={`w-[42px] h-6 ${!disabled || onClick ? 'cursor-pointer' : ''} appearance-none`}
         style={{ backgroundImage: `url('${backgroundImage.src}')` }}
         type='checkbox'
         id={id}
-        disabled={disabled}
+        disabled={disabled && !onClick}
         checked={checked}
         onChange={event => setChecked?.(event.target.checked)}
+        onClick={onClick}
       />
     </div>
   )

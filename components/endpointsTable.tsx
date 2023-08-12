@@ -163,19 +163,24 @@ function EndpointsGroup({
         <HeaderCell>Usage</HeaderCell>
         {endpoints.map((endpoint, index) => {
           const active = activeEndpoint?.id === endpoint.id
-          const ActiveCell = ({ children }: { children: ReactNode }) => (
-            <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
+          const ActiveCell = ({
+            children,
+            center,
+            first,
+          }: {
+            children: ReactNode
+            center?: boolean
+            first?: boolean
+          }) => (
+            <RowCell center={center} first={first} active={active} callback={() => setActiveEndpoint(endpoint)}>
               {children}
             </RowCell>
           )
           return (
             <Fragment key={index}>
-              <PublishToggle
-                endpoint={endpoint}
-                onRefresh={onRefresh}
-                isActive={active}
-                setActive={() => setActiveEndpoint(endpoint)}
-              />
+              <ActiveCell center first>
+                <Checkbox checked={endpoint.enabled} disabled onClick={() => setActiveEndpoint(endpoint)} />
+              </ActiveCell>
               <ActiveCell>{endpoint.urlPath}</ActiveCell>
               <ActiveCell>{endpoint.flavor}</ActiveCell>
               <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
