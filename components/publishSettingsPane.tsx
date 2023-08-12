@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ActiveProject, ActivePrompt, Endpoint, Version } from '@/types'
+import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Version } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
@@ -15,6 +15,8 @@ import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
+const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
+
 export default function PublishSettingsPane({
   endpoint,
   project,
@@ -27,6 +29,9 @@ export default function PublishSettingsPane({
   onRefresh: () => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
+  const [parentID, setParentID] = useInitialState(endpoint.parentID)
+  const [versionID, setVersionID] = useInitialState(endpoint.versionID)
+  const [urlPath, setURLPath] = useInitialState(endpoint.urlPath)
   const [flavor, setFlavor] = useInitialState(endpoint.flavor)
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
   const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
@@ -92,9 +97,21 @@ export default function PublishSettingsPane({
     updateFlavor(flavor)
   }
 
-  const [versionID, setVersionID] = useInitialState(endpoint.versionID)
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
+
+  const parents = [...project.prompts, ...project.chains]
+  const parentFromID = (id: number) => parents.find(item => item.id === id)!
+
+  const updateParentID = (parentID: number) => {
+    showUpdatePrompt(() => {
+      const parent = parentFromID(parentID)
+      const versionID = isPrompt(parent) ? parent.lastVersionID : undefined
+      setParentID(parentID)
+      setVersionID(versionID)
+      api.updateEndpoint({ ...endpoint, parentID, versionID }).then(_ => onRefresh())
+    })
+  }
 
   const updateVersion = (version: Version) => {
     showUpdatePrompt(() => {
@@ -103,7 +120,6 @@ export default function PublishSettingsPane({
     })
   }
 
-  const [urlPath, setURLPath] = useInitialState(endpoint.urlPath)
   const canUpdateURLPath = urlPath !== endpoint.urlPath && CheckValidURLPath(urlPath)
   const updateURLPath = () => {
     showUpdatePrompt(() => {
@@ -111,12 +127,9 @@ export default function PublishSettingsPane({
     })
   }
 
-  const parents = [...project.prompts, ...project.chains]
-  const parent = parents.find(item => item.id === endpoint.parentID)!
-
   return (
     <>
-      <Label>{parent.name}</Label>
+      <Label>{parentFromID(parentID).name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
         <Checkbox checked={isEnabled} setChecked={togglePublish} />
@@ -140,6 +153,18 @@ export default function PublishSettingsPane({
             {addNewEnvironment}
           </option>
         </DropdownMenu>
+        {
+          <>
+            <Label>Prompt / Chain</Label>
+            <DropdownMenu value={parentID} onChange={value => updateParentID(Number(value))}>
+              {parents.map((parent, index) => (
+                <option key={index} value={parent.id}>
+                  {parent.name}
+                </option>
+              ))}
+            </DropdownMenu>
+          </>
+        }
         {prompt && versionIndex >= 0 && (
           <>
             <Label className='self-start mt-2'>Version</Label>
