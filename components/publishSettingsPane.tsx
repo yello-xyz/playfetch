@@ -6,11 +6,10 @@ import {
   EndpointParentIsPrompt,
   EndpointParentsInProject,
   FindParentInProject,
-  Version,
 } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
-import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
+import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
@@ -18,10 +17,8 @@ import VersionSelector from './versionSelector'
 import { useInitialState } from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
-import IconButton from './iconButton'
-import enterIcon from '@/public/enter.svg'
-import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import Button, { PendingButton } from './button'
 
 export default function PublishSettingsPane({
   endpoint,
@@ -42,58 +39,37 @@ export default function PublishSettingsPane({
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
   const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
 
-  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+  const isDirty =
+    isEnabled !== endpoint.enabled ||
+    parentID !== endpoint.parentID ||
+    versionID !== endpoint.versionID ||
+    urlPath !== endpoint.urlPath ||
+    flavor !== endpoint.flavor ||
+    useCache !== endpoint.useCache ||
+    useStreaming !== endpoint.useStreaming
 
-  const togglePublish = (enabled: boolean) => {
-    const callback = () => {
-      setEnabled(enabled)
-      api.updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
-    }
-    if (isEnabled) {
-      setDialogPrompt({
-        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback,
-        destructive: true,
-      })
-    } else {
-      callback()
-    }
-  }
+  const [isEditing, setEditing] = useState(false)
+  const [isSaving, setSaving] = useState(false)
 
-  const toggleCache = (checked: boolean) => {
-    setUseCache(checked)
-    api.updateEndpoint({ ...endpoint, useCache: checked }).then(_ => onRefresh())
-  }
-
-  const toggleStreaming = (checked: boolean) => {
-    setUseStreaming(checked)
-    api.updateEndpoint({ ...endpoint, useStreaming: checked }).then(_ => onRefresh())
+  if (isDirty && !isSaving && !isEditing) {
+    setEnabled(endpoint.enabled)
+    setParentID(endpoint.parentID)
+    setVersionID(endpoint.versionID)
+    setURLPath(endpoint.urlPath)
+    setFlavor(endpoint.flavor)
+    setUseCache(endpoint.useCache)
+    setUseStreaming(endpoint.useStreaming)
   }
 
   const setDialogPrompt = useModalDialogPrompt()
-
-  const showUpdatePrompt = (callback: () => void) => {
-    if (endpoint.enabled) {
-      setDialogPrompt({
-        title: 'Updating a published endpoint may break existing integrations',
-        confirmTitle: 'Proceed',
-        callback,
-        destructive: true,
-      })
-    } else {
-      callback()
-    }
-  }
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const addNewEnvironment = 'Add New Environment…'
   const updateFlavor = (flavor: string) => {
     if (flavor === addNewEnvironment) {
       setShowPickNamePrompt(true)
     } else {
-      showUpdatePrompt(() => {
-        setFlavor(flavor)
-        api.updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
-      })
+      setFlavor(flavor)
     }
   }
 
@@ -103,33 +79,31 @@ export default function PublishSettingsPane({
     updateFlavor(flavor)
   }
 
-  const versions = prompt?.versions ?? []
-  const versionIndex = versions.findIndex(version => version.id === versionID)
-
   const parents = EndpointParentsInProject(project)
   const parent = FindParentInProject(parentID, project)
 
   const updateParentID = (parentID: number) => {
-    showUpdatePrompt(() => {
-      const parent = FindParentInProject(parentID, project)
-      const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
-      setParentID(parentID)
-      setVersionID(versionID)
-      api.updateEndpoint({ ...endpoint, parentID, versionID }).then(_ => onRefresh())
-    })
+    const parent = FindParentInProject(parentID, project)
+    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
+    setParentID(parentID)
+    setVersionID(versionID)
   }
 
-  const updateVersion = (version: Version) => {
-    showUpdatePrompt(() => {
-      setVersionID(version.id)
-      api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
-    })
-  }
+  const versions = prompt?.versions ?? []
+  const versionIndex = versions.findIndex(version => version.id === versionID)
 
-  const canUpdateURLPath = urlPath !== endpoint.urlPath && CheckValidURLPath(urlPath)
-  const updateURLPath = () => {
-    showUpdatePrompt(() => {
-      api.updateEndpoint({ ...endpoint, urlPath }).then(_ => onRefresh())
+  const saveChanges = () => {
+    setDialogPrompt({
+      title: 'Updating a published endpoint may break existing integrations',
+      confirmTitle: 'Proceed',
+      callback: async () => {
+        setEditing(false)
+        setSaving(true)
+        await api.updateEndpoint(endpoint.id, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+        await onRefresh()
+        setSaving(false)
+      },
+      destructive: true,
     })
   }
 
@@ -137,19 +111,35 @@ export default function PublishSettingsPane({
     <>
       <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
-        <Label>Enabled</Label>
-        <Checkbox checked={isEnabled} setChecked={togglePublish} />
-        <Label>URL Path</Label>
-        <div className='flex items-center gap-2'>
-          <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
-          <IconButton
-            disabled={!canUpdateURLPath}
-            icon={canUpdateURLPath ? enterIcon : enterDisabledIcon}
-            onClick={updateURLPath}
-          />
-        </div>
-        <Label>Environment</Label>
-        <DropdownMenu value={flavor} onChange={updateFlavor}>
+        <Label disabled={!isEditing}>Enabled</Label>
+        <Checkbox disabled={!isEditing} checked={isEnabled} setChecked={setEnabled} />
+        <Label disabled={!isEditing}>Prompt / Chain</Label>
+        <DropdownMenu disabled={!isEditing} value={parentID} onChange={value => updateParentID(Number(value))}>
+          {parents.map((parent, index) => (
+            <option key={index} value={parent.id}>
+              {parent.name}
+            </option>
+          ))}
+        </DropdownMenu>
+        {prompt && versionIndex >= 0 && (
+          <>
+            <Label disabled={!isEditing} className='self-start mt-2'>
+              Version
+            </Label>
+            <VersionSelector
+              versions={versions}
+              endpoints={project.endpoints}
+              activeVersion={versions[versionIndex]}
+              setActiveVersion={version => setVersionID(version.id)}
+              labelColors={AvailableLabelColorsForPrompt(prompt)}
+              disabled={!isEditing}
+            />
+          </>
+        )}
+        <Label disabled={!isEditing}>Name</Label>
+        <TextInput disabled={!isEditing} value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
+        <Label disabled={!isEditing}>Environment</Label>
+        <DropdownMenu disabled={!isEditing} value={flavor} onChange={updateFlavor}>
           {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
@@ -159,37 +149,24 @@ export default function PublishSettingsPane({
             {addNewEnvironment}
           </option>
         </DropdownMenu>
-        {
-          <>
-            <Label>Prompt / Chain</Label>
-            <DropdownMenu value={parentID} onChange={value => updateParentID(Number(value))}>
-              {parents.map((parent, index) => (
-                <option key={index} value={parent.id}>
-                  {parent.name}
-                </option>
-              ))}
-            </DropdownMenu>
-          </>
-        }
-        {prompt && versionIndex >= 0 && (
-          <>
-            <Label className='self-start mt-2'>Version</Label>
-            <VersionSelector
-              versions={versions}
-              endpoints={project.endpoints}
-              activeVersion={versions[versionIndex]}
-              setActiveVersion={updateVersion}
-              labelColors={AvailableLabelColorsForPrompt(prompt)}
-            />
-            <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
-              {StripPromptSentinels(versions[versionIndex].prompt)}
+        <Label disabled={!isEditing}>Cache Responses</Label>
+        <Checkbox disabled={!isEditing} checked={useCache} setChecked={setUseCache} />
+        <Label disabled={!isEditing}>Stream Responses</Label>
+        <Checkbox disabled={!isEditing} checked={useStreaming} setChecked={setUseStreaming} />
+        <div className='col-span-2 text-right'>
+          {isEditing || isSaving ? (
+            <div className='flex justify-end gap-2'>
+              <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+              <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
+                Save Changes
+              </PendingButton>
             </div>
-          </>
-        )}
-        <Label>Cache Responses</Label>
-        <Checkbox checked={useCache} setChecked={toggleCache} />
-        <Label>Stream Responses</Label>
-        <Checkbox checked={useStreaming} setChecked={toggleStreaming} />
+          ) : (
+            <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>
+          )}
+        </div>
       </div>
       {showPickNamePrompt && (
         <PickNameDialog

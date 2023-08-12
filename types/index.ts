@@ -155,7 +155,7 @@ export type ResolvedPromptEndpoint = ResolvedEndpoint & {
   versionID: number
 }
 
-export const EndpointParentsInProject = (project: ActiveProject) => [...project.chains, ...project.prompts]
+export const EndpointParentsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
 export const FindParentInProject = (parentID: number, project: ActiveProject) =>
   EndpointParentsInProject(project).find(item => item.id === parentID)!
 export const EndpointParentIsPrompt = (parent: Chain | Prompt | undefined): parent is Prompt =>

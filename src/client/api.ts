@@ -129,6 +129,24 @@ const api = {
   runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
+  getChain: function (chainID: number): Promise<Chain> {
+    return post(this.getChain, { chainID })
+  },
+  addChain: function (projectID: number): Promise<number> {
+    return post(this.addChain, { projectID })
+  },
+  duplicateChain: function (chainID: number): Promise<number> {
+    return post(this.duplicateChain, { chainID })
+  },
+  updateChain: function (chainID: number, items: ChainItemWithInputs[]): Promise<number> {
+    return post(this.updateChain, { chainID, items })
+  },
+  renameChain: function (chainID: number, name: string) {
+    return post(this.renameChain, { chainID, name })
+  },
+  deleteChain: function (chainID: number) {
+    return post(this.deleteChain, { chainID })
+  },
   publishEndpoint: function (
     projectID: number,
     parentID: number,
@@ -148,34 +166,25 @@ const api = {
       useStreaming,
     })
   },
-  getChain: function (chainID: number): Promise<Chain> {
-    return post(this.getChain, { chainID })
-  },
-  addChain: function (projectID: number): Promise<number> {
-    return post(this.addChain, { projectID })
-  },
-  duplicateChain: function (chainID: number): Promise<number> {
-    return post(this.duplicateChain, { chainID })
-  },
-  updateChain: function (chainID: number, items: ChainItemWithInputs[]): Promise<number> {
-    return post(this.updateChain, { chainID, items })
-  },
-  renameChain: function (chainID: number, name: string) {
-    return post(this.renameChain, { chainID, name })
-  },
-  deleteChain: function (chainID: number) {
-    return post(this.deleteChain, { chainID })
-  },
-  updateEndpoint: function (endpoint: Endpoint) {
+  updateEndpoint: function (
+    endpointID: number,
+    enabled: boolean,
+    parentID: number,
+    versionID: number | undefined,
+    name: string,
+    flavor: string,
+    useCache: boolean,
+    useStreaming: boolean
+  ) {
     return post(this.updateEndpoint, {
-      endpointID: endpoint.id,
-      enabled: endpoint.enabled,
-      parentID: endpoint.parentID,
-      versionID: endpoint.versionID,
-      name: endpoint.urlPath,
-      flavor: endpoint.flavor,
-      useCache: endpoint.useCache,
-      useStreaming: endpoint.useStreaming,
+      endpointID,
+      enabled,
+      parentID,
+      versionID,
+      name,
+      flavor,
+      useCache,
+      useStreaming,
     })
   },
   deleteEndpoint: function (endpointID: number) {

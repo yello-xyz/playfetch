@@ -9,7 +9,8 @@ export default function VersionSelector({
   activeVersion,
   setActiveVersion,
   flagIfNotLatest,
-  labelColors = {}
+  labelColors = {},
+  disabled,
 }: {
   versions: Version[]
   endpoints: ResolvedEndpoint[]
@@ -17,6 +18,7 @@ export default function VersionSelector({
   setActiveVersion: (version: Version) => void
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
+  disabled?: boolean
 }) {
   const suffixForVersionID = (versionID: number) => {
     const labels = [
@@ -34,6 +36,7 @@ export default function VersionSelector({
         activeVersionID={activeVersion?.id ?? 0}
         setActiveVersionID={versionID => setActiveVersion(versions.find(version => version.id === versionID)!)}
         flagIfNotLatest={flagIfNotLatest}
+        disabled={disabled}
       />
       {activeVersion && <ItemLabels labels={activeVersion.labels} colors={labelColors} />}
     </div>
@@ -46,12 +49,14 @@ function VersionIDSelector({
   setActiveVersionID,
   suffixForVersionID,
   flagIfNotLatest,
+  disabled,
 }: {
   versionIDs: number[]
   activeVersionID: number
   setActiveVersionID: (versionID: number) => void
   suffixForVersionID?: (versionID: number) => string | undefined
   flagIfNotLatest?: boolean
+  disabled?: boolean
 }) {
   const [isFocused, setFocused] = useState(false)
 
@@ -59,7 +64,7 @@ function VersionIDSelector({
   return (
     <DropdownMenu
       className={className}
-      disabled={!versionIDs.length}
+      disabled={!versionIDs.length || disabled}
       value={activeVersionID}
       onChange={value => setActiveVersionID(Number(value))}
       onFocus={() => setFocused(true)}
