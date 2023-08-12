@@ -15,8 +15,11 @@ export default function VersionSelector({
   flagIfNotLatest?: boolean
 }) {
   const suffixForVersionID = (versionID: number) => {
-    const flavors = endpoints.filter(endpoint => endpoint.versionID === versionID).map(endpoint => endpoint.flavor)
-    return flavors.length > 0 ? ` (${[...new Set(flavors)].join(', ')})` : undefined
+    const labels = [
+      ...versions.filter(version => version.id === versionID).flatMap(version => version.labels),
+      ...endpoints.filter(endpoint => endpoint.versionID === versionID).map(endpoint => endpoint.flavor)
+    ]
+    return labels.length > 0 ? ` (${[...new Set(labels)].join(', ')})` : undefined
   }
 
   return (
