@@ -1,6 +1,7 @@
 import { ResolvedEndpoint, Version } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import { useState } from 'react'
+import { ItemLabels } from './versionCell'
 
 export default function VersionSelector({
   versions,
@@ -8,12 +9,14 @@ export default function VersionSelector({
   activeVersion,
   setActiveVersion,
   flagIfNotLatest,
+  labelColors = {}
 }: {
   versions: Version[]
   endpoints: ResolvedEndpoint[]
   activeVersion?: Version
   setActiveVersion: (version: Version) => void
   flagIfNotLatest?: boolean
+  labelColors?: Record<string, string>
 }) {
   const suffixForVersionID = (versionID: number) => {
     const labels = [
@@ -24,13 +27,16 @@ export default function VersionSelector({
   }
 
   return (
-    <VersionIDSelector
-      versionIDs={versions.map(version => version.id)}
-      suffixForVersionID={suffixForVersionID}
-      activeVersionID={activeVersion?.id ?? 0}
-      setActiveVersionID={versionID => setActiveVersion(versions.find(version => version.id === versionID)!)}
-      flagIfNotLatest={flagIfNotLatest}
-    />
+    <div className='flex flex-col gap-2'>
+      <VersionIDSelector
+        versionIDs={versions.map(version => version.id)}
+        suffixForVersionID={suffixForVersionID}
+        activeVersionID={activeVersion?.id ?? 0}
+        setActiveVersionID={versionID => setActiveVersion(versions.find(version => version.id === versionID)!)}
+        flagIfNotLatest={flagIfNotLatest}
+      />
+      {activeVersion && <ItemLabels labels={activeVersion.labels} colors={labelColors} />}
+    </div>
   )
 }
 

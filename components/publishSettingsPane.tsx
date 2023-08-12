@@ -14,6 +14,7 @@ import TextInput from './textInput'
 import IconButton from './iconButton'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
+import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 export default function PublishSettingsPane({
   endpoint,
@@ -123,14 +124,15 @@ export default function PublishSettingsPane({
             {addNewEnvironment}
           </option>
         </DropdownMenu>
-        {versionIndex >= 0 && (
+        {prompt && versionIndex >= 0 && (
           <>
-            <Label>Version</Label>
+            <Label className='self-start mt-2'>Version</Label>
             <VersionSelector
               versions={versions}
               endpoints={project.endpoints}
               activeVersion={versions[versionIndex]}
               setActiveVersion={updateVersion}
+              labelColors={AvailableLabelColorsForPrompt(prompt)}
             />
             <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
               {StripPromptSentinels(versions[versionIndex].prompt)}
