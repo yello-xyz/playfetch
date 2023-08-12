@@ -18,7 +18,7 @@ import enterDisabledIcon from '@/public/enterDisabled.svg'
 export default function PublishSettingsPane({
   endpoint,
   project,
-  versions,
+  versions = [],
   availableFlavors,
   onRefresh,
 }: {
@@ -78,7 +78,7 @@ export default function PublishSettingsPane({
   }
 
   const [versionID, setVersionID] = useInitialState(endpoint.versionID)
-  const versionIndex = versions?.findIndex(version => version.id === versionID)
+  const versionIndex = versions.findIndex(version => version.id === versionID)
 
   const updateVersion = (version: Version) => {
     showUpdatePrompt(() => {
@@ -124,7 +124,7 @@ export default function PublishSettingsPane({
             {addNewEnvironment}
           </option>
         </DropdownMenu>
-        {versions && !!versionIndex && versionIndex >= 0 && (
+        {versionIndex >= 0 && (
           <>
             <Label>Version</Label>
             <VersionSelector
