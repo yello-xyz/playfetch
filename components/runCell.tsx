@@ -143,7 +143,7 @@ export default function RunCell({
           position={{
             // TODO make this smarter so it avoids the edge of the container
             top: popupPosition.top - containerRect.top + 20 - scrollTop + startScrollTop,
-            left: popupPosition.left - containerRect.left - 200,
+            left: Math.max(-10, popupPosition.left - containerRect.left - 200),
           }}
         />
       )}
