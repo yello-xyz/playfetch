@@ -52,7 +52,8 @@ export default function WorkspaceGridView({
 
   return (
     <>
-      <div className='flex flex-col h-full px-6 pb-0 bg-gray-25'>
+      
+      <div className={`${activeWorkspace.projects.length > 0 ? 'bg-gray-25' : 'bg-white'} flex flex-col h-full px-6 pb-0`}>
         <WorkspaceTopBar
           activeWorkspace={activeWorkspace}
           isUserWorkspace={isUserWorkspace}
@@ -89,10 +90,10 @@ export default function WorkspaceGridView({
 
 function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWorkspace; onAddProject: () => void }) {
   return (
-    <div className='h-full pb-6'>
-      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+    <div className='h-full pb-6 text-gray-700'>
+      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 bg-gray-25 border border-gray-200  rounded-lg'>
         <span className='font-medium'>{workspace.name} is empty</span>
-        <span className='text-xs text-center text-gray-400 '>
+        <span className='text-sm text-center text-gray-400 '>
           Create a{' '}
           <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddProject}>
             New Project

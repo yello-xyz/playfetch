@@ -7,6 +7,7 @@ module.exports = {
     textColor: {
       transparent: 'transparent',
       black: '#000000',
+      'blue-400': '#3B8CEB',
       'blue-500': '#2C7BD8',
       'gray-25': '#FBFBFD',
       'gray-50': '#F3F4F6',
