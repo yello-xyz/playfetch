@@ -128,11 +128,11 @@ export default function PublishSettingsPane({
         <Checkbox checked={useCache} setChecked={setUseCache} />
         <Label>Stream Responses</Label>
         <Checkbox checked={useStreaming} setChecked={setUseStreaming} />
-      </div>
-      <div className='self-end'>
-        <PendingButton disabled={isSaving || !CheckValidURLPath(urlPath)} onClick={saveChanges}>
-          Save Changes
-        </PendingButton>
+        <div className='col-span-2 text-right'>
+          <PendingButton disabled={isSaving || !CheckValidURLPath(urlPath)} onClick={saveChanges}>
+            Save Changes
+          </PendingButton>
+        </div>
       </div>
       {showPickNamePrompt && (
         <PickNameDialog
