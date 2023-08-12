@@ -9,7 +9,7 @@ import {
 } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
-import { CheckValidURLPath, StripPromptSentinels, ToCamelCase } from '@/src/common/formatting'
+import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
 import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
@@ -18,7 +18,7 @@ import { useInitialState } from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
-import { PendingButton } from './button'
+import Button, { PendingButton } from './button'
 
 export default function PublishSettingsPane({
   endpoint,
@@ -70,12 +70,14 @@ export default function PublishSettingsPane({
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
+  const [isEditing, setEditing] = useState(false)
   const [isSaving, setSaving] = useState(false)
   const saveChanges = () => {
     setDialogPrompt({
       title: 'Updating a published endpoint may break existing integrations',
       confirmTitle: 'Proceed',
       callback: async () => {
+        setEditing(false)
         setSaving(true)
         await api.updateEndpoint(endpoint.id, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
         await onRefresh()
@@ -89,10 +91,10 @@ export default function PublishSettingsPane({
     <>
       <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
-        <Label>Enabled</Label>
-        <Checkbox checked={isEnabled} setChecked={setEnabled} />
-        <Label>Prompt / Chain</Label>
-        <DropdownMenu value={parentID} onChange={value => updateParentID(Number(value))}>
+        <Label disabled={!isEditing}>Enabled</Label>
+        <Checkbox disabled={!isEditing} checked={isEnabled} setChecked={setEnabled} />
+        <Label disabled={!isEditing}>Prompt / Chain</Label>
+        <DropdownMenu disabled={!isEditing} value={parentID} onChange={value => updateParentID(Number(value))}>
           {parents.map((parent, index) => (
             <option key={index} value={parent.id}>
               {parent.name}
@@ -101,20 +103,23 @@ export default function PublishSettingsPane({
         </DropdownMenu>
         {prompt && versionIndex >= 0 && (
           <>
-            <Label className='self-start mt-2'>Version</Label>
+            <Label disabled={!isEditing} className='self-start mt-2'>
+              Version
+            </Label>
             <VersionSelector
               versions={versions}
               endpoints={project.endpoints}
               activeVersion={versions[versionIndex]}
               setActiveVersion={version => setVersionID(version.id)}
               labelColors={AvailableLabelColorsForPrompt(prompt)}
+              disabled={!isEditing}
             />
           </>
         )}
-        <Label>Name</Label>
-        <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
-        <Label>Environment</Label>
-        <DropdownMenu value={flavor} onChange={updateFlavor}>
+        <Label disabled={!isEditing}>Name</Label>
+        <TextInput disabled={!isEditing} value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
+        <Label disabled={!isEditing}>Environment</Label>
+        <DropdownMenu disabled={!isEditing} value={flavor} onChange={updateFlavor}>
           {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
@@ -124,14 +129,23 @@ export default function PublishSettingsPane({
             {addNewEnvironment}
           </option>
         </DropdownMenu>
-        <Label>Cache Responses</Label>
-        <Checkbox checked={useCache} setChecked={setUseCache} />
-        <Label>Stream Responses</Label>
-        <Checkbox checked={useStreaming} setChecked={setUseStreaming} />
+        <Label disabled={!isEditing}>Cache Responses</Label>
+        <Checkbox disabled={!isEditing} checked={useCache} setChecked={setUseCache} />
+        <Label disabled={!isEditing}>Stream Responses</Label>
+        <Checkbox disabled={!isEditing} checked={useStreaming} setChecked={setUseStreaming} />
         <div className='col-span-2 text-right'>
-          <PendingButton disabled={isSaving || !CheckValidURLPath(urlPath)} onClick={saveChanges}>
-            Save Changes
-          </PendingButton>
+          {isEditing || isSaving ? (
+            <div className='flex justify-end gap-2'>
+              <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+              <PendingButton disabled={isSaving || !CheckValidURLPath(urlPath)} onClick={saveChanges}>
+                Save Changes
+              </PendingButton>
+            </div>
+          ) : (
+            <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>
+          )}
         </div>
       </div>
       {showPickNamePrompt && (
