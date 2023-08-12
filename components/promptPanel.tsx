@@ -54,7 +54,7 @@ export default function PromptPanel({
   )
 
   return (
-    <div className='flex flex-col h-full min-h-0 gap-4 bg-white text-gray-500'>
+    <div className='flex flex-col h-full min-h-0 gap-4 bg-white p-4 text-gray-500'>
       <div className='self-stretch flex-1 min-h-0'>
         <RichTextInput
           key={version.id}
