@@ -6,7 +6,6 @@ import {
   EndpointParentIsPrompt,
   EndpointParentsInProject,
   FindParentInProject,
-  Version,
 } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
@@ -18,10 +17,8 @@ import VersionSelector from './versionSelector'
 import { useInitialState } from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
-import IconButton from './iconButton'
-import enterIcon from '@/public/enter.svg'
-import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { PendingButton } from './button'
 
 export default function PublishSettingsPane({
   endpoint,
@@ -42,58 +39,15 @@ export default function PublishSettingsPane({
   const [useCache, setUseCache] = useInitialState(endpoint.useCache)
   const [useStreaming, setUseStreaming] = useInitialState(endpoint.useStreaming)
 
-  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
-
-  const togglePublish = (enabled: boolean) => {
-    const callback = () => {
-      setEnabled(enabled)
-      api.updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
-    }
-    if (isEnabled) {
-      setDialogPrompt({
-        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback,
-        destructive: true,
-      })
-    } else {
-      callback()
-    }
-  }
-
-  const toggleCache = (checked: boolean) => {
-    setUseCache(checked)
-    api.updateEndpoint({ ...endpoint, useCache: checked }).then(_ => onRefresh())
-  }
-
-  const toggleStreaming = (checked: boolean) => {
-    setUseStreaming(checked)
-    api.updateEndpoint({ ...endpoint, useStreaming: checked }).then(_ => onRefresh())
-  }
-
   const setDialogPrompt = useModalDialogPrompt()
-
-  const showUpdatePrompt = (callback: () => void) => {
-    if (endpoint.enabled) {
-      setDialogPrompt({
-        title: 'Updating a published endpoint may break existing integrations',
-        confirmTitle: 'Proceed',
-        callback,
-        destructive: true,
-      })
-    } else {
-      callback()
-    }
-  }
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const addNewEnvironment = 'Add New Environment…'
   const updateFlavor = (flavor: string) => {
     if (flavor === addNewEnvironment) {
       setShowPickNamePrompt(true)
     } else {
-      showUpdatePrompt(() => {
-        setFlavor(flavor)
-        api.updateEndpoint({ ...endpoint, flavor }).then(_ => onRefresh())
-      })
+      setFlavor(flavor)
     }
   }
 
@@ -103,33 +57,31 @@ export default function PublishSettingsPane({
     updateFlavor(flavor)
   }
 
-  const versions = prompt?.versions ?? []
-  const versionIndex = versions.findIndex(version => version.id === versionID)
-
   const parents = EndpointParentsInProject(project)
   const parent = FindParentInProject(parentID, project)
 
   const updateParentID = (parentID: number) => {
-    showUpdatePrompt(() => {
-      const parent = FindParentInProject(parentID, project)
-      const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
-      setParentID(parentID)
-      setVersionID(versionID)
-      api.updateEndpoint({ ...endpoint, parentID, versionID }).then(_ => onRefresh())
-    })
+    const parent = FindParentInProject(parentID, project)
+    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
+    setParentID(parentID)
+    setVersionID(versionID)
   }
 
-  const updateVersion = (version: Version) => {
-    showUpdatePrompt(() => {
-      setVersionID(version.id)
-      api.updateEndpoint({ ...endpoint, versionID: version.id }).then(_ => onRefresh())
-    })
-  }
+  const versions = prompt?.versions ?? []
+  const versionIndex = versions.findIndex(version => version.id === versionID)
 
-  const canUpdateURLPath = urlPath !== endpoint.urlPath && CheckValidURLPath(urlPath)
-  const updateURLPath = () => {
-    showUpdatePrompt(() => {
-      api.updateEndpoint({ ...endpoint, urlPath }).then(_ => onRefresh())
+  const [isSaving, setSaving] = useState(false)
+  const saveChanges = () => {
+    setDialogPrompt({
+      title: 'Updating a published endpoint may break existing integrations',
+      confirmTitle: 'Proceed',
+      callback: async () => {
+        setSaving(true)
+        await api.updateEndpoint(endpoint.id, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+        await onRefresh()
+        setSaving(false)
+      },
+      destructive: true,
     })
   }
 
@@ -138,16 +90,9 @@ export default function PublishSettingsPane({
       <Label>{parent.name}</Label>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label>Enabled</Label>
-        <Checkbox checked={isEnabled} setChecked={togglePublish} />
+        <Checkbox checked={isEnabled} setChecked={setEnabled} />
         <Label>URL Path</Label>
-        <div className='flex items-center gap-2'>
-          <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
-          <IconButton
-            disabled={!canUpdateURLPath}
-            icon={canUpdateURLPath ? enterIcon : enterDisabledIcon}
-            onClick={updateURLPath}
-          />
-        </div>
+        <TextInput value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
         <Label>Environment</Label>
         <DropdownMenu value={flavor} onChange={updateFlavor}>
           {project.availableFlavors.map((flavor, index) => (
@@ -178,7 +123,7 @@ export default function PublishSettingsPane({
               versions={versions}
               endpoints={project.endpoints}
               activeVersion={versions[versionIndex]}
-              setActiveVersion={updateVersion}
+              setActiveVersion={version => setVersionID(version.id)}
               labelColors={AvailableLabelColorsForPrompt(prompt)}
             />
             <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
@@ -187,9 +132,14 @@ export default function PublishSettingsPane({
           </>
         )}
         <Label>Cache Responses</Label>
-        <Checkbox checked={useCache} setChecked={toggleCache} />
+        <Checkbox checked={useCache} setChecked={setUseCache} />
         <Label>Stream Responses</Label>
-        <Checkbox checked={useStreaming} setChecked={toggleStreaming} />
+        <Checkbox checked={useStreaming} setChecked={setUseStreaming} />
+      </div>
+      <div className='self-end'>
+        <PendingButton disabled={isSaving || !CheckValidURLPath(urlPath)} onClick={saveChanges}>
+          Save Changes
+        </PendingButton>
       </div>
       {showPickNamePrompt && (
         <PickNameDialog
