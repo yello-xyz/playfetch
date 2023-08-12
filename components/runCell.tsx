@@ -116,7 +116,7 @@ export default function RunCell({
   }
 
   const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg'
-  const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-50'
+  const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
   const shimmerClass = isLast && !run.timestamp ? 'animate-shimmer' : ''
 
   return (

@@ -21,5 +21,5 @@ export default function RunCellFooter({ run }: { run: PartialRun }) {
     attributes.push(formattedDate)
   }
 
-  return attributes.length > 0 ? <div className='self-end text-xs'>{attributes.join(' · ')}</div> : null
+  return attributes.length > 0 ? <div className='self-end text-xs text-gray-500'>{attributes.join(' · ')}</div> : null
 }

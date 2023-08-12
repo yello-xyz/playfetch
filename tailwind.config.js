@@ -93,6 +93,7 @@ module.exports = {
       white: '#FFFFFF',
     },
     fontSize: {
+      xs: '12px',
       sm: '0.79rem',
       base: '.92rem'
     },
