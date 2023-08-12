@@ -126,7 +126,7 @@ export default function PublishSettingsPane({
         </DropdownMenu>
         {versions && !!versionIndex && versionIndex >= 0 && (
           <>
-            <Label>Prompt</Label>
+            <Label>Version</Label>
             <VersionSelector
               versions={versions}
               endpoints={project.endpoints}

@@ -55,7 +55,7 @@ function VersionIDSelector({
       onChange={value => setActiveVersionID(Number(value))}>
       {versionIDs.map((versionID, index) => (
         <option key={index} value={versionID}>
-          {`Prompt ${index + 1}${suffixForVersionID?.(versionID) ?? ''}`}
+          {`version ${index + 1}${suffixForVersionID?.(versionID) ?? ''}`}
         </option>
       ))}
     </DropdownMenu>
