@@ -109,9 +109,6 @@ export default function PublishSettingsPane({
               setActiveVersion={version => setVersionID(version.id)}
               labelColors={AvailableLabelColorsForPrompt(prompt)}
             />
-            <div className='col-span-2 line-clamp-[9] overflow-y-auto border border-gray-200 p-3 rounded-lg text-gray-400'>
-              {StripPromptSentinels(versions[versionIndex].prompt)}
-            </div>
           </>
         )}
         <Label>Name</Label>
