@@ -7,6 +7,8 @@ export default function DropdownMenu({
   children,
   value,
   onChange,
+  onFocus,
+  onBlur,
 }: {
   size?: 'small' | 'medium'
   className?: string
@@ -14,6 +16,8 @@ export default function DropdownMenu({
   children: any
   value: string | number | undefined
   onChange: (value: string) => void
+  onFocus?: () => void
+  onBlur?: () => void
 }) {
   const sizeClass = size === 'small' ? 'text-xs' : 'text-sm font-medium'
   const stateClass = disabled ? 'opacity-50' : 'cursor-pointer'
@@ -25,7 +29,14 @@ export default function DropdownMenu({
       className={`${sizeClass} ${stateClass} ${appearanceClass} ${className ?? ''} w-full py-2 pl-4 pr-8 text-gray-800`}
       style={{ backgroundImage: `url('${chevronIcon.src}')` }}
       value={value}
-      onChange={event => onChange(event.target.value)}>
+      onChange={event => {
+        onChange(event.target.value)
+        if (onBlur) {
+          event.target.blur()
+        }
+      }}
+      onFocus={onFocus}
+      onBlur={onBlur}>
       {children}
     </select>
   )
