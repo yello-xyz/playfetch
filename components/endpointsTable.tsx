@@ -1,55 +1,22 @@
-import { ActiveProject, Chain, Endpoint, Prompt, ResolvedEndpoint } from '@/types'
+import {
+  ActiveProject,
+  Chain,
+  Endpoint,
+  EndpointParentIsPrompt,
+  EndpointParentsInProject,
+  FindParentInProject,
+  Prompt,
+  ResolvedEndpoint,
+} from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
-import useModalDialogPrompt from './modalDialogContext'
 import api from '@/src/client/api'
 import Checkbox from './checkbox'
 import { ToCamelCase } from '@/src/common/formatting'
 import DropdownMenu from './dropdownMenu'
-import { useInitialState } from './useInitialState'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
-
-export function PublishToggle({
-  endpoint,
-  onRefresh,
-  isActive,
-  setActive,
-}: {
-  endpoint: Endpoint
-  onRefresh: () => Promise<void>
-  isActive?: boolean
-  setActive?: () => void
-}) {
-  const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
-
-  const setDialogPrompt = useModalDialogPrompt()
-
-  const togglePublish = (enabled: boolean) => {
-    const callback = () => {
-      setEnabled(enabled)
-      api.updateEndpoint({ ...endpoint, enabled }).then(_ => onRefresh())
-    }
-    if (isEnabled) {
-      setDialogPrompt({
-        title: 'Are you sure you want to unpublish this prompt? You will no longer be able to access the API.',
-        callback,
-        destructive: true,
-      })
-    } else {
-      callback()
-    }
-  }
-
-  return setActive ? (
-    <RowCell active={isActive} center first>
-      <Checkbox checked={isEnabled} setChecked={togglePublish} />
-    </RowCell>
-  ) : (
-    <Checkbox checked={isEnabled} setChecked={togglePublish} />
-  )
-}
 
 const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
@@ -66,8 +33,6 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
   }
 }
 
-const isPrompt = (parent: Chain | Prompt): parent is Prompt => 'lastVersionID' in parent
-
 export default function EndpointsTable({
   project,
   activeEndpoint,
@@ -79,17 +44,17 @@ export default function EndpointsTable({
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onRefresh: () => Promise<void>
 }) {
-  const parents = [...project.prompts, ...project.chains]
+  const parents = EndpointParentsInProject(project)
   const canAddNewEndpoint = parents.length > 0
 
   const addEndpoint = (parentID: number) => {
-    const parent = parents.find(parent => parent.id === parentID)!
+    const parent = FindParentInProject(parentID, project)
     const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
-    const versionID = isPrompt(parent) ? parent.lastVersionID : undefined
+    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
   }
 
-  const groups = [...project.prompts, ...project.chains]
+  const groups = parents
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
@@ -104,7 +69,7 @@ export default function EndpointsTable({
               </option>
               {parents.map((parent, index) => (
                 <option key={index} value={parent.id}>
-                  {isPrompt(parent) ? 'Prompt' : 'Chain'} “{parent.name}”
+                  {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'} “{parent.name}”
                 </option>
               ))}
             </DropdownMenu>
@@ -115,11 +80,10 @@ export default function EndpointsTable({
         groups.map((group, index) => (
           <EndpointsGroup
             key={index}
-            parent={parents.find(parent => parent.id === group[0].parentID)!}
+            parent={FindParentInProject(group[0].parentID, project)}
             endpoints={group}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={setActiveEndpoint}
-            onRefresh={onRefresh}
           />
         ))
       ) : (
@@ -134,13 +98,11 @@ function EndpointsGroup({
   endpoints,
   activeEndpoint,
   setActiveEndpoint,
-  onRefresh,
 }: {
   parent: Chain | Prompt
   endpoints: ResolvedEndpoint[]
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
-  onRefresh: () => Promise<void>
 }) {
   const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
     <RowCell header first={first}>
@@ -151,7 +113,7 @@ function EndpointsGroup({
   return (
     <>
       <div className='flex items-center gap-1 mt-4 text-gray-700'>
-        <Icon icon={isPrompt(parent) ? promptIcon : chainIcon} />
+        <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
         {parent.name}
       </div>
       <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
@@ -163,19 +125,24 @@ function EndpointsGroup({
         <HeaderCell>Usage</HeaderCell>
         {endpoints.map((endpoint, index) => {
           const active = activeEndpoint?.id === endpoint.id
-          const ActiveCell = ({ children }: { children: ReactNode }) => (
-            <RowCell active={active} callback={() => setActiveEndpoint(endpoint)}>
+          const ActiveCell = ({
+            children,
+            center,
+            first,
+          }: {
+            children: ReactNode
+            center?: boolean
+            first?: boolean
+          }) => (
+            <RowCell center={center} first={first} active={active} callback={() => setActiveEndpoint(endpoint)}>
               {children}
             </RowCell>
           )
           return (
             <Fragment key={index}>
-              <PublishToggle
-                endpoint={endpoint}
-                onRefresh={onRefresh}
-                isActive={active}
-                setActive={() => setActiveEndpoint(endpoint)}
-              />
+              <ActiveCell center first>
+                <Checkbox checked={endpoint.enabled} disabled onClick={() => setActiveEndpoint(endpoint)} />
+              </ActiveCell>
               <ActiveCell>{endpoint.urlPath}</ActiveCell>
               <ActiveCell>{endpoint.flavor}</ActiveCell>
               <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
