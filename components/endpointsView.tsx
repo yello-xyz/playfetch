@@ -67,6 +67,7 @@ export default function EndpointsView({
               endpoint={activeEndpoint}
               project={project}
               prompt={activePrompt}
+              onCollapse={() => setActiveEndpointID(undefined)}
               onRefresh={onRefresh}
             />
             {activeEndpoint.enabled && (

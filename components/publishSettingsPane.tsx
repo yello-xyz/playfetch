@@ -19,16 +19,20 @@ import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import Button, { PendingButton } from './button'
+import collapseIcon from '@/public/collapse.svg'
+import IconButton from './iconButton'
 
 export default function PublishSettingsPane({
   endpoint,
   project,
   prompt,
+  onCollapse,
   onRefresh,
 }: {
   endpoint: Endpoint
   project: ActiveProject
   prompt?: ActivePrompt
+  onCollapse: () => void
   onRefresh: () => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
@@ -109,7 +113,10 @@ export default function PublishSettingsPane({
 
   return (
     <>
-      <Label>{parent.name}</Label>
+      <div className='flex items-center justify-between w-full'>
+        <Label>{parent.name}</Label>
+        <IconButton icon={collapseIcon} onClick={onCollapse} />
+      </div>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label disabled={!isEditing}>Enabled</Label>
         <Checkbox disabled={!isEditing} checked={isEnabled} setChecked={setEnabled} />
