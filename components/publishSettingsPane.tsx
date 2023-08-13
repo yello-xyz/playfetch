@@ -193,9 +193,15 @@ export default function PublishSettingsPane({
       {isEditing && (
         <>
           <Label>Danger zone</Label>
+          <div className='flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg'>
+            <div className='flex flex-col'>
+              <span>Delete this endpoint</span>
+              <span className='text-xs text-gray-400'>Deleting an endpoint may break existing integrations. Please be certain.</span>
+            </div>
           <Button type='destructive' onClick={deleteEndpoint}>
             Delete Endpoint
           </Button>
+          </div>
         </>
       )}
       {showPickNamePrompt && (
