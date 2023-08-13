@@ -10,63 +10,34 @@ import {
 } from '@/types'
 import Label from './label'
 import { Fragment, ReactNode } from 'react'
-import api from '@/src/client/api'
 import Checkbox from './checkbox'
-import { ToCamelCase } from '@/src/common/formatting'
 import addIcon from '@/public/add.svg'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
 
-const NewConfigFromEndpoints = (endpoints: Endpoint[], parent: Prompt | Chain, availableFlavors: string[]) => {
-  const existingNamesForParent = endpoints
-    .filter(endpoint => endpoint.parentID === parent.id)
-    .map(endpoint => endpoint.urlPath)
-  for (const existingName of existingNamesForParent) {
-    const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
-    const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
-    const availableFlavor = availableFlavors.find(flavor => !existingFlavors.includes(flavor))
-    if (availableFlavor) {
-      return { name: existingName, flavor: availableFlavor }
-    }
-  }
-  return {
-    name: ToCamelCase(parent.name.split(' ').slice(0, 3).join(' ')),
-    flavor: availableFlavors[0],
-  }
-}
-
 export default function EndpointsTable({
   project,
   activeEndpoint,
   setActiveEndpoint,
-  onRefresh,
+  onAddEndpoint,
 }: {
   project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
-  onRefresh: () => Promise<void>
+  onAddEndpoint?: () => void
 }) {
-  const parents = EndpointParentsInProject(project)
-
-  const addEndpoint = parents.length > 0 ? () => {
-    const parent = parents[0]
-    const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent, project.availableFlavors)
-    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
-    api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
-  } : undefined
-
-  const groups = parents
+  const groups = EndpointParentsInProject(project)
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
     <>
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
-        {addEndpoint && (
+        {onAddEndpoint && (
           <div
             className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'
-            onClick={addEndpoint}>
+            onClick={onAddEndpoint}>
             <Icon icon={addIcon} />
             New Endpoint
           </div>
@@ -83,7 +54,7 @@ export default function EndpointsTable({
           />
         ))
       ) : (
-        <EmptyTable onAddEndpoint={addEndpoint} />
+        <EmptyTable onAddEndpoint={onAddEndpoint} />
       )}
     </>
   )
