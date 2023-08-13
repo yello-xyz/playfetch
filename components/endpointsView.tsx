@@ -8,6 +8,7 @@ import {
   EndpointParentsInProject,
   Prompt,
   Chain,
+  ResolvedEndpoint,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -46,6 +47,8 @@ export default function EndpointsView({
 }) {
   const endpoints = project.endpoints
 
+  const [newEndpoint, setNewEndpoint] = useState<EditableEndpoint>()
+
   const parents = EndpointParentsInProject(project)
   const addEndpoint =
     parents.length > 0
@@ -58,7 +61,8 @@ export default function EndpointsView({
       : undefined
 
   const [activeEndpointID, setActiveEndpointID] = useState<number>()
-  const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
+  const activeEndpoint = newEndpoint ?? endpoints.find(endpoint => endpoint.id === activeEndpointID)
+  const IsSavedEndpoint = (endpoint: EditableEndpoint): endpoint is ResolvedEndpoint => !!endpoint?.id
 
   if (activeEndpointID && !activeEndpoint) {
     setActiveEndpointID(undefined)
@@ -91,7 +95,7 @@ export default function EndpointsView({
   const minWidth = 460
   return (
     <Allotment>
-      {!isEditing && (
+      {!isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-2 p-6 overflow-y-auto text-gray-500'>
             <EndpointsTable
@@ -115,7 +119,7 @@ export default function EndpointsView({
               onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
               onRefresh={onRefresh}
             />
-            {activeEndpoint.enabled && !isEditing && (
+            {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && (
               <ExamplePane
                 endpoint={activeEndpoint}
                 inputs={inputs}
@@ -123,7 +127,9 @@ export default function EndpointsView({
                 defaultFlavor={project.availableFlavors[0]}
               />
             )}
-            {!isEditing && <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />}
+            {!isEditing && IsSavedEndpoint(activeEndpoint) && (
+              <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
+            )}
           </div>
         </Allotment.Pane>
       )}

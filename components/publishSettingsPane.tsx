@@ -2,7 +2,6 @@ import { useState } from 'react'
 import {
   ActiveProject,
   ActivePrompt,
-  Endpoint,
   EndpointParentIsPrompt,
   EndpointParentsInProject,
   FindParentInProject,
@@ -22,6 +21,17 @@ import Button, { PendingButton } from './button'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 
+export type EditableEndpoint = {
+  id: number | undefined
+  enabled: boolean
+  parentID: number
+  versionID?: number
+  urlPath: string
+  flavor: string
+  useCache: boolean
+  useStreaming: boolean
+}
+
 export default function PublishSettingsPane({
   endpoint,
   project,
@@ -31,7 +41,7 @@ export default function PublishSettingsPane({
   onCollapse,
   onRefresh,
 }: {
-  endpoint: Endpoint
+  endpoint: EditableEndpoint
   project: ActiveProject
   prompt?: ActivePrompt
   isEditing: boolean
@@ -105,7 +115,7 @@ export default function PublishSettingsPane({
       confirmTitle: 'Proceed',
       callback: async () => {
         setSaving(true)
-        await api.updateEndpoint(endpoint.id, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+        await api.updateEndpoint(endpoint.id!, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
         await onRefresh()
         setSaving(false)
         setEditing(false)
@@ -121,7 +131,7 @@ export default function PublishSettingsPane({
         `You will no longer be able to access ${endpoint.enabled ? 'the API or ' : ''}usage data.`,
       callback: async () => {
         setSaving(true)
-        await api.deleteEndpoint(endpoint.id),
+        await api.deleteEndpoint(endpoint.id!)
         await onRefresh()
         setSaving(false)
         setEditing(false)
@@ -185,7 +195,7 @@ export default function PublishSettingsPane({
           {!isEditing && <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>}
         </div>
       </div>
-      {isEditing && (
+      {isEditing && endpoint.id && (
         <>
           <Label className='-mb-4'>Danger zone</Label>
           <div className='flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg'>
@@ -201,7 +211,7 @@ export default function PublishSettingsPane({
           </div>
         </>
       )}
-      {isEditing && (
+      {isEditing && endpoint.id && (
         <div className='flex justify-end w-full gap-2'>
           <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
             Cancel
