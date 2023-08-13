@@ -19,13 +19,11 @@ export default function EndpointsView({
   onRefresh: () => Promise<void>
 }) {
   const endpoints = project.endpoints
-  const [activeEndpointID, setActiveEndpointID] = useState(endpoints[0]?.id as number | undefined)
+  const [activeEndpointID, setActiveEndpointID] = useState<number>()
   const activeEndpoint = endpoints.find(endpoint => endpoint.id === activeEndpointID)
 
   if (activeEndpointID && !activeEndpoint) {
     setActiveEndpointID(undefined)
-  } else if (!activeEndpointID && endpoints.length === 1) {
-    setActiveEndpointID(endpoints[0].id)
   }
 
   const updateActiveEndpoint = (endpoint: Endpoint) => {
