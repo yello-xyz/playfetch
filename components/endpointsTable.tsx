@@ -18,8 +18,11 @@ import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
 
-const NewConfigFromEndpoints = (endpoints: Endpoint[], parentName: string, availableFlavors: string[]) => {
-  for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
+const NewConfigFromEndpoints = (endpoints: Endpoint[], parent: Prompt | Chain, availableFlavors: string[]) => {
+  const existingNamesForParent = endpoints
+    .filter(endpoint => endpoint.parentID === parent.id)
+    .map(endpoint => endpoint.urlPath)
+  for (const existingName of existingNamesForParent) {
     const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
     const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
     const availableFlavor = availableFlavors.find(flavor => !existingFlavors.includes(flavor))
@@ -28,7 +31,7 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], parentName: string, avail
     }
   }
   return {
-    name: ToCamelCase(parentName.split(' ').slice(0, 3).join(' ')),
+    name: ToCamelCase(parent.name.split(' ').slice(0, 3).join(' ')),
     flavor: availableFlavors[0],
   }
 }
@@ -49,7 +52,7 @@ export default function EndpointsTable({
 
   const addEndpoint = () => {
     const parent = parents[0]
-    const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
+    const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent, project.availableFlavors)
     const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
   }
