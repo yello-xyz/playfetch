@@ -47,6 +47,8 @@ export default function EndpointsView({
       : ExtractUnboundChainInputs(parent.items)
     : []
 
+  const [isEditing, setEditing] = useState(false)
+
   const minWidth = 460
   return (
     <Allotment>
@@ -67,6 +69,8 @@ export default function EndpointsView({
               endpoint={activeEndpoint}
               project={project}
               prompt={activePrompt}
+              isEditing={isEditing}
+              setEditing={setEditing}
               onCollapse={() => setActiveEndpointID(undefined)}
               onRefresh={onRefresh}
             />

@@ -26,12 +26,16 @@ export default function PublishSettingsPane({
   endpoint,
   project,
   prompt,
+  isEditing,
+  setEditing,
   onCollapse,
   onRefresh,
 }: {
   endpoint: Endpoint
   project: ActiveProject
   prompt?: ActivePrompt
+  isEditing: boolean
+  setEditing: (isEditing: boolean) => void
   onCollapse: () => void
   onRefresh: () => Promise<void>
 }) {
@@ -52,7 +56,6 @@ export default function PublishSettingsPane({
     useCache !== endpoint.useCache ||
     useStreaming !== endpoint.useStreaming
 
-  const [isEditing, setEditing] = useState(false)
   const [isSaving, setSaving] = useState(false)
 
   if (isDirty && !isEditing) {
