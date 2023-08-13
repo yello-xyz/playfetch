@@ -181,7 +181,7 @@ export default function PublishSettingsPane({
             </option>
           ))}
         </DropdownMenu>
-        {prompt && versionIndex >= 0 && (
+        {EndpointParentIsPrompt(parent) && (
           <>
             <Label disabled={disabled} className='self-start mt-2'>
               Version
@@ -191,7 +191,7 @@ export default function PublishSettingsPane({
               endpoints={project.endpoints}
               activeVersion={versions[versionIndex]}
               setActiveVersion={version => setVersionID(version.id)}
-              labelColors={AvailableLabelColorsForPrompt(prompt)}
+              labelColors={prompt ? AvailableLabelColorsForPrompt(prompt) : {}}
               disabled={disabled}
             />
           </>
