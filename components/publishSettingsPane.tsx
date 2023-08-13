@@ -24,10 +24,10 @@ import IconButton from './iconButton'
 export type EditableEndpoint = {
   id: number | undefined
   enabled: boolean
-  parentID: number
+  parentID?: number
   versionID?: number
   urlPath: string
-  flavor: string
+  flavor?: string
   useCache: boolean
   useStreaming: boolean
 }
@@ -45,7 +45,7 @@ export default function PublishSettingsPane({
   endpoint: EditableEndpoint
   project: ActiveProject
   prompt?: ActivePrompt
-  onSelectParentID: (parentID: number) => void
+  onSelectParentID: (parentID?: number) => void
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
   onCollapse?: () => void
@@ -70,7 +70,7 @@ export default function PublishSettingsPane({
 
   const [isSaving, setSaving] = useState(false)
 
-  const updateParentID = (parentID: number) => {
+  const updateParentID = (parentID?: number) => {
     const parent = FindParentInProject(parentID, project)
     const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     setParentID(parentID)
@@ -117,10 +117,10 @@ export default function PublishSettingsPane({
     const newEndpointID = await api.publishEndpoint(
       isEnabled,
       project.id,
-      parentID,
+      parentID!,
       versionID,
       urlPath,
-      flavor,
+      flavor!,
       useCache,
       useStreaming
     )
@@ -135,7 +135,16 @@ export default function PublishSettingsPane({
       confirmTitle: 'Proceed',
       callback: async () => {
         setSaving(true)
-        await api.updateEndpoint(endpoint.id!, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+        await api.updateEndpoint(
+          endpoint.id!,
+          isEnabled,
+          parentID!,
+          versionID,
+          urlPath,
+          flavor!,
+          useCache,
+          useStreaming
+        )
         await onRefresh()
         setSaving(false)
         setEditing(false)
@@ -161,6 +170,8 @@ export default function PublishSettingsPane({
   }
 
   const disabled = !isEditing || isSaving
+  const isValidConfig =
+    !!parentID && (!!versionID || !EndpointParentIsPrompt(parent)) && !!flavor && CheckValidURLPath(urlPath)
 
   return (
     <>
@@ -175,13 +186,14 @@ export default function PublishSettingsPane({
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>
         <DropdownMenu disabled={disabled} value={parentID} onChange={value => updateParentID(Number(value))}>
+          {!parentID && <option value={parentID}>Select a Prompt or Chain</option>}
           {parents.map((parent, index) => (
             <option key={index} value={parent.id}>
               {parent.name}
             </option>
           ))}
         </DropdownMenu>
-        {EndpointParentIsPrompt(parent) && (
+        {(!parent || EndpointParentIsPrompt(parent)) && (
           <>
             <Label disabled={disabled} className='self-start mt-2'>
               Version
@@ -205,6 +217,7 @@ export default function PublishSettingsPane({
         />
         <Label disabled={disabled}>Environment</Label>
         <DropdownMenu disabled={disabled} value={flavor} onChange={updateFlavor}>
+          {!flavor && <option value={flavor}>Select environment</option>}
           {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
@@ -244,11 +257,11 @@ export default function PublishSettingsPane({
             Cancel
           </Button>
           {endpoint.id ? (
-            <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
+            <PendingButton disabled={!isValidConfig || !isDirty || isSaving} onClick={saveChanges}>
               Save Changes
             </PendingButton>
           ) : (
-            <PendingButton disabled={!CheckValidURLPath(urlPath) || isSaving} onClick={publishEndpoint}>
+            <PendingButton disabled={!isValidConfig || isSaving} onClick={publishEndpoint}>
               Create Endpoint
             </PendingButton>
           )}

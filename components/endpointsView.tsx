@@ -18,23 +18,15 @@ import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
 
-const NewEndpointForProject = (project: ActiveProject) => {
-  const parents = EndpointParentsInProject(project)
-  if (parents.length > 0) {
-    const parent = parents[0]
-    return {
-      id: undefined,
-      enabled: true,
-      parentID: parent.id,
-      versionID: EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined,
-      urlPath: '',
-      flavor: project.availableFlavors[0],
-      useCache: true,
-      useStreaming: false,
-    }
-  } else {
-    return undefined
-  }
+const NewEndpointConfig = {
+  id: undefined,
+  enabled: true,
+  parentID: undefined,
+  versionID: undefined,
+  urlPath: '',
+  flavor: undefined,
+  useCache: true,
+  useStreaming: false,
 }
 
 export default function EndpointsView({
@@ -49,14 +41,14 @@ export default function EndpointsView({
   const [newEndpoint, setNewEndpoint] = useState<EditableEndpoint>()
   const [isEditing, setEditing] = useState(false)
 
-  const newEndpointForProject = NewEndpointForProject(project)
-  const addEndpoint = newEndpointForProject
-    ? () => {
-        setNewEndpoint(newEndpointForProject)
-        setActiveParentID(newEndpointForProject.parentID)
-        setEditing(true)
-      }
-    : undefined
+  const addEndpoint =
+    EndpointParentsInProject(project).length > 0
+      ? () => {
+          setNewEndpoint(NewEndpointConfig)
+          setActiveParentID(undefined)
+          setEditing(true)
+        }
+      : undefined
 
   const refresh = async (newEndpointID?: number) => {
     await onRefresh()
