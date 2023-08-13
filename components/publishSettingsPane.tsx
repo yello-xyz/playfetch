@@ -119,7 +119,13 @@ export default function PublishSettingsPane({
       title:
         'Are you sure you want to delete this endpoint? ' +
         `You will no longer be able to access ${endpoint.enabled ? 'the API or ' : ''}usage data.`,
-      callback: () => api.deleteEndpoint(endpoint.id).then(onRefresh),
+      callback: async () => {
+        setSaving(true)
+        await api.deleteEndpoint(endpoint.id),
+        await onRefresh()
+        setSaving(false)
+        setEditing(false)
+      },
       destructive: true,
     })
   }
