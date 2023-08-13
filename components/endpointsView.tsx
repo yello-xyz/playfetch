@@ -48,6 +48,7 @@ export default function EndpointsView({
   const endpoints = project.endpoints
 
   const [newEndpoint, setNewEndpoint] = useState<EditableEndpoint>()
+  const [isEditing, setEditing] = useState(false)
 
   const parents = EndpointParentsInProject(project)
   const addEndpoint =
@@ -55,10 +56,23 @@ export default function EndpointsView({
       ? () => {
           const parent = parents[0]
           const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent, project.availableFlavors)
-          const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
-          api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
+          setNewEndpoint({
+            id: undefined,
+            enabled: true,
+            parentID: parent.id,
+            versionID: EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined,
+            urlPath: name,
+            flavor,
+            useCache: true,
+            useStreaming: false,
+          })
+          setEditing(true)
         }
       : undefined
+
+  if (newEndpoint && !isEditing) {
+    setNewEndpoint(undefined)
+  }
 
   const [activeEndpointID, setActiveEndpointID] = useState<number>()
   const activeEndpoint = newEndpoint ?? endpoints.find(endpoint => endpoint.id === activeEndpointID)
@@ -89,8 +103,6 @@ export default function EndpointsView({
       ? ExtractPromptVariables(version?.prompt ?? '')
       : ExtractUnboundChainInputs(parent.items)
     : []
-
-  const [isEditing, setEditing] = useState(false)
 
   const minWidth = 460
   return (

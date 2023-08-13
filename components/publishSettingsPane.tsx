@@ -109,6 +109,14 @@ export default function PublishSettingsPane({
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
+  const publishEndpoint = async () => {
+    setSaving(true)
+    await api.publishEndpoint(project.id, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+    await onRefresh()
+    setSaving(false)
+    setEditing(false)
+  }
+
   const saveChanges = () => {
     setDialogPrompt({
       title: 'Updating a published endpoint may break existing integrations',
@@ -211,14 +219,20 @@ export default function PublishSettingsPane({
           </div>
         </>
       )}
-      {isEditing && endpoint.id && (
+      {isEditing && (
         <div className='flex justify-end w-full gap-2'>
           <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
             Cancel
           </Button>
-          <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
-            Save Changes
-          </PendingButton>
+          {endpoint.id ? (
+            <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
+              Save Changes
+            </PendingButton>
+          ) : (
+            <PendingButton disabled={!CheckValidURLPath(urlPath) || isSaving} onClick={publishEndpoint}>
+              Create Endpoint
+            </PendingButton>
+          )}
         </div>
       )}
       {showPickNamePrompt && (
