@@ -53,6 +53,7 @@ export default function EndpointsView({
   const addEndpoint = newEndpointForProject
     ? () => {
         setNewEndpoint(newEndpointForProject)
+        setActiveParentID(newEndpointForProject.parentID)
         setEditing(true)
       }
     : undefined
@@ -76,14 +77,20 @@ export default function EndpointsView({
     setActiveEndpointID(undefined)
   }
 
+  const [activeParentID, setActiveParentID] = useState<number>()
+  if (!isEditing && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
+    setActiveParentID(activeEndpoint.parentID)
+  }
+
   const updateActiveEndpoint = (endpoint: Endpoint) => {
     setActiveEndpointID(endpoint.id)
+    setActiveParentID(endpoint.parentID)
     if (endpoint.parentID !== activeEndpoint?.parentID) {
       setActivePrompt(undefined)
     }
   }
 
-  const parent = activeEndpoint ? FindParentInProject(activeEndpoint.parentID, project) : undefined
+  const parent = activeParentID ? FindParentInProject(activeParentID, project) : undefined
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
   useEffect(() => {
     if (EndpointParentIsPrompt(parent)) {
@@ -113,7 +120,7 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeEndpoint && parent && (
+      {activeEndpoint && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-6 p-6 overflow-y-auto max-w-[680px]'>
             <PublishSettingsPane
