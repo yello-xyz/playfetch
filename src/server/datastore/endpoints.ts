@@ -87,6 +87,7 @@ const getValidURLPath = async (
 }
 
 export async function saveEndpoint(
+  isEnabled: boolean,
   userID: number,
   projectID: number,
   parentID: number,
@@ -99,7 +100,7 @@ export async function saveEndpoint(
   await ensureEndpointAccess(userID, { projectID, parentID, versionID })
   const urlPath = await getValidURLPath(projectID, parentID, name, flavor)
   const endpointData = toEndpointData(
-    false,
+    isEnabled,
     userID,
     projectID,
     parentID,

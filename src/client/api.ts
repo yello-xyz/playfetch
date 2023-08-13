@@ -148,6 +148,7 @@ const api = {
     return post(this.deleteChain, { chainID })
   },
   publishEndpoint: function (
+    isEnabled: boolean,
     projectID: number,
     parentID: number,
     versionID: number | undefined,
@@ -157,6 +158,7 @@ const api = {
     useStreaming: boolean
   ) {
     return post(this.publishEndpoint, {
+      isEnabled,
       projectID,
       parentID,
       versionID,

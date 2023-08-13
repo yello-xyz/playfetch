@@ -111,7 +111,7 @@ export default function PublishSettingsPane({
 
   const publishEndpoint = async () => {
     setSaving(true)
-    await api.publishEndpoint(project.id, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+    await api.publishEndpoint(isEnabled, project.id, parentID, versionID, urlPath, flavor, useCache, useStreaming)
     await onRefresh()
     setSaving(false)
     setEditing(false)
