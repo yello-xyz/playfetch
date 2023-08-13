@@ -52,8 +52,8 @@ export default function WorkspaceGridView({
 
   return (
     <>
-      
-      <div className={`${activeWorkspace.projects.length > 0 ? 'bg-gray-25' : 'bg-white'} flex flex-col h-full px-6 pb-0`}>
+      <div
+        className={`${activeWorkspace.projects.length > 0 ? 'bg-gray-25' : 'bg-white'} flex flex-col h-full px-6 pb-0`}>
         <WorkspaceTopBar
           activeWorkspace={activeWorkspace}
           isUserWorkspace={isUserWorkspace}

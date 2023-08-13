@@ -1,7 +1,6 @@
 import {
   ActiveProject,
   Chain,
-  Endpoint,
   EndpointParentIsPrompt,
   EndpointParentsInProject,
   FindParentInProject,
