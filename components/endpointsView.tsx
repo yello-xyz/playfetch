@@ -52,26 +52,28 @@ export default function EndpointsView({
   const minWidth = 460
   return (
     <Allotment>
-      <Allotment.Pane minSize={minWidth}>
-        <div className='flex flex-col items-start h-full gap-2 p-6 overflow-y-auto text-gray-500'>
-          <EndpointsTable
-            project={project}
-            activeEndpoint={activeEndpoint}
-            setActiveEndpoint={updateActiveEndpoint}
-            onRefresh={onRefresh}
-          />
-        </div>
-      </Allotment.Pane>
+      {!isEditing && (
+        <Allotment.Pane minSize={minWidth}>
+          <div className='flex flex-col items-start h-full gap-2 p-6 overflow-y-auto text-gray-500'>
+            <EndpointsTable
+              project={project}
+              activeEndpoint={activeEndpoint}
+              setActiveEndpoint={updateActiveEndpoint}
+              onRefresh={onRefresh}
+            />
+          </div>
+        </Allotment.Pane>
+      )}
       {activeEndpoint && parent && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
+          <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto max-w-[680px]'>
             <PublishSettingsPane
               endpoint={activeEndpoint}
               project={project}
               prompt={activePrompt}
               isEditing={isEditing}
               setEditing={setEditing}
-              onCollapse={() => setActiveEndpointID(undefined)}
+              onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
               onRefresh={onRefresh}
             />
             {activeEndpoint.enabled && (

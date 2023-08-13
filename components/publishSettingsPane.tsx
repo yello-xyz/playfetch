@@ -36,7 +36,7 @@ export default function PublishSettingsPane({
   prompt?: ActivePrompt
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
-  onCollapse: () => void
+  onCollapse?: () => void
   onRefresh: () => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
@@ -120,7 +120,7 @@ export default function PublishSettingsPane({
     <>
       <div className='flex items-center justify-between w-full'>
         <Label>{`${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`}</Label>
-        <IconButton icon={collapseIcon} onClick={onCollapse} />
+        {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </div>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label disabled={disabled}>Enabled</Label>
