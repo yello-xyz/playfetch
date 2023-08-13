@@ -62,7 +62,7 @@ export default function EndpointsView({
           `You will no longer be able to access ${activeEndpoint.enabled ? 'the API or ' : ''}usage data.`,
         callback: () => api.deleteEndpoint(activeEndpoint.id).then(onRefresh),
         destructive: true,
-      })  
+      })
     }
   }
 
@@ -93,7 +93,7 @@ export default function EndpointsView({
               onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
               onRefresh={onRefresh}
             />
-            {activeEndpoint.enabled && (
+            {activeEndpoint.enabled && !isEditing && (
               <ExamplePane
                 endpoint={activeEndpoint}
                 inputs={inputs}
@@ -101,11 +101,15 @@ export default function EndpointsView({
                 defaultFlavor={project.availableFlavors[0]}
               />
             )}
-            <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
-            <Label>Danger zone</Label>
-            <Button type='destructive' onClick={deleteEndpoint}>
-              Delete Endpoint
-            </Button>
+            {!isEditing && <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />}
+            {isEditing && (
+              <>
+                <Label>Danger zone</Label>
+                <Button type='destructive' onClick={deleteEndpoint}>
+                  Delete Endpoint
+                </Button>
+              </>
+            )}
           </div>
         </Allotment.Pane>
       )}
