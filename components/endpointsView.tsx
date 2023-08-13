@@ -85,7 +85,7 @@ export default function EndpointsView({
   const updateActiveEndpoint = (endpoint: Endpoint) => {
     setActiveEndpointID(endpoint.id)
     setActiveParentID(endpoint.parentID)
-    if (endpoint.parentID !== activeEndpoint?.parentID) {
+    if (endpoint.parentID !== activeParentID) {
       setActivePrompt(undefined)
     }
   }
