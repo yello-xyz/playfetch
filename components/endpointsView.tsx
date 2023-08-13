@@ -6,8 +6,6 @@ import {
   FindParentInProject,
   EndpointParentIsPrompt,
   EndpointParentsInProject,
-  Prompt,
-  Chain,
   ResolvedEndpoint,
 } from '@/types'
 import UsagePane from './usagePane'
@@ -20,21 +18,36 @@ import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
 
-const NewConfigFromEndpoints = (endpoints: Endpoint[], parent: Prompt | Chain, availableFlavors: string[]) => {
-  const existingNamesForParent = endpoints
+const NewEndpointForProject = (project: ActiveProject) => {
+  const parents = EndpointParentsInProject(project)
+  if (!parents.length) {
+    return undefined
+  }
+  const parent = parents[0]
+  const existingNamesForParent = project.endpoints
     .filter(endpoint => endpoint.parentID === parent.id)
     .map(endpoint => endpoint.urlPath)
+  let urlPath = ToCamelCase(parent.name.split(' ').slice(0, 3).join(' '))
+  let flavor = project.availableFlavors[0]
   for (const existingName of existingNamesForParent) {
-    const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
+    const otherEndpointsWithName = project.endpoints.filter(endpoint => endpoint.urlPath === existingName)
     const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
-    const availableFlavor = availableFlavors.find(flavor => !existingFlavors.includes(flavor))
+    const availableFlavor = project.availableFlavors.find(flavor => !existingFlavors.includes(flavor))
     if (availableFlavor) {
-      return { name: existingName, flavor: availableFlavor }
+      urlPath = existingName
+      flavor = availableFlavor
+      break
     }
   }
   return {
-    name: ToCamelCase(parent.name.split(' ').slice(0, 3).join(' ')),
-    flavor: availableFlavors[0],
+    id: undefined,
+    enabled: true,
+    parentID: parent.id,
+    versionID: EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined,
+    urlPath,
+    flavor,
+    useCache: true,
+    useStreaming: false,
   }
 }
 
@@ -50,25 +63,13 @@ export default function EndpointsView({
   const [newEndpoint, setNewEndpoint] = useState<EditableEndpoint>()
   const [isEditing, setEditing] = useState(false)
 
-  const parents = EndpointParentsInProject(project)
-  const addEndpoint =
-    parents.length > 0
-      ? () => {
-          const parent = parents[0]
-          const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent, project.availableFlavors)
-          setNewEndpoint({
-            id: undefined,
-            enabled: true,
-            parentID: parent.id,
-            versionID: EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined,
-            urlPath: name,
-            flavor,
-            useCache: true,
-            useStreaming: false,
-          })
-          setEditing(true)
-        }
-      : undefined
+  const newEndpointForProject = NewEndpointForProject(project)
+  const addEndpoint = newEndpointForProject
+    ? () => {
+        setNewEndpoint(newEndpointForProject)
+        setEditing(true)
+      }
+    : undefined
 
   if (newEndpoint && !isEditing) {
     setNewEndpoint(undefined)
