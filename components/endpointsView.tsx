@@ -20,34 +20,20 @@ import { Allotment } from 'allotment'
 
 const NewEndpointForProject = (project: ActiveProject) => {
   const parents = EndpointParentsInProject(project)
-  if (!parents.length) {
-    return undefined
-  }
-  const parent = parents[0]
-  const existingNamesForParent = project.endpoints
-    .filter(endpoint => endpoint.parentID === parent.id)
-    .map(endpoint => endpoint.urlPath)
-  let urlPath = ToCamelCase(parent.name.split(' ').slice(0, 3).join(' '))
-  let flavor = project.availableFlavors[0]
-  for (const existingName of existingNamesForParent) {
-    const otherEndpointsWithName = project.endpoints.filter(endpoint => endpoint.urlPath === existingName)
-    const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
-    const availableFlavor = project.availableFlavors.find(flavor => !existingFlavors.includes(flavor))
-    if (availableFlavor) {
-      urlPath = existingName
-      flavor = availableFlavor
-      break
+  if (parents.length > 0) {
+    const parent = parents[0]
+    return {
+      id: undefined,
+      enabled: true,
+      parentID: parent.id,
+      versionID: EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined,
+      urlPath: '',
+      flavor: project.availableFlavors[0],
+      useCache: true,
+      useStreaming: false,
     }
-  }
-  return {
-    id: undefined,
-    enabled: true,
-    parentID: parent.id,
-    versionID: EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined,
-    urlPath,
-    flavor,
-    useCache: true,
-    useStreaming: false,
+  } else {
+    return undefined
   }
 }
 

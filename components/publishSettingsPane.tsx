@@ -192,7 +192,12 @@ export default function PublishSettingsPane({
           </>
         )}
         <Label disabled={disabled}>Name</Label>
-        <TextInput disabled={disabled} value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
+        <TextInput
+          placeholder='endpointName'
+          disabled={disabled}
+          value={urlPath}
+          setValue={value => setURLPath(ToCamelCase(value))}
+        />
         <Label disabled={disabled}>Environment</Label>
         <DropdownMenu disabled={disabled} value={flavor} onChange={updateFlavor}>
           {project.availableFlavors.map((flavor, index) => (
