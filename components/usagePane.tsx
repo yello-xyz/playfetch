@@ -2,7 +2,7 @@ import { ResolvedEndpoint } from '@/types'
 import Label from './label'
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
 
-export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedEndpoint; onRefresh: () => void }) {
+export default function UsagePane({ endpoint }: { endpoint: ResolvedEndpoint }) {
   const usage = endpoint.usage
   const averageCost = usage.requests ? usage.cost / usage.requests : 0
   const averageDuration = usage.requests ? usage.duration / usage.requests : 0

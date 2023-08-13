@@ -92,11 +92,20 @@ export default function EndpointsView({
 
   const parent = activeParentID ? FindParentInProject(activeParentID, project) : undefined
   const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
+  const [promptCache, setPromptCache] = useState<Record<string, ActivePrompt>>({})
   useEffect(() => {
     if (EndpointParentIsPrompt(parent)) {
-      api.getPromptVersions(parent.id).then(versions => setActivePrompt(toActivePrompt(parent.id, versions, project)))
+      if (promptCache[parent.id]) {
+        setActivePrompt(promptCache[parent.id])
+      } else {
+        api.getPromptVersions(parent.id).then(versions => {
+          const prompt = toActivePrompt(parent.id, versions, project)
+          setPromptCache({ ...promptCache, [parent.id]: prompt })
+          setActivePrompt(prompt)
+        })
+      }
     }
-  }, [parent, project])
+  }, [parent, project, promptCache])
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
   const inputs = parent
@@ -141,9 +150,7 @@ export default function EndpointsView({
                 defaultFlavor={project.availableFlavors[0]}
               />
             )}
-            {!isEditing && IsSavedEndpoint(activeEndpoint) && (
-              <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />
-            )}
+            {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
           </div>
         </Allotment.Pane>
       )}
