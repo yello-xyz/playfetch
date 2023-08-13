@@ -13,12 +13,12 @@ import { Fragment, ReactNode } from 'react'
 import api from '@/src/client/api'
 import Checkbox from './checkbox'
 import { ToCamelCase } from '@/src/common/formatting'
-import DropdownMenu from './dropdownMenu'
+import addIcon from '@/public/add.svg'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
 
-const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availableFlavors: string[]) => {
+const NewConfigFromEndpoints = (endpoints: Endpoint[], parentName: string, availableFlavors: string[]) => {
   for (const existingName of endpoints.map(endpoint => endpoint.urlPath)) {
     const otherEndpointsWithName = endpoints.filter(endpoint => endpoint.urlPath === existingName)
     const existingFlavors = otherEndpointsWithName.map(endpoint => endpoint.flavor)
@@ -28,7 +28,7 @@ const NewConfigFromEndpoints = (endpoints: Endpoint[], itemName: string, availab
     }
   }
   return {
-    name: ToCamelCase(itemName.split(' ').slice(0, 3).join(' ')),
+    name: ToCamelCase(parentName.split(' ').slice(0, 3).join(' ')),
     flavor: availableFlavors[0],
   }
 }
@@ -47,8 +47,8 @@ export default function EndpointsTable({
   const parents = EndpointParentsInProject(project)
   const canAddNewEndpoint = parents.length > 0
 
-  const addEndpoint = (parentID: number) => {
-    const parent = FindParentInProject(parentID, project)
+  const addEndpoint = () => {
+    const parent = parents[0]
     const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent.name, project.availableFlavors)
     const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
@@ -62,17 +62,11 @@ export default function EndpointsTable({
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
         {canAddNewEndpoint && (
-          <div className='flex-end'>
-            <DropdownMenu value={0} onChange={value => addEndpoint(Number(value))}>
-              <option value={0} disabled>
-                Add New Endpoint
-              </option>
-              {parents.map((parent, index) => (
-                <option key={index} value={parent.id}>
-                  {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'} “{parent.name}”
-                </option>
-              ))}
-            </DropdownMenu>
+          <div
+            className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'
+            onClick={addEndpoint}>
+            <Icon icon={addIcon} />
+            New Endpoint
           </div>
         )}
       </div>
