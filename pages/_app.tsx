@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google'
 import '@/styles/globals.css'
+import 'allotment/dist/style.css'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 

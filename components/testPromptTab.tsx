@@ -7,7 +7,6 @@ import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
 import { Allotment } from 'allotment'
-import 'allotment/dist/style.css'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 export default function TestPromptTab({

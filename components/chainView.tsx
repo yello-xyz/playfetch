@@ -7,7 +7,6 @@ import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainItemToConfig, ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
-import 'allotment/dist/style.css'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined

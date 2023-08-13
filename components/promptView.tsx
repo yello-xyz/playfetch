@@ -14,7 +14,6 @@ import { useInitialState } from './useInitialState'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-import 'allotment/dist/style.css'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]

@@ -9,7 +9,6 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import 'allotment/dist/style.css'
 
 export default function EndpointsView({
   project,

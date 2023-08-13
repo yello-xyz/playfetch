@@ -7,7 +7,6 @@ import PromptPanel from './promptPanel'
 import { RefreshContext } from './refreshContext'
 import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
-import 'allotment/dist/style.css'
 
 export default function PromptChainNodeEditor({
   node,

@@ -3,7 +3,6 @@ import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode } from 'react'
 import { Allotment } from 'allotment'
-import 'allotment/dist/style.css'
 
 export default function RunPromptTab({
   currentPrompt,
