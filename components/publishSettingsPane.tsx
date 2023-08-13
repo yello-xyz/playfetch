@@ -36,6 +36,7 @@ export default function PublishSettingsPane({
   endpoint,
   project,
   prompt,
+  onSelectParentID,
   isEditing,
   setEditing,
   onCollapse,
@@ -44,6 +45,7 @@ export default function PublishSettingsPane({
   endpoint: EditableEndpoint
   project: ActiveProject
   prompt?: ActivePrompt
+  onSelectParentID: (parentID: number) => void
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
   onCollapse?: () => void
@@ -68,9 +70,17 @@ export default function PublishSettingsPane({
 
   const [isSaving, setSaving] = useState(false)
 
+  const updateParentID = (parentID: number) => {
+    const parent = FindParentInProject(parentID, project)
+    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
+    setParentID(parentID)
+    setVersionID(versionID)
+    onSelectParentID(parentID)
+  }
+
   if (isDirty && !isEditing) {
     setEnabled(endpoint.enabled)
-    setParentID(endpoint.parentID)
+    updateParentID(endpoint.parentID)
     setVersionID(endpoint.versionID)
     setURLPath(endpoint.urlPath)
     setFlavor(endpoint.flavor)
@@ -98,13 +108,6 @@ export default function PublishSettingsPane({
 
   const parents = EndpointParentsInProject(project)
   const parent = FindParentInProject(parentID, project)
-
-  const updateParentID = (parentID: number) => {
-    const parent = FindParentInProject(parentID, project)
-    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
-    setParentID(parentID)
-    setVersionID(versionID)
-  }
 
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)

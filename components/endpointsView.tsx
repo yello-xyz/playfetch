@@ -127,6 +127,7 @@ export default function EndpointsView({
               endpoint={activeEndpoint}
               project={project}
               prompt={activePrompt}
+              onSelectParentID={setActiveParentID}
               isEditing={isEditing}
               setEditing={setEditing}
               onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
