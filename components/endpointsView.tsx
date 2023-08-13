@@ -71,6 +71,13 @@ export default function EndpointsView({
       }
     : undefined
 
+  const refresh = async (newEndpointID?: number) => {
+    await onRefresh()
+    if (newEndpointID) {
+      setActiveEndpointID(newEndpointID)
+    }
+  }
+
   if (newEndpoint && !isEditing) {
     setNewEndpoint(undefined)
   }
@@ -130,7 +137,7 @@ export default function EndpointsView({
               isEditing={isEditing}
               setEditing={setEditing}
               onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
-              onRefresh={onRefresh}
+              onRefresh={refresh}
             />
             {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && (
               <ExamplePane

@@ -156,7 +156,7 @@ const api = {
     flavor: string,
     useCache: boolean,
     useStreaming: boolean
-  ) {
+  ): Promise<number> {
     return post(this.publishEndpoint, {
       isEnabled,
       projectID,

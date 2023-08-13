@@ -47,7 +47,7 @@ export default function PublishSettingsPane({
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
   onCollapse?: () => void
-  onRefresh: () => Promise<void>
+  onRefresh: (newEndpointID?: number) => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
   const [parentID, setParentID] = useInitialState(endpoint.parentID)
@@ -111,8 +111,17 @@ export default function PublishSettingsPane({
 
   const publishEndpoint = async () => {
     setSaving(true)
-    await api.publishEndpoint(isEnabled, project.id, parentID, versionID, urlPath, flavor, useCache, useStreaming)
-    await onRefresh()
+    const newEndpointID = await api.publishEndpoint(
+      isEnabled,
+      project.id,
+      parentID,
+      versionID,
+      urlPath,
+      flavor,
+      useCache,
+      useStreaming
+    )
+    await onRefresh(newEndpointID)
     setSaving(false)
     setEditing(false)
   }

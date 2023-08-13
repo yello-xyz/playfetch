@@ -113,6 +113,7 @@ export async function saveEndpoint(
   )
   await getDatastore().save(endpointData)
   await saveUsage(getID(endpointData), projectID, parentID)
+  return getID(endpointData)
 }
 
 export const DefaultEndpointFlavor = 'default'
