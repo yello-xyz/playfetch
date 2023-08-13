@@ -162,7 +162,9 @@ export default function PublishSettingsPane({
   return (
     <>
       <div className='flex items-center justify-between w-full -mb-4'>
-        <Label>{`${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`}</Label>
+        <Label>
+          {endpoint.id ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}` : 'New Endpoint'}
+        </Label>
         {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </div>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
