@@ -55,7 +55,7 @@ export default function PublishSettingsPane({
   const [isEditing, setEditing] = useState(false)
   const [isSaving, setSaving] = useState(false)
 
-  if (isDirty && !isSaving && !isEditing) {
+  if (isDirty && !isEditing) {
     setEnabled(endpoint.enabled)
     setParentID(endpoint.parentID)
     setVersionID(endpoint.versionID)
@@ -101,15 +101,17 @@ export default function PublishSettingsPane({
       title: 'Updating a published endpoint may break existing integrations',
       confirmTitle: 'Proceed',
       callback: async () => {
-        setEditing(false)
         setSaving(true)
         await api.updateEndpoint(endpoint.id, isEnabled, parentID, versionID, urlPath, flavor, useCache, useStreaming)
         await onRefresh()
         setSaving(false)
+        setEditing(false)
       },
       destructive: true,
     })
   }
+
+  const disabled = !isEditing || isSaving
 
   return (
     <>
@@ -118,10 +120,10 @@ export default function PublishSettingsPane({
         <IconButton icon={collapseIcon} onClick={onCollapse} />
       </div>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
-        <Label disabled={!isEditing}>Enabled</Label>
-        <Checkbox disabled={!isEditing} checked={isEnabled} setChecked={setEnabled} />
-        <Label disabled={!isEditing}>Prompt / Chain</Label>
-        <DropdownMenu disabled={!isEditing} value={parentID} onChange={value => updateParentID(Number(value))}>
+        <Label disabled={disabled}>Enabled</Label>
+        <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
+        <Label disabled={disabled}>Prompt / Chain</Label>
+        <DropdownMenu disabled={disabled} value={parentID} onChange={value => updateParentID(Number(value))}>
           {parents.map((parent, index) => (
             <option key={index} value={parent.id}>
               {parent.name}
@@ -130,7 +132,7 @@ export default function PublishSettingsPane({
         </DropdownMenu>
         {prompt && versionIndex >= 0 && (
           <>
-            <Label disabled={!isEditing} className='self-start mt-2'>
+            <Label disabled={disabled} className='self-start mt-2'>
               Version
             </Label>
             <VersionSelector
@@ -139,14 +141,14 @@ export default function PublishSettingsPane({
               activeVersion={versions[versionIndex]}
               setActiveVersion={version => setVersionID(version.id)}
               labelColors={AvailableLabelColorsForPrompt(prompt)}
-              disabled={!isEditing}
+              disabled={disabled}
             />
           </>
         )}
-        <Label disabled={!isEditing}>Name</Label>
-        <TextInput disabled={!isEditing} value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
-        <Label disabled={!isEditing}>Environment</Label>
-        <DropdownMenu disabled={!isEditing} value={flavor} onChange={updateFlavor}>
+        <Label disabled={disabled}>Name</Label>
+        <TextInput disabled={disabled} value={urlPath} setValue={value => setURLPath(ToCamelCase(value))} />
+        <Label disabled={disabled}>Environment</Label>
+        <DropdownMenu disabled={disabled} value={flavor} onChange={updateFlavor}>
           {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
@@ -156,12 +158,12 @@ export default function PublishSettingsPane({
             {addNewEnvironment}
           </option>
         </DropdownMenu>
-        <Label disabled={!isEditing}>Cache Responses</Label>
-        <Checkbox disabled={!isEditing} checked={useCache} setChecked={setUseCache} />
-        <Label disabled={!isEditing}>Stream Responses</Label>
-        <Checkbox disabled={!isEditing} checked={useStreaming} setChecked={setUseStreaming} />
+        <Label disabled={disabled}>Cache Responses</Label>
+        <Checkbox disabled={disabled} checked={useCache} setChecked={setUseCache} />
+        <Label disabled={disabled}>Stream Responses</Label>
+        <Checkbox disabled={disabled} checked={useStreaming} setChecked={setUseStreaming} />
         <div className='col-span-2 text-right'>
-          {isEditing || isSaving ? (
+          {isEditing ? (
             <div className='flex justify-end gap-2'>
               <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
                 Cancel
