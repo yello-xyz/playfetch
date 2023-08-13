@@ -114,6 +114,16 @@ export default function PublishSettingsPane({
     })
   }
 
+  const deleteEndpoint = () => {
+    setDialogPrompt({
+      title:
+        'Are you sure you want to delete this endpoint? ' +
+        `You will no longer be able to access ${endpoint.enabled ? 'the API or ' : ''}usage data.`,
+      callback: () => api.deleteEndpoint(endpoint.id).then(onRefresh),
+      destructive: true,
+    })
+  }
+
   const disabled = !isEditing || isSaving
 
   return (
@@ -180,6 +190,14 @@ export default function PublishSettingsPane({
           )}
         </div>
       </div>
+      {isEditing && (
+        <>
+          <Label>Danger zone</Label>
+          <Button type='destructive' onClick={deleteEndpoint}>
+            Delete Endpoint
+          </Button>
+        </>
+      )}
       {showPickNamePrompt && (
         <PickNameDialog
           title='Add Project Environment'

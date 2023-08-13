@@ -9,9 +9,6 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import Label from './label'
-import Button from './button'
-import useModalDialogPrompt from './modalDialogContext'
 
 export default function EndpointsView({
   project,
@@ -52,20 +49,6 @@ export default function EndpointsView({
 
   const [isEditing, setEditing] = useState(false)
 
-  const setDialogPrompt = useModalDialogPrompt()
-
-  const deleteEndpoint = () => {
-    if (activeEndpoint) {
-      setDialogPrompt({
-        title:
-          'Are you sure you want to delete this endpoint? ' +
-          `You will no longer be able to access ${activeEndpoint.enabled ? 'the API or ' : ''}usage data.`,
-        callback: () => api.deleteEndpoint(activeEndpoint.id).then(onRefresh),
-        destructive: true,
-      })
-    }
-  }
-
   const minWidth = 460
   return (
     <Allotment>
@@ -102,14 +85,6 @@ export default function EndpointsView({
               />
             )}
             {!isEditing && <UsagePane endpoint={activeEndpoint} onRefresh={onRefresh} />}
-            {isEditing && (
-              <>
-                <Label>Danger zone</Label>
-                <Button type='destructive' onClick={deleteEndpoint}>
-                  Delete Endpoint
-                </Button>
-              </>
-            )}
           </div>
         </Allotment.Pane>
       )}
