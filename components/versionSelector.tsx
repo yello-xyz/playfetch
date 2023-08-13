@@ -71,7 +71,7 @@ function VersionIDSelector({
       onBlur={() => setFocused(false)}>
       {versionIDs.map((versionID, index) => (
         <option key={index} value={versionID}>
-          {`version ${index + 1}${isFocused ? suffixForVersionID?.(versionID) ?? '' : ''}`}
+          {`Version ${index + 1}${isFocused ? suffixForVersionID?.(versionID) ?? '' : ''}`}
         </option>
       ))}
     </DropdownMenu>
