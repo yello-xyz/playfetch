@@ -48,14 +48,13 @@ export default function EndpointsTable({
   onRefresh: () => Promise<void>
 }) {
   const parents = EndpointParentsInProject(project)
-  const canAddNewEndpoint = parents.length > 0
 
-  const addEndpoint = () => {
+  const addEndpoint = parents.length > 0 ? () => {
     const parent = parents[0]
     const { name, flavor } = NewConfigFromEndpoints(project.endpoints, parent, project.availableFlavors)
     const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     api.publishEndpoint(project.id, parent.id, versionID, name, flavor, false, false).then(onRefresh)
-  }
+  } : undefined
 
   const groups = parents
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
@@ -64,7 +63,7 @@ export default function EndpointsTable({
     <>
       <div className='flex items-center justify-between w-full'>
         <Label>Endpoints</Label>
-        {canAddNewEndpoint && (
+        {addEndpoint && (
           <div
             className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'
             onClick={addEndpoint}>
@@ -84,7 +83,7 @@ export default function EndpointsTable({
           />
         ))
       ) : (
-        <EmptyTable canAddNewEndpoint={canAddNewEndpoint} />
+        <EmptyTable onAddEndpoint={addEndpoint} />
       )}
     </>
   )
@@ -188,15 +187,26 @@ function RowCell({
   )
 }
 
-function EmptyTable({ canAddNewEndpoint }: { canAddNewEndpoint: boolean }) {
+function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
+  const AddPromptLink = ({ label }: { label: string }) => (
+    <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddEndpoint}>
+      {label}
+    </span>
+  )
+
   return (
     <div className='w-full h-full'>
       <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
         <span className='font-medium'>No Endpoints</span>
 
         <span className='text-xs text-center text-gray-400 w-60'>
-          {canAddNewEndpoint ? 'Add a new endpoint' : 'Create some prompts or chains first'} to integrate this project
-          into your code base.
+          {onAddEndpoint ? (
+            <span>
+              Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.
+            </span>
+          ) : (
+            <span>Create some prompts or chains first to integrate this project into your code base.</span>
+          )}{' '}
         </span>
       </div>
     </div>
