@@ -11,7 +11,7 @@ export default function UsagePane({ endpoint, onRefresh }: { endpoint: ResolvedE
 
   return (
     <>
-      <Label>Usage</Label>
+      <Label className='-mb-4'>Usage</Label>
       <div className='flex flex-col w-full gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
         <UsageRow label='Requests' value={usage.requests} />
         <UsageRow label='Failed Requests' value={usage.failures} />

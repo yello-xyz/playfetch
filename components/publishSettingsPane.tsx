@@ -128,7 +128,7 @@ export default function PublishSettingsPane({
 
   return (
     <>
-      <div className='flex items-center justify-between w-full'>
+      <div className='flex items-center justify-between w-full -mb-4'>
         <Label>{`${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`}</Label>
         {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </div>
@@ -176,33 +176,34 @@ export default function PublishSettingsPane({
         <Label disabled={disabled}>Stream Responses</Label>
         <Checkbox disabled={disabled} checked={useStreaming} setChecked={setUseStreaming} />
         <div className='col-span-2 text-right'>
-          {isEditing ? (
-            <div className='flex justify-end gap-2'>
-              <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
-                Cancel
-              </Button>
-              <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
-                Save Changes
-              </PendingButton>
-            </div>
-          ) : (
-            <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>
-          )}
+          {!isEditing && <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>}
         </div>
       </div>
       {isEditing && (
         <>
-          <Label>Danger zone</Label>
+          <Label className='-mb-4'>Danger zone</Label>
           <div className='flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg'>
             <div className='flex flex-col'>
               <span>Delete this endpoint</span>
-              <span className='text-xs text-gray-400'>Deleting an endpoint may break existing integrations. Please be certain.</span>
+              <span className='text-xs text-gray-400'>
+                Deleting an endpoint may break existing integrations. Please be certain.
+              </span>
             </div>
-          <Button type='destructive' onClick={deleteEndpoint}>
-            Delete Endpoint
-          </Button>
+            <Button type='destructive' onClick={deleteEndpoint}>
+              Delete Endpoint
+            </Button>
           </div>
         </>
+      )}
+      {isEditing && (
+        <div className='flex justify-end w-full gap-2'>
+          <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
+            Cancel
+          </Button>
+          <PendingButton disabled={!CheckValidURLPath(urlPath) || !isDirty || isSaving} onClick={saveChanges}>
+            Save Changes
+          </PendingButton>
+        </div>
       )}
       {showPickNamePrompt && (
         <PickNameDialog

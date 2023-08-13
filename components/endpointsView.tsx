@@ -66,7 +66,7 @@ export default function EndpointsView({
       )}
       {activeEndpoint && parent && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto max-w-[680px]'>
+          <div className='flex flex-col items-start h-full gap-6 p-6 overflow-y-auto max-w-[680px]'>
             <PublishSettingsPane
               endpoint={activeEndpoint}
               project={project}
