@@ -23,6 +23,7 @@ export enum Entity {
   ACCESS = 'access',
   INPUT = 'input',
   USAGE = 'usage',
+  LOG = 'log',
   COMMENT = 'comment',
   PROVIDER = 'provider',
   CHAIN = 'chain',
