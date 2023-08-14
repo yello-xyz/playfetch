@@ -5,9 +5,9 @@ import IconButton from './iconButton'
 import Icon from './icon'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
-import { useEffect, useState } from 'react'
 import Label from './label'
 import { CodeBlock } from './examplePane'
+import useFormattedDate from './useFormattedDate'
 
 export default function LogEntryDetailsPane({
   logEntry,
@@ -22,8 +22,7 @@ export default function LogEntryDetailsPane({
   prompt?: ActivePrompt
   onCollapse: () => void
 }) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => setFormattedDate(FormatDate(logEntry.timestamp, true, true)), [logEntry.timestamp])
+  const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
 
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === endpoint.versionID)

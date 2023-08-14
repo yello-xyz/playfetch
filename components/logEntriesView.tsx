@@ -1,10 +1,11 @@
 import { LogEntry, ResolvedEndpoint } from '@/types'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
 import TableCell, { TableHeader } from './TableCell'
 import { FormatDate } from '@/src/common/formatting'
+import useFormattedDate from './useFormattedDate'
 
 export default function LogEntriesView({
   tabSelector,
@@ -52,8 +53,7 @@ function LogEntryRow({
   isActive: boolean
   setActive: () => void
 }) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => setFormattedDate(FormatDate(logEntry.timestamp, true, true)), [logEntry.timestamp])
+  const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
 
   const statusColor = logEntry.error ? 'bg-red-300' : 'bg-green-300'
   return endpoint ? (

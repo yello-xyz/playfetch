@@ -1,5 +1,5 @@
 import { ActiveWorkspace, Project, Workspace } from '@/types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
 import IconButton from './iconButton'
@@ -9,6 +9,7 @@ import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
 import WorkspaceTopBar from './workspaceTopBar'
+import useFormattedDate from './useFormattedDate'
 
 export default function WorkspaceGridView({
   workspaces,
@@ -122,8 +123,7 @@ function ProjectCell({
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => setFormattedDate(FormatRelativeDate(project.timestamp)), [project.timestamp])
+  const formattedDate = useFormattedDate(project.timestamp, FormatRelativeDate)
 
   return (
     <div
