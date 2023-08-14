@@ -2,7 +2,18 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { ActivePrompt, Version, User, ActiveProject, AvailableProvider, Workspace, Chain } from '@/types'
+import {
+  ActivePrompt,
+  Version,
+  User,
+  ActiveProject,
+  AvailableProvider,
+  Workspace,
+  Chain,
+  PromptChainItem,
+  ChainItem,
+  LogEntry,
+} from '@/types'
 import ClientRoute, {
   ChainRoute,
   EndpointsRoute,
@@ -20,22 +31,39 @@ import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/components/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import ProjectSidebar from '@/components/projectSidebar'
-import EndpointsView from '@/components/endpointsView'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
+import useSavePrompt from '@/components/useSavePrompt'
 
 import dynamic from 'next/dynamic'
-import useSavePrompt from '@/components/useSavePrompt'
+import { IsPromptChainItem } from '@/components/chainNode'
+import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
+const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
-export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => ({
-  ...project.prompts.find(prompt => prompt.id === promptID)!,
-  versions,
-  users: project.users,
-  availableLabels: project.availableLabels,
-})
+export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => {
+  const versionIDsUsedInChains = project.chains
+    .flatMap(chain => chain.items as ChainItem[])
+    .filter(IsPromptChainItem)
+    .map(item => item.versionID)
+
+  const versionIDsUsedAsEndpoints = project.endpoints
+    .map(endpoint => endpoint.versionID)
+    .filter(versionID => !!versionID)
+
+  return {
+    ...project.prompts.find(prompt => prompt.id === promptID)!,
+    versions: versions.map(version => ({
+      ...version,
+      usedInChain: versionIDsUsedInChains.includes(version.id),
+      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
+    })),
+    users: project.users,
+    availableLabels: project.availableLabels,
+  }
+}
 
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | Chain | typeof Endpoints
@@ -64,6 +92,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       ? await getActivePrompt(activeProject.prompts[0].id)
       : undefined
 
+  const initialLogEntries = activeItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
@@ -72,6 +101,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       workspaces,
       initialActiveProject: activeProject,
       initialActiveItem: activeItem ?? null,
+      initialLogEntries,
       availableProviders,
     },
   }
@@ -82,12 +112,14 @@ export default function Home({
   workspaces,
   initialActiveProject,
   initialActiveItem,
+  initialLogEntries,
   availableProviders,
 }: {
   user: User
   workspaces: Workspace[]
   initialActiveProject: ActiveProject
-  initialActiveItem?: ActiveItem
+  initialActiveItem: ActiveItem | null
+  initialLogEntries: LogEntry[] | null
   availableProviders: AvailableProvider[]
 }) {
   const router = useRouter()
@@ -95,17 +127,19 @@ export default function Home({
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const [activeProject, setActiveProject] = useState(initialActiveProject)
-  const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const isPrompt = (item: ActiveItem): item is ActivePrompt =>
-    item !== Endpoints && 'lastVersionID' in (item as ActivePrompt)
-  const isChain = (item: ActiveItem): item is Chain => item !== Endpoints && 'items' in (item as Chain)
+
+  const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
+  const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && 'lastVersionID' in item
+  const isChain = (item: ActiveItem): item is Chain => item !== Endpoints && 'items' in item
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
+
   const activeEndpoints = activeItem === Endpoints ? activeProject.endpoints : undefined
+  const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
 
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState(activePrompt?.versions?.slice(-1)?.[0])
+  const [activeVersion, setActiveVersion] = useState<Version | undefined>(activePrompt?.versions?.slice(-1)?.[0])
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
   const updateVersion = (version?: Version) => {
@@ -133,7 +167,7 @@ export default function Home({
 
   const selectPrompt = async (promptID: number) => {
     if (promptID !== activePrompt?.id) {
-      savePrompt()
+      savePrompt(refreshProject)
       await refreshPrompt(promptID)
       router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
@@ -149,13 +183,18 @@ export default function Home({
 
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
+      savePrompt(refreshProject)
       await refreshChain(chainID)
       router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
   }
 
   const selectEndpoints = () => {
+    savePrompt(refreshProject)
     setActiveItem(Endpoints)
+    if (!logEntries) {
+      api.getLogEntries(activeProject.id).then(setLogEntries)
+    }
     updateVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
@@ -204,15 +243,20 @@ export default function Home({
   }
 
   const addChain = async () => {
-    const chainID = await api.addChain(activeProject.id)    
+    const chainID = await api.addChain(activeProject.id)
     refreshProject().then(() => selectChain(chainID))
   }
 
-  const selectSettings = () => router.push(ClientRoute.Settings, undefined, { shallow: true })
+  const selectSettings = () => {
+    savePrompt()
+    router.push(ClientRoute.Settings, undefined, { shallow: true })
+  }
 
   const isSharedProject = !workspaces.find(workspace => workspace.id === activeProject.workspaceID)
-  const navigateBack = () =>
+  const navigateBack = () => {
+    savePrompt()
     router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
+  }
 
   return (
     <>
@@ -253,7 +297,7 @@ export default function Home({
                         setModifiedVersion={setModifiedVersion}
                         showComments={showComments}
                         setShowComments={setShowComments}
-                        savePrompt={() => savePrompt(refreshActivePrompt).then(versionID => versionID!)}
+                        savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
                       />
                     </Suspense>
                   )}
@@ -267,7 +311,11 @@ export default function Home({
                       />
                     </Suspense>
                   )}
-                  {activeEndpoints && <EndpointsView project={activeProject} onRefresh={refreshProject} />}
+                  {activeEndpoints && (
+                    <Suspense>
+                      <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
+                    </Suspense>
+                  )}
                   {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
                 </div>
               </div>

@@ -34,7 +34,7 @@ export default function WorkspaceTopBar({
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
-        <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />
+        {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
         {hasPopupMenu && (
           <>

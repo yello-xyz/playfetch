@@ -21,8 +21,7 @@ export default function VersionTimeline({
 
   const labelColors = AvailableLabelColorsForPrompt(prompt)
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const containerRect = useContainerRect(containerRef)
+  const [containerRect, containerRef] = useContainerRect()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [_, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
@@ -44,38 +43,45 @@ export default function VersionTimeline({
   const filteredVersions = versions.filter(BuildVersionFilter(filters))
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
-    <>
-      <div ref={containerRef} className='relative flex flex-1 min-h-[50%]'>
-        <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
-          <VersionFilters
-            users={prompt.users}
-            labelColors={labelColors}
-            versions={versions}
-            filters={filters}
-            setFilters={setFilters}
-            tabSelector={tabSelector}
-          />
-          <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
-            {filteredVersions.map((version, index) => (
-              <VersionCell
-                key={index}
-                identifier={identifierForVersion(version)}
-                isLast={index === filteredVersions.length - 1}
-                labelColors={labelColors}
-                version={version}
-                index={versions.findIndex(v => v.id === version.id)}
-                isActiveVersion={version.id === activeVersion.id}
-                compareVersion={versions.find(v => v.id === version.previousID)}
-                prompt={prompt}
-                onSelect={selectVersion}
-                containerRect={containerRect}
-              />
-            ))}
-          </div>
+    <div ref={containerRef} className='relative flex h-full'>
+      <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
+        <VersionFilters
+          users={prompt.users}
+          labelColors={labelColors}
+          versions={versions}
+          filters={filters}
+          setFilters={setFilters}
+          tabSelector={tabSelector}
+        />
+        <div ref={scrollRef} className='flex flex-col overflow-y-auto'>
+          {filteredVersions.map((version, index) => (
+            <VersionCell
+              key={index}
+              identifier={identifierForVersion(version)}
+              isLast={index === filteredVersions.length - 1}
+              labelColors={labelColors}
+              version={version}
+              index={versions.findIndex(v => v.id === version.id)}
+              isActiveVersion={version.id === activeVersion.id}
+              compareVersion={versions.find(v => v.id === version.previousID)}
+              prompt={prompt}
+              onSelect={selectVersion}
+              containerRect={containerRect}
+            />
+          ))}
         </div>
       </div>
-    </>
+    </div>
   ) : (
-    <>{tabSelector}</>
+    <div className='flex h-full'>
+      <div className='flex flex-col w-full gap-4'>
+        {tabSelector}
+        <div className='flex flex-col gap-4 overflow-y-hidden'>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className='min-h-[160px] bg-gray-50 rounded-lg ml-14'></div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }

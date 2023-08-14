@@ -32,7 +32,16 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 type CallbackType = (
   index: number,
   version: Version | null,
-  response: { output?: string; cost: number; duration: number; attempts: number; cacheHit: boolean; failed: boolean }
+  response: {
+    result?: any
+    output?: string
+    error?: string
+    cost: number
+    duration: number
+    attempts: number
+    cacheHit: boolean
+    failed: boolean
+  }
 ) => Promise<any>
 
 export const runChainConfigs = async (
@@ -61,13 +70,12 @@ export const runChainConfigs = async (
       }
       const runResponse = await runWithTimer(runPromptWithConfig(userID, prompt, version.config, useCache, stream))
       const output = runResponse.output
-      try {
-        result = output ? JSON.parse(output) : output
-      } catch {
-        result = output
+      result = runResponse.result
+      if (runResponse.failed) {
+        stream(runResponse.error)
       }
       await callback(index, version, runResponse)
-      if (result.failed) {
+      if (runResponse.failed) {
         break
       } else {
         runningContext += `\n\n${output}\n\n`

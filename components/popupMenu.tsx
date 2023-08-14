@@ -16,12 +16,16 @@ function useOutsideDetector(ref: RefObject<HTMLDivElement>, callback: () => void
   }, [ref, callback])
 }
 
-export const CalculatePopupOffset = (ref: RefObject<HTMLDivElement>, containerRect?: DOMRect) => {
+export const CalculatePopupOffset = (
+  ref: RefObject<HTMLDivElement>,
+  containerRect?: DOMRect,
+  contentRect?: DOMRect
+) => {
   const iconRect = ref.current?.getBoundingClientRect()
-  return {
-    right: (containerRect?.right ?? 0) - (iconRect?.right ?? 0),
-    top: (iconRect?.top ?? 0) - (containerRect?.top ?? 0) + 28,
-  }
+  const right = (containerRect?.right ?? 0) - (iconRect?.right ?? 0)
+  const top = Math.max(0, (iconRect?.top ?? 0) - (containerRect?.top ?? 0) + 28)
+  const useBottom = contentRect && containerRect && top + contentRect.height > containerRect.height
+  return useBottom ? { right, bottom: 0 } : { right, top }
 }
 
 export default function PopupMenu({
@@ -41,7 +45,7 @@ export default function PopupMenu({
   return expanded ? (
     <div
       onClick={event => event.stopPropagation()}
-      className={`${className} cursor-default relative z-20 overflow-hidden bg-white border border-gray-300 rounded-lg drop-shadow`}
+      className={`${className} cursor-default relative z-20 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm`}
       ref={menuRef}>
       {children}
     </div>

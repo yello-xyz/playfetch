@@ -44,8 +44,10 @@ export type Prompt = {
   timestamp: string
 }
 
+export type VersionWithReferences = Version & { usedInChain: boolean; usedAsEndpoint: boolean }
+
 export type ActivePrompt = Prompt & {
-  versions: Version[]
+  versions: VersionWithReferences[]
   users: User[]
   availableLabels: string[]
 }
@@ -153,6 +155,12 @@ export type ResolvedPromptEndpoint = ResolvedEndpoint & {
   versionID: number
 }
 
+export const EndpointParentsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
+export const FindParentInProject = (parentID: number | undefined, project: ActiveProject) =>
+  EndpointParentsInProject(project).find(item => item.id === parentID)!
+export const EndpointParentIsPrompt = (parent: Chain | Prompt | undefined): parent is Prompt =>
+  !!parent && 'lastVersionID' in parent
+
 export type Usage = {
   endpointID: number
   requests: number
@@ -175,4 +183,16 @@ export type Comment = {
   quote?: string
   runID?: number
   startIndex?: number
+}
+
+export type LogEntry = {
+  timestamp: string
+  endpointID: number
+  cost: number
+  duration: number
+  inputs: PromptInputs
+  output: object
+  error?: string
+  cacheHit: boolean
+  attempts: number
 }

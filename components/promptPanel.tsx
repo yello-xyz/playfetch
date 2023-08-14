@@ -4,10 +4,13 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
-import { VersionsEqual } from '@/src/common/versionsEqual'
+import { ConfigsEqual } from '@/src/common/versionsEqual'
 import RichTextInput from './richTextInput'
+import { useInitialState } from './useInitialState'
 
 export default function PromptPanel({
+  initialPrompt,
+  initialConfig,
   version,
   setModifiedVersion,
   runPrompt,
@@ -15,6 +18,8 @@ export default function PromptPanel({
   showLabel,
   checkProviderAvailable,
 }: {
+  initialPrompt?: string
+  initialConfig?: PromptConfig
   version: Version
   setModifiedVersion: (version: Version) => void
   runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
@@ -22,15 +27,11 @@ export default function PromptPanel({
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
-  const [prompt, setPrompt] = useState(version.prompt)
-  const [config, setConfig] = useState(version.config)
-
-  const [savedVersion, setSavedVersion] = useState(version)
-  if (!VersionsEqual(version, savedVersion)) {
-    setPrompt(version.prompt)
-    setConfig(version.config)
-    setSavedVersion(version)
-  }
+  const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
+  const [config, setConfig] = useInitialState(
+    initialConfig !== undefined ? initialConfig : version.config,
+    ConfigsEqual
+  )
 
   const update = (prompt: string, config: PromptConfig) => {
     setPrompt(prompt)
@@ -53,13 +54,19 @@ export default function PromptPanel({
   )
 
   return (
-    <div className='flex flex-col min-h-0 gap-4 text-gray-500'>
-      <div className='self-stretch min-h-0'>
-        <RichTextInput value={prompt} setValue={updatePrompt} label={showLabel ? 'Prompt' : undefined} />
+    <div className='flex flex-col h-full min-h-0 gap-4 bg-white p-4 text-gray-500'>
+      <div className='self-stretch flex-1 min-h-0'>
+        <RichTextInput
+          key={version.id}
+          value={prompt}
+          setValue={updatePrompt}
+          label={showLabel ? 'Prompt' : undefined}
+          placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
+        />
       </div>
       {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
       {runPrompt && (
-        <div className='flex items-center self-end gap-4'>
+        <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />
           <PendingButton disabled={!prompt.length} onClick={() => runPrompt(config, [inputs])}>
             {version.runs.length ? 'Run again' : 'Run'}

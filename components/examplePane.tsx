@@ -1,8 +1,9 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { InputValues, ResolvedEndpoint } from '@/types'
-import Button from './button'
 import Label from './label'
 import { ToCamelCase } from '@/src/common/formatting'
+import Icon from './icon'
+import clipboardIcon from '@/public/clipboard.svg'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,
@@ -26,16 +27,16 @@ const buildCurlCommand = (
 
 export default function ExamplePane({
   endpoint,
-  inputs,
+  variables,
   inputValues,
   defaultFlavor,
 }: {
   endpoint: ResolvedEndpoint
-  inputs: string[]
+  variables: string[]
   inputValues: InputValues
   defaultFlavor: string
 }) {
-  const curlCommand = buildCurlCommand(endpoint, inputs, inputValues, defaultFlavor)
+  const curlCommand = buildCurlCommand(endpoint, variables, inputValues, defaultFlavor)
 
   const [canCopyToClipboard, setCanCopyToClipboard] = useState(false)
   useEffect(() => setCanCopyToClipboard(!!navigator.clipboard?.writeText), [])
@@ -43,22 +44,27 @@ export default function ExamplePane({
 
   return (
     <>
-      <Label>Integration</Label>
+      <div className='flex items-baseline justify-between w-full gap-2 -mb-4'>
+        <Label>Integration</Label>
+        {canCopyToClipboard && (
+          <div className='flex items-center gap-1 cursor-pointer' onClick={() => copyToClipboard(curlCommand)}>
+            <Icon icon={clipboardIcon} />
+            <span>Copy to clipboard</span>
+          </div>
+        )}
+      </div>
       <CodeBlock>
         <MarkedUpCURLCommand useStreaming={endpoint.useStreaming}>{curlCommand}</MarkedUpCURLCommand>
       </CodeBlock>
-      {canCopyToClipboard && (
-        <div className='self-end'>
-          <Button onClick={() => copyToClipboard(curlCommand)}>Copy</Button>
-        </div>
-      )}
     </>
   )
 }
 
-export function CodeBlock({ children, active }: { children: ReactNode; active?: boolean }) {
+export function CodeBlock({ children, active, error }: { children: ReactNode; active?: boolean; error?: boolean }) {
+  const colorClass = error ? 'text-red-300' : 'text-green-300'
+  const borderClass = active ? 'border' : ''
   return (
-    <div className={`p-4 text-xs text-[#53961F] bg-gray-100 rounded-lg ${active ? 'border' : ''}`}>
+    <div className={`p-4 text-xs bg-gray-100 rounded-lg ${colorClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>

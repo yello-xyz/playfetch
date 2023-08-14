@@ -17,8 +17,7 @@ export default function RunTimeline({
   activeRunID?: number
   isRunning?: boolean
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const containerRect = useContainerRect(containerRef)
+  const [containerRect, containerRef] = useContainerRect()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
   useScrollDetection(setScrollTop, scrollRef)
@@ -50,10 +49,10 @@ export default function RunTimeline({
   }
 
   return (
-    <div ref={containerRef} className='relative flex flex-col h-full gap-2'>
-      <div className='font-medium text-gray-600'>Responses</div>
+    <div ref={containerRef} className='relative flex flex-col h-full'>
+      <div className='font-medium text-gray-700 bg-white py-2.5 px-4 leading-6 border-b border-gray-200'>Responses</div>
       {runs.length > 0 ? (
-        <div ref={scrollRef} className='flex flex-col flex-1 gap-2 overflow-y-auto'>
+        <div ref={scrollRef} className='flex flex-col flex-1 gap-3 px-4 pt-4 overflow-y-auto'>
           {runs.map((run, index) => (
             <RunCell
               key={run.id}
@@ -75,9 +74,15 @@ export default function RunTimeline({
 }
 
 function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
-  return (
+  return isRunning ? (
     <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
-      <span className='font-medium text-gray-600'>{isRunning ? 'Waiting for responses…' : 'No Responses'}</span>
+      <span className='font-medium text-gray-600'>Waiting for responses…</span>
+    </div>
+  ) : (
+    <div className='flex flex-col gap-3 overflow-y-hidden px-4 pt-4'>
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className='min-h-[320px] bg-gray-50 rounded-lg'></div>
+      ))}
     </div>
   )
 }

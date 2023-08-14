@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google'
 import '@/styles/globals.css'
+import 'allotment/dist/style.css'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 
@@ -12,6 +13,9 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
         {`
           :root {
             --font-inter: ${inter.style.fontFamily};
+            --focus-border: #E3E6E9;
+            --separator-border: #E3E6E9;
+            --focus-border-size: 1px;
           }
         `}
       </style>

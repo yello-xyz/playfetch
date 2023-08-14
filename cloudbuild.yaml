@@ -4,6 +4,9 @@ steps:
     args: ['install']
   - name: node
     entrypoint: npm
+    args: ["run", "test"]
+  - name: node
+    entrypoint: npm
     args: ['run', 'clean']
   - name: node
     entrypoint: npm

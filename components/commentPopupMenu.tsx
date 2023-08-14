@@ -86,7 +86,7 @@ export function CommentsPopup({
   isMenuExpanded: boolean
   setMenuExpanded: (expanded: boolean) => void
   callback?: () => void
-  position: { top: number; left: number } | { top: number; right: number }
+  position: { top?: number; left?: number; right?: number; bottom?: number }
 }) {
   const haveComments = comments.length > 0
 

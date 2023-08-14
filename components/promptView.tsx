@@ -1,6 +1,6 @@
 import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
 
-import PlayTab from './playTab'
+import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
 import useInputValues from './inputValues'
 import RunTimeline from './runTimeline'
@@ -10,9 +10,14 @@ import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector, { TabButton } from './tabSelector'
+import { useInitialState } from './useInitialState'
+import { ConfigsEqual } from '@/src/common/versionsEqual'
+import { ExtractPromptVariables } from '@/src/common/formatting'
+import { Allotment } from 'allotment'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
   const runs = [] as PartialRun[]
+  setPartialRuns(runs)
   while (reader) {
     const { done, value } = await reader.read()
     if (done) {
@@ -69,6 +74,15 @@ export default function PromptView({
     activeTab
   )
 
+  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
+  const [currentConfig, setCurrentConfig] = useInitialState(activeVersion.config, ConfigsEqual)
+
+  const updateVersion = (version: Version) => {
+    setCurrentPrompt(version.prompt)
+    setCurrentConfig(version.config)
+    setModifiedVersion(version)
+  }
+
   const [activeRunID, setActiveRunID] = useState<number>()
 
   const onSelectComment = (version: Version, runID?: number) => {
@@ -95,7 +109,7 @@ export default function PromptView({
       const streamReader = await api.runPrompt({ versionID }, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)
       await refreshPrompt(versionID)
-      setPartialRuns([])
+      setPartialRuns(runs => runs.filter(run => run.failed))
       setRunning(false)
     }
   }
@@ -103,71 +117,83 @@ export default function PromptView({
   const selectTab = (tab: ActiveTab) => {
     setActiveTab(tab)
     persistInputValuesIfNeeded()
-    savePrompt()
   }
 
-  const maxTabWidth = showComments ? 'max-w-[40%]' : 'max-w-[50%]'
+  const showTestData = ExtractPromptVariables(currentPrompt).length > 0
   const tabSelector = (
     <TabSelector>
       <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={selectTab} />
-      <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />
+      {showTestData && <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />}
     </TabSelector>
   )
+
+  if (activeTab === 'testdata' && !showTestData) {
+    setActiveTab('versions')
+  }
 
   const renderTab = (tab: ActiveTab) => {
     switch (tab) {
       case 'versions':
         return (
-          <PlayTab
-            prompt={prompt}
+          <RunPromptTab
+            currentPrompt={currentPrompt}
+            currentConfig={currentConfig}
+            activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
-            setModifiedVersion={setModifiedVersion}
+            setModifiedVersion={updateVersion}
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
-            maxWidth={maxTabWidth}
             tabSelector={tabSelector}
           />
         )
       case 'testdata':
         return (
           <TestPromptTab
-            prompt={prompt}
-            project={project}
+            currentPrompt={currentPrompt}
+            currentConfig={currentConfig}
+            activeProject={project}
+            activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
-            setModifiedVersion={setModifiedVersion}
+            setModifiedVersion={updateVersion}
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            maxWidth={maxTabWidth}
             tabSelector={tabSelector}
           />
         )
     }
   }
 
+  const minWidth = 280
   return (
-    <div className='flex items-stretch h-full'>
-      {renderTab(activeTab)}
-      <div className='flex-1 p-6 pl-0'>
-        <RunTimeline
-          runs={[...activeVersion.runs, ...partialRuns]}
+    <Allotment>
+      <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
+        {renderTab(activeTab)}
+      </Allotment.Pane>
+      <Allotment.Pane minSize={minWidth}>
+        <div className='h-full bg-gray-25'>
+          <RunTimeline
+            runs={[...activeVersion.runs, ...partialRuns]}
+            prompt={prompt}
+            version={activeVersion}
+            activeRunID={activeRunID}
+            isRunning={isRunning}
+          />
+        </div>
+      </Allotment.Pane>
+      <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
+        <CommentsPane
           prompt={prompt}
-          version={activeVersion}
-          activeRunID={activeRunID}
-          isRunning={isRunning}
+          onSelectComment={onSelectComment}
+          showComments={showComments}
+          setShowComments={setShowComments}
         />
-      </div>
-      <CommentsPane
-        prompt={prompt}
-        onSelectComment={onSelectComment}
-        showComments={showComments}
-        setShowComments={setShowComments}
-      />
-    </div>
+      </Allotment.Pane>
+    </Allotment>
   )
 }

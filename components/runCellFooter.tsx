@@ -1,14 +1,9 @@
-import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
+import { FormatCost, FormatDuration } from '@/src/common/formatting'
 import { PartialRun } from '@/types'
-import { useEffect, useState } from 'react'
+import useFormattedDate from './useFormattedDate'
 
 export default function RunCellFooter({ run }: { run: PartialRun }) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    if (run.timestamp) {
-      setFormattedDate(FormatDate(run.timestamp))
-    }
-  }, [run.timestamp])
+  const formattedDate = useFormattedDate(run.timestamp)
 
   const attributes = [] as string[]
   if (run.duration) {
@@ -21,5 +16,5 @@ export default function RunCellFooter({ run }: { run: PartialRun }) {
     attributes.push(formattedDate)
   }
 
-  return attributes.length > 0 ? <div className='self-end text-xs'>{attributes.join(' · ')}</div> : null
+  return attributes.length > 0 ? <div className='self-end text-xs text-gray-500'>{attributes.join(' · ')}</div> : null
 }

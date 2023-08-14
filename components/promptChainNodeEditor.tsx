@@ -1,5 +1,4 @@
 import { ChainItem, ModelProvider, PromptChainItem, Version } from '@/types'
-import { ReactNode } from 'react'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import Label from './label'
@@ -7,6 +6,7 @@ import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
 import { RefreshContext } from './refreshContext'
 import { IsPromptChainItem } from './chainNode'
+import { Allotment } from 'allotment'
 
 export default function PromptChainNodeEditor({
   node,
@@ -30,34 +30,41 @@ export default function PromptChainNodeEditor({
   const loadedPrompt = promptCache.promptForItem(node)
   const activeVersion = promptCache.versionForItem(node)
 
+  const minHeight = 230
   return (
     <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
-      <div className='flex flex-col justify-between flex-grow h-full gap-4'>
-        {loadedPrompt && activeVersion && (
-          <>
-            <VersionTimeline
-              prompt={loadedPrompt}
-              activeVersion={activeVersion}
-              setActiveVersion={selectVersion}
-              tabSelector={<Label>Prompt Versions</Label>}
-            />
-            {items.slice(0, index).some(IsPromptChainItem) && (
-              <div className='self-start'>
-                <Checkbox
-                  label='Include previous chain context into prompt'
-                  checked={!!node.includeContext}
-                  setChecked={toggleIncludeContext}
-                />
-              </div>
-            )}
-            <PromptPanel
-              version={activeVersion}
-              setModifiedVersion={setModifiedVersion}
-              checkProviderAvailable={checkProviderAvailable}
-            />
-          </>
-        )}
-      </div>
+      {loadedPrompt && activeVersion && (
+        <Allotment vertical>
+          <Allotment.Pane minSize={minHeight}>
+            <div className='flex flex-col h-full gap-4 px-6 pb-6'>
+              <VersionTimeline
+                prompt={loadedPrompt}
+                activeVersion={activeVersion}
+                setActiveVersion={selectVersion}
+                tabSelector={<Label>Prompt Versions</Label>}
+              />
+              {items.slice(0, index).some(IsPromptChainItem) && (
+                <div className='self-start'>
+                  <Checkbox
+                    label='Include previous chain context into prompt'
+                    checked={!!node.includeContext}
+                    setChecked={toggleIncludeContext}
+                  />
+                </div>
+              )}
+            </div>
+          </Allotment.Pane>
+          <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
+            <div className='h-full px-6 pt-6'>
+              <PromptPanel
+                version={activeVersion}
+                setModifiedVersion={setModifiedVersion}
+                checkProviderAvailable={checkProviderAvailable}
+              />
+            </div>
+          </Allotment.Pane>
+        </Allotment>
+      )}
     </RefreshContext.Provider>
   )
 }

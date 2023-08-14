@@ -57,8 +57,7 @@ async function tryCompleteChat(
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
 
     return { output, cost }
-  } catch (error) {
-    console.error(error)
-    return { output: undefined, cost: 0 }
+  } catch (error: any) {
+    return { error: error?.message ?? 'Unknown error' }
   }
 }

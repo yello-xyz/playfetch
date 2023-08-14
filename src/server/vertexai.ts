@@ -47,8 +47,7 @@ async function complete(
       streamChunks(output)
     }
     return { output, cost: 0 }
-  } catch (error) {
-    console.error(error)
-    return { output: undefined, cost: 0 }
+  } catch (error: any) {
+    return { error: error?.details ?? 'Unknown error' }
   }
 }

@@ -103,7 +103,7 @@ export default function ChainNodeEditor({
     setTimeout(() => setItems(currentItems))
     toggleEditing()
   } else if (isEditing && items.length !== editingItemsCount) {
-    if (items.length === editingIndex + 1) {
+    if (items.length === editingItemsCount + 1) {
       // This means an item was inserted at the position of the item we were editing, so we
       // need to persist the edit to the item which now has a index one higher than before.
       setTimeout(() =>
@@ -157,47 +157,48 @@ export default function ChainNodeEditor({
 
   return (
     <>
-      <div className='flex flex-col items-end flex-1 h-full gap-4 p-6 overflow-hidden'>
-        <div className='flex flex-col flex-1 w-full gap-2 overflow-y-auto'>
-          {activeNode === InputNode && (
-            <>
-              <Label>Test data</Label>
-              <TestDataPane
-                variables={variables}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                emptyMessage='Chain has no unbound inputs'
-              />
-            </>
-          )}
-          {IsPromptChainItem(activeNode) && (
-            <PromptChainNodeEditor
-              node={activeNode}
-              index={activeItemIndex}
-              items={items}
-              toggleIncludeContext={toggleIncludeContext}
-              promptCache={promptCache}
-              checkProviderAvailable={checkProviderAvailable}
-              selectVersion={selectVersion}
-              setModifiedVersion={setModifiedVersion}
+      <div className='flex flex-col items-end flex-1 h-full gap-4 py-6 overflow-hidden'>
+        {activeNode === InputNode && variables.length > 0 && (
+          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+            <Label>Test data</Label>
+            <TestDataPane
+              variables={variables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             />
-          )}
-          {IsCodeChainItem(activeNode) && (
-            <>
-              <Label>Code Editor</Label>
-              <RichTextInput
-                value={isEditing ? editedCode : activeNode.code}
-                setValue={setEditedCode}
-                disabled={!isEditing}
-                focus={isEditing}
-                preformatted
-              />
-            </>
-          )}
-          {activeNode === OutputNode && <RunTimeline runs={partialRuns} isRunning={isRunning} />}
-        </div>
-        <div className='flex items-center justify-between w-full gap-4'>
+          </div>
+        )}
+        {IsPromptChainItem(activeNode) && (
+          <PromptChainNodeEditor
+            node={activeNode}
+            index={activeItemIndex}
+            items={items}
+            toggleIncludeContext={toggleIncludeContext}
+            promptCache={promptCache}
+            checkProviderAvailable={checkProviderAvailable}
+            selectVersion={selectVersion}
+            setModifiedVersion={setModifiedVersion}
+          />
+        )}
+        {IsCodeChainItem(activeNode) && (
+          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+            <Label>Code Editor</Label>
+            <RichTextInput
+              key={activeItemIndex}
+              placeholder={`'Hello World!'`}
+              value={isEditing ? editedCode : activeNode.code}
+              setValue={setEditedCode}
+              preformatted
+            />
+          </div>
+        )}
+        {activeNode === OutputNode && (
+          <div className='flex flex-col flex-1 w-full gap-2 -mt-6 overflow-y-auto'>
+            <RunTimeline runs={partialRuns} isRunning={isRunning} />
+          </div>
+        )}
+        <div className='flex items-center justify-between w-full gap-4 px-6'>
           {IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode) ? (
             <OutputMapper
               key={activeNode.output}

@@ -6,11 +6,14 @@ import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
-import { useInitialState } from './useInitialState'
+import { Allotment } from 'allotment'
+import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 export default function TestPromptTab({
-  prompt,
-  project,
+  currentPrompt,
+  currentConfig,
+  activeProject,
+  activePrompt,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
@@ -19,11 +22,12 @@ export default function TestPromptTab({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
-  maxWidth,
   tabSelector,
 }: {
-  prompt: ActivePrompt
-  project: ActiveProject
+  currentPrompt: string
+  currentConfig: PromptConfig
+  activeProject: ActiveProject
+  activePrompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
@@ -32,16 +36,8 @@ export default function TestPromptTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
-  maxWidth: string
   tabSelector: ReactNode
 }) {
-  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-
-  const updateVersion = (version: Version) => {
-    setCurrentPrompt(version.prompt)
-    setModifiedVersion(version)
-  }
-
   const variables = ExtractPromptVariables(currentPrompt)
 
   const selectVersion = (version: Version) => {
@@ -51,42 +47,51 @@ export default function TestPromptTab({
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(activeVersion.config, inputs)
+    return runPrompt(currentConfig, inputs)
   }
 
+  const minHeight = 240
   return (
-    <>
-      <div className={`flex flex-col justify-between flex-grow h-full gap-4 p-6  ${maxWidth}`}>
-        <div className='flex flex-col flex-grow gap-2 overflow-hidden min-h-[50%]'>
+    <Allotment vertical>
+      <Allotment.Pane minSize={minHeight} preferredSize='50%'>
+        <div className='flex flex-col flex-grow h-full min-h-0 gap-2 p-6 overflow-hidden'>
           {tabSelector}
           <TestDataPane
             variables={variables}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            emptyMessage='Create inputs for your prompt below'
           />
         </div>
-        <div className='self-start'>
-          <VersionSelector
-            versions={prompt.versions}
-            endpoints={project.endpoints}
-            activeVersion={activeVersion}
-            setActiveVersion={selectVersion}
-          />
+      </Allotment.Pane>
+      <Allotment.Pane minSize={minHeight}>
+        <div className='h-full p-6'>
+          <div className='flex flex-col h-full gap-4'>
+            <div className='self-start'>
+              <VersionSelector
+                versions={activePrompt.versions}
+                endpoints={activeProject.endpoints}
+                activeVersion={activeVersion}
+                setActiveVersion={selectVersion}
+                labelColors={AvailableLabelColorsForPrompt(activePrompt)}
+              />
+            </div>
+            <PromptPanel
+              initialPrompt={currentPrompt}
+              initialConfig={currentConfig}
+              version={activeVersion}
+              setModifiedVersion={setModifiedVersion}
+              checkProviderAvailable={checkProviderAvailable}
+            />
+            <TestButtons
+              variables={variables}
+              inputValues={inputValues}
+              disabled={!currentPrompt.length}
+              callback={testPrompt}
+            />
+          </div>
         </div>
-        <PromptPanel
-          version={activeVersion}
-          setModifiedVersion={updateVersion}
-          checkProviderAvailable={checkProviderAvailable}
-        />
-        <TestButtons
-          variables={variables}
-          inputValues={inputValues}
-          disabled={!currentPrompt.length}
-          callback={testPrompt}
-        />
-      </div>
-    </>
+      </Allotment.Pane>
+    </Allotment>
   )
 }

@@ -17,9 +17,9 @@ type TextFilter = { text: string }
 
 export type VersionFilter = UserFilter | LabelFilter | TextFilter
 
-const isUserFilter = (filter: VersionFilter): filter is UserFilter => 'userID' in (filter as UserFilter)
-const isLabelFilter = (filter: VersionFilter): filter is LabelFilter => 'label' in (filter as LabelFilter)
-const isTextFilter = (filter: VersionFilter): filter is TextFilter => 'text' in (filter as TextFilter)
+const isUserFilter = (filter: VersionFilter): filter is UserFilter => 'userID' in filter
+const isLabelFilter = (filter: VersionFilter): filter is LabelFilter => 'label' in filter
+const isTextFilter = (filter: VersionFilter): filter is TextFilter => 'text' in filter
 
 const userIDsFromFilters = (filters: VersionFilter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
 const labelsFromFilters = (filters: VersionFilter[]) => filters.filter(isLabelFilter).map(filter => filter.label)

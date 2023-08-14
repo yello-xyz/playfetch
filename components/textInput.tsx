@@ -20,10 +20,11 @@ export default function TextInput({
   setValue: (value: string) => void
   onKeyDown?: KeyboardEventHandler
 }) {
+  const colorStyle = disabled ? 'text-gray-300 border-gray-200' : 'text-gray-800 border-gray-300'
   return (
     <LabelWrapper id={id} label={label}>
       <input
-        className='w-full p-2 text-sm bg-white border border-gray-300 rounded-lg'
+        className={`w-full p-2 text-sm bg-white border rounded-lg ${colorStyle}`}
         type={type}
         disabled={disabled}
         value={value}

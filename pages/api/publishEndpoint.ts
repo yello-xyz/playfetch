@@ -5,7 +5,8 @@ import { saveEndpoint } from '@/src/server/datastore/endpoints'
 import { ensureProjectAPIKey } from '@/src/server/datastore/projects'
 import { User } from '@/types'
 
-async function publishEndpoint(req: NextApiRequest, res: NextApiResponse, user: User) {
+async function publishEndpoint(req: NextApiRequest, res: NextApiResponse<number>, user: User) {
+  const isEnabled = req.body.isEnabled
   const userID = user.id
   const projectID = req.body.projectID
   const parentID = req.body.parentID
@@ -17,9 +18,19 @@ async function publishEndpoint(req: NextApiRequest, res: NextApiResponse, user: 
 
   const urlPath = ToCamelCase(name)
   await ensureProjectAPIKey(userID, projectID)
-  await saveEndpoint(userID, projectID, parentID, versionID, urlPath, flavor, useCache, useStreaming)
+  const endpointID = await saveEndpoint(
+    isEnabled,
+    userID,
+    projectID,
+    parentID,
+    versionID,
+    urlPath,
+    flavor,
+    useCache,
+    useStreaming
+  )
 
-  res.json({})
+  res.json(endpointID)
 }
 
 export default withLoggedInUserRoute(publishEndpoint)

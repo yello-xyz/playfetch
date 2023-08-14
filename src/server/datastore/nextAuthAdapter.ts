@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntity,
-  getEntityKey,
   getEntityKeys,
   getFilteredEntity,
   getID,
@@ -15,7 +14,6 @@ import { and } from '@google-cloud/datastore'
 enum Entity {
   USER = '_nextauth_user',
   ACCOUNT = '_nextauth_account',
-  SESSION = '_nextauth_session',
   TOKEN = '_nextauth_token',
 }
 
@@ -73,9 +71,7 @@ export default function NextAuthAdapter(): Adapter {
     },
     async deleteUser(userId) {
       const accountKeys = await getEntityKeys(Entity.ACCOUNT, 'userId', userId)
-      const sessionKeys = await getEntityKeys(Entity.SESSION, 'userId', userId)
-      // TODO delete user project and access keys?
-      await getDatastore().delete([...accountKeys, ...sessionKeys, buildKey(Entity.USER, Number(userId))])
+      await getDatastore().delete([...accountKeys, buildKey(Entity.USER, Number(userId))])
     },
     async linkAccount(account) {
       await getDatastore().save({
@@ -95,47 +91,6 @@ export default function NextAuthAdapter(): Adapter {
     async unlinkAccount({ providerAccountId, provider }) {
       const account = await getAccount(providerAccountId, provider)
       await getDatastore().delete(buildKey(Entity.ACCOUNT, getID(account)))
-    },
-    async createSession({ sessionToken, userId, expires }) {
-      await getDatastore().save({
-        key: buildKey(Entity.SESSION),
-        data: { sessionToken, userId, expires },
-        excludeFromIndexes: ['userId', 'expires'],
-      })
-      return { sessionToken, userId, expires }
-    },
-    async getSessionAndUser(sessionToken) {
-      const session = await getEntity(Entity.SESSION, 'sessionToken', sessionToken)
-      if (!session) {
-        return null
-      }
-      const user = await getKeyedEntity(Entity.USER, Number(session.userId))
-      if (!user) {
-        throw new Error('User not found')
-      }
-      return {
-        session: { sessionToken, userId: session.userId, expires: session.expires },
-        user: { id: user.id.toString(), email: user.email, emailVerified: user.verifiedAt ?? null },
-      }
-    },
-    async updateSession(session) {
-      const sessionToken = session.sessionToken
-      const existingSession = await getEntity(Entity.SESSION, 'sessionToken', sessionToken)
-      if (!existingSession) {
-        return null
-      }
-      const userId = session.userId ?? existingSession.userId
-      const expires = session.expires ?? existingSession.expires
-      await getDatastore().save({
-        key: buildKey(Entity.SESSION, getID(existingSession)),
-        data: { sessionToken, userId, expires },
-        excludeFromIndexes: ['userId', 'expires'],
-      })
-      return { sessionToken, userId, expires }
-    },
-    async deleteSession(sessionToken) {
-      const sessionKey = await getEntityKey(Entity.SESSION, 'sessionToken', sessionToken)
-      await getDatastore().delete(sessionKey)
     },
     async createVerificationToken({ identifier, expires, token }) {
       await getDatastore().save({

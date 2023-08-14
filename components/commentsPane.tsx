@@ -1,5 +1,5 @@
 import { ActivePrompt, Comment, User, Version } from '@/types'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
@@ -8,6 +8,7 @@ import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versionComparison'
 import { LabelForModel } from './modelSelector'
+import useFormattedDate from './useFormattedDate'
 
 export default function CommentsPane({
   prompt,
@@ -27,7 +28,7 @@ export default function CommentsPane({
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   return showComments ? (
-    <div className='flex flex-col px-3 pb-3 border-l border-gray-200 w-[280px]'>
+    <div className='flex flex-col px-3 pb-3 border-l border-gray-200'>
       <div className='flex items-start justify-between py-5'>
         <span className='font-medium text-gray-800'>Comments</span>
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
@@ -61,10 +62,7 @@ export function CommentCell({
   versions?: Version[]
   onSelect?: (version: Version, runID?: number) => void
 }) {
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    setFormattedDate(FormatRelativeDate(comment.timestamp, 1))
-  }, [comment.timestamp])
+  const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 
   const version = versions.find(version => version.id === comment.versionID)
   const compareVersion = versions.find(v => v.id === version?.previousID)

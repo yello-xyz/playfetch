@@ -11,9 +11,8 @@ import {
   getTimestamp,
 } from './datastore'
 import { toRun } from './runs'
-import { ensurePromptAccess, getVerifiedUserPromptData, matchesDefaultPromptName, updatePrompt } from './prompts'
-import { StripPromptSentinels } from '@/src/common/formatting'
-import { ensureProjectLabel } from './projects'
+import { augmentPromptDataWithNewVersion, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
+import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
 import { VersionsEqual } from '@/src/common/versionsEqual'
@@ -80,12 +79,8 @@ export async function saveVersionForUser(
   const savedVersionID = getID(versionData)
 
   const lastPrompt = currentVersion ? currentVersion.prompt : ''
-  const name =
-    matchesDefaultPromptName(promptData.name) && prompt.length && !lastPrompt.length
-      ? StripPromptSentinels(prompt).split(' ').slice(0, 5).join(' ')
-      : promptData.name
-
-  await updatePrompt({ ...promptData, lastVersionID: savedVersionID, name }, true)
+  await augmentPromptDataWithNewVersion(promptData, savedVersionID, prompt, lastPrompt)
+  await augmentProjectWithNewVersion(promptData.projectID, prompt, lastPrompt)
 
   return savedVersionID
 }

@@ -12,6 +12,7 @@ import {
   Workspace,
   Version,
   ChainItemWithInputs,
+  LogEntry,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -129,25 +130,6 @@ const api = {
   runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
-  publishEndpoint: function (
-    projectID: number,
-    parentID: number,
-    versionID: number | undefined,
-    name: string,
-    flavor: string,
-    useCache: boolean,
-    useStreaming: boolean
-  ) {
-    return post(this.publishEndpoint, {
-      projectID,
-      parentID,
-      versionID,
-      name,
-      flavor,
-      useCache,
-      useStreaming,
-    })
-  },
   getChain: function (chainID: number): Promise<Chain> {
     return post(this.getChain, { chainID })
   },
@@ -166,20 +148,53 @@ const api = {
   deleteChain: function (chainID: number) {
     return post(this.deleteChain, { chainID })
   },
-  updateEndpoint: function (endpoint: Endpoint) {
+  publishEndpoint: function (
+    isEnabled: boolean,
+    projectID: number,
+    parentID: number,
+    versionID: number | undefined,
+    name: string,
+    flavor: string,
+    useCache: boolean,
+    useStreaming: boolean
+  ): Promise<number> {
+    return post(this.publishEndpoint, {
+      isEnabled,
+      projectID,
+      parentID,
+      versionID,
+      name,
+      flavor,
+      useCache,
+      useStreaming,
+    })
+  },
+  updateEndpoint: function (
+    endpointID: number,
+    enabled: boolean,
+    parentID: number,
+    versionID: number | undefined,
+    name: string,
+    flavor: string,
+    useCache: boolean,
+    useStreaming: boolean
+  ) {
     return post(this.updateEndpoint, {
-      endpointID: endpoint.id,
-      enabled: endpoint.enabled,
-      parentID: endpoint.parentID,
-      versionID: endpoint.versionID,
-      name: endpoint.urlPath,
-      flavor: endpoint.flavor,
-      useCache: endpoint.useCache,
-      useStreaming: endpoint.useStreaming,
+      endpointID,
+      enabled,
+      parentID,
+      versionID,
+      name,
+      flavor,
+      useCache,
+      useStreaming,
     })
   },
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
+  },
+  getLogEntries: function (projectID: number): Promise<LogEntry[]> {
+    return post(this.getLogEntries, { projectID })
   },
   addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
     return post(this.addComment, { versionID, text, quote, runID, startIndex })

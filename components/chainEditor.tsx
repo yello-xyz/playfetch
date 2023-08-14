@@ -20,15 +20,11 @@ export default function ChainEditor({
   const insertItem = (item: ChainItem) => setNodes([...nodes.slice(0, activeIndex), item, ...nodes.slice(activeIndex)])
   const insertPrompt = (promptID: number) =>
     insertItem({ promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
-
-  const insertCodeBlock = () => {
-    const code = `'Hello world'`
-    insertItem({ code })
-  }
+  const insertCodeBlock = () => insertItem({ code: '' })
 
   return (
-    <div className='flex flex-col items-center justify-between min-w-[500px] border-r border-gray-300 bg-gray-25'>
-      <div className='flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
+    <div className='flex flex-col items-center justify-between h-full bg-gray-25'>
+      <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}

@@ -39,8 +39,7 @@ async function complete(
     const cost = calculateCost(formattedPrompt, output)
 
     return { output, cost }
-  } catch (error) {
-    console.error(error)
-    return { output: undefined, cost: 0 }
+  } catch (error: any) {
+    return { error: error?.error?.error?.message ?? 'Unknown error' }
   }
 }

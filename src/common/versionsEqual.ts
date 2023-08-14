@@ -1,11 +1,9 @@
 import { PromptConfig } from '@/types'
 
+export const ConfigsEqual = (a: PromptConfig, b: PromptConfig) =>
+  a.provider === b.provider && a.model === b.model && a.temperature === b.temperature && a.maxTokens === b.maxTokens
+
 export const VersionsEqual = (
   a: { prompt: string; config: PromptConfig },
   b: { prompt: string; config: PromptConfig }
-) =>
-  a.prompt === b.prompt &&
-  a.config.provider === b.config.provider &&
-  a.config.model === b.config.model &&
-  a.config.temperature === b.config.temperature &&
-  a.config.maxTokens === b.config.maxTokens
+) => a.prompt === b.prompt && ConfigsEqual(a.config, b.config)

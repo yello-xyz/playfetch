@@ -64,3 +64,9 @@ indexes:
   properties:
   - name: userID
   - name: provider
+
+- kind: log
+  properties:
+  - name: projectID
+  - name: createdAt
+    direction: desc

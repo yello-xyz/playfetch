@@ -7,6 +7,7 @@ module.exports = {
     textColor: {
       transparent: 'transparent',
       black: '#000000',
+      'blue-400': '#3B8CEB',
       'blue-500': '#2C7BD8',
       'gray-25': '#FBFBFD',
       'gray-50': '#F3F4F6',
@@ -18,6 +19,9 @@ module.exports = {
       'gray-600': '#484F5A',
       'gray-700': '#333A46',
       'gray-800': '#1D2532',
+      'green-300': '#71B892',
+      'red-300': '#E4735B',
+      'red-400': '#DC4F30',
       'red-500': '#C64629',
       white: '#FFFFFF',
     },
@@ -52,6 +56,7 @@ module.exports = {
       'orange-200': '#F9D093',
       'orange-300': '#F6BE6A',
       'orange-400': '#F2A93C',
+      'pink-100': '#F4B8EE',
       'purple-200': '#BEA4F6',
       'purple-300': '#9F78F3',
       'purple-400': '#7D48EF',
@@ -75,6 +80,7 @@ module.exports = {
       black: '#000000',
       'blue-50': '#DCEAFA',
       'blue-100': '#B1D1F6',
+      'blue-400': '#3B8CEB',
       'blue-500': '#2C7BD8',
       'blue-600': '#226FCA',
       'gray-25': '#FBFBFD',
@@ -89,6 +95,11 @@ module.exports = {
       'gray-800': '#838C9A',
       'red-50': '#FDE5E0',
       white: '#FFFFFF',
+    },
+    fontSize: {
+      xs: '12px',
+      sm: '0.79rem',
+      base: '.92rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',
@@ -106,6 +117,9 @@ module.exports = {
           '50%': { opacity: 0.6 },
         },
       },
+      boxShadow: {
+        'sm': '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',
+      }
     },
   },
 }

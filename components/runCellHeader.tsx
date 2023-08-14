@@ -14,7 +14,7 @@ export default function RunCellHeader({
   prompt?: ActivePrompt
   containerRect?: DOMRect
 }) {
-  const isProperRun = (item: PartialRun): item is Run => 'labels' in (item as Run)
+  const isProperRun = (item: PartialRun): item is Run => 'labels' in item
 
   return prompt && isProperRun(run) ? (
     <div className='flex items-start justify-between gap-2 text-sm'>
@@ -29,46 +29,43 @@ export default function RunCellHeader({
 
 function RunInputs({ inputs }: { inputs: PromptInputs }) {
   return Object.entries(inputs).length > 0 ? (
-    <CollapsibleRunHeaderRow title='Inputs' margin='-ml-1' bold>
+    <CollapsibleInputsHeader>
       {Object.entries(inputs).map(([variable, value]) => (
         <RunInput key={variable} variable={variable} value={value} />
       ))}
-    </CollapsibleRunHeaderRow>
+    </CollapsibleInputsHeader>
   ) : null
 }
 
 function RunInput({ variable, value }: { variable: string; value: string }) {
   return (
-    <div className='flex-col'>
-      <CollapsibleRunHeaderRow title={variable} margin='ml-2' expanded>
-        <div className='ml-8 text-gray-500'>{value}</div>
-      </CollapsibleRunHeaderRow>
-    </div>
+    <ExpandableInputRow>
+      <span className='font-medium text-gray-700'>{variable}: </span>
+      <span className='text-gray-500'>{value}</span>
+    </ExpandableInputRow>
   )
 }
 
-function CollapsibleRunHeaderRow({
-  title,
-  margin,
-  bold,
-  expanded,
-  children,
-}: {
-  title: string
-  margin: string
-  bold?: boolean
-  expanded?: boolean
-  children: ReactNode
-}) {
-  const [isExpanded, setExpanded] = useState(expanded)
+function CollapsibleInputsHeader({ children }: { children: ReactNode }) {
+  const [isExpanded, setExpanded] = useState(false)
 
   return (
     <>
       <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
-        <Icon className={`${margin} ${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
-        <span className={`${bold ? 'font-medium' : ''} text-gray-700`}>{title}</span>
+        <Icon className={`-ml-1 ${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
+        <span className='font-medium text-gray-700'>Inputs</span>
       </div>
       {isExpanded && children}
     </>
+  )
+}
+
+function ExpandableInputRow({ children }: { children: ReactNode }) {
+  const [isExpanded, setExpanded] = useState(false)
+
+  return (
+    <div className={`ml-8 cursor-pointer ${isExpanded ? '' : 'line-clamp-1'}`} onClick={() => setExpanded(!isExpanded)}>
+      {children}
+    </div>
   )
 }

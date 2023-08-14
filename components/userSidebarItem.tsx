@@ -107,26 +107,36 @@ export default function UserSidebarItem() {
       <div className='flex'>
         <Icon icon={chevronIcon} />
         {isMenuExpanded && (
-          <div className='absolute top-0 left-0'>
+          <div className='absolute top-0 left-1.5'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-              <div className='flex flex-col items-stretch gap-2.5 p-3'>
-                <div className='flex items-center gap-2.5'>
+              <div className='flex flex-col items-stretch gap-0.5 p-3 select-none'>
+                <div className='flex items-center gap-2.5 pb-2 px-2'>
                   <UserAvatar user={user} />
                   <div className='flex flex-col min-w-0'>
-                    <span className='overflow-hidden font-semibold text-ellipsis'>{user.fullName}</span>
-                    <span className='overflow-hidden text-xs text-ellipsis'>{user.email}</span>
+                    <span className='overflow-hidden font-semibold text-ellipsis select-none'>{user.fullName}</span>
+                    <span className='overflow-hidden text-xs text-ellipsis text-gray-400 select-none'>
+                      {user.email}
+                    </span>
                   </div>
                 </div>
-                <span className='p-1 font-medium cursor-pointer' onClick={selectSettings}>
+                <span
+                  className='py-1 px-2 leading-6 font-medium cursor-pointer text-gray-700 hover:bg-gray-50 rounded select-none'
+                  onClick={selectSettings}>
                   Settings
                 </span>
                 {user.isAdmin && (
-                  <Link href={ClientRoute.Admin}>
-                    <span className='p-1 font-medium'>Admin</span>
+                  <Link
+                    href={ClientRoute.Admin}
+                    className='py-1 px-2 leading-6 w-full hover:bg-gray-50 rounded select-none'>
+                    <span className='font-medium cursor-pointer text-gray-700 '>Admin</span>
                   </Link>
                 )}
-                <div className='border-t border-gray-300' />
-                <span className='p-1 font-medium text-red-500 cursor-pointer' onClick={logOut}>
+                <div className='pb-1 pt-1'>
+                  <div className='h-px bg-gray-200' />
+                </div>
+                <span
+                  className='py-1 px-2 leading-6 font-medium text-red-500 cursor-pointer hover:bg-red-50 rounded select-none'
+                  onClick={logOut}>
                   Log out
                 </span>
               </div>

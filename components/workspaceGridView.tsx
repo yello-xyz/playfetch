@@ -1,5 +1,5 @@
 import { ActiveWorkspace, Project, Workspace } from '@/types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
 import IconButton from './iconButton'
@@ -9,6 +9,7 @@ import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
 import WorkspaceTopBar from './workspaceTopBar'
+import useFormattedDate from './useFormattedDate'
 
 export default function WorkspaceGridView({
   workspaces,
@@ -52,7 +53,8 @@ export default function WorkspaceGridView({
 
   return (
     <>
-      <div className='flex flex-col h-full px-6 pb-0 bg-gray-25'>
+      <div
+        className={`${activeWorkspace.projects.length > 0 ? 'bg-gray-25' : 'bg-white'} flex flex-col h-full px-6 pb-0`}>
         <WorkspaceTopBar
           activeWorkspace={activeWorkspace}
           isUserWorkspace={isUserWorkspace}
@@ -63,7 +65,7 @@ export default function WorkspaceGridView({
           onDeleted={resetWorkspaces}
         />
         {activeWorkspace.projects.length > 0 ? (
-          <div className='flex flex-col items-stretch h-full gap-6 overflow-y-auto'>
+          <div className='flex flex-col items-stretch h-full gap-3 overflow-y-auto'>
             {activeWorkspace.projects.map((project, index) => (
               <ProjectCell
                 key={index}
@@ -89,10 +91,10 @@ export default function WorkspaceGridView({
 
 function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWorkspace; onAddProject: () => void }) {
   return (
-    <div className='h-full pb-6'>
-      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+    <div className='h-full pb-6 text-gray-700'>
+      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
         <span className='font-medium'>{workspace.name} is empty</span>
-        <span className='text-xs text-center text-gray-400 '>
+        <span className='text-sm text-center text-gray-400 '>
           Create a{' '}
           <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddProject}>
             New Project
@@ -121,19 +123,16 @@ function ProjectCell({
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
-  const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    setFormattedDate(FormatRelativeDate(project.timestamp))
-  }, [project.timestamp])
+  const formattedDate = useFormattedDate(project.timestamp, FormatRelativeDate)
 
   return (
     <div
-      className={`flex flex-col gap-1 p-4 border border-gray-300 rounded-lg cursor-pointer gap-6 w-full bg-white`}
+      className={`flex flex-col gap-1 p-4 border border-gray-200 rounded-lg cursor-pointer gap-6 w-full bg-white hover:bg-gray-50 hover:border-gray-300`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
-        <span className='flex-1 text-base font-medium line-clamp-2'>{project.name}</span>
+        <span className='flex-1 text-base font-normal text-gray-700 line-clamp-2'>{project.name}</span>
         <div className='relative flex items-center gap-2'>
-          <span className='mr-5 text-xs text-gray-500'>Edited {formattedDate}</span>
+          <span className='mr-5 text-xs text-gray-400'>Edited {formattedDate}</span>
           <IconButton
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}

@@ -5,7 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function logOut(_: NextApiRequest, res: NextApiResponse, user: User) {
   const nextAuthAdapter = NextAuthAdapter()
-  const nextAuthUser = await nextAuthAdapter.getUserByEmail(user.email)
+  const nextAuthUser = await nextAuthAdapter.getUserByEmail?.(user.email)
   if (nextAuthUser) {
     await nextAuthAdapter.deleteUser?.(nextAuthUser.id)
   }
