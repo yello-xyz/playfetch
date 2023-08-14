@@ -1,4 +1,4 @@
-import { ActiveProject, LogEntry, ResolvedEndpoint } from '@/types'
+import { ActiveProject, EndpointParentIsPrompt, LogEntry, ResolvedEndpoint } from '@/types'
 import { Fragment, ReactNode, useEffect, useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
@@ -26,7 +26,7 @@ export default function LogEntriesView({
         <TableHeader first>Endpoint</TableHeader>
         <TableHeader>Environment</TableHeader>
         <TableHeader>Time</TableHeader>
-        <TableHeader>Status</TableHeader>
+        <TableHeader last>Status</TableHeader>
         {logEntries.map((logEntry, index) => (
           <LogEntryRow
             key={index}
@@ -55,19 +55,25 @@ function LogEntryRow({
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => setFormattedDate(FormatDate(logEntry.timestamp, true, true)), [logEntry.timestamp])
 
-  const SelectableCell = ({ children, center, first }: { children: ReactNode; center?: boolean; first?: boolean }) => (
-    <TableCell center={center} first={first} active={isActive} callback={setActive}>
-      {children}
-    </TableCell>
-  )
   return endpoint ? (
-    <Fragment>
-      <SelectableCell first>
-        {endpoint.urlPath}
-      </SelectableCell>
-      <SelectableCell>{endpoint.flavor}</SelectableCell>
-      <SelectableCell>{formattedDate}</SelectableCell>
-      <SelectableCell>{logEntry.error ? 'Error' : 'Success'}</SelectableCell>
-    </Fragment>
+    <>
+      <TableCell first active={isActive} callback={setActive}>
+        <div className='flex items-center gap-1'>
+          <Icon icon={!!endpoint.versionID ? promptIcon : chainIcon} />
+          {endpoint.urlPath}
+        </div>
+      </TableCell>
+      <TableCell active={isActive} callback={setActive}>
+        {endpoint.flavor}
+      </TableCell>
+      <TableCell active={isActive} callback={setActive}>
+        {formattedDate}
+      </TableCell>
+      <TableCell last active={isActive} callback={setActive}>
+        <div className={`rounded px-1.5 flex items-center text-white ${logEntry.error ? 'bg-red-300' : 'bg-green-300'}`}>
+          {logEntry.error ? 'Error' : 'Success'}
+        </div>
+      </TableCell>
+    </>
   ) : null
 }

@@ -85,19 +85,26 @@ function EndpointsGroup({
         <TableHeader>Environment</TableHeader>
         <TableHeader>Cache</TableHeader>
         <TableHeader>Stream</TableHeader>
-        <TableHeader>Usage</TableHeader>
+        <TableHeader last>Usage</TableHeader>
         {endpoints.map((endpoint, index) => {
           const active = activeEndpoint?.id === endpoint.id
           const SelectableCell = ({
             children,
             center,
             first,
+            last,
           }: {
             children: ReactNode
             center?: boolean
             first?: boolean
+            last?: boolean
           }) => (
-            <TableCell center={center} first={first} active={active} callback={() => setActiveEndpoint(endpoint)}>
+            <TableCell
+              center={center}
+              first={first}
+              last={last}
+              active={active}
+              callback={() => setActiveEndpoint(endpoint)}>
               {children}
             </TableCell>
           )
@@ -110,7 +117,7 @@ function EndpointsGroup({
               <SelectableCell>{endpoint.flavor}</SelectableCell>
               <SelectableCell>{endpoint.useCache ? 'Yes' : 'No'}</SelectableCell>
               <SelectableCell>{endpoint.useStreaming ? 'Yes' : 'No'}</SelectableCell>
-              <SelectableCell>{endpoint.usage.requests} requests</SelectableCell>
+              <SelectableCell last>{endpoint.usage.requests} requests</SelectableCell>
             </Fragment>
           )
         })}
