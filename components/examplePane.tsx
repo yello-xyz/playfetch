@@ -1,6 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { InputValues, ResolvedEndpoint } from '@/types'
-import Button from './button'
 import Label from './label'
 import { ToCamelCase } from '@/src/common/formatting'
 import Icon from './icon'

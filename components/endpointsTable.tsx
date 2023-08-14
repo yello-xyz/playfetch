@@ -16,11 +16,13 @@ import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
 
 export default function EndpointsTable({
+  tabSelector,
   project,
   activeEndpoint,
   setActiveEndpoint,
   onAddEndpoint,
 }: {
+  tabSelector: ReactNode
   project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
@@ -32,7 +34,7 @@ export default function EndpointsTable({
   return (
     <>
       <div className='flex items-center justify-between w-full'>
-        <Label>Endpoints</Label>
+        {tabSelector}
         {onAddEndpoint && (
           <div
             className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'

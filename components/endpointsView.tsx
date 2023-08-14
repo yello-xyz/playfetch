@@ -7,6 +7,7 @@ import {
   EndpointParentIsPrompt,
   EndpointParentsInProject,
   ResolvedEndpoint,
+  LogEntry,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -17,8 +18,9 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
+import TabSelector, { TabButton } from './tabSelector'
 
-const NewEndpointConfig = {
+const NewEndpointSettings: EndpointSettings = {
   id: undefined,
   enabled: true,
   parentID: undefined,
@@ -29,13 +31,26 @@ const NewEndpointConfig = {
   useStreaming: false,
 }
 
+type ActiveTab = 'endpoints' | 'logs'
+
 export default function EndpointsView({
   project,
+  logEntries = [],
   onRefresh,
 }: {
   project: ActiveProject
+  logEntries?: LogEntry[]
   onRefresh: () => Promise<void>
 }) {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('endpoints')
+
+  const tabSelector = (
+    <TabSelector>
+      <TabButton title='Endpoints' tab='endpoints' activeTab={activeTab} setActiveTab={setActiveTab} />
+      {logEntries.length > 0 && <TabButton title='Logs' tab='logs' activeTab={activeTab} setActiveTab={setActiveTab} />}
+    </TabSelector>
+  )
+
   const endpoints = project.endpoints
 
   const [newEndpoint, setNewEndpoint] = useState<EndpointSettings>()
@@ -44,7 +59,7 @@ export default function EndpointsView({
   const addEndpoint =
     EndpointParentsInProject(project).length > 0
       ? () => {
-          setNewEndpoint(NewEndpointConfig)
+          setNewEndpoint(NewEndpointSettings)
           setActiveParentID(undefined)
           setEditing(true)
         }
@@ -111,8 +126,9 @@ export default function EndpointsView({
     <Allotment>
       {!isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-2 p-6 overflow-y-auto text-gray-500'>
+          <div className='flex flex-col items-start h-full gap-2 p-4 overflow-y-auto text-gray-500'>
             <EndpointsTable
+              tabSelector={tabSelector}
               project={project}
               activeEndpoint={activeEndpoint}
               setActiveEndpoint={updateActiveEndpoint}
@@ -123,7 +139,7 @@ export default function EndpointsView({
       )}
       {activeEndpoint && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-6 p-6 overflow-y-auto max-w-[680px]'>
+          <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto max-w-[680px]'>
             <EndpointSettingsPane
               endpoint={activeEndpoint}
               project={project}
