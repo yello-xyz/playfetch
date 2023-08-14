@@ -178,7 +178,7 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
             </span>
           ) : (
             <span>Create some prompts or chains first to integrate this project into your code base.</span>
-          )}{' '}
+          )}
         </span>
       </div>
     </div>

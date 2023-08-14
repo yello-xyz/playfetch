@@ -175,7 +175,7 @@ export default function EndpointSettingsPane({
 
   return (
     <>
-      <div className='flex items-center justify-between w-full mt-0.5 -mb-4'>
+      <div className='flex items-center justify-between w-full -mt-0.5 -mb-4'>
         <Label>
           {endpoint.id && parent
             ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`

@@ -19,6 +19,7 @@ import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
 import TabSelector, { TabButton } from './tabSelector'
+import LogEntriesView from './logEntriesView'
 
 const NewEndpointSettings: EndpointSettings = {
   id: undefined,
@@ -121,12 +122,14 @@ export default function EndpointsView({
       : ExtractUnboundChainInputs(parent.items)
     : []
 
+  const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
+
   const minWidth = 460
   return (
     <Allotment>
-      {!isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
+      {activeTab === 'endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-2 p-4 overflow-y-auto text-gray-500'>
+          <div className='flex flex-col items-start h-full gap-2 p-4 pt-3 overflow-y-auto text-gray-500'>
             <EndpointsTable
               tabSelector={tabSelector}
               project={project}
@@ -137,7 +140,7 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeEndpoint && (
+      {activeTab === 'endpoints' && activeEndpoint && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto max-w-[680px]'>
             <EndpointSettingsPane
@@ -159,6 +162,19 @@ export default function EndpointsView({
               />
             )}
             {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
+          </div>
+        </Allotment.Pane>
+      )}
+      {activeTab === 'logs' && (
+        <Allotment.Pane minSize={minWidth}>
+          <div className='flex flex-col items-start h-full gap-2 p-4 overflow-y-auto text-gray-500'>
+            <LogEntriesView
+              tabSelector={tabSelector}
+              logEntries={logEntries}
+              endpoints={project.endpoints}
+              activeIndex={activeLogEntryIndex}
+              setActiveIndex={setActiveLogEntryIndex}
+            />
           </div>
         </Allotment.Pane>
       )}
