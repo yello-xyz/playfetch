@@ -114,7 +114,7 @@ export default async function runPromptWithConfig(
       : isValidPredictionResponse(result)
       ? { ...result, result: parseOutput(result.output), error: undefined, failed: false }
       : { ...result, result: undefined, output: undefined, error: 'Received empty prediction response', failed: true }),
-    attempts,
+    attempts: Math.min(attempts, maxAttempts),
     cacheHit: false,
   }
 }
