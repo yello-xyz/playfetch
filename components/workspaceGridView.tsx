@@ -129,7 +129,7 @@ function ProjectCell({
 
   return (
     <div
-      className={`flex flex-col gap-1 p-4 border border-gray-200 rounded-lg cursor-pointer gap-6 w-full bg-white hover:bg-gray-25 hover:border-gray-300`}
+      className={`flex flex-col gap-1 p-4 border border-gray-200 rounded-lg cursor-pointer gap-6 w-full bg-white hover:bg-gray-50 hover:border-gray-300`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <span className='flex-1 text-base font-normal line-clamp-2 text-gray-700'>{project.name}</span>
