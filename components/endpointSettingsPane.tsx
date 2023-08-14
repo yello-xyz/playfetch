@@ -177,7 +177,9 @@ export default function EndpointSettingsPane({
     <>
       <div className='flex items-center justify-between w-full -mb-4'>
         <Label>
-          {endpoint.id ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}` : 'New Endpoint'}
+          {endpoint.id && parent
+            ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`
+            : 'New Endpoint'}
         </Label>
         {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </div>
