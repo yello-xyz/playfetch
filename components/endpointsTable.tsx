@@ -14,6 +14,7 @@ import addIcon from '@/public/add.svg'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
+import TableCell, { TableHeader } from './TableCell'
 
 export default function EndpointsTable({
   tabSelector,
@@ -72,12 +73,6 @@ function EndpointsGroup({
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
 }) {
-  const HeaderCell = ({ children, first }: { children: ReactNode; first?: boolean }) => (
-    <RowCell header first={first}>
-      {children}
-    </RowCell>
-  )
-
   return (
     <>
       <div className='flex items-center gap-1 mt-4 text-gray-700'>
@@ -85,15 +80,15 @@ function EndpointsGroup({
         {parent.name}
       </div>
       <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
-        <HeaderCell first>Enabled</HeaderCell>
-        <HeaderCell>Endpoint</HeaderCell>
-        <HeaderCell>Environment</HeaderCell>
-        <HeaderCell>Cache</HeaderCell>
-        <HeaderCell>Stream</HeaderCell>
-        <HeaderCell>Usage</HeaderCell>
+        <TableHeader first>Enabled</TableHeader>
+        <TableHeader>Endpoint</TableHeader>
+        <TableHeader>Environment</TableHeader>
+        <TableHeader>Cache</TableHeader>
+        <TableHeader>Stream</TableHeader>
+        <TableHeader>Usage</TableHeader>
         {endpoints.map((endpoint, index) => {
           const active = activeEndpoint?.id === endpoint.id
-          const ActiveCell = ({
+          const SelectableCell = ({
             children,
             center,
             first,
@@ -102,60 +97,25 @@ function EndpointsGroup({
             center?: boolean
             first?: boolean
           }) => (
-            <RowCell center={center} first={first} active={active} callback={() => setActiveEndpoint(endpoint)}>
+            <TableCell center={center} first={first} active={active} callback={() => setActiveEndpoint(endpoint)}>
               {children}
-            </RowCell>
+            </TableCell>
           )
           return (
             <Fragment key={index}>
-              <ActiveCell center first>
+              <SelectableCell center first>
                 <Checkbox checked={endpoint.enabled} disabled onClick={() => setActiveEndpoint(endpoint)} />
-              </ActiveCell>
-              <ActiveCell>{endpoint.urlPath}</ActiveCell>
-              <ActiveCell>{endpoint.flavor}</ActiveCell>
-              <ActiveCell>{endpoint.useCache ? 'Yes' : 'No'}</ActiveCell>
-              <ActiveCell>{endpoint.useStreaming ? 'Yes' : 'No'}</ActiveCell>
-              <ActiveCell>{endpoint.usage.requests} requests</ActiveCell>
+              </SelectableCell>
+              <SelectableCell>{endpoint.urlPath}</SelectableCell>
+              <SelectableCell>{endpoint.flavor}</SelectableCell>
+              <SelectableCell>{endpoint.useCache ? 'Yes' : 'No'}</SelectableCell>
+              <SelectableCell>{endpoint.useStreaming ? 'Yes' : 'No'}</SelectableCell>
+              <SelectableCell>{endpoint.usage.requests} requests</SelectableCell>
             </Fragment>
           )
         })}
       </div>
     </>
-  )
-}
-
-function RowCell({
-  children,
-  header,
-  first,
-  center,
-  active,
-  callback,
-}: {
-  children: ReactNode
-  header?: boolean
-  first?: boolean
-  center?: boolean
-  active?: boolean
-  callback?: () => void
-}) {
-  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-100'
-  const borderClass = header
-    ? first
-      ? 'border'
-      : 'border-r border-y'
-    : first
-    ? 'border-b border-x'
-    : 'border-b border-r'
-  const textClass = header ? 'font-medium text-gray-800' : ''
-  const bgClass = active ? 'bg-blue-25' : ''
-  const layoutClass = center ? 'flex justify-center' : ''
-  const cursorClass = callback ? 'cursor-pointer' : ''
-  const className = `${baseClass} ${borderClass} ${textClass} ${bgClass} ${layoutClass} ${cursorClass}`
-  return (
-    <div className={className} onClick={callback}>
-      {children}
-    </div>
   )
 }
 
