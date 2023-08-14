@@ -32,7 +32,16 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 type CallbackType = (
   index: number,
   version: Version | null,
-  response: { output?: string; cost: number; duration: number; attempts: number; cacheHit: boolean; failed: boolean }
+  response: {
+    result?: any
+    output?: string
+    error?: string
+    cost: number
+    duration: number
+    attempts: number
+    cacheHit: boolean
+    failed: boolean
+  }
 ) => Promise<any>
 
 export const runChainConfigs = async (

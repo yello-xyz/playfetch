@@ -6,6 +6,7 @@ import { updateUsage } from '@/src/server/datastore/usage'
 import { CodeConfig, Endpoint, PromptInputs, RunConfig } from '@/types'
 import { runChainConfigs } from '../runChain'
 import { getChainItems } from '@/src/server/datastore/chains'
+import { saveLogEntry } from '@/src/server/datastore/logs'
 
 const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig | CodeConfig)[]> => {
   if (endpoint.versionID) {
@@ -37,6 +38,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         let anyCacheHit = false
         const updateAggregateUsage = async (
           isLastRun: boolean,
+          result: any | undefined,
+          error: string | undefined,
           cost: number,
           duration: number,
           attempts: number,
@@ -49,6 +52,17 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           anyCacheHit = anyCacheHit || cacheHit
           if (isLastRun || failed) {
             updateUsage(endpoint.id, totalCost, totalDuration, anyCacheHit, 1 + extraAttempts, failed)
+            saveLogEntry(
+              endpoint.projectID,
+              endpoint.id,
+              inputs,
+              result,
+              error,
+              totalCost,
+              totalDuration,
+              anyCacheHit,
+              1 + extraAttempts
+            )
           }
         }
 
@@ -61,8 +75,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           inputs,
           endpoint.useCache,
           true,
-          (index, _, { cost, duration, attempts, cacheHit, failed }) =>
-            updateAggregateUsage(isLastRun(index), cost, duration, attempts, cacheHit, failed),
+          (index, _, { result, error, cost, duration, attempts, cacheHit, failed }) =>
+            updateAggregateUsage(isLastRun(index), result, error, cost, duration, attempts, cacheHit, failed),
           (index, message) => (useStreaming && isLastRun(index) ? res.write(message) : undefined)
         )
         return useStreaming ? res.end() : res.json({ output })
