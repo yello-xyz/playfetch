@@ -20,6 +20,7 @@ import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
 import TabSelector, { TabButton } from './tabSelector'
 import LogEntriesView from './logEntriesView'
+import LogEntryDetailsPane from './logEntryDetailsPane'
 
 const NewEndpointSettings: EndpointSettings = {
   id: undefined,
@@ -45,10 +46,22 @@ export default function EndpointsView({
 }) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('endpoints')
 
+  const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
+  const updateActiveLogEntryIndex = (index: number) => {
+    setActiveLogEntryIndex(index)
+    const endpoint = project.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
+    updateActiveEndpoint(endpoint!)
+  }
+
+  const selectTab = (tab: ActiveTab) => {
+    setActiveTab(tab)
+    setActiveLogEntryIndex(undefined)
+  }
+
   const tabSelector = (
     <TabSelector>
-      <TabButton title='Endpoints' tab='endpoints' activeTab={activeTab} setActiveTab={setActiveTab} />
-      {logEntries.length > 0 && <TabButton title='Logs' tab='logs' activeTab={activeTab} setActiveTab={setActiveTab} />}
+      <TabButton title='Endpoints' tab='endpoints' activeTab={activeTab} setActiveTab={selectTab} />
+      {logEntries.length > 0 && <TabButton title='Logs' tab='logs' activeTab={activeTab} setActiveTab={selectTab} />}
     </TabSelector>
   )
 
@@ -116,13 +129,11 @@ export default function EndpointsView({
   }, [parent, project, promptCache])
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
-  const inputs = parent
+  const variables = parent
     ? EndpointParentIsPrompt(parent)
       ? ExtractPromptVariables(version?.prompt ?? '')
       : ExtractUnboundChainInputs(parent.items)
     : []
-
-  const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
   const minWidth = 460
   return (
@@ -156,7 +167,7 @@ export default function EndpointsView({
             {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && (
               <ExamplePane
                 endpoint={activeEndpoint}
-                inputs={inputs}
+                variables={variables}
                 inputValues={project.inputValues}
                 defaultFlavor={project.availableFlavors[0]}
               />
@@ -173,7 +184,20 @@ export default function EndpointsView({
               logEntries={logEntries}
               endpoints={project.endpoints}
               activeIndex={activeLogEntryIndex}
-              setActiveIndex={setActiveLogEntryIndex}
+              setActiveIndex={updateActiveLogEntryIndex}
+            />
+          </div>
+        </Allotment.Pane>
+      )}
+      {activeLogEntryIndex !== undefined && activeEndpoint && IsSavedEndpoint(activeEndpoint) && parent && (
+        <Allotment.Pane minSize={minWidth}>
+          <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto'>
+            <LogEntryDetailsPane
+              logEntry={logEntries[activeLogEntryIndex]}
+              endpoint={activeEndpoint}
+              parent={parent}
+              prompt={activePrompt}
+              onCollapse={() => setActiveLogEntryIndex(undefined)}
             />
           </div>
         </Allotment.Pane>

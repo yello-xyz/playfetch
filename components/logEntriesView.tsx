@@ -1,5 +1,5 @@
-import { ActiveProject, EndpointParentIsPrompt, LogEntry, ResolvedEndpoint } from '@/types'
-import { Fragment, ReactNode, useEffect, useState } from 'react'
+import { LogEntry, ResolvedEndpoint } from '@/types'
+import { ReactNode, useEffect, useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
@@ -55,6 +55,7 @@ function LogEntryRow({
   const [formattedDate, setFormattedDate] = useState<string>()
   useEffect(() => setFormattedDate(FormatDate(logEntry.timestamp, true, true)), [logEntry.timestamp])
 
+  const statusColor = logEntry.error ? 'bg-red-300' : 'bg-green-300'
   return endpoint ? (
     <>
       <TableCell first active={isActive} callback={setActive}>
@@ -70,7 +71,7 @@ function LogEntryRow({
         {formattedDate}
       </TableCell>
       <TableCell last active={isActive} callback={setActive}>
-        <div className={`rounded px-1.5 flex items-center text-white ${logEntry.error ? 'bg-red-300' : 'bg-green-300'}`}>
+        <div className={`rounded px-1.5 flex items-center text-white ${statusColor}`}>
           {logEntry.error ? 'Error' : 'Success'}
         </div>
       </TableCell>

@@ -27,16 +27,16 @@ const buildCurlCommand = (
 
 export default function ExamplePane({
   endpoint,
-  inputs,
+  variables,
   inputValues,
   defaultFlavor,
 }: {
   endpoint: ResolvedEndpoint
-  inputs: string[]
+  variables: string[]
   inputValues: InputValues
   defaultFlavor: string
 }) {
-  const curlCommand = buildCurlCommand(endpoint, inputs, inputValues, defaultFlavor)
+  const curlCommand = buildCurlCommand(endpoint, variables, inputValues, defaultFlavor)
 
   const [canCopyToClipboard, setCanCopyToClipboard] = useState(false)
   useEffect(() => setCanCopyToClipboard(!!navigator.clipboard?.writeText), [])
@@ -60,9 +60,11 @@ export default function ExamplePane({
   )
 }
 
-export function CodeBlock({ children, active }: { children: ReactNode; active?: boolean }) {
+export function CodeBlock({ children, active, error }: { children: ReactNode; active?: boolean; error?: boolean }) {
+  const colorClass = error ? 'text-red-300' : 'text-green-300'
+  const borderClass = active ? 'border' : ''
   return (
-    <div className={`p-4 text-xs text-[#53961F] bg-gray-100 rounded-lg ${active ? 'border' : ''}`}>
+    <div className={`p-4 text-xs bg-gray-100 rounded-lg ${colorClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>
