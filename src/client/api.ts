@@ -12,6 +12,7 @@ import {
   Workspace,
   Version,
   ChainItemWithInputs,
+  LogEntry,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -191,6 +192,9 @@ const api = {
   },
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
+  },
+  getLogEntries: function (projectID: number): Promise<LogEntry[]> {
+    return post(this.getLogEntries, { projectID })
   },
   addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
     return post(this.addComment, { versionID, text, quote, runID, startIndex })

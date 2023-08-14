@@ -184,3 +184,15 @@ export type Comment = {
   runID?: number
   startIndex?: number
 }
+
+export type LogEntry = {
+  timestamp: string
+  endpointID: number
+  cost: number
+  duration: number
+  inputs: PromptInputs
+  output: object
+  error?: string
+  cacheHit: boolean
+  attempts: number
+}
