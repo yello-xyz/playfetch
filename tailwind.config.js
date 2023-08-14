@@ -19,6 +19,7 @@ module.exports = {
       'gray-600': '#484F5A',
       'gray-700': '#333A46',
       'gray-800': '#1D2532',
+      'red-400': '#DC4F30',
       'red-500': '#C64629',
       white: '#FFFFFF',
     },
@@ -114,6 +115,9 @@ module.exports = {
           '50%': { opacity: 0.6 },
         },
       },
+      boxShadow: {
+        'sm': '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',
+      }
     },
   },
 }
