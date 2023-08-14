@@ -114,21 +114,29 @@ export default function UserSidebarItem() {
                   <UserAvatar user={user} />
                   <div className='flex flex-col min-w-0'>
                     <span className='overflow-hidden font-semibold text-ellipsis select-none'>{user.fullName}</span>
-                    <span className='overflow-hidden text-xs text-ellipsis text-gray-400 select-none'>{user.email}</span>
+                    <span className='overflow-hidden text-xs text-ellipsis text-gray-400 select-none'>
+                      {user.email}
+                    </span>
                   </div>
                 </div>
-                <span className='py-1 px-2 leading-6 font-medium cursor-pointer text-gray-700 hover:bg-gray-50 rounded select-none' onClick={selectSettings}>
+                <span
+                  className='py-1 px-2 leading-6 font-medium cursor-pointer text-gray-700 hover:bg-gray-50 rounded select-none'
+                  onClick={selectSettings}>
                   Settings
                 </span>
                 {user.isAdmin && (
-                  <Link href={ClientRoute.Admin} className='py-1 px-2 leading-6 w-full hover:bg-gray-50 rounded select-none'>
+                  <Link
+                    href={ClientRoute.Admin}
+                    className='py-1 px-2 leading-6 w-full hover:bg-gray-50 rounded select-none'>
                     <span className='font-medium cursor-pointer text-gray-700 '>Admin</span>
                   </Link>
                 )}
                 <div className='pb-1 pt-1'>
                   <div className='h-px bg-gray-200' />
                 </div>
-                <span className='py-1 px-2 leading-6 font-medium text-red-500 cursor-pointer hover:bg-red-50 rounded select-none' onClick={logOut}>
+                <span
+                  className='py-1 px-2 leading-6 font-medium text-red-500 cursor-pointer hover:bg-red-50 rounded select-none'
+                  onClick={logOut}>
                   Log out
                 </span>
               </div>

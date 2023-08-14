@@ -64,20 +64,17 @@ export default function LogEntryDetailsPane({
           <CodeBlock>{JSON.stringify(logEntry.inputs, null, 2)}</CodeBlock>
         </>
       )}
-      {
-        logEntry.error ? 
-        (
-          <>
-            <Label className='-mb-4'>Error</Label>
-            <CodeBlock error>{logEntry.error}</CodeBlock>
-          </>
-        ) : (
-          <>
-            <Label className='-mb-4'>Output</Label>
-            <CodeBlock>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
-          </>
-        )
-      }
+      {logEntry.error ? (
+        <>
+          <Label className='-mb-4'>Error</Label>
+          <CodeBlock error>{logEntry.error}</CodeBlock>
+        </>
+      ) : (
+        <>
+          <Label className='-mb-4'>Output</Label>
+          <CodeBlock>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
+        </>
+      )}
     </>
   )
 }

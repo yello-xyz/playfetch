@@ -18,7 +18,7 @@ export async function migrateLogs() {
         logData.duration,
         logData.cacheHit,
         logData.attempts,
-        getID(logData),
+        getID(logData)
       )
     )
   }

@@ -69,7 +69,11 @@ function VersionIDSelector({
       onChange={value => setActiveVersionID(Number(value))}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}>
-      {!versionIDs.includes(activeVersionID) && <option value={activeVersionID} disabled>Select version</option>}
+      {!versionIDs.includes(activeVersionID) && (
+        <option value={activeVersionID} disabled>
+          Select version
+        </option>
+      )}
       {versionIDs.map((versionID, index) => (
         <option key={index} value={versionID}>
           {`Version ${index + 1}${isFocused ? suffixForVersionID?.(versionID) ?? '' : ''}`}
