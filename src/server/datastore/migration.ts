@@ -3,6 +3,7 @@ import { migrateChains } from './chains'
 import { migrateComments } from './comments'
 import { migrateEndpoints } from './endpoints'
 import { migrateInputs } from './inputs'
+import { migrateLogs } from './logs'
 import { migrateProjects } from './projects'
 import { migratePrompts } from './prompts'
 import { migrateRuns } from './runs'
@@ -22,6 +23,7 @@ export async function runDataMigrations() {
   // await migrateChains()
   // await migrateEndpoints()
   // await migrateUsage()
+  await migrateLogs()
   // await migrateUsers()
   // await migrateComments()
 }

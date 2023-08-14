@@ -56,7 +56,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
               endpoint.projectID,
               endpoint.id,
               inputs,
-              { output: result },
+              result ? { output: result } : {},
               error,
               totalCost,
               totalDuration,

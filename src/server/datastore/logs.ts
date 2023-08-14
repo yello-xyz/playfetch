@@ -1,3 +1,4 @@
+import { PromptInputs } from '@/types'
 import { Entity, buildKey, getDatastore, getID } from './datastore'
 
 export async function migrateLogs() {
@@ -9,7 +10,7 @@ export async function migrateLogs() {
         logData.projectID,
         logData.endpointID,
         JSON.parse(logData.input),
-        logData.output ? JSON.parse(logData.output) : undefined,
+        JSON.parse(logData.output ?? '{}'),
         logData.error,
         logData.createdAt,
         logData.cost,
@@ -25,8 +26,8 @@ export async function migrateLogs() {
 export async function saveLogEntry(
   projectID: number,
   endpointID: number,
-  input: any,
-  output: any | undefined,
+  inputs: PromptInputs,
+  output: any,
   error: string | undefined,
   cost: number,
   duration: number,
@@ -34,15 +35,15 @@ export async function saveLogEntry(
   attempts: number
 ) {
   await getDatastore().save(
-    toLogData(projectID, endpointID, input, output, error, new Date(), cost, duration, cacheHit, attempts)
+    toLogData(projectID, endpointID, inputs, output, error, new Date(), cost, duration, cacheHit, attempts)
   )
 }
 
 const toLogData = (
   projectID: number,
   endpointID: number,
-  input: any,
-  output: any | undefined,
+  inputs: PromptInputs,
+  output: any,
   error: string | undefined,
   createdAt: Date,
   cost: number,
@@ -55,8 +56,8 @@ const toLogData = (
   data: {
     projectID,
     endpointID,
-    input: JSON.stringify(input),
-    output: output ? JSON.stringify(output) : output,
+    inputs: JSON.stringify(inputs),
+    output: JSON.stringify(output),
     error,
     createdAt,
     cost,
@@ -64,5 +65,6 @@ const toLogData = (
     cacheHit,
     attempts,
   },
-  excludeFromIndexes: ['input', 'output', 'error'],
+  excludeFromIndexes: ['inputs', 'output', 'error'],
 })
+
