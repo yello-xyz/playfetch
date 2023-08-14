@@ -62,9 +62,7 @@ export function CommentCell({
   onSelect?: (version: Version, runID?: number) => void
 }) {
   const [formattedDate, setFormattedDate] = useState<string>()
-  useEffect(() => {
-    setFormattedDate(FormatRelativeDate(comment.timestamp, 1))
-  }, [comment.timestamp])
+  useEffect(() => setFormattedDate(FormatRelativeDate(comment.timestamp, 1)), [comment.timestamp])
 
   const version = versions.find(version => version.id === comment.versionID)
   const compareVersion = versions.find(v => v.id === version?.previousID)
