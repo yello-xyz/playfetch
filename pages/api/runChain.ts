@@ -61,11 +61,7 @@ export const runChainConfigs = async (
       }
       const runResponse = await runWithTimer(runPromptWithConfig(userID, prompt, version.config, useCache, stream))
       const output = runResponse.output
-      try {
-        result = output ? JSON.parse(output) : output
-      } catch {
-        result = output
-      }
+      result = runResponse.result
       if (runResponse.failed) {
         stream(runResponse.error)
       }
