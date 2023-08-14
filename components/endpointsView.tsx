@@ -10,7 +10,7 @@ import {
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
-import PublishSettingsPane, { EditableEndpoint } from './publishSettingsPane'
+import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -38,7 +38,7 @@ export default function EndpointsView({
 }) {
   const endpoints = project.endpoints
 
-  const [newEndpoint, setNewEndpoint] = useState<EditableEndpoint>()
+  const [newEndpoint, setNewEndpoint] = useState<EndpointSettings>()
   const [isEditing, setEditing] = useState(false)
 
   const addEndpoint =
@@ -63,7 +63,7 @@ export default function EndpointsView({
 
   const [activeEndpointID, setActiveEndpointID] = useState<number>()
   const activeEndpoint = newEndpoint ?? endpoints.find(endpoint => endpoint.id === activeEndpointID)
-  const IsSavedEndpoint = (endpoint: EditableEndpoint): endpoint is ResolvedEndpoint => !!endpoint?.id
+  const IsSavedEndpoint = (endpoint: EndpointSettings): endpoint is ResolvedEndpoint => !!endpoint?.id
 
   if (activeEndpointID && !activeEndpoint) {
     setActiveEndpointID(undefined)
@@ -124,7 +124,7 @@ export default function EndpointsView({
       {activeEndpoint && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-6 p-6 overflow-y-auto max-w-[680px]'>
-            <PublishSettingsPane
+            <EndpointSettingsPane
               endpoint={activeEndpoint}
               project={project}
               prompt={activePrompt}

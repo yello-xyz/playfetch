@@ -21,7 +21,7 @@ import Button, { PendingButton } from './button'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 
-export type EditableEndpoint = {
+export type EndpointSettings = {
   id: number | undefined
   enabled: boolean
   parentID?: number
@@ -32,7 +32,7 @@ export type EditableEndpoint = {
   useStreaming: boolean
 }
 
-export default function PublishSettingsPane({
+export default function EndpointSettingsPane({
   endpoint,
   project,
   prompt,
@@ -42,7 +42,7 @@ export default function PublishSettingsPane({
   onCollapse,
   onRefresh,
 }: {
-  endpoint: EditableEndpoint
+  endpoint: EndpointSettings
   project: ActiveProject
   prompt?: ActivePrompt
   onSelectParentID: (parentID?: number) => void
