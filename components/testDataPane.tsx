@@ -22,23 +22,20 @@ export default function TestDataPane({
     setActiveColumn(0)
   }
 
-  const activeVariable = variables[activeColumn]
-  const activeInputs = inputValues[activeVariable] ?? ['']
-
   const containerRef = useRef<HTMLDivElement>(null)
 
   const filterEmptyInputs = (inputs: string[]) => inputs.filter(input => input.trim().length > 0)
-  const updateInputs = (value: string, index = activeInputs.length) =>
+  const updateInputs = (variable: string, value: string, index: number) =>
     setInputValues({
       ...inputValues,
-      [activeVariable]: [
-        ...filterEmptyInputs(activeInputs.slice(0, index)),
+      [variable]: [
+        ...filterEmptyInputs(inputValues[variable].slice(0, index)),
         value,
-        ...filterEmptyInputs(activeInputs.slice(index + 1)),
+        ...filterEmptyInputs(inputValues[variable].slice(index + 1)),
       ],
     })
   const addInput = () => {
-    updateInputs('', activeInputs.length)
+    variables.forEach(variable => updateInputs(variable, '', inputValues[variable].length))
     setTimeout(() => {
       const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
       const lastChild = editables[editables.length - 1] as HTMLElement
@@ -65,15 +62,15 @@ export default function TestDataPane({
             <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>{variable}</span>
           </div>
         ))}
-        {Array.from({ length: rowCount }).map((_, index) => (
-          <Fragment key={index}>
-            <div className='py-1 text-center text-gray-400 border-b border-gray-200 border-x'>#{index + 1}</div>
-            {variables.map((variable, index) => (
-              <Suspense>
+        {Array.from({ length: rowCount }).map((_, row) => (
+          <Fragment key={row}>
+            <div className='py-1 text-center text-gray-400 border-b border-gray-200 border-x'>#{row + 1}</div>
+            {variables.map((variable, col) => (
+              <Suspense key={col}>
                 <ContentEditable
                   className='w-full px-3 py-1 text-sm border-b border-r border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border'
-                  htmlValue={inputValues[variable]?.[index] ?? ''}
-                  onChange={() => {}}
+                  htmlValue={inputValues[variable]?.[row] ?? ''}
+                  onChange={value => updateInputs(variable, value, row)}
                 />
               </Suspense>
             ))}
