@@ -3,7 +3,7 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntityKeys,
+  getEntityKey,
   getID,
   getKeyedEntity,
   getTimestamp,
@@ -114,9 +114,12 @@ export async function updateChainName(userID: number, chainID: number, name: str
 }
 
 export async function deleteChainForUser(userID: number, chainID: number) {
-  // TODO warn or even refuse when chain has published endpoints
   await ensureChainAccess(userID, chainID)
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', chainID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', chainID)
-  await getDatastore().delete([...usageKeys, ...endpointKeys, buildKey(Entity.CHAIN, chainID)])
+
+  const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'parentID', chainID)
+  if (anyEndpointKey) {
+    throw new Error('Cannot delete chain with published endpoints')
+  }
+  
+  await getDatastore().delete(buildKey(Entity.CHAIN, chainID))
 }

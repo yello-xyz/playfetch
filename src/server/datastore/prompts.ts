@@ -3,6 +3,7 @@ import {
   buildKey,
   getDatastore,
   getEntities,
+  getEntityKey,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -160,18 +161,19 @@ export async function updatePromptName(userID: number, promptID: number, name: s
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
-  // TODO warn or even refuse when prompt has published endpoints or is used in chain.
   await ensurePromptAccess(userID, promptID)
+
+  const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'parentID', promptID)
+  if (anyEndpointKey) {
+    throw new Error('Cannot delete prompt with published endpoints')
+  }
+
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', promptID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', promptID)
   const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'promptID', promptID)
   await getDatastore().delete([
     ...commentKeys,
     ...runKeys,
-    ...usageKeys,
-    ...endpointKeys,
     ...versionKeys,
     buildKey(Entity.PROMPT, promptID),
   ])

@@ -5,6 +5,7 @@ import {
   getDatastore,
   getEntity,
   getEntityCount,
+  getEntityKey,
   getEntityKeys,
   getID,
   getKeyedEntity,
@@ -180,6 +181,12 @@ export const toVersion = (data: any, runs: any[], comments: any[]): Version => (
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
+
+  const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'versionID', versionID)
+  if (anyEndpointKey) {
+    throw new Error('Cannot delete version with published endpoints')
+  }
+
   const promptID = versionData.promptID
   const versionCount = await getEntityCount(Entity.VERSION, 'promptID', promptID)
   const wasLastVersion = versionCount === 1
