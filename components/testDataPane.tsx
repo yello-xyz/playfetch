@@ -59,6 +59,7 @@ export default function TestDataPane({
                   className='w-full px-3 py-1 text-sm border-b border-r border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border'
                   htmlValue={inputValues[variable]?.[row] ?? ''}
                   onChange={value => updateInputs(variable, value, row)}
+                  onBlur={() => persistInputValuesIfNeeded()}
                 />
               </Suspense>
             ))}
