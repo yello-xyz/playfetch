@@ -1,10 +1,8 @@
-import { Fragment, Suspense, useRef, useState } from 'react'
+import { Fragment, useRef } from 'react'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
-
-import dynamic from 'next/dynamic'
-const ContentEditable = dynamic(() => import('./contentEditable'))
+import RichTextInput from './richTextInput'
 
 export default function TestDataPane({
   variables,
@@ -60,14 +58,13 @@ export default function TestDataPane({
           <Fragment key={row}>
             <div className='py-1 text-center text-gray-400 border-b border-gray-200 border-x'>#{row + 1}</div>
             {variables.map((variable, col) => (
-              <Suspense key={col}>
-                <ContentEditable
-                  className='w-full px-3 py-1 text-sm border-b border-r border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border'
-                  htmlValue={inputValues[variable]?.[row] ?? ''}
-                  onChange={value => updateInputs(variable, value, row)}
-                  onBlur={() => persistInputValuesIfNeeded()}
-                />
-              </Suspense>
+              <RichTextInput
+                key={col}
+                className='w-full px-3 py-1 text-sm border-b border-r border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border'
+                value={inputValues[variable]?.[row] ?? ''}
+                setValue={value => updateInputs(variable, value, row)}
+                onBlur={() => persistInputValuesIfNeeded()}
+              />
             ))}
           </Fragment>
         ))}

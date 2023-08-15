@@ -12,17 +12,6 @@ const escapeSpecialCharacters = (text: string) =>
 const unescapeSpecialCharacters = (html: string) =>
   html.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 
-const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
-
-const printVariables = (text: string) => text.replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
-
-const parseVariables = (html: string) =>
-  html
-    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '{{$1}}')
-    .replaceAll('{{}}', '')
-    .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
-    .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
-
 const linesToDivs = (text: string) =>
   text
     .split('\n')
@@ -51,9 +40,24 @@ const divsToLines = (html: string) => {
   ].join('\n')
 }
 
-export const RichTextToHTML = (text: string) => linesToDivs(printVariables(escapeSpecialCharacters(text)))
+export const RichTextToHTML = (text: string) => linesToDivs(escapeSpecialCharacters(text))
 
-export const RichTextFromHTML = (html: string) => unescapeSpecialCharacters(parseVariables(divsToLines(html)))
+export const RichTextFromHTML = (html: string) => unescapeSpecialCharacters(divsToLines(html))
+
+const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
+
+const printVariables = (text: string) => text.replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
+
+const parseVariables = (html: string) =>
+  html
+    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '{{$1}}')
+    .replaceAll('{{}}', '')
+    .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
+    .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
+
+const PromptToHTML = (text: string) => linesToDivs(printVariables(escapeSpecialCharacters(text)))
+
+const PromptFromHTML = (html: string) => unescapeSpecialCharacters(parseVariables(divsToLines(html)))
 
 type Selection = { text: string; range: Range; popupPoint: { x: number; y: number }; isInput: boolean }
 
@@ -103,6 +107,42 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
 }
 
 export default function RichTextInput({
+  className,
+  value,
+  setValue,
+  onFocus,
+  onBlur,
+}: {
+  className?: string
+  value: string
+  setValue: (value: string) => void
+  onFocus?: () => void
+  onBlur?: () => void
+}) {
+  const [htmlValue, setHTMLValue] = useState('')
+  if (value !== RichTextFromHTML(htmlValue)) {
+    setHTMLValue(RichTextToHTML(value))
+  }
+  const updateHTMLValue = (html: string) => {
+    setHTMLValue(html)
+    setValue(RichTextFromHTML(html))
+  }
+
+  return (
+    <Suspense>
+      <ContentEditable
+        className={className}
+        htmlValue={htmlValue}
+        onChange={updateHTMLValue}
+        allowedTags={['br', 'div']}
+        onBlur={onBlur}
+        onFocus={onFocus}
+      />
+    </Suspense>
+  )
+}
+
+export function PromptInput({
   value,
   setValue,
   label,
@@ -151,15 +191,15 @@ export default function RichTextInput({
     : `h-full p-4 overflow-y-auto text-gray-700 border border-gray-300 focus:border-blue-400 focus:ring-0 focus:outline-none  rounded-lg ${placeholderClassName}`
 
   const [htmlValue, setHTMLValue] = useState('')
-  if (value !== RichTextFromHTML(htmlValue)) {
-    setHTMLValue(RichTextToHTML(value))
+  if (value !== PromptFromHTML(htmlValue)) {
+    setHTMLValue(PromptToHTML(value))
   } else if (printVariables(parseVariables(htmlValue)) !== htmlValue) {
     setHTMLValue(printVariables(parseVariables(htmlValue)))
   }
   const updateHTMLValue = (html: string) => {
     setSelection(undefined)
     setHTMLValue(html)
-    setValue(RichTextFromHTML(html))
+    setValue(PromptFromHTML(html))
   }
 
   const renderContentEditable = () => (

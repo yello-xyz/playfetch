@@ -1,11 +1,10 @@
-import { useState } from 'react'
 import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
-import RichTextInput from './richTextInput'
+import { PromptInput } from './richTextInput'
 import { useInitialState } from './useInitialState'
 
 export default function PromptPanel({
@@ -56,7 +55,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
       <div className='self-stretch flex-1 min-h-0'>
-        <RichTextInput
+        <PromptInput
           key={version.id}
           value={prompt}
           setValue={updatePrompt}

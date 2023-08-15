@@ -11,7 +11,7 @@ import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
-import RichTextInput from './richTextInput'
+import { PromptInput } from './richTextInput'
 import useInputValues from './inputValues'
 import useCheckProvider from './checkProvider'
 import { ConsumeRunStreamReader } from './promptView'
@@ -184,7 +184,7 @@ export default function ChainNodeEditor({
         {IsCodeChainItem(activeNode) && (
           <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
             <Label>Code Editor</Label>
-            <RichTextInput
+            <PromptInput
               key={activeItemIndex}
               placeholder={`'Hello World!'`}
               value={isEditing ? editedCode : activeNode.code}
