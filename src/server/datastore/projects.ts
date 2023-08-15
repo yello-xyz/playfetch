@@ -29,6 +29,7 @@ import { deleteChainForUser, toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
 import { StripPromptSentinels } from '@/src/common/formatting'
+import { Key } from '@google-cloud/datastore'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -282,15 +283,31 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
     // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
     throw new Error('Cannot delete multi-user project')
   }
-  const chainIDs = await getEntityIDs(Entity.CHAIN, 'projectID', projectID)
-  for (const chainID of chainIDs) {
-    await deleteChainForUser(userID, chainID)
+
+  const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
+  const versionKeys = [] as Key[]
+  const runKeys = [] as Key[]
+  const commentKeys = [] as Key[]
+  for (const promptID in promptKeys.map(key => getID({ key }))){
+    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'promptID', promptID)))
+    runKeys.push(...await getEntityKeys(Entity.RUN, 'promptID', promptID))
+    commentKeys.push(...await getEntityKeys(Entity.COMMENT, 'promptID', promptID))
   }
-  const promptIDs = await getEntityIDs(Entity.PROMPT, 'projectID', projectID)
-  for (const promptID of promptIDs) {
-    await deletePromptForUser(userID, promptID)
-  }
+
+  const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', projectID)
-  await getDatastore().delete([...accessKeys, ...usageKeys, ...inputKeys, buildKey(Entity.PROJECT, projectID)])
+  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
+  const usageKeys = await getEntityKeys(Entity.USAGE, 'projectID', projectID)
+  await getDatastore().delete([
+    ...accessKeys,
+    ...inputKeys,
+    ...endpointKeys,
+    ...usageKeys,
+    ...commentKeys,
+    ...runKeys,
+    ...versionKeys,
+    ...promptKeys,
+    ...chainKeys,
+    buildKey(Entity.PROJECT, projectID),
+  ])
 }
