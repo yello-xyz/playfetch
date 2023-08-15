@@ -17,11 +17,6 @@ export default function TestDataPane({
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
 }) {
-  const [activeColumn, setActiveColumn] = useState(0)
-  if (activeColumn > 0 && activeColumn >= variables.length) {
-    setActiveColumn(0)
-  }
-
   const containerRef = useRef<HTMLDivElement>(null)
 
   const filterEmptyInputs = (inputs: string[]) => inputs.filter(input => input.trim().length > 0)
@@ -43,22 +38,14 @@ export default function TestDataPane({
     })
   }
 
-  const selectColumn = (index: number) => {
-    persistInputValuesIfNeeded()
-    setActiveColumn(index)
-  }
-
   const gridTemplateColumns = `42px repeat(${variables.length}, minmax(240px, 1fr))`
   const rowCount = Math.max(...variables.map(variable => inputValues[variable]?.length ?? 0))
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
-        <div className='border border-gray-200 bg-gray-25'/>
+        <div className='border border-gray-200 bg-gray-25' />
         {variables.map((variable, index) => (
-          <div
-            key={index}
-            className='flex items-center px-3 py-1 border-r border-gray-200 border-y bg-pink-25'
-            onClick={() => selectColumn(index)}>
+          <div key={index} className='flex items-center px-3 py-1 border-r border-gray-200 border-y bg-pink-25'>
             <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>{variable}</span>
           </div>
         ))}
