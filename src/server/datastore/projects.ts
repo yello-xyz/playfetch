@@ -296,13 +296,17 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
 
   const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
+  
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
   const usageKeys = await getEntityKeys(Entity.USAGE, 'projectID', projectID)
+  const logEntryKeys = await getEntityKeys(Entity.LOG, 'projectID', projectID)
+  
   await getDatastore().delete([
     ...accessKeys,
     ...inputKeys,
-    ...endpointKeys,
+    ...logEntryKeys,
     ...usageKeys,
+    ...endpointKeys,
     ...commentKeys,
     ...runKeys,
     ...versionKeys,

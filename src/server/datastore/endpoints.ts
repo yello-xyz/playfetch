@@ -5,6 +5,7 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
+  getEntityKeys,
   getFilteredEntities,
   getFilteredEntity,
   getID,
@@ -166,7 +167,8 @@ export async function updateEndpointForUser(
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData)
-  const keysToDelete = [buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
+  const logEntryKeys = await getEntityKeys(Entity.LOG, 'endpointID', endpointID)
+  const keysToDelete = [...logEntryKeys, buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
   await getDatastore().delete(keysToDelete)
 }
 
