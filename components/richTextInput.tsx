@@ -1,7 +1,6 @@
 import { RefObject, Suspense, useCallback, useEffect, useState } from 'react'
 import { useRef } from 'react'
 import Label from './label'
-import { InputVariableClass } from './inputVariable'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
@@ -13,10 +12,10 @@ const escapeSpecialCharacters = (text: string) =>
 const unescapeSpecialCharacters = (html: string) =>
   html.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 
+const InputVariableClass = 'text-white rounded px-1 py-0.5 bg-purple-400 whitespace-nowrap font-normal'
+
 const printVariables = (text: string) =>
-  text
-    .replace(/}}$/, '}}&nbsp;')
-    .replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
+  text.replace(/}}$/, '}}&nbsp;').replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
 
 const parseVariables = (html: string) =>
   html
@@ -174,7 +173,7 @@ export default function RichTextInput({
         htmlValue={htmlValue}
         onChange={updateHTMLValue}
         allowedTags={['br', 'div', 'b']}
-        allowedAttributes={{ b: ['class', 'style'] }}
+        allowedAttributes={{ b: ['class'] }}
         innerRef={contentEditableRef}
         onLoadedRef={onSuspenseLoaded}
       />
