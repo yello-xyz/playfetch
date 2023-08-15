@@ -30,6 +30,7 @@ export default function TestDataPane({
       ],
     })
   const addInput = () => {
+    persistInputValuesIfNeeded()
     variables.forEach(variable => updateInputs(variable, '', inputValues[variable].length))
     setTimeout(() => {
       const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
@@ -42,7 +43,7 @@ export default function TestDataPane({
   const rowCount = Math.max(...variables.map(variable => inputValues[variable]?.length ?? 0))
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
+      <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
         <div className='border border-gray-200 bg-gray-25' />
         {variables.map((variable, index) => (
           <div key={index} className='flex items-center px-3 py-1 border-r border-gray-200 border-y bg-pink-25'>
