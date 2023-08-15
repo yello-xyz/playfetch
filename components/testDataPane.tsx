@@ -1,6 +1,5 @@
 import { Suspense, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
-import linkIcon from '@/public/link.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
 
@@ -63,10 +62,9 @@ export default function TestDataPane({
         {variables.map((variable, index) => (
           <div
             key={index}
-            className={`flex items-center border-r border-gray-100 px-3 py-1 ${styleForColumn(index)}`}
+            className={`flex items-center border-r border-gray-100 px-3 py-1 bg-pink-25 ${styleForColumn(index)}`}
             onClick={() => selectColumn(index)}>
-            <Icon icon={linkIcon} />
-            <span className='flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis'>{variable}</span>
+            <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>{variable}</span>
           </div>
         ))}
       </div>

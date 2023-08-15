@@ -12,7 +12,7 @@ const escapeSpecialCharacters = (text: string) =>
 const unescapeSpecialCharacters = (html: string) =>
   html.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 
-const InputVariableClass = 'text-white rounded px-1 py-0.5 bg-purple-400 whitespace-nowrap font-normal'
+const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
 const printVariables = (text: string) =>
   text.replace(/}}$/, '}}&nbsp;').replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
