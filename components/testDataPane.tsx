@@ -19,28 +19,34 @@ export default function TestDataPane({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const filterEmptyInputs = (inputs: string[]) => inputs.filter(input => input.trim().length > 0)
+  const rowCount = Math.max(...variables.map(variable => inputValues[variable]?.length ?? 0))
+
+  const paddedColumn = (variable: string, length: number) => [
+    ...inputValues[variable],
+    ...Array.from({ length: Math.max(0, length - inputValues[variable].length) }).map(() => ''),
+  ]
   const updateInputs = (variable: string, value: string, index: number) =>
     setInputValues({
       ...inputValues,
       [variable]: [
-        ...filterEmptyInputs(inputValues[variable].slice(0, index)),
+        ...paddedColumn(variable, index).slice(0, index),
         value,
-        ...filterEmptyInputs(inputValues[variable].slice(index + 1)),
+        ...paddedColumn(variable, index).slice(index + 1),
       ],
     })
   const addInput = () => {
     persistInputValuesIfNeeded()
-    variables.forEach(variable => updateInputs(variable, '', inputValues[variable].length))
-    setTimeout(() => {
-      const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
-      const lastChild = editables[editables.length - 1] as HTMLElement
-      lastChild?.focus()
-    })
+    if (variables.some(variable => (inputValues[variable]?.[rowCount - 1] ?? '').length > 0)) {
+      variables.forEach(variable => updateInputs(variable, '', rowCount))
+      setTimeout(() => {
+        const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
+        const lastChild = editables[editables.length - 1] as HTMLElement
+        lastChild?.focus()
+      })
+    }
   }
 
   const gridTemplateColumns = `42px repeat(${variables.length}, minmax(240px, 1fr))`
-  const rowCount = Math.max(...variables.map(variable => inputValues[variable]?.length ?? 0))
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
