@@ -44,10 +44,12 @@ const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => {
-  const versionIDsUsedInChains = project.chains
-    .flatMap(chain => chain.items as ChainItem[])
-    .filter(IsPromptChainItem)
-    .map(item => item.versionID)
+  const versionIDsUsedInChains = {} as { [versionID: number]: string }
+  project.chains.forEach(chain =>
+    (chain.items as ChainItem[]).filter(IsPromptChainItem).forEach(item => {
+      versionIDsUsedInChains[item.versionID] = chain.name
+    })
+  )
 
   const versionIDsUsedAsEndpoints = project.endpoints
     .map(endpoint => endpoint.versionID)
@@ -57,7 +59,7 @@ export const toActivePrompt = (promptID: number, versions: Version[], project: A
     ...project.prompts.find(prompt => prompt.id === promptID)!,
     versions: versions.map(version => ({
       ...version,
-      usedInChain: versionIDsUsedInChains.includes(version.id),
+      usedInChain: versionIDsUsedInChains[version.id] ?? null,
       usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
     })),
     users: project.users,
