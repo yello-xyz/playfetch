@@ -10,7 +10,7 @@ const escapeSpecialCharacters = (text: string) =>
   text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
 const unescapeSpecialCharacters = (html: string) =>
-  html.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  html.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
 
 const linesToDivs = (text: string) =>
   text

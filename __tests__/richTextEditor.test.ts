@@ -15,6 +15,7 @@ testText('{{hello {{world}}}} ')
 testText('hello\nworld')
 testText('hello\n{{world}} ')
 testText('{{hello}}\nworld')
+testText('&lt;')
 
 testHTML('A')
 testHTML('A ')
