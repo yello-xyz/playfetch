@@ -79,7 +79,7 @@ function EndpointsGroup({
         <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
         {parent.name}
       </div>
-      <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
+      <div className='grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>
         <TableHeader first>Enabled</TableHeader>
         <TableHeader>Endpoint</TableHeader>
         <TableHeader>Environment</TableHeader>

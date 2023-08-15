@@ -1,4 +1,4 @@
-import { Suspense, useRef, useState } from 'react'
+import { Fragment, Suspense, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
 import { InputValues } from '@/types'
@@ -27,11 +27,6 @@ export default function TestDataPane({
 
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const styleForColumn = (index: number) =>
-    (index === activeColumn ? 'text-gray-800' : 'text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100') +
-    ' ' +
-    (index === variables.length - 1 ? 'flex-grow' : '')
-
   const filterEmptyInputs = (inputs: string[]) => inputs.filter(input => input.trim().length > 0)
   const updateInputs = (value: string, index = activeInputs.length) =>
     setInputValues({
@@ -56,40 +51,37 @@ export default function TestDataPane({
     setActiveColumn(index)
   }
 
+  const gridTemplateColumns = `42px repeat(${variables.length}, minmax(240px, 1fr))`
+  const rowCount = Math.max(...variables.map(variable => inputValues[variable]?.length ?? 0))
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div className='flex overflow-x-auto border-l border-gray-100 shrink-0 border-y'>
+      <div className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
+        <div className='border border-gray-200 bg-gray-25'/>
         {variables.map((variable, index) => (
           <div
             key={index}
-            className={`flex items-center border-r border-gray-100 px-3 py-1 bg-pink-25 ${styleForColumn(index)}`}
+            className='flex items-center px-3 py-1 border-r border-gray-200 border-y bg-pink-25'
             onClick={() => selectColumn(index)}>
             <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>{variable}</span>
           </div>
         ))}
-      </div>
-      <div ref={containerRef} className='flex flex-col'>
-        <div className='flex'>
-          <div className='border-b border-l border-gray-100 w-14' />
-          <div className='w-full px-3 py-2 font-medium text-gray-800 bg-white border-b border-gray-100 border-x'>
-            Value
-          </div>
-        </div>
-        {activeInputs.map((value, index) => (
-          <div key={index} className='flex'>
-            <div className='py-1 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
-            <Suspense>
-              <ContentEditable
-                className='w-full px-3 py-1 text-sm bg-white border-b border-gray-100 outline-none border-x line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border-t'
-                htmlValue={value}
-                onChange={value => updateInputs(value, index)}
-              />
-            </Suspense>
-          </div>
+        {Array.from({ length: rowCount }).map((_, index) => (
+          <Fragment key={index}>
+            <div className='py-1 text-center text-gray-400 border-b border-gray-200 border-x'>#{index + 1}</div>
+            {variables.map((variable, index) => (
+              <Suspense>
+                <ContentEditable
+                  className='w-full px-3 py-1 text-sm border-b border-r border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border'
+                  htmlValue={inputValues[variable]?.[index] ?? ''}
+                  onChange={() => {}}
+                />
+              </Suspense>
+            ))}
+          </Fragment>
         ))}
       </div>
       <div
-        className='flex justify-center border-b border-gray-100 border-x py-1.5 cursor-pointer items-center font-medium'
+        className='flex justify-center border-b border-gray-200 border-x py-1.5 cursor-pointer items-center font-medium'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add
