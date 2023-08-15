@@ -1,15 +1,11 @@
 import { RefObject, Suspense, useCallback, useEffect, useState } from 'react'
 import { useRef } from 'react'
 import Label from './label'
-import linkIcon from '@/public/linkWhite.svg'
 import { InputVariableClass } from './inputVariable'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
 const ContentEditable = dynamic(() => import('./contentEditable'))
-
-const LinkedVariableClass = `${InputVariableClass} pl-5 bg-no-repeat bg-[left_2px_center]`
-const LinkedVariableStyle = `background-image: url('${linkIcon.src}')`
 
 const escapeSpecialCharacters = (text: string) =>
   text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -20,7 +16,7 @@ const unescapeSpecialCharacters = (html: string) =>
 const printVariables = (text: string) =>
   text
     .replace(/}}$/, '}}&nbsp;')
-    .replace(/{{([^{]*?)}}/g, `<b class="${LinkedVariableClass}" style="${LinkedVariableStyle}">$1</b>`)
+    .replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
 
 const parseVariables = (html: string) =>
   html
