@@ -43,12 +43,7 @@ export async function saveInputValues(
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })
 
-async function getTrustedParentInputValues(parentID: number) {
+export async function getTrustedParentInputValues(parentID: number) {
   const entities = await getEntities(Entity.INPUT, 'parentID', parentID)
   return Object.fromEntries(entities.map(toInput).map(input => [input.name, input.values])) as InputValues
-}
-
-export async function getPromptInputValuesForUser(userID: number, promptID: number) {
-  await ensurePromptAccess(userID, promptID)
-  return getTrustedParentInputValues(promptID)
 }

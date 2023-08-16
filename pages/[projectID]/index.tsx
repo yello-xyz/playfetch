@@ -13,6 +13,7 @@ import {
   ChainItem,
   LogEntry,
   InputValues,
+  Prompt,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -22,7 +23,7 @@ import ClientRoute, {
   PromptRoute,
   WorkspaceRoute,
 } from '@/components/clientRoute'
-import { getPromptVersionsForUser } from '@/src/server/datastore/prompts'
+import { getPromptForUser } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
@@ -39,13 +40,12 @@ import useSavePrompt from '@/components/useSavePrompt'
 import dynamic from 'next/dynamic'
 import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
-import { getPromptInputValuesForUser } from '@/src/server/datastore/inputs'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 export const toActivePrompt = (
-  promptID: number,
+  prompt: Prompt,
   versions: Version[],
   inputValues: InputValues,
   project: ActiveProject
@@ -62,7 +62,7 @@ export const toActivePrompt = (
     .filter(versionID => !!versionID)
 
   return {
-    ...project.prompts.find(prompt => prompt.id === promptID)!,
+    ...prompt,
     versions: versions.map(version => ({
       ...version,
       usedInChain: versionIDsUsedInChains[version.id] ?? null,
@@ -86,9 +86,8 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   const activeProject = await getActiveProject(user.id, projectID!, buildURL)
 
   const getActivePrompt = async (promptID: number): Promise<ActivePrompt | undefined> => {
-    const versions = await getPromptVersionsForUser(user.id, promptID)
-    const inputValues = await getPromptInputValuesForUser(user.id, promptID)
-    return toActivePrompt(promptID, versions, inputValues, activeProject)
+    const { prompt, versions, inputValues } = await getPromptForUser(user.id, promptID)
+    return toActivePrompt(prompt, versions, inputValues, activeProject)
   }
 
   let activeItem =
@@ -165,8 +164,8 @@ export default function Home({
   }
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
-    const { versions, inputValues } = await api.getPromptEntities(promptID)
-    const newPrompt = toActivePrompt(promptID, versions, inputValues, activeProject)
+    const { prompt, versions, inputValues } = await api.getPrompt(promptID)
+    const newPrompt = toActivePrompt(prompt, versions, inputValues, activeProject)
     setActiveItem(newPrompt)
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }

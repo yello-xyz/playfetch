@@ -14,6 +14,7 @@ import {
   ChainItemWithInputs,
   LogEntry,
   InputValues,
+  Prompt,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -107,8 +108,8 @@ const api = {
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },
-  getPromptEntities: function (promptID: number): Promise<{ versions: Version[], inputValues: InputValues }> {
-    return post(this.getPromptEntities, { promptID })
+  getPrompt: function (promptID: number): Promise<{ prompt: Prompt; versions: Version[]; inputValues: InputValues }> {
+    return post(this.getPrompt, { promptID })
   },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })

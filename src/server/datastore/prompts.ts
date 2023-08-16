@@ -11,9 +11,10 @@ import {
   getTimestamp,
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
-import { Prompt, Version } from '@/types'
+import { InputValues, Prompt, Version } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripPromptSentinels } from '@/src/common/formatting'
+import { getTrustedParentInputValues } from './inputs'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -44,13 +45,23 @@ export const toPrompt = (data: any): Prompt => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getPromptVersionsForUser(userID: number, promptID: number): Promise<Version[]> {
-  await ensurePromptAccess(userID, promptID)
+export async function getPromptForUser(
+  userID: number,
+  promptID: number
+): Promise<{ prompt: Prompt; versions: Version[]; inputValues: InputValues }> {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
   const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
 
-  return versions.map(version => toVersion(version, runs, comments)).reverse()
+  const inputValues = await getTrustedParentInputValues(promptID)
+
+  return {
+    prompt: toPrompt(promptData),
+    versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
+    inputValues,
+  }
 }
 
 export const getUniqueNameWithFormat = async (

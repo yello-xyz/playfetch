@@ -33,21 +33,21 @@ export default function ChainView({
 
   const refreshPrompt = useCallback(
     async (promptID: number) =>
-      api.getPromptEntities(promptID).then(({ versions, inputValues }) => {
-        const prompt = toActivePrompt(promptID, versions, inputValues, project)
-        setActivePromptCache(cache => ({ ...cache, [promptID]: prompt }))
+      api.getPrompt(promptID).then(({ prompt, versions, inputValues }) => {
+        const activePrompt = toActivePrompt(prompt, versions, inputValues, project)
+        setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
         setNodes(
           nodes.map(node =>
-            IsPromptChainItem(node) && node.promptID === prompt.id
+            IsPromptChainItem(node) && node.promptID === promptID
               ? {
                   ...node,
-                  prompt,
-                  version: prompt.versions.find(version => version.id === node.versionID),
+                  activePrompt,
+                  version: activePrompt.versions.find(version => version.id === node.versionID),
                 }
               : node
           )
         )
-        return prompt
+        return activePrompt
       }),
     [nodes, project]
   )

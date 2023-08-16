@@ -119,10 +119,10 @@ export default function EndpointsView({
       if (promptCache[parent.id]) {
         setActivePrompt(promptCache[parent.id])
       } else {
-        api.getPromptEntities(parent.id).then(({ versions, inputValues }) => {
-          const prompt = toActivePrompt(parent.id, versions, inputValues, project)
-          setPromptCache({ ...promptCache, [parent.id]: prompt })
-          setActivePrompt(prompt)
+        api.getPrompt(parent.id).then(({ prompt, versions, inputValues }) => {
+          const activePrompt = toActivePrompt(prompt, versions, inputValues, project)
+          setPromptCache({ ...promptCache, [parent.id]: activePrompt })
+          setActivePrompt(activePrompt)
         })
       }
     }
