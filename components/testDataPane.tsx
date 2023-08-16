@@ -17,7 +17,7 @@ export default function TestDataPane({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const rowCount = Math.max(...variables.map(variable => inputValues[variable]?.length ?? 0))
+  const rowCount = Math.max(1, ...variables.map(variable => inputValues[variable]?.length ?? 0))
 
   const paddedColumn = (variable: string, length: number) => [
     ...inputValues[variable],
