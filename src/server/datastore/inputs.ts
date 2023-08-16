@@ -2,7 +2,6 @@ import { and } from '@google-cloud/datastore'
 import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityID, getID } from './datastore'
 import { ensureProjectAccess } from './projects'
 import { InputValues } from '@/types'
-import { ensurePromptAccess } from './prompts'
 
 export async function migrateInputs() {
   const datastore = getDatastore()

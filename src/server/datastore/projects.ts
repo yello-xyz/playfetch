@@ -114,7 +114,6 @@ export async function getActiveProject(
 
   return {
     ...toProject(projectData, userID),
-    inputValues: {},
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? '', buildURL),
     prompts,

@@ -9,7 +9,6 @@ import {
   ActiveProject,
   AvailableProvider,
   Workspace,
-  Chain,
   ChainItem,
   LogEntry,
   InputValues,

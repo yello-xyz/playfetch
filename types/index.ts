@@ -28,7 +28,6 @@ export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {
   endpoints: ResolvedEndpoint[]
-  inputValues: InputValues
   availableFlavors: string[]
   prompts: Prompt[]
   chains: Chain[]
