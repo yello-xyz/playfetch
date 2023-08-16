@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntityIDs,
   getEntityKeys,
   getID,
   getKeyedEntities,
@@ -21,11 +20,10 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, deletePromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addPromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { toUser } from './users'
-import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
-import { deleteChainForUser, toChain } from './chains'
+import { toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
 import { StripPromptSentinels } from '@/src/common/formatting'
@@ -116,7 +114,7 @@ export async function getActiveProject(
 
   return {
     ...toProject(projectData, userID),
-    inputValues: await getProjectInputValues(projectID),
+    inputValues: {},
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? '', buildURL),
     prompts,
