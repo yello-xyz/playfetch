@@ -96,6 +96,7 @@ module.exports = {
       'gray-600': '#9AA2AD',
       'gray-700': '#8C94A1',
       'gray-800': '#838C9A',
+      'pink-50': '#F9D9F6',
       'red-50': '#FDE5E0',
       white: '#FFFFFF',
     },

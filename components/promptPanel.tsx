@@ -48,6 +48,7 @@ export default function PromptPanel({
   }
 
   // In the play tab, we resolve each variable with any available input and otherwise let it stand for itself.
+  // TODO pick first non-empty row rather than the first row now that we allow empty rows.
   const inputs = Object.fromEntries(
     ExtractPromptVariables(prompt).map(variable => [variable, inputValues?.[variable]?.[0] ?? variable])
   )

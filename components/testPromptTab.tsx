@@ -69,7 +69,7 @@ export default function TestPromptTab({
       <Allotment.Pane minSize={minHeight}>
         <div className='h-full p-4'>
           <div className='flex flex-col h-full gap-4'>
-            <div className='self-start'>
+            <div className='flex gap-2'>
               <VersionSelector
                 versions={activePrompt.versions}
                 endpoints={activeProject.endpoints}
@@ -77,6 +77,11 @@ export default function TestPromptTab({
                 setActiveVersion={selectVersion}
                 labelColors={AvailableLabelColorsForPrompt(activePrompt)}
               />
+              {selectedIndices.length > 1 && (
+                <div className='flex-grow px-3 py-2 border rounded border-pink-50 bg-pink-25'>
+                  Running this prompt will use {selectedIndices.length} rows of test data.
+                </div>
+              )}
             </div>
             <PromptPanel
               initialPrompt={currentPrompt}
