@@ -20,8 +20,8 @@ export default function TestDataPane({
   const rowCount = Math.max(1, ...variables.map(variable => inputValues[variable]?.length ?? 0))
 
   const paddedColumn = (variable: string, length: number) => [
-    ...inputValues[variable],
-    ...Array.from({ length: Math.max(0, length - inputValues[variable].length) }).map(() => ''),
+    ...(inputValues[variable] ?? []),
+    ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }).map(() => ''),
   ]
   const updateInputs = (variable: string, value: string, index: number) =>
     setInputValues({
