@@ -46,11 +46,12 @@ export const RichTextFromHTML = (html: string) => unescapeSpecialCharacters(divs
 
 const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
-const printVariables = (text: string) => text.replace(/{{([^{]*?)}}/g, `<b class="${InputVariableClass}">$1</b>`)
+const printVariables = (text: string) => text.replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
 
 const parseVariables = (html: string) =>
   html
-    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '{{$1}}')
+    .replace(/<b[^>]*>([^>{}]*?)<\/b>/g, '{{$1}}')
+    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '$1')
     .replaceAll('{{}}', '')
     .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
     .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
@@ -178,10 +179,10 @@ export function PromptInput({
   }, [])
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
-    if (isInput) {
-      setValue(value.replaceAll(`{{${text}}}`, text))
-    } else {
+    if (!isInput) {
       range.surroundContents(document.createElement('b'))
+    } else if (!!text.match(/^{{(.*)}}$/)) {
+      setValue(value.replaceAll(text, text.slice(2, -2)))
     }
   }
 

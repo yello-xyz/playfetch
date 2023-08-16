@@ -53,7 +53,9 @@ export default function TestDataPane({
         <div className='border border-gray-200 bg-gray-25' />
         {variables.map((variable, index) => (
           <div key={index} className='flex items-center px-3 py-1 border-r border-gray-200 border-y bg-pink-25'>
-            <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>{variable}</span>
+            <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>
+              {`{{${variable}}}`}
+            </span>
           </div>
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
