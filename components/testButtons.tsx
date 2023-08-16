@@ -7,44 +7,38 @@ import { InputValues, PromptInputs } from '@/types'
 type TestMode = 'first' | 'last' | 'random' | 'all'
 
 const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: string }[] => {
-  const selectInput = (inputs: string[], mode: TestMode): string => {
-    switch (mode) {
-      default:
-      case 'first':
-        return inputs[0] ?? ''
-      case 'last':
-        return inputs[inputs.length - 1] ?? ''
-      case 'random':
-        return inputs[Math.floor(Math.random() * inputs.length)] ?? ''
-    }
+  const columns = Object.values(inputs)
+  const maxRowCount = Math.max(...columns.map(values => values.length))
+  const emptyRowIndices = Array.from({ length: maxRowCount }, (_, i) => i).filter(i =>
+    columns.every(column => column[i] === undefined || column[i].length === 0)
+  )
+
+  const filteredPaddedInputs: InputValues = {}
+  for (const [key, values] of Object.entries(inputs)) {
+    filteredPaddedInputs[key] = [
+      ...values,
+      ...Array.from({ length: maxRowCount - values.length }).map(() => ''),
+    ].filter((_, i) => !emptyRowIndices.includes(i))
+  }
+  const rowCount = Math.max(...Object.values(filteredPaddedInputs).map(values => values.length))
+
+  if (rowCount === 0) {
+    return []
   }
 
-  const cartesian = (array: string[][]) =>
-    array.reduce(
-      (a, b) => {
-        return a
-          .map(x => {
-            return b.map(y => {
-              return x.concat(y)
-            })
-          })
-          .reduce((c, d) => c.concat(d), [])
-      },
-      [[]] as string[][]
-    )
-
-  const entries = Object.entries(inputs)
+  const entries = Object.entries(filteredPaddedInputs)
+  const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
 
   switch (mode) {
     default:
     case 'first':
+      return [selectRow(0)]
     case 'last':
+      return [selectRow(rowCount - 1)]
     case 'random':
-      return [Object.fromEntries(entries.map(([key, values]) => [key, selectInput(values, mode)]))]
+      return [selectRow(Math.floor(Math.random() * rowCount))]
     case 'all':
-      const keys = entries.map(([key, _]) => key)
-      const values = cartesian(entries.map(([_, values]) => values))
-      return values.map(value => Object.fromEntries(keys.map((key, i) => [key, value[i]])))
+      return Array.from({ length: rowCount }, (_, i) => selectRow(i))
   }
 }
 
