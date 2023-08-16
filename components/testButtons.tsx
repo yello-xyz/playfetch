@@ -59,14 +59,14 @@ export default function TestButtons({
   inputValues,
   disabled,
   callback,
-  setSelectedIndices,
+  onSelectIndices,
 }: {
   runTitle?: string
   variables: string[]
   inputValues: InputValues
   disabled?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
-  setSelectedIndices: (indices: number[]) => void
+  onSelectIndices: (indices: number[]) => void
 }) {
   const [testMode, setTestMode] = useState<TestMode>('first')
 
@@ -75,11 +75,15 @@ export default function TestButtons({
   const [isRunningAllVariants, setRunningAllVariants] = useState(false)
 
   const allRows = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
-  const [allInputs] = selectInputs(allRows, 'all')
+  const updateTestMode = (mode: TestMode) => {
+    setTestMode(mode)
+    const [_, indices] = selectInputs(allRows, mode)
+    onSelectIndices(indices)
+  }
 
   const testPrompt = async () => {
     const [inputs, indices] = selectInputs(allRows, testMode)
-    setSelectedIndices(indices)
+    onSelectIndices(indices)
     if (inputs.length > 1) {
       setDialogPrompt({
         title: `Run ${inputs.length} times?`,
@@ -95,13 +99,14 @@ export default function TestButtons({
     }
   }
 
+  const [allInputs] = selectInputs(allRows, 'all')
   return (
     <div className='flex items-center self-end gap-4'>
       <DropdownMenu
         disabled={allInputs.length <= 1}
         size='medium'
         value={testMode}
-        onChange={value => setTestMode(value as TestMode)}>
+        onChange={value => updateTestMode(value as TestMode)}>
         <option value={'first'}>First</option>
         <option value={'last'}>Last</option>
         <option value={'random'}>Random</option>

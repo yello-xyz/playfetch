@@ -90,7 +90,7 @@ export default function TestPromptTab({
               inputValues={inputValues}
               disabled={!currentPrompt.length}
               callback={testPrompt}
-              setSelectedIndices={setSelectedIndices}
+              onSelectIndices={setSelectedIndices}
             />
           </div>
         </div>

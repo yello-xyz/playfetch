@@ -204,7 +204,7 @@ export default function ChainNodeEditor({
             variables={variables}
             inputValues={inputValues}
             callback={runChain}
-            setSelectedIndices={setSelectedIndices}
+            onSelectIndices={setSelectedIndices}
           />
         </div>
       </div>
