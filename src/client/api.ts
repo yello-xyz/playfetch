@@ -106,8 +106,8 @@ const api = {
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },
-  getPromptVersions: function (promptID: number): Promise<Version[]> {
-    return post(this.getPromptVersions, { promptID })
+  getPromptEntities: function (promptID: number): Promise<Version[]> {
+    return post(this.getPromptEntities, { promptID })
   },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
