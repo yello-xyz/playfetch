@@ -12,6 +12,7 @@ import {
   Chain,
   ChainItem,
   LogEntry,
+  InputValues,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -38,11 +39,17 @@ import useSavePrompt from '@/components/useSavePrompt'
 import dynamic from 'next/dynamic'
 import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
+import { getPromptInputValuesForUser } from '@/src/server/datastore/inputs'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
-export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => {
+export const toActivePrompt = (
+  promptID: number,
+  versions: Version[],
+  inputValues: InputValues,
+  project: ActiveProject
+): ActivePrompt => {
   const versionIDsUsedInChains = {} as { [versionID: number]: string }
   project.chains.forEach(chain =>
     (chain.items as ChainItem[]).filter(IsPromptChainItem).forEach(item => {
@@ -61,6 +68,7 @@ export const toActivePrompt = (promptID: number, versions: Version[], project: A
       usedInChain: versionIDsUsedInChains[version.id] ?? null,
       usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
     })),
+    inputValues,
     users: project.users,
     availableLabels: project.availableLabels,
   }
@@ -79,7 +87,8 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
 
   const getActivePrompt = async (promptID: number): Promise<ActivePrompt | undefined> => {
     const versions = await getPromptVersionsForUser(user.id, promptID)
-    return toActivePrompt(promptID, versions, activeProject)
+    const inputValues = await getPromptInputValuesForUser(user.id, promptID)
+    return toActivePrompt(promptID, versions, inputValues, activeProject)
   }
 
   let activeItem =
@@ -157,7 +166,7 @@ export default function Home({
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
     const { versions, inputValues } = await api.getPromptEntities(promptID)
-    const newPrompt = toActivePrompt(promptID, versions, activeProject)
+    const newPrompt = toActivePrompt(promptID, versions, inputValues, activeProject)
     setActiveItem(newPrompt)
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }

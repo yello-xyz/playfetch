@@ -2,6 +2,7 @@ import { and } from '@google-cloud/datastore'
 import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityID, getID } from './datastore'
 import { ensureProjectAccess } from './projects'
 import { InputValues } from '@/types'
+import { ensurePromptAccess } from './prompts'
 
 export async function migrateInputs() {
   const datastore = getDatastore()
@@ -42,7 +43,12 @@ export async function saveInputValues(
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })
 
-export async function getTrustedParentInputValues(parentID: number) {
+async function getTrustedParentInputValues(parentID: number) {
   const entities = await getEntities(Entity.INPUT, 'parentID', parentID)
   return Object.fromEntries(entities.map(toInput).map(input => [input.name, input.values])) as InputValues
+}
+
+export async function getPromptInputValuesForUser(userID: number, promptID: number) {
+  await ensurePromptAccess(userID, promptID)
+  return getTrustedParentInputValues(promptID)
 }

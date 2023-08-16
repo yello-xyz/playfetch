@@ -1,4 +1,4 @@
-import { getTrustedParentInputValues } from '@/src/server/datastore/inputs';
+import { getPromptInputValuesForUser } from '@/src/server/datastore/inputs';
 import { getPromptVersionsForUser } from '@/src/server/datastore/prompts'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { Version, User, InputValues } from '@/types'
@@ -10,7 +10,7 @@ async function getPromptEntities(
   user: User
 ) {
   const versions = await getPromptVersionsForUser(user.id, req.body.promptID)
-  const inputValues = await getTrustedParentInputValues(req.body.promptID)
+  const inputValues = await getPromptInputValuesForUser(user.id, req.body.promptID)
   res.json({ versions, inputValues })
 }
 

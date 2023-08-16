@@ -48,6 +48,7 @@ export type VersionWithReferences = Version & { usedInChain: string | null; used
 
 export type ActivePrompt = Prompt & {
   versions: VersionWithReferences[]
+  inputValues: InputValues
   users: User[]
   availableLabels: string[]
 }
