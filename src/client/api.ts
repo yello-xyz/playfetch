@@ -206,8 +206,8 @@ const api = {
   toggleRunLabel: function (runID: number, projectID: number, label: string, checked: boolean) {
     return post(this.toggleRunLabel, { runID, projectID, label, checked })
   },
-  updateInputValues: function (projectID: number, parentID: number, name: string, values: string[]) {
-    return post(this.updateInputValues, { projectID, parentID, name, values })
+  updateInputValues: function (parentID: number, parentType: 'prompt' | 'chain', name: string, values: string[]) {
+    return post(this.updateInputValues, { parentID, parentType, name, values })
   },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })

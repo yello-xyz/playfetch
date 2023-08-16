@@ -147,7 +147,6 @@ export default function ChainView({
           activeItemIndex={activeNodeIndex - 1}
           activeNode={activeNode}
           promptCache={promptCache}
-          project={project}
           onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
           savePrompt={() => savePrompt().then(versionID => versionID!)}
           selectVersion={selectVersion}

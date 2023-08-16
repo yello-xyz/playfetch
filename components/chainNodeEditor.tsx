@@ -13,7 +13,7 @@ import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
 import { PromptInput } from './richTextInput'
-import useInputValues from './inputValues'
+import useInputValues from './useInputValues'
 import useCheckProvider from './checkProvider'
 import { ConsumeRunStreamReader } from './promptView'
 import api from '@/src/client/api'
@@ -58,7 +58,6 @@ export default function ChainNodeEditor({
   activeItemIndex,
   activeNode,
   promptCache,
-  project,
   onRun,
   savePrompt,
   selectVersion,
@@ -70,7 +69,6 @@ export default function ChainNodeEditor({
   activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
-  project: ActiveProject
   onRun: () => void
   savePrompt: () => Promise<number>
   selectVersion: (version: Version) => void
@@ -78,8 +76,8 @@ export default function ChainNodeEditor({
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     chain.inputValues,
-    project.id,
     chain.id,
+    'chain',
     JSON.stringify(activeNode)
   )
 

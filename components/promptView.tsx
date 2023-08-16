@@ -2,7 +2,7 @@ import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Ve
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
-import useInputValues from './inputValues'
+import useInputValues from './useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { useState } from 'react'
@@ -70,8 +70,8 @@ export default function PromptView({
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     prompt.inputValues,
-    project.id,
     prompt.id,
+    'prompt',
     activeTab
   )
 
