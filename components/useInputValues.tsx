@@ -1,20 +1,19 @@
 import { Dispatch, SetStateAction, useState } from 'react'
-import { InputValues } from '@/types'
+import { ActiveChain, ActivePrompt, InputValues } from '@/types'
 import api from '@/src/client/api'
+import { useInitialState } from './useInitialState'
 
 export default function useInputValues(
-  initialInputs: InputValues,
-  parentID: number,
-  parentType: 'prompt' | 'chain',
+  parent: ActivePrompt | ActiveChain,
   activeTab: string
 ): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
-  const [originalInputValues, setOriginalInputValues] = useState(initialInputs)
-  const [inputValues, setInputValues] = useState(originalInputValues)
+  const [originalInputValues, setOriginalInputValues] = useInitialState(parent.inputValues)
+  const [inputValues, setInputValues] = useInitialState(originalInputValues)
 
   const persistInputValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
       if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(parentID, parentType, variable, inputs)
+        api.updateInputValues(parent.id, 'versions' in parent ? 'prompt' : 'chain', variable, inputs)
       }
     }
     setOriginalInputValues(inputValues)

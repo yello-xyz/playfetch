@@ -68,12 +68,7 @@ export default function PromptView({
 }) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('versions')
 
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    prompt.inputValues,
-    prompt.id,
-    'prompt',
-    activeTab
-  )
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
   const [currentConfig, setCurrentConfig] = useInitialState(activeVersion.config, ConfigsEqual)

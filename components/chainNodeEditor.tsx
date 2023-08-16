@@ -74,12 +74,7 @@ export default function ChainNodeEditor({
   selectVersion: (version: Version) => void
   setModifiedVersion: (version: Version) => void
 }) {
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    chain.inputValues,
-    chain.id,
-    'chain',
-    JSON.stringify(activeNode)
-  )
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
 
   const checkProviderAvailable = useCheckProvider()
 
