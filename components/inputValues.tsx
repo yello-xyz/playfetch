@@ -5,6 +5,7 @@ import api from '@/src/client/api'
 export default function useInputValues(
   initialInputs: InputValues,
   projectID: number,
+  parentID: number,
   activeTab: string
 ): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
   const [originalInputValues, setOriginalInputValues] = useState(initialInputs)
@@ -13,7 +14,7 @@ export default function useInputValues(
   const persistInputValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
       if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(projectID, variable, inputs)
+        api.updateInputValues(projectID, parentID, variable, inputs)
       }
     }
     setOriginalInputValues(inputValues)

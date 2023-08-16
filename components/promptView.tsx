@@ -71,6 +71,7 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     project.inputValues,
     project.id,
+    prompt.id,
     activeTab
   )
 

@@ -1,5 +1,6 @@
 import {
   ActiveProject,
+  Chain,
   ChainItem,
   ChainItemWithInputs,
   CodeChainItem,
@@ -51,6 +52,7 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) =>
 }
 
 export default function ChainNodeEditor({
+  chain,
   items,
   setItems,
   activeItemIndex,
@@ -62,6 +64,7 @@ export default function ChainNodeEditor({
   selectVersion,
   setModifiedVersion,
 }: {
+  chain: Chain
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
@@ -76,6 +79,7 @@ export default function ChainNodeEditor({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
     project.inputValues,
     project.id,
+    chain.id,
     JSON.stringify(activeNode)
   )
 

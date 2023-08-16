@@ -8,24 +8,36 @@ export async function migrateInputs() {
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const inputData of allInputs) {
     await datastore.save(
-      toInputData(inputData.projectID, inputData.name, JSON.parse(inputData.values), getID(inputData))
+      toInputData(
+        inputData.projectID,
+        inputData.parentID,
+        inputData.name,
+        JSON.parse(inputData.values),
+        getID(inputData)
+      )
     )
   }
 }
 
-const toInputData = (projectID: number, name: string, values: string[], inputID?: number) => ({
+const toInputData = (projectID: number, parentID: number, name: string, values: string[], inputID?: number) => ({
   key: buildKey(Entity.INPUT, inputID),
-  data: { projectID, name, values: JSON.stringify(values) },
+  data: { projectID, parentID, name, values: JSON.stringify(values) },
   excludeFromIndexes: ['values'],
 })
 
-export async function saveInputValues(userID: number, projectID: number, name: string, values: string[]) {
+export async function saveInputValues(
+  userID: number,
+  projectID: number,
+  parentID: number,
+  name: string,
+  values: string[]
+) {
   await ensureProjectAccess(userID, projectID)
   const inputID = await getFilteredEntityID(
     Entity.INPUT,
-    and([buildFilter('projectID', projectID), buildFilter('name', name)])
+    and([buildFilter('parentID', parentID), buildFilter('name', name)])
   )
-  await getDatastore().save(toInputData(projectID, name, values, inputID))
+  await getDatastore().save(toInputData(projectID, parentID, name, values, inputID))
 }
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })

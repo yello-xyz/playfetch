@@ -133,6 +133,7 @@ export default function ChainView({
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
         <ChainNodeEditor
+          chain={chain}
           items={items}
           setItems={items => setNodes([InputNode, ...items, OutputNode])}
           activeItemIndex={activeNodeIndex - 1}
