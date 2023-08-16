@@ -171,7 +171,9 @@ export async function deletePromptForUser(userID: number, promptID: number) {
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
   const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'promptID', promptID)
+  const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', promptID)
   await getDatastore().delete([
+    ...inputKeys,
     ...commentKeys,
     ...runKeys,
     ...versionKeys,

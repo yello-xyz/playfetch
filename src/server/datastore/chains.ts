@@ -4,6 +4,7 @@ import {
   getDatastore,
   getEntities,
   getEntityKey,
+  getEntityKeys,
   getID,
   getKeyedEntity,
   getTimestamp,
@@ -120,6 +121,7 @@ export async function deleteChainForUser(userID: number, chainID: number) {
   if (anyEndpointKey) {
     throw new Error('Cannot delete chain with published endpoints')
   }
-  
-  await getDatastore().delete(buildKey(Entity.CHAIN, chainID))
+
+  const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', chainID)
+  await getDatastore().delete([...inputKeys, buildKey(Entity.CHAIN, chainID)])
 }
