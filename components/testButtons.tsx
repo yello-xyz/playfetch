@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
-import useModalDialogPrompt from './modalDialogContext'
 import { InputValues, PromptInputs } from '@/types'
 
 type TestMode = 'first' | 'last' | 'random' | 'all'
@@ -70,10 +69,6 @@ export default function TestButtons({
 }) {
   const [testMode, setTestMode] = useState<TestMode>('first')
 
-  const setDialogPrompt = useModalDialogPrompt()
-
-  const [isRunningAllVariants, setRunningAllVariants] = useState(false)
-
   const allRows = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
   const updateTestMode = (mode: TestMode) => {
     setTestMode(mode)
@@ -81,22 +76,10 @@ export default function TestButtons({
     onSelectIndices(indices)
   }
 
-  const testPrompt = async () => {
+  const testPrompt = () => {
     const [inputs, indices] = selectInputs(allRows, testMode)
     onSelectIndices(indices)
-    if (inputs.length > 1) {
-      setDialogPrompt({
-        title: `Run ${inputs.length} times?`,
-        confirmTitle: 'Run',
-        callback: async () => {
-          setRunningAllVariants(true)
-          await callback(inputs)
-          setRunningAllVariants(false)
-        },
-      })
-    } else {
-      await callback(inputs)
-    }
+    return callback(inputs)
   }
 
   const [allInputs] = selectInputs(allRows, 'all')
@@ -112,7 +95,7 @@ export default function TestButtons({
         <option value={'random'}>Random</option>
         <option value={'all'}>All</option>
       </DropdownMenu>
-      <PendingButton disabled={disabled || isRunningAllVariants} onClick={testPrompt}>
+      <PendingButton disabled={disabled} onClick={testPrompt}>
         {runTitle ?? 'Run'}
       </PendingButton>
     </div>
