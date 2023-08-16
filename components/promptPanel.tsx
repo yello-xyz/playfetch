@@ -6,6 +6,7 @@ import ModelSelector, { ProviderForModel } from './modelSelector'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { PromptInput } from './richTextInput'
 import { useInitialState } from './useInitialState'
+import { SelectInputRows } from './testButtons'
 
 export default function PromptPanel({
   initialPrompt,
@@ -47,11 +48,7 @@ export default function PromptPanel({
     }
   }
 
-  // In the play tab, we resolve each variable with any available input and otherwise let it stand for itself.
-  // TODO pick first non-empty row rather than the first row now that we allow empty rows.
-  const inputs = Object.fromEntries(
-    ExtractPromptVariables(prompt).map(variable => [variable, inputValues?.[variable]?.[0] ?? variable])
-  )
+  const [inputs] = SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), 'first')
 
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
@@ -68,7 +65,7 @@ export default function PromptPanel({
       {runPrompt && (
         <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />
-          <PendingButton disabled={!prompt.length} onClick={() => runPrompt(config, [inputs])}>
+          <PendingButton disabled={!prompt.length} onClick={() => runPrompt(config, inputs)}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>

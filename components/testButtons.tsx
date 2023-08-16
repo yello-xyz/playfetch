@@ -5,7 +5,13 @@ import { InputValues, PromptInputs } from '@/types'
 
 type TestMode = 'first' | 'last' | 'random' | 'all'
 
-const selectInputs = (inputs: InputValues, mode: TestMode): [{ [key: string]: string }[], number[]] => {
+export const SelectInputRows = (
+  inputValues: InputValues,
+  variables: string[],
+  mode: TestMode
+): [{ [key: string]: string }[], number[]] => {
+  const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+
   const columns = Object.values(inputs)
   const maxRowCount = Math.max(...columns.map(values => values.length))
   const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
@@ -69,20 +75,21 @@ export default function TestButtons({
 }) {
   const [testMode, setTestMode] = useState<TestMode>('first')
 
-  const allRows = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+  const selectInputs = (mode: TestMode) => SelectInputRows(inputValues, variables, mode)
+
   const updateTestMode = (mode: TestMode) => {
     setTestMode(mode)
-    const [_, indices] = selectInputs(allRows, mode)
+    const [_, indices] = selectInputs(mode)
     onSelectIndices(indices)
   }
 
   const testPrompt = () => {
-    const [inputs, indices] = selectInputs(allRows, testMode)
+    const [inputs, indices] = selectInputs(testMode)
     onSelectIndices(indices)
     return callback(inputs)
   }
 
-  const [allInputs] = selectInputs(allRows, 'all')
+  const [allInputs] = selectInputs('all')
   return (
     <div className='flex items-center self-end gap-4'>
       <DropdownMenu
