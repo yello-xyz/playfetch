@@ -154,9 +154,9 @@ export default function ChainNodeEditor({
 
   return (
     <>
-      <div className='flex flex-col items-end flex-1 h-full gap-4 py-6 overflow-hidden'>
+      <div className='flex flex-col items-end flex-1 h-full gap-4 py-4 overflow-hidden'>
         {activeNode === InputNode && variables.length > 0 && (
-          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+          <div className='flex flex-col flex-1 w-full gap-2 px-4 overflow-y-auto'>
             <Label>Test data</Label>
             <TestDataPane
               variables={variables}
@@ -179,7 +179,7 @@ export default function ChainNodeEditor({
           />
         )}
         {IsCodeChainItem(activeNode) && (
-          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
+          <div className='flex flex-col flex-1 w-full gap-2 px-4 overflow-y-auto'>
             <Label>Code Editor</Label>
             <PromptInput
               key={activeItemIndex}
@@ -191,11 +191,11 @@ export default function ChainNodeEditor({
           </div>
         )}
         {activeNode === OutputNode && (
-          <div className='flex flex-col flex-1 w-full gap-2 -mt-6 overflow-y-auto'>
+          <div className='flex flex-col flex-1 w-full gap-2 -mt-4 overflow-y-auto'>
             <RunTimeline runs={partialRuns} isRunning={isRunning} />
           </div>
         )}
-        <div className='flex items-center justify-between w-full gap-4 px-6'>
+        <div className='flex items-center justify-between w-full gap-4 px-4'>
           {IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode) ? (
             <OutputMapper
               key={activeNode.output}

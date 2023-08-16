@@ -36,7 +36,7 @@ export default function PromptChainNodeEditor({
       {loadedPrompt && activeVersion && (
         <Allotment vertical>
           <Allotment.Pane minSize={minHeight}>
-            <div className='flex flex-col h-full gap-4 px-6 pb-6'>
+            <div className='flex flex-col h-full gap-4 px-4'>
               <VersionTimeline
                 prompt={loadedPrompt}
                 activeVersion={activeVersion}
@@ -55,7 +55,7 @@ export default function PromptChainNodeEditor({
             </div>
           </Allotment.Pane>
           <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
-            <div className='h-full px-6 pt-6'>
+            <div className='h-full px-4 pt-4'>
               <PromptPanel
                 version={activeVersion}
                 setModifiedVersion={setModifiedVersion}
