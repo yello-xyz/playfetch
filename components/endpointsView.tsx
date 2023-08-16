@@ -8,6 +8,7 @@ import {
   EndpointParentsInProject,
   ResolvedEndpoint,
   LogEntry,
+  ActiveChain,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -107,26 +108,30 @@ export default function EndpointsView({
     setActiveEndpointID(endpoint.id)
     setActiveParentID(endpoint.parentID)
     if (endpoint.parentID !== activeParentID) {
-      setActivePrompt(undefined)
+      setActiveParent(undefined)
     }
   }
 
   const parent = activeParentID ? FindParentInProject(activeParentID, project) : undefined
-  const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
-  const [promptCache, setPromptCache] = useState<Record<string, ActivePrompt>>({})
+  const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
+  const [parentCache, setParentCache] = useState<Record<string, ActivePrompt | ActiveChain>>({})
   useEffect(() => {
-    if (EndpointParentIsPrompt(parent)) {
-      if (promptCache[parent.id]) {
-        setActivePrompt(promptCache[parent.id])
-      } else {
-        api.getPrompt(parent.id).then(({ prompt, versions, inputValues }) => {
-          const activePrompt = toActivePrompt(prompt, versions, inputValues, project)
-          setPromptCache({ ...promptCache, [parent.id]: activePrompt })
-          setActivePrompt(activePrompt)
-        })
-      }
+    if (parent && parentCache[parent.id]) {
+      setActiveParent(parentCache[parent.id])
+    } else if (EndpointParentIsPrompt(parent)) {
+      api.getPrompt(parent.id).then(({ prompt, versions, inputValues }) => {
+        const activePrompt = toActivePrompt(prompt, versions, inputValues, project)
+        setParentCache({ ...parentCache, [parent.id]: activePrompt })
+        setActiveParent(activePrompt)
+      })
+    } else if (parent) {
+      api.getChain(parent.id).then(activeChain => {
+        setParentCache({ ...parentCache, [parent.id]: activeChain })
+        setActiveParent(activeChain)
+      })
     }
-  }, [parent, project, promptCache])
+  }, [parent, project, parentCache])
+  const activePrompt = EndpointParentIsPrompt(parent) ? activeParent as ActivePrompt : undefined
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
   const variables = parent
@@ -164,11 +169,11 @@ export default function EndpointsView({
               onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
               onRefresh={refresh}
             />
-            {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && (
+            {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && activeParent && (
               <ExamplePane
                 endpoint={activeEndpoint}
                 variables={variables}
-                inputValues={project.inputValues}
+                inputValues={activeParent.inputValues}
                 defaultFlavor={project.availableFlavors[0]}
               />
             )}
