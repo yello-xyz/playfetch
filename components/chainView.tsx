@@ -33,7 +33,7 @@ export default function ChainView({
 
   const refreshPrompt = useCallback(
     async (promptID: number) =>
-      api.getPromptEntities(promptID).then(versions => {
+      api.getPromptEntities(promptID).then(({ versions, inputValues }) => {
         const prompt = toActivePrompt(promptID, versions, project)
         setActivePromptCache(cache => ({ ...cache, [promptID]: prompt }))
         setNodes(

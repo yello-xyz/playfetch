@@ -156,8 +156,8 @@ export default function Home({
   }
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
-    const newVersions = await api.getPromptEntities(promptID)
-    const newPrompt = toActivePrompt(promptID, newVersions, activeProject)
+    const { versions, inputValues } = await api.getPromptEntities(promptID)
+    const newPrompt = toActivePrompt(promptID, versions, activeProject)
     setActiveItem(newPrompt)
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }

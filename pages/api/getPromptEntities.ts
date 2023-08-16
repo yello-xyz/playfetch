@@ -1,11 +1,17 @@
+import { getTrustedParentInputValues } from '@/src/server/datastore/inputs';
 import { getPromptVersionsForUser } from '@/src/server/datastore/prompts'
 import { withLoggedInUserRoute } from '@/src/server/session'
-import { Version, User } from '@/types'
+import { Version, User, InputValues } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function getPromptEntities(req: NextApiRequest, res: NextApiResponse<Version[]>, user: User) {
+async function getPromptEntities(
+  req: NextApiRequest,
+  res: NextApiResponse<{ versions: Version[]; inputValues: InputValues }>,
+  user: User
+) {
   const versions = await getPromptVersionsForUser(user.id, req.body.promptID)
-  res.json(versions)
+  const inputValues = await getTrustedParentInputValues(req.body.promptID)
+  res.json({ versions, inputValues })
 }
 
 export default withLoggedInUserRoute(getPromptEntities)
