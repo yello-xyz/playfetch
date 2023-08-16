@@ -69,7 +69,7 @@ export default function PromptView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('versions')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    project.inputValues,
+    prompt.inputValues,
     project.id,
     prompt.id,
     activeTab

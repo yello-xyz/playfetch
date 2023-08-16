@@ -1,4 +1,12 @@
-import { ActiveProject, ActivePrompt, Chain, ChainItem, ChainItemWithInputs, PromptChainItem, Version } from '@/types'
+import {
+  ActiveChain,
+  ActiveProject,
+  ActivePrompt,
+  ChainItem,
+  ChainItemWithInputs,
+  PromptChainItem,
+  Version,
+} from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import { toActivePrompt } from '@/pages/[projectID]'
@@ -21,7 +29,7 @@ export default function ChainView({
   project,
   onRefresh,
 }: {
-  chain: Chain
+  chain: ActiveChain
   project: ActiveProject
   onRefresh: () => void
 }) {

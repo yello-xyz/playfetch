@@ -1,6 +1,6 @@
 import {
+  ActiveChain,
   ActiveProject,
-  Chain,
   ChainItem,
   ChainItemWithInputs,
   CodeChainItem,
@@ -64,7 +64,7 @@ export default function ChainNodeEditor({
   selectVersion,
   setModifiedVersion,
 }: {
-  chain: Chain
+  chain: ActiveChain
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
@@ -77,7 +77,7 @@ export default function ChainNodeEditor({
   setModifiedVersion: (version: Version) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    project.inputValues,
+    chain.inputValues,
     project.id,
     chain.id,
     JSON.stringify(activeNode)
