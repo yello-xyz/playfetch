@@ -21,7 +21,7 @@ export default function TestDataPane({
 
   const paddedColumn = (variable: string, length: number) => [
     ...(inputValues[variable] ?? []),
-    ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }).map(() => ''),
+    ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
   ]
   const updateInputs = (variable: string, value: string, index: number) =>
     setInputValues({
@@ -54,7 +54,7 @@ export default function TestDataPane({
             <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>{variable}</span>
           </div>
         ))}
-        {Array.from({ length: rowCount }).map((_, row) => (
+        {Array.from({ length: rowCount }, (_, row) => (
           <Fragment key={row}>
             <div className='py-1 text-center text-gray-400 border-b border-gray-200 border-x'>#{row + 1}</div>
             {variables.map((variable, col) => (

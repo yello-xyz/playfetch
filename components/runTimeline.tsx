@@ -80,7 +80,7 @@ function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
     </div>
   ) : (
     <div className='flex flex-col gap-3 px-4 pt-4 overflow-y-hidden'>
-      {Array.from({ length: 3 }).map((_, index) => (
+      {Array.from({ length: 3 }, (_, index) => (
         <div key={index} className='min-h-[320px] bg-gray-50 rounded-lg'></div>
       ))}
     </div>

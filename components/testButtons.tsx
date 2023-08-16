@@ -9,8 +9,8 @@ type TestMode = 'first' | 'last' | 'random' | 'all'
 const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: string }[] => {
   const columns = Object.values(inputs)
   const maxRowCount = Math.max(...columns.map(values => values.length))
-  const emptyRowIndices = Array.from({ length: maxRowCount }, (_, i) => i).filter(i =>
-    columns.every(column => column[i] === undefined || column[i].length === 0)
+  const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
+    columns.every(column => column[index] === undefined || column[index].length === 0)
   )
 
   const filteredPaddedInputs: InputValues = {}
@@ -18,7 +18,7 @@ const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: str
     filteredPaddedInputs[key] = [
       ...values,
       ...Array.from({ length: maxRowCount - values.length }).map(() => ''),
-    ].filter((_, i) => !emptyRowIndices.includes(i))
+    ].filter((_, index) => !emptyRowIndices.includes(index))
   }
   const rowCount = Math.max(...Object.values(filteredPaddedInputs).map(values => values.length))
 
@@ -38,7 +38,7 @@ const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: str
     case 'random':
       return [selectRow(Math.floor(Math.random() * rowCount))]
     case 'all':
-      return Array.from({ length: rowCount }, (_, i) => selectRow(i))
+      return Array.from({ length: rowCount }, (_, index) => selectRow(index))
   }
 }
 

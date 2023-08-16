@@ -77,7 +77,7 @@ export default function VersionTimeline({
       <div className='flex flex-col w-full gap-4'>
         {tabSelector}
         <div className='flex flex-col gap-4 overflow-y-hidden'>
-          {Array.from({ length: 3 }).map((_, index) => (
+          {Array.from({ length: 3 }, (_, index) => (
             <div key={index} className='min-h-[160px] bg-gray-50 rounded-lg ml-14'></div>
           ))}
         </div>
