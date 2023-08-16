@@ -3,20 +3,65 @@ import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEn
 import { InputValues } from '@/types'
 import { ensurePromptAccess } from './prompts'
 import { ensureChainAccess } from './chains'
+import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractUnboundChainInputs } from '@/components/chainNodeEditor'
 
-export async function migrateInputs() {
+export async function migrateInputs(postMerge: boolean) {
   const datastore = getDatastore()
-  const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
-  for (const inputData of allInputs) {
-    await datastore.save(
-      toInputData(
-        inputData.parentID,
-        inputData.name,
-        JSON.parse(inputData.values),
-        getID(inputData)
-      )
-    )
+  const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.INPUT))
+  for (const [index, inputData] of allInputs.entries()) {
+    const inputID = getID(inputData)
+    console.log('processing input', inputData.name, inputID, `(${index + 1}/${allInputs.length})`)
+    const projectID = inputData.projectID
+    if (!projectID) {
+      console.log('skipping', inputData.name, 'for project', inputID)
+      continue
+    }
+    if (postMerge) {
+      console.log('deleting', inputData.name, 'for project', inputID)
+      await datastore.delete(buildKey(Entity.INPUT, inputID))
+    } else {
+      const prompts = await getEntities(Entity.PROMPT, 'projectID', projectID)
+      for (const prompt of prompts) {
+        const promptID = getID(prompt)
+        const previousInputID = await getFilteredEntityID(
+          Entity.INPUT,
+          and([buildFilter('parentID', promptID), buildFilter('name', inputData.name)])
+        )
+        if (previousInputID) {
+          console.log('skipping', inputData.name, 'for prompt', promptID, 'with previous input', inputID)
+          continue
+        }
+        const variables = [] as string[]
+        const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
+        for (const version of versions) {
+          variables.push(...ExtractPromptVariables(version?.prompt ?? ''))
+        }
+        if (variables.includes(inputData.name)) {
+          console.log('saving', inputData.name, 'for prompt', promptID)
+          await datastore.save(toInputData(promptID, inputData.name, JSON.parse(inputData.values)))
+        }
+      }
+      const chains = await getEntities(Entity.CHAIN, 'projectID', projectID)
+      for (const chain of chains) {
+        const chainID = getID(chain)
+        const previousInputID = await getFilteredEntityID(
+          Entity.INPUT,
+          and([buildFilter('parentID', chainID), buildFilter('name', inputData.name)])
+        )
+        if (previousInputID) {
+          console.log('skipping', inputData.name, 'for chain', chainID, 'with previous input', inputID)
+          continue
+        }
+        const variables = ExtractUnboundChainInputs(JSON.parse(chain.items))
+        if (variables.includes(inputData.name)) {
+          console.log('saving', inputData.name, 'for chain', chainID)
+          await datastore.save(toInputData(chainID, inputData.name, JSON.parse(inputData.values)))
+        }
+      }
+    }
   }
+  console.log('DONE')
 }
 
 const toInputData = (parentID: number, name: string, values: string[], inputID?: number) => ({

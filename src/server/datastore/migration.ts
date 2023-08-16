@@ -12,18 +12,6 @@ import { migrateUsers } from './users'
 import { migrateVersions } from './versions'
 import { migrateWorkspaces } from './workspaces'
 
-export async function runDataMigrations() {
-  // await migrateWorkspaces()
-  // await migrateProjects()
-  // await migrateInputs()
-  // await migrateAccess()
-  // await migratePrompts()
-  // await migrateVersions()
-  // await migrateRuns()
-  // await migrateChains()
-  // await migrateEndpoints()
-  // await migrateUsage()
-  await migrateLogs()
-  // await migrateUsers()
-  // await migrateComments()
+export async function runDataMigrations(postMerge: boolean) {
+  await migrateInputs(postMerge)
 }
