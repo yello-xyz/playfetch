@@ -1,13 +1,4 @@
-import {
-  ActiveChain,
-  ActiveProject,
-  ChainItem,
-  ChainItemWithInputs,
-  CodeChainItem,
-  PartialRun,
-  PromptInputs,
-  Version,
-} from '@/types'
+import { ActiveChain, ChainItem, ChainItemWithInputs, CodeChainItem, PartialRun, PromptInputs, Version } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -75,6 +66,7 @@ export default function ChainNodeEditor({
   setModifiedVersion: (version: Version) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([])
 
   const checkProviderAvailable = useCheckProvider()
 
@@ -161,6 +153,7 @@ export default function ChainNodeEditor({
             <TestDataPane
               variables={variables}
               inputValues={inputValues}
+              selectedIndices={selectedIndices}
               setInputValues={setInputValues}
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             />
@@ -206,7 +199,13 @@ export default function ChainNodeEditor({
           ) : (
             <div />
           )}
-          <TestButtons runTitle='Run Chain' variables={variables} inputValues={inputValues} callback={runChain} />
+          <TestButtons
+            runTitle='Run Chain'
+            variables={variables}
+            inputValues={inputValues}
+            callback={runChain}
+            setSelectedIndices={setSelectedIndices}
+          />
         </div>
       </div>
     </>

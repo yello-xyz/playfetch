@@ -6,7 +6,7 @@ import { InputValues, PromptInputs } from '@/types'
 
 type TestMode = 'first' | 'last' | 'random' | 'all'
 
-const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: string }[] => {
+const selectInputs = (inputs: InputValues, mode: TestMode): [{ [key: string]: string }[], number[]] => {
   const columns = Object.values(inputs)
   const maxRowCount = Math.max(...columns.map(values => values.length))
   const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
@@ -21,25 +21,36 @@ const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: str
     ].filter((_, index) => !emptyRowIndices.includes(index))
   }
   const rowCount = Math.max(...Object.values(filteredPaddedInputs).map(values => values.length))
-
   if (rowCount === 0) {
-    return []
+    return [[], []]
   }
 
   const entries = Object.entries(filteredPaddedInputs)
   const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
+  const selectedIndices = (() => {
+    switch (mode) {
+      default:
+      case 'first':
+        return [0]
+      case 'last':
+        return [rowCount - 1]
+      case 'random':
+        return [Math.floor(Math.random() * rowCount)]
+      case 'all':
+        return Array.from({ length: rowCount }, (_, index) => index)
+    }
+  })()
 
-  switch (mode) {
-    default:
-    case 'first':
-      return [selectRow(0)]
-    case 'last':
-      return [selectRow(rowCount - 1)]
-    case 'random':
-      return [selectRow(Math.floor(Math.random() * rowCount))]
-    case 'all':
-      return Array.from({ length: rowCount }, (_, index) => selectRow(index))
+  const originalIndices = [] as number[]
+  for (let i = 0, offset = 0; i < maxRowCount; ++i) {
+    if (emptyRowIndices.includes(i)) {
+      ++offset
+    } else if (selectedIndices.includes(i - offset)) {
+      originalIndices.push(i)
+    }
   }
+
+  return [selectedIndices.map(selectRow), originalIndices]
 }
 
 export default function TestButtons({
@@ -48,12 +59,14 @@ export default function TestButtons({
   inputValues,
   disabled,
   callback,
+  setSelectedIndices,
 }: {
   runTitle?: string
   variables: string[]
   inputValues: InputValues
   disabled?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
+  setSelectedIndices: (indices: number[]) => void
 }) {
   const [testMode, setTestMode] = useState<TestMode>('first')
 
@@ -61,11 +74,12 @@ export default function TestButtons({
 
   const [isRunningAllVariants, setRunningAllVariants] = useState(false)
 
-  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
-  const multipleInputs = selectInputs(allInputs, 'all').length > 1
+  const allRows = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+  const [allInputs] = selectInputs(allRows, 'all')
 
   const testPrompt = async () => {
-    const inputs = selectInputs(allInputs, testMode)
+    const [inputs, indices] = selectInputs(allRows, testMode)
+    setSelectedIndices(indices)
     if (inputs.length > 1) {
       setDialogPrompt({
         title: `Run ${inputs.length} times?`,
@@ -84,7 +98,7 @@ export default function TestButtons({
   return (
     <div className='flex items-center self-end gap-4'>
       <DropdownMenu
-        disabled={!multipleInputs}
+        disabled={allInputs.length <= 1}
         size='medium'
         value={testMode}
         onChange={value => setTestMode(value as TestMode)}>

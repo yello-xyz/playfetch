@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject } from '@/types'
 
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -39,6 +39,7 @@ export default function TestPromptTab({
   tabSelector: ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompt)
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([])
 
   const selectVersion = (version: Version) => {
     persistInputValuesIfNeeded()
@@ -59,6 +60,7 @@ export default function TestPromptTab({
           <TestDataPane
             variables={variables}
             inputValues={inputValues}
+            selectedIndices={selectedIndices}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
           />
@@ -88,6 +90,7 @@ export default function TestPromptTab({
               inputValues={inputValues}
               disabled={!currentPrompt.length}
               callback={testPrompt}
+              setSelectedIndices={setSelectedIndices}
             />
           </div>
         </div>
