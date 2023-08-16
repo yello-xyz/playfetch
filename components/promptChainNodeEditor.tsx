@@ -33,7 +33,7 @@ export default function PromptChainNodeEditor({
   const minHeight = 230
   return (
     <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
-      {loadedPrompt && activeVersion && (
+      {loadedPrompt && activeVersion ? (
         <Allotment vertical>
           <Allotment.Pane minSize={minHeight}>
             <div className='flex flex-col h-full gap-4 px-4'>
@@ -64,6 +64,8 @@ export default function PromptChainNodeEditor({
             </div>
           </Allotment.Pane>
         </Allotment>
+      ) : (
+        <div className='flex-grow' />
       )}
     </RefreshContext.Provider>
   )

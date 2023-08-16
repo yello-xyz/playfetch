@@ -131,7 +131,7 @@ export default function EndpointsView({
       })
     }
   }, [parent, project, parentCache])
-  const activePrompt = EndpointParentIsPrompt(parent) ? activeParent as ActivePrompt : undefined
+  const activePrompt = EndpointParentIsPrompt(parent) ? (activeParent as ActivePrompt) : undefined
 
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
   const variables = parent
