@@ -5,8 +5,6 @@ import {
   ActiveProject,
   RunConfig,
   ModelProvider,
-  Endpoint,
-  Chain,
   CodeConfig,
   ActiveWorkspace,
   Workspace,
@@ -15,6 +13,7 @@ import {
   LogEntry,
   InputValues,
   Prompt,
+  ActiveChain,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -132,7 +131,7 @@ const api = {
   runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
-  getChain: function (chainID: number): Promise<Chain> {
+  getChain: function (chainID: number): Promise<ActiveChain> {
     return post(this.getChain, { chainID })
   },
   addChain: function (projectID: number): Promise<number> {

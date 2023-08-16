@@ -14,6 +14,7 @@ import {
   LogEntry,
   InputValues,
   Prompt,
+  ActiveChain,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -40,6 +41,7 @@ import useSavePrompt from '@/components/useSavePrompt'
 import dynamic from 'next/dynamic'
 import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
+import { getChainForUser } from '@/src/server/datastore/chains'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
@@ -75,7 +77,7 @@ export const toActivePrompt = (
 }
 
 const Endpoints = 'endpoints'
-type ActiveItem = ActivePrompt | Chain | typeof Endpoints
+type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
@@ -85,23 +87,23 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const activeProject = await getActiveProject(user.id, projectID!, buildURL)
 
-  const getActivePrompt = async (promptID: number): Promise<ActivePrompt | undefined> => {
+  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> => {
     const { prompt, versions, inputValues } = await getPromptForUser(user.id, promptID)
     return toActivePrompt(prompt, versions, inputValues, activeProject)
   }
 
-  let activeItem =
+  const initialActiveItem: ActiveItem | null =
     endpoints === 1
       ? Endpoints
       : promptID
       ? await getActivePrompt(promptID)
       : chainID
-      ? activeProject.chains.find(chain => chain.id === chainID)
+      ? await getChainForUser(user.id, chainID)
       : activeProject.prompts.length > 0
       ? await getActivePrompt(activeProject.prompts[0].id)
-      : undefined
+      : null
 
-  const initialLogEntries = activeItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
+  const initialLogEntries = initialActiveItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
@@ -109,7 +111,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       user,
       workspaces,
       initialActiveProject: activeProject,
-      initialActiveItem: activeItem ?? null,
+      initialActiveItem,
       initialLogEntries,
       availableProviders,
     },
@@ -139,7 +141,7 @@ export default function Home({
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
   const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && 'lastVersionID' in item
-  const isChain = (item: ActiveItem): item is Chain => item !== Endpoints && 'items' in item
+  const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'items' in item
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
 

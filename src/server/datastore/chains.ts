@@ -9,9 +9,10 @@ import {
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
-import { Chain, ChainItemWithInputs } from '@/types'
+import { ActiveChain, Chain, ChainItemWithInputs } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
+import { getTrustedParentInputValues } from './inputs'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -48,9 +49,10 @@ export const toChain = (data: any): Chain => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getChainForUser(userID: number, chainID: number): Promise<Chain> {
+export async function getChainForUser(userID: number, chainID: number): Promise<ActiveChain> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
-  return toChain(chainData)
+  const inputValues = await getTrustedParentInputValues(chainID)
+  return { ...toChain(chainData), inputValues }
 }
 
 export async function getChainItems(chainID: number): Promise<ChainItemWithInputs[]> {

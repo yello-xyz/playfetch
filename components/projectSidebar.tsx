@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { ActiveProject, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -10,7 +10,7 @@ import { useState } from 'react'
 import IconButton from './iconButton'
 
 const Endpoints = 'endpoints'
-type ActiveItem = ActivePrompt | Chain | typeof Endpoints
+type ActiveItem = Prompt | Chain | typeof Endpoints
 
 export default function ProjectSidebar({
   activeProject,
