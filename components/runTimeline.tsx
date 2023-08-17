@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
 import RunCell from './runCell'
-import TabSelector from './tabSelector'
+import { SingleTabHeader } from './tabSelector'
 
 export default function RunTimeline({
   runs = [],
@@ -51,7 +51,7 @@ export default function RunTimeline({
 
   return (
     <div ref={containerRef} className='relative flex flex-col h-full'>
-      <TabSelector tabs={['Responses']} />
+      <SingleTabHeader label='Responses' />
       {runs.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
           {runs.map((run, index) => (

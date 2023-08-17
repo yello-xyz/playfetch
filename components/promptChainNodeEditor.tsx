@@ -1,13 +1,12 @@
 import { ChainItem, ModelProvider, PromptChainItem, Version } from '@/types'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
-import Label from './label'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
 import { RefreshContext } from './refreshContext'
 import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
-import TabSelector from './tabSelector'
+import { SingleTabHeader } from './tabSelector'
 
 export default function PromptChainNodeEditor({
   node,
@@ -42,7 +41,7 @@ export default function PromptChainNodeEditor({
                 prompt={loadedPrompt}
                 activeVersion={activeVersion}
                 setActiveVersion={selectVersion}
-                tabSelector={() => <TabSelector tabs={['Prompt versions']} />}
+                tabSelector={() => <SingleTabHeader label='Prompt versions' />}
               />
               {items.slice(0, index).some(IsPromptChainItem) && (
                 <div className='self-start'>

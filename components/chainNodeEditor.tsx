@@ -14,7 +14,7 @@ import TestButtons from './testButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainItemToConfig, ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
-import TabSelector from './tabSelector'
+import { SingleTabHeader } from './tabSelector'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -150,7 +150,7 @@ export default function ChainNodeEditor({
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
         {activeNode === InputNode && variables.length > 0 && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <TabSelector tabs={['Test data']} />
+            <SingleTabHeader label='Test data' />
             <TestDataPane
               variables={variables}
               inputValues={inputValues}
@@ -174,7 +174,7 @@ export default function ChainNodeEditor({
         )}
         {IsCodeChainItem(activeNode) && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <TabSelector tabs={['Code Editor']} />
+            <SingleTabHeader label='Code Editor' />
             <div className='p-4'>
               <PromptInput
                 key={activeItemIndex}

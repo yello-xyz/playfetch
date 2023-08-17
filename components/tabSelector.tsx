@@ -1,5 +1,9 @@
 import { ReactNode } from 'react'
 
+export function SingleTabHeader({ label, children }: { label: string; children?: ReactNode }) { 
+  return <TabSelector tabs={[label]}>{children}</TabSelector>
+}
+
 export default function TabSelector<T extends string>({
   tabs,
   activeTab,
