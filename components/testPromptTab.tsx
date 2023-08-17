@@ -55,8 +55,8 @@ export default function TestPromptTab({
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minHeight} preferredSize='50%'>
-        <div className='flex flex-col flex-grow h-full min-h-0 gap-2 py-4 overflow-hidden'>
-          {tabSelector}
+        <div className='flex flex-col flex-grow h-full min-h-0 pb-4 overflow-hidden'>
+          <div className='p-4 py-2.5 leading-6 bg-white'>{tabSelector}</div>
           <TestDataPane
             variables={variables}
             inputValues={inputValues}

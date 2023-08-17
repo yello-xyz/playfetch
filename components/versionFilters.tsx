@@ -56,7 +56,7 @@ export default function VersionFilters({
   return (
     <div className='flex flex-col gap-2 -mt-0.5'>
       <div className='flex items-center justify-between'>
-        {tabSelector}
+      <div className='leading-6'>{tabSelector}</div>
         <FilterButton
           users={users}
           labelColors={labelColors}
