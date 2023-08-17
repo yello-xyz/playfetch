@@ -31,7 +31,7 @@ export default function RunPromptTab({
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minHeight} preferredSize='50%'>
-        <div className='h-full px-4 pt-3'>
+        <div className='h-full'>
           <VersionTimeline
             prompt={activePrompt}
             activeVersion={activeVersion}

@@ -23,7 +23,7 @@ export default function EndpointsTable({
   setActiveEndpoint,
   onAddEndpoint,
 }: {
-  tabSelector: (children? : ReactNode) => ReactNode
+  tabSelector: (children?: ReactNode) => ReactNode
   project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
@@ -33,32 +33,33 @@ export default function EndpointsTable({
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
-    <>
-      <div className='flex items-center justify-between w-full'>
-        {tabSelector()}
-        {onAddEndpoint && (
+    <div className='flex flex-col h-full'>
+      {tabSelector(
+        onAddEndpoint && (
           <div
             className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'
             onClick={onAddEndpoint}>
             <Icon icon={addIcon} />
             New Endpoint
           </div>
+        )
+      )}
+      <div className='flex flex-col w-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'>
+        {groups.length > 0 ? (
+          groups.map((group, index) => (
+            <EndpointsGroup
+              key={index}
+              parent={FindParentInProject(group[0].parentID, project)}
+              endpoints={group}
+              activeEndpoint={activeEndpoint}
+              setActiveEndpoint={setActiveEndpoint}
+            />
+          ))
+        ) : (
+          <EmptyTable onAddEndpoint={onAddEndpoint} />
         )}
       </div>
-      {groups.length > 0 ? (
-        groups.map((group, index) => (
-          <EndpointsGroup
-            key={index}
-            parent={FindParentInProject(group[0].parentID, project)}
-            endpoints={group}
-            activeEndpoint={activeEndpoint}
-            setActiveEndpoint={setActiveEndpoint}
-          />
-        ))
-      ) : (
-        <EmptyTable onAddEndpoint={onAddEndpoint} />
-      )}
-    </>
+    </div>
   )
 }
 
@@ -75,11 +76,11 @@ function EndpointsGroup({
 }) {
   return (
     <>
-      <div className='flex items-center gap-1 mt-4 text-gray-700'>
+      <div className='flex items-center gap-1 text-gray-700'>
         <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
         {parent.name}
       </div>
-      <div className='grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>
+      <div className='mb-4 grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>
         <TableHeader first>Enabled</TableHeader>
         <TableHeader>Endpoint</TableHeader>
         <TableHeader>Environment</TableHeader>

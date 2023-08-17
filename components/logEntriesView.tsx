@@ -21,24 +21,26 @@ export default function LogEntriesView({
   setActiveIndex: (index: number) => void
 }) {
   return (
-    <>
+    <div className='flex flex-col h-full'>
       {tabSelector()}
-      <div className='grid w-full grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'>
-        <TableHeader first>Endpoint</TableHeader>
-        <TableHeader>Environment</TableHeader>
-        <TableHeader>Time</TableHeader>
-        <TableHeader last>Status</TableHeader>
-        {logEntries.map((logEntry, index) => (
-          <LogEntryRow
-            key={index}
-            logEntry={logEntry}
-            endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
-            isActive={index === activeIndex}
-            setActive={() => setActiveIndex(index)}
-          />
-        ))}
+      <div className='overflow-y-auto '>
+        <div className='grid p-4 w-full grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'>
+          <TableHeader first>Endpoint</TableHeader>
+          <TableHeader>Environment</TableHeader>
+          <TableHeader>Time</TableHeader>
+          <TableHeader last>Status</TableHeader>
+          {logEntries.map((logEntry, index) => (
+            <LogEntryRow
+              key={index}
+              logEntry={logEntry}
+              endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
+              isActive={index === activeIndex}
+              setActive={() => setActiveIndex(index)}
+            />
+          ))}
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 

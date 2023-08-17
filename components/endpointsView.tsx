@@ -146,15 +146,13 @@ export default function EndpointsView({
     <Allotment>
       {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-2 p-4 pt-3 overflow-y-auto text-gray-500'>
-            <EndpointsTable
-              tabSelector={tabSelector}
-              project={project}
-              activeEndpoint={activeEndpoint}
-              setActiveEndpoint={updateActiveEndpoint}
-              onAddEndpoint={addEndpoint}
-            />
-          </div>
+          <EndpointsTable
+            tabSelector={tabSelector}
+            project={project}
+            activeEndpoint={activeEndpoint}
+            setActiveEndpoint={updateActiveEndpoint}
+            onAddEndpoint={addEndpoint}
+          />
         </Allotment.Pane>
       )}
       {activeTab === 'Endpoints' && activeEndpoint && (
@@ -184,7 +182,7 @@ export default function EndpointsView({
       )}
       {activeTab === 'Logs' && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-2 p-4 overflow-y-auto text-gray-500'>
+          <div className='flex flex-col h-full min-h-0 text-gray-500'>
             <LogEntriesView
               tabSelector={tabSelector}
               logEntries={logEntries}
