@@ -50,9 +50,9 @@ export default function TestDataPane({
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
-        <div className='border-b border-gray-200 border-y bg-gray-25' />
+        <div className='border-b border-gray-200 bg-gray-25' />
         {variables.map((variable, index) => (
-          <div key={index} className='flex items-center px-3 py-1 border-l border-gray-200 border-y bg-pink-25'>
+          <div key={index} className='flex items-center px-3 py-1 border-b border-l border-gray-200 bg-pink-25'>
             <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>
               {`{{${variable}}}`}
             </span>

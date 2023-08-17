@@ -12,7 +12,7 @@ export default function TabSelector<T extends string>({
   children?: ReactNode
 }) {
   return (
-    <div className='flex items-center justify-between gap-1 px-4 py-2.5 bg-white border-b border-gray-300'>
+    <div className='flex items-center justify-between gap-1 px-4 py-2.5 bg-white border-b border-gray-200'>
       <div className='flex items-center gap-1 font-medium leading-6'>
         {tabs.map((tab, index) => (
           <TabButton key={index} tab={tab} activeTab={activeTab} setActiveTab={setActiveTab} />
