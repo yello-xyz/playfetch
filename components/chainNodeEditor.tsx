@@ -187,7 +187,7 @@ export default function ChainNodeEditor({
           </div>
         )}
         {activeNode === OutputNode && (
-          <div className='flex flex-col flex-1 w-full gap-2 -mt-4 overflow-y-auto'>
+          <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline runs={partialRuns} isRunning={isRunning} />
           </div>
         )}

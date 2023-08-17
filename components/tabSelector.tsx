@@ -35,7 +35,7 @@ function TabButton<T extends string>({
   const textColor = activeTab === undefined || activeTab === tab ? 'text-gray-700' : 'text-gray-300'
   const cursor = setActiveTab ? 'cursor-pointer' : ''
   return (
-    <div className={`px-2 ${textColor} ${cursor}}`} onClick={() => setActiveTab?.(tab)}>
+    <div className={`px-2 ${textColor} ${cursor}`} onClick={() => setActiveTab?.(tab)}>
       {tab}
     </div>
   )
