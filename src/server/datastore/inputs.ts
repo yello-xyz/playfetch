@@ -18,6 +18,9 @@ import { ExtractUnboundChainInputs } from '@/components/chainNodeEditor'
 export async function migrateInputs(postMerge: boolean) {
   const datastore = getDatastore()
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.INPUT))
+  const promptsCache = {} as { [projectID: number]: any[] }
+  const chainsCache = {} as { [projectID: number]: any[] }
+  const promptVariablesCache = {} as { [promptID: number]: string[] }
   for (const [index, inputData] of allInputs.entries()) {
     const inputID = getID(inputData)
     console.log('processing input', inputData.name, inputID, `(${index + 1}/${allInputs.length})`)
@@ -30,7 +33,11 @@ export async function migrateInputs(postMerge: boolean) {
       console.log('deleting', inputData.name, 'for project', inputID)
       await datastore.delete(buildKey(Entity.INPUT, inputID))
     } else {
-      const prompts = await getEntities(Entity.PROMPT, 'projectID', projectID)
+      let prompts = promptsCache[projectID]
+      if (!prompts) {
+        prompts = await getEntities(Entity.PROMPT, 'projectID', projectID)
+        promptsCache[projectID] = prompts
+      }
       for (const prompt of prompts) {
         const promptID = getID(prompt)
         const previousInputID = await getFilteredEntityID(
@@ -41,17 +48,25 @@ export async function migrateInputs(postMerge: boolean) {
           console.log('skipping', inputData.name, 'for prompt', promptID, 'with previous input', inputID)
           continue
         }
-        const variables = [] as string[]
-        const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
-        for (const version of versions) {
-          variables.push(...ExtractPromptVariables(version?.prompt ?? ''))
+        let variables = promptVariablesCache[promptID]
+        if (!variables) {
+          let variables = [] as string[]
+          const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
+          for (const version of versions) {
+            variables.push(...ExtractPromptVariables(version?.prompt ?? ''))
+          }
+          promptVariablesCache[promptID] = variables
         }
         if (variables.includes(inputData.name)) {
           console.log('saving', inputData.name, 'for prompt', promptID)
           await datastore.save(toInputData(promptID, inputData.name, JSON.parse(inputData.values)))
         }
       }
-      const chains = await getEntities(Entity.CHAIN, 'projectID', projectID)
+      let chains = chainsCache[projectID]
+      if (!chains) {
+        chains = await getEntities(Entity.CHAIN, 'projectID', projectID)
+        chainsCache[projectID] = chains
+      }
       for (const chain of chains) {
         const chainID = getID(chain)
         const previousInputID = await getFilteredEntityID(
@@ -104,7 +119,6 @@ export async function saveInputValues(
     const inputID = inputKey ? getID(inputKey) : undefined
     transaction.save(toInputData(parentID, name, values, inputID))
   })
-
 }
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })
