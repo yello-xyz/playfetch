@@ -54,9 +54,10 @@ export function SidebarButton({
   link?: string
   actionComponent?: ReactNode
 }) {
-  const activeClass = 'bg-blue-50 hover:bg-blue-50'
-  const baseClass = 'flex gap-1 items-center pl-4 p-1 cursor-pointer select-none hover:bg-gray-100 rounded-lg'
-  const className = `${baseClass} ${active ? activeClass : ''}`
+  const activeClass = 'bg-blue-50 '
+  const baseHoverClass = 'hover:bg-gray-100'
+  const baseClass = 'flex gap-1 items-center pl-4 p-1 cursor-pointer select-none rounded-lg'
+  const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
     <LinkWrapper link={link}>
       <div className={className} onClick={onClick}>
