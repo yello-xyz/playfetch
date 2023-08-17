@@ -65,8 +65,8 @@ export default function WorkspaceGridView({
           onDeleted={resetWorkspaces}
         />
         {activeWorkspace.projects.length > 0 ? (
-          <div className='flex flex-col items-stretch h-full gap-3 overflow-y-auto'>
-            <div className='border-b border-gray-100 text-dark-gray-400 font-medium antialiased pt-1.5 pb-2.5'>
+          <div className='flex flex-col items-stretch h-full gap-4 overflow-y-auto'>
+            <div className='border-b border-gray-100 text-dark-gray-700 font-medium antialiased pt-1.5 pb-2.5'>
               <span>Project name</span>
             </div>
             {activeWorkspace.projects.map((project, index) => (
@@ -130,7 +130,7 @@ function ProjectCell({
 
   return (
     <div
-      className={`flex flex-col gap-1 p-4 rounded-lg cursor-pointer gap-6 w-full bg-gray-25 border border-gray-100 hover:bg-gray-50 hover:border-gray-200`}
+      className={`flex flex-col gap-1 px-3 py-4 rounded-lg cursor-pointer gap-6 w-full bg-gray-25 border border-gray-100 hover:bg-gray-50 hover:border-gray-200`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <div className='flex flex-row gap-1.5 justify-center leading-6'>
@@ -138,10 +138,10 @@ function ProjectCell({
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
           />
-          <span className='flex-1 text-base font-normal text-dark-gray-700 line-clamp-2 antialiased'>{project.name}</span>
+          <span className='flex-1 text-base font-medium text-dark-gray-700 line-clamp-2 antialiased'>{project.name}</span>
         </div>
         <div className='relative flex items-center gap-2'>
-          <span className='mr-5 text-xs text-dark-gray-400 antialiased'>Edited {formattedDate}</span>
+          <span className='mr-5 text-xs text-dark-gray-700 antialiased'>Edited {formattedDate}</span>
           <IconButton hoverType='opacity' icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
             <ProjectPopupMenu

@@ -105,7 +105,7 @@ module.exports = {
     fontSize: {
       xs: '12px',
       sm: '0.79rem',
-      base: '.92rem'
+      base: '.9rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',

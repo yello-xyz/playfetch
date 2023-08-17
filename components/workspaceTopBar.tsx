@@ -35,22 +35,24 @@ export default function WorkspaceTopBar({
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
         {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
-        <span className='text-base font-medium text-dark-gray-700 antialiased'>{activeWorkspace.name}</span>
-        {hasPopupMenu && (
-          <>
-            <Icon icon={chevronIcon} />
-            <div className='absolute left-0 top-8'>
-              <WorkspacePopupMenu
-                workspace={activeWorkspace}
-                isOnlyUser={activeWorkspace.users.length === 1}
-                isMenuExpanded={isMenuExpanded}
-                setMenuExpanded={setMenuExpanded}
-                onRenamed={onRenamed}
-                onDeleted={onDeleted}
-              />
-            </div>
-          </>
-        )}
+        <div className='flex items-center gap-0'>
+          <span className='text-base font-medium text-dark-gray-700 antialiased'>{activeWorkspace.name}</span>
+          {hasPopupMenu && (
+            <>
+              <Icon icon={chevronIcon} />
+              <div className='absolute left-0 top-8'>
+                <WorkspacePopupMenu
+                  workspace={activeWorkspace}
+                  isOnlyUser={activeWorkspace.users.length === 1}
+                  isMenuExpanded={isMenuExpanded}
+                  setMenuExpanded={setMenuExpanded}
+                  onRenamed={onRenamed}
+                  onDeleted={onDeleted}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
       {!isSharedProjects && (
         <div className='flex items-center gap-2'>

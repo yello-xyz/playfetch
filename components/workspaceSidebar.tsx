@@ -10,7 +10,6 @@ import { useLoggedInUser } from './userContext'
 import { SidebarButton, SidebarSection } from './sidebar'
 import feedbackIcon from '@/public/feedback.svg'
 
-
 export default function WorkspaceSidebar({
   workspaces,
   activeWorkspace,

@@ -29,7 +29,7 @@ export function SidebarSection({
   return (
     <div className={`${className ?? ''} flex flex-col gap-0.5`}>
       {title && (
-        <div className='flex items-center justify-between p-1 pl-4 text-xs font-medium text-gray-400'>
+        <div className='flex items-center justify-between p-1 pl-4 text-xs font-medium text-dark-gray-400 antialiased'>
           {title}
           {actionComponent}
         </div>
@@ -56,13 +56,13 @@ export function SidebarButton({
 }) {
   const activeClass = 'bg-blue-50 '
   const baseHoverClass = 'hover:bg-gray-100'
-  const baseClass = 'flex gap-1 items-center pl-4 p-1 cursor-pointer select-none rounded-lg'
+  const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg'
   const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
     <LinkWrapper link={link}>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
-        <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap'>{title}</div>
+        <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap text-dark-gray-700 antialiased'>{title}</div>
         {actionComponent}
       </div>
     </LinkWrapper>
