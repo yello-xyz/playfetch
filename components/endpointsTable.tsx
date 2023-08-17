@@ -44,7 +44,7 @@ export default function EndpointsTable({
           </div>
         )
       )}
-      <div className='flex flex-col w-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'>
+      <div className='flex flex-col w-full h-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'>
         {groups.length > 0 ? (
           groups.map((group, index) => (
             <EndpointsGroup
@@ -129,17 +129,17 @@ function EndpointsGroup({
 
 function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
   const AddPromptLink = ({ label }: { label: string }) => (
-    <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddEndpoint}>
+    <span className='font-medium text-blue-400 cursor-pointer' onClick={onAddEndpoint}>
       {label}
     </span>
   )
 
   return (
-    <div className='w-full h-full'>
-      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+    <div className='w-full h-full pb-4'>
+      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-50 rounded-lg'>
         <span className='font-medium'>No Endpoints</span>
 
-        <span className='text-xs text-center text-gray-400 w-60'>
+        <span className='text-sm text-center text-gray-400 w-60'>
           {onAddEndpoint ? (
             <span>
               Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.

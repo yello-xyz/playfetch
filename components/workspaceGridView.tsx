@@ -96,7 +96,7 @@ function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWork
         <span className='font-medium'>{workspace.name} is empty</span>
         <span className='text-sm text-center text-gray-400 '>
           Create a{' '}
-          <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddProject}>
+          <span className='font-medium text-blue-400 cursor-pointer' onClick={onAddProject}>
             New Project
           </span>{' '}
           to get started.
