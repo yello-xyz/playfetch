@@ -1,5 +1,14 @@
 import { and } from '@google-cloud/datastore'
-import { Entity, buildFilter, buildKey, getDatastore, getEntities, getFilteredEntityID, getID } from './datastore'
+import {
+  Entity,
+  buildFilter,
+  buildKey,
+  getDatastore,
+  getEntities,
+  getFilteredEntityID,
+  getID,
+  runTransactionWithExponentialBackoff,
+} from './datastore'
 import { InputValues } from '@/types'
 import { ensurePromptAccess } from './prompts'
 import { ensureChainAccess } from './chains'
@@ -85,11 +94,17 @@ export async function saveInputValues(
       await ensureChainAccess(userID, parentID)
       break
   }
-  const inputID = await getFilteredEntityID(
-    Entity.INPUT,
-    and([buildFilter('parentID', parentID), buildFilter('name', name)])
-  )
-  await getDatastore().save(toInputData(parentID, name, values, inputID))
+  await runTransactionWithExponentialBackoff(async transaction => {
+    const query = transaction
+      .createQuery(Entity.INPUT)
+      .filter(and([buildFilter('parentID', parentID), buildFilter('name', name)]))
+      .select('__key__')
+      .limit(1)
+    const [[inputKey]] = await transaction.runQuery(query)
+    const inputID = inputKey ? getID(inputKey) : undefined
+    transaction.save(toInputData(parentID, name, values, inputID))
+  })
+
 }
 
 const toInput = (data: any): InputValues => ({ name: data.name, values: JSON.parse(data.values) })
