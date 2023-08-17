@@ -24,6 +24,8 @@ module.exports = {
       'red-300': '#E4735B',
       'red-400': '#DC4F30',
       'red-500': '#C64629',
+      'dark-gray-400': '#898D96',
+      'dark-gray-700': '#333A46',
       white: '#FFFFFF',
     },
     backgroundColor: {
@@ -40,7 +42,7 @@ module.exports = {
       'blue-700': '#1660B8',
       'blue-800': '#0F58AE',
       'dark-gray-800': '#1D2532',
-      'gray-25': '#FBFBFD',
+      'gray-25': '#FAFBFB',
       'gray-50': '#F5F6F7',
       'gray-100': '#EEF0F2',
       'gray-200': '#E3E6E9',

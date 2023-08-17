@@ -42,7 +42,7 @@ export default function WorkspaceSidebar({
 
   return (
     <>
-      <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200'>
+      <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200 bg-gray-25'>
         <SidebarSection>
           <UserSidebarItem />
         </SidebarSection>
@@ -63,7 +63,7 @@ export default function WorkspaceSidebar({
               onClick={onSelectSharedProjects}
             />
           )}
-          <SidebarButton title='New Project…' icon={addIcon} onClick={onAddProject} />
+          {/* <SidebarButton title='New Project…' icon={addIcon} onClick={onAddProject} /> */}
         </SidebarSection>
         <SidebarSection title='Workspaces' className='flex-1'>
           {properWorkspaces.map((workspace, workspaceIndex) => (

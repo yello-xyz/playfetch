@@ -3,18 +3,35 @@ import { UserAvatar } from './userSidebarItem'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 
+type ButtonType = 'primary' | 'outline'
+
 export function TopBarButton({
+  type = 'outline',
   title,
   icon,
   onClick,
 }: {
+  type?: ButtonType,
   title?: string
   icon?: StaticImageData
   onClick: () => void
 }) {
+
+  const baseClass = 'flex items-center gap-0.5 pl-1.5 pr-1.5 py-1 font-regular rounded-lg cursor-pointer '
+
+  const colorForType = (type: ButtonType) => {
+    switch (type) {
+      default:
+      case 'primary':
+        return baseClass + 'text-white bg-blue-400 hover:bg-blue-300'
+      case 'outline':
+        return baseClass + 'text-dark-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+    }
+  }
+
   return (
     <div
-      className='flex items-center gap-1 px-2 py-1 font-regular bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-300'
+      className={`${colorForType(type)} antialiased`}
       onClick={onClick}>
       {icon && <Icon icon={icon} />}
       {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}

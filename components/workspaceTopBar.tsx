@@ -1,6 +1,6 @@
 import { ActiveWorkspace } from '@/types'
 import { TopBarButton, UserAvatars } from './topBarButton'
-import addIcon from '@/public/add.svg'
+import addIcon from '@/public/24-white-add.svg'
 import chevronIcon from '@/public/chevron.svg'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
@@ -35,7 +35,7 @@ export default function WorkspaceTopBar({
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
         {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
-        <span className='text-base font-medium text-gray-800'>{activeWorkspace.name}</span>
+        <span className='text-base font-medium text-dark-gray-700 antialiased'>{activeWorkspace.name}</span>
         {hasPopupMenu && (
           <>
             <Icon icon={chevronIcon} />
@@ -56,7 +56,7 @@ export default function WorkspaceTopBar({
         <div className='flex items-center gap-2'>
           <UserAvatars users={activeWorkspace.users} />
           {!isUserWorkspace && <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />}
-          <TopBarButton title='New Project' icon={addIcon} onClick={onAddProject} />
+          <TopBarButton type="primary" title='New Project' icon={addIcon} onClick={onAddProject} />
         </div>
       )}
     </div>
