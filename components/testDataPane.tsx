@@ -50,9 +50,9 @@ export default function TestDataPane({
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
-        <div className='border border-gray-200 bg-gray-25' />
+        <div className='border-b border-gray-200 border-y bg-gray-25' />
         {variables.map((variable, index) => (
-          <div key={index} className='flex items-center px-3 py-1 border-r border-gray-200 border-y bg-pink-25'>
+          <div key={index} className='flex items-center px-3 py-1 border-l border-gray-200 border-y bg-pink-25'>
             <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>
               {`{{${variable}}}`}
             </span>
@@ -62,13 +62,13 @@ export default function TestDataPane({
           const color = selectedIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
           return (
             <Fragment key={row}>
-              <div className={`py-1 text-center text-gray-400 border-b border-gray-200 border-x ${color}`}>
+              <div className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color}`}>
                 #{row + 1}
               </div>
               {variables.map((variable, col) => (
                 <RichTextInput
                   key={col}
-                  className={`w-full px-3 py-1 text-sm border-b border-r border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border ${color}`}
+                  className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border ${color}`}
                   value={inputValues[variable]?.[row] ?? ''}
                   setValue={value => updateInputs(variable, value, row)}
                   onBlur={() => persistInputValuesIfNeeded()}
@@ -79,7 +79,7 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex justify-center border-b border-gray-200 border-x py-1.5 cursor-pointer items-center font-medium'
+        className='flex justify-center border-b border-gray-200 py-1.5 cursor-pointer items-center font-medium'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add
