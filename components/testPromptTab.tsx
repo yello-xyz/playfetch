@@ -36,7 +36,7 @@ export default function TestPromptTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
-  tabSelector: ReactNode
+  tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompt)
   const [selectedIndices, setSelectedIndices] = useState<number[]>([])
@@ -56,7 +56,7 @@ export default function TestPromptTab({
     <Allotment vertical>
       <Allotment.Pane minSize={minHeight} preferredSize='50%'>
         <div className='flex flex-col flex-grow h-full min-h-0 pb-4 overflow-hidden'>
-          <div className='p-4 py-2.5 leading-6 bg-white'>{tabSelector}</div>
+          <div className='p-4 py-2.5 leading-6 bg-white'>{tabSelector()}</div>
           <TestDataPane
             variables={variables}
             inputValues={inputValues}

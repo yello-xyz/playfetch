@@ -14,7 +14,7 @@ export default function LogEntriesView({
   activeIndex,
   setActiveIndex,
 }: {
-  tabSelector: ReactNode
+  tabSelector: (children?: ReactNode) => ReactNode
   logEntries: LogEntry[]
   endpoints: ResolvedEndpoint[]
   activeIndex?: number
@@ -22,7 +22,7 @@ export default function LogEntriesView({
 }) {
   return (
     <>
-      {tabSelector}
+      {tabSelector()}
       <div className='grid w-full grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'>
         <TableHeader first>Endpoint</TableHeader>
         <TableHeader>Environment</TableHeader>

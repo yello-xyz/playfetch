@@ -23,7 +23,7 @@ export default function EndpointsTable({
   setActiveEndpoint,
   onAddEndpoint,
 }: {
-  tabSelector: ReactNode
+  tabSelector: (children? : ReactNode) => ReactNode
   project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
@@ -35,7 +35,7 @@ export default function EndpointsTable({
   return (
     <>
       <div className='flex items-center justify-between w-full'>
-        {tabSelector}
+        {tabSelector()}
         {onAddEndpoint && (
           <div
             className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'

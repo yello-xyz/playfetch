@@ -1,17 +1,24 @@
+import { ReactNode } from 'react'
+
 export default function TabSelector<T extends string>({
   tabs,
   activeTab,
   setActiveTab,
+  children,
 }: {
   tabs: T[]
   activeTab: T
   setActiveTab: (tab: T) => void
+  children?: ReactNode
 }) {
   return (
-    <div className='flex items-center gap-1 font-medium'>
-      {tabs.map((tab, index) => (
-        <TabButton key={index} tab={tab} activeTab={activeTab} setActiveTab={setActiveTab} />
-      ))}
+    <div className='flex items-center justify-between gap-1'>
+      <div className='flex items-center gap-1 font-medium '>
+        {tabs.map((tab, index) => (
+          <TabButton key={index} tab={tab} activeTab={activeTab} setActiveTab={setActiveTab} />
+        ))}
+      </div>
+      {children}
     </div>
   )
 }

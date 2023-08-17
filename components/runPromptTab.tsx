@@ -25,7 +25,7 @@ export default function RunPromptTab({
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
-  tabSelector: ReactNode
+  tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const minHeight = 230
   return (

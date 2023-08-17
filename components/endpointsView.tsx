@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import {
   ActiveProject,
   ActivePrompt,
@@ -58,12 +58,13 @@ export default function EndpointsView({
     setActiveLogEntryIndex(undefined)
   }
 
-  const tabSelector = (
+  const tabSelector = (children?: ReactNode) => (
     <TabSelector
       tabs={logEntries.length > 0 ? ['Endpoints', 'Logs'] : ['Endpoints']}
       activeTab={activeTab}
-      setActiveTab={selectTab}
-    />
+      setActiveTab={selectTab}>
+      {children}
+    </TabSelector>
   )
 
   const endpoints = project.endpoints

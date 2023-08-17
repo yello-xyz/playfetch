@@ -5,7 +5,7 @@ import TestPromptTab from './testPromptTab'
 import useInputValues from './useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
@@ -114,12 +114,13 @@ export default function PromptView({
   }
 
   const showTestData = ExtractPromptVariables(currentPrompt).length > 0
-  const tabSelector = (
+  const tabSelector = (children?: ReactNode) => (
     <TabSelector
       tabs={showTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
       activeTab={activeTab}
-      setActiveTab={selectTab}
-    />
+      setActiveTab={selectTab}>
+      {children}
+    </TabSelector>
   )
 
   if (activeTab === 'Test data' && !showTestData) {
