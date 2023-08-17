@@ -62,9 +62,7 @@ export default function TestDataPane({
           const color = selectedIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
           return (
             <Fragment key={row}>
-              <div className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color}`}>
-                #{row + 1}
-              </div>
+              <div className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color}`}>#{row + 1}</div>
               {variables.map((variable, col) => (
                 <RichTextInput
                   key={col}
@@ -79,7 +77,7 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex justify-center border-b border-gray-200 py-1.5 cursor-pointer items-center font-medium'
+        className='flex justify-center border-b border-gray-200 py-1.5 bg-gray-25 cursor-pointer items-center font-medium'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add

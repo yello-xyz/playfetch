@@ -7,6 +7,7 @@ import PromptPanel from './promptPanel'
 import { RefreshContext } from './refreshContext'
 import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
+import TabSelector from './tabSelector'
 
 export default function PromptChainNodeEditor({
   node,
@@ -36,12 +37,12 @@ export default function PromptChainNodeEditor({
       {loadedPrompt && activeVersion ? (
         <Allotment vertical>
           <Allotment.Pane minSize={minHeight}>
-            <div className='flex flex-col h-full gap-4 px-4'>
+            <div className='flex flex-col h-full gap-4'>
               <VersionTimeline
                 prompt={loadedPrompt}
                 activeVersion={activeVersion}
                 setActiveVersion={selectVersion}
-                tabSelector={<Label>Prompt Versions</Label>}
+                tabSelector={() => <TabSelector tabs={['Prompt versions']} />}
               />
               {items.slice(0, index).some(IsPromptChainItem) && (
                 <div className='self-start'>

@@ -7,8 +7,8 @@ export default function TabSelector<T extends string>({
   children,
 }: {
   tabs: T[]
-  activeTab: T
-  setActiveTab: (tab: T) => void
+  activeTab?: T
+  setActiveTab?: (tab: T) => void
   children?: ReactNode
 }) {
   return (
@@ -29,13 +29,13 @@ function TabButton<T extends string>({
   setActiveTab,
 }: {
   tab: T
-  activeTab: T
-  setActiveTab: (tab: T) => void
+  activeTab?: T
+  setActiveTab?: (tab: T) => void
 }) {
+  const textColor = activeTab === undefined || activeTab === tab ? 'text-gray-700' : 'text-gray-300'
+  const cursor = setActiveTab ? 'cursor-pointer' : ''
   return (
-    <div
-      className={`px-2 cursor-pointer ${activeTab === tab ? 'text-gray-700' : 'text-gray-300'}`}
-      onClick={() => setActiveTab(tab)}>
+    <div className={`px-2 ${textColor} ${cursor}}`} onClick={() => setActiveTab?.(tab)}>
       {tab}
     </div>
   )
