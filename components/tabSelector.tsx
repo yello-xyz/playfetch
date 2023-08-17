@@ -1,16 +1,26 @@
-import { ReactNode } from 'react'
-
-export default function TabSelector({ children }: { children: ReactNode }) {
-  return <div className='flex items-center gap-1 font-medium'>{children}</div>
+export default function TabSelector<T extends string>({
+  tabs,
+  activeTab,
+  setActiveTab,
+}: {
+  tabs: T[]
+  activeTab: T
+  setActiveTab: (tab: T) => void
+}) {
+  return (
+    <div className='flex items-center gap-1 font-medium'>
+      {tabs.map((tab, index) => (
+        <TabButton key={index} tab={tab} activeTab={activeTab} setActiveTab={setActiveTab} />
+      ))}
+    </div>
+  )
 }
 
-export function TabButton<T>({
-  title,
+function TabButton<T extends string>({
   tab,
   activeTab,
   setActiveTab,
 }: {
-  title: string
   tab: T
   activeTab: T
   setActiveTab: (tab: T) => void
@@ -19,7 +29,7 @@ export function TabButton<T>({
     <div
       className={`px-2 cursor-pointer ${activeTab === tab ? 'text-gray-700' : 'text-gray-300'}`}
       onClick={() => setActiveTab(tab)}>
-      {title}
+      {tab}
     </div>
   )
 }

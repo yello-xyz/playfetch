@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
-import TabSelector, { TabButton } from './tabSelector'
+import TabSelector from './tabSelector'
 import { useInitialState } from './useInitialState'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -45,8 +45,6 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
   }
 }
 
-type ActiveTab = 'versions' | 'testdata'
-
 export default function PromptView({
   prompt,
   project,
@@ -66,8 +64,8 @@ export default function PromptView({
   setShowComments: (show: boolean) => void
   savePrompt: () => Promise<number>
 }) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('versions')
-
+  type ActiveTab = 'Prompt versions' | 'Test data'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
@@ -117,19 +115,20 @@ export default function PromptView({
 
   const showTestData = ExtractPromptVariables(currentPrompt).length > 0
   const tabSelector = (
-    <TabSelector>
-      <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={selectTab} />
-      {showTestData && <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />}
-    </TabSelector>
+    <TabSelector
+      tabs={showTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
+      activeTab={activeTab}
+      setActiveTab={selectTab}
+    />
   )
 
-  if (activeTab === 'testdata' && !showTestData) {
-    setActiveTab('versions')
+  if (activeTab === 'Test data' && !showTestData) {
+    setActiveTab('Prompt versions')
   }
 
   const renderTab = (tab: ActiveTab) => {
     switch (tab) {
-      case 'versions':
+      case 'Prompt versions':
         return (
           <RunPromptTab
             currentPrompt={currentPrompt}
@@ -144,7 +143,7 @@ export default function PromptView({
             tabSelector={tabSelector}
           />
         )
-      case 'testdata':
+      case 'Test data':
         return (
           <TestPromptTab
             currentPrompt={currentPrompt}

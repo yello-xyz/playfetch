@@ -19,7 +19,7 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import TabSelector, { TabButton } from './tabSelector'
+import TabSelector from './tabSelector'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 
@@ -34,8 +34,6 @@ const NewEndpointSettings: EndpointSettings = {
   useStreaming: false,
 }
 
-type ActiveTab = 'endpoints' | 'logs'
-
 export default function EndpointsView({
   project,
   logEntries = [],
@@ -45,7 +43,8 @@ export default function EndpointsView({
   logEntries?: LogEntry[]
   onRefresh: () => Promise<void>
 }) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('endpoints')
+  type ActiveTab = 'Endpoints' | 'Logs'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('Endpoints')
 
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
   const updateActiveLogEntryIndex = (index: number) => {
@@ -60,10 +59,11 @@ export default function EndpointsView({
   }
 
   const tabSelector = (
-    <TabSelector>
-      <TabButton title='Endpoints' tab='endpoints' activeTab={activeTab} setActiveTab={selectTab} />
-      {logEntries.length > 0 && <TabButton title='Logs' tab='logs' activeTab={activeTab} setActiveTab={selectTab} />}
-    </TabSelector>
+    <TabSelector
+      tabs={logEntries.length > 0 ? ['Endpoints', 'Logs'] : ['Endpoints']}
+      activeTab={activeTab}
+      setActiveTab={selectTab}
+    />
   )
 
   const endpoints = project.endpoints
@@ -143,7 +143,7 @@ export default function EndpointsView({
   const minWidth = 460
   return (
     <Allotment>
-      {activeTab === 'endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
+      {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-2 p-4 pt-3 overflow-y-auto text-gray-500'>
             <EndpointsTable
@@ -156,7 +156,7 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeTab === 'endpoints' && activeEndpoint && (
+      {activeTab === 'Endpoints' && activeEndpoint && (
         <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto max-w-[680px]'>
             <EndpointSettingsPane
@@ -181,7 +181,7 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeTab === 'logs' && (
+      {activeTab === 'Logs' && (
         <Allotment.Pane minSize={minWidth}>
           <div className='flex flex-col items-start h-full gap-2 p-4 overflow-y-auto text-gray-500'>
             <LogEntriesView
