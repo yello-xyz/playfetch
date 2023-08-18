@@ -17,13 +17,13 @@ export function TopBarButton({
   onClick: () => void
 }) {
 
-  const baseClass = 'flex items-center gap-0.5 pl-1.5 pr-1.5 py-1 font-regular rounded-lg cursor-pointer '
+  const baseClass = 'flex items-center gap-0.5 pl-1.5 pr-1.5 py-1 font-medium rounded-lg cursor-pointer '
 
   const colorForType = (type: ButtonType) => {
     switch (type) {
       default:
       case 'primary':
-        return baseClass + 'text-white bg-blue-400 hover:bg-blue-300'
+        return baseClass + 'text-white bg-blue-400 hover:bg-blue-500'
       case 'outline':
         return baseClass + 'text-dark-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
     }

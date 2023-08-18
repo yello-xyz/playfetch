@@ -65,7 +65,7 @@ export default function WorkspaceGridView({
           onDeleted={resetWorkspaces}
         />
         {activeWorkspace.projects.length > 0 ? (
-          <div className='flex flex-col items-stretch h-full gap-4 overflow-y-auto'>
+          <div className='flex flex-col items-stretch h-full gap-3.5 overflow-y-auto'>
             <div className='border-b border-gray-100 text-dark-gray-700 font-medium antialiased pt-1.5 pb-2.5'>
               <span>Project name</span>
             </div>
