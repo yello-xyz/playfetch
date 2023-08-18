@@ -29,7 +29,7 @@ export function TopBarButton({
   }
 
   return (
-    <div className={`${baseClass} ${colorForType(type)} antialiased`} onClick={onClick}>
+    <div className={`${baseClass} ${colorForType(type)}`} onClick={onClick}>
       {icon && <Icon icon={icon} />}
       {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}
     </div>
