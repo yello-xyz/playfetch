@@ -17,8 +17,7 @@ export default function IconButton({
   onClick: () => void
   disabled?: boolean
 }) {
-
-  const hoverTypeClass = (type: HoverType) => {3
+  const hoverTypeClass = (type: HoverType) => {
     switch (type) {
       default:
       case 'background':

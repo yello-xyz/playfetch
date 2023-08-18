@@ -3,8 +3,8 @@ import { useState } from 'react'
 import InviteDialog from './inviteDialog'
 import api from '@/src/client/api'
 import IconButton from './iconButton'
-import starIcon from '@/public/24-black-star-outline.svg'
-import filledStarIcon from '@/public/24-black-star-filled.svg'
+import starIcon from '@/public/star.svg'
+import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
@@ -134,14 +134,17 @@ function ProjectCell({
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
         <div className='flex flex-row gap-1.5 justify-center leading-6'>
-          <IconButton hoverType={project.favorited ? 'none' : 'opacity'}
+          <IconButton
+            hoverType={project.favorited ? 'none' : 'opacity'}
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
           />
-          <span className='flex-1 text-base font-medium text-dark-gray-700 line-clamp-2 antialiased'>{project.name}</span>
+          <span className='flex-1 text-base antialiased font-medium text-dark-gray-700 line-clamp-2'>
+            {project.name}
+          </span>
         </div>
         <div className='relative flex items-center gap-2'>
-          <span className='mr-5 text-xs text-dark-gray-700 antialiased'>Edited {formattedDate}</span>
+          <span className='mr-5 text-xs antialiased text-dark-gray-700'>Edited {formattedDate}</span>
           <IconButton hoverType='opacity' icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
             <ProjectPopupMenu

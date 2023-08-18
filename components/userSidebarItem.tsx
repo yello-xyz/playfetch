@@ -113,7 +113,9 @@ export default function UserSidebarItem() {
                 <div className='flex items-center gap-2.5 pb-2 px-2'>
                   <UserAvatar user={user} />
                   <div className='flex flex-col min-w-0'>
-                    <span className='overflow-hidden font-semibold text-ellipsis text-dark-gray-700 select-none antialiased'>{user.fullName}</span>
+                    <span className='overflow-hidden font-semibold text-ellipsis text-dark-gray-700 select-none antialiased'>
+                      {user.fullName}
+                    </span>
                     <span className='overflow-hidden text-xs text-ellipsis text-dark-gray-400 antialiased select-none'>
                       {user.email}
                     </span>

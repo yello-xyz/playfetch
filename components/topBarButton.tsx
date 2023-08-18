@@ -11,28 +11,25 @@ export function TopBarButton({
   icon,
   onClick,
 }: {
-  type?: ButtonType,
+  type?: ButtonType
   title?: string
   icon?: StaticImageData
   onClick: () => void
 }) {
-
   const baseClass = 'flex items-center gap-0.5 pl-1.5 pr-1.5 py-1 font-regular rounded-lg cursor-pointer '
 
   const colorForType = (type: ButtonType) => {
     switch (type) {
       default:
       case 'primary':
-        return baseClass + 'text-white bg-blue-400 hover:bg-blue-300'
+        return 'text-white bg-blue-400 hover:bg-blue-300'
       case 'outline':
-        return baseClass + 'text-dark-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+        return 'text-dark-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
     }
   }
 
   return (
-    <div
-      className={`${colorForType(type)} antialiased`}
-      onClick={onClick}>
+    <div className={`${baseClass} ${colorForType(type)} antialiased`} onClick={onClick}>
       {icon && <Icon icon={icon} />}
       {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}
     </div>

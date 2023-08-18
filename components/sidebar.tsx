@@ -62,7 +62,9 @@ export function SidebarButton({
     <LinkWrapper link={link}>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
-        <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap text-dark-gray-700 antialiased'>{title}</div>
+        <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap text-dark-gray-700 antialiased'>
+          {title}
+        </div>
         {actionComponent}
       </div>
     </LinkWrapper>
