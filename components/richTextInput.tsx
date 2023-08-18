@@ -4,6 +4,7 @@ import Label from './label'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
+import useScrollHeight from './useScrollHeight'
 const ContentEditable = dynamic(() => import('./contentEditable'))
 
 const escapeSpecialCharacters = (text: string) =>
@@ -154,6 +155,7 @@ export function PromptInput({
   placeholder,
   disabled,
   preformatted,
+  onUpdateScrollHeight,
 }: {
   value: string
   setValue: (value: string) => void
@@ -161,8 +163,11 @@ export function PromptInput({
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
+  onUpdateScrollHeight?: (height: number) => void
 }) {
-  const contentEditableRef = useRef<HTMLInputElement>(null)
+  const [scrollHeight, contentEditableRef] = useScrollHeight()
+
+  useEffect(() => onUpdateScrollHeight?.(scrollHeight ?? 0), [scrollHeight])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
@@ -171,6 +176,7 @@ export function PromptInput({
     if (node && contentEditableRef.current) {
       contentEditableRef.current.focus()
       moveCursorToEndOfNode(contentEditableRef.current)
+      onUpdateScrollHeight?.(contentEditableRef.current.scrollHeight)
     }
   }, [])
 
@@ -205,6 +211,7 @@ export function PromptInput({
     setSelection(undefined)
     setHTMLValue(html)
     setValue(PromptFromHTML(html))
+    onUpdateScrollHeight?.(contentEditableRef.current?.scrollHeight ?? 0)
   }
 
   const renderContentEditable = () => (

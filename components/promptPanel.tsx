@@ -54,7 +54,14 @@ export default function PromptPanel({
   const [inputs] = SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), 'first')
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
-  const preferredHeight = (showLabel ? 32 : 0) + (runPrompt ? (areOptionsExpanded ? 320 : 195) : 100)
+  const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
+  const updatePromptInputScrollHeight = (scrollHeight: number) => {
+    if (scrollHeight > promptInputScrollHeight) {
+      setPromptInputScrollHeight(Math.min(250, scrollHeight))
+    }
+  }
+  const preferredHeight =
+    (showLabel ? 32 : 0) + (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) + promptInputScrollHeight
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight])
 
   return (
@@ -66,6 +73,7 @@ export default function PromptPanel({
           setValue={updatePrompt}
           label={showLabel ? 'Prompt' : undefined}
           placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
+          onUpdateScrollHeight={updatePromptInputScrollHeight}
         />
       </div>
       {runPrompt && (
