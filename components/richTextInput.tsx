@@ -167,7 +167,7 @@ export function PromptInput({
 }) {
   const [scrollHeight, contentEditableRef] = useScrollHeight()
 
-  useEffect(() => onUpdateScrollHeight?.(scrollHeight ?? 0), [scrollHeight])
+  useEffect(() => onUpdateScrollHeight?.(scrollHeight ?? 0), [scrollHeight, onUpdateScrollHeight])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
@@ -178,7 +178,7 @@ export function PromptInput({
       moveCursorToEndOfNode(contentEditableRef.current)
       onUpdateScrollHeight?.(contentEditableRef.current.scrollHeight)
     }
-  }, [])
+  }, [contentEditableRef, onUpdateScrollHeight])
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
@@ -186,7 +186,7 @@ export function PromptInput({
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [])
+  }, [contentEditableRef])
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
     if (!isInput) {

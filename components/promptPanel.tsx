@@ -57,12 +57,12 @@ export default function PromptPanel({
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
   const updatePromptInputScrollHeight = (scrollHeight: number) => {
     if (scrollHeight > promptInputScrollHeight) {
-      setPromptInputScrollHeight(Math.min(250, scrollHeight))
+      setPromptInputScrollHeight(Math.min(180, scrollHeight))
     }
   }
   const preferredHeight =
     (showLabel ? 32 : 0) + (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) + promptInputScrollHeight
-  useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight])
+  useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
