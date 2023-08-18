@@ -51,10 +51,12 @@ export default function TestPromptTab({
     return runPrompt(currentConfig, inputs)
   }
 
-  const minHeight = 240
+  const minVersionHeight = 240
+  const [promptHeight, setPromptHeight] = useState(1)
+  const preferredHeight = promptHeight + 105
   return (
     <Allotment vertical>
-      <Allotment.Pane minSize={minHeight} preferredSize='50%'>
+      <Allotment.Pane minSize={minVersionHeight}>
         <div className='flex flex-col flex-grow h-full min-h-0 pb-4 overflow-hidden'>
           {tabSelector()}
           <TestDataPane
@@ -66,7 +68,7 @@ export default function TestPromptTab({
           />
         </div>
       </Allotment.Pane>
-      <Allotment.Pane minSize={minHeight}>
+      <Allotment.Pane minSize={preferredHeight} preferredSize={preferredHeight}>
         <div className='h-full p-4'>
           <div className='flex flex-col h-full gap-4'>
             <div className='flex gap-2'>
@@ -89,6 +91,7 @@ export default function TestPromptTab({
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
               checkProviderAvailable={checkProviderAvailable}
+              onUpdatePreferredHeight={setPromptHeight}
             />
             <TestButtons
               variables={variables}

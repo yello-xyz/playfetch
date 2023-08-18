@@ -27,12 +27,11 @@ export default function RunPromptTab({
   inputValues: InputValues
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const minHeight = 230
-  const [promptHeight, setPromptHeight] = useState(minHeight)
-
+  const minVersionHeight = 230
+  const [promptHeight, setPromptHeight] = useState(1)
   return (
     <Allotment vertical>
-      <Allotment.Pane minSize={minHeight} preferredSize='50%'>
+      <Allotment.Pane minSize={minVersionHeight}>
         <div className='h-full'>
           <VersionTimeline
             prompt={activePrompt}
