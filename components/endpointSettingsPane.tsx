@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ActiveProject,
   ActivePrompt,
@@ -35,6 +35,7 @@ export default function EndpointSettingsPane({
   project,
   prompt,
   onSelectParentID,
+  onSelectVersionIndex,
   isEditing,
   setEditing,
   onRefresh,
@@ -43,6 +44,7 @@ export default function EndpointSettingsPane({
   project: ActiveProject
   prompt?: ActivePrompt
   onSelectParentID: (parentID?: number) => void
+  onSelectVersionIndex: (versionIndex: number) => void
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
   onRefresh: (newEndpointID?: number) => Promise<void>
@@ -107,6 +109,8 @@ export default function EndpointSettingsPane({
 
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
+
+  useEffect(() => onSelectVersionIndex(versionIndex), [onSelectVersionIndex, versionIndex])
 
   const publishEndpoint = async () => {
     setSaving(true)

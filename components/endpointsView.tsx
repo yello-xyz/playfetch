@@ -136,6 +136,7 @@ export default function EndpointsView({
   }, [parent, project, parentCache])
   const activePrompt = EndpointParentIsPrompt(parent) ? (activeParent as ActivePrompt) : undefined
 
+  const [versionIndex, setVersionIndex] = useState(-1)
   const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
   const variables = parent
     ? EndpointParentIsPrompt(parent)
@@ -161,7 +162,9 @@ export default function EndpointsView({
       {activeTab === 'Endpoints' && activeEndpoint && (
         <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <div className='flex flex-col w-full h-full bg-gray-25'>
-            <SingleTabHeader label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}>
+            <SingleTabHeader
+              label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
+              secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : ''}>
               {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
             </SingleTabHeader>
             <div className='flex flex-col gap-6 p-4 overflow-y-auto'>
@@ -170,6 +173,7 @@ export default function EndpointsView({
                 project={project}
                 prompt={activePrompt}
                 onSelectParentID={setActiveParentID}
+                onSelectVersionIndex={setVersionIndex}
                 isEditing={isEditing}
                 setEditing={setEditing}
                 onRefresh={refresh}
