@@ -50,11 +50,11 @@ const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitesp
 const printVariables = (text: string) =>
   text
     .replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
-    .replace(/(<\/b>)(<br \/>)?(<\/div>)?$/, '$1&nbsp;$2$3')
+    .replace(/(<\/b>)(<br \/>)?(<\/div>)?( )?$/, '$1&nbsp;$2$3$4')
 
 const parseVariables = (html: string) =>
   html
-    .replace(/(<\/b>)&nbsp;(<br \/>)?(<\/div>)?$/, '$1$2$3')
+    .replace(/(<\/b>)&nbsp;(<br \/>)?(<\/div>)?( )?$/, '$1$2$3$4')
     .replace(/<b[^>]*>([^>{}]*?)<\/b>/g, '{{$1}}')
     .replace(/<b[^>]*>([^>]*?)<\/b>/g, '$1')
     .replaceAll('{{}}', '')
