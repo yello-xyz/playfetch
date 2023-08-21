@@ -166,8 +166,17 @@ export function PromptInput({
   onUpdateScrollHeight?: (height: number) => void
 }) {
   const [scrollHeight, contentEditableRef] = useScrollHeight()
+  const updateScrollHeight = useCallback(() => {
+    if (onUpdateScrollHeight && contentEditableRef.current) {
+      const styleHeight = contentEditableRef.current.style.height
+      contentEditableRef.current.style.height = '0'
+      const scrollHeight = contentEditableRef.current.scrollHeight
+      contentEditableRef.current.style.height = styleHeight
+      onUpdateScrollHeight(scrollHeight)
+    }
+  }, [contentEditableRef, onUpdateScrollHeight])
 
-  useEffect(() => onUpdateScrollHeight?.(scrollHeight ?? 0), [scrollHeight, onUpdateScrollHeight])
+  useEffect(updateScrollHeight, [scrollHeight, updateScrollHeight])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
@@ -177,10 +186,10 @@ export function PromptInput({
       if (node && contentEditableRef.current) {
         contentEditableRef.current.focus()
         moveCursorToEndOfNode(contentEditableRef.current)
-        onUpdateScrollHeight?.(contentEditableRef.current.scrollHeight)
+        updateScrollHeight()
       }
     },
-    [contentEditableRef, onUpdateScrollHeight]
+    [contentEditableRef, updateScrollHeight]
   )
 
   useEffect(() => {
@@ -214,7 +223,7 @@ export function PromptInput({
     setSelection(undefined)
     setHTMLValue(html)
     setValue(PromptFromHTML(html))
-    onUpdateScrollHeight?.(contentEditableRef.current?.scrollHeight ?? 0)
+    updateScrollHeight()
   }
 
   const renderContentEditable = () => (

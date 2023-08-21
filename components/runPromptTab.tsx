@@ -41,7 +41,7 @@ export default function RunPromptTab({
           />
         </div>
       </Allotment.Pane>
-      <Allotment.Pane minSize={promptHeight} preferredSize={promptHeight}>
+      <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
         <div className='h-full p-4 bg-white'>
           <PromptPanel
             initialPrompt={currentPrompt}
