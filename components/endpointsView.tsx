@@ -19,9 +19,11 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import TabSelector from './tabSelector'
+import TabSelector, { SingleTabHeader } from './tabSelector'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
+import IconButton from './iconButton'
+import collapseIcon from '@/public/collapse.svg'
 
 const NewEndpointSettings: EndpointSettings = {
   id: undefined,
@@ -156,27 +158,31 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
       {activeTab === 'Endpoints' && activeEndpoint && (
-        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto max-w-[680px]'>
-            <EndpointSettingsPane
-              endpoint={activeEndpoint}
-              project={project}
-              prompt={activePrompt}
-              onSelectParentID={setActiveParentID}
-              isEditing={isEditing}
-              setEditing={setEditing}
-              onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
-              onRefresh={refresh}
-            />
-            {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && activeParent && (
-              <ExamplePane
+        <Allotment.Pane minSize={minWidth} maxSize={680} preferredSize={minWidth}>
+          <div className='flex flex-col w-full h-full'>
+            <SingleTabHeader label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}>
+              {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
+            </SingleTabHeader>
+            <div className='flex flex-col gap-6 p-4 overflow-y-auto'>
+              <EndpointSettingsPane
                 endpoint={activeEndpoint}
-                variables={variables}
-                inputValues={activeParent.inputValues}
-                defaultFlavor={project.availableFlavors[0]}
+                project={project}
+                prompt={activePrompt}
+                onSelectParentID={setActiveParentID}
+                isEditing={isEditing}
+                setEditing={setEditing}
+                onRefresh={refresh}
               />
-            )}
-            {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
+              {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && activeParent && (
+                <ExamplePane
+                  endpoint={activeEndpoint}
+                  variables={variables}
+                  inputValues={activeParent.inputValues}
+                  defaultFlavor={project.availableFlavors[0]}
+                />
+              )}
+              {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
+            </div>
           </div>
         </Allotment.Pane>
       )}

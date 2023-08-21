@@ -44,7 +44,7 @@ export default function ExamplePane({
 
   return (
     <>
-      <div className='flex items-baseline justify-between w-full gap-2 -mb-4'>
+      <div className='flex items-center justify-between w-full gap-2 -mb-4'>
         <Label>Integration</Label>
         {canCopyToClipboard && (
           <div className='flex items-center gap-1 cursor-pointer' onClick={() => copyToClipboard(curlCommand)}>

@@ -18,8 +18,6 @@ import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import Button, { PendingButton } from './button'
-import collapseIcon from '@/public/collapse.svg'
-import IconButton from './iconButton'
 
 export type EndpointSettings = {
   id: number | undefined
@@ -39,7 +37,6 @@ export default function EndpointSettingsPane({
   onSelectParentID,
   isEditing,
   setEditing,
-  onCollapse,
   onRefresh,
 }: {
   endpoint: EndpointSettings
@@ -48,7 +45,6 @@ export default function EndpointSettingsPane({
   onSelectParentID: (parentID?: number) => void
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
-  onCollapse?: () => void
   onRefresh: (newEndpointID?: number) => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
@@ -175,14 +171,6 @@ export default function EndpointSettingsPane({
 
   return (
     <>
-      <div className='flex items-center justify-between w-full -mt-0.5 -mb-4'>
-        <Label>
-          {endpoint.id && parent
-            ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`
-            : 'New Endpoint'}
-        </Label>
-        {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
-      </div>
       <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
