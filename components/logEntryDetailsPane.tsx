@@ -28,13 +28,14 @@ export default function LogEntryDetailsPane({
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === endpoint.versionID)
 
+  const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
-    <div className='flex flex-col w-full h-full'>
+    <div className='flex flex-col w-full h-full bg-gray-25'>
       <SingleTabHeader label={endpoint.urlPath}>
         {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </SingleTabHeader>
       <div className='flex flex-col gap-6 p-4'>
-        <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
+        <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg`}>
           {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'}
           <div className='flex items-center justify-end gap-1'>
             <Icon icon={!!endpoint.versionID ? promptIcon : chainIcon} />
@@ -58,20 +59,20 @@ export default function LogEntryDetailsPane({
         {Object.keys(logEntry.inputs).length > 0 && (
           <>
             <Label className='-mb-4'>Input</Label>
-            <CodeBlock dark>{JSON.stringify(logEntry.inputs, null, 2)}</CodeBlock>
+            <CodeBlock>{JSON.stringify(logEntry.inputs, null, 2)}</CodeBlock>
           </>
         )}
         {logEntry.error ? (
           <>
             <Label className='-mb-4'>Error</Label>
-            <CodeBlock dark error>
+            <CodeBlock error>
               {logEntry.error}
             </CodeBlock>
           </>
         ) : (
           <>
             <Label className='-mb-4'>Output</Label>
-            <CodeBlock dark>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
+            <CodeBlock>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
           </>
         )}
       </div>

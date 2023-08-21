@@ -144,6 +144,7 @@ export default function EndpointsView({
     : []
 
   const minWidth = 460
+  const maxWidth = 680
   return (
     <Allotment>
       {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
@@ -158,7 +159,7 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
       {activeTab === 'Endpoints' && activeEndpoint && (
-        <Allotment.Pane minSize={minWidth} maxSize={680} preferredSize={minWidth}>
+        <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <div className='flex flex-col w-full h-full bg-gray-25'>
             <SingleTabHeader label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}>
               {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
@@ -200,7 +201,7 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
       {activeLogEntryIndex !== undefined && activeEndpoint && IsSavedEndpoint(activeEndpoint) && parent && (
-        <Allotment.Pane minSize={minWidth}>
+        <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <LogEntryDetailsPane
             logEntry={logEntries[activeLogEntryIndex]}
             endpoint={activeEndpoint}
