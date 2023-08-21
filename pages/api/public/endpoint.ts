@@ -55,6 +55,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             saveLogEntry(
               endpoint.projectID,
               endpoint.id,
+              endpoint.urlPath,
+              endpoint.flavor,
+              endpoint.parentID,
+              endpoint.versionID,
               inputs,
               result ? { output: result } : {},
               error,
