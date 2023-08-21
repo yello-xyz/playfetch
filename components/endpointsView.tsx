@@ -49,10 +49,12 @@ export default function EndpointsView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('Endpoints')
 
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
+  
   const updateActiveLogEntryIndex = (index: number) => {
     setActiveLogEntryIndex(index)
     const endpoint = project.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
-    updateActiveEndpoint(endpoint!)
+    setActiveEndpointID(endpoint?.id)
+    setActiveParentID(logEntries[index].parentID)
   }
 
   const selectTab = (tab: ActiveTab) => {
@@ -103,13 +105,14 @@ export default function EndpointsView({
   }
 
   const [activeParentID, setActiveParentID] = useState<number>()
-  if (!isEditing && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
+  if (!isEditing && activeLogEntryIndex === undefined && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
     setActiveParentID(activeEndpoint.parentID)
   }
 
   const updateActiveEndpoint = (endpoint: Endpoint) => {
     setActiveEndpointID(endpoint.id)
     setActiveParentID(endpoint.parentID)
+    setActiveLogEntryIndex(undefined)
     if (endpoint.parentID !== activeParentID) {
       setActiveParent(undefined)
     }
@@ -204,7 +207,7 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeLogEntryIndex !== undefined && activeEndpoint && IsSavedEndpoint(activeEndpoint) && parent && (
+      {activeLogEntryIndex !== undefined && parent && (
         <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <LogEntryDetailsPane
             logEntry={logEntries[activeLogEntryIndex]}
