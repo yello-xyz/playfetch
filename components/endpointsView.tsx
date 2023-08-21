@@ -159,7 +159,7 @@ export default function EndpointsView({
       )}
       {activeTab === 'Endpoints' && activeEndpoint && (
         <Allotment.Pane minSize={minWidth} maxSize={680} preferredSize={minWidth}>
-          <div className='flex flex-col w-full h-full'>
+          <div className='flex flex-col w-full h-full bg-gray-25'>
             <SingleTabHeader label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}>
               {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
             </SingleTabHeader>

@@ -169,9 +169,10 @@ export default function EndpointSettingsPane({
   const isValidConfig =
     !!parentID && (!!versionID || !EndpointParentIsPrompt(parent)) && !!flavor && CheckValidURLPath(urlPath)
 
+  const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <>
-      <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
+      <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border-gray-200 border rounded-lg`}>
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>

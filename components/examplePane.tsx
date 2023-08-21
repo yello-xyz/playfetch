@@ -60,11 +60,22 @@ export default function ExamplePane({
   )
 }
 
-export function CodeBlock({ children, active, error }: { children: ReactNode; active?: boolean; error?: boolean }) {
-  const colorClass = error ? 'text-red-300' : 'text-green-300'
+export function CodeBlock({
+  children,
+  active,
+  dark,
+  error,
+}: {
+  children: ReactNode
+  active?: boolean
+  dark?: boolean
+  error?: boolean
+}) {
+  const colorClass = dark ? 'bg-gray-100' : 'bg-white border border-gray-200'
+  const textClass = error ? 'text-red-300' : 'text-green-300'
   const borderClass = active ? 'border' : ''
   return (
-    <div className={`p-4 text-xs bg-gray-100 rounded-lg ${colorClass} ${borderClass}`}>
+    <div className={`p-4 text-xs rounded-lg ${colorClass} ${textClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>

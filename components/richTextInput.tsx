@@ -172,13 +172,16 @@ export function PromptInput({
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
 
-  const onSuspenseLoaded = useCallback((node: any) => {
-    if (node && contentEditableRef.current) {
-      contentEditableRef.current.focus()
-      moveCursorToEndOfNode(contentEditableRef.current)
-      onUpdateScrollHeight?.(contentEditableRef.current.scrollHeight)
-    }
-  }, [contentEditableRef, onUpdateScrollHeight])
+  const onSuspenseLoaded = useCallback(
+    (node: any) => {
+      if (node && contentEditableRef.current) {
+        contentEditableRef.current.focus()
+        moveCursorToEndOfNode(contentEditableRef.current)
+        onUpdateScrollHeight?.(contentEditableRef.current.scrollHeight)
+      }
+    },
+    [contentEditableRef, onUpdateScrollHeight]
+  )
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
@@ -238,7 +241,13 @@ export function PromptInput({
             <Label onClick={() => contentEditableRef.current?.focus()}>{label}</Label>
           </div>
         )}
-        {preformatted ? <CodeBlock active={!disabled}>{renderContentEditable()}</CodeBlock> : renderContentEditable()}
+        {preformatted ? (
+          <CodeBlock dark active={!disabled}>
+            {renderContentEditable()}
+          </CodeBlock>
+        ) : (
+          renderContentEditable()
+        )}
       </div>
       {selection && (
         <div
