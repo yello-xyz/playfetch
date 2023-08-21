@@ -17,7 +17,7 @@ export default function LogEntryDetailsPane({
   onCollapse,
 }: {
   logEntry: LogEntry
-  parent: Prompt | Chain
+  parent?: Prompt | Chain
   prompt?: ActivePrompt
   onCollapse: () => void
 }) {
@@ -34,11 +34,15 @@ export default function LogEntryDetailsPane({
       </SingleTabHeader>
       <div className='flex flex-col gap-6 p-4'>
         <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg`}>
-          {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'}
-          <div className='flex items-center justify-end gap-1'>
-            <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
-            {`${parent.name}${versionIndex >= 0 ? ` - Version ${versionIndex + 1}` : ''}`}
-          </div>
+          {parent && (
+            <>
+              {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'}
+              <div className='flex items-center justify-end gap-1'>
+                <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
+                {`${parent.name}${versionIndex >= 0 ? ` - Version ${versionIndex + 1}` : ''}`}
+              </div>
+            </>
+          )}
           <span>Environment</span>
           <span className='flex justify-end'>{logEntry.flavor}</span>
           <span>Status</span>
@@ -63,9 +67,7 @@ export default function LogEntryDetailsPane({
         {logEntry.error ? (
           <>
             <Label className='-mb-4'>Error</Label>
-            <CodeBlock error>
-              {logEntry.error}
-            </CodeBlock>
+            <CodeBlock error>{logEntry.error}</CodeBlock>
           </>
         ) : (
           <>

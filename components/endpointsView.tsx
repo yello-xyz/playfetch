@@ -207,7 +207,7 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeLogEntryIndex !== undefined && parent && (
+      {activeLogEntryIndex !== undefined && (
         <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <LogEntryDetailsPane
             logEntry={logEntries[activeLogEntryIndex]}
