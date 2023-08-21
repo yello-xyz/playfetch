@@ -62,7 +62,6 @@ export default function WorkspaceSidebar({
               onClick={onSelectSharedProjects}
             />
           )}
-          {/* <SidebarButton title='New Project…' icon={addIcon} onClick={onAddProject} /> */}
         </SidebarSection>
         <SidebarSection title='Workspaces' className='flex-1'>
           {properWorkspaces.map((workspace, workspaceIndex) => (
@@ -77,7 +76,11 @@ export default function WorkspaceSidebar({
           <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
         </SidebarSection>
         <SidebarSection>
-          <SidebarButton title='Feedback' icon={feedbackIcon} link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback' />
+          <SidebarButton
+            title='Feedback'
+            icon={feedbackIcon}
+            link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback'
+          />
         </SidebarSection>
       </div>
       {showPickNamePrompt && (

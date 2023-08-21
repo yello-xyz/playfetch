@@ -1,5 +1,5 @@
 import { LogEntry, PromptInputs } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getOrderedEntities, getTimestamp } from './datastore'
 import { ensureProjectAccess } from './projects'
 
 export async function migrateLogs() {
@@ -10,6 +10,10 @@ export async function migrateLogs() {
       toLogData(
         logData.projectID,
         logData.endpointID,
+        logData.urlPath,
+        logData.flavor,
+        logData.parentID,
+        logData.versionID,
         JSON.parse(logData.inputs),
         JSON.parse(logData.output),
         logData.error,
@@ -33,6 +37,10 @@ export async function getLogEntriesForProject(userID: number, projectID: number)
 export async function saveLogEntry(
   projectID: number,
   endpointID: number,
+  urlPath: string,
+  flavor: string,
+  parentID: number,
+  versionID: number | undefined,
   inputs: PromptInputs,
   output: object,
   error: string | undefined,
@@ -42,13 +50,32 @@ export async function saveLogEntry(
   attempts: number
 ) {
   await getDatastore().save(
-    toLogData(projectID, endpointID, inputs, output, error, new Date(), cost, duration, cacheHit, attempts)
+    toLogData(
+      projectID,
+      endpointID,
+      urlPath,
+      flavor,
+      parentID,
+      versionID,
+      inputs,
+      output,
+      error,
+      new Date(),
+      cost,
+      duration,
+      cacheHit,
+      attempts
+    )
   )
 }
 
 const toLogData = (
   projectID: number,
   endpointID: number,
+  urlPath: string,
+  flavor: string,
+  parentID: number,
+  versionID: number | undefined,
   inputs: PromptInputs,
   output: object,
   error: string | undefined,
@@ -63,9 +90,13 @@ const toLogData = (
   data: {
     projectID,
     endpointID,
+    urlPath,
+    flavor,
+    parentID,
+    versionID: versionID ?? null,
     inputs: JSON.stringify(inputs),
     output: JSON.stringify(output),
-    error,
+    error: error ?? null,
     createdAt,
     cost,
     duration,
@@ -77,6 +108,10 @@ const toLogData = (
 
 const toLogEntry = (data: any): LogEntry => ({
   endpointID: data.endpointID,
+  urlPath: data.urlPath,
+  flavor: data.flavor,
+  parentID: data.parentID,
+  versionID: data.versionID ?? null,
   inputs: JSON.parse(data.inputs),
   output: JSON.parse(data.output),
   error: data.error ?? null,

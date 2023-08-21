@@ -7,6 +7,7 @@ import { RefreshContext } from './refreshContext'
 import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
 import { SingleTabHeader } from './tabSelector'
+import { useState } from 'react'
 
 export default function PromptChainNodeEditor({
   node,
@@ -30,12 +31,13 @@ export default function PromptChainNodeEditor({
   const loadedPrompt = promptCache.promptForItem(node)
   const activeVersion = promptCache.versionForItem(node)
 
-  const minHeight = 230
+  const minVersionHeight = 230
+  const [promptHeight, setPromptHeight] = useState(1)
   return (
     <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
       {loadedPrompt && activeVersion ? (
         <Allotment vertical>
-          <Allotment.Pane minSize={minHeight}>
+          <Allotment.Pane minSize={minVersionHeight}>
             <div className='flex flex-col h-full gap-4'>
               <VersionTimeline
                 prompt={loadedPrompt}
@@ -54,12 +56,13 @@ export default function PromptChainNodeEditor({
               )}
             </div>
           </Allotment.Pane>
-          <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
+          <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
             <div className='h-full px-4 pt-4'>
               <PromptPanel
                 version={activeVersion}
                 setModifiedVersion={setModifiedVersion}
                 checkProviderAvailable={checkProviderAvailable}
+                onUpdatePreferredHeight={setPromptHeight}
               />
             </div>
           </Allotment.Pane>

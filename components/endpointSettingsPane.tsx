@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ActiveProject,
   ActivePrompt,
@@ -18,8 +18,6 @@ import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import Button, { PendingButton } from './button'
-import collapseIcon from '@/public/collapse.svg'
-import IconButton from './iconButton'
 
 export type EndpointSettings = {
   id: number | undefined
@@ -37,18 +35,18 @@ export default function EndpointSettingsPane({
   project,
   prompt,
   onSelectParentID,
+  onSelectVersionIndex,
   isEditing,
   setEditing,
-  onCollapse,
   onRefresh,
 }: {
   endpoint: EndpointSettings
   project: ActiveProject
   prompt?: ActivePrompt
   onSelectParentID: (parentID?: number) => void
+  onSelectVersionIndex: (versionIndex: number) => void
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
-  onCollapse?: () => void
   onRefresh: (newEndpointID?: number) => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
@@ -112,6 +110,8 @@ export default function EndpointSettingsPane({
   const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
+  useEffect(() => onSelectVersionIndex(versionIndex), [onSelectVersionIndex, versionIndex])
+
   const publishEndpoint = async () => {
     setSaving(true)
     const newEndpointID = await api.publishEndpoint(
@@ -173,17 +173,10 @@ export default function EndpointSettingsPane({
   const isValidConfig =
     !!parentID && (!!versionID || !EndpointParentIsPrompt(parent)) && !!flavor && CheckValidURLPath(urlPath)
 
+  const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <>
-      <div className='flex items-center justify-between w-full -mt-0.5 -mb-4'>
-        <Label>
-          {endpoint.id && parent
-            ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`
-            : 'New Endpoint'}
-        </Label>
-        {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
-      </div>
-      <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
+      <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border-gray-200 border rounded-lg`}>
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>

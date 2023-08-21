@@ -53,7 +53,7 @@ export default function Button({
 
   return (
     <button
-      className={`${colorForType(type)} antialiased text-sm border whitespace-nowrap px-4 py-2 rounded-lg`}
+      className={`${colorForType(type)} text-sm border whitespace-nowrap px-4 py-2 rounded-lg`}
       disabled={disabled}
       onClick={onClick}>
       {children}

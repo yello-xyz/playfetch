@@ -12,7 +12,7 @@ export default function UsagePane({ endpoint }: { endpoint: ResolvedEndpoint }) 
   return (
     <>
       <Label className='-mb-4'>Usage</Label>
-      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg'>
         <UsageRow label='Requests' value={usage.requests} />
         <UsageRow label='Failed Requests' value={usage.failures} />
         <UsageRow label='Total Cost' value={FormatCost(usage.cost)} />

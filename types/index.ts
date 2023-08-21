@@ -192,6 +192,10 @@ export type Comment = {
 export type LogEntry = {
   timestamp: string
   endpointID: number
+  urlPath: string
+  flavor: string
+  parentID: number
+  versionID?: number
   cost: number
   duration: number
   inputs: PromptInputs

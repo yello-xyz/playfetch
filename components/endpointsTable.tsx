@@ -80,7 +80,7 @@ function EndpointsGroup({
         <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
         {parent.name}
       </div>
-      <div className='mb-4 grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px] bg-white'>
+      <div className='mb-4 grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>
         <TableHeader first>Enabled</TableHeader>
         <TableHeader>Endpoint</TableHeader>
         <TableHeader>Environment</TableHeader>
@@ -136,7 +136,7 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
 
   return (
     <div className='w-full h-full pb-4'>
-      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 bg-gray-50 rounded-lg'>
+      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-50'>
         <span className='font-medium'>No Endpoints</span>
 
         <span className='text-sm text-center text-gray-400 w-60'>

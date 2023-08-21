@@ -7,6 +7,7 @@ import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { PromptInput } from './richTextInput'
 import { useInitialState } from './useInitialState'
 import { SelectInputRows } from './testButtons'
+import { useEffect, useState } from 'react'
 
 export default function PromptPanel({
   initialPrompt,
@@ -17,6 +18,7 @@ export default function PromptPanel({
   inputValues,
   showLabel,
   checkProviderAvailable,
+  onUpdatePreferredHeight,
 }: {
   initialPrompt?: string
   initialConfig?: PromptConfig
@@ -26,6 +28,7 @@ export default function PromptPanel({
   inputValues?: InputValues
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
+  onUpdatePreferredHeight?: (height: number) => void
 }) {
   const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
   const [config, setConfig] = useInitialState(
@@ -50,6 +53,12 @@ export default function PromptPanel({
 
   const [inputs] = SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), 'first')
 
+  const [areOptionsExpanded, setOptionsExpanded] = useState(false)
+  const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
+  const preferredHeight =
+    (showLabel ? 32 : 0) + (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) + promptInputScrollHeight
+  useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
+
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
       <div className='self-stretch flex-1 min-h-0'>
@@ -59,9 +68,17 @@ export default function PromptPanel({
           setValue={updatePrompt}
           label={showLabel ? 'Prompt' : undefined}
           placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
+          onUpdateScrollHeight={setPromptInputScrollHeight}
         />
       </div>
-      {runPrompt && <PromptSettingsPane config={config} setConfig={updateConfig} />}
+      {runPrompt && (
+        <PromptSettingsPane
+          config={config}
+          setConfig={updateConfig}
+          isExpanded={areOptionsExpanded}
+          setExpanded={setOptionsExpanded}
+        />
+      )}
       {runPrompt && (
         <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />

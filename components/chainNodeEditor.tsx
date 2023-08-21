@@ -147,7 +147,7 @@ export default function ChainNodeEditor({
 
   return (
     <>
-      <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
+      <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
         {activeNode === InputNode && variables.length > 0 && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />

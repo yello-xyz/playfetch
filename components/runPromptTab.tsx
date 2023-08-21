@@ -1,7 +1,7 @@
 import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { Allotment } from 'allotment'
 
 export default function RunPromptTab({
@@ -27,10 +27,11 @@ export default function RunPromptTab({
   inputValues: InputValues
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const minHeight = 230
+  const minVersionHeight = 230
+  const [promptHeight, setPromptHeight] = useState(1)
   return (
     <Allotment vertical>
-      <Allotment.Pane minSize={minHeight} preferredSize='50%'>
+      <Allotment.Pane minSize={minVersionHeight}>
         <div className='h-full'>
           <VersionTimeline
             prompt={activePrompt}
@@ -40,7 +41,7 @@ export default function RunPromptTab({
           />
         </div>
       </Allotment.Pane>
-      <Allotment.Pane minSize={minHeight}>
+      <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
         <div className='h-full p-4 bg-white'>
           <PromptPanel
             initialPrompt={currentPrompt}
@@ -51,6 +52,7 @@ export default function RunPromptTab({
             runPrompt={runPrompt}
             inputValues={inputValues}
             showLabel
+            onUpdatePreferredHeight={setPromptHeight}
           />
         </div>
       </Allotment.Pane>

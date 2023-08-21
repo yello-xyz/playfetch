@@ -4,6 +4,7 @@ import Label from './label'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
+import useScrollHeight from './useScrollHeight'
 const ContentEditable = dynamic(() => import('./contentEditable'))
 
 const escapeSpecialCharacters = (text: string) =>
@@ -46,10 +47,14 @@ export const RichTextFromHTML = (html: string) => unescapeSpecialCharacters(divs
 
 const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
-const printVariables = (text: string) => text.replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
+const printVariables = (text: string) =>
+  text
+    .replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
+    .replace(/(<\/b>)(<br \/>)?(<\/div>)?( )?$/, '$1&nbsp;$2$3$4')
 
 const parseVariables = (html: string) =>
   html
+    .replace(/(<\/b>)&nbsp;(<br \/>)?(<\/div>)?( )?$/, '$1$2$3$4')
     .replace(/<b[^>]*>([^>{}]*?)<\/b>/g, '{{$1}}')
     .replace(/<b[^>]*>([^>]*?)<\/b>/g, '$1')
     .replaceAll('{{}}', '')
@@ -150,6 +155,7 @@ export function PromptInput({
   placeholder,
   disabled,
   preformatted,
+  onUpdateScrollHeight,
 }: {
   value: string
   setValue: (value: string) => void
@@ -157,18 +163,34 @@ export function PromptInput({
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
+  onUpdateScrollHeight?: (height: number) => void
 }) {
-  const contentEditableRef = useRef<HTMLInputElement>(null)
+  const [scrollHeight, contentEditableRef] = useScrollHeight()
+  const updateScrollHeight = useCallback(() => {
+    if (onUpdateScrollHeight && contentEditableRef.current) {
+      const styleHeight = contentEditableRef.current.style.height
+      contentEditableRef.current.style.height = '0'
+      const scrollHeight = contentEditableRef.current.scrollHeight
+      contentEditableRef.current.style.height = styleHeight
+      onUpdateScrollHeight(scrollHeight)
+    }
+  }, [contentEditableRef, onUpdateScrollHeight])
+
+  useEffect(updateScrollHeight, [scrollHeight, updateScrollHeight])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [selection, setSelection] = useState<Selection>()
 
-  const onSuspenseLoaded = useCallback((node: any) => {
-    if (node && contentEditableRef.current) {
-      contentEditableRef.current.focus()
-      moveCursorToEndOfNode(contentEditableRef.current)
-    }
-  }, [])
+  const onSuspenseLoaded = useCallback(
+    (node: any) => {
+      if (node && contentEditableRef.current) {
+        contentEditableRef.current.focus()
+        moveCursorToEndOfNode(contentEditableRef.current)
+        updateScrollHeight()
+      }
+    },
+    [contentEditableRef, updateScrollHeight]
+  )
 
   useEffect(() => {
     const selectionChangeHandler = () => setSelection(extractSelection(contentEditableRef, containerRef))
@@ -176,7 +198,7 @@ export function PromptInput({
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [])
+  }, [contentEditableRef])
 
   const toggleInput = (text: string, range: Range, isInput: boolean) => {
     if (!isInput) {
@@ -201,6 +223,7 @@ export function PromptInput({
     setSelection(undefined)
     setHTMLValue(html)
     setValue(PromptFromHTML(html))
+    updateScrollHeight()
   }
 
   const renderContentEditable = () => (
