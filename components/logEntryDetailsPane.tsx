@@ -31,7 +31,7 @@ export default function LogEntryDetailsPane({
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <div className='flex flex-col w-full h-full bg-gray-25'>
-      <SingleTabHeader label={endpoint.urlPath}>
+      <SingleTabHeader label={endpoint.urlPath} secondaryLabel={formattedDate}>
         {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </SingleTabHeader>
       <div className='flex flex-col gap-6 p-4'>

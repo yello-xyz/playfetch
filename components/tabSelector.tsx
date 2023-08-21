@@ -1,18 +1,32 @@
 import { ReactNode } from 'react'
 
-export function SingleTabHeader({ label, children }: { label: string; children?: ReactNode }) {
-  return <TabSelector tabs={[label]}>{children}</TabSelector>
+export function SingleTabHeader({
+  label,
+  secondaryLabel,
+  children,
+}: {
+  label: string
+  secondaryLabel?: string
+  children?: ReactNode
+}) {
+  return (
+    <TabSelector tabs={[label]} secondaryLabel={secondaryLabel}>
+      {children}
+    </TabSelector>
+  )
 }
 
 export default function TabSelector<T extends string>({
   tabs,
   activeTab,
   setActiveTab,
+  secondaryLabel,
   children,
 }: {
   tabs: T[]
   activeTab?: T
   setActiveTab?: (tab: T) => void
+  secondaryLabel?: string
   children?: ReactNode
 }) {
   return (
@@ -26,6 +40,7 @@ export default function TabSelector<T extends string>({
             setActiveTab={tabs.length > 1 ? setActiveTab : undefined}
           />
         ))}
+        {secondaryLabel && <span className='text-gray-400'>{secondaryLabel}</span>}
       </div>
       {children}
     </div>
