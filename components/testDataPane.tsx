@@ -19,7 +19,8 @@ export default function TestDataPane({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const rowCount = Math.max(1, ...variables.map(variable => inputValues[variable]?.length ?? 0))
+  const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
+  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
 
   const paddedColumn = (variable: string, length: number) => [
     ...(inputValues[variable] ?? []),
@@ -36,8 +37,8 @@ export default function TestDataPane({
     })
   const addInput = () => {
     persistInputValuesIfNeeded()
-    if (variables.some(variable => (inputValues[variable]?.[rowCount - 1] ?? '').length > 0)) {
-      variables.forEach(variable => updateInputs(variable, '', rowCount))
+    if (allVariables.some(variable => (inputValues[variable]?.[rowCount - 1] ?? '').length > 0)) {
+      allVariables.forEach(variable => updateInputs(variable, '', rowCount))
       setTimeout(() => {
         const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
         const lastChild = editables[editables.length - 1] as HTMLElement
@@ -46,15 +47,19 @@ export default function TestDataPane({
     }
   }
 
-  const gridTemplateColumns = `42px repeat(${variables.length}, minmax(240px, 1fr))`
+  const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
+  const bgColor = (variable: string) => (variables.includes(variable) ? 'bg-pink-25' : '')
+  const textColor = (variable: string) => (variables.includes(variable) ? 'text-pink-400' : '')
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
         <div className='border-b border-gray-200 bg-gray-25' />
-        {variables.map((variable, index) => (
-          <div key={index} className='flex items-center px-3 py-1 border-b border-l border-gray-200 bg-pink-25'>
-            <span className='flex-1 mr-6 font-medium text-pink-400 whitespace-nowrap text-ellipsis'>
-              {`{{${variable}}}`}
+        {allVariables.map((variable, index) => (
+          <div
+            key={index}
+            className={`flex items-center px-3 py-1 border-b border-l border-gray-200 ${bgColor(variable)}`}>
+            <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
+              {variables.includes(variable) ? `{{${variable}}}` : variable}
             </span>
           </div>
         ))}
@@ -63,7 +68,7 @@ export default function TestDataPane({
           return (
             <Fragment key={row}>
               <div className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color}`}>#{row + 1}</div>
-              {variables.map((variable, col) => (
+              {allVariables.map((variable, col) => (
                 <RichTextInput
                   key={col}
                   className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border ${color}`}
