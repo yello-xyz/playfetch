@@ -30,7 +30,7 @@ export default function WorkspaceTopBar({
   const hasPopupMenu = !isUserWorkspace && !isSharedProjects
 
   return (
-    <div className='flex items-center justify-between py-4'>
+    <div className='flex items-center justify-between pt-4 pb-3.5 px-5'>
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
