@@ -241,13 +241,7 @@ export function PromptInput({
             <Label onClick={() => contentEditableRef.current?.focus()}>{label}</Label>
           </div>
         )}
-        {preformatted ? (
-          <CodeBlock dark active={!disabled}>
-            {renderContentEditable()}
-          </CodeBlock>
-        ) : (
-          renderContentEditable()
-        )}
+        {preformatted ? <CodeBlock active={!disabled}>{renderContentEditable()}</CodeBlock> : renderContentEditable()}
       </div>
       {selection && (
         <div
