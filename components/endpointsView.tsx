@@ -201,15 +201,13 @@ export default function EndpointsView({
       )}
       {activeLogEntryIndex !== undefined && activeEndpoint && IsSavedEndpoint(activeEndpoint) && parent && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto'>
-            <LogEntryDetailsPane
-              logEntry={logEntries[activeLogEntryIndex]}
-              endpoint={activeEndpoint}
-              parent={parent}
-              prompt={activePrompt}
-              onCollapse={() => setActiveLogEntryIndex(undefined)}
-            />
-          </div>
+          <LogEntryDetailsPane
+            logEntry={logEntries[activeLogEntryIndex]}
+            endpoint={activeEndpoint}
+            parent={parent}
+            prompt={activePrompt}
+            onCollapse={() => setActiveLogEntryIndex(undefined)}
+          />
         </Allotment.Pane>
       )}
     </Allotment>
