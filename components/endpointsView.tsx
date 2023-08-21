@@ -188,7 +188,7 @@ export default function EndpointsView({
       )}
       {activeTab === 'Logs' && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col h-full min-h-0 text-gray-500'>
+          <div className='flex flex-col h-full min-h-0 text-gray-500 bg-gray-25'>
             <LogEntriesView
               tabSelector={tabSelector}
               logEntries={logEntries}
