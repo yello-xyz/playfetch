@@ -10,6 +10,9 @@ import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
 import WorkspaceTopBar from './workspaceTopBar'
 import useFormattedDate from './useFormattedDate'
+import { TopBarButton } from './topBarButton'
+import addIcon from '@/public/addWhite.svg'
+
 
 export default function WorkspaceGridView({
   workspaces,
@@ -93,16 +96,25 @@ export default function WorkspaceGridView({
 
 function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWorkspace; onAddProject: () => void }) {
   return (
-    <div className='h-full text-dark-gray-700 select-none pt-4 pb-4 px-5'>
-      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
-        <span className='font-medium'>{workspace.name} is empty</span>
-        <span className='text-sm text-center text-gray-400 select-none'>
-          Create a{' '}
-          <span className='font-medium text-blue-400 cursor-pointer' onClick={onAddProject}>
-            New Project
-          </span>{' '}
-          to get started.
-        </span>
+    <div className='h-full text-dark-gray-700 pt-2 pb-6 px-6'>
+      <div className='flex flex-col items-center justify-center h-full gap-3 p-6 border border-gray-200 rounded-lg bg-gray-25'>
+        <div className='flex flex-col items-center max-w-md gap-0.5'>
+          <span className='font-medium'>{workspace.name} is empty</span>
+          <div className='text-sm text-center text-gray-400'>
+            { workspace.name === "Drafts" ? (
+              <p>Projects created in drafts are private by default and can be shared later.</p>
+            ) : (
+              <>
+              <p>Share your first project to invite collaborators to this workspace.</p><p>Shared projects can be viewed and edited by workspace members.</p>
+              </>
+            )
+            }
+            <p>Get started by creating your first project in drafts.</p>
+          </div>
+        </div>
+        <div>
+          <TopBarButton type='primary' title='New Project' icon={addIcon} onClick={onAddProject} />
+        </div>
       </div>
     </div>
   )
@@ -132,7 +144,7 @@ function ProjectCell({
       className={`flex flex-col gap-1 px-3 py-4 rounded-lg cursor-pointer gap-6 w-full bg-gray-25 border border-gray-100 hover:bg-gray-50 hover:border-gray-200 select-none`}
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
-        <div className='flex flex-row gap-1.5 justify-center leading-6'>
+        <div className='flex flex-row gap-1.5 justify-center'>
           <IconButton
             hoverType={project.favorited ? 'none' : 'opacity'}
             icon={project.favorited ? filledStarIcon : starIcon}
