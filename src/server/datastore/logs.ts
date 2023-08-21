@@ -6,15 +6,14 @@ export async function migrateLogs() {
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   for (const logData of allLogs) {
-    const endpoint = await getKeyedEntity(Entity.ENDPOINT, logData.endpointID)
     await getDatastore().save(
       toLogData(
         logData.projectID,
         logData.endpointID,
-        endpoint.urlPath,
-        endpoint.flavor,
-        endpoint.parentID,
-        endpoint.versionID,
+        logData.urlPath,
+        logData.flavor,
+        logData.parentID,
+        logData.versionID,
         JSON.parse(logData.inputs),
         JSON.parse(logData.output),
         logData.error,
