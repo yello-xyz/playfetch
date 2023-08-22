@@ -68,7 +68,7 @@ function SignInButton({ name, icon, provider }: { name: string; icon: string; pr
       className='flex justify-center p-3 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200'
       onClick={() => signIn(provider, { callbackUrl: ClientRoute.Home }).then()}>
       <div className='flex items-center gap-2'>
-        <Icon className='w-[22px] h-fit' icon={icon} />
+        <Icon icon={icon} />
         Sign in with {name}
       </div>
     </button>
