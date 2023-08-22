@@ -113,7 +113,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const showTestData = ExtractPromptVariables(currentPrompt).length > 0
+  const showTestData = ExtractPromptVariables(currentPrompt).length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
       tabs={showTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}

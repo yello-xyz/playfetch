@@ -144,11 +144,12 @@ export default function ChainNodeEditor({
     setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], includeContext }))
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
+  const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
-        {activeNode === InputNode && variables.length > 0 && (
+        {activeNode === InputNode && showTestData && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />
             <TestDataPane
