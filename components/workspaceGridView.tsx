@@ -109,9 +109,15 @@ function EmptyWorkspaceView({
           <span className='font-medium'>{workspace.name} is empty</span>
           <div className='text-sm text-center text-gray-400'>
             {isUserWorkspace ? (
-              <p>Draft projects are private by default but can be shared later. Get started by creating your first project.</p>
+              <p>
+                Draft projects are private by default but can be shared later. Get started by creating your first
+                project.
+              </p>
             ) : (
-              <p>Inviting people to this workspace will give them access to all projects in it. Get started by creating your first project.</p>
+              <p>
+                Inviting people to this workspace will give them access to all projects in it. Get started by creating
+                your first project.
+              </p>
             )}
           </div>
         </div>

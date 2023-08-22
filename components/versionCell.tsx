@@ -6,8 +6,8 @@ import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import CommentPopupMenu from './commentPopupMenu'
 import { LabelForModel } from './modelSelector'
-import chainIcon from '@/public/chain_18_black.svg'
-import endpointIcon from '@/public/endpoints_18_black.svg'
+import chainIcon from '@/public/chainSmall.svg'
+import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from './icon'
 
 const extractSelection = (identifier: string) => {
