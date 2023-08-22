@@ -17,24 +17,24 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
   const [email, setEmail] = useState('')
 
   return (
-    <main className={`bg-gray-100 h-screen flex flex-col items-center justify-center gap-6 p-10 font-sans`}>
+    <main className={`bg-gray-25 h-screen flex flex-col items-center justify-center gap-6 p-10`}>
       <div className='flex flex-col items-center gap-1.5'>
         <span className='text-2xl font-semibold'>Sign in to Play/Fetch</span>
-        <span className='text-sm text-gray-600'>
+        <span className='text-sm text-gray-400'>
           Don’t have an account?{' '}
           <Link href='mailto:hello@yello.xyz?subject=Join waitlist'>
             <span className='underline'>Join our waitlist</span>
           </Link>
         </span>
       </div>
-      <div className='flex flex-col w-full gap-3 p-16 bg-white rounded-lg shadow max-w-[520px]'>
+      <div className='flex flex-col w-full gap-3 p-8 bg-white rounded-lg border border-gray-200 max-w-[450px]'>
         <form className='flex flex-col w-full' method='POST' action='/api/auth/signin/email'>
           <input name='csrfToken' type='hidden' defaultValue={tokenCSRF} />
-          <label className='mb-2 text-sm font-medium text-gray-600' htmlFor='email'>
+          <label className='mb-2 text-sm font-medium text-gray-700' htmlFor='email'>
             Email Address
           </label>
           <input
-            className='px-4 py-3 mb-3 text-base text-gray-600 bg-white border border-gray-200 rounded-lg'
+            className='px-4 py-3 mb-3 text-base text-gray-700 bg-white border border-gray-200 rounded-lg focus:border-blue-400 focus:ring-0 focus:outline-none'
             type='email'
             id='email'
             name='email'
@@ -44,7 +44,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
             onChange={event => setEmail(event.target.value.trim())}
           />
           <button
-            className='flex justify-center bg-dark-gray-800 hover:bg-black p-3.5 rounded-lg text-white disabled:opacity-30 text-sm font-medium'
+            className='flex justify-center bg-gray-600 hover:bg-gray-800 p-3.5 rounded-lg text-white disabled:bg-gray-300 text-sm font-medium'
             type='submit'
             disabled={!CheckValidEmail(email)}>
             Sign in with Email
@@ -52,7 +52,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
         </form>
         <div className='flex items-center gap-6'>
           <div className='flex-1 h-px bg-gray-200' />
-          <span className='py-3 text-sm text-gray-600'>or</span>
+          <span className='py-3 text-sm text-gray-400'>or</span>
           <div className='flex-1 h-px bg-gray-200' />
         </div>
         <SignInButton name='Google' icon={googleIcon} provider='google' />
@@ -65,9 +65,9 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
 function SignInButton({ name, icon, provider }: { name: string; icon: string; provider: string }) {
   return (
     <button
-      className='flex justify-center p-3 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200'
+      className='flex justify-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-200 hover:border-gray-300'
       onClick={() => signIn(provider, { callbackUrl: ClientRoute.Home }).then()}>
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2 text-sm'>
         <Icon className='w-[22px] h-fit' icon={icon} />
         Sign in with {name}
       </div>

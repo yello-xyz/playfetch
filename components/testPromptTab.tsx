@@ -1,5 +1,14 @@
 import { ReactNode, useState } from 'react'
-import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject, TestConfig } from '@/types'
+import {
+  ActivePrompt,
+  Version,
+  InputValues,
+  PromptConfig,
+  PromptInputs,
+  ModelProvider,
+  ActiveProject,
+  TestConfig,
+} from '@/types'
 
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
@@ -69,7 +78,7 @@ export default function TestPromptTab({
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-        />
+          />
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={Math.min(350, preferredHeight)} preferredSize={preferredHeight}>
