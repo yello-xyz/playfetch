@@ -132,7 +132,7 @@ export type CodeConfig = {
 }
 
 export type TestConfig = {
-  mode: 'first' | 'last' | 'random' | 'all'
+  mode: 'custom' | 'first' | 'last' | 'random' | 'all'
   rowIndices: number[]
 }
 

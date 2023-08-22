@@ -5,7 +5,7 @@ import { InputValues, PromptInputs, TestConfig } from '@/types'
 export const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
-  mode: TestConfig['mode']
+  config: TestConfig
 ): [{ [key: string]: string }[], number[]] => {
   const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
@@ -14,6 +14,7 @@ export const SelectInputRows = (
   const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
     columns.every(column => column[index] === undefined || column[index].length === 0)
   )
+  const filteredRowIndices = config.rowIndices.filter(index => !emptyRowIndices.includes(index))
 
   const filteredPaddedInputs: InputValues = {}
   for (const [key, values] of Object.entries(inputs)) {
@@ -30,7 +31,7 @@ export const SelectInputRows = (
   const entries = Object.entries(filteredPaddedInputs)
   const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
   const selectedIndices = (() => {
-    switch (mode) {
+    switch (config.mode) {
       default:
       case 'first':
         return [0]
@@ -40,6 +41,8 @@ export const SelectInputRows = (
         return [Math.floor(Math.random() * rowCount)]
       case 'all':
         return Array.from({ length: rowCount }, (_, index) => index)
+      case 'custom':
+        return filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
     }
   })()
 
@@ -63,6 +66,7 @@ const selectValidRowIndices = (
     case 'first':
     case 'last':
       return selectInputs(mode)[1]
+    case 'custom':
     case 'random':
     case 'all':
       return selectInputs('all')[1]
@@ -86,10 +90,14 @@ export default function TestButtons({
   disabled?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
-  const selectInputs = (mode: TestConfig['mode']) => SelectInputRows(inputValues, variables, mode)
+  const selectInputs = (config: TestConfig | { mode: TestConfig['mode'] }) =>
+    SelectInputRows(inputValues, variables, {
+      mode: config.mode,
+      rowIndices: 'rowIndices' in config ? config.rowIndices : [],
+    })
 
-  const [_, rowIndices] = selectInputs(testConfig.mode)
-  const validRowIndices = selectValidRowIndices(testConfig.mode, selectInputs)
+  const [_, rowIndices] = selectInputs(testConfig)
+  const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode }))
   if (
     testConfig.rowIndices.length !== rowIndices.length ||
     testConfig.rowIndices.some(index => !validRowIndices.includes(index))
@@ -98,17 +106,17 @@ export default function TestButtons({
   }
 
   const updateTestMode = (mode: TestConfig['mode']) => {
-    const [_, rowIndices] = selectInputs(mode)
+    const [_, rowIndices] = selectInputs({ mode })
     setTestConfig({ mode, rowIndices })
   }
 
   const testPrompt = () => {
-    const [inputs, indices] = selectInputs(testConfig.mode)
+    const [inputs, indices] = selectInputs(testConfig)
     setTestConfig({ ...testConfig, rowIndices: indices })
     return callback(inputs)
   }
 
-  const [allInputs] = selectInputs('all')
+  const [allInputs] = selectInputs({ mode: 'all' })
   return (
     <div className='flex items-center self-end gap-4'>
       <DropdownMenu
@@ -116,6 +124,7 @@ export default function TestButtons({
         size='medium'
         value={testConfig.mode}
         onChange={value => updateTestMode(value as TestConfig['mode'])}>
+        {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
         <option value={'first'}>First</option>
         <option value={'last'}>Last</option>
         <option value={'random'}>Random</option>

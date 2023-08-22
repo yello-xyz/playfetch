@@ -53,7 +53,7 @@ export default function PromptPanel({
     }
   }
 
-  const [inputs] = SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), testConfig?.mode ?? 'first')
+  const [inputs] = testConfig ? SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), testConfig) : [[{}]]
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
