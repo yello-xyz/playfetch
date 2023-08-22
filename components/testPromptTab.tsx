@@ -67,8 +67,9 @@ export default function TestPromptTab({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            selectedIndices={testConfig.rowIndices}
-          />
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
+        />
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={Math.min(350, preferredHeight)} preferredSize={preferredHeight}>

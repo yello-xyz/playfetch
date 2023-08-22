@@ -1,21 +1,23 @@
 import { Fragment, useRef } from 'react'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
-import { InputValues } from '@/types'
+import { InputValues, TestConfig } from '@/types'
 import RichTextInput from './richTextInput'
 
 export default function TestDataPane({
   variables,
   inputValues,
   setInputValues,
-  selectedIndices,
   persistInputValuesIfNeeded,
+  testConfig,
+  setTestConfig,
 }: {
   variables: string[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
-  selectedIndices: number[]
   persistInputValuesIfNeeded: () => void
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -47,6 +49,14 @@ export default function TestDataPane({
     }
   }
 
+  const toggleRow = (row: number) =>
+    setTestConfig({
+      mode: 'custom',
+      rowIndices: testConfig.rowIndices.includes(row)
+        ? testConfig.rowIndices.filter(index => index !== row)
+        : [...testConfig.rowIndices, row],
+    })
+
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   const bgColor = (variable: string) => (variables.includes(variable) ? 'bg-pink-25' : '')
   const textColor = (variable: string) => (variables.includes(variable) ? 'text-pink-400' : '')
@@ -64,10 +74,14 @@ export default function TestDataPane({
           </div>
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
-          const color = selectedIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
+          const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
           return (
             <Fragment key={row}>
-              <div className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color}`}>#{row + 1}</div>
+              <div
+                className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
+                onClick={() => toggleRow(row)}>
+                #{row + 1}
+              </div>
               {allVariables.map((variable, col) => (
                 <RichTextInput
                   key={col}

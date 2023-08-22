@@ -155,9 +155,10 @@ export default function ChainNodeEditor({
             <TestDataPane
               variables={variables}
               inputValues={inputValues}
-              selectedIndices={testConfig.rowIndices}
               setInputValues={setInputValues}
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
             />
           </div>
         )}
