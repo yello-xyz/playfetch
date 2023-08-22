@@ -16,7 +16,6 @@ export function TopBarButton({
   icon?: StaticImageData
   onClick: () => void
 }) {
-
   const baseClass = 'flex items-center gap-0.5 pl-1.5 pr-1.5 py-1 font-medium rounded-lg cursor-pointer '
 
   const colorForType = (type: ButtonType) => {

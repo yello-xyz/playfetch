@@ -14,7 +14,7 @@ export default function PromptSettingsPane({
   config,
   setConfig,
   isExpanded,
-  setExpanded
+  setExpanded,
 }: {
   config: PromptConfig
   setConfig: (config: PromptConfig) => void

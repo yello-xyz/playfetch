@@ -49,7 +49,7 @@ export default function EndpointsView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('Endpoints')
 
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
-  
+
   const updateActiveLogEntryIndex = (index: number) => {
     setActiveLogEntryIndex(index)
     const endpoint = project.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)

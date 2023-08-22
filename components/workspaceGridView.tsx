@@ -13,7 +13,6 @@ import useFormattedDate from './useFormattedDate'
 import { TopBarButton } from './topBarButton'
 import addIcon from '@/public/addWhite.svg'
 
-
 export default function WorkspaceGridView({
   workspaces,
   activeWorkspace,
@@ -56,37 +55,37 @@ export default function WorkspaceGridView({
 
   return (
     <div className='flex flex-col h-full'>
-        <WorkspaceTopBar
-          activeWorkspace={activeWorkspace}
-          isUserWorkspace={isUserWorkspace}
-          isSharedProjects={isSharedProjects}
-          onAddProject={onAddProject}
-          setShowInviteDialog={setShowInviteDialog}
-          onRenamed={refresh}
-          onDeleted={resetWorkspaces}
-        />
-        {activeWorkspace.projects.length > 0 ? (
-          <>
-            <div className='border-b border-gray-100 text-dark-gray-700 font-medium antialiased pt-1.5 pb-2.5 mx-5 mb-1'>
-              <span>Project name</span>
-            </div>
-            <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
-                {activeWorkspace.projects.map((project, index) => (
-                  <ProjectCell
-                    key={index}
-                    project={project}
-                    isSharedProjects={isSharedProjects}
-                    onSelectProject={onSelectProject}
-                    onRefreshWorkspace={onRefreshWorkspace}
-                    onDeleted={onDeleted}
-                    workspaces={workspaces}
-                  />
-                ))}
-            </div>
-          </>
-        ) : (
-          <EmptyWorkspaceView workspace={activeWorkspace} onAddProject={onAddProject} />
-        )}
+      <WorkspaceTopBar
+        activeWorkspace={activeWorkspace}
+        isUserWorkspace={isUserWorkspace}
+        isSharedProjects={isSharedProjects}
+        onAddProject={onAddProject}
+        setShowInviteDialog={setShowInviteDialog}
+        onRenamed={refresh}
+        onDeleted={resetWorkspaces}
+      />
+      {activeWorkspace.projects.length > 0 ? (
+        <>
+          <div className='border-b border-gray-100 text-dark-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
+            <span>Project name</span>
+          </div>
+          <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
+            {activeWorkspace.projects.map((project, index) => (
+              <ProjectCell
+                key={index}
+                project={project}
+                isSharedProjects={isSharedProjects}
+                onSelectProject={onSelectProject}
+                onRefreshWorkspace={onRefreshWorkspace}
+                onDeleted={onDeleted}
+                workspaces={workspaces}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <EmptyWorkspaceView workspace={activeWorkspace} onAddProject={onAddProject} />
+      )}
       {showInviteDialog && (
         <InviteDialog label='workspace' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
       )}
@@ -96,19 +95,19 @@ export default function WorkspaceGridView({
 
 function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWorkspace; onAddProject: () => void }) {
   return (
-    <div className='h-full text-dark-gray-700 pt-2 pb-6 px-6'>
+    <div className='h-full px-6 pt-2 pb-6 text-dark-gray-700'>
       <div className='flex flex-col items-center justify-center h-full gap-3 p-6 border border-gray-200 rounded-lg bg-gray-25'>
         <div className='flex flex-col items-center max-w-md gap-0.5'>
           <span className='font-medium'>{workspace.name} is empty</span>
           <div className='text-sm text-center text-gray-400'>
-            { workspace.name === "Drafts" ? (
+            {workspace.name === 'Drafts' ? (
               <p>Projects created in drafts are private by default and can be shared later.</p>
             ) : (
               <>
-              <p>Share your first project to invite collaborators to this workspace.</p><p>Shared projects can be viewed and edited by workspace members.</p>
+                <p>Share your first project to invite collaborators to this workspace.</p>
+                <p>Shared projects can be viewed and edited by workspace members.</p>
               </>
-            )
-            }
+            )}
             <p>Get started by creating your first project in drafts.</p>
           </div>
         </div>
@@ -150,9 +149,7 @@ function ProjectCell({
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
           />
-          <span className='flex-1 text-base font-medium text-dark-gray-700 line-clamp-2'>
-            {project.name}
-          </span>
+          <span className='flex-1 text-base font-medium text-dark-gray-700 line-clamp-2'>{project.name}</span>
         </div>
         <div className='relative flex items-center gap-2'>
           <span className='mr-5 text-xs text-dark-gray-700'>Edited {formattedDate}</span>
