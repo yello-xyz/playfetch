@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, TestConfig, Version } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
@@ -67,14 +67,14 @@ export default function PromptView({
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([])
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] }) // TODO empty indices?
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-  const [currentConfig, setCurrentConfig] = useInitialState(activeVersion.config, ConfigsEqual)
+  const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, ConfigsEqual)
 
   const updateVersion = (version: Version) => {
     setCurrentPrompt(version.prompt)
-    setCurrentConfig(version.config)
+    setCurrentPromptConfig(version.config)
     setModifiedVersion(version)
   }
 
@@ -134,7 +134,7 @@ export default function PromptView({
         return (
           <RunPromptTab
             currentPrompt={currentPrompt}
-            currentConfig={currentConfig}
+            currentPromptConfig={currentPromptConfig}
             activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
@@ -149,7 +149,7 @@ export default function PromptView({
         return (
           <TestPromptTab
             currentPrompt={currentPrompt}
-            currentConfig={currentConfig}
+            currentPromptConfig={currentPromptConfig}
             activeProject={project}
             activePrompt={prompt}
             activeVersion={activeVersion}
@@ -160,8 +160,8 @@ export default function PromptView({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            selectedIndices={selectedIndices}
-            setSelectedIndices={setSelectedIndices}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
             tabSelector={tabSelector}
           />
         )

@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react'
-import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject } from '@/types'
+import { ActivePrompt, Version, InputValues, PromptConfig, PromptInputs, ModelProvider, ActiveProject, TestConfig } from '@/types'
 
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
@@ -11,7 +11,7 @@ import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 
 export default function TestPromptTab({
   currentPrompt,
-  currentConfig,
+  currentPromptConfig,
   activeProject,
   activePrompt,
   activeVersion,
@@ -22,12 +22,12 @@ export default function TestPromptTab({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
-  selectedIndices,
-  setSelectedIndices,
+  testConfig,
+  setTestConfig,
   tabSelector,
 }: {
   currentPrompt: string
-  currentConfig: PromptConfig
+  currentPromptConfig: PromptConfig
   activeProject: ActiveProject
   activePrompt: ActivePrompt
   activeVersion: Version
@@ -38,8 +38,8 @@ export default function TestPromptTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
-  selectedIndices: number[]
-  setSelectedIndices: (selectedIndices: number[]) => void
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompt)
@@ -51,7 +51,7 @@ export default function TestPromptTab({
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(currentConfig, inputs)
+    return runPrompt(currentPromptConfig, inputs)
   }
 
   const minVersionHeight = 240
@@ -67,7 +67,7 @@ export default function TestPromptTab({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            selectedIndices={selectedIndices}
+            selectedIndices={testConfig.rowIndices}
           />
         </div>
       </Allotment.Pane>
@@ -82,15 +82,15 @@ export default function TestPromptTab({
                 setActiveVersion={selectVersion}
                 labelColors={AvailableLabelColorsForPrompt(activePrompt)}
               />
-              {selectedIndices.length > 1 && (
+              {testConfig.rowIndices.length > 1 && (
                 <div className='flex-grow px-3 py-2 border rounded border-pink-50 bg-pink-25'>
-                  Running this prompt will use {selectedIndices.length} rows of test data.
+                  Running this prompt will use {testConfig.rowIndices.length} rows of test data.
                 </div>
               )}
             </div>
             <PromptPanel
               initialPrompt={currentPrompt}
-              initialConfig={currentConfig}
+              initialConfig={currentPromptConfig}
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
               checkProviderAvailable={checkProviderAvailable}
@@ -99,9 +99,10 @@ export default function TestPromptTab({
             <TestButtons
               variables={variables}
               inputValues={inputValues}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
               disabled={!currentPrompt.length}
               callback={testPrompt}
-              onSelectIndices={setSelectedIndices}
             />
           </div>
         </div>

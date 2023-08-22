@@ -6,7 +6,7 @@ import { Allotment } from 'allotment'
 
 export default function RunPromptTab({
   currentPrompt,
-  currentConfig,
+  currentPromptConfig,
   activePrompt,
   activeVersion,
   setActiveVersion,
@@ -17,7 +17,7 @@ export default function RunPromptTab({
   tabSelector,
 }: {
   currentPrompt: string
-  currentConfig: PromptConfig
+  currentPromptConfig: PromptConfig
   activePrompt: ActivePrompt
   activeVersion: Version
   setActiveVersion: (version: Version) => void
@@ -45,7 +45,7 @@ export default function RunPromptTab({
         <div className='h-full p-4 bg-white'>
           <PromptPanel
             initialPrompt={currentPrompt}
-            initialConfig={currentConfig}
+            initialConfig={currentPromptConfig}
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
             checkProviderAvailable={checkProviderAvailable}

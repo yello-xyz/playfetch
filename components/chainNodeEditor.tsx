@@ -1,4 +1,4 @@
-import { ActiveChain, ChainItem, ChainItemWithInputs, CodeChainItem, PartialRun, PromptInputs, Version } from '@/types'
+import { ActiveChain, ChainItem, ChainItemWithInputs, CodeChainItem, PartialRun, PromptInputs, TestConfig, Version } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
@@ -67,7 +67,7 @@ export default function ChainNodeEditor({
   setModifiedVersion: (version: Version) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([])
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] }) // TODO empty indices?
 
   const checkProviderAvailable = useCheckProvider()
 
@@ -155,7 +155,7 @@ export default function ChainNodeEditor({
             <TestDataPane
               variables={variables}
               inputValues={inputValues}
-              selectedIndices={selectedIndices}
+              selectedIndices={testConfig.rowIndices}
               setInputValues={setInputValues}
               persistInputValuesIfNeeded={persistInputValuesIfNeeded}
             />
@@ -207,8 +207,9 @@ export default function ChainNodeEditor({
             runTitle='Run Chain'
             variables={variables}
             inputValues={inputValues}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
             callback={runChain}
-            onSelectIndices={setSelectedIndices}
           />
         </div>
       </div>

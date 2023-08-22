@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
@@ -60,30 +59,29 @@ export default function TestButtons({
   runTitle,
   variables,
   inputValues,
+  testConfig,
+  setTestConfig,
   disabled,
   callback,
-  onSelectIndices,
 }: {
   runTitle?: string
   variables: string[]
   inputValues: InputValues
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
   disabled?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
-  onSelectIndices: (indices: number[]) => void
 }) {
   const selectInputs = (mode: TestConfig['mode']) => SelectInputRows(inputValues, variables, mode)
 
-  const [config, setConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] }) // TODO empty indices?
-
   const updateTestMode = (mode: TestConfig['mode']) => {
     const [_, indices] = selectInputs(mode)
-    setConfig({ mode, rowIndices: indices })
-    onSelectIndices(indices)
+    setTestConfig({ mode, rowIndices: indices })
   }
 
   const testPrompt = () => {
-    const [inputs, indices] = selectInputs(config.mode)
-    onSelectIndices(indices)
+    const [inputs, indices] = selectInputs(testConfig.mode)
+    setTestConfig({ ...testConfig, rowIndices: indices })
     return callback(inputs)
   }
 
@@ -93,7 +91,7 @@ export default function TestButtons({
       <DropdownMenu
         disabled={allInputs.length <= 1}
         size='medium'
-        value={config.mode}
+        value={testConfig.mode}
         onChange={value => updateTestMode(value as TestConfig['mode'])}>
         <option value={'first'}>First</option>
         <option value={'last'}>Last</option>
