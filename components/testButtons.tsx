@@ -102,7 +102,10 @@ export default function TestButtons({
     testConfig.rowIndices.length !== rowIndices.length ||
     testConfig.rowIndices.some(index => !validRowIndices.includes(index))
   ) {
-    setTestConfig({ mode: testConfig.mode, rowIndices })
+    setTimeout(() => setTestConfig({ mode: testConfig.mode, rowIndices }))
+  } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
+    const [_, rowIndices] = selectInputs({ mode: 'first' })
+    setTimeout(() => setTestConfig({ mode: 'first', rowIndices }))
   }
 
   const updateTestMode = (mode: TestConfig['mode']) => {
