@@ -84,7 +84,7 @@ export default function WorkspaceGridView({
           </div>
         </>
       ) : (
-        <EmptyWorkspaceView workspace={activeWorkspace} onAddProject={onAddProject} />
+        <EmptyWorkspaceView workspace={activeWorkspace} isUserWorkspace={isUserWorkspace} onAddProject={onAddProject} />
       )}
       {showInviteDialog && (
         <InviteDialog label='workspace' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
@@ -93,14 +93,22 @@ export default function WorkspaceGridView({
   )
 }
 
-function EmptyWorkspaceView({ workspace, onAddProject }: { workspace: ActiveWorkspace; onAddProject: () => void }) {
+function EmptyWorkspaceView({
+  workspace,
+  isUserWorkspace,
+  onAddProject,
+}: {
+  workspace: ActiveWorkspace
+  isUserWorkspace: boolean
+  onAddProject: () => void
+}) {
   return (
     <div className='h-full px-6 pt-2 pb-6 text-dark-gray-700'>
       <div className='flex flex-col items-center justify-center h-full gap-3 p-6 border border-gray-200 rounded-lg bg-gray-25'>
         <div className='flex flex-col items-center max-w-md gap-0.5'>
           <span className='font-medium'>{workspace.name} is empty</span>
           <div className='text-sm text-center text-gray-400'>
-            {workspace.name === 'Drafts' ? (
+            {isUserWorkspace ? (
               <p>Projects created in drafts are private by default and can be shared later.</p>
             ) : (
               <>
