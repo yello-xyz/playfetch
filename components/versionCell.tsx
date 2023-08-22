@@ -6,8 +6,8 @@ import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import CommentPopupMenu from './commentPopupMenu'
 import { LabelForModel } from './modelSelector'
-import chainIcon from '@/public/chain.svg'
-import endpointIcon from '@/public/endpoint.svg'
+import chainIcon from '@/public/chain_18_black.svg'
+import endpointIcon from '@/public/endpoints_18_black.svg'
 import Icon from './icon'
 
 const extractSelection = (identifier: string) => {
@@ -139,9 +139,9 @@ export function ItemLabel({
   const color = colors[label] ?? 'bg-gray-400'
   const icon = icons[label]
   return (
-    <span className={`px-1.5 py-px text-xs flex items-center rounded ${color}`}>
-      {label}
+    <span className={`px-1.5 text-xs flex items-center rounded ${color}`}>
       {icon ? <Icon icon={icon} className='-my-0.5' /> : null}
+      {label}
     </span>
   )
 }
