@@ -14,7 +14,7 @@ export const SelectInputRows = (
   const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
     columns.every(column => column[index] === undefined || column[index].length === 0)
   )
-  const filteredRowIndices = config.rowIndices.filter(index => !emptyRowIndices.includes(index))
+  const filteredRowIndices = config.rowIndices.filter(index => !emptyRowIndices.includes(index)).sort()
 
   const filteredPaddedInputs: InputValues = {}
   for (const [key, values] of Object.entries(inputs)) {
@@ -98,7 +98,7 @@ export default function TestButtons({
       rowIndices: 'rowIndices' in config ? config.rowIndices : [],
     })
 
-  const [_, rowIndices] = selectInputs(testConfig)
+  const [, rowIndices] = selectInputs(testConfig)
   const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode }))
   if (
     testConfig.rowIndices.length !== rowIndices.length ||
@@ -106,12 +106,12 @@ export default function TestButtons({
   ) {
     setTimeout(() => setTestConfig({ mode: testConfig.mode, rowIndices }))
   } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-    const [_, rowIndices] = selectInputs({ mode: 'first' })
+    const [, rowIndices] = selectInputs({ mode: 'first' })
     setTimeout(() => setTestConfig({ mode: 'first', rowIndices }))
   }
 
   const updateTestMode = (mode: TestConfig['mode']) => {
-    const [_, rowIndices] = selectInputs({ mode })
+    const [, rowIndices] = selectInputs({ mode })
     setTestConfig({ mode, rowIndices })
   }
 

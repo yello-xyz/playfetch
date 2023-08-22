@@ -23,7 +23,7 @@ export default function VersionTimeline({
 
   const [containerRect, containerRef] = useContainerRect()
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [_, forceStateUpdate] = useState(0)
+  const [, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
 
   const identifierForVersion = (version: Version) => `v${version.id}`
