@@ -1,14 +1,12 @@
 import { useState } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
-import { InputValues, PromptInputs } from '@/types'
-
-type TestMode = 'first' | 'last' | 'random' | 'all'
+import { InputValues, PromptInputs, TestConfig } from '@/types'
 
 export const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
-  mode: TestMode
+  mode: TestConfig['mode']
 ): [{ [key: string]: string }[], number[]] => {
   const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
@@ -73,18 +71,18 @@ export default function TestButtons({
   callback: (inputs: PromptInputs[]) => Promise<void>
   onSelectIndices: (indices: number[]) => void
 }) {
-  const [testMode, setTestMode] = useState<TestMode>('first')
+  const selectInputs = (mode: TestConfig['mode']) => SelectInputRows(inputValues, variables, mode)
 
-  const selectInputs = (mode: TestMode) => SelectInputRows(inputValues, variables, mode)
+  const [config, setConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] }) // TODO empty indices?
 
-  const updateTestMode = (mode: TestMode) => {
-    setTestMode(mode)
+  const updateTestMode = (mode: TestConfig['mode']) => {
     const [_, indices] = selectInputs(mode)
+    setConfig({ mode, rowIndices: indices })
     onSelectIndices(indices)
   }
 
   const testPrompt = () => {
-    const [inputs, indices] = selectInputs(testMode)
+    const [inputs, indices] = selectInputs(config.mode)
     onSelectIndices(indices)
     return callback(inputs)
   }
@@ -95,8 +93,8 @@ export default function TestButtons({
       <DropdownMenu
         disabled={allInputs.length <= 1}
         size='medium'
-        value={testMode}
-        onChange={value => updateTestMode(value as TestMode)}>
+        value={config.mode}
+        onChange={value => updateTestMode(value as TestConfig['mode'])}>
         <option value={'first'}>First</option>
         <option value={'last'}>Last</option>
         <option value={'random'}>Random</option>

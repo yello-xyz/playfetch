@@ -131,6 +131,11 @@ export type CodeConfig = {
   output?: string
 }
 
+export type TestConfig = {
+  mode: 'first' | 'last' | 'random' | 'all'
+  rowIndices: number[]
+}
+
 export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[] }
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
 export type ChainItem = PromptChainItem | CodeChainItem
