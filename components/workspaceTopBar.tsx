@@ -3,7 +3,7 @@ import { TopBarButton, UserAvatars } from './topBarButton'
 import addIcon from '@/public/addWhite.svg'
 import chevronIcon from '@/public/chevron.svg'
 import fileIcon from '@/public/file.svg'
-import folderIcon from '@/public/folder_32_black.svg'
+import folderIcon from '@/public/folderBig.svg'
 import Icon from './icon'
 import { useState } from 'react'
 import WorkspacePopupMenu from './workspacePopupMenu'
@@ -36,7 +36,7 @@ export default function WorkspaceTopBar({
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
         {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <div className='flex items-center gap-0'>
-          <span className='text-lg font-medium text-dark-gray-700 leading-8'>{activeWorkspace.name}</span>
+          <span className='text-lg font-medium leading-8 text-dark-gray-700'>{activeWorkspace.name}</span>
           {hasPopupMenu && (
             <>
               <Icon icon={chevronIcon} />

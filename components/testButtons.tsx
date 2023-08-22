@@ -130,7 +130,7 @@ export default function TestButtons({
         <option value={'random'}>Random</option>
         <option value={'all'}>All</option>
       </DropdownMenu>
-      <PendingButton disabled={disabled} onClick={testPrompt}>
+      <PendingButton disabled={disabled || (rowIndices.length === 0 && variables.length > 0)} onClick={testPrompt}>
         {runTitle ?? 'Run'}
       </PendingButton>
     </div>

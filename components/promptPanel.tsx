@@ -53,7 +53,8 @@ export default function PromptPanel({
     }
   }
 
-  const [inputs] = testConfig ? SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), testConfig) : [[{}]]
+  const variables = ExtractPromptVariables(prompt)
+  const [inputs] = testConfig ? SelectInputRows(inputValues ?? {}, variables, testConfig) : [[{}]]
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
@@ -84,7 +85,9 @@ export default function PromptPanel({
       {runPrompt && (
         <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />
-          <PendingButton disabled={!prompt.length} onClick={() => runPrompt(config, inputs)}>
+          <PendingButton
+            disabled={prompt.length === 0 || (inputs.length === 0 && variables.length > 0)}
+            onClick={() => runPrompt(config, inputs)}>
             {version.runs.length ? 'Run again' : 'Run'}
           </PendingButton>
         </div>

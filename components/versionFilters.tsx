@@ -103,7 +103,7 @@ function FilterCell({
       {isTextFilter(filter) && <TextFilterCell filter={filter} />}
       {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
       {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
-      <Icon className='w-[18px] h-fit cursor-pointer' icon={clearIcon} onClick={onClick} />
+      <Icon className='cursor-pointer' icon={clearIcon} onClick={onClick} />
     </div>
   )
 }
