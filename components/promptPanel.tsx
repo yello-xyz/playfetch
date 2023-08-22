@@ -1,12 +1,11 @@
 import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel, TestConfig } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from './useInitialState'
-import { SelectInputRows } from './testButtons'
+import TestButtons from './testButtons'
 import { useEffect, useState } from 'react'
 
 export default function PromptPanel({
@@ -17,6 +16,7 @@ export default function PromptPanel({
   runPrompt,
   inputValues,
   testConfig,
+  setTestConfig,
   showLabel,
   checkProviderAvailable,
   onUpdatePreferredHeight,
@@ -28,6 +28,7 @@ export default function PromptPanel({
   runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   testConfig?: TestConfig
+  setTestConfig?: (testConfig: TestConfig) => void
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
   onUpdatePreferredHeight?: (height: number) => void
@@ -52,9 +53,6 @@ export default function PromptPanel({
       updateConfig({ ...config, provider, model })
     }
   }
-
-  const variables = ExtractPromptVariables(prompt)
-  const [inputs] = testConfig ? SelectInputRows(inputValues ?? {}, variables, testConfig) : [[{}]]
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
@@ -82,14 +80,19 @@ export default function PromptPanel({
           setExpanded={setOptionsExpanded}
         />
       )}
-      {runPrompt && (
+      {runPrompt && testConfig && setTestConfig && inputValues && (
         <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />
-          <PendingButton
-            disabled={prompt.length === 0 || (inputs.length === 0 && variables.length > 0)}
-            onClick={() => runPrompt(config, inputs)}>
-            {version.runs.length ? 'Run again' : 'Run'}
-          </PendingButton>
+          <TestButtons
+            runTitle={version.runs.length ? 'Run again' : 'Run'}
+            variables={ExtractPromptVariables(prompt)}
+            inputValues={inputValues}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
+            disabled={prompt.length === 0}
+            hideDropdown
+            callback={inputs => runPrompt(config, inputs)}
+          />
         </div>
       )}
     </div>

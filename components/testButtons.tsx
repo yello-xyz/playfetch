@@ -80,6 +80,7 @@ export default function TestButtons({
   testConfig,
   setTestConfig,
   disabled,
+  hideDropdown,
   callback,
 }: {
   runTitle?: string
@@ -88,6 +89,7 @@ export default function TestButtons({
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
   disabled?: boolean
+  hideDropdown?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
   const selectInputs = (config: TestConfig | { mode: TestConfig['mode'] }) =>
@@ -122,17 +124,19 @@ export default function TestButtons({
   const [allInputs] = selectInputs({ mode: 'all' })
   return (
     <div className='flex items-center self-end gap-4'>
-      <DropdownMenu
-        disabled={allInputs.length <= 1}
-        size='medium'
-        value={testConfig.mode}
-        onChange={value => updateTestMode(value as TestConfig['mode'])}>
-        {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
-        <option value={'first'}>First</option>
-        <option value={'last'}>Last</option>
-        <option value={'random'}>Random</option>
-        <option value={'all'}>All</option>
-      </DropdownMenu>
+      {!hideDropdown && (
+        <DropdownMenu
+          disabled={allInputs.length <= 1}
+          size='medium'
+          value={testConfig.mode}
+          onChange={value => updateTestMode(value as TestConfig['mode'])}>
+          {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
+          <option value={'first'}>First</option>
+          <option value={'last'}>Last</option>
+          <option value={'random'}>Random</option>
+          <option value={'all'}>All</option>
+        </DropdownMenu>
+      )}
       <PendingButton disabled={disabled || (rowIndices.length === 0 && variables.length > 0)} onClick={testPrompt}>
         {runTitle ?? 'Run'}
       </PendingButton>

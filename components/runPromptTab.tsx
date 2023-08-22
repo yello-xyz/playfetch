@@ -15,6 +15,7 @@ export default function RunPromptTab({
   runPrompt,
   inputValues,
   testConfig,
+  setTestConfig,
   tabSelector,
 }: {
   currentPrompt: string
@@ -27,6 +28,7 @@ export default function RunPromptTab({
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const minVersionHeight = 230
@@ -54,6 +56,7 @@ export default function RunPromptTab({
             runPrompt={runPrompt}
             inputValues={inputValues}
             testConfig={testConfig}
+            setTestConfig={setTestConfig}
             showLabel
             onUpdatePreferredHeight={setPromptHeight}
           />

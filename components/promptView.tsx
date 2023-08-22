@@ -145,6 +145,7 @@ export default function PromptView({
             runPrompt={runPrompt}
             inputValues={inputValues}
             testConfig={testConfig}
+            setTestConfig={setTestConfig}
             tabSelector={tabSelector}
           />
         )
