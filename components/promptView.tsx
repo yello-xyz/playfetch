@@ -67,6 +67,7 @@ export default function PromptView({
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([])
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
   const [currentConfig, setCurrentConfig] = useInitialState(activeVersion.config, ConfigsEqual)
@@ -159,6 +160,8 @@ export default function PromptView({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            selectedIndices={selectedIndices}
+            setSelectedIndices={setSelectedIndices}
             tabSelector={tabSelector}
           />
         )

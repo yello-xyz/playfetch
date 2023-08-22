@@ -22,6 +22,8 @@ export default function TestPromptTab({
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  selectedIndices,
+  setSelectedIndices,
   tabSelector,
 }: {
   currentPrompt: string
@@ -36,10 +38,11 @@ export default function TestPromptTab({
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
+  selectedIndices: number[]
+  setSelectedIndices: (selectedIndices: number[]) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompt)
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([])
 
   const selectVersion = (version: Version) => {
     persistInputValuesIfNeeded()
@@ -62,9 +65,9 @@ export default function TestPromptTab({
           <TestDataPane
             variables={variables}
             inputValues={inputValues}
-            selectedIndices={selectedIndices}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            selectedIndices={selectedIndices}
           />
         </div>
       </Allotment.Pane>

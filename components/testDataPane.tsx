@@ -7,14 +7,14 @@ import RichTextInput from './richTextInput'
 export default function TestDataPane({
   variables,
   inputValues,
-  selectedIndices,
   setInputValues,
+  selectedIndices,
   persistInputValuesIfNeeded,
 }: {
   variables: string[]
   inputValues: InputValues
-  selectedIndices: number[]
   setInputValues: (inputValues: InputValues) => void
+  selectedIndices: number[]
   persistInputValuesIfNeeded: () => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
