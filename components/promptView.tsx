@@ -16,8 +16,8 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
-  const runs = [] as PartialRun[]
-  setPartialRuns(runs)
+  const runs = {} as { [index: number]: PartialRun }
+  setPartialRuns([])
   while (reader) {
     const { done, value } = await reader.read()
     if (done) {
@@ -29,19 +29,18 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
       const data = line.split('data:').slice(-1)[0]
       const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
       const output = message ?? ''
-      const currentIndex = runs.length - 1
-      if (index > currentIndex) {
-        runs.push({ id: index, output, cost, duration, timestamp, failed })
+      if (runs[index]) {
+        runs[index].output += output
+        runs[index].id = index
+        runs[index].cost = cost
+        runs[index].duration = duration
+        runs[index].timestamp = timestamp
+        runs[index].failed = failed
       } else {
-        runs[currentIndex].output += output
-        runs[currentIndex].id = index
-        runs[currentIndex].cost = cost
-        runs[currentIndex].duration = duration
-        runs[currentIndex].timestamp = timestamp
-        runs[currentIndex].failed = failed
+        runs[index] = { id: index, output, cost, duration, timestamp, failed }
       }
     }
-    setPartialRuns([...runs])
+    setPartialRuns(Object.entries(runs).sort(([a], [b]) => Number(a) - Number(b)).map(([, run]) => run))
   }
 }
 
