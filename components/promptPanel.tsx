@@ -1,4 +1,4 @@
-import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel } from '@/types'
+import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel, TestConfig } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { PendingButton } from './button'
@@ -16,6 +16,7 @@ export default function PromptPanel({
   setModifiedVersion,
   runPrompt,
   inputValues,
+  testConfig,
   showLabel,
   checkProviderAvailable,
   onUpdatePreferredHeight,
@@ -26,6 +27,7 @@ export default function PromptPanel({
   setModifiedVersion: (version: Version) => void
   runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
+  testConfig?: TestConfig
   showLabel?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
   onUpdatePreferredHeight?: (height: number) => void
@@ -51,7 +53,7 @@ export default function PromptPanel({
     }
   }
 
-  const [inputs] = SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), 'first')
+  const [inputs] = SelectInputRows(inputValues ?? {}, ExtractPromptVariables(prompt), testConfig?.mode ?? 'first')
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)

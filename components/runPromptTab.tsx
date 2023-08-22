@@ -1,4 +1,4 @@
-import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, TestConfig, Version } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode, useState } from 'react'
@@ -14,6 +14,7 @@ export default function RunPromptTab({
   checkProviderAvailable,
   runPrompt,
   inputValues,
+  testConfig,
   tabSelector,
 }: {
   currentPrompt: string
@@ -25,6 +26,7 @@ export default function RunPromptTab({
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
+  testConfig: TestConfig
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const minVersionHeight = 230
@@ -51,6 +53,7 @@ export default function RunPromptTab({
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
+            testConfig={testConfig}
             showLabel
             onUpdatePreferredHeight={setPromptHeight}
           />

@@ -10,12 +10,10 @@ const ContentEditable = dynamic(() => import('./contentEditable'))
 
 const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
-const printVariables = (text: string) => {
-  console.log(`<<${text}>>`)
-  return text
+const printVariables = (text: string) =>
+  text
     .replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
     .replace(/(<\/b>)(<br \/>)?(<\/div>)?( )?$/, '$1&nbsp;$2$3$4')
-}
 
 const parseVariables = (html: string) =>
   html

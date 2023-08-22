@@ -142,6 +142,7 @@ export default function PromptView({
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
+            testConfig={testConfig}
             tabSelector={tabSelector}
           />
         )
