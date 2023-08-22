@@ -30,13 +30,13 @@ export default function WorkspaceTopBar({
   const hasPopupMenu = !isUserWorkspace && !isSharedProjects
 
   return (
-    <div className='flex items-center justify-between pt-4 pb-3.5 px-5'>
+    <div className='flex items-center justify-between pt-3 pb-2.5 px-5'>
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
         {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <div className='flex items-center gap-0'>
-          <span className='text-base font-semibold text-dark-gray-700 leading-6'>{activeWorkspace.name}</span>
+          <span className='text-lg font-medium text-dark-gray-700 leading-8'>{activeWorkspace.name}</span>
           {hasPopupMenu && (
             <>
               <Icon icon={chevronIcon} />
