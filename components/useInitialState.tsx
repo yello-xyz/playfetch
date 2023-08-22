@@ -1,14 +1,28 @@
 import { Dispatch, SetStateAction, useState } from 'react'
 
-export const useInitialState = <T,>(
+const trackInitialState = <T,U>(
   initialValue: T,
-  equalityOperator?: (a: T, b: T) => boolean
+  trackedValue: U,
+  equalityOperator?: (a: U, b: U) => boolean
 ): readonly [T, Dispatch<SetStateAction<T>>] => {
   const [state, setState] = useState(initialValue)
-  const [savedState, setSavedState] = useState(initialValue)
-  if (equalityOperator ? !equalityOperator(initialValue, savedState) : initialValue !== savedState) {
+  const [savedState, setSavedState] = useState(trackedValue)
+  if (equalityOperator ? !equalityOperator(trackedValue, savedState) : trackedValue !== savedState) {
     setState(initialValue)
-    setSavedState(initialValue)
+    setSavedState(trackedValue)
   }
   return [state, setState] as const
 }
+
+export const useInitialTrackedState = <T,U>(
+  initialValue: T,
+  trackedValue: U,
+  equalityOperator?: (a: U, b: U) => boolean
+): readonly [T, Dispatch<SetStateAction<T>>] => trackInitialState(initialValue, trackedValue, equalityOperator)
+
+const useInitialState = <T,>(
+  initialValue: T,
+  equalityOperator?: (a: T, b: T) => boolean
+): readonly [T, Dispatch<SetStateAction<T>>] => trackInitialState(initialValue, initialValue, equalityOperator)
+
+export default useInitialState

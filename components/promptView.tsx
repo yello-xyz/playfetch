@@ -10,7 +10,7 @@ import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector from './tabSelector'
-import { useInitialState } from './useInitialState'
+import useInitialState, { useInitialTrackedState } from './useInitialState'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
@@ -67,7 +67,10 @@ export default function PromptView({
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
-  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] }) // TODO empty indices?
+  const [testConfig, setTestConfig] = useInitialTrackedState<TestConfig, number>(
+    { mode: 'first', rowIndices: [0] },
+    activeVersion.id
+  ) // TODO empty indices?
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
   const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, ConfigsEqual)

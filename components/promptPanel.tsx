@@ -5,7 +5,7 @@ import { PendingButton } from './button'
 import ModelSelector, { ProviderForModel } from './modelSelector'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
-import { useInitialState } from './useInitialState'
+import useInitialState from './useInitialState'
 import { SelectInputRows } from './testButtons'
 import { useEffect, useState } from 'react'
 
