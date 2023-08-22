@@ -10,7 +10,7 @@ import { useRefreshPrompt } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector from './tabSelector'
-import useInitialState, { useInitialTrackedState } from './useInitialState'
+import useInitialState from './useInitialState'
 import { ConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
@@ -66,11 +66,9 @@ export default function PromptView({
 }) {
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
+
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
-  const [testConfig, setTestConfig] = useInitialTrackedState<TestConfig, number>(
-    { mode: 'first', rowIndices: [0] },
-    activeVersion.id
-  ) // TODO empty indices?
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
   const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, ConfigsEqual)
@@ -117,7 +115,8 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const showTestData = ExtractPromptVariables(currentPrompt).length > 0 || Object.keys(prompt.inputValues).length > 0
+  const variables = ExtractPromptVariables(currentPrompt)
+  const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
       tabs={showTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}

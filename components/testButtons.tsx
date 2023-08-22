@@ -55,6 +55,20 @@ export const SelectInputRows = (
   return [selectedIndices.map(selectRow), originalIndices]
 }
 
+const selectValidRowIndices = (
+  mode: TestConfig['mode'],
+  selectInputs: (mode: TestConfig['mode']) => ReturnType<typeof SelectInputRows>
+) => {
+  switch (mode) {
+    case 'first':
+    case 'last':
+      return selectInputs(mode)[1]
+    case 'random':
+    case 'all':
+      return selectInputs('all')[1]
+  }
+}
+
 export default function TestButtons({
   runTitle,
   variables,
@@ -74,9 +88,18 @@ export default function TestButtons({
 }) {
   const selectInputs = (mode: TestConfig['mode']) => SelectInputRows(inputValues, variables, mode)
 
+  const [_, rowIndices] = selectInputs(testConfig.mode)
+  const validRowIndices = selectValidRowIndices(testConfig.mode, selectInputs)
+  if (
+    testConfig.rowIndices.length !== rowIndices.length ||
+    testConfig.rowIndices.some(index => !validRowIndices.includes(index))
+  ) {
+    setTestConfig({ mode: testConfig.mode, rowIndices })
+  }
+
   const updateTestMode = (mode: TestConfig['mode']) => {
-    const [_, indices] = selectInputs(mode)
-    setTestConfig({ mode, rowIndices: indices })
+    const [_, rowIndices] = selectInputs(mode)
+    setTestConfig({ mode, rowIndices })
   }
 
   const testPrompt = () => {

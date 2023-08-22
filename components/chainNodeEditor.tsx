@@ -67,7 +67,7 @@ export default function ChainNodeEditor({
   setModifiedVersion: (version: Version) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
-  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] }) // TODO empty indices?
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const checkProviderAvailable = useCheckProvider()
 
