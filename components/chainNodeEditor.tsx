@@ -219,6 +219,7 @@ export default function ChainNodeEditor({
             inputValues={inputValues}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
+            disabled={!items.length}
             callback={runChain}
           />
         </div>
