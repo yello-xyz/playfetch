@@ -41,8 +41,8 @@ export default function ProjectTopBar({
 
   return (
     <>
-      <div className='z-10 flex items-center justify-between gap-4 px-6 py-3 border-b border-gray-200'>
-        <div className='flex items-center gap-1 py-1 cursor-pointer' onClick={onNavigateBack}>
+      <div className='z-10 flex items-center justify-between px-6 py-3 border-b border-gray-200 w-full'>
+        <div className='flex items-center gap-1 py-1 cursor-pointer min-w-[30%]' onClick={onNavigateBack}>
           <Icon icon={backIcon} />
           Back to overview
         </div>
@@ -69,7 +69,7 @@ export default function ProjectTopBar({
             </div>
           </div>
         </div>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-4 min-w-[30%] justify-end'>
           <UserAvatars users={activeProject.users} />
           <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
           {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
