@@ -107,15 +107,37 @@ export default function PromptInput({
 
   const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<VariablePopupProps>()
 
-  const updateSelection = (selection?: Selection) => {
-    if (selection) {
-      setPopup(VariablePopup)
-      setPopupProps({ selection, toggleInput })
-      setPopupLocation({ top: selection.popupPoint.y, left: selection.popupPoint.x })
-    } else {
-      setPopup(undefined)
+  const toggleInput = useCallback(
+    (selection: Selection) => {
+      if (!selection.isInput) {
+        selection.range.surroundContents(document.createElement('b'))
+      } else if (!!selection.text.match(/^{{(.*)}}$/)) {
+        setValue(value.replaceAll(selection.text, selection.text.slice(2, -2)))
+      }
+    },
+    [value, setValue]
+  )
+
+  const updateSelection = useCallback(
+    (selection?: Selection) => {
+      if (selection) {
+        setPopup(VariablePopup)
+        setPopupProps({ selection, toggleInput })
+        setPopupLocation({ top: selection.popupPoint.y, left: selection.popupPoint.x })
+      } else {
+        setPopup(undefined)
+      }
+    },
+    [setPopup, setPopupProps, setPopupLocation, toggleInput]
+  )
+
+  useEffect(() => {
+    const selectionChangeHandler = () => updateSelection(extractSelection(contentEditableRef))
+    document.addEventListener('selectionchange', selectionChangeHandler)
+    return () => {
+      document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }
+  }, [contentEditableRef, updateSelection])
 
   const onSuspenseLoaded = useCallback(
     (node: any) => {
@@ -127,22 +149,6 @@ export default function PromptInput({
     },
     [contentEditableRef, updateScrollHeight]
   )
-
-  useEffect(() => {
-    const selectionChangeHandler = () => updateSelection(extractSelection(contentEditableRef))
-    document.addEventListener('selectionchange', selectionChangeHandler)
-    return () => {
-      document.removeEventListener('selectionchange', selectionChangeHandler)
-    }
-  }, [contentEditableRef])
-
-  const toggleInput = (selection: Selection) => {
-    if (!selection.isInput) {
-      selection.range.surroundContents(document.createElement('b'))
-    } else if (!!selection.text.match(/^{{(.*)}}$/)) {
-      setValue(value.replaceAll(selection.text, selection.text.slice(2, -2)))
-    }
-  }
 
   const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
   const contentEditableClassName = preformatted
