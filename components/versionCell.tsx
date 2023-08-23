@@ -194,7 +194,7 @@ function VerticalBarWrapper({
   return (
     <div id={id} className='flex items-stretch gap-4'>
       {displayTimeline && (
-        <div className='flex flex-col items-end w-10 gap-1'>
+        <div className='flex flex-col items-end w-10 gap-1 -ml-2'>
           {sequenceNumber !== undefined && (
             <div className='flex items-center gap-2'>
               <span className={`${isFilled ? 'text-dark-gray-700' : 'text-gray-300'} text-xs font-medium`}>
