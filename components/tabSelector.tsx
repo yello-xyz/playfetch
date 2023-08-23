@@ -60,7 +60,9 @@ function TabButton<T extends string>({
   const underline = activeTab === tab ? 'border-b border-black -mb-px' : ''
   const cursor = setActiveTab ? 'cursor-pointer' : ''
   return (
-    <div className={`px-2 py-2.5 font-medium select-none ${color} ${underline} ${cursor}`} onClick={() => setActiveTab?.(tab)}>
+    <div
+      className={`px-2 py-2.5 font-medium select-none ${color} ${underline} ${cursor}`}
+      onClick={() => setActiveTab?.(tab)}>
       {tab}
     </div>
   )

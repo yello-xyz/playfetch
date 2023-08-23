@@ -106,24 +106,26 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
-  await Promise.all(multipleInputs.map((inputs, inputIndex) => {
-    const offset = (index: number) => inputIndex * configs.length + index
-    return runChainConfigs(
-      user.id,
-      configs,
-      inputs,
-      false,
-      false,
-      (index, version, { output, cost, duration, failed }) => {
-        const createdAt = new Date()
-        sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
-        return version && output && !failed
-          ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost, duration, [])
-          : Promise.resolve({})
-      },
-      (index, message) => sendData({ index: offset(index), message })
-    )
-  }))
+  await Promise.all(
+    multipleInputs.map((inputs, inputIndex) => {
+      const offset = (index: number) => inputIndex * configs.length + index
+      return runChainConfigs(
+        user.id,
+        configs,
+        inputs,
+        false,
+        false,
+        (index, version, { output, cost, duration, failed }) => {
+          const createdAt = new Date()
+          sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
+          return version && output && !failed
+            ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost, duration, [])
+            : Promise.resolve({})
+        },
+        (index, message) => sendData({ index: offset(index), message })
+      )
+    })
+  )
 
   res.end()
 }

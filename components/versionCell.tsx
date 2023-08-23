@@ -177,7 +177,9 @@ function VerticalBarWrapper({
       <div className='flex flex-col items-end w-10 gap-1'>
         {sequenceNumber !== undefined && (
           <div className='flex items-center gap-2'>
-            <span className={`${isFilled ? 'text-dark-gray-700' : 'text-gray-300'} text-xs font-medium`}>{sequenceNumber}</span>
+            <span className={`${isFilled ? 'text-dark-gray-700' : 'text-gray-300'} text-xs font-medium`}>
+              {sequenceNumber}
+            </span>
             <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-700' : 'border border-gray-300'}`} />
           </div>
         )}
