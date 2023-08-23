@@ -199,6 +199,7 @@ export default function EndpointSettingsPane({
               activeVersion={versions[versionIndex]}
               setActiveVersion={version => setVersionID(version.id)}
               labelColors={prompt ? AvailableLabelColorsForPrompt(prompt) : {}}
+              hideReferences
               disabled={disabled}
             />
           </>

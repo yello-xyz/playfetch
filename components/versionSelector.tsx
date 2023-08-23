@@ -10,6 +10,7 @@ export default function VersionSelector({
   setActiveVersion,
   flagIfNotLatest,
   labelColors = {},
+  hideReferences,
   disabled,
 }: {
   versions: PromptVersion[]
@@ -18,6 +19,7 @@ export default function VersionSelector({
   setActiveVersion: (version: PromptVersion) => void
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
+  hideReferences?: boolean
   disabled?: boolean
 }) {
   const suffixForVersionID = (versionID: number) => {
@@ -38,7 +40,7 @@ export default function VersionSelector({
         flagIfNotLatest={flagIfNotLatest}
         disabled={disabled}
       />
-      {activeVersion && <VersionLabels version={activeVersion} colors={labelColors} />}
+      {activeVersion && <VersionLabels version={activeVersion} colors={labelColors} hideReferences={hideReferences} />}
     </div>
   )
 }

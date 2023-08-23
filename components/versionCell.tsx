@@ -95,7 +95,15 @@ export default function VersionCell({
   )
 }
 
-export function VersionLabels({ version, colors }: { version: PromptVersion; colors: Record<string, string> }) {
+export function VersionLabels({
+  version,
+  colors,
+  hideReferences,
+}: {
+  version: PromptVersion
+  colors: Record<string, string>
+  hideReferences?: boolean
+}) {
   const usedInChain = 'used in chain'
   const usedAsEndpoint = 'used as endpoint'
   const extraColor = 'bg-pink-100 text-black'
@@ -108,7 +116,7 @@ export function VersionLabels({ version, colors }: { version: PromptVersion; col
 
   return (
     <ItemLabels
-      labels={[...version.labels, ...extraLabels]}
+      labels={[...version.labels, ...(hideReferences ? [] : extraLabels)]}
       colors={{ ...colors, ...extraColors }}
       icons={extraIcons}
     />
