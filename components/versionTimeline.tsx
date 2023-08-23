@@ -31,7 +31,7 @@ export default function VersionTimeline({
   useEffect(() => {
     const element = document.getElementById(identifierForVersion(activeVersion))
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setTimeout(() => element.scrollIntoView({ behavior: 'auto', block: 'start' }), 100)
     }
   }, [activeVersion])
 

@@ -30,7 +30,7 @@ export default function RunTimeline({
       setTimeout(() => {
         const element = document.getElementById(identifierForRunID(focusRunID))
         if (runs.length > 1 && element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.scrollIntoView({ behavior: 'auto', block: 'start' })
         }
       })
     }
