@@ -5,7 +5,7 @@ import Icon from './icon'
 
 const SettingsRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className='flex items-center w-full gap-4'>
-    <div className='w-1/3 font-regular text-gray700'>{label}</div>
+    <div className='w-1/3 font-medium text-gray700'>{label}</div>
     {children}
   </div>
 )
