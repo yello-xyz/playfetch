@@ -116,9 +116,6 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
       },
-      animation: {
-        shimmer: 'shimmer 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      },
       keyframes: {
         shimmer: {
           '0%, 100%': { opacity: 1 },
