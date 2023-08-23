@@ -7,7 +7,6 @@ import {
   Prompt,
   ResolvedEndpoint,
 } from '@/types'
-import Label from './label'
 import { Fragment, ReactNode } from 'react'
 import Checkbox from './checkbox'
 import addIcon from '@/public/add.svg'

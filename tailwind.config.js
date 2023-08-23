@@ -116,12 +116,6 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
       },
-      keyframes: {
-        shimmer: {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.6 },
-        },
-      },
       boxShadow: {
         'sm': '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',
       }

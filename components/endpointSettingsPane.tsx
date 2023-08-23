@@ -253,13 +253,13 @@ export default function EndpointSettingsPane({
             Cancel
           </Button>
           {endpoint.id ? (
-            <PendingButton disabled={!isValidConfig || !isDirty || isSaving} onClick={saveChanges}>
-              Save Changes
-            </PendingButton>
+            <PendingButton
+              title='Save Changes'
+              disabled={!isValidConfig || !isDirty || isSaving}
+              onClick={saveChanges}
+            />
           ) : (
-            <PendingButton disabled={!isValidConfig || isSaving} onClick={publishEndpoint}>
-              Create Endpoint
-            </PendingButton>
+            <PendingButton title='Create Endpoint' disabled={!isValidConfig || isSaving} onClick={publishEndpoint} />
           )}
         </div>
       )}

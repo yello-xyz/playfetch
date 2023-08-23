@@ -22,9 +22,7 @@ export default function Admin() {
       <TextInput label='Email' value={email} setValue={setEmail} />
       <TextInput label='Full Name (optional)' value={fullName} setValue={setFullName} />
       <Checkbox label='Add as Admin' id='admin' checked={addAsAdmin} setChecked={setAddAsAdmin} />
-      <PendingButton disabled={!CheckValidEmail(email)} onClick={addUser}>
-        Add User to Allowlist
-      </PendingButton>
+      <PendingButton title='Add User to Allowlist' disabled={!CheckValidEmail(email)} onClick={addUser} />
     </main>
   )
 }
