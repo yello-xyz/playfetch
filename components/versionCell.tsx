@@ -51,16 +51,6 @@ export default function VersionCell({
 
   const user = prompt.users.find(user => user.id === version.userID)
 
-  const usedInChain = 'used in chain'
-  const usedAsEndpoint = 'used as endpoint'
-  const extraColor = 'bg-pink-100 text-black'
-  const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
-  const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
-  const extraLabels = [
-    ...(version.usedInChain ? [usedInChain] : []),
-    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
-  ]
-
   return (
     <VerticalBarWrapper
       id={identifier}
@@ -96,16 +86,32 @@ export default function VersionCell({
           </div>
         </div>
         {user && prompt.projectID !== user.id && <UserDetails user={user} />}
-        <ItemLabels
-          labels={[...version.labels, ...extraLabels]}
-          colors={{ ...labelColors, ...extraColors }}
-          icons={extraIcons}
-        />
+        <VersionLabels version={version} colors={labelColors} />
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </div>
     </VerticalBarWrapper>
+  )
+}
+
+export function VersionLabels({ version, colors }: { version: PromptVersion; colors: Record<string, string> }) {
+  const usedInChain = 'used in chain'
+  const usedAsEndpoint = 'used as endpoint'
+  const extraColor = 'bg-pink-100 text-black'
+  const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
+  const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
+  const extraLabels = [
+    ...(version.usedInChain ? [usedInChain] : []),
+    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
+  ]
+
+  return (
+    <ItemLabels
+      labels={[...version.labels, ...extraLabels]}
+      colors={{ ...colors, ...extraColors }}
+      icons={extraIcons}
+    />
   )
 }
 
