@@ -1,4 +1,4 @@
-import { ActivePrompt, Run, Version } from '@/types'
+import { ActivePrompt, Run, PromptVersion } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
@@ -38,7 +38,7 @@ export default function LabelPopupMenu({
   prompt,
   containerRect,
 }: {
-  item: Version | Run
+  item: PromptVersion | Run
   prompt: ActivePrompt
   containerRect?: DOMRect
 }) {

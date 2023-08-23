@@ -1,4 +1,4 @@
-import { VersionWithReferences } from '@/types'
+import { PromptVersion } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset, PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
@@ -11,7 +11,7 @@ export default function VersionPopupMenu({
   version,
   containerRect,
 }: {
-  version: VersionWithReferences
+  version: PromptVersion
   containerRect?: DOMRect
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)

@@ -1,4 +1,12 @@
-import { InputValues, PromptConfig, PromptInputs, ModelProvider, Version, LanguageModel, TestConfig } from '@/types'
+import {
+  InputValues,
+  PromptConfig,
+  PromptInputs,
+  ModelProvider,
+  PromptVersion,
+  LanguageModel,
+  TestConfig,
+} from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector, { ProviderForModel } from './modelSelector'
@@ -23,8 +31,8 @@ export default function PromptPanel({
 }: {
   initialPrompt?: string
   initialConfig?: PromptConfig
-  version: Version
-  setModifiedVersion: (version: Version) => void
+  version: PromptVersion
+  setModifiedVersion: (version: PromptVersion) => void
   runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   testConfig?: TestConfig

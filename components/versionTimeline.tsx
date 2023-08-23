@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
-import { ActivePrompt, Version } from '@/types'
+import { ActivePrompt, PromptVersion } from '@/types'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
@@ -13,8 +13,8 @@ export default function VersionTimeline({
   tabSelector,
 }: {
   prompt: ActivePrompt
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
+  activeVersion: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const [filters, setFilters] = useState<VersionFilter[]>([])
@@ -26,7 +26,7 @@ export default function VersionTimeline({
   const [, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
 
-  const identifierForVersion = (version: Version) => `v${version.id}`
+  const identifierForVersion = (version: PromptVersion) => `v${version.id}`
 
   useEffect(() => {
     const element = document.getElementById(identifierForVersion(activeVersion))
@@ -35,7 +35,7 @@ export default function VersionTimeline({
     }
   }, [activeVersion])
 
-  const selectVersion = (version: Version) => {
+  const selectVersion = (version: PromptVersion) => {
     setActiveVersion(version)
   }
 

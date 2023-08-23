@@ -1,4 +1,4 @@
-import { ActivePrompt, Comment, User, Version } from '@/types'
+import { ActivePrompt, Comment, User, PromptVersion } from '@/types'
 import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versionCell'
@@ -19,7 +19,7 @@ export default function CommentsPane({
   prompt: ActivePrompt
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: Version, runID?: number) => void
+  onSelectComment: (version: PromptVersion, runID?: number) => void
 }) {
   const users = prompt.users
   const labelColors = AvailableLabelColorsForPrompt(prompt)
@@ -59,8 +59,8 @@ export function CommentCell({
   comment: Comment
   user: User
   labelColors: Record<string, string>
-  versions?: Version[]
-  onSelect?: (version: Version, runID?: number) => void
+  versions?: PromptVersion[]
+  onSelect?: (version: PromptVersion, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 

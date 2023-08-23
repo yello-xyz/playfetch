@@ -1,4 +1,12 @@
-import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, TestConfig, Version } from '@/types'
+import {
+  ActivePrompt,
+  InputValues,
+  ModelProvider,
+  PromptConfig,
+  PromptInputs,
+  TestConfig,
+  PromptVersion,
+} from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode, useState } from 'react'
@@ -21,9 +29,9 @@ export default function RunPromptTab({
   currentPrompt: string
   currentPromptConfig: PromptConfig
   activePrompt: ActivePrompt
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  activeVersion: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues

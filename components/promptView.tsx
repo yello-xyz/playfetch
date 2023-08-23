@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, TestConfig, Version } from '@/types'
+import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
@@ -60,9 +60,9 @@ export default function PromptView({
 }: {
   prompt: ActivePrompt
   project: ActiveProject
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  activeVersion: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
   savePrompt: () => Promise<number>
@@ -76,7 +76,7 @@ export default function PromptView({
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
   const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, ConfigsEqual)
 
-  const updateVersion = (version: Version) => {
+  const updateVersion = (version: PromptVersion) => {
     setCurrentPrompt(version.prompt)
     setCurrentPromptConfig(version.config)
     setModifiedVersion(version)
@@ -84,7 +84,7 @@ export default function PromptView({
 
   const [activeRunID, setActiveRunID] = useState<number>()
 
-  const onSelectComment = (version: Version, runID?: number) => {
+  const onSelectComment = (version: PromptVersion, runID?: number) => {
     if (version.id !== activeVersion.id) {
       setActiveRunID(undefined)
       setActiveVersion(version)

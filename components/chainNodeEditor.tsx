@@ -5,8 +5,8 @@ import {
   CodeChainItem,
   PartialRun,
   PromptInputs,
+  PromptVersion,
   TestConfig,
-  Version,
 } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
@@ -72,8 +72,8 @@ export default function ChainNodeEditor({
   promptCache: PromptCache
   onRun: () => void
   savePrompt: () => Promise<number>
-  selectVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  selectVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })

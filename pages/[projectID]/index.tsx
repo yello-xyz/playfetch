@@ -1,10 +1,9 @@
 import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
-import { ReactNode, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
 import {
   ActivePrompt,
-  Version,
   User,
   ActiveProject,
   AvailableProvider,
@@ -14,6 +13,8 @@ import {
   InputValues,
   Prompt,
   ActiveChain,
+  Version,
+  PromptVersion,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -149,15 +150,15 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState<Version | undefined>(activePrompt?.versions?.slice(-1)?.[0])
+  const [activeVersion, setActiveVersion] = useState<PromptVersion | undefined>(activePrompt?.versions?.slice(-1)?.[0])
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
-  const updateVersion = (version?: Version) => {
+  const updateVersion = (version?: PromptVersion) => {
     setActiveVersion(version)
     setModifiedVersion(undefined)
   }
 
-  const selectVersion = (version: Version) => {
+  const selectVersion = (version: PromptVersion) => {
     if (activePrompt && activeVersion && version.id !== activeVersion.id) {
       savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
       updateVersion(version)

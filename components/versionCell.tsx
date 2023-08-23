@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { ActivePrompt, User, Version, VersionWithReferences } from '@/types'
+import { ActivePrompt, User, PromptVersion } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
@@ -31,13 +31,13 @@ export default function VersionCell({
 }: {
   identifier: string
   labelColors: Record<string, string>
-  version: VersionWithReferences
+  version: PromptVersion
   index: number
   isLast: boolean
   isActiveVersion: boolean
-  compareVersion?: Version
+  compareVersion?: PromptVersion
   prompt: ActivePrompt
-  onSelect: (version: Version) => void
+  onSelect: (version: PromptVersion) => void
   containerRect?: DOMRect
 }) {
   const [selection, setSelection] = useState<string>()

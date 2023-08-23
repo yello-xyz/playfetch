@@ -1,4 +1,4 @@
-import { ChainItem, ModelProvider, PromptChainItem, Version } from '@/types'
+import { ChainItem, ModelProvider, PromptChainItem, PromptVersion } from '@/types'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import VersionTimeline from './versionTimeline'
@@ -25,8 +25,8 @@ export default function PromptChainNodeEditor({
   toggleIncludeContext: (includeContext: boolean) => void
   promptCache: PromptCache
   checkProviderAvailable: (provider: ModelProvider) => boolean
-  selectVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  selectVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
 }) {
   const loadedPrompt = promptCache.promptForItem(node)
   const activeVersion = promptCache.versionForItem(node)

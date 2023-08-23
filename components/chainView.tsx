@@ -5,7 +5,7 @@ import {
   ChainItem,
   ChainItemWithInputs,
   PromptChainItem,
-  Version,
+  PromptVersion,
 } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
@@ -19,7 +19,7 @@ import { Allotment } from 'allotment'
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
   promptForItem: (item: PromptChainItem) => ActivePrompt | undefined
-  versionForItem: (item: PromptChainItem) => Version | undefined
+  versionForItem: (item: PromptChainItem) => PromptVersion | undefined
   promptItemForID: (promptID: number) => ChainItem
   refreshPrompt: (promptID: number) => Promise<ActivePrompt>
 }
@@ -89,10 +89,10 @@ export default function ChainView({
 
   const activeNode = nodes[activeNodeIndex]
   const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
-  const [activeVersion, setActiveVersion] = useState<Version>()
+  const [activeVersion, setActiveVersion] = useState<PromptVersion>()
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
-  const selectVersion = (version?: Version) => {
+  const selectVersion = (version?: PromptVersion) => {
     savePrompt()
     setActiveVersion(version)
     if (version && IsPromptChainItem(activeNode)) {

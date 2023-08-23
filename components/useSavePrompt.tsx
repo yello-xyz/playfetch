@@ -1,14 +1,14 @@
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { ActivePrompt, Version } from '@/types'
+import { ActivePrompt, PromptVersion } from '@/types'
 import { VersionsEqual } from '@/src/common/versionsEqual'
 
 export default function useSavePrompt(
   activePrompt: ActivePrompt | undefined,
-  activeVersion: Version | undefined,
-  setActiveVersion: (version: Version) => void
+  activeVersion: PromptVersion | undefined,
+  setActiveVersion: (version: PromptVersion) => void
 ) {
-  const [modifiedVersion, setModifiedVersion] = useState<Version>()
+  const [modifiedVersion, setModifiedVersion] = useState<PromptVersion>()
 
   const savePrompt = async (onSaved?: ((versionID: number) => Promise<void>) | (() => void)) => {
     const versionNeedsSaving =

@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react'
 import {
   ActivePrompt,
-  Version,
+  PromptVersion,
   InputValues,
   PromptConfig,
   PromptInputs,
@@ -39,9 +39,9 @@ export default function TestPromptTab({
   currentPromptConfig: PromptConfig
   activeProject: ActiveProject
   activePrompt: ActivePrompt
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  activeVersion: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
@@ -53,7 +53,7 @@ export default function TestPromptTab({
 }) {
   const variables = ExtractPromptVariables(currentPrompt)
 
-  const selectVersion = (version: Version) => {
+  const selectVersion = (version: PromptVersion) => {
     persistInputValuesIfNeeded()
     setActiveVersion(version)
   }

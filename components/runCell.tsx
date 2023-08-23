@@ -1,4 +1,4 @@
-import { ActivePrompt, Comment, PartialRun, Version } from '@/types'
+import { ActivePrompt, Comment, PartialRun, PromptVersion } from '@/types'
 import { MouseEvent, useEffect, useState } from 'react'
 import { CommentsPopup } from './commentPopupMenu'
 import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
@@ -42,7 +42,7 @@ export default function RunCell({
 }: {
   identifier: string
   run: PartialRun
-  version?: Version
+  version?: PromptVersion
   prompt?: ActivePrompt
   containerRect?: DOMRect
   scrollTop: number

@@ -1,4 +1,4 @@
-import { ActivePrompt, PartialRun, Version } from '@/types'
+import { ActivePrompt, PartialRun, PromptVersion } from '@/types'
 import { useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
@@ -13,7 +13,7 @@ export default function RunTimeline({
   isRunning,
 }: {
   runs: PartialRun[]
-  version?: Version
+  version?: PromptVersion
   prompt?: ActivePrompt
   activeRunID?: number
   isRunning?: boolean

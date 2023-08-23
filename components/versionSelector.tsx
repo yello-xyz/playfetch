@@ -1,4 +1,4 @@
-import { ResolvedEndpoint, Version } from '@/types'
+import { PromptVersion, ResolvedEndpoint } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import { useState } from 'react'
 import { ItemLabels } from './versionCell'
@@ -12,10 +12,10 @@ export default function VersionSelector({
   labelColors = {},
   disabled,
 }: {
-  versions: Version[]
+  versions: PromptVersion[]
   endpoints: ResolvedEndpoint[]
-  activeVersion?: Version
-  setActiveVersion: (version: Version) => void
+  activeVersion?: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
   disabled?: boolean
