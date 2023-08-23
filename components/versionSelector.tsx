@@ -1,7 +1,7 @@
 import { PromptVersion, ResolvedEndpoint } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import { useState } from 'react'
-import { ItemLabels } from './versionCell'
+import { VersionLabels } from './versionCell'
 
 export default function VersionSelector({
   versions,
@@ -38,7 +38,7 @@ export default function VersionSelector({
         flagIfNotLatest={flagIfNotLatest}
         disabled={disabled}
       />
-      {activeVersion && <ItemLabels labels={activeVersion.labels} colors={labelColors} />}
+      {activeVersion && <VersionLabels version={activeVersion} colors={labelColors} />}
     </div>
   )
 }
