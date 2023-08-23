@@ -30,7 +30,7 @@ export default function TabSelector<T extends string>({
   children?: ReactNode
 }) {
   return (
-    <div className='flex items-center justify-between gap-1 px-4 bg-white border-b border-gray-200'>
+    <div className='flex items-center justify-between gap-1 px-2 bg-white border-b border-gray-200'>
       <div className='flex items-center gap-1 leading-6'>
         {tabs.map((tab, index) => (
           <TabButton
@@ -60,7 +60,9 @@ function TabButton<T extends string>({
   const underline = activeTab === tab ? 'border-b border-black -mb-px' : ''
   const cursor = setActiveTab ? 'cursor-pointer' : ''
   return (
-    <div className={`px-2 py-2.5 font-medium ${color} ${underline} ${cursor}`} onClick={() => setActiveTab?.(tab)}>
+    <div
+      className={`px-2 py-2.5 font-medium select-none ${color} ${underline} ${cursor}`}
+      onClick={() => setActiveTab?.(tab)}>
       {tab}
     </div>
   )

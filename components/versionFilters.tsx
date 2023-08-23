@@ -53,9 +53,10 @@ export default function VersionFilters({
   setFilters: (filters: VersionFilter[]) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4' : ''
+  const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4 py-2' : ''
+
   return (
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col'>
       {tabSelector(
         <FilterButton
           users={users}
@@ -65,7 +66,7 @@ export default function VersionFilters({
           setFilters={setFilters}
         />
       )}
-      <div className={`flex flex-wrap flex-1 gap-2 pb-2 mx-4 text-xs text-gray-800 ${markup}`}>
+      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-800 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
             key={index}

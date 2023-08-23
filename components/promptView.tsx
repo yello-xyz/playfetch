@@ -40,7 +40,11 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
         runs[index] = { id: index, output, cost, duration, timestamp, failed }
       }
     }
-    setPartialRuns(Object.entries(runs).sort(([a], [b]) => Number(a) - Number(b)).map(([, run]) => run))
+    setPartialRuns(
+      Object.entries(runs)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([, run]) => run)
+    )
   }
 }
 
