@@ -56,7 +56,7 @@ export function SidebarButton({
 }) {
   const activeClass = 'bg-blue-50 '
   const baseHoverClass = 'hover:bg-gray-100'
-  const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg'
+  const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg group w-[220px]'
   const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
     <LinkWrapper link={link}>
@@ -65,7 +65,9 @@ export function SidebarButton({
         <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap text-dark-gray-700'>
           {title}
         </div>
-        {actionComponent}
+        <div className='hidden group-hover:block'>
+          {actionComponent}
+        </div>
       </div>
     </LinkWrapper>
   )
