@@ -41,6 +41,7 @@ export default function VersionTimeline({
 
   const versions = prompt.versions
   const filteredVersions = versions.filter(BuildVersionFilter(filters))
+  const displayTimeline = filteredVersions.length !== 1
 
   return versions.length > 1 || versions[0].runs.length > 0 ? (
     <div ref={containerRef} className='relative flex h-full'>
@@ -53,7 +54,9 @@ export default function VersionTimeline({
           setFilters={setFilters}
           tabSelector={tabSelector}
         />
-        <div ref={scrollRef} className='flex flex-col pl-2 pr-4 pb-1.5 pt-3 overflow-y-auto gap-0'>
+        <div
+          ref={scrollRef}
+          className={`flex flex-col pl-2 pr-4 pb-1.5 pt-3 overflow-y-auto gap-0 ${displayTimeline ? '' : 'pl-4'}`}>
           {filteredVersions.map((version, index) => (
             <VersionCell
               key={index}
@@ -67,6 +70,7 @@ export default function VersionTimeline({
               prompt={prompt}
               onSelect={selectVersion}
               containerRect={containerRect}
+              displayTimeline={displayTimeline}
             />
           ))}
         </div>
