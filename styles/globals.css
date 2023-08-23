@@ -2,6 +2,7 @@
 @layer base {
   html {
     @apply antialiased;
+    @apply font-sans;
   }
 }
 @tailwind components;

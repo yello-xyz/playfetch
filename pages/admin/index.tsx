@@ -18,7 +18,7 @@ export default function Admin() {
   }
 
   return (
-    <main className={`flex flex-col gap-4 p-10 items-start font-sans`}>
+    <main className='flex flex-col items-start gap-4 p-10'>
       <TextInput label='Email' value={email} setValue={setEmail} />
       <TextInput label='Full Name (optional)' value={fullName} setValue={setFullName} />
       <Checkbox label='Add as Admin' id='admin' checked={addAsAdmin} setChecked={setAddAsAdmin} />

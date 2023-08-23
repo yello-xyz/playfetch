@@ -273,7 +273,7 @@ export default function Home({
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
           <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
-            <main className={`flex flex-col h-screen text-sm font-sans`}>
+            <main className='flex flex-col h-screen text-sm'>
               <ProjectTopBar
                 workspaces={workspaces}
                 activeProject={activeProject}
