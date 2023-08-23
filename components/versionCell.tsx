@@ -53,8 +53,8 @@ export default function VersionCell({
 
   const user = prompt.users.find(user => user.id === version.userID)
 
-  const usedInChain = 'used in chain'
-  const usedAsEndpoint = 'used as endpoint'
+  const usedInChain = 'used in Chain'
+  const usedAsEndpoint = 'used as Endpoint'
   const extraColor = 'bg-pink-100 text-black'
   const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
   const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
@@ -72,7 +72,7 @@ export default function VersionCell({
       displayTimeline={displayTimeline}>
       <div
         className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
-          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-400 opacity-60'
+          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-300'
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
