@@ -139,6 +139,7 @@ export default function TestButtons({
       )}
       <PendingButton
         title={runTitle ?? 'Run'}
+        pendingTitle='Running…'
         disabled={disabled || (rowIndices.length === 0 && variables.length > 0)}
         onClick={testPrompt}
       />

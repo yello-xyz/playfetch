@@ -4,11 +4,13 @@ type ButtonType = 'primary' | 'outline' | 'destructive'
 
 export function PendingButton({
   title,
+  pendingTitle,
   type = 'primary',
   disabled,
   onClick,
 }: {
   title: string
+  pendingTitle?: string
   type?: ButtonType
   disabled?: boolean
   onClick: () => void | Promise<void>
@@ -23,7 +25,7 @@ export function PendingButton({
 
   return (
     <Button type={type} disabled={disabled || isPending} onClick={handleClick}>
-      {title}
+      {isPending && pendingTitle ? pendingTitle : title}
     </Button>
   )
 }
