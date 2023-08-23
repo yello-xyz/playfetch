@@ -105,7 +105,7 @@ export default function PromptInput({
 
   useEffect(updateScrollHeight, [scrollHeight, updateScrollHeight])
 
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup()
+  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<VariablePopupProps>()
 
   const updateSelection = (selection?: Selection) => {
     if (selection) {
@@ -192,13 +192,9 @@ export default function PromptInput({
   )
 }
 
-function VariablePopup({
-  selection,
-  toggleInput,
-}: {
-  selection: Selection
-  toggleInput: (selection: Selection) => void
-}) {
+type VariablePopupProps = { selection: Selection; toggleInput: (selection: Selection) => void }
+
+function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
   return (
     <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
       <div className='p-1 bg-white rounded-lg shadow whitespace-nowrap'>

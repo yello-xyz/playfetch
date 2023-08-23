@@ -41,12 +41,7 @@ import dynamic from 'next/dynamic'
 import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
-import {
-  GlobalPopupContext,
-  GlobalPopupLocation,
-  GlobalPopupProps,
-  GlobalPopupRender,
-} from '@/components/globalPopupContext'
+import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
@@ -274,8 +269,8 @@ export default function Home({
   }
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [popupRender, setPopupRender] = useState<GlobalPopupRender>()
-  const [popupProps, setPopupProps] = useState<GlobalPopupProps>()
+  const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
+  const [popupProps, setPopupProps] = useState<any>()
   const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
 
   return (
