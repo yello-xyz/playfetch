@@ -107,8 +107,8 @@ export function VersionLabels({
   colors: Record<string, string>
   hideReferences?: boolean
 }) {
-  const usedInChain = 'used in chain'
-  const usedAsEndpoint = 'used as endpoint'
+  const usedInChain = 'used in Chain'
+  const usedAsEndpoint = 'used as Endpoint'
   const extraColor = 'bg-pink-100 text-black'
   const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
   const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
