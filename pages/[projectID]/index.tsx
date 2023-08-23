@@ -1,7 +1,7 @@
 import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
-import { Suspense, useState } from 'react'
+import { ReactNode, Suspense, useState } from 'react'
 import {
   ActivePrompt,
   Version,
@@ -41,6 +41,8 @@ import dynamic from 'next/dynamic'
 import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
+import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
+import GlobalPopup from '@/components/globalPopup'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
@@ -133,8 +135,6 @@ export default function Home({
   availableProviders: AvailableProvider[]
 }) {
   const router = useRouter()
-
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const [activeProject, setActiveProject] = useState(initialActiveProject)
 
@@ -268,71 +268,89 @@ export default function Home({
     router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
   }
 
+  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
+  const [popupProps, setPopupProps] = useState<any>()
+  const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
+
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-          <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
-            <main className={`flex flex-col h-screen text-sm font-sans`}>
-              <ProjectTopBar
-                workspaces={workspaces}
-                activeProject={activeProject}
-                activeItem={activePrompt ?? activeChain}
-                onRefreshProject={refreshProject}
-                onNavigateBack={navigateBack}
-                showComments={showComments}
-                setShowComments={setShowComments}
-              />
-              <div className='flex items-stretch flex-1 overflow-hidden'>
-                <ProjectSidebar
-                  activeProject={activeProject}
-                  activeItem={activeItem}
+        <GlobalPopupContext.Provider
+          value={{
+            setPopupRender: render => setPopupRender(() => render),
+            setPopupProps,
+            setPopupLocation,
+          }}>
+          <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
+            <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
+              <main className='flex flex-col h-screen text-sm'>
+                <ProjectTopBar
                   workspaces={workspaces}
-                  onAddPrompt={addPrompt}
-                  onAddChain={addChain}
-                  onDeleteItem={onDeleteItem}
-                  onRefreshItem={refreshActiveItem}
-                  onSelectPrompt={selectPrompt}
-                  onSelectChain={selectChain}
-                  onSelectEndpoints={selectEndpoints}
+                  activeProject={activeProject}
+                  activeItem={activePrompt ?? activeChain}
+                  onRefreshProject={refreshProject}
+                  onNavigateBack={navigateBack}
+                  showComments={showComments}
+                  setShowComments={setShowComments}
                 />
-                <div className='flex-1'>
-                  {activePrompt && activeVersion && (
-                    <Suspense>
-                      <PromptView
-                        prompt={activePrompt}
-                        project={activeProject}
-                        activeVersion={activeVersion}
-                        setActiveVersion={selectVersion}
-                        setModifiedVersion={setModifiedVersion}
-                        showComments={showComments}
-                        setShowComments={setShowComments}
-                        savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
-                      />
-                    </Suspense>
-                  )}
-                  {activeChain && (
-                    <Suspense>
-                      <ChainView
-                        key={activeChain.id}
-                        chain={activeChain}
-                        project={activeProject}
-                        onRefresh={refreshProject}
-                      />
-                    </Suspense>
-                  )}
-                  {activeEndpoints && (
-                    <Suspense>
-                      <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
-                    </Suspense>
-                  )}
-                  {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
+                <div className='flex items-stretch flex-1 overflow-hidden'>
+                  <ProjectSidebar
+                    activeProject={activeProject}
+                    activeItem={activeItem}
+                    workspaces={workspaces}
+                    onAddPrompt={addPrompt}
+                    onAddChain={addChain}
+                    onDeleteItem={onDeleteItem}
+                    onRefreshItem={refreshActiveItem}
+                    onSelectPrompt={selectPrompt}
+                    onSelectChain={selectChain}
+                    onSelectEndpoints={selectEndpoints}
+                  />
+                  <div className='flex-1'>
+                    {activePrompt && activeVersion && (
+                      <Suspense>
+                        <PromptView
+                          prompt={activePrompt}
+                          project={activeProject}
+                          activeVersion={activeVersion}
+                          setActiveVersion={selectVersion}
+                          setModifiedVersion={setModifiedVersion}
+                          showComments={showComments}
+                          setShowComments={setShowComments}
+                          savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
+                        />
+                      </Suspense>
+                    )}
+                    {activeChain && (
+                      <Suspense>
+                        <ChainView
+                          key={activeChain.id}
+                          chain={activeChain}
+                          project={activeProject}
+                          onRefresh={refreshProject}
+                        />
+                      </Suspense>
+                    )}
+                    {activeEndpoints && (
+                      <Suspense>
+                        <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
+                      </Suspense>
+                    )}
+                    {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
+                  </div>
                 </div>
-              </div>
-            </main>
-          </RefreshContext.Provider>
-        </UserContext.Provider>
+              </main>
+            </RefreshContext.Provider>
+          </UserContext.Provider>
+        </GlobalPopupContext.Provider>
       </ModalDialogContext.Provider>
+      <GlobalPopup
+        {...popupProps}
+        location={popupLocation}
+        onDismiss={() => setPopupRender(undefined)}
+        render={popupRender}
+      />
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
     </>
   )
