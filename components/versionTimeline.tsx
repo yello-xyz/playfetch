@@ -54,7 +54,9 @@ export default function VersionTimeline({
           setFilters={setFilters}
           tabSelector={tabSelector}
         />
-        <div ref={scrollRef} className={`flex flex-col pl-2 pr-4 pb-1.5 pt-3 overflow-y-auto gap-0 ${displayTimeline ? '' : 'pl-4'}`}>
+        <div
+          ref={scrollRef}
+          className={`flex flex-col pl-2 pr-4 pb-1.5 pt-3 overflow-y-auto gap-0 ${displayTimeline ? '' : 'pl-4'}`}>
           {filteredVersions.map((version, index) => (
             <VersionCell
               key={index}

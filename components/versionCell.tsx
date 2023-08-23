@@ -28,7 +28,7 @@ export default function VersionCell({
   prompt,
   onSelect,
   containerRect,
-  displayTimeline = true
+  displayTimeline = true,
 }: {
   identifier: string
   labelColors: Record<string, string>
@@ -164,7 +164,7 @@ function VerticalBarWrapper({
   bulletStyle = 'stroked',
   strokeStyle = 'none',
   children,
-  displayTimeline = true
+  displayTimeline = true,
 }: {
   id?: string
   sequenceNumber?: number
@@ -179,7 +179,7 @@ function VerticalBarWrapper({
 
   return (
     <div id={id} className='flex items-stretch gap-4'>
-      { displayTimeline && 
+      {displayTimeline && (
         <div className='flex flex-col items-end w-10 gap-1'>
           {sequenceNumber !== undefined && (
             <div className='flex items-center gap-2'>
@@ -193,7 +193,7 @@ function VerticalBarWrapper({
             <div className={`border-l flex-1 mb-1 pr-1 border-gray-300 ${isDashed ? 'border-dashed' : ''}`} />
           )}
         </div>
-      }
+      )}
       {children}
     </div>
   )
