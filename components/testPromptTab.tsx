@@ -65,7 +65,9 @@ export default function TestPromptTab({
 
   const minVersionHeight = 240
   const [promptHeight, setPromptHeight] = useState(1)
-  const preferredHeight = promptHeight + 105 + (activeVersion.labels.length ? 26 : 0)
+  const versionSelectorHeight = 105
+  const labelHeight = activeVersion.labels.length || activeVersion.usedInChain || activeVersion.usedAsEndpoint ? 26 : 0
+  const preferredHeight = promptHeight + versionSelectorHeight + labelHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minVersionHeight}>
