@@ -41,7 +41,7 @@ export default function ProjectTopBar({
 
   return (
     <>
-      <div className='z-10 flex items-center justify-between px-6 py-3 border-b border-gray-200 w-full'>
+      <div className='z-10 flex items-center justify-between px-4 py-3 border-b border-gray-200 w-full'>
         <div className='flex items-center gap-1 py-1 cursor-pointer min-w-[30%]' onClick={onNavigateBack}>
           <Icon icon={backIcon} />
           Back to overview
