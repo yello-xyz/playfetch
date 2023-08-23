@@ -28,7 +28,6 @@ export default function VersionCell({
   prompt,
   onSelect,
   containerRect,
-  displayTimeline = true,
 }: {
   identifier: string
   labelColors: Record<string, string>
@@ -40,7 +39,6 @@ export default function VersionCell({
   prompt: ActivePrompt
   onSelect: (version: PromptVersion) => void
   containerRect?: DOMRect
-  displayTimeline?: boolean
 }) {
   const [selection, setSelection] = useState<string>()
   useEffect(() => {
@@ -58,8 +56,7 @@ export default function VersionCell({
       id={identifier}
       sequenceNumber={index + 1}
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
-      strokeStyle={isLast ? 'none' : 'stroked'}
-      displayTimeline={displayTimeline}>
+      strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
         className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
           isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-300'
@@ -178,22 +175,21 @@ function VerticalBarWrapper({
   bulletStyle = 'stroked',
   strokeStyle = 'none',
   children,
-  displayTimeline = true,
 }: {
   id?: string
   sequenceNumber?: number
   bulletStyle?: 'filled' | 'stroked'
   strokeStyle?: 'stroked' | 'dashed' | 'none'
   children: ReactNode
-  displayTimeline?: boolean
 }) {
   const isFilled = bulletStyle === 'filled'
   const hasStroke = strokeStyle !== 'none'
   const isDashed = strokeStyle === 'dashed'
+  const isSingleItem = sequenceNumber === 1 && !hasStroke
 
   return (
     <div id={id} className='flex items-stretch gap-4'>
-      {displayTimeline && (
+      {!isSingleItem && (
         <div className='flex flex-col items-end w-10 gap-1 -ml-2'>
           {sequenceNumber !== undefined && (
             <div className='flex items-center gap-2'>
