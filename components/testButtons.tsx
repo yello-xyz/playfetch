@@ -137,9 +137,11 @@ export default function TestButtons({
           <option value={'all'}>All</option>
         </DropdownMenu>
       )}
-      <PendingButton disabled={disabled || (rowIndices.length === 0 && variables.length > 0)} onClick={testPrompt}>
-        {runTitle ?? 'Run'}
-      </PendingButton>
+      <PendingButton
+        title={runTitle ?? 'Run'}
+        disabled={disabled || (rowIndices.length === 0 && variables.length > 0)}
+        onClick={testPrompt}
+      />
     </div>
   )
 }

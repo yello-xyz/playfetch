@@ -3,13 +3,13 @@ import { ReactNode, useState } from 'react'
 type ButtonType = 'primary' | 'outline' | 'destructive'
 
 export function PendingButton({
+  title,
   type = 'primary',
-  children,
   disabled,
   onClick,
 }: {
+  title: string
   type?: ButtonType
-  children: ReactNode
   disabled?: boolean
   onClick: () => void | Promise<void>
 }) {
@@ -23,7 +23,7 @@ export function PendingButton({
 
   return (
     <Button type={type} disabled={disabled || isPending} onClick={handleClick}>
-      {children}
+      {title}
     </Button>
   )
 }
