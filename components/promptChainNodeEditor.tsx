@@ -38,15 +38,17 @@ export default function PromptChainNodeEditor({
       {loadedPrompt && activeVersion ? (
         <Allotment vertical>
           <Allotment.Pane minSize={minVersionHeight}>
-            <div className='flex flex-col h-full gap-4'>
-              <VersionTimeline
-                prompt={loadedPrompt}
-                activeVersion={activeVersion}
-                setActiveVersion={selectVersion}
-                tabSelector={() => <SingleTabHeader label='Prompt versions' />}
-              />
+            <div className='flex flex-col h-full'>
+              <div className='flex-1 overflow-y-auto'>
+                <VersionTimeline
+                  prompt={loadedPrompt}
+                  activeVersion={activeVersion}
+                  setActiveVersion={selectVersion}
+                  tabSelector={() => <SingleTabHeader label='Prompt versions' />}
+                />
+              </div>
               {items.slice(0, index).some(IsPromptChainItem) && (
-                <div className='self-start'>
+                <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
                   <Checkbox
                     label='Include previous chain context into prompt'
                     checked={!!node.includeContext}
