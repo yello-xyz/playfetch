@@ -44,7 +44,7 @@ async function ensureEndpointAccess(
   endpointData: {
     projectID: number
     parentID: number
-    versionID: number | null
+    versionID: number
   }
 ) {
   const data = endpointData.versionID
@@ -92,7 +92,7 @@ export async function saveEndpoint(
   userID: number,
   projectID: number,
   parentID: number,
-  versionID: number | null,
+  versionID: number,
   name: string,
   flavor: string,
   useCache: boolean,
@@ -136,7 +136,7 @@ export async function updateEndpointForUser(
   endpointID: number,
   enabled: boolean,
   parentID: number,
-  versionID: number | null,
+  versionID: number,
   urlPath: string,
   flavor: string,
   useCache: boolean,
@@ -177,7 +177,7 @@ const toEndpointData = (
   userID: number,
   projectID: number,
   parentID: number,
-  versionID: number | null,
+  versionID: number,
   urlPath: string,
   flavor: string,
   createdAt: Date,

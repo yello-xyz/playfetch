@@ -119,7 +119,7 @@ export default function EndpointSettingsPane({
       isEnabled,
       project.id,
       parentID!,
-      versionID,
+      versionID!,
       urlPath,
       flavor!,
       useCache,
@@ -140,7 +140,7 @@ export default function EndpointSettingsPane({
           endpoint.id!,
           isEnabled,
           parentID!,
-          versionID,
+          versionID!,
           urlPath,
           flavor!,
           useCache,
@@ -171,8 +171,7 @@ export default function EndpointSettingsPane({
   }
 
   const disabled = !isEditing || isSaving
-  const isValidConfig =
-    !!parentID && (!!versionID || !EndpointParentIsPrompt(parent)) && !!flavor && CheckValidURLPath(urlPath)
+  const isValidConfig = !!parentID && !!versionID && !!flavor && CheckValidURLPath(urlPath)
 
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
@@ -189,22 +188,18 @@ export default function EndpointSettingsPane({
             </option>
           ))}
         </DropdownMenu>
-        {(!parent || EndpointParentIsPrompt(parent)) && (
-          <>
-            <Label disabled={disabled} className='self-start mt-2'>
-              Version
-            </Label>
-            <VersionSelector
-              versions={versions}
-              endpoints={project.endpoints}
-              activeVersion={versions[versionIndex]}
-              setActiveVersion={version => setVersionID(version.id)}
-              labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
-              hideReferences
-              disabled={disabled}
-            />
-          </>
-        )}
+        <Label disabled={disabled} className='self-start mt-2'>
+          Version
+        </Label>
+        <VersionSelector
+          versions={versions}
+          endpoints={project.endpoints}
+          activeVersion={versions[versionIndex]}
+          setActiveVersion={version => setVersionID(version.id)}
+          labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
+          hideReferences
+          disabled={disabled}
+        />
         <Label disabled={disabled}>Name</Label>
         <TextInput
           placeholder='endpointName'

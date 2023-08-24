@@ -156,7 +156,7 @@ export type Endpoint = {
   userID: number
   projectID: number
   parentID: number
-  versionID?: number
+  versionID: number
   timestamp: string
   urlPath: string
   flavor: string
@@ -209,7 +209,7 @@ export type LogEntry = {
   urlPath: string
   flavor: string
   parentID: number
-  versionID?: number
+  versionID: number
   cost: number
   duration: number
   inputs: PromptInputs
