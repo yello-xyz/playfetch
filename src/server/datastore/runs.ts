@@ -71,7 +71,7 @@ export async function updateRunLabel(
     labels,
     userID,
     runData.versionID,
-    runData.promptID,
+    runData.parentID,
     projectID,
     label,
     checked,
@@ -85,7 +85,7 @@ export async function updateRunLabel(
 async function updateRun(runData: any) {
   await getDatastore().save(
     toRunData(
-      runData.promptID,
+      runData.parentID,
       runData.versionID,
       JSON.parse(runData.inputs),
       runData.output,

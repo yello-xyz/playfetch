@@ -52,7 +52,7 @@ export async function getPromptForUser(
   const promptData = await getVerifiedUserPromptData(userID, promptID)
 
   const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
-  const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
+  const runs = await getOrderedEntities(Entity.RUN, 'parentID', promptID)
   const comments = await getOrderedEntities(Entity.COMMENT, 'parentID', promptID)
 
   const inputValues = await getTrustedParentInputValues(promptID)
@@ -184,7 +184,7 @@ export async function deletePromptForUser(userID: number, promptID: number) {
   }
 
   const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
-  const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
+  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', promptID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', promptID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', promptID)
   await getDatastore().delete([
