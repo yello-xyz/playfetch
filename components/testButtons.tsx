@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
@@ -92,23 +93,28 @@ export default function TestButtons({
   hideDropdown?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
-  const selectInputs = (config: TestConfig | { mode: TestConfig['mode'] }) =>
-    SelectInputRows(inputValues, variables, {
-      mode: config.mode,
-      rowIndices: 'rowIndices' in config ? config.rowIndices : [],
-    })
+  const selectInputs = useCallback(
+    (config: TestConfig | { mode: TestConfig['mode'] }) =>
+      SelectInputRows(inputValues, variables, {
+        mode: config.mode,
+        rowIndices: 'rowIndices' in config ? config.rowIndices : [],
+      }),
+    [inputValues, variables]
+  )
 
   const [, rowIndices] = selectInputs(testConfig)
-  const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode }))
-  if (
-    testConfig.rowIndices.length !== rowIndices.length ||
-    testConfig.rowIndices.some(index => !validRowIndices.includes(index))
-  ) {
-    setTimeout(() => setTestConfig({ mode: testConfig.mode, rowIndices }))
-  } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-    const [, rowIndices] = selectInputs({ mode: 'first' })
-    setTimeout(() => setTestConfig({ mode: 'first', rowIndices }))
-  }
+  useEffect(() => {
+    const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode }))
+    if (
+      testConfig.rowIndices.length !== rowIndices.length ||
+      testConfig.rowIndices.some(index => !validRowIndices.includes(index))
+    ) {
+      setTestConfig({ mode: testConfig.mode, rowIndices })
+    } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
+      const [, rowIndices] = selectInputs({ mode: 'first' })
+      setTestConfig({ mode: 'first', rowIndices })
+    }
+  }, [testConfig, setTestConfig, rowIndices, selectInputs])
 
   const updateTestMode = (mode: TestConfig['mode']) => {
     const [, rowIndices] = selectInputs({ mode })
