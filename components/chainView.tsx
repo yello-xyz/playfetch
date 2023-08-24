@@ -13,7 +13,7 @@ import { toActivePrompt } from '@/pages/[projectID]'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
-import { ChainItemToConfig, ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
 
 export type PromptCache = {
@@ -117,9 +117,10 @@ export default function ChainView({
     setActiveNodeIndex(index)
   }
 
-  const itemsWithInputs = items
-    .map(item => (IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item))
-    .map(item => ({ ...item, inputs: ExtractChainItemVariables(item, promptCache) })) as ChainItemWithInputs[]
+  const itemsWithInputs: ChainItemWithInputs[] = items.map(item => ({
+    ...item,
+    inputs: ExtractChainItemVariables(item, promptCache),
+  }))
   const itemsKey = JSON.stringify(itemsWithInputs)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
   if (chainIsLoaded && itemsKey !== savedItemsKey) {

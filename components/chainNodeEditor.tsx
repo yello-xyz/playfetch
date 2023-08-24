@@ -3,9 +3,11 @@ import {
   ChainItem,
   ChainItemWithInputs,
   CodeChainItem,
+  CodeConfig,
   PartialRun,
   PromptInputs,
   PromptVersion,
+  RunConfig,
   TestConfig,
 } from '@/types'
 import { useState } from 'react'
@@ -22,7 +24,7 @@ import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { ChainItemToConfig, ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
@@ -51,6 +53,18 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) =>
   const allInputVariables = ExtractChainVariables(chain, cache)
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }
+
+const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
+  IsPromptChainItem(item)
+    ? {
+        versionID: item.versionID,
+        output: item.output,
+        includeContext: item.includeContext,
+      }
+    : {
+        code: item.code,
+        output: item.output,
+      }
 
 export default function ChainNodeEditor({
   chain,
