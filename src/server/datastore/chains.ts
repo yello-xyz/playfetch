@@ -10,7 +10,7 @@ import {
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveChain, Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
+import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
@@ -47,6 +47,9 @@ export const toChain = (data: any): Chain => ({
   id: getID(data),
   name: data.name,
   items: JSON.parse(data.items),
+  referencedItemIDs: JSON.parse(data.items).flatMap((item: ChainItemWithInputs) =>
+    'promptID' in item ? [item.promptID, item.versionID] : []
+  ),
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })

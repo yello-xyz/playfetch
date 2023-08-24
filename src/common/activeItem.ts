@@ -1,10 +1,8 @@
-import { IsPromptChainItem } from '@/components/chainNode'
 import {
   ActiveChain,
   ActiveProject,
   ActivePrompt,
   Chain,
-  ChainItem,
   InputValues,
   Prompt,
   RawChainVersion,
@@ -22,10 +20,10 @@ export const BuildActivePrompt =
     versions: RawPromptVersion[]
     inputValues: InputValues
   }): ActivePrompt => {
-    const versionIDsUsedInChains = {} as { [versionID: number]: string }
+    const chainReferencedItemIDs = {} as { [id: number]: string }
     project.chains.forEach(chain =>
-      (chain.items as ChainItem[]).filter(IsPromptChainItem).forEach(item => {
-        versionIDsUsedInChains[item.versionID] = chain.name
+      chain.referencedItemIDs.forEach(id => {
+        chainReferencedItemIDs[id] = chain.name
       })
     )
 
@@ -37,7 +35,7 @@ export const BuildActivePrompt =
       ...prompt,
       versions: versions.map(version => ({
         ...version,
-        usedInChain: versionIDsUsedInChains[version.id] ?? null,
+        usedInChain: chainReferencedItemIDs[version.id] ?? null,
         usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
       })),
       inputValues,

@@ -56,6 +56,7 @@ export type Chain = {
   id: number
   name: string
   items: ChainItemWithInputs[]
+  referencedItemIDs: number[]
   projectID: number
   timestamp: string
 }

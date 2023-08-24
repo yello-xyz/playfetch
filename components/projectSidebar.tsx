@@ -37,9 +37,7 @@ export default function ProjectSidebar({
 }) {
   const reference = (item: Prompt | Chain) =>
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
-    activeProject.chains.find(chain =>
-      chain.items.some(chainItem => 'promptID' in chainItem && chainItem.promptID === item.id)
-    )
+    activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
 
   const actionButtonForProjectItem = (item: Prompt | Chain) => (
     <ProjectItemActionButton
