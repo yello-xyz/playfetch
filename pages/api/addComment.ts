@@ -6,11 +6,11 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function addComment(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
-  const promptID = await getTrustedVersion(versionID).then(version => version.promptID)
+  const parentID = await getTrustedVersion(versionID).then(version => version.parentID)
 
   await saveComment(
     user.id,
-    promptID,
+    parentID,
     versionID,
     req.body.text,
     undefined,

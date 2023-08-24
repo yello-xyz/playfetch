@@ -104,7 +104,7 @@ export default function ChainView({
     }
   }
 
-  if (activeVersion?.promptID !== activePrompt?.id) {
+  if (activeVersion?.parentID !== activePrompt?.id) {
     selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
   } else if (activeVersion && activePrompt && !activePrompt.versions.some(version => version.id === activeVersion.id)) {
     selectVersion(activePrompt.versions.slice(-1)[0])

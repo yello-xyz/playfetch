@@ -90,7 +90,7 @@ export type AvailableProvider = {
 
 export type Version = {
   id: number
-  promptID: number
+  parentID: number
   userID: number
   previousID?: number
   timestamp: string

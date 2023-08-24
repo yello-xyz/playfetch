@@ -32,7 +32,7 @@ indexes:
 
 - kind: version
   properties:
-  - name: promptID
+  - name: parentID
   - name: createdAt
     direction: desc
 

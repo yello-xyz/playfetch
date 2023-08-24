@@ -119,7 +119,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
           const createdAt = new Date()
           sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
           return version && output && !failed
-            ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost, duration, [])
+            ? saveRun(user.id, version.parentID, version.id, inputs, output, createdAt, cost, duration, [])
             : Promise.resolve({})
         },
         (index, message) => sendData({ index: offset(index), message })
