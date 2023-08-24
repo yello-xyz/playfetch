@@ -120,7 +120,7 @@ export async function duplicatePromptForUser(
   return newPromptID
 }
 
-export async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
+async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(
       promptData.projectID,
@@ -148,6 +148,11 @@ export async function augmentPromptDataWithNewVersion(
       : promptData.name
 
   await updatePrompt({ ...promptData, lastVersionID: newVersionID, name: newPromptName }, true)
+}
+
+export async function updatePromptOnDeletedVersion(promptID: number, newLastVersionID: number) {
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  await updatePrompt({ ...promptData, lastVersionID: newLastVersionID }, true)
 }
 
 export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {

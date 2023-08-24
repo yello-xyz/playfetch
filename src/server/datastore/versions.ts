@@ -12,7 +12,12 @@ import {
   getTimestamp,
 } from './datastore'
 import { toRun } from './runs'
-import { augmentPromptDataWithNewVersion, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
+import {
+  augmentPromptDataWithNewVersion,
+  ensurePromptAccess,
+  getVerifiedUserPromptData,
+  updatePromptOnDeletedVersion,
+} from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
@@ -277,8 +282,7 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const lastVersionData = await getEntity(Entity.VERSION, 'parentID', parentID, true)
 
   if (wasPromptVersion) {
-    const promptData = await getKeyedEntity(Entity.PROMPT, parentID)
-    await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData) }, true)
+    await updatePromptOnDeletedVersion(parentID, getID(lastVersionData))
   } else {
     // TODO update last version ID and references in chain data
   }
