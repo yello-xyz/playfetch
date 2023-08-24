@@ -119,13 +119,15 @@ export default function ChainView({
 
   const itemsWithInputs: ChainItemWithInputs[] = items.map(item => ({
     ...item,
+    activePrompt: undefined,
+    version: undefined,
     inputs: ExtractChainItemVariables(item, promptCache),
   }))
   const itemsKey = JSON.stringify(itemsWithInputs)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
   if (chainIsLoaded && itemsKey !== savedItemsKey) {
     setSavedItemsKey(itemsKey)
-    api.updateChain(chain.id, itemsWithInputs).then(onRefresh)
+    api.updateChain(chain.id, itemsWithInputs, lastVersion.id).then(onRefresh)
   }
 
   const minWidth = 320

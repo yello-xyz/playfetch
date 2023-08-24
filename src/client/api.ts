@@ -120,7 +120,7 @@ const api = {
   duplicatePrompt: function (promptID: number, targetProjectID?: number): Promise<number> {
     return post(this.duplicatePrompt, { promptID, targetProjectID })
   },
-  updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID?: number): Promise<number> {
+  updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID: number): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, config, versionID })
   },
   renamePrompt: function (promptID: number, name: string) {
@@ -144,8 +144,8 @@ const api = {
   duplicateChain: function (chainID: number): Promise<number> {
     return post(this.duplicateChain, { chainID })
   },
-  updateChain: function (chainID: number, items: ChainItemWithInputs[]): Promise<number> {
-    return post(this.updateChain, { chainID, items })
+  updateChain: function (chainID: number, items: ChainItemWithInputs[], versionID: number): Promise<number> {
+    return post(this.updateChain, { chainID, items, versionID })
   },
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })

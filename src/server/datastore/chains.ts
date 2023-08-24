@@ -207,11 +207,6 @@ export const ensureChainAccess = (userID: number, chainID: number) => getVerifie
 export const ensurePromptOrChainAccess = (userID: number, parentID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
 
-export async function updateChainItems(userID: number, chainID: number, items: ChainItemWithInputs[]) {
-  const chainData = await getVerifiedUserChainData(userID, chainID)
-  await updateChain({ ...chainData, items: JSON.stringify(items) }, true)
-}
-
 export async function updateChainName(userID: number, chainID: number, name: string) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   await updateChain({ ...chainData, name }, true)

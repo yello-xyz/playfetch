@@ -11,7 +11,7 @@ async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>, u
     req.body.config,
     req.body.versionID
   )
-  res.json(versionID!)
+  res.json(versionID)
 }
 
 export default withLoggedInUserRoute(updatePrompt)
