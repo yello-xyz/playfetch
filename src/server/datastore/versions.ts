@@ -18,11 +18,23 @@ import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
 import { VersionsEqual } from '@/src/common/versionsEqual'
 
-export async function migrateVersions() {
+export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    await updateVersion({ ...versionData })
+    await datastore.save(
+      toVersionData(
+        versionData.userID,
+        versionData.parentID ?? versionData.promptID,
+        versionData.prompt,
+        JSON.parse(versionData.config),
+        JSON.parse(versionData.labels),
+        versionData.createdAt,
+        versionData.previousVersionID,
+        getID(versionData),
+        postMerge && versionData.parentID ? undefined : versionData.promptID
+      )
+    )
   }
 }
 
@@ -90,13 +102,14 @@ async function updateVersion(versionData: any) {
   await getDatastore().save(
     toVersionData(
       versionData.userID,
-      versionData.promptID,
+      versionData.parentID,
       versionData.prompt,
       JSON.parse(versionData.config),
       JSON.parse(versionData.labels),
       versionData.createdAt,
       versionData.previousVersionID,
-      getID(versionData)
+      getID(versionData),
+      versionData.promptID
     )
   )
 }
@@ -139,23 +152,25 @@ export async function updateVersionLabel(
 
 const toVersionData = (
   userID: number,
-  promptID: number,
+  parentID: number,
   prompt: string,
   config: PromptConfig,
   labels: string[],
   createdAt: Date,
   previousVersionID?: number,
-  versionID?: number
+  versionID?: number,
+  promptID?: number // TODO safe to delete this after running next post-merge data migrations in prod
 ) => ({
   key: buildKey(Entity.VERSION, versionID),
   data: {
     userID,
-    promptID,
+    parentID,
     prompt,
     config: JSON.stringify(config),
     labels: JSON.stringify(labels),
     createdAt,
     previousVersionID,
+    promptID,
   },
   excludeFromIndexes: ['prompt', 'config', 'labels'],
 })
