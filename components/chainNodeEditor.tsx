@@ -172,17 +172,19 @@ export default function ChainNodeEditor({
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
-        {activeNode === InputNode && showTestData && (
+        {activeNode === InputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <SingleTabHeader label='Test data' />
-            <TestDataPane
-              variables={variables}
-              inputValues={inputValues}
-              setInputValues={setInputValues}
-              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-              testConfig={testConfig}
-              setTestConfig={setTestConfig}
-            />
+            {showTestData && <SingleTabHeader label='Test data' />}
+            {showTestData && (
+              <TestDataPane
+                variables={variables}
+                inputValues={inputValues}
+                setInputValues={setInputValues}
+                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+                testConfig={testConfig}
+                setTestConfig={setTestConfig}
+              />
+            )}
           </div>
         )}
         {IsPromptChainItem(activeNode) && (

@@ -127,6 +127,7 @@ export default function ChainView({
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
   if (chainIsLoaded && itemsKey !== savedItemsKey) {
     setSavedItemsKey(itemsKey)
+    // TODO load new version
     api.updateChain(chain.id, itemsWithInputs, lastVersion.id).then(onRefresh)
   }
 
