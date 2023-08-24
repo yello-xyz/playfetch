@@ -16,8 +16,10 @@ import {
   RawPromptVersion,
   RawChainVersion,
   Chain,
+  ActivePrompt,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
+import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
 
@@ -109,10 +111,8 @@ const api = {
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },
-  getPrompt: function (
-    promptID: number
-  ): Promise<{ prompt: Prompt; versions: RawPromptVersion[]; inputValues: InputValues }> {
-    return post(this.getPrompt, { promptID })
+  getPrompt: function (promptID: number, activeProject: ActiveProject): Promise<ActivePrompt> {
+    return post(this.getPrompt, { promptID }).then(BuildActivePrompt(activeProject))
   },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
@@ -135,10 +135,8 @@ const api = {
   runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
-  getChain: function (
-    chainID: number
-  ): Promise<{ chain: Chain; versions: RawChainVersion[]; inputValues: InputValues }> {
-    return post(this.getChain, { chainID })
+  getChain: function (chainID: number, activeProject: ActiveProject): Promise<ActiveChain> {
+    return post(this.getChain, { chainID }).then(BuildActiveChain(activeProject))
   },
   addChain: function (projectID: number): Promise<number> {
     return post(this.addChain, { projectID })

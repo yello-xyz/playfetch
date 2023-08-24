@@ -9,7 +9,6 @@ import {
 } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
-import { toActivePrompt } from '@/pages/[projectID]'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
@@ -41,8 +40,7 @@ export default function ChainView({
 
   const refreshPrompt = useCallback(
     async (promptID: number) =>
-      api.getPrompt(promptID).then(({ prompt, versions, inputValues }) => {
-        const activePrompt = toActivePrompt(prompt, versions, inputValues, project)
+      api.getPrompt(promptID, project).then(activePrompt => {
         setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
         setNodes(
           nodes.map(node =>

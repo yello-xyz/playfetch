@@ -8,15 +8,9 @@ import {
   ActiveProject,
   AvailableProvider,
   Workspace,
-  ChainItem,
   LogEntry,
-  InputValues,
-  Prompt,
   ActiveChain,
   PromptVersion,
-  RawPromptVersion,
-  RawChainVersion,
-  Chain,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -41,66 +35,14 @@ import ProjectTopBar from '@/components/projectTopBar'
 import useSavePrompt from '@/components/useSavePrompt'
 
 import dynamic from 'next/dynamic'
-import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
 import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
+import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
-
-export const toActivePrompt = (
-  prompt: Prompt,
-  versions: RawPromptVersion[],
-  inputValues: InputValues,
-  project: ActiveProject
-): ActivePrompt => {
-  const versionIDsUsedInChains = {} as { [versionID: number]: string }
-  project.chains.forEach(chain =>
-    (chain.items as ChainItem[]).filter(IsPromptChainItem).forEach(item => {
-      versionIDsUsedInChains[item.versionID] = chain.name
-    })
-  )
-
-  const versionIDsUsedAsEndpoints = project.endpoints
-    .map(endpoint => endpoint.versionID)
-    .filter(versionID => !!versionID)
-
-  return {
-    ...prompt,
-    versions: versions.map(version => ({
-      ...version,
-      usedInChain: versionIDsUsedInChains[version.id] ?? null,
-      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
-    })),
-    inputValues,
-    users: project.users,
-    availableLabels: project.availableLabels,
-  }
-}
-
-export const toActiveChain = (
-  chain: Chain,
-  versions: RawChainVersion[],
-  inputValues: InputValues,
-  project: ActiveProject
-): ActiveChain => {
-  const versionIDsUsedAsEndpoints = project.endpoints
-    .map(endpoint => endpoint.versionID)
-    .filter(versionID => !!versionID)
-
-  return {
-    ...chain,
-    versions: versions.map(version => ({
-      ...version,
-      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
-    })),
-    inputValues,
-    users: project.users,
-    availableLabels: project.availableLabels,
-  }
-}
 
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
@@ -113,15 +55,11 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const activeProject = await getActiveProject(user.id, projectID!, buildURL)
 
-  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> => {
-    const { prompt, versions, inputValues } = await getPromptForUser(user.id, promptID)
-    return toActivePrompt(prompt, versions, inputValues, activeProject)
-  }
+  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> =>
+    getPromptForUser(user.id, promptID).then(BuildActivePrompt(activeProject))
 
-  const getActiveChain = async (chainID: number): Promise<ActiveChain> => {
-    const { chain, versions, inputValues } = await getChainForUser(user.id, chainID)
-    return toActiveChain(chain, versions, inputValues, activeProject)
-  }
+  const getActiveChain = async (chainID: number): Promise<ActiveChain> =>
+    await getChainForUser(user.id, chainID).then(BuildActiveChain(activeProject))
 
   const initialActiveItem: ActiveItem | null =
     endpoints === 1
@@ -195,8 +133,7 @@ export default function Home({
   }
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
-    const { prompt, versions, inputValues } = await api.getPrompt(promptID)
-    const newPrompt = toActivePrompt(prompt, versions, inputValues, activeProject)
+    const newPrompt = await api.getPrompt(promptID, activeProject)
     setActiveItem(newPrompt)
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }
@@ -214,8 +151,7 @@ export default function Home({
   }
 
   const refreshChain = async (chainID: number) => {
-    const { chain, versions, inputValues } = await api.getChain(chainID)
-    const newChain = toActiveChain(chain, versions, inputValues, activeProject)
+    const newChain = await api.getChain(chainID, activeProject)
     setActiveItem(newChain)
     updateVersion(undefined)
   }
