@@ -1,7 +1,7 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, User, RunConfig, CodeConfig, Version } from '@/types'
+import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
@@ -31,7 +31,7 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 
 type CallbackType = (
   index: number,
-  version: Version | null,
+  version: RawPromptVersion | null,
   response: {
     result?: any
     output?: string
@@ -62,7 +62,7 @@ export const runChainConfigs = async (
   for (const [index, config] of configs.entries()) {
     const stream = (chunk: string) => streamChunk?.(index, chunk)
     if (isRunConfig(config)) {
-      const version = await getTrustedVersion(config.versionID)
+      const version = (await getTrustedVersion(config.versionID)) as RawPromptVersion
       let prompt = resolvePrompt(version.prompt, inputs, useCamelCase)
       runningContext += prompt
       if (config.includeContext) {

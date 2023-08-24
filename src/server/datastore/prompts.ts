@@ -11,7 +11,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { saveVersionForUser, toVersion } from './versions'
-import { InputValues, Prompt, Version } from '@/types'
+import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripPromptSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
@@ -48,7 +48,7 @@ export const toPrompt = (data: any): Prompt => ({
 export async function getPromptForUser(
   userID: number,
   promptID: number
-): Promise<{ prompt: Prompt; versions: Version[]; inputValues: InputValues }> {
+): Promise<{ prompt: Prompt; versions: RawPromptVersion[]; inputValues: InputValues }> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
 
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
@@ -59,7 +59,7 @@ export async function getPromptForUser(
 
   return {
     prompt: toPrompt(promptData),
-    versions: versions.map(version => toVersion(version, runs, comments)).reverse(),
+    versions: versions.map(version => toVersion(version, runs, comments) as RawPromptVersion).reverse(),
     inputValues,
   }
 }

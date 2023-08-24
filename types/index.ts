@@ -43,8 +43,6 @@ export type Prompt = {
   timestamp: string
 }
 
-export type PromptVersion = Version & { usedInChain: string | null; usedAsEndpoint: boolean }
-
 export type ActivePrompt = Prompt & {
   versions: PromptVersion[]
   inputValues: InputValues
@@ -94,12 +92,16 @@ export type Version = {
   userID: number
   previousID?: number
   timestamp: string
-  prompt: string
-  config: PromptConfig
+  prompt?: string
+  config?: PromptConfig
   labels: string[]
   runs: Run[]
   comments: Comment[]
 }
+
+export type RawPromptVersion = Version & { prompt: string; config: PromptConfig }
+
+export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
 
 export type PromptInputs = { [name: string]: string }
 

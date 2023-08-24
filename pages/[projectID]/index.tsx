@@ -13,8 +13,8 @@ import {
   InputValues,
   Prompt,
   ActiveChain,
-  Version,
   PromptVersion,
+  RawPromptVersion,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -50,7 +50,7 @@ const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 export const toActivePrompt = (
   prompt: Prompt,
-  versions: Version[],
+  versions: RawPromptVersion[],
   inputValues: InputValues,
   project: ActiveProject
 ): ActivePrompt => {

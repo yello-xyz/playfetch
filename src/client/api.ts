@@ -8,12 +8,12 @@ import {
   CodeConfig,
   ActiveWorkspace,
   Workspace,
-  Version,
   ChainItemWithInputs,
   LogEntry,
   InputValues,
   Prompt,
   ActiveChain,
+  RawPromptVersion,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -107,7 +107,9 @@ const api = {
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },
-  getPrompt: function (promptID: number): Promise<{ prompt: Prompt; versions: Version[]; inputValues: InputValues }> {
+  getPrompt: function (
+    promptID: number
+  ): Promise<{ prompt: Prompt; versions: RawPromptVersion[]; inputValues: InputValues }> {
     return post(this.getPrompt, { promptID })
   },
   addPrompt: function (projectID: number): Promise<number> {
