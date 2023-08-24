@@ -3,7 +3,10 @@ import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
 
-export const SelectInputRows = (
+export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
+  SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0]
+
+const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
   config: TestConfig
