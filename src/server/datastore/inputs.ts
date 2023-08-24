@@ -93,12 +93,7 @@ const toInputData = (parentID: number, name: string, values: string[], inputID?:
   excludeFromIndexes: ['values'],
 })
 
-export async function saveInputValues(
-  userID: number,
-  parentID: number,
-  name: string,
-  values: string[]
-) {
+export async function saveInputValues(userID: number, parentID: number, name: string, values: string[]) {
   ensurePromptOrChainAccess(userID, parentID)
   await runTransactionWithExponentialBackoff(async transaction => {
     const query = transaction
