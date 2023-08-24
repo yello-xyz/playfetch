@@ -100,11 +100,12 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
 }
 
 export const getVerifiedUserChainData = async (userID: number, chainID: number) =>
-  getVerifiedProjectScopedData(userID, Entity.CHAIN, chainID)
+  getVerifiedProjectScopedData(userID, [Entity.CHAIN], chainID)
 
-export async function ensureChainAccess(userID: number, chainID: number) {
-  await getVerifiedUserChainData(userID, chainID)
-}
+export const ensureChainAccess = (userID: number, chainID: number) => getVerifiedUserChainData(userID, chainID)
+
+export const ensurePromptOrChainAccess = (userID: number, parentID: number) =>
+  getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
 
 export async function updateChainItems(userID: number, chainID: number, items: ChainItemWithInputs[]) {
   const chainData = await getVerifiedUserChainData(userID, chainID)

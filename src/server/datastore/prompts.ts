@@ -150,8 +150,14 @@ export async function augmentPromptDataWithNewVersion(
   await updatePrompt({ ...promptData, lastVersionID: newVersionID, name: newPromptName }, true)
 }
 
-export const getVerifiedProjectScopedData = async (userID: number, entity: Entity, id: number) => {
-  const data = await getKeyedEntity(entity, id)
+export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {
+  let data
+  for (const entity of entities) {
+    data = await getKeyedEntity(entity, id)
+    if (data) {
+      break
+    }
+  }
   if (!data) {
     throw new Error(`Entity with ID ${id} does not exist or user has no access`)
   }
@@ -160,11 +166,9 @@ export const getVerifiedProjectScopedData = async (userID: number, entity: Entit
 }
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) =>
-  getVerifiedProjectScopedData(userID, Entity.PROMPT, promptID)
+  getVerifiedProjectScopedData(userID, [Entity.PROMPT], promptID)
 
-export async function ensurePromptAccess(userID: number, promptID: number) {
-  await getVerifiedUserPromptData(userID, promptID)
-}
+export const ensurePromptAccess = (userID: number, promptID: number) => getVerifiedUserPromptData(userID, promptID)
 
 export async function updatePromptName(userID: number, promptID: number, name: string) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
