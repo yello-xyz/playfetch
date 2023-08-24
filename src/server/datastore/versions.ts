@@ -22,7 +22,7 @@ import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
 import { ChainVersionsEqual, PromptVersionsEqual } from '@/src/common/versionsEqual'
-import { ensureChainAccess, getVerifiedUserChainData } from './chains'
+import { augmentChainDataWithNewVersion, ensureChainAccess, getVerifiedUserChainData, updateChainOnDeletedVersion } from './chains'
 
 export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
@@ -148,8 +148,8 @@ async function saveVersionForUser(
     const lastPrompt = currentVersion ? currentVersion.prompt : ''
     await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompt, lastPrompt)
     await augmentProjectWithNewVersion(parentData.projectID, prompt, lastPrompt)
-  } else {
-    // TODO update last version ID and references in chain data
+  } else if (items) {
+    await augmentChainDataWithNewVersion(parentData, savedVersionID, items)
   }
 
   return savedVersionID
@@ -284,6 +284,6 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   if (wasPromptVersion) {
     await updatePromptOnDeletedVersion(parentID, getID(lastVersionData))
   } else {
-    // TODO update last version ID and references in chain data
+    await updateChainOnDeletedVersion(parentID, versionID, getID(lastVersionData))
   }
 }

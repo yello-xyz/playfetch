@@ -98,11 +98,13 @@ export async function migrateChains(postMerge: boolean) {
   }
 }
 
+type References = { [versionID: number]: number[] }
+
 const toChainData = (
   projectID: number,
   name: string,
   lastVersionID: number,
-  references: { [versionID: number]: number[] },
+  references: References,
   createdAt: Date,
   lastEditedAt: Date,
   chainID?: number,
@@ -126,9 +128,7 @@ export const toChain = (data: any): Chain => ({
   name: data.name,
   // lastVersionID: data.lastVersionID,
   items: JSON.parse(data.items),
-  referencedItemIDs: JSON.parse(data.items).flatMap((item: ChainItemWithInputs) =>
-    'promptID' in item ? [item.promptID, item.versionID] : []
-  ),
+  referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
@@ -216,6 +216,27 @@ export async function updateChainItems(userID: number, chainID: number, items: C
 export async function updateChainName(userID: number, chainID: number, name: string) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   await updateChain({ ...chainData, name }, true)
+}
+
+export async function augmentChainDataWithNewVersion(
+  chainData: any,
+  newVersionID: number,
+  newItems: ChainItemWithInputs[]
+) {
+  const references = chainData.references ? JSON.parse(chainData.references) : {}
+  references[newVersionID] = newItems.flatMap(item => ('promptID' in item ? [item.promptID, item.versionID] : []))
+  await updateChain({ ...chainData, lastVersionID: newVersionID, references: JSON.stringify(references) }, true)
+}
+
+export async function updateChainOnDeletedVersion(
+  chainID: number,
+  deletedVersionID: number,
+  newLastVersionID: number
+) {
+  const chainData = await getKeyedEntity(Entity.PROMPT, chainID)
+  const references = chainData.references ? JSON.parse(chainData.references) : {}
+  references[deletedVersionID] = undefined
+  await updateChain({ ...chainData, lastVersionID: newLastVersionID, references: JSON.stringify(references) }, true)
 }
 
 export async function deleteChainForUser(userID: number, chainID: number) {
