@@ -159,7 +159,7 @@ export async function updateEndpointForUser(
       endpointData.createdAt,
       useCache,
       useStreaming,
-      getID(endpointData)
+      endpointID
     )
   )
 }

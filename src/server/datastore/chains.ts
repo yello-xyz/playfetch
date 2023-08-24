@@ -14,39 +14,117 @@ import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/type
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
-import { toVersion } from './versions'
+import { saveChainVersionForUser, toVersion, toVersionData } from './versions'
+import { updateEndpointForUser } from './endpoints'
+import { toLogData } from './logs'
 
-export async function migrateChains() {
+export async function migrateChains(postMerge: boolean) {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    await updateChain({ ...chainData }, false)
-    // Don't forget to update existing chain endpoints and log entries with versionID when adding chain versions
+    let lastVersionID = chainData.lastVersionID
+    const references = chainData.references ? JSON.parse(chainData.references) : {}
+    if (!postMerge && chainData.items && !lastVersionID) {
+      const items = JSON.parse(chainData.items) as ChainItemWithInputs[]
+      const project = await getKeyedEntity(Entity.PROJECT, chainData.projectID)
+      const workspace = await getKeyedEntity(Entity.WORKSPACE, project.workspaceID)
+      const userID = workspace.userID
+      const versionData = toVersionData(
+        userID,
+        getID(chainData),
+        null,
+        null,
+        items,
+        [],
+        chainData.lastEditedAt,
+        undefined,
+        undefined,
+        undefined
+      )
+      await datastore.save(versionData)
+      lastVersionID = getID(versionData)
+      references[lastVersionID] = items.flatMap(item => ('promptID' in item ? [item.promptID, item.versionID] : []))
+
+      const endpoints = await getEntities(Entity.ENDPOINT, 'parentID', getID(chainData))
+      for (const endpoint of endpoints) {
+        await updateEndpointForUser(
+          endpoint.userID,
+          getID(endpoint),
+          endpoint.enabled,
+          endpoint.parentID,
+          lastVersionID,
+          endpoint.urlPath,
+          endpoint.flavor,
+          endpoint.useCache,
+          endpoint.useStreaming
+        )
+      }
+
+      const logs = await getEntities(Entity.LOG, 'parentID', getID(chainData))
+      for (const log of logs) {
+        datastore.save(
+          toLogData(
+            log.projectID,
+            log.endpointID,
+            log.urlPath,
+            log.flavor,
+            log.parentID,
+            lastVersionID,
+            JSON.parse(log.inputs),
+            JSON.parse(log.output),
+            log.error,
+            log.createdAt,
+            log.cost,
+            log.duration,
+            log.cacheHit,
+            log.attempts,
+            getID(log)
+          )
+        )
+      }
+    }
+    await datastore.save(
+      toChainData(
+        chainData.projectID,
+        chainData.name,
+        lastVersionID,
+        chainData.references ? JSON.parse(chainData.references) : references,
+        chainData.createdAt,
+        chainData.lastEditedAt,
+        getID(chainData),
+        postMerge && chainData.references ? undefined : chainData.items ? JSON.parse(chainData.items) : undefined
+      )
+    )
   }
 }
 
 const toChainData = (
   projectID: number,
   name: string,
-  items: ChainItemWithInputs[],
+  lastVersionID: number,
+  references: { [versionID: number]: number[] },
   createdAt: Date,
   lastEditedAt: Date,
-  chainID?: number
+  chainID?: number,
+  items?: ChainItemWithInputs[]
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
   data: {
     projectID,
     name,
-    items: JSON.stringify(items),
+    lastVersionID,
+    references: JSON.stringify(references),
     createdAt,
     lastEditedAt,
+    items: items ? JSON.stringify(items) : undefined,
   },
-  excludeFromIndexes: ['name', 'items'],
+  excludeFromIndexes: ['name', 'items', 'references'],
 })
 
 export const toChain = (data: any): Chain => ({
   id: getID(data),
   name: data.name,
+  // lastVersionID: data.lastVersionID,
   items: JSON.parse(data.items),
   referencedItemIDs: JSON.parse(data.items).flatMap((item: ChainItemWithInputs) =>
     'promptID' in item ? [item.promptID, item.versionID] : []
@@ -81,7 +159,7 @@ export async function getChainItems(chainID: number): Promise<ChainItemWithInput
 
 const DefaultChainName = 'New Chain'
 
-export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName): Promise<number> {
+export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName) {
   await ensureProjectAccess(userID, projectID)
   const chainNames = await getEntities(Entity.CHAIN, 'projectID', projectID)
   const uniqueName = await getUniqueName(
@@ -89,16 +167,18 @@ export async function addChainForUser(userID: number, projectID: number, name = 
     chainNames.map(chain => chain.name)
   )
   const createdAt = new Date()
-  const chainData = toChainData(projectID, uniqueName, [], createdAt, createdAt)
+  const chainData = toChainData(projectID, uniqueName, 0, {}, createdAt, createdAt)
   await getDatastore().save(chainData)
+  const versionID = await saveChainVersionForUser(userID, getID(chainData))
   await updateProjectLastEditedAt(projectID)
-  return getID(chainData)
+  return { chainID: getID(chainData), versionID }
 }
 
 export async function duplicateChainForUser(userID: number, chainID: number): Promise<number> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
-  const newChainID = await addChainForUser(userID, chainData.projectID, chainData.name)
-  await updateChainItems(userID, newChainID, JSON.parse(chainData.items))
+  const { chainID: newChainID, versionID } = await addChainForUser(userID, chainData.projectID, chainData.name)
+  const lastVersion = await getKeyedEntity(Entity.VERSION, chainData.lastVersionID)
+  await saveChainVersionForUser(userID, newChainID, JSON.parse(lastVersion.items), versionID)
   return newChainID
 }
 
@@ -107,10 +187,12 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
     toChainData(
       chainData.projectID,
       chainData.name,
-      JSON.parse(chainData.items),
+      chainData.lastVersionID,
+      JSON.parse(chainData.references),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
-      getID(chainData)
+      getID(chainData),
+      chainData.items ? JSON.parse(chainData.items) : undefined
     )
   )
   if (updateLastEditedTimestamp) {

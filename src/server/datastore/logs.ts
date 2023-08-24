@@ -73,7 +73,7 @@ export async function saveLogEntry(
   )
 }
 
-const toLogData = (
+export const toLogData = (
   projectID: number,
   endpointID: number,
   urlPath: string,

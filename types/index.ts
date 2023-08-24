@@ -55,6 +55,7 @@ export type ChainItemWithInputs = ChainItem & { inputs: string[] }
 export type Chain = {
   id: number
   name: string
+  // lastVersionID: number
   items: ChainItemWithInputs[]
   referencedItemIDs: number[]
   projectID: number

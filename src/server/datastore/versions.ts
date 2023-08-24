@@ -144,7 +144,7 @@ async function saveVersionForUser(
     await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompt, lastPrompt)
     await augmentProjectWithNewVersion(parentData.projectID, prompt, lastPrompt)
   } else {
-    // TODO update last version ID in chain data
+    // TODO update last version ID and references in chain data
   }
 
   return savedVersionID
@@ -202,7 +202,7 @@ export async function updateVersionLabel(
   }
 }
 
-const toVersionData = (
+export const toVersionData = (
   userID: number,
   parentID: number,
   prompt: string | null,
@@ -280,6 +280,6 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     const promptData = await getKeyedEntity(Entity.PROMPT, parentID)
     await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData) }, true)
   } else {
-    // TODO update last version ID in chain data
+    // TODO update last version ID and references in chain data
   }
 }
