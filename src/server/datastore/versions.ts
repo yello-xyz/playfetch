@@ -12,12 +12,12 @@ import {
   getTimestamp,
 } from './datastore'
 import { toRun } from './runs'
-import { augmentPromptDataWithNewVersion, getVerifiedUserPromptData, updatePrompt } from './prompts'
+import { augmentPromptDataWithNewVersion, ensurePromptAccess, getVerifiedUserPromptData, updatePrompt } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
-import { PromptVersionsEqual } from '@/src/common/versionsEqual'
-import { ensurePromptOrChainAccess } from './chains'
+import { ChainVersionsEqual, PromptVersionsEqual } from '@/src/common/versionsEqual'
+import { ensureChainAccess, getVerifiedUserChainData } from './chains'
 
 export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
@@ -40,15 +40,30 @@ export async function migrateVersions(postMerge: boolean) {
   }
 }
 
-const isVersionDataCompatible = (versionData: any, prompt: string, config: PromptConfig) =>
-  PromptVersionsEqual({ prompt: versionData.prompt, config: JSON.parse(versionData.config) }, { prompt, config })
+const IsPromptVersion = (version: { items: ChainItemWithInputs[] | null }) => !version.items
+
+const isVersionDataCompatible = (
+  versionData: any,
+  prompt: string | null,
+  config: PromptConfig | null,
+  items: ChainItemWithInputs[] | null
+) =>
+  IsPromptVersion({ items })
+    ? prompt &&
+      config &&
+      PromptVersionsEqual({ prompt: versionData.prompt, config: JSON.parse(versionData.config) }, { prompt, config })
+    : items && ChainVersionsEqual({ items: JSON.parse(versionData.items) }, { items })
 
 const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
   if (!versionData) {
     throw new Error(`Version with ID ${versionID} does not exist or user has no access`)
   }
-  await ensurePromptOrChainAccess(userID, versionData.parentID)
+  if (IsPromptVersion(versionData)) {
+    await ensurePromptAccess(userID, versionData.parentID)
+  } else {
+    await ensureChainAccess(userID, versionData.parentID)
+  }
   return versionData
 }
 
@@ -57,28 +72,48 @@ export async function getTrustedVersion(versionID: number) {
   return toVersion(versionData, [], [])
 }
 
-export async function saveVersionForUser(
+export async function savePromptVersionForUser(
   userID: number,
-  parentID: number,
+  promptID: number,
   prompt: string = '',
   config: PromptConfig = DefaultConfig,
-  items: ChainItemWithInputs[] | null = null,
+  currentVersionID?: number
+) {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
+  return saveVersionForUser(userID, promptData, prompt, config, null, currentVersionID)
+}
+
+export async function saveChainVersionForUser(
+  userID: number,
+  chainID: number,
+  items: ChainItemWithInputs[] = [],
+  currentVersionID?: number
+) {
+  const chainData = await getVerifiedUserChainData(userID, chainID)
+  return saveVersionForUser(userID, chainData, null, null, items, currentVersionID)
+}
+
+async function saveVersionForUser(
+  userID: number,
+  parentData: any,
+  prompt: string | null,
+  config: PromptConfig | null,
+  items: ChainItemWithInputs[] | null,
   currentVersionID?: number
 ) {
   const datastore = getDatastore()
-  const promptData = await getVerifiedUserPromptData(userID, parentID)
 
   let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
   const canOverwrite =
     currentVersionID &&
-    (isVersionDataCompatible(currentVersion, prompt, config) ||
+    (isVersionDataCompatible(currentVersion, prompt, config, items) ||
       !(await getEntity(Entity.RUN, 'versionID', currentVersionID)))
 
-  if (canOverwrite && !isVersionDataCompatible(currentVersion, prompt, config)) {
+  if (canOverwrite && !isVersionDataCompatible(currentVersion, prompt, config, items)) {
     const previousVersion = currentVersion.previousVersionID
       ? await getKeyedEntity(Entity.VERSION, currentVersion.previousVersionID)
       : undefined
-    if (previousVersion && isVersionDataCompatible(previousVersion, prompt, config)) {
+    if (previousVersion && isVersionDataCompatible(previousVersion, prompt, config, items)) {
       await datastore.delete(buildKey(Entity.VERSION, currentVersionID))
       currentVersionID = currentVersion.previousVersionID
       currentVersion = previousVersion
@@ -92,7 +127,7 @@ export async function saveVersionForUser(
   const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
   const versionData = toVersionData(
     userID,
-    parentID,
+    getID(parentData),
     prompt,
     config,
     items,
@@ -104,9 +139,13 @@ export async function saveVersionForUser(
   await datastore.save(versionData)
   const savedVersionID = getID(versionData)
 
-  const lastPrompt = currentVersion ? currentVersion.prompt : ''
-  await augmentPromptDataWithNewVersion(promptData, savedVersionID, prompt, lastPrompt)
-  await augmentProjectWithNewVersion(promptData.projectID, prompt, lastPrompt)
+  if (IsPromptVersion({ items }) && prompt) {
+    const lastPrompt = currentVersion ? currentVersion.prompt : ''
+    await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompt, lastPrompt)
+    await augmentProjectWithNewVersion(parentData.projectID, prompt, lastPrompt)
+  } else {
+    // TODO update last version ID in chain data
+  }
 
   return savedVersionID
 }
@@ -221,16 +260,26 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const parentID = versionData.parentID
   const versionCount = await getEntityCount(Entity.VERSION, 'parentID', parentID)
   const wasLastVersion = versionCount === 1
+  const wasPromptVersion = IsPromptVersion(versionData)
 
   const runKeys = await getEntityKeys(Entity.RUN, 'versionID', versionID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'versionID', versionID)
   await getDatastore().delete([...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
 
   if (wasLastVersion) {
-    await saveVersionForUser(userID, parentID)
+    if (wasPromptVersion) {
+      await savePromptVersionForUser(userID, parentID)
+    } else {
+      await saveChainVersionForUser(userID, parentID)
+    }
   }
 
   const lastVersionData = await getEntity(Entity.VERSION, 'parentID', parentID, true)
-  const promptData = await getKeyedEntity(Entity.PROMPT, parentID)
-  await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData) }, true)
+
+  if (wasPromptVersion) {
+    const promptData = await getKeyedEntity(Entity.PROMPT, parentID)
+    await updatePrompt({ ...promptData, lastVersionID: getID(lastVersionData) }, true)
+  } else {
+    // TODO update last version ID in chain data
+  }
 }
