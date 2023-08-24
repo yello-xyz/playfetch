@@ -14,6 +14,7 @@ import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
+import useSaveChain from './useSaveChain'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -33,8 +34,10 @@ export default function ChainView({
   onRefresh: () => void
 }) {
   // TODO add version UI so we can view or edit earlier versions as well.
-  const lastVersion = chain.versions.slice(-1)[0]
-  const [nodes, setNodes] = useState([InputNode, ...lastVersion.items, OutputNode] as ChainNode[])
+  const [chainVersion, setChainVersion] = useState(chain.versions.slice(-1)[0])
+  const saveChain = useSaveChain(chain, chainVersion, setChainVersion)
+  // TODO update when active chain version changes
+  const [nodes, setNodes] = useState([InputNode, ...chainVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
   const items = nodes.filter(IsChainItem)
 
@@ -77,8 +80,6 @@ export default function ChainView({
     refreshPrompt,
   }
 
-  const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
-
   useEffect(() => {
     const promptItems = items.filter(IsPromptChainItem)
     const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
@@ -117,18 +118,15 @@ export default function ChainView({
     setActiveNodeIndex(index)
   }
 
-  const itemsWithInputs: ChainItemWithInputs[] = items.map(item => ({
-    ...item,
-    activePrompt: undefined,
-    version: undefined,
-    inputs: ExtractChainItemVariables(item, promptCache),
-  }))
-  const itemsKey = JSON.stringify(itemsWithInputs)
-  const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
-  if (chainIsLoaded && itemsKey !== savedItemsKey) {
-    setSavedItemsKey(itemsKey)
-    // TODO load new version
-    api.updateChain(chain.id, itemsWithInputs, lastVersion.id).then(onRefresh)
+  const updateItems = (items: ChainItem[]) => {
+    setNodes([InputNode, ...items, OutputNode])
+    const itemsWithInputs: ChainItemWithInputs[] = items.map(item => ({
+      ...item,
+      activePrompt: undefined,
+      version: undefined,
+      inputs: ExtractChainItemVariables(item, promptCache),
+    }))
+    return saveChain(itemsWithInputs, onRefresh)
   }
 
   const minWidth = 320
@@ -147,7 +145,7 @@ export default function ChainView({
         <ChainNodeEditor
           chain={chain}
           items={items}
-          setItems={items => setNodes([InputNode, ...items, OutputNode])}
+          setItems={updateItems}
           activeItemIndex={activeNodeIndex - 1}
           activeNode={activeNode}
           promptCache={promptCache}
