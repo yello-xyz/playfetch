@@ -15,7 +15,7 @@ import {
 import { getUniqueNameWithFormat, getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
-import { getVerifiedUserChainData } from './chains'
+import { getVerifiedUserChainData, getVerifiedUserPromptOrChainData } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -47,9 +47,7 @@ async function ensureEndpointAccess(
     versionID: number
   }
 ) {
-  const data = endpointData.versionID
-    ? await getVerifiedUserPromptData(userID, endpointData.parentID)
-    : await getVerifiedUserChainData(userID, endpointData.parentID)
+  const data = await getVerifiedUserPromptOrChainData(userID, endpointData.parentID)
   if (data.projectID !== endpointData.projectID) {
     throw new Error(
       `Item with ID ${endpointData.parentID} does not belong to project with ID ${endpointData.projectID}`
@@ -207,7 +205,7 @@ export const toEndpoint = (data: any): Endpoint => ({
   userID: data.userID,
   projectID: data.projectID,
   parentID: data.parentID,
-  versionID: data.versionID ?? null,
+  versionID: data.versionID,
   timestamp: getTimestamp(data),
   urlPath: data.urlPath,
   flavor: data.flavor,

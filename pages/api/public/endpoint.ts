@@ -8,8 +8,8 @@ import { runChainConfigs } from '../runChain'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 
-const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig | CodeConfig)[]> => 
-  getTrustedVersion(endpoint.versionID).then(version  => version.items ?? [{ versionID: endpoint.versionID }])
+const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig | CodeConfig)[]> =>
+  getTrustedVersion(endpoint.versionID).then(version => version.items ?? [{ versionID: endpoint.versionID }])
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)

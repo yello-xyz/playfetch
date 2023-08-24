@@ -115,7 +115,7 @@ const toLogEntry = (data: any): LogEntry => ({
   urlPath: data.urlPath,
   flavor: data.flavor,
   parentID: data.parentID,
-  versionID: data.versionID ?? null,
+  versionID: data.versionID,
   inputs: JSON.parse(data.inputs),
   output: JSON.parse(data.output),
   error: data.error ?? null,

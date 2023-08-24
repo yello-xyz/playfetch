@@ -22,7 +22,12 @@ import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
 import { ChainVersionsEqual, PromptVersionsEqual } from '@/src/common/versionsEqual'
-import { augmentChainDataWithNewVersion, ensureChainAccess, getVerifiedUserChainData, updateChainOnDeletedVersion } from './chains'
+import {
+  augmentChainDataWithNewVersion,
+  ensureChainAccess,
+  getVerifiedUserChainData,
+  updateChainOnDeletedVersion,
+} from './chains'
 
 export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
