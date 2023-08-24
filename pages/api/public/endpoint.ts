@@ -3,8 +3,8 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
-import { CodeConfig, Endpoint, PromptInputs, RunConfig } from '@/types'
-import { loadConfigsFromVersionID, runChainConfigs } from '../runChain'
+import { PromptInputs } from '@/types'
+import { loadConfigsFromVersion, runChainConfigs } from '../runChain'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 
@@ -63,10 +63,12 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         }
 
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
-        const configs = await loadConfigsFromVersionID(endpoint.versionID)
+        const version = await getTrustedVersion(endpoint.versionID)
+        const configs = loadConfigsFromVersion(version)
         const isLastRun = (index: number) => index === configs.length - 1
         const output = await runChainConfigs(
           endpoint.userID,
+          version,
           configs,
           inputs,
           endpoint.useCache,

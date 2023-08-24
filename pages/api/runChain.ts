@@ -1,7 +1,7 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion } from '@/types'
+import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
@@ -46,6 +46,7 @@ type CallbackType = (
 
 export const runChainConfigs = async (
   userID: number,
+  version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   useCache: boolean,
@@ -62,19 +63,23 @@ export const runChainConfigs = async (
   for (const [index, config] of configs.entries()) {
     const stream = (chunk: string) => streamChunk?.(index, chunk)
     if (isRunConfig(config)) {
-      const version = (await getTrustedVersion(config.versionID)) as RawPromptVersion
-      let prompt = resolvePrompt(version.prompt, inputs, useCamelCase)
+      const promptVersion = (
+        config.versionID === version.id ? version : await getTrustedVersion(config.versionID)
+      ) as RawPromptVersion
+      let prompt = resolvePrompt(promptVersion.prompt, inputs, useCamelCase)
       runningContext += prompt
       if (config.includeContext) {
         prompt = runningContext
       }
-      const runResponse = await runWithTimer(runPromptWithConfig(userID, prompt, version.config, useCache, stream))
+      const runResponse = await runWithTimer(
+        runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream)
+      )
       const output = runResponse.output
       result = runResponse.result
       if (runResponse.failed) {
         stream(runResponse.error)
       }
-      await callback(index, version, runResponse)
+      await callback(index, promptVersion, runResponse)
       if (runResponse.failed) {
         break
       } else {
@@ -99,15 +104,15 @@ export const runChainConfigs = async (
   return result
 }
 
-// TODO maybe optimise this by not loading the same version twice in case of a prompt version.
-export const loadConfigsFromVersionID = async (versionID: number): Promise<(RunConfig | CodeConfig)[]> =>
-  getTrustedVersion(versionID).then(version => version.items ?? [{ versionID }])
+export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
+  version.items ?? [{ versionID: version.id }]
 
 async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
 
-  const configs = await loadConfigsFromVersionID(versionID)
+  const version = await getTrustedVersion(versionID)
+  const configs = loadConfigsFromVersion(version)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
@@ -117,6 +122,7 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
       const offset = (index: number) => inputIndex * configs.length + index
       return runChainConfigs(
         user.id,
+        version,
         configs,
         inputs,
         false,
