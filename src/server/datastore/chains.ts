@@ -108,7 +108,7 @@ const toChainData = (
   createdAt: Date,
   lastEditedAt: Date,
   chainID?: number,
-  items?: ChainItemWithInputs[]
+  items?: ChainItemWithInputs[] // TODO safe to delete this after running next post-merge data migrations in prod
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
   data: {
@@ -120,14 +120,13 @@ const toChainData = (
     lastEditedAt,
     items: items ? JSON.stringify(items) : undefined,
   },
-  excludeFromIndexes: ['name', 'items', 'references'],
+  excludeFromIndexes: ['name', 'items', 'references'], // TODO also delete items here
 })
 
 export const toChain = (data: any): Chain => ({
   id: getID(data),
   name: data.name,
   // lastVersionID: data.lastVersionID,
-  items: JSON.parse(data.items),
   referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),

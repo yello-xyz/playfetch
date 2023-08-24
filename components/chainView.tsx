@@ -32,7 +32,9 @@ export default function ChainView({
   project: ActiveProject
   onRefresh: () => void
 }) {
-  const [nodes, setNodes] = useState([InputNode, ...chain.items, OutputNode] as ChainNode[])
+  // TODO add version UI so we can view or edit earlier versions as well.
+  const lastVersion = chain.versions.slice(-1)[0]
+  const [nodes, setNodes] = useState([InputNode, ...lastVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
   const items = nodes.filter(IsChainItem)
 

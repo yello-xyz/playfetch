@@ -108,7 +108,7 @@ export default function Home({
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
   const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && 'lastVersionID' in item
-  const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'items' in item
+  const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
 
