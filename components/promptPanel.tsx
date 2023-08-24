@@ -10,7 +10,7 @@ import {
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector, { ProviderForModel } from './modelSelector'
-import { ConfigsEqual } from '@/src/common/versionsEqual'
+import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from './useInitialState'
 import TestButtons from './testButtons'
@@ -44,7 +44,7 @@ export default function PromptPanel({
   const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
   const [config, setConfig] = useInitialState(
     initialConfig !== undefined ? initialConfig : version.config,
-    ConfigsEqual
+    PromptConfigsEqual
   )
 
   const update = (prompt: string, config: PromptConfig) => {

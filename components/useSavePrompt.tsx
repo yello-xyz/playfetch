@@ -1,7 +1,7 @@
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
-import { VersionsEqual } from '@/src/common/versionsEqual'
+import { PromptVersionsEqual } from '@/src/common/versionsEqual'
 
 export default function useSavePrompt(
   activePrompt: ActivePrompt | undefined,
@@ -12,12 +12,12 @@ export default function useSavePrompt(
 
   const savePrompt = async (onSaved?: ((versionID: number) => Promise<void>) | (() => void)) => {
     const versionNeedsSaving =
-      activePrompt && activeVersion && modifiedVersion && !VersionsEqual(activeVersion, modifiedVersion)
+      activePrompt && activeVersion && modifiedVersion && !PromptVersionsEqual(activeVersion, modifiedVersion)
     setModifiedVersion(undefined)
     if (!versionNeedsSaving) {
       return activeVersion?.id
     }
-    const equalPreviousVersion = activePrompt.versions.find(version => VersionsEqual(version, modifiedVersion))
+    const equalPreviousVersion = activePrompt.versions.find(version => PromptVersionsEqual(version, modifiedVersion))
     if (equalPreviousVersion) {
       setActiveVersion(equalPreviousVersion)
       return equalPreviousVersion.id

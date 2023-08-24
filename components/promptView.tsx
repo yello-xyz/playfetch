@@ -11,7 +11,7 @@ import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector from './tabSelector'
 import useInitialState from './useInitialState'
-import { ConfigsEqual } from '@/src/common/versionsEqual'
+import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 
@@ -74,7 +74,7 @@ export default function PromptView({
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-  const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, ConfigsEqual)
+  const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, PromptConfigsEqual)
 
   const updateVersion = (version: PromptVersion) => {
     setCurrentPrompt(version.prompt)

@@ -16,7 +16,7 @@ import { augmentPromptDataWithNewVersion, getVerifiedUserPromptData, updatePromp
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
-import { VersionsEqual } from '@/src/common/versionsEqual'
+import { PromptVersionsEqual } from '@/src/common/versionsEqual'
 import { ensurePromptOrChainAccess } from './chains'
 
 export async function migrateVersions(postMerge: boolean) {
@@ -41,7 +41,7 @@ export async function migrateVersions(postMerge: boolean) {
 }
 
 const isVersionDataCompatible = (versionData: any, prompt: string, config: PromptConfig) =>
-  VersionsEqual({ prompt: versionData.prompt, config: JSON.parse(versionData.config) }, { prompt, config })
+  PromptVersionsEqual({ prompt: versionData.prompt, config: JSON.parse(versionData.config) }, { prompt, config })
 
 const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)

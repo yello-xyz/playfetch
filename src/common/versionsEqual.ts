@@ -1,9 +1,12 @@
-import { PromptConfig } from '@/types'
+import { ChainItemWithInputs, PromptConfig } from '@/types'
 
-export const ConfigsEqual = (a: PromptConfig, b: PromptConfig) =>
+export const PromptConfigsEqual = (a: PromptConfig, b: PromptConfig) =>
   a.provider === b.provider && a.model === b.model && a.temperature === b.temperature && a.maxTokens === b.maxTokens
 
-export const VersionsEqual = (
+export const PromptVersionsEqual = (
   a: { prompt: string; config: PromptConfig },
   b: { prompt: string; config: PromptConfig }
-) => a.prompt === b.prompt && ConfigsEqual(a.config, b.config)
+) => a.prompt === b.prompt && PromptConfigsEqual(a.config, b.config)
+
+export const ChainVersionsEqual = (a: { items: ChainItemWithInputs[] }, b: { items: ChainItemWithInputs[] }) =>
+  JSON.stringify(a.items) === JSON.stringify(b.items)
