@@ -2,6 +2,7 @@ import {
   ActiveChain,
   ChainItem,
   ChainItemWithInputs,
+  ChainVersion,
   CodeChainItem,
   CodeConfig,
   PartialRun,
@@ -68,6 +69,7 @@ const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
 
 export default function ChainNodeEditor({
   chain,
+  chainVersion,
   items,
   setItems,
   activeItemIndex,
@@ -79,6 +81,7 @@ export default function ChainNodeEditor({
   setModifiedVersion,
 }: {
   chain: ActiveChain
+  chainVersion: ChainVersion
   items: ChainItem[]
   setItems: (items: ChainItem[]) => Promise<number>
   activeItemIndex: number
@@ -134,6 +137,7 @@ export default function ChainNodeEditor({
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (currentItems.length > 0) {
+      let chainVersionID = chainVersion.id
       let newItems = currentItems
       let versionForItem = promptCache.versionForItem
       if (IsPromptChainItem(activeNode)) {
@@ -144,8 +148,8 @@ export default function ChainNodeEditor({
           item.promptID === activePrompt.id
             ? activePrompt.versions.find(version => version.id === item.versionID)
             : promptCache.versionForItem(item)
+        chainVersionID = await setItems(newItems)
       }
-      const chainVersionID = await setItems(newItems)
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
@@ -215,7 +219,7 @@ export default function ChainNodeEditor({
         )}
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <RunTimeline runs={partialRuns} isRunning={isRunning} />
+            <RunTimeline runs={[...chainVersion.runs, ...partialRuns]} isRunning={isRunning} />
           </div>
         )}
         <div className='flex items-center justify-between w-full gap-4 px-4'>

@@ -11,8 +11,7 @@ export default function useSaveChain(
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => {
-    const versionNeedsSaving =
-      activeChain && activeVersion && !ChainVersionsEqual(activeVersion, { items })
+    const versionNeedsSaving = activeChain && activeVersion && !ChainVersionsEqual(activeVersion, { items })
     if (!versionNeedsSaving) {
       return activeVersion?.id
     }

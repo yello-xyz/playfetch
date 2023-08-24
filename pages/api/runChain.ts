@@ -114,6 +114,18 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   const version = await getTrustedVersion(versionID)
   const configs = loadConfigsFromVersion(version)
 
+  let totalCost = 0
+  let totalDuration = 0
+  const updateChainVersion = version.items
+    ? (index: number, inputs: PromptInputs, output: string, cost: number, duration: number) => {
+        totalCost += cost
+        totalDuration += duration
+        if (index === configs.length - 1) {
+          saveRun(user.id, version.parentID, version.id, inputs, output, new Date(), totalCost, totalDuration, [])
+        }
+      }
+    : undefined
+
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
@@ -127,9 +139,13 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
         inputs,
         false,
         false,
+        // TODO the appropriate inputs for the specific run should be passed in here as well.
         (index, version, { output, cost, duration, failed }) => {
           const createdAt = new Date()
           sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
+          if (updateChainVersion && output && !failed) {
+            updateChainVersion(index, inputs, output, cost, duration)
+          }
           return version && output && !failed
             ? saveRun(user.id, version.parentID, version.id, inputs, output, createdAt, cost, duration, [])
             : Promise.resolve({})

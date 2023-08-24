@@ -145,6 +145,7 @@ export default function ChainView({
       <Allotment.Pane minSize={minWidth}>
         <ChainNodeEditor
           chain={chain}
+          chainVersion={chainVersion}
           items={items}
           setItems={updateItems}
           activeItemIndex={activeNodeIndex - 1}
