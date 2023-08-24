@@ -86,7 +86,7 @@ export type AvailableProvider = {
   truncatedAPIKey?: string
 }
 
-export type Version = {
+type Version = {
   id: number
   parentID: number
   userID: number
@@ -94,12 +94,14 @@ export type Version = {
   timestamp: string
   prompt?: string
   config?: PromptConfig
+  items?: ChainItemWithInputs[]
   labels: string[]
   runs: Run[]
   comments: Comment[]
 }
 
 export type RawPromptVersion = Version & { prompt: string; config: PromptConfig }
+export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
 
 export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
 

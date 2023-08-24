@@ -1,4 +1,4 @@
-import { PromptConfig, Version } from '@/types'
+import { ChainItemWithInputs, PromptConfig, RawChainVersion, RawPromptVersion } from '@/types'
 import {
   Entity,
   buildKey,
@@ -29,6 +29,7 @@ export async function migrateVersions(postMerge: boolean) {
         versionData.parentID ?? versionData.promptID,
         versionData.prompt,
         versionData.config ? JSON.parse(versionData.config) : null,
+        versionData.items ? JSON.parse(versionData.items) : null,
         JSON.parse(versionData.labels),
         versionData.createdAt,
         versionData.previousVersionID,
@@ -61,6 +62,7 @@ export async function saveVersionForUser(
   parentID: number,
   prompt: string = '',
   config: PromptConfig = DefaultConfig,
+  items: ChainItemWithInputs[] | null = null,
   currentVersionID?: number
 ) {
   const datastore = getDatastore()
@@ -88,7 +90,17 @@ export async function saveVersionForUser(
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
 
   const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
-  const versionData = toVersionData(userID, parentID, prompt, config, labels, createdAt, previousVersionID, versionID)
+  const versionData = toVersionData(
+    userID,
+    parentID,
+    prompt,
+    config,
+    items,
+    labels,
+    createdAt,
+    previousVersionID,
+    versionID
+  )
   await datastore.save(versionData)
   const savedVersionID = getID(versionData)
 
@@ -106,6 +118,7 @@ async function updateVersion(versionData: any) {
       versionData.parentID,
       versionData.prompt,
       versionData.config ? JSON.parse(versionData.config) : null,
+      versionData.items ? JSON.parse(versionData.items) : null,
       JSON.parse(versionData.labels),
       versionData.createdAt,
       versionData.previousVersionID,
@@ -155,6 +168,7 @@ const toVersionData = (
   parentID: number,
   prompt: string | null,
   config: PromptConfig | null,
+  items: ChainItemWithInputs[] | null,
   labels: string[],
   createdAt: Date,
   previousVersionID?: number,
@@ -167,15 +181,16 @@ const toVersionData = (
     parentID,
     prompt,
     config: config ? JSON.stringify(config) : null,
+    items: items ? JSON.stringify(items) : null,
     labels: JSON.stringify(labels),
     createdAt,
     previousVersionID,
     promptID,
   },
-  excludeFromIndexes: ['prompt', 'config', 'labels'],
+  excludeFromIndexes: ['prompt', 'config', 'items', 'labels'],
 })
 
-export const toVersion = (data: any, runs: any[], comments: any[]): Version => ({
+export const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
   id: getID(data),
   parentID: data.parentID,
   userID: data.userID,
@@ -183,6 +198,7 @@ export const toVersion = (data: any, runs: any[], comments: any[]): Version => (
   timestamp: getTimestamp(data),
   prompt: data.prompt ?? null,
   config: data.config ? JSON.parse(data.config) : null,
+  items: data.items ? JSON.parse(data.items) : null,
   labels: JSON.parse(data.labels),
   runs: runs
     .filter(run => run.versionID === getID(data))
