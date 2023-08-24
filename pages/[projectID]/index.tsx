@@ -15,6 +15,8 @@ import {
   ActiveChain,
   PromptVersion,
   RawPromptVersion,
+  RawChainVersion,
+  Chain,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -78,6 +80,28 @@ export const toActivePrompt = (
   }
 }
 
+export const toActiveChain = (
+  chain: Chain,
+  versions: RawChainVersion[],
+  inputValues: InputValues,
+  project: ActiveProject
+): ActiveChain => {
+  const versionIDsUsedAsEndpoints = project.endpoints
+    .map(endpoint => endpoint.versionID)
+    .filter(versionID => !!versionID)
+
+  return {
+    ...chain,
+    versions: versions.map(version => ({
+      ...version,
+      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
+    })),
+    inputValues,
+    users: project.users,
+    availableLabels: project.availableLabels,
+  }
+}
+
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
 
@@ -94,13 +118,18 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
     return toActivePrompt(prompt, versions, inputValues, activeProject)
   }
 
+  const getActiveChain = async (chainID: number): Promise<ActiveChain> => {
+    const { chain, versions, inputValues } = await getChainForUser(user.id, chainID)
+    return toActiveChain(chain, versions, inputValues, activeProject)
+  }
+
   const initialActiveItem: ActiveItem | null =
     endpoints === 1
       ? Endpoints
       : promptID
       ? await getActivePrompt(promptID)
       : chainID
-      ? await getChainForUser(user.id, chainID)
+      ? await getActiveChain(chainID)
       : activeProject.prompts.length > 0
       ? await getActivePrompt(activeProject.prompts[0].id)
       : null
@@ -185,7 +214,8 @@ export default function Home({
   }
 
   const refreshChain = async (chainID: number) => {
-    const newChain = await api.getChain(chainID)
+    const { chain, versions, inputValues } = await api.getChain(chainID)
+    const newChain = toActiveChain(chain, versions, inputValues, activeProject)
     setActiveItem(newChain)
     updateVersion(undefined)
   }

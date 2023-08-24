@@ -7,12 +7,14 @@ import {
   getEntityKeys,
   getID,
   getKeyedEntity,
+  getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveChain, Chain, ChainItemWithInputs } from '@/types'
+import { ActiveChain, Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
+import { toVersion } from './versions'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -49,10 +51,23 @@ export const toChain = (data: any): Chain => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getChainForUser(userID: number, chainID: number): Promise<ActiveChain> {
+export async function getChainForUser(
+  userID: number,
+  chainID: number
+): Promise<{ chain: Chain; versions: RawChainVersion[]; inputValues: InputValues }> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
+
+  const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
+  const runs = await getOrderedEntities(Entity.RUN, 'parentID', chainID)
+  const comments = await getOrderedEntities(Entity.COMMENT, 'parentID', chainID)
+
   const inputValues = await getTrustedParentInputValues(chainID)
-  return { ...toChain(chainData), inputValues }
+
+  return {
+    chain: toChain(chainData),
+    versions: versions.map(version => toVersion(version, runs, comments) as RawChainVersion).reverse(),
+    inputValues,
+  }
 }
 
 export async function getChainItems(chainID: number): Promise<ChainItemWithInputs[]> {

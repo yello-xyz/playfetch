@@ -61,7 +61,10 @@ export type Chain = {
 }
 
 export type ActiveChain = Chain & {
+  versions: ChainVersion[]
   inputValues: InputValues
+  users: User[]
+  availableLabels: string[]
 }
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
@@ -104,6 +107,7 @@ export type RawPromptVersion = Version & { prompt: string; config: PromptConfig 
 export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
 
 export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
+export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
 
 export type PromptInputs = { [name: string]: string }
 

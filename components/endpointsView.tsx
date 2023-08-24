@@ -16,7 +16,7 @@ import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import { toActivePrompt } from '@/pages/[projectID]'
+import { toActiveChain, toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
 import TabSelector, { SingleTabHeader } from './tabSelector'
@@ -131,7 +131,8 @@ export default function EndpointsView({
         setActiveParent(activePrompt)
       })
     } else if (parent) {
-      api.getChain(parent.id).then(activeChain => {
+      api.getChain(parent.id).then(({ chain, versions, inputValues }) => {
+        const activeChain = toActiveChain(chain, versions, inputValues, project)
         setParentCache({ ...parentCache, [parent.id]: activeChain })
         setActiveParent(activeChain)
       })

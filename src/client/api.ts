@@ -14,6 +14,8 @@ import {
   Prompt,
   ActiveChain,
   RawPromptVersion,
+  RawChainVersion,
+  Chain,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
 
@@ -133,7 +135,9 @@ const api = {
   runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
     return post(this.runChain, { configs, inputs }, 'stream')
   },
-  getChain: function (chainID: number): Promise<ActiveChain> {
+  getChain: function (
+    chainID: number
+  ): Promise<{ chain: Chain; versions: RawChainVersion[]; inputValues: InputValues }> {
     return post(this.getChain, { chainID })
   },
   addChain: function (projectID: number): Promise<number> {
