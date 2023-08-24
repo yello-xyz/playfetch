@@ -2,7 +2,7 @@ import { ActivePrompt, PartialRun, PromptInputs, Run } from '@/types'
 import { ReactNode, useState } from 'react'
 import Icon from './icon'
 import chevronIcon from '@/public/chevron.svg'
-import LabelPopupMenu, { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import LabelPopupMenu, { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { ItemLabels } from './versionCell'
 
 export default function RunCellHeader({
@@ -19,7 +19,7 @@ export default function RunCellHeader({
   return prompt && isProperRun(run) ? (
     <div className='flex items-start justify-between gap-2 text-sm'>
       <div className='flex flex-col flex-1 gap-1'>
-        <ItemLabels labels={run.labels} colors={AvailableLabelColorsForPrompt(prompt)} />
+        <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(prompt)} />
         <RunInputs inputs={run.inputs} />
       </div>
       <LabelPopupMenu containerRect={containerRect} prompt={prompt} item={run} />

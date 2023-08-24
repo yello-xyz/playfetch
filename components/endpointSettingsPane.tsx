@@ -16,7 +16,7 @@ import VersionSelector from './versionSelector'
 import useInitialState from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import Button, { PendingButton } from './button'
 
 export type EndpointSettings = {
@@ -198,7 +198,7 @@ export default function EndpointSettingsPane({
               endpoints={project.endpoints}
               activeVersion={versions[versionIndex]}
               setActiveVersion={version => setVersionID(version.id)}
-              labelColors={prompt ? AvailableLabelColorsForPrompt(prompt) : {}}
+              labelColors={prompt ? AvailableLabelColorsForItem(prompt) : {}}
               hideReferences
               disabled={disabled}
             />

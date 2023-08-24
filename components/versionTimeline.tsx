@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
 import useScrollDetection from './useScrollDetection'
@@ -19,7 +19,7 @@ export default function VersionTimeline({
 }) {
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
-  const labelColors = AvailableLabelColorsForPrompt(prompt)
+  const labelColors = AvailableLabelColorsForItem(prompt)
 
   const [containerRect, containerRef] = useContainerRect()
   const scrollRef = useRef<HTMLDivElement>(null)

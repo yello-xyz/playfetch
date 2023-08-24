@@ -1,4 +1,4 @@
-import { ActivePrompt, Run, PromptVersion } from '@/types'
+import { ActivePrompt, Run, PromptVersion, ActiveChain } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
@@ -18,7 +18,7 @@ const projectLabelColors = [
   'bg-yellow-300 text-white',
 ]
 
-export const AvailableLabelColorsForPrompt = (prompt: ActivePrompt) =>
+export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain) =>
   Object.fromEntries(
     prompt.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
@@ -47,7 +47,7 @@ export default function LabelPopupMenu({
   const trimmedLabel = newLabel.trim()
 
   const labels = prompt.availableLabels
-  const colors = AvailableLabelColorsForPrompt(prompt)
+  const colors = AvailableLabelColorsForItem(prompt)
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 

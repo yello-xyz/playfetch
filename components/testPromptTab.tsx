@@ -16,7 +16,7 @@ import VersionSelector from './versionSelector'
 import TestButtons from './testButtons'
 import PromptPanel from './promptPanel'
 import { Allotment } from 'allotment'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
 export default function TestPromptTab({
   currentPrompt,
@@ -92,7 +92,7 @@ export default function TestPromptTab({
                 endpoints={activeProject.endpoints}
                 activeVersion={activeVersion}
                 setActiveVersion={selectVersion}
-                labelColors={AvailableLabelColorsForPrompt(activePrompt)}
+                labelColors={AvailableLabelColorsForItem(activePrompt)}
               />
               {testConfig.rowIndices.length > 1 && (
                 <div className='flex-grow px-3 py-2 border rounded border-pink-50 bg-pink-25'>

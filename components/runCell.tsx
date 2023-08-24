@@ -1,7 +1,7 @@
 import { ActivePrompt, Comment, PartialRun, PromptVersion } from '@/types'
 import { MouseEvent, useEffect, useState } from 'react'
 import { CommentsPopup } from './commentPopupMenu'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellCommentInputPopup from './runCellCommentInputPopup'
@@ -135,7 +135,7 @@ export default function RunCell({
           runID={run.id}
           startIndex={popupComments[0].startIndex}
           users={prompt.users}
-          labelColors={AvailableLabelColorsForPrompt(prompt)}
+          labelColors={AvailableLabelColorsForItem(prompt)}
           isMenuExpanded={!!popupComments}
           setMenuExpanded={() => setPopupComments(undefined)}
           callback={closeCommentsPopup}
