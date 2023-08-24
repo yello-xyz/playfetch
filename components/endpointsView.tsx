@@ -9,6 +9,8 @@ import {
   ResolvedEndpoint,
   LogEntry,
   ActiveChain,
+  PromptVersion,
+  ChainVersion,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -135,15 +137,16 @@ export default function EndpointsView({
       })
     }
   }, [parent, project, parentCache])
-  const activePrompt = EndpointParentIsPrompt(parent) ? (activeParent as ActivePrompt) : undefined
 
   const [versionIndex, setVersionIndex] = useState(-1)
-  const versions = activePrompt?.versions ?? []
-  const version = versions.find(version => version.id === activeEndpoint?.versionID)
+  const versions = activeParent?.versions ?? []
+  const activeVersion = (versions as (PromptVersion | ChainVersion)[]).find(
+    version => version.id === activeEndpoint?.versionID
+  )
   const variables = parent
     ? EndpointParentIsPrompt(parent)
-      ? ExtractPromptVariables(version?.prompt ?? '')
-      : ExtractUnboundChainInputs(parent.items)
+      ? ExtractPromptVariables(activeVersion?.prompt ?? '')
+      : ExtractUnboundChainInputs(activeVersion?.items ?? [])
     : []
 
   const minWidth = 460
@@ -173,7 +176,7 @@ export default function EndpointsView({
               <EndpointSettingsPane
                 endpoint={activeEndpoint}
                 project={project}
-                prompt={activePrompt}
+                activeParent={activeParent}
                 onSelectParentID={setActiveParentID}
                 onSelectVersionIndex={setVersionIndex}
                 isEditing={isEditing}

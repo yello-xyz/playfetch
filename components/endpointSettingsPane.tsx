@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  ActiveChain,
   ActiveProject,
   ActivePrompt,
   EndpointParentIsPrompt,
@@ -33,7 +34,7 @@ export type EndpointSettings = {
 export default function EndpointSettingsPane({
   endpoint,
   project,
-  prompt,
+  activeParent,
   onSelectParentID,
   onSelectVersionIndex,
   isEditing,
@@ -42,7 +43,7 @@ export default function EndpointSettingsPane({
 }: {
   endpoint: EndpointSettings
   project: ActiveProject
-  prompt?: ActivePrompt
+  activeParent?: ActivePrompt | ActiveChain
   onSelectParentID: (parentID?: number) => void
   onSelectVersionIndex: (versionIndex: number) => void
   isEditing: boolean
@@ -107,7 +108,7 @@ export default function EndpointSettingsPane({
   const parents = EndpointParentsInProject(project)
   const parent = FindParentInProject(parentID, project)
 
-  const versions = prompt?.versions ?? []
+  const versions = activeParent?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
   useEffect(() => onSelectVersionIndex(versionIndex), [onSelectVersionIndex, versionIndex])
@@ -198,7 +199,7 @@ export default function EndpointSettingsPane({
               endpoints={project.endpoints}
               activeVersion={versions[versionIndex]}
               setActiveVersion={version => setVersionID(version.id)}
-              labelColors={prompt ? AvailableLabelColorsForItem(prompt) : {}}
+              labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
               hideReferences
               disabled={disabled}
             />

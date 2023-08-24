@@ -18,7 +18,7 @@ export default function LogEntryDetailsPane({
 }: {
   logEntry: LogEntry
   parent?: Prompt | Chain
-  versions: (PromptVersion | ChainVersion)[]
+  versions: PromptVersion[] | ChainVersion[]
   onCollapse: () => void
 }) {
   const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
