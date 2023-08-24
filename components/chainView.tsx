@@ -126,6 +126,7 @@ export default function ChainView({
       version: undefined,
       inputs: ExtractChainItemVariables(item, promptCache),
     }))
+    // TODO refresh active chain (not just project) and focus on the newly saved version.
     return saveChain(itemsWithInputs, onRefresh)
   }
 

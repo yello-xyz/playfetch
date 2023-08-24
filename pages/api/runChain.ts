@@ -99,9 +99,15 @@ export const runChainConfigs = async (
   return result
 }
 
+// TODO maybe optimise this by not loading the same version twice in case of a prompt version.
+export const loadConfigsFromVersionID = async (versionID: number): Promise<(RunConfig | CodeConfig)[]> =>
+  getTrustedVersion(versionID).then(version => version.items ?? [{ versionID }])
+
 async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
-  const configs: (RunConfig | CodeConfig)[] = req.body.configs
+  const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
+
+  const configs = await loadConfigsFromVersionID(versionID)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)

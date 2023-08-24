@@ -80,7 +80,7 @@ export default function ChainNodeEditor({
 }: {
   chain: ActiveChain
   items: ChainItem[]
-  setItems: (items: ChainItem[]) => void
+  setItems: (items: ChainItem[]) => Promise<number>
   activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
@@ -144,14 +144,14 @@ export default function ChainNodeEditor({
           item.promptID === activePrompt.id
             ? activePrompt.versions.find(version => version.id === item.versionID)
             : promptCache.versionForItem(item)
-        setItems(newItems)
       }
+      const chainVersionID = await setItems(newItems)
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
         setPartialRuns([])
         onRun()
-        const streamReader = await api.runChain(newItems.map(ChainItemToConfig), inputs)
+        const streamReader = await api.runChain(chainVersionID, inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
         setRunning(false)
       }
