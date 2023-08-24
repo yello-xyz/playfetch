@@ -41,7 +41,7 @@ export default function WorkspaceSidebar({
 
   return (
     <>
-      <div className='flex flex-col gap-6 px-2 py-4 border-r border-gray-200 bg-gray-25'>
+      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 border-r border-gray-200 bg-gray-25'>
         <SidebarSection>
           <UserSidebarItem />
         </SidebarSection>

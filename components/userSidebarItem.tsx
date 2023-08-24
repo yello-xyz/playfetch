@@ -100,7 +100,7 @@ export default function UserSidebarItem() {
 
   return (
     <div
-      className='flex pl-3 py-1 gap-2.5 items-center relative cursor-pointer'
+      className='flex pl-3 pr-1.5 py-2 gap-2.5 items-center relative cursor-pointer rounded-lg hover:bg-gray-100 '
       onClick={() => setMenuExpanded(!isMenuExpanded)}>
       <UserAvatar user={user} />
       <span className='flex-1 font-semibold text-dark-gray-700'>{user.fullName}</span>
