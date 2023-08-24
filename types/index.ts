@@ -184,7 +184,6 @@ export type CommentAction = 'addLabel' | 'removeLabel'
 
 export type Comment = {
   userID: number
-  promptID: number
   versionID: number
   text: string
   timestamp: string
