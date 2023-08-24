@@ -13,7 +13,7 @@ export default function useInputValues(
   const persistInputValuesIfNeeded = () => {
     for (const [variable, inputs] of Object.entries(inputValues)) {
       if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(parent.id, 'versions' in parent ? 'prompt' : 'chain', variable, inputs)
+        api.updateInputValues(parent.id, variable, inputs)
       }
     }
     setOriginalInputValues(inputValues)

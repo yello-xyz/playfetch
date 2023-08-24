@@ -10,8 +10,7 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { InputValues } from '@/types'
-import { ensurePromptAccess } from './prompts'
-import { ensureChainAccess } from './chains'
+import { ensurePromptOrChainAccess } from './chains'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { ExtractUnboundChainInputs } from '@/components/chainNodeEditor'
 
@@ -97,18 +96,10 @@ const toInputData = (parentID: number, name: string, values: string[], inputID?:
 export async function saveInputValues(
   userID: number,
   parentID: number,
-  parentType: 'prompt' | 'chain',
   name: string,
   values: string[]
 ) {
-  switch (parentType) {
-    case 'prompt':
-      await ensurePromptAccess(userID, parentID)
-      break
-    case 'chain':
-      await ensureChainAccess(userID, parentID)
-      break
-  }
+  ensurePromptOrChainAccess(userID, parentID)
   await runTransactionWithExponentialBackoff(async transaction => {
     const query = transaction
       .createQuery(Entity.INPUT)
