@@ -28,7 +28,7 @@ export default function CommentsPane({
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   return showComments ? (
-    <div className='flex flex-col px-3 pb-3 border-l border-gray-200'>
+    <div className='flex flex-col h-full px-3 pb-3 border-l border-gray-200'>
       <div className='flex items-start justify-between py-5'>
         <span className='font-medium text-gray-800'>Comments</span>
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
