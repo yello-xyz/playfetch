@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { ActivePrompt, User, PromptVersion } from '@/types'
+import { ActivePrompt, User, PromptVersion, ChainVersion } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
@@ -95,12 +95,12 @@ export default function VersionCell({
   )
 }
 
-export function VersionLabels({
+export function VersionLabels<T extends PromptVersion | ChainVersion>({
   version,
   colors,
   hideReferences,
 }: {
-  version: PromptVersion
+  version: T
   colors: Record<string, string>
   hideReferences?: boolean
 }) {
@@ -110,7 +110,7 @@ export function VersionLabels({
   const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
   const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
   const extraLabels = [
-    ...(version.usedInChain ? [usedInChain] : []),
+    ...('usedInChain' in version && version.usedInChain ? [usedInChain] : []),
     ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
   ]
 

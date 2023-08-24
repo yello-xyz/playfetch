@@ -1,9 +1,9 @@
-import { PromptVersion, ResolvedEndpoint } from '@/types'
+import { ChainVersion, PromptVersion, ResolvedEndpoint } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import { useState } from 'react'
 import { VersionLabels } from './versionCell'
 
-export default function VersionSelector({
+export default function VersionSelector<T extends PromptVersion | ChainVersion>({
   versions,
   endpoints,
   activeVersion,
@@ -13,10 +13,10 @@ export default function VersionSelector({
   hideReferences,
   disabled,
 }: {
-  versions: PromptVersion[]
+  versions: T[]
   endpoints: ResolvedEndpoint[]
-  activeVersion?: PromptVersion
-  setActiveVersion: (version: PromptVersion) => void
+  activeVersion?: T
+  setActiveVersion: (version: T) => void
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
   hideReferences?: boolean
