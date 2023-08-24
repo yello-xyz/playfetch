@@ -287,7 +287,7 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   const commentKeys = [] as Key[]
   const inputKeys = [] as Key[]
   for (const promptID in promptKeys.map(key => getID({ key }))) {
-    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'promptID', promptID)))
+    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', promptID)))
     runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', promptID)))
     commentKeys.push(...(await getEntityKeys(Entity.COMMENT, 'parentID', promptID)))
     inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', promptID)))

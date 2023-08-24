@@ -51,7 +51,7 @@ export async function getPromptForUser(
 ): Promise<{ prompt: Prompt; versions: Version[]; inputValues: InputValues }> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
 
-  const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
+  const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'parentID', promptID)
   const comments = await getOrderedEntities(Entity.COMMENT, 'parentID', promptID)
 
@@ -183,7 +183,7 @@ export async function deletePromptForUser(userID: number, promptID: number) {
     throw new Error('Cannot delete prompt with published endpoints')
   }
 
-  const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
+  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', promptID)
   const runKeys = await getEntityKeys(Entity.RUN, 'parentID', promptID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', promptID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', promptID)
