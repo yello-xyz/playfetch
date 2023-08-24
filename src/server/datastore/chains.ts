@@ -151,11 +151,6 @@ export async function getChainForUser(
   }
 }
 
-export async function getChainItems(chainID: number): Promise<ChainItemWithInputs[]> {
-  const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
-  return chainData ? JSON.parse(chainData.items) : []
-}
-
 const DefaultChainName = 'New Chain'
 
 export async function addChainForUser(userID: number, projectID: number, name = DefaultChainName) {

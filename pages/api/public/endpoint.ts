@@ -5,16 +5,11 @@ import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { CodeConfig, Endpoint, PromptInputs, RunConfig } from '@/types'
 import { runChainConfigs } from '../runChain'
-import { getChainItems } from '@/src/server/datastore/chains'
 import { saveLogEntry } from '@/src/server/datastore/logs'
+import { getTrustedVersion } from '@/src/server/datastore/versions'
 
-const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig | CodeConfig)[]> => {
-  if (endpoint.versionID) {
-    return [{ versionID: endpoint.versionID }]
-  } else {
-    return getChainItems(endpoint.parentID)
-  }
-}
+const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig | CodeConfig)[]> => 
+  getTrustedVersion(endpoint.versionID).then(version  => version.items ?? [{ versionID: endpoint.versionID }])
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
