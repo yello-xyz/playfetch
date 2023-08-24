@@ -21,6 +21,7 @@ export async function migrateChains() {
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
     await updateChain({ ...chainData }, false)
+    // Don't forget to update existing chain endpoints and log entries with versionID when adding chain versions
   }
 }
 

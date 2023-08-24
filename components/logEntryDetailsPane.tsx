@@ -1,4 +1,4 @@
-import { ActivePrompt, Chain, EndpointParentIsPrompt, LogEntry, Prompt, ResolvedEndpoint } from '@/types'
+import { Chain, ChainVersion, EndpointParentIsPrompt, LogEntry, Prompt, PromptVersion } from '@/types'
 import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
@@ -13,17 +13,16 @@ import { SingleTabHeader } from './tabSelector'
 export default function LogEntryDetailsPane({
   logEntry,
   parent,
-  prompt,
+  versions,
   onCollapse,
 }: {
   logEntry: LogEntry
   parent?: Prompt | Chain
-  prompt?: ActivePrompt
+  versions: (PromptVersion | ChainVersion)[]
   onCollapse: () => void
 }) {
   const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
 
-  const versions = prompt?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === logEntry.versionID)
 
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'

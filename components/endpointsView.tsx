@@ -138,7 +138,8 @@ export default function EndpointsView({
   const activePrompt = EndpointParentIsPrompt(parent) ? (activeParent as ActivePrompt) : undefined
 
   const [versionIndex, setVersionIndex] = useState(-1)
-  const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
+  const versions = activePrompt?.versions ?? []
+  const version = versions.find(version => version.id === activeEndpoint?.versionID)
   const variables = parent
     ? EndpointParentIsPrompt(parent)
       ? ExtractPromptVariables(version?.prompt ?? '')
@@ -210,7 +211,7 @@ export default function EndpointsView({
           <LogEntryDetailsPane
             logEntry={logEntries[activeLogEntryIndex]}
             parent={parent}
-            prompt={activePrompt}
+            versions={versions}
             onCollapse={() => setActiveLogEntryIndex(undefined)}
           />
         </Allotment.Pane>
