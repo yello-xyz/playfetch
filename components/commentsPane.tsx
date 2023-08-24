@@ -3,12 +3,12 @@ import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versionComparison'
 import { LabelForModel } from './modelSelector'
 import useFormattedDate from './useFormattedDate'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
 export default function CommentsPane({
   prompt,
@@ -22,7 +22,7 @@ export default function CommentsPane({
   onSelectComment: (version: PromptVersion, runID?: number) => void
 }) {
   const users = prompt.users
-  const labelColors = AvailableLabelColorsForPrompt(prompt)
+  const labelColors = AvailableLabelColorsForItem(prompt)
   const comments = prompt.versions
     .flatMap(version => version.comments)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())

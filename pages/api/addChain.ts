@@ -4,7 +4,7 @@ import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function addChain(req: NextApiRequest, res: NextApiResponse<number>, user: User) {
-  const chainID = await addChainForUser(user.id, req.body.projectID)
+  const { chainID } = await addChainForUser(user.id, req.body.projectID)
   res.json(chainID)
 }
 
