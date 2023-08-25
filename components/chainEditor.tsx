@@ -1,15 +1,18 @@
-import { ChainItem, Prompt } from '@/types'
+import { ActiveChain, ChainItem, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
+import { SingleTabHeader } from './tabSelector'
 
 export default function ChainEditor({
+  chain,
   nodes,
   setNodes,
   activeIndex,
   setActiveIndex,
   prompts,
 }: {
+  chain: ActiveChain
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
   activeIndex: number
@@ -23,7 +26,8 @@ export default function ChainEditor({
   const insertCodeBlock = () => insertItem({ code: '' })
 
   return (
-    <div className='flex flex-col items-center justify-between h-full bg-gray-25'>
+    <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
+      <SingleTabHeader label={chain.name} />
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox

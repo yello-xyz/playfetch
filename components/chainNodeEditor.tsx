@@ -176,7 +176,7 @@ export default function ChainNodeEditor({
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
         {activeNode === InputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            {showTestData && <SingleTabHeader label='Test data' />}
+            <SingleTabHeader label='Test data' />
             {showTestData && (
               <TestDataPane
                 variables={variables}
@@ -203,7 +203,7 @@ export default function ChainNodeEditor({
         )}
         {IsCodeChainItem(activeNode) && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <SingleTabHeader label='Code Editor' />
+            <SingleTabHeader label='Code block' />
             <div className='p-4'>
               <PromptInput
                 key={activeItemIndex}

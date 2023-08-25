@@ -146,6 +146,7 @@ export default function ChainView({ chain, project }: { chain: ActiveChain; proj
     <Allotment>
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
         <ChainEditor
+          chain={chain}
           nodes={nodes}
           setNodes={setNodes}
           activeIndex={activeNodeIndex}
