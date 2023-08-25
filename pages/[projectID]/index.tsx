@@ -117,25 +117,29 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState<PromptVersion | undefined>(activePrompt?.versions?.slice(-1)?.[0])
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+  const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion | undefined>(
+    activePrompt?.versions?.slice(-1)?.[0]
+  )
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
-  const updateVersion = (version?: PromptVersion) => {
-    setActiveVersion(version)
+  const updatePromptVersion = (version?: PromptVersion) => {
+    setActivePromptVersion(version)
     setModifiedVersion(undefined)
   }
 
-  const selectVersion = (version: PromptVersion) => {
-    if (activePrompt && activeVersion && version.id !== activeVersion.id) {
+  const selectPromptVersion = (version: PromptVersion) => {
+    if (activePrompt && activePromptVersion && version.id !== activePromptVersion.id) {
       savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
-      updateVersion(version)
+      updatePromptVersion(version)
     }
   }
 
-  const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
+  const refreshPrompt = async (promptID: number, focusVersionID = activePromptVersion?.id) => {
     const newPrompt = await api.getPrompt(promptID, activeProject)
     setActiveItem(newPrompt)
-    updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
+    updatePromptVersion(
+      newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0]
+    )
   }
 
   const refreshActivePrompt = activePrompt
@@ -153,7 +157,7 @@ export default function Home({
   const refreshChain = async (chainID: number) => {
     const newChain = await api.getChain(chainID, activeProject)
     setActiveItem(newChain)
-    updateVersion(undefined)
+    updatePromptVersion(undefined)
   }
 
   const refreshActiveChain = activeChain ? () => refreshChain(activeChain.id) : undefined
@@ -172,7 +176,7 @@ export default function Home({
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
-    updateVersion(undefined)
+    updatePromptVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
@@ -193,7 +197,7 @@ export default function Home({
       selectPrompt(promptID)
     } else {
       setActiveItem(undefined)
-      updateVersion(undefined)
+      updatePromptVersion(undefined)
       router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
     }
   }
@@ -275,13 +279,13 @@ export default function Home({
                     onSelectEndpoints={selectEndpoints}
                   />
                   <div className='flex-1'>
-                    {activePrompt && activeVersion && (
+                    {activePrompt && activePromptVersion && (
                       <Suspense>
                         <PromptView
                           prompt={activePrompt}
                           project={activeProject}
-                          activeVersion={activeVersion}
-                          setActiveVersion={selectVersion}
+                          activeVersion={activePromptVersion}
+                          setActiveVersion={selectPromptVersion}
                           setModifiedVersion={setModifiedVersion}
                           showComments={showComments}
                           setShowComments={setShowComments}
