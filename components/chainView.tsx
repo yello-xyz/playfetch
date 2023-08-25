@@ -15,6 +15,7 @@ import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
 import useSaveChain from './useSaveChain'
+import { useRefreshActiveItem } from './refreshContext'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -24,23 +25,16 @@ export type PromptCache = {
   refreshPrompt: (promptID: number) => Promise<ActivePrompt>
 }
 
-export default function ChainView({
-  chain,
-  project,
-  onRefresh,
-}: {
-  chain: ActiveChain
-  project: ActiveProject
-  onRefresh: () => void
-}) {
+export default function ChainView({ chain, project }: { chain: ActiveChain; project: ActiveProject }) {
+  // TODO implement version selector (but make sure chainVersion is updated when chain is refreshed)
   const chainVersion = chain.versions.slice(-1)[0]
-  const saveChain = useSaveChain(chain, chainVersion, () => { 
-    // TODO implement version selector (but make sure chainVersion is updated when chain is refreshed)
-  })
+  const saveChain = useSaveChain(chain, chainVersion)
   // TODO keep nodes in sync when active chain version changes
   const [nodes, setNodes] = useState([InputNode, ...chainVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
   const items = nodes.filter(IsChainItem)
+
+  const refreshActiveItem = useRefreshActiveItem()
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
 
@@ -120,6 +114,7 @@ export default function ChainView({
   }
 
   const updateItems = (items: ChainItem[]) => {
+    console.log('setting items')
     setNodes([InputNode, ...items, OutputNode])
     const itemsWithInputs: ChainItemWithInputs[] = items.map(item => ({
       ...item,
@@ -128,7 +123,7 @@ export default function ChainView({
       inputs: ExtractChainItemVariables(item, promptCache),
     }))
     // TODO refresh active chain (not just project) and focus on the newly saved version.
-    return saveChain(itemsWithInputs, onRefresh)
+    return saveChain(itemsWithInputs, refreshActiveItem)
   }
 
   const minWidth = 320

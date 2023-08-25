@@ -291,12 +291,7 @@ export default function Home({
                     )}
                     {activeChain && (
                       <Suspense>
-                        <ChainView
-                          key={activeChain.id}
-                          chain={activeChain}
-                          project={activeProject}
-                          onRefresh={refreshProject}
-                        />
+                        <ChainView key={activeChain.id} chain={activeChain} project={activeProject} />
                       </Suspense>
                     )}
                     {activeEndpoints && (
