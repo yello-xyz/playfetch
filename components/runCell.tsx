@@ -1,4 +1,4 @@
-import { ActivePrompt, Comment, PartialRun, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, Comment, PartialRun, PromptVersion } from '@/types'
 import { MouseEvent, useEffect, useState } from 'react'
 import { CommentsPopup } from './commentPopupMenu'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
@@ -35,18 +35,16 @@ export default function RunCell({
   identifier,
   run,
   version,
-  prompt,
+  activeItem,
   containerRect,
   scrollTop,
-  isLast,
 }: {
   identifier: string
   run: PartialRun
-  version?: PromptVersion
-  prompt?: ActivePrompt
+  version?: PromptVersion | ChainVersion
+  activeItem?: ActivePrompt | ActiveChain
   containerRect?: DOMRect
   scrollTop: number
-  isLast: boolean
 }) {
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
@@ -120,22 +118,22 @@ export default function RunCell({
 
   return (
     <div className={`${baseClass} ${colorClass}`} onMouseDown={closePopups}>
-      <RunCellHeader run={run} prompt={prompt} containerRect={containerRect} />
+      <RunCellHeader run={run} activeItem={activeItem} containerRect={containerRect} />
       <RunCellBody
         identifier={identifier}
         output={run.output}
         selectionRanges={selectionRanges}
         onSelectComment={selectComment}
       />
-      {popupPosition && popupComments && containerRect && version && prompt && (
+      {popupPosition && popupComments && containerRect && version && activeItem && (
         <CommentsPopup
           comments={popupComments}
           versionID={version.id}
           selection={popupComments[0].text}
           runID={run.id}
           startIndex={popupComments[0].startIndex}
-          users={prompt.users}
-          labelColors={AvailableLabelColorsForItem(prompt)}
+          users={activeItem.users}
+          labelColors={AvailableLabelColorsForItem(activeItem)}
           isMenuExpanded={!!popupComments}
           setMenuExpanded={() => setPopupComments(undefined)}
           callback={closeCommentsPopup}

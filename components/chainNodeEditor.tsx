@@ -219,7 +219,12 @@ export default function ChainNodeEditor({
         )}
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <RunTimeline runs={[...chainVersion.runs, ...partialRuns]} isRunning={isRunning} />
+            <RunTimeline
+              runs={[...chainVersion.runs, ...partialRuns]}
+              activeItem={chain}
+              version={chainVersion}
+              isRunning={isRunning}
+            />
           </div>
         )}
         <div className='flex items-center justify-between w-full gap-4 px-4'>

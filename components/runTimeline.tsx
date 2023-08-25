@@ -1,4 +1,4 @@
-import { ActivePrompt, PartialRun, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
 import { useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
@@ -8,13 +8,13 @@ import { SingleTabHeader } from './tabSelector'
 export default function RunTimeline({
   runs = [],
   version,
-  prompt,
+  activeItem,
   activeRunID,
   isRunning,
 }: {
   runs: PartialRun[]
-  version?: PromptVersion
-  prompt?: ActivePrompt
+  version?: PromptVersion | ChainVersion
+  activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
   isRunning?: boolean
 }) {
@@ -54,16 +54,15 @@ export default function RunTimeline({
       <SingleTabHeader label='Responses' />
       {runs.length > 0 ? (
         <div ref={scrollRef} className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
-          {runs.map((run, index) => (
+          {runs.map(run => (
             <RunCell
               key={run.id}
               identifier={identifierForRunID(run.id)}
               run={run}
               version={version}
-              prompt={prompt}
+              activeItem={activeItem}
               containerRect={containerRect}
               scrollTop={scrollTop}
-              isLast={index === runs.length - 1}
             />
           ))}
         </div>

@@ -185,7 +185,7 @@ export default function PromptView({
         <div className='h-full bg-gray-25'>
           <RunTimeline
             runs={[...activeVersion.runs, ...partialRuns]}
-            prompt={prompt}
+            activeItem={prompt}
             version={activeVersion}
             activeRunID={activeRunID}
             isRunning={isRunning}
