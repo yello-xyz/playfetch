@@ -142,6 +142,7 @@ export default function Home({
     updatePromptVersion(
       newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0]
     )
+    setActiveChainVersion(undefined)
   }
 
   const refreshActivePrompt = activePrompt
@@ -161,9 +162,12 @@ export default function Home({
   )
   const saveChain = useSaveChain(activeChain, activeChainVersion, setActiveChainVersion)
 
-  const refreshChain = async (chainID: number) => {
+  const refreshChain = async (chainID: number, focusVersionID = activePromptVersion?.id) => {
     const newChain = await api.getChain(chainID, activeProject)
     setActiveItem(newChain)
+    setActiveChainVersion(
+      newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0]
+    )
     updatePromptVersion(undefined)
   }
 
@@ -184,6 +188,7 @@ export default function Home({
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
     updatePromptVersion(undefined)
+    setActiveChainVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
@@ -205,6 +210,7 @@ export default function Home({
     } else {
       setActiveItem(undefined)
       updatePromptVersion(undefined)
+      setActiveChainVersion(undefined)
       router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
     }
   }

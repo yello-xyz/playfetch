@@ -39,9 +39,17 @@ export default function ChainView({
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
 }) {
-  // TODO keep nodes in sync when active chain version changes
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
+  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
+  if (syncedVersionID !== activeVersion.id) {
+    setSyncedVersionID(activeVersion.id)
+    const newNodes = [InputNode, ...activeVersion.items, OutputNode] as ChainNode[]
+    setNodes(newNodes)
+    if (activeNodeIndex >= newNodes.length) {
+      setActiveNodeIndex(1)
+    }
+  }
   const items = nodes.filter(IsChainItem)
 
   const refreshActiveItem = useRefreshActiveItem()
