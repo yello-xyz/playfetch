@@ -106,8 +106,6 @@ export default function EndpointSettingsPane({
   }
 
   const parents = EndpointParentsInProject(project)
-  const parent = FindParentInProject(parentID, project)
-
   const versions = activeParent?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
@@ -180,8 +178,8 @@ export default function EndpointSettingsPane({
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>
-        <DropdownMenu disabled={disabled} value={parentID} onChange={value => updateParentID(Number(value))}>
-          {!parentID && <option value={parentID}>Select a Prompt or Chain</option>}
+        <DropdownMenu disabled={disabled} value={parentID ?? 0} onChange={value => updateParentID(Number(value))}>
+          {!parentID && <option value={0}>Select a Prompt or Chain</option>}
           {parents.map((parent, index) => (
             <option key={index} value={parent.id}>
               {parent.name}
@@ -208,8 +206,8 @@ export default function EndpointSettingsPane({
           setValue={value => setURLPath(ToCamelCase(value))}
         />
         <Label disabled={disabled}>Environment</Label>
-        <DropdownMenu disabled={disabled} value={flavor} onChange={updateFlavor}>
-          {!flavor && <option value={flavor}>Select environment</option>}
+        <DropdownMenu disabled={disabled} value={flavor ?? 0} onChange={updateFlavor}>
+          {!flavor && <option value={0}>Select environment</option>}
           {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}

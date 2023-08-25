@@ -82,6 +82,7 @@ export default function EndpointsView({
       ? () => {
           setNewEndpoint(NewEndpointSettings)
           setActiveParentID(undefined)
+          setActiveParent(undefined)
           setEditing(true)
         }
       : undefined
