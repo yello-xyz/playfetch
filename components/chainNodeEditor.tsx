@@ -55,21 +55,9 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) =>
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }
 
-const ChainItemToConfig = (item: ChainItem): RunConfig | CodeConfig =>
-  IsPromptChainItem(item)
-    ? {
-        versionID: item.versionID,
-        output: item.output,
-        includeContext: item.includeContext,
-      }
-    : {
-        code: item.code,
-        output: item.output,
-      }
-
 export default function ChainNodeEditor({
   chain,
-  chainVersion,
+  activeVersion,
   items,
   setItems,
   activeItemIndex,
@@ -81,7 +69,7 @@ export default function ChainNodeEditor({
   setModifiedVersion,
 }: {
   chain: ActiveChain
-  chainVersion: ChainVersion
+  activeVersion: ChainVersion
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
@@ -218,9 +206,9 @@ export default function ChainNodeEditor({
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
-              runs={[...chainVersion.runs, ...partialRuns]}
+              runs={[...activeVersion.runs, ...partialRuns]}
               activeItem={chain}
-              version={chainVersion}
+              version={activeVersion}
               isRunning={isRunning}
             />
           </div>

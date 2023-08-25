@@ -4,6 +4,7 @@ import {
   ActivePrompt,
   ChainItem,
   ChainItemWithInputs,
+  ChainVersion,
   PromptChainItem,
   PromptVersion,
 } from '@/types'
@@ -14,7 +15,6 @@ import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
-import useSaveChain from './useSaveChain'
 import { useRefreshActiveItem } from './refreshContext'
 
 export type PromptCache = {
@@ -25,12 +25,22 @@ export type PromptCache = {
   refreshPrompt: (promptID: number) => Promise<ActivePrompt>
 }
 
-export default function ChainView({ chain, project }: { chain: ActiveChain; project: ActiveProject }) {
-  // TODO implement version selector (but make sure chainVersion is updated when chain is refreshed)
-  const chainVersion = chain.versions.slice(-1)[0]
-  const saveChain = useSaveChain(chain, chainVersion)
+export default function ChainView({
+  chain,
+  activeVersion,
+  project,
+  saveChain,
+}: {
+  chain: ActiveChain
+  activeVersion: ChainVersion
+  project: ActiveProject
+  saveChain: (
+    items: ChainItemWithInputs[],
+    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
+  ) => Promise<number | undefined>
+}) {
   // TODO keep nodes in sync when active chain version changes
-  const [nodes, setNodes] = useState([InputNode, ...chainVersion.items, OutputNode] as ChainNode[])
+  const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
   const items = nodes.filter(IsChainItem)
 
@@ -81,16 +91,16 @@ export default function ChainView({ chain, project }: { chain: ActiveChain; proj
     if (unloadedItem) {
       refreshPrompt(unloadedItem.promptID)
     }
-  }, [project, items, nodes, setNodes, activePromptCache, refreshPrompt])
+  }, [project, items, activePromptCache, refreshPrompt])
 
   const activeNode = nodes[activeNodeIndex]
   const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
-  const [activeVersion, setActiveVersion] = useState<PromptVersion>()
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+  const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion>()
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
   const selectVersion = (version?: PromptVersion) => {
     savePrompt()
-    setActiveVersion(version)
+    setActivePromptVersion(version)
     if (version && IsPromptChainItem(activeNode)) {
       setNodes([
         ...nodes.slice(0, activeNodeIndex),
@@ -100,9 +110,13 @@ export default function ChainView({ chain, project }: { chain: ActiveChain; proj
     }
   }
 
-  if (activeVersion?.parentID !== activePrompt?.id) {
+  if (activePromptVersion?.parentID !== activePrompt?.id) {
     selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
-  } else if (activeVersion && activePrompt && !activePrompt.versions.some(version => version.id === activeVersion.id)) {
+  } else if (
+    activePromptVersion &&
+    activePrompt &&
+    !activePrompt.versions.some(version => version.id === activePromptVersion.id)
+  ) {
     selectVersion(activePrompt.versions.slice(-1)[0])
   }
 
@@ -157,7 +171,7 @@ export default function ChainView({ chain, project }: { chain: ActiveChain; proj
       <Allotment.Pane minSize={minWidth}>
         <ChainNodeEditor
           chain={chain}
-          chainVersion={chainVersion}
+          activeVersion={activeVersion}
           items={items}
           setItems={updateItems}
           activeItemIndex={activeNodeIndex - 1}

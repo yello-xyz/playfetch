@@ -3,9 +3,9 @@ import { ActiveChain, ChainItemWithInputs, ChainVersion } from '@/types'
 import { ChainVersionsEqual } from '@/src/common/versionsEqual'
 
 export default function useSaveChain(
-  activeChain: ActiveChain,
-  activeVersion: ChainVersion
-  // setActiveVersion: (version: ChainVersion) => void
+  activeChain: ActiveChain | undefined,
+  activeVersion: ChainVersion | undefined,
+  setActiveVersion: (version: ChainVersion) => void
 ) {
   const saveChain = async (
     items: ChainItemWithInputs[],
@@ -15,12 +15,11 @@ export default function useSaveChain(
     if (!versionNeedsSaving) {
       return activeVersion?.id
     }
-    // TODO add back when chain version selector is implemented
-    // const equalPreviousVersion = activeChain.versions.find(version => ChainVersionsEqual(version, { items }))
-    // if (equalPreviousVersion) {
-    //   setActiveVersion(equalPreviousVersion)
-    //   return equalPreviousVersion.id
-    // }
+    const equalPreviousVersion = activeChain.versions.find(version => ChainVersionsEqual(version, { items }))
+    if (equalPreviousVersion) {
+      setActiveVersion(equalPreviousVersion)
+      return equalPreviousVersion.id
+    }
     const versionID = await api.updateChain(activeChain.id, items, activeVersion.id)
     await onSaved?.(versionID)
     return versionID

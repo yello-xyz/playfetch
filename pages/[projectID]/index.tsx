@@ -11,6 +11,7 @@ import {
   LogEntry,
   ActiveChain,
   PromptVersion,
+  ChainVersion,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -40,6 +41,7 @@ import { getChainForUser } from '@/src/server/datastore/chains'
 import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
+import useSaveChain from '@/components/useSaveChain'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
@@ -153,6 +155,11 @@ export default function Home({
       router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
   }
+
+  const [activeChainVersion, setActiveChainVersion] = useState<ChainVersion | undefined>(
+    activeChain?.versions?.slice(-1)?.[0]
+  )
+  const saveChain = useSaveChain(activeChain, activeChainVersion, setActiveChainVersion)
 
   const refreshChain = async (chainID: number) => {
     const newChain = await api.getChain(chainID, activeProject)
@@ -293,9 +300,15 @@ export default function Home({
                         />
                       </Suspense>
                     )}
-                    {activeChain && (
+                    {activeChain && activeChainVersion && (
                       <Suspense>
-                        <ChainView key={activeChain.id} chain={activeChain} project={activeProject} />
+                        <ChainView
+                          key={activeChain.id}
+                          chain={activeChain}
+                          activeVersion={activeChainVersion}
+                          project={activeProject}
+                          saveChain={saveChain}
+                        />
                       </Suspense>
                     )}
                     {activeEndpoints && (
