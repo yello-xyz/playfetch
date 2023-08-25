@@ -2,14 +2,14 @@ import { Comment, CommentAction } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getTimestamp } from './datastore'
 import { ensurePromptOrChainAccess } from './chains'
 
-export async function migrateComments(postMerge: boolean) {
+export async function migrateComments() {
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   for (const commentData of allComments) {
     await datastore.save(
       toCommentData(
         commentData.userID,
-        commentData.parentID ?? commentData.promptID,
+        commentData.parentID,
         commentData.versionID,
         commentData.text,
         commentData.createdAt,
@@ -18,7 +18,6 @@ export async function migrateComments(postMerge: boolean) {
         commentData.runID,
         commentData.startIndex,
         getID(commentData),
-        postMerge && commentData.parentID ? undefined : commentData.promptID
       )
     )
   }
@@ -51,10 +50,9 @@ const toCommentData = (
   runID?: number,
   startIndex?: number,
   commentID?: number,
-  promptID?: number // TODO safe to delete this after running next post-merge data migrations in prod
 ) => ({
   key: buildKey(Entity.COMMENT, commentID),
-  data: { userID, parentID, versionID, text, createdAt, action, quote, runID, startIndex, promptID },
+  data: { userID, parentID, versionID, text, createdAt, action, quote, runID, startIndex },
   excludeFromIndexes: ['text', 'action', 'quote', 'runID', 'startIndex'],
 })
 

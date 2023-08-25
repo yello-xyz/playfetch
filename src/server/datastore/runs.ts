@@ -3,13 +3,13 @@ import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp } f
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 
-export async function migrateRuns(postMerge: boolean) {
+export async function migrateRuns() {
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
     await datastore.save(
       toRunData(
-        runData.parentID ?? runData.promptID,
+        runData.parentID,
         runData.versionID,
         JSON.parse(runData.inputs),
         runData.output,
@@ -17,8 +17,7 @@ export async function migrateRuns(postMerge: boolean) {
         runData.cost,
         runData.duration,
         JSON.parse(runData.labels),
-        getID(runData),
-        postMerge && runData.parentID ? undefined : runData.promptID
+        getID(runData)
       )
     )
   }
@@ -107,8 +106,7 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
-  runID?: number,
-  promptID?: number // TODO safe to delete this after running next post-merge data migrations in prod
+  runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
   data: {
@@ -120,7 +118,6 @@ const toRunData = (
     cost,
     duration,
     labels: JSON.stringify(labels),
-    promptID,
   },
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })

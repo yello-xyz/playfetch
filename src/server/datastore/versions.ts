@@ -29,22 +29,21 @@ import {
   updateChainOnDeletedVersion,
 } from './chains'
 
-export async function migrateVersions(postMerge: boolean) {
+export async function migrateVersions() {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
     await datastore.save(
       toVersionData(
         versionData.userID,
-        versionData.parentID ?? versionData.promptID,
+        versionData.parentID,
         versionData.prompt,
         versionData.config ? JSON.parse(versionData.config) : null,
         versionData.items ? JSON.parse(versionData.items) : null,
         JSON.parse(versionData.labels),
         versionData.createdAt,
         versionData.previousVersionID,
-        getID(versionData),
-        postMerge && versionData.parentID ? undefined : versionData.promptID
+        getID(versionData)
       )
     )
   }
@@ -212,7 +211,7 @@ export async function updateVersionLabel(
   }
 }
 
-export const toVersionData = (
+const toVersionData = (
   userID: number,
   parentID: number,
   prompt: string | null,
@@ -221,8 +220,7 @@ export const toVersionData = (
   labels: string[],
   createdAt: Date,
   previousVersionID?: number,
-  versionID?: number,
-  promptID?: number // TODO safe to delete this after running next post-merge data migrations in prod
+  versionID?: number
 ) => ({
   key: buildKey(Entity.VERSION, versionID),
   data: {
@@ -234,7 +232,6 @@ export const toVersionData = (
     labels: JSON.stringify(labels),
     createdAt,
     previousVersionID,
-    promptID,
   },
   excludeFromIndexes: ['prompt', 'config', 'items', 'labels'],
 })
