@@ -250,7 +250,7 @@ export default function Home({
             setPopupLocation,
           }}>
           <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-            <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
+            <RefreshContext.Provider value={{ refreshActiveItem: refreshActivePrompt ?? refreshActiveChain }}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar
                   workspaces={workspaces}

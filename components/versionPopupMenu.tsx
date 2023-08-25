@@ -5,7 +5,7 @@ import useModalDialogPrompt from './modalDialogContext'
 import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useRef, useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshActiveItem } from './refreshContext'
 
 export default function VersionPopupMenu({
   version,
@@ -16,7 +16,7 @@ export default function VersionPopupMenu({
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
 
   const setDialogPrompt = useModalDialogPrompt()
 
@@ -34,7 +34,7 @@ export default function VersionPopupMenu({
     } else {
       setDialogPrompt({
         title: `Are you sure you want to delete this version? This action cannot be undone.`,
-        callback: () => api.deleteVersion(version.id).then(_ => refreshPrompt()),
+        callback: () => api.deleteVersion(version.id).then(_ => refreshActiveItem()),
         destructive: true,
       })
     }

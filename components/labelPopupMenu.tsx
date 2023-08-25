@@ -6,7 +6,7 @@ import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useCallback, useRef, useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshActiveItem } from './refreshContext'
 import Icon from './icon'
 
 const projectLabelColors = [
@@ -51,7 +51,7 @@ export default function LabelPopupMenu({
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
 
   const iconRef = useRef<HTMLDivElement>(null)
   const [popupRect, popupRef] = useClientRect()
@@ -62,9 +62,9 @@ export default function LabelPopupMenu({
     const checked = !item.labels.includes(label)
     const itemIsVersion = 'runs' in item
     if (itemIsVersion) {
-      api.toggleVersionLabel(item.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+      api.toggleVersionLabel(item.id, prompt.projectID, label, checked).then(_ => refreshActiveItem())
     } else {
-      api.toggleRunLabel(item.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+      api.toggleRunLabel(item.id, prompt.projectID, label, checked).then(_ => refreshActiveItem())
     }
   }
 

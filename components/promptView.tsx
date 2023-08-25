@@ -6,7 +6,7 @@ import useInputValues from './useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshActiveItem } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector from './tabSelector'
@@ -94,7 +94,7 @@ export default function PromptView({
     }
   }
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
 
   const checkProviderAvailable = useCheckProvider()
@@ -107,7 +107,7 @@ export default function PromptView({
       const versionID = await savePrompt()
       const streamReader = await api.runPrompt(versionID, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)
-      await refreshPrompt(versionID)
+      await refreshActiveItem(versionID)
       setPartialRuns(runs => runs.filter(run => run.failed))
       setRunning(false)
     }

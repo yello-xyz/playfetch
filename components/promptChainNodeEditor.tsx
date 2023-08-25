@@ -33,45 +33,41 @@ export default function PromptChainNodeEditor({
 
   const minVersionHeight = 230
   const [promptHeight, setPromptHeight] = useState(1)
-  return (
-    <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
-      {loadedPrompt && activeVersion ? (
-        <Allotment vertical>
-          <Allotment.Pane minSize={minVersionHeight}>
-            <div className='flex flex-col h-full'>
-              <div className='flex-1 overflow-y-auto'>
-                <VersionTimeline
-                  prompt={loadedPrompt}
-                  activeVersion={activeVersion}
-                  setActiveVersion={selectVersion}
-                  tabSelector={() => <SingleTabHeader label='Prompt versions' />}
-                />
-              </div>
-              {items.slice(0, index).some(IsPromptChainItem) && (
-                <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
-                  <Checkbox
-                    label='Include previous chain context into prompt'
-                    checked={!!node.includeContext}
-                    setChecked={toggleIncludeContext}
-                  />
-                </div>
-              )}
-            </div>
-          </Allotment.Pane>
-          <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
-            <div className='h-full px-4 pt-4'>
-              <PromptPanel
-                version={activeVersion}
-                setModifiedVersion={setModifiedVersion}
-                checkProviderAvailable={checkProviderAvailable}
-                onUpdatePreferredHeight={setPromptHeight}
+  return loadedPrompt && activeVersion ? (
+    <Allotment vertical>
+      <Allotment.Pane minSize={minVersionHeight}>
+        <div className='flex flex-col h-full'>
+          <div className='flex-1 overflow-y-auto'>
+            <VersionTimeline
+              prompt={loadedPrompt}
+              activeVersion={activeVersion}
+              setActiveVersion={selectVersion}
+              tabSelector={() => <SingleTabHeader label='Prompt versions' />}
+            />
+          </div>
+          {items.slice(0, index).some(IsPromptChainItem) && (
+            <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
+              <Checkbox
+                label='Include previous chain context into prompt'
+                checked={!!node.includeContext}
+                setChecked={toggleIncludeContext}
               />
             </div>
-          </Allotment.Pane>
-        </Allotment>
-      ) : (
-        <div className='flex-grow' />
-      )}
-    </RefreshContext.Provider>
+          )}
+        </div>
+      </Allotment.Pane>
+      <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
+        <div className='h-full px-4 pt-4'>
+          <PromptPanel
+            version={activeVersion}
+            setModifiedVersion={setModifiedVersion}
+            checkProviderAvailable={checkProviderAvailable}
+            onUpdatePreferredHeight={setPromptHeight}
+          />
+        </div>
+      </Allotment.Pane>
+    </Allotment>
+  ) : (
+    <div className='flex-grow' />
   )
 }
