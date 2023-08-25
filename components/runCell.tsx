@@ -82,7 +82,7 @@ export default function RunCell({
 
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
   const selectionRanges = comments
-    .filter(comment => comment.startIndex && comment.quote)
+    .filter(comment => comment.startIndex !== undefined && comment.quote)
     .map(comment => ({
       startIndex: comment.startIndex!,
       endIndex: comment.startIndex! + comment.quote!.length,
