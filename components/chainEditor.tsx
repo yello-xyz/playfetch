@@ -58,8 +58,8 @@ export default function ChainEditor({
                 Remove Node
               </Button>
             )}
-            {chain.versions.length > 1 && (
-              <div className='flex justify-end w-full'>
+            <div className='flex justify-end w-full'>
+              {chain.versions.length > 1 && (
                 <VersionSelector
                   versions={chain.versions}
                   endpoints={project.endpoints}
@@ -67,8 +67,8 @@ export default function ChainEditor({
                   setActiveVersion={setActiveVersion}
                   hideLabels
                 />
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
       </div>
