@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  ActiveChain,
-  ActiveProject,
-  ActivePrompt,
-  EndpointParentsInProject,
-  FindParentInProject,
-} from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, EndpointParentsInProject, FindParentInProject } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
@@ -77,7 +71,7 @@ export default function EndpointSettingsPane({
 
   if (isDirty && !isEditing) {
     setEnabled(endpoint.enabled)
-    updateParentID(endpoint.parentID)
+    setParentID(endpoint.parentID)
     setVersionID(endpoint.versionID)
     setURLPath(endpoint.urlPath)
     setFlavor(endpoint.flavor)
