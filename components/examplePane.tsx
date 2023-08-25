@@ -15,7 +15,7 @@ const buildCurlCommand = (
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
   const inputRow = SelectAnyInputRow(inputValues, variables)
-  const inputs = variables.map(variable => [variable, inputRow[variable] ?? ''])
+  const inputs = variables.map(variable => [variable, inputRow[variable]])
 
   return (
     `curl ${endpoint.useStreaming ? '-N ' : ''}-X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
