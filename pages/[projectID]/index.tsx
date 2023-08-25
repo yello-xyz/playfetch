@@ -312,6 +312,7 @@ export default function Home({
                           key={activeChain.id}
                           chain={activeChain}
                           activeVersion={activeChainVersion}
+                          setActiveVersion={setActiveChainVersion}
                           project={activeProject}
                           saveChain={saveChain}
                         />

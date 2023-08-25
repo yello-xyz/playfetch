@@ -28,11 +28,13 @@ export type PromptCache = {
 export default function ChainView({
   chain,
   activeVersion,
+  setActiveVersion,
   project,
   saveChain,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
+  setActiveVersion: (version: ChainVersion) => void
   project: ActiveProject
   saveChain: (
     items: ChainItemWithInputs[],
@@ -169,6 +171,9 @@ export default function ChainView({
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
         <ChainEditor
           chain={chain}
+          activeVersion={activeVersion}
+          setActiveVersion={setActiveVersion}
+          project={project}
           nodes={nodes}
           setNodes={setNodes}
           activeIndex={activeNodeIndex}

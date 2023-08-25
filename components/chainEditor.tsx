@@ -1,11 +1,15 @@
-import { ActiveChain, ChainItem, Prompt } from '@/types'
+import { ActiveChain, ActiveProject, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
 import { SingleTabHeader } from './tabSelector'
+import VersionSelector from './versionSelector'
 
 export default function ChainEditor({
   chain,
+  activeVersion,
+  setActiveVersion,
+  project,
   nodes,
   setNodes,
   activeIndex,
@@ -13,6 +17,9 @@ export default function ChainEditor({
   prompts,
 }: {
   chain: ActiveChain
+  activeVersion: ChainVersion
+  setActiveVersion: (version: ChainVersion) => void
+  project: ActiveProject
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
   activeIndex: number
@@ -40,7 +47,7 @@ export default function ChainEditor({
           />
         ))}
       </div>
-      <div className='flex self-start gap-4 p-6'>
+      <div className='flex self-start w-full gap-4 p-6'>
         {activeIndex > 0 && (
           <>
             {prompts.length > 0 && (
@@ -50,6 +57,17 @@ export default function ChainEditor({
               <Button type='destructive' onClick={removeItem}>
                 Remove Node
               </Button>
+            )}
+            {chain.versions.length > 1 && (
+              <div className='flex justify-end w-full'>
+                <VersionSelector
+                  versions={chain.versions}
+                  endpoints={project.endpoints}
+                  activeVersion={activeVersion}
+                  setActiveVersion={setActiveVersion}
+                  hideLabels
+                />
+              </div>
             )}
           </>
         )}

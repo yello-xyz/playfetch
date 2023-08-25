@@ -4,11 +4,9 @@ import {
   ChainItemWithInputs,
   ChainVersion,
   CodeChainItem,
-  CodeConfig,
   PartialRun,
   PromptInputs,
   PromptVersion,
-  RunConfig,
   TestConfig,
 } from '@/types'
 import { useState } from 'react'
@@ -103,7 +101,13 @@ export default function ChainNodeEditor({
     setEditingItemsCount(items.length)
   }
 
-  if (isEditing && editingIndex !== activeItemIndex) {
+  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
+  if (syncedVersionID !== activeVersion.id) {
+    setSyncedVersionID(activeVersion.id)
+    if (isEditing) {
+      toggleEditing()
+    }
+  } else if (isEditing && editingIndex !== activeItemIndex) {
     setTimeout(() => setItems(currentItems))
     toggleEditing()
   } else if (isEditing && items.length !== editingItemsCount) {

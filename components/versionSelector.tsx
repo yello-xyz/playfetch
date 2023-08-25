@@ -10,6 +10,7 @@ export default function VersionSelector<T extends PromptVersion | ChainVersion>(
   setActiveVersion,
   flagIfNotLatest,
   labelColors = {},
+  hideLabels,
   hideReferences,
   disabled,
 }: {
@@ -19,6 +20,7 @@ export default function VersionSelector<T extends PromptVersion | ChainVersion>(
   setActiveVersion: (version: T) => void
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
+  hideLabels?: boolean
   hideReferences?: boolean
   disabled?: boolean
 }) {
@@ -40,7 +42,9 @@ export default function VersionSelector<T extends PromptVersion | ChainVersion>(
         flagIfNotLatest={flagIfNotLatest}
         disabled={disabled}
       />
-      {activeVersion && <VersionLabels version={activeVersion} colors={labelColors} hideReferences={hideReferences} />}
+      {activeVersion && !hideLabels && (
+        <VersionLabels version={activeVersion} colors={labelColors} hideReferences={hideReferences} />
+      )}
     </div>
   )
 }
