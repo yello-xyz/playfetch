@@ -1,97 +1,102 @@
-import { Suspense, useRef, useState } from 'react'
+import { Fragment, useRef } from 'react'
 import addIcon from '@/public/add.svg'
-import linkIcon from '@/public/link.svg'
 import Icon from './icon'
-import { InputValues } from '@/types'
-
-import dynamic from 'next/dynamic'
-const ContentEditable = dynamic(() => import('./contentEditable'))
+import { InputValues, TestConfig } from '@/types'
+import RichTextInput from './richTextInput'
 
 export default function TestDataPane({
   variables,
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
+  testConfig,
+  setTestConfig,
 }: {
   variables: string[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
 }) {
-  const [activeColumn, setActiveColumn] = useState(0)
-  if (activeColumn > 0 && activeColumn >= variables.length) {
-    setActiveColumn(0)
-  }
-
-  const activeVariable = variables[activeColumn]
-  const activeInputs = inputValues[activeVariable] ?? ['']
-
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const styleForColumn = (index: number) =>
-    (index === activeColumn ? 'text-gray-800' : 'text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100') +
-    ' ' +
-    (index === variables.length - 1 ? 'flex-grow' : '')
+  const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
+  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
 
-  const filterEmptyInputs = (inputs: string[]) => inputs.filter(input => input.trim().length > 0)
-  const updateInputs = (value: string, index = activeInputs.length) =>
+  const paddedColumn = (variable: string, length: number) => [
+    ...(inputValues[variable] ?? []),
+    ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
+  ]
+  const updateInputs = (variable: string, value: string, index: number) =>
     setInputValues({
       ...inputValues,
-      [activeVariable]: [
-        ...filterEmptyInputs(activeInputs.slice(0, index)),
+      [variable]: [
+        ...paddedColumn(variable, index).slice(0, index),
         value,
-        ...filterEmptyInputs(activeInputs.slice(index + 1)),
+        ...paddedColumn(variable, index).slice(index + 1),
       ],
     })
   const addInput = () => {
-    updateInputs('', activeInputs.length)
-    setTimeout(() => {
-      const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
-      const lastChild = editables[editables.length - 1] as HTMLElement
-      lastChild?.focus()
-    })
-  }
-
-  const selectColumn = (index: number) => {
     persistInputValuesIfNeeded()
-    setActiveColumn(index)
+    if (allVariables.some(variable => (inputValues[variable]?.[rowCount - 1] ?? '').length > 0)) {
+      allVariables.forEach(variable => updateInputs(variable, '', rowCount))
+      setTimeout(() => {
+        const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
+        const lastChild = editables[editables.length - 1] as HTMLElement
+        lastChild?.focus()
+      })
+    }
   }
 
+  const toggleRow = (row: number) =>
+    setTestConfig({
+      mode: 'custom',
+      rowIndices: testConfig.rowIndices.includes(row)
+        ? testConfig.rowIndices.filter(index => index !== row)
+        : [...testConfig.rowIndices, row],
+    })
+
+  const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
+  const bgColor = (variable: string) => (variables.includes(variable) ? 'bg-pink-25' : '')
+  const textColor = (variable: string) => (variables.includes(variable) ? 'text-pink-400' : '')
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div className='flex overflow-x-auto border-l border-gray-100 shrink-0 border-y'>
-        {variables.map((variable, index) => (
+      <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
+        <div className='border-b border-gray-200 bg-gray-25' />
+        {allVariables.map((variable, index) => (
           <div
             key={index}
-            className={`flex items-center border-r border-gray-100 px-3 py-1 ${styleForColumn(index)}`}
-            onClick={() => selectColumn(index)}>
-            <Icon icon={linkIcon} />
-            <span className='flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis'>{variable}</span>
+            className={`flex items-center px-3 py-1 border-b border-l border-gray-200 ${bgColor(variable)}`}>
+            <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
+              {variables.includes(variable) ? `{{${variable}}}` : variable}
+            </span>
           </div>
         ))}
-      </div>
-      <div ref={containerRef} className='flex flex-col'>
-        <div className='flex'>
-          <div className='border-b border-l border-gray-100 w-14' />
-          <div className='w-full px-3 py-2 font-medium text-gray-800 bg-white border-b border-gray-100 border-x'>
-            Value
-          </div>
-        </div>
-        {activeInputs.map((value, index) => (
-          <div key={index} className='flex'>
-            <div className='py-1 text-center border-b border-l border-gray-100 w-14'>{index + 1}</div>
-            <Suspense>
-              <ContentEditable
-                className='w-full px-3 py-1 text-sm bg-white border-b border-gray-100 outline-none border-x line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border-t'
-                htmlValue={value}
-                onChange={value => updateInputs(value, index)}
-              />
-            </Suspense>
-          </div>
-        ))}
+        {Array.from({ length: rowCount }, (_, row) => {
+          const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
+          return (
+            <Fragment key={row}>
+              <div
+                className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
+                onClick={() => toggleRow(row)}>
+                #{row + 1}
+              </div>
+              {allVariables.map((variable, col) => (
+                <RichTextInput
+                  key={col}
+                  className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border ${color}`}
+                  value={inputValues[variable]?.[row] ?? ''}
+                  setValue={value => updateInputs(variable, value, row)}
+                  onBlur={() => persistInputValuesIfNeeded()}
+                />
+              ))}
+            </Fragment>
+          )
+        })}
       </div>
       <div
-        className='flex justify-center border-b border-gray-100 border-x py-1.5 cursor-pointer items-center font-medium'
+        className='flex justify-center border-b border-gray-200 py-1.5 bg-gray-25 cursor-pointer items-center font-medium'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add

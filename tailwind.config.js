@@ -20,9 +20,12 @@ module.exports = {
       'gray-700': '#333A46',
       'gray-800': '#1D2532',
       'green-300': '#71B892',
+      'pink-400': '#E14BD2',
       'red-300': '#E4735B',
       'red-400': '#DC4F30',
       'red-500': '#C64629',
+      'dark-gray-400': '#898D96',
+      'dark-gray-700': '#333A46',
       white: '#FFFFFF',
     },
     backgroundColor: {
@@ -38,8 +41,9 @@ module.exports = {
       'blue-600': '#226FCA',
       'blue-700': '#1660B8',
       'blue-800': '#0F58AE',
+      'dark-gray-700': '#333A46',
       'dark-gray-800': '#1D2532',
-      'gray-25': '#FBFBFD',
+      'gray-25': '#FAFBFB',
       'gray-50': '#F5F6F7',
       'gray-100': '#EEF0F2',
       'gray-200': '#E3E6E9',
@@ -56,7 +60,9 @@ module.exports = {
       'orange-200': '#F9D093',
       'orange-300': '#F6BE6A',
       'orange-400': '#F2A93C',
+      'pink-25': '#FDF2FC',
       'pink-100': '#F4B8EE',
+      'pink-400': '#E14BD2',
       'purple-200': '#BEA4F6',
       'purple-300': '#9F78F3',
       'purple-400': '#7D48EF',
@@ -93,13 +99,15 @@ module.exports = {
       'gray-600': '#9AA2AD',
       'gray-700': '#8C94A1',
       'gray-800': '#838C9A',
+      'pink-50': '#F9D9F6',
       'red-50': '#FDE5E0',
       white: '#FFFFFF',
     },
     fontSize: {
       xs: '12px',
       sm: '0.79rem',
-      base: '.92rem'
+      base: '.9rem',
+      lg: '1rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',
@@ -107,15 +115,6 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
-      },
-      animation: {
-        shimmer: 'shimmer 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      },
-      keyframes: {
-        shimmer: {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.6 },
-        },
       },
       boxShadow: {
         'sm': '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',

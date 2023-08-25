@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react'
 
-export const useInitialState = <T,>(
+const useInitialState = <T,>(
   initialValue: T,
   equalityOperator?: (a: T, b: T) => boolean
 ): readonly [T, Dispatch<SetStateAction<T>>] => {
@@ -12,3 +12,5 @@ export const useInitialState = <T,>(
   }
   return [state, setState] as const
 }
+
+export default useInitialState

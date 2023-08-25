@@ -1,15 +1,19 @@
 import { ReactNode, useState } from 'react'
+import Icon from './icon'
+import spinnerIcon from '@/public/spinner.svg'
 
 type ButtonType = 'primary' | 'outline' | 'destructive'
 
 export function PendingButton({
+  title,
+  pendingTitle,
   type = 'primary',
-  children,
   disabled,
   onClick,
 }: {
+  title: string
+  pendingTitle?: string
   type?: ButtonType
-  children: ReactNode
   disabled?: boolean
   onClick: () => void | Promise<void>
 }) {
@@ -22,8 +26,8 @@ export function PendingButton({
   }
 
   return (
-    <Button type={type} disabled={disabled || isPending} onClick={handleClick}>
-      {children}
+    <Button type={type} disabled={disabled || isPending} showSpinner={isPending} onClick={handleClick}>
+      {isPending && pendingTitle ? pendingTitle : title}
     </Button>
   )
 }
@@ -31,11 +35,13 @@ export function PendingButton({
 export default function Button({
   type = 'primary',
   children,
+  showSpinner,
   disabled,
   onClick,
 }: {
   type?: ButtonType
   children: ReactNode
+  showSpinner?: boolean
   disabled?: boolean
   onClick: () => void | Promise<void>
 }) {
@@ -51,11 +57,14 @@ export default function Button({
     }
   }
 
+  const paddingClass = showSpinner ? 'pr-4 pl-2.5 py-1.5' : 'px-4 py-2'
+
   return (
     <button
-      className={`${colorForType(type)} antialiased text-sm border whitespace-nowrap px-4 py-2 rounded-lg`}
+      className={`${colorForType(type)} ${paddingClass} text-sm border whitespace-nowrap rounded-lg flex items-center`}
       disabled={disabled}
       onClick={onClick}>
+      {showSpinner && <Icon icon={spinnerIcon} className='animate-spin max-w-[24px]' />}
       {children}
     </button>
   )

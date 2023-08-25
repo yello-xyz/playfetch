@@ -1,50 +1,80 @@
-import { useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
-import useModalDialogPrompt from './modalDialogContext'
-import { InputValues, PromptInputs } from '@/types'
+import { InputValues, PromptInputs, TestConfig } from '@/types'
 
-type TestMode = 'first' | 'last' | 'random' | 'all'
+export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
+  SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
+  Object.fromEntries(variables.map(variable => [variable, '']))
 
-const selectInputs = (inputs: InputValues, mode: TestMode): { [key: string]: string }[] => {
-  const selectInput = (inputs: string[], mode: TestMode): string => {
-    switch (mode) {
+const SelectInputRows = (
+  inputValues: InputValues,
+  variables: string[],
+  config: TestConfig
+): [{ [key: string]: string }[], number[]] => {
+  const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
+
+  const columns = Object.values(inputs)
+  const maxRowCount = Math.max(...columns.map(values => values.length))
+  const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
+    columns.every(column => column[index] === undefined || column[index].length === 0)
+  )
+  const filteredRowIndices = config.rowIndices.filter(index => !emptyRowIndices.includes(index)).sort()
+
+  const filteredPaddedInputs: InputValues = {}
+  for (const [key, values] of Object.entries(inputs)) {
+    filteredPaddedInputs[key] = [
+      ...values,
+      ...Array.from({ length: maxRowCount - values.length }).map(() => ''),
+    ].filter((_, index) => !emptyRowIndices.includes(index))
+  }
+  const rowCount = Math.max(...Object.values(filteredPaddedInputs).map(values => values.length))
+  if (rowCount === 0) {
+    return [[], []]
+  }
+
+  const entries = Object.entries(filteredPaddedInputs)
+  const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
+  const selectedIndices = (() => {
+    switch (config.mode) {
       default:
       case 'first':
-        return inputs[0] ?? ''
+        return [0]
       case 'last':
-        return inputs[inputs.length - 1] ?? ''
+        return [rowCount - 1]
       case 'random':
-        return inputs[Math.floor(Math.random() * inputs.length)] ?? ''
+        return [Math.floor(Math.random() * rowCount)]
+      case 'all':
+        return Array.from({ length: rowCount }, (_, index) => index)
+      case 'custom':
+        return filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
+    }
+  })()
+
+  const originalIndices = [] as number[]
+  for (let i = 0, offset = 0; i < maxRowCount; ++i) {
+    if (emptyRowIndices.includes(i)) {
+      ++offset
+    } else if (selectedIndices.includes(i - offset)) {
+      originalIndices.push(i)
     }
   }
 
-  const cartesian = (array: string[][]) =>
-    array.reduce(
-      (a, b) => {
-        return a
-          .map(x => {
-            return b.map(y => {
-              return x.concat(y)
-            })
-          })
-          .reduce((c, d) => c.concat(d), [])
-      },
-      [[]] as string[][]
-    )
+  return [selectedIndices.map(selectRow), originalIndices]
+}
 
-  const entries = Object.entries(inputs)
-
+const selectValidRowIndices = (
+  mode: TestConfig['mode'],
+  selectInputs: (mode: TestConfig['mode']) => ReturnType<typeof SelectInputRows>
+) => {
   switch (mode) {
-    default:
     case 'first':
     case 'last':
+      return selectInputs(mode)[1]
+    case 'custom':
     case 'random':
-      return [Object.fromEntries(entries.map(([key, values]) => [key, selectInput(values, mode)]))]
     case 'all':
-      const keys = entries.map(([key, _]) => key)
-      const values = cartesian(entries.map(([_, values]) => values))
-      return values.map(value => Object.fromEntries(keys.map((key, i) => [key, value[i]])))
+      return selectInputs('all')[1]
   }
 }
 
@@ -52,56 +82,77 @@ export default function TestButtons({
   runTitle,
   variables,
   inputValues,
+  testConfig,
+  setTestConfig,
   disabled,
+  hideDropdown,
   callback,
 }: {
   runTitle?: string
   variables: string[]
   inputValues: InputValues
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
   disabled?: boolean
+  hideDropdown?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
-  const [testMode, setTestMode] = useState<TestMode>('first')
+  const selectInputs = useCallback(
+    (config: TestConfig | { mode: TestConfig['mode'] }) =>
+      SelectInputRows(inputValues, variables, {
+        mode: config.mode,
+        rowIndices: 'rowIndices' in config ? config.rowIndices : [],
+      }),
+    [inputValues, variables]
+  )
 
-  const setDialogPrompt = useModalDialogPrompt()
-
-  const [isRunningAllVariants, setRunningAllVariants] = useState(false)
-
-  const allInputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
-  const multipleInputs = selectInputs(allInputs, 'all').length > 1
-
-  const testPrompt = async () => {
-    const inputs = selectInputs(allInputs, testMode)
-    if (inputs.length > 1) {
-      setDialogPrompt({
-        title: `Run ${inputs.length} times?`,
-        confirmTitle: 'Run',
-        callback: async () => {
-          setRunningAllVariants(true)
-          await callback(inputs)
-          setRunningAllVariants(false)
-        },
-      })
-    } else {
-      await callback(inputs)
+  const [, rowIndices] = selectInputs(testConfig)
+  useEffect(() => {
+    const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode }))
+    if (
+      testConfig.rowIndices.length !== rowIndices.length ||
+      testConfig.rowIndices.some(index => !validRowIndices.includes(index))
+    ) {
+      setTestConfig({ mode: testConfig.mode, rowIndices })
+    } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
+      const [, rowIndices] = selectInputs({ mode: 'first' })
+      setTestConfig({ mode: 'first', rowIndices })
     }
+  }, [testConfig, setTestConfig, rowIndices, selectInputs])
+
+  const updateTestMode = (mode: TestConfig['mode']) => {
+    const [, rowIndices] = selectInputs({ mode })
+    setTestConfig({ mode, rowIndices })
   }
 
+  const testPrompt = () => {
+    const [inputs, indices] = selectInputs(testConfig)
+    setTestConfig({ ...testConfig, rowIndices: indices })
+    return callback(inputs)
+  }
+
+  const [allInputs] = selectInputs({ mode: 'all' })
   return (
     <div className='flex items-center self-end gap-4'>
-      <DropdownMenu
-        disabled={!multipleInputs}
-        size='medium'
-        value={testMode}
-        onChange={value => setTestMode(value as TestMode)}>
-        <option value={'first'}>First</option>
-        <option value={'last'}>Last</option>
-        <option value={'random'}>Random</option>
-        <option value={'all'}>All</option>
-      </DropdownMenu>
-      <PendingButton disabled={disabled || isRunningAllVariants} onClick={testPrompt}>
-        {runTitle ?? 'Run'}
-      </PendingButton>
+      {!hideDropdown && (
+        <DropdownMenu
+          disabled={allInputs.length <= 1}
+          size='medium'
+          value={testConfig.mode}
+          onChange={value => updateTestMode(value as TestConfig['mode'])}>
+          {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
+          <option value={'first'}>First</option>
+          <option value={'last'}>Last</option>
+          <option value={'random'}>Random</option>
+          <option value={'all'}>All</option>
+        </DropdownMenu>
+      )}
+      <PendingButton
+        title={runTitle ?? 'Run'}
+        pendingTitle='Running'
+        disabled={disabled || (rowIndices.length === 0 && variables.length > 0)}
+        onClick={testPrompt}
+      />
     </div>
   )
 }

@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import {
   ActiveProject,
   ActivePrompt,
   Endpoint,
   FindParentInProject,
-  EndpointParentIsPrompt,
+  EndpointParentIsChain,
   EndpointParentsInProject,
   ResolvedEndpoint,
   LogEntry,
+  ActiveChain,
+  PromptVersion,
+  ChainVersion,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -15,12 +18,13 @@ import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import { toActivePrompt } from '@/pages/[projectID]'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import TabSelector, { TabButton } from './tabSelector'
+import TabSelector, { SingleTabHeader } from './tabSelector'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
+import IconButton from './iconButton'
+import collapseIcon from '@/public/collapse.svg'
 
 const NewEndpointSettings: EndpointSettings = {
   id: undefined,
@@ -33,8 +37,6 @@ const NewEndpointSettings: EndpointSettings = {
   useStreaming: false,
 }
 
-type ActiveTab = 'endpoints' | 'logs'
-
 export default function EndpointsView({
   project,
   logEntries = [],
@@ -44,13 +46,16 @@ export default function EndpointsView({
   logEntries?: LogEntry[]
   onRefresh: () => Promise<void>
 }) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('endpoints')
+  type ActiveTab = 'Endpoints' | 'Logs'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('Endpoints')
 
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
+
   const updateActiveLogEntryIndex = (index: number) => {
     setActiveLogEntryIndex(index)
     const endpoint = project.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
-    updateActiveEndpoint(endpoint!)
+    setActiveEndpointID(endpoint?.id)
+    setActiveParentID(logEntries[index].parentID)
   }
 
   const selectTab = (tab: ActiveTab) => {
@@ -58,10 +63,12 @@ export default function EndpointsView({
     setActiveLogEntryIndex(undefined)
   }
 
-  const tabSelector = (
-    <TabSelector>
-      <TabButton title='Endpoints' tab='endpoints' activeTab={activeTab} setActiveTab={selectTab} />
-      {logEntries.length > 0 && <TabButton title='Logs' tab='logs' activeTab={activeTab} setActiveTab={selectTab} />}
+  const tabSelector = (children?: ReactNode) => (
+    <TabSelector
+      tabs={logEntries.length > 0 ? ['Endpoints', 'Logs'] : ['Endpoints']}
+      activeTab={activeTab}
+      setActiveTab={selectTab}>
+      {children}
     </TabSelector>
   )
 
@@ -75,6 +82,7 @@ export default function EndpointsView({
       ? () => {
           setNewEndpoint(NewEndpointSettings)
           setActiveParentID(undefined)
+          setActiveParent(undefined)
           setEditing(true)
         }
       : undefined
@@ -99,86 +107,99 @@ export default function EndpointsView({
   }
 
   const [activeParentID, setActiveParentID] = useState<number>()
-  if (!isEditing && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
+  if (!isEditing && activeLogEntryIndex === undefined && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
     setActiveParentID(activeEndpoint.parentID)
   }
 
   const updateActiveEndpoint = (endpoint: Endpoint) => {
     setActiveEndpointID(endpoint.id)
     setActiveParentID(endpoint.parentID)
+    setActiveLogEntryIndex(undefined)
     if (endpoint.parentID !== activeParentID) {
-      setActivePrompt(undefined)
+      setActiveParent(undefined)
     }
   }
 
   const parent = activeParentID ? FindParentInProject(activeParentID, project) : undefined
-  const [activePrompt, setActivePrompt] = useState<ActivePrompt>()
-  const [promptCache, setPromptCache] = useState<Record<string, ActivePrompt>>({})
+  const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
+  const [parentCache, setParentCache] = useState<Record<string, ActivePrompt | ActiveChain>>({})
   useEffect(() => {
-    if (EndpointParentIsPrompt(parent)) {
-      if (promptCache[parent.id]) {
-        setActivePrompt(promptCache[parent.id])
-      } else {
-        api.getPromptVersions(parent.id).then(versions => {
-          const prompt = toActivePrompt(parent.id, versions, project)
-          setPromptCache({ ...promptCache, [parent.id]: prompt })
-          setActivePrompt(prompt)
-        })
-      }
+    if (parent && parentCache[parent.id]) {
+      setActiveParent(parentCache[parent.id])
+    } else if (EndpointParentIsChain(parent)) {
+      api.getChain(parent.id, project).then(activeChain => {
+        setParentCache({ ...parentCache, [parent.id]: activeChain })
+        setActiveParent(activeChain)
+      })
+    } else if (parent) {
+      api.getPrompt(parent.id, project).then(activePrompt => {
+        setParentCache({ ...parentCache, [parent.id]: activePrompt })
+        setActiveParent(activePrompt)
+      })
     }
-  }, [parent, project, promptCache])
+  }, [parent, project, parentCache])
 
-  const version = activePrompt?.versions?.find(version => version.id === activeEndpoint?.versionID)
+  const [versionIndex, setVersionIndex] = useState(-1)
+  const versions = activeParent?.versions ?? []
+  const activeVersion = (versions as (PromptVersion | ChainVersion)[]).find(
+    version => version.id === activeEndpoint?.versionID
+  )
   const variables = parent
-    ? EndpointParentIsPrompt(parent)
-      ? ExtractPromptVariables(version?.prompt ?? '')
-      : ExtractUnboundChainInputs(parent.items)
+    ? EndpointParentIsChain(parent)
+      ? ExtractUnboundChainInputs(activeVersion?.items ?? [])
+      : ExtractPromptVariables(activeVersion?.prompt ?? '')
     : []
 
   const minWidth = 460
+  const maxWidth = 680
   return (
     <Allotment>
-      {activeTab === 'endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
+      {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-2 p-4 pt-3 overflow-y-auto text-gray-500'>
-            <EndpointsTable
-              tabSelector={tabSelector}
-              project={project}
-              activeEndpoint={activeEndpoint}
-              setActiveEndpoint={updateActiveEndpoint}
-              onAddEndpoint={addEndpoint}
-            />
-          </div>
+          <EndpointsTable
+            tabSelector={tabSelector}
+            project={project}
+            activeEndpoint={activeEndpoint}
+            setActiveEndpoint={updateActiveEndpoint}
+            onAddEndpoint={addEndpoint}
+          />
         </Allotment.Pane>
       )}
-      {activeTab === 'endpoints' && activeEndpoint && (
-        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto max-w-[680px]'>
-            <EndpointSettingsPane
-              endpoint={activeEndpoint}
-              project={project}
-              prompt={activePrompt}
-              onSelectParentID={setActiveParentID}
-              isEditing={isEditing}
-              setEditing={setEditing}
-              onCollapse={isEditing ? undefined : () => setActiveEndpointID(undefined)}
-              onRefresh={refresh}
-            />
-            {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && (
-              <ExamplePane
+      {activeTab === 'Endpoints' && activeEndpoint && (
+        <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
+          <div className='flex flex-col w-full h-full bg-gray-25'>
+            <SingleTabHeader
+              label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
+              secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : ''}>
+              {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
+            </SingleTabHeader>
+            <div className='flex flex-col gap-6 p-4 overflow-y-auto'>
+              <EndpointSettingsPane
                 endpoint={activeEndpoint}
-                variables={variables}
-                inputValues={project.inputValues}
-                defaultFlavor={project.availableFlavors[0]}
+                project={project}
+                activeParent={activeParent}
+                onSelectParentID={setActiveParentID}
+                onSelectVersionIndex={setVersionIndex}
+                isEditing={isEditing}
+                setEditing={setEditing}
+                onRefresh={refresh}
               />
-            )}
-            {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
+              {IsSavedEndpoint(activeEndpoint) && activeEndpoint.enabled && !isEditing && activeParent && (
+                <ExamplePane
+                  endpoint={activeEndpoint}
+                  variables={variables}
+                  inputValues={activeParent.inputValues}
+                  defaultFlavor={project.availableFlavors[0]}
+                />
+              )}
+              {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
+            </div>
           </div>
         </Allotment.Pane>
       )}
-      {activeTab === 'logs' && (
+      {activeTab === 'Logs' && (
         <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-2 p-4 overflow-y-auto text-gray-500'>
+          <div className='flex flex-col h-full min-h-0 text-gray-500 bg-gray-25'>
             <LogEntriesView
               tabSelector={tabSelector}
               logEntries={logEntries}
@@ -189,17 +210,14 @@ export default function EndpointsView({
           </div>
         </Allotment.Pane>
       )}
-      {activeLogEntryIndex !== undefined && activeEndpoint && IsSavedEndpoint(activeEndpoint) && parent && (
-        <Allotment.Pane minSize={minWidth}>
-          <div className='flex flex-col items-start h-full gap-6 p-4 overflow-y-auto'>
-            <LogEntryDetailsPane
-              logEntry={logEntries[activeLogEntryIndex]}
-              endpoint={activeEndpoint}
-              parent={parent}
-              prompt={activePrompt}
-              onCollapse={() => setActiveLogEntryIndex(undefined)}
-            />
-          </div>
+      {activeLogEntryIndex !== undefined && (
+        <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
+          <LogEntryDetailsPane
+            logEntry={logEntries[activeLogEntryIndex]}
+            parent={parent}
+            versions={versions}
+            onCollapse={() => setActiveLogEntryIndex(undefined)}
+          />
         </Allotment.Pane>
       )}
     </Allotment>

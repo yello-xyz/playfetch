@@ -1,4 +1,4 @@
-import { ActivePrompt, Run, Version } from '@/types'
+import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
@@ -6,7 +6,7 @@ import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useCallback, useRef, useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshActiveItem } from './refreshContext'
 import Icon from './icon'
 
 const projectLabelColors = [
@@ -18,7 +18,7 @@ const projectLabelColors = [
   'bg-yellow-300 text-white',
 ]
 
-export const AvailableLabelColorsForPrompt = (prompt: ActivePrompt) =>
+export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain) =>
   Object.fromEntries(
     prompt.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
@@ -35,23 +35,23 @@ function useClientRect(): readonly [DOMRect | undefined, (node: HTMLDivElement) 
 
 export default function LabelPopupMenu({
   item,
-  prompt,
+  activeItem,
   containerRect,
 }: {
-  item: Version | Run
-  prompt: ActivePrompt
+  item: PromptVersion | ChainVersion | Run
+  activeItem: ActivePrompt | ActiveChain
   containerRect?: DOMRect
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const trimmedLabel = newLabel.trim()
 
-  const labels = prompt.availableLabels
-  const colors = AvailableLabelColorsForPrompt(prompt)
+  const labels = activeItem.availableLabels
+  const colors = AvailableLabelColorsForItem(activeItem)
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
 
   const iconRef = useRef<HTMLDivElement>(null)
   const [popupRect, popupRef] = useClientRect()
@@ -62,9 +62,9 @@ export default function LabelPopupMenu({
     const checked = !item.labels.includes(label)
     const itemIsVersion = 'runs' in item
     if (itemIsVersion) {
-      api.toggleVersionLabel(item.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked).then(_ => refreshActiveItem())
     } else {
-      api.toggleRunLabel(item.id, prompt.projectID, label, checked).then(_ => refreshPrompt())
+      api.toggleRunLabel(item.id, activeItem.projectID, label, checked).then(_ => refreshActiveItem())
     }
   }
 

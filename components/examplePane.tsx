@@ -4,6 +4,7 @@ import Label from './label'
 import { ToCamelCase } from '@/src/common/formatting'
 import Icon from './icon'
 import clipboardIcon from '@/public/clipboard.svg'
+import { SelectAnyInputRow } from './testButtons'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,
@@ -13,7 +14,8 @@ const buildCurlCommand = (
 ) => {
   const apiKey = endpoint.apiKeyDev
   const url = endpoint.url
-  const inputs = variables.map(variable => [variable, (inputValues[variable] ?? [])[0] ?? ''])
+  const inputRow = SelectAnyInputRow(inputValues, variables)
+  const inputs = variables.map(variable => [variable, inputRow[variable]])
 
   return (
     `curl ${endpoint.useStreaming ? '-N ' : ''}-X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
@@ -44,7 +46,7 @@ export default function ExamplePane({
 
   return (
     <>
-      <div className='flex items-baseline justify-between w-full gap-2 -mb-4'>
+      <div className='flex items-center justify-between w-full gap-2 -mb-4'>
         <Label>Integration</Label>
         {canCopyToClipboard && (
           <div className='flex items-center gap-1 cursor-pointer' onClick={() => copyToClipboard(curlCommand)}>
@@ -61,10 +63,10 @@ export default function ExamplePane({
 }
 
 export function CodeBlock({ children, active, error }: { children: ReactNode; active?: boolean; error?: boolean }) {
-  const colorClass = error ? 'text-red-300' : 'text-green-300'
+  const textColorClass = error ? 'text-red-300' : 'text-green-300'
   const borderClass = active ? 'border' : ''
   return (
-    <div className={`p-4 text-xs bg-gray-100 rounded-lg ${colorClass} ${borderClass}`}>
+    <div className={`p-4 text-xs rounded-lg bg-white border border-gray-200 ${textColorClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>

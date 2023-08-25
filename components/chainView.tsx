@@ -1,53 +1,79 @@
-import { ActiveProject, ActivePrompt, Chain, ChainItem, ChainItemWithInputs, PromptChainItem, Version } from '@/types'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  ActiveChain,
+  ActiveProject,
+  ActivePrompt,
+  ChainItem,
+  ChainItemWithInputs,
+  ChainVersion,
+  PromptChainItem,
+  PromptVersion,
+} from '@/types'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import api from '@/src/client/api'
-import { toActivePrompt } from '@/pages/[projectID]'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
 import ChainEditor from './chainEditor'
-import { ChainItemToConfig, ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
+import { useRefreshActiveItem } from './refreshContext'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
   promptForItem: (item: PromptChainItem) => ActivePrompt | undefined
-  versionForItem: (item: PromptChainItem) => Version | undefined
+  versionForItem: (item: PromptChainItem) => PromptVersion | undefined
   promptItemForID: (promptID: number) => ChainItem
   refreshPrompt: (promptID: number) => Promise<ActivePrompt>
 }
 
 export default function ChainView({
   chain,
+  activeVersion,
+  setActiveVersion,
   project,
-  onRefresh,
+  saveChain,
 }: {
-  chain: Chain
+  chain: ActiveChain
+  activeVersion: ChainVersion
+  setActiveVersion: (version: ChainVersion) => void
   project: ActiveProject
-  onRefresh: () => void
+  saveChain: (
+    items: ChainItemWithInputs[],
+    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
+  ) => Promise<number | undefined>
 }) {
-  const [nodes, setNodes] = useState([InputNode, ...chain.items, OutputNode] as ChainNode[])
+  const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
+  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
+  if (syncedVersionID !== activeVersion.id) {
+    setSyncedVersionID(activeVersion.id)
+    const newNodes = [InputNode, ...activeVersion.items, OutputNode] as ChainNode[]
+    setNodes(newNodes)
+    if (activeNodeIndex >= newNodes.length) {
+      setActiveNodeIndex(1)
+    }
+  }
   const items = nodes.filter(IsChainItem)
+
+  const refreshActiveItem = useRefreshActiveItem()
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
 
   const refreshPrompt = useCallback(
     async (promptID: number) =>
-      api.getPromptVersions(promptID).then(versions => {
-        const prompt = toActivePrompt(promptID, versions, project)
-        setActivePromptCache(cache => ({ ...cache, [promptID]: prompt }))
+      api.getPrompt(promptID, project).then(activePrompt => {
+        setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
         setNodes(
           nodes.map(node =>
-            IsPromptChainItem(node) && node.promptID === prompt.id
+            IsPromptChainItem(node) && node.promptID === promptID
               ? {
                   ...node,
-                  prompt,
-                  version: prompt.versions.find(version => version.id === node.versionID),
+                  activePrompt,
+                  version: activePrompt.versions.find(version => version.id === node.versionID),
                 }
               : node
           )
         )
-        return prompt
+        return activePrompt
       }),
     [nodes, project]
   )
@@ -69,24 +95,22 @@ export default function ChainView({
     refreshPrompt,
   }
 
-  const chainIsLoaded = items.every(node => !IsPromptChainItem(node) || promptCache.promptForItem(node))
-
   useEffect(() => {
     const promptItems = items.filter(IsPromptChainItem)
     const unloadedItem = promptItems.find(item => !activePromptCache[item.promptID])
     if (unloadedItem) {
       refreshPrompt(unloadedItem.promptID)
     }
-  }, [project, items, nodes, setNodes, activePromptCache, refreshPrompt])
+  }, [project, items, activePromptCache, refreshPrompt])
 
   const activeNode = nodes[activeNodeIndex]
   const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
-  const [activeVersion, setActiveVersion] = useState<Version>()
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+  const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion>()
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
-  const selectVersion = (version?: Version) => {
+  const selectVersion = (version?: PromptVersion) => {
     savePrompt()
-    setActiveVersion(version)
+    setActivePromptVersion(version)
     if (version && IsPromptChainItem(activeNode)) {
       setNodes([
         ...nodes.slice(0, activeNodeIndex),
@@ -96,9 +120,13 @@ export default function ChainView({
     }
   }
 
-  if (activeVersion?.promptID !== activePrompt?.id) {
+  if (activePromptVersion?.parentID !== activePrompt?.id) {
     selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
-  } else if (activeVersion && activePrompt && !activePrompt.versions.some(version => version.id === activeVersion.id)) {
+  } else if (
+    activePromptVersion &&
+    activePrompt &&
+    !activePrompt.versions.some(version => version.id === activePromptVersion.id)
+  ) {
     selectVersion(activePrompt.versions.slice(-1)[0])
   }
 
@@ -109,14 +137,32 @@ export default function ChainView({
     setActiveNodeIndex(index)
   }
 
-  const itemsWithInputs = items
-    .map(item => (IsPromptChainItem(item) ? { promptID: item.promptID, ...ChainItemToConfig(item) } : item))
-    .map(item => ({ ...item, inputs: ExtractChainItemVariables(item, promptCache) })) as ChainItemWithInputs[]
-  const itemsKey = JSON.stringify(itemsWithInputs)
-  const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
-  if (chainIsLoaded && itemsKey !== savedItemsKey) {
-    setSavedItemsKey(itemsKey)
-    api.updateChain(chain.id, itemsWithInputs).then(onRefresh)
+  const savedItemsKey = useRef<string>()
+  const saveItems = (items: ChainItem[], force = false): Promise<number | undefined> => {
+    const itemsToSave = items.map(item => ({
+      ...item,
+      activePrompt: undefined,
+      version: undefined,
+      inputs: ExtractChainItemVariables(item, promptCache),
+    }))
+    const itemsKey = JSON.stringify(itemsToSave)
+    if (force || itemsKey !== savedItemsKey.current) {
+      // TODO deal with race condition when force saving while already saving a change.
+      savedItemsKey.current = itemsKey
+      return saveChain(itemsToSave, refreshActiveItem)
+    }
+    return Promise.resolve(undefined)
+  }
+
+  const updateItems = (items: ChainItem[]) => {
+    setNodes([InputNode, ...items, OutputNode])
+    saveItems(items)
+  }
+
+  const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
+    setActiveNodeIndex(nodes.indexOf(OutputNode))
+    const versionID = await saveItems(items, true)
+    return versionID!
   }
 
   const minWidth = 320
@@ -124,6 +170,10 @@ export default function ChainView({
     <Allotment>
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
         <ChainEditor
+          chain={chain}
+          activeVersion={activeVersion}
+          setActiveVersion={setActiveVersion}
+          project={project}
           nodes={nodes}
           setNodes={setNodes}
           activeIndex={activeNodeIndex}
@@ -133,13 +183,14 @@ export default function ChainView({
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
         <ChainNodeEditor
+          chain={chain}
+          activeVersion={activeVersion}
           items={items}
-          setItems={items => setNodes([InputNode, ...items, OutputNode])}
+          setItems={updateItems}
           activeItemIndex={activeNodeIndex - 1}
           activeNode={activeNode}
           promptCache={promptCache}
-          project={project}
-          onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
+          prepareForRunning={prepareForRunning}
           savePrompt={() => savePrompt().then(versionID => versionID!)}
           selectVersion={selectVersion}
           setModifiedVersion={setModifiedVersion}

@@ -4,15 +4,14 @@ import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
 import {
   ActivePrompt,
-  Version,
   User,
   ActiveProject,
   AvailableProvider,
   Workspace,
-  Chain,
-  PromptChainItem,
-  ChainItem,
   LogEntry,
+  ActiveChain,
+  PromptVersion,
+  ChainVersion,
 } from '@/types'
 import ClientRoute, {
   ChainRoute,
@@ -22,7 +21,7 @@ import ClientRoute, {
   PromptRoute,
   WorkspaceRoute,
 } from '@/components/clientRoute'
-import { getPromptVersionsForUser } from '@/src/server/datastore/prompts'
+import { getPromptForUser } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/components/modalDialogContext'
@@ -37,36 +36,18 @@ import ProjectTopBar from '@/components/projectTopBar'
 import useSavePrompt from '@/components/useSavePrompt'
 
 import dynamic from 'next/dynamic'
-import { IsPromptChainItem } from '@/components/chainNode'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
+import { getChainForUser } from '@/src/server/datastore/chains'
+import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
+import GlobalPopup from '@/components/globalPopup'
+import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
+import useSaveChain from '@/components/useSaveChain'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
-export const toActivePrompt = (promptID: number, versions: Version[], project: ActiveProject): ActivePrompt => {
-  const versionIDsUsedInChains = project.chains
-    .flatMap(chain => chain.items as ChainItem[])
-    .filter(IsPromptChainItem)
-    .map(item => item.versionID)
-
-  const versionIDsUsedAsEndpoints = project.endpoints
-    .map(endpoint => endpoint.versionID)
-    .filter(versionID => !!versionID)
-
-  return {
-    ...project.prompts.find(prompt => prompt.id === promptID)!,
-    versions: versions.map(version => ({
-      ...version,
-      usedInChain: versionIDsUsedInChains.includes(version.id),
-      usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
-    })),
-    users: project.users,
-    availableLabels: project.availableLabels,
-  }
-}
-
 const Endpoints = 'endpoints'
-type ActiveItem = ActivePrompt | Chain | typeof Endpoints
+type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
@@ -76,23 +57,24 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
   const buildURL = urlBuilderFromHeaders(req.headers)
   const activeProject = await getActiveProject(user.id, projectID!, buildURL)
 
-  const getActivePrompt = async (promptID: number): Promise<ActivePrompt | undefined> => {
-    const versions = await getPromptVersionsForUser(user.id, promptID)
-    return toActivePrompt(promptID, versions, activeProject)
-  }
+  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> =>
+    getPromptForUser(user.id, promptID).then(BuildActivePrompt(activeProject))
 
-  let activeItem =
+  const getActiveChain = async (chainID: number): Promise<ActiveChain> =>
+    await getChainForUser(user.id, chainID).then(BuildActiveChain(activeProject))
+
+  const initialActiveItem: ActiveItem | null =
     endpoints === 1
       ? Endpoints
       : promptID
       ? await getActivePrompt(promptID)
       : chainID
-      ? activeProject.chains.find(chain => chain.id === chainID)
+      ? await getActiveChain(chainID)
       : activeProject.prompts.length > 0
       ? await getActivePrompt(activeProject.prompts[0].id)
-      : undefined
+      : null
 
-  const initialLogEntries = activeItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
+  const initialLogEntries = initialActiveItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
@@ -100,7 +82,7 @@ export const getServerSideProps = withLoggedInSession(async ({ req, query, user 
       user,
       workspaces,
       initialActiveProject: activeProject,
-      initialActiveItem: activeItem ?? null,
+      initialActiveItem,
       initialLogEntries,
       availableProviders,
     },
@@ -124,13 +106,11 @@ export default function Home({
 }) {
   const router = useRouter()
 
-  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-
   const [activeProject, setActiveProject] = useState(initialActiveProject)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
-  const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && 'lastVersionID' in item
-  const isChain = (item: ActiveItem): item is Chain => item !== Endpoints && 'items' in item
+  const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
+  const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && !isChain(item)
   const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
 
@@ -139,26 +119,30 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
 
-  const [activeVersion, setActiveVersion] = useState<Version | undefined>(activePrompt?.versions?.slice(-1)?.[0])
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+  const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion | undefined>(
+    activePrompt?.versions?.slice(-1)?.[0]
+  )
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
-  const updateVersion = (version?: Version) => {
-    setActiveVersion(version)
+  const updatePromptVersion = (version?: PromptVersion) => {
+    setActivePromptVersion(version)
     setModifiedVersion(undefined)
   }
 
-  const selectVersion = (version: Version) => {
-    if (activePrompt && activeVersion && version.id !== activeVersion.id) {
+  const selectPromptVersion = (version: PromptVersion) => {
+    if (activePrompt && activePromptVersion && version.id !== activePromptVersion.id) {
       savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
-      updateVersion(version)
+      updatePromptVersion(version)
     }
   }
 
-  const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
-    const newVersions = await api.getPromptVersions(promptID)
-    const newPrompt = toActivePrompt(promptID, newVersions, activeProject)
+  const refreshPrompt = async (promptID: number, focusVersionID = activePromptVersion?.id) => {
+    const newPrompt = await api.getPrompt(promptID, activeProject)
     setActiveItem(newPrompt)
-    updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
+    updatePromptVersion(
+      newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0]
+    )
+    setActiveChainVersion(undefined)
   }
 
   const refreshActivePrompt = activePrompt
@@ -173,10 +157,18 @@ export default function Home({
     }
   }
 
-  const refreshChain = async (chainID: number) => {
-    const newChain = await api.getChain(chainID)
+  const [activeChainVersion, setActiveChainVersion] = useState<ChainVersion | undefined>(
+    activeChain?.versions?.slice(-1)?.[0]
+  )
+  const saveChain = useSaveChain(activeChain, activeChainVersion, setActiveChainVersion)
+
+  const refreshChain = async (chainID: number, focusVersionID = activePromptVersion?.id) => {
+    const newChain = await api.getChain(chainID, activeProject)
     setActiveItem(newChain)
-    updateVersion(undefined)
+    setActiveChainVersion(
+      newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0]
+    )
+    updatePromptVersion(undefined)
   }
 
   const refreshActiveChain = activeChain ? () => refreshChain(activeChain.id) : undefined
@@ -195,7 +187,8 @@ export default function Home({
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
-    updateVersion(undefined)
+    updatePromptVersion(undefined)
+    setActiveChainVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
@@ -216,7 +209,8 @@ export default function Home({
       selectPrompt(promptID)
     } else {
       setActiveItem(undefined)
-      updateVersion(undefined)
+      updatePromptVersion(undefined)
+      setActiveChainVersion(undefined)
       router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
     }
   }
@@ -258,71 +252,91 @@ export default function Home({
     router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
   }
 
+  const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
+  const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
+  const [popupProps, setPopupProps] = useState<any>()
+  const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
+
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-          <RefreshContext.Provider value={{ refreshPrompt: refreshActivePrompt }}>
-            <main className={`flex flex-col h-screen text-sm font-sans`}>
-              <ProjectTopBar
-                workspaces={workspaces}
-                activeProject={activeProject}
-                activeItem={activePrompt ?? activeChain}
-                onRefreshProject={refreshProject}
-                onNavigateBack={navigateBack}
-                showComments={showComments}
-                setShowComments={setShowComments}
-              />
-              <div className='flex items-stretch flex-1 overflow-hidden'>
-                <ProjectSidebar
-                  activeProject={activeProject}
-                  activeItem={activeItem}
+        <GlobalPopupContext.Provider
+          value={{
+            setPopupRender: render => setPopupRender(() => render),
+            setPopupProps,
+            setPopupLocation,
+          }}>
+          <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
+            <RefreshContext.Provider value={{ refreshActiveItem: refreshActivePrompt ?? refreshActiveChain }}>
+              <main className='flex flex-col h-screen text-sm'>
+                <ProjectTopBar
                   workspaces={workspaces}
-                  onAddPrompt={addPrompt}
-                  onAddChain={addChain}
-                  onDeleteItem={onDeleteItem}
-                  onRefreshItem={refreshActiveItem}
-                  onSelectPrompt={selectPrompt}
-                  onSelectChain={selectChain}
-                  onSelectEndpoints={selectEndpoints}
+                  activeProject={activeProject}
+                  activeItem={activePrompt ?? activeChain}
+                  onRefreshProject={refreshProject}
+                  onNavigateBack={navigateBack}
+                  showComments={showComments}
+                  setShowComments={setShowComments}
                 />
-                <div className='flex-1'>
-                  {activePrompt && activeVersion && (
-                    <Suspense>
-                      <PromptView
-                        prompt={activePrompt}
-                        project={activeProject}
-                        activeVersion={activeVersion}
-                        setActiveVersion={selectVersion}
-                        setModifiedVersion={setModifiedVersion}
-                        showComments={showComments}
-                        setShowComments={setShowComments}
-                        savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
-                      />
-                    </Suspense>
-                  )}
-                  {activeChain && (
-                    <Suspense>
-                      <ChainView
-                        key={activeChain.id}
-                        chain={activeChain}
-                        project={activeProject}
-                        onRefresh={refreshProject}
-                      />
-                    </Suspense>
-                  )}
-                  {activeEndpoints && (
-                    <Suspense>
-                      <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
-                    </Suspense>
-                  )}
-                  {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
+                <div className='flex items-stretch flex-1 overflow-hidden'>
+                  <ProjectSidebar
+                    activeProject={activeProject}
+                    activeItem={activeItem}
+                    workspaces={workspaces}
+                    onAddPrompt={addPrompt}
+                    onAddChain={addChain}
+                    onDeleteItem={onDeleteItem}
+                    onRefreshItem={refreshActiveItem}
+                    onSelectPrompt={selectPrompt}
+                    onSelectChain={selectChain}
+                    onSelectEndpoints={selectEndpoints}
+                  />
+                  <div className='flex-1'>
+                    {activePrompt && activePromptVersion && (
+                      <Suspense>
+                        <PromptView
+                          prompt={activePrompt}
+                          project={activeProject}
+                          activeVersion={activePromptVersion}
+                          setActiveVersion={selectPromptVersion}
+                          setModifiedVersion={setModifiedVersion}
+                          showComments={showComments}
+                          setShowComments={setShowComments}
+                          savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
+                        />
+                      </Suspense>
+                    )}
+                    {activeChain && activeChainVersion && (
+                      <Suspense>
+                        <ChainView
+                          key={activeChain.id}
+                          chain={activeChain}
+                          activeVersion={activeChainVersion}
+                          setActiveVersion={setActiveChainVersion}
+                          project={activeProject}
+                          saveChain={saveChain}
+                        />
+                      </Suspense>
+                    )}
+                    {activeEndpoints && (
+                      <Suspense>
+                        <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
+                      </Suspense>
+                    )}
+                    {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
+                  </div>
                 </div>
-              </div>
-            </main>
-          </RefreshContext.Provider>
-        </UserContext.Provider>
+              </main>
+            </RefreshContext.Provider>
+          </UserContext.Provider>
+        </GlobalPopupContext.Provider>
       </ModalDialogContext.Provider>
+      <GlobalPopup
+        {...popupProps}
+        location={popupLocation}
+        onDismiss={() => setPopupRender(undefined)}
+        render={popupRender}
+      />
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
     </>
   )

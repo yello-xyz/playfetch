@@ -1,23 +1,23 @@
-import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, Version } from '@/types'
+import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
-import useInputValues from './inputValues'
+import useInputValues from './useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
-import { useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { ReactNode, useState } from 'react'
+import { useRefreshActiveItem } from './refreshContext'
 import api, { StreamReader } from '@/src/client/api'
 import useCheckProvider from './checkProvider'
-import TabSelector, { TabButton } from './tabSelector'
-import { useInitialState } from './useInitialState'
-import { ConfigsEqual } from '@/src/common/versionsEqual'
+import TabSelector from './tabSelector'
+import useInitialState from './useInitialState'
+import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 
 export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
-  const runs = [] as PartialRun[]
-  setPartialRuns(runs)
+  const runs = {} as { [index: number]: PartialRun }
+  setPartialRuns([])
   while (reader) {
     const { done, value } = await reader.read()
     if (done) {
@@ -29,23 +29,24 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
       const data = line.split('data:').slice(-1)[0]
       const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
       const output = message ?? ''
-      const currentIndex = runs.length - 1
-      if (index > currentIndex) {
-        runs.push({ id: index, output, cost, duration, timestamp, failed })
+      if (runs[index]) {
+        runs[index].output += output
+        runs[index].id = index
+        runs[index].cost = cost
+        runs[index].duration = duration
+        runs[index].timestamp = timestamp
+        runs[index].failed = failed
       } else {
-        runs[currentIndex].output += output
-        runs[currentIndex].id = index
-        runs[currentIndex].cost = cost
-        runs[currentIndex].duration = duration
-        runs[currentIndex].timestamp = timestamp
-        runs[currentIndex].failed = failed
+        runs[index] = { id: index, output, cost, duration, timestamp, failed }
       }
     }
-    setPartialRuns([...runs])
+    setPartialRuns(
+      Object.entries(runs)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([, run]) => run)
+    )
   }
 }
-
-type ActiveTab = 'versions' | 'testdata'
 
 export default function PromptView({
   prompt,
@@ -59,33 +60,31 @@ export default function PromptView({
 }: {
   prompt: ActivePrompt
   project: ActiveProject
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  activeVersion: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
   savePrompt: () => Promise<number>
 }) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('versions')
+  type ActiveTab = 'Prompt versions' | 'Test data'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
 
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    project.inputValues,
-    project.id,
-    activeTab
-  )
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-  const [currentConfig, setCurrentConfig] = useInitialState(activeVersion.config, ConfigsEqual)
+  const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, PromptConfigsEqual)
 
-  const updateVersion = (version: Version) => {
+  const updateVersion = (version: PromptVersion) => {
     setCurrentPrompt(version.prompt)
-    setCurrentConfig(version.config)
+    setCurrentPromptConfig(version.config)
     setModifiedVersion(version)
   }
 
   const [activeRunID, setActiveRunID] = useState<number>()
 
-  const onSelectComment = (version: Version, runID?: number) => {
+  const onSelectComment = (version: PromptVersion, runID?: number) => {
     if (version.id !== activeVersion.id) {
       setActiveRunID(undefined)
       setActiveVersion(version)
@@ -95,7 +94,7 @@ export default function PromptView({
     }
   }
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
 
   const checkProviderAvailable = useCheckProvider()
@@ -106,9 +105,9 @@ export default function PromptView({
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
       const versionID = await savePrompt()
-      const streamReader = await api.runPrompt({ versionID }, inputs)
+      const streamReader = await api.runPrompt(versionID, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)
-      await refreshPrompt(versionID)
+      await refreshActiveItem(versionID)
       setPartialRuns(runs => runs.filter(run => run.failed))
       setRunning(false)
     }
@@ -119,25 +118,28 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const showTestData = ExtractPromptVariables(currentPrompt).length > 0
-  const tabSelector = (
-    <TabSelector>
-      <TabButton title='Prompt versions' tab='versions' activeTab={activeTab} setActiveTab={selectTab} />
-      {showTestData && <TabButton title='Test data' tab='testdata' activeTab={activeTab} setActiveTab={selectTab} />}
+  const variables = ExtractPromptVariables(currentPrompt)
+  const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
+  const tabSelector = (children?: ReactNode) => (
+    <TabSelector
+      tabs={showTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
+      activeTab={activeTab}
+      setActiveTab={selectTab}>
+      {children}
     </TabSelector>
   )
 
-  if (activeTab === 'testdata' && !showTestData) {
-    setActiveTab('versions')
+  if (activeTab === 'Test data' && !showTestData) {
+    setActiveTab('Prompt versions')
   }
 
   const renderTab = (tab: ActiveTab) => {
     switch (tab) {
-      case 'versions':
+      case 'Prompt versions':
         return (
           <RunPromptTab
             currentPrompt={currentPrompt}
-            currentConfig={currentConfig}
+            currentPromptConfig={currentPromptConfig}
             activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
@@ -145,14 +147,16 @@ export default function PromptView({
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
             tabSelector={tabSelector}
           />
         )
-      case 'testdata':
+      case 'Test data':
         return (
           <TestPromptTab
             currentPrompt={currentPrompt}
-            currentConfig={currentConfig}
+            currentPromptConfig={currentPromptConfig}
             activeProject={project}
             activePrompt={prompt}
             activeVersion={activeVersion}
@@ -163,6 +167,8 @@ export default function PromptView({
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
             tabSelector={tabSelector}
           />
         )
@@ -179,7 +185,7 @@ export default function PromptView({
         <div className='h-full bg-gray-25'>
           <RunTimeline
             runs={[...activeVersion.runs, ...partialRuns]}
-            prompt={prompt}
+            activeItem={prompt}
             version={activeVersion}
             activeRunID={activeRunID}
             isRunning={isRunning}

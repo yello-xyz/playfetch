@@ -1,12 +1,13 @@
-import { ChainItem, ModelProvider, PromptChainItem, Version } from '@/types'
+import { ChainItem, ModelProvider, PromptChainItem, PromptVersion } from '@/types'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
-import Label from './label'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
 import { RefreshContext } from './refreshContext'
 import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
+import { SingleTabHeader } from './tabSelector'
+import { useState } from 'react'
 
 export default function PromptChainNodeEditor({
   node,
@@ -24,47 +25,49 @@ export default function PromptChainNodeEditor({
   toggleIncludeContext: (includeContext: boolean) => void
   promptCache: PromptCache
   checkProviderAvailable: (provider: ModelProvider) => boolean
-  selectVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  selectVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
 }) {
   const loadedPrompt = promptCache.promptForItem(node)
   const activeVersion = promptCache.versionForItem(node)
 
-  const minHeight = 230
-  return (
-    <RefreshContext.Provider value={{ refreshPrompt: () => promptCache.refreshPrompt(node.promptID).then(_ => {}) }}>
-      {loadedPrompt && activeVersion && (
-        <Allotment vertical>
-          <Allotment.Pane minSize={minHeight}>
-            <div className='flex flex-col h-full gap-4 px-6 pb-6'>
-              <VersionTimeline
-                prompt={loadedPrompt}
-                activeVersion={activeVersion}
-                setActiveVersion={selectVersion}
-                tabSelector={<Label>Prompt Versions</Label>}
-              />
-              {items.slice(0, index).some(IsPromptChainItem) && (
-                <div className='self-start'>
-                  <Checkbox
-                    label='Include previous chain context into prompt'
-                    checked={!!node.includeContext}
-                    setChecked={toggleIncludeContext}
-                  />
-                </div>
-              )}
-            </div>
-          </Allotment.Pane>
-          <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
-            <div className='h-full px-6 pt-6'>
-              <PromptPanel
-                version={activeVersion}
-                setModifiedVersion={setModifiedVersion}
-                checkProviderAvailable={checkProviderAvailable}
+  const minVersionHeight = 230
+  const [promptHeight, setPromptHeight] = useState(1)
+  return loadedPrompt && activeVersion ? (
+    <Allotment vertical>
+      <Allotment.Pane minSize={minVersionHeight}>
+        <div className='flex flex-col h-full'>
+          <div className='flex-1 overflow-y-auto'>
+            <VersionTimeline
+              prompt={loadedPrompt}
+              activeVersion={activeVersion}
+              setActiveVersion={selectVersion}
+              tabSelector={() => <SingleTabHeader label='Prompt versions' />}
+            />
+          </div>
+          {items.slice(0, index).some(IsPromptChainItem) && (
+            <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
+              <Checkbox
+                label='Include previous chain context into prompt'
+                checked={!!node.includeContext}
+                setChecked={toggleIncludeContext}
               />
             </div>
-          </Allotment.Pane>
-        </Allotment>
-      )}
-    </RefreshContext.Provider>
+          )}
+        </div>
+      </Allotment.Pane>
+      <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
+        <div className='h-full px-4 pt-4'>
+          <PromptPanel
+            version={activeVersion}
+            setModifiedVersion={setModifiedVersion}
+            checkProviderAvailable={checkProviderAvailable}
+            onUpdatePreferredHeight={setPromptHeight}
+          />
+        </div>
+      </Allotment.Pane>
+    </Allotment>
+  ) : (
+    <div className='flex-grow' />
   )
 }

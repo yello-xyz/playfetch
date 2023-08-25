@@ -1,18 +1,20 @@
 import {
-  ActiveProject,
+  ActiveChain,
   ChainItem,
   ChainItemWithInputs,
+  ChainVersion,
   CodeChainItem,
   PartialRun,
   PromptInputs,
-  Version,
+  PromptVersion,
+  TestConfig,
 } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
-import RichTextInput from './richTextInput'
-import useInputValues from './inputValues'
+import PromptInput from './promptInput'
+import useInputValues from './useInputValues'
 import useCheckProvider from './checkProvider'
 import { ConsumeRunStreamReader } from './promptView'
 import api from '@/src/client/api'
@@ -21,7 +23,9 @@ import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { ChainItemToConfig, ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { SingleTabHeader } from './tabSelector'
+import { useRefreshActiveItem } from './refreshContext'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -51,33 +55,32 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) =>
 }
 
 export default function ChainNodeEditor({
+  chain,
+  activeVersion,
   items,
   setItems,
   activeItemIndex,
   activeNode,
   promptCache,
-  project,
-  onRun,
+  prepareForRunning,
   savePrompt,
   selectVersion,
   setModifiedVersion,
 }: {
+  chain: ActiveChain
+  activeVersion: ChainVersion
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
-  project: ActiveProject
-  onRun: () => void
+  prepareForRunning: (items: ChainItem[]) => Promise<number>
   savePrompt: () => Promise<number>
-  selectVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  selectVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(
-    project.inputValues,
-    project.id,
-    JSON.stringify(activeNode)
-  )
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const checkProviderAvailable = useCheckProvider()
 
@@ -99,7 +102,13 @@ export default function ChainNodeEditor({
     setEditingItemsCount(items.length)
   }
 
-  if (isEditing && editingIndex !== activeItemIndex) {
+  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
+  if (syncedVersionID !== activeVersion.id) {
+    setSyncedVersionID(activeVersion.id)
+    if (isEditing) {
+      toggleEditing()
+    }
+  } else if (isEditing && editingIndex !== activeItemIndex) {
     setTimeout(() => setItems(currentItems))
     toggleEditing()
   } else if (isEditing && items.length !== editingItemsCount) {
@@ -117,6 +126,7 @@ export default function ChainNodeEditor({
 
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
   const [isRunning, setRunning] = useState(false)
+  const refreshActiveItem = useRefreshActiveItem()
 
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
@@ -131,15 +141,17 @@ export default function ChainNodeEditor({
           item.promptID === activePrompt.id
             ? activePrompt.versions.find(version => version.id === item.versionID)
             : promptCache.versionForItem(item)
-        setItems(newItems)
       }
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
         setPartialRuns([])
-        onRun()
-        const streamReader = await api.runChain(newItems.map(ChainItemToConfig), inputs)
+        const chainVersionID = await prepareForRunning(newItems)
+        // TODO the rest of this logic is now the same for prompts and chains so factor it out.
+        const streamReader = await api.runChain(chainVersionID, inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
+        await refreshActiveItem(chainVersionID)
+        setPartialRuns(runs => runs.filter(run => run.failed))
         setRunning(false)
       }
     }
@@ -154,19 +166,24 @@ export default function ChainNodeEditor({
     setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], includeContext }))
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
+  const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
   return (
     <>
-      <div className='flex flex-col items-end flex-1 h-full gap-4 py-6 overflow-hidden'>
-        {activeNode === InputNode && variables.length > 0 && (
-          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
-            <Label>Test data</Label>
-            <TestDataPane
-              variables={variables}
-              inputValues={inputValues}
-              setInputValues={setInputValues}
-              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            />
+      <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
+        {activeNode === InputNode && (
+          <div className='flex flex-col flex-1 w-full overflow-y-auto'>
+            <SingleTabHeader label='Test data' />
+            {showTestData && (
+              <TestDataPane
+                variables={variables}
+                inputValues={inputValues}
+                setInputValues={setInputValues}
+                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+                testConfig={testConfig}
+                setTestConfig={setTestConfig}
+              />
+            )}
           </div>
         )}
         {IsPromptChainItem(activeNode) && (
@@ -182,23 +199,30 @@ export default function ChainNodeEditor({
           />
         )}
         {IsCodeChainItem(activeNode) && (
-          <div className='flex flex-col flex-1 w-full gap-2 px-6 overflow-y-auto'>
-            <Label>Code Editor</Label>
-            <RichTextInput
-              key={activeItemIndex}
-              placeholder={`'Hello World!'`}
-              value={isEditing ? editedCode : activeNode.code}
-              setValue={setEditedCode}
-              preformatted
-            />
+          <div className='flex flex-col flex-1 w-full overflow-y-auto'>
+            <SingleTabHeader label='Code block' />
+            <div className='p-4'>
+              <PromptInput
+                key={activeItemIndex}
+                placeholder={`'Hello World!'`}
+                value={isEditing ? editedCode : activeNode.code}
+                setValue={setEditedCode}
+                preformatted
+              />
+            </div>
           </div>
         )}
         {activeNode === OutputNode && (
-          <div className='flex flex-col flex-1 w-full gap-2 -mt-6 overflow-y-auto'>
-            <RunTimeline runs={partialRuns} isRunning={isRunning} />
+          <div className='flex flex-col flex-1 w-full overflow-y-auto'>
+            <RunTimeline
+              runs={[...activeVersion.runs, ...partialRuns]}
+              activeItem={chain}
+              version={activeVersion}
+              isRunning={isRunning}
+            />
           </div>
         )}
-        <div className='flex items-center justify-between w-full gap-4 px-6'>
+        <div className='flex items-center justify-between w-full gap-4 px-4'>
           {IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode) ? (
             <OutputMapper
               key={activeNode.output}
@@ -209,7 +233,15 @@ export default function ChainNodeEditor({
           ) : (
             <div />
           )}
-          <TestButtons runTitle='Run Chain' variables={variables} inputValues={inputValues} callback={runChain} />
+          <TestButtons
+            runTitle='Run Chain'
+            variables={variables}
+            inputValues={inputValues}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
+            disabled={!items.length}
+            callback={runChain}
+          />
         </div>
       </div>
     </>

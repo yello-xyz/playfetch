@@ -17,7 +17,7 @@ export default function TableCell({
   active?: boolean
   callback?: () => void
 }) {
-  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-100 flex'
+  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-200 flex'
   const borderClass = header
     ? first
       ? 'border-y border-l'
@@ -29,8 +29,8 @@ export default function TableCell({
     : last
     ? 'border-b border-r'
     : 'border-b'
-  const textClass = header ? 'font-medium text-gray-800' : ''
-  const bgClass = active ? 'bg-blue-25' : ''
+  const textClass = header ? 'font-medium text-gray-700' : ''
+  const bgClass = active ? 'bg-blue-25' : 'bg-white'
   const layoutClass = center ? 'flex justify-center' : ''
   const cursorClass = callback ? 'cursor-pointer' : ''
   const className = `${baseClass} ${borderClass} ${textClass} ${bgClass} ${layoutClass} ${cursorClass}`

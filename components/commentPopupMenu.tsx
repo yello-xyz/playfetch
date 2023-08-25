@@ -7,7 +7,7 @@ import commentBadgeIcon from '@/public/commentBadge.svg'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { useRef, useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshActiveItem } from './refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from './userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
@@ -147,12 +147,12 @@ export function CommentInput({
 
   const user = useLoggedInUser()
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
 
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(versionID, trimmedComment, selection, runID, startIndex).then(_ => refreshPrompt())
+      api.addComment(versionID, trimmedComment, selection, runID, startIndex).then(_ => refreshActiveItem())
       callback?.()
     }
   }

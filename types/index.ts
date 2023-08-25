@@ -28,7 +28,6 @@ export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {
   endpoints: ResolvedEndpoint[]
-  inputValues: InputValues
   availableFlavors: string[]
   prompts: Prompt[]
   chains: Chain[]
@@ -44,10 +43,9 @@ export type Prompt = {
   timestamp: string
 }
 
-export type VersionWithReferences = Version & { usedInChain: boolean; usedAsEndpoint: boolean }
-
 export type ActivePrompt = Prompt & {
-  versions: VersionWithReferences[]
+  versions: PromptVersion[]
+  inputValues: InputValues
   users: User[]
   availableLabels: string[]
 }
@@ -57,9 +55,17 @@ export type ChainItemWithInputs = ChainItem & { inputs: string[] }
 export type Chain = {
   id: number
   name: string
-  items: ChainItemWithInputs[]
+  lastVersionID: number
+  referencedItemIDs: number[]
   projectID: number
   timestamp: string
+}
+
+export type ActiveChain = Chain & {
+  versions: ChainVersion[]
+  inputValues: InputValues
+  users: User[]
+  availableLabels: string[]
 }
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
@@ -84,18 +90,25 @@ export type AvailableProvider = {
   truncatedAPIKey?: string
 }
 
-export type Version = {
+type Version = {
   id: number
-  promptID: number
+  parentID: number
   userID: number
   previousID?: number
   timestamp: string
-  prompt: string
-  config: PromptConfig
+  prompt?: string
+  config?: PromptConfig
+  items?: ChainItemWithInputs[]
   labels: string[]
   runs: Run[]
   comments: Comment[]
 }
+
+export type RawPromptVersion = Version & { prompt: string; config: PromptConfig }
+export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
+
+export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
+export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
 
 export type PromptInputs = { [name: string]: string }
 
@@ -127,6 +140,11 @@ export type CodeConfig = {
   output?: string
 }
 
+export type TestConfig = {
+  mode: 'custom' | 'first' | 'last' | 'random' | 'all'
+  rowIndices: number[]
+}
+
 export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[] }
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
 export type ChainItem = PromptChainItem | CodeChainItem
@@ -137,7 +155,7 @@ export type Endpoint = {
   userID: number
   projectID: number
   parentID: number
-  versionID?: number
+  versionID: number
   timestamp: string
   urlPath: string
   flavor: string
@@ -158,8 +176,8 @@ export type ResolvedPromptEndpoint = ResolvedEndpoint & {
 export const EndpointParentsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
 export const FindParentInProject = (parentID: number | undefined, project: ActiveProject) =>
   EndpointParentsInProject(project).find(item => item.id === parentID)!
-export const EndpointParentIsPrompt = (parent: Chain | Prompt | undefined): parent is Prompt =>
-  !!parent && 'lastVersionID' in parent
+export const EndpointParentIsChain = (parent: Chain | Prompt | undefined): parent is Chain =>
+  !!parent && 'referencedItemIDs' in parent
 
 export type Usage = {
   endpointID: number
@@ -175,7 +193,6 @@ export type CommentAction = 'addLabel' | 'removeLabel'
 
 export type Comment = {
   userID: number
-  promptID: number
   versionID: number
   text: string
   timestamp: string
@@ -188,6 +205,10 @@ export type Comment = {
 export type LogEntry = {
   timestamp: string
   endpointID: number
+  urlPath: string
+  flavor: string
+  parentID: number
+  versionID: number
   cost: number
   duration: number
   inputs: PromptInputs

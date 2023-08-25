@@ -32,13 +32,13 @@ indexes:
 
 - kind: version
   properties:
-  - name: promptID
+  - name: parentID
   - name: createdAt
     direction: desc
 
 - kind: run
   properties:
-  - name: promptID
+  - name: parentID
   - name: createdAt
     direction: desc
 
@@ -56,7 +56,7 @@ indexes:
 
 - kind: comment
   properties:
-  - name: promptID
+  - name: parentID
   - name: createdAt
     direction: desc
 

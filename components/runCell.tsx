@@ -1,7 +1,7 @@
-import { ActivePrompt, Comment, PartialRun, Version } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, Comment, PartialRun, PromptVersion } from '@/types'
 import { MouseEvent, useEffect, useState } from 'react'
 import { CommentsPopup } from './commentPopupMenu'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellCommentInputPopup from './runCellCommentInputPopup'
@@ -35,18 +35,16 @@ export default function RunCell({
   identifier,
   run,
   version,
-  prompt,
+  activeItem,
   containerRect,
   scrollTop,
-  isLast,
 }: {
   identifier: string
   run: PartialRun
-  version?: Version
-  prompt?: ActivePrompt
+  version?: PromptVersion | ChainVersion
+  activeItem?: ActivePrompt | ActiveChain
   containerRect?: DOMRect
   scrollTop: number
-  isLast: boolean
 }) {
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
@@ -84,7 +82,7 @@ export default function RunCell({
 
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
   const selectionRanges = comments
-    .filter(comment => comment.startIndex && comment.quote)
+    .filter(comment => comment.startIndex !== undefined && comment.quote)
     .map(comment => ({
       startIndex: comment.startIndex!,
       endIndex: comment.startIndex! + comment.quote!.length,
@@ -115,28 +113,27 @@ export default function RunCell({
     }
   }
 
-  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg'
+  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
-  const shimmerClass = isLast && !run.timestamp ? 'animate-shimmer' : ''
 
   return (
-    <div className={`${baseClass} ${colorClass} ${shimmerClass}`} onMouseDown={closePopups}>
-      <RunCellHeader run={run} prompt={prompt} containerRect={containerRect} />
+    <div className={`${baseClass} ${colorClass}`} onMouseDown={closePopups}>
+      <RunCellHeader run={run} activeItem={activeItem} containerRect={containerRect} />
       <RunCellBody
         identifier={identifier}
         output={run.output}
         selectionRanges={selectionRanges}
         onSelectComment={selectComment}
       />
-      {popupPosition && popupComments && containerRect && version && prompt && (
+      {popupPosition && popupComments && containerRect && version && activeItem && (
         <CommentsPopup
           comments={popupComments}
           versionID={version.id}
           selection={popupComments[0].text}
           runID={run.id}
           startIndex={popupComments[0].startIndex}
-          users={prompt.users}
-          labelColors={AvailableLabelColorsForPrompt(prompt)}
+          users={activeItem.users}
+          labelColors={AvailableLabelColorsForItem(activeItem)}
           isMenuExpanded={!!popupComments}
           setMenuExpanded={() => setPopupComments(undefined)}
           callback={closeCommentsPopup}

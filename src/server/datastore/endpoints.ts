@@ -5,6 +5,7 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
+  getEntityKeys,
   getFilteredEntities,
   getFilteredEntity,
   getID,
@@ -14,7 +15,7 @@ import {
 import { getUniqueNameWithFormat, getVerifiedUserPromptData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
-import { getVerifiedUserChainData } from './chains'
+import { getVerifiedUserChainData, getVerifiedUserPromptOrChainData } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -43,12 +44,10 @@ async function ensureEndpointAccess(
   endpointData: {
     projectID: number
     parentID: number
-    versionID: number | null
+    versionID: number
   }
 ) {
-  const data = endpointData.versionID
-    ? await getVerifiedUserPromptData(userID, endpointData.parentID)
-    : await getVerifiedUserChainData(userID, endpointData.parentID)
+  const data = await getVerifiedUserPromptOrChainData(userID, endpointData.parentID)
   if (data.projectID !== endpointData.projectID) {
     throw new Error(
       `Item with ID ${endpointData.parentID} does not belong to project with ID ${endpointData.projectID}`
@@ -91,7 +90,7 @@ export async function saveEndpoint(
   userID: number,
   projectID: number,
   parentID: number,
-  versionID: number | null,
+  versionID: number,
   name: string,
   flavor: string,
   useCache: boolean,
@@ -135,7 +134,7 @@ export async function updateEndpointForUser(
   endpointID: number,
   enabled: boolean,
   parentID: number,
-  versionID: number | null,
+  versionID: number,
   urlPath: string,
   flavor: string,
   useCache: boolean,
@@ -158,7 +157,7 @@ export async function updateEndpointForUser(
       endpointData.createdAt,
       useCache,
       useStreaming,
-      getID(endpointData)
+      endpointID
     )
   )
 }
@@ -166,7 +165,8 @@ export async function updateEndpointForUser(
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
   const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
   await ensureEndpointAccess(userID, endpointData)
-  const keysToDelete = [buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
+  const logEntryKeys = await getEntityKeys(Entity.LOG, 'endpointID', endpointID)
+  const keysToDelete = [...logEntryKeys, buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
   await getDatastore().delete(keysToDelete)
 }
 
@@ -175,7 +175,7 @@ const toEndpointData = (
   userID: number,
   projectID: number,
   parentID: number,
-  versionID: number | null,
+  versionID: number,
   urlPath: string,
   flavor: string,
   createdAt: Date,
@@ -205,7 +205,7 @@ export const toEndpoint = (data: any): Endpoint => ({
   userID: data.userID,
   projectID: data.projectID,
   parentID: data.parentID,
-  versionID: data.versionID ?? null,
+  versionID: data.versionID,
   timestamp: getTimestamp(data),
   urlPath: data.urlPath,
   flavor: data.flavor,

@@ -1,7 +1,7 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
-import { PromptInputs, User, RunConfig, Version, CodeConfig } from '@/types'
+import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
@@ -31,7 +31,7 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 
 type CallbackType = (
   index: number,
-  version: Version | null,
+  version: RawPromptVersion | null,
   response: {
     result?: any
     output?: string
@@ -46,6 +46,7 @@ type CallbackType = (
 
 export const runChainConfigs = async (
   userID: number,
+  version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   useCache: boolean,
@@ -62,19 +63,23 @@ export const runChainConfigs = async (
   for (const [index, config] of configs.entries()) {
     const stream = (chunk: string) => streamChunk?.(index, chunk)
     if (isRunConfig(config)) {
-      const version = await getTrustedVersion(config.versionID)
-      let prompt = resolvePrompt(version.prompt, inputs, useCamelCase)
+      const promptVersion = (
+        config.versionID === version.id ? version : await getTrustedVersion(config.versionID)
+      ) as RawPromptVersion
+      let prompt = resolvePrompt(promptVersion.prompt, inputs, useCamelCase)
       runningContext += prompt
       if (config.includeContext) {
         prompt = runningContext
       }
-      const runResponse = await runWithTimer(runPromptWithConfig(userID, prompt, version.config, useCache, stream))
+      const runResponse = await runWithTimer(
+        runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream)
+      )
       const output = runResponse.output
       result = runResponse.result
       if (runResponse.failed) {
         stream(runResponse.error)
       }
-      await callback(index, version, runResponse)
+      await callback(index, promptVersion, runResponse)
       if (runResponse.failed) {
         break
       } else {
@@ -99,31 +104,56 @@ export const runChainConfigs = async (
   return result
 }
 
+export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
+  version.items ?? [{ versionID: version.id }]
+
 async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
-  const configs: (RunConfig | CodeConfig)[] = req.body.configs
+  const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
+
+  const version = await getTrustedVersion(versionID)
+  const configs = loadConfigsFromVersion(version)
+
+  let totalCost = 0
+  let totalDuration = 0
+  const updateChainVersion = version.items
+    ? (index: number, inputs: PromptInputs, output: string, cost: number, duration: number) => {
+        totalCost += cost
+        totalDuration += duration
+        if (index === configs.length - 1) {
+          saveRun(user.id, version.parentID, version.id, inputs, output, new Date(), totalCost, totalDuration, [])
+        }
+      }
+    : undefined
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
-  for (const [inputIndex, inputs] of multipleInputs.entries()) {
-    const offset = (index: number) => inputIndex * configs.length + index
-    await runChainConfigs(
-      user.id,
-      configs,
-      inputs,
-      false,
-      false,
-      (index, version, { output, cost, duration, failed }) => {
-        const createdAt = new Date()
-        sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
-        return version && output && !failed
-          ? saveRun(user.id, version.promptID, version.id, inputs, output, createdAt, cost, duration, [])
-          : Promise.resolve({})
-      },
-      (index, message) => sendData({ index: offset(index), message })
-    )
-  }
+  await Promise.all(
+    multipleInputs.map((inputs, inputIndex) => {
+      const offset = (index: number) => inputIndex * configs.length + index
+      return runChainConfigs(
+        user.id,
+        version,
+        configs,
+        inputs,
+        false,
+        false,
+        // TODO the appropriate inputs for the specific run should be passed in here as well.
+        (index, version, { output, cost, duration, failed }) => {
+          const createdAt = new Date()
+          sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
+          if (updateChainVersion && output && !failed) {
+            updateChainVersion(index, inputs, output, cost, duration)
+          }
+          return version && output && !failed
+            ? saveRun(user.id, version.parentID, version.id, inputs, output, createdAt, cost, duration, [])
+            : Promise.resolve({})
+        },
+        (index, message) => sendData({ index: offset(index), message })
+      )
+    })
+  )
 
   res.end()
 }

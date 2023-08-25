@@ -3,18 +3,10 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
-import { CodeConfig, Endpoint, PromptInputs, RunConfig } from '@/types'
-import { runChainConfigs } from '../runChain'
-import { getChainItems } from '@/src/server/datastore/chains'
+import { PromptInputs } from '@/types'
+import { loadConfigsFromVersion, runChainConfigs } from '../runChain'
 import { saveLogEntry } from '@/src/server/datastore/logs'
-
-const loadConfigsFromEndpoint = async (endpoint: Endpoint): Promise<(RunConfig | CodeConfig)[]> => {
-  if (endpoint.versionID) {
-    return [{ versionID: endpoint.versionID }]
-  } else {
-    return getChainItems(endpoint.parentID)
-  }
-}
+import { getTrustedVersion } from '@/src/server/datastore/versions'
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -55,6 +47,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             saveLogEntry(
               endpoint.projectID,
               endpoint.id,
+              endpoint.urlPath,
+              endpoint.flavor,
+              endpoint.parentID,
+              endpoint.versionID,
               inputs,
               result ? { output: result } : {},
               error,
@@ -67,10 +63,12 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         }
 
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
-        const configs = await loadConfigsFromEndpoint(endpoint)
+        const version = await getTrustedVersion(endpoint.versionID)
+        const configs = loadConfigsFromVersion(version)
         const isLastRun = (index: number) => index === configs.length - 1
         const output = await runChainConfigs(
           endpoint.userID,
+          version,
           configs,
           inputs,
           endpoint.useCache,

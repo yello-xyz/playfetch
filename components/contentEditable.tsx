@@ -1,4 +1,4 @@
-import { RefObject, useState } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
 import ReactContentEditable from 'react-contenteditable'
 import sanitizeHtml from 'sanitize-html'
 
@@ -6,6 +6,8 @@ export default function ContentEditable({
   className,
   htmlValue,
   onChange,
+  onFocus,
+  onBlur,
   onLoadedRef,
   innerRef,
   allowedTags = [],
@@ -16,6 +18,8 @@ export default function ContentEditable({
   className?: string
   htmlValue: string
   onChange: (sanitizedHTMLValue: string) => void
+  onFocus?: () => void
+  onBlur?: () => void
   onLoadedRef?: (node: ReactContentEditable | HTMLDivElement | null) => void
   innerRef?: RefObject<HTMLElement>
   allowedTags?: string[]
@@ -31,10 +35,21 @@ export default function ContentEditable({
   }
 
   const updateRawHTML = (value: string) => {
-    const baseTags = ['br', 'div', 'span']
-    setRawHTML(sanitizeHtml(value, { allowedTags: baseTags }))
+    const allowedAndBaseTags = [...new Set([...allowedTags, 'br', 'div', 'span'])]
+    setRawHTML(sanitizeHtml(value, { allowedTags: allowedAndBaseTags, allowedAttributes }))
     onChange(sanitize(value))
   }
+
+  const ownRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const innerElement = (innerRef ?? ownRef).current
+    if (innerElement && onFocus) {
+      innerElement.onfocus = onFocus
+    }
+    if (innerElement && onBlur) {
+      innerElement.onblur = onBlur
+    }
+  }, [innerRef, onFocus, onBlur])
 
   return (
     <ReactContentEditable
@@ -43,7 +58,7 @@ export default function ContentEditable({
       placeholder={placeholder}
       html={rawHTML}
       onChange={event => updateRawHTML(event.currentTarget.innerHTML)}
-      innerRef={innerRef}
+      innerRef={innerRef ?? ownRef}
       ref={onLoadedRef}
     />
   )

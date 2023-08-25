@@ -6,7 +6,7 @@ export default function Icon(props: any) {
     <Image
       width={icon.width}
       height={icon.height}
-      className={`w-6 h-fit ${className ?? ''}`}
+      className={className}
       src={icon.src}
       alt={icon.src.split('/').slice(-1)[0].split('.')[0]}
       {...other}

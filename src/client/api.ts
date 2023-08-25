@@ -5,16 +5,21 @@ import {
   ActiveProject,
   RunConfig,
   ModelProvider,
-  Endpoint,
-  Chain,
   CodeConfig,
   ActiveWorkspace,
   Workspace,
-  Version,
   ChainItemWithInputs,
   LogEntry,
+  InputValues,
+  Prompt,
+  ActiveChain,
+  RawPromptVersion,
+  RawChainVersion,
+  Chain,
+  ActivePrompt,
 } from '@/types'
 import ClientRoute from '../../components/clientRoute'
+import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
 
@@ -106,8 +111,8 @@ const api = {
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },
-  getPromptVersions: function (promptID: number): Promise<Version[]> {
-    return post(this.getPromptVersions, { promptID })
+  getPrompt: function (promptID: number, activeProject: ActiveProject): Promise<ActivePrompt> {
+    return post(this.getPrompt, { promptID }).then(BuildActivePrompt(activeProject))
   },
   addPrompt: function (projectID: number): Promise<number> {
     return post(this.addPrompt, { projectID })
@@ -115,7 +120,7 @@ const api = {
   duplicatePrompt: function (promptID: number, targetProjectID?: number): Promise<number> {
     return post(this.duplicatePrompt, { promptID, targetProjectID })
   },
-  updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID?: number): Promise<number> {
+  updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID: number): Promise<number> {
     return post(this.updatePrompt, { promptID, prompt, config, versionID })
   },
   renamePrompt: function (promptID: number, name: string) {
@@ -124,14 +129,14 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  runPrompt: function (config: RunConfig, inputs: PromptInputs[]): Promise<StreamReader> {
-    return post(this.runChain, { configs: [config], inputs }, 'stream')
+  runPrompt: function (versionID: number, inputs: PromptInputs[]): Promise<StreamReader> {
+    return post(this.runChain, { versionID, inputs }, 'stream')
   },
-  runChain: function (configs: (RunConfig | CodeConfig)[], inputs: PromptInputs[]): Promise<StreamReader> {
-    return post(this.runChain, { configs, inputs }, 'stream')
+  runChain: function (versionID: number, inputs: PromptInputs[]): Promise<StreamReader> {
+    return post(this.runChain, { versionID, inputs }, 'stream')
   },
-  getChain: function (chainID: number): Promise<Chain> {
-    return post(this.getChain, { chainID })
+  getChain: function (chainID: number, activeProject: ActiveProject): Promise<ActiveChain> {
+    return post(this.getChain, { chainID }).then(BuildActiveChain(activeProject))
   },
   addChain: function (projectID: number): Promise<number> {
     return post(this.addChain, { projectID })
@@ -139,8 +144,8 @@ const api = {
   duplicateChain: function (chainID: number): Promise<number> {
     return post(this.duplicateChain, { chainID })
   },
-  updateChain: function (chainID: number, items: ChainItemWithInputs[]): Promise<number> {
-    return post(this.updateChain, { chainID, items })
+  updateChain: function (chainID: number, items: ChainItemWithInputs[], versionID: number): Promise<number> {
+    return post(this.updateChain, { chainID, items, versionID })
   },
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })
@@ -152,7 +157,7 @@ const api = {
     isEnabled: boolean,
     projectID: number,
     parentID: number,
-    versionID: number | undefined,
+    versionID: number,
     name: string,
     flavor: string,
     useCache: boolean,
@@ -173,7 +178,7 @@ const api = {
     endpointID: number,
     enabled: boolean,
     parentID: number,
-    versionID: number | undefined,
+    versionID: number,
     name: string,
     flavor: string,
     useCache: boolean,
@@ -205,8 +210,8 @@ const api = {
   toggleRunLabel: function (runID: number, projectID: number, label: string, checked: boolean) {
     return post(this.toggleRunLabel, { runID, projectID, label, checked })
   },
-  updateInputValues: function (projectID: number, name: string, values: string[]) {
-    return post(this.updateInputValues, { projectID, name, values })
+  updateInputValues: function (parentID: number, name: string, values: string[]) {
+    return post(this.updateInputValues, { parentID, name, values })
   },
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })

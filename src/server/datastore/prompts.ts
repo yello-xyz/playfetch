@@ -3,16 +3,18 @@ import {
   buildKey,
   getDatastore,
   getEntities,
+  getEntityKey,
   getEntityKeys,
   getID,
   getKeyedEntity,
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { saveVersionForUser, toVersion } from './versions'
-import { Prompt, Version } from '@/types'
+import { savePromptVersionForUser, toVersion } from './versions'
+import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripPromptSentinels } from '@/src/common/formatting'
+import { getTrustedParentInputValues } from './inputs'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -43,13 +45,23 @@ export const toPrompt = (data: any): Prompt => ({
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
-export async function getPromptVersionsForUser(userID: number, promptID: number): Promise<Version[]> {
-  await ensurePromptAccess(userID, promptID)
-  const versions = await getOrderedEntities(Entity.VERSION, 'promptID', promptID)
-  const runs = await getOrderedEntities(Entity.RUN, 'promptID', promptID)
-  const comments = await getOrderedEntities(Entity.COMMENT, 'promptID', promptID)
+export async function getPromptForUser(
+  userID: number,
+  promptID: number
+): Promise<{ prompt: Prompt; versions: RawPromptVersion[]; inputValues: InputValues }> {
+  const promptData = await getVerifiedUserPromptData(userID, promptID)
 
-  return versions.map(version => toVersion(version, runs, comments)).reverse()
+  const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
+  const runs = await getOrderedEntities(Entity.RUN, 'parentID', promptID)
+  const comments = await getOrderedEntities(Entity.COMMENT, 'parentID', promptID)
+
+  const inputValues = await getTrustedParentInputValues(promptID)
+
+  return {
+    prompt: toPrompt(promptData),
+    versions: versions.map(version => toVersion(version, runs, comments) as RawPromptVersion).reverse(),
+    inputValues,
+  }
 }
 
 export const getUniqueNameWithFormat = async (
@@ -87,7 +99,7 @@ export async function addPromptForUser(userID: number, projectID: number, name =
   const createdAt = new Date()
   const promptData = toPromptData(projectID, uniqueName, 0, createdAt, createdAt)
   await getDatastore().save(promptData)
-  const versionID = await saveVersionForUser(userID, getID(promptData))
+  const versionID = await savePromptVersionForUser(userID, getID(promptData))
   await updateProjectLastEditedAt(projectID)
   return { promptID: getID(promptData), versionID }
 }
@@ -104,11 +116,11 @@ export async function duplicatePromptForUser(
   const projectID = targetProjectID ?? promptData.projectID
   const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptData.name)
   const lastVersion = await getKeyedEntity(Entity.VERSION, promptData.lastVersionID)
-  await saveVersionForUser(userID, newPromptID, lastVersion.prompt, JSON.parse(lastVersion.config), versionID)
+  await savePromptVersionForUser(userID, newPromptID, lastVersion.prompt, JSON.parse(lastVersion.config), versionID)
   return newPromptID
 }
 
-export async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
+async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(
       promptData.projectID,
@@ -138,8 +150,19 @@ export async function augmentPromptDataWithNewVersion(
   await updatePrompt({ ...promptData, lastVersionID: newVersionID, name: newPromptName }, true)
 }
 
-export const getVerifiedProjectScopedData = async (userID: number, entity: Entity, id: number) => {
-  const data = await getKeyedEntity(entity, id)
+export async function updatePromptOnDeletedVersion(promptID: number, newLastVersionID: number) {
+  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  await updatePrompt({ ...promptData, lastVersionID: newLastVersionID }, true)
+}
+
+export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {
+  let data
+  for (const entity of entities) {
+    data = await getKeyedEntity(entity, id)
+    if (data) {
+      break
+    }
+  }
   if (!data) {
     throw new Error(`Entity with ID ${id} does not exist or user has no access`)
   }
@@ -148,11 +171,9 @@ export const getVerifiedProjectScopedData = async (userID: number, entity: Entit
 }
 
 export const getVerifiedUserPromptData = async (userID: number, promptID: number) =>
-  getVerifiedProjectScopedData(userID, Entity.PROMPT, promptID)
+  getVerifiedProjectScopedData(userID, [Entity.PROMPT], promptID)
 
-export async function ensurePromptAccess(userID: number, promptID: number) {
-  await getVerifiedUserPromptData(userID, promptID)
-}
+export const ensurePromptAccess = (userID: number, promptID: number) => getVerifiedUserPromptData(userID, promptID)
 
 export async function updatePromptName(userID: number, promptID: number, name: string) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
@@ -160,18 +181,21 @@ export async function updatePromptName(userID: number, promptID: number, name: s
 }
 
 export async function deletePromptForUser(userID: number, promptID: number) {
-  // TODO warn or even refuse when prompt has published endpoints or is used in chain.
   await ensurePromptAccess(userID, promptID)
-  const versionKeys = await getEntityKeys(Entity.VERSION, 'promptID', promptID)
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'parentID', promptID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', promptID)
-  const runKeys = await getEntityKeys(Entity.RUN, 'promptID', promptID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'promptID', promptID)
+
+  const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'parentID', promptID)
+  if (anyEndpointKey) {
+    throw new Error('Cannot delete prompt with published endpoints')
+  }
+
+  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', promptID)
+  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', promptID)
+  const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', promptID)
+  const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', promptID)
   await getDatastore().delete([
+    ...inputKeys,
     ...commentKeys,
     ...runKeys,
-    ...usageKeys,
-    ...endpointKeys,
     ...versionKeys,
     buildKey(Entity.PROMPT, promptID),
   ])

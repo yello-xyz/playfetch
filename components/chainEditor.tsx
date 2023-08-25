@@ -1,15 +1,25 @@
-import { ChainItem, Prompt } from '@/types'
+import { ActiveChain, ActiveProject, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
+import { SingleTabHeader } from './tabSelector'
+import VersionSelector from './versionSelector'
 
 export default function ChainEditor({
+  chain,
+  activeVersion,
+  setActiveVersion,
+  project,
   nodes,
   setNodes,
   activeIndex,
   setActiveIndex,
   prompts,
 }: {
+  chain: ActiveChain
+  activeVersion: ChainVersion
+  setActiveVersion: (version: ChainVersion) => void
+  project: ActiveProject
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
   activeIndex: number
@@ -23,7 +33,8 @@ export default function ChainEditor({
   const insertCodeBlock = () => insertItem({ code: '' })
 
   return (
-    <div className='flex flex-col items-center justify-between h-full bg-gray-25'>
+    <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
+      <SingleTabHeader label={chain.name} />
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
@@ -36,7 +47,7 @@ export default function ChainEditor({
           />
         ))}
       </div>
-      <div className='flex self-start gap-4 p-6'>
+      <div className='flex self-start w-full gap-4 p-6'>
         {activeIndex > 0 && (
           <>
             {prompts.length > 0 && (
@@ -47,6 +58,17 @@ export default function ChainEditor({
                 Remove Node
               </Button>
             )}
+            <div className='flex justify-end w-full'>
+              {chain.versions.length > 1 && (
+                <VersionSelector
+                  versions={chain.versions}
+                  endpoints={project.endpoints}
+                  activeVersion={activeVersion}
+                  setActiveVersion={setActiveVersion}
+                  hideLabels
+                />
+              )}
+            </div>
           </>
         )}
       </div>

@@ -1,14 +1,14 @@
-import { ActivePrompt, Comment, User, Version } from '@/types'
+import { ActivePrompt, Comment, User, PromptVersion } from '@/types'
 import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versionCell'
 import { UserAvatar } from './userSidebarItem'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versionComparison'
 import { LabelForModel } from './modelSelector'
 import useFormattedDate from './useFormattedDate'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
 export default function CommentsPane({
   prompt,
@@ -19,16 +19,16 @@ export default function CommentsPane({
   prompt: ActivePrompt
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: Version, runID?: number) => void
+  onSelectComment: (version: PromptVersion, runID?: number) => void
 }) {
   const users = prompt.users
-  const labelColors = AvailableLabelColorsForPrompt(prompt)
+  const labelColors = AvailableLabelColorsForItem(prompt)
   const comments = prompt.versions
     .flatMap(version => version.comments)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   return showComments ? (
-    <div className='flex flex-col px-3 pb-3 border-l border-gray-200'>
+    <div className='flex flex-col h-full px-3 pb-3 border-l border-gray-200'>
       <div className='flex items-start justify-between py-5'>
         <span className='font-medium text-gray-800'>Comments</span>
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
@@ -59,8 +59,8 @@ export function CommentCell({
   comment: Comment
   user: User
   labelColors: Record<string, string>
-  versions?: Version[]
-  onSelect?: (version: Version, runID?: number) => void
+  versions?: PromptVersion[]
+  onSelect?: (version: PromptVersion, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 

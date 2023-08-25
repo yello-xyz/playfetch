@@ -1,13 +1,12 @@
 import {
   ActiveProject,
   Chain,
-  EndpointParentIsPrompt,
+  EndpointParentIsChain,
   EndpointParentsInProject,
   FindParentInProject,
   Prompt,
   ResolvedEndpoint,
 } from '@/types'
-import Label from './label'
 import { Fragment, ReactNode } from 'react'
 import Checkbox from './checkbox'
 import addIcon from '@/public/add.svg'
@@ -23,7 +22,7 @@ export default function EndpointsTable({
   setActiveEndpoint,
   onAddEndpoint,
 }: {
-  tabSelector: ReactNode
+  tabSelector: (children?: ReactNode) => ReactNode
   project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
@@ -33,32 +32,33 @@ export default function EndpointsTable({
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
-    <>
-      <div className='flex items-center justify-between w-full'>
-        {tabSelector}
-        {onAddEndpoint && (
+    <div className='flex flex-col h-full bg-gray-25'>
+      {tabSelector(
+        onAddEndpoint && (
           <div
-            className='flex items-center gap-0.5 text-gray-800 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5'
+            className='flex items-center gap-0.5 text-gray-700 cursor-pointer rounded-lg hover:bg-gray-50 pl-1 pr-2 py-0.5 -my-0.5'
             onClick={onAddEndpoint}>
             <Icon icon={addIcon} />
             New Endpoint
           </div>
+        )
+      )}
+      <div className='flex flex-col w-full h-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'>
+        {groups.length > 0 ? (
+          groups.map((group, index) => (
+            <EndpointsGroup
+              key={index}
+              parent={FindParentInProject(group[0].parentID, project)}
+              endpoints={group}
+              activeEndpoint={activeEndpoint}
+              setActiveEndpoint={setActiveEndpoint}
+            />
+          ))
+        ) : (
+          <EmptyTable onAddEndpoint={onAddEndpoint} />
         )}
       </div>
-      {groups.length > 0 ? (
-        groups.map((group, index) => (
-          <EndpointsGroup
-            key={index}
-            parent={FindParentInProject(group[0].parentID, project)}
-            endpoints={group}
-            activeEndpoint={activeEndpoint}
-            setActiveEndpoint={setActiveEndpoint}
-          />
-        ))
-      ) : (
-        <EmptyTable onAddEndpoint={onAddEndpoint} />
-      )}
-    </>
+    </div>
   )
 }
 
@@ -75,11 +75,11 @@ function EndpointsGroup({
 }) {
   return (
     <>
-      <div className='flex items-center gap-1 mt-4 text-gray-700'>
-        <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
+      <div className='flex items-center gap-1 text-gray-700 '>
+        <Icon icon={EndpointParentIsChain(parent) ? chainIcon : promptIcon} />
         {parent.name}
       </div>
-      <div className={`grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]`}>
+      <div className='mb-4 grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>
         <TableHeader first>Enabled</TableHeader>
         <TableHeader>Endpoint</TableHeader>
         <TableHeader>Environment</TableHeader>
@@ -128,17 +128,17 @@ function EndpointsGroup({
 
 function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
   const AddPromptLink = ({ label }: { label: string }) => (
-    <span className='font-medium text-blue-500 cursor-pointer' onClick={onAddEndpoint}>
+    <span className='font-medium text-blue-400 cursor-pointer' onClick={onAddEndpoint}>
       {label}
     </span>
   )
 
   return (
-    <div className='w-full h-full'>
-      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+    <div className='w-full h-full pb-4'>
+      <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-50'>
         <span className='font-medium'>No Endpoints</span>
 
-        <span className='text-xs text-center text-gray-400 w-60'>
+        <span className='text-sm text-center text-gray-400 w-60'>
           {onAddEndpoint ? (
             <span>
               Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.

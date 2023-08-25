@@ -1,11 +1,5 @@
-import { useState } from 'react'
-import {
-  ActiveProject,
-  ActivePrompt,
-  EndpointParentIsPrompt,
-  EndpointParentsInProject,
-  FindParentInProject,
-} from '@/types'
+import { useEffect, useState } from 'react'
+import { ActiveChain, ActiveProject, ActivePrompt, EndpointParentsInProject, FindParentInProject } from '@/types'
 import api from '../src/client/api'
 import Label from './label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
@@ -13,13 +7,11 @@ import Checkbox from './checkbox'
 import DropdownMenu from './dropdownMenu'
 import PickNameDialog from './pickNameDialog'
 import VersionSelector from './versionSelector'
-import { useInitialState } from './useInitialState'
+import useInitialState from './useInitialState'
 import useModalDialogPrompt from './modalDialogContext'
 import TextInput from './textInput'
-import { AvailableLabelColorsForPrompt } from './labelPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import Button, { PendingButton } from './button'
-import collapseIcon from '@/public/collapse.svg'
-import IconButton from './iconButton'
 
 export type EndpointSettings = {
   id: number | undefined
@@ -35,20 +27,20 @@ export type EndpointSettings = {
 export default function EndpointSettingsPane({
   endpoint,
   project,
-  prompt,
+  activeParent,
   onSelectParentID,
+  onSelectVersionIndex,
   isEditing,
   setEditing,
-  onCollapse,
   onRefresh,
 }: {
   endpoint: EndpointSettings
   project: ActiveProject
-  prompt?: ActivePrompt
+  activeParent?: ActivePrompt | ActiveChain
   onSelectParentID: (parentID?: number) => void
+  onSelectVersionIndex: (versionIndex: number) => void
   isEditing: boolean
   setEditing: (isEditing: boolean) => void
-  onCollapse?: () => void
   onRefresh: (newEndpointID?: number) => Promise<void>
 }) {
   const [isEnabled, setEnabled] = useInitialState(endpoint.enabled)
@@ -72,15 +64,14 @@ export default function EndpointSettingsPane({
 
   const updateParentID = (parentID?: number) => {
     const parent = FindParentInProject(parentID, project)
-    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     setParentID(parentID)
-    setVersionID(versionID)
+    setVersionID(parent.lastVersionID)
     onSelectParentID(parentID)
   }
 
   if (isDirty && !isEditing) {
     setEnabled(endpoint.enabled)
-    updateParentID(endpoint.parentID)
+    setParentID(endpoint.parentID)
     setVersionID(endpoint.versionID)
     setURLPath(endpoint.urlPath)
     setFlavor(endpoint.flavor)
@@ -107,10 +98,10 @@ export default function EndpointSettingsPane({
   }
 
   const parents = EndpointParentsInProject(project)
-  const parent = FindParentInProject(parentID, project)
-
-  const versions = prompt?.versions ?? []
+  const versions = activeParent?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
+
+  useEffect(() => onSelectVersionIndex(versionIndex), [onSelectVersionIndex, versionIndex])
 
   const publishEndpoint = async () => {
     setSaving(true)
@@ -118,7 +109,7 @@ export default function EndpointSettingsPane({
       isEnabled,
       project.id,
       parentID!,
-      versionID,
+      versionID!,
       urlPath,
       flavor!,
       useCache,
@@ -139,7 +130,7 @@ export default function EndpointSettingsPane({
           endpoint.id!,
           isEnabled,
           parentID!,
-          versionID,
+          versionID!,
           urlPath,
           flavor!,
           useCache,
@@ -170,46 +161,35 @@ export default function EndpointSettingsPane({
   }
 
   const disabled = !isEditing || isSaving
-  const isValidConfig =
-    !!parentID && (!!versionID || !EndpointParentIsPrompt(parent)) && !!flavor && CheckValidURLPath(urlPath)
+  const isValidConfig = !!parentID && !!versionID && !!flavor && CheckValidURLPath(urlPath)
 
+  const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <>
-      <div className='flex items-center justify-between w-full -mt-0.5 -mb-4'>
-        <Label>
-          {endpoint.id && parent
-            ? `${parent.name}${versionIndex >= 0 ? ` (Version ${versionIndex + 1})` : ''}`
-            : 'New Endpoint'}
-        </Label>
-        {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
-      </div>
-      <div className='grid w-full grid-cols-[160px_minmax(0,1fr)] items-center gap-4 p-6 py-4 bg-gray-50 rounded-lg'>
+      <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border-gray-200 border rounded-lg`}>
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>
-        <DropdownMenu disabled={disabled} value={parentID} onChange={value => updateParentID(Number(value))}>
-          {!parentID && <option value={parentID}>Select a Prompt or Chain</option>}
+        <DropdownMenu disabled={disabled} value={parentID ?? 0} onChange={value => updateParentID(Number(value))}>
+          {!parentID && <option value={0}>Select a Prompt or Chain</option>}
           {parents.map((parent, index) => (
             <option key={index} value={parent.id}>
               {parent.name}
             </option>
           ))}
         </DropdownMenu>
-        {(!parent || EndpointParentIsPrompt(parent)) && (
-          <>
-            <Label disabled={disabled} className='self-start mt-2'>
-              Version
-            </Label>
-            <VersionSelector
-              versions={versions}
-              endpoints={project.endpoints}
-              activeVersion={versions[versionIndex]}
-              setActiveVersion={version => setVersionID(version.id)}
-              labelColors={prompt ? AvailableLabelColorsForPrompt(prompt) : {}}
-              disabled={disabled}
-            />
-          </>
-        )}
+        <Label disabled={disabled} className='self-start mt-2'>
+          Version
+        </Label>
+        <VersionSelector
+          versions={versions}
+          endpoints={project.endpoints}
+          activeVersion={versions[versionIndex]}
+          setActiveVersion={version => setVersionID(version.id)}
+          labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
+          hideReferences
+          disabled={disabled}
+        />
         <Label disabled={disabled}>Name</Label>
         <TextInput
           placeholder='endpointName'
@@ -218,8 +198,8 @@ export default function EndpointSettingsPane({
           setValue={value => setURLPath(ToCamelCase(value))}
         />
         <Label disabled={disabled}>Environment</Label>
-        <DropdownMenu disabled={disabled} value={flavor} onChange={updateFlavor}>
-          {!flavor && <option value={flavor}>Select environment</option>}
+        <DropdownMenu disabled={disabled} value={flavor ?? 0} onChange={updateFlavor}>
+          {!flavor && <option value={0}>Select environment</option>}
           {project.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
@@ -259,13 +239,13 @@ export default function EndpointSettingsPane({
             Cancel
           </Button>
           {endpoint.id ? (
-            <PendingButton disabled={!isValidConfig || !isDirty || isSaving} onClick={saveChanges}>
-              Save Changes
-            </PendingButton>
+            <PendingButton
+              title='Save Changes'
+              disabled={!isValidConfig || !isDirty || isSaving}
+              onClick={saveChanges}
+            />
           ) : (
-            <PendingButton disabled={!isValidConfig || isSaving} onClick={publishEndpoint}>
-              Create Endpoint
-            </PendingButton>
+            <PendingButton title='Create Endpoint' disabled={!isValidConfig || isSaving} onClick={publishEndpoint} />
           )}
         </div>
       )}

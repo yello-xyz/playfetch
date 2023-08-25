@@ -100,10 +100,10 @@ export default function UserSidebarItem() {
 
   return (
     <div
-      className='flex pl-4 gap-2.5 items-center relative cursor-pointer'
+      className='flex pl-3 pr-1.5 py-2 gap-2.5 items-center relative cursor-pointer rounded-lg hover:bg-gray-100 '
       onClick={() => setMenuExpanded(!isMenuExpanded)}>
       <UserAvatar user={user} />
-      <span className='flex-1 font-semibold'>{user.fullName}</span>
+      <span className='flex-1 font-semibold text-dark-gray-700'>{user.fullName}</span>
       <div className='flex'>
         <Icon icon={chevronIcon} />
         {isMenuExpanded && (
@@ -113,29 +113,31 @@ export default function UserSidebarItem() {
                 <div className='flex items-center gap-2.5 pb-2 px-2'>
                   <UserAvatar user={user} />
                   <div className='flex flex-col min-w-0'>
-                    <span className='overflow-hidden font-semibold text-ellipsis select-none'>{user.fullName}</span>
-                    <span className='overflow-hidden text-xs text-ellipsis text-gray-400 select-none'>
+                    <span className='overflow-hidden font-semibold select-none text-ellipsis text-dark-gray-700'>
+                      {user.fullName}
+                    </span>
+                    <span className='overflow-hidden text-xs select-none text-ellipsis text-dark-gray-400'>
                       {user.email}
                     </span>
                   </div>
                 </div>
                 <span
-                  className='py-1 px-2 leading-6 font-medium cursor-pointer text-gray-700 hover:bg-gray-50 rounded select-none'
+                  className='px-2 py-1 font-medium leading-6 rounded cursor-pointer select-none text-dark-gray-700 hover:bg-gray-50'
                   onClick={selectSettings}>
                   Settings
                 </span>
                 {user.isAdmin && (
                   <Link
                     href={ClientRoute.Admin}
-                    className='py-1 px-2 leading-6 w-full hover:bg-gray-50 rounded select-none'>
-                    <span className='font-medium cursor-pointer text-gray-700 '>Admin</span>
+                    className='w-full px-2 py-1 leading-6 rounded select-none hover:bg-gray-50'>
+                    <span className='font-medium cursor-pointer text-dark-gray-700'>Admin</span>
                   </Link>
                 )}
-                <div className='pb-1 pt-1'>
+                <div className='pt-1 pb-1'>
                   <div className='h-px bg-gray-200' />
                 </div>
                 <span
-                  className='py-1 px-2 leading-6 font-medium text-red-500 cursor-pointer hover:bg-red-50 rounded select-none'
+                  className='px-2 py-1 font-medium leading-6 text-red-500 rounded cursor-pointer select-none hover:bg-red-50'
                   onClick={logOut}>
                   Log out
                 </span>

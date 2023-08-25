@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntityIDs,
   getEntityKeys,
   getID,
   getKeyedEntities,
@@ -21,14 +20,14 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, deletePromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addPromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { toUser } from './users'
-import { getProjectInputValues } from './inputs'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
-import { deleteChainForUser, toChain } from './chains'
+import { toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
 import { StripPromptSentinels } from '@/src/common/formatting'
+import { Key } from '@google-cloud/datastore'
 
 export async function migrateProjects() {
   const datastore = getDatastore()
@@ -115,7 +114,6 @@ export async function getActiveProject(
 
   return {
     ...toProject(projectData, userID),
-    inputValues: await getProjectInputValues(projectID),
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? '', buildURL),
     prompts,
@@ -282,15 +280,39 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
     // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
     throw new Error('Cannot delete multi-user project')
   }
-  const chainIDs = await getEntityIDs(Entity.CHAIN, 'projectID', projectID)
-  for (const chainID of chainIDs) {
-    await deleteChainForUser(userID, chainID)
+
+  const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
+  const versionKeys = [] as Key[]
+  const runKeys = [] as Key[]
+  const commentKeys = [] as Key[]
+  const inputKeys = [] as Key[]
+  for (const promptID in promptKeys.map(key => getID({ key }))) {
+    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', promptID)))
+    runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', promptID)))
+    commentKeys.push(...(await getEntityKeys(Entity.COMMENT, 'parentID', promptID)))
+    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', promptID)))
   }
-  const promptIDs = await getEntityIDs(Entity.PROMPT, 'projectID', projectID)
-  for (const promptID of promptIDs) {
-    await deletePromptForUser(userID, promptID)
+
+  const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
+  for (const chainID in chainKeys.map(key => getID({ key }))) {
+    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', chainID)))
   }
-  const inputKeys = await getEntityKeys(Entity.INPUT, 'projectID', projectID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'parentID', projectID)
-  await getDatastore().delete([...accessKeys, ...usageKeys, ...inputKeys, buildKey(Entity.PROJECT, projectID)])
+
+  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
+  const usageKeys = await getEntityKeys(Entity.USAGE, 'projectID', projectID)
+  const logEntryKeys = await getEntityKeys(Entity.LOG, 'projectID', projectID)
+
+  await getDatastore().delete([
+    ...accessKeys,
+    ...inputKeys,
+    ...logEntryKeys,
+    ...usageKeys,
+    ...endpointKeys,
+    ...commentKeys,
+    ...runKeys,
+    ...versionKeys,
+    ...promptKeys,
+    ...chainKeys,
+    buildKey(Entity.PROJECT, projectID),
+  ])
 }

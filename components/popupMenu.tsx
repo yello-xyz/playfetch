@@ -45,7 +45,7 @@ export default function PopupMenu({
   return expanded ? (
     <div
       onClick={event => event.stopPropagation()}
-      className={`${className} cursor-default relative z-20 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm`}
+      className={`${className} cursor-default relative z-20 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm gap-0.5 select-none`}
       ref={menuRef}>
       {children}
     </div>
@@ -63,10 +63,10 @@ export function PopupMenuItem({
   destructive?: boolean
   separated?: boolean
 }) {
-  const baseClass = 'px-4 py-2 text-sm font-normal'
+  const baseClass = 'px-4 py-2 text-sm font-normal text-dark-gray-700'
   const destructiveClass = destructive ? 'text-red-500' : ''
-  const separatedClass = separated ? 'border-t border-gray-300' : ''
-  const hoverClass = destructive ? 'hover:bg-red-500 hover:text-white' : 'hover:bg-blue-600 hover:text-white'
+  const separatedClass = separated ? 'border-t border-gray-200' : ''
+  const hoverClass = destructive ? 'hover:bg-red-400 hover:text-white' : 'hover:bg-blue-400 hover:text-white'
 
   return (
     <div onClick={callback} className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass}`}>

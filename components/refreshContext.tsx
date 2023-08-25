@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react'
 
 type RefreshContextType = {
-  refreshPrompt?: (focusVersionID?: number) => Promise<void>
+  refreshActiveItem?: (focusVersionID?: number) => Promise<void>
 }
 
 export const RefreshContext = createContext<RefreshContextType>({})
 
-export const useRefreshPrompt = () => useContext(RefreshContext).refreshPrompt!
+export const useRefreshActiveItem = () => useContext(RefreshContext).refreshActiveItem!

@@ -1,19 +1,32 @@
 import { PromptInputs, Run } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp } from './datastore'
-import { ensurePromptAccess } from './prompts'
 import { processLabels } from './versions'
+import { ensurePromptOrChainAccess } from './chains'
 
-export async function migrateRuns() {
+export async function migrateRuns(postMerge: boolean) {
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    await updateRun({ ...runData })
+    await datastore.save(
+      toRunData(
+        runData.parentID ?? runData.promptID,
+        runData.versionID,
+        JSON.parse(runData.inputs),
+        runData.output,
+        runData.createdAt,
+        runData.cost,
+        runData.duration,
+        JSON.parse(runData.labels),
+        getID(runData),
+        postMerge && runData.parentID ? undefined : runData.promptID
+      )
+    )
   }
 }
 
 export async function saveRun(
   userID: number,
-  promptID: number,
+  parentID: number,
   versionID: number,
   inputs: PromptInputs,
   output: string,
@@ -22,8 +35,8 @@ export async function saveRun(
   duration: number,
   labels: string[]
 ): Promise<Run> {
-  await ensurePromptAccess(userID, promptID)
-  const runData = toRunData(promptID, versionID, inputs, output, createdAt, cost, duration, labels)
+  await ensurePromptOrChainAccess(userID, parentID)
+  const runData = toRunData(parentID, versionID, inputs, output, createdAt, cost, duration, labels)
   await getDatastore().save(runData)
   return {
     id: getID(runData),
@@ -41,7 +54,7 @@ const getVerifiedUserRunData = async (userID: number, runID: number) => {
   if (!runData) {
     throw new Error(`Run with ID ${runID} does not exist or user has no access`)
   }
-  await ensurePromptAccess(userID, runData.promptID)
+  await ensurePromptOrChainAccess(userID, runData.parentID)
   return runData
 }
 
@@ -58,7 +71,7 @@ export async function updateRunLabel(
     labels,
     userID,
     runData.versionID,
-    runData.promptID,
+    runData.parentID,
     projectID,
     label,
     checked,
@@ -72,7 +85,7 @@ export async function updateRunLabel(
 async function updateRun(runData: any) {
   await getDatastore().save(
     toRunData(
-      runData.promptID,
+      runData.parentID,
       runData.versionID,
       JSON.parse(runData.inputs),
       runData.output,
@@ -86,7 +99,7 @@ async function updateRun(runData: any) {
 }
 
 const toRunData = (
-  promptID: number,
+  parentID: number,
   versionID: number,
   inputs: PromptInputs,
   output: string,
@@ -94,11 +107,12 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
-  runID?: number
+  runID?: number,
+  promptID?: number // TODO safe to delete this after running next post-merge data migrations in prod
 ) => ({
   key: buildKey(Entity.RUN, runID),
   data: {
-    promptID,
+    parentID,
     versionID,
     inputs: JSON.stringify(inputs),
     output,
@@ -106,6 +120,7 @@ const toRunData = (
     cost,
     duration,
     labels: JSON.stringify(labels),
+    promptID,
   },
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })

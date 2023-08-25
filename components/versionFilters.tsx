@@ -1,4 +1,4 @@
-import { User, Version } from '@/types'
+import { User, PromptVersion } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import filterIcon from '@/public/filter.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -24,15 +24,15 @@ const isTextFilter = (filter: VersionFilter): filter is TextFilter => 'text' in 
 const userIDsFromFilters = (filters: VersionFilter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
 const labelsFromFilters = (filters: VersionFilter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
 
-export const BuildVersionFilter = (filters: VersionFilter[]) => (version: Version) => {
+export const BuildVersionFilter = (filters: VersionFilter[]) => (version: PromptVersion) => {
   const userIDs = userIDsFromFilters(filters)
-  const userFilter = (version: Version) => !userIDs.length || userIDs.includes(version.userID)
+  const userFilter = (version: PromptVersion) => !userIDs.length || userIDs.includes(version.userID)
 
   const labels = labelsFromFilters(filters)
-  const labelFilter = (version: Version) => !labels.length || version.labels.some(label => labels.includes(label))
+  const labelFilter = (version: PromptVersion) => !labels.length || version.labels.some(label => labels.includes(label))
 
   const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
-  const textFilter = (version: Version) =>
+  const textFilter = (version: PromptVersion) =>
     !textStrings.length || textStrings.every(filter => version.prompt.toLowerCase().includes(filter))
 
   return userFilter(version) && labelFilter(version) && textFilter(version)
@@ -48,15 +48,16 @@ export default function VersionFilters({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: Version[]
+  versions: PromptVersion[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
-  tabSelector: ReactNode
+  tabSelector: (children?: ReactNode) => ReactNode
 }) {
+  const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4 py-2' : ''
+
   return (
-    <div className='flex flex-col gap-2 -mt-0.5'>
-      <div className='flex items-center justify-between'>
-        {tabSelector}
+    <div className='flex flex-col'>
+      {tabSelector(
         <FilterButton
           users={users}
           labelColors={labelColors}
@@ -64,8 +65,8 @@ export default function VersionFilters({
           filters={filters}
           setFilters={setFilters}
         />
-      </div>
-      <div className='flex flex-wrap flex-1 gap-2 pb-2 text-xs text-gray-800'>
+      )}
+      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-800 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
             key={index}
@@ -103,7 +104,7 @@ function FilterCell({
       {isTextFilter(filter) && <TextFilterCell filter={filter} />}
       {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
       {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
-      <Icon className='w-[18px] h-fit cursor-pointer' icon={clearIcon} onClick={onClick} />
+      <Icon className='cursor-pointer' icon={clearIcon} onClick={onClick} />
     </div>
   )
 }
@@ -136,7 +137,7 @@ function FilterButton({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: Version[]
+  versions: PromptVersion[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
 }) {

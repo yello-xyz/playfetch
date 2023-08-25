@@ -1,4 +1,4 @@
-import { Version } from '@/types'
+import { PromptVersion } from '@/types'
 import simplediff from 'simplediff'
 
 type Span = { state: ComparisonState; content: string; tagged: boolean }
@@ -84,7 +84,13 @@ const tokenize = (prompt: string) => {
   return tokens
 }
 
-export default function VersionComparison({ version, compareVersion }: { version: Version; compareVersion?: Version }) {
+export default function VersionComparison({
+  version,
+  compareVersion,
+}: {
+  version: PromptVersion
+  compareVersion?: PromptVersion
+}) {
   const parts = compareVersion
     ? simplediff.diff(tokenize(compareVersion.prompt), tokenize(version.prompt))
     : [['=', [version.prompt]]]

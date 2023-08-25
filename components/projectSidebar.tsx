@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { ActiveProject, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -10,7 +10,7 @@ import { useState } from 'react'
 import IconButton from './iconButton'
 
 const Endpoints = 'endpoints'
-type ActiveItem = ActivePrompt | Chain | typeof Endpoints
+type ActiveItem = Prompt | Chain | typeof Endpoints
 
 export default function ProjectSidebar({
   activeProject,
@@ -37,9 +37,7 @@ export default function ProjectSidebar({
 }) {
   const reference = (item: Prompt | Chain) =>
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
-    activeProject.chains.find(chain =>
-      chain.items.some(chainItem => 'promptID' in chainItem && chainItem.promptID === item.id)
-    )
+    activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
 
   const actionButtonForProjectItem = (item: Prompt | Chain) => (
     <ProjectItemActionButton
@@ -106,10 +104,11 @@ function ProjectItemActionButton({
   onDelete: () => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
+  const iconClass = isMenuExpanded ? '' : 'hidden group-hover:block'
 
   return (
     <div className='relative'>
-      <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}

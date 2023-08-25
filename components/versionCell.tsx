@@ -1,13 +1,13 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { ActivePrompt, User, Version, VersionWithReferences } from '@/types'
+import { ActivePrompt, User, PromptVersion, ChainVersion } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
 import { UserAvatar } from './userSidebarItem'
 import CommentPopupMenu from './commentPopupMenu'
 import { LabelForModel } from './modelSelector'
-import chainIcon from '@/public/chain.svg'
-import endpointIcon from '@/public/endpoint.svg'
+import chainIcon from '@/public/chainSmall.svg'
+import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from './icon'
 
 const extractSelection = (identifier: string) => {
@@ -31,13 +31,13 @@ export default function VersionCell({
 }: {
   identifier: string
   labelColors: Record<string, string>
-  version: VersionWithReferences
+  version: PromptVersion
   index: number
   isLast: boolean
   isActiveVersion: boolean
-  compareVersion?: Version
+  compareVersion?: PromptVersion
   prompt: ActivePrompt
-  onSelect: (version: Version) => void
+  onSelect: (version: PromptVersion) => void
   containerRect?: DOMRect
 }) {
   const [selection, setSelection] = useState<string>()
@@ -51,16 +51,6 @@ export default function VersionCell({
 
   const user = prompt.users.find(user => user.id === version.userID)
 
-  const usedInChain = 'used in chain'
-  const usedAsEndpoint = 'used as endpoint'
-  const extraColor = 'bg-pink-100 text-black'
-  const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
-  const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
-  const extraLabels = [
-    ...(version.usedInChain ? [usedInChain] : []),
-    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
-  ]
-
   return (
     <VerticalBarWrapper
       id={identifier}
@@ -68,8 +58,8 @@ export default function VersionCell({
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
-        className={`flex-1 border rounded-lg cursor-pointer p-4 flex flex-col gap-2 mb-2.5 ${
-          isActiveVersion ? 'bg-blue-25 border-blue-50' : 'border-gray-300'
+        className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
+          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-300'
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
@@ -91,21 +81,45 @@ export default function VersionCell({
               labelColors={labelColors}
               containerRect={containerRect}
             />
-            <LabelPopupMenu containerRect={containerRect} prompt={prompt} item={version} />
+            <LabelPopupMenu containerRect={containerRect} activeItem={prompt} item={version} />
             <VersionPopupMenu containerRect={containerRect} version={version} />
           </div>
         </div>
         {user && prompt.projectID !== user.id && <UserDetails user={user} />}
-        <ItemLabels
-          labels={[...version.labels, ...extraLabels]}
-          colors={{ ...labelColors, ...extraColors }}
-          icons={extraIcons}
-        />
+        <VersionLabels version={version} colors={labelColors} />
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </div>
     </VerticalBarWrapper>
+  )
+}
+
+export function VersionLabels<T extends PromptVersion | ChainVersion>({
+  version,
+  colors,
+  hideReferences,
+}: {
+  version: T
+  colors: Record<string, string>
+  hideReferences?: boolean
+}) {
+  const usedInChain = 'used in Chain'
+  const usedAsEndpoint = 'used as Endpoint'
+  const extraColor = 'bg-pink-100 text-black'
+  const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
+  const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
+  const extraLabels = [
+    ...('usedInChain' in version && version.usedInChain ? [usedInChain] : []),
+    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
+  ]
+
+  return (
+    <ItemLabels
+      labels={[...version.labels, ...(hideReferences ? [] : extraLabels)]}
+      colors={{ ...colors, ...extraColors }}
+      icons={extraIcons}
+    />
   )
 }
 
@@ -139,9 +153,9 @@ export function ItemLabel({
   const color = colors[label] ?? 'bg-gray-400'
   const icon = icons[label]
   return (
-    <span className={`px-1.5 py-px text-xs flex items-center rounded ${color}`}>
-      {label}
+    <span className={`pl-1 pr-1.5 text-xs gap-0.5 flex items-center rounded ${color}`}>
       {icon ? <Icon icon={icon} className='-my-0.5' /> : null}
+      {label}
     </span>
   )
 }
@@ -171,20 +185,25 @@ function VerticalBarWrapper({
   const isFilled = bulletStyle === 'filled'
   const hasStroke = strokeStyle !== 'none'
   const isDashed = strokeStyle === 'dashed'
+  const isSingleItem = sequenceNumber === 1 && !hasStroke
 
   return (
     <div id={id} className='flex items-stretch gap-4'>
-      <div className='flex flex-col items-end w-10 gap-1'>
-        {sequenceNumber !== undefined && (
-          <div className='flex items-center gap-2'>
-            <span className={`${isFilled ? 'text-gray-800' : 'text-gray-400'} text-xs`}>{sequenceNumber}</span>
-            <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-800' : 'border border-gray-400'}`} />
-          </div>
-        )}
-        {hasStroke && (
-          <div className={`border-l flex-1 mb-1 pr-1 border-gray-400 ${isDashed ? 'border-dashed' : ''}`} />
-        )}
-      </div>
+      {!isSingleItem && (
+        <div className='flex flex-col items-end w-10 gap-1 -ml-2'>
+          {sequenceNumber !== undefined && (
+            <div className='flex items-center gap-2'>
+              <span className={`${isFilled ? 'text-dark-gray-700' : 'text-gray-300'} text-xs font-medium`}>
+                {sequenceNumber}
+              </span>
+              <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-700' : 'border border-gray-300'}`} />
+            </div>
+          )}
+          {hasStroke && (
+            <div className={`border-l flex-1 mb-1 pr-1 border-gray-300 ${isDashed ? 'border-dashed' : ''}`} />
+          )}
+        </div>
+      )}
       {children}
     </div>
   )

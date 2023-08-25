@@ -1,19 +1,20 @@
-import { ActivePrompt, PartialRun, Version } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
 import { useRef, useState } from 'react'
 import useScrollDetection from './useScrollDetection'
 import useContainerRect from './useContainerRect'
 import RunCell from './runCell'
+import { SingleTabHeader } from './tabSelector'
 
 export default function RunTimeline({
   runs = [],
   version,
-  prompt,
+  activeItem,
   activeRunID,
   isRunning,
 }: {
   runs: PartialRun[]
-  version?: Version
-  prompt?: ActivePrompt
+  version?: PromptVersion | ChainVersion
+  activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
   isRunning?: boolean
 }) {
@@ -29,7 +30,7 @@ export default function RunTimeline({
       setTimeout(() => {
         const element = document.getElementById(identifierForRunID(focusRunID))
         if (runs.length > 1 && element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.scrollIntoView({ behavior: 'auto', block: 'start' })
         }
       })
     }
@@ -50,19 +51,18 @@ export default function RunTimeline({
 
   return (
     <div ref={containerRef} className='relative flex flex-col h-full'>
-      <div className='font-medium text-gray-700 bg-white py-2.5 px-4 leading-6 border-b border-gray-200'>Responses</div>
+      <SingleTabHeader label='Responses' />
       {runs.length > 0 ? (
-        <div ref={scrollRef} className='flex flex-col flex-1 gap-3 px-4 pt-4 overflow-y-auto'>
-          {runs.map((run, index) => (
+        <div ref={scrollRef} className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
+          {runs.map(run => (
             <RunCell
               key={run.id}
               identifier={identifierForRunID(run.id)}
               run={run}
               version={version}
-              prompt={prompt}
+              activeItem={activeItem}
               containerRect={containerRect}
               scrollTop={scrollTop}
-              isLast={index === runs.length - 1}
             />
           ))}
         </div>
@@ -75,12 +75,12 @@ export default function RunTimeline({
 
 function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
   return isRunning ? (
-    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 bg-gray-100 rounded-lg'>
+    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-4 bg-gray-100 rounded-lg'>
       <span className='font-medium text-gray-600'>Waiting for responses…</span>
     </div>
   ) : (
-    <div className='flex flex-col gap-3 overflow-y-hidden px-4 pt-4'>
-      {Array.from({ length: 3 }).map((_, index) => (
+    <div className='flex flex-col gap-3 px-4 pt-4 overflow-y-hidden'>
+      {Array.from({ length: 3 }, (_, index) => (
         <div key={index} className='min-h-[320px] bg-gray-50 rounded-lg'></div>
       ))}
     </div>

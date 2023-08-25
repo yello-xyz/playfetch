@@ -1,12 +1,20 @@
-import { ActivePrompt, InputValues, ModelProvider, PromptConfig, PromptInputs, Version } from '@/types'
+import {
+  ActivePrompt,
+  InputValues,
+  ModelProvider,
+  PromptConfig,
+  PromptInputs,
+  TestConfig,
+  PromptVersion,
+} from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { Allotment } from 'allotment'
 
 export default function RunPromptTab({
   currentPrompt,
-  currentConfig,
+  currentPromptConfig,
   activePrompt,
   activeVersion,
   setActiveVersion,
@@ -14,24 +22,29 @@ export default function RunPromptTab({
   checkProviderAvailable,
   runPrompt,
   inputValues,
+  testConfig,
+  setTestConfig,
   tabSelector,
 }: {
   currentPrompt: string
-  currentConfig: PromptConfig
+  currentPromptConfig: PromptConfig
   activePrompt: ActivePrompt
-  activeVersion: Version
-  setActiveVersion: (version: Version) => void
-  setModifiedVersion: (version: Version) => void
+  activeVersion: PromptVersion
+  setActiveVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
   checkProviderAvailable: (provider: ModelProvider) => boolean
   runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
-  tabSelector: ReactNode
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
+  tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const minHeight = 230
+  const minVersionHeight = 230
+  const [promptHeight, setPromptHeight] = useState(1)
   return (
     <Allotment vertical>
-      <Allotment.Pane minSize={minHeight} preferredSize='50%'>
-        <div className='h-full p-4'>
+      <Allotment.Pane minSize={minVersionHeight}>
+        <div className='h-full'>
           <VersionTimeline
             prompt={activePrompt}
             activeVersion={activeVersion}
@@ -40,17 +53,20 @@ export default function RunPromptTab({
           />
         </div>
       </Allotment.Pane>
-      <Allotment.Pane minSize={minHeight}>
-        <div className='h-full'>
+      <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
+        <div className='h-full p-4 bg-white'>
           <PromptPanel
             initialPrompt={currentPrompt}
-            initialConfig={currentConfig}
+            initialConfig={currentPromptConfig}
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
             checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
             showLabel
+            onUpdatePreferredHeight={setPromptHeight}
           />
         </div>
       </Allotment.Pane>

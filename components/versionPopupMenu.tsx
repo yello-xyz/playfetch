@@ -1,16 +1,22 @@
-import { Version } from '@/types'
+import { PromptVersion } from '@/types'
 import api from '../src/client/api'
 import PopupMenu, { CalculatePopupOffset, PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from './modalDialogContext'
 import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useRef, useState } from 'react'
-import { useRefreshPrompt } from './refreshContext'
+import { useRefreshActiveItem } from './refreshContext'
 
-export default function VersionPopupMenu({ version, containerRect }: { version: Version; containerRect?: DOMRect }) {
+export default function VersionPopupMenu({
+  version,
+  containerRect,
+}: {
+  version: PromptVersion
+  containerRect?: DOMRect
+}) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
-  const refreshPrompt = useRefreshPrompt()
+  const refreshActiveItem = useRefreshActiveItem()
 
   const setDialogPrompt = useModalDialogPrompt()
 
@@ -18,11 +24,20 @@ export default function VersionPopupMenu({ version, containerRect }: { version: 
 
   const deleteVersion = async () => {
     setMenuExpanded(false)
-    setDialogPrompt({
-      title: `Are you sure you want to delete this version? This action cannot be undone.`,
-      callback: () => api.deleteVersion(version.id).then(_ => refreshPrompt()),
-      destructive: true,
-    })
+    if (version.usedAsEndpoint || version.usedInChain) {
+      const reason = version.usedAsEndpoint ? `published as an endpoint` : `used in chain “${version.usedInChain}”`
+      setDialogPrompt({
+        title: `Cannot delete version because it is ${reason}.`,
+        confirmTitle: 'OK',
+        cancellable: false,
+      })
+    } else {
+      setDialogPrompt({
+        title: `Are you sure you want to delete this version? This action cannot be undone.`,
+        callback: () => api.deleteVersion(version.id).then(_ => refreshActiveItem()),
+        destructive: true,
+      })
+    }
   }
 
   return (
