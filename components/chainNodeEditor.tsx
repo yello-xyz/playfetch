@@ -16,8 +16,7 @@ import { PromptCache } from './chainView'
 import PromptInput from './promptInput'
 import useInputValues from './useInputValues'
 import useCheckProvider from './checkProvider'
-import { ConsumeRunStreamReader } from './promptView'
-import api from '@/src/client/api'
+import { RunVersionWithInputs } from './promptView'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
@@ -145,13 +144,7 @@ export default function ChainNodeEditor({
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
-        setPartialRuns([])
-        const chainVersionID = await prepareForRunning(newItems)
-        // TODO the rest of this logic is now the same for prompts and chains so factor it out.
-        const streamReader = await api.runVersion(chainVersionID, inputs)
-        await ConsumeRunStreamReader(streamReader, setPartialRuns)
-        await refreshActiveItem(chainVersionID)
-        setPartialRuns(runs => runs.filter(run => run.failed))
+        await RunVersionWithInputs(() => prepareForRunning(newItems), inputs, setPartialRuns, refreshActiveItem)
         setRunning(false)
       }
     }

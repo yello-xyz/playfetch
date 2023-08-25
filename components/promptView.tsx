@@ -5,9 +5,9 @@ import TestPromptTab from './testPromptTab'
 import useInputValues from './useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
-import { ReactNode, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { useRefreshActiveItem } from './refreshContext'
-import api, { StreamReader } from '@/src/client/api'
+import api from '@/src/client/api'
 import useCheckProvider from './checkProvider'
 import TabSelector from './tabSelector'
 import useInitialState from './useInitialState'
@@ -15,13 +15,20 @@ import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 
-export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
+export const RunVersionWithInputs = async (
+  getVersion: () => Promise<number>,
+  inputs: PromptInputs[],
+  setPartialRuns: Dispatch<SetStateAction<PartialRun[]>>,
+  refreshActiveItem: (versionID: number) => Promise<void>
+) => {
+  const versionID = await getVersion()
+  const streamReader = await api.runVersion(versionID, inputs)
   const runs = {} as { [index: number]: PartialRun }
   setPartialRuns([])
-  while (reader) {
-    const { done, value } = await reader.read()
+  while (streamReader) {
+    const { done, value } = await streamReader.read()
     if (done) {
-      return
+      break
     }
     const text = await new Response(value).text()
     const lines = text.split('\n')
@@ -46,6 +53,8 @@ export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRun
         .map(([, run]) => run)
     )
   }
+  await refreshActiveItem(versionID)
+  setPartialRuns(runs => runs.filter(run => run.failed))
 }
 
 export default function PromptView({
@@ -104,11 +113,7 @@ export default function PromptView({
   const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
-      const versionID = await savePrompt()
-      const streamReader = await api.runVersion(versionID, inputs)
-      await ConsumeRunStreamReader(streamReader, setPartialRuns)
-      await refreshActiveItem(versionID)
-      setPartialRuns(runs => runs.filter(run => run.failed))
+      await RunVersionWithInputs(savePrompt, inputs, setPartialRuns, refreshActiveItem)
       setRunning(false)
     }
   }
