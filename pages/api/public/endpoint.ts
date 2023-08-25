@@ -4,7 +4,7 @@ import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { PromptInputs } from '@/types'
-import { loadConfigsFromVersion, runChainConfigs } from '../runChain'
+import { loadConfigsFromVersion, runChainConfigs } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 

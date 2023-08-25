@@ -4,7 +4,6 @@ import {
   ChainItemWithInputs,
   ChainVersion,
   CodeChainItem,
-  PartialRun,
   PromptInputs,
   PromptVersion,
   TestConfig,
@@ -16,7 +15,6 @@ import { PromptCache } from './chainView'
 import PromptInput from './promptInput'
 import useInputValues from './useInputValues'
 import useCheckProvider from './checkProvider'
-import { RunVersionWithInputs } from './promptView'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
@@ -24,7 +22,7 @@ import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
-import { useRefreshActiveItem } from './refreshContext'
+import useRunVersion from './useRunVersion'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -123,10 +121,7 @@ export default function ChainNodeEditor({
     toggleEditing()
   }
 
-  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-  const [isRunning, setRunning] = useState(false)
-  const refreshActiveItem = useRefreshActiveItem()
-
+  const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (currentItems.length > 0) {
@@ -143,9 +138,7 @@ export default function ChainNodeEditor({
       }
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
-        setRunning(true)
-        await RunVersionWithInputs(() => prepareForRunning(newItems), inputs, setPartialRuns, refreshActiveItem)
-        setRunning(false)
+        await runVersion(() => prepareForRunning(newItems), inputs)
       }
     }
   }

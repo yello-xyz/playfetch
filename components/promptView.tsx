@@ -1,61 +1,18 @@
-import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
+import { ActiveProject, ActivePrompt, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
 import useInputValues from './useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
-import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
-import { useRefreshActiveItem } from './refreshContext'
-import api from '@/src/client/api'
+import { ReactNode, useState } from 'react'
 import useCheckProvider from './checkProvider'
 import TabSelector from './tabSelector'
 import useInitialState from './useInitialState'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-
-export const RunVersionWithInputs = async (
-  getVersion: () => Promise<number>,
-  inputs: PromptInputs[],
-  setPartialRuns: Dispatch<SetStateAction<PartialRun[]>>,
-  refreshActiveItem: (versionID: number) => Promise<void>
-) => {
-  const versionID = await getVersion()
-  const streamReader = await api.runVersion(versionID, inputs)
-  const runs = {} as { [index: number]: PartialRun }
-  setPartialRuns([])
-  while (streamReader) {
-    const { done, value } = await streamReader.read()
-    if (done) {
-      break
-    }
-    const text = await new Response(value).text()
-    const lines = text.split('\n')
-    for (const line of lines.filter(line => line.trim().length > 0)) {
-      const data = line.split('data:').slice(-1)[0]
-      const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
-      const output = message ?? ''
-      if (runs[index]) {
-        runs[index].output += output
-        runs[index].id = index
-        runs[index].cost = cost
-        runs[index].duration = duration
-        runs[index].timestamp = timestamp
-        runs[index].failed = failed
-      } else {
-        runs[index] = { id: index, output, cost, duration, timestamp, failed }
-      }
-    }
-    setPartialRuns(
-      Object.entries(runs)
-        .sort(([a], [b]) => Number(a) - Number(b))
-        .map(([, run]) => run)
-    )
-  }
-  await refreshActiveItem(versionID)
-  setPartialRuns(runs => runs.filter(run => run.failed))
-}
+import useRunVersion from './useRunVersion'
 
 export default function PromptView({
   prompt,
@@ -103,18 +60,12 @@ export default function PromptView({
     }
   }
 
-  const refreshActiveItem = useRefreshActiveItem()
-  const [isRunning, setRunning] = useState(false)
-
   const checkProviderAvailable = useCheckProvider()
 
-  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-
+  const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
-      setRunning(true)
-      await RunVersionWithInputs(savePrompt, inputs, setPartialRuns, refreshActiveItem)
-      setRunning(false)
+      await runVersion(savePrompt, inputs)
     }
   }
 
