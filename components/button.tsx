@@ -7,14 +7,12 @@ type ButtonType = 'primary' | 'outline' | 'destructive'
 export function PendingButton({
   title,
   pendingTitle,
-  showSpinner,
   type = 'primary',
   disabled,
   onClick,
 }: {
   title: string
   pendingTitle?: string
-  showSpinner?: boolean
   type?: ButtonType
   disabled?: boolean
   onClick: () => void | Promise<void>
