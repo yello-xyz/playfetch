@@ -55,7 +55,7 @@ export type ChainItemWithInputs = ChainItem & { inputs: string[] }
 export type Chain = {
   id: number
   name: string
-  // lastVersionID: number
+  lastVersionID: number
   referencedItemIDs: number[]
   projectID: number
   timestamp: string
@@ -176,8 +176,8 @@ export type ResolvedPromptEndpoint = ResolvedEndpoint & {
 export const EndpointParentsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
 export const FindParentInProject = (parentID: number | undefined, project: ActiveProject) =>
   EndpointParentsInProject(project).find(item => item.id === parentID)!
-export const EndpointParentIsPrompt = (parent: Chain | Prompt | undefined): parent is Prompt =>
-  !!parent && 'lastVersionID' in parent
+export const EndpointParentIsChain = (parent: Chain | Prompt | undefined): parent is Chain =>
+  !!parent && 'referencedItemIDs' in parent
 
 export type Usage = {
   endpointID: number

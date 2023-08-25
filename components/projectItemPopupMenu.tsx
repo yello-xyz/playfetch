@@ -31,15 +31,15 @@ export default function ProjectItemPopupMenu({
   const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
   const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
-  const isPrompt = 'lastVersionID' in item
+  const isChain = 'referencedItemIDs' in item
 
-  const deleteCall = () => (isPrompt ? api.deletePrompt(item.id) : api.deleteChain(item.id))
-  const duplicateCall = () => (isPrompt ? api.duplicatePrompt(item.id) : api.duplicateChain(item.id))
-  const renameCall = (name: string) => (isPrompt ? api.renamePrompt(item.id, name) : api.renameChain(item.id, name))
+  const deleteCall = () => (isChain ? api.deleteChain(item.id) : api.deletePrompt(item.id))
+  const duplicateCall = () => (isChain ? api.duplicateChain(item.id) : api.duplicatePrompt(item.id))
+  const renameCall = (name: string) => (isChain ? api.renameChain(item.id, name) : api.renamePrompt(item.id, name))
 
   const deleteItem = () => {
     setMenuExpanded(false)
-    const label = isPrompt ? 'prompt' : 'chain'
+    const label = isChain ? 'chain' : 'prompt'
     if (reference) {
       const reason = 'name' in reference ? `it is referenced by chain “${reference.name}”` : `has published endpoints`
       setDialogPrompt({
@@ -85,12 +85,12 @@ export default function ProjectItemPopupMenu({
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename…' callback={renameItem} />
         <PopupMenuItem title='Duplicate' callback={duplicateItem} />
-        {isPrompt && <PopupMenuItem title='Copy to Project…' callback={copyPromptToProject} />}
+        {!isChain && <PopupMenuItem title='Copy to Project…' callback={copyPromptToProject} />}
         <PopupMenuItem separated destructive title='Delete' callback={deleteItem} />
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog
-          title={isPrompt ? 'Rename Prompt' : 'Rename Chain'}
+          title={isChain ? 'Rename Chain' : 'Rename Prompt'}
           confirmTitle='Rename'
           label='Name'
           initialName={item.name}
@@ -98,7 +98,7 @@ export default function ProjectItemPopupMenu({
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
-      {isPrompt && showMovePromptDialog && (
+      {!isChain && showMovePromptDialog && (
         <MovePromptDialog
           item={item}
           workspaces={allWorkspaces}

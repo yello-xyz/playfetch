@@ -1,4 +1,4 @@
-import { Chain, ChainVersion, EndpointParentIsPrompt, LogEntry, Prompt, PromptVersion } from '@/types'
+import { Chain, ChainVersion, EndpointParentIsChain, LogEntry, Prompt, PromptVersion } from '@/types'
 import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
@@ -35,9 +35,9 @@ export default function LogEntryDetailsPane({
         <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg`}>
           {parent && (
             <>
-              {EndpointParentIsPrompt(parent) ? 'Prompt' : 'Chain'}
+              {EndpointParentIsChain(parent) ? 'Chain' : 'Prompt'}
               <div className='flex items-center justify-end gap-1'>
-                <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
+                <Icon icon={EndpointParentIsChain(parent) ? chainIcon : promptIcon} />
                 {`${parent.name}${versionIndex >= 0 ? ` - Version ${versionIndex + 1}` : ''}`}
               </div>
             </>

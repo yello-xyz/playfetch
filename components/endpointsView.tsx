@@ -4,7 +4,7 @@ import {
   ActivePrompt,
   Endpoint,
   FindParentInProject,
-  EndpointParentIsPrompt,
+  EndpointParentIsChain,
   EndpointParentsInProject,
   ResolvedEndpoint,
   LogEntry,
@@ -126,15 +126,15 @@ export default function EndpointsView({
   useEffect(() => {
     if (parent && parentCache[parent.id]) {
       setActiveParent(parentCache[parent.id])
-    } else if (EndpointParentIsPrompt(parent)) {
-      api.getPrompt(parent.id, project).then(activePrompt => {
-        setParentCache({ ...parentCache, [parent.id]: activePrompt })
-        setActiveParent(activePrompt)
-      })
-    } else if (parent) {
+    } else if (EndpointParentIsChain(parent)) {
       api.getChain(parent.id, project).then(activeChain => {
         setParentCache({ ...parentCache, [parent.id]: activeChain })
         setActiveParent(activeChain)
+      })
+    } else if (parent) {
+      api.getPrompt(parent.id, project).then(activePrompt => {
+        setParentCache({ ...parentCache, [parent.id]: activePrompt })
+        setActiveParent(activePrompt)
       })
     }
   }, [parent, project, parentCache])
@@ -145,9 +145,9 @@ export default function EndpointsView({
     version => version.id === activeEndpoint?.versionID
   )
   const variables = parent
-    ? EndpointParentIsPrompt(parent)
-      ? ExtractPromptVariables(activeVersion?.prompt ?? '')
-      : ExtractUnboundChainInputs(activeVersion?.items ?? [])
+    ? EndpointParentIsChain(parent)
+      ? ExtractUnboundChainInputs(activeVersion?.items ?? [])
+      : ExtractPromptVariables(activeVersion?.prompt ?? '')
     : []
 
   const minWidth = 460

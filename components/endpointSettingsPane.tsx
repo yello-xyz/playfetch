@@ -3,7 +3,6 @@ import {
   ActiveChain,
   ActiveProject,
   ActivePrompt,
-  EndpointParentIsPrompt,
   EndpointParentsInProject,
   FindParentInProject,
 } from '@/types'
@@ -71,9 +70,8 @@ export default function EndpointSettingsPane({
 
   const updateParentID = (parentID?: number) => {
     const parent = FindParentInProject(parentID, project)
-    const versionID = EndpointParentIsPrompt(parent) ? parent.lastVersionID : undefined
     setParentID(parentID)
-    setVersionID(versionID)
+    setVersionID(parent.lastVersionID)
     onSelectParentID(parentID)
   }
 

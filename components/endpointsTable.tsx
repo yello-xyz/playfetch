@@ -1,7 +1,7 @@
 import {
   ActiveProject,
   Chain,
-  EndpointParentIsPrompt,
+  EndpointParentIsChain,
   EndpointParentsInProject,
   FindParentInProject,
   Prompt,
@@ -76,7 +76,7 @@ function EndpointsGroup({
   return (
     <>
       <div className='flex items-center gap-1 text-gray-700 '>
-        <Icon icon={EndpointParentIsPrompt(parent) ? promptIcon : chainIcon} />
+        <Icon icon={EndpointParentIsChain(parent) ? chainIcon : promptIcon} />
         {parent.name}
       </div>
       <div className='mb-4 grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>
