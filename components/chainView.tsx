@@ -33,10 +33,11 @@ export default function ChainView({
   project: ActiveProject
   onRefresh: () => void
 }) {
-  // TODO add version UI so we can view or edit earlier versions as well.
-  const [chainVersion, setChainVersion] = useState(chain.versions.slice(-1)[0])
-  const saveChain = useSaveChain(chain, chainVersion, setChainVersion)
-  // TODO update when active chain version changes
+  const chainVersion = chain.versions.slice(-1)[0]
+  const saveChain = useSaveChain(chain, chainVersion, () => { 
+    // TODO implement version selector (but make sure chainVersion is updated when chain is refreshed)
+  })
+  // TODO keep nodes in sync when active chain version changes
   const [nodes, setNodes] = useState([InputNode, ...chainVersion.items, OutputNode] as ChainNode[])
   const [activeNodeIndex, setActiveNodeIndex] = useState(1)
   const items = nodes.filter(IsChainItem)
