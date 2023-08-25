@@ -1,4 +1,4 @@
-import { ActivePrompt, Comment, User, PromptVersion } from '@/types'
+import { ActivePrompt, Comment, User, PromptVersion, ActiveChain, ChainVersion, IsPromptVersion } from '@/types'
 import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versionCell'
@@ -10,20 +10,22 @@ import { LabelForModel } from './modelSelector'
 import useFormattedDate from './useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
-export default function CommentsPane({
-  prompt,
+export default function CommentsPane<T extends PromptVersion | ChainVersion>({
+  activeItem,
+  versions,
   showComments,
   setShowComments,
   onSelectComment,
 }: {
-  prompt: ActivePrompt
+  activeItem: ActivePrompt | ActiveChain
+  versions: T[]
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: PromptVersion, runID?: number) => void
+  onSelectComment: (version: T, runID?: number) => void
 }) {
-  const users = prompt.users
-  const labelColors = AvailableLabelColorsForItem(prompt)
-  const comments = prompt.versions
+  const users = activeItem.users
+  const labelColors = AvailableLabelColorsForItem(activeItem)
+  const comments = activeItem.versions
     .flatMap(version => version.comments)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
@@ -40,7 +42,7 @@ export default function CommentsPane({
             comment={comment}
             user={users.find(user => user.id === comment.userID)!}
             labelColors={labelColors}
-            versions={prompt.versions}
+            versions={versions}
             onSelect={onSelectComment}
           />
         ))}
@@ -49,7 +51,7 @@ export default function CommentsPane({
   ) : null
 }
 
-export function CommentCell({
+export function CommentCell<T extends PromptVersion | ChainVersion>({
   comment,
   user,
   labelColors,
@@ -59,8 +61,8 @@ export function CommentCell({
   comment: Comment
   user: User
   labelColors: Record<string, string>
-  versions?: PromptVersion[]
-  onSelect?: (version: PromptVersion, runID?: number) => void
+  versions?: T[]
+  onSelect?: (version: T, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 
@@ -95,14 +97,16 @@ export function CommentCell({
             <CommentQuote>
               {version && (
                 <span className='font-medium'>
-                  {versionIndex} › {LabelForModel(version.config.model)}
+                  {IsPromptVersion(version)
+                    ? `${versionIndex} › ${LabelForModel(version.config.model)}`
+                    : `version ${versionIndex}`}
                 </span>
               )}
               <div className='line-clamp-2'>
                 {comment.quote ? (
                   <span>{comment.quote}</span>
-                ) : version ? (
-                  <VersionComparison version={version} compareVersion={compareVersion} />
+                ) : version && IsPromptVersion(version) ? (
+                  <VersionComparison version={version} compareVersion={compareVersion as PromptVersion | undefined} />
                 ) : null}
               </div>
             </CommentQuote>

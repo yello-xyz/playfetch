@@ -150,7 +150,8 @@ export default function PromptView({
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane
-          prompt={prompt}
+          activeItem={prompt}
+          versions={prompt.versions}
           onSelectComment={onSelectComment}
           showComments={showComments}
           setShowComments={setShowComments}

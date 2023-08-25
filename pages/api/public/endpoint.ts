@@ -64,8 +64,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
         const version = await getTrustedVersion(endpoint.versionID)
+
         const configs = loadConfigsFromVersion(version)
         const isLastRun = (index: number) => index === configs.length - 1
+        // TODO shortcut this when using caching for chain?
         const output = await runChainConfigs(
           endpoint.userID,
           version,

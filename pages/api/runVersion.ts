@@ -140,6 +140,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         false,
         false,
         // TODO the appropriate inputs for the specific run should be passed in here as well.
+        // TODO no need to persist individual prompt runs when evaluating a chain version?
         (index, version, { output, cost, duration, failed }) => {
           const createdAt = new Date()
           sendData({ index: offset(index), timestamp: createdAt.toISOString(), cost, duration, failed })
