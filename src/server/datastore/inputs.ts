@@ -49,7 +49,7 @@ export async function migrateInputs(postMerge: boolean) {
         }
         let variables = promptVariablesCache[promptID]
         if (!variables) {
-          let variables = [] as string[]
+          variables = [] as string[]
           const versions = await getEntities(Entity.VERSION, 'promptID', promptID)
           for (const version of versions) {
             variables.push(...ExtractPromptVariables(version?.prompt ?? ''))
@@ -84,7 +84,6 @@ export async function migrateInputs(postMerge: boolean) {
       }
     }
   }
-  console.log('DONE')
 }
 
 const toInputData = (parentID: number, name: string, values: string[], inputID?: number) => ({
