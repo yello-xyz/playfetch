@@ -25,6 +25,7 @@ import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
+import { useRefreshActiveItem } from './refreshContext'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -125,6 +126,7 @@ export default function ChainNodeEditor({
 
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
   const [isRunning, setRunning] = useState(false)
+  const refreshActiveItem = useRefreshActiveItem()
 
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
@@ -145,8 +147,11 @@ export default function ChainNodeEditor({
         setRunning(true)
         setPartialRuns([])
         const chainVersionID = await prepareForRunning(newItems)
+        // TODO the rest of this logic is now the same for prompts and chains so factor it out.
         const streamReader = await api.runChain(chainVersionID, inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
+        await refreshActiveItem(chainVersionID)
+        setPartialRuns(runs => runs.filter(run => run.failed))
         setRunning(false)
       }
     }
