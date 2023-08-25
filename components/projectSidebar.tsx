@@ -104,10 +104,11 @@ function ProjectItemActionButton({
   onDelete: () => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
+  const iconClass = isMenuExpanded ? '' : 'hidden group-hover:block'
 
   return (
     <div className='relative'>
-      <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}

@@ -65,7 +65,7 @@ export function SidebarButton({
         <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap text-dark-gray-700'>
           {title}
         </div>
-        <div className='hidden group-hover:block'>{actionComponent}</div>
+        {actionComponent}
       </div>
     </LinkWrapper>
   )
