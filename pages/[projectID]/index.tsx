@@ -314,6 +314,8 @@ export default function Home({
                           activeVersion={activeChainVersion}
                           setActiveVersion={setActiveChainVersion}
                           project={activeProject}
+                          showComments={showComments}
+                          setShowComments={setShowComments}        
                           saveChain={saveChain}
                         />
                       </Suspense>

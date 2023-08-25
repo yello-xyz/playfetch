@@ -49,7 +49,6 @@ export default function PromptView({
   }
 
   const [activeRunID, setActiveRunID] = useState<number>()
-
   const onSelectComment = (version: PromptVersion, runID?: number) => {
     if (version.id !== activeVersion.id) {
       setActiveRunID(undefined)

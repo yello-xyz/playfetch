@@ -54,6 +54,7 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) =>
 export default function ChainNodeEditor({
   chain,
   activeVersion,
+  activeRunID,
   items,
   setItems,
   activeItemIndex,
@@ -66,6 +67,7 @@ export default function ChainNodeEditor({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
+  activeRunID?: number,
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
@@ -203,6 +205,7 @@ export default function ChainNodeEditor({
             <RunTimeline
               runs={[...activeVersion.runs, ...partialRuns]}
               activeItem={chain}
+              activeRunID={activeRunID}
               version={activeVersion}
               isRunning={isRunning}
             />
