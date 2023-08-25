@@ -148,7 +148,7 @@ export default function ChainNodeEditor({
         setPartialRuns([])
         const chainVersionID = await prepareForRunning(newItems)
         // TODO the rest of this logic is now the same for prompts and chains so factor it out.
-        const streamReader = await api.runChain(chainVersionID, inputs)
+        const streamReader = await api.runVersion(chainVersionID, inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
         await refreshActiveItem(chainVersionID)
         setPartialRuns(runs => runs.filter(run => run.failed))

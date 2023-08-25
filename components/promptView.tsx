@@ -105,7 +105,7 @@ export default function PromptView({
     if (checkProviderAvailable(config.provider)) {
       setRunning(true)
       const versionID = await savePrompt()
-      const streamReader = await api.runPrompt(versionID, inputs)
+      const streamReader = await api.runVersion(versionID, inputs)
       await ConsumeRunStreamReader(streamReader, setPartialRuns)
       await refreshActiveItem(versionID)
       setPartialRuns(runs => runs.filter(run => run.failed))

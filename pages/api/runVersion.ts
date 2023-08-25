@@ -107,7 +107,7 @@ export const runChainConfigs = async (
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   version.items ?? [{ versionID: version.id }]
 
-async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
+async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
 
@@ -158,4 +158,4 @@ async function runChain(req: NextApiRequest, res: NextApiResponse, user: User) {
   res.end()
 }
 
-export default withLoggedInUserRoute(runChain)
+export default withLoggedInUserRoute(runVersion)
