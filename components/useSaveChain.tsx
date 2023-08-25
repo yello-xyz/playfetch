@@ -4,7 +4,7 @@ import { ChainVersionsEqual } from '@/src/common/versionsEqual'
 
 export default function useSaveChain(
   activeChain: ActiveChain,
-  activeVersion: ChainVersion,
+  activeVersion: ChainVersion
   // setActiveVersion: (version: ChainVersion) => void
 ) {
   const saveChain = async (

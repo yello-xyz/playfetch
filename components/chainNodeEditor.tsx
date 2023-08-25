@@ -75,7 +75,7 @@ export default function ChainNodeEditor({
   activeItemIndex,
   activeNode,
   promptCache,
-  onRun,
+  prepareForRunning,
   savePrompt,
   selectVersion,
   setModifiedVersion,
@@ -83,11 +83,11 @@ export default function ChainNodeEditor({
   chain: ActiveChain
   chainVersion: ChainVersion
   items: ChainItem[]
-  setItems: (items: ChainItem[]) => Promise<number>
+  setItems: (items: ChainItem[]) => void
   activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
-  onRun: () => void
+  prepareForRunning: (items: ChainItem[]) => Promise<number>
   savePrompt: () => Promise<number>
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
@@ -137,7 +137,6 @@ export default function ChainNodeEditor({
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (currentItems.length > 0) {
-      let chainVersionID = chainVersion.id
       let newItems = currentItems
       let versionForItem = promptCache.versionForItem
       if (IsPromptChainItem(activeNode)) {
@@ -148,13 +147,12 @@ export default function ChainNodeEditor({
           item.promptID === activePrompt.id
             ? activePrompt.versions.find(version => version.id === item.versionID)
             : promptCache.versionForItem(item)
-        chainVersionID = await setItems(newItems)
       }
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
         setRunning(true)
         setPartialRuns([])
-        onRun()
+        const chainVersionID = await prepareForRunning(newItems)
         const streamReader = await api.runChain(chainVersionID, inputs)
         await ConsumeRunStreamReader(streamReader, setPartialRuns)
         setRunning(false)

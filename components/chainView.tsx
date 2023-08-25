@@ -7,7 +7,7 @@ import {
   PromptChainItem,
   PromptVersion,
 } from '@/types'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from './useSavePrompt'
@@ -113,17 +113,32 @@ export default function ChainView({ chain, project }: { chain: ActiveChain; proj
     setActiveNodeIndex(index)
   }
 
-  const updateItems = (items: ChainItem[]) => {
-    console.log('setting items')
-    setNodes([InputNode, ...items, OutputNode])
-    const itemsWithInputs: ChainItemWithInputs[] = items.map(item => ({
+  const savedItemsKey = useRef<string>()
+  const saveItems = (items: ChainItem[], force = false): Promise<number | undefined> => {
+    const itemsToSave = items.map(item => ({
       ...item,
       activePrompt: undefined,
       version: undefined,
       inputs: ExtractChainItemVariables(item, promptCache),
     }))
-    // TODO refresh active chain (not just project) and focus on the newly saved version.
-    return saveChain(itemsWithInputs, refreshActiveItem)
+    const itemsKey = JSON.stringify(itemsToSave)
+    if (force || itemsKey !== savedItemsKey.current) {
+      // TODO deal with race condition when force saving while already saving a change.
+      savedItemsKey.current = itemsKey
+      return saveChain(itemsToSave, refreshActiveItem)
+    }
+    return Promise.resolve(undefined)
+  }
+
+  const updateItems = (items: ChainItem[]) => {
+    setNodes([InputNode, ...items, OutputNode])
+    saveItems(items)
+  }
+
+  const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
+    setActiveNodeIndex(nodes.indexOf(OutputNode))
+    const versionID = await saveItems(items, true)
+    return versionID!
   }
 
   const minWidth = 320
@@ -147,7 +162,7 @@ export default function ChainView({ chain, project }: { chain: ActiveChain; proj
           activeItemIndex={activeNodeIndex - 1}
           activeNode={activeNode}
           promptCache={promptCache}
-          onRun={() => setActiveNodeIndex(nodes.indexOf(OutputNode))}
+          prepareForRunning={prepareForRunning}
           savePrompt={() => savePrompt().then(versionID => versionID!)}
           selectVersion={selectVersion}
           setModifiedVersion={setModifiedVersion}
