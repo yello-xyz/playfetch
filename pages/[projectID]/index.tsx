@@ -34,7 +34,6 @@ import ProjectSidebar from '@/components/projectSidebar'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
-import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 
 import dynamic from 'next/dynamic'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
@@ -43,6 +42,7 @@ import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/sr
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import useSaveChain from '@/src/client/hooks/useSaveChain'
+import usePrompt from '@/src/client/hooks/usePrompt'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
@@ -108,6 +108,7 @@ export default function Home({
   const router = useRouter()
 
   const [activeProject, setActiveProject] = useState(initialActiveProject)
+  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
   const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
@@ -121,7 +122,14 @@ export default function Home({
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
   const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
 
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActiveVersion)
+  const [refreshPrompt, selectPrompt, addPrompt, savePrompt, setModifiedVersion] = usePrompt(
+    activeProject,
+    refreshProject,
+    activePrompt,
+    setActiveItem,
+    activePromptVersion,
+    setActiveVersion
+  )
   const saveChain = useSaveChain(activeChain, activeChainVersion, setActiveVersion)
 
   const updateVersion = (version?: PromptVersion | ChainVersion) => {
@@ -136,14 +144,6 @@ export default function Home({
       }
       updateVersion(version)
     }
-  }
-
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
-
-  const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
-    const newPrompt = await api.getPrompt(promptID, activeProject)
-    setActiveItem(newPrompt)
-    updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }
 
   const refreshChain = async (chainID: number, focusVersionID = activeVersion?.id) => {
@@ -166,14 +166,6 @@ export default function Home({
     refreshActiveItem()
     if (activeItem !== Endpoints) {
       refreshProject()
-    }
-  }
-
-  const selectPrompt = async (promptID: number) => {
-    if (promptID !== activePrompt?.id) {
-      savePrompt(refreshProject)
-      await refreshPrompt(promptID)
-      router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
   }
 
@@ -228,11 +220,6 @@ export default function Home({
       selectPrompt(activeProject.prompts[0].id)
     }
     setQuery(currentQueryState)
-  }
-
-  const addPrompt = async () => {
-    const promptID = await api.addPrompt(activeProject.id)
-    refreshProject().then(() => selectPrompt(promptID))
   }
 
   const addChain = async () => {
