@@ -1,5 +1,4 @@
 import api from '@/src/client/api'
-import { useState } from 'react'
 import { ActiveProject, ActivePrompt, PromptVersion } from '@/types'
 import useSavePrompt from './useSavePrompt'
 import { useRouter } from 'next/router'
@@ -11,7 +10,7 @@ export default function usePrompt(
   activePrompt: ActivePrompt | undefined,
   setActivePromp: (prompt: ActivePrompt) => void,
   activeVersion: PromptVersion | undefined,
-  setActiveVersion: (version: PromptVersion) => void
+  setActiveVersion: (version: PromptVersion) => void,
 ) {
   const router = useRouter()
 

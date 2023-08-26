@@ -14,14 +14,7 @@ import {
   ChainVersion,
   IsPromptVersion,
 } from '@/types'
-import ClientRoute, {
-  ChainRoute,
-  EndpointsRoute,
-  ParseNumberQuery,
-  ProjectRoute,
-  PromptRoute,
-  WorkspaceRoute,
-} from '@/src/client/clientRoute'
+import ClientRoute, { EndpointsRoute, ParseNumberQuery, ProjectRoute, WorkspaceRoute } from '@/src/client/clientRoute'
 import { getPromptForUser } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
@@ -41,14 +34,16 @@ import { getChainForUser } from '@/src/server/datastore/chains'
 import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
-import useSaveChain from '@/src/client/hooks/useSaveChain'
 import usePrompt from '@/src/client/hooks/usePrompt'
+import useChain from '@/src/client/hooks/useChain'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
+const IsChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
+const IsPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && !IsChain(item)
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
@@ -111,10 +106,8 @@ export default function Home({
   const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
-  const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
-  const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && !isChain(item)
-  const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
-  const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
+  const activePrompt = activeItem && IsPrompt(activeItem) ? activeItem : undefined
+  const activeChain = activeItem && IsChain(activeItem) ? activeItem : undefined
 
   const [activeVersion, setActiveVersion] = useState<PromptVersion | ChainVersion | undefined>(
     activeItem === Endpoints ? undefined : activeItem?.versions?.slice(-1)?.[0]
@@ -130,7 +123,16 @@ export default function Home({
     activePromptVersion,
     setActiveVersion
   )
-  const saveChain = useSaveChain(activeChain, activeChainVersion, setActiveVersion)
+
+  const [refreshChain, selectChain, addChain, saveChain] = useChain(
+    activeProject,
+    refreshProject,
+    activeChain,
+    setActiveItem,
+    activeChainVersion,
+    setActiveVersion,
+    savePrompt
+  )
 
   const updateVersion = (version?: PromptVersion | ChainVersion) => {
     setActiveVersion(version)
@@ -144,12 +146,6 @@ export default function Home({
       }
       updateVersion(version)
     }
-  }
-
-  const refreshChain = async (chainID: number, focusVersionID = activeVersion?.id) => {
-    const newChain = await api.getChain(chainID, activeProject)
-    setActiveItem(newChain)
-    updateVersion(newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0])
   }
 
   const refreshActiveItem = (versionID?: number) => {
@@ -166,14 +162,6 @@ export default function Home({
     refreshActiveItem()
     if (activeItem !== Endpoints) {
       refreshProject()
-    }
-  }
-
-  const selectChain = async (chainID: number) => {
-    if (chainID !== activeChain?.id) {
-      savePrompt(refreshProject)
-      await refreshChain(chainID)
-      router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
   }
 
@@ -220,11 +208,6 @@ export default function Home({
       selectPrompt(activeProject.prompts[0].id)
     }
     setQuery(currentQueryState)
-  }
-
-  const addChain = async () => {
-    const chainID = await api.addChain(activeProject.id)
-    refreshProject().then(() => selectChain(chainID))
   }
 
   const isSharedProject = !workspaces.find(workspace => workspace.id === activeProject.workspaceID)
