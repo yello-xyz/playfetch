@@ -43,7 +43,7 @@ export default function useRunVersion() {
       )
     }
     await refreshActiveItem(versionID)
-    setPartialRuns(runs => runs.filter(run => run.failed))
+    setPartialRuns(runs => runs.filter((run, index) => run.failed || index < runs.length - 1))
     setRunning(false)
   }
 
