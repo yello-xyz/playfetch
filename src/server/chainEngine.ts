@@ -49,8 +49,7 @@ export default async function runChain(
   inputs: PromptInputs,
   useCache: boolean,
   useCamelCase: boolean,
-  streamChunk?: (index: number, chunk: string) => void,
-  callback?: (index: number, cost: number, duration: number, failed: boolean) => void,
+  stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void
 ) {
   let cost = 0
   let duration = 0
@@ -70,7 +69,15 @@ export default async function runChain(
   const codeContext = CreateCodeContextWithInputs(inputs)
 
   for (const [index, config] of configs.entries()) {
-    const stream = (chunk: string) => streamChunk?.(index, chunk)
+    const streamPartialResponse = (chunk: string) => stream?.(index, chunk)
+    const streamResponse = (response: ResponseType, skipFinalOutput = false) =>
+      stream?.(
+        index,
+        response.failed ? response.error : skipFinalOutput ? '' : response.output,
+        response.cost,
+        response.duration,
+        response.failed
+      )
     if (isRunConfig(config)) {
       const promptVersion = (
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID)
@@ -80,23 +87,21 @@ export default async function runChain(
       if (config.includeContext) {
         prompt = runningContext
       }
-      lastResponse = await runChainStep(runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream))
-      const output = lastResponse.output
-      if (lastResponse.failed) {
-        stream(lastResponse.error)
-      }
-      callback?.(index, lastResponse.cost, lastResponse.duration, lastResponse.failed)
+      lastResponse = await runChainStep(
+        runPromptWithConfig(userID, prompt, promptVersion.config, useCache, streamPartialResponse)
+      )
+      streamResponse(lastResponse, true)
       if (lastResponse.failed) {
         break
       } else {
+        const output = lastResponse.output
         runningContext += `\n\n${output}\n\n`
         AugmentInputs(inputs, config.output, output!, useCamelCase)
         AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
     } else {
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
-      stream(lastResponse.failed ? lastResponse.error : lastResponse.output)
-      callback?.(index, lastResponse.cost, lastResponse.duration, lastResponse.failed)
+      streamResponse(lastResponse)
       if (lastResponse.failed) {
         break
       } else {

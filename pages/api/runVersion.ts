@@ -8,6 +8,24 @@ import runChain from '@/src/server/chainEngine'
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   version.items ?? [{ versionID: version.id }]
 
+const logResponse =
+  (userID: number, version: RawPromptVersion | RawChainVersion, inputs: PromptInputs) =>
+  (response: Awaited<ReturnType<typeof runChain>>) => {
+    if (!response.failed) {
+      saveRun(
+        userID,
+        version.parentID,
+        version.id,
+        inputs,
+        response.output,
+        new Date(),
+        response.cost,
+        response.duration,
+        []
+      )
+    }
+  }
+
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
@@ -21,31 +39,10 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
       const offset = (index: number) => inputIndex * configs.length + index
-      const response = await runChain(
-        user.id,
-        version,
-        configs,
-        inputs,
-        false,
-        false,
-        (index, message) => sendData({ index: offset(index), message }),
-        (index, cost, duration, failed) =>
-          sendData({ index: offset(index), timestamp: new Date().toISOString(), cost, duration, failed })
-      )
-
-      if (!response.failed) {
-        saveRun(
-          user.id,
-          version.parentID,
-          version.id,
-          inputs,
-          response.output,
-          new Date(),
-          response.cost,
-          response.duration,
-          []
-        )
-      }
+      const timestamp = (failed?: boolean) => (failed !== undefined ? new Date().toISOString() : undefined)
+      return runChain(user.id, version, configs, inputs, false, false, (index, message, cost, duration, failed) =>
+        sendData({ index: offset(index), message, timestamp: timestamp(failed), cost, duration, failed })
+      ).then(logResponse(user.id, version, inputs))
     })
   )
 
