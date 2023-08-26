@@ -3,9 +3,9 @@ import { ReactNode } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
-import TableCell, { TableHeader } from './TableCell'
+import TableCell, { TableHeader } from './tableCell'
 import { FormatDate } from '@/src/common/formatting'
-import useFormattedDate from './useFormattedDate'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function LogEntriesView({
   tabSelector,

@@ -28,7 +28,7 @@ export async function migrateChains() {
         JSON.parse(chainData.references),
         chainData.createdAt,
         chainData.lastEditedAt,
-        getID(chainData),
+        getID(chainData)
       )
     )
   }
@@ -43,7 +43,7 @@ const toChainData = (
   references: References,
   createdAt: Date,
   lastEditedAt: Date,
-  chainID?: number,
+  chainID?: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
   data: {
@@ -119,7 +119,7 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       JSON.parse(chainData.references),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
-      getID(chainData),
+      getID(chainData)
     )
   )
   if (updateLastEditedTimestamp) {

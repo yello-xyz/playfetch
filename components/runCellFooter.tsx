@@ -1,6 +1,6 @@
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
 import { PartialRun } from '@/types'
-import useFormattedDate from './useFormattedDate'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function RunCellFooter({ run }: { run: PartialRun }) {
   const formattedDate = useFormattedDate(run.timestamp)

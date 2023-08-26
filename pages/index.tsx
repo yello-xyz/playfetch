@@ -8,10 +8,10 @@ import ClientRoute, {
   ProjectRoute,
   SharedProjectsWorkspaceID,
   WorkspaceRoute,
-} from '@/components/clientRoute'
+} from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
-import { ModalDialogContext } from '@/components/modalDialogContext'
-import { UserContext } from '@/components/userContext'
+import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
+import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'

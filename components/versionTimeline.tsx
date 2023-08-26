@@ -3,8 +3,8 @@ import { ActivePrompt, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
-import useScrollDetection from './useScrollDetection'
-import useContainerRect from './useContainerRect'
+import useScrollDetection from '@/src/client/hooks/useScrollDetection'
+import useContainerRect from '@/src/client/hooks/useContainerRect'
 
 export default function VersionTimeline({
   prompt,

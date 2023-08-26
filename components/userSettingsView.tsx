@@ -1,4 +1,4 @@
-import { useLoggedInUser } from './userContext'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 import Label from './label'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { AllProviders, LabelForProvider } from './modelSelector'
@@ -6,7 +6,7 @@ import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 import api from '@/src/client/api'
-import useModalDialogPrompt from './modalDialogContext'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { FormatCost } from '@/src/common/formatting'
 
 export default function UserSettingsView() {

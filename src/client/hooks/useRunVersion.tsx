@@ -1,7 +1,7 @@
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
-import { useRefreshActiveItem } from './refreshContext'
+import { useRefreshActiveItem } from '../context/refreshContext'
 
 export default function useRunVersion() {
   const refreshActiveItem = useRefreshActiveItem()

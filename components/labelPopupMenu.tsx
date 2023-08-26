@@ -1,12 +1,12 @@
 import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/types'
-import api from '../src/client/api'
+import api from '@/src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useCallback, useRef, useState } from 'react'
-import { useRefreshActiveItem } from './refreshContext'
+import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import Icon from './icon'
 
 const projectLabelColors = [

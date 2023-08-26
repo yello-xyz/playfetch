@@ -1,7 +1,7 @@
 import { Workspace } from '@/types'
-import api from '../src/client/api'
+import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from './popupMenu'
-import useModalDialogPrompt from './modalDialogContext'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 

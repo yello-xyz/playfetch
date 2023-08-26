@@ -41,7 +41,7 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
     if (providerData) {
       transaction.save(
         toProviderData(userID, provider, providerData.apiKey, providerData.cost + cost, getID(providerData))
-      )  
+      )
     }
   })
 }

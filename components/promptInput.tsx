@@ -1,12 +1,11 @@
 import { RefObject, Suspense, useCallback, useEffect, useState } from 'react'
-import { useRef } from 'react'
 import Label from './label'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
-import useScrollHeight from './useScrollHeight'
+import useScrollHeight from '@/src/client/hooks/useScrollHeight'
 import { RichTextFromHTML, RichTextToHTML } from './richTextInput'
-import useGlobalPopup from './globalPopupContext'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
 const ContentEditable = dynamic(() => import('./contentEditable'))
 
 const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'

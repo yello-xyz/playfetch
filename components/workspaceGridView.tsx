@@ -9,7 +9,7 @@ import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from './projectPopupMenu'
 import WorkspaceTopBar from './workspaceTopBar'
-import useFormattedDate from './useFormattedDate'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { TopBarButton } from './topBarButton'
 import addIcon from '@/public/addWhite.svg'
 

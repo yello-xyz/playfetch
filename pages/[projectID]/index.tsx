@@ -20,28 +20,28 @@ import ClientRoute, {
   ProjectRoute,
   PromptRoute,
   WorkspaceRoute,
-} from '@/components/clientRoute'
+} from '@/src/client/clientRoute'
 import { getPromptForUser } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
-import { ModalDialogContext } from '@/components/modalDialogContext'
-import { RefreshContext } from '@/components/refreshContext'
+import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
+import { RefreshContext } from '@/src/client/context/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
-import { UserContext } from '@/components/userContext'
+import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import ProjectSidebar from '@/components/projectSidebar'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
-import useSavePrompt from '@/components/useSavePrompt'
+import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 
 import dynamic from 'next/dynamic'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
-import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
+import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
-import useSaveChain from '@/components/useSaveChain'
+import useSaveChain from '@/src/client/hooks/useSaveChain'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))

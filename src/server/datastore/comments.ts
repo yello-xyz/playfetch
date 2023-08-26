@@ -17,7 +17,7 @@ export async function migrateComments() {
         commentData.quote,
         commentData.runID,
         commentData.startIndex,
-        getID(commentData),
+        getID(commentData)
       )
     )
   }
@@ -49,7 +49,7 @@ const toCommentData = (
   quote?: string,
   runID?: number,
   startIndex?: number,
-  commentID?: number,
+  commentID?: number
 ) => ({
   key: buildKey(Entity.COMMENT, commentID),
   data: { userID, parentID, versionID, text, createdAt, action, quote, runID, startIndex },

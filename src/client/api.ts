@@ -18,7 +18,7 @@ import {
   Chain,
   ActivePrompt,
 } from '@/types'
-import ClientRoute from '../../components/clientRoute'
+import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>

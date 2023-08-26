@@ -2,17 +2,17 @@ import { ActiveProject, ActivePrompt, PromptConfig, PromptInputs, PromptVersion,
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
-import useInputValues from './useInputValues'
+import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
-import useCheckProvider from './checkProvider'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import TabSelector from './tabSelector'
-import useInitialState from './useInitialState'
+import useInitialState from '@/src/client/hooks/useInitialState'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-import useRunVersion from './useRunVersion'
+import useRunVersion from '@/src/client/hooks/useRunVersion'
 
 export default function PromptView({
   prompt,

@@ -11,11 +11,11 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
-import useSavePrompt from './useSavePrompt'
+import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
-import { useRefreshActiveItem } from './refreshContext'
+import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 
 export type PromptCache = {
@@ -222,7 +222,7 @@ export default function ChainView({
           selectVersion={selectVersion}
           setModifiedVersion={setModifiedVersion}
           activeRunID={activeRunID}
-          />
+        />
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane

@@ -7,7 +7,7 @@ import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versionComparison'
 import { LabelForModel } from './modelSelector'
-import useFormattedDate from './useFormattedDate'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
 export default function CommentsPane<T extends PromptVersion | ChainVersion>({

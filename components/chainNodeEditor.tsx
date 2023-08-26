@@ -13,8 +13,8 @@ import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
 import PromptInput from './promptInput'
-import useInputValues from './useInputValues'
-import useCheckProvider from './checkProvider'
+import useInputValues from '@/src/client/hooks/useInputValues'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
@@ -22,7 +22,7 @@ import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
-import useRunVersion from './useRunVersion'
+import useRunVersion from '@/src/client/hooks/useRunVersion'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -67,7 +67,7 @@ export default function ChainNodeEditor({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  activeRunID?: number,
+  activeRunID?: number
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
