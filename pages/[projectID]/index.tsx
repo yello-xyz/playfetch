@@ -138,9 +138,7 @@ export default function Home({
     }
   }
 
-  const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
-
-  const [showComments, setShowComments] = useState(false)
+  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
     const newPrompt = await api.getPrompt(promptID, activeProject)
@@ -148,9 +146,28 @@ export default function Home({
     updateVersion(newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0])
   }
 
-  const refreshActivePrompt = activePrompt
-    ? (versionID?: number) => refreshPrompt(activePrompt.id, versionID)
-    : undefined
+  const refreshChain = async (chainID: number, focusVersionID = activeVersion?.id) => {
+    const newChain = await api.getChain(chainID, activeProject)
+    setActiveItem(newChain)
+    updateVersion(newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0])
+  }
+
+  const refreshActiveItem = (versionID?: number) => {
+    if (activePrompt) {
+      return refreshPrompt(activePrompt.id, versionID)
+    } else if (activeChain) {
+      return refreshChain(activeChain.id, versionID)
+    } else {
+      return refreshProject()
+    }
+  }
+
+  const refresh = () => {
+    refreshActiveItem()
+    if (activeItem !== Endpoints) {
+      refreshProject()
+    }
+  }
 
   const selectPrompt = async (promptID: number) => {
     if (promptID !== activePrompt?.id) {
@@ -160,14 +177,6 @@ export default function Home({
     }
   }
 
-  const refreshChain = async (chainID: number, focusVersionID = activeVersion?.id) => {
-    const newChain = await api.getChain(chainID, activeProject)
-    setActiveItem(newChain)
-    updateVersion(newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0])
-  }
-
-  const refreshActiveChain = activeChain ? (versionID?: number) => refreshChain(activeChain.id, versionID) : undefined
-
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
       savePrompt(refreshProject)
@@ -176,23 +185,20 @@ export default function Home({
     }
   }
 
+  const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(Endpoints)
+    updateVersion(undefined)
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
-    updateVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
-
-  const refreshActiveItem = () => {
-    refreshActivePrompt?.()
-    refreshActiveChain?.()
-    // Make sure active item is updated in sidebar too (and this will also update active endpoints).
-    refreshProject()
+  const selectSettings = () => {
+    savePrompt()
+    router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
 
   const onDeleteItem = async () => {
@@ -234,17 +240,13 @@ export default function Home({
     refreshProject().then(() => selectChain(chainID))
   }
 
-  const selectSettings = () => {
-    savePrompt()
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
-  }
-
   const isSharedProject = !workspaces.find(workspace => workspace.id === activeProject.workspaceID)
   const navigateBack = () => {
     savePrompt()
     router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
   }
 
+  const [showComments, setShowComments] = useState(false)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
   const [popupProps, setPopupProps] = useState<any>()
@@ -260,7 +262,7 @@ export default function Home({
             setPopupLocation,
           }}>
           <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-            <RefreshContext.Provider value={{ refreshActiveItem: refreshActivePrompt ?? refreshActiveChain }}>
+            <RefreshContext.Provider value={{ refreshActiveItem }}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar
                   workspaces={workspaces}
@@ -279,7 +281,7 @@ export default function Home({
                     onAddPrompt={addPrompt}
                     onAddChain={addChain}
                     onDeleteItem={onDeleteItem}
-                    onRefreshItem={refreshActiveItem}
+                    onRefreshItem={refresh}
                     onSelectPrompt={selectPrompt}
                     onSelectChain={selectChain}
                     onSelectEndpoints={selectEndpoints}
@@ -295,7 +297,7 @@ export default function Home({
                           setModifiedVersion={setModifiedVersion}
                           showComments={showComments}
                           setShowComments={setShowComments}
-                          savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
+                          savePrompt={() => savePrompt(refresh).then(versionID => versionID!)}
                         />
                       </Suspense>
                     )}
