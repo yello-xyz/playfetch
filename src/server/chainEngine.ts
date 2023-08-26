@@ -26,7 +26,10 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
   return { ...result, duration }
 }
 
-type ResponseType = Awaited<ReturnType<typeof runWithTimer<Awaited<ReturnType<typeof runPromptWithConfig>>>>>
+const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
+
+type ChainStepResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
+type ResponseType = Awaited<ReturnType<typeof runWithTimer<ChainStepResponse>>>
 
 const emptyResponse: ResponseType = {
   output: '',
@@ -51,11 +54,22 @@ export default async function runChain(
   callback: CallbackType,
   streamChunk?: (index: number, chunk: string) => void
 ) {
+  let cost = 0
+  let duration = 0
+  let extraAttempts = 0
+  let cacheHit = false
+  const runChainStep = async (operation: Promise<ChainStepResponse>) => {
+    const response = await runWithTimer(operation)
+    cost += response.cost
+    duration += response.duration
+    extraAttempts += response.attempts - 1
+    cacheHit = cacheHit || response.cacheHit
+    return response
+  }
+
   let lastResponse = emptyResponse
   let runningContext = ''
   const codeContext = CreateCodeContextWithInputs(inputs)
-
-  const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
 
   for (const [index, config] of configs.entries()) {
     const stream = (chunk: string) => streamChunk?.(index, chunk)
@@ -68,7 +82,7 @@ export default async function runChain(
       if (config.includeContext) {
         prompt = runningContext
       }
-      lastResponse = await runWithTimer(runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream))
+      lastResponse = await runChainStep(runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream))
       const output = lastResponse.output
       if (lastResponse.failed) {
         stream(lastResponse.error)
@@ -82,7 +96,7 @@ export default async function runChain(
         AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
     } else {
-      lastResponse = await runWithTimer(runCodeInContext(config.code, codeContext))
+      lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       stream(lastResponse.failed ? lastResponse.error : lastResponse.output)
       await callback(index, null, lastResponse)
       if (lastResponse.failed) {
@@ -94,5 +108,5 @@ export default async function runChain(
     }
   }
 
-  return lastResponse
+  return { ...lastResponse, cost, duration, cacheHit, attempts: 1 + extraAttempts }
 }
