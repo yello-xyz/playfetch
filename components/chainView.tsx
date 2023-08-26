@@ -17,6 +17,7 @@ import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from
 import { Allotment } from 'allotment'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -177,20 +178,7 @@ export default function ChainView({
     return versionID!
   }
 
-  const [activeRunID, setActiveRunID] = useState<number>()
-  const onSelectComment = (version: ChainVersion, runID?: number) => {
-    if (version.id !== activeVersion.id) {
-      setActiveRunID(undefined)
-      setActiveVersion(version)
-      setTimeout(() => {
-        activateOutputNode()
-        setActiveRunID(runID)
-      }, 1000)
-    } else {
-      setActiveRunID(runID)
-      activateOutputNode()
-    }
-  }
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
 
   const minWidth = 280
   return (
@@ -228,7 +216,7 @@ export default function ChainView({
         <CommentsPane
           activeItem={chain}
           versions={chain.versions}
-          onSelectComment={onSelectComment}
+          onSelectComment={selectComment}
           showComments={showComments}
           setShowComments={setShowComments}
         />

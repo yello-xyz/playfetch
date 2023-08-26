@@ -13,6 +13,7 @@ import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 export default function PromptView({
   prompt,
@@ -48,16 +49,7 @@ export default function PromptView({
     setModifiedVersion(version)
   }
 
-  const [activeRunID, setActiveRunID] = useState<number>()
-  const onSelectComment = (version: PromptVersion, runID?: number) => {
-    if (version.id !== activeVersion.id) {
-      setActiveRunID(undefined)
-      setActiveVersion(version)
-      setTimeout(() => setActiveRunID(runID), 1000)
-    } else {
-      setActiveRunID(runID)
-    }
-  }
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
   const checkProviderAvailable = useCheckProvider()
 
@@ -151,7 +143,7 @@ export default function PromptView({
         <CommentsPane
           activeItem={prompt}
           versions={prompt.versions}
-          onSelectComment={onSelectComment}
+          onSelectComment={selectComment}
           showComments={showComments}
           setShowComments={setShowComments}
         />
