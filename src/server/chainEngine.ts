@@ -1,7 +1,7 @@
 import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
-import { AugmentCodeContext, CreateCodeContextWithInputs, EvaluateCode } from '@/src/server/codeEngine'
+import { AugmentCodeContext, CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
@@ -26,20 +26,20 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
   return { ...result, duration }
 }
 
-type CallbackType = (
-  index: number,
-  version: RawPromptVersion | null,
-  response: {
-    result?: any
-    output?: string
-    error?: string
-    cost: number
-    duration: number
-    attempts: number
-    cacheHit: boolean
-    failed: boolean
-  }
-) => Promise<any>
+type ResponseType = Awaited<ReturnType<typeof runWithTimer<Awaited<ReturnType<typeof runPromptWithConfig>>>>>
+
+const emptyResponse: ResponseType = {
+  output: '',
+  result: '',
+  error: undefined,
+  cost: 0,
+  duration: 0,
+  attempts: 1,
+  cacheHit: false,
+  failed: false,
+}
+
+type CallbackType = (index: number, version: RawPromptVersion | null, response: ResponseType) => Promise<any>
 
 export default async function runChain(
   userID: number,
@@ -51,7 +51,7 @@ export default async function runChain(
   callback: CallbackType,
   streamChunk?: (index: number, chunk: string) => void
 ) {
-  let result = undefined
+  let lastResponse = emptyResponse
   let runningContext = ''
   const codeContext = CreateCodeContextWithInputs(inputs)
 
@@ -68,35 +68,31 @@ export default async function runChain(
       if (config.includeContext) {
         prompt = runningContext
       }
-      const runResponse = await runWithTimer(
-        runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream)
-      )
-      const output = runResponse.output
-      result = runResponse.result
-      if (runResponse.failed) {
-        stream(runResponse.error)
+      lastResponse = await runWithTimer(runPromptWithConfig(userID, prompt, promptVersion.config, useCache, stream))
+      const output = lastResponse.output
+      if (lastResponse.failed) {
+        stream(lastResponse.error)
       }
-      await callback(index, promptVersion, runResponse)
-      if (runResponse.failed) {
+      await callback(index, promptVersion, lastResponse)
+      if (lastResponse.failed) {
         break
       } else {
         runningContext += `\n\n${output}\n\n`
         AugmentInputs(inputs, config.output, output!, useCamelCase)
-        AugmentCodeContext(codeContext, config.output, result)
+        AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
     } else {
-      const codeResponse = await runWithTimer(EvaluateCode(config.code, codeContext))
-      result = codeResponse.result
-      stream(codeResponse.failed ? codeResponse.error : codeResponse.output)
-      await callback(index, null, codeResponse)
-      if (codeResponse.failed) {
+      lastResponse = await runWithTimer(runCodeInContext(config.code, codeContext))
+      stream(lastResponse.failed ? lastResponse.error : lastResponse.output)
+      await callback(index, null, lastResponse)
+      if (lastResponse.failed) {
         break
       } else {
-        AugmentInputs(inputs, config.output, codeResponse.output, useCamelCase)
-        AugmentCodeContext(codeContext, config.output, result)
+        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
+        AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
     }
   }
 
-  return result
+  return lastResponse
 }

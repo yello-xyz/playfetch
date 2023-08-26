@@ -69,7 +69,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const configs = loadConfigsFromVersion(version)
         const isLastRun = (index: number) => index === configs.length - 1
         // TODO shortcut this when using caching for chain?
-        const output = await runChain(
+        const { result: output } = await runChain(
           endpoint.userID,
           version,
           configs,
