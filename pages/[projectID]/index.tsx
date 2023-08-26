@@ -166,7 +166,7 @@ export default function Home({
     updateVersion(newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0])
   }
 
-  const refreshActiveChain = activeChain ? () => refreshChain(activeChain.id) : undefined
+  const refreshActiveChain = activeChain ? (versionID?: number) => refreshChain(activeChain.id, versionID) : undefined
 
   const selectChain = async (chainID: number) => {
     if (chainID !== activeChain?.id) {
