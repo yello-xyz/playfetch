@@ -4,9 +4,10 @@ import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
 import { PromptInputs } from '@/types'
-import { loadConfigsFromVersion, runChainConfigs } from '../runVersion'
+import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
+import runChain from '@/src/server/chainEngine'
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -68,7 +69,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const configs = loadConfigsFromVersion(version)
         const isLastRun = (index: number) => index === configs.length - 1
         // TODO shortcut this when using caching for chain?
-        const output = await runChainConfigs(
+        const output = await runChain(
           endpoint.userID,
           version,
           configs,
