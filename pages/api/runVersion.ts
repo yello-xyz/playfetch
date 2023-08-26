@@ -40,6 +40,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         inputs,
         false,
         false,
+        (index, message) => sendData({ index: offset(index), message }),
         // TODO the appropriate inputs for the specific run should be passed in here as well.
         // TODO no need to persist individual prompt runs when evaluating a chain version?
         (index, version, { output, cost, duration, failed }) => {
@@ -51,8 +52,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           return version && output && !failed
             ? saveRun(user.id, version.parentID, version.id, inputs, output, createdAt, cost, duration, [])
             : Promise.resolve({})
-        },
-        (index, message) => sendData({ index: offset(index), message })
+        }
       )
     })
   )

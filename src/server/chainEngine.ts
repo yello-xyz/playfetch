@@ -51,8 +51,8 @@ export default async function runChain(
   inputs: PromptInputs,
   useCache: boolean,
   useCamelCase: boolean,
-  callback: CallbackType,
-  streamChunk?: (index: number, chunk: string) => void
+  streamChunk?: (index: number, chunk: string) => void,
+  callback?: CallbackType,
 ) {
   let cost = 0
   let duration = 0
@@ -87,7 +87,7 @@ export default async function runChain(
       if (lastResponse.failed) {
         stream(lastResponse.error)
       }
-      await callback(index, promptVersion, lastResponse)
+      await callback?.(index, promptVersion, lastResponse)
       if (lastResponse.failed) {
         break
       } else {
@@ -98,7 +98,7 @@ export default async function runChain(
     } else {
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       stream(lastResponse.failed ? lastResponse.error : lastResponse.output)
-      await callback(index, null, lastResponse)
+      await callback?.(index, null, lastResponse)
       if (lastResponse.failed) {
         break
       } else {
