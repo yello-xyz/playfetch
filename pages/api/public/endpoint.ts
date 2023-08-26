@@ -49,16 +49,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         const configs = loadConfigsFromVersion(version)
         const isLastRun = (index: number) => index === configs.length - 1
+        const streamChunk = (index: number, message: string) =>
+          useStreaming && isLastRun(index) ? res.write(message) : undefined
         // TODO shortcut this when using caching for chain?
-        const response = await runChain(
-          endpoint.userID,
-          version,
-          configs,
-          inputs,
-          endpoint.useCache,
-          true,
-          (index, message) => (useStreaming && isLastRun(index) ? res.write(message) : undefined)
-        )
+        const response = await runChain(endpoint.userID, version, configs, inputs, endpoint.useCache, true, streamChunk)
 
         logResponse(endpoint, inputs, response)
 

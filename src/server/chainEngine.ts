@@ -42,8 +42,6 @@ const emptyResponse: ResponseType = {
   failed: false,
 }
 
-type CallbackType = (index: number, version: RawPromptVersion | null, response: ResponseType) => Promise<any>
-
 export default async function runChain(
   userID: number,
   version: RawPromptVersion | RawChainVersion,
@@ -52,7 +50,7 @@ export default async function runChain(
   useCache: boolean,
   useCamelCase: boolean,
   streamChunk?: (index: number, chunk: string) => void,
-  callback?: CallbackType,
+  callback?: (index: number, cost: number, duration: number, failed: boolean) => void,
 ) {
   let cost = 0
   let duration = 0
@@ -87,7 +85,7 @@ export default async function runChain(
       if (lastResponse.failed) {
         stream(lastResponse.error)
       }
-      await callback?.(index, promptVersion, lastResponse)
+      callback?.(index, lastResponse.cost, lastResponse.duration, lastResponse.failed)
       if (lastResponse.failed) {
         break
       } else {
@@ -98,7 +96,7 @@ export default async function runChain(
     } else {
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       stream(lastResponse.failed ? lastResponse.error : lastResponse.output)
-      await callback?.(index, null, lastResponse)
+      callback?.(index, lastResponse.cost, lastResponse.duration, lastResponse.failed)
       if (lastResponse.failed) {
         break
       } else {
