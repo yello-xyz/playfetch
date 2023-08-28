@@ -10,7 +10,7 @@ export default function usePrompt(
   activePrompt: ActivePrompt | undefined,
   setActivePromp: (prompt: ActivePrompt) => void,
   activeVersion: PromptVersion | undefined,
-  setActiveVersion: (version: PromptVersion) => void,
+  setActiveVersion: (version: PromptVersion) => void
 ) {
   const router = useRouter()
 

@@ -8,6 +8,7 @@ import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/chainEngine'
+import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 
 const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited<ReturnType<typeof runChain>>) => {
   updateUsage(endpoint.id, response.cost, response.duration, response.cacheHit, response.attempts, response.failed)
@@ -28,6 +29,29 @@ const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited
   )
 }
 
+type ResponseType = Awaited<ReturnType<typeof runChain>>
+
+const getCacheKey = (versionID: number, inputs: PromptInputs) => ({ versionID, inputs })
+
+const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
+  const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
+  return cachedValue
+    ? {
+        result: JSON.parse(cachedValue),
+        output: '',
+        error: undefined,
+        duration: 0,
+        cost: 0,
+        failed: false,
+        attempts: 1,
+        cacheHit: true,
+      }
+    : null
+}
+
+const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType) =>
+  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result))
+
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
   const projectID = Number(projectIDFromPath)
@@ -44,15 +68,24 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('X-Accel-Buffering', 'no')
         }
 
+        const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
-        const version = await getTrustedVersion(endpoint.versionID)
 
-        const configs = loadConfigsFromVersion(version)
-        const isLastRun = (index: number) => index === configs.length - 1
-        const stream = (index: number, message: string) =>
-          useStreaming && isLastRun(index) ? res.write(message) : undefined
-        // TODO shortcut this when using caching for chain?
-        const response = await runChain(endpoint.userID, version, configs, inputs, endpoint.useCache, true, stream)
+        let response = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
+        if (!response) {
+          const version = await getTrustedVersion(versionID)
+
+          const configs = loadConfigsFromVersion(version)
+          const isLastRun = (index: number) => index === configs.length - 1
+          const stream = (index: number, message: string) =>
+            useStreaming && isLastRun(index) ? res.write(message) : undefined
+          // TODO shortcut this when using caching for chain?
+          response = await runChain(endpoint.userID, version, configs, inputs, endpoint.useCache, true, stream)
+
+          if (endpoint.useCache && !response.failed) {
+            cacheResponse(versionID, inputs, response)
+          }
+        }
 
         logResponse(endpoint, inputs, response)
 

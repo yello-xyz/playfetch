@@ -11,7 +11,7 @@ export default function useChain(
   setActiveChain: (chain: ActiveChain) => void,
   activeVersion: ChainVersion | undefined,
   setActiveVersion: (version: ChainVersion) => void,
-  savePrompt: (onSaved: () => Promise<void>) => void,
+  savePrompt: (onSaved: () => Promise<void>) => void
 ) {
   const router = useRouter()
 
