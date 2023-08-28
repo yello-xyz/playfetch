@@ -40,7 +40,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     multipleInputs.map(async (inputs, inputIndex) => {
       const offset = (index: number) => inputIndex * configs.length + index
       const timestamp = (failed?: boolean) => (failed !== undefined ? new Date().toISOString() : undefined)
-      return runChain(user.id, version, configs, inputs, false, false, (index, message, cost, duration, failed) =>
+      return runChain(user.id, version, configs, inputs, false, (index, message, cost, duration, failed) =>
         sendData({ index: offset(index), message, timestamp: timestamp(failed), cost, duration, failed })
       ).then(logResponse(user.id, version, inputs))
     })

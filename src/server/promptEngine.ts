@@ -10,7 +10,6 @@ import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import cohere from '@/src/server/cohere'
-import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
 type ValidPredictionResponse = { output: string; cost: number }
@@ -31,7 +30,6 @@ export default async function runPromptWithConfig(
   userID: number,
   prompt: string,
   config: PromptConfig,
-  useCache: boolean,
   streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> {
   const parseOutput = (output: string | undefined) => {
@@ -48,19 +46,6 @@ export default async function runPromptWithConfig(
     temperature: config.temperature,
     maxTokens: config.maxTokens,
     prompt,
-  }
-
-  const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
-  if (cachedValue) {
-    return {
-      result: parseOutput(cachedValue),
-      output: cachedValue,
-      error: undefined,
-      cost: 0,
-      failed: false,
-      attempts: 1,
-      cacheHit: true,
-    }
   }
 
   const getAPIKey = async (provider: ModelProvider) => {
@@ -98,10 +83,6 @@ export default async function runPromptWithConfig(
     if (isValidPredictionResponse(result)) {
       break
     }
-  }
-
-  if (useCache && isValidPredictionResponse(result)) {
-    await cacheValue(cacheKey, result.output)
   }
 
   if (!isErrorPredictionResponse(result) && result.cost > 0) {

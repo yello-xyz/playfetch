@@ -33,6 +33,9 @@ type ResponseType = Awaited<ReturnType<typeof runChain>>
 
 const getCacheKey = (versionID: number, inputs: PromptInputs) => ({ versionID, inputs })
 
+const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType) =>
+  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result))
+
 const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
   const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
   return cachedValue
@@ -48,9 +51,6 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
       }
     : null
 }
-
-const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType) =>
-  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result))
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -79,8 +79,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const isLastRun = (index: number) => index === configs.length - 1
           const stream = (index: number, message: string) =>
             useStreaming && isLastRun(index) ? res.write(message) : undefined
-          // TODO shortcut this when using caching for chain?
-          response = await runChain(endpoint.userID, version, configs, inputs, endpoint.useCache, true, stream)
+
+          response = await runChain(endpoint.userID, version, configs, inputs, true, stream)
 
           if (endpoint.useCache && !response.failed) {
             cacheResponse(versionID, inputs, response)

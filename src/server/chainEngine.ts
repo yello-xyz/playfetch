@@ -47,7 +47,6 @@ export default async function runChain(
   version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
-  useCache: boolean,
   useCamelCase: boolean,
   stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void
 ) {
@@ -88,7 +87,7 @@ export default async function runChain(
         prompt = runningContext
       }
       lastResponse = await runChainStep(
-        runPromptWithConfig(userID, prompt, promptVersion.config, useCache, streamPartialResponse)
+        runPromptWithConfig(userID, prompt, promptVersion.config, streamPartialResponse)
       )
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {
