@@ -148,7 +148,7 @@ async function saveVersionForUser(
   await datastore.save(versionData)
   const savedVersionID = getID(versionData)
 
-  if (IsPromptVersion({ items }) && prompt) {
+  if (IsPromptVersion({ items }) && prompt !== null) {
     const lastPrompt = currentVersion ? currentVersion.prompt : ''
     await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompt, lastPrompt)
     await augmentProjectWithNewVersion(parentData.projectID, prompt, lastPrompt)
