@@ -168,6 +168,15 @@ export async function deleteChainForUser(userID: number, chainID: number) {
     throw new Error('Cannot delete chain with published endpoints')
   }
 
+  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', chainID)
+  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', chainID)
+  const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', chainID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', chainID)
-  await getDatastore().delete([...inputKeys, buildKey(Entity.CHAIN, chainID)])
+  await getDatastore().delete([
+    ...inputKeys,
+    ...commentKeys,
+    ...runKeys,
+    ...versionKeys,
+    buildKey(Entity.CHAIN, chainID),
+  ])
 }

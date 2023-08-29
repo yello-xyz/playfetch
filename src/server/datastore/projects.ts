@@ -282,20 +282,17 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   }
 
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
+  const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
+
   const versionKeys = [] as Key[]
   const runKeys = [] as Key[]
   const commentKeys = [] as Key[]
   const inputKeys = [] as Key[]
-  for (const promptID in promptKeys.map(key => getID({ key }))) {
-    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', promptID)))
-    runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', promptID)))
-    commentKeys.push(...(await getEntityKeys(Entity.COMMENT, 'parentID', promptID)))
-    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', promptID)))
-  }
-
-  const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
-  for (const chainID in chainKeys.map(key => getID({ key }))) {
-    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', chainID)))
+  for (const parentID in [...promptKeys, ...chainKeys].map(key => getID({ key }))) {
+    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', parentID)))
+    runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', parentID)))
+    commentKeys.push(...(await getEntityKeys(Entity.COMMENT, 'parentID', parentID)))
+    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', parentID)))
   }
 
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
