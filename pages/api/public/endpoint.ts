@@ -31,7 +31,8 @@ const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited
 
 type ResponseType = Awaited<ReturnType<typeof runChain>>
 
-const getCacheKey = (versionID: number, inputs: PromptInputs) => ({ versionID, inputs })
+const getCacheKey = (versionID: number, inputs: PromptInputs) =>
+  `${versionID}:${JSON.stringify(Object.entries(inputs).sort(([a], [b]) => a.localeCompare(b)))}`
 
 const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType) =>
   cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result))
