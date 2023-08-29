@@ -14,7 +14,7 @@ export async function migrateUsers(postMerge: boolean) {
         userData.email,
         userData.fullName,
         userData.imageURL,
-        true,
+        userData.hasAccess,
         userData.isAdmin,
         userData.createdAt,
         userData.lastLoginAt,

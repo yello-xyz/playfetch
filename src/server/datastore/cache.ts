@@ -1,24 +1,32 @@
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
 
 export async function migrateCache(postMerge: boolean) {
-  if (!postMerge) {
+  if (postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allCacheData] = await datastore.runQuery(datastore.createQuery(Entity.CACHE))
   for (const cacheData of allCacheData) {
-    if (!cacheData.key) {
-      await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
-    }
+    await datastore.save(
+      toCacheData(
+        cacheData.key,
+        cacheData.value,
+        Object.fromEntries(Object.entries(cacheData).filter(([k]) => !['key', 'value', 'createdAt'].includes(k))),
+        cacheData.createdAt,
+        getID(cacheData)
+      )
+    )
   }
 }
 
+const toCacheData = (key: string, value: string, indices = {}, createdAt: Date, cacheID?: number) => ({
+  key: buildKey(Entity.CACHE, cacheID ?? hashValue(key)),
+  data: { ...indices, key, value, createdAt },
+  excludeFromIndexes: ['key', 'value'],
+})
+
 export async function cacheValue(key: string, value: string, indices = {}) {
-  await getDatastore().save({
-    key: buildKey(Entity.CACHE, hashValue(key)),
-    data: { ...indices, key, value, createdAt: new Date() },
-    excludeFromIndexes: ['key', 'value'],
-  })
+  await getDatastore().save(toCacheData(key, value, indices, new Date()))
 }
 
 export async function getCachedValue(key: string) {
