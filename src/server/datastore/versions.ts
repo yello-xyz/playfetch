@@ -269,9 +269,10 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const wasLastVersion = versionCount === 1
   const wasPromptVersion = IsPromptVersion(versionData)
 
+  const cacheKeys = await getEntityKeys(Entity.CACHE, 'versionID', versionID)
   const runKeys = await getEntityKeys(Entity.RUN, 'versionID', versionID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'versionID', versionID)
-  await getDatastore().delete([...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
+  await getDatastore().delete([...cacheKeys, ...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
 
   if (wasLastVersion) {
     if (wasPromptVersion) {
