@@ -6,7 +6,6 @@ import googleIcon from '@/public/google.svg'
 import Icon from '@/components/icon'
 import { useState } from 'react'
 import { CheckValidEmail } from '@/src/common/formatting'
-import Link from 'next/link'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
@@ -21,10 +20,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
       <div className='flex flex-col items-center gap-1.5'>
         <span className='text-2xl font-semibold'>Sign in to Play/Fetch</span>
         <span className='text-sm text-gray-400'>
-          Don’t have an account?{' '}
-          <Link href='mailto:hello@yello.xyz?subject=Join waitlist'>
-            <span className='underline'>Join our waitlist</span>
-          </Link>
+          Don’t have an account? Sign in to join our waitlist…
         </span>
       </div>
       <div className='flex flex-col w-full gap-3 p-8 bg-white rounded-lg border border-gray-200 max-w-[450px]'>
@@ -65,7 +61,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
 function SignInButton({ name, icon, provider }: { name: string; icon: string; provider: string }) {
   return (
     <button
-      className='flex justify-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-200 hover:border-gray-300'
+      className='flex justify-center p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-200 hover:border-gray-300'
       onClick={() => signIn(provider, { callbackUrl: ClientRoute.Home }).then()}>
       <div className='flex items-center gap-2 text-sm'>
         <Icon className='w-[22px] h-fit' icon={icon} />
