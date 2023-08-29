@@ -97,7 +97,7 @@ export default function PromptPanel({
             inputValues={inputValues}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-            disabled={prompt.length === 0}
+            disabled={prompt.trim().length === 0}
             hideDropdown
             callback={inputs => runPrompt(config, inputs)}
           />

@@ -12,7 +12,11 @@ export default function useSavePrompt(
 
   const savePrompt = async (onSaved?: ((versionID: number) => Promise<void>) | (() => void)) => {
     const versionNeedsSaving =
-      activePrompt && activeVersion && modifiedVersion && !PromptVersionsEqual(activeVersion, modifiedVersion)
+      activePrompt &&
+      activeVersion &&
+      modifiedVersion &&
+      modifiedVersion.prompt.trim().length > 0 &&
+      !PromptVersionsEqual(activeVersion, modifiedVersion)
     setModifiedVersion(undefined)
     if (!versionNeedsSaving) {
       return activeVersion?.id
