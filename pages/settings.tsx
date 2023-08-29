@@ -6,6 +6,7 @@ import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/userSettingsView'
+import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
   const availableProviders = await getAvailableProvidersForUser(user.id)
@@ -26,11 +27,14 @@ export default function Settings({
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
         <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-          <main className='flex items-stretch h-screen text-sm'>
-            <div className='flex flex-col flex-1'>
-              <div className='flex-1 overflow-y-auto'>
-                <UserSettingsView />
-              </div>
+          <main className='flex flex-col h-screen overflow-hidden text-sm'>
+            <TopBar>
+              <TopBarBackItem />
+              <span className='text-base font-medium'>Settings</span>
+              <TopBarAccessoryItem />
+            </TopBar>
+            <div className='flex flex-col items-center overflow-y-auto'>
+              <UserSettingsView />
             </div>
           </main>
         </UserContext.Provider>

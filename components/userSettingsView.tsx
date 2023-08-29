@@ -19,7 +19,6 @@ export default function UserSettingsView() {
 
   return (
     <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
-      <div className='text-base font-medium text-gray-800'>Settings</div>
       <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} onRefresh={refresh} />
       <CostPane availableProviders={user.availableProviders} />
     </div>
