@@ -172,7 +172,9 @@ export async function deleteChainForUser(userID: number, chainID: number) {
   const runKeys = await getEntityKeys(Entity.RUN, 'parentID', chainID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', chainID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', chainID)
+  const cacheKeys = await getEntityKeys(Entity.CACHE, 'parentID', chainID)
   await getDatastore().delete([
+    ...cacheKeys,
     ...inputKeys,
     ...commentKeys,
     ...runKeys,
