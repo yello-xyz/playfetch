@@ -43,7 +43,11 @@ export default function useRunVersion() {
       )
     }
     await refreshActiveItem(versionID)
-    setPartialRuns(runs => runs.filter((run, index) => run.failed || index < runs.length - 1))
+
+    const runsPerInput = (runs: PartialRun[]) => runs.length / (inputs.length ? inputs.length : 1)
+    const isIntermediateRun = (runs: PartialRun[], index: number) => index % runsPerInput(runs) < runsPerInput(runs) - 1
+    setPartialRuns(runs => runs.filter((run, index, runs) => run.failed || isIntermediateRun(runs, index)))
+
     setRunning(false)
   }
 
