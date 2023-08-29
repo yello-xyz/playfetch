@@ -34,8 +34,8 @@ type ResponseType = Awaited<ReturnType<typeof runChain>>
 const getCacheKey = (versionID: number, inputs: PromptInputs) =>
   `${versionID}:${JSON.stringify(Object.entries(inputs).sort(([a], [b]) => a.localeCompare(b)))}`
 
-const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType) =>
-  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result), { versionID })
+const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType, parentID: number) =>
+  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result), { versionID, parentID })
 
 const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
   const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
@@ -84,7 +84,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           response = await runChain(endpoint.userID, version, configs, inputs, true, stream)
 
           if (endpoint.useCache && !response.failed) {
-            cacheResponse(versionID, inputs, response)
+            cacheResponse(versionID, inputs, response, endpoint.parentID)
           }
         }
 
