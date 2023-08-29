@@ -69,10 +69,10 @@ export default async function runChain(
 
   for (const [index, config] of configs.entries()) {
     const streamPartialResponse = (chunk: string) => stream?.(index, chunk)
-    const streamResponse = (response: ResponseType, skipFinalOutput = false) =>
+    const streamResponse = (response: ResponseType, skipOutput = false) =>
       stream?.(
         index,
-        response.failed ? response.error : skipFinalOutput ? '' : response.output,
+        response.failed ? response.error : skipOutput ? '' : response.output,
         response.cost,
         response.duration,
         response.failed

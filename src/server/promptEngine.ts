@@ -26,28 +26,20 @@ type RunResponse = (
   | { result: undefined; output: undefined; error: string; failed: true }
 ) & { cost: number; attempts: number; cacheHit: boolean }
 
+export const TryParseOutput = (output: string | undefined) => {
+  try {
+    return output ? JSON.parse(output) : output
+  } catch {
+    return output
+  }
+}
+
 export default async function runPromptWithConfig(
   userID: number,
   prompt: string,
   config: PromptConfig,
   streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> {
-  const parseOutput = (output: string | undefined) => {
-    try {
-      return output ? JSON.parse(output) : output
-    } catch {
-      return output
-    }
-  }
-
-  const cacheKey = {
-    provider: config.provider,
-    model: config.model,
-    temperature: config.temperature,
-    maxTokens: config.maxTokens,
-    prompt,
-  }
-
   const getAPIKey = async (provider: ModelProvider) => {
     switch (provider) {
       case 'google':
@@ -93,7 +85,7 @@ export default async function runPromptWithConfig(
     ...(isErrorPredictionResponse(result)
       ? { error: result.error, result: undefined, output: undefined, cost: 0, failed: true }
       : isValidPredictionResponse(result)
-      ? { ...result, result: parseOutput(result.output), error: undefined, failed: false }
+      ? { ...result, result: TryParseOutput(result.output), error: undefined, failed: false }
       : { ...result, result: undefined, output: undefined, error: 'Received empty prediction response', failed: true }),
     attempts: Math.min(attempts, maxAttempts),
     cacheHit: false,

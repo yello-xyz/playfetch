@@ -9,6 +9,7 @@ import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/chainEngine'
 import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
+import { TryParseOutput } from '@/src/server/promptEngine'
 
 const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited<ReturnType<typeof runChain>>) => {
   updateUsage(endpoint.id, response.cost, response.duration, response.cacheHit, response.attempts, response.failed)
@@ -34,15 +35,19 @@ type ResponseType = Awaited<ReturnType<typeof runChain>>
 const getCacheKey = (versionID: number, inputs: PromptInputs) =>
   `${versionID}:${JSON.stringify(Object.entries(inputs).sort(([a], [b]) => a.localeCompare(b)))}`
 
-const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType, parentID: number) =>
-  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result), { versionID, parentID })
+const cacheResponse = (
+  versionID: number,
+  inputs: PromptInputs,
+  response: ResponseType & { failed: false },
+  parentID: number
+) => cacheValue(getCacheKey(versionID, inputs), response.output, { versionID, parentID })
 
 const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
   const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
   return cachedValue
     ? {
-        result: JSON.parse(cachedValue),
-        output: '',
+        result: TryParseOutput(cachedValue),
+        output: cachedValue,
         error: undefined,
         duration: 0,
         cost: 0,
@@ -73,6 +78,9 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
 
         let response = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
+        if (response && useStreaming) {
+          res.write(response.output)
+        }
         if (!response) {
           const version = await getTrustedVersion(versionID)
 
