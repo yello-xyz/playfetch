@@ -47,14 +47,9 @@ export const toUser = (data: any): User => ({
   isAdmin: data.isAdmin,
 })
 
-export async function getUser(userID: number) {
-  const userData = await getKeyedEntity(Entity.USER, userID)
-  return userData ? toUser(userData) : undefined
-}
-
-export async function getUserForEmail(email: string) {
+export async function getUserForEmail(email: string, includingWithoutAccess = false) {
   const userData = await getEntity(Entity.USER, 'email', email)
-  return userData ? toUser(userData) : undefined
+  return userData && (includingWithoutAccess || userData.hasAccess) ? toUser(userData) : undefined
 }
 
 export async function markUserLogin(userID: number, fullName: string, imageURL: string) {
@@ -79,8 +74,8 @@ export async function markUserLogin(userID: number, fullName: string, imageURL: 
 export async function saveUser(email: string, fullName: string, hasAccess = false, isAdmin = false) {
   const previousUserData = await getEntity(Entity.USER, 'email', email)
   const userData = toUserData(
-    email.toLowerCase(),
-    fullName.length ? fullName : email.toLowerCase(),
+    email.trim().toLowerCase(),
+    (fullName.length ? fullName : email).trim(),
     previousUserData?.imageURL ?? '',
     hasAccess,
     isAdmin,

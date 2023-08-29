@@ -1,5 +1,6 @@
+import { CheckValidEmail } from '@/src/common/formatting'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
-import { getUserForEmail, markUserLogin } from '@/src/server/datastore/users'
+import { getUserForEmail, markUserLogin, saveUser } from '@/src/server/datastore/users'
 import { GetNoReplyFromAddress } from '@/src/server/email'
 import NextAuth, { Session, SessionStrategy, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
@@ -41,6 +42,9 @@ export const authOptions = {
       if (registeredUser) {
         await markUserLogin(registeredUser.id, user.name ?? '', user.image ?? '')
         return true
+      } else if (CheckValidEmail(user.email ?? '')) {
+        await saveUser(user.email ?? '', user.name ?? '')
+        return false // TODO redirect to show waitlist confirmation
       } else {
         return false
       }
