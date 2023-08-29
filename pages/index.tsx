@@ -3,17 +3,11 @@ import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { User, AvailableProvider, Workspace, ActiveWorkspace, Project } from '@/types'
-import ClientRoute, {
-  ParseNumberQuery,
-  ProjectRoute,
-  SharedProjectsWorkspaceID,
-  WorkspaceRoute,
-} from '@/src/client/clientRoute'
+import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
-import UserSettingsView from '@/components/userSettingsView'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import WorkspaceGridView from '@/components/workspaceGridView'
 import WorkspaceSidebar from '@/components/workspaceSidebar'
@@ -28,7 +22,7 @@ export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace =>
 })
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
-  const { w: workspaceID, s: settings } = ParseNumberQuery(query)
+  const { w: workspaceID } = ParseNumberQuery(query)
 
   const initialWorkspaces = await getWorkspacesForUser(user.id)
 
@@ -40,7 +34,6 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       : await getActiveWorkspace(user.id, workspaceID ?? user.id)
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
-  const initialShowSettings = settings === 1
 
   return {
     props: {
@@ -49,7 +42,6 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       initialWorkspaces,
       initialActiveWorkspace,
       availableProviders,
-      initialShowSettings,
     },
   }
 })
@@ -60,14 +52,12 @@ export default function Home({
   initialWorkspaces,
   initialActiveWorkspace,
   availableProviders,
-  initialShowSettings,
 }: {
   user: User
   sharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialActiveWorkspace: ActiveWorkspace
   availableProviders: AvailableProvider[]
-  initialShowSettings: boolean
 }) {
   const router = useRouter()
 
@@ -77,19 +67,16 @@ export default function Home({
 
   const [activeWorkspace, setActiveWorkspace] = useState(initialActiveWorkspace)
 
-  const [showSettings, setShowSettings] = useState(initialShowSettings)
-
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
       ? api.getSharedProjects().then(projects => setActiveWorkspace(SharedProjectsWorkspace(projects)))
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
-    if (workspaceID !== activeWorkspace.id || showSettings) {
+    if (workspaceID !== activeWorkspace.id) {
       await refreshWorkspace(workspaceID)
       router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
     }
-    setShowSettings(false)
   }
 
   const navigateToProject = async (projectID: number) => {
@@ -101,22 +88,13 @@ export default function Home({
     navigateToProject(projectID)
   }
 
-  const selectSettings = () => {
-    setShowSettings(true)
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
-  }
-
   const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
 
-  const { w: workspaceID, s: settings } = ParseNumberQuery(router.query)
-  const currentQueryState = settings ? 'settings' : workspaceID
+  const { w: workspaceID } = ParseNumberQuery(router.query)
+  const currentQueryState = workspaceID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
-    if (settings) {
-      selectSettings()
-    } else {
-      selectWorkspace(workspaceID ?? user.id)
-    }
+    selectWorkspace(workspaceID ?? user.id)
     setQuery(currentQueryState)
   }
 
@@ -136,21 +114,17 @@ export default function Home({
             />
             <div className='flex flex-col flex-1'>
               <div className='flex-1 overflow-hidden'>
-                {showSettings ? (
-                  <UserSettingsView />
-                ) : (
-                  <WorkspaceGridView
-                    workspaces={workspaces}
-                    activeWorkspace={activeWorkspace}
-                    isUserWorkspace={activeWorkspace.id === user.id}
-                    isSharedProjects={IsSharedProjects(activeWorkspace)}
-                    onAddProject={addProject}
-                    onSelectProject={navigateToProject}
-                    onSelectUserWorkspace={() => selectWorkspace(user.id)}
-                    onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                    onRefreshWorkspaces={refreshWorkspaces}
-                  />
-                )}
+                <WorkspaceGridView
+                  workspaces={workspaces}
+                  activeWorkspace={activeWorkspace}
+                  isUserWorkspace={activeWorkspace.id === user.id}
+                  isSharedProjects={IsSharedProjects(activeWorkspace)}
+                  onAddProject={addProject}
+                  onSelectProject={navigateToProject}
+                  onSelectUserWorkspace={() => selectWorkspace(user.id)}
+                  onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                  onRefreshWorkspaces={refreshWorkspaces}
+                />
               </div>
             </div>
           </main>

@@ -176,11 +176,6 @@ export default function Home({
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
-  const selectSettings = () => {
-    savePrompt()
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
-  }
-
   const onDeleteItem = async () => {
     const newProject = await api.getProject(activeProject.id)
     setActiveProject(newProject)
