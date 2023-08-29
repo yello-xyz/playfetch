@@ -123,7 +123,7 @@ export default function Home({
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
+        <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
           <main className='flex items-stretch h-screen text-sm'>
             <WorkspaceSidebar
               workspaces={workspaces}

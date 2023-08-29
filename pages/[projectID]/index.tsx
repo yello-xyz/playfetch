@@ -231,7 +231,7 @@ export default function Home({
             setPopupProps,
             setPopupLocation,
           }}>
-          <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
+          <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
             <RefreshContext.Provider value={{ refreshActiveItem }}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar

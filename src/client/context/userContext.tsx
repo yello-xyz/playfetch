@@ -4,7 +4,6 @@ import { AvailableProvider, User } from '@/types'
 type UserContextType = {
   loggedInUser?: User
   availableProviders?: AvailableProvider[]
-  showSettings?: () => void
 }
 
 export const UserContext = createContext<UserContextType>({})
@@ -14,6 +13,5 @@ export const useLoggedInUser = () => {
   return {
     ...context.loggedInUser!,
     availableProviders: context.availableProviders!,
-    showSettings: context.showSettings!,
   }
 }

@@ -6,10 +6,10 @@ import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Icon from './icon'
 import { useLoggedInUser } from '@/src/client/context/userContext'
-import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import api from '@/src/client/api'
 import Link from 'next/link'
 import ClientRoute from '@/src/client/clientRoute'
+import { useRouter } from 'next/router'
 
 const avatarColors = [
   'bg-orange-300',
@@ -90,10 +90,11 @@ export default function UserSidebarItem() {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const user = useLoggedInUser()
+  const router = useRouter()
 
   const selectSettings = () => {
     setMenuExpanded(false)
-    user.showSettings()
+    router.push(ClientRoute.Settings)
   }
 
   const logOut = async () => api.logOut().then(() => signOut())

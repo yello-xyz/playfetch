@@ -5,7 +5,7 @@ export const SharedProjectsWorkspaceID = 1
 enum ClientRoute {
   Home = '/',
   SharedProjects = `${ClientRoute.Home}?w=${SharedProjectsWorkspaceID}`,
-  Settings = `${ClientRoute.Home}?s=1`,
+  Settings = '/settings',
   Login = '/login',
   Waitlist = `${ClientRoute.Login}?w=1`,
   Admin = '/admin',
