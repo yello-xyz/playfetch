@@ -14,85 +14,21 @@ import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/type
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
-import { saveChainVersionForUser, toVersion, toVersionData } from './versions'
-import { updateEndpointForUser } from './endpoints'
-import { toLogData } from './logs'
+import { saveChainVersionForUser, toVersion } from './versions'
 
-export async function migrateChains(postMerge: boolean) {
+export async function migrateChains() {
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {
-    let lastVersionID = chainData.lastVersionID
-    const references = chainData.references ? JSON.parse(chainData.references) : {}
-    if (!postMerge && chainData.items && !lastVersionID) {
-      const items = JSON.parse(chainData.items) as ChainItemWithInputs[]
-      const project = await getKeyedEntity(Entity.PROJECT, chainData.projectID)
-      const workspace = await getKeyedEntity(Entity.WORKSPACE, project.workspaceID)
-      const userID = workspace.userID
-      const versionData = toVersionData(
-        userID,
-        getID(chainData),
-        null,
-        null,
-        items,
-        [],
-        chainData.lastEditedAt,
-        undefined,
-        undefined,
-        undefined
-      )
-      await datastore.save(versionData)
-      lastVersionID = getID(versionData)
-      references[lastVersionID] = items.flatMap(item => ('promptID' in item ? [item.promptID, item.versionID] : []))
-
-      const endpoints = await getEntities(Entity.ENDPOINT, 'parentID', getID(chainData))
-      for (const endpoint of endpoints) {
-        await updateEndpointForUser(
-          endpoint.userID,
-          getID(endpoint),
-          endpoint.enabled,
-          endpoint.parentID,
-          lastVersionID,
-          endpoint.urlPath,
-          endpoint.flavor,
-          endpoint.useCache,
-          endpoint.useStreaming
-        )
-      }
-
-      const logs = await getEntities(Entity.LOG, 'parentID', getID(chainData))
-      for (const log of logs) {
-        datastore.save(
-          toLogData(
-            log.projectID,
-            log.endpointID,
-            log.urlPath,
-            log.flavor,
-            log.parentID,
-            lastVersionID,
-            JSON.parse(log.inputs),
-            JSON.parse(log.output),
-            log.error,
-            log.createdAt,
-            log.cost,
-            log.duration,
-            log.cacheHit,
-            log.attempts,
-            getID(log)
-          )
-        )
-      }
-    }
     await datastore.save(
       toChainData(
         chainData.projectID,
         chainData.name,
-        lastVersionID,
-        chainData.references ? JSON.parse(chainData.references) : references,
+        chainData.lastVersionID,
+        JSON.parse(chainData.references),
         chainData.createdAt,
         chainData.lastEditedAt,
-        getID(chainData),
-        postMerge && chainData.references ? undefined : chainData.items ? JSON.parse(chainData.items) : undefined
+        getID(chainData)
       )
     )
   }
@@ -107,8 +43,7 @@ const toChainData = (
   references: References,
   createdAt: Date,
   lastEditedAt: Date,
-  chainID?: number,
-  items?: ChainItemWithInputs[] // TODO safe to delete this after running next post-merge data migrations in prod
+  chainID?: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
   data: {
@@ -118,9 +53,8 @@ const toChainData = (
     references: JSON.stringify(references),
     createdAt,
     lastEditedAt,
-    items: items ? JSON.stringify(items) : undefined,
   },
-  excludeFromIndexes: ['name', 'items', 'references'], // TODO also delete items here
+  excludeFromIndexes: ['name', 'references'],
 })
 
 export const toChain = (data: any): Chain => ({
@@ -185,8 +119,7 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
       JSON.parse(chainData.references),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
-      getID(chainData),
-      chainData.items ? JSON.parse(chainData.items) : undefined
+      getID(chainData)
     )
   )
   if (updateLastEditedTimestamp) {
@@ -235,6 +168,17 @@ export async function deleteChainForUser(userID: number, chainID: number) {
     throw new Error('Cannot delete chain with published endpoints')
   }
 
+  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', chainID)
+  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', chainID)
+  const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', chainID)
   const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', chainID)
-  await getDatastore().delete([...inputKeys, buildKey(Entity.CHAIN, chainID)])
+  const cacheKeys = await getEntityKeys(Entity.CACHE, 'parentID', chainID)
+  await getDatastore().delete([
+    ...cacheKeys,
+    ...inputKeys,
+    ...commentKeys,
+    ...runKeys,
+    ...versionKeys,
+    buildKey(Entity.CHAIN, chainID),
+  ])
 }

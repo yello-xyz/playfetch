@@ -1,5 +1,5 @@
 import { ModelProvider } from '@/types'
-import { useLoggedInUser } from './userContext'
+import { useLoggedInUser } from '../context/userContext'
 
 export default function useCheckProvider() {
   const user = useLoggedInUser()

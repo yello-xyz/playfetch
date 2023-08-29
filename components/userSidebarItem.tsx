@@ -5,11 +5,11 @@ import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Icon from './icon'
-import { useLoggedInUser } from './userContext'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import api from '@/src/client/api'
 import Link from 'next/link'
-import ClientRoute from './clientRoute'
+import ClientRoute from '@/src/client/clientRoute'
 
 const avatarColors = [
   'bg-orange-300',

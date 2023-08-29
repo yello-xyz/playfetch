@@ -1,7 +1,7 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
 import { useRef, useState } from 'react'
-import useScrollDetection from './useScrollDetection'
-import useContainerRect from './useContainerRect'
+import useScrollDetection from '@/src/client/hooks/useScrollDetection'
+import useContainerRect from '@/src/client/hooks/useContainerRect'
 import RunCell from './runCell'
 import { SingleTabHeader } from './tabSelector'
 

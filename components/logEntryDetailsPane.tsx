@@ -7,7 +7,7 @@ import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Label from './label'
 import { CodeBlock } from './examplePane'
-import useFormattedDate from './useFormattedDate'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { SingleTabHeader } from './tabSelector'
 
 export default function LogEntryDetailsPane({

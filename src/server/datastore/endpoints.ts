@@ -12,10 +12,10 @@ import {
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
-import { getUniqueNameWithFormat, getVerifiedUserPromptData } from './prompts'
+import { getUniqueNameWithFormat } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
-import { getVerifiedUserChainData, getVerifiedUserPromptOrChainData } from './chains'
+import { getVerifiedUserPromptOrChainData } from './chains'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()

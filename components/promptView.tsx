@@ -1,52 +1,19 @@
-import { ActiveProject, ActivePrompt, PartialRun, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
+import { ActiveProject, ActivePrompt, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
-import useInputValues from './useInputValues'
+import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
-import { useRefreshActiveItem } from './refreshContext'
-import api, { StreamReader } from '@/src/client/api'
-import useCheckProvider from './checkProvider'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import TabSelector from './tabSelector'
-import useInitialState from './useInitialState'
+import useInitialState from '@/src/client/hooks/useInitialState'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-
-export const ConsumeRunStreamReader = async (reader: StreamReader, setPartialRuns: (runs: PartialRun[]) => void) => {
-  const runs = {} as { [index: number]: PartialRun }
-  setPartialRuns([])
-  while (reader) {
-    const { done, value } = await reader.read()
-    if (done) {
-      return
-    }
-    const text = await new Response(value).text()
-    const lines = text.split('\n')
-    for (const line of lines.filter(line => line.trim().length > 0)) {
-      const data = line.split('data:').slice(-1)[0]
-      const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
-      const output = message ?? ''
-      if (runs[index]) {
-        runs[index].output += output
-        runs[index].id = index
-        runs[index].cost = cost
-        runs[index].duration = duration
-        runs[index].timestamp = timestamp
-        runs[index].failed = failed
-      } else {
-        runs[index] = { id: index, output, cost, duration, timestamp, failed }
-      }
-    }
-    setPartialRuns(
-      Object.entries(runs)
-        .sort(([a], [b]) => Number(a) - Number(b))
-        .map(([, run]) => run)
-    )
-  }
-}
+import useRunVersion from '@/src/client/hooks/useRunVersion'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 export default function PromptView({
   prompt,
@@ -82,34 +49,14 @@ export default function PromptView({
     setModifiedVersion(version)
   }
 
-  const [activeRunID, setActiveRunID] = useState<number>()
-
-  const onSelectComment = (version: PromptVersion, runID?: number) => {
-    if (version.id !== activeVersion.id) {
-      setActiveRunID(undefined)
-      setActiveVersion(version)
-      setTimeout(() => setActiveRunID(runID), 1000)
-    } else {
-      setActiveRunID(runID)
-    }
-  }
-
-  const refreshActiveItem = useRefreshActiveItem()
-  const [isRunning, setRunning] = useState(false)
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
   const checkProviderAvailable = useCheckProvider()
 
-  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-
+  const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
     if (checkProviderAvailable(config.provider)) {
-      setRunning(true)
-      const versionID = await savePrompt()
-      const streamReader = await api.runPrompt(versionID, inputs)
-      await ConsumeRunStreamReader(streamReader, setPartialRuns)
-      await refreshActiveItem(versionID)
-      setPartialRuns(runs => runs.filter(run => run.failed))
-      setRunning(false)
+      await runVersion(savePrompt, inputs)
     }
   }
 
@@ -194,8 +141,9 @@ export default function PromptView({
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane
-          prompt={prompt}
-          onSelectComment={onSelectComment}
+          activeItem={prompt}
+          versions={prompt.versions}
+          onSelectComment={selectComment}
           showComments={showComments}
           setShowComments={setShowComments}
         />

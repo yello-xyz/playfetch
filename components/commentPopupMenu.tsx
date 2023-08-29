@@ -1,5 +1,5 @@
 import { Comment, User } from '@/types'
-import api from '../src/client/api'
+import api from '@/src/client/api'
 import PopupMenu, { CalculatePopupOffset } from './popupMenu'
 import IconButton from './iconButton'
 import commentIcon from '@/public/comment.svg'
@@ -7,9 +7,9 @@ import commentBadgeIcon from '@/public/commentBadge.svg'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
 import { useRef, useState } from 'react'
-import { useRefreshActiveItem } from './refreshContext'
+import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import { UserAvatar } from './userSidebarItem'
-import { useLoggedInUser } from './userContext'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
 
 export default function CommentPopupMenu({

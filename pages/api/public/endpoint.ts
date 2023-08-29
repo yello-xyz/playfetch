@@ -1,12 +1,62 @@
-import { ParseQuery } from '@/components/clientRoute'
+import { ParseQuery } from '@/src/client/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
 import { updateUsage } from '@/src/server/datastore/usage'
-import { PromptInputs } from '@/types'
-import { loadConfigsFromVersion, runChainConfigs } from '../runChain'
+import { Endpoint, PromptInputs } from '@/types'
+import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
+import runChain from '@/src/server/chainEngine'
+import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
+import { TryParseOutput } from '@/src/server/promptEngine'
+
+const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited<ReturnType<typeof runChain>>) => {
+  updateUsage(endpoint.id, response.cost, response.duration, response.cacheHit, response.attempts, response.failed)
+  saveLogEntry(
+    endpoint.projectID,
+    endpoint.id,
+    endpoint.urlPath,
+    endpoint.flavor,
+    endpoint.parentID,
+    endpoint.versionID,
+    inputs,
+    response.result ? { output: response.result } : {},
+    response.error,
+    response.cost,
+    response.duration,
+    response.cacheHit,
+    response.attempts
+  )
+}
+
+type ResponseType = Awaited<ReturnType<typeof runChain>>
+
+const getCacheKey = (versionID: number, inputs: PromptInputs) =>
+  `${versionID}:${JSON.stringify(Object.entries(inputs).sort(([a], [b]) => a.localeCompare(b)))}`
+
+const cacheResponse = (
+  versionID: number,
+  inputs: PromptInputs,
+  response: ResponseType & { failed: false },
+  parentID: number
+) => cacheValue(getCacheKey(versionID, inputs), response.output, { versionID, parentID })
+
+const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
+  const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
+  return cachedValue
+    ? {
+        result: TryParseOutput(cachedValue),
+        output: cachedValue,
+        error: undefined,
+        duration: 0,
+        cost: 0,
+        failed: false,
+        attempts: 1,
+        cacheHit: true,
+      }
+    : null
+}
 
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
@@ -24,60 +74,31 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('X-Accel-Buffering', 'no')
         }
 
-        let totalCost = 0
-        let totalDuration = 0
-        let extraAttempts = 0
-        let anyCacheHit = false
-        const updateAggregateUsage = async (
-          isLastRun: boolean,
-          result: any | undefined,
-          error: string | undefined,
-          cost: number,
-          duration: number,
-          attempts: number,
-          cacheHit: boolean,
-          failed: boolean
-        ) => {
-          totalCost += cost
-          totalDuration += duration
-          extraAttempts += attempts - 1
-          anyCacheHit = anyCacheHit || cacheHit
-          if (isLastRun || failed) {
-            updateUsage(endpoint.id, totalCost, totalDuration, anyCacheHit, 1 + extraAttempts, failed)
-            saveLogEntry(
-              endpoint.projectID,
-              endpoint.id,
-              endpoint.urlPath,
-              endpoint.flavor,
-              endpoint.parentID,
-              endpoint.versionID,
-              inputs,
-              result ? { output: result } : {},
-              error,
-              totalCost,
-              totalDuration,
-              anyCacheHit,
-              1 + extraAttempts
-            )
+        const versionID = endpoint.versionID
+        const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
+
+        let response = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
+        if (response && useStreaming) {
+          res.write(response.output)
+        }
+        if (!response) {
+          const version = await getTrustedVersion(versionID)
+
+          const configs = loadConfigsFromVersion(version)
+          const isLastRun = (index: number) => index === configs.length - 1
+          const stream = (index: number, message: string) =>
+            useStreaming && isLastRun(index) ? res.write(message) : undefined
+
+          response = await runChain(endpoint.userID, version, configs, inputs, true, stream)
+
+          if (endpoint.useCache && !response.failed) {
+            cacheResponse(versionID, inputs, response, endpoint.parentID)
           }
         }
 
-        const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
-        const version = await getTrustedVersion(endpoint.versionID)
-        const configs = loadConfigsFromVersion(version)
-        const isLastRun = (index: number) => index === configs.length - 1
-        const output = await runChainConfigs(
-          endpoint.userID,
-          version,
-          configs,
-          inputs,
-          endpoint.useCache,
-          true,
-          (index, _, { result, error, cost, duration, attempts, cacheHit, failed }) =>
-            updateAggregateUsage(isLastRun(index), result, error, cost, duration, attempts, cacheHit, failed),
-          (index, message) => (useStreaming && isLastRun(index) ? res.write(message) : undefined)
-        )
-        return useStreaming ? res.end() : res.json({ output })
+        logResponse(endpoint, inputs, response)
+
+        return useStreaming ? res.end() : res.json({ output: response.result })
       }
     }
   }

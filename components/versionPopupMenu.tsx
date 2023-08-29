@@ -1,11 +1,11 @@
 import { PromptVersion } from '@/types'
-import api from '../src/client/api'
+import api from '@/src/client/api'
 import PopupMenu, { CalculatePopupOffset, PopupMenuItem } from './popupMenu'
-import useModalDialogPrompt from './modalDialogContext'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useRef, useState } from 'react'
-import { useRefreshActiveItem } from './refreshContext'
+import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 
 export default function VersionPopupMenu({
   version,

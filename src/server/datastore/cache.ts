@@ -1,26 +1,36 @@
-import { Entity, buildKey, getDatastore, getKeyedEntity } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
 
-export async function cacheValue(object: any, value: string) {
-  const key = hashValue(object)
+export async function migrateCache(postMerge: boolean) {
+  if (!postMerge) {
+    return
+  }
+  const datastore = getDatastore()
+  const [allCacheData] = await datastore.runQuery(datastore.createQuery(Entity.CACHE))
+  for (const cacheData of allCacheData) {
+    if (!cacheData.key) {
+      await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+    }
+  }
+}
+
+export async function cacheValue(key: string, value: string, indices = {}) {
   await getDatastore().save({
-    key: buildKey(Entity.CACHE, key),
-    data: { value },
-    excludeFromIndexes: ['value'],
+    key: buildKey(Entity.CACHE, hashValue(key)),
+    data: { ...indices, key, value, createdAt: new Date() },
+    excludeFromIndexes: ['key', 'value'],
   })
 }
 
-export async function getCachedValue(object: any) {
-  const key = hashValue(object)
-  const cachedValue = await getKeyedEntity(Entity.CACHE, key)
-  return cachedValue ? cachedValue.value : undefined
+export async function getCachedValue(key: string) {
+  const cachedValue = await getKeyedEntity(Entity.CACHE, hashValue(key))
+  return cachedValue && cachedValue.key === key ? cachedValue.value : undefined
 }
 
-const hashValue = (object: any, seed = 0) => {
-  const str = JSON.stringify(object)
+const hashValue = (value: string, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
     h2 = 0x41c6ce57 ^ seed
-  for (let i = 0, ch; i < str.length; i++) {
-    ch = str.charCodeAt(i)
+  for (let i = 0, ch; i < value.length; i++) {
+    ch = value.charCodeAt(i)
     h1 = Math.imul(h1 ^ ch, 2654435761)
     h2 = Math.imul(h2 ^ ch, 1597334677)
   }

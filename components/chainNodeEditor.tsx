@@ -7,6 +7,7 @@ import {
   PartialRun,
   PromptInputs,
   PromptVersion,
+  Run,
   TestConfig,
 } from '@/types'
 import { useState } from 'react'
@@ -14,10 +15,8 @@ import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
 import PromptInput from './promptInput'
-import useInputValues from './useInputValues'
-import useCheckProvider from './checkProvider'
-import { ConsumeRunStreamReader } from './promptView'
-import api from '@/src/client/api'
+import useInputValues from '@/src/client/hooks/useInputValues'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import TestButtons from './testButtons'
@@ -25,7 +24,7 @@ import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
-import { useRefreshActiveItem } from './refreshContext'
+import useRunVersion from '@/src/client/hooks/useRunVersion'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -54,9 +53,20 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) =>
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }
 
+const sortByTimestamp = <T extends { timestamp: string }>(items: T[]): T[] =>
+  items.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+
+const hasTimestamp = <T extends { timestamp?: string }>(run: T): run is T & { timestamp: string } => !!run.timestamp
+
+const mergeRuns = <T extends { timestamp?: string }>(runs: T[]): T[] => [
+  ...sortByTimestamp(runs.filter(hasTimestamp)),
+  ...runs.filter(run => !hasTimestamp(run)),
+]
+
 export default function ChainNodeEditor({
   chain,
   activeVersion,
+  activeRunID,
   items,
   setItems,
   activeItemIndex,
@@ -69,6 +79,7 @@ export default function ChainNodeEditor({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
+  activeRunID?: number
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
@@ -124,10 +135,7 @@ export default function ChainNodeEditor({
     toggleEditing()
   }
 
-  const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
-  const [isRunning, setRunning] = useState(false)
-  const refreshActiveItem = useRefreshActiveItem()
-
+  const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (currentItems.length > 0) {
@@ -144,15 +152,7 @@ export default function ChainNodeEditor({
       }
       const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
       if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
-        setRunning(true)
-        setPartialRuns([])
-        const chainVersionID = await prepareForRunning(newItems)
-        // TODO the rest of this logic is now the same for prompts and chains so factor it out.
-        const streamReader = await api.runChain(chainVersionID, inputs)
-        await ConsumeRunStreamReader(streamReader, setPartialRuns)
-        await refreshActiveItem(chainVersionID)
-        setPartialRuns(runs => runs.filter(run => run.failed))
-        setRunning(false)
+        await runVersion(() => prepareForRunning(newItems), inputs)
       }
     }
   }
@@ -215,8 +215,9 @@ export default function ChainNodeEditor({
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
-              runs={[...activeVersion.runs, ...partialRuns]}
+              runs={mergeRuns([...activeVersion.runs, ...partialRuns])}
               activeItem={chain}
+              activeRunID={activeRunID}
               version={activeVersion}
               isRunning={isRunning}
             />

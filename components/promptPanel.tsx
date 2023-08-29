@@ -12,7 +12,7 @@ import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector, { ProviderForModel } from './modelSelector'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
-import useInitialState from './useInitialState'
+import useInitialState from '@/src/client/hooks/useInitialState'
 import TestButtons from './testButtons'
 import { useEffect, useState } from 'react'
 

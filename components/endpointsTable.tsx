@@ -13,7 +13,7 @@ import addIcon from '@/public/add.svg'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Icon from './icon'
-import TableCell, { TableHeader } from './TableCell'
+import TableCell, { TableHeader } from './tableCell'
 
 export default function EndpointsTable({
   tabSelector,

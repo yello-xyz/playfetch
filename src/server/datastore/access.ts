@@ -68,12 +68,13 @@ export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise
 
 export async function grantUsersAccess(emails: string[], objectID: number, kind: 'project' | 'workspace') {
   for (const email of emails) {
-    const user = await getUserForEmail(email.toLowerCase())
+    const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
       await grantUserAccess(user.id, objectID, kind)
-      // TODO send notification
+      // TODO send notification (but only if they already have access)
     } else {
-      // TODO send invite to sign up
+      // TODO send invite to sign up (if we automatically want to give people access)
+      // Or even automatically sign them up to the waitlist (but maybe not?)
     }
   }
 }

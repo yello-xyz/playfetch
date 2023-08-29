@@ -10,7 +10,6 @@ import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
 import vertexai from '@/src/server/vertexai'
 import cohere from '@/src/server/cohere'
-import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
 type ValidPredictionResponse = { output: string; cost: number }
@@ -27,42 +26,20 @@ type RunResponse = (
   | { result: undefined; output: undefined; error: string; failed: true }
 ) & { cost: number; attempts: number; cacheHit: boolean }
 
+export const TryParseOutput = (output: string | undefined) => {
+  try {
+    return output ? JSON.parse(output) : output
+  } catch {
+    return output
+  }
+}
+
 export default async function runPromptWithConfig(
   userID: number,
   prompt: string,
   config: PromptConfig,
-  useCache: boolean,
   streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> {
-  const parseOutput = (output: string | undefined) => {
-    try {
-      return output ? JSON.parse(output) : output
-    } catch {
-      return output
-    }
-  }
-
-  const cacheKey = {
-    provider: config.provider,
-    model: config.model,
-    temperature: config.temperature,
-    maxTokens: config.maxTokens,
-    prompt,
-  }
-
-  const cachedValue = useCache ? await getCachedValue(cacheKey) : undefined
-  if (cachedValue) {
-    return {
-      result: parseOutput(cachedValue),
-      output: cachedValue,
-      error: undefined,
-      cost: 0,
-      failed: false,
-      attempts: 1,
-      cacheHit: true,
-    }
-  }
-
   const getAPIKey = async (provider: ModelProvider) => {
     switch (provider) {
       case 'google':
@@ -100,11 +77,7 @@ export default async function runPromptWithConfig(
     }
   }
 
-  if (useCache && isValidPredictionResponse(result)) {
-    await cacheValue(cacheKey, result.output)
-  }
-
-  if (!isErrorPredictionResponse(result)) {
+  if (!isErrorPredictionResponse(result) && result.cost > 0) {
     await incrementProviderCostForUser(userID, config.provider, result.cost)
   }
 
@@ -112,7 +85,7 @@ export default async function runPromptWithConfig(
     ...(isErrorPredictionResponse(result)
       ? { error: result.error, result: undefined, output: undefined, cost: 0, failed: true }
       : isValidPredictionResponse(result)
-      ? { ...result, result: parseOutput(result.output), error: undefined, failed: false }
+      ? { ...result, result: TryParseOutput(result.output), error: undefined, failed: false }
       : { ...result, result: undefined, output: undefined, error: 'Received empty prediction response', failed: true }),
     attempts: Math.min(attempts, maxAttempts),
     cacheHit: false,

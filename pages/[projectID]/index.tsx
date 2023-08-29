@@ -12,42 +12,38 @@ import {
   ActiveChain,
   PromptVersion,
   ChainVersion,
+  IsPromptVersion,
 } from '@/types'
-import ClientRoute, {
-  ChainRoute,
-  EndpointsRoute,
-  ParseNumberQuery,
-  ProjectRoute,
-  PromptRoute,
-  WorkspaceRoute,
-} from '@/components/clientRoute'
+import ClientRoute, { EndpointsRoute, ParseNumberQuery, ProjectRoute, WorkspaceRoute } from '@/src/client/clientRoute'
 import { getPromptForUser } from '@/src/server/datastore/prompts'
 import { getActiveProject } from '@/src/server/datastore/projects'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
-import { ModalDialogContext } from '@/components/modalDialogContext'
-import { RefreshContext } from '@/components/refreshContext'
+import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
+import { RefreshContext } from '@/src/client/context/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
-import { UserContext } from '@/components/userContext'
+import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import ProjectSidebar from '@/components/projectSidebar'
 import { EmptyGridView } from '@/components/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projectTopBar'
-import useSavePrompt from '@/components/useSavePrompt'
 
 import dynamic from 'next/dynamic'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
-import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/components/globalPopupContext'
+import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
-import useSaveChain from '@/components/useSaveChain'
+import usePrompt from '@/src/client/hooks/usePrompt'
+import useChain from '@/src/client/hooks/useChain'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
 
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
+const IsChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
+const IsPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && !IsChain(item)
 
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
@@ -107,98 +103,82 @@ export default function Home({
   const router = useRouter()
 
   const [activeProject, setActiveProject] = useState(initialActiveProject)
+  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
-  const isChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
-  const isPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && !isChain(item)
-  const activePrompt = activeItem && isPrompt(activeItem) ? activeItem : undefined
-  const activeChain = activeItem && isChain(activeItem) ? activeItem : undefined
+  const activePrompt = activeItem && IsPrompt(activeItem) ? activeItem : undefined
+  const activeChain = activeItem && IsChain(activeItem) ? activeItem : undefined
 
-  const activeEndpoints = activeItem === Endpoints ? activeProject.endpoints : undefined
-  const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
-
-  const [showComments, setShowComments] = useState(false)
-
-  const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion | undefined>(
-    activePrompt?.versions?.slice(-1)?.[0]
+  const [activeVersion, setActiveVersion] = useState<PromptVersion | ChainVersion | undefined>(
+    activeItem === Endpoints ? undefined : activeItem?.versions?.slice(-1)?.[0]
   )
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
+  const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
+  const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
 
-  const updatePromptVersion = (version?: PromptVersion) => {
-    setActivePromptVersion(version)
+  const [refreshPrompt, selectPrompt, addPrompt, savePrompt, setModifiedVersion] = usePrompt(
+    activeProject,
+    refreshProject,
+    activePrompt,
+    setActiveItem,
+    activePromptVersion,
+    setActiveVersion
+  )
+
+  const [refreshChain, selectChain, addChain, saveChain] = useChain(
+    activeProject,
+    refreshProject,
+    activeChain,
+    setActiveItem,
+    activeChainVersion,
+    setActiveVersion,
+    savePrompt
+  )
+
+  const updateVersion = (version?: PromptVersion | ChainVersion) => {
+    setActiveVersion(version)
     setModifiedVersion(undefined)
   }
 
-  const selectPromptVersion = (version: PromptVersion) => {
-    if (activePrompt && activePromptVersion && version.id !== activePromptVersion.id) {
-      savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
-      updatePromptVersion(version)
+  const selectVersion = (version: PromptVersion | ChainVersion) => {
+    if (version.id !== activeVersion?.id) {
+      if (activePrompt) {
+        savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
+      }
+      updateVersion(version)
     }
   }
 
-  const refreshPrompt = async (promptID: number, focusVersionID = activePromptVersion?.id) => {
-    const newPrompt = await api.getPrompt(promptID, activeProject)
-    setActiveItem(newPrompt)
-    updatePromptVersion(
-      newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0]
-    )
-    setActiveChainVersion(undefined)
-  }
-
-  const refreshActivePrompt = activePrompt
-    ? (versionID?: number) => refreshPrompt(activePrompt.id, versionID)
-    : undefined
-
-  const selectPrompt = async (promptID: number) => {
-    if (promptID !== activePrompt?.id) {
-      savePrompt(refreshProject)
-      await refreshPrompt(promptID)
-      router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
+  const refreshActiveItem = (versionID?: number) => {
+    if (activePrompt) {
+      return refreshPrompt(activePrompt.id, versionID)
+    } else if (activeChain) {
+      return refreshChain(activeChain.id, versionID)
+    } else {
+      return refreshProject()
     }
   }
 
-  const [activeChainVersion, setActiveChainVersion] = useState<ChainVersion | undefined>(
-    activeChain?.versions?.slice(-1)?.[0]
-  )
-  const saveChain = useSaveChain(activeChain, activeChainVersion, setActiveChainVersion)
-
-  const refreshChain = async (chainID: number, focusVersionID = activePromptVersion?.id) => {
-    const newChain = await api.getChain(chainID, activeProject)
-    setActiveItem(newChain)
-    setActiveChainVersion(
-      newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0]
-    )
-    updatePromptVersion(undefined)
-  }
-
-  const refreshActiveChain = activeChain ? () => refreshChain(activeChain.id) : undefined
-
-  const selectChain = async (chainID: number) => {
-    if (chainID !== activeChain?.id) {
-      savePrompt(refreshProject)
-      await refreshChain(chainID)
-      router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
+  const refresh = () => {
+    refreshActiveItem()
+    if (activeItem !== Endpoints) {
+      refreshProject()
     }
   }
 
+  const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(Endpoints)
+    updateVersion(undefined)
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
-    updatePromptVersion(undefined)
-    setActiveChainVersion(undefined)
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
-
-  const refreshActiveItem = () => {
-    refreshActivePrompt?.()
-    refreshActiveChain?.()
-    // Make sure active item is updated in sidebar too (and this will also update active endpoints).
-    refreshProject()
+  const selectSettings = () => {
+    savePrompt()
+    router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
 
   const onDeleteItem = async () => {
@@ -209,8 +189,7 @@ export default function Home({
       selectPrompt(promptID)
     } else {
       setActiveItem(undefined)
-      updatePromptVersion(undefined)
-      setActiveChainVersion(undefined)
+      updateVersion(undefined)
       router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
     }
   }
@@ -231,27 +210,13 @@ export default function Home({
     setQuery(currentQueryState)
   }
 
-  const addPrompt = async () => {
-    const promptID = await api.addPrompt(activeProject.id)
-    refreshProject().then(() => selectPrompt(promptID))
-  }
-
-  const addChain = async () => {
-    const chainID = await api.addChain(activeProject.id)
-    refreshProject().then(() => selectChain(chainID))
-  }
-
-  const selectSettings = () => {
-    savePrompt()
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
-  }
-
   const isSharedProject = !workspaces.find(workspace => workspace.id === activeProject.workspaceID)
   const navigateBack = () => {
     savePrompt()
     router.push(isSharedProject ? ClientRoute.SharedProjects : WorkspaceRoute(activeProject.workspaceID, user.id))
   }
 
+  const [showComments, setShowComments] = useState(false)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
   const [popupProps, setPopupProps] = useState<any>()
@@ -267,7 +232,7 @@ export default function Home({
             setPopupLocation,
           }}>
           <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-            <RefreshContext.Provider value={{ refreshActiveItem: refreshActivePrompt ?? refreshActiveChain }}>
+            <RefreshContext.Provider value={{ refreshActiveItem }}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar
                   workspaces={workspaces}
@@ -286,7 +251,7 @@ export default function Home({
                     onAddPrompt={addPrompt}
                     onAddChain={addChain}
                     onDeleteItem={onDeleteItem}
-                    onRefreshItem={refreshActiveItem}
+                    onRefreshItem={refresh}
                     onSelectPrompt={selectPrompt}
                     onSelectChain={selectChain}
                     onSelectEndpoints={selectEndpoints}
@@ -298,11 +263,11 @@ export default function Home({
                           prompt={activePrompt}
                           project={activeProject}
                           activeVersion={activePromptVersion}
-                          setActiveVersion={selectPromptVersion}
+                          setActiveVersion={selectVersion}
                           setModifiedVersion={setModifiedVersion}
                           showComments={showComments}
                           setShowComments={setShowComments}
-                          savePrompt={() => savePrompt(refreshActiveItem).then(versionID => versionID!)}
+                          savePrompt={() => savePrompt(refresh).then(versionID => versionID!)}
                         />
                       </Suspense>
                     )}
@@ -312,13 +277,15 @@ export default function Home({
                           key={activeChain.id}
                           chain={activeChain}
                           activeVersion={activeChainVersion}
-                          setActiveVersion={setActiveChainVersion}
+                          setActiveVersion={selectVersion}
                           project={activeProject}
+                          showComments={showComments}
+                          setShowComments={setShowComments}
                           saveChain={saveChain}
                         />
                       </Suspense>
                     )}
-                    {activeEndpoints && (
+                    {activeItem === Endpoints && (
                       <Suspense>
                         <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
                       </Suspense>

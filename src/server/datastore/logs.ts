@@ -1,23 +1,19 @@
 import { LogEntry, PromptInputs } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getOrderedEntities, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp } from './datastore'
 import { ensureProjectAccess } from './projects'
 
-export async function migrateLogs(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
+export async function migrateLogs() {
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   for (const logData of allLogs) {
-    const endpoint = await getKeyedEntity(Entity.ENDPOINT, logData.endpointID)
     await getDatastore().save(
       toLogData(
         logData.projectID,
         logData.endpointID,
-        logData.urlPath ?? endpoint.urlPath,
-        logData.flavor ?? endpoint.flavor,
-        logData.parentID ?? endpoint.parentID,
-        logData.versionID ?? endpoint.versionID,
+        logData.urlPath,
+        logData.flavor,
+        logData.parentID,
+        logData.versionID,
         JSON.parse(logData.inputs),
         JSON.parse(logData.output),
         logData.error,
@@ -73,7 +69,7 @@ export async function saveLogEntry(
   )
 }
 
-export const toLogData = (
+const toLogData = (
   projectID: number,
   endpointID: number,
   urlPath: string,

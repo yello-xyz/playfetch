@@ -1,12 +1,12 @@
 import { withLoggedOutSession } from '@/src/server/session'
 import { getCsrfToken, signIn } from 'next-auth/react'
-import ClientRoute from '@/components/clientRoute'
+import ClientRoute, { ParseNumberQuery } from '@/src/client/clientRoute'
 import githubIcon from '@/public/github.svg'
 import googleIcon from '@/public/google.svg'
 import Icon from '@/components/icon'
 import { useState } from 'react'
 import { CheckValidEmail } from '@/src/common/formatting'
-import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
@@ -14,17 +14,24 @@ export const getServerSideProps = withLoggedOutSession(async context => {
 })
 
 export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
+  const router = useRouter()
+  const { w: joinedWaitList } = ParseNumberQuery(router.query)
+
   const [email, setEmail] = useState('')
 
   return (
     <main className={`bg-gray-25 h-screen flex flex-col items-center justify-center gap-6 p-10`}>
       <div className='flex flex-col items-center gap-1.5'>
         <span className='text-2xl font-semibold'>Sign in to Play/Fetch</span>
-        <span className='text-sm text-gray-400'>
-          Don’t have an account?{' '}
-          <Link href='mailto:hello@yello.xyz?subject=Join waitlist'>
-            <span className='underline'>Join our waitlist</span>
-          </Link>
+        <span className='text-sm text-center text-gray-400'>
+          {joinedWaitList ? (
+            <>
+              <p>Thanks for signing up! We’re currently in closed beta,</p>
+              <p>but will notify you when we open up more broadly.</p>
+            </>
+          ) : (
+            <p>Don’t have an account? Sign in to join our waitlist…</p>
+          )}
         </span>
       </div>
       <div className='flex flex-col w-full gap-3 p-8 bg-white rounded-lg border border-gray-200 max-w-[450px]'>
@@ -65,7 +72,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
 function SignInButton({ name, icon, provider }: { name: string; icon: string; provider: string }) {
   return (
     <button
-      className='flex justify-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-200 hover:border-gray-300'
+      className='flex justify-center p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-200 hover:border-gray-300'
       onClick={() => signIn(provider, { callbackUrl: ClientRoute.Home }).then()}>
       <div className='flex items-center gap-2 text-sm'>
         <Icon className='w-[22px] h-fit' icon={icon} />

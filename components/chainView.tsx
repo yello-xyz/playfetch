@@ -11,11 +11,13 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
-import useSavePrompt from './useSavePrompt'
+import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
-import { useRefreshActiveItem } from './refreshContext'
+import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
+import CommentsPane from './commentsPane'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -30,12 +32,16 @@ export default function ChainView({
   activeVersion,
   setActiveVersion,
   project,
+  showComments,
+  setShowComments,
   saveChain,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   setActiveVersion: (version: ChainVersion) => void
   project: ActiveProject
+  showComments: boolean
+  setShowComments: (show: boolean) => void
   saveChain: (
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
@@ -159,13 +165,22 @@ export default function ChainView({
     saveItems(items)
   }
 
+  const activateOutputNode = () => {
+    setNodes(nodes => {
+      setActiveNodeIndex(nodes.indexOf(OutputNode))
+      return nodes
+    })
+  }
+
   const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
-    setActiveNodeIndex(nodes.indexOf(OutputNode))
+    activateOutputNode()
     const versionID = await saveItems(items, true)
     return versionID!
   }
 
-  const minWidth = 320
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
+
+  const minWidth = 280
   return (
     <Allotment>
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
@@ -194,6 +209,16 @@ export default function ChainView({
           savePrompt={() => savePrompt().then(versionID => versionID!)}
           selectVersion={selectVersion}
           setModifiedVersion={setModifiedVersion}
+          activeRunID={activeRunID}
+        />
+      </Allotment.Pane>
+      <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
+        <CommentsPane
+          activeItem={chain}
+          versions={chain.versions}
+          onSelectComment={selectComment}
+          showComments={showComments}
+          setShowComments={setShowComments}
         />
       </Allotment.Pane>
     </Allotment>

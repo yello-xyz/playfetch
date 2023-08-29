@@ -1,4 +1,4 @@
-import ClientRoute, { Redirect } from '@/components/clientRoute'
+import ClientRoute, { Redirect } from '@/src/client/clientRoute'
 import {
   GetServerSidePropsContext,
   GetServerSidePropsResult,
