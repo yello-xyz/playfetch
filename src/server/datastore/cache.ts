@@ -1,4 +1,14 @@
-import { Entity, buildKey, getDatastore, getKeyedEntity } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
+
+export async function migrateCache(postMerge: boolean) {
+  const datastore = getDatastore()
+  const [allCacheData] = await datastore.runQuery(datastore.createQuery(Entity.CACHE))
+  for (const cacheData of allCacheData) {
+    if (postMerge && !cacheData.key) {
+      await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+    }
+  }
+}
 
 export async function cacheValue(key: string, value: string) {
   await getDatastore().save({
