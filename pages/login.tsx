@@ -1,11 +1,12 @@
 import { withLoggedOutSession } from '@/src/server/session'
 import { getCsrfToken, signIn } from 'next-auth/react'
-import ClientRoute from '@/src/client/clientRoute'
+import ClientRoute, { ParseNumberQuery } from '@/src/client/clientRoute'
 import githubIcon from '@/public/github.svg'
 import googleIcon from '@/public/google.svg'
 import Icon from '@/components/icon'
 import { useState } from 'react'
 import { CheckValidEmail } from '@/src/common/formatting'
+import { useRouter } from 'next/router'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
@@ -13,14 +14,24 @@ export const getServerSideProps = withLoggedOutSession(async context => {
 })
 
 export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
+  const router = useRouter()
+  const { w: joinedWaitList } = ParseNumberQuery(router.query)
+
   const [email, setEmail] = useState('')
 
   return (
     <main className={`bg-gray-25 h-screen flex flex-col items-center justify-center gap-6 p-10`}>
       <div className='flex flex-col items-center gap-1.5'>
         <span className='text-2xl font-semibold'>Sign in to Play/Fetch</span>
-        <span className='text-sm text-gray-400'>
-          Don’t have an account? Sign in to join our waitlist…
+        <span className='text-sm text-center text-gray-400'>
+          {joinedWaitList ? (
+            <>
+              <p>Thanks for signing up! We’re currently in closed beta,</p>
+              <p>but will notify you when we open up more broadly.</p>
+            </>
+          ) : (
+            <p>Don’t have an account? Sign in to join our waitlist…</p>
+          )}
         </span>
       </div>
       <div className='flex flex-col w-full gap-3 p-8 bg-white rounded-lg border border-gray-200 max-w-[450px]'>

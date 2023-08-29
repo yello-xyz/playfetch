@@ -7,6 +7,7 @@ enum ClientRoute {
   SharedProjects = `${ClientRoute.Home}?w=${SharedProjectsWorkspaceID}`,
   Settings = `${ClientRoute.Home}?s=1`,
   Login = '/login',
+  Waitlist = `${ClientRoute.Login}?w=1`,
   Admin = '/admin',
 }
 

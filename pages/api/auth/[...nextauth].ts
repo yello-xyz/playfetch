@@ -1,3 +1,4 @@
+import ClientRoute from '@/src/client/clientRoute'
 import { CheckValidEmail } from '@/src/common/formatting'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import { getUserForEmail, markUserLogin, saveUser } from '@/src/server/datastore/users'
@@ -44,7 +45,7 @@ export const authOptions = {
         return true
       } else if (CheckValidEmail(user.email ?? '')) {
         await saveUser(user.email ?? '', user.name ?? '')
-        return false // TODO redirect to show waitlist confirmation
+        return ClientRoute.Waitlist
       } else {
         return false
       }
