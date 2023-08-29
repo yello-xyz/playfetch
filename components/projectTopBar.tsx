@@ -7,7 +7,7 @@ import Icon from './icon'
 import api from '@/src/client/api'
 import InviteDialog from './inviteDialog'
 import { TopBarButton, UserAvatars } from './topBarButton'
-import backIcon from '@/public/back.svg'
+import TopBar, { TopBarAccessoryItem, TopBarBackItem } from './topBar'
 
 export default function ProjectTopBar({
   workspaces,
@@ -41,11 +41,8 @@ export default function ProjectTopBar({
 
   return (
     <>
-      <div className='z-10 flex items-center justify-between px-4 py-3 border-b border-gray-200 w-full'>
-        <div className='flex items-center gap-1 py-1 cursor-pointer min-w-[30%]' onClick={onNavigateBack}>
-          <Icon icon={backIcon} />
-          Back to overview
-        </div>
+      <TopBar>
+        <TopBarBackItem title='Back to overview' onNavigateBack={onNavigateBack} />
         <div className='relative flex gap-1 text-base justify-self-start'>
           {workspace && (
             <span>
@@ -69,12 +66,12 @@ export default function ProjectTopBar({
             </div>
           </div>
         </div>
-        <div className='flex items-center gap-4 min-w-[30%] justify-end'>
+        <TopBarAccessoryItem className='flex items-center justify-end gap-4'>
           <UserAvatars users={activeProject.users} />
           <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
           {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
-        </div>
-      </div>
+        </TopBarAccessoryItem>
+      </TopBar>
       {showInviteDialog && (
         <InviteDialog label='project' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
       )}
