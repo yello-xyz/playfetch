@@ -10,10 +10,10 @@ export async function migrateCache(postMerge: boolean) {
   }
 }
 
-export async function cacheValue(key: string, value: string) {
+export async function cacheValue(key: string, value: string, indices = {}) {
   await getDatastore().save({
     key: buildKey(Entity.CACHE, hashValue(key)),
-    data: { key, value },
+    data: { ...indices, key, value },
     excludeFromIndexes: ['key', 'value'],
   })
 }

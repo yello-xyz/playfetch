@@ -35,7 +35,7 @@ const getCacheKey = (versionID: number, inputs: PromptInputs) =>
   `${versionID}:${JSON.stringify(Object.entries(inputs).sort(([a], [b]) => a.localeCompare(b)))}`
 
 const cacheResponse = (versionID: number, inputs: PromptInputs, response: ResponseType) =>
-  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result))
+  cacheValue(getCacheKey(versionID, inputs), JSON.stringify(response.result), { versionID })
 
 const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
   const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
