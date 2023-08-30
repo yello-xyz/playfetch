@@ -33,7 +33,7 @@ export default function Settings({
               <span className='text-base font-medium'>Settings</span>
               <TopBarAccessoryItem />
             </TopBar>
-            <div className='flex flex-col items-center overflow-y-auto'>
+            <div className='flex flex-col items-center h-full overflow-y-auto bg-gray-25'>
               <UserSettingsView />
             </div>
           </main>

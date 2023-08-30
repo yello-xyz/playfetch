@@ -18,7 +18,7 @@ export default function UserSettingsView() {
   const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
 
   return (
-    <div className='flex flex-col items-start flex-1 gap-4 p-6 text-gray-500'>
+    <div className='flex flex-col items-start flex-1 gap-3 p-6 text-gray-500 max-w-[680px]'>
       <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} onRefresh={refresh} />
       <CostPane availableProviders={user.availableProviders} />
     </div>
@@ -36,8 +36,12 @@ function ProviderSettingsPane({
 }) {
   return (
     <>
-      <Label>API Keys</Label>
-      <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+      <Label>Manage API keys</Label>
+      <span>
+        Provide your API credentials here to enable integration with AI services like OpenAI. To get started, you'll
+        need to sign up for accounts with one or more services and get API keys from them.
+      </span>
+      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg'>
         {providers.map((provider, index) => (
           <ProviderRow
             key={index}
@@ -81,7 +85,7 @@ function ProviderRow({
   return (
     <div className='flex items-center justify-between gap-4'>
       <Label className='w-40'>{label}</Label>
-      {truncatedAPIKey}
+      ••••••••••••••••••••••••••••••••
       <div className='underline cursor-pointer' onClick={haveAPIKey ? removeKey : () => setShowAPIKeyPrompt(true)}>
         {haveAPIKey ? 'remove' : 'add key'}
       </div>
@@ -104,7 +108,7 @@ function CostPane({ availableProviders }: { availableProviders: AvailableProvide
   return nonZeroCostProviders.length ? (
     <>
       <Label>Running Cost</Label>
-      <div className='flex flex-col gap-4 p-6 py-4 bg-gray-100 rounded-lg'>
+      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg'>
         {nonZeroCostProviders
           .sort((a, b) => b.cost - a.cost)
           .filter(p => p.provider !== DefaultProvider)
