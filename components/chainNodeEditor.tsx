@@ -19,7 +19,7 @@ import useInputValues from '@/src/client/hooks/useInputValues'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
-import TestButtons from './testButtons'
+import RunButtons from './runButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
@@ -234,7 +234,7 @@ export default function ChainNodeEditor({
           ) : (
             <div />
           )}
-          <TestButtons
+          <RunButtons
             runTitle='Run Chain'
             variables={variables}
             inputValues={inputValues}

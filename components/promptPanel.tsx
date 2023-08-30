@@ -13,7 +13,7 @@ import ModelSelector, { ProviderForModel } from './modelSelector'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import TestButtons from './testButtons'
+import RunButtons from './runButtons'
 import { useEffect, useState } from 'react'
 
 export default function PromptPanel({
@@ -91,7 +91,7 @@ export default function PromptPanel({
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <div className='flex items-center self-end gap-3'>
           <ModelSelector model={config.model} setModel={updateModel} />
-          <TestButtons
+          <RunButtons
             runTitle={version.runs.length ? 'Run again' : 'Run'}
             variables={ExtractPromptVariables(prompt)}
             inputValues={inputValues}

@@ -4,7 +4,7 @@ import Label from './label'
 import { ToCamelCase } from '@/src/common/formatting'
 import Icon from './icon'
 import clipboardIcon from '@/public/clipboard.svg'
-import { SelectAnyInputRow } from './testButtons'
+import { SelectAnyInputRow } from './runButtons'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,

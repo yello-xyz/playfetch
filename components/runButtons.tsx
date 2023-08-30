@@ -78,7 +78,7 @@ const selectValidRowIndices = (
   }
 }
 
-export default function TestButtons({
+export default function RunButtons({
   runTitle,
   variables,
   inputValues,

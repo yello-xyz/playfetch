@@ -13,7 +13,7 @@ import {
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
-import TestButtons from './testButtons'
+import RunButtons from './runButtons'
 import PromptPanel from './promptPanel'
 import { Allotment } from 'allotment'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
@@ -108,7 +108,7 @@ export default function TestPromptTab({
               checkProviderAvailable={checkProviderAvailable}
               onUpdatePreferredHeight={setPromptHeight}
             />
-            <TestButtons
+            <RunButtons
               variables={variables}
               inputValues={inputValues}
               testConfig={testConfig}
