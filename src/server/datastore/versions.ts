@@ -29,10 +29,14 @@ import {
   updateChainOnDeletedVersion,
 } from './chains'
 
-export async function migrateVersions() {
+export async function migrateVersions(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
+    const anyRun = await getEntity(Entity.RUN, 'versionID', getID(versionData))
     await datastore.save(
       toVersionData(
         versionData.userID,
@@ -42,6 +46,7 @@ export async function migrateVersions() {
         versionData.items ? JSON.parse(versionData.items) : null,
         JSON.parse(versionData.labels),
         versionData.createdAt,
+        !!anyRun,
         versionData.previousVersionID,
         getID(versionData)
       )
@@ -132,8 +137,9 @@ async function saveVersionForUser(
   const versionID = canOverwrite ? currentVersionID : undefined
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
-
+  const didRun = canOverwrite ? currentVersion.didRun : false
   const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
+
   const versionData = toVersionData(
     userID,
     getID(parentData),
@@ -142,6 +148,7 @@ async function saveVersionForUser(
     items,
     labels,
     createdAt,
+    didRun,
     previousVersionID,
     versionID
   )
@@ -169,6 +176,7 @@ async function updateVersion(versionData: any) {
       versionData.items ? JSON.parse(versionData.items) : null,
       JSON.parse(versionData.labels),
       versionData.createdAt,
+      versionData.didRun,
       versionData.previousVersionID,
       getID(versionData)
     )
@@ -219,6 +227,7 @@ const toVersionData = (
   items: ChainItemWithInputs[] | null,
   labels: string[],
   createdAt: Date,
+  didRun: boolean,
   previousVersionID?: number,
   versionID?: number
 ) => ({
@@ -231,6 +240,7 @@ const toVersionData = (
     items: items ? JSON.stringify(items) : null,
     labels: JSON.stringify(labels),
     createdAt,
+    didRun,
     previousVersionID,
   },
   excludeFromIndexes: ['prompt', 'config', 'items', 'labels'],
