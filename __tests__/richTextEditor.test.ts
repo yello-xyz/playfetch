@@ -1,9 +1,16 @@
 import { RichTextFromHTML, RichTextToHTML } from '@/components/richTextInput'
 
+const testStripsDivs = (html: string) =>
+  test(`Rich Text Editor strips Divs "${html}"`, () => expect(RichTextFromHTML(html).includes('<div>')).toBe(false))
 const testHTML = (html: string) =>
   test(`Rich Text Editor Preserves HTML "${html}"`, () => expect(RichTextToHTML(RichTextFromHTML(html))).toBe(html))
 const testText = (text: string) =>
   test(`Rich Text Editor Preserves Text "${text}"`, () => expect(RichTextFromHTML(RichTextToHTML(text))).toBe(text))
+
+testStripsDivs('<div></div>')
+testStripsDivs('<div><div></div></div>')
+testStripsDivs('<div>A<div>B</div></div>')
+testStripsDivs('<div><div>A</div>B</div>')
 
 testText('hello')
 testText('hello world ')
