@@ -17,7 +17,7 @@ export default function TextInput({
   placeholder?: string
   disabled?: boolean
   value: string
-  setValue: (value: string) => void
+  setValue?: (value: string) => void
   onKeyDown?: KeyboardEventHandler
 }) {
   const colorStyle = disabled ? 'text-gray-300 border-gray-200' : 'text-gray-800 border-gray-300'
@@ -28,7 +28,7 @@ export default function TextInput({
         type={type}
         disabled={disabled}
         value={value}
-        onChange={event => setValue(event.target.value)}
+        onChange={event => setValue?.(event.target.value)}
         id={id}
         placeholder={placeholder}
         required

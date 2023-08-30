@@ -10,6 +10,7 @@ import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { FormatCost } from '@/src/common/formatting'
 import Icon from './icon'
 import Button from './button'
+import TextInput from './textInput'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
@@ -43,7 +44,7 @@ function ProviderSettingsPane({
         Provide your API credentials here to enable integration with AI services like OpenAI. To get started, you'll
         need to sign up for accounts with one or more services and get API keys from them.
       </span>
-      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg'>
+      <div className='flex flex-col w-full gap-3'>
         {providers.map((provider, index) => (
           <ProviderRow
             key={index}
@@ -83,17 +84,17 @@ function ProviderRow({
   }
 
   return (
-    <div className='flex items-center gap-4'>
+    <div className='flex items-center gap-2.5 p-3 bg-white border border-gray-200 rounded-lg'>
       <Icon icon={IconForProvider(provider)} />
       <Label className='w-40'>{label}</Label>
-      {availableProvider ? '••••••••••••••••••••••••••••••••' : undefined}
+      {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
       <div
         className='flex justify-end flex-grow cursor-pointer'
         onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
         <Button
           type={availableProvider ? 'destructive' : 'outline'}
           onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
-          {availableProvider ? 'Remove' : 'Add Key'}
+          {availableProvider ? 'Remove' : 'Configure'}
         </Button>
       </div>
       {showAPIKeyPrompt && (
