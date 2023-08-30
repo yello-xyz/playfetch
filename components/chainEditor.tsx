@@ -4,6 +4,8 @@ import Button from './button'
 import DropdownMenu from './dropdownMenu'
 import { CustomHeader, HeaderItem } from './tabSelector'
 import VersionSelector from './versionSelector'
+import Icon from './icon'
+import chainIcon from '@/public/chain.svg'
 
 export default function ChainEditor({
   chain,
@@ -35,7 +37,7 @@ export default function ChainEditor({
   return (
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
       <CustomHeader>
-      <HeaderItem>{chain.name}</HeaderItem>
+      <HeaderItem className='flex items-center gap-1'><Icon icon={chainIcon}/>{chain.name}</HeaderItem>
       </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
