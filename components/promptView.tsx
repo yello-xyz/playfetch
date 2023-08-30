@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
+import { ActiveProject, ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
@@ -6,7 +6,6 @@ import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import TabSelector from './tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
@@ -51,14 +50,8 @@ export default function PromptView({
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
-  const checkProviderAvailable = useCheckProvider()
-
   const [runVersion, partialRuns, isRunning] = useRunVersion()
-  const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
-    if (checkProviderAvailable(config.provider)) {
-      await runVersion(savePrompt, inputs)
-    }
-  }
+  const runPrompt = (inputs: PromptInputs[]) => runVersion(savePrompt, inputs)
 
   const selectTab = (tab: ActiveTab) => {
     setActiveTab(tab)
@@ -91,7 +84,6 @@ export default function PromptView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={updateVersion}
-            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             testConfig={testConfig}
@@ -109,7 +101,6 @@ export default function PromptView({
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={updateVersion}
-            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             setInputValues={setInputValues}

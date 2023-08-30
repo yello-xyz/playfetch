@@ -5,7 +5,6 @@ import {
   InputValues,
   PromptConfig,
   PromptInputs,
-  ModelProvider,
   ActiveProject,
   TestConfig,
 } from '@/types'
@@ -17,6 +16,7 @@ import RunButtons from './runButtons'
 import PromptPanel, { PromptPanelWarning } from './promptPanel'
 import { Allotment } from 'allotment'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 
 export default function TestPromptTab({
   currentPrompt,
@@ -26,7 +26,6 @@ export default function TestPromptTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
-  checkProviderAvailable,
   runPrompt,
   inputValues,
   setInputValues,
@@ -42,8 +41,7 @@ export default function TestPromptTab({
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  checkProviderAvailable: (provider: ModelProvider) => boolean
-  runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt: (inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
@@ -60,8 +58,11 @@ export default function TestPromptTab({
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(currentPromptConfig, inputs)
+    return runPrompt(inputs)
   }
+
+  const checkProviderAvailable = useCheckProvider()
+  const isProviderAvailable = checkProviderAvailable(currentPromptConfig.provider)
 
   const minVersionHeight = 240
   const [promptHeight, setPromptHeight] = useState(1)
@@ -106,7 +107,6 @@ export default function TestPromptTab({
               initialConfig={currentPromptConfig}
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
-              checkProviderAvailable={checkProviderAvailable}
               onUpdatePreferredHeight={setPromptHeight}
             />
             <RunButtons
@@ -115,7 +115,7 @@ export default function TestPromptTab({
               testConfig={testConfig}
               setTestConfig={setTestConfig}
               showTestMode
-              disabled={!currentPrompt.length}
+              disabled={!isProviderAvailable || !currentPrompt.length}
               callback={testPrompt}
             />
           </div>

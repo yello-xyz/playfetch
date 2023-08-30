@@ -1,7 +1,6 @@
 import {
   ActivePrompt,
   InputValues,
-  ModelProvider,
   PromptConfig,
   PromptInputs,
   TestConfig,
@@ -19,7 +18,6 @@ export default function RunPromptTab({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
-  checkProviderAvailable,
   runPrompt,
   inputValues,
   testConfig,
@@ -32,8 +30,7 @@ export default function RunPromptTab({
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  checkProviderAvailable: (provider: ModelProvider) => boolean
-  runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt: (inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
@@ -60,7 +57,6 @@ export default function RunPromptTab({
             initialConfig={currentPromptConfig}
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
-            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             testConfig={testConfig}

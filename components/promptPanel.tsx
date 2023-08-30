@@ -2,7 +2,6 @@ import {
   InputValues,
   PromptConfig,
   PromptInputs,
-  ModelProvider,
   PromptVersion,
   LanguageModel,
   TestConfig,
@@ -15,6 +14,7 @@ import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from './runButtons'
 import { useEffect, useState } from 'react'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 
 export default function PromptPanel({
   initialPrompt,
@@ -26,19 +26,17 @@ export default function PromptPanel({
   testConfig,
   setTestConfig,
   showLabel,
-  checkProviderAvailable,
   onUpdatePreferredHeight,
 }: {
   initialPrompt?: string
   initialConfig?: PromptConfig
   version: PromptVersion
   setModifiedVersion: (version: PromptVersion) => void
-  runPrompt?: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt?: (inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
   showLabel?: boolean
-  checkProviderAvailable: (provider: ModelProvider) => boolean
   onUpdatePreferredHeight?: (height: number) => void
 }) {
   const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
@@ -55,12 +53,10 @@ export default function PromptPanel({
 
   const updatePrompt = (prompt: string) => update(prompt, config)
   const updateConfig = (config: PromptConfig) => update(prompt, config)
-  const updateModel = (model: LanguageModel) => {
-    const provider = ProviderForModel(model)
-    if (checkProviderAvailable(provider)) {
-      updateConfig({ ...config, provider, model })
-    }
-  }
+  const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
+
+  const checkProviderAvailable = useCheckProvider()
+  const isProviderAvailable = checkProviderAvailable(config.provider)
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
@@ -98,8 +94,8 @@ export default function PromptPanel({
             setLanguageModel={updateModel}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-            disabled={prompt.trim().length === 0}
-            callback={inputs => runPrompt(config, inputs)}
+            disabled={!isProviderAvailable || prompt.trim().length === 0}
+            callback={runPrompt}
           />
         </div>
       )}
@@ -107,7 +103,7 @@ export default function PromptPanel({
   )
 }
 
-export function PromptPanelWarning({ message, severity }: { message: string, severity: 'info' | 'warning' }) {
+export function PromptPanelWarning({ message, severity }: { message: string; severity: 'info' | 'warning' }) {
   const colorClass = severity === 'info' ? 'border-orange-100 bg-orange-25' : 'border-pink-50 bg-pink-25'
   return <div className={`flex-grow px-3 py-2 border rounded ${colorClass}`}>{message}</div>
 }

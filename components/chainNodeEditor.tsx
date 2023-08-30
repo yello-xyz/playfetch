@@ -4,10 +4,8 @@ import {
   ChainItemWithInputs,
   ChainVersion,
   CodeChainItem,
-  PartialRun,
   PromptInputs,
   PromptVersion,
-  Run,
   TestConfig,
 } from '@/types'
 import { useState } from 'react'
@@ -93,8 +91,6 @@ export default function ChainNodeEditor({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const checkProviderAvailable = useCheckProvider()
-
   const [editingIndex, setEditingIndex] = useState<number>()
   const [editedCode, setEditedCode] = useState<string>('')
   const [editingItemsCount, setEditingItemsCount] = useState(items.length)
@@ -135,6 +131,13 @@ export default function ChainNodeEditor({
     toggleEditing()
   }
 
+  const checkProviderAvailable = useCheckProvider()
+  const areProvidersAvailable = (items: ChainItem[], versionForItem = promptCache.versionForItem) =>
+    items
+      .filter(IsPromptChainItem)
+      .map(versionForItem)
+      .every(version => !!version && checkProviderAvailable(version.config.provider))
+
   const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
@@ -150,8 +153,7 @@ export default function ChainNodeEditor({
             ? activePrompt.versions.find(version => version.id === item.versionID)
             : promptCache.versionForItem(item)
       }
-      const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
-      if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
+      if (areProvidersAvailable(newItems, versionForItem)) {
         await runVersion(() => prepareForRunning(newItems), inputs)
       }
     }
@@ -241,7 +243,7 @@ export default function ChainNodeEditor({
             testConfig={testConfig}
             setTestConfig={setTestConfig}
             showTestMode
-            disabled={!items.length}
+            disabled={!items.length || !areProvidersAvailable(items)}
             callback={runChain}
           />
         </div>
