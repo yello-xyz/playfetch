@@ -14,7 +14,7 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import RunButtons from './runButtons'
-import PromptPanel from './promptPanel'
+import PromptPanel, { PromptPanelWarning } from './promptPanel'
 import { Allotment } from 'allotment'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
@@ -86,7 +86,7 @@ export default function TestPromptTab({
       <Allotment.Pane minSize={Math.min(350, preferredHeight)} preferredSize={preferredHeight}>
         <div className='h-full p-4'>
           <div className='flex flex-col h-full gap-4'>
-            <div className='flex gap-2'>
+            <div className='flex items-start gap-2'>
               <VersionSelector
                 versions={activePrompt.versions}
                 endpoints={activeProject.endpoints}
@@ -95,9 +95,10 @@ export default function TestPromptTab({
                 labelColors={AvailableLabelColorsForItem(activePrompt)}
               />
               {testConfig.rowIndices.length > 1 && (
-                <div className='flex-grow px-3 py-2 border rounded border-pink-50 bg-pink-25'>
-                  Running this prompt will use {testConfig.rowIndices.length} rows of test data.
-                </div>
+                <PromptPanelWarning
+                  severity='warning'
+                  message={`Running this prompt will use ${testConfig.rowIndices.length} rows of test data.`}
+                />
               )}
             </div>
             <PromptPanel

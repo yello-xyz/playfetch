@@ -106,3 +106,8 @@ export default function PromptPanel({
     </div>
   )
 }
+
+export function PromptPanelWarning({ message, severity }: { message: string, severity: 'info' | 'warning' }) {
+  const colorClass = severity === 'info' ? 'border-orange-100 bg-orange-25' : 'border-pink-50 bg-pink-25'
+  return <div className={`flex-grow px-3 py-2 border rounded ${colorClass}`}>{message}</div>
+}
