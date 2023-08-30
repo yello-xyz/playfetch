@@ -145,19 +145,23 @@ export default function ChainView({
 
   const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
 
-  const itemsToSave = nodes.filter(IsChainItem).map(item => ({
-    ...item,
-    activePrompt: undefined,
-    version: undefined,
-    inputs: ExtractChainItemVariables(item, promptCache),
-  }))
-  const itemsKey = JSON.stringify(itemsToSave)
+  const getItemsToSave = (items: ChainItem[]) =>
+    items.map(item => ({
+      ...item,
+      activePrompt: undefined,
+      version: undefined,
+      inputs: ExtractChainItemVariables(item, promptCache),
+    }))
+  const itemsKey = JSON.stringify(getItemsToSave(items))
   const savedItemsKey = useRef<string>(itemsKey)
 
-  const saveItems = itemsKey !== savedItemsKey.current ? (): Promise<number | undefined> => {
-    savedItemsKey.current = itemsKey
+  const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
+    const itemsToSave = getItemsToSave(items)
+    savedItemsKey.current = JSON.stringify(itemsToSave)
     return saveChain(itemsToSave, refreshActiveItem)
-  } : undefined
+  }
+
+  const saveItemsIfNeeded = itemsKey !== savedItemsKey.current ? () => saveItems(items) : undefined
 
   const activateOutputNode = () => {
     setNodes(nodes => {
@@ -166,9 +170,9 @@ export default function ChainView({
     })
   }
 
-  const prepareForRunning = async (): Promise<number> => {
+  const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
     activateOutputNode()
-    const versionID = saveItems ? await saveItems() : activeVersion.id
+    const versionID = await saveItems(items)
     return versionID!
   }
 
@@ -185,7 +189,7 @@ export default function ChainView({
           project={project}
           nodes={nodes}
           setNodes={setNodes}
-          saveItems={saveItems}
+          saveItems={saveItemsIfNeeded}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
