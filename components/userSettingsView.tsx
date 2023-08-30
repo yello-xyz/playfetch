@@ -88,14 +88,15 @@ function ProviderRow({
       <Icon icon={IconForProvider(provider)} />
       <Label className='w-40'>{label}</Label>
       {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
-      <div
-        className='flex justify-end flex-grow cursor-pointer'
-        onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
-        <Button
-          type={availableProvider ? 'destructive' : 'outline'}
-          onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
-          {availableProvider ? 'Remove' : 'Configure'}
+      <div className='flex gap-2.5 justify-end flex-grow cursor-pointer'>
+        <Button type='outline' onClick={() => setShowAPIKeyPrompt(true)}>
+          {availableProvider ? 'Update' : 'Configure'}
         </Button>
+        {availableProvider && (
+          <Button type='destructive' onClick={removeKey}>
+            Remove
+          </Button>
+        )}
       </div>
       {showAPIKeyPrompt && (
         <PickNameDialog
