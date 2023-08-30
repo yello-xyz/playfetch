@@ -109,7 +109,6 @@ export default function Home({
               sharedProjects={sharedProjects}
               onSelectWorkspace={selectWorkspace}
               onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
-              onAddProject={addProject}
               onRefreshWorkspaces={refreshWorkspaces}
             />
             <div className='flex flex-col flex-1'>

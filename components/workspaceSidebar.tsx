@@ -7,8 +7,7 @@ import addIcon from '@/public/add.svg'
 import UserSidebarItem from './userSidebarItem'
 import PickNameDialog from './pickNameDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
-import { SidebarButton, SidebarSection } from './sidebar'
-import feedbackIcon from '@/public/feedback.svg'
+import { FeedbackSection, SidebarButton, SidebarSection } from './sidebar'
 
 export default function WorkspaceSidebar({
   workspaces,
@@ -16,7 +15,6 @@ export default function WorkspaceSidebar({
   sharedProjects,
   onSelectWorkspace,
   onSelectSharedProjects,
-  onAddProject,
   onRefreshWorkspaces,
 }: {
   workspaces: Workspace[]
@@ -24,7 +22,6 @@ export default function WorkspaceSidebar({
   sharedProjects?: ActiveWorkspace
   onSelectWorkspace: (workspaceID: number) => void
   onSelectSharedProjects?: () => void
-  onAddProject: () => void
   onRefreshWorkspaces: () => Promise<void>
 }) {
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
@@ -75,13 +72,7 @@ export default function WorkspaceSidebar({
           ))}
           <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
         </SidebarSection>
-        <SidebarSection>
-          <SidebarButton
-            title='Feedback'
-            icon={feedbackIcon}
-            link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback'
-          />
-        </SidebarSection>
+        <FeedbackSection />
       </div>
       {showPickNamePrompt && (
         <PickNameDialog
