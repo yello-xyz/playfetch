@@ -65,8 +65,6 @@ function ProviderRow({
   onRefresh: () => void
 }) {
   const label = LabelForProvider(provider)
-  const truncatedAPIKey = availableProvider?.truncatedAPIKey ?? ''
-  const haveAPIKey = truncatedAPIKey.length > 0
 
   const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
 
@@ -86,8 +84,10 @@ function ProviderRow({
     <div className='flex items-center justify-between gap-4'>
       <Label className='w-40'>{label}</Label>
       ••••••••••••••••••••••••••••••••
-      <div className='underline cursor-pointer' onClick={haveAPIKey ? removeKey : () => setShowAPIKeyPrompt(true)}>
-        {haveAPIKey ? 'remove' : 'add key'}
+      <div
+        className='underline cursor-pointer'
+        onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
+        {availableProvider ? 'remove' : 'add key'}
       </div>
       {showAPIKeyPrompt && (
         <PickNameDialog
