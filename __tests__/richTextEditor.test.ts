@@ -11,6 +11,7 @@ testStripsDivs('<div></div>')
 testStripsDivs('<div><div></div></div>')
 testStripsDivs('<div>A<div>B</div></div>')
 testStripsDivs('<div><div>A</div>B</div>')
+testStripsDivs('<div>A<div>B</div><div>C</div></div>')
 
 testText('hello')
 testText('hello world ')
