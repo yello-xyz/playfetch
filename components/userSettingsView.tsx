@@ -40,7 +40,7 @@ function ProviderSettingsPane({
     <>
       <Label>Manage API keys</Label>
       <span>
-        Provide your API credentials here to enable integration with AI services like OpenAI. To get started, you'll
+        Provide your API credentials here to enable integration with AI services like OpenAI. To get started, you’ll
         need to sign up for accounts with one or more services and get API keys from them.
       </span>
       <div className='flex flex-col w-full gap-3'>
