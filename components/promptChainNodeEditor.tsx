@@ -1,9 +1,8 @@
-import { ChainItem, ModelProvider, PromptChainItem, PromptVersion } from '@/types'
+import { ChainItem, PromptChainItem, PromptVersion } from '@/types'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
-import { RefreshContext } from '@/src/client/context/refreshContext'
 import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
 import { SingleTabHeader } from './tabSelector'
@@ -15,7 +14,6 @@ export default function PromptChainNodeEditor({
   items,
   toggleIncludeContext,
   promptCache,
-  checkProviderAvailable,
   selectVersion,
   setModifiedVersion,
 }: {
@@ -24,7 +22,6 @@ export default function PromptChainNodeEditor({
   items: ChainItem[]
   toggleIncludeContext: (includeContext: boolean) => void
   promptCache: PromptCache
-  checkProviderAvailable: (provider: ModelProvider) => boolean
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
@@ -61,7 +58,6 @@ export default function PromptChainNodeEditor({
           <PromptPanel
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
-            checkProviderAvailable={checkProviderAvailable}
             onUpdatePreferredHeight={setPromptHeight}
           />
         </div>

@@ -1,11 +1,4 @@
-import {
-  ActivePrompt,
-  InputValues,
-  PromptConfig,
-  PromptInputs,
-  TestConfig,
-  PromptVersion,
-} from '@/types'
+import { ActivePrompt, InputValues, PromptConfig, PromptInputs, TestConfig, PromptVersion } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode, useState } from 'react'

@@ -195,7 +195,6 @@ export default function ChainNodeEditor({
             items={items}
             toggleIncludeContext={toggleIncludeContext}
             promptCache={promptCache}
-            checkProviderAvailable={checkProviderAvailable}
             selectVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
           />
