@@ -23,7 +23,6 @@ export default function UserSettingsView() {
   return (
     <div className='flex flex-col items-start flex-1 gap-3 p-6 text-gray-500 max-w-[680px]'>
       <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} onRefresh={refresh} />
-      <CostPane availableProviders={user.availableProviders} />
     </div>
   )
 }
@@ -90,6 +89,9 @@ function ProviderRow({
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <Label className='w-40'>{label}</Label>
+        {availableProvider && availableProvider.cost > 0 && (
+          <div className='flex justify-end flex-grow text-xs'>{FormatCost(availableProvider.cost)}</div>
+        )}
       </div>
       <div className='flex items-center gap-2.5'>
         {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
@@ -113,33 +115,6 @@ function ProviderRow({
           onDismiss={() => setShowAPIKeyPrompt(false)}
         />
       )}
-    </div>
-  )
-}
-
-function CostPane({ availableProviders }: { availableProviders: AvailableProvider[] }) {
-  const nonZeroCostProviders = availableProviders.filter(p => p.cost > 0)
-
-  return nonZeroCostProviders.length ? (
-    <>
-      <Label>Running Cost</Label>
-      <div className='flex flex-col w-full gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg'>
-        {nonZeroCostProviders
-          .sort((a, b) => b.cost - a.cost)
-          .filter(p => p.provider !== DefaultProvider)
-          .map((provider, index) => (
-            <CostRow key={index} availableProvider={provider} />
-          ))}
-      </div>
-    </>
-  ) : null
-}
-
-function CostRow({ availableProvider }: { availableProvider: AvailableProvider }) {
-  return (
-    <div className='flex items-center justify-between gap-4'>
-      <Label className='w-40'>{LabelForProvider(availableProvider.provider)}</Label>
-      {FormatCost(availableProvider.cost ?? 0)}
     </div>
   )
 }
