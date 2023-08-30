@@ -96,10 +96,9 @@ export default function TestPromptTab({
                 labelColors={AvailableLabelColorsForItem(activePrompt)}
               />
               {testConfig.rowIndices.length > 1 && (
-                <PromptPanelWarning
-                  severity='warning'
-                  message={`Running this prompt will use ${testConfig.rowIndices.length} rows of test data.`}
-                />
+                <PromptPanelWarning>
+                  Running this prompt will use {testConfig.rowIndices.length} rows of test data.
+                </PromptPanelWarning>
               )}
             </div>
             <PromptPanel

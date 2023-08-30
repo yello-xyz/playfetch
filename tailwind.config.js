@@ -58,6 +58,7 @@ module.exports = {
       'green-300': '#71B892',
       'green-400': '#4EA476',
       'orange-25': '#FFFAF2',
+      'orange-100': '#FBDFB5',
       'orange-200': '#F9D093',
       'orange-300': '#F6BE6A',
       'orange-400': '#F2A93C',

@@ -1,11 +1,4 @@
-import {
-  InputValues,
-  PromptConfig,
-  PromptInputs,
-  PromptVersion,
-  LanguageModel,
-  TestConfig,
-} from '@/types'
+import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { ProviderForModel } from './modelSelector'
@@ -13,8 +6,10 @@ import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from './runButtons'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
+import { useRouter } from 'next/router'
+import ClientRoute from '@/src/client/clientRoute'
 
 export default function PromptPanel({
   initialPrompt,
@@ -61,11 +56,15 @@ export default function PromptPanel({
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
   const preferredHeight =
-    (showLabel ? 32 : 0) + (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) + promptInputScrollHeight
+    (showLabel ? 32 : 0) +
+    (isProviderAvailable ? 0 : 72) +
+    (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) +
+    promptInputScrollHeight
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
+      {!isProviderAvailable && <PromptPanelProviderWarning />}
       <div className='self-stretch flex-1 min-h-0'>
         <PromptInput
           key={version.id}
@@ -103,7 +102,30 @@ export default function PromptPanel({
   )
 }
 
-export function PromptPanelWarning({ message, severity }: { message: string; severity: 'info' | 'warning' }) {
-  const colorClass = severity === 'info' ? 'border-orange-100 bg-orange-25' : 'border-pink-50 bg-pink-25'
-  return <div className={`flex-grow px-3 py-2 border rounded ${colorClass}`}>{message}</div>
+export function PromptPanelWarning({ children }: { children: ReactNode }) {
+  return <PromptPanelBanner className='border-pink-50 bg-pink-25'>{children}</PromptPanelBanner>
+}
+
+export function PromptPanelProviderWarning() {
+  const router = useRouter()
+
+  return (
+    <div className='min-h-0'>
+      <PromptPanelBanner className='flex items-center justify-between gap-1 border-orange-100 bg-orange-25'>
+        <div className='flex flex-col'>
+          <span className='font-medium text-gray-600'>Missing API Key</span>
+          <span className='max-w-[384px]'>An API key is required to use certain models.</span>
+        </div>
+        <div
+          className='px-3 py-1.5 text-gray-700 bg-orange-100 rounded-md cursor-pointer whitespace-nowrap'
+          onClick={() => router.push(ClientRoute.Settings)}>
+          Add API Key
+        </div>
+      </PromptPanelBanner>
+    </div>
+  )
+}
+
+function PromptPanelBanner({ children, className }: { children: ReactNode; className: string }) {
+  return <div className={`flex-grow px-3 py-2 border rounded ${className ?? ''}`}>{children}</div>
 }
