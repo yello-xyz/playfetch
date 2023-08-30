@@ -1,13 +1,15 @@
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import Label from './label'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AllProviders, LabelForProvider } from './modelSelector'
+import { AllProviders, IconForProvider, LabelForProvider } from './modelSelector'
 import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { FormatCost } from '@/src/common/formatting'
+import Icon from './icon'
+import Button from './button'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
@@ -81,13 +83,16 @@ function ProviderRow({
   }
 
   return (
-    <div className='flex items-center justify-between gap-4'>
+    <div className='flex items-center gap-4'>
+      <Icon icon={IconForProvider(provider)} />
       <Label className='w-40'>{label}</Label>
-      ••••••••••••••••••••••••••••••••
+      {availableProvider ? '••••••••••••••••••••••••••••••••' : undefined}
       <div
-        className='underline cursor-pointer'
+        className='flex justify-end flex-grow cursor-pointer'
         onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
-        {availableProvider ? 'remove' : 'add key'}
+        <Button type='outline' onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
+          {availableProvider ? 'Remove' : 'Add Key'}
+        </Button>
       </div>
       {showAPIKeyPrompt && (
         <PickNameDialog

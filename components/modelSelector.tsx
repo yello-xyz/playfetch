@@ -1,5 +1,22 @@
 import { LanguageModel, ModelProvider } from '@/types'
 import DropdownMenu from './dropdownMenu'
+import openaiIcon from '@/public/openai.svg'
+import anthropicIcon from '@/public/anthropic.svg'
+import googleIcon from '@/public/google.svg'
+import cohereIcon from '@/public/cohere.svg'
+
+export const IconForProvider = (provider: ModelProvider) => {
+  switch (provider) {
+    case 'openai':
+      return openaiIcon
+    case 'anthropic':
+      return anthropicIcon
+    case 'google':
+      return googleIcon
+    case 'cohere':
+      return cohereIcon
+  }
+}
 
 export const LabelForProvider = (provider: ModelProvider) => {
   switch (provider) {
