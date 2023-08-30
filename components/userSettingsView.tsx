@@ -83,26 +83,32 @@ function ProviderRow({
     })
   }
 
+  const flexLayout = availableProvider ? 'flex-col' : 'justify-between'
+
   return (
-    <div className='flex items-center gap-2.5 p-3 bg-white border border-gray-200 rounded-lg'>
-      <Icon icon={IconForProvider(provider)} />
-      <Label className='w-40'>{label}</Label>
-      {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
-      <div className='flex gap-2.5 justify-end flex-grow cursor-pointer'>
-        <Button type='outline' onClick={() => setShowAPIKeyPrompt(true)}>
-          {availableProvider ? 'Update' : 'Configure'}
-        </Button>
-        {availableProvider && (
-          <Button type='destructive' onClick={removeKey}>
-            Remove
+    <div className={`flex ${flexLayout} gap-2 p-3 bg-white border border-gray-200 rounded-lg`}>
+      <div className='flex items-center gap-1'>
+        <Icon icon={IconForProvider(provider)} />
+        <Label className='w-40'>{label}</Label>
+      </div>
+      <div className='flex items-center gap-2.5'>
+        {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
+        <div className='flex gap-2.5 justify-end flex-grow cursor-pointer'>
+          <Button type='outline' onClick={() => setShowAPIKeyPrompt(true)}>
+            {availableProvider ? 'Update' : 'Configure'}
           </Button>
-        )}
+          {availableProvider && (
+            <Button type='destructive' onClick={removeKey}>
+              Remove
+            </Button>
+          )}
+        </div>
       </div>
       {showAPIKeyPrompt && (
         <PickNameDialog
-          title='Link API Key'
+          title='Add API Key'
           confirmTitle='Save'
-          label={label}
+          label={`${label} API key`}
           onConfirm={updateKey}
           onDismiss={() => setShowAPIKeyPrompt(false)}
         />
