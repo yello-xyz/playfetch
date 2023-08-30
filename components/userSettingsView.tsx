@@ -90,7 +90,9 @@ function ProviderRow({
       <div
         className='flex justify-end flex-grow cursor-pointer'
         onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
-        <Button type='outline' onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
+        <Button
+          type={availableProvider ? 'destructive' : 'outline'}
+          onClick={availableProvider ? removeKey : () => setShowAPIKeyPrompt(true)}>
           {availableProvider ? 'Remove' : 'Add Key'}
         </Button>
       </div>

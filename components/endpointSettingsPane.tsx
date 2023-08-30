@@ -235,7 +235,7 @@ export default function EndpointSettingsPane({
       )}
       {isEditing && (
         <div className='flex justify-end w-full gap-2'>
-          <Button type='outline' disabled={isSaving} onClick={() => setEditing(false)}>
+          <Button type='secondary' disabled={isSaving} onClick={() => setEditing(false)}>
             Cancel
           </Button>
           {endpoint.id ? (
