@@ -79,7 +79,7 @@ export default async function runChain(
       )
     if (isRunConfig(config)) {
       const promptVersion = (
-        config.versionID === version.id ? version : await getTrustedVersion(config.versionID)
+        config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
       let prompt = resolvePrompt(promptVersion.prompt, inputs, useCamelCase)
       runningContext += prompt
