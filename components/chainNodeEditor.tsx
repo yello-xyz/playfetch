@@ -83,7 +83,7 @@ export default function ChainNodeEditor({
   activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
-  prepareForRunning: (items: ChainItem[]) => Promise<number>
+  prepareForRunning: () => Promise<number>
   savePrompt: () => Promise<number>
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
@@ -154,7 +154,7 @@ export default function ChainNodeEditor({
             : promptCache.versionForItem(item)
       }
       if (areProvidersAvailable(newItems, versionForItem)) {
-        await runVersion(() => prepareForRunning(newItems), inputs)
+        await runVersion(() => prepareForRunning(), inputs)
       }
     }
   }

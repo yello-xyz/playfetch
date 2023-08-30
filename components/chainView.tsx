@@ -143,27 +143,21 @@ export default function ChainView({
     setActiveNodeIndex(index)
   }
 
-  const savedItemsKey = useRef<string>()
-  const saveItems = (items: ChainItem[], force = false): Promise<number | undefined> => {
-    const itemsToSave = items.map(item => ({
-      ...item,
-      activePrompt: undefined,
-      version: undefined,
-      inputs: ExtractChainItemVariables(item, promptCache),
-    }))
-    const itemsKey = JSON.stringify(itemsToSave)
-    if (force || itemsKey !== savedItemsKey.current) {
-      // TODO deal with race condition when force saving while already saving a change.
-      savedItemsKey.current = itemsKey
-      return saveChain(itemsToSave, refreshActiveItem)
-    }
-    return Promise.resolve(undefined)
-  }
+  const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
 
-  const updateItems = (items: ChainItem[]) => {
-    setNodes([InputNode, ...items, OutputNode])
-    saveItems(items)
-  }
+  const itemsToSave = nodes.filter(IsChainItem).map(item => ({
+    ...item,
+    activePrompt: undefined,
+    version: undefined,
+    inputs: ExtractChainItemVariables(item, promptCache),
+  }))
+  const itemsKey = JSON.stringify(itemsToSave)
+  const savedItemsKey = useRef<string>(itemsKey)
+
+  const saveItems = itemsKey !== savedItemsKey.current ? (): Promise<number | undefined> => {
+    savedItemsKey.current = itemsKey
+    return saveChain(itemsToSave, refreshActiveItem)
+  } : undefined
 
   const activateOutputNode = () => {
     setNodes(nodes => {
@@ -172,9 +166,9 @@ export default function ChainView({
     })
   }
 
-  const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
+  const prepareForRunning = async (): Promise<number> => {
     activateOutputNode()
-    const versionID = await saveItems(items, true)
+    const versionID = saveItems ? await saveItems() : activeVersion.id
     return versionID!
   }
 
@@ -191,6 +185,7 @@ export default function ChainView({
           project={project}
           nodes={nodes}
           setNodes={setNodes}
+          saveItems={saveItems}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}

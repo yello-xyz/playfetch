@@ -6,6 +6,7 @@ import { CustomHeader, HeaderItem } from './tabSelector'
 import VersionSelector from './versionSelector'
 import Icon from './icon'
 import chainIcon from '@/public/chain.svg'
+import saveIcon from '@/public/save.svg'
 
 export default function ChainEditor({
   chain,
@@ -14,6 +15,7 @@ export default function ChainEditor({
   project,
   nodes,
   setNodes,
+  saveItems,
   activeIndex,
   setActiveIndex,
   prompts,
@@ -24,6 +26,7 @@ export default function ChainEditor({
   project: ActiveProject
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
+  saveItems?: () => void
   activeIndex: number
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
@@ -34,10 +37,29 @@ export default function ChainEditor({
     insertItem({ promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
   const insertCodeBlock = () => insertItem({ code: '' })
 
+  const versionIndex = chain.versions.findIndex(version => version.id === activeVersion.id)
+
   return (
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
       <CustomHeader>
-      <HeaderItem className='flex items-center gap-1'><Icon icon={chainIcon}/>{chain.name}</HeaderItem>
+        <div className='min-w-[25%]' />
+        <div className='flex items-center whitespace-nowrap'>
+          <HeaderItem className='flex items-center gap-1'>
+            <Icon icon={chainIcon} />
+            {chain.name}
+          </HeaderItem>
+          {saveItems ? (
+            <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
+          ) : (
+            <span className='text-gray-400'>Version {versionIndex + 1}</span>
+          )}
+        </div>
+        <div
+          className={`flex items-center gap-1 px-1.5 whitespace-nowrap ${saveItems ? 'cursor-pointer' : 'opacity-50'}`}
+          onClick={saveItems}>
+          <Icon icon={saveIcon} />
+          Save version
+        </div>
       </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
