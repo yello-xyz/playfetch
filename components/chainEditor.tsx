@@ -2,7 +2,7 @@ import { ActiveChain, ActiveProject, ChainItem, ChainVersion, Prompt } from '@/t
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
-import { SingleTabHeader } from './tabSelector'
+import { CustomHeader, HeaderItem } from './tabSelector'
 import VersionSelector from './versionSelector'
 
 export default function ChainEditor({
@@ -34,7 +34,9 @@ export default function ChainEditor({
 
   return (
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
-      <SingleTabHeader label={chain.name} />
+      <CustomHeader>
+      <HeaderItem>{chain.name}</HeaderItem>
+      </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
