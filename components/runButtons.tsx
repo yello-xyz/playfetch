@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
-import { InputValues, PromptInputs, TestConfig } from '@/types'
+import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
+import ModelSelector from './modelSelector'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
@@ -82,19 +83,23 @@ export default function RunButtons({
   runTitle,
   variables,
   inputValues,
+  languageModel,
+  setLanguageModel,
   testConfig,
   setTestConfig,
+  showTestMode,
   disabled,
-  hideDropdown,
   callback,
 }: {
   runTitle?: string
   variables: string[]
   inputValues: InputValues
+  languageModel?: LanguageModel
+  setLanguageModel?: (model: LanguageModel) => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  showTestMode?: boolean
   disabled?: boolean
-  hideDropdown?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
   const selectInputs = useCallback(
@@ -134,7 +139,8 @@ export default function RunButtons({
   const [allInputs] = selectInputs({ mode: 'all' })
   return (
     <div className='flex items-center self-end gap-4'>
-      {!hideDropdown && (
+      {languageModel && setLanguageModel && <ModelSelector model={languageModel} setModel={setLanguageModel} />}
+      {showTestMode && (
         <DropdownMenu
           disabled={allInputs.length <= 1}
           size='medium'

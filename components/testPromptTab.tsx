@@ -113,6 +113,7 @@ export default function TestPromptTab({
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
+              showTestMode
               disabled={!currentPrompt.length}
               callback={testPrompt}
             />

@@ -9,7 +9,7 @@ import {
 } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import ModelSelector, { ProviderForModel } from './modelSelector'
+import { ProviderForModel } from './modelSelector'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -90,15 +90,15 @@ export default function PromptPanel({
       )}
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <div className='flex items-center self-end gap-3'>
-          <ModelSelector model={config.model} setModel={updateModel} />
           <RunButtons
             runTitle={version.runs.length ? 'Run again' : 'Run'}
             variables={ExtractPromptVariables(prompt)}
             inputValues={inputValues}
+            languageModel={config.model}
+            setLanguageModel={updateModel}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
             disabled={prompt.trim().length === 0}
-            hideDropdown
             callback={inputs => runPrompt(config, inputs)}
           />
         </div>

@@ -240,6 +240,7 @@ export default function ChainNodeEditor({
             inputValues={inputValues}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
+            showTestMode
             disabled={!items.length}
             callback={runChain}
           />
