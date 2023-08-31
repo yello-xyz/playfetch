@@ -103,6 +103,8 @@ export default function RunCell({
     })
   }
 
+  const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment?.startIndex)
+
   const updateSelectionForComment = (selection?: Selection) => {
     const existingRange = selection && existingCommentRangeForSelection(selection)
     if (existingRange) {
@@ -146,7 +148,7 @@ export default function RunCell({
       )}
       {activeItem && version && !popupComments && selectionForComment && selectionForComment && (
         <CommentsPopup
-          comments={[]}
+          comments={selectionComments}
           versionID={version.id}
           selection={selectionForComment.text}
           runID={run.id}
