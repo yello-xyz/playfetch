@@ -98,8 +98,18 @@ export default function ChainView({
       version: undefined,
       inputs: ExtractChainItemVariables(item, promptCache),
     }))
-  const itemsKey = JSON.stringify(getItemsToSave(items))
-  const savedItemsKey = useRef<string>(itemsKey)
+  const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
+  const itemsKey = getItemsKey(items)
+  const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
+
+  const refreshActiveItem = useRefreshActiveItem()
+
+  const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
+    setSavedItemsKey(getItemsKey(items))
+    return saveChain(getItemsToSave(items), refreshActiveItem)
+  }
+
+  const saveItemsIfNeeded = itemsKey !== savedItemsKey ? () => saveItems(items) : undefined
 
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
   if (syncedVersionID !== activeVersion.id) {
@@ -109,10 +119,8 @@ export default function ChainView({
     if (activeNodeIndex >= newNodes.length) {
       setActiveNodeIndex(1)
     }
-    savedItemsKey.current = JSON.stringify(getItemsToSave(activeVersion.items))
+    setSavedItemsKey(getItemsKey(activeVersion.items))
   }
-
-  const refreshActiveItem = useRefreshActiveItem()
 
   useEffect(() => {
     const promptItems = items.filter(IsPromptChainItem)
@@ -157,14 +165,6 @@ export default function ChainView({
   }
 
   const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
-
-  const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
-    const itemsToSave = getItemsToSave(items)
-    savedItemsKey.current = JSON.stringify(itemsToSave)
-    return saveChain(itemsToSave, refreshActiveItem)
-  }
-
-  const saveItemsIfNeeded = itemsKey !== savedItemsKey.current ? () => saveItems(items) : undefined
 
   const activateOutputNode = () => {
     setNodes(nodes => {
