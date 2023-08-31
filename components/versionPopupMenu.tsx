@@ -1,4 +1,4 @@
-import { PromptVersion } from '@/types'
+import { ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { CalculatePopupOffset, PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -7,11 +7,11 @@ import dotsIcon from '@/public/dots.svg'
 import { useRef, useState } from 'react'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 
-export default function VersionPopupMenu({
+export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
   containerRect,
 }: {
-  version: PromptVersion
+  version: Version
   containerRect?: DOMRect
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
@@ -22,10 +22,12 @@ export default function VersionPopupMenu({
 
   const iconRef = useRef<HTMLDivElement>(null)
 
+  const chainReference = IsPromptVersion(version) ? version.usedInChain : null
+
   const deleteVersion = async () => {
     setMenuExpanded(false)
-    if (version.usedAsEndpoint || version.usedInChain) {
-      const reason = version.usedAsEndpoint ? `published as an endpoint` : `used in chain “${version.usedInChain}”`
+    if (version.usedAsEndpoint || chainReference) {
+      const reason = version.usedAsEndpoint ? `published as an endpoint` : `used in chain “${chainReference}”`
       setDialogPrompt({
         title: `Cannot delete version because it is ${reason}.`,
         confirmTitle: 'OK',

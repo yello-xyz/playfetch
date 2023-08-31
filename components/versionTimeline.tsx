@@ -65,7 +65,7 @@ export default function VersionTimeline({
                 index={versions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
                 compareVersion={versions.find(v => v.id === version.previousID)}
-                prompt={prompt}
+                activeItem={prompt}
                 onSelect={selectVersion}
                 containerRect={containerRect}
               />

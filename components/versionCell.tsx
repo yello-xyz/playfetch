@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { ActivePrompt, User, PromptVersion, ChainVersion } from '@/types'
+import { ActivePrompt, User, PromptVersion, ChainVersion, IsPromptVersion, ActiveChain } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
@@ -17,7 +17,7 @@ const extractSelection = (identifier: string) => {
     : undefined
 }
 
-export default function VersionCell({
+export default function VersionCell<Version extends PromptVersion | ChainVersion>({
   identifier,
   labelColors,
   version,
@@ -25,19 +25,19 @@ export default function VersionCell({
   isLast,
   isActiveVersion,
   compareVersion,
-  prompt,
+  activeItem,
   onSelect,
   containerRect,
 }: {
   identifier: string
   labelColors: Record<string, string>
-  version: PromptVersion
+  version: Version
   index: number
   isLast: boolean
   isActiveVersion: boolean
   compareVersion?: PromptVersion
-  prompt: ActivePrompt
-  onSelect: (version: PromptVersion) => void
+  activeItem: ActivePrompt | ActiveChain
+  onSelect: (version: Version) => void
   containerRect?: DOMRect
 }) {
   const [selection, setSelection] = useState<string>()
@@ -49,7 +49,7 @@ export default function VersionCell({
     }
   }, [identifier])
 
-  const user = prompt.users.find(user => user.id === version.userID)
+  const user = activeItem.users.find(user => user.id === version.userID)
 
   return (
     <VerticalBarWrapper
@@ -64,7 +64,7 @@ export default function VersionCell({
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
-            <span className='font-medium'>{LabelForModel(version.config.model)}</span>
+            {IsPromptVersion(version) && <span className='font-medium'>{LabelForModel(version.config.model)}</span>}
             {version.runs.length > 0 && (
               <span>
                 {' '}
@@ -77,19 +77,21 @@ export default function VersionCell({
               comments={version.comments.filter(comment => !comment.action)}
               versionID={version.id}
               selection={selection}
-              users={prompt.users}
+              users={activeItem.users}
               labelColors={labelColors}
               containerRect={containerRect}
             />
-            <LabelPopupMenu containerRect={containerRect} activeItem={prompt} item={version} />
+            <LabelPopupMenu containerRect={containerRect} activeItem={activeItem} item={version} />
             <VersionPopupMenu containerRect={containerRect} version={version} />
           </div>
         </div>
-        {user && prompt.projectID !== user.id && <UserDetails user={user} />}
+        {user && activeItem.projectID !== user.id && <UserDetails user={user} />}
         <VersionLabels version={version} colors={labelColors} />
-        <div className={isActiveVersion ? '' : 'line-clamp-2'}>
-          <VersionComparison version={version} compareVersion={compareVersion} />
-        </div>
+        {IsPromptVersion(version) && (
+          <div className={isActiveVersion ? '' : 'line-clamp-2'}>
+            <VersionComparison version={version} compareVersion={compareVersion} />
+          </div>
+        )}
       </div>
     </VerticalBarWrapper>
   )
