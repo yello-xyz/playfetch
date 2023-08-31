@@ -126,7 +126,7 @@ export function CommentsPopup({
   )
 }
 
-export function CommentInput({
+function CommentInput({
   versionID,
   selection,
   runID,

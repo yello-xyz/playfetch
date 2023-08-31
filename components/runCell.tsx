@@ -134,7 +134,7 @@ export default function RunCell({
           startIndex={popupComments[0].startIndex}
           users={activeItem.users}
           labelColors={AvailableLabelColorsForItem(activeItem)}
-          isMenuExpanded={!!popupComments}
+          isMenuExpanded={true}
           setMenuExpanded={() => setPopupComments(undefined)}
           callback={closeCommentsPopup}
           position={{
@@ -144,12 +144,27 @@ export default function RunCell({
           }}
         />
       )}
-      {(selection || selectionForComment) && version && !popupComments && (
+      {activeItem && version && !popupComments && selectionForComment && selectionForComment && (
+        <CommentsPopup
+          comments={[]}
+          versionID={version.id}
+          selection={selectionForComment.text}
+          runID={run.id}
+          startIndex={selectionForComment.startIndex}
+          users={activeItem.users}
+          labelColors={AvailableLabelColorsForItem(activeItem)}
+          isMenuExpanded={true}
+          setMenuExpanded={() => setSelectionForComment(undefined)}
+          callback={() => setSelectionForComment(undefined)}
+          position={{
+            top: selectionForComment.popupPoint.y,
+            left: Math.max(10, selectionForComment.popupPoint.x - 160),
+          }}
+        />
+      )}
+      {selection && version && !popupComments && (
         <RunCellCommentInputPopup
           selection={selection}
-          selectionForComment={selectionForComment}
-          versionID={version.id}
-          runID={run.id}
           onClose={closeInputPopup}
           onUpdateSelectionForComment={updateSelectionForComment}
           scrollTop={scrollTop - startScrollTop}
