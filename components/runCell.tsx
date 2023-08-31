@@ -129,7 +129,7 @@ export default function RunCell({
         <CommentsPopup
           comments={popupComments}
           versionID={version.id}
-          selection={popupComments[0].text}
+          selection={popupComments[0].quote}
           runID={run.id}
           startIndex={popupComments[0].startIndex}
           users={activeItem.users}
