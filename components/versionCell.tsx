@@ -9,7 +9,6 @@ import { LabelForModel } from './modelSelector'
 import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from './icon'
-import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 const extractSelection = (identifier: string) => {
@@ -84,7 +83,6 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
               selection={selection}
               users={activeItem.users}
               labelColors={labelColors}
-              containerRect={containerRect}
             />
             <LabelPopupMenu containerRect={containerRect} activeItem={activeItem} item={version} />
             <VersionPopupMenu containerRect={containerRect} version={version} />

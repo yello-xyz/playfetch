@@ -1,17 +1,18 @@
 import { ActiveChain, ActivePrompt, ChainVersion, Comment, PartialRun, PromptVersion } from '@/types'
 import { MouseEvent, useEffect, useState } from 'react'
-import { CommentsPopup } from './commentPopupMenu'
+import { CommentsPopup, CommentsPopupProps } from './commentPopupMenu'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellCommentInputPopup from './runCellCommentInputPopup'
 import RunCellBody from './runCellBody'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
-const extractSelection = (identifier: string, containerRect?: DOMRect) => {
+const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
-  if (selection && containerRect) {
+  if (selection) {
     const selectionElement = selection?.anchorNode?.parentElement
     const containerElement = selectionElement?.parentElement
     const text = selection.toString().trim()
@@ -22,8 +23,8 @@ const extractSelection = (identifier: string, containerRect?: DOMRect) => {
       const range = selection.getRangeAt(0)
       const selectionRect = range.getBoundingClientRect()
       const popupPoint = {
-        x: selectionRect.left - containerRect.left + selectionRect.width / 2,
-        y: selectionRect.top - containerRect.top - 42,
+        x: selectionRect.left + selectionRect.width / 2,
+        y: selectionRect.top - 42,
       }
       return { text, popupPoint, startIndex: range.startOffset + spanOffset }
     }
@@ -44,33 +45,37 @@ export default function RunCell({
   activeItem?: ActivePrompt | ActiveChain
   containerRect?: DOMRect
 }) {
+  const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
   const [selection, setSelection] = useState<Selection>()
-  const [selectionForComment, setSelectionForComment] = useState<Selection>()
 
-  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>()
-  const [popupComments, setPopupComments] = useState<Comment[]>()
+  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentsPopupProps>()
+
   const selectComment = (event: MouseEvent, startIndex: number) => {
-    setPopupComments(comments.filter(comment => comment.startIndex === startIndex))
-    setPopupPosition({ top: event.clientY, left: event.clientX })
+    if (version && activeItem) {
+      const popupComments = comments.filter(comment => comment.startIndex === startIndex)
+      setPopup(CommentsPopup)
+      setPopupProps({
+        comments: popupComments,
+        versionID: version.id,
+        selection: popupComments[0].quote,
+        runID: run.id,
+        startIndex,
+        users: activeItem.users,
+        labelColors: AvailableLabelColorsForItem(activeItem),
+      })
+      setPopupLocation({ left: event.clientX - 200, top: event.clientY + 20 })
+    }
   }
 
   const isProperRun = 'inputs' in run
   useEffect(() => {
-    const selectionChangeHandler = () => isProperRun && setSelection(extractSelection(identifier, containerRect))
+    const selectionChangeHandler = () => isProperRun && setSelection(extractSelection(identifier))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [isProperRun, identifier, containerRect])
+  }, [isProperRun, identifier])
 
-  const closeInputPopup = () => setSelectionForComment(undefined)
-  const closeCommentsPopup = () => setPopupComments(undefined)
-  const closePopups = () => {
-    closeInputPopup()
-    closeCommentsPopup()
-  }
-
-  const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
   const selectionRanges = comments
     .filter(comment => comment.startIndex !== undefined && comment.quote)
     .map(comment => ({
@@ -78,38 +83,38 @@ export default function RunCell({
       endIndex: comment.startIndex! + comment.quote!.length,
     }))
 
-  const existingCommentRangeForSelection = (selection: Selection) => {
-    const start = selection.startIndex
-    const end = start + selection.text.length
-    return selectionRanges.find(
-      ({ startIndex, endIndex }) => (start >= startIndex && start < endIndex) || (end > startIndex && end <= endIndex)
-    )
-  }
-
-  if (selectionForComment && !existingCommentRangeForSelection(selectionForComment)) {
-    selectionRanges.unshift({
-      startIndex: selectionForComment.startIndex,
-      endIndex: selectionForComment.startIndex + selectionForComment.text.length,
-    })
-  }
-
-  const [selectionComments, setSelectionComments] = useState<Comment[]>([])
   const updateSelectionForComment = (selection?: Selection) => {
-    const existingRange = selection && existingCommentRangeForSelection(selection)
-    if (existingRange) {
-      const text = run.output.substring(existingRange.startIndex, existingRange.endIndex)
-      setSelectionForComment({ ...selection, startIndex: existingRange.startIndex, text })
-    } else {
-      setSelectionForComment(selection)
+    if (selection && version && activeItem) {
+      let selectionForComment = selection
+      const start = selection.startIndex
+      const end = start + selection.text.length
+      const existingRange = selectionRanges.find(
+        ({ startIndex, endIndex }) => (start >= startIndex && start < endIndex) || (end > startIndex && end <= endIndex)
+      )
+      if (existingRange) {
+        const text = run.output.substring(existingRange.startIndex, existingRange.endIndex)
+        selectionForComment = { ...selection, startIndex: existingRange.startIndex, text }
+      }
+      const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment.startIndex)
+      setPopup(CommentsPopup)
+      setPopupProps({
+        comments: selectionComments,
+        versionID: version.id,
+        selection: selectionForComment.text,
+        runID: run.id,
+        startIndex: selectionForComment.startIndex,
+        users: activeItem.users,
+        labelColors: AvailableLabelColorsForItem(activeItem),
+      })
+      setPopupLocation({ left: selectionForComment.popupPoint.x - 160, top: selectionForComment.popupPoint.y })
     }
-    setSelectionComments(comments.filter(comment => comment.startIndex === selection?.startIndex))
   }
 
   const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
 
   return (
-    <div className={`${baseClass} ${colorClass}`} onMouseDown={closePopups}>
+    <div className={`${baseClass} ${colorClass}`}>
       <RunCellHeader run={run} activeItem={activeItem} containerRect={containerRect} />
       <RunCellBody
         identifier={identifier}
@@ -117,43 +122,12 @@ export default function RunCell({
         selectionRanges={selectionRanges}
         onSelectComment={selectComment}
       />
-      {popupPosition && popupComments && containerRect && version && activeItem && (
-        <CommentsPopup
-          comments={popupComments}
-          versionID={version.id}
-          selection={popupComments[0].quote}
-          runID={run.id}
-          startIndex={popupComments[0].startIndex}
-          users={activeItem.users}
-          labelColors={AvailableLabelColorsForItem(activeItem)}
-          isMenuExpanded={true}
-          setMenuExpanded={() => setPopupComments(undefined)}
-          position={{
-            // TODO make this smarter so it avoids the edge of the container
-            top: popupPosition.top - containerRect.top + 20,
-            left: Math.max(-10, popupPosition.left - containerRect.left - 200),
-          }}
+      {selection && version && containerRect && (
+        <RunCellCommentInputPopup
+          selection={selection}
+          onUpdateSelectionForComment={updateSelectionForComment}
+          containerRect={containerRect}
         />
-      )}
-      {activeItem && version && !popupComments && selectionForComment && selectionForComment && (
-        <CommentsPopup
-          comments={selectionComments}
-          versionID={version.id}
-          selection={selectionForComment.text}
-          runID={run.id}
-          startIndex={selectionForComment.startIndex}
-          users={activeItem.users}
-          labelColors={AvailableLabelColorsForItem(activeItem)}
-          isMenuExpanded={true}
-          setMenuExpanded={() => setSelectionForComment(undefined)}
-          position={{
-            top: selectionForComment.popupPoint.y,
-            left: Math.max(10, selectionForComment.popupPoint.x - 160),
-          }}
-        />
-      )}
-      {selection && version && !popupComments && (
-        <RunCellCommentInputPopup selection={selection} onUpdateSelectionForComment={updateSelectionForComment} />
       )}
       <RunCellFooter run={run} />
     </div>

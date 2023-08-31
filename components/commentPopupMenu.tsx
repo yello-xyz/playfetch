@@ -1,6 +1,6 @@
 import { Comment, User } from '@/types'
 import api from '@/src/client/api'
-import PopupMenu, { CalculatePopupOffset } from './popupMenu'
+import { PopupContent } from './popupMenu'
 import IconButton from './iconButton'
 import commentIcon from '@/public/comment.svg'
 import commentBadgeIcon from '@/public/commentBadge.svg'
@@ -12,6 +12,7 @@ import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
 import useInitialState from '@/src/client/hooks/useInitialState'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
 
 export default function CommentPopupMenu({
   comments,
@@ -21,7 +22,6 @@ export default function CommentPopupMenu({
   startIndex,
   users,
   labelColors,
-  containerRect,
 }: {
   comments: Comment[]
   versionID: number
@@ -30,38 +30,41 @@ export default function CommentPopupMenu({
   startIndex?: number
   users: User[]
   labelColors: Record<string, string>
-  containerRect?: DOMRect
 }) {
-  const [isMenuExpanded, setMenuExpanded] = useState(false)
   const iconRef = useRef<HTMLDivElement>(null)
+  const iconRect = iconRef.current?.getBoundingClientRect()
 
-  const [lastSelection, setLastSelection] = useState<string>()
-  if (!isMenuExpanded && selection !== lastSelection) {
-    setLastSelection(selection)
+  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentsPopupProps>()
+
+  const togglePopup = () => {
+    setPopup(CommentsPopup)
+    setPopupProps({
+      comments,
+      versionID,
+      selection,
+      runID,
+      startIndex,
+      users,
+      labelColors,
+    })
+    setPopupLocation({ left: (iconRect?.right ?? 0) - 320, top: iconRect?.bottom })
   }
 
   return (
-    <>
-      <div ref={iconRef}>
-        <IconButton
-          icon={comments.length > 0 ? commentBadgeIcon : commentIcon}
-          onClick={() => setMenuExpanded(!isMenuExpanded)}
-        />
-      </div>
-      <CommentsPopup
-        comments={comments}
-        versionID={versionID}
-        selection={lastSelection}
-        runID={runID}
-        startIndex={startIndex}
-        users={users}
-        labelColors={labelColors}
-        isMenuExpanded={isMenuExpanded}
-        setMenuExpanded={setMenuExpanded}
-        position={CalculatePopupOffset(iconRef, containerRect)}
-      />
-    </>
+    <div ref={iconRef}>
+      <IconButton icon={comments.length > 0 ? commentBadgeIcon : commentIcon} onClick={togglePopup} />
+    </div>
   )
+}
+
+export type CommentsPopupProps = {
+  comments: Comment[]
+  versionID: number
+  selection?: string
+  runID?: number
+  startIndex?: number
+  users: User[]
+  labelColors: Record<string, string>
 }
 
 export function CommentsPopup({
@@ -72,58 +75,36 @@ export function CommentsPopup({
   startIndex,
   users,
   labelColors,
-  isMenuExpanded,
-  setMenuExpanded,
-  position,
-}: {
-  comments: Comment[]
-  versionID: number
-  selection?: string
-  runID?: number
-  startIndex?: number
-  users: User[]
-  labelColors: Record<string, string>
-  isMenuExpanded: boolean
-  setMenuExpanded: (expanded: boolean) => void
-  position: { top?: number; left?: number; right?: number; bottom?: number }
-}) {
+}: CommentsPopupProps) {
   const haveComments = comments.length > 0
 
   const [allComments, setAllComments] = useInitialState(comments, (a, b) => JSON.stringify(a) === JSON.stringify(b))
 
   return (
-    <>
-      <div
-        className='absolute'
-        style={position}
-        onMouseDown={event => event.stopPropagation()}
-        onClick={event => event.stopPropagation()}>
-        <PopupMenu expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-          <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
-            {haveComments && (
-              <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
-                {allComments.map((comment, index) => (
-                  <CommentCell
-                    comment={comment}
-                    user={users.find(user => user.id === comment.userID)!}
-                    labelColors={labelColors}
-                    key={index}
-                  />
-                ))}
-              </div>
-            )}
-            <CommentInput
-              versionID={versionID}
-              selection={selection}
-              runID={runID}
-              startIndex={startIndex}
-              callback={comment => setAllComments([...allComments, comment])}
-              focus={!haveComments}
-            />
+    <PopupContent>
+      <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
+        {haveComments && (
+          <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
+            {allComments.map((comment, index) => (
+              <CommentCell
+                comment={comment}
+                user={users.find(user => user.id === comment.userID)!}
+                labelColors={labelColors}
+                key={index}
+              />
+            ))}
           </div>
-        </PopupMenu>
+        )}
+        <CommentInput
+          versionID={versionID}
+          selection={selection}
+          runID={runID}
+          startIndex={startIndex}
+          callback={comment => setAllComments([...allComments, comment])}
+          focus={!haveComments}
+        />
       </div>
-    </>
+    </PopupContent>
   )
 }
 
