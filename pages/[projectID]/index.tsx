@@ -219,15 +219,15 @@ export default function Home({
 
   return (
     <>
-      <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <GlobalPopupContext.Provider
-          value={{
-            setPopupRender: render => setPopupRender(() => render),
-            setPopupProps,
-            setPopupLocation,
-          }}>
-          <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-            <RefreshContext.Provider value={{ refreshActiveItem }}>
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+        <RefreshContext.Provider value={{ refreshActiveItem }}>
+          <ModalDialogContext.Provider value={{ setDialogPrompt }}>
+            <GlobalPopupContext.Provider
+              value={{
+                setPopupRender: render => setPopupRender(() => render),
+                setPopupProps,
+                setPopupLocation,
+              }}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar
                   workspaces={workspaces}
@@ -289,17 +289,17 @@ export default function Home({
                   </div>
                 </div>
               </main>
-            </RefreshContext.Provider>
-          </UserContext.Provider>
-        </GlobalPopupContext.Provider>
-      </ModalDialogContext.Provider>
-      <GlobalPopup
-        {...popupProps}
-        location={popupLocation}
-        onDismiss={() => setPopupRender(undefined)}
-        render={popupRender}
-      />
-      <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+            </GlobalPopupContext.Provider>
+          </ModalDialogContext.Provider>
+          <GlobalPopup
+            {...popupProps}
+            location={popupLocation}
+            onDismiss={() => setPopupRender(undefined)}
+            render={popupRender}
+          />
+          <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+        </RefreshContext.Provider>
+      </UserContext.Provider>
     </>
   )
 }

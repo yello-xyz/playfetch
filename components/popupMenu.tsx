@@ -45,11 +45,22 @@ export default function PopupMenu({
   return expanded ? (
     <div
       onClick={event => event.stopPropagation()}
-      className={`${className} cursor-default relative z-20 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm gap-0.5 select-none`}
+      className='relative z-20 overflow-hidden cursor-default'
       ref={menuRef}>
-      {children}
+        <PopupContent className={className}>
+        {children}
+        </PopupContent>
     </div>
   ) : null
+}
+
+export function PopupContent({ children, className }: { children: any; className?: string }) {
+  return (
+    <div
+      className={`${className} bg-white border border-gray-200 rounded-lg shadow-sm gap-0.5 select-none`}>
+      {children}
+    </div>
+  )
 }
 
 export function PopupMenuItem({
