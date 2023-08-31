@@ -73,7 +73,7 @@ export default function ChainEditor({
           />
         ))}
       </div>
-      <div className='flex self-start w-full gap-4 p-6'>
+      <div className='flex self-start gap-4 p-6'>
         {activeIndex > 0 && (
           <>
             {prompts.length > 0 && (
@@ -84,17 +84,6 @@ export default function ChainEditor({
                 Remove Node
               </Button>
             )}
-            <div className='flex justify-end w-full'>
-              {chain.versions.length > 1 && (
-                <VersionSelector
-                  versions={chain.versions}
-                  endpoints={project.endpoints}
-                  activeVersion={activeVersion}
-                  setActiveVersion={setActiveVersion}
-                  hideLabels
-                />
-              )}
-            </div>
           </>
         )}
       </div>
