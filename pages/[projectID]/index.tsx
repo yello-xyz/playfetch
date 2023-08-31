@@ -36,6 +36,7 @@ import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
+import { useSimpleContainerRect } from '@/src/client/hooks/useContainerRect'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
@@ -216,6 +217,8 @@ export default function Home({
   const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
   const [popupProps, setPopupProps] = useState<any>()
   const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
+  const [parentRect, parentRef] = useSimpleContainerRect()
+  const [childRect, childRef] = useSimpleContainerRect()
 
   return (
     <>
@@ -296,6 +299,10 @@ export default function Home({
             location={popupLocation}
             onDismiss={() => setPopupRender(undefined)}
             render={popupRender}
+            parentRef={parentRef}
+            parentRect={parentRect}
+            childRef={childRef}
+            childRect={childRect}
           />
           <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
         </RefreshContext.Provider>
