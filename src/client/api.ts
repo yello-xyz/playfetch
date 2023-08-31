@@ -3,20 +3,14 @@ import {
   PromptConfig,
   PromptInputs,
   ActiveProject,
-  RunConfig,
   ModelProvider,
-  CodeConfig,
   ActiveWorkspace,
   Workspace,
   ChainItemWithInputs,
   LogEntry,
-  InputValues,
-  Prompt,
   ActiveChain,
-  RawPromptVersion,
-  RawChainVersion,
-  Chain,
   ActivePrompt,
+  Comment,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -198,7 +192,13 @@ const api = {
   getLogEntries: function (projectID: number): Promise<LogEntry[]> {
     return post(this.getLogEntries, { projectID })
   },
-  addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
+  addComment: function (
+    versionID: number,
+    text: string,
+    quote?: string,
+    runID?: number,
+    startIndex?: number
+  ): Promise<Comment> {
     return post(this.addComment, { versionID, text, quote, runID, startIndex })
   },
   toggleVersionLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
