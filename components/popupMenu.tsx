@@ -53,19 +53,26 @@ export function PopupMenuItem({
   callback,
   destructive,
   separated,
+  first,
+  last,
 }: {
   title: string
   callback: () => void
   destructive?: boolean
   separated?: boolean
+  first?: boolean
+  last?: boolean
 }) {
   const baseClass = 'px-4 py-2 text-sm font-normal text-dark-gray-700'
   const destructiveClass = destructive ? 'text-red-500' : ''
   const separatedClass = separated ? 'border-t border-gray-200' : ''
   const hoverClass = destructive ? 'hover:bg-red-400 hover:text-white' : 'hover:bg-blue-400 hover:text-white'
+  const roundedClass = first && last ? 'rounded-lg' : first ? 'rounded-t-lg' : last ? 'rounded-b-lg' : ''
 
   return (
-    <div onClick={callback} className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass}`}>
+    <div
+      onClick={callback}
+      className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass} ${roundedClass}`}>
       {title}
     </div>
   )

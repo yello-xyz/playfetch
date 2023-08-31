@@ -60,7 +60,7 @@ type VersionPopupProps = { deleteVersion: () => void }
 function VersionPopup({ deleteVersion }: VersionPopupProps) {
   return (
     <PopupContent className='w-40'>
-      <PopupMenuItem destructive title='Delete' callback={deleteVersion} />
+      <PopupMenuItem destructive title='Delete' callback={deleteVersion}  first last />
     </PopupContent>
   )
 }

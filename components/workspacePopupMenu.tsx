@@ -50,9 +50,12 @@ export default function WorkspacePopupMenu({
   return (
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename Workspace…' callback={renameWorkspace} />
-        {!isOnlyUser && <PopupMenuItem separated destructive title='Leave Workspace' callback={leaveWorkspace} />}
-        {isOnlyUser && <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} />}
+        <PopupMenuItem title='Rename Workspace…' callback={renameWorkspace} first />
+        {isOnlyUser ? (
+          <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} last />
+        ) : (
+          <PopupMenuItem separated destructive title='Leave Workspace' callback={leaveWorkspace} last />
+        )}
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog
