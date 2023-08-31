@@ -101,7 +101,7 @@ export function CommentsPopup({
           runID={runID}
           startIndex={startIndex}
           callback={comment => setAllComments([...allComments, comment])}
-          focus={!haveComments}
+          haveComments={haveComments}
         />
       </div>
     </PopupContent>
@@ -113,14 +113,14 @@ function CommentInput({
   selection,
   runID,
   startIndex,
-  focus,
+  haveComments,
   callback,
 }: {
   versionID: number
   selection?: string
   runID?: number
   startIndex?: number
-  focus?: boolean
+  haveComments: boolean
   callback?: (comment: Comment) => void
 }) {
   const [newComment, setNewComment] = useState('')
@@ -148,13 +148,13 @@ function CommentInput({
   }
 
   const inputRef = useRef<HTMLInputElement>(null)
-  if (focus && !inputRef.current) {
+  if (!haveComments && !inputRef.current) {
     setTimeout(() => inputRef.current?.focus())
   }
 
   return (
     <div className='flex flex-col items-stretch gap-1'>
-      {selection && !runID && <CommentQuote className='mt-2'>{selection}</CommentQuote>}
+      {selection && (!runID || !haveComments) && <CommentQuote className='mt-2'>{selection}</CommentQuote>}
       <div className='flex items-center gap-2'>
         <UserAvatar user={user} size='md' />
         <input
