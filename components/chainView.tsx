@@ -18,7 +18,7 @@ import { Allotment } from 'allotment'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import VersionTimeline from './versionTimeline'
+import VersionTimeline, { ShouldShowVersions } from './versionTimeline'
 import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
@@ -184,8 +184,8 @@ export default function ChainView({
   }
 
   const [showVersions, setShowVersions] = useState(false)
-  const canShowVersions = chain.versions.length > 1 || chain.versions[0].runs.length > 0
-  if (showVersions && !canShowVersions) {
+  const shouldShowVersions = ShouldShowVersions(chain.versions)
+  if (showVersions && !shouldShowVersions) {
     setShowVersions(false)
   }
 
@@ -222,7 +222,7 @@ export default function ChainView({
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
           showVersions={showVersions}
-          setShowVersions={canShowVersions ? setShowVersions : undefined}
+          setShowVersions={shouldShowVersions ? setShowVersions : undefined}
         />
       </Allotment.Pane>
       {!showVersions && (
