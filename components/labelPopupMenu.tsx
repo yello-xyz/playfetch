@@ -34,11 +34,13 @@ export default function LabelPopupMenu({
   const iconRef = useRef<HTMLDivElement>(null)
   const iconRect = iconRef.current?.getBoundingClientRect()
 
+  const refreshActiveItem = useRefreshActiveItem()
+  const [newLabel, setNewLabel] = useState('')
   const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<LabelsPopupProps>()
 
   const togglePopup = () => {
     setPopup(LabelsPopup)
-    setPopupProps({ item, activeItem })
+    setPopupProps({ item, activeItem, refreshActiveItem, newLabel, setNewLabel })
     setPopupLocation({ left: (iconRect?.right ?? 0) - 320, top: iconRect?.bottom })
   }
 
@@ -52,11 +54,13 @@ export default function LabelPopupMenu({
 export type LabelsPopupProps = {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
+  newLabel: string
+  setNewLabel: (label: string) => void
+  refreshActiveItem: () => void
   onDismiss?: () => void
 }
 
-function LabelsPopup({ item, activeItem, onDismiss }: LabelsPopupProps) {
-  const [newLabel, setNewLabel] = useState('')
+function LabelsPopup({ item, activeItem, refreshActiveItem, onDismiss, newLabel, setNewLabel }: LabelsPopupProps) {
   const trimmedLabel = newLabel.trim()
 
   const labels = activeItem.availableLabels
@@ -64,8 +68,6 @@ function LabelsPopup({ item, activeItem, onDismiss }: LabelsPopupProps) {
   const colors = AvailableLabelColorsForItem(activeItem)
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
-
-  const refreshActiveItem = useRefreshActiveItem()
 
   const toggleLabel = (label: string) => {
     onDismiss?.()
