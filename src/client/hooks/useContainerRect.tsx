@@ -11,7 +11,7 @@ export default function useContainerRect(): readonly [DOMRect | undefined, RefOb
   return [rect, ref]
 }
 
-// TODO Unify these by adapting the useResizeObserver above so it can use RefCallbacks like below 
+// TODO Unify these by adapting the useResizeObserver above so it can use RefCallbacks like below
 // and we don't need to worry about whether the component has already been loaded as with RefObjects.
 export function useSimpleContainerRect(): readonly [DOMRect | undefined, RefCallback<HTMLDivElement>] {
   const [rect, setRect] = useState<DOMRect>()

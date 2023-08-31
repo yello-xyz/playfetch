@@ -35,17 +35,14 @@ export default function PopupMenu({
       onClick={event => event.stopPropagation()}
       className='relative z-20 overflow-hidden cursor-default'
       ref={menuRef}>
-        <PopupContent className={className}>
-        {children}
-        </PopupContent>
+      <PopupContent className={className}>{children}</PopupContent>
     </div>
   ) : null
 }
 
 export function PopupContent({ children, className }: { children: any; className?: string }) {
   return (
-    <div
-      className={`${className} bg-white border border-gray-200 rounded-lg shadow-sm gap-0.5 select-none`}>
+    <div className={`${className} bg-white border border-gray-200 rounded-lg shadow-sm gap-0.5 select-none`}>
       {children}
     </div>
   )
