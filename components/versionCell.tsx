@@ -9,6 +9,8 @@ import { LabelForModel } from './modelSelector'
 import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from './icon'
+import { FormatDate } from '@/src/common/formatting'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -50,6 +52,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   }, [identifier])
 
   const user = activeItem.users.find(user => user.id === version.userID)
+  const formattedDate = useFormattedDate(version.timestamp)
 
   return (
     <VerticalBarWrapper
@@ -64,8 +67,10 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
-            {IsPromptVersion(version) && <span className='font-medium'>{LabelForModel(version.config.model)}</span>}
-            {version.runs.length > 0 && (
+            <span className='font-medium'>
+              {IsPromptVersion(version) ? LabelForModel(version.config.model) : formattedDate}
+            </span>
+            {IsPromptVersion(version) && version.runs.length > 0 && (
               <span>
                 {' '}
                 | {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}

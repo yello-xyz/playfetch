@@ -36,7 +36,8 @@ export default function RunPromptTab({
       <Allotment.Pane minSize={minVersionHeight}>
         <div className='h-full'>
           <VersionTimeline
-            prompt={activePrompt}
+            activeItem={activePrompt}
+            versions={activePrompt.versions}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             tabSelector={tabSelector}

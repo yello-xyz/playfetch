@@ -36,7 +36,8 @@ export default function PromptChainNodeEditor({
         <div className='flex flex-col h-full'>
           <div className='flex-1 overflow-y-auto'>
             <VersionTimeline
-              prompt={loadedPrompt}
+              activeItem={loadedPrompt}
+              versions={loadedPrompt.versions}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
               tabSelector={() => <SingleTabHeader label='Prompt versions' />}
