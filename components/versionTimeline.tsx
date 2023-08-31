@@ -4,7 +4,6 @@ import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
 import useScrollDetection from '@/src/client/hooks/useScrollDetection'
-import useContainerRect from '@/src/client/hooks/useContainerRect'
 
 export const ShouldShowVersions = <Version extends PromptVersion | ChainVersion>(versions: Version[]) =>
   versions.length > 1 || versions[0].runs.length > 0 || (!IsPromptVersion(versions[0]) && versions[0].items.length > 0)
@@ -26,7 +25,6 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
 
-  const [containerRect, containerRef] = useContainerRect()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
@@ -51,7 +49,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   }
 
   return (
-    <div ref={containerRef} className='relative flex h-full'>
+    <div className='relative flex h-full'>
       {ShouldShowVersions(versions) ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
@@ -75,7 +73,6 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 compareVersion={previousPromptVersion(version)}
                 activeItem={activeItem}
                 onSelect={selectVersion}
-                containerRect={containerRect}
               />
             ))}
           </div>

@@ -28,7 +28,6 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   compareVersion,
   activeItem,
   onSelect,
-  containerRect,
 }: {
   identifier: string
   labelColors: Record<string, string>
@@ -39,7 +38,6 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   compareVersion?: PromptVersion
   activeItem: ActivePrompt | ActiveChain
   onSelect: (version: Version) => void
-  containerRect?: DOMRect
 }) {
   const [selection, setSelection] = useState<string>()
   useEffect(() => {
@@ -85,7 +83,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
               labelColors={labelColors}
             />
             <LabelPopupMenu activeItem={activeItem} item={version} />
-            <VersionPopupMenu containerRect={containerRect} version={version} />
+            <VersionPopupMenu version={version} />
           </div>
         </div>
         {user && activeItem.projectID !== user.id && <UserDetails user={user} />}
