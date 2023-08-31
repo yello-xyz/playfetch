@@ -184,6 +184,10 @@ export default function ChainView({
   }
 
   const [showVersions, setShowVersions] = useState(false)
+  const canShowVersions = chain.versions.length > 1 || chain.versions[0].runs.length > 0
+  if (showVersions && !canShowVersions) {
+    setShowVersions(false)
+  }
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
 
@@ -218,7 +222,7 @@ export default function ChainView({
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
           showVersions={showVersions}
-          setShowVersions={setShowVersions}
+          setShowVersions={canShowVersions ? setShowVersions : undefined}
         />
       </Allotment.Pane>
       {!showVersions && (

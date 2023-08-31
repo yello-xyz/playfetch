@@ -31,7 +31,7 @@ export default function ChainEditor({
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
   showVersions: boolean
-  setShowVersions: (show: boolean) => void
+  setShowVersions?: (show: boolean) => void
 }) {
   const removeItem = () => setNodes([...nodes.slice(0, activeIndex), ...nodes.slice(activeIndex + 1)])
   const insertItem = (item: ChainItem) => setNodes([...nodes.slice(0, activeIndex), item, ...nodes.slice(activeIndex)])
@@ -45,7 +45,7 @@ export default function ChainEditor({
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
       <CustomHeader>
         <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-        <HeaderTitle chainName={chain.name} versionIndex={saveItems ? undefined : versionIndex} />
+        <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
         <SaveVersionButton saveItems={saveItems} />
       </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
@@ -102,7 +102,7 @@ const ShowVersionsButton = ({
   setShowVersions?: (show: boolean) => void
 }) => (
   <HeaderButton
-    onClick={() => setShowVersions?.(!showVersions)}
+    onClick={setShowVersions ? () => setShowVersions(!showVersions) : undefined}
     title={showVersions ? 'Hide versions' : 'Show versions'}
     icon={historyIcon}
     justify='justify-start'
