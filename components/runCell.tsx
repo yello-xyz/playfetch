@@ -103,8 +103,7 @@ export default function RunCell({
     })
   }
 
-  const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment?.startIndex)
-
+  const [selectionComments, setSelectionComments] = useState<Comment[]>([])
   const updateSelectionForComment = (selection?: Selection) => {
     const existingRange = selection && existingCommentRangeForSelection(selection)
     if (existingRange) {
@@ -113,6 +112,7 @@ export default function RunCell({
     } else {
       setSelectionForComment(selection)
     }
+    setSelectionComments(comments.filter(comment => comment.startIndex === selection?.startIndex))
   }
 
   const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
@@ -157,7 +157,7 @@ export default function RunCell({
           labelColors={AvailableLabelColorsForItem(activeItem)}
           isMenuExpanded={true}
           setMenuExpanded={() => setSelectionForComment(undefined)}
-          callback={() => setSelectionForComment(undefined)}
+          callback={comment => setSelectionComments([...selectionComments, comment])}
           position={{
             top: selectionForComment.popupPoint.y,
             left: Math.max(10, selectionForComment.popupPoint.x - 160),
