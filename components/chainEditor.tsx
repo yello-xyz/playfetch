@@ -2,18 +2,17 @@ import { ActiveChain, ActiveProject, ChainItem, ChainVersion, Prompt } from '@/t
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
-import { CustomHeader, HeaderItem } from './tabSelector'
-import VersionSelector from './versionSelector'
+import { CustomHeader } from './tabSelector'
 import Icon from './icon'
 import chainIcon from '@/public/chain.svg'
 import saveIcon from '@/public/save.svg'
 import historyIcon from '@/public/history.svg'
+import { ReactNode } from 'react'
+import { StaticImageData } from 'next/image'
 
 export default function ChainEditor({
   chain,
   activeVersion,
-  setActiveVersion,
-  project,
   nodes,
   setNodes,
   saveItems,
@@ -25,8 +24,6 @@ export default function ChainEditor({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  setActiveVersion: (version: ChainVersion) => void
-  project: ActiveProject
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
   saveItems?: () => void
@@ -48,7 +45,7 @@ export default function ChainEditor({
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
       <CustomHeader>
         <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-        <VersionHeaderItem chainName={chain.name} versionIndex={saveItems ? undefined : versionIndex} />
+        <HeaderTitle chainName={chain.name} versionIndex={saveItems ? undefined : versionIndex} />
         <SaveVersionButton saveItems={saveItems} />
       </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
@@ -81,9 +78,9 @@ export default function ChainEditor({
   )
 }
 
-function VersionHeaderItem({ chainName, versionIndex }: { chainName: string; versionIndex?: number }) {
+function HeaderTitle({ chainName, versionIndex }: { chainName: string; versionIndex?: number }) {
   return (
-    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden max-h-11'>
+    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-11'>
       <div className='flex items-center h-full font-medium select-none whitespace-nowrap'>
         <Icon icon={chainIcon} className='h-full py-2.5' />
         {chainName}
@@ -97,32 +94,46 @@ function VersionHeaderItem({ chainName, versionIndex }: { chainName: string; ver
   )
 }
 
-function ShowVersionsButton({
+const ShowVersionsButton = ({
   showVersions,
   setShowVersions,
 }: {
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
-}) {
-  const activeClass = setShowVersions ? 'cursor-pointer' : 'opacity-0'
-  return (
-    <div
-      className={`flex flex-wrap items-center h-full overflow-hidden px-1.5 ${activeClass}`}
-      onClick={() => setShowVersions?.(!showVersions)}>
-      <Icon icon={historyIcon} className='h-full' />
-      <span className='-mb-px whitespace-nowrap'>{showVersions ? 'Hide versions' : 'Show versions'}</span>
-    </div>
-  )
-}
+}) => (
+  <HeaderButton
+    onClick={() => setShowVersions?.(!showVersions)}
+    title={showVersions ? 'Hide versions' : 'Show versions'}
+    icon={historyIcon}
+    justify='justify-start'
+    hideIfInactive
+  />
+)
 
-function SaveVersionButton({ saveItems }: { saveItems?: () => void }) {
-  const activeClass = saveItems ? 'cursor-pointer' : 'opacity-50'
+const SaveVersionButton = ({ saveItems }: { saveItems?: () => void }) => (
+  <HeaderButton onClick={saveItems} title='Save version' icon={saveIcon} justify='justify-end' />
+)
+
+function HeaderButton({
+  title,
+  icon,
+  justify,
+  onClick,
+  hideIfInactive,
+}: {
+  title: string
+  icon: StaticImageData
+  justify: 'justify-start' | 'justify-end' | 'justify-center'
+  onClick?: () => void
+  hideIfInactive?: boolean
+}) {
+  const activeClass = onClick ? 'cursor-pointer hover:bg-gray-50' : hideIfInactive ? 'opacity-0' : 'opacity-50'
   return (
-    <div
-      className={`flex items-center justify-end flex-wrap overflow-hidden h-full px-1.5 ${activeClass}`}
-      onClick={saveItems}>
-      <Icon icon={saveIcon} className='h-full' />
-      <span className='-mb-px whitespace-nowrap'>Save version</span>
+    <div className={`rounded-md max-h-7 py-1 overflow-hidden ${activeClass}`} onClick={onClick}>
+      <div className={`flex flex-wrap items-center -mt-0.5 px-1.5 ${justify}`}>
+        <Icon icon={icon} className='h-full' />
+        <span className='whitespace-nowrap'>{title}</span>
+      </div>
     </div>
   )
 }

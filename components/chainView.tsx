@@ -211,8 +211,6 @@ export default function ChainView({
         <ChainEditor
           chain={chain}
           activeVersion={activeVersion}
-          setActiveVersion={setActiveVersion}
-          project={project}
           nodes={nodes}
           setNodes={setNodes}
           saveItems={saveItemsIfNeeded}

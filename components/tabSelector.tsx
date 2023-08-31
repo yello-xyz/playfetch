@@ -49,7 +49,7 @@ export default function TabSelector<T extends string>({
 
 export function CustomHeader({ children }: { children?: ReactNode }) {
   return (
-    <div className='flex items-center justify-between gap-1 px-2 bg-white border-b border-gray-200'>{children}</div>
+    <div className='flex items-center justify-between gap-2 px-2 bg-white border-b border-gray-200'>{children}</div>
   )
 }
 
