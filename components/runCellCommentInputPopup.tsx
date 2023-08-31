@@ -6,17 +6,14 @@ type Selection = { text: string; startIndex: number; popupPoint: { x: number; y:
 export default function RunCellCommentInputPopup({
   selection,
   onUpdateSelectionForComment,
-  scrollTop,
 }: {
   selection: Selection
-  onClose: () => void
   onUpdateSelectionForComment: (selection?: Selection) => void
-  scrollTop: number
 }) {
   return (
     <div
       className='absolute flex items-center justify-center overflow-visible text-center max-w-0'
-      style={{ top: selection.popupPoint.y - scrollTop, left: Math.max(40, selection.popupPoint.x) }}>
+      style={{ top: selection.popupPoint.y, left: Math.max(40, selection.popupPoint.x) }}>
       <div className='p-1 bg-white rounded-lg shadow' onMouseDown={event => event.stopPropagation()}>
         <div
           className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'

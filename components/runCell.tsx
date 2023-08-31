@@ -37,14 +37,12 @@ export default function RunCell({
   version,
   activeItem,
   containerRect,
-  scrollTop,
 }: {
   identifier: string
   run: PartialRun
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   containerRect?: DOMRect
-  scrollTop: number
 }) {
   const [selection, setSelection] = useState<Selection>()
   const [selectionForComment, setSelectionForComment] = useState<Selection>()
@@ -54,14 +52,6 @@ export default function RunCell({
   const selectComment = (event: MouseEvent, startIndex: number) => {
     setPopupComments(comments.filter(comment => comment.startIndex === startIndex))
     setPopupPosition({ top: event.clientY, left: event.clientX })
-  }
-
-  const [startScrollTop, setStartScrollTop] = useState(0)
-  if (!selection && !selectionForComment && !popupComments && startScrollTop > 0) {
-    setStartScrollTop(0)
-  }
-  if ((selection || popupComments) && startScrollTop === 0 && scrollTop > 0) {
-    setStartScrollTop(scrollTop)
   }
 
   const isProperRun = 'inputs' in run
@@ -140,7 +130,7 @@ export default function RunCell({
           setMenuExpanded={() => setPopupComments(undefined)}
           position={{
             // TODO make this smarter so it avoids the edge of the container
-            top: popupPosition.top - containerRect.top + 20 - scrollTop + startScrollTop,
+            top: popupPosition.top - containerRect.top + 20,
             left: Math.max(-10, popupPosition.left - containerRect.left - 200),
           }}
         />
@@ -163,12 +153,7 @@ export default function RunCell({
         />
       )}
       {selection && version && !popupComments && (
-        <RunCellCommentInputPopup
-          selection={selection}
-          onClose={closeInputPopup}
-          onUpdateSelectionForComment={updateSelectionForComment}
-          scrollTop={scrollTop - startScrollTop}
-        />
+        <RunCellCommentInputPopup selection={selection} onUpdateSelectionForComment={updateSelectionForComment} />
       )}
       <RunCellFooter run={run} />
     </div>
