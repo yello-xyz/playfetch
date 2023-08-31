@@ -48,17 +48,7 @@ export default function ChainEditor({
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
       <CustomHeader>
         <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-        <div className='flex items-center whitespace-nowrap'>
-          <HeaderItem className='flex items-center gap-1'>
-            <Icon icon={chainIcon} />
-            {chain.name}
-          </HeaderItem>
-          {saveItems ? (
-            <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
-          ) : (
-            <span className='leading-6 text-gray-400'>Version {versionIndex + 1}</span>
-          )}
-        </div>
+        <VersionHeaderItem chainName={chain.name} versionIndex={saveItems ? undefined : versionIndex} />
         <SaveVersionButton saveItems={saveItems} />
       </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
@@ -91,6 +81,22 @@ export default function ChainEditor({
   )
 }
 
+function VersionHeaderItem({ chainName, versionIndex }: { chainName: string; versionIndex?: number }) {
+  return (
+    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden max-h-11'>
+      <div className='flex items-center h-full font-medium select-none whitespace-nowrap'>
+        <Icon icon={chainIcon} className='h-full py-2.5' />
+        {chainName}
+      </div>
+      {versionIndex === undefined ? (
+        <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
+      ) : (
+        <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
+      )}
+    </div>
+  )
+}
+
 function ShowVersionsButton({
   showVersions,
   setShowVersions,
@@ -101,10 +107,10 @@ function ShowVersionsButton({
   const activeClass = setShowVersions ? 'cursor-pointer' : 'opacity-0'
   return (
     <div
-      className={`flex items-center flex-wrap overflow-hidden h-full px-1.5 ${activeClass}`}
+      className={`flex flex-wrap items-center h-full overflow-hidden px-1.5 ${activeClass}`}
       onClick={() => setShowVersions?.(!showVersions)}>
       <Icon icon={historyIcon} className='h-full' />
-      <span className='-mb-px'>{showVersions ? 'Hide versions' : 'Show versions'}</span>
+      <span className='-mb-px whitespace-nowrap'>{showVersions ? 'Hide versions' : 'Show versions'}</span>
     </div>
   )
 }
@@ -116,7 +122,7 @@ function SaveVersionButton({ saveItems }: { saveItems?: () => void }) {
       className={`flex items-center justify-end flex-wrap overflow-hidden h-full px-1.5 ${activeClass}`}
       onClick={saveItems}>
       <Icon icon={saveIcon} className='h-full' />
-      <span className='-mb-px'>Save version</span>
+      <span className='-mb-px whitespace-nowrap'>Save version</span>
     </div>
   )
 }
