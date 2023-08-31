@@ -138,7 +138,7 @@ export default function RunCell({
           labelColors={AvailableLabelColorsForItem(activeItem)}
           isMenuExpanded={true}
           setMenuExpanded={() => setPopupComments(undefined)}
-          callback={closeCommentsPopup}
+          callback={comment => setPopupComments([...popupComments, comment])}
           position={{
             // TODO make this smarter so it avoids the edge of the container
             top: popupPosition.top - containerRect.top + 20 - scrollTop + startScrollTop,

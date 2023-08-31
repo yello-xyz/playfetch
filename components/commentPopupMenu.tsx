@@ -85,7 +85,7 @@ export function CommentsPopup({
   labelColors: Record<string, string>
   isMenuExpanded: boolean
   setMenuExpanded: (expanded: boolean) => void
-  callback?: () => void
+  callback?: (comment: Comment) => void
   position: { top?: number; left?: number; right?: number; bottom?: number }
 }) {
   const haveComments = comments.length > 0
@@ -139,7 +139,7 @@ function CommentInput({
   runID?: number
   startIndex?: number
   focus?: boolean
-  callback?: () => void
+  callback?: (comment: Comment) => void
 }) {
   const [newComment, setNewComment] = useState('')
   const trimmedComment = newComment.trim()
@@ -152,8 +152,10 @@ function CommentInput({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(versionID, trimmedComment, selection, runID, startIndex).then(_ => refreshActiveItem())
-      callback?.()
+      api.addComment(versionID, trimmedComment, selection, runID, startIndex).then(comment => {
+        refreshActiveItem()
+        callback?.(comment)
+      })
     }
   }
 

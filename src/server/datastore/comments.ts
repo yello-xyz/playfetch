@@ -36,7 +36,7 @@ export async function saveComment(
   await ensurePromptOrChainAccess(userID, parentID)
   const commentData = toCommentData(userID, parentID, versionID, text, new Date(), action, quote, runID, startIndex)
   await getDatastore().save(commentData)
-  return toComment(commentData)
+  return toComment(commentData.data)
 }
 
 const toCommentData = (
