@@ -137,7 +137,6 @@ async function saveVersionForUser(
 
   const versionID = canOverwrite ? currentVersionID : undefined
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
-  const createdAt = canOverwrite ? currentVersion.createdAt : new Date()
   const didRun = canOverwrite ? currentVersion.didRun : false
   const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
 
@@ -148,7 +147,7 @@ async function saveVersionForUser(
     config,
     items,
     labels,
-    createdAt,
+    new Date(),
     didRun,
     previousVersionID,
     versionID
