@@ -3,7 +3,7 @@ import DropdownMenu from './dropdownMenu'
 import { useState } from 'react'
 import { VersionLabels } from './versionCell'
 
-export default function VersionSelector<T extends PromptVersion | ChainVersion>({
+export default function VersionSelector<Version extends PromptVersion | ChainVersion>({
   versions,
   endpoints,
   activeVersion,
@@ -14,10 +14,10 @@ export default function VersionSelector<T extends PromptVersion | ChainVersion>(
   hideReferences,
   disabled,
 }: {
-  versions: T[]
+  versions: Version[]
   endpoints: ResolvedEndpoint[]
-  activeVersion?: T
-  setActiveVersion: (version: T) => void
+  activeVersion?: Version
+  setActiveVersion: (version: Version) => void
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
   hideLabels?: boolean

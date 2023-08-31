@@ -95,12 +95,12 @@ export default function VersionCell({
   )
 }
 
-export function VersionLabels<T extends PromptVersion | ChainVersion>({
+export function VersionLabels<Version extends PromptVersion | ChainVersion>({
   version,
   colors,
   hideReferences,
 }: {
-  version: T
+  version: Version
   colors: Record<string, string>
   hideReferences?: boolean
 }) {

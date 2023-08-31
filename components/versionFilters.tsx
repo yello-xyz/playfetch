@@ -1,4 +1,4 @@
-import { User, PromptVersion } from '@/types'
+import { User, PromptVersion, ChainVersion, IsPromptVersion } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import filterIcon from '@/public/filter.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -24,21 +24,24 @@ const isTextFilter = (filter: VersionFilter): filter is TextFilter => 'text' in 
 const userIDsFromFilters = (filters: VersionFilter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
 const labelsFromFilters = (filters: VersionFilter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
 
-export const BuildVersionFilter = (filters: VersionFilter[]) => (version: PromptVersion) => {
-  const userIDs = userIDsFromFilters(filters)
-  const userFilter = (version: PromptVersion) => !userIDs.length || userIDs.includes(version.userID)
+export const BuildVersionFilter =
+  <Version extends PromptVersion | ChainVersion>(filters: VersionFilter[]) =>
+  (version: Version) => {
+    const userIDs = userIDsFromFilters(filters)
+    const userFilter = (version: Version) => !userIDs.length || userIDs.includes(version.userID)
 
-  const labels = labelsFromFilters(filters)
-  const labelFilter = (version: PromptVersion) => !labels.length || version.labels.some(label => labels.includes(label))
+    const labels = labelsFromFilters(filters)
+    const labelFilter = (version: Version) => !labels.length || version.labels.some(label => labels.includes(label))
 
-  const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
-  const textFilter = (version: PromptVersion) =>
-    !textStrings.length || textStrings.every(filter => version.prompt.toLowerCase().includes(filter))
+    const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
+    const textFilter = (version: Version) =>
+      !textStrings.length ||
+      textStrings.every(filter => IsPromptVersion(version) && version.prompt.toLowerCase().includes(filter))
 
-  return userFilter(version) && labelFilter(version) && textFilter(version)
-}
+    return userFilter(version) && labelFilter(version) && textFilter(version)
+  }
 
-export default function VersionFilters({
+export default function VersionFilters<Version extends PromptVersion | ChainVersion>({
   users,
   labelColors,
   versions,
@@ -48,7 +51,7 @@ export default function VersionFilters({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: PromptVersion[]
+  versions: Version[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
   tabSelector: (children?: ReactNode) => ReactNode
@@ -128,7 +131,7 @@ const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }
   ) : null
 }
 
-function FilterButton({
+function FilterButton<Version extends PromptVersion | ChainVersion>({
   users,
   labelColors,
   versions,
@@ -137,7 +140,7 @@ function FilterButton({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: PromptVersion[]
+  versions: Version[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
 }) {
