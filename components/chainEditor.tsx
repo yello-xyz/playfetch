@@ -7,6 +7,7 @@ import VersionSelector from './versionSelector'
 import Icon from './icon'
 import chainIcon from '@/public/chain.svg'
 import saveIcon from '@/public/save.svg'
+import historyIcon from '@/public/history.svg'
 
 export default function ChainEditor({
   chain,
@@ -19,6 +20,8 @@ export default function ChainEditor({
   activeIndex,
   setActiveIndex,
   prompts,
+  showVersions,
+  setShowVersions,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -30,6 +33,8 @@ export default function ChainEditor({
   activeIndex: number
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
+  showVersions: boolean
+  setShowVersions: (show: boolean) => void
 }) {
   const removeItem = () => setNodes([...nodes.slice(0, activeIndex), ...nodes.slice(activeIndex + 1)])
   const insertItem = (item: ChainItem) => setNodes([...nodes.slice(0, activeIndex), item, ...nodes.slice(activeIndex)])
@@ -42,7 +47,7 @@ export default function ChainEditor({
   return (
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
       <CustomHeader>
-        <div className='min-w-[25%]' />
+        <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
         <div className='flex items-center whitespace-nowrap'>
           <HeaderItem className='flex items-center gap-1'>
             <Icon icon={chainIcon} />
@@ -93,6 +98,24 @@ export default function ChainEditor({
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+function ShowVersionsButton({
+  showVersions,
+  setShowVersions,
+}: {
+  showVersions: boolean
+  setShowVersions?: (show: boolean) => void
+}) {
+  const activeClass = setShowVersions ? 'cursor-pointer' : 'opacity-0'
+  return (
+    <div
+      className={`flex items-center flex-wrap overflow-hidden h-full px-1.5 ${activeClass}`}
+      onClick={() => setShowVersions?.(!showVersions)}>
+      <Icon icon={historyIcon} className='h-full' />
+      <span className='-mb-px'>{showVersions ? 'Hide versions' : 'Show versions'}</span>
     </div>
   )
 }

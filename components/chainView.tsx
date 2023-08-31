@@ -18,6 +18,10 @@ import { Allotment } from 'allotment'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
+import VersionTimeline from './versionTimeline'
+import { SingleTabHeader } from './tabSelector'
+import IconButton from './iconButton'
+import closeIcon from '@/public/close.svg'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -68,7 +72,6 @@ export default function ChainView({
       }),
     [nodes, project]
   )
-
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
   const promptCache: PromptCache = {
@@ -162,6 +165,7 @@ export default function ChainView({
       savePrompt().then(_ => promptCache.refreshPrompt(activePrompt.id))
     }
     setActiveNodeIndex(index)
+    setShowVersions(false)
   }
 
   const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
@@ -179,11 +183,30 @@ export default function ChainView({
     return versionID!
   }
 
+  const [showVersions, setShowVersions] = useState(false)
+
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
 
-  const minWidth = 280
+  const minWidth = 300
   return (
     <Allotment>
+      {showVersions && (
+        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
+          <div className='h-full'>
+            <VersionTimeline
+              activeItem={chain}
+              versions={chain.versions}
+              activeVersion={activeVersion}
+              setActiveVersion={setActiveVersion}
+              tabSelector={() => (
+                <SingleTabHeader label='Version history'>
+                  <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
+                </SingleTabHeader>
+              )}
+            />
+          </div>
+        </Allotment.Pane>
+      )}
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
         <ChainEditor
           chain={chain}
@@ -196,24 +219,28 @@ export default function ChainView({
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
+          showVersions={showVersions}
+          setShowVersions={setShowVersions}
         />
       </Allotment.Pane>
-      <Allotment.Pane minSize={minWidth}>
-        <ChainNodeEditor
-          chain={chain}
-          activeVersion={activeVersion}
-          items={items}
-          setItems={updateItems}
-          activeItemIndex={activeNodeIndex - 1}
-          activeNode={activeNode}
-          promptCache={promptCache}
-          prepareForRunning={prepareForRunning}
-          savePrompt={() => savePrompt().then(versionID => versionID!)}
-          selectVersion={selectVersion}
-          setModifiedVersion={setModifiedVersion}
-          activeRunID={activeRunID}
-        />
-      </Allotment.Pane>
+      {!showVersions && (
+        <Allotment.Pane minSize={minWidth}>
+          <ChainNodeEditor
+            chain={chain}
+            activeVersion={activeVersion}
+            items={items}
+            setItems={updateItems}
+            activeItemIndex={activeNodeIndex - 1}
+            activeNode={activeNode}
+            promptCache={promptCache}
+            prepareForRunning={prepareForRunning}
+            savePrompt={() => savePrompt().then(versionID => versionID!)}
+            selectVersion={selectVersion}
+            setModifiedVersion={setModifiedVersion}
+            activeRunID={activeRunID}
+          />
+        </Allotment.Pane>
+      )}
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane
           activeItem={chain}
