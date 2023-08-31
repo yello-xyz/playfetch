@@ -18,7 +18,7 @@ export default function GlobalPopup(props: any) {
   return render ? (
     <div ref={parentRef} onClick={onDismiss} className='fixed inset-0 z-30 w-full h-full text-sm'>
       <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute' style={adjustedLocation}>
-        {render(other)}
+        {render({ ...other, onDismiss })}
       </div>
     </div>
   ) : null

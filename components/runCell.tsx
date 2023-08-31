@@ -115,7 +115,7 @@ export default function RunCell({
 
   return (
     <div className={`${baseClass} ${colorClass}`}>
-      <RunCellHeader run={run} activeItem={activeItem} containerRect={containerRect} />
+      <RunCellHeader run={run} activeItem={activeItem} />
       <RunCellBody
         identifier={identifier}
         output={run.output}

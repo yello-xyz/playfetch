@@ -84,7 +84,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
               users={activeItem.users}
               labelColors={labelColors}
             />
-            <LabelPopupMenu containerRect={containerRect} activeItem={activeItem} item={version} />
+            <LabelPopupMenu activeItem={activeItem} item={version} />
             <VersionPopupMenu containerRect={containerRect} version={version} />
           </div>
         </div>
