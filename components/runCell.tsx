@@ -138,7 +138,6 @@ export default function RunCell({
           labelColors={AvailableLabelColorsForItem(activeItem)}
           isMenuExpanded={true}
           setMenuExpanded={() => setPopupComments(undefined)}
-          callback={comment => setPopupComments([...popupComments, comment])}
           position={{
             // TODO make this smarter so it avoids the edge of the container
             top: popupPosition.top - containerRect.top + 20 - scrollTop + startScrollTop,
@@ -157,7 +156,6 @@ export default function RunCell({
           labelColors={AvailableLabelColorsForItem(activeItem)}
           isMenuExpanded={true}
           setMenuExpanded={() => setSelectionForComment(undefined)}
-          callback={comment => setSelectionComments([...selectionComments, comment])}
           position={{
             top: selectionForComment.popupPoint.y,
             left: Math.max(10, selectionForComment.popupPoint.x - 160),

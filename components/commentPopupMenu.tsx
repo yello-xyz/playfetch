@@ -11,6 +11,7 @@ import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function CommentPopupMenu({
   comments,
@@ -73,7 +74,6 @@ export function CommentsPopup({
   labelColors,
   isMenuExpanded,
   setMenuExpanded,
-  callback,
   position,
 }: {
   comments: Comment[]
@@ -85,10 +85,11 @@ export function CommentsPopup({
   labelColors: Record<string, string>
   isMenuExpanded: boolean
   setMenuExpanded: (expanded: boolean) => void
-  callback?: (comment: Comment) => void
   position: { top?: number; left?: number; right?: number; bottom?: number }
 }) {
   const haveComments = comments.length > 0
+
+  const [allComments, setAllComments] = useInitialState(comments, (a, b) => JSON.stringify(a) === JSON.stringify(b))
 
   return (
     <>
@@ -101,7 +102,7 @@ export function CommentsPopup({
           <div className={`flex flex-col gap-2 w-80 ${haveComments ? 'p-3' : 'px-2 py-1'}`}>
             {haveComments && (
               <div className='flex flex-col gap-2 overflow-y-auto max-h-60'>
-                {comments.map((comment, index) => (
+                {allComments.map((comment, index) => (
                   <CommentCell
                     comment={comment}
                     user={users.find(user => user.id === comment.userID)!}
@@ -116,7 +117,7 @@ export function CommentsPopup({
               selection={selection}
               runID={runID}
               startIndex={startIndex}
-              callback={callback}
+              callback={comment => setAllComments([...allComments, comment])}
               focus={!haveComments}
             />
           </div>
