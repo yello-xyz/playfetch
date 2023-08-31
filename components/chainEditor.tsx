@@ -51,15 +51,10 @@ export default function ChainEditor({
           {saveItems ? (
             <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
           ) : (
-            <span className='text-gray-400'>Version {versionIndex + 1}</span>
+            <span className='leading-6 text-gray-400'>Version {versionIndex + 1}</span>
           )}
         </div>
-        <div
-          className={`flex items-center gap-1 px-1.5 whitespace-nowrap ${saveItems ? 'cursor-pointer' : 'opacity-50'}`}
-          onClick={saveItems}>
-          <Icon icon={saveIcon} />
-          Save version
-        </div>
+        <SaveVersionButton saveItems={saveItems} />
       </CustomHeader>
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
@@ -98,6 +93,18 @@ export default function ChainEditor({
           </>
         )}
       </div>
+    </div>
+  )
+}
+
+function SaveVersionButton({ saveItems }: { saveItems?: () => void }) {
+  const activeClass = saveItems ? 'cursor-pointer' : 'opacity-50'
+  return (
+    <div
+      className={`flex items-center justify-end flex-wrap overflow-hidden h-full px-1.5 ${activeClass}`}
+      onClick={saveItems}>
+      <Icon icon={saveIcon} className='h-full' />
+      <span className='-mb-px'>Save version</span>
     </div>
   )
 }
