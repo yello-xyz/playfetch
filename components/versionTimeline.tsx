@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
@@ -31,14 +31,14 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   const [, forceStateUpdate] = useState(0)
   useScrollDetection(forceStateUpdate, scrollRef)
 
-  const identifierForVersion = (version: Version) => `v${version.id}`
+  const identifierForVersion = useCallback((version: Version) => `v${version.id}`, [])
 
   useEffect(() => {
     const element = document.getElementById(identifierForVersion(activeVersion))
     if (element) {
       setTimeout(() => element.scrollIntoView({ behavior: 'auto', block: 'start' }), 100)
     }
-  }, [activeVersion])
+  }, [activeVersion, identifierForVersion])
 
   const selectVersion = (version: Version) => {
     setActiveVersion(version)

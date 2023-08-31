@@ -129,7 +129,7 @@ export default function PromptInput({
         setPopup(undefined)
       }
     },
-    [setPopup, setPopupProps, setPopupLocation, toggleInput]
+    [setPopup, setPopupProps, setPopupLocation, toggleInput, lastSelection]
   )
 
   useEffect(() => {
