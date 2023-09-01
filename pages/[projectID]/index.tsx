@@ -31,12 +31,11 @@ import ProjectTopBar from '@/components/projectTopBar'
 import dynamic from 'next/dynamic'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
-import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/src/client/context/globalPopupContext'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
-import { useContainerRect } from '@/src/client/hooks/useContainerRect'
 const PromptView = dynamic(() => import('@/components/promptView'))
 const ChainView = dynamic(() => import('@/components/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpointsView'))
@@ -214,23 +213,14 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
-  const [popupProps, setPopupProps] = useState<any>()
-  const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
-  const [parentRect, parentRef] = useContainerRect()
-  const [childRect, childRef] = useContainerRect()
+  const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider()
 
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
         <RefreshContext.Provider value={{ refreshActiveItem }}>
           <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-            <GlobalPopupContext.Provider
-              value={{
-                setPopupRender: render => setPopupRender(() => render),
-                setPopupProps,
-                setPopupLocation,
-              }}>
+            <GlobalPopupContext.Provider value={globalPopupProviderProps}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar
                   workspaces={workspaces}
@@ -294,20 +284,7 @@ export default function Home({
               </main>
             </GlobalPopupContext.Provider>
           </ModalDialogContext.Provider>
-          <GlobalPopup
-            {...popupProps}
-            location={popupLocation}
-            onDismissGlobalPopup={() => {
-              setPopupRender(undefined)
-              setPopupProps(undefined)
-              setPopupLocation({})
-            }}
-            render={popupRender}
-            parentRef={parentRef}
-            parentRect={parentRect}
-            childRef={childRef}
-            childRect={childRect}
-          />
+          <GlobalPopup {...globalPopupProps} {...popupProps} />
           <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
         </RefreshContext.Provider>
       </UserContext.Provider>

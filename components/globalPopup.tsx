@@ -1,7 +1,9 @@
-export default function GlobalPopup(props: any) {
+import { GlobalPopupLocation, GlobalPopupProps } from '@/src/client/context/globalPopupContext'
+
+export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
   const { render, location, onDismissGlobalPopup, parentRef, parentRect, childRect, childRef, ...other } = props
 
-  const position = { left: undefined, top: undefined, right: undefined, bottom: undefined, ...location }
+  const position: GlobalPopupLocation = { ...location }
   if (parentRect && childRect) {
     if (position.right !== undefined) {
       position.right = parentRect.width - position.right
@@ -17,7 +19,7 @@ export default function GlobalPopup(props: any) {
         position.left = parentRect.width - childRect.width
       }
     }
-    if (position.botton !== undefined) {
+    if (position.bottom !== undefined) {
       position.bottom = parentRect.height - position.bottom
       if (position.bottom < 0) {
         position.bottom = 0
