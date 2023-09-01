@@ -158,8 +158,8 @@ export default function Home({
     }
   }
 
-  const refresh = () => {
-    refreshActiveItem()
+  const refresh = (versionID?: number) => {
+    refreshActiveItem(versionID)
     if (activeItem !== Endpoints) {
       refreshProject()
     }
@@ -239,7 +239,7 @@ export default function Home({
                     onAddPrompt={addPrompt}
                     onAddChain={addChain}
                     onDeleteItem={onDeleteItem}
-                    onRefreshItem={refresh}
+                    onRefreshItem={() => refresh()}
                     onSelectPrompt={selectPrompt}
                     onSelectChain={selectChain}
                     onSelectEndpoints={selectEndpoints}
