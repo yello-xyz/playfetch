@@ -47,7 +47,7 @@ export default function CommentPopupMenu({
       users,
       labelColors,
     })
-    setPopupLocation({ left: (iconRect?.right ?? 0) - 320, top: iconRect?.bottom })
+    setPopupLocation({ right: iconRect?.right, top: iconRect?.bottom })
   }
 
   return (

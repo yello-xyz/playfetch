@@ -41,7 +41,7 @@ export default function LabelPopupMenu({
     const iconRect = iconRef.current?.getBoundingClientRect()
     setPopup(LabelsPopup)
     setPopupProps({ item, activeItem, refreshActiveItem, newLabel, setNewLabel })
-    setPopupLocation({ left: (iconRect?.right ?? 0) - 320, top: iconRect?.bottom })
+    setPopupLocation({ right: iconRect?.right, top: iconRect?.bottom })
   }
 
   return (

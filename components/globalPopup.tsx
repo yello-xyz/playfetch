@@ -1,23 +1,41 @@
 export default function GlobalPopup(props: any) {
   const { render, location, onDismiss, parentRef, parentRect, childRect, childRef, ...other } = props
 
-  const adjustedLocation = { left: undefined, top: undefined, right: undefined, bottom: undefined, ...location }
+  const position = { left: undefined, top: undefined, right: undefined, bottom: undefined, ...location }
   if (parentRect && childRect) {
-    if (location.left < 0) {
-      adjustedLocation.left = 0
-    } else if (location.left && location.left + childRect.width > parentRect.width) {
-      adjustedLocation.left = parentRect.width - childRect.width
+    if (position.right !== undefined) {
+      position.right = parentRect.width - position.right
+      if (position.right < 0) {
+        position.right = 0
+      } else if (position.right - childRect.width < 0) {
+        position.right = parentRect.width - childRect.width
+      }
+    } else if (position.left !== undefined) {
+      if (position.left < 0) {
+        position.left = 0
+      } else if (position.left + childRect.width > parentRect.width) {
+        position.left = parentRect.width - childRect.width
+      }
     }
-    if (location.top < 0) {
-      adjustedLocation.top = 0
-    } else if (location.top && location.top + childRect.height > parentRect.height) {
-      adjustedLocation.top = parentRect.height - childRect.height
+    if (position.botton !== undefined) {
+      position.bottom = parentRect.height - position.bottom
+      if (position.bottom < 0) {
+        position.bottom = 0
+      } else if (position.bottom - childRect.height < 0) {
+        position.bottom = parentRect.height - childRect.height
+      }
+    } else if (position.top !== undefined) {
+      if (position.top < 0) {
+        position.top = 0
+      } else if (position.top + childRect.height > parentRect.height) {
+        position.top = parentRect.height - childRect.height
+      }
     }
   }
 
   return render ? (
     <div ref={parentRef} onClick={onDismiss} className='fixed inset-0 z-30 w-full h-full text-sm'>
-      <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute' style={adjustedLocation}>
+      <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute' style={position}>
         {render({ ...other, onDismiss })}
       </div>
     </div>

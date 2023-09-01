@@ -45,7 +45,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     const iconRect = iconRef.current?.getBoundingClientRect()
     setPopup(VersionPopup)
     setPopupProps({ deleteVersion })
-    setPopupLocation({ left: (iconRect?.right ?? 0) - 160, top: iconRect?.bottom })
+    setPopupLocation({ right: iconRect?.right, top: iconRect?.bottom })
   }
 
   return (
