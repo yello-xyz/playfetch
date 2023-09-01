@@ -1,5 +1,5 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
-import { MouseEvent, useEffect } from 'react'
+import { MouseEvent, useCallback, useEffect } from 'react'
 import { CommentsPopup, CommentsPopupProps } from './commentPopupMenu'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
@@ -48,14 +48,6 @@ export default function RunCell({
 
   const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
 
-  const updateSelection = (selection?: Selection) => {
-    if (selection && version) {
-      setPopup(props => CommentInputPopup(props as CommentInputProps))
-      setPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
-      setPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
-    }
-  }
-
   const selectComment = (event: MouseEvent, startIndex: number) => {
     if (version && activeItem) {
       const popupComments = comments.filter(comment => comment.startIndex === startIndex)
@@ -73,15 +65,6 @@ export default function RunCell({
     }
   }
 
-  const isProperRun = 'inputs' in run
-  useEffect(() => {
-    const selectionChangeHandler = () => isProperRun && updateSelection(extractSelection(identifier))
-    document.addEventListener('selectionchange', selectionChangeHandler)
-    return () => {
-      document.removeEventListener('selectionchange', selectionChangeHandler)
-    }
-  }, [isProperRun, identifier])
-
   const selectionRanges = comments
     .filter(comment => comment.startIndex !== undefined && comment.quote)
     .map(comment => ({
@@ -89,7 +72,7 @@ export default function RunCell({
       endIndex: comment.startIndex! + comment.quote!.length,
     }))
 
-  const updateSelectionForComment = (selection?: Selection) => {
+  const updateSelectionForComment = useCallback((selection?: Selection) => {
     if (selection && version && activeItem) {
       let selectionForComment = selection
       const start = selection.startIndex
@@ -114,7 +97,24 @@ export default function RunCell({
       })
       setPopupLocation({ left: selectionForComment.popupPoint.x - 160, top: selectionForComment.popupPoint.y })
     }
-  }
+  }, [activeItem, version, comments, run, selectionRanges, setPopup, setPopupProps, setPopupLocation])
+
+  const updateSelection = useCallback((selection?: Selection) => {
+    if (selection && version) {
+      setPopup(props => CommentInputPopup(props as CommentInputProps))
+      setPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
+      setPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
+    }
+  }, [version, setPopup, setPopupProps, setPopupLocation, updateSelectionForComment])
+
+  const isProperRun = 'inputs' in run
+  useEffect(() => {
+    const selectionChangeHandler = () => isProperRun && updateSelection(extractSelection(identifier))
+    document.addEventListener('selectionchange', selectionChangeHandler)
+    return () => {
+      document.removeEventListener('selectionchange', selectionChangeHandler)
+    }
+  }, [isProperRun, identifier, updateSelection])
 
   const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
