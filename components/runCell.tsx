@@ -37,13 +37,13 @@ const extractSelection = (identifier: string) => {
   const precedingSpans = spans.slice(0, spans.indexOf(selectionElement))
   const spanOffset = precedingSpans.reduce((len, node) => len + (node.textContent?.length ?? 0), 0)
   const range = selection.getRangeAt(0)
-  
+
   const selectionRect = range.getBoundingClientRect()
   const popupPoint = {
     x: selectionRect.left + selectionRect.width / 2,
     y: selectionRect.top - 42,
   }
-  
+
   return { text, popupPoint, startIndex: range.startOffset + spanOffset }
 }
 
@@ -60,22 +60,24 @@ export default function RunCell({
 }) {
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
 
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
+  const setPopup = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
 
   const selectComment = (event: MouseEvent, startIndex: number) => {
     if (version && activeItem) {
       const popupComments = comments.filter(comment => comment.startIndex === startIndex)
-      setPopup(props => CommentsPopup(props as CommentsPopupProps))
-      setPopupProps({
-        comments: popupComments,
-        versionID: version.id,
-        selection: popupComments[0].quote,
-        runID: run.id,
-        startIndex,
-        users: activeItem.users,
-        labelColors: AvailableLabelColorsForItem(activeItem),
-      })
-      setPopupLocation({ left: event.clientX - 200, top: event.clientY + 20 })
+      setPopup(
+        props => CommentsPopup(props as CommentsPopupProps),
+        {
+          comments: popupComments,
+          versionID: version.id,
+          selection: popupComments[0].quote,
+          runID: run.id,
+          startIndex,
+          users: activeItem.users,
+          labelColors: AvailableLabelColorsForItem(activeItem),
+        },
+        { left: event.clientX - 200, top: event.clientY + 20 }
+      )
     }
   }
 
@@ -101,30 +103,34 @@ export default function RunCell({
           selectionForComment = { ...selection, startIndex: existingRange.startIndex, text }
         }
         const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment.startIndex)
-        setPopup(props => CommentsPopup(props as CommentsPopupProps))
-        setPopupProps({
-          comments: selectionComments,
-          versionID: version.id,
-          selection: selectionForComment.text,
-          runID: run.id,
-          startIndex: selectionForComment.startIndex,
-          users: activeItem.users,
-          labelColors: AvailableLabelColorsForItem(activeItem),
-        })
-        setPopupLocation({ left: selectionForComment.popupPoint.x - 160, top: selectionForComment.popupPoint.y })
+        setPopup(
+          props => CommentsPopup(props as CommentsPopupProps),
+          {
+            comments: selectionComments,
+            versionID: version.id,
+            selection: selectionForComment.text,
+            runID: run.id,
+            startIndex: selectionForComment.startIndex,
+            users: activeItem.users,
+            labelColors: AvailableLabelColorsForItem(activeItem),
+          },
+          { left: selectionForComment.popupPoint.x - 160, top: selectionForComment.popupPoint.y }
+        )
       }
     },
-    [activeItem, version, comments, run, selectionRanges, setPopup, setPopupProps, setPopupLocation]
+    [activeItem, version, comments, run, selectionRanges, setPopup]
   )
 
   const [selection, setSelection] = useState<Selection | undefined>(undefined)
   const updateSelection = useCallback(() => {
     if (selection && version) {
-      setPopup(props => CommentInputPopup(props as CommentInputProps))
-      setPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
-      setPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
+      setPopup(
+        props => CommentInputPopup(props as CommentInputProps),
+        { selection, onUpdateSelectionForComment: updateSelectionForComment },
+        { left: selection.popupPoint.x, top: selection.popupPoint.y }
+      )
     }
-  }, [selection, version, setPopup, setPopupProps, setPopupLocation, updateSelectionForComment])
+  }, [selection, version, setPopup, updateSelectionForComment])
 
   const isProperRun = 'inputs' in run
   useEffect(() => {

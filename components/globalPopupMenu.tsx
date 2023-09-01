@@ -12,14 +12,12 @@ export default function GlobalPopupMenu<T>({
 }) {
   const iconRef = useRef<HTMLDivElement>(null)
 
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<T>()
+  const setPopup = useGlobalPopup<T>()
 
   const togglePopup = () => {
     const iconRect = iconRef.current?.getBoundingClientRect()
     const [Popup, props] = loadPopup()
-    setPopup(Popup)
-    setPopupProps(props)
-    setPopupLocation({ right: iconRect?.right, top: iconRect?.bottom })
+    setPopup(Popup, props, { right: iconRect?.right, top: iconRect?.bottom })
   }
 
   return (

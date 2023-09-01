@@ -213,7 +213,7 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider()
+  const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
   return (
     <>

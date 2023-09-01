@@ -115,21 +115,23 @@ export default function PromptInput({
     [value, setValue]
   )
 
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<VariablePopupProps>()
+  const setPopup = useGlobalPopup<VariablePopupProps>()
 
   const [lastSelection, setLastSelection] = useState<Selection | undefined>(undefined)
   const updateSelection = useCallback(
     (selection?: Selection) => {
       setLastSelection(selection)
       if (selection) {
-        setPopup(VariablePopup)
-        setPopupProps({ selection, toggleInput })
-        setPopupLocation({ top: selection.popupPoint.y, left: selection.popupPoint.x })
+        setPopup(
+          VariablePopup,
+          { selection, toggleInput },
+          { top: selection.popupPoint.y, left: selection.popupPoint.x }
+        )
       } else if (lastSelection) {
-        setPopup(undefined)
+        setPopup(undefined, undefined, {})
       }
     },
-    [setPopup, setPopupProps, setPopupLocation, toggleInput, lastSelection]
+    [setPopup, toggleInput, lastSelection]
   )
 
   useEffect(() => {
