@@ -16,8 +16,9 @@ const extractSelection = (identifier: string) => {
   if (selection) {
     const selectionElement = selection?.anchorNode?.parentElement
     const containerElement = selectionElement?.parentElement
+    const endContainer = selection?.focusNode?.parentElement?.parentElement
     const text = selection.toString().trim()
-    if (containerElement?.id === identifier && selectionElement && text.length > 0) {
+    if (containerElement?.id === identifier && endContainer?.id === identifier && selectionElement && text.length > 0) {
       const spans = [...containerElement.children]
       const precedingSpans = spans.slice(0, spans.indexOf(selectionElement))
       const spanOffset = precedingSpans.reduce((len, node) => len + (node.textContent?.length ?? 0), 0)
@@ -72,32 +73,36 @@ export default function RunCell({
       endIndex: comment.startIndex! + comment.quote!.length,
     }))
 
-  const updateSelectionForComment = useCallback((selection?: Selection) => {
-    if (selection && version && activeItem) {
-      let selectionForComment = selection
-      const start = selection.startIndex
-      const end = start + selection.text.length
-      const existingRange = selectionRanges.find(
-        ({ startIndex, endIndex }) => (start >= startIndex && start < endIndex) || (end > startIndex && end <= endIndex)
-      )
-      if (existingRange) {
-        const text = run.output.substring(existingRange.startIndex, existingRange.endIndex)
-        selectionForComment = { ...selection, startIndex: existingRange.startIndex, text }
+  const updateSelectionForComment = useCallback(
+    (selection?: Selection) => {
+      if (selection && version && activeItem) {
+        let selectionForComment = selection
+        const start = selection.startIndex
+        const end = start + selection.text.length
+        const existingRange = selectionRanges.find(
+          ({ startIndex, endIndex }) =>
+            (start >= startIndex && start < endIndex) || (end > startIndex && end <= endIndex)
+        )
+        if (existingRange) {
+          const text = run.output.substring(existingRange.startIndex, existingRange.endIndex)
+          selectionForComment = { ...selection, startIndex: existingRange.startIndex, text }
+        }
+        const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment.startIndex)
+        setPopup(props => CommentsPopup(props as CommentsPopupProps))
+        setPopupProps({
+          comments: selectionComments,
+          versionID: version.id,
+          selection: selectionForComment.text,
+          runID: run.id,
+          startIndex: selectionForComment.startIndex,
+          users: activeItem.users,
+          labelColors: AvailableLabelColorsForItem(activeItem),
+        })
+        setPopupLocation({ left: selectionForComment.popupPoint.x - 160, top: selectionForComment.popupPoint.y })
       }
-      const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment.startIndex)
-      setPopup(props => CommentsPopup(props as CommentsPopupProps))
-      setPopupProps({
-        comments: selectionComments,
-        versionID: version.id,
-        selection: selectionForComment.text,
-        runID: run.id,
-        startIndex: selectionForComment.startIndex,
-        users: activeItem.users,
-        labelColors: AvailableLabelColorsForItem(activeItem),
-      })
-      setPopupLocation({ left: selectionForComment.popupPoint.x - 160, top: selectionForComment.popupPoint.y })
-    }
-  }, [activeItem, version, comments, run, selectionRanges, setPopup, setPopupProps, setPopupLocation])
+    },
+    [activeItem, version, comments, run, selectionRanges, setPopup, setPopupProps, setPopupLocation]
+  )
 
   const [selection, setSelection] = useState<Selection | undefined>(undefined)
   const updateSelection = useCallback(() => {
