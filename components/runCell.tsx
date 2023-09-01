@@ -46,22 +46,20 @@ export default function RunCell({
 }) {
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
 
-  const [setInputPopup, setInputPopupProps, setInputPopupLocation] = useGlobalPopup<CommentInputProps>()
+  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
 
   const updateSelection = (selection?: Selection) => {
     if (selection && version) {
-      setInputPopup(CommentInputPopup)
-      setInputPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
-      setInputPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
+      setPopup(props => CommentInputPopup(props as CommentInputProps))
+      setPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
+      setPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
     }
   }
-
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentsPopupProps>()
 
   const selectComment = (event: MouseEvent, startIndex: number) => {
     if (version && activeItem) {
       const popupComments = comments.filter(comment => comment.startIndex === startIndex)
-      setPopup(CommentsPopup)
+      setPopup(props => CommentsPopup(props as CommentsPopupProps))
       setPopupProps({
         comments: popupComments,
         versionID: version.id,
@@ -104,7 +102,7 @@ export default function RunCell({
         selectionForComment = { ...selection, startIndex: existingRange.startIndex, text }
       }
       const selectionComments = comments.filter(comment => comment.startIndex === selectionForComment.startIndex)
-      setPopup(CommentsPopup)
+      setPopup(props => CommentsPopup(props as CommentsPopupProps))
       setPopupProps({
         comments: selectionComments,
         versionID: version.id,
