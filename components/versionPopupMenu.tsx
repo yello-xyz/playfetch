@@ -14,7 +14,6 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   version: Version
 }) {
   const iconRef = useRef<HTMLDivElement>(null)
-  const iconRect = iconRef.current?.getBoundingClientRect()
 
   const refreshActiveItem = useRefreshActiveItem()
 
@@ -43,6 +42,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   }
 
   const togglePopup = () => {
+    const iconRect = iconRef.current?.getBoundingClientRect()
     setPopup(VersionPopup)
     setPopupProps({ deleteVersion })
     setPopupLocation({ left: (iconRect?.right ?? 0) - 160, top: iconRect?.bottom })

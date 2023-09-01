@@ -3,7 +3,6 @@ import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
-import useScrollDetection from '@/src/client/hooks/useScrollDetection'
 
 export const ShouldShowVersions = <Version extends PromptVersion | ChainVersion>(versions: Version[]) =>
   versions.length > 1 || versions[0].runs.length > 0 || (!IsPromptVersion(versions[0]) && versions[0].items.length > 0)
@@ -24,10 +23,6 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
-
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [, forceStateUpdate] = useState(0)
-  useScrollDetection(forceStateUpdate, scrollRef)
 
   const identifierForVersion = useCallback((version: Version) => `v${version.id}`, [])
 
@@ -60,7 +55,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
             setFilters={setFilters}
             tabSelector={tabSelector}
           />
-          <div ref={scrollRef} className='flex flex-col px-4 pb-1.5 pt-3 overflow-y-auto gap-0'>
+          <div className='flex flex-col px-4 pb-1.5 pt-3 overflow-y-auto gap-0'>
             {filteredVersions.map((version, index) => (
               <VersionCell
                 key={index}

@@ -32,13 +32,13 @@ export default function LabelPopupMenu({
   activeItem: ActivePrompt | ActiveChain
 }) {
   const iconRef = useRef<HTMLDivElement>(null)
-  const iconRect = iconRef.current?.getBoundingClientRect()
 
   const refreshActiveItem = useRefreshActiveItem()
   const [newLabel, setNewLabel] = useState('')
   const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<LabelsPopupProps>()
 
   const togglePopup = () => {
+    const iconRect = iconRef.current?.getBoundingClientRect()
     setPopup(LabelsPopup)
     setPopupProps({ item, activeItem, refreshActiveItem, newLabel, setNewLabel })
     setPopupLocation({ left: (iconRect?.right ?? 0) - 320, top: iconRect?.bottom })

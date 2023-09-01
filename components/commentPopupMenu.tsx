@@ -32,11 +32,11 @@ export default function CommentPopupMenu({
   labelColors: Record<string, string>
 }) {
   const iconRef = useRef<HTMLDivElement>(null)
-  const iconRect = iconRef.current?.getBoundingClientRect()
 
   const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentsPopupProps>()
 
   const togglePopup = () => {
+    const iconRect = iconRef.current?.getBoundingClientRect()
     setPopup(CommentsPopup)
     setPopupProps({
       comments,
