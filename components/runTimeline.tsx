@@ -1,6 +1,5 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
 import { useState } from 'react'
-import useContainerRect from '@/src/client/hooks/useContainerRect'
 import RunCell from './runCell'
 import { SingleTabHeader } from './tabSelector'
 
@@ -17,8 +16,6 @@ export default function RunTimeline({
   activeRunID?: number
   isRunning?: boolean
 }) {
-  const [containerRect, containerRef] = useContainerRect()
-
   const identifierForRunID = (runID: number) => `r${runID}`
 
   const focusRun = (focusRunID?: number) => {
@@ -46,7 +43,7 @@ export default function RunTimeline({
   }
 
   return (
-    <div ref={containerRef} className='relative flex flex-col h-full'>
+    <div className='relative flex flex-col h-full'>
       <SingleTabHeader label='Responses' />
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
@@ -57,7 +54,6 @@ export default function RunTimeline({
               run={run}
               version={version}
               activeItem={activeItem}
-              containerRect={containerRect}
             />
           ))}
         </div>

@@ -1,12 +1,13 @@
-import { ActiveChain, ActivePrompt, ChainVersion, Comment, PartialRun, PromptVersion } from '@/types'
-import { MouseEvent, useEffect, useState } from 'react'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
+import { MouseEvent, useEffect } from 'react'
 import { CommentsPopup, CommentsPopupProps } from './commentPopupMenu'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
-import RunCellCommentInputPopup from './runCellCommentInputPopup'
 import RunCellBody from './runCellBody'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import Icon from './icon'
+import commentIcon from '@/public/comment.svg'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -37,16 +38,23 @@ export default function RunCell({
   run,
   version,
   activeItem,
-  containerRect,
 }: {
   identifier: string
   run: PartialRun
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
-  containerRect?: DOMRect
 }) {
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
-  const [selection, setSelection] = useState<Selection>()
+
+  const [setInputPopup, setInputPopupProps, setInputPopupLocation] = useGlobalPopup<CommentInputProps>()
+
+  const updateSelection = (selection?: Selection) => {
+    if (selection && version) {
+      setInputPopup(CommentInputPopup)
+      setInputPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
+      setInputPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
+    }
+  }
 
   const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentsPopupProps>()
 
@@ -69,7 +77,7 @@ export default function RunCell({
 
   const isProperRun = 'inputs' in run
   useEffect(() => {
-    const selectionChangeHandler = () => isProperRun && setSelection(extractSelection(identifier))
+    const selectionChangeHandler = () => isProperRun && updateSelection(extractSelection(identifier))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
@@ -122,14 +130,27 @@ export default function RunCell({
         selectionRanges={selectionRanges}
         onSelectComment={selectComment}
       />
-      {selection && version && containerRect && (
-        <RunCellCommentInputPopup
-          selection={selection}
-          onUpdateSelectionForComment={updateSelectionForComment}
-          containerRect={containerRect}
-        />
-      )}
       <RunCellFooter run={run} />
+    </div>
+  )
+}
+
+type CommentInputProps = {
+  selection: Selection
+  onUpdateSelectionForComment: (selection?: Selection) => void
+}
+
+function CommentInputPopup({ selection, onUpdateSelectionForComment }: CommentInputProps) {
+  return (
+    <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
+      <div className='p-1 bg-white rounded-lg shadow'>
+        <div
+          className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
+          onClick={() => onUpdateSelectionForComment(selection)}>
+          <Icon className='max-w-[24px]' icon={commentIcon} />
+          <div>Comment</div>
+        </div>
+      </div>
     </div>
   )
 }

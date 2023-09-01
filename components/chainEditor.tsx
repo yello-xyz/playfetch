@@ -60,7 +60,7 @@ export default function ChainEditor({
           />
         ))}
       </div>
-      <div className='flex self-start gap-4 p-6'>
+      <div className='flex self-start gap-4 p-4'>
         {activeIndex > 0 && (
           <>
             {prompts.length > 0 && (
