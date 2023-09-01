@@ -1,11 +1,11 @@
 import { OpenAILanguageModel } from '@/types'
-import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
+import { ChatCompletionFunctions, ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from './stream'
 import { encode } from 'gpt-3-encoder'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
   return (prompt: string, temperature: number, maxOutputTokens: number, streamChunks?: (chunk: string) => void) =>
-    tryCompleteChat(apiKey, userID, model, prompt, temperature, maxOutputTokens, undefined, streamChunks)
+    tryCompleteChat(apiKey, userID, model, prompt, temperature, maxOutputTokens, undefined, undefined, streamChunks)
 }
 
 const costForTokensWithModel = (model: OpenAILanguageModel, input: string, output: string) => {
@@ -27,6 +27,7 @@ async function tryCompleteChat(
   temperature: number,
   maxTokens: number,
   system?: string,
+  functions?: ChatCompletionFunctions[],
   streamChunks?: (chunk: string) => void
 ) {
   try {
@@ -42,17 +43,33 @@ async function tryCompleteChat(
         max_tokens: maxTokens,
         user: userID.toString(),
         stream: true,
+        functions,
       },
       { responseType: 'stream', timeout: 30 * 1000 }
     )
 
     let output = ''
     for await (const message of StreamResponseData(response.data)) {
+      let text = ''
+
       const parsed = JSON.parse(message)
-      const text = parsed.choices[0].delta?.content ?? ''
+      const choice = parsed.choices[0]
+      const functionCall = choice.delta?.function_call
+
+      if (functionCall) {
+        if (functionCall.name) {
+          text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
+        }
+        text += functionCall.arguments.replaceAll('\n', '\n    ')
+      } else if (choice.finish_reason === 'function_call') {
+        text = '\n  }\n}\n'
+      } else {
+        text = choice.delta?.content ?? ''
+      }
+
       output += text
       streamChunks?.(text)
-    }
+  }
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
 
