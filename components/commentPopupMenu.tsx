@@ -12,7 +12,7 @@ import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { CommentCell, CommentQuote } from './commentsPane'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import GlobalPopupMenu from './globalPopupMenu'
 
 export default function CommentPopupMenu({
   comments,
@@ -31,30 +31,12 @@ export default function CommentPopupMenu({
   users: User[]
   labelColors: Record<string, string>
 }) {
-  const iconRef = useRef<HTMLDivElement>(null)
+  const loadPopup = (): [typeof CommentsPopup, CommentsPopupProps] => [
+    CommentsPopup,
+    { comments, versionID, selection, runID, startIndex, users, labelColors },
+  ]
 
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<CommentsPopupProps>()
-
-  const togglePopup = () => {
-    const iconRect = iconRef.current?.getBoundingClientRect()
-    setPopup(CommentsPopup)
-    setPopupProps({
-      comments,
-      versionID,
-      selection,
-      runID,
-      startIndex,
-      users,
-      labelColors,
-    })
-    setPopupLocation({ right: iconRect?.right, top: iconRect?.bottom })
-  }
-
-  return (
-    <div ref={iconRef}>
-      <IconButton icon={comments.length > 0 ? commentBadgeIcon : commentIcon} onClick={togglePopup} />
-    </div>
-  )
+  return <GlobalPopupMenu icon={comments.length > 0 ? commentBadgeIcon : commentIcon} loadPopup={loadPopup} />
 }
 
 export type CommentsPopupProps = {

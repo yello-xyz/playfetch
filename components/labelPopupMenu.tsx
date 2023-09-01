@@ -1,14 +1,13 @@
 import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/types'
 import api from '@/src/client/api'
 import { PopupContent } from './popupMenu'
-import IconButton from './iconButton'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import Icon from './icon'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import GlobalPopupMenu from './globalPopupMenu'
 
 const projectLabelColors = [
   'bg-red-300 text-white',
@@ -31,24 +30,15 @@ export default function LabelPopupMenu({
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
 }) {
-  const iconRef = useRef<HTMLDivElement>(null)
-
   const refreshActiveItem = useRefreshActiveItem()
   const [newLabel, setNewLabel] = useState('')
-  const [setPopup, setPopupProps, setPopupLocation] = useGlobalPopup<LabelsPopupProps>()
 
-  const togglePopup = () => {
-    const iconRect = iconRef.current?.getBoundingClientRect()
-    setPopup(LabelsPopup)
-    setPopupProps({ item, activeItem, refreshActiveItem, newLabel, setNewLabel })
-    setPopupLocation({ right: iconRect?.right, top: iconRect?.bottom })
-  }
+  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [
+    LabelsPopup,
+    { item, activeItem, refreshActiveItem, newLabel, setNewLabel },
+  ]
 
-  return (
-    <div ref={iconRef}>
-      <IconButton icon={labelIcon} onClick={togglePopup} />
-    </div>
-  )
+  return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} />
 }
 
 export type LabelsPopupProps = {
@@ -57,10 +47,17 @@ export type LabelsPopupProps = {
   newLabel: string
   setNewLabel: (label: string) => void
   refreshActiveItem: () => void
-  onDismiss?: () => void
+  onDismissGlobalPopup?: () => void
 }
 
-function LabelsPopup({ item, activeItem, refreshActiveItem, onDismiss, newLabel, setNewLabel }: LabelsPopupProps) {
+function LabelsPopup({
+  item,
+  activeItem,
+  refreshActiveItem,
+  onDismissGlobalPopup,
+  newLabel,
+  setNewLabel,
+}: LabelsPopupProps) {
   const trimmedLabel = newLabel.trim()
 
   const labels = activeItem.availableLabels
@@ -70,7 +67,7 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, onDismiss, newLabel,
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
   const toggleLabel = (label: string) => {
-    onDismiss?.()
+    onDismissGlobalPopup?.()
     setNewLabel('')
     const checked = !item.labels.includes(label)
     const itemIsVersion = 'runs' in item

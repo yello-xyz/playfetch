@@ -297,7 +297,7 @@ export default function Home({
           <GlobalPopup
             {...popupProps}
             location={popupLocation}
-            onDismiss={() => {
+            onDismissGlobalPopup={() => {
               setPopupRender(undefined)
               setPopupProps(undefined)
               setPopupLocation({})

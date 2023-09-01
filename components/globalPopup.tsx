@@ -1,5 +1,5 @@
 export default function GlobalPopup(props: any) {
-  const { render, location, onDismiss, parentRef, parentRect, childRect, childRef, ...other } = props
+  const { render, location, onDismissGlobalPopup, parentRef, parentRect, childRect, childRef, ...other } = props
 
   const position = { left: undefined, top: undefined, right: undefined, bottom: undefined, ...location }
   if (parentRect && childRect) {
@@ -34,9 +34,9 @@ export default function GlobalPopup(props: any) {
   }
 
   return render ? (
-    <div ref={parentRef} onClick={onDismiss} className='fixed inset-0 z-30 w-full h-full text-sm'>
+    <div ref={parentRef} onClick={onDismissGlobalPopup} className='fixed inset-0 z-30 w-full h-full text-sm'>
       <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute' style={position}>
-        {render({ ...other, onDismiss })}
+        {render({ ...other, onDismissGlobalPopup })}
       </div>
     </div>
   ) : null
