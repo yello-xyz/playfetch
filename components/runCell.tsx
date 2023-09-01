@@ -1,5 +1,5 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
-import { MouseEvent, useCallback, useEffect } from 'react'
+import { MouseEvent, useCallback, useEffect, useState } from 'react'
 import { CommentsPopup, CommentsPopupProps } from './commentPopupMenu'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import RunCellHeader from './runCellHeader'
@@ -99,20 +99,23 @@ export default function RunCell({
     }
   }, [activeItem, version, comments, run, selectionRanges, setPopup, setPopupProps, setPopupLocation])
 
-  const updateSelection = useCallback((selection?: Selection) => {
+  const [selection, setSelection] = useState<Selection | undefined>(undefined)
+  const updateSelection = useCallback(() => {
     if (selection && version) {
       setPopup(props => CommentInputPopup(props as CommentInputProps))
       setPopupProps({ selection, onUpdateSelectionForComment: updateSelectionForComment })
       setPopupLocation({ left: selection.popupPoint.x, top: selection.popupPoint.y })
     }
-  }, [version, setPopup, setPopupProps, setPopupLocation, updateSelectionForComment])
+  }, [selection, version, setPopup, setPopupProps, setPopupLocation, updateSelectionForComment])
 
   const isProperRun = 'inputs' in run
   useEffect(() => {
-    const selectionChangeHandler = () => isProperRun && updateSelection(extractSelection(identifier))
+    const selectionChangeHandler = () => isProperRun && setSelection(extractSelection(identifier))
     document.addEventListener('selectionchange', selectionChangeHandler)
+    document.addEventListener('mouseup', updateSelection)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
+      document.removeEventListener('mouseup', updateSelection)
     }
   }, [isProperRun, identifier, updateSelection])
 
