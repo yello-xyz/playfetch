@@ -8,7 +8,6 @@ import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
 import TabSelector from './tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
@@ -39,8 +38,14 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-  const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, PromptConfigsEqual)
+  const [currentPrompt, setCurrentPrompt] = useState(activeVersion.prompt)
+  const [currentPromptConfig, setCurrentPromptConfig] = useState(activeVersion.config)
+  const [currentVersionID, setCurrentVersionID] = useInitialState(activeVersion.id)
+  if (activeVersion.id !== currentVersionID) {
+    setCurrentVersionID(activeVersion.id)
+    setCurrentPrompt(activeVersion.prompt)
+    setCurrentPromptConfig(activeVersion.config)
+  }
 
   const updateVersion = (version: PromptVersion) => {
     setCurrentPrompt(version.prompt)
