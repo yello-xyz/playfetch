@@ -66,7 +66,7 @@ export default function WorkspaceGridView({
       />
       {activeWorkspace.projects.length > 0 ? (
         <>
-          <div className='border-b border-gray-100 text-dark-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
+          <div className='border-b border-gray-100 text-gray-700 font-medium pt-1.5 pb-2.5 mx-5 mb-1'>
             <span>Project name</span>
           </div>
           <div className='flex flex-col overflow-y-auto h-full px-6 gap-3.5 pt-3.5 pb-5'>
@@ -103,7 +103,7 @@ function EmptyWorkspaceView({
   onAddProject: () => void
 }) {
   return (
-    <div className='h-full px-6 pt-2 pb-6 text-dark-gray-700'>
+    <div className='h-full px-6 pt-2 pb-6 text-gray-700'>
       <div className='flex flex-col items-center justify-center h-full gap-3 p-6 border border-gray-200 rounded-lg bg-gray-25'>
         <div className='flex flex-col items-center max-w-sm gap-0.5'>
           <span className='font-medium'>{workspace.name} is empty</span>
@@ -159,10 +159,10 @@ function ProjectCell({
             icon={project.favorited ? filledStarIcon : starIcon}
             onClick={() => api.toggleFavoriteProject(project.id, !project.favorited).then(onRefreshWorkspace)}
           />
-          <span className='flex-1 text-base font-medium text-dark-gray-700 line-clamp-2'>{project.name}</span>
+          <span className='flex-1 text-base font-medium text-gray-700 line-clamp-2'>{project.name}</span>
         </div>
         <div className='relative flex items-center gap-2'>
-          <span className='mr-5 text-xs text-dark-gray-700'>Edited {formattedDate}</span>
+          <span className='mr-5 text-xs text-gray-700'>Edited {formattedDate}</span>
           <IconButton hoverType='opacity' icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
           <div className='absolute right-0 top-7'>
             <ProjectPopupMenu

@@ -104,7 +104,7 @@ export default function UserSidebarItem() {
       className='flex pl-3 pr-1.5 py-2 gap-2.5 items-center relative cursor-pointer rounded-lg hover:bg-gray-100 '
       onClick={() => setMenuExpanded(!isMenuExpanded)}>
       <UserAvatar user={user} />
-      <span className='flex-1 font-semibold text-dark-gray-700'>{user.fullName}</span>
+      <span className='flex-1 font-semibold text-gray-700'>{user.fullName}</span>
       <div className='flex'>
         <Icon icon={chevronIcon} />
         {isMenuExpanded && (
@@ -114,16 +114,16 @@ export default function UserSidebarItem() {
                 <div className='flex items-center gap-2.5 pb-2 px-2'>
                   <UserAvatar user={user} />
                   <div className='flex flex-col min-w-0'>
-                    <span className='overflow-hidden font-semibold select-none text-ellipsis text-dark-gray-700'>
+                    <span className='overflow-hidden font-semibold text-gray-700 select-none text-ellipsis'>
                       {user.fullName}
                     </span>
-                    <span className='overflow-hidden text-xs select-none text-ellipsis text-dark-gray-400'>
+                    <span className='overflow-hidden text-xs text-gray-400 select-none text-ellipsis'>
                       {user.email}
                     </span>
                   </div>
                 </div>
                 <span
-                  className='px-2 py-1 font-medium leading-6 rounded cursor-pointer select-none text-dark-gray-700 hover:bg-gray-50'
+                  className='px-2 py-1 font-medium leading-6 text-gray-700 rounded cursor-pointer select-none hover:bg-gray-50'
                   onClick={selectSettings}>
                   Settings
                 </span>
@@ -131,7 +131,7 @@ export default function UserSidebarItem() {
                   <Link
                     href={ClientRoute.Admin}
                     className='w-full px-2 py-1 leading-6 rounded select-none hover:bg-gray-50'>
-                    <span className='font-medium cursor-pointer text-dark-gray-700'>Admin</span>
+                    <span className='font-medium text-gray-700 cursor-pointer'>Admin</span>
                   </Link>
                 )}
                 <div className='pt-1 pb-1'>
