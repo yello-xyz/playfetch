@@ -1,7 +1,7 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { LabelForSupportedPrompt, PlaceholderForSupportedPrompt, ProviderForModel, SupportedPromptsForModel } from './modelSelector'
+import { LabelForSupportedPrompt, PlaceholderForSupportedPrompt, ProviderForModel, ShouldPreformatSupportedPrompt, SupportedPromptsForModel } from './modelSelector'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -86,6 +86,7 @@ export default function PromptPanel({
           activeLabel={activePromptLabel}
           setActiveLabel={setActivePromptLabel}
           placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
+          preformatted={ShouldPreformatSupportedPrompt(activePromptKey)}
           onUpdateScrollHeight={setPromptInputScrollHeight}
         />
       </div>

@@ -89,6 +89,16 @@ export const PlaceholderForSupportedPrompt = (prompt: keyof Prompts) => {
   }
 }
 
+export const ShouldPreformatSupportedPrompt = (prompt: keyof Prompts) => {
+  switch (prompt) {
+    case 'main':
+    case 'system':
+      return false
+    case 'functions':
+      return true
+  }
+}
+
 export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
