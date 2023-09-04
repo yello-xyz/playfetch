@@ -4,7 +4,7 @@ import Label from './label'
 import { ToCamelCase } from '@/src/common/formatting'
 import Icon from './icon'
 import clipboardIcon from '@/public/clipboard.svg'
-import { SelectAnyInputRow } from './testButtons'
+import { SelectAnyInputRow } from './runButtons'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,
@@ -63,10 +63,11 @@ export default function ExamplePane({
 }
 
 export function CodeBlock({ children, active, error }: { children: ReactNode; active?: boolean; error?: boolean }) {
+  const baseClass = 'p-4 text-xs rounded-lg bg-white overflow-y-auto border border-gray-200'
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
   const borderClass = active ? 'border' : ''
   return (
-    <div className={`p-4 text-xs rounded-lg bg-white border border-gray-200 ${textColorClass} ${borderClass}`}>
+    <div className={`${baseClass} ${textColorClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>

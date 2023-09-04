@@ -8,11 +8,9 @@ import { ItemLabels } from './versionCell'
 export default function RunCellHeader({
   run,
   activeItem,
-  containerRect,
 }: {
   run: PartialRun
   activeItem?: ActivePrompt | ActiveChain
-  containerRect?: DOMRect
 }) {
   const isProperRun = (item: PartialRun): item is Run => 'labels' in item
 
@@ -22,7 +20,7 @@ export default function RunCellHeader({
         <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
         <RunInputs inputs={run.inputs} />
       </div>
-      <LabelPopupMenu containerRect={containerRect} activeItem={activeItem} item={run} />
+      <LabelPopupMenu activeItem={activeItem} item={run} selectedCell={true} />
     </div>
   ) : null
 }

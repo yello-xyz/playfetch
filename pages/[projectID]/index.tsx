@@ -31,7 +31,7 @@ import ProjectTopBar from '@/components/projectTopBar'
 import dynamic from 'next/dynamic'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
 import { getChainForUser } from '@/src/server/datastore/chains'
-import { GlobalPopupContext, GlobalPopupLocation, GlobalPopupRender } from '@/src/client/context/globalPopupContext'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
@@ -158,8 +158,8 @@ export default function Home({
     }
   }
 
-  const refresh = () => {
-    refreshActiveItem()
+  const refresh = (versionID?: number) => {
+    refreshActiveItem(versionID)
     if (activeItem !== Endpoints) {
       refreshProject()
     }
@@ -174,11 +174,6 @@ export default function Home({
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
     router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
-  }
-
-  const selectSettings = () => {
-    savePrompt()
-    router.push(ClientRoute.Settings, undefined, { shallow: true })
   }
 
   const onDeleteItem = async () => {
@@ -218,21 +213,14 @@ export default function Home({
 
   const [showComments, setShowComments] = useState(false)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
-  const [popupRender, setPopupRender] = useState<GlobalPopupRender<any>>()
-  const [popupProps, setPopupProps] = useState<any>()
-  const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
+  const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
   return (
     <>
-      <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <GlobalPopupContext.Provider
-          value={{
-            setPopupRender: render => setPopupRender(() => render),
-            setPopupProps,
-            setPopupLocation,
-          }}>
-          <UserContext.Provider value={{ loggedInUser: user, availableProviders, showSettings: selectSettings }}>
-            <RefreshContext.Provider value={{ refreshActiveItem }}>
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+        <RefreshContext.Provider value={{ refreshActiveItem }}>
+          <ModalDialogContext.Provider value={{ setDialogPrompt }}>
+            <GlobalPopupContext.Provider value={globalPopupProviderProps}>
               <main className='flex flex-col h-screen text-sm'>
                 <ProjectTopBar
                   workspaces={workspaces}
@@ -251,7 +239,7 @@ export default function Home({
                     onAddPrompt={addPrompt}
                     onAddChain={addChain}
                     onDeleteItem={onDeleteItem}
-                    onRefreshItem={refresh}
+                    onRefreshItem={() => refresh()}
                     onSelectPrompt={selectPrompt}
                     onSelectChain={selectChain}
                     onSelectEndpoints={selectEndpoints}
@@ -294,17 +282,12 @@ export default function Home({
                   </div>
                 </div>
               </main>
-            </RefreshContext.Provider>
-          </UserContext.Provider>
-        </GlobalPopupContext.Provider>
-      </ModalDialogContext.Provider>
-      <GlobalPopup
-        {...popupProps}
-        location={popupLocation}
-        onDismiss={() => setPopupRender(undefined)}
-        render={popupRender}
-      />
-      <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+            </GlobalPopupContext.Provider>
+          </ModalDialogContext.Provider>
+          <GlobalPopup {...globalPopupProps} {...popupProps} />
+          <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+        </RefreshContext.Provider>
+      </UserContext.Provider>
     </>
   )
 }

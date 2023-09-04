@@ -1,12 +1,12 @@
-import useResizeObserver from '@react-hook/resize-observer'
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { RefCallback, useCallback, useState } from 'react'
 
-export default function useContainerRect(): readonly [DOMRect | undefined, RefObject<HTMLDivElement>] {
-  const ref = useRef<HTMLDivElement>(null)
+export function useContainerRect(): readonly [DOMRect | undefined, RefCallback<HTMLDivElement>] {
   const [rect, setRect] = useState<DOMRect>()
+  const ref = useCallback((node: any) => setRect(node?.getBoundingClientRect()), [])
 
-  useEffect(() => setRect(ref.current?.getBoundingClientRect()), [])
-  useResizeObserver(ref, _ => setRect(ref.current?.getBoundingClientRect()))
+  // TODO Find a way to useResizeObserver with a RefCallback rather than a RefObject
+  // so we don't need to worry about whether the component has already been loaded.
+  // useResizeObserver(ref, (node: any) => setRect(node?.getBoundingClientRect()))
 
   return [rect, ref]
 }

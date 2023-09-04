@@ -3,20 +3,15 @@ import {
   PromptConfig,
   PromptInputs,
   ActiveProject,
-  RunConfig,
   ModelProvider,
-  CodeConfig,
   ActiveWorkspace,
   Workspace,
   ChainItemWithInputs,
   LogEntry,
-  InputValues,
-  Prompt,
   ActiveChain,
-  RawPromptVersion,
-  RawChainVersion,
-  Chain,
   ActivePrompt,
+  Comment,
+  Prompts,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -120,8 +115,13 @@ const api = {
   duplicatePrompt: function (promptID: number, targetProjectID?: number): Promise<number> {
     return post(this.duplicatePrompt, { promptID, targetProjectID })
   },
-  updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID: number): Promise<number> {
-    return post(this.updatePrompt, { promptID, prompt, config, versionID })
+  updatePrompt: function (
+    promptID: number,
+    prompts: Prompts,
+    config: PromptConfig,
+    versionID: number
+  ): Promise<number> {
+    return post(this.updatePrompt, { promptID, prompts, config, versionID })
   },
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
@@ -198,7 +198,13 @@ const api = {
   getLogEntries: function (projectID: number): Promise<LogEntry[]> {
     return post(this.getLogEntries, { projectID })
   },
-  addComment: function (versionID: number, text: string, quote?: string, runID?: number, startIndex?: number) {
+  addComment: function (
+    versionID: number,
+    text: string,
+    quote?: string,
+    runID?: number,
+    startIndex?: number
+  ): Promise<Comment> {
     return post(this.addComment, { versionID, text, quote, runID, startIndex })
   },
   toggleVersionLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {

@@ -82,7 +82,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.write(response.output)
         }
         if (!response) {
-          const version = await getTrustedVersion(versionID)
+          const version = await getTrustedVersion(versionID, true)
 
           const configs = loadConfigsFromVersion(version)
           const isLastRun = (index: number) => index === configs.length - 1

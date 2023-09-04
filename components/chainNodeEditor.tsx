@@ -3,23 +3,20 @@ import {
   ChainItem,
   ChainItemWithInputs,
   ChainVersion,
-  CodeChainItem,
-  PartialRun,
   PromptInputs,
   PromptVersion,
-  Run,
   TestConfig,
 } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
 import PromptInput from './promptInput'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
-import TestButtons from './testButtons'
+import RunButtons from './runButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
@@ -33,10 +30,10 @@ export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache) => {
   if (IsCodeChainItem(item)) {
-    return ExtractPromptVariables(item.code)
+    return ExtractVariables(item.code)
   }
   const version = cache.versionForItem(item)
-  return version ? ExtractPromptVariables(version.prompt) : item.inputs ?? []
+  return version ? ExtractPromptVariables(version.prompts, version.config) : item.inputs ?? []
 }
 
 const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainItem[]) => {
@@ -93,77 +90,48 @@ export default function ChainNodeEditor({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const checkProviderAvailable = useCheckProvider()
-
-  const [editingIndex, setEditingIndex] = useState<number>()
-  const [editedCode, setEditedCode] = useState<string>('')
-  const [editingItemsCount, setEditingItemsCount] = useState(items.length)
-  const isEditing = editingIndex !== undefined
-
-  const currentItems = items.map((item, index) => (index === editingIndex ? { ...item, code: editedCode } : item))
   const updatedItems = (items: ChainItem[], index: number, item: ChainItem) => [
     ...items.slice(0, index),
     item,
     ...items.slice(index + 1),
   ]
 
-  const toggleEditing = () => {
-    setEditingIndex(isEditing ? undefined : activeItemIndex)
-    setEditedCode(isEditing ? '' : (items[activeItemIndex] as CodeChainItem).code)
-    setEditingItemsCount(items.length)
-  }
-
-  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
-  if (syncedVersionID !== activeVersion.id) {
-    setSyncedVersionID(activeVersion.id)
-    if (isEditing) {
-      toggleEditing()
-    }
-  } else if (isEditing && editingIndex !== activeItemIndex) {
-    setTimeout(() => setItems(currentItems))
-    toggleEditing()
-  } else if (isEditing && items.length !== editingItemsCount) {
-    if (items.length === editingItemsCount + 1) {
-      // This means an item was inserted at the position of the item we were editing, so we
-      // need to persist the edit to the item which now has a index one higher than before.
-      setTimeout(() =>
-        setItems(updatedItems(items, editingIndex + 1, { ...items[editingIndex + 1], code: editedCode }))
-      )
-    }
-    toggleEditing()
-  } else if (!isEditing && IsCodeChainItem(activeNode)) {
-    toggleEditing()
-  }
+  const checkProviderAvailable = useCheckProvider()
+  const areProvidersAvailable = (items: ChainItem[], versionForItem = promptCache.versionForItem) =>
+    items
+      .filter(IsPromptChainItem)
+      .map(versionForItem)
+      .every(version => !!version && checkProviderAvailable(version.config.provider))
 
   const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
-    if (currentItems.length > 0) {
-      let newItems = currentItems
-      let versionForItem = promptCache.versionForItem
-      if (IsPromptChainItem(activeNode)) {
-        const versionID = await savePrompt()
-        const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
-        newItems = updatedItems(currentItems, activeItemIndex, { ...activeNode, versionID })
-        versionForItem = item =>
-          item.promptID === activePrompt.id
-            ? activePrompt.versions.find(version => version.id === item.versionID)
-            : promptCache.versionForItem(item)
-      }
-      const versions = newItems.filter(IsPromptChainItem).map(versionForItem)
-      if (versions.every(version => version && checkProviderAvailable(version.config.provider))) {
-        await runVersion(() => prepareForRunning(newItems), inputs)
-      }
+    let newItems = items
+    let versionForItem = promptCache.versionForItem
+    if (IsPromptChainItem(activeNode)) {
+      const versionID = await savePrompt()
+      const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
+      newItems = updatedItems(items, activeItemIndex, { ...activeNode, versionID })
+      versionForItem = item =>
+        item.promptID === activePrompt.id
+          ? activePrompt.versions.find(version => version.id === item.versionID)
+          : promptCache.versionForItem(item)
+    }
+    if (areProvidersAvailable(newItems, versionForItem)) {
+      await runVersion(() => prepareForRunning(newItems), inputs)
     }
   }
 
   const mapOutput = (output?: string) => {
-    const newItems = currentItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
+    const newItems = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
     setItems(updatedItems(newItems, activeItemIndex, { ...newItems[activeItemIndex], output }))
   }
 
   const toggleIncludeContext = (includeContext: boolean) =>
     setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], includeContext }))
+
+  const updateCode = (code: string) =>
+    setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], code }))
 
   const variables = ExtractUnboundChainVariables(items, promptCache)
   const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
@@ -193,7 +161,6 @@ export default function ChainNodeEditor({
             items={items}
             toggleIncludeContext={toggleIncludeContext}
             promptCache={promptCache}
-            checkProviderAvailable={checkProviderAvailable}
             selectVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
           />
@@ -205,8 +172,8 @@ export default function ChainNodeEditor({
               <PromptInput
                 key={activeItemIndex}
                 placeholder={`'Hello World!'`}
-                value={isEditing ? editedCode : activeNode.code}
-                setValue={setEditedCode}
+                value={activeNode.code}
+                setValue={updateCode}
                 preformatted
               />
             </div>
@@ -234,13 +201,14 @@ export default function ChainNodeEditor({
           ) : (
             <div />
           )}
-          <TestButtons
+          <RunButtons
             runTitle='Run Chain'
             variables={variables}
             inputValues={inputValues}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-            disabled={!items.length}
+            showTestMode
+            disabled={!items.length || !areProvidersAvailable(items)}
             callback={runChain}
           />
         </div>

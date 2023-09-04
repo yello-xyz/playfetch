@@ -7,7 +7,7 @@ async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>, u
   const versionID = await savePromptVersionForUser(
     user.id,
     req.body.promptID,
-    req.body.prompt,
+    req.body.prompts,
     req.body.config,
     req.body.versionID
   )

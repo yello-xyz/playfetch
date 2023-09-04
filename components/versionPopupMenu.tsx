@@ -1,31 +1,27 @@
-import { PromptVersion } from '@/types'
+import { ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import api from '@/src/client/api'
-import PopupMenu, { CalculatePopupOffset, PopupMenuItem } from './popupMenu'
+import { PopupContent, PopupMenuItem } from './popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
-import IconButton from './iconButton'
 import dotsIcon from '@/public/dots.svg'
-import { useRef, useState } from 'react'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
+import GlobalPopupMenu from './globalPopupMenu'
 
-export default function VersionPopupMenu({
+export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
-  containerRect,
+  selectedCell = false,
 }: {
-  version: PromptVersion
-  containerRect?: DOMRect
+  version: Version
+  selectedCell?: boolean
 }) {
-  const [isMenuExpanded, setMenuExpanded] = useState(false)
-
   const refreshActiveItem = useRefreshActiveItem()
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const iconRef = useRef<HTMLDivElement>(null)
+  const chainReference = IsPromptVersion(version) ? version.usedInChain : null
 
   const deleteVersion = async () => {
-    setMenuExpanded(false)
-    if (version.usedAsEndpoint || version.usedInChain) {
-      const reason = version.usedAsEndpoint ? `published as an endpoint` : `used in chain “${version.usedInChain}”`
+    if (version.usedAsEndpoint || chainReference) {
+      const reason = version.usedAsEndpoint ? `published as an endpoint` : `used in chain “${chainReference}”`
       setDialogPrompt({
         title: `Cannot delete version because it is ${reason}.`,
         confirmTitle: 'OK',
@@ -40,18 +36,22 @@ export default function VersionPopupMenu({
     }
   }
 
+  const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [VersionPopup, { deleteVersion }]
+
+  return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
+}
+
+type VersionPopupProps = { deleteVersion: () => void; onDismissGlobalPopup?: () => void }
+
+function VersionPopup({ deleteVersion, onDismissGlobalPopup }: VersionPopupProps) {
+  const callback = () => {
+    onDismissGlobalPopup?.()
+    deleteVersion()
+  }
+
   return (
-    <>
-      <div ref={iconRef}>
-        <IconButton icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
-      </div>
-      {isMenuExpanded && (
-        <div className='absolute' style={CalculatePopupOffset(iconRef, containerRect)}>
-          <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-            <PopupMenuItem destructive title='Delete' callback={deleteVersion} />
-          </PopupMenu>
-        </div>
-      )}
-    </>
+    <PopupContent className='w-40'>
+      <PopupMenuItem destructive title='Delete' callback={callback} first last />
+    </PopupContent>
   )
 }

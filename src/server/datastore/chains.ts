@@ -154,7 +154,7 @@ export async function augmentChainDataWithNewVersion(
 }
 
 export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number, newLastVersionID: number) {
-  const chainData = await getKeyedEntity(Entity.PROMPT, chainID)
+  const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[deletedVersionID] = undefined
   await updateChain({ ...chainData, lastVersionID: newLastVersionID, references: JSON.stringify(references) }, true)

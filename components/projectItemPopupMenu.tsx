@@ -83,10 +83,10 @@ export default function ProjectItemPopupMenu({
   return (
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename…' callback={renameItem} />
+        <PopupMenuItem title='Rename…' callback={renameItem} first />
         <PopupMenuItem title='Duplicate' callback={duplicateItem} />
         {!isChain && <PopupMenuItem title='Copy to Project…' callback={copyPromptToProject} />}
-        <PopupMenuItem separated destructive title='Delete' callback={deleteItem} />
+        <PopupMenuItem separated destructive title='Delete' callback={deleteItem} last />
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog

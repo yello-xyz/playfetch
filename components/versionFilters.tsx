@@ -1,4 +1,4 @@
-import { User, PromptVersion } from '@/types'
+import { User, PromptVersion, ChainVersion, IsPromptVersion } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import filterIcon from '@/public/filter.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -10,6 +10,7 @@ import { ReactNode, useRef, useState } from 'react'
 import PopupMenu from './popupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
+import { PromptVersionMatchesFilter } from '@/src/common/versionsEqual'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
@@ -24,21 +25,24 @@ const isTextFilter = (filter: VersionFilter): filter is TextFilter => 'text' in 
 const userIDsFromFilters = (filters: VersionFilter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
 const labelsFromFilters = (filters: VersionFilter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
 
-export const BuildVersionFilter = (filters: VersionFilter[]) => (version: PromptVersion) => {
-  const userIDs = userIDsFromFilters(filters)
-  const userFilter = (version: PromptVersion) => !userIDs.length || userIDs.includes(version.userID)
+export const BuildVersionFilter =
+  <Version extends PromptVersion | ChainVersion>(filters: VersionFilter[]) =>
+  (version: Version) => {
+    const userIDs = userIDsFromFilters(filters)
+    const userFilter = (version: Version) => !userIDs.length || userIDs.includes(version.userID)
 
-  const labels = labelsFromFilters(filters)
-  const labelFilter = (version: PromptVersion) => !labels.length || version.labels.some(label => labels.includes(label))
+    const labels = labelsFromFilters(filters)
+    const labelFilter = (version: Version) => !labels.length || version.labels.some(label => labels.includes(label))
 
-  const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
-  const textFilter = (version: PromptVersion) =>
-    !textStrings.length || textStrings.every(filter => version.prompt.toLowerCase().includes(filter))
+    const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
+    const textFilter = (version: Version) =>
+      !textStrings.length ||
+      textStrings.every(filter => IsPromptVersion(version) && PromptVersionMatchesFilter(version, filter))
 
-  return userFilter(version) && labelFilter(version) && textFilter(version)
-}
+    return userFilter(version) && labelFilter(version) && textFilter(version)
+  }
 
-export default function VersionFilters({
+export default function VersionFilters<Version extends PromptVersion | ChainVersion>({
   users,
   labelColors,
   versions,
@@ -48,7 +52,7 @@ export default function VersionFilters({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: PromptVersion[]
+  versions: Version[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
   tabSelector: (children?: ReactNode) => ReactNode
@@ -66,7 +70,7 @@ export default function VersionFilters({
           setFilters={setFilters}
         />
       )}
-      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-800 ${markup}`}>
+      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-dark-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
             key={index}
@@ -128,7 +132,7 @@ const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }
   ) : null
 }
 
-function FilterButton({
+function FilterButton<Version extends PromptVersion | ChainVersion>({
   users,
   labelColors,
   versions,
@@ -137,7 +141,7 @@ function FilterButton({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: PromptVersion[]
+  versions: Version[]
   filters: VersionFilter[]
   setFilters: (filters: VersionFilter[]) => void
 }) {
@@ -185,12 +189,12 @@ function FilterButton({
   return (
     <div className='relative flex overflow-visible'>
       <div
-        className='flex items-center gap-1 px-2 cursor-pointer'
+        className='flex items-center gap-1 pl-1 pr-2 py-0.5 cursor-pointer hover:bg-gray-100 rounded-md'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
         <Icon icon={filterIcon} />
         Filter
       </div>
-      <div className='absolute right-0 top-7'>
+      <div className='absolute right-0 top-7 shadow-sm'>
         <PopupMenu
           className={menuState === 'text' ? 'w-72 p-2' : 'w-56 p-3'}
           expanded={menuState !== 'collapsed'}
@@ -210,7 +214,7 @@ function FilterButton({
             availableLabels.map((label, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ label })}>
                 <div className={`w-2 h-2 m-1 rounded-full ${labelColors[label]}`} />
-                <div className='flex-grow'>{label}</div>
+                <div className='grow'>{label}</div>
                 <div className='pr-2'>{countForLabel(label)}</div>
               </FilterPopupItem>
             ))}
@@ -218,7 +222,7 @@ function FilterButton({
             availableUsers.map((user, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ userID: user.id })}>
                 <UserAvatar user={user} size='sm' />
-                <div className='flex-grow'>{user.fullName}</div>
+                <div className='grow'>{user.fullName}</div>
                 <div className='pr-2'>{countForUserID(user.id)}</div>
               </FilterPopupItem>
             ))}
@@ -241,7 +245,7 @@ function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: Sta
   return (
     <FilterPopupItem onClick={onClick}>
       <Icon icon={icon} />
-      <div className='flex-grow'>{title}</div>
+      <div className='grow'>{title}</div>
       <Icon icon={chevronIcon} />
     </FilterPopupItem>
   )

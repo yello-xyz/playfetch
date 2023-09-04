@@ -10,7 +10,7 @@ import { LabelForModel } from './modelSelector'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
-export default function CommentsPane<T extends PromptVersion | ChainVersion>({
+export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
   activeItem,
   versions,
   showComments,
@@ -18,10 +18,10 @@ export default function CommentsPane<T extends PromptVersion | ChainVersion>({
   onSelectComment,
 }: {
   activeItem: ActivePrompt | ActiveChain
-  versions: T[]
+  versions: Version[]
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: T, runID?: number) => void
+  onSelectComment: (version: Version, runID?: number) => void
 }) {
   const users = activeItem.users
   const labelColors = AvailableLabelColorsForItem(activeItem)
@@ -51,7 +51,7 @@ export default function CommentsPane<T extends PromptVersion | ChainVersion>({
   ) : null
 }
 
-export function CommentCell<T extends PromptVersion | ChainVersion>({
+export function CommentCell<Version extends PromptVersion | ChainVersion>({
   comment,
   user,
   labelColors,
@@ -61,8 +61,8 @@ export function CommentCell<T extends PromptVersion | ChainVersion>({
   comment: Comment
   user: User
   labelColors: Record<string, string>
-  versions?: T[]
-  onSelect?: (version: T, runID?: number) => void
+  versions?: Version[]
+  onSelect?: (version: Version, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 

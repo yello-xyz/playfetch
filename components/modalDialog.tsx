@@ -39,7 +39,7 @@ export default function ModalDialog({
           <div className='text-left'>{children}</div>
           <div className='flex justify-end gap-4'>
             {prompt.cancellable !== false && (
-              <Button type='outline' onClick={onDismiss}>
+              <Button type='secondary' onClick={onDismiss}>
                 Cancel
               </Button>
             )}

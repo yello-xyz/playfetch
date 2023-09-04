@@ -5,6 +5,7 @@ import {
   GoogleLanguageModel,
   AnthropicLanguageModel,
   CohereLanguageModel,
+  Prompts,
 } from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
@@ -36,7 +37,7 @@ export const TryParseOutput = (output: string | undefined) => {
 
 export default async function runPromptWithConfig(
   userID: number,
-  prompt: string,
+  prompts: Prompts,
   config: PromptConfig,
   streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> {
@@ -71,7 +72,7 @@ export default async function runPromptWithConfig(
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(prompt, config.temperature, config.maxTokens, streamChunks)
+    result = await predictor(prompts, config.temperature, config.maxTokens, streamChunks)
     if (isValidPredictionResponse(result)) {
       break
     }

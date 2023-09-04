@@ -6,10 +6,10 @@ import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Icon from './icon'
 import { useLoggedInUser } from '@/src/client/context/userContext'
-import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import api from '@/src/client/api'
 import Link from 'next/link'
 import ClientRoute from '@/src/client/clientRoute'
+import { useRouter } from 'next/router'
 
 const avatarColors = [
   'bg-orange-300',
@@ -90,10 +90,11 @@ export default function UserSidebarItem() {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const user = useLoggedInUser()
+  const router = useRouter()
 
   const selectSettings = () => {
     setMenuExpanded(false)
-    user.showSettings()
+    router.push(ClientRoute.Settings)
   }
 
   const logOut = async () => api.logOut().then(() => signOut())
@@ -107,7 +108,7 @@ export default function UserSidebarItem() {
       <div className='flex'>
         <Icon icon={chevronIcon} />
         {isMenuExpanded && (
-          <div className='absolute top-0 left-1.5'>
+          <div className='absolute top-0 left-1.5 shadow-sm'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
               <div className='flex flex-col items-stretch gap-0.5 p-3 select-none'>
                 <div className='flex items-center gap-2.5 pb-2 px-2'>

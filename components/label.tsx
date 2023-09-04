@@ -1,3 +1,5 @@
+import { ReactNode } from 'react'
+
 export default function Label({
   className,
   htmlFor,
@@ -8,7 +10,7 @@ export default function Label({
   className?: string
   htmlFor?: string
   onClick?: () => void
-  children: string
+  children: ReactNode
   disabled?: boolean
 }) {
   return (

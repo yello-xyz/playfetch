@@ -56,11 +56,7 @@ export async function getAvailableProvidersForUser(userID: number): Promise<Avai
   const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
   const providerKeys: AvailableProvider[] = providerData
     .filter(data => !!data.apiKey?.length)
-    .map(data => ({
-      provider: data.provider,
-      truncatedAPIKey: `${data.apiKey.slice(0, 4)}…${data.apiKey.slice(-4)}`,
-      cost: data.cost,
-    }))
+    .map(data => ({ provider: data.provider, cost: data.cost }))
   if (!providerKeys.find(key => key.provider === DefaultProvider)) {
     providerKeys.push({ provider: DefaultProvider, cost: 0 })
   }

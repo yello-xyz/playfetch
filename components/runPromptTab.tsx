@@ -1,39 +1,29 @@
-import {
-  ActivePrompt,
-  InputValues,
-  ModelProvider,
-  PromptConfig,
-  PromptInputs,
-  TestConfig,
-  PromptVersion,
-} from '@/types'
+import { ActivePrompt, InputValues, PromptConfig, PromptInputs, TestConfig, PromptVersion, Prompts } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode, useState } from 'react'
 import { Allotment } from 'allotment'
 
 export default function RunPromptTab({
-  currentPrompt,
+  currentPrompts,
   currentPromptConfig,
   activePrompt,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
-  checkProviderAvailable,
   runPrompt,
   inputValues,
   testConfig,
   setTestConfig,
   tabSelector,
 }: {
-  currentPrompt: string
+  currentPrompts: Prompts
   currentPromptConfig: PromptConfig
   activePrompt: ActivePrompt
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  checkProviderAvailable: (provider: ModelProvider) => boolean
-  runPrompt: (config: PromptConfig, inputs: PromptInputs[]) => Promise<void>
+  runPrompt: (inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
@@ -46,7 +36,8 @@ export default function RunPromptTab({
       <Allotment.Pane minSize={minVersionHeight}>
         <div className='h-full'>
           <VersionTimeline
-            prompt={activePrompt}
+            activeItem={activePrompt}
+            versions={activePrompt.versions}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             tabSelector={tabSelector}
@@ -56,11 +47,10 @@ export default function RunPromptTab({
       <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
         <div className='h-full p-4 bg-white'>
           <PromptPanel
-            initialPrompt={currentPrompt}
+            initialPrompts={currentPrompts}
             initialConfig={currentPromptConfig}
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
-            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             testConfig={testConfig}

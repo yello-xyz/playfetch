@@ -16,18 +16,6 @@ function useOutsideDetector(ref: RefObject<HTMLDivElement>, callback: () => void
   }, [ref, callback])
 }
 
-export const CalculatePopupOffset = (
-  ref: RefObject<HTMLDivElement>,
-  containerRect?: DOMRect,
-  contentRect?: DOMRect
-) => {
-  const iconRect = ref.current?.getBoundingClientRect()
-  const right = (containerRect?.right ?? 0) - (iconRect?.right ?? 0)
-  const top = Math.max(0, (iconRect?.top ?? 0) - (containerRect?.top ?? 0) + 28)
-  const useBottom = contentRect && containerRect && top + contentRect.height > containerRect.height
-  return useBottom ? { right, bottom: 0 } : { right, top }
-}
-
 export default function PopupMenu({
   expanded,
   collapse,
@@ -45,11 +33,15 @@ export default function PopupMenu({
   return expanded ? (
     <div
       onClick={event => event.stopPropagation()}
-      className={`${className} cursor-default relative z-20 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm gap-0.5 select-none`}
+      className='relative z-20 overflow-hidden cursor-default'
       ref={menuRef}>
-      {children}
+      <PopupContent className={className}>{children}</PopupContent>
     </div>
   ) : null
+}
+
+export function PopupContent({ children, className }: { children: any; className?: string }) {
+  return <div className={`${className} bg-white border border-gray-200 rounded-lg gap-0.5 select-none`}>{children}</div>
 }
 
 export function PopupMenuItem({
@@ -57,19 +49,26 @@ export function PopupMenuItem({
   callback,
   destructive,
   separated,
+  first,
+  last,
 }: {
   title: string
   callback: () => void
   destructive?: boolean
   separated?: boolean
+  first?: boolean
+  last?: boolean
 }) {
   const baseClass = 'px-4 py-2 text-sm font-normal text-dark-gray-700'
   const destructiveClass = destructive ? 'text-red-500' : ''
   const separatedClass = separated ? 'border-t border-gray-200' : ''
   const hoverClass = destructive ? 'hover:bg-red-400 hover:text-white' : 'hover:bg-blue-400 hover:text-white'
+  const roundedClass = first && last ? 'rounded-lg' : first ? 'rounded-t-lg' : last ? 'rounded-b-lg' : ''
 
   return (
-    <div onClick={callback} className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass}`}>
+    <div
+      onClick={callback}
+      className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass} ${roundedClass}`}>
       {title}
     </div>
   )

@@ -23,11 +23,14 @@ const flattenDivs = (html: string) =>
     .replace(/<div><div>(.*)<\/div><\/div>/g, '<div>$1</div>')
     .replace(/<div><div>(.*)<\/div>(.*)<\/div>/g, '<div>$1</div><div>$2</div>')
     .replace(/<div>(.*)<div>(.*)<\/div><\/div>/g, '<div>$1</div><div>$2</div>')
-    .replaceAll('<br />', '')
-    .replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
+
+const cleanUpWhitespace = (html: string) =>
+  html.replaceAll('<br />', '').replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
 
 const divsToLines = (html: string) => {
-  const flattened = flattenDivs(html)
+  let flattened = html
+  while (flattened !== (flattened = flattenDivs(flattened))) {}
+  flattened = cleanUpWhitespace(flattened)
   const matches = [...flattened.matchAll(/(.*?)<div>(.*?)<\/div>/g)]
   const divs = matches.map(match => match[0]).join('')
   const end = flattened.indexOf(divs) + divs.length

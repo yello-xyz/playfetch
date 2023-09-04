@@ -8,10 +8,16 @@ export default function Sidebar({ children }: { children: ReactNode }) {
   return (
     <div className='flex flex-col gap-6 px-2 py-4 overflow-y-auto border-r border-gray-200'>
       {children}
-      <SidebarSection>
-        <SidebarButton title='Feedback' icon={feedbackIcon} link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback' />
-      </SidebarSection>
+      <FeedbackSection />
     </div>
+  )
+}
+
+export function FeedbackSection() {
+  return (
+    <SidebarSection>
+      <SidebarButton title='Feedback' icon={feedbackIcon} link='mailto:hello@yello.xyz?subject=Play/Fetch Feedback' />
+    </SidebarSection>
   )
 }
 

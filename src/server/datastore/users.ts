@@ -1,5 +1,5 @@
 import { User } from '@/types'
-import { Entity, buildKey, getDatastore, getEntity, getID, getKeyedEntity } from './datastore'
+import { Entity, buildKey, getDatastore, getEntity, getID, getKeyedEntity, getOrderedEntities } from './datastore'
 import { addWorkspaceForUser } from './workspaces'
 
 export async function migrateUsers(postMerge: boolean) {
@@ -14,7 +14,7 @@ export async function migrateUsers(postMerge: boolean) {
         userData.email,
         userData.fullName,
         userData.imageURL,
-        true,
+        userData.hasAccess,
         userData.isAdmin,
         userData.createdAt,
         userData.lastLoginAt,
@@ -87,4 +87,9 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {
     await addWorkspaceForUser(getID(userData))
   }
+}
+
+export async function getUsersWithoutAccess() {
+  const usersData = await getOrderedEntities(Entity.USER, 'hasAccess', false)
+  return usersData.map(toUser)
 }

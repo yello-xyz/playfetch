@@ -1,25 +1,70 @@
-import { ReactNode, createContext, useContext } from 'react'
+import { ReactNode, RefCallback, createContext, useContext, useState } from 'react'
+import { useContainerRect } from '../hooks/useContainerRect'
 
 export type GlobalPopupLocation = { top?: number; left?: number; bottom?: number; right?: number }
-export type GlobalPopupRender<T> = (props: T) => ReactNode
+export type GlobalPopupRender<PropsType> = (props: PropsType) => ReactNode
 
-type GlobalPopupContextType = {
-  setPopupRender: (render?: GlobalPopupRender<any>) => void
-  setPopupProps: (props: any) => void
-  setPopupLocation: (location: GlobalPopupLocation) => void
+type GlobalPopupContextType<PropsType> = {
+  setPopup: (
+    render: GlobalPopupRender<PropsType> | undefined,
+    props: PropsType | undefined,
+    location: GlobalPopupLocation
+  ) => void
 }
 
-export const GlobalPopupContext = createContext<GlobalPopupContextType>({
-  setPopupRender: _ => {},
-  setPopupProps: _ => {},
-  setPopupLocation: _ => {},
+export const GlobalPopupContext = createContext<GlobalPopupContextType<any>>({
+  setPopup: _ => {},
 })
 
-export default function useGlobalPopup<PropsType>(): [
-  (render?: GlobalPopupRender<PropsType>) => void,
-  (props: PropsType) => void,
-  (location: GlobalPopupLocation) => void
-] {
+export default function useGlobalPopup<PropsType>(): (
+  render: GlobalPopupRender<PropsType> | undefined,
+  props: PropsType | undefined,
+  location: GlobalPopupLocation
+) => void {
   const context = useContext(GlobalPopupContext)
-  return [context.setPopupRender, context.setPopupProps, context.setPopupLocation]
+  return context.setPopup
+}
+
+export type GlobalPopupProps = {
+  render: GlobalPopupRender<any> | undefined
+  location: GlobalPopupLocation
+  onDismissGlobalPopup: () => void
+  parentRef: RefCallback<HTMLDivElement>
+  parentRect: DOMRect | undefined
+  childRef: RefCallback<HTMLDivElement>
+  childRect: DOMRect | undefined
+}
+
+export function useGlobalPopupProvider<PropsType>(): readonly [
+  GlobalPopupContextType<PropsType>,
+  GlobalPopupProps,
+  PropsType | undefined
+] {
+  const [popupRender, setPopupRender] = useState<GlobalPopupRender<PropsType>>()
+  const [popupProps, setPopupProps] = useState<PropsType>()
+  const [popupLocation, setPopupLocation] = useState<GlobalPopupLocation>({})
+  const [parentRect, parentRef] = useContainerRect()
+  const [childRect, childRef] = useContainerRect()
+
+  const setPopup: GlobalPopupContextType<PropsType>['setPopup'] = (render, props, location) => {
+    setPopupRender(() => render)
+    setPopupProps(props)
+    setPopupLocation(location)
+  }
+
+  return [
+    {
+      setPopup,
+    },
+    {
+      location: popupLocation,
+      onDismissGlobalPopup: () => setPopup(undefined, undefined, {}),
+      render: popupRender,
+      parentRef,
+      parentRect,
+      childRef,
+      childRect,
+    },
+    popupProps,
+  ]
 }

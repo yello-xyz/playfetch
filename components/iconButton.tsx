@@ -10,18 +10,20 @@ export default function IconButton({
   icon,
   onClick,
   disabled,
+  hoverStyle = 'hover:bg-gray-100',
 }: {
   hoverType?: HoverType
   className?: string
   icon: StaticImageData
   onClick: () => void
   disabled?: boolean
+  hoverStyle?: string
 }) {
   const hoverTypeClass = (type: HoverType) => {
     switch (type) {
       default:
       case 'background':
-        return 'rounded hover:bg-gray-100 cursor-pointer'
+        return 'rounded cursor-pointer ' + hoverStyle
       case 'opacity':
         return 'opacity-60 hover:opacity-100'
       case 'none':

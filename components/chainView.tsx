@@ -18,6 +18,10 @@ import { Allotment } from 'allotment'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
+import VersionTimeline, { ShouldShowVersions } from './versionTimeline'
+import { SingleTabHeader } from './tabSelector'
+import IconButton from './iconButton'
+import closeIcon from '@/public/close.svg'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -48,21 +52,6 @@ export default function ChainView({
   ) => Promise<number | undefined>
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
-  const [activeNodeIndex, setActiveNodeIndex] = useState(1)
-  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
-  if (syncedVersionID !== activeVersion.id) {
-    setSyncedVersionID(activeVersion.id)
-    const newNodes = [InputNode, ...activeVersion.items, OutputNode] as ChainNode[]
-    setNodes(newNodes)
-    if (activeNodeIndex >= newNodes.length) {
-      setActiveNodeIndex(1)
-    }
-  }
-  const items = nodes.filter(IsChainItem)
-
-  const refreshActiveItem = useRefreshActiveItem()
-
-  const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
 
   const refreshPrompt = useCallback(
     async (promptID: number) =>
@@ -84,6 +73,7 @@ export default function ChainView({
     [nodes, project]
   )
 
+  const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
   const promptCache: PromptCache = {
     promptForID: id => activePromptCache[id],
     promptForItem: item => activePromptCache[item.promptID],
@@ -99,6 +89,40 @@ export default function ChainView({
       }
     },
     refreshPrompt,
+  }
+
+  const [activeNodeIndex, setActiveNodeIndex] = useState(1)
+
+  const items = nodes.filter(IsChainItem)
+  const getItemsToSave = (items: ChainItem[]) =>
+    items.map(item => ({
+      ...item,
+      activePrompt: undefined,
+      version: undefined,
+      inputs: ExtractChainItemVariables(item, promptCache),
+    }))
+  const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
+  const itemsKey = getItemsKey(items)
+  const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
+
+  const refreshActiveItem = useRefreshActiveItem()
+
+  const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
+    setSavedItemsKey(getItemsKey(items))
+    return saveChain(getItemsToSave(items), refreshActiveItem)
+  }
+
+  const saveItemsIfNeeded = itemsKey !== savedItemsKey ? () => saveItems(items) : undefined
+
+  const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
+  if (syncedVersionID !== activeVersion.id) {
+    setSyncedVersionID(activeVersion.id)
+    const newNodes = [InputNode, ...activeVersion.items, OutputNode] as ChainNode[]
+    setNodes(newNodes)
+    if (activeNodeIndex >= newNodes.length) {
+      setActiveNodeIndex(1)
+    }
+    setSavedItemsKey(getItemsKey(activeVersion.items))
   }
 
   useEffect(() => {
@@ -141,29 +165,10 @@ export default function ChainView({
       savePrompt().then(_ => promptCache.refreshPrompt(activePrompt.id))
     }
     setActiveNodeIndex(index)
+    setShowVersions(false)
   }
 
-  const savedItemsKey = useRef<string>()
-  const saveItems = (items: ChainItem[], force = false): Promise<number | undefined> => {
-    const itemsToSave = items.map(item => ({
-      ...item,
-      activePrompt: undefined,
-      version: undefined,
-      inputs: ExtractChainItemVariables(item, promptCache),
-    }))
-    const itemsKey = JSON.stringify(itemsToSave)
-    if (force || itemsKey !== savedItemsKey.current) {
-      // TODO deal with race condition when force saving while already saving a change.
-      savedItemsKey.current = itemsKey
-      return saveChain(itemsToSave, refreshActiveItem)
-    }
-    return Promise.resolve(undefined)
-  }
-
-  const updateItems = (items: ChainItem[]) => {
-    setNodes([InputNode, ...items, OutputNode])
-    saveItems(items)
-  }
+  const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
 
   const activateOutputNode = () => {
     setNodes(nodes => {
@@ -174,44 +179,70 @@ export default function ChainView({
 
   const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
     activateOutputNode()
-    const versionID = await saveItems(items, true)
+    const versionID = await saveItems(items)
     return versionID!
+  }
+
+  const [showVersions, setShowVersions] = useState(false)
+  const shouldShowVersions = ShouldShowVersions(chain.versions)
+  if (showVersions && !shouldShowVersions) {
+    setShowVersions(false)
   }
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
 
-  const minWidth = 280
+  const minWidth = 300
   return (
     <Allotment>
+      {showVersions && (
+        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
+          <div className='h-full'>
+            <VersionTimeline
+              activeItem={chain}
+              versions={chain.versions}
+              activeVersion={activeVersion}
+              setActiveVersion={setActiveVersion}
+              tabSelector={() => (
+                <SingleTabHeader label='Version history'>
+                  <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
+                </SingleTabHeader>
+              )}
+            />
+          </div>
+        </Allotment.Pane>
+      )}
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
         <ChainEditor
           chain={chain}
           activeVersion={activeVersion}
-          setActiveVersion={setActiveVersion}
-          project={project}
           nodes={nodes}
           setNodes={setNodes}
+          saveItems={saveItemsIfNeeded}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
+          showVersions={showVersions}
+          setShowVersions={shouldShowVersions ? setShowVersions : undefined}
         />
       </Allotment.Pane>
-      <Allotment.Pane minSize={minWidth}>
-        <ChainNodeEditor
-          chain={chain}
-          activeVersion={activeVersion}
-          items={items}
-          setItems={updateItems}
-          activeItemIndex={activeNodeIndex - 1}
-          activeNode={activeNode}
-          promptCache={promptCache}
-          prepareForRunning={prepareForRunning}
-          savePrompt={() => savePrompt().then(versionID => versionID!)}
-          selectVersion={selectVersion}
-          setModifiedVersion={setModifiedVersion}
-          activeRunID={activeRunID}
-        />
-      </Allotment.Pane>
+      {!showVersions && (
+        <Allotment.Pane minSize={minWidth}>
+          <ChainNodeEditor
+            chain={chain}
+            activeVersion={activeVersion}
+            items={items}
+            setItems={updateItems}
+            activeItemIndex={activeNodeIndex - 1}
+            activeNode={activeNode}
+            promptCache={promptCache}
+            prepareForRunning={prepareForRunning}
+            savePrompt={() => savePrompt().then(versionID => versionID!)}
+            selectVersion={selectVersion}
+            setModifiedVersion={setModifiedVersion}
+            activeRunID={activeRunID}
+          />
+        </Allotment.Pane>
+      )}
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane
           activeItem={chain}

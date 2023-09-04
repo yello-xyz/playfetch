@@ -87,7 +87,6 @@ export type PromptConfig = {
 export type AvailableProvider = {
   provider: ModelProvider
   cost: number
-  truncatedAPIKey?: string
 }
 
 type Version = {
@@ -96,7 +95,7 @@ type Version = {
   userID: number
   previousID?: number
   timestamp: string
-  prompt?: string
+  prompts?: Prompts
   config?: PromptConfig
   items?: ChainItemWithInputs[]
   labels: string[]
@@ -104,13 +103,19 @@ type Version = {
   comments: Comment[]
 }
 
-export type RawPromptVersion = Version & { prompt: string; config: PromptConfig }
+export type Prompts = {
+  main: string
+  system?: string
+  functions?: string
+}
+
+export type RawPromptVersion = Version & { prompts: Prompts; config: PromptConfig }
 export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
 
 export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
 export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
 export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion =>
-  'prompt' in version && version.prompt !== undefined && version.prompt !== null
+  'prompts' in version && version.prompts !== undefined && version.prompts !== null
 
 export type PromptInputs = { [name: string]: string }
 

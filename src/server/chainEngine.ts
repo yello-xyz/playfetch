@@ -1,11 +1,11 @@
-import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
+import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
-  ExtractPromptVariables(prompt).reduce(
+  ExtractVariables(prompt).reduce(
     (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
     prompt
   )
@@ -15,6 +15,11 @@ const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boole
     (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
     useCamelCase ? promptToCamelCase(prompt) : prompt
   )
+
+const resolvePrompts = (prompts: Prompts, inputs: PromptInputs, useCamelCase: boolean) =>
+  Object.fromEntries(
+    Object.entries(prompts).map(([key, value]) => [key, resolvePrompt(value, inputs, useCamelCase)])
+  ) as Prompts
 
 const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
   variable ? (inputs[useCamelCase ? ToCamelCase(variable) : variable] = value) : undefined
@@ -79,15 +84,15 @@ export default async function runChain(
       )
     if (isRunConfig(config)) {
       const promptVersion = (
-        config.versionID === version.id ? version : await getTrustedVersion(config.versionID)
+        config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
-      let prompt = resolvePrompt(promptVersion.prompt, inputs, useCamelCase)
-      runningContext += prompt
+      let prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
+      runningContext += prompts.main
       if (config.includeContext) {
-        prompt = runningContext
+        prompts.main = runningContext
       }
       lastResponse = await runChainStep(
-        runPromptWithConfig(userID, prompt, promptVersion.config, streamPartialResponse)
+        runPromptWithConfig(userID, prompts, promptVersion.config, streamPartialResponse)
       )
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {

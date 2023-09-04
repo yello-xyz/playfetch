@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, PromptConfig, PromptInputs, PromptVersion, TestConfig } from '@/types'
+import { ActiveProject, ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
@@ -6,10 +6,8 @@ import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import TabSelector from './tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { PromptConfigsEqual } from '@/src/common/versionsEqual'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
@@ -40,32 +38,32 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [currentPrompt, setCurrentPrompt] = useInitialState(activeVersion.prompt)
-  const [currentPromptConfig, setCurrentPromptConfig] = useInitialState(activeVersion.config, PromptConfigsEqual)
+  const [currentPrompts, setCurrentPrompts] = useState(activeVersion.prompts)
+  const [currentPromptConfig, setCurrentPromptConfig] = useState(activeVersion.config)
+  const [currentVersionID, setCurrentVersionID] = useInitialState(activeVersion.id)
+  if (activeVersion.id !== currentVersionID) {
+    setCurrentVersionID(activeVersion.id)
+    setCurrentPrompts(activeVersion.prompts)
+    setCurrentPromptConfig(activeVersion.config)
+  }
 
   const updateVersion = (version: PromptVersion) => {
-    setCurrentPrompt(version.prompt)
+    setCurrentPrompts(version.prompts)
     setCurrentPromptConfig(version.config)
     setModifiedVersion(version)
   }
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
-  const checkProviderAvailable = useCheckProvider()
-
   const [runVersion, partialRuns, isRunning] = useRunVersion()
-  const runPrompt = async (config: PromptConfig, inputs: PromptInputs[]) => {
-    if (checkProviderAvailable(config.provider)) {
-      await runVersion(savePrompt, inputs)
-    }
-  }
+  const runPrompt = (inputs: PromptInputs[]) => runVersion(savePrompt, inputs)
 
   const selectTab = (tab: ActiveTab) => {
     setActiveTab(tab)
     persistInputValuesIfNeeded()
   }
 
-  const variables = ExtractPromptVariables(currentPrompt)
+  const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
   const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
@@ -85,13 +83,12 @@ export default function PromptView({
       case 'Prompt versions':
         return (
           <RunPromptTab
-            currentPrompt={currentPrompt}
+            currentPrompts={currentPrompts}
             currentPromptConfig={currentPromptConfig}
             activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={updateVersion}
-            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             testConfig={testConfig}
@@ -102,14 +99,13 @@ export default function PromptView({
       case 'Test data':
         return (
           <TestPromptTab
-            currentPrompt={currentPrompt}
+            currentPrompts={currentPrompts}
             currentPromptConfig={currentPromptConfig}
             activeProject={project}
             activePrompt={prompt}
             activeVersion={activeVersion}
             setActiveVersion={setActiveVersion}
             setModifiedVersion={updateVersion}
-            checkProviderAvailable={checkProviderAvailable}
             runPrompt={runPrompt}
             inputValues={inputValues}
             setInputValues={setInputValues}

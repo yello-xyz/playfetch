@@ -30,7 +30,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
 
-  const version = await getTrustedVersion(versionID)
+  const version = await getTrustedVersion(versionID, true)
   const configs = loadConfigsFromVersion(version)
 
   res.setHeader('X-Accel-Buffering', 'no')

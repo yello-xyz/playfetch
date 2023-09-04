@@ -1,6 +1,6 @@
 import api from '@/src/client/api'
 import { ActiveChain, ChainItemWithInputs, ChainVersion } from '@/types'
-import { ChainVersionsEqual } from '@/src/common/versionsEqual'
+import { ChainVersionsAreEqual } from '@/src/common/versionsEqual'
 
 export default function useSaveChain(
   activeChain: ActiveChain | undefined,
@@ -11,11 +11,11 @@ export default function useSaveChain(
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => {
-    const versionNeedsSaving = activeChain && activeVersion && !ChainVersionsEqual(activeVersion, { items })
+    const versionNeedsSaving = activeChain && activeVersion && !ChainVersionsAreEqual(activeVersion, { items })
     if (!versionNeedsSaving) {
       return activeVersion?.id
     }
-    const equalPreviousVersion = activeChain.versions.find(version => ChainVersionsEqual(version, { items }))
+    const equalPreviousVersion = activeChain.versions.find(version => ChainVersionsAreEqual(version, { items }))
     if (equalPreviousVersion) {
       setActiveVersion(equalPreviousVersion)
       return equalPreviousVersion.id

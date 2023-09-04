@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
-import { ActivePrompt, User, PromptVersion, ChainVersion } from '@/types'
+import { ActivePrompt, User, PromptVersion, ChainVersion, IsPromptVersion, ActiveChain } from '@/types'
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from './labelPopupMenu'
@@ -9,6 +9,7 @@ import { LabelForModel } from './modelSelector'
 import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from './icon'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -17,7 +18,7 @@ const extractSelection = (identifier: string) => {
     : undefined
 }
 
-export default function VersionCell({
+export default function VersionCell<Version extends PromptVersion | ChainVersion>({
   identifier,
   labelColors,
   version,
@@ -25,20 +26,18 @@ export default function VersionCell({
   isLast,
   isActiveVersion,
   compareVersion,
-  prompt,
+  activeItem,
   onSelect,
-  containerRect,
 }: {
   identifier: string
   labelColors: Record<string, string>
-  version: PromptVersion
+  version: Version
   index: number
   isLast: boolean
   isActiveVersion: boolean
   compareVersion?: PromptVersion
-  prompt: ActivePrompt
-  onSelect: (version: PromptVersion) => void
-  containerRect?: DOMRect
+  activeItem: ActivePrompt | ActiveChain
+  onSelect: (version: Version) => void
 }) {
   const [selection, setSelection] = useState<string>()
   useEffect(() => {
@@ -49,7 +48,8 @@ export default function VersionCell({
     }
   }, [identifier])
 
-  const user = prompt.users.find(user => user.id === version.userID)
+  const user = activeItem.users.find(user => user.id === version.userID)
+  const formattedDate = useFormattedDate(version.timestamp)
 
   return (
     <VerticalBarWrapper
@@ -59,13 +59,15 @@ export default function VersionCell({
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
         className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
-          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-300'
+          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-200'
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
-          <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
-            <span className='font-medium'>{LabelForModel(version.config.model)}</span>
-            {version.runs.length > 0 && (
+          <div className='flex items-center flex-1 gap-2 text-xs text-gray-700'>
+            <span className='font-medium'>
+              {IsPromptVersion(version) ? LabelForModel(version.config.model) : formattedDate}
+            </span>
+            {IsPromptVersion(version) && version.runs.length > 0 && (
               <span>
                 {' '}
                 | {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
@@ -77,30 +79,32 @@ export default function VersionCell({
               comments={version.comments.filter(comment => !comment.action)}
               versionID={version.id}
               selection={selection}
-              users={prompt.users}
+              users={activeItem.users}
               labelColors={labelColors}
-              containerRect={containerRect}
+              selectedCell={isActiveVersion}
             />
-            <LabelPopupMenu containerRect={containerRect} activeItem={prompt} item={version} />
-            <VersionPopupMenu containerRect={containerRect} version={version} />
+            <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
+            <VersionPopupMenu version={version} selectedCell={isActiveVersion} />
           </div>
         </div>
-        {user && prompt.projectID !== user.id && <UserDetails user={user} />}
+        {user && activeItem.projectID !== user.id && <UserDetails user={user} />}
         <VersionLabels version={version} colors={labelColors} />
-        <div className={isActiveVersion ? '' : 'line-clamp-2'}>
-          <VersionComparison version={version} compareVersion={compareVersion} />
-        </div>
+        {IsPromptVersion(version) && (
+          <div className={isActiveVersion ? '' : 'line-clamp-2'}>
+            <VersionComparison version={version} compareVersion={compareVersion} />
+          </div>
+        )}
       </div>
     </VerticalBarWrapper>
   )
 }
 
-export function VersionLabels<T extends PromptVersion | ChainVersion>({
+export function VersionLabels<Version extends PromptVersion | ChainVersion>({
   version,
   colors,
   hideReferences,
 }: {
-  version: T
+  version: Version
   colors: Record<string, string>
   hideReferences?: boolean
 }) {
@@ -153,7 +157,7 @@ export function ItemLabel({
   const color = colors[label] ?? 'bg-gray-400'
   const icon = icons[label]
   return (
-    <span className={`pl-1 pr-1.5 text-xs gap-0.5 flex items-center rounded ${color}`}>
+    <span className={`pl-1 pr-1.5 text-xs gap-0.5 flex items-center whitespace-nowrap rounded ${color}`}>
       {icon ? <Icon icon={icon} className='-my-0.5' /> : null}
       {label}
     </span>
@@ -196,7 +200,7 @@ function VerticalBarWrapper({
               <span className={`${isFilled ? 'text-dark-gray-700' : 'text-gray-300'} text-xs font-medium`}>
                 {sequenceNumber}
               </span>
-              <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-700' : 'border border-gray-300'}`} />
+              <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-700' : 'border border-gray-400'}`} />
             </div>
           )}
           {hasStroke && (

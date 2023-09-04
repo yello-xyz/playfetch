@@ -15,6 +15,9 @@ export default function RunCellBody({
 
   let index = 0
   for (const { startIndex, endIndex } of selectionRanges.sort((a, b) => a.startIndex - b.startIndex)) {
+    if (startIndex < index) {
+      continue
+    }
     if (startIndex > index) {
       spans.push(<span key={index}>{output.substring(index, startIndex)}</span>)
     }
