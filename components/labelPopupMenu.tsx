@@ -26,7 +26,7 @@ export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain) 
 export default function LabelPopupMenu({
   item,
   activeItem,
-  selectedCell = false
+  selectedCell = false,
 }: {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain

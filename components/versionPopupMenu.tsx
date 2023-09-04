@@ -8,7 +8,7 @@ import GlobalPopupMenu from './globalPopupMenu'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
-  selectedCell = false
+  selectedCell = false,
 }: {
   version: Version
   selectedCell?: boolean

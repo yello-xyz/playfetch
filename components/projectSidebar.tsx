@@ -39,7 +39,7 @@ export default function ProjectSidebar({
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
     activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
 
-  const actionButtonForProjectItem = (item: Prompt | Chain, activeItem:boolean) => (
+  const actionButtonForProjectItem = (item: Prompt | Chain, activeItem: boolean) => (
     <ProjectItemActionButton
       item={item}
       workspaces={workspaces}
@@ -104,14 +104,19 @@ function ProjectItemActionButton({
   reference: Chain | Endpoint | undefined
   onRefresh: () => void
   onDelete: () => void
-  active?:boolean
+  active?: boolean
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const iconClass = isMenuExpanded ? '' : 'hidden group-hover:block'
 
   return (
     <div className='relative'>
-      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} hoverStyle={active ? 'hover:bg-blue-100' : 'hover:bg-gray-200'} />
+      <IconButton
+        className={iconClass}
+        icon={dotsIcon}
+        onClick={() => setMenuExpanded(!isMenuExpanded)}
+        hoverStyle={active ? 'hover:bg-blue-100' : 'hover:bg-gray-200'}
+      />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}

@@ -22,7 +22,7 @@ export default function CommentPopupMenu({
   startIndex,
   users,
   labelColors,
-  selectedCell = false
+  selectedCell = false,
 }: {
   comments: Comment[]
   versionID: number
@@ -38,7 +38,13 @@ export default function CommentPopupMenu({
     { comments, versionID, selection, runID, startIndex, users, labelColors },
   ]
 
-  return <GlobalPopupMenu icon={comments.length > 0 ? commentBadgeIcon : commentIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
+  return (
+    <GlobalPopupMenu
+      icon={comments.length > 0 ? commentBadgeIcon : commentIcon}
+      loadPopup={loadPopup}
+      selectedCell={selectedCell}
+    />
+  )
 }
 
 export type CommentsPopupProps = {

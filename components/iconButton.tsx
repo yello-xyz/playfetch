@@ -10,7 +10,7 @@ export default function IconButton({
   icon,
   onClick,
   disabled,
-  hoverStyle = 'hover:bg-gray-100'
+  hoverStyle = 'hover:bg-gray-100',
 }: {
   hoverType?: HoverType
   className?: string
