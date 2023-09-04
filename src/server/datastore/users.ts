@@ -89,7 +89,7 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
   }
 }
 
-export async function getWaitlistUsers() {
+export async function getUsersWithoutAccess() {
   const usersData = await getOrderedEntities(Entity.USER, 'hasAccess', false)
   return usersData.map(toUser)
 }

@@ -64,7 +64,7 @@ export default function TestPromptTab({
 
   const checkProviderAvailable = useCheckProvider()
   const isProviderAvailable = checkProviderAvailable(currentPromptConfig.provider)
-  const showMultipleInputsWarning = testConfig.rowIndices.length > 1 
+  const showMultipleInputsWarning = testConfig.rowIndices.length > 1
 
   const minVersionHeight = 240
   const [promptHeight, setPromptHeight] = useState(1)
