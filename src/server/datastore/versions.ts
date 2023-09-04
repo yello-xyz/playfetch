@@ -248,7 +248,7 @@ export async function updateVersionLabel(
 }
 
 const filterOutEmptyOptionalPrompts = (prompts: Prompts) =>
-  Object.fromEntries(Object.entries(prompts).filter(([k, v]) => k === 'main' || v?.trim()?.length))
+  Object.fromEntries(Object.entries(prompts).filter(([key, value]) => key === 'main' || value?.trim()?.length))
 
 const toVersionData = (
   userID: number,

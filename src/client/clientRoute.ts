@@ -35,7 +35,7 @@ export function ParseQuery(query: NodeJS.Dict<string | string[]>): NodeJS.Dict<s
 }
 
 const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): NodeJS.Dict<U> =>
-  Object.fromEntries(Object.entries(dict).map(([k, v]) => [k, v ? mapper(v) : undefined]))
+  Object.fromEntries(Object.entries(dict).map(([key, value]) => [key, value ? mapper(value) : undefined]))
 
 export const ParseNumberQuery = (query: NodeJS.Dict<string | string[]>): NodeJS.Dict<number> =>
   mapDictionary(ParseQuery(query), value => Number(value))
