@@ -60,6 +60,15 @@ export const LabelForSupportedPrompt = (prompt: keyof Prompts) => {
   }
 }
 
+export const PlaceholderForSupportedPrompt = (prompt: keyof Prompts) => {
+  switch (prompt) {
+    case 'main':
+      return 'Enter prompt here. Use {{variable}} to insert dynamic values.'
+    case 'system':
+      return 'Enter system prompt here. This is optional and will be ignored by models that do not support it.'
+  }
+}
+
 export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':

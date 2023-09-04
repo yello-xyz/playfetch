@@ -1,7 +1,7 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { LabelForSupportedPrompt, ProviderForModel, SupportedPromptsForModel } from './modelSelector'
+import { LabelForSupportedPrompt, PlaceholderForSupportedPrompt, ProviderForModel, SupportedPromptsForModel } from './modelSelector'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -85,7 +85,7 @@ export default function PromptPanel({
           labels={promptLabels}
           activeLabel={activePromptLabel}
           setActiveLabel={setActivePromptLabel}
-          placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
+          placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
           onUpdateScrollHeight={setPromptInputScrollHeight}
         />
       </div>
