@@ -8,7 +8,7 @@ import CommentsPane from './commentsPane'
 import { ReactNode, useState } from 'react'
 import TabSelector from './tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
@@ -63,7 +63,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const variables = ExtractPromptVariables(currentPrompt)
+  const variables = ExtractVariables(currentPrompt) // TODO generalise to use ExtractPromptVariables
   const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector

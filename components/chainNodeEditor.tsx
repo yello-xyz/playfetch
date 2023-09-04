@@ -3,14 +3,13 @@ import {
   ChainItem,
   ChainItemWithInputs,
   ChainVersion,
-  CodeChainItem,
   PromptInputs,
   PromptVersion,
   TestConfig,
 } from '@/types'
 import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
 import PromptInput from './promptInput'
 import useInputValues from '@/src/client/hooks/useInputValues'
@@ -31,10 +30,10 @@ export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache) => {
   if (IsCodeChainItem(item)) {
-    return ExtractPromptVariables(item.code)
+    return ExtractVariables(item.code)
   }
   const version = cache.versionForItem(item)
-  return version ? ExtractPromptVariables(version.prompts.main) : item.inputs ?? []
+  return version ? ExtractPromptVariables(version.prompts) : item.inputs ?? []
 }
 
 const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainItem[]) => {

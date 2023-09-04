@@ -9,7 +9,7 @@ import {
   TestConfig,
 } from '@/types'
 
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import RunButtons from './runButtons'
@@ -49,7 +49,7 @@ export default function TestPromptTab({
   setTestConfig: (testConfig: TestConfig) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const variables = ExtractPromptVariables(currentPrompt)
+  const variables = ExtractVariables(currentPrompt) // TODO generalise to use ExtractPromptVariables
 
   const selectVersion = (version: PromptVersion) => {
     persistInputValuesIfNeeded()

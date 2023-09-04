@@ -1,11 +1,11 @@
 import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 
 const promptToCamelCase = (prompt: string) =>
-  ExtractPromptVariables(prompt).reduce(
+  ExtractVariables(prompt).reduce(
     (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
     prompt
   )

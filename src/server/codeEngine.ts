@@ -1,9 +1,9 @@
 import { PromptInputs } from '@/types'
-import { ExtractPromptVariables, ToCamelCase } from '@/src/common/formatting'
+import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import Isolated from 'isolated-vm'
 
 const codeToCamelCase = (code: string) =>
-  ExtractPromptVariables(code).reduce(
+  ExtractVariables(code).reduce(
     (code, variable) => code.replaceAll(`{{${variable}}}`, ToCamelCase(variable)),
     code
   )

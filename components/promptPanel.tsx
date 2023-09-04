@@ -1,5 +1,5 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig } from '@/types'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { ProviderForModel } from './modelSelector'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
@@ -87,7 +87,7 @@ export default function PromptPanel({
         <div className='flex items-center self-end gap-3'>
           <RunButtons
             runTitle={version.runs.length ? 'Run again' : 'Run'}
-            variables={ExtractPromptVariables(prompt)}
+            variables={ExtractVariables(prompt)} // TODO generalise to use ExtractPromptVariables
             inputValues={inputValues}
             languageModel={config.model}
             setLanguageModel={updateModel}

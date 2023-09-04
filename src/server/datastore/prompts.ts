@@ -13,7 +13,7 @@ import {
 import { savePromptVersionForUser, toVersion } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { StripPromptSentinels } from '@/src/common/formatting'
+import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 
 export async function migratePrompts() {
@@ -144,7 +144,7 @@ export async function augmentPromptDataWithNewVersion(
 ) {
   const newPromptName =
     matchesDefaultName(promptData.name, DefaultPromptName) && !previousVersionPrompt.length && newVersionPrompt.length
-      ? StripPromptSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
+      ? StripVariableSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
 
   await updatePrompt({ ...promptData, lastVersionID: newVersionID, name: newPromptName }, true)
