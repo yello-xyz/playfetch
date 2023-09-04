@@ -86,7 +86,7 @@ export default function TestPromptTab({
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={Math.min(350, preferredHeight)} preferredSize={preferredHeight}>
-        <div className='h-full p-4'>
+        <div className='h-full p-4 bg-white'>
           <div className='flex flex-col h-full gap-4'>
             <div className='flex items-start gap-2'>
               <VersionSelector
