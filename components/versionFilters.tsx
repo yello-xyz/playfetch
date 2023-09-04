@@ -188,7 +188,7 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
   return (
     <div className='relative flex overflow-visible'>
       <div
-        className='flex items-center gap-1 pl-1 pr-2 py-0.5 cursor-pointer hover:bg-gray-100 rounded-lg'
+        className='flex items-center gap-1 pl-1 pr-2 py-0.5 cursor-pointer hover:bg-gray-100 rounded-md'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
         <Icon icon={filterIcon} />
         Filter
