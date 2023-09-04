@@ -1,7 +1,7 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { ProviderForModel, SupportedPromptsForModel } from './modelSelector'
+import { LabelForSupportedPrompt, ProviderForModel, SupportedPromptsForModel } from './modelSelector'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -39,7 +39,8 @@ export default function PromptPanel({
     initialConfig !== undefined ? initialConfig : version.config,
     PromptConfigsAreEqual
   )
-  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>(SupportedPromptsForModel(config.model)[0])
+  const supportedPrompts = SupportedPromptsForModel(config.model)
+  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>(supportedPrompts[0])
 
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
@@ -58,10 +59,16 @@ export default function PromptPanel({
   const checkProviderAvailable = useCheckProvider()
   const isProviderAvailable = checkProviderAvailable(config.provider)
 
+  const activePromptLabel = LabelForSupportedPrompt(activePromptKey)
+  const setActivePromptLabel = (label: string) =>
+    setActivePromptKey(supportedPrompts.find(p => LabelForSupportedPrompt(p) === label) ?? supportedPrompts[0])
+  const promptLabels =
+    showLabel || supportedPrompts.length > 1 ? supportedPrompts.map(LabelForSupportedPrompt) : undefined
+
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
   const preferredHeight =
-    (showLabel ? 32 : 0) +
+    (promptLabels ? 32 : 0) +
     (isProviderAvailable ? 0 : 72) +
     (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) +
     promptInputScrollHeight
@@ -75,7 +82,9 @@ export default function PromptPanel({
           key={version.id}
           value={prompts[activePromptKey] ?? ''}
           setValue={updatePrompt}
-          label={showLabel ? 'Prompt' : undefined}
+          labels={promptLabels}
+          activeLabel={activePromptLabel}
+          setActiveLabel={setActivePromptLabel}
           placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
           onUpdateScrollHeight={setPromptInputScrollHeight}
         />

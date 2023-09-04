@@ -48,6 +48,15 @@ export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[
   }
 }
 
+export const LabelForSupportedPrompt = (prompt: keyof Prompts) => {
+  switch (prompt) {
+    case 'main':
+      return 'Prompt'
+    case 'system':
+      return 'System'
+  }
+}
+
 export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
