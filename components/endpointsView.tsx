@@ -147,7 +147,7 @@ export default function EndpointsView({
   const variables = parent
     ? EndpointParentIsChain(parent)
       ? ExtractUnboundChainInputs(activeVersion?.items ?? [])
-      : ExtractPromptVariables(activeVersion?.prompt ?? '')
+      : ExtractPromptVariables(activeVersion?.prompts?.main ?? '')
     : []
 
   const minWidth = 460

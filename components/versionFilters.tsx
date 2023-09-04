@@ -36,7 +36,7 @@ export const BuildVersionFilter =
     const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
     const textFilter = (version: Version) =>
       !textStrings.length ||
-      textStrings.every(filter => IsPromptVersion(version) && version.prompt.toLowerCase().includes(filter))
+      textStrings.every(filter => IsPromptVersion(version) && version.prompts.main.toLowerCase().includes(filter))
 
     return userFilter(version) && labelFilter(version) && textFilter(version)
   }

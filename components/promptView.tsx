@@ -38,17 +38,17 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [currentPrompt, setCurrentPrompt] = useState(activeVersion.prompt)
+  const [currentPrompt, setCurrentPrompt] = useState(activeVersion.prompts.main)
   const [currentPromptConfig, setCurrentPromptConfig] = useState(activeVersion.config)
   const [currentVersionID, setCurrentVersionID] = useInitialState(activeVersion.id)
   if (activeVersion.id !== currentVersionID) {
     setCurrentVersionID(activeVersion.id)
-    setCurrentPrompt(activeVersion.prompt)
+    setCurrentPrompt(activeVersion.prompts.main)
     setCurrentPromptConfig(activeVersion.config)
   }
 
   const updateVersion = (version: PromptVersion) => {
-    setCurrentPrompt(version.prompt)
+    setCurrentPrompt(version.prompts.main)
     setCurrentPromptConfig(version.config)
     setModifiedVersion(version)
   }

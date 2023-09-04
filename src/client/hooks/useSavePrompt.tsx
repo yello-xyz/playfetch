@@ -15,7 +15,7 @@ export default function useSavePrompt(
       activePrompt &&
       activeVersion &&
       modifiedVersion &&
-      modifiedVersion.prompt.trim().length > 0 &&
+      modifiedVersion.prompts.main.trim().length > 0 &&
       !PromptVersionsEqual(activeVersion, modifiedVersion)
     setModifiedVersion(undefined)
     if (!versionNeedsSaving) {
@@ -28,7 +28,7 @@ export default function useSavePrompt(
     }
     const versionID = await api.updatePrompt(
       activePrompt.id,
-      modifiedVersion.prompt,
+      modifiedVersion.prompts,
       modifiedVersion.config,
       activeVersion.id
     )

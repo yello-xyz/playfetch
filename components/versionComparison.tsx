@@ -92,8 +92,8 @@ export default function VersionComparison({
   compareVersion?: PromptVersion
 }) {
   const parts = compareVersion
-    ? simplediff.diff(tokenize(compareVersion.prompt), tokenize(version.prompt))
-    : [['=', [version.prompt]]]
+    ? simplediff.diff(tokenize(compareVersion.prompts.main), tokenize(version.prompts.main))
+    : [['=', [version.prompts.main]]]
 
   const result = []
   let tagged = false

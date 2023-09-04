@@ -69,7 +69,7 @@ async function tryCompleteChat(
 
       output += text
       streamChunks?.(text)
-  }
+    }
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
 

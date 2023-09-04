@@ -34,7 +34,7 @@ export default function PromptPanel({
   showLabel?: boolean
   onUpdatePreferredHeight?: (height: number) => void
 }) {
-  const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompt)
+  const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompts.main)
   const [config, setConfig] = useInitialState(
     initialConfig !== undefined ? initialConfig : version.config,
     PromptConfigsEqual
@@ -43,7 +43,7 @@ export default function PromptPanel({
   const update = (prompt: string, config: PromptConfig) => {
     setPrompt(prompt)
     setConfig(config)
-    setModifiedVersion({ ...version, prompt, config })
+    setModifiedVersion({ ...version, prompts: { main: prompt }, config })
   }
 
   const updatePrompt = (prompt: string) => update(prompt, config)

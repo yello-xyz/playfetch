@@ -11,6 +11,7 @@ import {
   ActiveChain,
   ActivePrompt,
   Comment,
+  Prompts,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -114,8 +115,13 @@ const api = {
   duplicatePrompt: function (promptID: number, targetProjectID?: number): Promise<number> {
     return post(this.duplicatePrompt, { promptID, targetProjectID })
   },
-  updatePrompt: function (promptID: number, prompt: string, config: PromptConfig, versionID: number): Promise<number> {
-    return post(this.updatePrompt, { promptID, prompt, config, versionID })
+  updatePrompt: function (
+    promptID: number,
+    prompts: Prompts,
+    config: PromptConfig,
+    versionID: number
+  ): Promise<number> {
+    return post(this.updatePrompt, { promptID, prompts, config, versionID })
   },
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
