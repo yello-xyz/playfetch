@@ -70,7 +70,7 @@ export default function VersionFilters<Version extends PromptVersion | ChainVers
           setFilters={setFilters}
         />
       )}
-      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-800 ${markup}`}>
+      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-dark-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
             key={index}
@@ -189,12 +189,12 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
   return (
     <div className='relative flex overflow-visible'>
       <div
-        className='flex items-center gap-1 px-2 cursor-pointer'
+        className='flex items-center gap-1 pl-1 pr-2 py-0.5 cursor-pointer hover:bg-gray-100 rounded-md'
         onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
         <Icon icon={filterIcon} />
         Filter
       </div>
-      <div className='absolute right-0 top-7'>
+      <div className='absolute right-0 top-7 shadow-sm'>
         <PopupMenu
           className={menuState === 'text' ? 'w-72 p-2' : 'w-56 p-3'}
           expanded={menuState !== 'collapsed'}

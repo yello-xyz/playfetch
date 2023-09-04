@@ -20,7 +20,7 @@ export default function RunCellHeader({
         <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
         <RunInputs inputs={run.inputs} />
       </div>
-      <LabelPopupMenu activeItem={activeItem} item={run} />
+      <LabelPopupMenu activeItem={activeItem} item={run} selectedCell={true} />
     </div>
   ) : null
 }

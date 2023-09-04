@@ -59,11 +59,11 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
         className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
-          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-300'
+          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'border-gray-200'
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
-          <div className='flex items-center flex-1 gap-2 text-xs text-gray-800'>
+          <div className='flex items-center flex-1 gap-2 text-xs text-gray-700'>
             <span className='font-medium'>
               {IsPromptVersion(version) ? LabelForModel(version.config.model) : formattedDate}
             </span>
@@ -81,9 +81,10 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
               selection={selection}
               users={activeItem.users}
               labelColors={labelColors}
+              selectedCell={isActiveVersion}
             />
-            <LabelPopupMenu activeItem={activeItem} item={version} />
-            <VersionPopupMenu version={version} />
+            <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
+            <VersionPopupMenu version={version} selectedCell={isActiveVersion} />
           </div>
         </div>
         {user && activeItem.projectID !== user.id && <UserDetails user={user} />}
@@ -199,7 +200,7 @@ function VerticalBarWrapper({
               <span className={`${isFilled ? 'text-dark-gray-700' : 'text-gray-300'} text-xs font-medium`}>
                 {sequenceNumber}
               </span>
-              <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-700' : 'border border-gray-300'}`} />
+              <div className={`rounded-full w-2.5 h-2.5 ${isFilled ? 'bg-dark-gray-700' : 'border border-gray-400'}`} />
             </div>
           )}
           {hasStroke && (

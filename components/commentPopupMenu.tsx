@@ -22,6 +22,7 @@ export default function CommentPopupMenu({
   startIndex,
   users,
   labelColors,
+  selectedCell = false,
 }: {
   comments: Comment[]
   versionID: number
@@ -30,13 +31,20 @@ export default function CommentPopupMenu({
   startIndex?: number
   users: User[]
   labelColors: Record<string, string>
+  selectedCell?: boolean
 }) {
   const loadPopup = (): [typeof CommentsPopup, CommentsPopupProps] => [
     CommentsPopup,
     { comments, versionID, selection, runID, startIndex, users, labelColors },
   ]
 
-  return <GlobalPopupMenu icon={comments.length > 0 ? commentBadgeIcon : commentIcon} loadPopup={loadPopup} />
+  return (
+    <GlobalPopupMenu
+      icon={comments.length > 0 ? commentBadgeIcon : commentIcon}
+      loadPopup={loadPopup}
+      selectedCell={selectedCell}
+    />
+  )
 }
 
 export type CommentsPopupProps = {

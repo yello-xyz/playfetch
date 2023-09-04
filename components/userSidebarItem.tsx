@@ -108,7 +108,7 @@ export default function UserSidebarItem() {
       <div className='flex'>
         <Icon icon={chevronIcon} />
         {isMenuExpanded && (
-          <div className='absolute top-0 left-1.5'>
+          <div className='absolute top-0 left-1.5 shadow-sm'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
               <div className='flex flex-col items-stretch gap-0.5 p-3 select-none'>
                 <div className='flex items-center gap-2.5 pb-2 px-2'>
