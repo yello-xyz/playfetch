@@ -83,7 +83,7 @@ export default function ProjectSidebar({
             icon={chainIcon}
             active={activeItem !== Endpoints && activeItem?.id === chain.id}
             onClick={() => onSelectChain(chain.id)}
-            actionComponent={actionButtonForProjectItem(chain, activeItem?.id === prompt.id)}
+            actionComponent={actionButtonForProjectItem(chain, activeItem?.id === chain.id)}
           />
         ))}
       </SidebarSection>
@@ -111,7 +111,7 @@ function ProjectItemActionButton({
 
   return (
     <div className='relative'>
-      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} hoverStyle={active ? 'hover:bg-blue-50' : 'hover:bg-gray-200'} />
+      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} hoverStyle={active ? 'hover:bg-blue-100' : 'hover:bg-gray-200'} />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
