@@ -1,28 +1,20 @@
-import { ActiveChain, ActivePrompt, PartialRun, PromptInputs, Run } from '@/types'
+import { ActiveChain, ActivePrompt, PromptInputs, Run } from '@/types'
 import { ReactNode, useState } from 'react'
 import Icon from './icon'
 import chevronIcon from '@/public/chevron.svg'
 import LabelPopupMenu, { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { ItemLabels } from './versionCell'
 
-export default function RunCellHeader({
-  run,
-  activeItem,
-}: {
-  run: PartialRun
-  activeItem?: ActivePrompt | ActiveChain
-}) {
-  const isProperRun = (item: PartialRun): item is Run => 'labels' in item
-
-  return activeItem && isProperRun(run) ? (
+export default function RunCellHeader({ run, activeItem }: { run: Run; activeItem: ActivePrompt | ActiveChain }) {
+  return (
     <div className='flex items-start justify-between gap-2 text-sm'>
       <div className='flex flex-col flex-1 gap-1'>
         <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
         <RunInputs inputs={run.inputs} />
       </div>
-      <LabelPopupMenu activeItem={activeItem} item={run} selectedCell={true} />
+      <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
     </div>
-  ) : null
+  )
 }
 
 function RunInputs({ inputs }: { inputs: PromptInputs }) {

@@ -34,7 +34,7 @@ export default function IconButton({
   return (
     <Icon
       icon={icon}
-      className={` ${className} ${disabled ? '' : hoverTypeClass(hoverType)}`}
+      className={`${className ?? ''} ${disabled ? '' : hoverTypeClass(hoverType)}`}
       onClick={
         disabled
           ? undefined

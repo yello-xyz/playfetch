@@ -24,8 +24,6 @@ module.exports = {
       'red-300': '#E4735B',
       'red-400': '#DC4F30',
       'red-500': '#C64629',
-      'dark-gray-400': '#898D96',
-      'dark-gray-700': '#333A46',
       white: '#FFFFFF',
     },
     backgroundColor: {

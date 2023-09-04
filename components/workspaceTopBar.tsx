@@ -36,7 +36,7 @@ export default function WorkspaceTopBar({
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
         {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <div className='flex items-center gap-0'>
-          <span className='text-lg font-medium leading-8 text-dark-gray-700'>{activeWorkspace.name}</span>
+          <span className='text-lg font-medium leading-8 text-gray-700'>{activeWorkspace.name}</span>
           {hasPopupMenu && (
             <>
               <Icon icon={chevronIcon} />

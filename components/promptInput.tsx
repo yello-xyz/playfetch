@@ -211,7 +211,13 @@ export default function PromptInput({
             ))}
           </div>
         )}
-        {preformatted ? <CodeBlock active={!disabled}>{renderContentEditable()}</CodeBlock> : renderContentEditable()}
+        {preformatted ? (
+          <CodeBlock active={!disabled} scroll>
+            {renderContentEditable()}
+          </CodeBlock>
+        ) : (
+          renderContentEditable()
+        )}
       </div>
     </div>
   )

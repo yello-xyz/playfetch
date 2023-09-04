@@ -24,7 +24,7 @@ export function TopBarButton({
       case 'primary':
         return baseClass + 'text-white bg-blue-400 hover:bg-blue-500'
       case 'outline':
-        return 'text-dark-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+        return 'text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
     }
   }
 
