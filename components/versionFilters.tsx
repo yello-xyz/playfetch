@@ -69,7 +69,7 @@ export default function VersionFilters<Version extends PromptVersion | ChainVers
           setFilters={setFilters}
         />
       )}
-      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-800 ${markup}`}>
+      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-dark-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
             key={index}
@@ -193,7 +193,7 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
         <Icon icon={filterIcon} />
         Filter
       </div>
-      <div className='absolute right-0 top-7'>
+      <div className='absolute right-0 top-7 shadow-sm'>
         <PopupMenu
           className={menuState === 'text' ? 'w-72 p-2' : 'w-56 p-3'}
           expanded={menuState !== 'collapsed'}
