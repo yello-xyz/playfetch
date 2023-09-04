@@ -53,7 +53,7 @@ export default function ProjectTopBar({
           <div className='relative flex cursor-pointer' onClick={() => setMenuExpanded(!isMenuExpanded)}>
             <span className='font-medium'>{activeProject.name}</span>
             <Icon icon={chevronIcon} />
-            <div className='absolute right-0 top-8'>
+            <div className='absolute right-0 top-8 shadow-sm'>
               <ProjectPopupMenu
                 project={activeProject}
                 isMenuExpanded={isMenuExpanded}
