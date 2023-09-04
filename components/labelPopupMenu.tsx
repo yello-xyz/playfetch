@@ -33,11 +33,10 @@ export default function LabelPopupMenu({
   selectedCell?: boolean
 }) {
   const refreshActiveItem = useRefreshActiveItem()
-  const [newLabel, setNewLabel] = useState('')
 
   const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [
     LabelsPopup,
-    { item, activeItem, refreshActiveItem, newLabel, setNewLabel },
+    { item, activeItem, refreshActiveItem },
   ]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
@@ -46,8 +45,6 @@ export default function LabelPopupMenu({
 export type LabelsPopupProps = {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
-  newLabel: string
-  setNewLabel: (label: string) => void
   refreshActiveItem: () => void
   onDismissGlobalPopup?: () => void
 }
@@ -57,9 +54,9 @@ function LabelsPopup({
   activeItem,
   refreshActiveItem,
   onDismissGlobalPopup,
-  newLabel,
-  setNewLabel,
 }: LabelsPopupProps) {
+  const [newLabel, setNewLabel] = useState('')
+
   const trimmedLabel = newLabel.trim()
 
   const labels = activeItem.availableLabels
