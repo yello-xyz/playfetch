@@ -1,4 +1,4 @@
-import { LanguageModel, ModelProvider } from '@/types'
+import { LanguageModel, ModelProvider, Prompts } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
@@ -34,6 +34,19 @@ export const LabelForProvider = (provider: ModelProvider) => {
 export const AllProviders = (['openai', 'anthropic', 'google', 'cohere'] as ModelProvider[]).sort((a, b) =>
   LabelForProvider(a).localeCompare(LabelForProvider(b))
 )
+
+export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+      return ['main', 'system']
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return ['main']
+  }
+}
 
 export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   switch (model) {

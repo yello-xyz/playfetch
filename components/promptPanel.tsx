@@ -1,7 +1,7 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { ProviderForModel } from './modelSelector'
+import { ProviderForModel, SupportedPromptsForModel } from './modelSelector'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -39,14 +39,19 @@ export default function PromptPanel({
     initialConfig !== undefined ? initialConfig : version.config,
     PromptConfigsAreEqual
   )
+  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>(SupportedPromptsForModel(config.model)[0])
 
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion({ ...version, prompts, config })
+    const supportedPrompts = SupportedPromptsForModel(config.model)
+    if (!supportedPrompts.includes(activePromptKey)) {
+      setActivePromptKey(supportedPrompts[0])
+    }
   }
 
-  const updatePrompt = (prompt: string) => update({ main: prompt }, config)
+  const updatePrompt = (prompt: string) => update({ ...prompts, [activePromptKey]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
@@ -68,7 +73,7 @@ export default function PromptPanel({
       <div className='self-stretch flex-1 min-h-0'>
         <PromptInput
           key={version.id}
-          value={prompts.main}
+          value={prompts[activePromptKey] ?? ''}
           setValue={updatePrompt}
           label={showLabel ? 'Prompt' : undefined}
           placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
