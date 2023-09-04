@@ -77,7 +77,7 @@ export default function PromptPanel({
     (promptLabels ? 32 : 0) +
     (isProviderAvailable ? 0 : 72) +
     (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) +
-    promptInputScrollHeight
+    Math.max(51, promptInputScrollHeight)
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
   return (

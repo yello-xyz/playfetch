@@ -64,12 +64,13 @@ export default function TestPromptTab({
 
   const checkProviderAvailable = useCheckProvider()
   const isProviderAvailable = checkProviderAvailable(currentPromptConfig.provider)
+  const showMultipleInputsWarning = testConfig.rowIndices.length > 1 
 
   const minVersionHeight = 240
   const [promptHeight, setPromptHeight] = useState(1)
-  const versionSelectorHeight = 105
-  const labelHeight = activeVersion.labels.length || activeVersion.usedInChain || activeVersion.usedAsEndpoint ? 26 : 0
-  const preferredHeight = promptHeight + versionSelectorHeight + labelHeight
+  const runButtonsHeight = 55
+  const warningsHeight = showMultipleInputsWarning ? 53 : 0
+  const preferredHeight = promptHeight + runButtonsHeight + warningsHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minVersionHeight}>
@@ -88,20 +89,11 @@ export default function TestPromptTab({
       <Allotment.Pane minSize={Math.min(350, preferredHeight)} preferredSize={preferredHeight}>
         <div className='h-full p-4 bg-white'>
           <div className='flex flex-col h-full gap-4'>
-            <div className='flex items-start gap-2'>
-              <VersionSelector
-                versions={activePrompt.versions}
-                endpoints={activeProject.endpoints}
-                activeVersion={activeVersion}
-                setActiveVersion={selectVersion}
-                labelColors={AvailableLabelColorsForItem(activePrompt)}
-              />
-              {testConfig.rowIndices.length > 1 && (
-                <PromptPanelWarning>
-                  Running this prompt will use {testConfig.rowIndices.length} rows of test data.
-                </PromptPanelWarning>
-              )}
-            </div>
+            {showMultipleInputsWarning && (
+              <PromptPanelWarning>
+                Running this prompt will use {testConfig.rowIndices.length} rows of test data.
+              </PromptPanelWarning>
+            )}
             <PromptPanel
               initialPrompts={currentPrompts}
               initialConfig={currentPromptConfig}
