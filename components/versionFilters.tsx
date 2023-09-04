@@ -10,6 +10,7 @@ import { ReactNode, useRef, useState } from 'react'
 import PopupMenu from './popupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
+import { PromptVersionMatchesFilter } from '@/src/common/versionsEqual'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
@@ -36,7 +37,7 @@ export const BuildVersionFilter =
     const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
     const textFilter = (version: Version) =>
       !textStrings.length ||
-      textStrings.every(filter => IsPromptVersion(version) && version.prompts.main.toLowerCase().includes(filter))
+      textStrings.every(filter => IsPromptVersion(version) && PromptVersionMatchesFilter(version, filter))
 
     return userFilter(version) && labelFilter(version) && textFilter(version)
   }

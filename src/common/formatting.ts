@@ -1,4 +1,4 @@
-import { Prompts } from "@/types"
+import { Prompts } from '@/types'
 
 const validEmailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -77,7 +77,10 @@ export const ExtractVariables = (text: string) => [
   ...new Set([...text.matchAll(/{{([^{}]+)}}/g)].map(match => match[1])),
 ]
 
-export const ExtractPromptVariables = (prompts: Prompts) => ExtractVariables(prompts.main)
+export const ExtractPromptVariables = (prompts: Prompts) => [
+  ...ExtractVariables(prompts.main),
+  ...(prompts.system ? ExtractVariables(prompts.system) : []),
+]
 
 export const CheckValidURLPath = (urlPath: string) => {
   const validRegexp = /^[a-zA-Z0-9\-]+$/

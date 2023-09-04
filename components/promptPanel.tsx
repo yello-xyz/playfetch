@@ -1,8 +1,8 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
-import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { ProviderForModel } from './modelSelector'
-import { PromptConfigsEqual } from '@/src/common/versionsEqual'
+import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from './runButtons'
@@ -37,7 +37,7 @@ export default function PromptPanel({
   const [prompts, setPrompts] = useInitialState(initialPrompts !== undefined ? initialPrompts : version.prompts)
   const [config, setConfig] = useInitialState(
     initialConfig !== undefined ? initialConfig : version.config,
-    PromptConfigsEqual
+    PromptConfigsAreEqual
   )
 
   const update = (prompts: Prompts, config: PromptConfig) => {
@@ -106,7 +106,7 @@ export function PromptPanelWarning({ children }: { children: ReactNode }) {
   return <PromptPanelBanner className='border-pink-50 bg-pink-25'>{children}</PromptPanelBanner>
 }
 
-export function PromptPanelProviderWarning() {
+function PromptPanelProviderWarning() {
   const router = useRouter()
 
   return (
