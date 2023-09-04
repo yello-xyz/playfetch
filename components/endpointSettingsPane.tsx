@@ -213,7 +213,7 @@ export default function EndpointSettingsPane({
         <Checkbox disabled={disabled} checked={useCache} setChecked={setUseCache} />
         <Label disabled={disabled}>Stream Responses</Label>
         <Checkbox disabled={disabled} checked={useStreaming} setChecked={setUseStreaming} />
-        <div className='col-span-2 text-right'>
+        <div className='col-span-2 text-right flex flex-col items-end'>
           {!isEditing && <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>}
         </div>
       </div>

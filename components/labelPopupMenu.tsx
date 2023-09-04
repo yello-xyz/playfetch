@@ -34,10 +34,7 @@ export default function LabelPopupMenu({
 }) {
   const refreshActiveItem = useRefreshActiveItem()
 
-  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [
-    LabelsPopup,
-    { item, activeItem, refreshActiveItem },
-  ]
+  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [LabelsPopup, { item, activeItem, refreshActiveItem }]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
@@ -49,12 +46,7 @@ export type LabelsPopupProps = {
   onDismissGlobalPopup?: () => void
 }
 
-function LabelsPopup({
-  item,
-  activeItem,
-  refreshActiveItem,
-  onDismissGlobalPopup,
-}: LabelsPopupProps) {
+function LabelsPopup({ item, activeItem, refreshActiveItem, onDismissGlobalPopup }: LabelsPopupProps) {
   const [newLabel, setNewLabel] = useState('')
 
   const trimmedLabel = newLabel.trim()
