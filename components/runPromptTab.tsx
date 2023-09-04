@@ -1,11 +1,11 @@
-import { ActivePrompt, InputValues, PromptConfig, PromptInputs, TestConfig, PromptVersion } from '@/types'
+import { ActivePrompt, InputValues, PromptConfig, PromptInputs, TestConfig, PromptVersion, Prompts } from '@/types'
 import VersionTimeline from '@/components/versionTimeline'
 import PromptPanel from './promptPanel'
 import { ReactNode, useState } from 'react'
 import { Allotment } from 'allotment'
 
 export default function RunPromptTab({
-  currentPrompt,
+  currentPrompts,
   currentPromptConfig,
   activePrompt,
   activeVersion,
@@ -17,7 +17,7 @@ export default function RunPromptTab({
   setTestConfig,
   tabSelector,
 }: {
-  currentPrompt: string
+  currentPrompts: Prompts
   currentPromptConfig: PromptConfig
   activePrompt: ActivePrompt
   activeVersion: PromptVersion
@@ -47,7 +47,7 @@ export default function RunPromptTab({
       <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
         <div className='h-full p-4 bg-white'>
           <PromptPanel
-            initialPrompt={currentPrompt}
+            initialPrompts={currentPrompts}
             initialConfig={currentPromptConfig}
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}

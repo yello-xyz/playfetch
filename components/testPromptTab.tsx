@@ -7,9 +7,10 @@ import {
   PromptInputs,
   ActiveProject,
   TestConfig,
+  Prompts,
 } from '@/types'
 
-import { ExtractVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
 import VersionSelector from './versionSelector'
 import RunButtons from './runButtons'
@@ -19,7 +20,7 @@ import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 
 export default function TestPromptTab({
-  currentPrompt,
+  currentPrompts,
   currentPromptConfig,
   activeProject,
   activePrompt,
@@ -34,7 +35,7 @@ export default function TestPromptTab({
   setTestConfig,
   tabSelector,
 }: {
-  currentPrompt: string
+  currentPrompts: Prompts
   currentPromptConfig: PromptConfig
   activeProject: ActiveProject
   activePrompt: ActivePrompt
@@ -49,7 +50,7 @@ export default function TestPromptTab({
   setTestConfig: (testConfig: TestConfig) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const variables = ExtractVariables(currentPrompt) // TODO generalise to use ExtractPromptVariables
+  const variables = ExtractPromptVariables(currentPrompts)
 
   const selectVersion = (version: PromptVersion) => {
     persistInputValuesIfNeeded()
@@ -102,7 +103,7 @@ export default function TestPromptTab({
               )}
             </div>
             <PromptPanel
-              initialPrompt={currentPrompt}
+              initialPrompts={currentPrompts}
               initialConfig={currentPromptConfig}
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
@@ -114,7 +115,7 @@ export default function TestPromptTab({
               testConfig={testConfig}
               setTestConfig={setTestConfig}
               showTestMode
-              disabled={!isProviderAvailable || !currentPrompt.length}
+              disabled={!isProviderAvailable || !currentPrompts.main.length}
               callback={testPrompt}
             />
           </div>

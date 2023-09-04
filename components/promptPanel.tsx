@@ -1,5 +1,5 @@
-import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig } from '@/types'
-import { ExtractVariables } from '@/src/common/formatting'
+import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
+import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import { ProviderForModel } from './modelSelector'
 import { PromptConfigsEqual } from '@/src/common/versionsEqual'
@@ -12,7 +12,7 @@ import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 
 export default function PromptPanel({
-  initialPrompt,
+  initialPrompts,
   initialConfig,
   version,
   setModifiedVersion,
@@ -23,7 +23,7 @@ export default function PromptPanel({
   showLabel,
   onUpdatePreferredHeight,
 }: {
-  initialPrompt?: string
+  initialPrompts?: Prompts
   initialConfig?: PromptConfig
   version: PromptVersion
   setModifiedVersion: (version: PromptVersion) => void
@@ -34,20 +34,20 @@ export default function PromptPanel({
   showLabel?: boolean
   onUpdatePreferredHeight?: (height: number) => void
 }) {
-  const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompts.main)
+  const [prompts, setPrompts] = useInitialState(initialPrompts !== undefined ? initialPrompts : version.prompts)
   const [config, setConfig] = useInitialState(
     initialConfig !== undefined ? initialConfig : version.config,
     PromptConfigsEqual
   )
 
-  const update = (prompt: string, config: PromptConfig) => {
-    setPrompt(prompt)
+  const update = (prompts: Prompts, config: PromptConfig) => {
+    setPrompts(prompts)
     setConfig(config)
-    setModifiedVersion({ ...version, prompts: { main: prompt }, config })
+    setModifiedVersion({ ...version, prompts, config })
   }
 
-  const updatePrompt = (prompt: string) => update(prompt, config)
-  const updateConfig = (config: PromptConfig) => update(prompt, config)
+  const updatePrompt = (prompt: string) => update({ main: prompt }, config)
+  const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
   const checkProviderAvailable = useCheckProvider()
@@ -68,7 +68,7 @@ export default function PromptPanel({
       <div className='self-stretch flex-1 min-h-0'>
         <PromptInput
           key={version.id}
-          value={prompt}
+          value={prompts.main}
           setValue={updatePrompt}
           label={showLabel ? 'Prompt' : undefined}
           placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
@@ -87,13 +87,13 @@ export default function PromptPanel({
         <div className='flex items-center self-end gap-3'>
           <RunButtons
             runTitle={version.runs.length ? 'Run again' : 'Run'}
-            variables={ExtractVariables(prompt)} // TODO generalise to use ExtractPromptVariables
+            variables={ExtractPromptVariables(prompts)}
             inputValues={inputValues}
             languageModel={config.model}
             setLanguageModel={updateModel}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-            disabled={!isProviderAvailable || prompt.trim().length === 0}
+            disabled={!isProviderAvailable || prompts.main.trim().length === 0}
             callback={runPrompt}
           />
         </div>
