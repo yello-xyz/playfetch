@@ -67,8 +67,7 @@ export function CodeBlock({ children, active, error }: { children: ReactNode; ac
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
   const borderClass = active ? 'border' : ''
   return (
-    <div
-      className={`${baseClass} ${textColorClass} ${borderClass}`}>
+    <div className={`${baseClass} ${textColorClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>

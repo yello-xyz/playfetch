@@ -3,10 +3,7 @@ import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import Isolated from 'isolated-vm'
 
 const codeToCamelCase = (code: string) =>
-  ExtractVariables(code).reduce(
-    (code, variable) => code.replaceAll(`{{${variable}}}`, ToCamelCase(variable)),
-    code
-  )
+  ExtractVariables(code).reduce((code, variable) => code.replaceAll(`{{${variable}}}`, ToCamelCase(variable)), code)
 
 const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
 

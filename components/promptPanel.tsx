@@ -1,7 +1,13 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { LabelForSupportedPrompt, PlaceholderForSupportedPrompt, ProviderForModel, ShouldPreformatSupportedPrompt, SupportedPromptsForModel } from './modelSelector'
+import {
+  LabelForSupportedPrompt,
+  PlaceholderForSupportedPrompt,
+  ProviderForModel,
+  ShouldPreformatSupportedPrompt,
+  SupportedPromptsForModel,
+} from './modelSelector'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
