@@ -35,5 +35,5 @@ export default function RunCellBody({
     spans.push(<span key={index}>{output.substring(index)}</span>)
   }
 
-  return <div id={identifier}>{spans}</div>
+  return <div className='flex-1' id={identifier}>{spans}</div>
 }
