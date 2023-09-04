@@ -65,6 +65,6 @@ export default function PromptChainNodeEditor({
       </Allotment.Pane>
     </Allotment>
   ) : (
-    <div className='flex-grow' />
+    <div className='grow' />
   )
 }

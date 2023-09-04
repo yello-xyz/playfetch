@@ -11,7 +11,7 @@ export async function migrateCache(postMerge: boolean) {
       toCacheData(
         cacheData.key,
         cacheData.value,
-        Object.fromEntries(Object.entries(cacheData).filter(([k]) => !['key', 'value', 'createdAt'].includes(k))),
+        Object.fromEntries(Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt'].includes(key))),
         cacheData.createdAt,
         getID(cacheData)
       )

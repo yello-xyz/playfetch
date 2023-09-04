@@ -1,3 +1,6 @@
+import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/components/modelSelector'
+import { PromptConfig, Prompts } from '@/types'
+
 const validEmailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
@@ -69,10 +72,16 @@ export const Truncate = (text: string, length: number) =>
 export const ToCamelCase = (s: string) =>
   s.replace(/(?:^\w|[A-Z]|\b\w)/g, (ch, i) => (i === 0 ? ch.toLowerCase() : ch.toUpperCase())).replace(/\s+/g, '')
 
-export const StripPromptSentinels = (prompt: string) => prompt.replaceAll('{{', '').replaceAll('}}', '')
+export const StripVariableSentinels = (text: string) => text.replaceAll('{{', '').replaceAll('}}', '')
 
-export const ExtractPromptVariables = (prompt: string) => [
-  ...new Set([...prompt.matchAll(/{{([^{}]+)}}/g)].map(match => match[1])),
+export const ExtractVariables = (text: string) => [
+  ...new Set([...text.matchAll(/{{([^{}]+)}}/g)].map(match => match[1])),
+]
+
+export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig) => [
+  ...ExtractVariables(prompts.main),
+  ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
+  ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {

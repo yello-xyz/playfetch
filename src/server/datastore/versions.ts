@@ -21,7 +21,7 @@ import {
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment, toComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
-import { ChainVersionsEqual, PromptVersionsEqual } from '@/src/common/versionsEqual'
+import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
   augmentChainDataWithNewVersion,
   ensureChainAccess,
@@ -88,8 +88,11 @@ const isVersionDataCompatible = (
   IsPromptVersion({ items })
     ? prompts &&
       config &&
-      PromptVersionsEqual({ prompts: versionData.prompts, config: JSON.parse(versionData.config) }, { prompts, config })
-    : items && ChainVersionsEqual({ items: JSON.parse(versionData.items) }, { items })
+      PromptVersionsAreEqual(
+        { prompts: versionData.prompts, config: JSON.parse(versionData.config) },
+        { prompts, config }
+      )
+    : items && ChainVersionsAreEqual({ items: JSON.parse(versionData.items) }, { items })
 
 const getVerifiedUserVersionData = async (userID: number, versionID: number) => {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
@@ -244,6 +247,9 @@ export async function updateVersionLabel(
   }
 }
 
+const filterOutEmptyOptionalPrompts = (prompts: Prompts) =>
+  Object.fromEntries(Object.entries(prompts).filter(([key, value]) => key === 'main' || value?.trim()?.length))
+
 const toVersionData = (
   userID: number,
   parentID: number,
@@ -261,7 +267,7 @@ const toVersionData = (
   data: {
     userID,
     parentID,
-    prompts: prompts ? JSON.stringify(prompts) : null,
+    prompts: prompts ? JSON.stringify(filterOutEmptyOptionalPrompts(prompts)) : null,
     config: config ? JSON.stringify(config) : null,
     items: items ? JSON.stringify(items) : null,
     labels: JSON.stringify(labels),

@@ -1,8 +1,14 @@
-import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig } from '@/types'
+import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import { ProviderForModel } from './modelSelector'
-import { PromptConfigsEqual } from '@/src/common/versionsEqual'
+import {
+  LabelForSupportedPrompt,
+  PlaceholderForSupportedPrompt,
+  ProviderForModel,
+  ShouldPreformatSupportedPrompt,
+  SupportedPromptsForModel,
+} from './modelSelector'
+import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from './runButtons'
@@ -12,7 +18,7 @@ import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 
 export default function PromptPanel({
-  initialPrompt,
+  initialPrompts,
   initialConfig,
   version,
   setModifiedVersion,
@@ -23,7 +29,7 @@ export default function PromptPanel({
   showLabel,
   onUpdatePreferredHeight,
 }: {
-  initialPrompt?: string
+  initialPrompts?: Prompts
   initialConfig?: PromptConfig
   version: PromptVersion
   setModifiedVersion: (version: PromptVersion) => void
@@ -34,32 +40,44 @@ export default function PromptPanel({
   showLabel?: boolean
   onUpdatePreferredHeight?: (height: number) => void
 }) {
-  const [prompt, setPrompt] = useInitialState(initialPrompt !== undefined ? initialPrompt : version.prompts.main)
+  const [prompts, setPrompts] = useInitialState(initialPrompts !== undefined ? initialPrompts : version.prompts)
   const [config, setConfig] = useInitialState(
     initialConfig !== undefined ? initialConfig : version.config,
-    PromptConfigsEqual
+    PromptConfigsAreEqual
   )
+  const supportedPrompts = SupportedPromptsForModel(config.model)
+  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>(supportedPrompts[0])
 
-  const update = (prompt: string, config: PromptConfig) => {
-    setPrompt(prompt)
+  const update = (prompts: Prompts, config: PromptConfig) => {
+    setPrompts(prompts)
     setConfig(config)
-    setModifiedVersion({ ...version, prompts: { main: prompt }, config })
+    setModifiedVersion({ ...version, prompts, config })
+    const supportedPrompts = SupportedPromptsForModel(config.model)
+    if (!supportedPrompts.includes(activePromptKey)) {
+      setActivePromptKey(supportedPrompts[0])
+    }
   }
 
-  const updatePrompt = (prompt: string) => update(prompt, config)
-  const updateConfig = (config: PromptConfig) => update(prompt, config)
+  const updatePrompt = (prompt: string) => update({ ...prompts, [activePromptKey]: prompt }, config)
+  const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
   const checkProviderAvailable = useCheckProvider()
   const isProviderAvailable = checkProviderAvailable(config.provider)
 
+  const activePromptLabel = LabelForSupportedPrompt(activePromptKey)
+  const setActivePromptLabel = (label: string) =>
+    setActivePromptKey(supportedPrompts.find(p => LabelForSupportedPrompt(p) === label) ?? supportedPrompts[0])
+  const promptLabels =
+    showLabel || supportedPrompts.length > 1 ? supportedPrompts.map(LabelForSupportedPrompt) : undefined
+
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
   const preferredHeight =
-    (showLabel ? 32 : 0) +
+    (promptLabels ? 32 : 0) +
     (isProviderAvailable ? 0 : 72) +
     (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) +
-    promptInputScrollHeight
+    Math.max(51, promptInputScrollHeight)
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
   return (
@@ -68,10 +86,13 @@ export default function PromptPanel({
       <div className='self-stretch flex-1 min-h-0'>
         <PromptInput
           key={version.id}
-          value={prompt}
+          value={prompts[activePromptKey] ?? ''}
           setValue={updatePrompt}
-          label={showLabel ? 'Prompt' : undefined}
-          placeholder='Enter prompt here. Use {{variable}} to insert dynamic values.'
+          labels={promptLabels}
+          activeLabel={activePromptLabel}
+          setActiveLabel={setActivePromptLabel}
+          placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
+          preformatted={ShouldPreformatSupportedPrompt(activePromptKey)}
           onUpdateScrollHeight={setPromptInputScrollHeight}
         />
       </div>
@@ -87,13 +108,13 @@ export default function PromptPanel({
         <div className='flex items-center self-end gap-3'>
           <RunButtons
             runTitle={version.runs.length ? 'Run again' : 'Run'}
-            variables={ExtractPromptVariables(prompt)}
+            variables={ExtractPromptVariables(prompts, config)}
             inputValues={inputValues}
             languageModel={config.model}
             setLanguageModel={updateModel}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-            disabled={!isProviderAvailable || prompt.trim().length === 0}
+            disabled={!isProviderAvailable || prompts.main.trim().length === 0}
             callback={runPrompt}
           />
         </div>
@@ -106,7 +127,7 @@ export function PromptPanelWarning({ children }: { children: ReactNode }) {
   return <PromptPanelBanner className='border-pink-50 bg-pink-25'>{children}</PromptPanelBanner>
 }
 
-export function PromptPanelProviderWarning() {
+function PromptPanelProviderWarning() {
   const router = useRouter()
 
   return (
@@ -127,5 +148,5 @@ export function PromptPanelProviderWarning() {
 }
 
 function PromptPanelBanner({ children, className }: { children: ReactNode; className: string }) {
-  return <div className={`flex-grow px-3 py-2 border rounded ${className ?? ''}`}>{children}</div>
+  return <div className={`grow px-3 py-2 border rounded ${className ?? ''}`}>{children}</div>
 }

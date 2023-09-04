@@ -70,3 +70,9 @@ indexes:
   - name: projectID
   - name: createdAt
     direction: desc
+
+- kind: user
+  properties:
+  - name: hasAccess
+  - name: createdAt
+    direction: desc

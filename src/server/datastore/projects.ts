@@ -26,7 +26,7 @@ import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
-import { StripPromptSentinels } from '@/src/common/formatting'
+import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
 
 export async function migrateProjects() {
@@ -155,7 +155,7 @@ export async function augmentProjectWithNewVersion(
     !previousVersionPrompt.length &&
     newVersionPrompt.length
   ) {
-    const newProjectName = StripPromptSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
+    const newProjectName = StripVariableSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
     await updateProject({ ...projectData, name: newProjectName }, true)
   }
 }

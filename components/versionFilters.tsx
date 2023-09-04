@@ -10,6 +10,7 @@ import { ReactNode, useRef, useState } from 'react'
 import PopupMenu from './popupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
+import { PromptVersionMatchesFilter } from '@/src/common/versionsEqual'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
@@ -36,7 +37,7 @@ export const BuildVersionFilter =
     const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
     const textFilter = (version: Version) =>
       !textStrings.length ||
-      textStrings.every(filter => IsPromptVersion(version) && version.prompts.main.toLowerCase().includes(filter))
+      textStrings.every(filter => IsPromptVersion(version) && PromptVersionMatchesFilter(version, filter))
 
     return userFilter(version) && labelFilter(version) && textFilter(version)
   }
@@ -213,7 +214,7 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
             availableLabels.map((label, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ label })}>
                 <div className={`w-2 h-2 m-1 rounded-full ${labelColors[label]}`} />
-                <div className='flex-grow'>{label}</div>
+                <div className='grow'>{label}</div>
                 <div className='pr-2'>{countForLabel(label)}</div>
               </FilterPopupItem>
             ))}
@@ -221,7 +222,7 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
             availableUsers.map((user, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ userID: user.id })}>
                 <UserAvatar user={user} size='sm' />
-                <div className='flex-grow'>{user.fullName}</div>
+                <div className='grow'>{user.fullName}</div>
                 <div className='pr-2'>{countForUserID(user.id)}</div>
               </FilterPopupItem>
             ))}
@@ -244,7 +245,7 @@ function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: Sta
   return (
     <FilterPopupItem onClick={onClick}>
       <Icon icon={icon} />
-      <div className='flex-grow'>{title}</div>
+      <div className='grow'>{title}</div>
       <Icon icon={chevronIcon} />
     </FilterPopupItem>
   )

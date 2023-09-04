@@ -1,4 +1,4 @@
-import { LanguageModel, ModelProvider } from '@/types'
+import { LanguageModel, ModelProvider, Prompts } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
@@ -34,6 +34,70 @@ export const LabelForProvider = (provider: ModelProvider) => {
 export const AllProviders = (['openai', 'anthropic', 'google', 'cohere'] as ModelProvider[]).sort((a, b) =>
   LabelForProvider(a).localeCompare(LabelForProvider(b))
 )
+
+export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] => [
+  'main',
+  ...(SupportsSystemPrompt(model) ? ['system' as keyof Prompts] : []),
+  ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
+]
+
+export const SupportsSystemPrompt = (model: LanguageModel) => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+      return true
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return false
+  }
+}
+
+export const SupportsFunctionsPrompt = (model: LanguageModel) => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+      return true
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return false
+  }
+}
+
+export const LabelForSupportedPrompt = (prompt: keyof Prompts) => {
+  switch (prompt) {
+    case 'main':
+      return 'Prompt'
+    case 'system':
+      return 'System'
+    case 'functions':
+      return 'Functions'
+  }
+}
+
+export const PlaceholderForSupportedPrompt = (prompt: keyof Prompts) => {
+  switch (prompt) {
+    case 'main':
+      return 'Enter prompt here. Use {{variable}} to insert dynamic values.'
+    case 'system':
+      return 'Enter system prompt here. This is optional and will be ignored by models that do not support it.'
+    case 'functions':
+      return 'Enter functions as a JSON array. This will be ignored by models that do not support it.'
+  }
+}
+
+export const ShouldPreformatSupportedPrompt = (prompt: keyof Prompts) => {
+  switch (prompt) {
+    case 'main':
+    case 'system':
+      return false
+    case 'functions':
+      return true
+  }
+}
 
 export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   switch (model) {

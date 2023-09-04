@@ -77,7 +77,9 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
 export default function PromptInput({
   value,
   setValue,
-  label,
+  labels,
+  activeLabel,
+  setActiveLabel,
   placeholder,
   disabled,
   preformatted,
@@ -85,7 +87,9 @@ export default function PromptInput({
 }: {
   value: string
   setValue: (value: string) => void
-  label?: string
+  labels?: string[]
+  activeLabel?: string
+  setActiveLabel?: (label: string) => void
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
@@ -187,12 +191,24 @@ export default function PromptInput({
     </Suspense>
   )
 
+  const selectLabel = (label: string) => {
+    contentEditableRef.current?.focus()
+    setActiveLabel?.(label)
+  }
+
   return (
     <div className='h-full'>
       <div className='flex flex-col h-full gap-2 overflow-hidden'>
-        {label && (
-          <div className='flex items-center block gap-2 mb-1'>
-            <Label onClick={() => contentEditableRef.current?.focus()}>{label}</Label>
+        {labels && (
+          <div className='flex items-center gap-2 mb-1 font-medium'>
+            {labels.map(label => (
+              <div
+                key={label}
+                className={label === activeLabel ? 'text-gray-600' : 'text-gray-300 cursor-pointer'}
+                onClick={() => selectLabel(label)}>
+                {label}
+              </div>
+            ))}
           </div>
         )}
         {preformatted ? <CodeBlock active={!disabled}>{renderContentEditable()}</CodeBlock> : renderContentEditable()}

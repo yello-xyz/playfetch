@@ -38,17 +38,17 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [currentPrompt, setCurrentPrompt] = useState(activeVersion.prompts.main)
+  const [currentPrompts, setCurrentPrompts] = useState(activeVersion.prompts)
   const [currentPromptConfig, setCurrentPromptConfig] = useState(activeVersion.config)
   const [currentVersionID, setCurrentVersionID] = useInitialState(activeVersion.id)
   if (activeVersion.id !== currentVersionID) {
     setCurrentVersionID(activeVersion.id)
-    setCurrentPrompt(activeVersion.prompts.main)
+    setCurrentPrompts(activeVersion.prompts)
     setCurrentPromptConfig(activeVersion.config)
   }
 
   const updateVersion = (version: PromptVersion) => {
-    setCurrentPrompt(version.prompts.main)
+    setCurrentPrompts(version.prompts)
     setCurrentPromptConfig(version.config)
     setModifiedVersion(version)
   }
@@ -63,7 +63,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const variables = ExtractPromptVariables(currentPrompt)
+  const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
   const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
@@ -83,7 +83,7 @@ export default function PromptView({
       case 'Prompt versions':
         return (
           <RunPromptTab
-            currentPrompt={currentPrompt}
+            currentPrompts={currentPrompts}
             currentPromptConfig={currentPromptConfig}
             activePrompt={prompt}
             activeVersion={activeVersion}
@@ -99,7 +99,7 @@ export default function PromptView({
       case 'Test data':
         return (
           <TestPromptTab
-            currentPrompt={currentPrompt}
+            currentPrompts={currentPrompts}
             currentPromptConfig={currentPromptConfig}
             activeProject={project}
             activePrompt={prompt}
