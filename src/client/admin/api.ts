@@ -5,8 +5,8 @@ const post = (apiCall: Function, json: any = {}) => {
 }
 
 const api = {
-  addUser: async function (email: string, fullName: string, isAdmin: boolean) {
-    return post(this.addUser, { email, fullName, isAdmin })
+  addUser: async function (email: string, fullName: string) {
+    return post(this.addUser, { email, fullName })
   },
 }
 
