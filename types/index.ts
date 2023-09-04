@@ -106,6 +106,7 @@ type Version = {
 export type Prompts = {
   main: string
   system?: string
+  functions?: string
 }
 
 export type RawPromptVersion = Version & { prompts: Prompts; config: PromptConfig }

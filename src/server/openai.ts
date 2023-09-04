@@ -13,7 +13,7 @@ export default function predict(apiKey: string, userID: number, model: OpenAILan
       temperature,
       maxOutputTokens,
       prompts.system,
-      undefined,
+      prompts.functions,
       streamChunks
     )
 }
@@ -37,9 +37,18 @@ async function tryCompleteChat(
   temperature: number,
   maxTokens: number,
   system?: string,
-  functions?: ChatCompletionFunctions[],
+  functionsPrompt?: string,
   streamChunks?: (chunk: string) => void
 ) {
+  let functions = undefined as ChatCompletionFunctions[] | undefined
+  if (functionsPrompt) {
+    try {
+      functions = JSON.parse(functionsPrompt)
+    } catch (error: any) {
+      return { error: `Failed to parse functions as JSON array.\n${error?.message ?? ''}` }
+    }
+  }
+
   try {
     const api = new OpenAIApi(new Configuration({ apiKey }))
     const response = await api.createChatCompletion(

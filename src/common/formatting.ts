@@ -1,4 +1,4 @@
-import { SupportsSystemPrompt } from '@/components/modelSelector'
+import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/components/modelSelector'
 import { PromptConfig, Prompts } from '@/types'
 
 const validEmailRegExp =
@@ -81,6 +81,7 @@ export const ExtractVariables = (text: string) => [
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
+  ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {

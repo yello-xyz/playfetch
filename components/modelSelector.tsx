@@ -35,10 +35,26 @@ export const AllProviders = (['openai', 'anthropic', 'google', 'cohere'] as Mode
   LabelForProvider(a).localeCompare(LabelForProvider(b))
 )
 
-export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] =>
-  SupportsSystemPrompt(model) ? ['main', 'system'] : ['main']
+export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] => [
+  'main',
+  ...(SupportsSystemPrompt(model) ? ['system' as keyof Prompts] : []),
+  ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
+]
 
 export const SupportsSystemPrompt = (model: LanguageModel) => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+      return true
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return false
+  }
+}
+
+export const SupportsFunctionsPrompt = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
@@ -57,6 +73,8 @@ export const LabelForSupportedPrompt = (prompt: keyof Prompts) => {
       return 'Prompt'
     case 'system':
       return 'System'
+    case 'functions':
+      return 'Functions'
   }
 }
 
@@ -66,6 +84,8 @@ export const PlaceholderForSupportedPrompt = (prompt: keyof Prompts) => {
       return 'Enter prompt here. Use {{variable}} to insert dynamic values.'
     case 'system':
       return 'Enter system prompt here. This is optional and will be ignored by models that do not support it.'
+    case 'functions':
+      return 'Enter functions as a JSON array. This will be ignored by models that do not support it.'
   }
 }
 
