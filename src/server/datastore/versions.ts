@@ -140,7 +140,7 @@ async function saveVersionForUser(
   const versionID = canOverwrite ? currentVersionID : undefined
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const didRun = canOverwrite ? currentVersion.didRun : false
-  const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
+  const labels = canOverwrite ? JSON.parse(currentVersion.labels) : []
 
   const versionData = toVersionData(
     userID,
