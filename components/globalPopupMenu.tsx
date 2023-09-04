@@ -24,7 +24,7 @@ export default function GlobalPopupMenu<T>({
 
   return (
     <div ref={iconRef}>
-      <IconButton icon={icon} onClick={togglePopup} hoverColor={selectedCell ? 'bg-blue-50' : 'bg-gray-200'} />
+      <IconButton icon={icon} onClick={togglePopup} hoverStyle={selectedCell ? 'hover:bg-blue-50' : 'hover:bg-gray-100'} />
     </div>
   )
 }
