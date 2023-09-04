@@ -2,32 +2,29 @@ import { StaticImageData } from 'next/image'
 import { MouseEvent } from 'react'
 import Icon from './icon'
 
-type HoverType = 'background' | 'opacity' | 'none'
+type HoverType = { background: string } | 'opacity' | 'none'
 
 export default function IconButton({
-  hoverType = 'background',
+  hoverType = { background: 'hover:bg-gray-100' },
   className,
   icon,
   onClick,
   disabled,
-  hoverStyle = 'hover:bg-gray-100',
 }: {
   hoverType?: HoverType
   className?: string
   icon: StaticImageData
   onClick: () => void
   disabled?: boolean
-  hoverStyle?: string
 }) {
   const hoverTypeClass = (type: HoverType) => {
     switch (type) {
-      default:
-      case 'background':
-        return 'rounded cursor-pointer ' + hoverStyle
-      case 'opacity':
-        return 'opacity-60 hover:opacity-100'
       case 'none':
         return ''
+      case 'opacity':
+        return 'opacity-60 hover:opacity-100'
+      default:
+        return `rounded cursor-pointer ${type.background}`
     }
   }
 
