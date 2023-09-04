@@ -52,6 +52,7 @@ export default function ProjectSidebar({
 
   const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
   const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
+  const isActiveItem = (item: Prompt | Chain) => activeItem !== Endpoints && activeItem?.id === item.id
 
   return (
     <Sidebar>
@@ -69,9 +70,9 @@ export default function ProjectSidebar({
             key={promptIndex}
             title={prompt.name}
             icon={promptIcon}
-            active={activeItem !== Endpoints && activeItem?.id === prompt.id}
+            active={isActiveItem(prompt)}
             onClick={() => onSelectPrompt(prompt.id)}
-            actionComponent={actionButtonForProjectItem(prompt, activeItem?.id === prompt.id)}
+            actionComponent={actionButtonForProjectItem(prompt, isActiveItem(prompt))}
           />
         ))}
       </SidebarSection>
@@ -81,9 +82,9 @@ export default function ProjectSidebar({
             key={chainIndex}
             title={chain.name}
             icon={chainIcon}
-            active={activeItem !== Endpoints && activeItem?.id === chain.id}
+            active={isActiveItem(chain)}
             onClick={() => onSelectChain(chain.id)}
-            actionComponent={actionButtonForProjectItem(chain, activeItem?.id === chain.id)}
+            actionComponent={actionButtonForProjectItem(chain, isActiveItem(chain))}
           />
         ))}
       </SidebarSection>
