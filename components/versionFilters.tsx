@@ -214,7 +214,7 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
             availableLabels.map((label, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ label })}>
                 <div className={`w-2 h-2 m-1 rounded-full ${labelColors[label]}`} />
-                <div className='flex-grow'>{label}</div>
+                <div className='grow'>{label}</div>
                 <div className='pr-2'>{countForLabel(label)}</div>
               </FilterPopupItem>
             ))}
@@ -222,7 +222,7 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
             availableUsers.map((user, index) => (
               <FilterPopupItem key={index} onClick={() => addFilter({ userID: user.id })}>
                 <UserAvatar user={user} size='sm' />
-                <div className='flex-grow'>{user.fullName}</div>
+                <div className='grow'>{user.fullName}</div>
                 <div className='pr-2'>{countForUserID(user.id)}</div>
               </FilterPopupItem>
             ))}
@@ -245,7 +245,7 @@ function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: Sta
   return (
     <FilterPopupItem onClick={onClick}>
       <Icon icon={icon} />
-      <div className='flex-grow'>{title}</div>
+      <div className='grow'>{title}</div>
       <Icon icon={chevronIcon} />
     </FilterPopupItem>
   )

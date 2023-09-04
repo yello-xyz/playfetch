@@ -90,12 +90,12 @@ function ProviderRow({
         <Icon icon={IconForProvider(provider)} />
         <Label className='w-40'>{label}</Label>
         {availableProvider && availableProvider.cost > 0 && (
-          <div className='flex justify-end flex-grow text-xs'>{FormatCost(availableProvider.cost)}</div>
+          <div className='flex justify-end text-xs grow'>{FormatCost(availableProvider.cost)}</div>
         )}
       </div>
       <div className='flex items-center gap-2.5'>
         {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
-        <div className='flex gap-2.5 justify-end flex-grow cursor-pointer'>
+        <div className='flex gap-2.5 justify-end grow cursor-pointer'>
           <Button type='outline' onClick={() => setShowAPIKeyPrompt(true)}>
             {availableProvider ? 'Update' : 'Configure'}
           </Button>
