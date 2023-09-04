@@ -33,7 +33,7 @@ export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache) =
     return ExtractVariables(item.code)
   }
   const version = cache.versionForItem(item)
-  return version ? ExtractPromptVariables(version.prompts) : item.inputs ?? []
+  return version ? ExtractPromptVariables(version.prompts, version.config) : item.inputs ?? []
 }
 
 const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainItem[]) => {

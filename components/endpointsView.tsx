@@ -149,8 +149,8 @@ export default function EndpointsView({
       ? activeVersion?.items
         ? ExtractUnboundChainInputs(activeVersion.items)
         : []
-      : activeVersion?.prompts
-      ? ExtractPromptVariables(activeVersion.prompts)
+      : activeVersion?.prompts && activeVersion?.config
+      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config)
       : []
     : []
 

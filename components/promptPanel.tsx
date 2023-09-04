@@ -101,7 +101,7 @@ export default function PromptPanel({
         <div className='flex items-center self-end gap-3'>
           <RunButtons
             runTitle={version.runs.length ? 'Run again' : 'Run'}
-            variables={ExtractPromptVariables(prompts)}
+            variables={ExtractPromptVariables(prompts, config)}
             inputValues={inputValues}
             languageModel={config.model}
             setLanguageModel={updateModel}

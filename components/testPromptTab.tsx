@@ -50,7 +50,7 @@ export default function TestPromptTab({
   setTestConfig: (testConfig: TestConfig) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const variables = ExtractPromptVariables(currentPrompts)
+  const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
 
   const selectVersion = (version: PromptVersion) => {
     persistInputValuesIfNeeded()

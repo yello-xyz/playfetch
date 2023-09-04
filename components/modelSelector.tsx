@@ -35,16 +35,19 @@ export const AllProviders = (['openai', 'anthropic', 'google', 'cohere'] as Mode
   LabelForProvider(a).localeCompare(LabelForProvider(b))
 )
 
-export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] => {
+export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] =>
+  SupportsSystemPrompt(model) ? ['main', 'system'] : ['main']
+
+export const SupportsSystemPrompt = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
-      return ['main', 'system']
+      return true
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison@001':
     case 'command':
-      return ['main']
+      return false
   }
 }
 
