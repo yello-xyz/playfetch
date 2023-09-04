@@ -39,18 +39,19 @@ export default function ProjectSidebar({
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
     activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
 
-  const actionButtonForProjectItem = (item: Prompt | Chain) => (
+  const actionButtonForProjectItem = (item: Prompt | Chain, activeItem:boolean) => (
     <ProjectItemActionButton
       item={item}
       workspaces={workspaces}
       reference={reference(item)}
       onRefresh={onRefreshItem}
       onDelete={onDeleteItem}
+      active={activeItem}
     />
   )
 
-  const addPromptButton = <IconButton className='opacity-50' icon={addIcon} onClick={onAddPrompt} />
-  const addChainButton = <IconButton className='opacity-50' icon={addIcon} onClick={onAddChain} />
+  const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
+  const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
 
   return (
     <Sidebar>
@@ -70,7 +71,7 @@ export default function ProjectSidebar({
             icon={promptIcon}
             active={activeItem !== Endpoints && activeItem?.id === prompt.id}
             onClick={() => onSelectPrompt(prompt.id)}
-            actionComponent={actionButtonForProjectItem(prompt)}
+            actionComponent={actionButtonForProjectItem(prompt, activeItem?.id === prompt.id)}
           />
         ))}
       </SidebarSection>
@@ -82,7 +83,7 @@ export default function ProjectSidebar({
             icon={chainIcon}
             active={activeItem !== Endpoints && activeItem?.id === chain.id}
             onClick={() => onSelectChain(chain.id)}
-            actionComponent={actionButtonForProjectItem(chain)}
+            actionComponent={actionButtonForProjectItem(chain, activeItem?.id === prompt.id)}
           />
         ))}
       </SidebarSection>
@@ -96,19 +97,21 @@ function ProjectItemActionButton({
   reference,
   onRefresh,
   onDelete,
+  active,
 }: {
   item: Prompt | Chain
   workspaces: Workspace[]
   reference: Chain | Endpoint | undefined
   onRefresh: () => void
   onDelete: () => void
+  active?:boolean
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
   const iconClass = isMenuExpanded ? '' : 'hidden group-hover:block'
 
   return (
     <div className='relative'>
-      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
+      <IconButton className={iconClass} icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} hoverColor={active ? 'bg-blue-100' : 'bg-gray-200'} />
       <div className='absolute -right-1 top-8'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}

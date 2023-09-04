@@ -26,9 +26,11 @@ export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain) 
 export default function LabelPopupMenu({
   item,
   activeItem,
+  selectedCell = false
 }: {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
+  selectedCell?: boolean
 }) {
   const refreshActiveItem = useRefreshActiveItem()
   const [newLabel, setNewLabel] = useState('')
@@ -38,7 +40,7 @@ export default function LabelPopupMenu({
     { item, activeItem, refreshActiveItem, newLabel, setNewLabel },
   ]
 
-  return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} />
+  return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
 export type LabelsPopupProps = {

@@ -8,8 +8,10 @@ import GlobalPopupMenu from './globalPopupMenu'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
+  selectedCell = false
 }: {
   version: Version
+  selectedCell?: boolean
 }) {
   const refreshActiveItem = useRefreshActiveItem()
 
@@ -36,7 +38,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [VersionPopup, { deleteVersion }]
 
-  return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} />
+  return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
 type VersionPopupProps = { deleteVersion: () => void; onDismissGlobalPopup?: () => void }

@@ -81,9 +81,10 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
               selection={selection}
               users={activeItem.users}
               labelColors={labelColors}
+              selectedCell={isActiveVersion}
             />
-            <LabelPopupMenu activeItem={activeItem} item={version} />
-            <VersionPopupMenu version={version} />
+            <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
+            <VersionPopupMenu version={version} selectedCell={isActiveVersion} />
           </div>
         </div>
         {user && activeItem.projectID !== user.id && <UserDetails user={user} />}

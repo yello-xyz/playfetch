@@ -6,9 +6,11 @@ import IconButton from './iconButton'
 export default function GlobalPopupMenu<T>({
   icon,
   loadPopup,
+  selectedCell = false,
 }: {
   icon: StaticImageData
   loadPopup: () => [GlobalPopupRender<T>, T]
+  selectedCell?: boolean
 }) {
   const iconRef = useRef<HTMLDivElement>(null)
 
@@ -22,7 +24,7 @@ export default function GlobalPopupMenu<T>({
 
   return (
     <div ref={iconRef}>
-      <IconButton icon={icon} onClick={togglePopup} />
+      <IconButton icon={icon} onClick={togglePopup} hoverColor={selectedCell ? 'bg-blue-50' : 'bg-gray-200'} />
     </div>
   )
 }
