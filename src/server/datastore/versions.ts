@@ -183,7 +183,7 @@ async function saveVersionForUser(
   const savedVersionID = getID(versionData)
 
   if (IsPromptVersion({ items }) && prompts !== null) {
-    const lastPrompt = currentVersion ? currentVersion.prompts.main : ''
+    const lastPrompt = currentVersion ? JSON.parse(currentVersion.prompts).main : ''
     await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompts.main, lastPrompt)
     await augmentProjectWithNewVersion(parentData.projectID, prompts.main, lastPrompt)
   } else if (items) {
