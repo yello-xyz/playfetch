@@ -72,6 +72,7 @@ async function tryCompleteChat(
     )
 
     let output = ''
+    let functionMessage = undefined
     for await (const message of StreamResponseData(response.data)) {
       let text = ''
 
@@ -86,6 +87,7 @@ async function tryCompleteChat(
         text += functionCall.arguments.replaceAll('\n', '\n    ')
       } else if (choice.finish_reason === 'function_call') {
         text = '\n  }\n}\n'
+        functionMessage = { role: 'assistant', content: null, function_call: JSON.parse(output + text).function }
       } else {
         text = choice.delta?.content ?? ''
       }
@@ -95,7 +97,11 @@ async function tryCompleteChat(
     }
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
-    context.messages = [...runningMessages, ...promptMessages, { role: 'assistant', content: output }]
+    context.messages = [
+      ...runningMessages,
+      ...promptMessages,
+      functionMessage ?? { role: 'assistant', content: output },
+    ]
 
     return { output, cost }
   } catch (error: any) {
