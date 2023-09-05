@@ -1,6 +1,7 @@
-import { CohereLanguageModel, Prompts } from '@/types'
+import { CohereLanguageModel } from '@/types'
 import cohere from 'cohere-ai'
 import { encode } from 'gpt-3-encoder'
+import { Predictor } from './promptEngine'
 
 const calculateCost = (input: string, output: string) => {
   const inputTokens = encode(input).length
@@ -8,8 +9,8 @@ const calculateCost = (input: string, output: string) => {
   return ((inputTokens + outputTokens) * 15) / 1000000
 }
 
-export default function predict(apiKey: string, model: CohereLanguageModel) {
-  return (prompts: Prompts, temperature: number, maxTokens: number, streamChunks?: (text: string) => void) =>
+export default function predict(apiKey: string, model: CohereLanguageModel): Predictor {
+  return (prompts, temperature, maxTokens, streamChunks) =>
     complete(apiKey, model, prompts.main, temperature, maxTokens, streamChunks)
 }
 

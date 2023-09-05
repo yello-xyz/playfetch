@@ -1,11 +1,12 @@
-import { AnthropicLanguageModel, Prompts } from '@/types'
+import { AnthropicLanguageModel } from '@/types'
 import Anthropic from '@anthropic-ai/sdk'
+import { Predictor } from './promptEngine'
 
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
 
-export default function predict(apiKey: string, model: AnthropicLanguageModel) {
-  return (prompts: Prompts, temperature: number, maxTokens: number, streamChunks?: (text: string) => void) =>
+export default function predict(apiKey: string, model: AnthropicLanguageModel): Predictor {
+  return (prompts, temperature, maxTokens, streamChunks) =>
     complete(apiKey, model, prompts.main, temperature, maxTokens, streamChunks)
 }
 

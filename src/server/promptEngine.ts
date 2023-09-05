@@ -16,6 +16,12 @@ import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datas
 type ValidPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
 type PredictionResponse = { output: string | undefined; cost: number } | ErrorPredictionResponse
+export type Predictor = (
+  prompts: Prompts,
+  temperature: number,
+  maxTokens: number,
+  streamChunks?: (text: string) => void
+) => Promise<PredictionResponse>
 
 const isValidPredictionResponse = (response: PredictionResponse): response is ValidPredictionResponse =>
   'output' in response && !!response.output && response.output.length > 0
@@ -52,7 +58,7 @@ export default async function runPromptWithConfig(
     }
   }
 
-  const getPredictor = (provider: ModelProvider, apiKey: string) => {
+  const getPredictor = (provider: ModelProvider, apiKey: string): Predictor => {
     switch (provider) {
       case 'google':
         return vertexai(config.model as GoogleLanguageModel)
@@ -66,7 +72,7 @@ export default async function runPromptWithConfig(
   }
 
   const apiKey = await getAPIKey(config.provider)
-  const predictor = getPredictor(config.provider, apiKey ?? '')
+  const predictor: Predictor = getPredictor(config.provider, apiKey ?? '')
 
   let result: PredictionResponse = { output: undefined, cost: 0 }
   let attempts = 0

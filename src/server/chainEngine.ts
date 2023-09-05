@@ -33,7 +33,7 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 
 const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
 
-type ChainStepResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
+type ChainStepResponse = Awaited<ReturnType<typeof runPromptWithConfig | typeof runCodeInContext>>
 type ResponseType = Awaited<ReturnType<typeof runWithTimer<ChainStepResponse>>>
 
 const emptyResponse: ResponseType = {

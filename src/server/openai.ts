@@ -1,10 +1,11 @@
-import { OpenAILanguageModel, Prompts } from '@/types'
+import { OpenAILanguageModel } from '@/types'
 import { ChatCompletionFunctions, ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from './stream'
 import { encode } from 'gpt-3-encoder'
+import { Predictor } from './promptEngine'
 
-export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
-  return (prompts: Prompts, temperature: number, maxOutputTokens: number, streamChunks?: (chunk: string) => void) =>
+export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
+  return (prompts, temperature, maxOutputTokens, streamChunks) =>
     tryCompleteChat(
       apiKey,
       userID,
