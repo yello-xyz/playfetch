@@ -11,27 +11,50 @@ export async function migrateCache(postMerge: boolean) {
       toCacheData(
         cacheData.key,
         cacheData.value,
-        Object.fromEntries(Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt'].includes(key))),
+        Object.fromEntries(
+          Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt', 'expiresAt'].includes(key))
+        ),
         cacheData.createdAt,
+        cacheData.expiresAt,
         getID(cacheData)
       )
     )
   }
 }
 
-const toCacheData = (key: string, value: string, indices = {}, createdAt: Date, cacheID?: number) => ({
-  key: buildKey(Entity.CACHE, cacheID ?? hashValue(key)),
-  data: { ...indices, key, value, createdAt },
+const toCacheData = (
+  key: string | undefined,
+  value: string,
+  attributes = {},
+  createdAt: Date,
+  expiresAt?: Date,
+  cacheID?: number
+) => ({
+  key: buildKey(Entity.CACHE, cacheID),
+  data: { ...attributes, key, value, createdAt, expiresAt },
   excludeFromIndexes: ['key', 'value'],
 })
 
-export async function cacheValue(key: string, value: string, indices = {}) {
-  await getDatastore().save(toCacheData(key, value, indices, new Date()))
+export async function cacheExpiringValue(value: string, expirationTimeMilliseconds: number) {
+  const createdAt = new Date()
+  const expiresAt = new Date(createdAt.getTime() + expirationTimeMilliseconds)
+  const cacheData = toCacheData(undefined, value, undefined, createdAt, expiresAt)
+  await getDatastore().save(cacheData)
+  return getID(cacheData)
 }
 
-export async function getCachedValue(key: string) {
-  const cachedValue = await getKeyedEntity(Entity.CACHE, hashValue(key))
-  return cachedValue && cachedValue.key === key ? cachedValue.value : undefined
+export async function getExpiringCachedValue(cacheID: number) {
+  const cacheData = await getKeyedEntity(Entity.CACHE, cacheID)
+  return cacheData && new Date() < cacheData.expiresAt ? cacheData.value : undefined
+}
+
+export async function cacheValueForKey(key: string, value: string, indices = {}) {
+  await getDatastore().save(toCacheData(key, value, indices, new Date(), undefined, hashValue(key)))
+}
+
+export async function getCachedValueForKey(key: string) {
+  const cacheData = await getKeyedEntity(Entity.CACHE, hashValue(key))
+  return cacheData && cacheData.key === key ? cacheData.value : undefined
 }
 
 const hashValue = (value: string, seed = 0) => {
