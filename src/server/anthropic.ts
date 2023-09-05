@@ -1,13 +1,13 @@
 import { AnthropicLanguageModel } from '@/types'
 import Anthropic from '@anthropic-ai/sdk'
-import { Predictor } from './promptEngine'
+import { Predictor, PromptContext } from './promptEngine'
 
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
 
 export default function predict(apiKey: string, model: AnthropicLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, streamChunks) =>
-    complete(apiKey, model, prompts.main, temperature, maxTokens, streamChunks)
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
+    complete(apiKey, model, prompts.main, temperature, maxTokens, context, useContext, streamChunks)
 }
 
 async function complete(
@@ -16,16 +16,19 @@ async function complete(
   prompt: string,
   temperature: number,
   maxTokens: number,
+  context: PromptContext,
+  usePreviousContext: boolean,
   streamChunks?: (text: string) => void
 ) {
   try {
     const anthropic = new Anthropic({ apiKey })
+    const runningContext = usePreviousContext ? context.running ?? '' : ''
     const formattedPrompt = `${Anthropic.HUMAN_PROMPT} ${prompt} ${Anthropic.AI_PROMPT}`
     const stream = await anthropic.completions.create({
       model,
       temperature,
       max_tokens_to_sample: maxTokens,
-      prompt: formattedPrompt,
+      prompt: `${runningContext}${formattedPrompt}`,
       stop_sequences: [Anthropic.HUMAN_PROMPT],
       stream: true,
     })
@@ -38,6 +41,7 @@ async function complete(
     }
 
     const cost = calculateCost(formattedPrompt, output)
+    context.running = `${runningContext}${formattedPrompt}${output}`
 
     return { output, cost }
   } catch (error: any) {

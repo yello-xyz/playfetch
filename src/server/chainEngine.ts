@@ -69,7 +69,7 @@ export default async function runChain(
   }
 
   let lastResponse = emptyResponse
-  let runningContext = ''
+  const promptContext = {}
   const codeContext = CreateCodeContextWithInputs(inputs)
 
   for (const [index, config] of configs.entries()) {
@@ -87,19 +87,15 @@ export default async function runChain(
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
       let prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
-      runningContext += prompts.main
-      if (config.includeContext) {
-        prompts.main = runningContext
-      }
+      const useContext = config.includeContext ?? false
       lastResponse = await runChainStep(
-        runPromptWithConfig(userID, prompts, promptVersion.config, streamPartialResponse)
+        runPromptWithConfig(userID, prompts, promptVersion.config, promptContext, useContext, streamPartialResponse)
       )
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {
         break
       } else {
         const output = lastResponse.output
-        runningContext += `\n\n${output}\n\n`
         AugmentInputs(inputs, config.output, output!, useCamelCase)
         AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }

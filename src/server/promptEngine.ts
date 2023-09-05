@@ -15,11 +15,15 @@ import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datas
 
 type ValidPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
-type PredictionResponse = { output: string | undefined; cost: number } | ErrorPredictionResponse
+type PredictionResponse = { output: undefined; cost: number } | ValidPredictionResponse | ErrorPredictionResponse
+
+export type PromptContext = any
 export type Predictor = (
   prompts: Prompts,
   temperature: number,
   maxTokens: number,
+  context: PromptContext,
+  usePreviousContext: boolean,
   streamChunks?: (text: string) => void
 ) => Promise<PredictionResponse>
 
@@ -45,6 +49,8 @@ export default async function runPromptWithConfig(
   userID: number,
   prompts: Prompts,
   config: PromptConfig,
+  context: PromptContext,
+  usePreviousContext: boolean,
   streamChunks?: (chunk: string) => void
 ): Promise<RunResponse> {
   const getAPIKey = async (provider: ModelProvider) => {
@@ -78,7 +84,7 @@ export default async function runPromptWithConfig(
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(prompts, config.temperature, config.maxTokens, streamChunks)
+    result = await predictor(prompts, config.temperature, config.maxTokens, context, usePreviousContext, streamChunks)
     if (isValidPredictionResponse(result)) {
       break
     }
