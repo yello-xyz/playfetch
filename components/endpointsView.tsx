@@ -170,14 +170,18 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
       {activeTab === 'Endpoints' && activeEndpoint && (
-        <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
+        <Allotment.Pane
+          key={isEditing.toString()}
+          minSize={isEditing ? undefined : minWidth}
+          maxSize={isEditing ? undefined : maxWidth}
+          preferredSize={isEditing ? '100%' : minWidth}>
           <div className='flex flex-col w-full h-full bg-gray-25'>
             <SingleTabHeader
               label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
               secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : ''}>
               {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
             </SingleTabHeader>
-            <div className='flex flex-col gap-6 p-4 overflow-y-auto'>
+            <div className='flex flex-col gap-6 p-4 overflow-y-auto max-w-[680px]'>
               <EndpointSettingsPane
                 endpoint={activeEndpoint}
                 project={project}

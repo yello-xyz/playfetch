@@ -220,7 +220,7 @@ export default function EndpointSettingsPane({
       {isEditing && endpoint.id && (
         <>
           <Label className='-mb-4'>Danger zone</Label>
-          <div className='flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg'>
+          <div className='flex items-center justify-between w-full p-4 bg-white border border-gray-200 rounded-lg'>
             <div className='flex flex-col'>
               <span>Delete this endpoint</span>
               <span className='text-xs text-gray-400'>
