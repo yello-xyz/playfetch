@@ -18,7 +18,7 @@ export function TopBarBackItem({ title, onNavigateBack }: { title?: string; onNa
 
   return (
     <TopBarAccessoryItem className='flex items-center gap-1 py-1 cursor-pointer' onClick={navigateBack}>
-      <div className='hover:bg-gray-100 flex items-center gap-1 py-1 pl-1.5 pr-2.5 rounded-lg'>
+      <div className='hover:bg-gray-100 flex items-center gap-0.5 py-1 pl-1.5 pr-3 rounded-lg'>
         <Icon icon={backIcon} />
         {title ?? 'Back'}
       </div>
