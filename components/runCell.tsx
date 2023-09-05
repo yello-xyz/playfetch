@@ -143,13 +143,13 @@ export default function RunCell({
     }
   }, [isProperRun, identifier, updateSelection])
 
-  const baseClass = 'flex flex-col gap-3 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
+  const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
   const showInlineHeader = isProperRun && !Object.keys(run.inputs).length && !run.labels.length
 
   return (
     <div className={`${baseClass} ${colorClass}`}>
-      <div className={showInlineHeader ? 'flex flex-row-reverse justify-between' : 'flex flex-col gap-3'}>
+      <div className={showInlineHeader ? 'flex flex-row-reverse justify-between' : 'flex flex-col gap-2.5'}>
         {activeItem && isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
         <RunCellBody
           identifier={identifier}
