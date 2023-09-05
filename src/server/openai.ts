@@ -32,6 +32,13 @@ const costForTokensWithModel = (model: OpenAILanguageModel, input: string, outpu
   }
 }
 
+const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any) => [
+  ...(system ? [{ role: 'system', content: system }] : []),
+  ...(lastMessage && lastMessage.role === 'assistant' && lastMessage.function_call
+    ? [{ role: 'function', name: lastMessage.function_call.name, content: prompt }]
+    : [{ role: 'user', content: prompt }]),
+]
+
 async function tryCompleteChat(
   apiKey: string,
   userID: number,
@@ -45,7 +52,7 @@ async function tryCompleteChat(
   useContext: boolean,
   streamChunks?: (chunk: string) => void
 ) {
-  let functions = undefined as ChatCompletionFunctions[] | undefined
+  let functions = [] as ChatCompletionFunctions[]
   if (functionsPrompt) {
     try {
       functions = JSON.parse(functionsPrompt)
@@ -57,7 +64,8 @@ async function tryCompleteChat(
   try {
     const api = new OpenAIApi(new Configuration({ apiKey }))
     const runningMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: prompt }]
+    const promptMessages = buildPromptMessages(prompt, system, runningMessages.slice(-1)[0])
+    const runningFunctions = useContext ? context?.functions ?? [] : []
     const response = await api.createChatCompletion(
       {
         model,
@@ -66,7 +74,7 @@ async function tryCompleteChat(
         max_tokens: maxTokens,
         user: userID.toString(),
         stream: true,
-        functions,
+        functions: [...runningFunctions, ...functions],
       },
       { responseType: 'stream', timeout: 30 * 1000 }
     )
@@ -87,7 +95,12 @@ async function tryCompleteChat(
         text += functionCall.arguments.replaceAll('\n', '\n    ')
       } else if (choice.finish_reason === 'function_call') {
         text = '\n  }\n}\n'
-        functionMessage = { role: 'assistant', content: null, function_call: JSON.parse(output + text).function }
+        const functionCall = JSON.parse(output + text).function
+        functionMessage = {
+          role: 'assistant',
+          content: null,
+          function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
+        }
       } else {
         text = choice.delta?.content ?? ''
       }
@@ -102,6 +115,7 @@ async function tryCompleteChat(
       ...promptMessages,
       functionMessage ?? { role: 'assistant', content: output },
     ]
+    context.functions = [...runningFunctions, ...functions]
 
     return { output, cost }
   } catch (error: any) {
