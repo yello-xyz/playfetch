@@ -152,7 +152,7 @@ async function saveVersionForUser(
     new Date(),
     didRun,
     previousVersionID,
-    versionID,
+    versionID
   )
   await datastore.save(versionData)
   const savedVersionID = getID(versionData)
@@ -180,7 +180,7 @@ async function updateVersion(versionData: any) {
       versionData.createdAt,
       versionData.didRun,
       versionData.previousVersionID,
-      getID(versionData),
+      getID(versionData)
     )
   )
 }
@@ -234,7 +234,7 @@ const toVersionData = (
   createdAt: Date,
   didRun: boolean,
   previousVersionID?: number,
-  versionID?: number,
+  versionID?: number
 ) => ({
   key: buildKey(Entity.VERSION, versionID),
   data: {

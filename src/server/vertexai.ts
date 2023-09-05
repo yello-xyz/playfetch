@@ -51,7 +51,7 @@ async function complete(
       streamChunks(output)
     }
     context.running = `${runningContext}${prompt}\n${output}\n`
-    
+
     return { output, cost: 0 }
   } catch (error: any) {
     return { error: error?.details ?? 'Unknown error' }
