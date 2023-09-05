@@ -31,7 +31,7 @@ export default function TabSelector<T extends string>({
 }) {
   return (
     <CustomHeader>
-      <div className='flex items-center gap-1'>
+      <div className='flex items-center gap-0.5'>
         {tabs.map((tab, index) => (
           <TabButton
             key={index}

@@ -46,7 +46,7 @@ export default function ExamplePane({
 
   return (
     <>
-      <div className='flex items-center justify-between w-full gap-2 -mb-4'>
+      <div className='flex items-center justify-between w-full gap-2 -mb-4 pr-1.5'>
         <Label>Integration</Label>
         {canCopyToClipboard && (
           <div className='flex items-center gap-1 cursor-pointer' onClick={() => copyToClipboard(curlCommand)}>
@@ -73,14 +73,14 @@ export function CodeBlock({
   scroll?: boolean
   error?: boolean
 }) {
-  const baseClass = 'p-4 text-xs rounded-lg bg-white border border-gray-200'
+  const baseClass = 'px-2 py-4 text-xs rounded-lg bg-white border border-gray-200'
   const scrollClass = scroll ? 'overflow-y-auto' : ''
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
   const borderClass = active ? 'border' : ''
   return (
     <div className={`${baseClass} ${scrollClass} ${textColorClass} ${borderClass}`}>
       <div className='relative overflow-hidden'>
-        <pre className='pl-10 break-all whitespace-pre-wrap'>{children}</pre>
+        <pre className='pl-9 break-all whitespace-pre-wrap'>{children}</pre>
         <div className='absolute top-0 left-0'>
           <pre className='w-4 text-right text-gray-400'>
             {[...Array(100).keys()].map(i => (i + 1).toString()).join('\n')}

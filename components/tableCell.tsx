@@ -25,7 +25,7 @@ export default function TableCell({
       ? 'border-y border-r'
       : 'border-y'
     : first
-    ? 'border-b border-l'
+    ? 'border-b border-l '
     : last
     ? 'border-b border-r'
     : 'border-b'

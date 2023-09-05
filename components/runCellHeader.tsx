@@ -6,13 +6,24 @@ import LabelPopupMenu, { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { ItemLabels } from './versionCell'
 
 export default function RunCellHeader({ run, activeItem }: { run: Run; activeItem: ActivePrompt | ActiveChain }) {
+  const hasLabels = run.labels.length !== 0
+  const hasInputs = JSON.stringify(run.inputs) !== '{}'
+  const baseClass = 'border-b border-b-1 border-gray-200 pb-2.5'
+
   return (
-    <div className='flex items-start justify-between gap-2 text-sm'>
-      <div className='flex flex-col flex-1 gap-1'>
-        <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
-        <RunInputs inputs={run.inputs} />
+    <div className={hasInputs ? baseClass : ''}>
+      <div className='flex items-start justify-between gap-2 text-sm'>
+        <div className='flex flex-col flex-1 gap-1'>
+          <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
+          {!hasLabels && <RunInputs inputs={run.inputs} />}
+        </div>
+        <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
       </div>
-      <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
+      {hasLabels && (
+        <div className='border-t border-t-1 border-gray-200 pt-2.5 mt-2.5'>
+          <RunInputs inputs={run.inputs} />
+        </div>
+      )}
     </div>
   )
 }
