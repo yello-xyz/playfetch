@@ -40,7 +40,7 @@ export default function WorkspaceTopBar({
           {hasPopupMenu && (
             <>
               <Icon icon={chevronIcon} />
-              <div className='absolute left-0 top-8'>
+              <div className='absolute -left-1 top-10 shadow-sm'>
                 <WorkspacePopupMenu
                   workspace={activeWorkspace}
                   isOnlyUser={activeWorkspace.users.length === 1}

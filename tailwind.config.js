@@ -108,7 +108,7 @@ module.exports = {
       xs: '12px',
       sm: '0.79rem',
       base: '.9rem',
-      lg: '1rem'
+      lg: '.95rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',
