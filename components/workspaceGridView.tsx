@@ -164,7 +164,7 @@ function ProjectCell({
         <div className='relative flex items-center gap-2'>
           <span className='mr-5 text-xs text-gray-700'>Edited {formattedDate}</span>
           <IconButton hoverType='opacity' icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
-          <div className='absolute right-0 top-7'>
+          <div className='absolute right-0 top-7 shadow-sm'>
             <ProjectPopupMenu
               project={project}
               isMenuExpanded={isMenuExpanded}
