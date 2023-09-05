@@ -118,7 +118,7 @@ function ProjectItemActionButton({
         onClick={() => setMenuExpanded(!isMenuExpanded)}
         hoverType={{ background: active ? '' : '' }}
       />
-      <div className='absolute -right-1 top-8'>
+      <div className='absolute -right-1 top-8 shadow-sm'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
         />
