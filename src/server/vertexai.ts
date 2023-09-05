@@ -1,15 +1,15 @@
 import aiplatform from '@google-cloud/aiplatform'
 import { getProjectID } from './datastore/datastore'
 import { GoogleLanguageModel } from '@/types'
-import { Predictor } from './promptEngine'
+import { Predictor, PromptContext } from './promptEngine'
 const { PredictionServiceClient } = aiplatform.v1
 
 const location = 'us-central1'
 const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatform.googleapis.com` })
 
 export default function predict(model: GoogleLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, streamChunks) =>
-    complete(model, prompts.main, temperature, maxTokens, streamChunks)
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
+    complete(model, prompts.main, temperature, maxTokens, context, useContext, streamChunks)
 }
 
 async function complete(
@@ -17,17 +17,20 @@ async function complete(
   prompt: string,
   temperature: number,
   maxOutputTokens: number,
+  context: PromptContext,
+  usePreviousContext: boolean,
   streamChunks?: (text: string) => void
 ) {
   try {
     const projectID = await getProjectID()
+    const runningContext = usePreviousContext ? context.running ?? '' : ''
     const request = {
       endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/${model}`,
       instances: [
         {
           structValue: {
             fields: {
-              content: { stringValue: prompt },
+              content: { stringValue: `${runningContext}${prompt}` },
             },
           },
         },
@@ -47,6 +50,8 @@ async function complete(
     if (output && streamChunks) {
       streamChunks(output)
     }
+    context.running = `${runningContext}${prompt}\n${output}\n`
+
     return { output, cost: 0 }
   } catch (error: any) {
     return { error: error?.details ?? 'Unknown error' }

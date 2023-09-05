@@ -1,20 +1,22 @@
 import { OpenAILanguageModel } from '@/types'
-import { ChatCompletionFunctions, ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
+import { ChatCompletionFunctions, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from './stream'
 import { encode } from 'gpt-3-encoder'
-import { Predictor } from './promptEngine'
+import { Predictor, PromptContext } from './promptEngine'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
-  return (prompts, temperature, maxOutputTokens, streamChunks) =>
+  return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks) =>
     tryCompleteChat(
       apiKey,
       userID,
       model,
       prompts.main,
-      temperature,
-      maxOutputTokens,
       prompts.system,
       prompts.functions,
+      temperature,
+      maxOutputTokens,
+      context,
+      useContext,
       streamChunks
     )
 }
@@ -35,10 +37,12 @@ async function tryCompleteChat(
   userID: number,
   model: OpenAILanguageModel,
   prompt: string,
+  system: string | undefined,
+  functionsPrompt: string | undefined,
   temperature: number,
   maxTokens: number,
-  system?: string,
-  functionsPrompt?: string,
+  context: PromptContext,
+  useContext: boolean,
   streamChunks?: (chunk: string) => void
 ) {
   let functions = undefined as ChatCompletionFunctions[] | undefined
@@ -52,13 +56,12 @@ async function tryCompleteChat(
 
   try {
     const api = new OpenAIApi(new Configuration({ apiKey }))
+    const runningMessages = useContext ? context?.messages ?? [] : []
+    const promptMessages = [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: prompt }]
     const response = await api.createChatCompletion(
       {
         model,
-        messages: [
-          ...(system ? [{ role: 'system' as ChatCompletionRequestMessageRoleEnum, content: system }] : []),
-          { role: 'user', content: prompt },
-        ],
+        messages: [...runningMessages, ...promptMessages],
         temperature,
         max_tokens: maxTokens,
         user: userID.toString(),
@@ -92,6 +95,7 @@ async function tryCompleteChat(
     }
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
+    context.messages = [...runningMessages, ...promptMessages, { role: 'assistant', content: output }]
 
     return { output, cost }
   } catch (error: any) {
