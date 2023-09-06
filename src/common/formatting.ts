@@ -78,10 +78,25 @@ export const ExtractVariables = (text: string) => [
   ...new Set([...text.matchAll(/{{([^{}]+)}}/g)].map(match => match[1])),
 ]
 
+const TryParseJSON = (text: string) => {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return undefined
+  }
+}
+
+const ExtractFunctionNames = (text: string) => {
+  const json = TryParseJSON(text)
+  return Array.isArray(json) ? json.map(item => item?.name).filter(name => name) : []
+}
+
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
-  ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
+  ...(SupportsFunctionsPrompt(config.model) && prompts.functions
+    ? [...ExtractVariables(prompts.functions), ...ExtractFunctionNames(prompts.functions)]
+    : []),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {
