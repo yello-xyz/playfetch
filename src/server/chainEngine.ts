@@ -3,7 +3,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
-import { cacheExpiringValue } from './datastore/cache'
+import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -57,8 +57,10 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
-  stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void
+  stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void,
+  continuationID?: number
 ) {
+  const continuationInputs = inputs
   const useCamelCase = isEndpointEvaluation
   let cost = 0
   let duration = 0
@@ -74,11 +76,22 @@ export default async function runChain(
   }
 
   let continuationIndex = undefined
-  const promptContext = {}
+  let promptContext = {}
+
+  if (continuationID) {
+    const cachedValue = await getExpiringCachedValue(continuationID)
+    if (cachedValue) {
+      const continuation = JSON.parse(cachedValue)
+      continuationIndex = continuation.continuationIndex
+      inputs = { ...continuation.inputs, ...inputs }
+      promptContext = continuation.promptContext
+    }
+  }
+
   const codeContext = CreateCodeContextWithInputs(inputs)
   let lastResponse = emptyResponse
 
-  for (const [index, config] of configs.entries()) {
+  for (const [index, config] of configs.slice(continuationIndex ?? 0).entries()) {
     const streamPartialResponse = (chunk: string) => stream?.(index, chunk)
     const streamResponse = (response: ResponseType, skipOutput = false) =>
       stream?.(
@@ -93,9 +106,16 @@ export default async function runChain(
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
       let prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
-      const useContext = config.includeContext ?? false
       lastResponse = await runChainStep(
-        runPromptWithConfig(userID, prompts, promptVersion.config, promptContext, useContext, streamPartialResponse)
+        runPromptWithConfig(
+          userID,
+          prompts,
+          promptVersion.config,
+          promptContext,
+          config.includeContext ?? false,
+          streamPartialResponse,
+          index === continuationIndex ? continuationInputs : undefined
+        )
       )
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {
@@ -120,7 +140,7 @@ export default async function runChain(
     }
   }
 
-  const continuationID =
+  continuationID =
     continuationIndex !== undefined
       ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }))
       : undefined

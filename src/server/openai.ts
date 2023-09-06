@@ -1,11 +1,11 @@
-import { OpenAILanguageModel } from '@/types'
+import { OpenAILanguageModel, PromptInputs } from '@/types'
 import { ChatCompletionFunctions, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from './stream'
 import { encode } from 'gpt-3-encoder'
 import { Predictor, PromptContext } from './promptEngine'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
-  return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks) =>
+  return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
     tryCompleteChat(
       apiKey,
       userID,
@@ -17,7 +17,8 @@ export default function predict(apiKey: string, userID: number, model: OpenAILan
       maxOutputTokens,
       context,
       useContext,
-      streamChunks
+      streamChunks,
+      continuationInputs
     )
 }
 
@@ -32,10 +33,14 @@ const costForTokensWithModel = (model: OpenAILanguageModel, input: string, outpu
   }
 }
 
-const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any) => [
+const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any, inputs?: PromptInputs) => [
   ...(system ? [{ role: 'system', content: system }] : []),
-  ...(lastMessage && lastMessage.role === 'assistant' && lastMessage.function_call
-    ? [{ role: 'function', name: lastMessage.function_call.name, content: prompt }]
+  ...(lastMessage &&
+  lastMessage.role === 'assistant' &&
+  lastMessage.function_call &&
+  inputs &&
+  inputs[lastMessage.function_call] !== undefined
+    ? [{ role: 'function', name: lastMessage.function_call.name, content: inputs[lastMessage.function_call] }]
     : [{ role: 'user', content: prompt }]),
 ]
 
@@ -50,7 +55,8 @@ async function tryCompleteChat(
   maxTokens: number,
   context: PromptContext,
   useContext: boolean,
-  streamChunks?: (chunk: string) => void
+  streamChunks?: (chunk: string) => void,
+  continuationInputs?: PromptInputs
 ) {
   let functions = [] as ChatCompletionFunctions[]
   if (functionsPrompt) {
@@ -64,7 +70,7 @@ async function tryCompleteChat(
   try {
     const api = new OpenAIApi(new Configuration({ apiKey }))
     const runningMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(prompt, system, runningMessages.slice(-1)[0])
+    const promptMessages = buildPromptMessages(prompt, system, runningMessages.slice(-1)[0], continuationInputs)
     const runningFunctions = useContext ? context?.functions ?? [] : []
     const response = await api.createChatCompletion(
       {

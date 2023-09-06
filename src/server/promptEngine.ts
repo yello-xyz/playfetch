@@ -6,6 +6,7 @@ import {
   AnthropicLanguageModel,
   CohereLanguageModel,
   Prompts,
+  PromptInputs,
 } from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
@@ -26,7 +27,8 @@ export type Predictor = (
   maxTokens: number,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks?: (text: string) => void
+  streamChunks?: (text: string) => void,
+  continuationInputs?: PromptInputs
 ) => Promise<PredictionResponse>
 
 const isValidPredictionResponse = (response: PredictionResponse): response is ValidPredictionResponse =>
@@ -53,7 +55,8 @@ export default async function runPromptWithConfig(
   config: PromptConfig,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks?: (chunk: string) => void
+  streamChunks?: (chunk: string) => void,
+  continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
   const getAPIKey = async (provider: ModelProvider) => {
     switch (provider) {
@@ -86,7 +89,15 @@ export default async function runPromptWithConfig(
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(prompts, config.temperature, config.maxTokens, context, usePreviousContext, streamChunks)
+    result = await predictor(
+      prompts,
+      config.temperature,
+      config.maxTokens,
+      context,
+      usePreviousContext,
+      streamChunks,
+      continuationInputs
+    )
     if (isValidPredictionResponse(result)) {
       break
     }

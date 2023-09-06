@@ -67,6 +67,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const continuationKey = 'x-continuation-key'
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
+    const continuation = req.headers['x-continuation-key'] as string | undefined
+    const continuationID = continuationKey ? Number(continuation) : undefined
 
     if (apiKey && (await checkProject(projectID, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
@@ -91,7 +93,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const stream = (index: number, message: string) =>
             useStreaming && isLastRun(index) ? res.write(message) : undefined
 
-          response = await runChain(endpoint.userID, version, configs, inputs, true, stream)
+          response = await runChain(endpoint.userID, version, configs, inputs, true, stream, continuationID)
 
           if (endpoint.useCache && !response.failed) {
             cacheResponse(versionID, inputs, response, endpoint.parentID)
