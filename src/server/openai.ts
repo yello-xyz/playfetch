@@ -37,10 +37,10 @@ const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any,
   ...(system ? [{ role: 'system', content: system }] : []),
   ...(lastMessage &&
   lastMessage.role === 'assistant' &&
-  lastMessage.function_call &&
+  lastMessage.function_call?.name &&
   inputs &&
-  inputs[lastMessage.function_call] !== undefined
-    ? [{ role: 'function', name: lastMessage.function_call.name, content: inputs[lastMessage.function_call] }]
+  inputs[lastMessage.function_call.name] !== undefined
+    ? [{ role: 'function', name: lastMessage.function_call.name, content: inputs[lastMessage.function_call.name] }]
     : [{ role: 'user', content: prompt }]),
 ]
 

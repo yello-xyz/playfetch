@@ -112,7 +112,7 @@ export default async function runChain(
           prompts,
           promptVersion.config,
           promptContext,
-          config.includeContext ?? false,
+          index === continuationIndex || (config.includeContext ?? false),
           streamPartialResponse,
           index === continuationIndex ? continuationInputs : undefined
         )
@@ -124,6 +124,7 @@ export default async function runChain(
         continuationIndex = index
         break
       } else {
+        continuationIndex = index === continuationIndex ? undefined : continuationIndex
         const output = lastResponse.output
         AugmentInputs(inputs, config.output, output!, useCamelCase)
         AugmentCodeContext(codeContext, config.output, lastResponse.result)
