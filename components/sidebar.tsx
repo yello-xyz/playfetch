@@ -22,7 +22,7 @@ export function FeedbackSection() {
 }
 
 export function SidebarSection({
-  className,
+  className = '',
   title,
   children,
   actionComponent,
@@ -33,7 +33,7 @@ export function SidebarSection({
   actionComponent?: ReactNode
 }) {
   return (
-    <div className={`${className ?? ''} flex flex-col gap-0.5`}>
+    <div className={`${className} flex flex-col gap-0.5`}>
       {title && (
         <div className='flex items-center justify-between p-1 pl-4 text-xs font-medium text-gray-400'>
           {title}

@@ -27,7 +27,9 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
 
   const promptAddUser = (email: string, fullName: string, callback?: () => Promise<void>) =>
     setDialogPrompt({
-      title: 'Grant user access? They will NOT be notified by email automatically and they will NOT automatically be added as a test user for Google Authentication.',
+      title:
+        'Grant user access? They will NOT be notified by email automatically ' +
+        'and they will NOT automatically be added as a test user for Google Authentication.',
       confirmTitle: 'Proceed',
       callback: async () => {
         setAdding(true)

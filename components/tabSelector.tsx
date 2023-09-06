@@ -76,7 +76,7 @@ function TabButton<T extends string>({
 
 export function HeaderItem({
   active = true,
-  className,
+  className = '',
   onClick,
   children,
 }: {
@@ -87,7 +87,7 @@ export function HeaderItem({
 }) {
   const color = active ? 'text-gray-700' : 'text-gray-300'
   return (
-    <div className={`px-2 py-2.5 font-medium select-none leading-6 ${color} ${className ?? ''}`} onClick={onClick}>
+    <div className={`px-2 py-2.5 font-medium select-none leading-6 ${color} ${className}`} onClick={onClick}>
       {children}
     </div>
   )

@@ -147,6 +147,6 @@ function PromptPanelProviderWarning() {
   )
 }
 
-function PromptPanelBanner({ children, className }: { children: ReactNode; className: string }) {
-  return <div className={`grow px-3 py-2 border rounded ${className ?? ''}`}>{children}</div>
+function PromptPanelBanner({ children, className = '' }: { children: ReactNode; className: string }) {
+  return <div className={`grow px-3 py-2 border rounded ${className}`}>{children}</div>
 }

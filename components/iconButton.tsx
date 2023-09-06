@@ -6,7 +6,7 @@ type HoverType = { background: string } | 'opacity' | 'none'
 
 export default function IconButton({
   hoverType = { background: 'hover:bg-gray-100' },
-  className,
+  className = '',
   icon,
   onClick,
   disabled,
@@ -31,7 +31,7 @@ export default function IconButton({
   return (
     <Icon
       icon={icon}
-      className={`${className ?? ''} ${disabled ? '' : hoverTypeClass(hoverType)}`}
+      className={`${className} ${disabled ? '' : hoverTypeClass(hoverType)}`}
       onClick={
         disabled
           ? undefined
