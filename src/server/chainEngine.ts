@@ -91,7 +91,8 @@ export default async function runChain(
   const codeContext = CreateCodeContextWithInputs(inputs)
   let lastResponse = emptyResponse
 
-  for (const [index, config] of configs.slice(continuationIndex ?? 0).entries()) {
+  for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
+    const config = configs[index]
     const streamPartialResponse = (chunk: string) => stream?.(index, chunk)
     const streamResponse = (response: ResponseType, skipOutput = false) =>
       stream?.(
@@ -121,8 +122,14 @@ export default async function runChain(
       if (lastResponse.failed) {
         break
       } else if (isPromptResponse(lastResponse) && lastResponse.interrupted) {
-        continuationIndex = index
-        break
+        if (isEndpointEvaluation) {
+          continuationIndex = index
+          break  
+        } else if (continuationIndex === undefined) {
+          continuationIndex = index
+          index -= 1
+          continue
+        }
       } else {
         continuationIndex = index === continuationIndex ? undefined : continuationIndex
         const output = lastResponse.output
