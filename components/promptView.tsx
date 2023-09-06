@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
+import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import RunPromptTab from './runPromptTab'
 import TestPromptTab from './testPromptTab'
@@ -15,7 +15,6 @@ import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 export default function PromptView({
   prompt,
-  project,
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
@@ -24,7 +23,6 @@ export default function PromptView({
   savePrompt,
 }: {
   prompt: ActivePrompt
-  project: ActiveProject
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
@@ -101,10 +99,7 @@ export default function PromptView({
           <TestPromptTab
             currentPrompts={currentPrompts}
             currentPromptConfig={currentPromptConfig}
-            activeProject={project}
-            activePrompt={prompt}
             activeVersion={activeVersion}
-            setActiveVersion={setActiveVersion}
             setModifiedVersion={updateVersion}
             runPrompt={runPrompt}
             inputValues={inputValues}

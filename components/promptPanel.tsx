@@ -76,7 +76,8 @@ export default function PromptPanel({
   const preferredHeight =
     (promptLabels ? 32 : 0) +
     (isProviderAvailable ? 0 : 72) +
-    (runPrompt ? (areOptionsExpanded ? 250 : 125) : 30) +
+    (runPrompt ? 55 : 0) +
+    (areOptionsExpanded ? 195 : 70) +
     Math.max(51, promptInputScrollHeight)
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
@@ -96,14 +97,12 @@ export default function PromptPanel({
           onUpdateScrollHeight={setPromptInputScrollHeight}
         />
       </div>
-      {runPrompt && (
-        <PromptSettingsPane
-          config={config}
-          setConfig={updateConfig}
-          isExpanded={areOptionsExpanded}
-          setExpanded={setOptionsExpanded}
-        />
-      )}
+      <PromptSettingsPane
+        config={config}
+        setConfig={updateConfig}
+        isExpanded={areOptionsExpanded}
+        setExpanded={setOptionsExpanded}
+      />
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <div className='flex items-center self-end gap-3'>
           <RunButtons
@@ -147,6 +146,6 @@ function PromptPanelProviderWarning() {
   )
 }
 
-function PromptPanelBanner({ children, className }: { children: ReactNode; className: string }) {
-  return <div className={`grow px-3 py-2 border rounded ${className ?? ''}`}>{children}</div>
+function PromptPanelBanner({ children, className = '' }: { children: ReactNode; className: string }) {
+  return <div className={`grow px-3 py-2 border rounded ${className}`}>{children}</div>
 }

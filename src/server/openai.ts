@@ -74,7 +74,7 @@ async function tryCompleteChat(
         max_tokens: maxTokens,
         user: userID.toString(),
         stream: true,
-        functions: [...runningFunctions, ...functions],
+        functions: runningFunctions.length || functions.length ? [...runningFunctions, ...functions] : undefined,
       },
       { responseType: 'stream', timeout: 30 * 1000 }
     )

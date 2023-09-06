@@ -249,7 +249,6 @@ export default function Home({
                       <Suspense>
                         <PromptView
                           prompt={activePrompt}
-                          project={activeProject}
                           activeVersion={activePromptVersion}
                           setActiveVersion={selectVersion}
                           setModifiedVersion={setModifiedVersion}

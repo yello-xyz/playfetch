@@ -8,7 +8,7 @@ import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/chainEngine'
-import { cacheValue, getCachedValue } from '@/src/server/datastore/cache'
+import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
 import { TryParseOutput } from '@/src/server/promptEngine'
 
 const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited<ReturnType<typeof runChain>>) => {
@@ -40,10 +40,10 @@ const cacheResponse = (
   inputs: PromptInputs,
   response: ResponseType & { failed: false },
   parentID: number
-) => cacheValue(getCacheKey(versionID, inputs), response.output, { versionID, parentID })
+) => cacheValueForKey(getCacheKey(versionID, inputs), response.output, { versionID, parentID })
 
 const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
-  const cachedValue = await getCachedValue(getCacheKey(versionID, inputs))
+  const cachedValue = await getCachedValueForKey(getCacheKey(versionID, inputs))
   return cachedValue
     ? {
         result: TryParseOutput(cachedValue),

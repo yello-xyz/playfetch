@@ -6,27 +6,37 @@ import LabelPopupMenu, { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { ItemLabels } from './versionCell'
 
 export default function RunCellHeader({ run, activeItem }: { run: Run; activeItem: ActivePrompt | ActiveChain }) {
-  const hasLabels = run.labels.length !== 0
-  const hasInputs = JSON.stringify(run.inputs) !== '{}'
-  const baseClass = 'border-b border-b-1 border-gray-200 pb-2.5'
+  const hasLabels = run.labels.length > 0
+  const hasInputs = Object.keys(run.inputs).length > 0
 
   return (
-    <div className={hasInputs ? baseClass : ''}>
-      <div className='flex items-start justify-between gap-2 text-sm'>
-        <div className='flex flex-col flex-1 gap-1'>
+    <>
+      <BorderedRow className='flex items-start justify-between gap-2 text-sm' addBorder={hasInputs || hasLabels}>
+        {hasLabels ? (
           <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
-          {!hasLabels && <RunInputs inputs={run.inputs} />}
-        </div>
-        <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
-      </div>
-      {hasLabels && (
-        <div className='border-t border-t-1 border-gray-200 pt-2.5 mt-2.5'>
+        ) : (
           <RunInputs inputs={run.inputs} />
-        </div>
+        )}
+        <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
+      </BorderedRow>
+      {hasLabels && hasInputs && (
+        <BorderedRow>
+          <RunInputs inputs={run.inputs} />
+        </BorderedRow>
       )}
-    </div>
+    </>
   )
 }
+
+const BorderedRow = ({
+  children,
+  className = '',
+  addBorder = true,
+}: {
+  children: ReactNode
+  className?: string
+  addBorder?: boolean
+}) => <div className={`${className} ${addBorder ? 'border-b border-b-1 border-gray-200 pb-2.5' : ''}`}>{children}</div>
 
 function RunInputs({ inputs }: { inputs: PromptInputs }) {
   return Object.entries(inputs).length > 0 ? (
@@ -51,13 +61,13 @@ function CollapsibleInputsHeader({ children }: { children: ReactNode }) {
   const [isExpanded, setExpanded] = useState(false)
 
   return (
-    <>
+    <div>
       <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
         <Icon className={`-ml-1 ${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
         <span className='font-medium text-gray-700'>Inputs</span>
       </div>
       {isExpanded && children}
-    </>
+    </div>
   )
 }
 

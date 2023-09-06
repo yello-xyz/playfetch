@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
 export default function Label({
-  className,
+  className = '',
   htmlFor,
   onClick,
   children,
@@ -15,7 +15,7 @@ export default function Label({
 }) {
   return (
     <label
-      className={`font-medium ${disabled ? 'text-gray-300' : 'text-gray-600'} cursor-default ${className ?? ''}`}
+      className={`font-medium ${disabled ? 'text-gray-300' : 'text-gray-600'} cursor-default ${className}`}
       htmlFor={htmlFor}
       onClick={onClick}>
       {children}

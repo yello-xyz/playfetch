@@ -246,7 +246,7 @@ function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: Sta
     <FilterPopupItem onClick={onClick}>
       <Icon icon={icon} />
       <div className='grow'>{title}</div>
-      <Icon icon={chevronIcon} />
+      <Icon className='-rotate-90' icon={chevronIcon} />
     </FilterPopupItem>
   )
 }

@@ -5,7 +5,7 @@ import { ReactNode } from 'react'
 
 export default function TopBar({ children }: { children: ReactNode }) {
   return (
-    <div className='z-10 flex items-center justify-between w-full pl-2 pr-4 py-2 border-b border-gray-200'>
+    <div className='z-10 flex items-center justify-between w-full py-2 pl-2 pr-4 border-b border-gray-200'>
       {children}
     </div>
   )
@@ -27,7 +27,7 @@ export function TopBarBackItem({ title, onNavigateBack }: { title?: string; onNa
 }
 
 export function TopBarAccessoryItem({
-  className,
+  className = '',
   onClick,
   children,
 }: {
@@ -36,7 +36,7 @@ export function TopBarAccessoryItem({
   children?: ReactNode
 }) {
   return (
-    <div className={`${className ?? ''} min-w-[30%]`} onClick={onClick}>
+    <div className={`${className} min-w-[30%]`} onClick={onClick}>
       {children}
     </div>
   )

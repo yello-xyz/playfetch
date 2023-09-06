@@ -2,7 +2,7 @@ import chevronIcon from '@/public/chevron.svg'
 
 export default function DropdownMenu({
   size = 'small',
-  className,
+  className = '',
   disabled,
   children,
   value,
@@ -26,7 +26,7 @@ export default function DropdownMenu({
   return (
     <select
       disabled={disabled}
-      className={`${sizeClass} ${stateClass} ${appearanceClass} ${className ?? ''} w-full py-2 pl-4 pr-8 text-gray-800`}
+      className={`${sizeClass} ${stateClass} ${appearanceClass} ${className} w-full py-2 pl-4 pr-8 text-gray-800`}
       style={{ backgroundImage: `url('${chevronIcon.src}')` }}
       value={value}
       onChange={event => {
