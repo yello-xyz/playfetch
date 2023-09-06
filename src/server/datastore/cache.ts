@@ -35,7 +35,7 @@ const toCacheData = (
   excludeFromIndexes: ['key', 'value'],
 })
 
-export async function cacheExpiringValue(value: string, expirationTimeMilliseconds: number) {
+export async function cacheExpiringValue(value: string, expirationTimeMilliseconds = 3600 * 1000) {
   const createdAt = new Date()
   const expiresAt = new Date(createdAt.getTime() + expirationTimeMilliseconds)
   const cacheData = toCacheData(undefined, value, undefined, createdAt, expiresAt)

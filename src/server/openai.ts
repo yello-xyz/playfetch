@@ -117,7 +117,7 @@ async function tryCompleteChat(
     ]
     context.functions = [...runningFunctions, ...functions]
 
-    return { output, cost }
+    return { output, cost, interrupted: !!functionMessage }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

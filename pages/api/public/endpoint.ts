@@ -54,6 +54,7 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
         failed: false,
         attempts: 1,
         cacheHit: true,
+        continuationID: undefined,
       }
     : null
 }
@@ -63,6 +64,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const projectID = Number(projectIDFromPath)
 
   if (projectID && endpointName) {
+    const continuationKey = 'x-continuation-key'
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
 
@@ -98,7 +100,12 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         logResponse(endpoint, inputs, response)
 
-        return useStreaming ? res.end() : res.json({ output: response.result })
+        return useStreaming
+          ? res.end()
+          : res.json({
+              output: response.result,
+              ...(response.continuationID ? { [continuationKey]: response.continuationID.toString() } : {}),
+            })
       }
     }
   }
