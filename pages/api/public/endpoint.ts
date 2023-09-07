@@ -15,7 +15,8 @@ const logResponse = (
   endpoint: Endpoint,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>>,
-  cacheHit: boolean
+  cacheHit: boolean,
+  continuationID: number | undefined
 ) => {
   updateUsage(endpoint.id, response.cost, response.duration, cacheHit, response.attempts, response.failed)
   saveLogEntry(
@@ -30,8 +31,9 @@ const logResponse = (
     response.error,
     response.cost,
     response.duration,
+    response.attempts,
     cacheHit,
-    response.attempts
+    continuationID ?? response.continuationID
   )
 }
 
@@ -105,7 +107,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           }
         }
 
-        logResponse(endpoint, inputs, response, !!cachedResponse)
+        logResponse(endpoint, inputs, response, !!cachedResponse, continuationID)
 
         return useStreaming
           ? res.end()

@@ -20,8 +20,9 @@ export async function migrateLogs() {
         logData.createdAt,
         logData.cost,
         logData.duration,
-        logData.cacheHit,
         logData.attempts,
+        logData.cacheHit,
+        logData.continuationID,
         getID(logData)
       )
     )
@@ -46,8 +47,9 @@ export async function saveLogEntry(
   error: string | undefined,
   cost: number,
   duration: number,
+  attempts: number,
   cacheHit: boolean,
-  attempts: number
+  continuationID: number | undefined
 ) {
   await getDatastore().save(
     toLogData(
@@ -63,8 +65,9 @@ export async function saveLogEntry(
       new Date(),
       cost,
       duration,
+      attempts,
       cacheHit,
-      attempts
+      continuationID
     )
   )
 }
@@ -82,8 +85,9 @@ const toLogData = (
   createdAt: Date,
   cost: number,
   duration: number,
-  cacheHit: boolean,
   attempts: number,
+  cacheHit: boolean,
+  continuationID?: number,
   logID?: number
 ) => ({
   key: buildKey(Entity.LOG, logID),
@@ -100,8 +104,9 @@ const toLogData = (
     createdAt,
     cost,
     duration,
-    cacheHit,
     attempts,
+    cacheHit,
+    continuationID,
   },
   excludeFromIndexes: ['inputs', 'output', 'error'],
 })
