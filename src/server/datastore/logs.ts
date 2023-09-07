@@ -2,10 +2,21 @@ import { LogEntry, PromptInputs } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp } from './datastore'
 import { ensureProjectAccess } from './projects'
 
-export async function migrateLogs() {
+export async function migrateLogs(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   for (const logData of allLogs) {
+    let continuationIDs = []
+    if (!logData.continuationID || isNaN(logData.continuationID)) {
+      continuationIDs = []
+    } else if (Array.isArray(logData.continuationID)) {
+      continuationIDs = logData.continuationID
+    } else {
+      continuationIDs = [logData.continuationID]
+    }
     await getDatastore().save(
       toLogData(
         logData.projectID,
@@ -22,7 +33,7 @@ export async function migrateLogs() {
         logData.duration,
         logData.attempts,
         logData.cacheHit,
-        logData.continuationID,
+        continuationIDs,
         getID(logData)
       )
     )
@@ -49,7 +60,7 @@ export async function saveLogEntry(
   duration: number,
   attempts: number,
   cacheHit: boolean,
-  continuationID: number | undefined
+  continuationIDs: number[]
 ) {
   await getDatastore().save(
     toLogData(
@@ -67,7 +78,7 @@ export async function saveLogEntry(
       duration,
       attempts,
       cacheHit,
-      continuationID
+      continuationIDs
     )
   )
 }
@@ -87,7 +98,7 @@ const toLogData = (
   duration: number,
   attempts: number,
   cacheHit: boolean,
-  continuationID?: number,
+  continuationIDs: number[],
   logID?: number
 ) => ({
   key: buildKey(Entity.LOG, logID),
@@ -106,9 +117,9 @@ const toLogData = (
     duration,
     attempts,
     cacheHit,
-    continuationID,
+    continuationIDs: JSON.stringify(continuationIDs),
   },
-  excludeFromIndexes: ['inputs', 'output', 'error'],
+  excludeFromIndexes: ['inputs', 'output', 'error', 'continuationIDs'],
 })
 
 const toLogEntry = (data: any): LogEntry => ({
@@ -125,5 +136,5 @@ const toLogEntry = (data: any): LogEntry => ({
   duration: data.duration,
   attempts: data.attempts,
   cacheHit: data.cacheHit,
-  continuationID: data.continuationID ?? null,
+  continuationIDs: JSON.parse(data.continuationIDs),
 })

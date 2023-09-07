@@ -33,7 +33,7 @@ const logResponse = (
     response.duration,
     response.attempts,
     cacheHit,
-    continuationID ?? response.continuationID
+    [...(continuationID ? [continuationID] : []), ...(response.continuationID ? [response.continuationID] : [])]
   )
 }
 

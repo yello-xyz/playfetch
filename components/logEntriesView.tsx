@@ -7,13 +7,33 @@ import TableCell, { TableHeader } from './tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
-const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
+type SequenceMapping = { [key: number]: number }
+const sequencesForEntries = (entries: LogEntry[]) => {
+  const mapping = {} as SequenceMapping
+  entries.forEach(({ continuationIDs }) => {
+    let sequence = Object.keys(mapping).length
+    continuationIDs.forEach(id => {
+      if (mapping[id] !== undefined) {
+        sequence = mapping[id]
+      }
+    })
+    continuationIDs.forEach(id => {
+      mapping[id] = sequence
+    })
+  })
+  return mapping
+}
 
-const isSameSequence = (entry: LogEntry, index: number | undefined, entries: LogEntry[]) =>
-  index !== undefined && sameSequence(entry)(entries[index])
+const sameSequence = (a: LogEntry, b: LogEntry, sequences: SequenceMapping) =>
+  a.continuationIDs.length > 0 &&
+  b.continuationIDs.length > 0 &&
+  sequences[a.continuationIDs[0]] === sequences[b.continuationIDs[0]]
 
-const getSequenceNumber = (entry: LogEntry, index: number, entries: LogEntry[]) =>
-  entries.slice(index).filter(sameSequence(entry)).length
+const isSameSequence = (entry: LogEntry, index: number | undefined, entries: LogEntry[], sequences: SequenceMapping) =>
+  index !== undefined && sameSequence(entry, entries[index], sequences)
+
+const getSequenceNumber = (entry: LogEntry, index: number, entries: LogEntry[], sequences: SequenceMapping) => 
+  entries.slice(index).filter(e => sameSequence(e, entry, sequences)).length
 
 export default function LogEntriesView({
   tabSelector,
@@ -28,6 +48,7 @@ export default function LogEntriesView({
   activeIndex?: number
   setActiveIndex: (index: number) => void
 }) {
+  const sequences = sequencesForEntries(logEntries)
   return (
     <div className='flex flex-col h-full'>
       {tabSelector()}
@@ -43,9 +64,9 @@ export default function LogEntriesView({
               logEntry={logEntry}
               endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
               isActive={index === activeIndex}
-              isSameSequenceAsActive={isSameSequence(logEntry, activeIndex, entries)}
+              isSameSequenceAsActive={isSameSequence(logEntry, activeIndex, entries, sequences)}
               setActive={() => setActiveIndex(index)}
-              sequenceNumber={getSequenceNumber(logEntry, index, entries)}
+              sequenceNumber={getSequenceNumber(logEntry, index, entries, sequences)}
             />
           ))}
         </div>
