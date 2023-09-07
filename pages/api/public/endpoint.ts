@@ -100,7 +100,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
           response = await runChain(endpoint.userID, version, configs, inputs, true, stream, continuationID)
 
-          if (endpoint.useCache && !response.failed) {
+          if (endpoint.useCache && !response.failed && !continuationID && !response.continuationID) {
             cacheResponse(versionID, inputs, response, endpoint.parentID)
           }
         }
