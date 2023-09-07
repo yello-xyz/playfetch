@@ -87,6 +87,8 @@ export default async function runChain(
 
   const codeContext = CreateCodeContextWithInputs(inputs)
   let lastResponse = emptyResponse
+  const maxContinuationCount = 10
+  let continuationCount = 0
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
@@ -123,7 +125,7 @@ export default async function runChain(
         if (isEndpointEvaluation) {
           continuationIndex = index
           break
-        } else if (continuationIndex === undefined) {
+        } else if (continuationCount++ < maxContinuationCount) {
           continuationIndex = index
           index -= 1
           continue
