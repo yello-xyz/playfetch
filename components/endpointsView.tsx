@@ -20,13 +20,15 @@ import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import TabSelector, { SingleTabHeader } from './tabSelector'
+import TabSelector, { HeaderItem, SingleTabHeader } from './tabSelector'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from './iconButton'
 import collapseIcon from '@/public/collapse.svg'
 import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
+import Icon from './icon'
+import chevronIcon from '@/public/chevron.svg'
 
 const NewEndpointSettings: EndpointSettings = {
   id: undefined,
@@ -182,11 +184,13 @@ export default function EndpointsView({
           maxSize={isEditing ? undefined : maxWidth}
           preferredSize={isEditing ? '100%' : minWidth}>
           <div className='flex flex-col w-full h-full bg-gray-25'>
-            <SingleTabHeader
+            <SettingsPaneHeader
+              isEditing={isEditing}
               label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
-              secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : ''}>
-              {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
-            </SingleTabHeader>
+              secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : undefined}
+              onNavigateBack={() => setEditing(false)}
+              onCollapse={() => setActiveEndpointID(undefined)}
+            />
             <div className='flex flex-col gap-6 p-4 overflow-y-auto max-w-[680px]'>
               <EndpointSettingsPane
                 endpoint={activeEndpoint}
@@ -235,5 +239,34 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
     </Allotment>
+  )
+}
+
+function SettingsPaneHeader({
+  label,
+  secondaryLabel,
+  isEditing,
+  onNavigateBack,
+  onCollapse,
+}: {
+  label: string
+  secondaryLabel?: string
+  isEditing: boolean
+  onNavigateBack: () => void
+  onCollapse: () => void
+}) {
+  return isEditing ? (
+    <div className='flex'>
+      <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
+        <Icon className='rotate-90 opacity-25' icon={chevronIcon} />
+        Endpoints /
+      </HeaderItem>
+      <HeaderItem className='-mx-2.5'>{label}</HeaderItem>
+      <HeaderItem active={false}>{secondaryLabel}</HeaderItem>
+    </div>
+  ) : (
+    <SingleTabHeader label={label} secondaryLabel={secondaryLabel}>
+      <IconButton icon={collapseIcon} onClick={onCollapse} />
+    </SingleTabHeader>
   )
 }

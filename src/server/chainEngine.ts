@@ -121,7 +121,7 @@ export default async function runChain(
       } else if (isPromptResponse(lastResponse) && lastResponse.interrupted) {
         if (isEndpointEvaluation) {
           continuationIndex = index
-          break  
+          break
         } else if (continuationIndex === undefined) {
           continuationIndex = index
           index -= 1
