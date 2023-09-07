@@ -22,6 +22,8 @@ export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRout
 
 export const EndpointsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1`
 
+export const LogsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1&l=1`
+
 export const Redirect = (route: ClientRoute): GetServerSidePropsResult<Record<string, unknown>> => ({
   redirect: { destination: route, permanent: false },
 })

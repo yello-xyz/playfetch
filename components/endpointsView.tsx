@@ -25,6 +25,8 @@ import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from './iconButton'
 import collapseIcon from '@/public/collapse.svg'
+import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/client/clientRoute'
+import { useRouter } from 'next/router'
 
 const NewEndpointSettings: EndpointSettings = {
   id: undefined,
@@ -46,8 +48,11 @@ export default function EndpointsView({
   logEntries?: LogEntry[]
   onRefresh: () => Promise<void>
 }) {
+  const router = useRouter()
+  const { l: showLogs } = ParseNumberQuery(router.query)
+
   type ActiveTab = 'Endpoints' | 'Logs'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('Endpoints')
+  const [activeTab, setActiveTab] = useState<ActiveTab>(showLogs ? 'Logs' : 'Endpoints')
 
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
@@ -59,6 +64,7 @@ export default function EndpointsView({
   }
 
   const selectTab = (tab: ActiveTab) => {
+    router.push(tab === 'Logs' ? LogsRoute(project.id) : EndpointsRoute(project.id), undefined, { shallow: true })
     setActiveTab(tab)
     setActiveLogEntryIndex(undefined)
   }
