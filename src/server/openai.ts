@@ -1,20 +1,24 @@
-import { OpenAILanguageModel, Prompts } from '@/types'
-import { ChatCompletionFunctions, ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai'
+import { OpenAILanguageModel, PromptInputs } from '@/types'
+import { ChatCompletionFunctions, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from './stream'
 import { encode } from 'gpt-3-encoder'
+import { Predictor, PromptContext } from './promptEngine'
 
-export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel) {
-  return (prompts: Prompts, temperature: number, maxOutputTokens: number, streamChunks?: (chunk: string) => void) =>
+export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
+  return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
     tryCompleteChat(
       apiKey,
       userID,
       model,
       prompts.main,
-      temperature,
-      maxOutputTokens,
       prompts.system,
       prompts.functions,
-      streamChunks
+      temperature,
+      maxOutputTokens,
+      context,
+      useContext,
+      streamChunks,
+      continuationInputs
     )
 }
 
@@ -29,18 +33,33 @@ const costForTokensWithModel = (model: OpenAILanguageModel, input: string, outpu
   }
 }
 
+const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any, inputs?: PromptInputs) => {
+  if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
+    const name = lastMessage.function_call.name
+    const response = inputs[name]
+    if (response) {
+      const content = typeof response === 'string' ? response : JSON.stringify(response)
+      return [{ role: 'function', name, content }]
+    }
+  }
+  return [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: prompt }]
+}
+
 async function tryCompleteChat(
   apiKey: string,
   userID: number,
   model: OpenAILanguageModel,
   prompt: string,
+  system: string | undefined,
+  functionsPrompt: string | undefined,
   temperature: number,
   maxTokens: number,
-  system?: string,
-  functionsPrompt?: string,
-  streamChunks?: (chunk: string) => void
+  context: PromptContext,
+  useContext: boolean,
+  streamChunks?: (chunk: string) => void,
+  continuationInputs?: PromptInputs
 ) {
-  let functions = undefined as ChatCompletionFunctions[] | undefined
+  let functions = [] as ChatCompletionFunctions[]
   if (functionsPrompt) {
     try {
       functions = JSON.parse(functionsPrompt)
@@ -51,23 +70,24 @@ async function tryCompleteChat(
 
   try {
     const api = new OpenAIApi(new Configuration({ apiKey }))
+    const runningMessages = useContext ? context?.messages ?? [] : []
+    const promptMessages = buildPromptMessages(prompt, system, runningMessages.slice(-1)[0], continuationInputs)
+    const runningFunctions = useContext ? context?.functions ?? [] : []
     const response = await api.createChatCompletion(
       {
         model,
-        messages: [
-          ...(system ? [{ role: 'system' as ChatCompletionRequestMessageRoleEnum, content: system }] : []),
-          { role: 'user', content: prompt },
-        ],
+        messages: [...runningMessages, ...promptMessages],
         temperature,
         max_tokens: maxTokens,
         user: userID.toString(),
         stream: true,
-        functions,
+        functions: runningFunctions.length || functions.length ? [...runningFunctions, ...functions] : undefined,
       },
       { responseType: 'stream', timeout: 30 * 1000 }
     )
 
     let output = ''
+    let functionMessage = undefined
     for await (const message of StreamResponseData(response.data)) {
       let text = ''
 
@@ -82,6 +102,12 @@ async function tryCompleteChat(
         text += functionCall.arguments.replaceAll('\n', '\n    ')
       } else if (choice.finish_reason === 'function_call') {
         text = '\n  }\n}\n'
+        const functionCall = JSON.parse(output + text).function
+        functionMessage = {
+          role: 'assistant',
+          content: null,
+          function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
+        }
       } else {
         text = choice.delta?.content ?? ''
       }
@@ -91,8 +117,14 @@ async function tryCompleteChat(
     }
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
+    context.messages = [
+      ...runningMessages,
+      ...promptMessages,
+      functionMessage ?? { role: 'assistant', content: output },
+    ]
+    context.functions = [...runningFunctions, ...functions]
 
-    return { output, cost }
+    return { output, cost, interrupted: !!functionMessage }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

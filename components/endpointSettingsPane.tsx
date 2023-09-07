@@ -166,7 +166,7 @@ export default function EndpointSettingsPane({
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <>
-      <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border-gray-200 border rounded-lg`}>
+      <div className={`${gridConfig} w-full items-center gap-4 p-4 py-4 bg-white border-gray-200 border rounded-lg`}>
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>
@@ -213,14 +213,14 @@ export default function EndpointSettingsPane({
         <Checkbox disabled={disabled} checked={useCache} setChecked={setUseCache} />
         <Label disabled={disabled}>Stream Responses</Label>
         <Checkbox disabled={disabled} checked={useStreaming} setChecked={setUseStreaming} />
-        <div className='col-span-2 text-right'>
+        <div className='flex justify-end col-span-2'>
           {!isEditing && <Button onClick={() => setEditing(true)}>Edit Endpoint</Button>}
         </div>
       </div>
       {isEditing && endpoint.id && (
         <>
           <Label className='-mb-4'>Danger zone</Label>
-          <div className='flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg'>
+          <div className='flex items-center justify-between w-full p-4 bg-white border border-gray-200 rounded-lg'>
             <div className='flex flex-col'>
               <span>Delete this endpoint</span>
               <span className='text-xs text-gray-400'>

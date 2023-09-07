@@ -70,7 +70,7 @@ export default function VersionFilters<Version extends PromptVersion | ChainVers
           setFilters={setFilters}
         />
       )}
-      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-dark-gray-700 ${markup}`}>
+      <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
             key={index}
@@ -162,8 +162,6 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
   const [text, setText] = useState('')
   const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'text'>('collapsed')
 
-  const canShowTopLevel = availableUsers.length > 0 || availableLabels.length > 0
-
   const addFilter = (filter: VersionFilter) => {
     setMenuState('collapsed')
     setFilters([...filters, filter])
@@ -190,23 +188,29 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
     <div className='relative flex overflow-visible'>
       <div
         className='flex items-center gap-1 pl-1 pr-2 py-0.5 cursor-pointer hover:bg-gray-100 rounded-md'
-        onClick={() => setMenuState(canShowTopLevel ? 'expanded' : 'text')}>
+        onClick={() => setMenuState('expanded')}>
         <Icon icon={filterIcon} />
         Filter
       </div>
-      <div className='absolute right-0 top-7 shadow-sm'>
+      <div className='absolute right-0 shadow-sm top-7'>
         <PopupMenu
           className={menuState === 'text' ? 'w-72 p-2' : 'w-56 p-3'}
           expanded={menuState !== 'collapsed'}
           collapse={() => setMenuState('collapsed')}>
           {menuState === 'expanded' && (
             <>
-              {availableUsers.length > 0 && (
-                <FilterCategoryItem title='Created by' icon={userIcon} onClick={() => setMenuState('user')} />
-              )}
-              {availableLabels.length > 0 && (
-                <FilterCategoryItem title='Label' icon={labelIcon} onClick={() => setMenuState('label')} />
-              )}
+              <FilterCategoryItem
+                title='Created by'
+                icon={userIcon}
+                onClick={() => setMenuState('user')}
+                disabled={!availableUsers.length}
+              />
+              <FilterCategoryItem
+                title='Label'
+                icon={labelIcon}
+                onClick={() => setMenuState('label')}
+                disabled={!availableLabels.length}
+              />
               <FilterCategoryItem title='Contains' icon={textIcon} onClick={() => setMenuState('text')} />
             </>
           )}
@@ -241,19 +245,38 @@ function FilterButton<Version extends PromptVersion | ChainVersion>({
   )
 }
 
-function FilterCategoryItem({ title, icon, onClick }: { title: string; icon: StaticImageData; onClick: () => void }) {
+function FilterCategoryItem({
+  title,
+  icon,
+  onClick,
+  disabled,
+}: {
+  title: string
+  icon: StaticImageData
+  onClick: () => void
+  disabled?: boolean
+}) {
   return (
-    <FilterPopupItem onClick={onClick}>
+    <FilterPopupItem onClick={onClick} disabled={disabled}>
       <Icon icon={icon} />
       <div className='grow'>{title}</div>
-      <Icon icon={chevronIcon} />
+      <Icon className='-rotate-90' icon={chevronIcon} />
     </FilterPopupItem>
   )
 }
 
-function FilterPopupItem({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+function FilterPopupItem({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: ReactNode
+  onClick: () => void
+  disabled?: boolean
+}) {
+  const activeClass = disabled ? 'opacity-50' : 'cursor-pointer hover:bg-gray-100'
   return (
-    <div className='flex items-center gap-2 p-1 rounded cursor-pointer hover:bg-gray-100' onClick={onClick}>
+    <div className={`flex items-center gap-2 p-1 rounded ${activeClass}`} onClick={disabled ? undefined : onClick}>
       {children}
     </div>
   )

@@ -28,12 +28,14 @@ export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]
   return ExcludeBoundChainVariables(allChainInputs, chainWithInputs)
 }
 
-export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache) => {
+export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item)) {
     return ExtractVariables(item.code)
   }
   const version = cache.versionForItem(item)
-  return version ? ExtractPromptVariables(version.prompts, version.config) : item.inputs ?? []
+  return version
+    ? ExtractPromptVariables(version.prompts, version.config, includingDynamic)
+    : [...(item.inputs ?? []), ...(includingDynamic ? item.dynamicInputs ?? [] : [])] ?? []
 }
 
 const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainItem[]) => {
@@ -41,12 +43,12 @@ const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainIte
   return allChainVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
-const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache) => [
-  ...new Set(chain.flatMap(item => ExtractChainItemVariables(item, cache))),
+const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache, includingDynamic: boolean) => [
+  ...new Set(chain.flatMap(item => ExtractChainItemVariables(item, cache, includingDynamic))),
 ]
 
-const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache) => {
-  const allInputVariables = ExtractChainVariables(chain, cache)
+const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache, includingDynamic: boolean) => {
+  const allInputVariables = ExtractChainVariables(chain, cache, includingDynamic)
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }
 
@@ -133,18 +135,21 @@ export default function ChainNodeEditor({
   const updateCode = (code: string) =>
     setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], code }))
 
-  const variables = ExtractUnboundChainVariables(items, promptCache)
+  const variables = ExtractUnboundChainVariables(items, promptCache, true)
+  const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
+  const colorClass = IsPromptChainItem(activeNode) ? 'bg-white' : 'bg-gray-25'
 
   return (
     <>
-      <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
+      <div className={`flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden ${colorClass}`}>
         {activeNode === InputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />
             {showTestData && (
               <TestDataPane
                 variables={variables}
+                staticVariables={staticVariables}
                 inputValues={inputValues}
                 setInputValues={setInputValues}
                 persistInputValuesIfNeeded={persistInputValuesIfNeeded}
@@ -195,7 +200,7 @@ export default function ChainNodeEditor({
             <OutputMapper
               key={activeNode.output}
               output={activeNode.output}
-              inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache)}
+              inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache, false)}
               onMapOutput={mapOutput}
             />
           ) : (

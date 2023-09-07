@@ -22,7 +22,7 @@ export function FeedbackSection() {
 }
 
 export function SidebarSection({
-  className,
+  className = '',
   title,
   children,
   actionComponent,
@@ -33,9 +33,9 @@ export function SidebarSection({
   actionComponent?: ReactNode
 }) {
   return (
-    <div className={`${className ?? ''} flex flex-col gap-0.5`}>
+    <div className={`${className} flex flex-col gap-0.5`}>
       {title && (
-        <div className='flex items-center justify-between p-1 pl-4 text-xs font-medium text-dark-gray-400'>
+        <div className='flex items-center justify-between p-1 pl-4 text-xs font-medium text-gray-400'>
           {title}
           {actionComponent}
         </div>
@@ -68,7 +68,7 @@ export function SidebarButton({
     <LinkWrapper link={link}>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
-        <div className='flex-1 w-40 overflow-hidden font-normal text-ellipsis whitespace-nowrap text-dark-gray-700'>
+        <div className='flex-1 w-40 overflow-hidden font-normal text-gray-700 text-ellipsis whitespace-nowrap'>
           {title}
         </div>
         {actionComponent}

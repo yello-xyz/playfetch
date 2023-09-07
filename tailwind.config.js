@@ -21,11 +21,10 @@ module.exports = {
       'gray-800': '#1D2532',
       'green-300': '#71B892',
       'pink-400': '#E14BD2',
+      'purple-400': '#7D48EF',
       'red-300': '#E4735B',
       'red-400': '#DC4F30',
       'red-500': '#C64629',
-      'dark-gray-400': '#898D96',
-      'dark-gray-700': '#333A46',
       white: '#FFFFFF',
     },
     backgroundColor: {
@@ -54,6 +53,7 @@ module.exports = {
       'gray-700': '#8C94A1',
       'gray-800': '#838C9A',
       'green-50': '#DDF1E7',
+      'green-100': '#C0E2CF',
       'green-200': '#9ACEB2',
       'green-300': '#71B892',
       'green-400': '#4EA476',
@@ -65,6 +65,7 @@ module.exports = {
       'pink-25': '#FDF2FC',
       'pink-100': '#F4B8EE',
       'pink-400': '#E14BD2',
+      'purple-25': '#F7F2FD', // TODO replace Copilot prediction with proper color code
       'purple-200': '#BEA4F6',
       'purple-300': '#9F78F3',
       'purple-400': '#7D48EF',
@@ -110,7 +111,7 @@ module.exports = {
       xs: '12px',
       sm: '0.79rem',
       base: '.9rem',
-      lg: '1rem'
+      lg: '.95rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',

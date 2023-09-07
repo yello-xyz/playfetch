@@ -31,7 +31,7 @@ export default function LogEntryDetailsPane({
       <SingleTabHeader label={logEntry.urlPath} secondaryLabel={formattedDate}>
         {onCollapse && <IconButton icon={collapseIcon} onClick={onCollapse} />}
       </SingleTabHeader>
-      <div className='flex flex-col gap-6 p-4'>
+      <div className='flex flex-col gap-6 p-4 overflow-y-auto'>
         <div className={`${gridConfig} w-full items-center gap-4 p-6 py-4 bg-white border border-gray-200 rounded-lg`}>
           {parent && (
             <>

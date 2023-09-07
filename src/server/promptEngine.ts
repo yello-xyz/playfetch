@@ -6,6 +6,7 @@ import {
   AnthropicLanguageModel,
   CohereLanguageModel,
   Prompts,
+  PromptInputs,
 } from '@/types'
 import openai from '@/src/server/openai'
 import anthropic from '@/src/server/anthropic'
@@ -15,7 +16,20 @@ import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datas
 
 type ValidPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
-type PredictionResponse = { output: string | undefined; cost: number } | ErrorPredictionResponse
+type PredictionResponse = ({ output: undefined; cost: number } | ValidPredictionResponse | ErrorPredictionResponse) & {
+  interrupted?: boolean
+}
+
+export type PromptContext = any
+export type Predictor = (
+  prompts: Prompts,
+  temperature: number,
+  maxTokens: number,
+  context: PromptContext,
+  usePreviousContext: boolean,
+  streamChunks?: (text: string) => void,
+  continuationInputs?: PromptInputs
+) => Promise<PredictionResponse>
 
 const isValidPredictionResponse = (response: PredictionResponse): response is ValidPredictionResponse =>
   'output' in response && !!response.output && response.output.length > 0
@@ -25,7 +39,7 @@ const isErrorPredictionResponse = (response: PredictionResponse): response is Er
 type RunResponse = (
   | { result: any; output: string; error: undefined; failed: false }
   | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number; cacheHit: boolean }
+) & { cost: number; attempts: number; interrupted: boolean }
 
 export const TryParseOutput = (output: string | undefined) => {
   try {
@@ -39,7 +53,10 @@ export default async function runPromptWithConfig(
   userID: number,
   prompts: Prompts,
   config: PromptConfig,
-  streamChunks?: (chunk: string) => void
+  context: PromptContext,
+  usePreviousContext: boolean,
+  streamChunks?: (chunk: string) => void,
+  continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
   const getAPIKey = async (provider: ModelProvider) => {
     switch (provider) {
@@ -52,7 +69,7 @@ export default async function runPromptWithConfig(
     }
   }
 
-  const getPredictor = (provider: ModelProvider, apiKey: string) => {
+  const getPredictor = (provider: ModelProvider, apiKey: string): Predictor => {
     switch (provider) {
       case 'google':
         return vertexai(config.model as GoogleLanguageModel)
@@ -66,13 +83,21 @@ export default async function runPromptWithConfig(
   }
 
   const apiKey = await getAPIKey(config.provider)
-  const predictor = getPredictor(config.provider, apiKey ?? '')
+  const predictor: Predictor = getPredictor(config.provider, apiKey ?? '')
 
   let result: PredictionResponse = { output: undefined, cost: 0 }
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
-    result = await predictor(prompts, config.temperature, config.maxTokens, streamChunks)
+    result = await predictor(
+      prompts,
+      config.temperature,
+      config.maxTokens,
+      context,
+      usePreviousContext,
+      streamChunks,
+      continuationInputs
+    )
     if (isValidPredictionResponse(result)) {
       break
     }
@@ -89,6 +114,6 @@ export default async function runPromptWithConfig(
       ? { ...result, result: TryParseOutput(result.output), error: undefined, failed: false }
       : { ...result, result: undefined, output: undefined, error: 'Received empty prediction response', failed: true }),
     attempts: Math.min(attempts, maxAttempts),
-    cacheHit: false,
+    interrupted: result.interrupted ?? false,
   }
 }

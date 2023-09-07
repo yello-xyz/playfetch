@@ -7,6 +7,34 @@ import TableCell, { TableHeader } from './tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
+type SequenceMapping = { [key: number]: number }
+const sequencesForEntries = (entries: LogEntry[]) => {
+  const mapping = {} as SequenceMapping
+  entries.forEach(({ continuationIDs }) => {
+    let sequence = Object.keys(mapping).length
+    continuationIDs.forEach(id => {
+      if (mapping[id] !== undefined) {
+        sequence = mapping[id]
+      }
+    })
+    continuationIDs.forEach(id => {
+      mapping[id] = sequence
+    })
+  })
+  return mapping
+}
+
+const sameSequence = (a: LogEntry, b: LogEntry, sequences: SequenceMapping) =>
+  a.continuationIDs.length > 0 &&
+  b.continuationIDs.length > 0 &&
+  sequences[a.continuationIDs[0]] === sequences[b.continuationIDs[0]]
+
+const isSameSequence = (entry: LogEntry, index: number | undefined, entries: LogEntry[], sequences: SequenceMapping) =>
+  index !== undefined && sameSequence(entry, entries[index], sequences)
+
+const getSequenceNumber = (entry: LogEntry, index: number, entries: LogEntry[], sequences: SequenceMapping) => 
+  entries.slice(index).filter(e => sameSequence(e, entry, sequences)).length
+
 export default function LogEntriesView({
   tabSelector,
   logEntries,
@@ -20,6 +48,7 @@ export default function LogEntriesView({
   activeIndex?: number
   setActiveIndex: (index: number) => void
 }) {
+  const sequences = sequencesForEntries(logEntries)
   return (
     <div className='flex flex-col h-full'>
       {tabSelector()}
@@ -29,13 +58,15 @@ export default function LogEntriesView({
           <TableHeader>Environment</TableHeader>
           <TableHeader>Time</TableHeader>
           <TableHeader last>Status</TableHeader>
-          {logEntries.map((logEntry, index) => (
+          {logEntries.map((logEntry, index, entries) => (
             <LogEntryRow
               key={index}
               logEntry={logEntry}
               endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
               isActive={index === activeIndex}
+              isSameSequenceAsActive={isSameSequence(logEntry, activeIndex, entries, sequences)}
               setActive={() => setActiveIndex(index)}
+              sequenceNumber={getSequenceNumber(logEntry, index, entries, sequences)}
             />
           ))}
         </div>
@@ -49,30 +80,32 @@ function LogEntryRow({
   endpoint,
   isActive,
   setActive,
+  isSameSequenceAsActive,
+  sequenceNumber,
 }: {
   logEntry: LogEntry
   endpoint?: ResolvedEndpoint
   isActive: boolean
   setActive: () => void
+  isSameSequenceAsActive: boolean
+  sequenceNumber: number
 }) {
   const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
-
   const statusColor = logEntry.error ? 'bg-red-300' : 'bg-green-300'
+  const props = { active: isActive, semiActive: isSameSequenceAsActive, callback: setActive }
+
   return endpoint ? (
     <>
-      <TableCell first active={isActive} callback={setActive}>
+      <TableCell first {...props}>
         <div className='flex items-center gap-1'>
           <Icon icon={!!endpoint.versionID ? promptIcon : chainIcon} />
           {endpoint.urlPath}
+          {sequenceNumber > 1 && ` [${sequenceNumber}]`}
         </div>
       </TableCell>
-      <TableCell active={isActive} callback={setActive}>
-        {endpoint.flavor}
-      </TableCell>
-      <TableCell active={isActive} callback={setActive}>
-        {formattedDate}
-      </TableCell>
-      <TableCell last active={isActive} callback={setActive}>
+      <TableCell {...props}>{endpoint.flavor}</TableCell>
+      <TableCell {...props}>{formattedDate}</TableCell>
+      <TableCell last {...props}>
         <div className={`rounded px-1.5 flex items-center text-white ${statusColor}`}>
           {logEntry.error ? 'Error' : 'Success'}
         </div>

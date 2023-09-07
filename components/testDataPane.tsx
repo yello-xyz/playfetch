@@ -6,6 +6,7 @@ import RichTextInput from './richTextInput'
 
 export default function TestDataPane({
   variables,
+  staticVariables,
   inputValues,
   setInputValues,
   persistInputValuesIfNeeded,
@@ -13,6 +14,7 @@ export default function TestDataPane({
   setTestConfig,
 }: {
   variables: string[]
+  staticVariables: string[]
   inputValues: InputValues
   setInputValues: (inputValues: InputValues) => void
   persistInputValuesIfNeeded: () => void
@@ -58,8 +60,10 @@ export default function TestDataPane({
     })
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
-  const bgColor = (variable: string) => (variables.includes(variable) ? 'bg-pink-25' : '')
-  const textColor = (variable: string) => (variables.includes(variable) ? 'text-pink-400' : '')
+  const bgColor = (variable: string) =>
+    staticVariables.includes(variable) ? 'bg-pink-25' : variables.includes(variable) ? 'bg-purple-25' : ''
+  const textColor = (variable: string) =>
+    staticVariables.includes(variable) ? 'text-pink-400' : variables.includes(variable) ? 'text-purple-400' : ''
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
@@ -69,7 +73,7 @@ export default function TestDataPane({
             key={index}
             className={`flex items-center px-3 py-1 border-b border-l border-gray-200 ${bgColor(variable)}`}>
             <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
-              {variables.includes(variable) ? `{{${variable}}}` : variable}
+              {staticVariables.includes(variable) ? `{{${variable}}}` : variable}
             </span>
           </div>
         ))}

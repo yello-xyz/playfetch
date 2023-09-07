@@ -116,7 +116,13 @@ export async function duplicatePromptForUser(
   const projectID = targetProjectID ?? promptData.projectID
   const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptData.name)
   const lastVersion = await getKeyedEntity(Entity.VERSION, promptData.lastVersionID)
-  await savePromptVersionForUser(userID, newPromptID, lastVersion.prompt, JSON.parse(lastVersion.config), versionID)
+  await savePromptVersionForUser(
+    userID,
+    newPromptID,
+    JSON.parse(lastVersion.prompts),
+    JSON.parse(lastVersion.config),
+    versionID
+  )
   return newPromptID
 }
 

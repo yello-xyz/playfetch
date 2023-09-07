@@ -55,7 +55,7 @@ export default function PromptChainNodeEditor({
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
-        <div className='h-full px-4 pt-4'>
+        <div className='h-full px-4 pt-4 bg-white'>
           <PromptPanel
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}

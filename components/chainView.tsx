@@ -95,12 +95,16 @@ export default function ChainView({
 
   const items = nodes.filter(IsChainItem)
   const getItemsToSave = (items: ChainItem[]) =>
-    items.map(item => ({
-      ...item,
-      activePrompt: undefined,
-      version: undefined,
-      inputs: ExtractChainItemVariables(item, promptCache),
-    }))
+    items.map(item => {
+      const inputs = ExtractChainItemVariables(item, promptCache, false)
+      return {
+        ...item,
+        activePrompt: undefined,
+        version: undefined,
+        inputs,
+        dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
+      }
+    })
   const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
   const itemsKey = getItemsKey(items)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)

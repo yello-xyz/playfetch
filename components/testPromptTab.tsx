@@ -1,31 +1,17 @@
 import { ReactNode, useState } from 'react'
-import {
-  ActivePrompt,
-  PromptVersion,
-  InputValues,
-  PromptConfig,
-  PromptInputs,
-  ActiveProject,
-  TestConfig,
-  Prompts,
-} from '@/types'
+import { PromptVersion, InputValues, PromptConfig, PromptInputs, TestConfig, Prompts } from '@/types'
 
-import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
-import VersionSelector from './versionSelector'
 import RunButtons from './runButtons'
 import PromptPanel, { PromptPanelWarning } from './promptPanel'
 import { Allotment } from 'allotment'
-import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 
 export default function TestPromptTab({
   currentPrompts,
   currentPromptConfig,
-  activeProject,
-  activePrompt,
   activeVersion,
-  setActiveVersion,
   setModifiedVersion,
   runPrompt,
   inputValues,
@@ -37,10 +23,7 @@ export default function TestPromptTab({
 }: {
   currentPrompts: Prompts
   currentPromptConfig: PromptConfig
-  activeProject: ActiveProject
-  activePrompt: ActivePrompt
   activeVersion: PromptVersion
-  setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
   runPrompt: (inputs: PromptInputs[]) => Promise<void>
   inputValues: InputValues
@@ -51,11 +34,7 @@ export default function TestPromptTab({
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
-
-  const selectVersion = (version: PromptVersion) => {
-    persistInputValuesIfNeeded()
-    setActiveVersion(version)
-  }
+  const staticVariables = ExtractPromptVariables(currentPrompts, currentPromptConfig, false)
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
@@ -78,6 +57,7 @@ export default function TestPromptTab({
           {tabSelector()}
           <TestDataPane
             variables={variables}
+            staticVariables={staticVariables}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}

@@ -30,50 +30,26 @@ import {
 } from './chains'
 
 export async function migrateVersions(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    if (postMerge) {
-      await datastore.save(
-        toVersionData(
-          versionData.userID,
-          versionData.parentID,
-          versionData.prompts ? JSON.parse(versionData.prompts) : null,
-          versionData.config ? JSON.parse(versionData.config) : null,
-          versionData.items ? JSON.parse(versionData.items) : null,
-          JSON.parse(versionData.labels),
-          versionData.createdAt,
-          versionData.didRun,
-          versionData.previousVersionID,
-          getID(versionData)
-        )
+    await datastore.save(
+      toVersionData(
+        versionData.userID,
+        versionData.parentID,
+        versionData.prompts ? JSON.parse(versionData.prompts) : null,
+        versionData.config ? JSON.parse(versionData.config) : null,
+        versionData.items ? JSON.parse(versionData.items) : null,
+        JSON.parse(versionData.labels),
+        versionData.createdAt,
+        versionData.didRun,
+        versionData.previousVersionID,
+        getID(versionData)
       )
-    } else {
-      let didRun = versionData.didRun
-      if (didRun === undefined) {
-        const anyRun = await getEntity(Entity.RUN, 'versionID', getID(versionData))
-        didRun = !!anyRun
-      }
-      let prompts = versionData.prompts
-      if (prompts === undefined && versionData.prompt !== null && versionData.items === null) {
-        prompts = JSON.stringify({ main: versionData.prompt })
-      }
-      await datastore.save(
-        toVersionData(
-          versionData.userID,
-          versionData.parentID,
-          prompts ? JSON.parse(prompts) : null,
-          versionData.config ? JSON.parse(versionData.config) : null,
-          versionData.items ? JSON.parse(versionData.items) : null,
-          JSON.parse(versionData.labels),
-          versionData.createdAt,
-          didRun,
-          versionData.previousVersionID,
-          getID(versionData),
-          versionData.prompt
-        )
-      )
-    }
+    )
   }
 }
 
@@ -164,7 +140,7 @@ async function saveVersionForUser(
   const versionID = canOverwrite ? currentVersionID : undefined
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const didRun = canOverwrite ? currentVersion.didRun : false
-  const labels = currentVersion ? JSON.parse(currentVersion.labels) : []
+  const labels = canOverwrite ? JSON.parse(currentVersion.labels) : []
 
   const versionData = toVersionData(
     userID,
@@ -176,8 +152,7 @@ async function saveVersionForUser(
     new Date(),
     didRun,
     previousVersionID,
-    versionID,
-    prompts ? prompts.main : undefined
+    versionID
   )
   await datastore.save(versionData)
   const savedVersionID = getID(versionData)
@@ -205,8 +180,7 @@ async function updateVersion(versionData: any) {
       versionData.createdAt,
       versionData.didRun,
       versionData.previousVersionID,
-      getID(versionData),
-      versionData.prompt
+      getID(versionData)
     )
   )
 }
@@ -260,8 +234,7 @@ const toVersionData = (
   createdAt: Date,
   didRun: boolean,
   previousVersionID?: number,
-  versionID?: number,
-  prompt?: string // TODO safe to delete this after running next post-merge data migrations in prod
+  versionID?: number
 ) => ({
   key: buildKey(Entity.VERSION, versionID),
   data: {
@@ -274,9 +247,8 @@ const toVersionData = (
     createdAt,
     didRun,
     previousVersionID,
-    prompt,
   },
-  excludeFromIndexes: ['prompts', 'config', 'items', 'labels', 'prompt'], // TODO delete prompt here too
+  excludeFromIndexes: ['prompts', 'config', 'items', 'labels'],
 })
 
 export const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({

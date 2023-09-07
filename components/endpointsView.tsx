@@ -20,22 +20,26 @@ import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
-import TabSelector, { SingleTabHeader } from './tabSelector'
+import TabSelector, { HeaderItem, SingleTabHeader } from './tabSelector'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from './iconButton'
 import collapseIcon from '@/public/collapse.svg'
+import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/client/clientRoute'
+import { useRouter } from 'next/router'
+import Icon from './icon'
+import chevronIcon from '@/public/chevron.svg'
 
-const NewEndpointSettings: EndpointSettings = {
+const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,
   enabled: true,
-  parentID: undefined,
-  versionID: undefined,
+  parentID,
+  versionID,
   urlPath: '',
   flavor: undefined,
   useCache: true,
   useStreaming: false,
-}
+})
 
 export default function EndpointsView({
   project,
@@ -46,8 +50,11 @@ export default function EndpointsView({
   logEntries?: LogEntry[]
   onRefresh: () => Promise<void>
 }) {
+  const router = useRouter()
+  const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
+
   type ActiveTab = 'Endpoints' | 'Logs'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('Endpoints')
+  const [activeTab, setActiveTab] = useState<ActiveTab>(showLogs ? 'Logs' : 'Endpoints')
 
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
@@ -59,6 +66,7 @@ export default function EndpointsView({
   }
 
   const selectTab = (tab: ActiveTab) => {
+    router.push(tab === 'Logs' ? LogsRoute(project.id) : EndpointsRoute(project.id), undefined, { shallow: true })
     setActiveTab(tab)
     setActiveLogEntryIndex(undefined)
   }
@@ -74,13 +82,16 @@ export default function EndpointsView({
 
   const endpoints = project.endpoints
 
-  const [newEndpoint, setNewEndpoint] = useState<EndpointSettings>()
-  const [isEditing, setEditing] = useState(false)
+  const startsEditing = newParentID !== undefined && newVersionID !== undefined
+  const [isEditing, setEditing] = useState(startsEditing)
+  const [newEndpoint, setNewEndpoint] = useState(
+    startsEditing ? NewEndpointSettings(newParentID, newVersionID) : undefined
+  )
 
   const addEndpoint =
     EndpointParentsInProject(project).length > 0
       ? () => {
-          setNewEndpoint(NewEndpointSettings)
+          setNewEndpoint(NewEndpointSettings())
           setActiveParentID(undefined)
           setActiveParent(undefined)
           setEditing(true)
@@ -106,7 +117,7 @@ export default function EndpointsView({
     setActiveEndpointID(undefined)
   }
 
-  const [activeParentID, setActiveParentID] = useState<number>()
+  const [activeParentID, setActiveParentID] = useState(newParentID)
   if (!isEditing && activeLogEntryIndex === undefined && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
     setActiveParentID(activeEndpoint.parentID)
   }
@@ -150,7 +161,7 @@ export default function EndpointsView({
         ? ExtractUnboundChainInputs(activeVersion.items)
         : []
       : activeVersion?.prompts && activeVersion?.config
-      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config)
+      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
       : []
     : []
 
@@ -170,14 +181,20 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
       {activeTab === 'Endpoints' && activeEndpoint && (
-        <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
+        <Allotment.Pane
+          key={isEditing.toString()}
+          minSize={isEditing ? undefined : minWidth}
+          maxSize={isEditing ? undefined : maxWidth}
+          preferredSize={isEditing ? '100%' : minWidth}>
           <div className='flex flex-col w-full h-full bg-gray-25'>
-            <SingleTabHeader
+            <SettingsPaneHeader
+              isEditing={isEditing}
               label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
-              secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : ''}>
-              {!isEditing && <IconButton icon={collapseIcon} onClick={() => setActiveEndpointID(undefined)} />}
-            </SingleTabHeader>
-            <div className='flex flex-col gap-6 p-4 overflow-y-auto'>
+              secondaryLabel={versionIndex >= 0 ? `Version ${versionIndex + 1}` : undefined}
+              onNavigateBack={() => setEditing(false)}
+              onCollapse={() => setActiveEndpointID(undefined)}
+            />
+            <div className='flex flex-col gap-6 p-4 overflow-y-auto max-w-[680px]'>
               <EndpointSettingsPane
                 endpoint={activeEndpoint}
                 project={project}
@@ -225,5 +242,34 @@ export default function EndpointsView({
         </Allotment.Pane>
       )}
     </Allotment>
+  )
+}
+
+function SettingsPaneHeader({
+  label,
+  secondaryLabel,
+  isEditing,
+  onNavigateBack,
+  onCollapse,
+}: {
+  label: string
+  secondaryLabel?: string
+  isEditing: boolean
+  onNavigateBack: () => void
+  onCollapse: () => void
+}) {
+  return isEditing ? (
+    <div className='flex'>
+      <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
+        <Icon className='rotate-90 opacity-25' icon={chevronIcon} />
+        Endpoints /
+      </HeaderItem>
+      <HeaderItem className='-mx-2.5'>{label}</HeaderItem>
+      <HeaderItem active={false}>{secondaryLabel}</HeaderItem>
+    </div>
+  ) : (
+    <SingleTabHeader label={label} secondaryLabel={secondaryLabel}>
+      <IconButton icon={collapseIcon} onClick={onCollapse} />
+    </SingleTabHeader>
   )
 }

@@ -5,6 +5,8 @@ import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import dotsIcon from '@/public/dots.svg'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import GlobalPopupMenu from './globalPopupMenu'
+import { useRouter } from 'next/router'
+import { NewEndpointRoute, ParseNumberQuery } from '@/src/client/clientRoute'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
@@ -36,22 +38,30 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     }
   }
 
-  const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [VersionPopup, { deleteVersion }]
+  const router = useRouter()
+  const { projectID } = ParseNumberQuery(router.query)
+  const createEndpoint = () => {
+    console.log(NewEndpointRoute(projectID!, version.parentID, version.id))
+    router.push(NewEndpointRoute(projectID!, version.parentID, version.id))
+  }
+
+  const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [VersionPopup, { deleteVersion, createEndpoint }]
 
   return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
-type VersionPopupProps = { deleteVersion: () => void; onDismissGlobalPopup?: () => void }
+type VersionPopupProps = { deleteVersion: () => void; createEndpoint: () => void; onDismissGlobalPopup?: () => void }
 
-function VersionPopup({ deleteVersion, onDismissGlobalPopup }: VersionPopupProps) {
-  const callback = () => {
+function VersionPopup({ deleteVersion, createEndpoint, onDismissGlobalPopup }: VersionPopupProps) {
+  const dismissAndCallback = (callback: () => void) => () => {
     onDismissGlobalPopup?.()
-    deleteVersion()
+    callback()
   }
 
   return (
     <PopupContent className='w-40'>
-      <PopupMenuItem destructive title='Delete' callback={callback} first last />
+      <PopupMenuItem title='Create Endpoint' callback={dismissAndCallback(createEndpoint)} first />
+      <PopupMenuItem destructive title='Delete' callback={dismissAndCallback(deleteVersion)} last />
     </PopupContent>
   )
 }

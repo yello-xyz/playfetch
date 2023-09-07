@@ -50,7 +50,10 @@ export type ActivePrompt = Prompt & {
   availableLabels: string[]
 }
 
-export type ChainItemWithInputs = ChainItem & { inputs: string[] }
+export type ChainItemWithInputs = ChainItem & {
+  inputs: string[]
+  dynamicInputs: string[]
+}
 
 export type Chain = {
   id: number
@@ -152,7 +155,7 @@ export type TestConfig = {
   rowIndices: number[]
 }
 
-export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[] }
+export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[]; dynamicInputs?: string[] }
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
 export type ChainItem = PromptChainItem | CodeChainItem
 
@@ -221,6 +224,7 @@ export type LogEntry = {
   inputs: PromptInputs
   output: object
   error?: string
-  cacheHit: boolean
   attempts: number
+  cacheHit: boolean
+  continuationIDs: number[]
 }

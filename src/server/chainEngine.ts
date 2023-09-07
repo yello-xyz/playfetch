@@ -3,6 +3,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { AugmentCodeContext, CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
+import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -33,7 +34,10 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 
 const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
 
-type ChainStepResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
+type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
+type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
+type ChainStepResponse = PromptResponse | CodeResponse
+const isPromptResponse = (response: ChainStepResponse): response is PromptResponse => 'interrupted' in response
 type ResponseType = Awaited<ReturnType<typeof runWithTimer<ChainStepResponse>>>
 
 const emptyResponse: ResponseType = {
@@ -43,7 +47,6 @@ const emptyResponse: ResponseType = {
   cost: 0,
   duration: 0,
   attempts: 1,
-  cacheHit: false,
   failed: false,
 }
 
@@ -52,27 +55,43 @@ export default async function runChain(
   version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
-  useCamelCase: boolean,
-  stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void
+  isEndpointEvaluation: boolean,
+  stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void,
+  continuationID?: number
 ) {
+  const continuationInputs = inputs
+  const useCamelCase = isEndpointEvaluation
   let cost = 0
   let duration = 0
   let extraAttempts = 0
-  let cacheHit = false
   const runChainStep = async (operation: Promise<ChainStepResponse>) => {
     const response = await runWithTimer(operation)
     cost += response.cost
     duration += response.duration
     extraAttempts += response.attempts - 1
-    cacheHit = cacheHit || response.cacheHit
     return response
   }
 
-  let lastResponse = emptyResponse
-  let runningContext = ''
-  const codeContext = CreateCodeContextWithInputs(inputs)
+  let continuationIndex = undefined
+  let promptContext = {}
 
-  for (const [index, config] of configs.entries()) {
+  if (continuationID) {
+    const cachedValue = await getExpiringCachedValue(continuationID)
+    if (cachedValue) {
+      const continuation = JSON.parse(cachedValue)
+      continuationIndex = continuation.continuationIndex
+      inputs = { ...continuation.inputs, ...inputs }
+      promptContext = continuation.promptContext
+    }
+  }
+
+  const codeContext = CreateCodeContextWithInputs(inputs)
+  let lastResponse = emptyResponse
+  const maxContinuationCount = 10
+  let continuationCount = 0
+
+  for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
+    const config = configs[index]
     const streamPartialResponse = (chunk: string) => stream?.(index, chunk)
     const streamResponse = (response: ResponseType, skipOutput = false) =>
       stream?.(
@@ -87,19 +106,33 @@ export default async function runChain(
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
       let prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
-      runningContext += prompts.main
-      if (config.includeContext) {
-        prompts.main = runningContext
-      }
       lastResponse = await runChainStep(
-        runPromptWithConfig(userID, prompts, promptVersion.config, streamPartialResponse)
+        runPromptWithConfig(
+          userID,
+          prompts,
+          promptVersion.config,
+          promptContext,
+          index === continuationIndex || (config.includeContext ?? false),
+          streamPartialResponse,
+          index === continuationIndex ? continuationInputs : undefined
+        )
       )
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {
+        continuationIndex = undefined
         break
+      } else if (isPromptResponse(lastResponse) && lastResponse.interrupted) {
+        if (isEndpointEvaluation) {
+          continuationIndex = index
+          break
+        } else if (continuationCount++ < maxContinuationCount) {
+          continuationIndex = index
+          index -= 1
+          continue
+        }
       } else {
+        continuationIndex = index === continuationIndex ? undefined : continuationIndex
         const output = lastResponse.output
-        runningContext += `\n\n${output}\n\n`
         AugmentInputs(inputs, config.output, output!, useCamelCase)
         AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
@@ -115,5 +148,10 @@ export default async function runChain(
     }
   }
 
-  return { ...lastResponse, cost, duration, cacheHit, attempts: 1 + extraAttempts }
+  continuationID =
+    continuationIndex !== undefined
+      ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }))
+      : undefined
+
+  return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID }
 }
