@@ -33,22 +33,17 @@ const costForTokensWithModel = (model: OpenAILanguageModel, input: string, outpu
   }
 }
 
-const buildPromptMessage = (prompt: string, lastMessage?: any, inputs?: PromptInputs) => {
+const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any, inputs?: PromptInputs) => {
   if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
     const name = lastMessage.function_call.name
     const response = inputs[name]
     if (response) {
       const content = typeof response === 'string' ? response : JSON.stringify(response)
-      return { role: 'function', name, content }
+      return [{ role: 'function', name, content }]
     }
   }
-  return { role: 'user', content: prompt }
+  return [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: prompt }]
 }
-
-const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any, inputs?: PromptInputs) => [
-  ...(system ? [{ role: 'system', content: system }] : []),
-  buildPromptMessage(prompt, lastMessage, inputs),
-]
 
 async function tryCompleteChat(
   apiKey: string,
