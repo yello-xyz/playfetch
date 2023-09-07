@@ -123,6 +123,7 @@ const toLogEntry = (data: any): LogEntry => ({
   timestamp: getTimestamp(data),
   cost: data.cost,
   duration: data.duration,
-  cacheHit: data.cacheHit,
   attempts: data.attempts,
+  cacheHit: data.cacheHit,
+  continuationID: data.continuationID ?? null,
 })

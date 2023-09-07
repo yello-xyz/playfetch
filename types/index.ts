@@ -221,6 +221,7 @@ export type LogEntry = {
   inputs: PromptInputs
   output: object
   error?: string
-  cacheHit: boolean
   attempts: number
+  cacheHit: boolean
+  continuationID?: number
 }

@@ -7,6 +7,14 @@ import TableCell, { TableHeader } from './tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
+const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
+
+const isSameSequence = (entry: LogEntry, index: number | undefined, entries: LogEntry[]) =>
+  index !== undefined && sameSequence(entry)(entries[index])
+
+const getSequenceNumber = (entry: LogEntry, index: number, entries: LogEntry[]) =>
+  entries.slice(index).filter(sameSequence(entry)).length
+
 export default function LogEntriesView({
   tabSelector,
   logEntries,
@@ -29,13 +37,15 @@ export default function LogEntriesView({
           <TableHeader>Environment</TableHeader>
           <TableHeader>Time</TableHeader>
           <TableHeader last>Status</TableHeader>
-          {logEntries.map((logEntry, index) => (
+          {logEntries.map((logEntry, index, entries) => (
             <LogEntryRow
               key={index}
               logEntry={logEntry}
               endpoint={endpoints.find(endpoint => endpoint.id === logEntry.endpointID)}
               isActive={index === activeIndex}
+              isSameSequenceAsActive={isSameSequence(logEntry, activeIndex, entries)}
               setActive={() => setActiveIndex(index)}
+              sequenceNumber={getSequenceNumber(logEntry, index, entries)}
             />
           ))}
         </div>
@@ -49,30 +59,32 @@ function LogEntryRow({
   endpoint,
   isActive,
   setActive,
+  isSameSequenceAsActive,
+  sequenceNumber,
 }: {
   logEntry: LogEntry
   endpoint?: ResolvedEndpoint
   isActive: boolean
   setActive: () => void
+  isSameSequenceAsActive: boolean
+  sequenceNumber: number
 }) {
   const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
-
   const statusColor = logEntry.error ? 'bg-red-300' : 'bg-green-300'
+  const props = { active: isActive, semiActive: isSameSequenceAsActive, callback: setActive }
+
   return endpoint ? (
     <>
-      <TableCell first active={isActive} callback={setActive}>
+      <TableCell first {...props}>
         <div className='flex items-center gap-1'>
           <Icon icon={!!endpoint.versionID ? promptIcon : chainIcon} />
           {endpoint.urlPath}
+          {sequenceNumber > 1 && ` [${sequenceNumber}]`}
         </div>
       </TableCell>
-      <TableCell active={isActive} callback={setActive}>
-        {endpoint.flavor}
-      </TableCell>
-      <TableCell active={isActive} callback={setActive}>
-        {formattedDate}
-      </TableCell>
-      <TableCell last active={isActive} callback={setActive}>
+      <TableCell {...props}>{endpoint.flavor}</TableCell>
+      <TableCell {...props}>{formattedDate}</TableCell>
+      <TableCell last {...props}>
         <div className={`rounded px-1.5 flex items-center text-white ${statusColor}`}>
           {logEntry.error ? 'Error' : 'Success'}
         </div>
