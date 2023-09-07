@@ -11,8 +11,13 @@ import runChain from '@/src/server/chainEngine'
 import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
 import { TryParseOutput } from '@/src/server/promptEngine'
 
-const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited<ReturnType<typeof runChain>>) => {
-  updateUsage(endpoint.id, response.cost, response.duration, response.cacheHit, response.attempts, response.failed)
+const logResponse = (
+  endpoint: Endpoint,
+  inputs: PromptInputs,
+  response: Awaited<ReturnType<typeof runChain>>,
+  cacheHit: boolean
+) => {
+  updateUsage(endpoint.id, response.cost, response.duration, cacheHit, response.attempts, response.failed)
   saveLogEntry(
     endpoint.projectID,
     endpoint.id,
@@ -25,7 +30,7 @@ const logResponse = (endpoint: Endpoint, inputs: PromptInputs, response: Awaited
     response.error,
     response.cost,
     response.duration,
-    response.cacheHit,
+    cacheHit,
     response.attempts
   )
 }
@@ -53,7 +58,6 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
         cost: 0,
         failed: false,
         attempts: 1,
-        cacheHit: true,
         continuationID: undefined,
       }
     : null
@@ -81,10 +85,11 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
 
-        let response = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
-        if (response && useStreaming) {
-          res.write(response.output)
+        const cachedResponse = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
+        if (cachedResponse && useStreaming) {
+          res.write(cachedResponse.output)
         }
+        let response = cachedResponse
         if (!response) {
           const version = await getTrustedVersion(versionID, true)
 
@@ -100,7 +105,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           }
         }
 
-        logResponse(endpoint, inputs, response)
+        logResponse(endpoint, inputs, response, !!cachedResponse)
 
         return useStreaming
           ? res.end()

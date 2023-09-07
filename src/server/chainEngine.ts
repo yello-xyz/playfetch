@@ -47,7 +47,6 @@ const emptyResponse: ResponseType = {
   cost: 0,
   duration: 0,
   attempts: 1,
-  cacheHit: false,
   failed: false,
 }
 
@@ -65,13 +64,11 @@ export default async function runChain(
   let cost = 0
   let duration = 0
   let extraAttempts = 0
-  let cacheHit = false
   const runChainStep = async (operation: Promise<ChainStepResponse>) => {
     const response = await runWithTimer(operation)
     cost += response.cost
     duration += response.duration
     extraAttempts += response.attempts - 1
-    cacheHit = cacheHit || response.cacheHit
     return response
   }
 
@@ -153,5 +150,5 @@ export default async function runChain(
       ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }))
       : undefined
 
-  return { ...lastResponse, cost, duration, cacheHit, attempts: 1 + extraAttempts, continuationID }
+  return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID }
 }
