@@ -9,14 +9,6 @@ export async function migrateLogs(postMerge: boolean) {
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   for (const logData of allLogs) {
-    let continuationIDs = []
-    if (!logData.continuationID || isNaN(logData.continuationID)) {
-      continuationIDs = []
-    } else if (Array.isArray(logData.continuationID)) {
-      continuationIDs = logData.continuationID
-    } else {
-      continuationIDs = [logData.continuationID]
-    }
     await getDatastore().save(
       toLogData(
         logData.projectID,
@@ -33,7 +25,7 @@ export async function migrateLogs(postMerge: boolean) {
         logData.duration,
         logData.attempts,
         logData.cacheHit,
-        continuationIDs,
+        JSON.parse(logData.continuationIDs),
         getID(logData)
       )
     )
