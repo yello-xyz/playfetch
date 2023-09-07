@@ -136,6 +136,7 @@ export default function ChainNodeEditor({
     setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], code }))
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
+  const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
   const colorClass = IsPromptChainItem(activeNode) ? 'bg-white' : 'bg-gray-25'
 
@@ -148,6 +149,7 @@ export default function ChainNodeEditor({
             {showTestData && (
               <TestDataPane
                 variables={variables}
+                staticVariables={staticVariables}
                 inputValues={inputValues}
                 setInputValues={setInputValues}
                 persistInputValuesIfNeeded={persistInputValuesIfNeeded}

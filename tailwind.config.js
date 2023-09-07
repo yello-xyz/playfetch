@@ -21,6 +21,7 @@ module.exports = {
       'gray-800': '#1D2532',
       'green-300': '#71B892',
       'pink-400': '#E14BD2',
+      'purple-400': '#7D48EF',
       'red-300': '#E4735B',
       'red-400': '#DC4F30',
       'red-500': '#C64629',
@@ -64,6 +65,7 @@ module.exports = {
       'pink-25': '#FDF2FC',
       'pink-100': '#F4B8EE',
       'pink-400': '#E14BD2',
+      'purple-25': '#F7F2FD', // TODO replace Copilot prediction with proper color code
       'purple-200': '#BEA4F6',
       'purple-300': '#9F78F3',
       'purple-400': '#7D48EF',

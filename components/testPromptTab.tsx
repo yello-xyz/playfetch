@@ -34,6 +34,7 @@ export default function TestPromptTab({
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
+  const staticVariables = ExtractPromptVariables(currentPrompts, currentPromptConfig, false)
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
     persistInputValuesIfNeeded()
@@ -56,6 +57,7 @@ export default function TestPromptTab({
           {tabSelector()}
           <TestDataPane
             variables={variables}
+            staticVariables={staticVariables}
             inputValues={inputValues}
             setInputValues={setInputValues}
             persistInputValuesIfNeeded={persistInputValuesIfNeeded}
