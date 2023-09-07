@@ -74,7 +74,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
     const continuation = req.headers['x-continuation-key'] as string | undefined
-    const continuationID = continuationKey ? Number(continuation) : undefined
+    const continuationID = continuation ? Number(continuation) : undefined
 
     if (apiKey && (await checkProject(projectID, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)

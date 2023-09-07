@@ -117,6 +117,7 @@ export default async function runChain(
       )
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {
+        continuationIndex = undefined
         break
       } else if (isPromptResponse(lastResponse) && lastResponse.interrupted) {
         if (isEndpointEvaluation) {
