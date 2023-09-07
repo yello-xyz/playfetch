@@ -88,14 +88,14 @@ const TryParseJSON = (text: string) => {
 
 const ExtractFunctionNames = (text: string) => {
   const json = TryParseJSON(text)
-  return Array.isArray(json) ? json.map(item => item?.name).filter(name => name) : []
+  return Array.isArray(json) ? json.map(item => item?.name as string).filter(name => name) : []
 }
 
-export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig) => [
+export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic = true) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
   ...(SupportsFunctionsPrompt(config.model) && prompts.functions
-    ? [...ExtractVariables(prompts.functions), ...ExtractFunctionNames(prompts.functions)]
+    ? [...ExtractVariables(prompts.functions), ...(includingDynamic ? ExtractFunctionNames(prompts.functions) : [])]
     : []),
 ]
 
