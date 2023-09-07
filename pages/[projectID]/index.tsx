@@ -173,7 +173,9 @@ export default function Home({
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
     }
-    router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
+    if (!endpoints) {
+      router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
+    }
   }
 
   const onDeleteItem = async () => {

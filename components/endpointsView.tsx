@@ -30,16 +30,16 @@ import { useRouter } from 'next/router'
 import Icon from './icon'
 import chevronIcon from '@/public/chevron.svg'
 
-const NewEndpointSettings: EndpointSettings = {
+const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,
   enabled: true,
-  parentID: undefined,
-  versionID: undefined,
+  parentID,
+  versionID,
   urlPath: '',
   flavor: undefined,
   useCache: true,
   useStreaming: false,
-}
+})
 
 export default function EndpointsView({
   project,
@@ -51,7 +51,7 @@ export default function EndpointsView({
   onRefresh: () => Promise<void>
 }) {
   const router = useRouter()
-  const { l: showLogs } = ParseNumberQuery(router.query)
+  const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
 
   type ActiveTab = 'Endpoints' | 'Logs'
   const [activeTab, setActiveTab] = useState<ActiveTab>(showLogs ? 'Logs' : 'Endpoints')
@@ -82,13 +82,16 @@ export default function EndpointsView({
 
   const endpoints = project.endpoints
 
-  const [newEndpoint, setNewEndpoint] = useState<EndpointSettings>()
-  const [isEditing, setEditing] = useState(false)
+  const startsEditing = newParentID !== undefined && newVersionID !== undefined
+  const [isEditing, setEditing] = useState(startsEditing)
+  const [newEndpoint, setNewEndpoint] = useState(
+    startsEditing ? NewEndpointSettings(newParentID, newVersionID) : undefined
+  )
 
   const addEndpoint =
     EndpointParentsInProject(project).length > 0
       ? () => {
-          setNewEndpoint(NewEndpointSettings)
+          setNewEndpoint(NewEndpointSettings())
           setActiveParentID(undefined)
           setActiveParent(undefined)
           setEditing(true)
@@ -114,7 +117,7 @@ export default function EndpointsView({
     setActiveEndpointID(undefined)
   }
 
-  const [activeParentID, setActiveParentID] = useState<number>()
+  const [activeParentID, setActiveParentID] = useState(newParentID)
   if (!isEditing && activeLogEntryIndex === undefined && activeEndpoint && activeEndpoint.parentID !== activeParentID) {
     setActiveParentID(activeEndpoint.parentID)
   }
