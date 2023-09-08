@@ -64,6 +64,7 @@ export default function PromptPanel({
 
   const checkProviderAvailable = useCheckProvider()
   const isProviderAvailable = checkProviderAvailable(config.provider)
+  const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
   const activePromptLabel = LabelForSupportedPrompt(activePromptKey)
   const setActivePromptLabel = (label: string) =>
@@ -78,12 +79,18 @@ export default function PromptPanel({
     (isProviderAvailable ? 0 : 72) +
     (runPrompt ? 55 : 0) +
     (areOptionsExpanded ? 195 : 70) +
+    (showMultipleInputsWarning ? 53 : 0) +
     Math.max(51, promptInputScrollHeight)
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
       {!isProviderAvailable && <PromptPanelProviderWarning />}
+      {showMultipleInputsWarning && (
+        <PromptPanelWarning>
+          Running this prompt will use {testConfig.rowIndices.length} rows of test data.
+        </PromptPanelWarning>
+      )}
       <div className='self-stretch flex-1 min-h-0'>
         <PromptInput
           key={version.id}
@@ -122,9 +129,9 @@ export default function PromptPanel({
   )
 }
 
-export function PromptPanelWarning({ children }: { children: ReactNode }) {
-  return <PromptPanelBanner className='border-pink-50 bg-pink-25'>{children}</PromptPanelBanner>
-}
+const PromptPanelWarning = ({ children }: { children: ReactNode }) => (
+  <PromptPanelBanner className='border-pink-50 bg-pink-25'>{children}</PromptPanelBanner>
+)
 
 function PromptPanelProviderWarning() {
   const router = useRouter()
@@ -146,6 +153,6 @@ function PromptPanelProviderWarning() {
   )
 }
 
-function PromptPanelBanner({ children, className = '' }: { children: ReactNode; className: string }) {
-  return <div className={`grow px-3 py-2 border rounded ${className}`}>{children}</div>
-}
+const PromptPanelBanner = ({ children, className = '' }: { children: ReactNode; className: string }) => (
+  <div className={`px-3 py-2 border rounded ${className}`}>{children}</div>
+)

@@ -4,7 +4,7 @@ import { PromptVersion, InputValues, PromptConfig, PromptInputs, TestConfig, Pro
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import TestDataPane from './testDataPane'
 import RunButtons from './runButtons'
-import PromptPanel, { PromptPanelWarning } from './promptPanel'
+import PromptPanel from './promptPanel'
 import { Allotment } from 'allotment'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 
@@ -43,13 +43,11 @@ export default function TestPromptTab({
 
   const checkProviderAvailable = useCheckProvider()
   const isProviderAvailable = checkProviderAvailable(currentPromptConfig.provider)
-  const showMultipleInputsWarning = testConfig.rowIndices.length > 1
 
   const minVersionHeight = 240
   const [promptHeight, setPromptHeight] = useState(1)
   const runButtonsHeight = 55
-  const warningsHeight = showMultipleInputsWarning ? 53 : 0
-  const preferredHeight = promptHeight + runButtonsHeight + warningsHeight
+  const preferredHeight = promptHeight + runButtonsHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minVersionHeight}>
@@ -69,16 +67,13 @@ export default function TestPromptTab({
       <Allotment.Pane minSize={Math.min(350, preferredHeight)} preferredSize={preferredHeight}>
         <div className='h-full p-4 bg-white'>
           <div className='flex flex-col h-full gap-4'>
-            {showMultipleInputsWarning && (
-              <PromptPanelWarning>
-                Running this prompt will use {testConfig.rowIndices.length} rows of test data.
-              </PromptPanelWarning>
-            )}
             <PromptPanel
               initialPrompts={currentPrompts}
               initialConfig={currentPromptConfig}
               version={activeVersion}
               setModifiedVersion={setModifiedVersion}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
               onUpdatePreferredHeight={setPromptHeight}
             />
             <RunButtons
