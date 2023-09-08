@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import runChain from '@/src/server/chainEngine'
+import runChain, { MaxContinuationCount } from '@/src/server/chainEngine'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   version.items ?? [{ versionID: version.id }]
@@ -40,7 +40,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
-      const offset = (index: number) => inputIndex * configs.length + index
+      const offset = (index: number) => inputIndex * (configs.length * MaxContinuationCount) + index
       return runChain(user.id, version, configs, inputs, false, (index, message, cost, duration, failed) =>
         sendData({
           index: offset(index),
@@ -52,7 +52,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         })
       ).then(response => {
         if (!response.failed) {
-          sendData({ index: offset(configs.length - 1) })
+          sendData({ index: offset(configs.length - 1 + response.extraSteps) })
           logResponse(user.id, version, inputs, response)
         }
       })

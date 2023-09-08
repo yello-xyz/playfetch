@@ -50,6 +50,8 @@ const emptyResponse: ResponseType = {
   failed: false,
 }
 
+export const MaxContinuationCount = 10
+
 export default async function runChain(
   userID: number,
   version: RawPromptVersion | RawChainVersion,
@@ -87,15 +89,14 @@ export default async function runChain(
 
   const codeContext = CreateCodeContextWithInputs(inputs)
   let lastResponse = emptyResponse
-  const maxContinuationCount = 10
   let continuationCount = 0
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
-    const streamPartialResponse = (chunk: string) => stream?.(index, chunk)
+    const streamPartialResponse = (chunk: string) => stream?.(index + continuationCount, chunk)
     const streamResponse = (response: ResponseType, skipOutput = false) =>
       stream?.(
-        index,
+        index + continuationCount,
         response.failed ? response.error : skipOutput ? '' : response.output,
         response.cost,
         response.duration,
@@ -125,7 +126,7 @@ export default async function runChain(
         if (isEndpointEvaluation) {
           continuationIndex = index
           break
-        } else if (continuationCount++ < maxContinuationCount) {
+        } else if (continuationCount++ < MaxContinuationCount) {
           continuationIndex = index
           index -= 1
           continue
@@ -153,5 +154,5 @@ export default async function runChain(
       ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }))
       : undefined
 
-  return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID }
+  return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID, extraSteps: continuationCount }
 }
