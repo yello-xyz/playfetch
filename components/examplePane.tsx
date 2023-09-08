@@ -58,7 +58,7 @@ export default function ExamplePane({
           <div
             className={`flex items-center gap-1 ${copied ? '' : 'cursor-pointer'}`}
             onClick={copied ? undefined : () => copyToClipboard(curlCommand)}>
-            {copied ? <Icon className='-mt-px' icon={checkIcon} /> : <Icon icon={clipboardIcon} />}
+            {copied ? <Icon icon={checkIcon} /> : <Icon icon={clipboardIcon} />}
             <span>{copied ? 'Copied to clipboard' : 'Copy to clipboard'}</span>
           </div>
         )}
