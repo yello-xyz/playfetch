@@ -63,7 +63,7 @@ function TabButton<T extends string>({
   setActiveTab?: (tab: T) => void
 }) {
   const underline = activeTab === tab ? 'border-b border-black -mb-px' : ''
-  const cursor = setActiveTab ? 'cursor-pointer' : ''
+  const cursor = setActiveTab ? 'cursor-pointer hover:text-gray-500' : ''
   return (
     <HeaderItem
       active={activeTab === undefined || activeTab === tab}
