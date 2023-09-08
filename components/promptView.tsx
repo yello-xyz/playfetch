@@ -77,6 +77,7 @@ export default function PromptView({
   const minWidth = 280
   const minTopPaneHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
+  const [maxHeight, setMaxHeight] = useState<number>()
   return (
     <Allotment>
       <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
@@ -93,7 +94,7 @@ export default function PromptView({
                 />
               </div>
             ) : (
-              <div className='flex flex-col h-full min-h-0 pb-4 overflow-hidden grow'>
+              <div className='flex flex-col h-full min-h-0 overflow-hidden grow'>
                 {tabSelector()}
                 <TestDataPane
                   variables={variables}
@@ -107,7 +108,7 @@ export default function PromptView({
               </div>
             )}
           </Allotment.Pane>
-          <Allotment.Pane minSize={promptHeight} preferredSize={promptHeight}>
+          <Allotment.Pane minSize={promptHeight} preferredSize={promptHeight} maxSize={maxHeight}>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
                 version={activeVersion}
@@ -117,8 +118,9 @@ export default function PromptView({
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
                 showTestMode={activeTab === 'Test data'}
-                onUpdatePreferredHeight={setPromptHeight}
-              />
+                setPreferredHeight={setPromptHeight}
+                setMaxHeight={setMaxHeight}
+                  />
             </div>
           </Allotment.Pane>
         </Allotment>

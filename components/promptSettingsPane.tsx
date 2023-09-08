@@ -27,7 +27,7 @@ export default function PromptSettingsPane({
 
   return (
     <Collapsible label='Advanced Settings' isExpanded={isExpanded} setExpanded={setExpanded}>
-      <div className='flex flex-col gap-2 px-6 py-4 -mt-1 border border-gray-200 border-solid rounded-lg bg-gray-25'>
+      <div className='flex flex-col gap-2 px-6 py-4 border border-gray-200 border-solid rounded-lg bg-gray-25'>
         <SettingsRow label='Temperature'>
           <input
             className='w-1/3 border border-gray-300 accent-gray-700 focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'

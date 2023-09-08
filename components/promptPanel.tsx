@@ -2,11 +2,11 @@ import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, 
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import {
-  LabelForSupportedPrompt,
-  PlaceholderForSupportedPrompt,
+  LabelForPromptKey,
+  PlaceholderForPromptKey,
+  PromptKeyNeedsPreformatted,
   ProviderForModel,
-  ShouldPreformatSupportedPrompt,
-  SupportedPromptsForModel,
+  SupportedPromptKeysForModel,
 } from './modelSelector'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
@@ -16,6 +16,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
+import Collapsible from './collapsible'
 
 export default function PromptPanel({
   version,
@@ -25,7 +26,8 @@ export default function PromptPanel({
   testConfig,
   setTestConfig,
   showTestMode,
-  onUpdatePreferredHeight,
+  setPreferredHeight,
+  setMaxHeight,
 }: {
   version: PromptVersion
   setModifiedVersion: (version: PromptVersion) => void
@@ -34,24 +36,20 @@ export default function PromptPanel({
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
   showTestMode?: boolean
-  onUpdatePreferredHeight?: (height: number) => void
+  setPreferredHeight: (height: number) => void
+  setMaxHeight: (height: number | undefined) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
-  const supportedPrompts = SupportedPromptsForModel(config.model)
-  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>(supportedPrompts[0])
 
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion({ ...version, prompts, config })
-    const supportedPrompts = SupportedPromptsForModel(config.model)
-    if (!supportedPrompts.includes(activePromptKey)) {
-      setActivePromptKey(supportedPrompts[0])
-    }
   }
 
-  const updatePrompt = (prompt: string) => update({ ...prompts, [activePromptKey]: prompt }, config)
+  const updatePrompt = (promptKey: keyof Prompts) => (prompt: string) =>
+    update({ ...prompts, [promptKey]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
@@ -59,39 +57,57 @@ export default function PromptPanel({
   const isProviderAvailable = checkProviderAvailable(config.provider)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
-  const activePromptLabel = LabelForSupportedPrompt(activePromptKey)
-  const setActivePromptLabel = (label: string) =>
-    setActivePromptKey(supportedPrompts.find(p => LabelForSupportedPrompt(p) === label) ?? supportedPrompts[0])
-  const promptLabels = supportedPrompts.map(LabelForSupportedPrompt)
+  const supportedPrompts = SupportedPromptKeysForModel(config.model)
+  const [expandedPromptKeys, setExpandedPromptKeys] = useState<Record<string, boolean>>({ main: true })
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
+
+  const outerPadding = 16 // p-4
+  const padding = 8 // gap-2
+  const buttonsHeight = 37
+  const labelHeight = 28
+  const promptHeight = 51
+  const promptsHeight =
+    supportedPrompts.filter(promptKey => expandedPromptKeys[promptKey]).length * (promptHeight + padding)
   const preferredHeight =
-    121 +
-    (promptLabels ? 32 : 0) +
-    (isProviderAvailable ? 0 : 72) +
-    (showMultipleInputsWarning ? 53 : 0) +
-    (areOptionsExpanded ? 127 : 0) +
-    (runPrompt ? 55 : 0)
-  useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
+    2 * outerPadding +
+    promptsHeight +
+    supportedPrompts.length * (labelHeight + padding) +
+    (isProviderAvailable ? 0 : 56 + padding) +
+    (showMultipleInputsWarning ? buttonsHeight + padding : 0) +
+    (areOptionsExpanded ? labelHeight + padding + 116 : labelHeight) +
+    (runPrompt ? outerPadding + buttonsHeight : 0)
+
+  useEffect(() => {
+    setPreferredHeight(preferredHeight)
+    setMaxHeight(promptsHeight ? undefined : preferredHeight)
+  }, [preferredHeight, promptsHeight, setPreferredHeight, setMaxHeight])
 
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 overflow-hidden text-gray-500 bg-white'>
-      <div className='flex flex-col flex-1 gap-4 overflow-y-auto'>
+      <div className='flex flex-col gap-2 overflow-y-auto'>
         {!isProviderAvailable && <ProviderWarning />}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
-        <div className='self-stretch flex-1 min-h-[82px]'>
-          <PromptInput
-            key={version.id}
-            value={prompts[activePromptKey] ?? ''}
-            setValue={updatePrompt}
-            labels={promptLabels}
-            activeLabel={activePromptLabel}
-            setActiveLabel={setActivePromptLabel}
-            placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
-            preformatted={ShouldPreformatSupportedPrompt(activePromptKey)}
-          />
+        <div className='flex flex-col self-stretch flex-1 min-h-[28px] gap-2'>
+          {supportedPrompts.map(promptKey => (
+            <Collapsible
+              key={promptKey}
+              label={LabelForPromptKey(promptKey)}
+              isExpanded={expandedPromptKeys[promptKey]}
+              setExpanded={expanded => setExpandedPromptKeys({ ...expandedPromptKeys, [promptKey]: expanded })}>
+              <div className='flex-1 min-h-[51px]'>
+                <PromptInput
+                  key={`${version.id}-${promptKey}`}
+                  value={prompts[promptKey] ?? ''}
+                  setValue={updatePrompt(promptKey)}
+                  placeholder={PlaceholderForPromptKey(promptKey)}
+                  preformatted={PromptKeyNeedsPreformatted(promptKey)}
+                />
+              </div>
+            </Collapsible>
+          ))}
         </div>
         <PromptSettingsPane
           config={config}
