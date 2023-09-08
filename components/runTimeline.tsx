@@ -3,6 +3,16 @@ import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from './tabSelector'
 
+const sortByTimestamp = <T extends { timestamp: string }>(items: T[]): T[] =>
+  items.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+
+const hasTimestamp = <T extends { timestamp?: string }>(run: T): run is T & { timestamp: string } => !!run.timestamp
+
+const sortRuns = <T extends { timestamp?: string }>(runs: T[]): T[] => [
+  ...sortByTimestamp(runs.filter(hasTimestamp)),
+  ...runs.filter(run => !hasTimestamp(run)),
+]
+
 export default function RunTimeline({
   runs = [],
   version,
@@ -35,7 +45,8 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const lastPartialRunID = runs.filter(run => !('inputs' in run)).slice(-1)[0]?.id
+  const sortedRuns = sortRuns(runs)
+  const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
     focusRun(lastPartialRunID)
@@ -47,7 +58,7 @@ export default function RunTimeline({
       <SingleTabHeader label='Responses' />
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
-          {runs.map(run => (
+          {sortedRuns.map(run => (
             <RunCell
               key={run.id}
               identifier={identifierForRunID(run.id)}

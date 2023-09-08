@@ -52,16 +52,6 @@ const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache, in
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }
 
-const sortByTimestamp = <T extends { timestamp: string }>(items: T[]): T[] =>
-  items.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-
-const hasTimestamp = <T extends { timestamp?: string }>(run: T): run is T & { timestamp: string } => !!run.timestamp
-
-const mergeRuns = <T extends { timestamp?: string }>(runs: T[]): T[] => [
-  ...sortByTimestamp(runs.filter(hasTimestamp)),
-  ...runs.filter(run => !hasTimestamp(run)),
-]
-
 export default function ChainNodeEditor({
   chain,
   activeVersion,
@@ -187,7 +177,7 @@ export default function ChainNodeEditor({
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
-              runs={mergeRuns([...activeVersion.runs, ...partialRuns])}
+              runs={[...activeVersion.runs, ...partialRuns]}
               activeItem={chain}
               activeRunID={activeRunID}
               version={activeVersion}
