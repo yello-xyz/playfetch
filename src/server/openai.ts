@@ -111,7 +111,9 @@ async function tryCompleteChat(
 
     let functionMessage = undefined
     if (isFunctionCall) {
-      output += '\n  }\n}\n'
+      const suffix = '\n  }\n}\n'
+      output += suffix
+      streamChunks?.(suffix)
       const functionCall = JSON.parse(output).function
       functionMessage = {
         role: 'assistant',
