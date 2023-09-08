@@ -87,7 +87,7 @@ async function tryCompleteChat(
     )
 
     let output = ''
-    let functionMessage = undefined
+    let isFunctionCall = false
     for await (const message of StreamResponseData(response.data)) {
       let text = ''
 
@@ -96,24 +96,28 @@ async function tryCompleteChat(
       const functionCall = choice.delta?.function_call
 
       if (functionCall) {
+        isFunctionCall = true
         if (functionCall.name) {
           text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
         }
         text += functionCall.arguments.replaceAll('\n', '\n    ')
-      } else if (choice.finish_reason === 'function_call') {
-        text = '\n  }\n}\n'
-        const functionCall = JSON.parse(output + text).function
-        functionMessage = {
-          role: 'assistant',
-          content: null,
-          function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
-        }
       } else {
         text = choice.delta?.content ?? ''
       }
 
       output += text
       streamChunks?.(text)
+    }
+
+    let functionMessage = undefined
+    if (isFunctionCall) {
+      output += '\n  }\n}\n'
+      const functionCall = JSON.parse(output).function
+      functionMessage = {
+        role: 'assistant',
+        content: null,
+        function_call: { name: functionCall.name, arguments: JSON.stringify(functionCall.arguments) },
+      }
     }
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
@@ -124,7 +128,7 @@ async function tryCompleteChat(
     ]
     context.functions = [...runningFunctions, ...functions]
 
-    return { output, cost, interrupted: !!functionMessage }
+    return { output, cost, interrupted: isFunctionCall }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }
