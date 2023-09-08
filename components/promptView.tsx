@@ -75,7 +75,8 @@ export default function PromptView({
   }
 
   const minWidth = 280
-  const minTopPaneHeight = 240
+  const minTopPaneHeight = 120
+  const maxBottomPaneHeight = 460
   const [promptHeight, setPromptHeight] = useState(1)
   return (
     <Allotment>
@@ -107,7 +108,7 @@ export default function PromptView({
               </div>
             )}
           </Allotment.Pane>
-          <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
+          <Allotment.Pane minSize={Math.min(maxBottomPaneHeight, promptHeight)} preferredSize={promptHeight}>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
                 version={activeVersion}

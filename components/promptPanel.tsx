@@ -67,39 +67,42 @@ export default function PromptPanel({
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
   const preferredHeight =
+    70 +
     (promptLabels ? 32 : 0) +
     (isProviderAvailable ? 0 : 72) +
-    (runPrompt ? 55 : 0) +
-    (areOptionsExpanded ? 195 : 70) +
     (showMultipleInputsWarning ? 53 : 0) +
-    Math.max(51, promptInputScrollHeight)
+    Math.max(51, promptInputScrollHeight) +
+    (areOptionsExpanded ? 127 : 0) +
+    (runPrompt ? 55 : 0)
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
 
   return (
-    <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
-      {!isProviderAvailable && <ProviderWarning />}
-      {showMultipleInputsWarning && (
-        <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
-      )}
-      <div className='self-stretch flex-1 min-h-0'>
-        <PromptInput
-          key={version.id}
-          value={prompts[activePromptKey] ?? ''}
-          setValue={updatePrompt}
-          labels={promptLabels}
-          activeLabel={activePromptLabel}
-          setActiveLabel={setActivePromptLabel}
-          placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
-          preformatted={ShouldPreformatSupportedPrompt(activePromptKey)}
-          onUpdateScrollHeight={setPromptInputScrollHeight}
+    <div className='flex flex-col h-full min-h-0 gap-4 overflow-hidden text-gray-500 bg-white'>
+      <div className='flex flex-col flex-1 gap-4 overflow-y-auto'>
+        {!isProviderAvailable && <ProviderWarning />}
+        {showMultipleInputsWarning && (
+          <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
+        )}
+        <div className='self-stretch flex-1 min-h-[82px]'>
+          <PromptInput
+            key={version.id}
+            value={prompts[activePromptKey] ?? ''}
+            setValue={updatePrompt}
+            labels={promptLabels}
+            activeLabel={activePromptLabel}
+            setActiveLabel={setActivePromptLabel}
+            placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
+            preformatted={ShouldPreformatSupportedPrompt(activePromptKey)}
+            onUpdateScrollHeight={setPromptInputScrollHeight}
+          />
+        </div>
+        <PromptSettingsPane
+          config={config}
+          setConfig={updateConfig}
+          isExpanded={areOptionsExpanded}
+          setExpanded={setOptionsExpanded}
         />
       </div>
-      <PromptSettingsPane
-        config={config}
-        setConfig={updateConfig}
-        isExpanded={areOptionsExpanded}
-        setExpanded={setOptionsExpanded}
-      />
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
           runTitle={version.runs.length ? 'Run again' : 'Run'}
@@ -126,19 +129,17 @@ function ProviderWarning() {
   const router = useRouter()
 
   return (
-    <div className='min-h-0'>
-      <Banner className='flex items-center justify-between gap-1 border-orange-100 bg-orange-25'>
-        <div className='flex flex-col'>
-          <span className='font-medium text-gray-600'>Missing API Key</span>
-          <span className='max-w-[384px]'>An API key is required to use certain models.</span>
-        </div>
-        <div
-          className='px-3 py-1.5 text-gray-700 bg-orange-100 rounded-md cursor-pointer whitespace-nowrap'
-          onClick={() => router.push(ClientRoute.Settings)}>
-          Add API Key
-        </div>
-      </Banner>
-    </div>
+    <Banner className='flex items-center justify-between gap-1 border-orange-100 bg-orange-25'>
+      <div className='flex flex-col'>
+        <span className='font-medium text-gray-600'>Missing API Key</span>
+        <span className='max-w-[384px]'>An API key is required to use certain models.</span>
+      </div>
+      <div
+        className='px-3 py-1.5 text-gray-700 bg-orange-100 rounded-md cursor-pointer whitespace-nowrap'
+        onClick={() => router.push(ClientRoute.Settings)}>
+        Add API Key
+      </div>
+    </Banner>
   )
 }
 
