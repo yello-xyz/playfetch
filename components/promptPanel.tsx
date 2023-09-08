@@ -59,6 +59,10 @@ export default function PromptPanel({
 
   const supportedPrompts = SupportedPromptKeysForModel(config.model)
   const [expandedPromptKeys, setExpandedPromptKeys] = useState<Record<string, boolean>>({ main: true })
+  const togglePrompt = (promptKey: string) =>
+    supportedPrompts.length > 1
+      ? (expanded: boolean) => setExpandedPromptKeys({ ...expandedPromptKeys, [promptKey]: expanded })
+      : undefined
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
 
@@ -95,7 +99,7 @@ export default function PromptPanel({
             key={promptKey}
             label={LabelForPromptKey(promptKey)}
             isExpanded={expandedPromptKeys[promptKey]}
-            setExpanded={expanded => setExpandedPromptKeys({ ...expandedPromptKeys, [promptKey]: expanded })}>
+            setExpanded={togglePrompt(promptKey)}>
             <div className='flex-1 min-h-[51px]'>
               <PromptInput
                 key={`${version.id}-${promptKey}`}
