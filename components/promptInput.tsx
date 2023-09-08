@@ -1,9 +1,7 @@
-import { RefObject, Suspense, useCallback, useEffect, useState } from 'react'
-import Label from './label'
+import { RefObject, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
-import useScrollHeight from '@/src/client/hooks/useScrollHeight'
 import { RichTextFromHTML, RichTextToHTML } from './richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 const ContentEditable = dynamic(() => import('./contentEditable'))
@@ -83,7 +81,6 @@ export default function PromptInput({
   placeholder,
   disabled,
   preformatted,
-  onUpdateScrollHeight,
 }: {
   value: string
   setValue: (value: string) => void
@@ -93,20 +90,8 @@ export default function PromptInput({
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
-  onUpdateScrollHeight?: (height: number) => void
 }) {
-  const [scrollHeight, contentEditableRef] = useScrollHeight()
-  const updateScrollHeight = useCallback(() => {
-    if (onUpdateScrollHeight && contentEditableRef.current) {
-      const styleHeight = contentEditableRef.current.style.height
-      contentEditableRef.current.style.height = '0'
-      const scrollHeight = contentEditableRef.current.scrollHeight
-      contentEditableRef.current.style.height = styleHeight
-      onUpdateScrollHeight(scrollHeight)
-    }
-  }, [contentEditableRef, onUpdateScrollHeight])
-
-  useEffect(updateScrollHeight, [scrollHeight, updateScrollHeight])
+  const contentEditableRef = useRef<HTMLDivElement>(null)
 
   const toggleInput = useCallback(
     (selection: Selection) => {
@@ -151,10 +136,9 @@ export default function PromptInput({
       if (node && contentEditableRef.current) {
         contentEditableRef.current.focus()
         moveCursorToEndOfNode(contentEditableRef.current)
-        updateScrollHeight()
       }
     },
-    [contentEditableRef, updateScrollHeight]
+    [contentEditableRef]
   )
 
   const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
@@ -172,7 +156,6 @@ export default function PromptInput({
     updateSelection(undefined)
     setHTMLValue(html)
     setValue(PromptFromHTML(html))
-    updateScrollHeight()
   }
 
   const renderContentEditable = () => (

@@ -65,13 +65,11 @@ export default function PromptPanel({
   const promptLabels = supportedPrompts.map(LabelForSupportedPrompt)
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
-  const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
   const preferredHeight =
-    70 +
+    121 +
     (promptLabels ? 32 : 0) +
     (isProviderAvailable ? 0 : 72) +
     (showMultipleInputsWarning ? 53 : 0) +
-    Math.max(51, promptInputScrollHeight) +
     (areOptionsExpanded ? 127 : 0) +
     (runPrompt ? 55 : 0)
   useEffect(() => onUpdatePreferredHeight?.(preferredHeight), [preferredHeight, onUpdatePreferredHeight])
@@ -93,7 +91,6 @@ export default function PromptPanel({
             setActiveLabel={setActivePromptLabel}
             placeholder={PlaceholderForSupportedPrompt(activePromptKey)}
             preformatted={ShouldPreformatSupportedPrompt(activePromptKey)}
-            onUpdateScrollHeight={setPromptInputScrollHeight}
           />
         </div>
         <PromptSettingsPane
