@@ -1,7 +1,5 @@
 import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
-import RunPromptTab from './runPromptTab'
-import TestPromptTab from './testPromptTab'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from './runTimeline'
 import CommentsPane from './commentsPane'
@@ -12,6 +10,9 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
+import PromptPanel from './promptPanel'
+import VersionTimeline from './versionTimeline'
+import TestDataPane from './testDataPane'
 
 export default function PromptView({
   prompt,
@@ -56,12 +57,18 @@ export default function PromptView({
   const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runPrompt = (inputs: PromptInputs[]) => runVersion(savePrompt, inputs)
 
+  const testPrompt = async (inputs: Record<string, string>[]) => {
+    persistInputValuesIfNeeded()
+    return runPrompt(inputs)
+  }
+
   const selectTab = (tab: ActiveTab) => {
     setActiveTab(tab)
     persistInputValuesIfNeeded()
   }
 
   const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
+  const staticVariables = ExtractPromptVariables(currentPrompts, currentPromptConfig, false)
   const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
@@ -76,48 +83,56 @@ export default function PromptView({
     setActiveTab('Prompt versions')
   }
 
-  const renderTab = (tab: ActiveTab) => {
-    switch (tab) {
-      case 'Prompt versions':
-        return (
-          <RunPromptTab
-            currentPrompts={currentPrompts}
-            currentPromptConfig={currentPromptConfig}
-            activePrompt={prompt}
-            activeVersion={activeVersion}
-            setActiveVersion={setActiveVersion}
-            setModifiedVersion={updateVersion}
-            runPrompt={runPrompt}
-            inputValues={inputValues}
-            testConfig={testConfig}
-            setTestConfig={setTestConfig}
-            tabSelector={tabSelector}
-          />
-        )
-      case 'Test data':
-        return (
-          <TestPromptTab
-            currentPrompts={currentPrompts}
-            currentPromptConfig={currentPromptConfig}
-            activeVersion={activeVersion}
-            setModifiedVersion={updateVersion}
-            runPrompt={runPrompt}
-            inputValues={inputValues}
-            setInputValues={setInputValues}
-            persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-            testConfig={testConfig}
-            setTestConfig={setTestConfig}
-            tabSelector={tabSelector}
-          />
-        )
-    }
-  }
-
   const minWidth = 280
+  const minTopPaneHeight = 240
+  const [promptHeight, setPromptHeight] = useState(1)
   return (
     <Allotment>
       <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
-        {renderTab(activeTab)}
+        <Allotment vertical>
+          <Allotment.Pane minSize={minTopPaneHeight}>
+            {activeTab === 'Prompt versions' ? (
+              <div className='h-full'>
+                <VersionTimeline
+                  activeItem={prompt}
+                  versions={prompt.versions}
+                  activeVersion={activeVersion}
+                  setActiveVersion={setActiveVersion}
+                  tabSelector={tabSelector}
+                />
+              </div>
+            ) : (
+              <div className='flex flex-col h-full min-h-0 pb-4 overflow-hidden grow'>
+                {tabSelector()}
+                <TestDataPane
+                  variables={variables}
+                  staticVariables={staticVariables}
+                  inputValues={inputValues}
+                  setInputValues={setInputValues}
+                  persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+                  testConfig={testConfig}
+                  setTestConfig={setTestConfig}
+                />
+              </div>
+            )}
+          </Allotment.Pane>
+          <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
+            <div className='h-full p-4 bg-white'>
+              <PromptPanel
+                initialPrompts={currentPrompts}
+                initialConfig={currentPromptConfig}
+                version={activeVersion}
+                setModifiedVersion={updateVersion}
+                runPrompt={activeTab === 'Test data' ? testPrompt : runPrompt}
+                inputValues={inputValues}
+                testConfig={testConfig}
+                setTestConfig={setTestConfig}
+                showTestMode={activeTab === 'Test data'}
+                onUpdatePreferredHeight={setPromptHeight}
+              />
+            </div>
+          </Allotment.Pane>
+        </Allotment>
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
         <div className='h-full bg-gray-25'>
