@@ -104,7 +104,7 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex justify-center border-b border-gray-200 py-1.5 bg-gray-25 cursor-pointer items-center font-medium'
+        className='flex justify-center border-b border-gray-200 py-1 bg-white hover:bg-gray-50 cursor-pointer items-center font-regular'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add
