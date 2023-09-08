@@ -61,6 +61,7 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
         failed: false,
         attempts: 1,
         continuationID: undefined,
+        extraSteps: 0,
       }
     : null
 }

@@ -32,7 +32,7 @@ const sameSequence = (a: LogEntry, b: LogEntry, sequences: SequenceMapping) =>
 const isSameSequence = (entry: LogEntry, index: number | undefined, entries: LogEntry[], sequences: SequenceMapping) =>
   index !== undefined && sameSequence(entry, entries[index], sequences)
 
-const getSequenceNumber = (entry: LogEntry, index: number, entries: LogEntry[], sequences: SequenceMapping) => 
+const getSequenceNumber = (entry: LogEntry, index: number, entries: LogEntry[], sequences: SequenceMapping) =>
   entries.slice(index).filter(e => sameSequence(e, entry, sequences)).length
 
 export default function LogEntriesView({
