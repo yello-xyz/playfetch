@@ -18,8 +18,6 @@ import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 
 export default function PromptPanel({
-  initialPrompts,
-  initialConfig,
   version,
   setModifiedVersion,
   runPrompt,
@@ -29,8 +27,6 @@ export default function PromptPanel({
   showTestMode,
   onUpdatePreferredHeight,
 }: {
-  initialPrompts?: Prompts
-  initialConfig?: PromptConfig
   version: PromptVersion
   setModifiedVersion: (version: PromptVersion) => void
   runPrompt?: (inputs: PromptInputs[]) => Promise<void>
@@ -40,11 +36,8 @@ export default function PromptPanel({
   showTestMode?: boolean
   onUpdatePreferredHeight?: (height: number) => void
 }) {
-  const [prompts, setPrompts] = useInitialState(initialPrompts !== undefined ? initialPrompts : version.prompts)
-  const [config, setConfig] = useInitialState(
-    initialConfig !== undefined ? initialConfig : version.config,
-    PromptConfigsAreEqual
-  )
+  const [prompts, setPrompts] = useInitialState(version.prompts)
+  const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
   const supportedPrompts = SupportedPromptsForModel(config.model)
   const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>(supportedPrompts[0])
 
@@ -84,11 +77,9 @@ export default function PromptPanel({
 
   return (
     <div className='flex flex-col h-full min-h-0 gap-4 text-gray-500 bg-white'>
-      {!isProviderAvailable && <PromptPanelProviderWarning />}
+      {!isProviderAvailable && <ProviderWarning />}
       {showMultipleInputsWarning && (
-        <PromptPanelWarning>
-          Running this prompt will use {testConfig.rowIndices.length} rows of test data.
-        </PromptPanelWarning>
+        <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
       )}
       <div className='self-stretch flex-1 min-h-0'>
         <PromptInput
@@ -127,16 +118,16 @@ export default function PromptPanel({
   )
 }
 
-const PromptPanelWarning = ({ children }: { children: ReactNode }) => (
-  <PromptPanelBanner className='border-pink-50 bg-pink-25'>{children}</PromptPanelBanner>
+const Warning = ({ children }: { children: ReactNode }) => (
+  <Banner className='border-pink-50 bg-pink-25'>{children}</Banner>
 )
 
-function PromptPanelProviderWarning() {
+function ProviderWarning() {
   const router = useRouter()
 
   return (
     <div className='min-h-0'>
-      <PromptPanelBanner className='flex items-center justify-between gap-1 border-orange-100 bg-orange-25'>
+      <Banner className='flex items-center justify-between gap-1 border-orange-100 bg-orange-25'>
         <div className='flex flex-col'>
           <span className='font-medium text-gray-600'>Missing API Key</span>
           <span className='max-w-[384px]'>An API key is required to use certain models.</span>
@@ -146,11 +137,11 @@ function PromptPanelProviderWarning() {
           onClick={() => router.push(ClientRoute.Settings)}>
           Add API Key
         </div>
-      </PromptPanelBanner>
+      </Banner>
     </div>
   )
 }
 
-const PromptPanelBanner = ({ children, className = '' }: { children: ReactNode; className: string }) => (
+const Banner = ({ children, className = '' }: { children: ReactNode; className: string }) => (
   <div className={`px-3 py-2 border rounded ${className}`}>{children}</div>
 )

@@ -37,18 +37,9 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [currentPrompts, setCurrentPrompts] = useState(activeVersion.prompts)
-  const [currentPromptConfig, setCurrentPromptConfig] = useState(activeVersion.config)
-  const [currentVersionID, setCurrentVersionID] = useInitialState(activeVersion.id)
-  if (activeVersion.id !== currentVersionID) {
-    setCurrentVersionID(activeVersion.id)
-    setCurrentPrompts(activeVersion.prompts)
-    setCurrentPromptConfig(activeVersion.config)
-  }
-
+  const [currentVersion, setCurrentVersion] = useInitialState(activeVersion, (a, b) => a.id === b.id)
   const updateVersion = (version: PromptVersion) => {
-    setCurrentPrompts(version.prompts)
-    setCurrentPromptConfig(version.config)
+    setCurrentVersion(version)
     setModifiedVersion(version)
   }
 
@@ -67,19 +58,19 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const variables = ExtractPromptVariables(currentPrompts, currentPromptConfig)
-  const staticVariables = ExtractPromptVariables(currentPrompts, currentPromptConfig, false)
-  const showTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
+  const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config)
+  const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
+  const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
-      tabs={showTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
+      tabs={canShowTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
       activeTab={activeTab}
       setActiveTab={selectTab}>
       {children}
     </TabSelector>
   )
 
-  if (activeTab === 'Test data' && !showTestData) {
+  if (activeTab === 'Test data' && !canShowTestData) {
     setActiveTab('Prompt versions')
   }
 
@@ -119,8 +110,6 @@ export default function PromptView({
           <Allotment.Pane minSize={Math.min(350, promptHeight)} preferredSize={promptHeight}>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
-                initialPrompts={currentPrompts}
-                initialConfig={currentPromptConfig}
                 version={activeVersion}
                 setModifiedVersion={updateVersion}
                 runPrompt={activeTab === 'Test data' ? testPrompt : runPrompt}
