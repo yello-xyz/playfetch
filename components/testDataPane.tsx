@@ -1,4 +1,4 @@
-import { Fragment, useRef } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
 import { InputValues, TestConfig } from '@/types'
@@ -59,6 +59,8 @@ export default function TestDataPane({
         : [...testConfig.rowIndices, row],
     })
 
+  const [activeRow, setActiveRow] = useState<number>()
+
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   const bgColor = (variable: string) =>
     staticVariables.includes(variable) ? 'bg-pink-25' : variables.includes(variable) ? 'bg-purple-25' : ''
@@ -79,6 +81,7 @@ export default function TestDataPane({
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
+          const truncate = row === activeRow ? '' : 'max-h-[46px] line-clamp-2' 
           return (
             <Fragment key={row}>
               <div
@@ -89,10 +92,11 @@ export default function TestDataPane({
               {allVariables.map((variable, col) => (
                 <RichTextInput
                   key={col}
-                  className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none line-clamp-2 focus:line-clamp-none focus:border-blue-500 focus:border ${color}`}
+                  className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
                   value={inputValues[variable]?.[row] ?? ''}
                   setValue={value => updateInputs(variable, value, row)}
                   onBlur={() => persistInputValuesIfNeeded()}
+                  onFocus={() => setActiveRow(row)}
                 />
               ))}
             </Fragment>
