@@ -26,7 +26,7 @@ export default function PromptPanel({
   inputValues,
   testConfig,
   setTestConfig,
-  showLabel,
+  showTestMode,
   onUpdatePreferredHeight,
 }: {
   initialPrompts?: Prompts
@@ -37,7 +37,7 @@ export default function PromptPanel({
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
-  showLabel?: boolean
+  showTestMode?: boolean
   onUpdatePreferredHeight?: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(initialPrompts !== undefined ? initialPrompts : version.prompts)
@@ -69,8 +69,7 @@ export default function PromptPanel({
   const activePromptLabel = LabelForSupportedPrompt(activePromptKey)
   const setActivePromptLabel = (label: string) =>
     setActivePromptKey(supportedPrompts.find(p => LabelForSupportedPrompt(p) === label) ?? supportedPrompts[0])
-  const promptLabels =
-    showLabel || supportedPrompts.length > 1 ? supportedPrompts.map(LabelForSupportedPrompt) : undefined
+  const promptLabels = supportedPrompts.map(LabelForSupportedPrompt)
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
   const [promptInputScrollHeight, setPromptInputScrollHeight] = useState(70)
@@ -111,19 +110,18 @@ export default function PromptPanel({
         setExpanded={setOptionsExpanded}
       />
       {runPrompt && testConfig && setTestConfig && inputValues && (
-        <div className='flex items-center self-end gap-3'>
-          <RunButtons
-            runTitle={version.runs.length ? 'Run again' : 'Run'}
-            variables={ExtractPromptVariables(prompts, config)}
-            inputValues={inputValues}
-            languageModel={config.model}
-            setLanguageModel={updateModel}
-            testConfig={testConfig}
-            setTestConfig={setTestConfig}
-            disabled={!isProviderAvailable || prompts.main.trim().length === 0}
-            callback={runPrompt}
-          />
-        </div>
+        <RunButtons
+          runTitle={version.runs.length ? 'Run again' : 'Run'}
+          variables={ExtractPromptVariables(prompts, config)}
+          inputValues={inputValues}
+          languageModel={config.model}
+          setLanguageModel={updateModel}
+          testConfig={testConfig}
+          setTestConfig={setTestConfig}
+          disabled={!isProviderAvailable || prompts.main.trim().length === 0}
+          callback={runPrompt}
+          showTestMode={showTestMode}
+        />
       )}
     </div>
   )

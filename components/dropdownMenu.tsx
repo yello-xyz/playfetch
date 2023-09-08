@@ -22,7 +22,7 @@ export default function DropdownMenu({
   const sizeClass = size === 'small' ? 'text-xs' : 'text-sm font-medium'
   const stateClass = disabled ? 'opacity-50' : 'cursor-pointer'
   const appearanceClass =
-    'appearance-none border border-gray-300 rounded-md outline-none bg-no-repeat bg-[right_6px_center]'
+    'appearance-none border border-gray-300 rounded-md outline-none bg-no-repeat bg-[right_6px_center] w-auto'
   return (
     <select
       disabled={disabled}

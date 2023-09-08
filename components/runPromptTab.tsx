@@ -55,7 +55,6 @@ export default function RunPromptTab({
             inputValues={inputValues}
             testConfig={testConfig}
             setTestConfig={setTestConfig}
-            showLabel
             onUpdatePreferredHeight={setPromptHeight}
           />
         </div>
