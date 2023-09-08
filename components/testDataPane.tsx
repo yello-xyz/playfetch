@@ -81,7 +81,7 @@ export default function TestDataPane({
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
-          const truncate = row === activeRow ? '' : 'max-h-[46px] line-clamp-2' 
+          const truncate = row === activeRow ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
               <div

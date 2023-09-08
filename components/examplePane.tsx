@@ -81,7 +81,7 @@ export function CodeBlock({
   scroll?: boolean
   error?: boolean
 }) {
-  const baseClass = 'px-2 py-4 text-xs rounded-lg bg-white border border-gray-200'
+  const baseClass = 'h-full px-2 py-4 text-xs rounded-lg bg-white border border-gray-200'
   const scrollClass = scroll ? 'overflow-y-auto' : ''
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
   const borderClass = active ? 'border' : ''

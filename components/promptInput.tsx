@@ -168,18 +168,12 @@ export default function PromptInput({
     </Suspense>
   )
 
-  return (
-    <div className='h-full'>
-      <div className='flex flex-col h-full gap-2 overflow-hidden'>
-        {preformatted ? (
-          <CodeBlock active={!disabled} scroll>
-            {renderContentEditable()}
-          </CodeBlock>
-        ) : (
-          renderContentEditable()
-        )}
-      </div>
-    </div>
+  return preformatted ? (
+    <CodeBlock active={!disabled} scroll>
+      {renderContentEditable()}
+    </CodeBlock>
+  ) : (
+    renderContentEditable()
   )
 }
 

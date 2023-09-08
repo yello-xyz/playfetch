@@ -120,7 +120,7 @@ export default function PromptView({
                 showTestMode={activeTab === 'Test data'}
                 setPreferredHeight={setPromptHeight}
                 setMaxHeight={setMaxHeight}
-                  />
+              />
             </div>
           </Allotment.Pane>
         </Allotment>

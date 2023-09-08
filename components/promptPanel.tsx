@@ -65,7 +65,7 @@ export default function PromptPanel({
   const outerPadding = 16 // p-4
   const padding = 8 // gap-2
   const buttonsHeight = 37
-  const labelHeight = 28
+  const labelHeight = 24
   const promptHeight = 51
   const promptsHeight =
     supportedPrompts.filter(promptKey => expandedPromptKeys[promptKey]).length * (promptHeight + padding)
@@ -84,31 +84,29 @@ export default function PromptPanel({
   }, [preferredHeight, promptsHeight, setPreferredHeight, setMaxHeight])
 
   return (
-    <div className='flex flex-col h-full min-h-0 gap-4 overflow-hidden text-gray-500 bg-white'>
-      <div className='flex flex-col gap-2 overflow-y-auto'>
+    <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
+      <div className='flex flex-col flex-1 min-h-0 gap-2'>
         {!isProviderAvailable && <ProviderWarning />}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
-        <div className='flex flex-col self-stretch flex-1 min-h-[28px] gap-2'>
-          {supportedPrompts.map(promptKey => (
-            <Collapsible
-              key={promptKey}
-              label={LabelForPromptKey(promptKey)}
-              isExpanded={expandedPromptKeys[promptKey]}
-              setExpanded={expanded => setExpandedPromptKeys({ ...expandedPromptKeys, [promptKey]: expanded })}>
-              <div className='flex-1 min-h-[51px]'>
-                <PromptInput
-                  key={`${version.id}-${promptKey}`}
-                  value={prompts[promptKey] ?? ''}
-                  setValue={updatePrompt(promptKey)}
-                  placeholder={PlaceholderForPromptKey(promptKey)}
-                  preformatted={PromptKeyNeedsPreformatted(promptKey)}
-                />
-              </div>
-            </Collapsible>
-          ))}
-        </div>
+        {supportedPrompts.map(promptKey => (
+          <Collapsible
+            key={promptKey}
+            label={LabelForPromptKey(promptKey)}
+            isExpanded={expandedPromptKeys[promptKey]}
+            setExpanded={expanded => setExpandedPromptKeys({ ...expandedPromptKeys, [promptKey]: expanded })}>
+            <div className='flex-1 min-h-[51px]'>
+              <PromptInput
+                key={`${version.id}-${promptKey}`}
+                value={prompts[promptKey] ?? ''}
+                setValue={updatePrompt(promptKey)}
+                placeholder={PlaceholderForPromptKey(promptKey)}
+                preformatted={PromptKeyNeedsPreformatted(promptKey)}
+              />
+            </div>
+          </Collapsible>
+        ))}
         <PromptSettingsPane
           config={config}
           setConfig={updateConfig}
