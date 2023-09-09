@@ -151,7 +151,7 @@ export default async function runChain(
 
   continuationID =
     continuationIndex !== undefined
-      ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }))
+      ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }), continuationID)
       : undefined
 
   return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID, extraSteps: continuationCount }
