@@ -226,5 +226,5 @@ export type LogEntry = {
   error?: string
   attempts: number
   cacheHit: boolean
-  continuationIDs: number[]
+  continuationID: number
 }

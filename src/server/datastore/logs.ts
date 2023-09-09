@@ -3,12 +3,18 @@ import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp
 import { ensureProjectAccess } from './projects'
 
 export async function migrateLogs(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
-  const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
+  const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG).order('createdAt', { descending: true }))
+  const mapping = {} as Record<number, number>
   for (const logData of allLogs) {
+    const continuationIDs = JSON.parse(logData.continuationIDs ?? '[]') as number[]
+    let continuationID = undefined as number | undefined
+    if (continuationIDs.length > 0) {
+      continuationIDs.forEach(id => (continuationID = continuationID ?? mapping[id]))
+      continuationID = continuationID ?? continuationIDs[0]
+      continuationIDs.forEach(id => (mapping[id] = continuationID!))
+    }
+    console.log(continuationIDs, '->', continuationID)
     await getDatastore().save(
       toLogData(
         logData.projectID,
@@ -25,8 +31,9 @@ export async function migrateLogs(postMerge: boolean) {
         logData.duration,
         logData.attempts,
         logData.cacheHit,
-        JSON.parse(logData.continuationIDs),
-        getID(logData)
+        postMerge ? logData.continuationID : continuationID,
+        getID(logData),
+        postMerge ? undefined : continuationIDs
       )
     )
   }
@@ -52,7 +59,7 @@ export async function saveLogEntry(
   duration: number,
   attempts: number,
   cacheHit: boolean,
-  continuationIDs: number[]
+  continuationID: number | undefined
 ) {
   await getDatastore().save(
     toLogData(
@@ -70,7 +77,7 @@ export async function saveLogEntry(
       duration,
       attempts,
       cacheHit,
-      continuationIDs
+      continuationID
     )
   )
 }
@@ -90,8 +97,9 @@ const toLogData = (
   duration: number,
   attempts: number,
   cacheHit: boolean,
-  continuationIDs: number[],
-  logID?: number
+  continuationID: number | undefined,
+  logID?: number,
+  continuationIDs?: number[] // TODO: delete when cleaning up migrations after next push to prod
 ) => ({
   key: buildKey(Entity.LOG, logID),
   data: {
@@ -100,7 +108,7 @@ const toLogData = (
     urlPath,
     flavor,
     parentID,
-    versionID: versionID ?? null,
+    versionID: versionID,
     inputs: JSON.stringify(inputs),
     output: JSON.stringify(output),
     error: error ?? null,
@@ -109,7 +117,8 @@ const toLogData = (
     duration,
     attempts,
     cacheHit,
-    continuationIDs: JSON.stringify(continuationIDs),
+    continuationID: continuationID ?? null,
+    continuationIDs: JSON.stringify(continuationIDs ?? []),
   },
   excludeFromIndexes: ['inputs', 'output', 'error', 'continuationIDs'],
 })
@@ -128,5 +137,5 @@ const toLogEntry = (data: any): LogEntry => ({
   duration: data.duration,
   attempts: data.attempts,
   cacheHit: data.cacheHit,
-  continuationIDs: JSON.parse(data.continuationIDs),
+  continuationID: data.continuationID ?? null,
 })
