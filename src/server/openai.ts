@@ -33,16 +33,26 @@ const costForTokensWithModel = (model: OpenAILanguageModel, input: string, outpu
   }
 }
 
-const buildPromptMessages = (prompt: string, system?: string, lastMessage?: any, inputs?: PromptInputs) => {
+const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs) => {
   if (lastMessage && inputs && lastMessage.role === 'assistant' && lastMessage.function_call?.name) {
     const name = lastMessage.function_call.name
     const response = inputs[name]
     if (response) {
       const content = typeof response === 'string' ? response : JSON.stringify(response)
-      return [{ role: 'function', name, content }]
+      return { role: 'function', name, content }
     }
   }
-  return [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: prompt }]
+  return undefined
+}
+
+const buildPromptMessages = (previousMessages: any[], prompt: string, system?: string, inputs?: PromptInputs) => {
+  const dropSystemPrompt =
+    !system || previousMessages.some(message => message.role === 'system' && message.content === system)
+  const lastMessage = previousMessages.slice(-1)[0]
+  return [
+    ...(dropSystemPrompt ? [] : [{ role: 'system', content: system }]),
+    getFunctionResponseMessage(lastMessage, inputs) ?? { role: 'user', content: prompt },
+  ]
 }
 
 async function tryCompleteChat(
@@ -70,18 +80,18 @@ async function tryCompleteChat(
 
   try {
     const api = new OpenAIApi(new Configuration({ apiKey }))
-    const runningMessages = useContext ? context?.messages ?? [] : []
-    const promptMessages = buildPromptMessages(prompt, system, runningMessages.slice(-1)[0], continuationInputs)
-    const runningFunctions = useContext ? context?.functions ?? [] : []
+    const previousMessages = useContext ? context?.messages ?? [] : []
+    const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
+    const previousFunctions = useContext ? context?.functions ?? [] : []
     const response = await api.createChatCompletion(
       {
         model,
-        messages: [...runningMessages, ...promptMessages],
+        messages: [...previousMessages, ...promptMessages],
         temperature,
         max_tokens: maxTokens,
         user: userID.toString(),
         stream: true,
-        functions: runningFunctions.length || functions.length ? [...runningFunctions, ...functions] : undefined,
+        functions: previousFunctions.length || functions.length ? [...previousFunctions, ...functions] : undefined,
       },
       { responseType: 'stream', timeout: 30 * 1000 }
     )
@@ -124,11 +134,11 @@ async function tryCompleteChat(
 
     const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
     context.messages = [
-      ...runningMessages,
+      ...previousMessages,
       ...promptMessages,
       functionMessage ?? { role: 'assistant', content: output },
     ]
-    context.functions = [...runningFunctions, ...functions]
+    context.functions = [...previousFunctions, ...functions]
 
     return { output, cost, interrupted: isFunctionCall }
   } catch (error: any) {
