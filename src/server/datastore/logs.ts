@@ -118,7 +118,7 @@ const toLogData = (
     attempts,
     cacheHit,
     continuationID: continuationID ?? null,
-    continuationIDs: JSON.stringify(continuationIDs ?? []),
+    continuationIDs: continuationIDs ? JSON.stringify(continuationIDs): continuationIDs,
   },
   excludeFromIndexes: ['inputs', 'output', 'error', 'continuationIDs'],
 })
