@@ -85,7 +85,7 @@ function LogEntryRow({
       <TableCell {...props}>{endpoint.flavor}</TableCell>
       <TableCell {...props}>{formattedDate}</TableCell>
       <TableCell last {...props}>
-        <div className={`rounded px-1.5 flex items-center text-white ${statusColor}`}>
+        <div className={`rounded px-1.5 py-0.5 flex items-center text-white ${statusColor}`}>
           {logEntry.error ? 'Error' : 'Success'}
         </div>
       </TableCell>

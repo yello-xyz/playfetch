@@ -19,7 +19,7 @@ export default function TableCell({
   semiActive?: boolean
   callback?: () => void
 }) {
-  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-200 flex'
+  const baseClass = 'px-3 py-2 text-ellipsis overflow-hidden border-gray-200 flex items-center'
   const borderClass = header
     ? first
       ? 'border-y border-l'
