@@ -75,6 +75,7 @@ export default async function runChain(
   }
 
   let continuationIndex = undefined
+  let requestContinuation = false
   let promptContext = {}
 
   if (continuationID) {
@@ -82,8 +83,12 @@ export default async function runChain(
     if (cachedValue) {
       const continuation = JSON.parse(cachedValue)
       continuationIndex = continuation.continuationIndex
+      requestContinuation = continuation.requestContinuation ?? false
       inputs = { ...continuation.inputs, ...inputs }
       promptContext = continuation.promptContext
+    } else {
+      continuationIndex = 0
+      requestContinuation = true
     }
   }
 
@@ -132,7 +137,7 @@ export default async function runChain(
           continue
         }
       } else {
-        continuationIndex = index === continuationIndex ? undefined : continuationIndex
+        continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
         const output = lastResponse.output
         AugmentInputs(inputs, config.output, output!, useCamelCase)
         AugmentCodeContext(codeContext, config.output, lastResponse.result)
@@ -151,7 +156,10 @@ export default async function runChain(
 
   continuationID =
     continuationIndex !== undefined
-      ? await cacheExpiringValue(JSON.stringify({ continuationIndex, inputs, promptContext }), continuationID)
+      ? await cacheExpiringValue(
+          JSON.stringify({ continuationIndex, inputs, promptContext, requestContinuation }),
+          continuationID
+        )
       : undefined
 
   return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID, extraSteps: continuationCount }
