@@ -154,7 +154,7 @@ function ProviderWarning() {
         <span className='max-w-[384px]'>An API key is required to use certain models.</span>
       </div>
       <div
-        className='px-3 py-1.5 text-gray-700 bg-orange-100 rounded-md cursor-pointer whitespace-nowrap'
+        className='px-3 py-1.5 text-gray-700 bg-orange-100 hover:bg-orange-200 rounded-md cursor-pointer whitespace-nowrap'
         onClick={() => router.push(ClientRoute.Settings)}>
         Add API Key
       </div>

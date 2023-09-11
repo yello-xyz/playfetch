@@ -96,7 +96,7 @@ function TabButton<T extends string>({
   setActiveTab?: (tab: T) => void
 }) {
   const underline = activeTab === tab ? 'border-b border-black -mb-px' : ''
-  const cursor = activeTab !== tab ? 'cursor-pointer opacity-40 hover:opacity-70' : 'cursor-default'
+  const cursor = activeTab !== tab ? 'cursor-pointer ' : 'cursor-default'
   
   return (
     <HeaderItem
@@ -109,7 +109,7 @@ function TabButton<T extends string>({
 }
 
 const headerClassName = (active = true) =>
-  `select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 ${!active && 'opacity-40 hover:opacity-70'}}`
+  `select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 ${active ? '' : 'opacity-40 hover:opacity-70'}}`
 
 export function HeaderItem({
   active = true,
