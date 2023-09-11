@@ -1,14 +1,18 @@
-import { ActiveChain, ActiveProject, ChainItem, ChainVersion, Prompt } from '@/types'
+import { useRef, useState } from 'react'
+import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
-import Button from './button'
 import DropdownMenu from './dropdownMenu'
-import { CustomHeader } from './tabSelector'
+import ChainEditorHeader from './chainEditorHeader'
+import { HeaderItem } from './tabSelector'
+import promptIcon from '@/public/prompt.svg'
+import codeIcon from '@/public/code.svg'
 import Icon from './icon'
-import chainIcon from '@/public/chain.svg'
-import saveIcon from '@/public/save.svg'
-import historyIcon from '@/public/history.svg'
-import { ReactNode } from 'react'
+import ChainNodePopupMenu from './chainNodePopupMenu'
+import addIcon from '@/public/addSmall.svg'
+import addActiveIcon from '@/public/addWhiteSmall.svg'
 import { StaticImageData } from 'next/image'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 
 export default function ChainEditor({
   chain,
@@ -33,167 +37,180 @@ export default function ChainEditor({
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
-  const removeItem = () => setNodes([...nodes.slice(0, activeIndex), ...nodes.slice(activeIndex + 1)])
-  const insertItem = (item: ChainItem) => setNodes([...nodes.slice(0, activeIndex), item, ...nodes.slice(activeIndex)])
-  const insertPrompt = (promptID: number) =>
-    insertItem({ promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
-  const insertCodeBlock = () => insertItem({ code: '' })
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
-  const versionIndex = chain.versions.findIndex(version => version.id === activeVersion.id)
+  const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
+  const insertItem = (index: number, item: ChainItem) =>
+    setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
+  const insertPrompt = (index: number, promptID: number) =>
+    insertItem(index, { promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
+  const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
+
+  const onSelect = (index: number) => {
+    setActiveIndex(index)
+    setActiveMenuIndex(undefined)
+  }
 
   return (
-    <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
-      <CustomHeader>
-        <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-        <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
-        <SaveVersionButton saveItems={saveItems} />
-      </CustomHeader>
+    <div className='flex flex-col items-stretch h-full bg-gray-25'>
+      <ChainEditorHeader
+        chain={chain}
+        activeVersion={activeVersion}
+        saveItems={saveItems}
+        showVersions={showVersions}
+        setShowVersions={setShowVersions}
+      />
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}
             chainNode={node}
             isFirst={index === 0}
-            isActive={index === activeIndex}
-            callback={() => setActiveIndex(index)}
+            isSelected={index === activeIndex}
+            onSelect={() => onSelect(index)}
+            isMenuActive={index === activeMenuIndex}
+            setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
+            onDelete={() => removeItem(index)}
+            onInsertPrompt={promptID => insertPrompt(index, promptID)}
+            onInsertCodeBlock={() => insertCodeBlock(index)}
             prompts={prompts}
           />
         ))}
       </div>
-      <div className='flex self-start gap-4 p-4'>
-        {activeIndex > 0 && (
-          <>
-            {prompts.length > 0 && (
-              <PromptSelector prompts={prompts} insertPrompt={insertPrompt} insertCodeBlock={insertCodeBlock} />
-            )}
-            {activeIndex !== nodes.length - 1 && (
-              <Button type='destructive' onClick={removeItem}>
-                Remove Node
-              </Button>
-            )}
-          </>
-        )}
-      </div>
     </div>
-  )
-}
-
-function HeaderTitle({ chainName, versionIndex }: { chainName: string; versionIndex?: number }) {
-  return (
-    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-11'>
-      <div className='flex items-center h-full font-medium select-none whitespace-nowrap'>
-        <Icon icon={chainIcon} className='h-full py-2.5' />
-        {chainName}
-      </div>
-      {versionIndex === undefined ? (
-        <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
-      ) : (
-        <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
-      )}
-    </div>
-  )
-}
-
-const ShowVersionsButton = ({
-  showVersions,
-  setShowVersions,
-}: {
-  showVersions: boolean
-  setShowVersions?: (show: boolean) => void
-}) => (
-  <HeaderButton
-    onClick={setShowVersions ? () => setShowVersions(!showVersions) : undefined}
-    title={showVersions ? 'Hide versions' : 'Show versions'}
-    icon={historyIcon}
-    justify='justify-start'
-    hideIfInactive
-  />
-)
-
-const SaveVersionButton = ({ saveItems }: { saveItems?: () => void }) => (
-  <HeaderButton onClick={saveItems} title='Save version' icon={saveIcon} justify='justify-end' />
-)
-
-function HeaderButton({
-  title,
-  icon,
-  justify,
-  onClick,
-  hideIfInactive,
-}: {
-  title: string
-  icon: StaticImageData
-  justify: 'justify-start' | 'justify-end' | 'justify-center'
-  onClick?: () => void
-  hideIfInactive?: boolean
-}) {
-  const activeClass = onClick ? 'cursor-pointer hover:bg-gray-50' : hideIfInactive ? 'opacity-0' : 'opacity-50'
-  return (
-    <div className={`rounded-md max-h-7 py-1 overflow-hidden ${activeClass}`} onClick={onClick}>
-      <div className={`flex flex-wrap items-center -mt-0.5 px-1.5 ${justify}`}>
-        <Icon icon={icon} className='h-full' />
-        <span className='whitespace-nowrap'>{title}</span>
-      </div>
-    </div>
-  )
-}
-
-function PromptSelector({
-  prompts,
-  insertPrompt,
-  insertCodeBlock,
-}: {
-  prompts: Prompt[]
-  insertPrompt: (promptID: number) => void
-  insertCodeBlock: () => void
-}) {
-  const CODE_BLOCK = 1
-
-  return (
-    <DropdownMenu
-      value={0}
-      onChange={value => (Number(value) === CODE_BLOCK ? insertCodeBlock() : insertPrompt(Number(value)))}>
-      <option value={0} disabled>
-        Insert Node
-      </option>
-      <option value={CODE_BLOCK}>Code Block</option>
-      {prompts.map((prompt, index) => (
-        <option key={index} value={prompt.id}>
-          Prompt “{prompt.name}”
-        </option>
-      ))}
-    </DropdownMenu>
   )
 }
 
 function ChainNodeBox({
   chainNode,
   isFirst,
-  isActive,
-  callback,
+  isSelected,
+  onSelect,
+  isMenuActive,
+  setMenuActive,
+  onInsertPrompt,
+  onInsertCodeBlock,
+  onDelete,
   prompts,
 }: {
   chainNode: ChainNode
   isFirst: boolean
-  isActive: boolean
-  callback: () => void
+  isSelected: boolean
+  onSelect: () => void
+  isMenuActive: boolean
+  setMenuActive: (active: boolean) => void
+  onInsertPrompt: (promptID: number) => void
+  onInsertCodeBlock: () => void
+  onDelete: () => void
   prompts: Prompt[]
 }) {
-  const colorClass = isActive ? 'bg-blue-50 border-blue-100' : 'bg-white border-gray-400'
+  const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-400'
+  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
     <>
       {!isFirst && (
         <>
-          <div className='w-px h-4 border-l border-gray-400 min-h-[32px]' />
-          <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
+          <SmallDot margin='-mt-[5px] mb-0.5' />
+          <DownStroke height='min-h-[12px]' />
+          <AddButton prompts={prompts} isActive={isMenuActive} setActive={setMenuActive} onInsertPrompt={onInsertPrompt} onInsertCodeBlock={onInsertCodeBlock} />
+          <DownArrow height='min-h-[18px]' />
+          <SmallDot margin='-mb-[5px] mt-1' />
         </>
       )}
-      <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
-        {chainNode === InputNode && 'Input'}
-        {chainNode === OutputNode && 'Output'}
-        {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-        {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+      <div
+        className={`flex items-center justify-between border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`}
+        onClick={onSelect}>
+        <HeaderItem>
+          {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}
+          {chainNode === InputNode && 'Input'}
+          {chainNode === OutputNode && 'Output'}
+          {IsPromptChainItem(chainNode) && <>{prompts.find(prompt => prompt.id === chainNode.promptID)?.name}</>}
+          {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
+        </HeaderItem>
+        {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
+          <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+        )}
       </div>
     </>
+  )
+}
+
+const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margin: string; color?: string }) => (
+  <div className={`${margin} ${color} z-10 w-2.5 h-2.5 rounded-full min-h-[10px]`} />
+)
+
+const DownStroke = ({ height = 'h-full', color = 'border-gray-400' }: { height?: string; color?: string }) => (
+  <div className={`${height} w-px h-4 border-l ${color}`} />
+)
+
+const DownArrow = ({ height }: { height: string }) => (
+  <>
+    <DownStroke height={height} />
+    <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
+  </>
+)
+
+const AddButton = ({
+  prompts,
+  isActive,
+  setActive,
+  onInsertCodeBlock,
+  onInsertPrompt,
+}: {
+  prompts: Prompt[]
+  isActive: boolean
+  setActive: (active: boolean) => void
+  onInsertPrompt: (promptID: number) => void
+  onInsertCodeBlock: () => void
+}) => {
+  const [isHovered, setHovered] = useState(false)
+  const hoverClass = isHovered ? 'bg-blue-200' : 'border border-gray-400'
+
+  const toggleActive = (callback?: () => void) => () => {
+    setActive(!isActive)
+    setHovered(false)
+    callback?.()
+  }
+
+  const buttonRef = useRef<HTMLDivElement>(null)
+
+  const setPopup = useGlobalPopup<PromptSelectorPopupProps>()
+
+  const togglePopup = () => {
+    const iconRect = buttonRef.current?.getBoundingClientRect()!
+    setPopup(
+      PromptSelectorPopup,
+      { prompts, selectPrompt: promptID => toggleActive(() => onInsertPrompt(promptID))() },
+      { top: iconRect.y + 10, left: iconRect.x + 10 }
+    )
+  }
+
+  return isActive ? (
+    <>
+      <DownArrow height='min-h-[38px]' />
+      <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
+      <div ref={buttonRef} className='flex p-1 border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+        <AddStepButton label='Add prompt' icon={promptIcon} onClick={togglePopup} />
+        <DownStroke color='border-blue-100' />
+        <AddStepButton label='Add code block' icon={codeIcon} onClick={toggleActive(onInsertCodeBlock)} />
+      </div>
+      <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
+      <DownStroke height='min-h-[32px]' />
+    </>
+  ) : (
+    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onClick={toggleActive()}>
+      <Icon className={`${hoverClass} my-0.5 rounded-full cursor-pointer`} icon={isHovered ? addActiveIcon : addIcon} />
+    </div>
+  )
+}
+
+const AddStepButton = ({ label, icon, onClick }: { label: string; icon: StaticImageData; onClick: () => void }) => {
+  return (
+    <div
+      className='flex items-center justify-center w-1/2 gap-1 p-2 rounded cursor-pointer hover:bg-blue-50'
+      onClick={onClick}>
+      <Icon icon={icon} />
+      {label}
+    </div>
   )
 }
