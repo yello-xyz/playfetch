@@ -17,13 +17,16 @@ const buildCurlCommand = (
   const url = endpoint.url
   const inputRow = SelectAnyInputRow(inputValues, variables)
   const inputs = variables.map(variable => [variable, inputRow[variable]])
+  const stringify = (value: any) => JSON.stringify(value).replaceAll('\\', '\\\\').replaceAll("'", "\\'")
 
   return (
     `curl ${endpoint.useStreaming ? '-N ' : ''}-X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
     (endpoint.flavor !== defaultFlavor ? ` \\\n  -H "x-environment: ${endpoint.flavor}"` : '') +
     (inputs.length > 0
       ? ` \\\n  -H "content-type: application/json"` +
-        ` \\\n  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
+        ` \\\n  -d $'{ ${inputs
+          .map(([variable, value]) => `"${ToCamelCase(variable)}": ${stringify(value)}`)
+          .join(', ')} }'`
       : '')
   )
 }
