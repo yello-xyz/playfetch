@@ -188,7 +188,6 @@ export default function EndpointsView({
           minSize={isEditing ? undefined : minWidth}
           maxSize={isEditing ? undefined : maxWidth}
           preferredSize={isEditing ? '100%' : minWidth}>
-
           <div className={`${isEditingClass} flex flex-col w-full h-full bg-gray-25 `}>
             <SettingsPaneHeader
               isEditing={isEditing}
@@ -267,7 +266,7 @@ function SettingsPaneHeader({
         <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
         Endpoints /
       </HeaderItem>
-      <HeaderItem className='-mx-2.5'>{label + " (" + secondaryLabel + ")"}</HeaderItem>
+      <HeaderItem className='-mx-2.5'>{label + ' (' + secondaryLabel + ')'}</HeaderItem>
     </div>
   ) : (
     <SingleTabHeader label={label} secondaryLabel={secondaryLabel}>
