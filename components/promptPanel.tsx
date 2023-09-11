@@ -70,7 +70,7 @@ export default function PromptPanel({
   const padding = 8 // gap-2
   const buttonsHeight = 37
   const labelHeight = 24
-  const promptHeight = 51
+  const promptHeight = 53
   const promptsHeight =
     supportedPrompts.filter(promptKey => expandedPromptKeys[promptKey]).length * (promptHeight + padding)
   const preferredHeight =
