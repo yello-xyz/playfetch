@@ -109,7 +109,7 @@ export default function PromptView({
               </div>
             )}
           </Allotment.Pane>
-          <Allotment.Pane minSize={minHeight} preferredSize={minHeight} maxSize={maxHeight}>
+          <Allotment.Pane minSize={minHeight} preferredSize={minHeight} maxSize={maxHeight} className='z-10 drop-shadow-[0_-4px_14px_rgba(0,0,0,0.03)]'>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
                 version={activeVersion}
