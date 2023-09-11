@@ -75,7 +75,6 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
     const continuation = req.headers['x-continuation-key'] as string | undefined
-    const continuationID = continuation ? Number(continuation) : undefined
 
     if (apiKey && (await checkProject(projectID, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
@@ -85,6 +84,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('X-Accel-Buffering', 'no')
         }
 
+        const salt = (value: number) => (value ^ endpoint.id) >>> 0
+        const continuationID = continuation ? salt(Number(continuation)) : undefined
         const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
 
@@ -114,7 +115,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           ? res.end()
           : res.json({
               output: response.result,
-              ...(response.continuationID ? { [continuationKey]: response.continuationID.toString() } : {}),
+              ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
             })
       }
     }
