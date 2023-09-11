@@ -127,7 +127,7 @@ export default function PromptView({
         </Allotment>
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
-        <div className='h-full bg-gray-25'>
+        <div className='h-full bg-gray-25 border-l border-gray-200'>
           <RunTimeline
             runs={[...activeVersion.runs, ...partialRuns]}
             activeItem={prompt}
