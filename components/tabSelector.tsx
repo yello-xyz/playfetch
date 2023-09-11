@@ -1,20 +1,23 @@
 import { StaticImageData } from 'next/image'
-import { ReactNode } from 'react'
+import { ReactNode, useCallback, useState } from 'react'
 import Icon from './icon'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export function SingleTabHeader({
   label,
   icon,
   secondaryLabel,
+  onUpdateLabel,
   children,
 }: {
   label: string
   icon?: StaticImageData
   secondaryLabel?: string
+  onUpdateLabel?: (label: string) => void
   children?: ReactNode
 }) {
   return (
-    <TabSelector tabs={[label]} icon={icon} secondaryLabel={secondaryLabel}>
+    <TabSelector tabs={[label]} icon={icon} secondaryLabel={secondaryLabel} onUpdateLabel={onUpdateLabel}>
       {children}
     </TabSelector>
   )
@@ -26,6 +29,7 @@ export default function TabSelector<T extends string>({
   setActiveTab,
   icon,
   secondaryLabel,
+  onUpdateLabel,
   children,
 }: {
   tabs: T[]
@@ -33,20 +37,42 @@ export default function TabSelector<T extends string>({
   setActiveTab?: (tab: T) => void
   icon?: StaticImageData
   secondaryLabel?: string
+  onUpdateLabel?: (label: string) => void
   children?: ReactNode
 }) {
+  const [label, setLabel] = useInitialState<string>(tabs[0])
+  const [isEditingLabel, setEditingLabel] = useState(false)
+  const inputRef = useCallback((node: any) => node?.select(), [])
+
+  const onKeyDown = (event: any) => {
+    if (event.key === 'Enter') {
+      onUpdateLabel?.(label)
+      setEditingLabel(false)
+    }
+  }
+
   return (
     <CustomHeader>
       <div className='flex items-center gap-0.5'>
         {icon && <Icon className='-mr-1.5' icon={icon} />}
-        {tabs.map((tab, index) => (
-          <TabButton
-            key={index}
-            tab={tab}
-            activeTab={tabs.length > 1 ? activeTab : undefined}
-            setActiveTab={tabs.length > 1 ? setActiveTab : undefined}
+        {isEditingLabel ? (
+          <input
+            ref={inputRef}
+            className={headerClassName()}
+            value={label}
+            onChange={event => setLabel(event.target.value)}
+            onKeyDown={onKeyDown}
           />
-        ))}
+        ) : (
+          tabs.map((tab, index) => (
+            <TabButton
+              key={index}
+              tab={tab}
+              activeTab={tabs.length > 1 ? activeTab : undefined}
+              setActiveTab={tabs.length > 1 ? setActiveTab : onUpdateLabel ? () => setEditingLabel(true) : undefined}
+            />
+          ))
+        )}
         {secondaryLabel && <span className='text-gray-400'>{secondaryLabel}</span>}
       </div>
       {children}
@@ -81,6 +107,9 @@ function TabButton<T extends string>({
   )
 }
 
+const headerClassName = (active = true) =>
+  `px-2 py-2.5 font-medium outline-none leading-6 ${active ? 'text-gray-700' : 'text-gray-300'}}`
+
 export function HeaderItem({
   active = true,
   className = '',
@@ -92,9 +121,8 @@ export function HeaderItem({
   onClick?: () => void
   children?: ReactNode
 }) {
-  const color = active ? 'text-gray-700' : 'text-gray-300'
   return (
-    <div className={`flex px-2 py-2.5 font-medium select-none leading-6 ${color} ${className}`} onClick={onClick}>
+    <div className={`flex select-none ${headerClassName(active)} ${className}`} onClick={onClick}>
       {children}
     </div>
   )
