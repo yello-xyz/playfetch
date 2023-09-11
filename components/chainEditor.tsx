@@ -7,6 +7,7 @@ import { HeaderItem } from './tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import Icon from './icon'
+import ChainNodePopupMenu from './chainNodePopupMenu'
 
 export default function ChainEditor({
   chain,
@@ -31,7 +32,7 @@ export default function ChainEditor({
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
-  const removeItem = () => setNodes([...nodes.slice(0, activeIndex), ...nodes.slice(activeIndex + 1)])
+  const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
   const insertItem = (item: ChainItem) => setNodes([...nodes.slice(0, activeIndex), item, ...nodes.slice(activeIndex)])
   const insertPrompt = (promptID: number) =>
     insertItem({ promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
@@ -52,24 +53,16 @@ export default function ChainEditor({
             key={index}
             chainNode={node}
             isFirst={index === 0}
-            isActive={index === activeIndex}
-            callback={() => setActiveIndex(index)}
+            isSelected={index === activeIndex}
+            onSelect={() => setActiveIndex(index)}
+            onDelete={() => removeItem(index)}
             prompts={prompts}
           />
         ))}
       </div>
       <div className='flex self-start gap-4 p-4'>
-        {activeIndex > 0 && (
-          <>
-            {prompts.length > 0 && (
-              <PromptSelector prompts={prompts} insertPrompt={insertPrompt} insertCodeBlock={insertCodeBlock} />
-            )}
-            {activeIndex !== nodes.length - 1 && (
-              <Button type='destructive' onClick={removeItem}>
-                Remove Node
-              </Button>
-            )}
-          </>
+        {activeIndex > 0 && prompts.length > 0 && (
+          <PromptSelector prompts={prompts} insertPrompt={insertPrompt} insertCodeBlock={insertCodeBlock} />
         )}
       </div>
     </div>
@@ -107,17 +100,19 @@ function PromptSelector({
 function ChainNodeBox({
   chainNode,
   isFirst,
-  isActive,
-  callback,
+  isSelected,
+  onSelect,
+  onDelete,
   prompts,
 }: {
   chainNode: ChainNode
   isFirst: boolean
-  isActive: boolean
-  callback: () => void
+  isSelected: boolean
+  onSelect: () => void
+  onDelete: () => void
   prompts: Prompt[]
 }) {
-  const colorClass = isActive ? 'bg-blue-50 border-blue-100' : 'bg-white border-gray-400'
+  const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-400'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
     <>
@@ -127,7 +122,9 @@ function ChainNodeBox({
           <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
         </>
       )}
-      <div className={`border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
+      <div
+        className={`flex items-center justify-between border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`}
+        onClick={onSelect}>
         <HeaderItem>
           {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}
           {chainNode === InputNode && 'Input'}
@@ -135,6 +132,9 @@ function ChainNodeBox({
           {IsPromptChainItem(chainNode) && <>{prompts.find(prompt => prompt.id === chainNode.promptID)?.name}</>}
           {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
         </HeaderItem>
+        {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
+          <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+        )}
       </div>
     </>
   )
