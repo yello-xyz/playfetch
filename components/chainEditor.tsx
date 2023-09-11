@@ -1,5 +1,5 @@
 import { ActiveChain, ActiveProject, ChainItem, ChainVersion, Prompt } from '@/types'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
 import { CustomHeader } from './tabSelector'
@@ -192,7 +192,7 @@ function ChainNodeBox({
         {chainNode === InputNode && 'Input'}
         {chainNode === OutputNode && 'Output'}
         {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-        {IsCodeChainItem(chainNode) && 'Code block'}
+        {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
       </div>
     </>
   )

@@ -19,9 +19,10 @@ import TestDataPane from './testDataPane'
 import RunButtons from './runButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
+import codeIcon from '@/public/code.svg'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -125,6 +126,9 @@ export default function ChainNodeEditor({
   const updateCode = (code: string) =>
     setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], code }))
 
+  const updateCodeBlockName = (name: string) =>
+    setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], name }))
+
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
@@ -162,7 +166,11 @@ export default function ChainNodeEditor({
         )}
         {IsCodeChainItem(activeNode) && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <SingleTabHeader label='Code block' />
+            <SingleTabHeader
+              label={NameForCodeChainItem(activeNode)}
+              icon={codeIcon}
+              onUpdateLabel={updateCodeBlockName}
+            />
             <div className='p-4'>
               <PromptInput
                 key={activeItemIndex}

@@ -1,7 +1,7 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import {
+import ModelSelector, {
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -66,21 +66,20 @@ export default function PromptPanel({
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
 
-  const outerPadding = 16 // p-4
+  const outerPadding = 16 // gap-4
   const padding = 8 // gap-2
-  const buttonsHeight = 37
+  const modelSelectorHeight = 37
   const labelHeight = 24
-  const promptHeight = 51
+  const promptHeight = 53
   const promptsHeight =
     supportedPrompts.filter(promptKey => expandedPromptKeys[promptKey]).length * (promptHeight + padding)
   const preferredHeight =
-    2 * outerPadding +
     promptsHeight +
     supportedPrompts.length * (labelHeight + padding) +
     (isProviderAvailable ? 0 : 56 + padding) +
-    (showMultipleInputsWarning ? buttonsHeight + padding : 0) +
+    (showMultipleInputsWarning ? 37 + padding : 0) +
     (areOptionsExpanded ? labelHeight + padding + 116 : labelHeight) +
-    (runPrompt ? outerPadding + buttonsHeight : 0)
+    ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
   useEffect(() => {
     setPreferredHeight(preferredHeight)
@@ -93,6 +92,11 @@ export default function PromptPanel({
         {!isProviderAvailable && <ProviderWarning />}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
+        )}
+        {!runPrompt && (
+          <div className={`flex justify-between items-center font-medium text-gray-600`}>
+            Model <ModelSelector model={config.model} setModel={updateModel} />
+          </div>
         )}
         {supportedPrompts.map(promptKey => (
           <Collapsible
