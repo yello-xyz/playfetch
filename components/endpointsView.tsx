@@ -167,6 +167,8 @@ export default function EndpointsView({
 
   const minWidth = 460
   const maxWidth = 680
+  const isEditingClass = isEditing ? 'pl-2' : ''
+
   return (
     <Allotment>
       {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
@@ -186,7 +188,7 @@ export default function EndpointsView({
           minSize={isEditing ? undefined : minWidth}
           maxSize={isEditing ? undefined : maxWidth}
           preferredSize={isEditing ? '100%' : minWidth}>
-          <div className='flex flex-col w-full h-full bg-gray-25'>
+          <div className={`${isEditingClass} flex flex-col w-full h-full bg-gray-25 `}>
             <SettingsPaneHeader
               isEditing={isEditing}
               label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
@@ -259,13 +261,12 @@ function SettingsPaneHeader({
   onCollapse: () => void
 }) {
   return isEditing ? (
-    <div className='flex'>
+    <div className='flex mt-2 -mb-2'>
       <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
-        <Icon className='rotate-90 opacity-25' icon={chevronIcon} />
+        <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
         Endpoints /
       </HeaderItem>
-      <HeaderItem className='-mx-2.5'>{label}</HeaderItem>
-      <HeaderItem active={false}>{secondaryLabel}</HeaderItem>
+      <HeaderItem className='-mx-2.5'>{label + ' (' + secondaryLabel + ')'}</HeaderItem>
     </div>
   ) : (
     <SingleTabHeader label={label} secondaryLabel={secondaryLabel}>

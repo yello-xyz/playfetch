@@ -105,6 +105,7 @@ module.exports = {
       'orange-100': '#FBDFB5',
       'pink-50': '#F9D9F6',
       'red-50': '#FDE5E0',
+      'red-100': '#F4BBAF',
       white: '#FFFFFF',
     },
     fontSize: {

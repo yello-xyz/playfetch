@@ -121,6 +121,7 @@ export function HeaderItem({
   onClick?: () => void
   children?: ReactNode
 }) {
+  const color = active ? 'text-gray-700' : 'opacity-25 hover:opacity-50'
   return (
     <div className={`flex select-none ${headerClassName(active)} ${className}`} onClick={onClick}>
       {children}
