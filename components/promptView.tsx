@@ -81,7 +81,7 @@ export default function PromptView({
   const [maxHeight, setMaxHeight] = useState<number>()
   return (
     <Allotment>
-      <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
+      <Allotment.Pane key={showComments.toString()} className='bg-gray-25' minSize={minWidth} preferredSize={showComments ? '40%' : '50%'}>
         <Allotment vertical>
           <Allotment.Pane minSize={minTopPaneHeight}>
             {activeTab === 'Prompt versions' ? (
