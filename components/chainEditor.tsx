@@ -3,6 +3,10 @@ import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeCh
 import Button from './button'
 import DropdownMenu from './dropdownMenu'
 import ChainEditorHeader from './chainEditorHeader'
+import { HeaderItem } from './tabSelector'
+import promptIcon from '@/public/prompt.svg'
+import codeIcon from '@/public/code.svg'
+import Icon from './icon'
 
 export default function ChainEditor({
   chain,
@@ -114,6 +118,7 @@ function ChainNodeBox({
   prompts: Prompt[]
 }) {
   const colorClass = isActive ? 'bg-blue-50 border-blue-100' : 'bg-white border-gray-400'
+  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
     <>
       {!isFirst && (
@@ -122,11 +127,14 @@ function ChainNodeBox({
           <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
         </>
       )}
-      <div className={`text-center border px-4 py-2 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
-        {chainNode === InputNode && 'Input'}
-        {chainNode === OutputNode && 'Output'}
-        {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-        {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+      <div className={`border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={callback}>
+        <HeaderItem>
+          {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}
+          {chainNode === InputNode && 'Input'}
+          {chainNode === OutputNode && 'Output'}
+          {IsPromptChainItem(chainNode) && <>{prompts.find(prompt => prompt.id === chainNode.promptID)?.name}</>}
+          {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
+        </HeaderItem>
       </div>
     </>
   )
