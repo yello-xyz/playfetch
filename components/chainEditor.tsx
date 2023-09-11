@@ -35,12 +35,19 @@ export default function ChainEditor({
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
+
   const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
   const insertItem = (index: number, item: ChainItem) =>
     setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
   const insertPrompt = (index: number, promptID: number) =>
     insertItem(index, { promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
   const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
+
+  const onSelect = (index: number) => {
+    setActiveIndex(index)
+    setActiveMenuIndex(undefined)
+  }
 
   return (
     <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
@@ -58,7 +65,9 @@ export default function ChainEditor({
             chainNode={node}
             isFirst={index === 0}
             isSelected={index === activeIndex}
-            onSelect={() => setActiveIndex(index)}
+            onSelect={() => onSelect(index)}
+            isMenuActive={index === activeMenuIndex}
+            setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onDelete={() => removeItem(index)}
             onInsertCodeBlock={() => insertCodeBlock(index)}
             prompts={prompts}
@@ -111,6 +120,8 @@ function ChainNodeBox({
   isFirst,
   isSelected,
   onSelect,
+  isMenuActive,
+  setMenuActive,
   onInsertCodeBlock,
   onDelete,
   prompts,
@@ -119,6 +130,8 @@ function ChainNodeBox({
   isFirst: boolean
   isSelected: boolean
   onSelect: () => void
+  isMenuActive: boolean
+  setMenuActive: (active: boolean) => void
   onInsertCodeBlock: () => void
   onDelete: () => void
   prompts: Prompt[]
@@ -131,7 +144,7 @@ function ChainNodeBox({
         <>
           <SmallDot margin='-mt-[5px] mb-0.5' />
           <DownStroke height='min-h-[12px]' />
-          <AddButton onInsertCodeBlock={onInsertCodeBlock} />
+          <AddButton isActive={isMenuActive} setActive={setMenuActive} onInsertCodeBlock={onInsertCodeBlock} />
           <DownArrow height='min-h-[18px]' />
           <SmallDot margin='-mb-[5px] mt-1' />
         </>
@@ -169,8 +182,15 @@ const DownArrow = ({ height }: { height: string }) => (
   </>
 )
 
-const AddButton = ({ onInsertCodeBlock }: { onInsertCodeBlock: () => void }) => {
-  const [isActive, setActive] = useState(false)
+const AddButton = ({
+  isActive,
+  setActive,
+  onInsertCodeBlock,
+}: {
+  isActive: boolean
+  setActive: (active: boolean) => void
+  onInsertCodeBlock: () => void
+}) => {
   const [isHovered, setHovered] = useState(false)
   const hoverClass = isHovered ? 'bg-blue-200' : 'border border-gray-400'
 
