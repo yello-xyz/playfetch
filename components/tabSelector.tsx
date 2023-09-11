@@ -96,7 +96,7 @@ function TabButton<T extends string>({
   setActiveTab?: (tab: T) => void
 }) {
   const underline = activeTab === tab ? 'border-b border-black -mb-px' : ''
-  const cursor = setActiveTab ? 'cursor-pointer hover:text-gray-500' : ''
+  const cursor = setActiveTab ? 'cursor-pointer text-gray-700' : 'text-gray-400'
   return (
     <HeaderItem
       active={activeTab === undefined || activeTab === tab}
@@ -121,9 +121,10 @@ export function HeaderItem({
   onClick?: () => void
   children?: ReactNode
 }) {
-  const color = active ? 'text-gray-700' : 'opacity-25 hover:opacity-50'
+  const color = active ? 'text-gray-700' : 'opacity-40 hover:opacity-60'
+
   return (
-    <div className={`flex select-none ${headerClassName(active)} ${className}`} onClick={onClick}>
+    <div className={`flex select-none px-2 py-2.5 leading-6 font-medium ${color} ${className}`} onClick={onClick}>
       {children}
     </div>
   )
