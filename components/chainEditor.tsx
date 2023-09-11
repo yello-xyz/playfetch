@@ -118,8 +118,10 @@ function ChainNodeBox({
     <>
       {!isFirst && (
         <>
+          <div className='w-2.5 h-2.5 -mt-[5px] mb-0.5 bg-white border border-gray-400 rounded-full min-h-[10px]'/>
           <div className='w-px h-4 border-l border-gray-400 min-h-[32px]' />
-          <div className='p-0.5 mb-px -mt-1.5 rotate-45 border-b border-r border-gray-400' />
+          <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
+          <div className='z-10 w-2.5 h-2.5 -mb-[5px] mt-1 bg-white border border-gray-400 rounded-full min-h-[10px]'/>
         </>
       )}
       <div
