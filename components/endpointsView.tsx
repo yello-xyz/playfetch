@@ -167,6 +167,8 @@ export default function EndpointsView({
 
   const minWidth = 460
   const maxWidth = 680
+  const isEditingClass = isEditing ? 'pl-2' : ''
+
   return (
     <Allotment>
       {activeTab === 'Endpoints' && !isEditing && (!activeEndpoint || IsSavedEndpoint(activeEndpoint)) && (
@@ -186,7 +188,8 @@ export default function EndpointsView({
           minSize={isEditing ? undefined : minWidth}
           maxSize={isEditing ? undefined : maxWidth}
           preferredSize={isEditing ? '100%' : minWidth}>
-          <div className='flex flex-col w-full h-full bg-gray-25'>
+
+          <div className={`${isEditingClass} flex flex-col w-full h-full bg-gray-25 `}>
             <SettingsPaneHeader
               isEditing={isEditing}
               label={activeEndpoint.id && parent ? parent.name : 'New Endpoint'}
