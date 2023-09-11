@@ -8,10 +8,10 @@ import {
   Prompts,
   PromptInputs,
 } from '@/types'
-import openai from '@/src/server/openai'
-import anthropic from '@/src/server/anthropic'
-import vertexai from '@/src/server/vertexai'
-import cohere from '@/src/server/cohere'
+import openai from '@/src/server/providers/openai'
+import anthropic from '@/src/server/providers/anthropic'
+import vertexai from '@/src/server/providers/vertexai'
+import cohere from '@/src/server/providers/cohere'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
 type ValidPredictionResponse = { output: string; cost: number }
