@@ -19,14 +19,14 @@ export default function DropdownMenu({
   onFocus?: () => void
   onBlur?: () => void
 }) {
-  const sizeClass = size === 'small' ? 'text-xs' : 'text-sm font-medium'
+  const sizeClass = size === 'small' ? 'text-sm' : 'text-sm font-medium'
   const stateClass = disabled ? 'opacity-50' : 'cursor-pointer'
   const appearanceClass =
     'appearance-none border border-gray-300 rounded-md outline-none bg-no-repeat bg-[right_6px_center]'
   return (
     <select
       disabled={disabled}
-      className={`${sizeClass} ${stateClass} ${appearanceClass} ${className} py-2 pl-4 pr-8 text-gray-800`}
+      className={`${sizeClass} ${stateClass} ${appearanceClass} ${className} py-2 pl-2 pr-8 text-gray-700`}
       style={{ backgroundImage: `url('${chevronIcon.src}')` }}
       value={value}
       onChange={event => {

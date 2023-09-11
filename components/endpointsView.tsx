@@ -259,13 +259,12 @@ function SettingsPaneHeader({
   onCollapse: () => void
 }) {
   return isEditing ? (
-    <div className='flex'>
+    <div className='flex mt-2 -mb-2'>
       <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
-        <Icon className='rotate-90 opacity-25' icon={chevronIcon} />
+        <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
         Endpoints /
       </HeaderItem>
-      <HeaderItem className='-mx-2.5'>{label}</HeaderItem>
-      <HeaderItem active={false}>{secondaryLabel}</HeaderItem>
+      <HeaderItem className='-mx-2.5'>{label + " (" + secondaryLabel + ")"}</HeaderItem>
     </div>
   ) : (
     <SingleTabHeader label={label} secondaryLabel={secondaryLabel}>

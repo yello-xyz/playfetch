@@ -221,9 +221,9 @@ export default function EndpointSettingsPane({
         <>
           <Label className='-mb-4'>Danger zone</Label>
           <div className='flex items-center justify-between w-full p-4 bg-white border border-gray-200 rounded-lg'>
-            <div className='flex flex-col'>
+            <div className='flex flex-col gap-1'>
               <span>Delete this endpoint</span>
-              <span className='text-xs text-gray-400'>
+              <span className='text-sm text-gray-400'>
                 Deleting an endpoint may break existing integrations. Please be certain.
               </span>
             </div>

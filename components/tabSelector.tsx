@@ -85,7 +85,7 @@ export function HeaderItem({
   onClick?: () => void
   children?: ReactNode
 }) {
-  const color = active ? 'text-gray-700' : 'text-gray-300'
+  const color = active ? 'text-gray-700' : 'opacity-25 hover:opacity-50'
   return (
     <div className={`flex px-2 py-2.5 font-medium select-none leading-6 ${color} ${className}`} onClick={onClick}>
       {children}
