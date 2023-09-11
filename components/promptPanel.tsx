@@ -66,7 +66,7 @@ export default function PromptPanel({
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
 
-  const outerPadding = 16 // p-4
+  const outerPadding = 16 // gap-4
   const padding = 8 // gap-2
   const buttonsHeight = 37
   const labelHeight = 24
@@ -74,7 +74,6 @@ export default function PromptPanel({
   const promptsHeight =
     supportedPrompts.filter(promptKey => expandedPromptKeys[promptKey]).length * (promptHeight + padding)
   const preferredHeight =
-    2 * outerPadding +
     promptsHeight +
     supportedPrompts.length * (labelHeight + padding) +
     (isProviderAvailable ? 0 : 56 + padding) +
