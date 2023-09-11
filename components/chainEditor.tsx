@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
 import DropdownMenu from './dropdownMenu'
@@ -11,6 +11,8 @@ import ChainNodePopupMenu from './chainNodePopupMenu'
 import addIcon from '@/public/addSmall.svg'
 import addActiveIcon from '@/public/addWhiteSmall.svg'
 import { StaticImageData } from 'next/image'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 
 export default function ChainEditor({
   chain,
@@ -50,7 +52,7 @@ export default function ChainEditor({
   }
 
   return (
-    <div className='flex flex-col items-stretch justify-between h-full bg-gray-25'>
+    <div className='flex flex-col items-stretch h-full bg-gray-25'>
       <ChainEditorHeader
         chain={chain}
         activeVersion={activeVersion}
@@ -69,49 +71,13 @@ export default function ChainEditor({
             isMenuActive={index === activeMenuIndex}
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onDelete={() => removeItem(index)}
+            onInsertPrompt={promptID => insertPrompt(index, promptID)}
             onInsertCodeBlock={() => insertCodeBlock(index)}
             prompts={prompts}
           />
         ))}
       </div>
-      <div className='flex self-start gap-4 p-4'>
-        {activeIndex > 0 && prompts.length > 0 && (
-          <PromptSelector
-            prompts={prompts}
-            insertPrompt={prompt => insertPrompt(activeIndex, prompt)}
-            insertCodeBlock={() => insertCodeBlock(activeIndex)}
-          />
-        )}
-      </div>
     </div>
-  )
-}
-
-function PromptSelector({
-  prompts,
-  insertPrompt,
-  insertCodeBlock,
-}: {
-  prompts: Prompt[]
-  insertPrompt: (promptID: number) => void
-  insertCodeBlock: () => void
-}) {
-  const CODE_BLOCK = 1
-
-  return (
-    <DropdownMenu
-      value={0}
-      onChange={value => (Number(value) === CODE_BLOCK ? insertCodeBlock() : insertPrompt(Number(value)))}>
-      <option value={0} disabled>
-        Insert Node
-      </option>
-      <option value={CODE_BLOCK}>Code Block</option>
-      {prompts.map((prompt, index) => (
-        <option key={index} value={prompt.id}>
-          Prompt “{prompt.name}”
-        </option>
-      ))}
-    </DropdownMenu>
   )
 }
 
@@ -122,6 +88,7 @@ function ChainNodeBox({
   onSelect,
   isMenuActive,
   setMenuActive,
+  onInsertPrompt,
   onInsertCodeBlock,
   onDelete,
   prompts,
@@ -132,6 +99,7 @@ function ChainNodeBox({
   onSelect: () => void
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
+  onInsertPrompt: (promptID: number) => void
   onInsertCodeBlock: () => void
   onDelete: () => void
   prompts: Prompt[]
@@ -144,7 +112,7 @@ function ChainNodeBox({
         <>
           <SmallDot margin='-mt-[5px] mb-0.5' />
           <DownStroke height='min-h-[12px]' />
-          <AddButton isActive={isMenuActive} setActive={setMenuActive} onInsertCodeBlock={onInsertCodeBlock} />
+          <AddButton prompts={prompts} isActive={isMenuActive} setActive={setMenuActive} onInsertPrompt={onInsertPrompt} onInsertCodeBlock={onInsertCodeBlock} />
           <DownArrow height='min-h-[18px]' />
           <SmallDot margin='-mb-[5px] mt-1' />
         </>
@@ -183,12 +151,16 @@ const DownArrow = ({ height }: { height: string }) => (
 )
 
 const AddButton = ({
+  prompts,
   isActive,
   setActive,
   onInsertCodeBlock,
+  onInsertPrompt,
 }: {
+  prompts: Prompt[]
   isActive: boolean
   setActive: (active: boolean) => void
+  onInsertPrompt: (promptID: number) => void
   onInsertCodeBlock: () => void
 }) => {
   const [isHovered, setHovered] = useState(false)
@@ -197,16 +169,28 @@ const AddButton = ({
   const toggleActive = (callback?: () => void) => () => {
     setActive(!isActive)
     setHovered(false)
-    console.log(callback)
     callback?.()
+  }
+
+  const buttonRef = useRef<HTMLDivElement>(null)
+
+  const setPopup = useGlobalPopup<PromptSelectorPopupProps>()
+
+  const togglePopup = () => {
+    const iconRect = buttonRef.current?.getBoundingClientRect()!
+    setPopup(
+      PromptSelectorPopup,
+      { prompts, selectPrompt: promptID => toggleActive(() => onInsertPrompt(promptID))() },
+      { top: iconRect.y + 10, left: iconRect.x + 10 }
+    )
   }
 
   return isActive ? (
     <>
       <DownArrow height='min-h-[38px]' />
       <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
-      <div className='flex p-1 border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
-        <AddStepButton label='Add prompt' icon={promptIcon} onClick={() => {}} />
+      <div ref={buttonRef} className='flex p-1 border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+        <AddStepButton label='Add prompt' icon={promptIcon} onClick={togglePopup} />
         <DownStroke color='border-blue-100' />
         <AddStepButton label='Add code block' icon={codeIcon} onClick={toggleActive(onInsertCodeBlock)} />
       </div>
