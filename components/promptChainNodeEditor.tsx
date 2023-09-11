@@ -7,6 +7,7 @@ import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
 import { SingleTabHeader } from './tabSelector'
 import { useState } from 'react'
+import promptIcon from '@/public/prompt.svg'
 
 export default function PromptChainNodeEditor({
   node,
@@ -42,7 +43,7 @@ export default function PromptChainNodeEditor({
               versions={loadedPrompt.versions}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
-              tabSelector={() => <SingleTabHeader label='Prompt versions' />}
+              tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
             />
           </div>
           {items.slice(0, index).some(IsPromptChainItem) && (

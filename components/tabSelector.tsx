@@ -1,16 +1,20 @@
+import { StaticImageData } from 'next/image'
 import { ReactNode } from 'react'
+import Icon from './icon'
 
 export function SingleTabHeader({
   label,
+  icon,
   secondaryLabel,
   children,
 }: {
   label: string
+  icon?: StaticImageData
   secondaryLabel?: string
   children?: ReactNode
 }) {
   return (
-    <TabSelector tabs={[label]} secondaryLabel={secondaryLabel}>
+    <TabSelector tabs={[label]} icon={icon} secondaryLabel={secondaryLabel}>
       {children}
     </TabSelector>
   )
@@ -20,18 +24,21 @@ export default function TabSelector<T extends string>({
   tabs,
   activeTab,
   setActiveTab,
+  icon,
   secondaryLabel,
   children,
 }: {
   tabs: T[]
   activeTab?: T
   setActiveTab?: (tab: T) => void
+  icon?: StaticImageData
   secondaryLabel?: string
   children?: ReactNode
 }) {
   return (
     <CustomHeader>
       <div className='flex items-center gap-0.5'>
+        {icon && <Icon className='-mr-1.5' icon={icon} />}
         {tabs.map((tab, index) => (
           <TabButton
             key={index}
