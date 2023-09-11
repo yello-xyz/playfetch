@@ -5,7 +5,7 @@ import { ReactNode } from 'react'
 
 export default function TopBar({ children }: { children: ReactNode }) {
   return (
-    <div className='z-10 flex items-center justify-between w-full py-2 pl-2 pr-4 border-b border-gray-200 z-20'>
+    <div className='flex items-center justify-between w-full py-2 pl-2 pr-4 border-b border-gray-200 z-20'>
       {children}
     </div>
   )
