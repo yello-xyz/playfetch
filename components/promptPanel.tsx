@@ -41,13 +41,16 @@ export default function PromptPanel({
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
   const supportedPrompts = SupportedPromptKeysForModel(config.model)
-  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>('main')
+  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts | 'advancedSettings'>('main')
 
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion({ ...version, prompts, config })
-    if (!SupportedPromptKeysForModel(config.model).includes(activePromptKey)) {
+    if (
+      activePromptKey !== 'advancedSettings' &&
+      !SupportedPromptKeysForModel(config.model).includes(activePromptKey)
+    ) {
       setActivePromptKey('main')
     }
   }
@@ -60,10 +63,11 @@ export default function PromptPanel({
   const isProviderAvailable = checkProviderAvailable(config.provider)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
-  const activePromptLabel = LabelForPromptKey(activePromptKey)
+  const activePromptLabel =
+    activePromptKey === 'advancedSettings' ? 'Advanced Settings' : LabelForPromptKey(activePromptKey)
   const setActivePromptLabel = (label: string) =>
-    setActivePromptKey(supportedPrompts.find(p => LabelForPromptKey(p) === label) ?? 'main')
-  const promptLabels = supportedPrompts.map(LabelForPromptKey)
+    setActivePromptKey(supportedPrompts.find(p => LabelForPromptKey(p) === label) ?? 'advancedSettings')
+  const promptLabels = [...supportedPrompts.map(LabelForPromptKey), 'Advanced Settings']
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
 
@@ -105,19 +109,22 @@ export default function PromptPanel({
             </div>
           ))}
         </div>
-        <PromptInput
-          key={version.id}
-          value={prompts[activePromptKey] ?? ''}
-          setValue={updatePrompt}
-          placeholder={PlaceholderForPromptKey(activePromptKey)}
-          preformatted={PromptKeyNeedsPreformatted(activePromptKey)}
-        />
-        <PromptSettingsPane
-          config={config}
-          setConfig={updateConfig}
-          isExpanded={areOptionsExpanded}
-          setExpanded={setOptionsExpanded}
-        />
+        {activePromptKey !== 'advancedSettings' ? (
+          <PromptInput
+            key={version.id}
+            value={prompts[activePromptKey] ?? ''}
+            setValue={updatePrompt}
+            placeholder={PlaceholderForPromptKey(activePromptKey)}
+            preformatted={PromptKeyNeedsPreformatted(activePromptKey)}
+          />
+        ) : (
+          <PromptSettingsPane
+            config={config}
+            setConfig={updateConfig}
+            isExpanded={areOptionsExpanded}
+            setExpanded={setOptionsExpanded}
+          />
+        )}
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
