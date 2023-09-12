@@ -87,9 +87,9 @@ export function CodeBlock({
   const baseClass = 'h-full p-2 text-xs rounded-lg bg-white border border-gray-200'
   const scrollClass = scroll ? 'overflow-y-auto' : ''
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
-  const borderClass = active ? 'border' : ''
+  const focusClass = active ? 'focus-within:border-blue-400' : ''
   return (
-    <div className={`${baseClass} ${scrollClass} ${textColorClass} ${borderClass}`}>
+    <div className={`${baseClass} ${scrollClass} ${textColorClass} ${focusClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='break-all whitespace-pre-wrap pl-9'>{children}</pre>
         <div className='absolute top-0 left-0'>
