@@ -13,7 +13,6 @@ import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 import CommentPopupMenu from './commentPopupMenu'
-import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
 export default function ChainEditor({
   chain,
@@ -151,7 +150,6 @@ function ChainNodeBox({
                 itemIndex={itemIndex}
                 versionID={savedVersion.id}
                 users={chain.users}
-                labelColors={AvailableLabelColorsForItem(chain)}
                 selectedCell={isSelected}
               />
             )}

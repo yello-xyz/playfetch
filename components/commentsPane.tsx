@@ -54,13 +54,13 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
 export function CommentCell<Version extends PromptVersion | ChainVersion>({
   comment,
   user,
-  labelColors,
+  labelColors = {},
   versions = [],
   onSelect,
 }: {
   comment: Comment
   user: User
-  labelColors: Record<string, string>
+  labelColors?: Record<string, string>
   versions?: Version[]
   onSelect?: (version: Version, runID?: number) => void
 }) {

@@ -32,7 +32,7 @@ export default function CommentPopupMenu({
   itemIndex?: number
   startIndex?: number
   users: User[]
-  labelColors: Record<string, string>
+  labelColors?: Record<string, string>
   selectedCell?: boolean
 }) {
   const loadPopup = (): [typeof CommentsPopup, CommentsPopupProps] => [
@@ -57,7 +57,7 @@ export type CommentsPopupProps = {
   itemIndex?: number
   startIndex?: number
   users: User[]
-  labelColors: Record<string, string>
+  labelColors?: Record<string, string>
 }
 
 export function CommentsPopup({
