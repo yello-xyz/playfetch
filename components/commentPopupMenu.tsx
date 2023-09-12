@@ -19,6 +19,7 @@ export default function CommentPopupMenu({
   versionID,
   selection,
   runID,
+  itemIndex,
   startIndex,
   users,
   labelColors,
@@ -28,6 +29,7 @@ export default function CommentPopupMenu({
   versionID: number
   selection?: string
   runID?: number
+  itemIndex?: number
   startIndex?: number
   users: User[]
   labelColors: Record<string, string>
@@ -35,7 +37,7 @@ export default function CommentPopupMenu({
 }) {
   const loadPopup = (): [typeof CommentsPopup, CommentsPopupProps] => [
     CommentsPopup,
-    { comments, versionID, selection, runID, startIndex, users, labelColors },
+    { comments, versionID, selection, runID, itemIndex, startIndex, users, labelColors },
   ]
 
   return (
@@ -52,6 +54,7 @@ export type CommentsPopupProps = {
   versionID: number
   selection?: string
   runID?: number
+  itemIndex?: number
   startIndex?: number
   users: User[]
   labelColors: Record<string, string>
@@ -62,6 +65,7 @@ export function CommentsPopup({
   versionID,
   selection,
   runID,
+  itemIndex,
   startIndex,
   users,
   labelColors,
@@ -90,6 +94,7 @@ export function CommentsPopup({
           selection={selection}
           runID={runID}
           startIndex={startIndex}
+          itemIndex={itemIndex}
           callback={comment => setAllComments([...allComments, comment])}
           haveComments={haveComments}
         />
@@ -102,6 +107,7 @@ function CommentInput({
   versionID,
   selection,
   runID,
+  itemIndex,
   startIndex,
   haveComments,
   callback,
@@ -109,6 +115,7 @@ function CommentInput({
   versionID: number
   selection?: string
   runID?: number
+  itemIndex?: number
   startIndex?: number
   haveComments: boolean
   callback?: (comment: Comment) => void
@@ -124,7 +131,7 @@ function CommentInput({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(versionID, trimmedComment, selection, runID, startIndex).then(comment => {
+      api.addComment(versionID, trimmedComment, selection, runID, itemIndex, startIndex).then(comment => {
         refreshActiveItem()
         callback?.(comment)
       })

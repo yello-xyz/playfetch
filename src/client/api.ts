@@ -203,9 +203,10 @@ const api = {
     text: string,
     quote?: string,
     runID?: number,
+    itemIndex?: number,
     startIndex?: number
   ): Promise<Comment> {
-    return post(this.addComment, { versionID, text, quote, runID, startIndex })
+    return post(this.addComment, { versionID, text, quote, runID, itemIndex, startIndex })
   },
   toggleVersionLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
     return post(this.toggleVersionLabel, { versionID, projectID, label, checked })
