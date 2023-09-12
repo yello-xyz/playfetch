@@ -6,6 +6,8 @@ import { SessionProvider } from 'next-auth/react'
 import Head from 'next/head'
 import { ErrorBoundary } from 'react-error-boundary'
 import ClientRoute from '@/src/client/clientRoute'
+import TagManager from 'react-gtm-module'
+import { useEffect } from 'react'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -16,6 +18,8 @@ const escapeHome = () => {
 }
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+  useEffect(() => TagManager.initialize({ gtmId: process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID ?? '' }), [])
+
   return (
     <>
       <Head>

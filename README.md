@@ -42,6 +42,8 @@ In order to run the app locally, you will need to add some additional variables 
 
 `NEXTAUTH_SECRET=` *[random string of at least 32 characters]*
 
+`NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
+
 - **To use Email authentication:**
 
 `NOREPLY_EMAIL_USER=no-reply@yello.xyz`
