@@ -22,11 +22,11 @@ export default function ChainEditorHeader({
   const versionIndex = chain.versions.findIndex(version => version.id === activeVersion.id)
 
   return (
-      <CustomHeader>
-        <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-        <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
-        <SaveVersionButton saveItems={saveItems} />
-      </CustomHeader>
+    <CustomHeader>
+      <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
+      <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
+      <SaveVersionButton saveItems={saveItems} />
+    </CustomHeader>
   )
 }
 
