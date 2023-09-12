@@ -109,7 +109,7 @@ const api = {
   getPrompt: function (promptID: number, activeProject: ActiveProject): Promise<ActivePrompt> {
     return post(this.getPrompt, { promptID }).then(BuildActivePrompt(activeProject))
   },
-  addPrompt: function (projectID: number): Promise<number> {
+  addPrompt: function (projectID: number): Promise<{ promptID: number, versionID: number }> {
     return post(this.addPrompt, { projectID })
   },
   duplicatePrompt: function (promptID: number, targetProjectID?: number): Promise<number> {
