@@ -42,8 +42,10 @@ export default function ChainEditor({
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
   const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
-  const insertItem = (index: number, item: ChainItem) =>
+  const insertItem = (index: number, item: ChainItem) => {
     setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
+    setActiveIndex(index)
+  }
   const insertPrompt = (index: number, promptID: number, versionID?: number) =>
     insertItem(index, {
       promptID,

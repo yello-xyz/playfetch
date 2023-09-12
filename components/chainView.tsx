@@ -8,7 +8,7 @@ import {
   PromptChainItem,
   PromptVersion,
 } from '@/types'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
@@ -57,7 +57,7 @@ export default function ChainView({
     async (promptID: number) =>
       api.getPrompt(promptID, project).then(activePrompt => {
         setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
-        setNodes(
+        setNodes(nodes =>
           nodes.map(node =>
             IsPromptChainItem(node) && node.promptID === promptID
               ? {
@@ -70,7 +70,7 @@ export default function ChainView({
         )
         return activePrompt
       }),
-    [nodes, project]
+    [project]
   )
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
