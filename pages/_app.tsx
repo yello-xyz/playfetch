@@ -4,8 +4,16 @@ import 'allotment/dist/style.css'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import Head from 'next/head'
+import { ErrorBoundary } from 'react-error-boundary'
+import ClientRoute from '@/src/client/clientRoute'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
+
+const escapeHome = () => {
+  if (window.location.pathname !== ClientRoute.Home) {
+    window.location.href = ClientRoute.Home
+  }
+}
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
@@ -23,9 +31,11 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
           }
         `}
       </style>
-      <SessionProvider session={session}>
-        <Component {...pageProps} />
-      </SessionProvider>
+      <ErrorBoundary fallbackRender={() => null} onError={escapeHome}>
+        <SessionProvider session={session}>
+          <Component {...pageProps} />
+        </SessionProvider>
+      </ErrorBoundary>
     </>
   )
 }
