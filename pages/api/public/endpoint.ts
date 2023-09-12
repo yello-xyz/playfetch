@@ -10,6 +10,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/chainEngine'
 import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
 import { TryParseOutput } from '@/src/server/promptEngine'
+import { withErrorRoute } from '@/src/server/session'
 
 const logResponse = (
   endpoint: Endpoint,
@@ -124,4 +125,4 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   return res.status(401).json({ error: 'Invalid URL or API Key' })
 }
 
-export default endpoint
+export default withErrorRoute(endpoint)

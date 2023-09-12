@@ -10,7 +10,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import { User } from '@/types'
 
-function withErrorRoute(handler: NextApiHandler): NextApiHandler {
+export function withErrorRoute(handler: NextApiHandler): NextApiHandler {
   return async function (req: NextApiRequest, res: NextApiResponse) {
     try {
       return await handler(req, res)
