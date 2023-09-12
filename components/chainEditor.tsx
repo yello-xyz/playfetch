@@ -23,6 +23,7 @@ export default function ChainEditor({
   activeIndex,
   setActiveIndex,
   prompts,
+  addPrompt,
   showVersions,
   setShowVersions,
 }: {
@@ -34,6 +35,7 @@ export default function ChainEditor({
   activeIndex: number
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
+  addPrompt: () => Promise<{ promptID: number; versionID: number }>
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
@@ -42,8 +44,11 @@ export default function ChainEditor({
   const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
   const insertItem = (index: number, item: ChainItem) =>
     setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
-  const insertPrompt = (index: number, promptID: number) =>
-    insertItem(index, { promptID, versionID: prompts.find(prompt => prompt.id === promptID)!.lastVersionID })
+  const insertPrompt = (index: number, promptID: number, versionID?: number) =>
+    insertItem(index, {
+      promptID,
+      versionID: versionID ?? prompts.find(prompt => prompt.id === promptID)!.lastVersionID,
+    })
   const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
 
   const onSelect = (index: number) => {
@@ -75,6 +80,9 @@ export default function ChainEditor({
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onDelete={() => removeItem(index)}
             onInsertPrompt={promptID => insertPrompt(index, promptID)}
+            onInsertNewPrompt={() =>
+              addPrompt().then(({ promptID, versionID }) => insertPrompt(index, promptID, versionID))
+            }
             onInsertCodeBlock={() => insertCodeBlock(index)}
             prompts={prompts}
           />
@@ -95,6 +103,7 @@ function ChainNodeBox({
   isMenuActive,
   setMenuActive,
   onInsertPrompt,
+  onInsertNewPrompt,
   onInsertCodeBlock,
   onDelete,
   prompts,
@@ -109,6 +118,7 @@ function ChainNodeBox({
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
+  onInsertNewPrompt: () => void
   onInsertCodeBlock: () => void
   onDelete: () => void
   prompts: Prompt[]
@@ -126,6 +136,7 @@ function ChainNodeBox({
             isActive={isMenuActive}
             setActive={setMenuActive}
             onInsertPrompt={onInsertPrompt}
+            onInsertNewPrompt={onInsertNewPrompt}
             onInsertCodeBlock={onInsertCodeBlock}
           />
           <DownArrow height='min-h-[18px]' />
@@ -180,13 +191,15 @@ const AddButton = ({
   prompts,
   isActive,
   setActive,
-  onInsertCodeBlock,
   onInsertPrompt,
+  onInsertNewPrompt,
+  onInsertCodeBlock,
 }: {
   prompts: Prompt[]
   isActive: boolean
   setActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
+  onInsertNewPrompt: () => void
   onInsertCodeBlock: () => void
 }) => {
   const [isHovered, setHovered] = useState(false)
@@ -206,7 +219,11 @@ const AddButton = ({
     const iconRect = buttonRef.current?.getBoundingClientRect()!
     setPopup(
       PromptSelectorPopup,
-      { prompts, selectPrompt: promptID => toggleActive(() => onInsertPrompt(promptID))() },
+      {
+        prompts,
+        selectPrompt: promptID => toggleActive(() => onInsertPrompt(promptID))(),
+        addPrompt: toggleActive(onInsertNewPrompt),
+      },
       { top: iconRect.y + 10, left: iconRect.x + 10 }
     )
   }

@@ -15,7 +15,7 @@ import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
-import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import VersionTimeline, { ShouldShowVersions } from './versionTimeline'
@@ -142,6 +142,14 @@ export default function ChainView({
   const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion>()
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
+  const refreshProject = useRefreshProject()
+
+  const addPrompt = async () => {
+    const { promptID, versionID } = await api.addPrompt(project.id)
+    refreshProject()
+    return { promptID, versionID }
+  }
+
   const selectVersion = (version?: PromptVersion) => {
     savePrompt()
     setActivePromptVersion(version)
@@ -225,6 +233,7 @@ export default function ChainView({
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
+          addPrompt={addPrompt}
           showVersions={showVersions}
           setShowVersions={shouldShowVersions ? setShowVersions : undefined}
         />
