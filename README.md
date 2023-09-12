@@ -42,6 +42,10 @@ In order to run the app locally, you will need to add some additional variables 
 
 `NEXTAUTH_SECRET=` *[random string of at least 32 characters]*
 
+`GOOGLE_ANALYTICS_API_SECRET=` *[see "Google Analytics API" in in the 1Password Engineering vault]*
+
+`GOOGLE_ANALYTICS_MEASUREMENT_ID=G-7EW4BEVHT1`
+
 `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
 
 - **To use Email authentication:**

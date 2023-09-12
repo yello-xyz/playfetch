@@ -78,7 +78,9 @@ export default function PromptPanel({
   useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
 
   const classNameForTab = (tab: Tab) =>
-    tab === activeTab ? 'bg-gray-100 text-gray-700' : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
+    tab === activeTab
+      ? 'bg-gray-100 text-gray-700'
+      : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
 
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
