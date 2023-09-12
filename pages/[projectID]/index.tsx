@@ -220,7 +220,7 @@ export default function Home({
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-        <RefreshContext.Provider value={{ refreshActiveItem }}>
+        <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
           <ModalDialogContext.Provider value={{ setDialogPrompt }}>
             <GlobalPopupContext.Provider value={globalPopupProviderProps}>
               <main className='flex flex-col h-screen text-sm'>
