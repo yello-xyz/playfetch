@@ -261,7 +261,7 @@ function SettingsPaneHeader({
   onCollapse: () => void
 }) {
   return isEditing ? (
-    <div className='flex mt-2 -mb-2'>
+    <div className='flex mt-1 -mb-2'>
       <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
         <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
         Endpoints /
