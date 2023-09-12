@@ -70,9 +70,9 @@ export function CommentsPopup({
   users,
   labelColors,
 }: CommentsPopupProps) {
-  const haveComments = comments.length > 0
-
   const [allComments, setAllComments] = useInitialState(comments, (a, b) => JSON.stringify(a) === JSON.stringify(b))
+
+  const haveComments = allComments.length > 0
 
   return (
     <PopupContent>
