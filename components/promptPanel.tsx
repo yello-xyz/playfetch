@@ -95,13 +95,20 @@ export default function PromptPanel({
             Model <ModelSelector model={config.model} setModel={updateModel} />
           </div>
         )}
+        <div className='flex items-center gap-2 mb-1 font-medium'>
+          {promptLabels.map(label => (
+            <div
+              key={label}
+              className={label === activePromptLabel ? 'text-gray-600' : 'text-gray-300 cursor-pointer'}
+              onClick={() => setActivePromptLabel(label)}>
+              {label}
+            </div>
+          ))}
+        </div>
         <PromptInput
           key={version.id}
           value={prompts[activePromptKey] ?? ''}
           setValue={updatePrompt}
-          labels={promptLabels}
-          activeLabel={activePromptLabel}
-          setActiveLabel={setActivePromptLabel}
           placeholder={PlaceholderForPromptKey(activePromptKey)}
           preformatted={PromptKeyNeedsPreformatted(activePromptKey)}
         />
