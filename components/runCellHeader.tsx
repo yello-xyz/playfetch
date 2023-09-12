@@ -11,7 +11,7 @@ export default function RunCellHeader({ run, activeItem }: { run: Run; activeIte
 
   return (
     <>
-      <BorderedRow className='flex items-start justify-between gap-2 text-sm' addBorder={hasInputs || hasLabels}>
+      <BorderedRow className='flex items-start justify-between text-sm' addBorder={hasInputs || hasLabels}>
         {hasLabels ? (
           <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
         ) : (

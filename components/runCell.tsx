@@ -149,7 +149,7 @@ export default function RunCell({
 
   return (
     <div className={`${baseClass} ${colorClass}`}>
-      <div className={showInlineHeader ? 'flex flex-row-reverse justify-between' : 'flex flex-col gap-2.5'}>
+      <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
         {activeItem && isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
         <RunCellBody
           identifier={identifier}
