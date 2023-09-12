@@ -9,6 +9,7 @@ enum ClientRoute {
   Login = '/login',
   Waitlist = `${ClientRoute.Login}?w=1`,
   Admin = '/admin',
+  Privacy = '/privacy',
 }
 
 export const WorkspaceRoute = (workspaceID: number, userID: number) =>

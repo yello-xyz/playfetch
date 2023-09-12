@@ -8,6 +8,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import ClientRoute from '@/src/client/clientRoute'
 import TagManager from 'react-gtm-module'
 import { useEffect } from 'react'
+import CookieBanner from '@/components/cookieBanner'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -36,9 +37,11 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
         `}
       </style>
       <ErrorBoundary fallbackRender={() => null} onError={escapeHome}>
-        <SessionProvider session={session}>
-          <Component {...pageProps} />
-        </SessionProvider>
+        <CookieBanner>
+          <SessionProvider session={session}>
+            <Component {...pageProps} />
+          </SessionProvider>
+        </CookieBanner>
       </ErrorBoundary>
     </>
   )
