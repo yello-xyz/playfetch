@@ -40,14 +40,19 @@ export default function PromptPanel({
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
+  const supportedPrompts = SupportedPromptKeysForModel(config.model)
+  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts>('main')
+
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion({ ...version, prompts, config })
+    if (!SupportedPromptKeysForModel(config.model).includes(activePromptKey)) {
+      setActivePromptKey('main')
+    }
   }
 
-  const updatePrompt = (promptKey: keyof Prompts) => (prompt: string) =>
-    update({ ...prompts, [promptKey]: prompt }, config)
+  const updatePrompt = (prompt: string) => update({ ...prompts, [activePromptKey]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
@@ -55,12 +60,10 @@ export default function PromptPanel({
   const isProviderAvailable = checkProviderAvailable(config.provider)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
-  const supportedPrompts = SupportedPromptKeysForModel(config.model)
-  const [expandedPromptKeys, setExpandedPromptKeys] = useState<Record<string, boolean>>({ main: true })
-  const togglePrompt = (promptKey: string) =>
-    supportedPrompts.length > 1
-      ? (expanded: boolean) => setExpandedPromptKeys({ ...expandedPromptKeys, [promptKey]: expanded })
-      : undefined
+  const activePromptLabel = LabelForPromptKey(activePromptKey)
+  const setActivePromptLabel = (label: string) =>
+    setActivePromptKey(supportedPrompts.find(p => LabelForPromptKey(p) === label) ?? 'main')
+  const promptLabels = supportedPrompts.map(LabelForPromptKey)
 
   const [areOptionsExpanded, setOptionsExpanded] = useState(false)
 
@@ -69,17 +72,16 @@ export default function PromptPanel({
   const modelSelectorHeight = 37
   const labelHeight = 24
   const promptHeight = 53
-  const promptsHeight =
-    supportedPrompts.filter(promptKey => expandedPromptKeys[promptKey]).length * (promptHeight + padding)
   const preferredHeight =
-    promptsHeight +
-    supportedPrompts.length * (labelHeight + padding) +
+    labelHeight +
+    padding +
+    promptHeight +
     (isProviderAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
     (areOptionsExpanded ? labelHeight + padding + 116 : labelHeight) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
-  useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, promptsHeight, setPreferredHeight])
+  useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
 
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
@@ -93,23 +95,16 @@ export default function PromptPanel({
             Model <ModelSelector model={config.model} setModel={updateModel} />
           </div>
         )}
-        {supportedPrompts.map(promptKey => (
-          <Collapsible
-            key={promptKey}
-            label={LabelForPromptKey(promptKey)}
-            isExpanded={expandedPromptKeys[promptKey]}
-            setExpanded={togglePrompt(promptKey)}>
-            <div className='flex-1 min-h-[51px]'>
-              <PromptInput
-                key={`${version.id}-${promptKey}`}
-                value={prompts[promptKey] ?? ''}
-                setValue={updatePrompt(promptKey)}
-                placeholder={PlaceholderForPromptKey(promptKey)}
-                preformatted={PromptKeyNeedsPreformatted(promptKey)}
-              />
-            </div>
-          </Collapsible>
-        ))}
+        <PromptInput
+          key={version.id}
+          value={prompts[activePromptKey] ?? ''}
+          setValue={updatePrompt}
+          labels={promptLabels}
+          activeLabel={activePromptLabel}
+          setActiveLabel={setActivePromptLabel}
+          placeholder={PlaceholderForPromptKey(activePromptKey)}
+          preformatted={PromptKeyNeedsPreformatted(activePromptKey)}
+        />
         <PromptSettingsPane
           config={config}
           setConfig={updateConfig}

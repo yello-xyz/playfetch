@@ -75,12 +75,18 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
 export default function PromptInput({
   value,
   setValue,
+  labels,
+  activeLabel,
+  setActiveLabel,
   placeholder,
   disabled,
   preformatted,
 }: {
   value: string
   setValue: (value: string) => void
+  labels?: string[]
+  activeLabel?: string
+  setActiveLabel?: (label: string) => void
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
@@ -168,12 +174,33 @@ export default function PromptInput({
     </Suspense>
   )
 
-  return preformatted ? (
-    <CodeBlock active={!disabled} scroll>
-      {renderContentEditable()}
-    </CodeBlock>
-  ) : (
-    renderContentEditable()
+  const selectLabel = (label: string) => {
+    contentEditableRef.current?.focus()
+    setActiveLabel?.(label)
+  }
+
+  return (
+    <>
+      {labels && (
+        <div className='flex items-center gap-2 mb-1 font-medium'>
+          {labels.map(label => (
+            <div
+              key={label}
+              className={label === activeLabel ? 'text-gray-600' : 'text-gray-300 cursor-pointer'}
+              onClick={() => selectLabel(label)}>
+              {label}
+            </div>
+          ))}
+        </div>
+      )}
+      {preformatted ? (
+        <CodeBlock active={!disabled} scroll>
+          {renderContentEditable()}
+        </CodeBlock>
+      ) : (
+        renderContentEditable()
+      )}
+    </>
   )
 }
 
@@ -182,7 +209,7 @@ type VariablePopupProps = { selection: Selection; toggleInput: (selection: Selec
 function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
   return (
     <div className='flex items-center justify-center overflow-visible text-center max-w-0 '>
-      <div className=' bg-white rounded-lg shadow-md whitespace-nowrap border border-gray-200 hover:border-gray-300'>
+      <div className='bg-white border border-gray-200 rounded-lg shadow-md whitespace-nowrap hover:border-gray-300'>
         <div
           className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
