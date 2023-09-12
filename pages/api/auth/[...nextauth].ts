@@ -25,6 +25,7 @@ export const authOptions = {
           user: process.env.NOREPLY_EMAIL_USER,
           pass: process.env.NOREPLY_EMAIL_PASSWORD,
         },
+        tls: { ciphers: 'SSLv3' },
       },
       from: GetNoReplyFromAddress(),
     }),
