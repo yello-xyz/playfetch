@@ -16,7 +16,6 @@ import { ReactNode, useEffect, useState } from 'react'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
-import Collapsible from './collapsible'
 
 export default function PromptPanel({
   version,
@@ -69,20 +68,17 @@ export default function PromptPanel({
     setActivePromptKey(supportedPrompts.find(p => LabelForPromptKey(p) === label) ?? 'advancedSettings')
   const promptLabels = [...supportedPrompts.map(LabelForPromptKey), 'Advanced Settings']
 
-  const [areOptionsExpanded, setOptionsExpanded] = useState(false)
-
   const outerPadding = 16 // gap-4
   const padding = 8 // gap-2
   const modelSelectorHeight = 37
   const labelHeight = 24
-  const promptHeight = 53
+  const promptHeight = 116
   const preferredHeight =
     labelHeight +
     padding +
     promptHeight +
     (isProviderAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
-    (areOptionsExpanded ? labelHeight + padding + 116 : labelHeight) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
   useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
@@ -118,12 +114,7 @@ export default function PromptPanel({
             preformatted={PromptKeyNeedsPreformatted(activePromptKey)}
           />
         ) : (
-          <PromptSettingsPane
-            config={config}
-            setConfig={updateConfig}
-            isExpanded={areOptionsExpanded}
-            setExpanded={setOptionsExpanded}
-          />
+          <PromptSettingsPane config={config} setConfig={updateConfig} />
         )}
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
