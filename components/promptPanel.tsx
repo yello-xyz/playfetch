@@ -78,11 +78,11 @@ export default function PromptPanel({
   useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
 
   const classNameForTab = (tab: Tab) =>
-    tab === activeTab ? 'bg-gray-100 text-gray-700' : 'text-gray-400 cursor-pointer hover:bg-gray-50'
+    tab === activeTab ? 'bg-gray-100 text-gray-700' : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
 
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
-      <div className='flex flex-col flex-1 min-h-0 gap-2'>
+      <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {!isProviderAvailable && <ProviderWarning />}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
