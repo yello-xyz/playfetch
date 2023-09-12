@@ -73,20 +73,20 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
 }
 
 export default function PromptInput({
+  promptKey = 'main',
   value,
   setValue,
   placeholder,
   disabled,
   preformatted,
 }: {
+  promptKey?: string
   value: string
   setValue: (value: string) => void
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
 }) {
-  const contentEditableRef = useRef<HTMLDivElement>(null)
-
   const toggleInput = useCallback(
     (selection: Selection) => {
       if (!selection.isInput) {
@@ -116,6 +116,13 @@ export default function PromptInput({
     },
     [setPopup, toggleInput, lastSelection]
   )
+
+  const contentEditableRef = useRef<HTMLDivElement>(null)
+  const [lastKey, setLastKey] = useState(promptKey)
+  if (promptKey !== lastKey) {
+    setLastKey(promptKey)
+    contentEditableRef?.current?.focus()
+  }
 
   useEffect(() => {
     const selectionChangeHandler = () => updateSelection(extractSelection(contentEditableRef))

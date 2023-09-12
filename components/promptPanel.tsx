@@ -104,6 +104,7 @@ export default function PromptPanel({
         ) : (
           <PromptInput
             key={version.id}
+            promptKey={activeTab}
             value={prompts[activeTab] ?? ''}
             setValue={updatePrompt}
             placeholder={PlaceholderForPromptKey(activeTab)}
