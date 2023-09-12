@@ -27,7 +27,6 @@ export default function PromptPanel({
   setTestConfig,
   showTestMode,
   setPreferredHeight,
-  setMaxHeight,
 }: {
   version: PromptVersion
   setModifiedVersion: (version: PromptVersion) => void
@@ -37,7 +36,6 @@ export default function PromptPanel({
   setTestConfig?: (testConfig: TestConfig) => void
   showTestMode?: boolean
   setPreferredHeight: (height: number) => void
-  setMaxHeight: (height: number | undefined) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
@@ -81,10 +79,7 @@ export default function PromptPanel({
     (areOptionsExpanded ? labelHeight + padding + 116 : labelHeight) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
-  useEffect(() => {
-    setPreferredHeight(preferredHeight)
-    setMaxHeight(promptsHeight ? undefined : preferredHeight)
-  }, [preferredHeight, promptsHeight, setPreferredHeight, setMaxHeight])
+  useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, promptsHeight, setPreferredHeight])
 
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>

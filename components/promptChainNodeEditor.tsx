@@ -32,7 +32,6 @@ export default function PromptChainNodeEditor({
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
   const minHeight = promptHeight + 16
-  const [maxHeight, setMaxHeight] = useState<number>()
   return loadedPrompt && activeVersion ? (
     <Allotment vertical>
       <Allotment.Pane minSize={minVersionHeight}>
@@ -57,13 +56,12 @@ export default function PromptChainNodeEditor({
           )}
         </div>
       </Allotment.Pane>
-      <Allotment.Pane minSize={minHeight} preferredSize={minHeight} maxSize={maxHeight}>
+      <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
         <div className='h-full px-4 pt-4 bg-white'>
           <PromptPanel
             version={activeVersion}
             setModifiedVersion={setModifiedVersion}
             setPreferredHeight={setPromptHeight}
-            setMaxHeight={setMaxHeight}
           />
         </div>
       </Allotment.Pane>

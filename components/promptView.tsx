@@ -78,7 +78,6 @@ export default function PromptView({
   const minTopPaneHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
   const minHeight = promptHeight + 2 * 16
-  const [maxHeight, setMaxHeight] = useState<number>()
   return (
     <Allotment>
       <Allotment.Pane
@@ -116,7 +115,6 @@ export default function PromptView({
           <Allotment.Pane
             minSize={minHeight}
             preferredSize={minHeight}
-            maxSize={maxHeight}
             className='z-10 drop-shadow-[0_-4px_14px_rgba(0,0,0,0.03)]'>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
@@ -128,14 +126,13 @@ export default function PromptView({
                 setTestConfig={setTestConfig}
                 showTestMode={activeTab === 'Test data'}
                 setPreferredHeight={setPromptHeight}
-                setMaxHeight={setMaxHeight}
               />
             </div>
           </Allotment.Pane>
         </Allotment>
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
-        <div className='h-full bg-gray-25 border-l border-gray-200'>
+        <div className='h-full border-l border-gray-200 bg-gray-25'>
           <RunTimeline
             runs={[...activeVersion.runs, ...partialRuns]}
             activeItem={prompt}
