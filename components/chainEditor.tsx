@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
-import DropdownMenu from './dropdownMenu'
 import ChainEditorHeader from './chainEditorHeader'
 import { HeaderItem } from './tabSelector'
 import promptIcon from '@/public/prompt.svg'
@@ -13,6 +12,8 @@ import addActiveIcon from '@/public/addWhiteSmall.svg'
 import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
+import CommentPopupMenu from './commentPopupMenu'
+import { AvailableLabelColorsForItem } from './labelPopupMenu'
 
 export default function ChainEditor({
   chain,
@@ -64,7 +65,10 @@ export default function ChainEditor({
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}
+            chain={chain}
+            savedVersion={saveItems ? null : activeVersion}
             chainNode={node}
+            itemIndex={index}
             isFirst={index === 0}
             isSelected={index === activeIndex}
             onSelect={() => onSelect(index)}
@@ -82,7 +86,10 @@ export default function ChainEditor({
 }
 
 function ChainNodeBox({
+  chain,
+  savedVersion,
   chainNode,
+  itemIndex,
   isFirst,
   isSelected,
   onSelect,
@@ -93,7 +100,10 @@ function ChainNodeBox({
   onDelete,
   prompts,
 }: {
+  chain: ActiveChain
+  savedVersion: ChainVersion | null
   chainNode: ChainNode
+  itemIndex: number
   isFirst: boolean
   isSelected: boolean
   onSelect: () => void
@@ -112,7 +122,13 @@ function ChainNodeBox({
         <>
           <SmallDot margin='-mt-[5px] mb-0.5' />
           <DownStroke height='min-h-[12px]' />
-          <AddButton prompts={prompts} isActive={isMenuActive} setActive={setMenuActive} onInsertPrompt={onInsertPrompt} onInsertCodeBlock={onInsertCodeBlock} />
+          <AddButton
+            prompts={prompts}
+            isActive={isMenuActive}
+            setActive={setMenuActive}
+            onInsertPrompt={onInsertPrompt}
+            onInsertCodeBlock={onInsertCodeBlock}
+          />
           <DownArrow height='min-h-[18px]' />
           <SmallDot margin='-mb-[5px] mt-1' />
         </>
@@ -128,7 +144,19 @@ function ChainNodeBox({
           {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
         </HeaderItem>
         {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-          <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+          <div className='flex items-center gap-1'>
+            {savedVersion && (
+              <CommentPopupMenu
+                comments={savedVersion.comments.filter(comment => comment.itemIndex === itemIndex)}
+                itemIndex={itemIndex}
+                versionID={savedVersion.id}
+                users={chain.users}
+                labelColors={AvailableLabelColorsForItem(chain)}
+                selectedCell={isSelected}
+              />
+            )}
+            <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+          </div>
         )}
       </div>
     </>
