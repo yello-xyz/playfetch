@@ -39,22 +39,22 @@ export default function PromptPanel({
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
-  const supportedPrompts = SupportedPromptKeysForModel(config.model)
-  const [activePromptKey, setActivePromptKey] = useState<keyof Prompts | 'advancedSettings'>('main')
+  type Tab = keyof Prompts | 'settings'
+  const isSettingsTab = (tab: Tab): tab is 'settings' => tab === 'settings'
+  const labelForTab = (tab: Tab) => (isSettingsTab(tab) ? 'Advanced Settings' : LabelForPromptKey(tab))
+  const tabs = [...SupportedPromptKeysForModel(config.model), 'settings'] as Tab[]
+  const [activeTab, setActiveTab] = useState<Tab>('main')
 
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion({ ...version, prompts, config })
-    if (
-      activePromptKey !== 'advancedSettings' &&
-      !SupportedPromptKeysForModel(config.model).includes(activePromptKey)
-    ) {
-      setActivePromptKey('main')
+    if (!isSettingsTab(activeTab) && !SupportedPromptKeysForModel(config.model).includes(activeTab)) {
+      setActiveTab('main')
     }
   }
 
-  const updatePrompt = (prompt: string) => update({ ...prompts, [activePromptKey]: prompt }, config)
+  const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
@@ -62,26 +62,23 @@ export default function PromptPanel({
   const isProviderAvailable = checkProviderAvailable(config.provider)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
-  const activePromptLabel =
-    activePromptKey === 'advancedSettings' ? 'Advanced Settings' : LabelForPromptKey(activePromptKey)
-  const setActivePromptLabel = (label: string) =>
-    setActivePromptKey(supportedPrompts.find(p => LabelForPromptKey(p) === label) ?? 'advancedSettings')
-  const promptLabels = [...supportedPrompts.map(LabelForPromptKey), 'Advanced Settings']
-
   const outerPadding = 16 // gap-4
   const padding = 8 // gap-2
   const modelSelectorHeight = 37
-  const labelHeight = 24
-  const promptHeight = 116
+  const tabHeight = 27
+  const contentHeight = 116
   const preferredHeight =
-    labelHeight +
+    tabHeight +
     padding +
-    promptHeight +
+    contentHeight +
     (isProviderAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
   useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
+
+  const classNameForTab = (tab: Tab) =>
+    tab === activeTab ? 'bg-gray-100 text-gray-700' : 'text-gray-400 cursor-pointer hover:bg-gray-50'
 
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
@@ -95,26 +92,23 @@ export default function PromptPanel({
             Model <ModelSelector model={config.model} setModel={updateModel} />
           </div>
         )}
-        <div className='flex items-center gap-2 mb-1 font-medium'>
-          {promptLabels.map(label => (
-            <div
-              key={label}
-              className={label === activePromptLabel ? 'text-gray-600' : 'text-gray-300 cursor-pointer'}
-              onClick={() => setActivePromptLabel(label)}>
-              {label}
+        <div className='flex items-center gap-1 font-medium'>
+          {tabs.map(tab => (
+            <div key={tab} className={`px-2 py-1 rounded ${classNameForTab(tab)}`} onClick={() => setActiveTab(tab)}>
+              {labelForTab(tab)}
             </div>
           ))}
         </div>
-        {activePromptKey !== 'advancedSettings' ? (
+        {isSettingsTab(activeTab) ? (
+          <PromptSettingsPane config={config} setConfig={updateConfig} />
+        ) : (
           <PromptInput
             key={version.id}
-            value={prompts[activePromptKey] ?? ''}
+            value={prompts[activeTab] ?? ''}
             setValue={updatePrompt}
-            placeholder={PlaceholderForPromptKey(activePromptKey)}
-            preformatted={PromptKeyNeedsPreformatted(activePromptKey)}
+            placeholder={PlaceholderForPromptKey(activeTab)}
+            preformatted={PromptKeyNeedsPreformatted(activeTab)}
           />
-        ) : (
-          <PromptSettingsPane config={config} setConfig={updateConfig} />
         )}
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
