@@ -9,8 +9,9 @@ async function addPrompt(
   res: NextApiResponse<{ promptID: number; versionID: number }>,
   user: User
 ) {
-  const { promptID, versionID } = await addPromptForUser(user.id, req.body.projectID)
-  logUserEvent(req, res, user.id, CreateEvent('prompt', promptID))
+  const projectID = req.body.projectID
+  logUserEvent(req, res, user.id, CreateEvent('prompt', projectID))
+  const { promptID, versionID } = await addPromptForUser(user.id, projectID)
   res.json({ promptID, versionID })
 }
 

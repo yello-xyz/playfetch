@@ -14,10 +14,11 @@ export function getClientID(req: NextApiRequest, res: NextApiResponse): string {
 }
 
 type Event = { name: string; params: { [key: string]: string | number } }
+type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'endpoint'
 
-export const CreateEvent = (type: 'prompt' | 'chain', id: number): Event => ({
+export const CreateEvent = (type: EntityType, parentID: number): Event => ({
   name: 'create_content',
-  params: { content_type: type, item_id: id.toString() },
+  params: { content_type: type, item_id: parentID.toString() },
 })
 
 export default function logUserEvent(req: NextApiRequest, res: NextApiResponse, userID: number, event: Event) {
