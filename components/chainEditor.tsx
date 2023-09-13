@@ -14,6 +14,8 @@ import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 import CommentPopupMenu from './commentPopupMenu'
 
+const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
+
 export default function ChainEditor({
   chain,
   activeVersion,
@@ -68,6 +70,7 @@ export default function ChainEditor({
         setShowVersions={setShowVersions}
       />
       <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
+        <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}
@@ -89,6 +92,7 @@ export default function ChainEditor({
             prompts={prompts}
           />
         ))}
+        <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
       </div>
     </div>
   )
@@ -150,7 +154,7 @@ function ChainNodeBox({
         onClick={onSelect}>
         <HeaderItem>
           {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}
-          {chainNode === InputNode && 'Input'}
+          {chainNode === InputNode && 'Inputs'}
           {chainNode === OutputNode && 'Output'}
           {IsPromptChainItem(chainNode) && <>{prompts.find(prompt => prompt.id === chainNode.promptID)?.name}</>}
           {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
