@@ -1,7 +1,7 @@
 import { withAdminSession } from '@/src/server/session'
 import TextInput from '@/components/textInput'
 import api from '@/src/client/admin/api'
-import { Fragment, useState } from 'react'
+import { Fragment, ReactNode, useState } from 'react'
 import { PendingButton } from '@/components/button'
 import { CheckValidEmail } from '@/src/common/formatting'
 import { User } from '@/types'
@@ -10,6 +10,10 @@ import Label from '@/components/label'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { UserAvatar } from '@/components/userSidebarItem'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
+import { AdminRoute } from '@/src/client/clientRoute'
+import Link from 'next/link'
+import Icon from '@/components/icon'
+import chainIcon from '@/public/chainSmall.svg'
 
 export const getServerSideProps = withAdminSession(async () => {
   const initialWaitlistUsers = await getUsersWithoutAccess()
@@ -54,6 +58,8 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
           <TopBarAccessoryItem />
         </TopBar>
         <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto bg-gray-25'>
+          <ExternalLink href={AdminRoute.AnalyticsDashboard}>Analytics Dashboard</ExternalLink>
+          <ExternalLink href={AdminRoute.ServerLogs}>Server Logs</ExternalLink>
           {addedEmail && <Label>Granted access to {addedEmail}</Label>}
           <div className='flex items-center gap-2'>
             <TextInput placeholder='Email' value={email} setValue={setEmail} />
@@ -87,3 +93,10 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
     </>
   )
 }
+
+const ExternalLink = ({ href, children }: { href: string; children: ReactNode }) => (
+  <Link className='flex gap-1 underline' href={href} target='_blank'>
+    <Icon className='-rotate-45' icon={chainIcon} />
+    {children}
+  </Link>
+)

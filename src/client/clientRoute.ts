@@ -8,8 +8,13 @@ enum ClientRoute {
   Settings = '/settings',
   Login = '/login',
   Waitlist = `${ClientRoute.Login}?w=1`,
-  Admin = '/admin',
   Privacy = '/privacy',
+}
+
+export enum AdminRoute {
+  Home = '/admin',
+  AnalyticsDashboard = '/api/admin/analytics',
+  ServerLogs = '/api/admin/serverLogs',
 }
 
 export const WorkspaceRoute = (workspaceID: number, userID: number) =>
