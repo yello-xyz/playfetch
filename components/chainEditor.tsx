@@ -159,20 +159,18 @@ function ChainNodeBox({
           {IsPromptChainItem(chainNode) && <>{prompts.find(prompt => prompt.id === chainNode.promptID)?.name}</>}
           {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
         </HeaderItem>
-        {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-          <div className='flex items-center gap-1'>
-            {savedVersion && (
-              <CommentPopupMenu
-                comments={savedVersion.comments.filter(comment => comment.itemIndex === itemIndex)}
-                itemIndex={itemIndex}
-                versionID={savedVersion.id}
-                users={chain.users}
-                selectedCell={isSelected}
-              />
-            )}
-            <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
-          </div>
-        )}
+        <div className='flex items-center gap-1'>
+          {savedVersion && (
+            <CommentPopupMenu
+              comments={savedVersion.comments.filter(comment => comment.itemIndex === itemIndex)}
+              itemIndex={itemIndex}
+              versionID={savedVersion.id}
+              users={chain.users}
+              selectedCell={isSelected}
+            />
+          )}
+          <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+        </div>
       </div>
     </>
   )
