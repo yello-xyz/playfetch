@@ -93,4 +93,6 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
   },
 })
 
-export default (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions(req, res))
+const getNextAuthOptions = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions(req, res))
+
+export default getNextAuthOptions
