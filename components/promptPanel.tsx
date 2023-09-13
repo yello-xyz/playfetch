@@ -63,7 +63,7 @@ export default function PromptPanel({
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
   const outerPadding = 16 // gap-4
-  const padding = 8 // gap-2
+  const padding = 12 // gap-3
   const modelSelectorHeight = 37
   const tabHeight = 27
   const contentHeight = 116
