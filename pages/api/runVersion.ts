@@ -4,16 +4,19 @@ import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain, { MaxContinuationCount } from '@/src/server/chainEngine'
+import logUserEvent, { RunEvent } from '@/src/server/analytics'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   version.items ?? [{ versionID: version.id }]
 
 const logResponse = (
+  req: NextApiRequest,
+  res: NextApiResponse,
   userID: number,
   version: RawPromptVersion | RawChainVersion,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>> & { output: string }
-) =>
+) => {
   saveRun(
     userID,
     version.parentID,
@@ -25,6 +28,8 @@ const logResponse = (
     response.duration,
     []
   )
+  logUserEvent(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+}
 
 const timestampIf = (condition: boolean) => (condition ? new Date().toISOString() : undefined)
 
@@ -53,7 +58,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       ).then(response => {
         if (!response.failed) {
           sendData({ index: offset(configs.length - 1 + response.extraSteps) })
-          logResponse(user.id, version, inputs, response)
+          logResponse(req, res, user.id, version, inputs, response)
         }
       })
     })

@@ -11,8 +11,11 @@ import runChain from '@/src/server/chainEngine'
 import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
 import { TryParseOutput } from '@/src/server/promptEngine'
 import { withErrorRoute } from '@/src/server/session'
+import { EndpointEvent, logUnknownUserEvent } from '@/src/server/analytics'
 
 const logResponse = (
+  req: NextApiRequest,
+  res: NextApiResponse,
   endpoint: Endpoint,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>>,
@@ -36,6 +39,7 @@ const logResponse = (
     cacheHit,
     continuationID ?? response.continuationID
   )
+  logUnknownUserEvent(req, res, EndpointEvent(endpoint.parentID, response.failed, response.cost, response.duration))
 }
 
 type ResponseType = Awaited<ReturnType<typeof runChain>>
@@ -110,7 +114,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           }
         }
 
-        logResponse(endpoint, inputs, response, !!cachedResponse, continuationID)
+        logResponse(req, res, endpoint, inputs, response, !!cachedResponse, continuationID)
 
         return useStreaming
           ? res.end()

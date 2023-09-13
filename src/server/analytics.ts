@@ -29,6 +29,20 @@ export const CreateEvent = (type: EntityType, parentID: number): Event => ({
   params: { content_type: type, item_id: parentID.toString() },
 })
 
+export const RunEvent = (
+  parentID: number,
+  failed: boolean,
+  cost: number,
+  duration: number,
+  origin: 'website' | 'api' = 'website'
+): Event => ({
+  name: 'run',
+  params: { origin, item_id: parentID.toString(), status: failed ? 'error' : 'success', cost, duration },
+})
+
+export const EndpointEvent = (parentID: number, failed: boolean, cost: number, duration: number) =>
+  RunEvent(parentID, failed, cost, duration, 'api')
+
 export default function logUserEvent(req: Request, res: Response, userID: number, event: Event) {
   const clientID = getClientID(req, res)
   return logEvent(clientID, userID, event)
