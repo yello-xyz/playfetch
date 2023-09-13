@@ -54,11 +54,11 @@ export default function TabSelector<T extends string>({
   return (
     <CustomHeader>
       <div className='flex items-center gap-0.5'>
-        {icon && <Icon className='-mr-1.5' icon={icon} />}
+        {icon && !isEditingLabel && <Icon className='-mr-1.5' icon={icon} />}
         {isEditingLabel ? (
           <input
             ref={inputRef}
-            className={headerClassName()}
+            className={headerClassName}
             value={label}
             onChange={event => setLabel(event.target.value)}
             onKeyDown={onKeyDown}
@@ -95,23 +95,17 @@ function TabButton<T extends string>({
   activeTab?: T
   setActiveTab?: (tab: T) => void
 }) {
-  const underline = activeTab === tab ? 'border-b border-black -mb-px' : ''
-  const cursor = activeTab !== tab ? 'cursor-pointer ' : 'cursor-default'
-
   return (
     <HeaderItem
       active={activeTab === undefined || activeTab === tab}
-      className={`${underline} ${cursor}`}
+      className={activeTab === tab ? 'border-b border-black -mb-px' : 'cursor-pointer'}
       onClick={() => setActiveTab?.(tab)}>
       {tab}
     </HeaderItem>
   )
 }
 
-const headerClassName = (active = true) =>
-  `select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 ${
-    active ? '' : 'opacity-40 hover:opacity-70'
-  }}`
+const headerClassName = 'select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700'
 
 export function HeaderItem({
   active = true,
@@ -124,8 +118,9 @@ export function HeaderItem({
   onClick?: () => void
   children?: ReactNode
 }) {
+  const activeClass = active ? '' : 'opacity-40 hover:opacity-70'
   return (
-    <div className={`flex ${className} ${headerClassName(active)}`} onClick={onClick}>
+    <div className={`flex ${className} ${headerClassName} ${activeClass}`} onClick={onClick}>
       {children}
     </div>
   )
