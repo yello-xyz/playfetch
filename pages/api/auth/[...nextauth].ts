@@ -56,11 +56,12 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
       if (registeredUser) {
         if (!email?.verificationRequest) {
           logUserEvent(req, res, registeredUser.id, LoginEvent(account?.provider))
+          await markUserLogin(registeredUser.id, user.name ?? '', user.image ?? '')
         }
-        await markUserLogin(registeredUser.id, user.name ?? '', user.image ?? '')
         return true
       } else if (CheckValidEmail(user.email ?? '')) {
         logUnknownUserEvent(req, res, SignupEvent(account?.provider))
+        // TODO should we postpone this until the email is verified and return true above otherwise?
         await saveUser(user.email ?? '', user.name ?? '')
         return ClientRoute.Waitlist
       } else {
