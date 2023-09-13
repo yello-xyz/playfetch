@@ -95,7 +95,7 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
 }
 
 const ExternalLink = ({ href, children }: { href: string; children: ReactNode }) => (
-  <Link className='flex gap-1 underline' href={href} target='_blank'>
+  <Link className='flex items-center gap-1 underline' href={href} target='_blank'>
     <Icon className='-rotate-45' icon={chainIcon} />
     {children}
   </Link>
