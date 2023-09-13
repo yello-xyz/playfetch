@@ -45,8 +45,6 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
   const grantWaitlistUserAccess = (user: User) =>
     promptAddUser(user.email, user.fullName, () => api.getWaitlistUsers().then(setWaitlistUsers))
 
-  const buttonTitle = adding ? 'Granting Access' : 'Grant Access'
-
   return (
     <>
       <main className='flex flex-col h-screen overflow-hidden text-sm'>
@@ -60,7 +58,7 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
           <div className='flex items-center gap-2'>
             <TextInput placeholder='Email' value={email} setValue={setEmail} />
             <TextInput placeholder='Full Name (optional)' value={fullName} setValue={setFullName} />
-            <PendingButton title={buttonTitle} disabled={!CheckValidEmail(email) || adding} onClick={addUser} />
+            <PendingButton title='Grant Access' disabled={!CheckValidEmail(email) || adding} onClick={addUser} />
           </div>
           {waitlistUsers.length > 0 && (
             <>
@@ -73,7 +71,7 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
                     <div className='font-medium'>{user.fullName}</div>
                     <div className='flex justify-end'>
                       <PendingButton
-                        title={buttonTitle}
+                        title='Grant Access'
                         onClick={() => grantWaitlistUserAccess(user)}
                         disabled={adding}
                       />
