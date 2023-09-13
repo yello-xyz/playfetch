@@ -1,7 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { ServerResponse } from 'http'
+import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 import ShortUniqueId from 'short-unique-id'
 
-export function getClientID(req: NextApiRequest, res: NextApiResponse): string {
+type Request = { cookies: NextApiRequestCookies }
+type Response = ServerResponse
+
+export function getClientID(req: Request, res: Response): string {
   const fallbackCookieName = 'fallback_ga'
   const cookieValue = req.cookies['_ga'] ?? req.cookies[fallbackCookieName]
   if (cookieValue) {
@@ -16,17 +20,21 @@ export function getClientID(req: NextApiRequest, res: NextApiResponse): string {
 type Event = { name: string; params: { [key: string]: string | number } }
 type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'endpoint'
 
+export const SignupEvent = (provider = 'unknown'): Event => ({ name: 'signup', params: { method: provider } })
+
+export const LoginEvent = (provider = 'unknown'): Event => ({ name: 'login', params: { method: provider } })
+
 export const CreateEvent = (type: EntityType, parentID: number): Event => ({
   name: 'create_content',
   params: { content_type: type, item_id: parentID.toString() },
 })
 
-export default function logUserEvent(req: NextApiRequest, res: NextApiResponse, userID: number, event: Event) {
+export default function logUserEvent(req: Request, res: Response, userID: number, event: Event) {
   const clientID = getClientID(req, res)
   return logEvent(clientID, userID, event)
 }
 
-export function logUnknownUserEvent(req: NextApiRequest, res: NextApiResponse, event: Event) {
+export function logUnknownUserEvent(req: Request, res: Response, event: Event) {
   const clientID = getClientID(req, res)
   return logEventInternal(clientID, undefined, event)
 }

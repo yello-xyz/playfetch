@@ -1,17 +1,21 @@
 import ClientRoute from '@/src/client/clientRoute'
 import { CheckValidEmail } from '@/src/common/formatting'
+import logUserEvent, { LoginEvent, SignupEvent, logUnknownUserEvent } from '@/src/server/analytics'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import { getUserForEmail, markUserLogin, saveUser } from '@/src/server/datastore/users'
 import { GetNoReplyFromAddress } from '@/src/server/email'
+import { ServerResponse } from 'http'
+import { NextApiRequest, NextApiResponse } from 'next'
 import NextAuth, { Session, SessionStrategy, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
 import EmailProvider from 'next-auth/providers/email'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
+import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 
 const getRegisteredUser = async (email?: string | null) => (email ? getUserForEmail(email) : undefined)
 
-export const authOptions = {
+export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse) => ({
   adapter: NextAuthAdapter(),
   session: {
     strategy: 'jwt' as SessionStrategy,
@@ -39,12 +43,24 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }: { user: User }) {
+    async signIn({
+      user,
+      account,
+      email,
+    }: {
+      user: User
+      account: { provider: string } | null
+      email?: { verificationRequest?: boolean }
+    }) {
       const registeredUser = await getRegisteredUser(user.email)
       if (registeredUser) {
+        if (!email?.verificationRequest) {
+          logUserEvent(req, res, registeredUser.id, LoginEvent(account?.provider))
+        }
         await markUserLogin(registeredUser.id, user.name ?? '', user.image ?? '')
         return true
       } else if (CheckValidEmail(user.email ?? '')) {
+        logUnknownUserEvent(req, res, SignupEvent(account?.provider))
         await saveUser(user.email ?? '', user.name ?? '')
         return ClientRoute.Waitlist
       } else {
@@ -74,6 +90,6 @@ export const authOptions = {
       return session
     },
   },
-}
+})
 
-export default NextAuth(authOptions)
+export default (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions(req, res))
