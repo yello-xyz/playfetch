@@ -1,4 +1,4 @@
-import logUserEvent, { CreateEvent } from '@/src/server/analytics'
+import logUserRequest, { CreateEvent } from '@/src/server/analytics'
 import { addPromptForUser } from '@/src/server/datastore/prompts'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
@@ -10,7 +10,7 @@ async function addPrompt(
   user: User
 ) {
   const projectID = req.body.projectID
-  logUserEvent(req, res, user.id, CreateEvent('prompt', projectID))
+  logUserRequest(req, res, user.id, CreateEvent('prompt', projectID))
   const { promptID, versionID } = await addPromptForUser(user.id, projectID)
   res.json({ promptID, versionID })
 }

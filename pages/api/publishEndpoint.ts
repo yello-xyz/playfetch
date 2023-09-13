@@ -4,7 +4,7 @@ import { ToCamelCase } from '@/src/common/formatting'
 import { saveEndpoint } from '@/src/server/datastore/endpoints'
 import { ensureProjectAPIKey } from '@/src/server/datastore/projects'
 import { User } from '@/types'
-import logUserEvent, { CreateEvent } from '@/src/server/analytics'
+import logUserRequest, { CreateEvent } from '@/src/server/analytics'
 
 async function publishEndpoint(req: NextApiRequest, res: NextApiResponse<number>, user: User) {
   const isEnabled = req.body.isEnabled
@@ -17,7 +17,7 @@ async function publishEndpoint(req: NextApiRequest, res: NextApiResponse<number>
   const useCache = req.body.useCache
   const useStreaming = req.body.useStreaming
 
-  logUserEvent(req, res, user.id, CreateEvent('endpoint', projectID))
+  logUserRequest(req, res, user.id, CreateEvent('endpoint', projectID))
 
   const urlPath = ToCamelCase(name)
   await ensureProjectAPIKey(userID, projectID)

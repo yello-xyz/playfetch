@@ -1,4 +1,4 @@
-import logUserEvent, { CreateEvent } from '@/src/server/analytics'
+import logUserRequest, { CreateEvent } from '@/src/server/analytics'
 import { saveComment } from '@/src/server/datastore/comments'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { withLoggedInUserRoute } from '@/src/server/session'
@@ -8,7 +8,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 async function addComment(req: NextApiRequest, res: NextApiResponse<Comment>, user: User) {
   const versionID = req.body.versionID
   const parentID = await getTrustedVersion(versionID).then(version => version.parentID)
-  logUserEvent(req, res, user.id, CreateEvent('comment', parentID))
+  logUserRequest(req, res, user.id, CreateEvent('comment', parentID))
 
   const comment = await saveComment(
     user.id,

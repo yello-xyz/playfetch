@@ -43,18 +43,22 @@ export const RunEvent = (
 export const EndpointEvent = (parentID: number, failed: boolean, cost: number, duration: number) =>
   RunEvent(parentID, failed, cost, duration, 'api')
 
-export default function logUserEvent(req: Request, res: Response, userID: number, event: Event) {
+export default function logUserRequest(req: Request, res: Response, userID: number, event: Event) {
   const clientID = getClientID(req, res)
-  return logEvent(clientID, userID, event)
+  return logUserEvent(clientID, userID, event)
 }
 
-export function logUnknownUserEvent(req: Request, res: Response, event: Event) {
-  const clientID = getClientID(req, res)
-  return logEventInternal(clientID, undefined, event)
-}
-
-export function logEvent(clientID: string, userID: number, event: Event) {
+export function logUserEvent(clientID: string, userID: number, event: Event) {
   return logEventInternal(clientID, userID, event)
+}
+
+export function logUnknownUserRequest(req: Request, res: Response, event: Event) {
+  const clientID = getClientID(req, res)
+  return logUnknownUserEvent(clientID, event)
+}
+
+export function logUnknownUserEvent(clientID: string, event: Event) {
+  return logEventInternal(clientID, undefined, event)
 }
 
 function logEventInternal(clientID: string, userID: number | undefined, event: Event) {

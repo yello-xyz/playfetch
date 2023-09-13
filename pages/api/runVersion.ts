@@ -4,7 +4,7 @@ import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain, { MaxContinuationCount } from '@/src/server/chainEngine'
-import logUserEvent, { RunEvent } from '@/src/server/analytics'
+import logUserRequest, { RunEvent } from '@/src/server/analytics'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   version.items ?? [{ versionID: version.id }]
@@ -28,7 +28,7 @@ const logResponse = (
     response.duration,
     []
   )
-  logUserEvent(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+  logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
 }
 
 const timestampIf = (condition: boolean) => (condition ? new Date().toISOString() : undefined)
