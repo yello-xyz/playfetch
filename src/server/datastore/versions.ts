@@ -246,7 +246,16 @@ const toVersionData = (
   excludeFromIndexes: ['prompts', 'config', 'items', 'labels'],
 })
 
-export const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
+export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
+  const versionIDsWithRuns = new Set(runs.map(run => run.versionID))
+
+  return versions
+    .filter(version => version.userID === userID || versionIDsWithRuns.has(version.id))
+    .map(version => toVersion(version, runs, comments))
+    .reverse()
+}
+
+const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
   id: getID(data),
   parentID: data.parentID,
   userID: data.userID,
