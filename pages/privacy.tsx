@@ -49,7 +49,8 @@ export default function Privacy() {
                       <TableCell>How we use this personal information</TableCell>
                       <TableCell>Legal basis we rely on</TableCell>
                       <TableCell>
-                        We use this information to communicate with you about our Services and to set up and manage your account with us.
+                        We use this information to communicate with you about our Services and to set up and manage your
+                        account with us.
                       </TableCell>
                       <TableCell>
                         The processing is necessary for our legitimate interests, namely providing and administering
@@ -58,22 +59,32 @@ export default function Privacy() {
                     </Table>
                   </ListItem>
                   <ListItem>
-                    Content you submit when using the Platform, such as text input that may be considered personal information. We collect this information directly from you when you submit it to the Platform in order to provide you with the service.
+                    Content you submit when using the Platform, such as text input that may be considered personal
+                    information. We collect this information directly from you when you submit it to the Platform in
+                    order to provide you with the service.
                     <Table>
                       <TableCell>How we use this personal information</TableCell>
                       <TableCell>Legal basis we rely on</TableCell>
                       <TableCell>
-                        We use this information to fulfil your request(s) to, among other things, run queries to LLM model providers and present you with the results.
-                        To the extent any of this information is used to provide functionalilty within the website we store the queries you run to allow you to access them through your user account.
+                        We use this information to fulfil your request(s) to, among other things, run queries to LLM
+                        model providers and present you with the results. To the extent any of this information is used
+                        to provide functionalilty within the website we store the queries you run to allow you to access
+                        them through your user account.
                       </TableCell>
                       <TableCell>
-                        The processing is necessary for the performance of a contract, or to take steps prior to the performance of a contract (namely our Terms of Service).
+                        The processing is necessary for the performance of a contract, or to take steps prior to the
+                        performance of a contract (namely our Terms of Service).
                       </TableCell>
                       <TableCell>
-                        We use this information for data and analytics purposes, such as training our algorithms and models using machine learning to improve and maintain our Services. This is carried out with strict access controls and policies in place to protect your privacy. These activities may include:
+                        We use this information for data and analytics purposes, such as training our algorithms and
+                        models using machine learning to improve and maintain our Services. This is carried out with
+                        strict access controls and policies in place to protect your privacy. These activities may
+                        include:
                         <BulletList>
                           <Bullet>detecting content prohibited by our Terms of Service;</Bullet>
-                          <Bullet>troubleshooting and fixing the Services when they are not working correctly; and</Bullet>
+                          <Bullet>
+                            troubleshooting and fixing the Services when they are not working correctly; and
+                          </Bullet>
                           <Bullet>getting feedback on our ideas for products or features.</Bullet>
                         </BulletList>
                       </TableCell>
@@ -81,40 +92,51 @@ export default function Privacy() {
                         The processing is necessary for our legitimate interests, namely:
                         <BulletList>
                           <Bullet>to create, provide and maintain our Services; and</Bullet>
-                          <Bullet>to enhance our Services via research and development, data analytics, data labelling, machine learning and predictive analytics.</Bullet>
+                          <Bullet>
+                            to enhance our Services via research and development, data analytics, data labelling,
+                            machine learning and predictive analytics.
+                          </Bullet>
                         </BulletList>
                       </TableCell>
                     </Table>
                   </ListItem>
                   <ListItem>
-                    Comments, queries and feedback that you submit to us when you contact us. We collect this information directly from you.
+                    Comments, queries and feedback that you submit to us when you contact us. We collect this
+                    information directly from you.
                     <Table>
                       <TableCell>How we use this personal information</TableCell>
                       <TableCell>Legal basis we rely on</TableCell>
                       <TableCell>
-                        We use this information to respond to your comments, queries and feedback about the Services or us.
+                        We use this information to respond to your comments, queries and feedback about the Services or
+                        us.
                       </TableCell>
                       <TableCell>
-                        The processing is necessary for our legitimate interests, namely communicating with customers, prospective customers and business contacts.
+                        The processing is necessary for our legitimate interests, namely communicating with customers,
+                        prospective customers and business contacts.
                       </TableCell>
                       <TableCell>
-                        We use this information to tailor the communications we send to you so that they are more relevant to you.
+                        We use this information to tailor the communications we send to you so that they are more
+                        relevant to you.
                       </TableCell>
                       <TableCell>
-                        The processing is necessary for our legitimate interests, namely ensuring that the contents of any communications that we send is relevant to the recipient’s needs and interests.
+                        The processing is necessary for our legitimate interests, namely ensuring that the contents of
+                        any communications that we send is relevant to the recipient’s needs and interests.
                       </TableCell>
                     </Table>
                   </ListItem>
                   <ListItem>
-                    Your communication preferences, such as whether you asked or agreed to receive emails from us promoting our Services. We collect this information directly from you.
+                    Your communication preferences, such as whether you asked or agreed to receive emails from us
+                    promoting our Services. We collect this information directly from you.
                     <Table>
                       <TableCell>How we use this personal information</TableCell>
                       <TableCell>Legal basis we rely on</TableCell>
                       <TableCell>
-                        We use this information to ensure that we only send promotional communications to you in accordance with your preferences.
+                        We use this information to ensure that we only send promotional communications to you in
+                        accordance with your preferences.
                       </TableCell>
                       <TableCell>
-                        TThe processing is necessary to comply with a legal obligation to which we are subject, namely laws implementing the ePrivacy Directive 2002/58/EC (as amended).
+                        TThe processing is necessary to comply with a legal obligation to which we are subject, namely
+                        laws implementing the ePrivacy Directive 2002/58/EC (as amended).
                       </TableCell>
                     </Table>
                   </ListItem>
@@ -236,50 +258,76 @@ export default function Privacy() {
               <ListItem>
                 Unless a longer retention period is required or permitted by law, we will only hold your personal
                 information on our systems for the period necessary to fulfil the purposes outlined in this Privacy
-                Policy or until you request it be deleted. The length of time that we keep your information will vary depending on the purposes for which we have it. In any event, we will review what information we need on an ongoing basis and will only retain it for the minimum amount of time that we need it for.
+                Policy or until you request it be deleted. The length of time that we keep your information will vary
+                depending on the purposes for which we have it. In any event, we will review what information we need on
+                an ongoing basis and will only retain it for the minimum amount of time that we need it for.
               </ListItem>
             </NumberedList>
           </ListItem>
           <ListItem title='RECIPIENTS'>
             <NumberedList>
               <ListItem>
-                As required in accordance with how we use your personal information, we may share your personal information as follows:
+                As required in accordance with how we use your personal information, we may share your personal
+                information as follows:
                 <Table>
                   <TableCell>Recipient</TableCell>
                   <TableCell>How they use it</TableCell>
                   <TableCell>
-                    Service providers. We may share your personal information with third party vendors and other service providers that perform services for us or on our behalf, such as providing hosting or other technical services such as analytics and AI services, payment services or email services.
+                    Service providers. We may share your personal information with third party vendors and other service
+                    providers that perform services for us or on our behalf, such as providing hosting or other
+                    technical services such as analytics and AI services, payment services or email services.
                   </TableCell>
                   <TableCell>
                     These service providers will use your personal information as processors on our instructions.
                   </TableCell>
                   <TableCell>
-                    Partners that provide complementary services. We may share your personal information with third party partners that perform additional services in connection with our Services, such as printing and merchandise providers.
+                    Partners that provide complementary services. We may share your personal information with third
+                    party partners that perform additional services in connection with our Services, such as printing
+                    and merchandise providers.
                   </TableCell>
                   <TableCell>
-                    These service providers will use your personal information as processors on our instructions. They may also collect personal information from you in accordance with their privacy notices.
+                    These service providers will use your personal information as processors on our instructions. They
+                    may also collect personal information from you in accordance with their privacy notices.
                   </TableCell>
                   <TableCell>
-                    Social media. When we interact with you through a social media platform, that social media platform will receive and process the personal information contained in such communications.
-                    We may use our social media accounts to interact with and share links to items that you have publicly shared. We will only do this in accordance with the relevant social media platform’s terms of use.
+                    Social media. When we interact with you through a social media platform, that social media platform
+                    will receive and process the personal information contained in such communications. We may use our
+                    social media accounts to interact with and share links to items that you have publicly shared. We
+                    will only do this in accordance with the relevant social media platform’s terms of use.
                   </TableCell>
                   <TableCell>
-                    Social media platforms will use the personal information they collect in accordance with their privacy notices. Note that if you choose to publicly share something on social media, it may be visible to other users who may not follow or know you.
-                    The lawful basis we rely on for transferring this personal information is that the processing is necessary for our legitimate interests, namely communicating with you and our customers through social media, and promoting our Services.
+                    Social media platforms will use the personal information they collect in accordance with their
+                    privacy notices. Note that if you choose to publicly share something on social media, it may be
+                    visible to other users who may not follow or know you. The lawful basis we rely on for transferring
+                    this personal information is that the processing is necessary for our legitimate interests, namely
+                    communicating with you and our customers through social media, and promoting our Services.
                   </TableCell>
                   <TableCell>
-                    Purchasers and third parties in connection with a business transaction. Your personal information may be disclosed to third parties in connection with a transaction, such as a merger, sale of assets or shares, reorganisation, financing, change of control or acquisition of all or a portion of our business.
+                    Purchasers and third parties in connection with a business transaction. Your personal information
+                    may be disclosed to third parties in connection with a transaction, such as a merger, sale of assets
+                    or shares, reorganisation, financing, change of control or acquisition of all or a portion of our
+                    business.
                   </TableCell>
                   <TableCell>
-                    These recipients will use your personal information to assess the potential transaction with us, and otherwise only as disclosed in this privacy policy.
-                    The lawful basis we rely on for transferring this personal information is that the processing is necessary for our and the third party’s legitimate interests, namely assessing and executing a potential transaction with us.
+                    These recipients will use your personal information to assess the potential transaction with us, and
+                    otherwise only as disclosed in this privacy policy. The lawful basis we rely on for transferring
+                    this personal information is that the processing is necessary for our and the third party’s
+                    legitimate interests, namely assessing and executing a potential transaction with us.
                   </TableCell>
                   <TableCell>
-                    Law enforcement, regulators and other parties for legal reasons. We may share your personal information with third parties as required by law or if we reasonably believe that such action is necessary to (i) comply with the law and the reasonable requests of law enforcement; (ii) detect and investigate illegal activities and breaches of agreements; and/or (iii) exercise or protect the rights, property, or personal safety of Dreambooks, its users or others.
+                    Law enforcement, regulators and other parties for legal reasons. We may share your personal
+                    information with third parties as required by law or if we reasonably believe that such action is
+                    necessary to (i) comply with the law and the reasonable requests of law enforcement; (ii) detect and
+                    investigate illegal activities and breaches of agreements; and/or (iii) exercise or protect the
+                    rights, property, or personal safety of Dreambooks, its users or others.
                   </TableCell>
                   <TableCell>
-                    These recipients will use your personal information in the performance of their regulatory or law enforcement role, or to advise us in connection with a potential claim or regulatory enforcement action.
-                    The lawful basis we rely on for sharing personal information with these recipients is that the processing is either necessary to comply with a legal obligation to which we are subject or is necessary for our legitimate interests, namely enforcing our rights or complying with requests from regulatory authorities.
+                    These recipients will use your personal information in the performance of their regulatory or law
+                    enforcement role, or to advise us in connection with a potential claim or regulatory enforcement
+                    action. The lawful basis we rely on for sharing personal information with these recipients is that
+                    the processing is either necessary to comply with a legal obligation to which we are subject or is
+                    necessary for our legitimate interests, namely enforcing our rights or complying with requests from
+                    regulatory authorities.
                   </TableCell>
                 </Table>
               </ListItem>
@@ -288,27 +336,43 @@ export default function Privacy() {
           <ListItem title='STORING AND TRANSFERRING YOUR PERSONAL INFORMATION'>
             <NumberedList>
               <ListItem>
-                Security. We implement appropriate technical and organisational measures to protect your personal information against accidental or unlawful destruction, loss, change or damage. All personal information we collect will be stored on our hosting provider’s secure servers. We will never send you unsolicited emails or contact you by phone requesting your credit or debit card information or national identification numbers.
+                Security. We implement appropriate technical and organisational measures to protect your personal
+                information against accidental or unlawful destruction, loss, change or damage. All personal information
+                we collect will be stored on our hosting provider’s secure servers. We will never send you unsolicited
+                emails or contact you by phone requesting your credit or debit card information or national
+                identification numbers.
               </ListItem>
               <ListItem>
-                International Transfers of your personal information. Your personal information is primarily processed within the territory in which you are based but, if you are based in the UK or EEA, we may transfer personal information from the EEA or the UK to other locations.
+                International Transfers of your personal information. Your personal information is primarily processed
+                within the territory in which you are based but, if you are based in the UK or EEA, we may transfer
+                personal information from the EEA or the UK to other locations.
                 <NumberedList>
                   <ListItem>
                     When we engage in such transfers of personal information, we rely on:
                     <NumberedList>
                       <ListItem>
-                        Adequacy decisions made by the European Commission that recognise the destination country as offering an equivalent level of protection as compared to the level of protection in the country where you are located; or, if you are in the United Kingdom, similar recognition that the destination country offers an equivalent level of protection under the UK Data Protection Act 2018 or regulations made by the UK Secretary of State under the UK Data Protection Act 2018; and
+                        Adequacy decisions made by the European Commission that recognise the destination country as
+                        offering an equivalent level of protection as compared to the level of protection in the country
+                        where you are located; or, if you are in the United Kingdom, similar recognition that the
+                        destination country offers an equivalent level of protection under the UK Data Protection Act
+                        2018 or regulations made by the UK Secretary of State under the UK Data Protection Act 2018; and
                       </ListItem>
                       <ListItem>
-                        Standard Contractual Clauses issued by the European Commission and, if you are in the United Kingdom, the approved addendum to those Standard Contractual Clauses issued under the UK Data Protection Act 2018.
+                        Standard Contractual Clauses issued by the European Commission and, if you are in the United
+                        Kingdom, the approved addendum to those Standard Contractual Clauses issued under the UK Data
+                        Protection Act 2018.
                       </ListItem>
                     </NumberedList>
                   </ListItem>
                   <ListItem>
-                    We also continually monitor the circumstances surrounding such transfers in order to ensure that these maintain, in practice, a level of protection that is essentially equivalent to the one guaranteed by the UK GDPR and EU GDPR.
+                    We also continually monitor the circumstances surrounding such transfers in order to ensure that
+                    these maintain, in practice, a level of protection that is essentially equivalent to the one
+                    guaranteed by the UK GDPR and EU GDPR.
                   </ListItem>
                   <ListItem>
-                    If you wish to enquire further about the safeguards we use, including obtaining a copy of any Standard Contractual Clauses we have in place with recipients outside the EEA or UK, please contact us using the details in the “About us” section above.
+                    If you wish to enquire further about the safeguards we use, including obtaining a copy of any
+                    Standard Contractual Clauses we have in place with recipients outside the EEA or UK, please contact
+                    us using the details in the “About us” section above.
                   </ListItem>
                 </NumberedList>
               </ListItem>
@@ -317,7 +381,8 @@ export default function Privacy() {
           <ListItem title='YOUR RIGHTS IN RESPECT OF YOUR PERSONAL INFORMATION'>
             <NumberedList>
               <ListItem>
-                In accordance with applicable privacy law you may have the following rights in respect of your personal information that we hold:
+                In accordance with applicable privacy law you may have the following rights in respect of your personal
+                information that we hold:
                 <NumberedList>
                   <ListItem>
                     Right of access. The right to obtain:
@@ -326,41 +391,56 @@ export default function Privacy() {
                         confirmation of whether, and where, we are processing your personal information;
                       </ListItem>
                       <ListItem>
-                        information about the categories of personal information we are processing, the purposes for which we process your personal information and information as to how we determine applicable retention periods;
+                        information about the categories of personal information we are processing, the purposes for
+                        which we process your personal information and information as to how we determine applicable
+                        retention periods;
                       </ListItem>
                       <ListItem>
-                        information about the categories of recipients with whom we may share your personal information; and
+                        information about the categories of recipients with whom we may share your personal information;
+                        and
                       </ListItem>
-                      <ListItem>
-                        a copy of the personal information we hold about you.
-                      </ListItem>
+                      <ListItem>a copy of the personal information we hold about you.</ListItem>
                     </NumberedList>
                   </ListItem>
                   <ListItem>
-                    Right of portability. The right, in certain circumstances, to receive a copy of the personal information you have provided to us in a structured, commonly used, machine-readable format that supports re-use, or to request the transfer of your personal data to another person.
+                    Right of portability. The right, in certain circumstances, to receive a copy of the personal
+                    information you have provided to us in a structured, commonly used, machine-readable format that
+                    supports re-use, or to request the transfer of your personal data to another person.
                   </ListItem>
                   <ListItem>
-                    Right to rectification. The right to obtain rectification of any inaccurate or incomplete personal information we hold about you without undue delay.
+                    Right to rectification. The right to obtain rectification of any inaccurate or incomplete personal
+                    information we hold about you without undue delay.
                   </ListItem>
                   <ListItem>
-                    Right to erasure. The right, in some circumstances, to require us to erase your personal information without undue delay if the continued processing of that personal information is not justified.
+                    Right to erasure. The right, in some circumstances, to require us to erase your personal information
+                    without undue delay if the continued processing of that personal information is not justified.
                   </ListItem>
                   <ListItem>
-                    Right to restriction. The right, in some circumstances, to require us to limit the purposes for which we process your personal information if the continued processing of the personal information in this way is not justified, such as where the accuracy of the personal information is contested by you.
+                    Right to restriction. The right, in some circumstances, to require us to limit the purposes for
+                    which we process your personal information if the continued processing of the personal information
+                    in this way is not justified, such as where the accuracy of the personal information is contested by
+                    you.
                   </ListItem>
                 </NumberedList>
               </ListItem>
               <ListItem>
-                You also have the right to object to any processing based on our legitimate interests where there are grounds relating to your particular situation. There may be compelling reasons for continuing to process your personal information, and we will assess and inform you if that is the case.
+                You also have the right to object to any processing based on our legitimate interests where there are
+                grounds relating to your particular situation. There may be compelling reasons for continuing to process
+                your personal information, and we will assess and inform you if that is the case.
               </ListItem>
               <ListItem>
-                You may also have the right to withdraw your consent to our processing of your personal information, where our processing is solely based on your consent.
+                You may also have the right to withdraw your consent to our processing of your personal information,
+                where our processing is solely based on your consent.
               </ListItem>
               <ListItem>
-                If you wish to exercise one of these rights, please contact us using the contact details in the “About us” section above.
+                If you wish to exercise one of these rights, please contact us using the contact details in the “About
+                us” section above.
               </ListItem>
               <ListItem>
-                You may also have the right to lodge a complaint to your local data protection authority. If you are based in the European Union, information about how to contact your local data protection authority is available here. If you are based in the UK, information about how to contact your local data protection authority is available here.
+                You may also have the right to lodge a complaint to your local data protection authority. If you are
+                based in the European Union, information about how to contact your local data protection authority is
+                available here. If you are based in the UK, information about how to contact your local data protection
+                authority is available here.
               </ListItem>
             </NumberedList>
           </ListItem>
@@ -377,14 +457,18 @@ export default function Privacy() {
             <NumberedList>
               <ListItem>
                 Any updates we may make to our Privacy Policy will be posted on this page. Please check back frequently
-                to see any updates or changes to our Privacy Policy. If you do not agree to these updates or changes, you should stop using the Services and notify us that you would like us to delete your personal information.
+                to see any updates or changes to our Privacy Policy. If you do not agree to these updates or changes,
+                you should stop using the Services and notify us that you would like us to delete your personal
+                information.
               </ListItem>
             </NumberedList>
           </ListItem>
           <ListItem title='NOTICE TO YOU'>
             <NumberedList>
               <ListItem>
-                If we need to provide you with information about something, whether for legal, marketing or other business-related purposes, we will select what we believe is the best way to get in contact with you. We will usually do this through email or by placing a notice on the Website.
+                If we need to provide you with information about something, whether for legal, marketing or other
+                business-related purposes, we will select what we believe is the best way to get in contact with you. We
+                will usually do this through email or by placing a notice on the Website.
               </ListItem>
             </NumberedList>
           </ListItem>
