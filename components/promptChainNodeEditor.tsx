@@ -8,6 +8,8 @@ import { Allotment } from 'allotment'
 import { SingleTabHeader } from './tabSelector'
 import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
+import { LoadPendingVersion } from './promptView'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function PromptChainNodeEditor({
   node,
@@ -61,6 +63,14 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
+  const [currentVersion, setCurrentVersion] = useInitialState(activeVersion, (a, b) => a.id === b.id)
+  const updateVersion = (version: PromptVersion) => {
+    setCurrentVersion(version)
+    setModifiedVersion(version)
+  }
+
+  const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, selectVersion, currentVersion)
+
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
   const minHeight = promptHeight + 16
@@ -92,7 +102,8 @@ function PromptEditor({
         <div className='h-full px-4 pt-4 bg-white'>
           <PromptPanel
             version={activeVersion}
-            setModifiedVersion={setModifiedVersion}
+            setModifiedVersion={updateVersion}
+            loadPendingVersion={loadPendingVersion}
             setPreferredHeight={setPromptHeight}
           />
         </div>

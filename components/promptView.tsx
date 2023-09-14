@@ -15,7 +15,7 @@ import VersionTimeline from './versionTimeline'
 import TestDataPane from './testDataPane'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 
-const LoadPendingVersion = (
+export const LoadPendingVersion = (
   versions: PromptVersion[],
   activeVersion: PromptVersion,
   setActiveVersion: (version: PromptVersion) => void,
