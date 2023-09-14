@@ -1,4 +1,4 @@
-import { ChainItem, PromptChainItem, PromptVersion } from '@/types'
+import { ActivePrompt, ChainItem, PromptChainItem, PromptVersion } from '@/types'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import VersionTimeline from './versionTimeline'
@@ -29,27 +29,59 @@ export default function PromptChainNodeEditor({
   const loadedPrompt = promptCache.promptForItem(node)
   const activeVersion = promptCache.versionForItem(node)
 
+  return loadedPrompt && activeVersion ? (
+    <PromptEditor
+      prompt={loadedPrompt}
+      activeVersion={activeVersion}
+      remainingItems={items.slice(0, index)}
+      includeContext={!!node.includeContext}
+      toggleIncludeContext={toggleIncludeContext}
+      selectVersion={selectVersion}
+      setModifiedVersion={setModifiedVersion}
+    />
+  ) : (
+    <div className='grow' />
+  )
+}
+
+function PromptEditor({
+  prompt,
+  activeVersion,
+  remainingItems,
+  includeContext,
+  toggleIncludeContext,
+  selectVersion,
+  setModifiedVersion,
+}: {
+  prompt: ActivePrompt
+  activeVersion: PromptVersion
+  remainingItems: ChainItem[]
+  includeContext: boolean
+  toggleIncludeContext: (includeContext: boolean) => void
+  selectVersion: (version: PromptVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
+}) {
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
   const minHeight = promptHeight + 16
-  return loadedPrompt && activeVersion ? (
+  return (
     <Allotment vertical>
       <Allotment.Pane minSize={minVersionHeight}>
         <div className='flex flex-col h-full'>
           <div className='flex-1 overflow-y-auto'>
             <VersionTimeline
-              activeItem={loadedPrompt}
-              versions={loadedPrompt.versions.filter(version => version.didRun)}
+              activeItem={prompt}
+              versions={prompt.versions.filter(version => version.didRun)}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
               tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
             />
           </div>
-          {items.slice(0, index).some(IsPromptChainItem) && (
+          {remainingItems.some(IsPromptChainItem) && (
             <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
               <Checkbox
                 label='Include previous chain context into prompt'
-                checked={!!node.includeContext}
+                checked={includeContext}
                 setChecked={toggleIncludeContext}
               />
             </div>
@@ -66,7 +98,5 @@ export default function PromptChainNodeEditor({
         </div>
       </Allotment.Pane>
     </Allotment>
-  ) : (
-    <div className='grow' />
   )
 }
