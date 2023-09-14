@@ -38,7 +38,7 @@ export type GlobalPopupProps = {
 export function useGlobalPopupProvider<PropsType>(): readonly [
   GlobalPopupContextType<PropsType>,
   GlobalPopupProps,
-  PropsType | undefined
+  PropsType | undefined,
 ] {
   const [popupRender, setPopupRender] = useState<GlobalPopupRender<PropsType>>()
   const [popupProps, setPopupProps] = useState<PropsType>()
