@@ -126,17 +126,6 @@ async function saveVersionForUser(
   const isCompatible = currentVersionID && isVersionDataCompatible(currentVersion, prompts, config, items)
   const canOverwrite = currentVersionID && (isCompatible || !currentVersion.didRun)
 
-  if (canOverwrite && !isCompatible) {
-    const previousVersion = currentVersion.previousVersionID
-      ? await getKeyedEntity(Entity.VERSION, currentVersion.previousVersionID)
-      : undefined
-    if (previousVersion && isVersionDataCompatible(previousVersion, prompts, config, items)) {
-      await datastore.delete(buildKey(Entity.VERSION, currentVersionID))
-      currentVersionID = currentVersion.previousVersionID
-      currentVersion = previousVersion
-    }
-  }
-
   const versionID = canOverwrite ? currentVersionID : undefined
   const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
   const didRun = canOverwrite ? currentVersion.didRun : false
