@@ -106,7 +106,7 @@ export default function PromptView({
               <div className='h-full'>
                 <VersionTimeline
                   activeItem={prompt}
-                  versions={prompt.versions}
+                  versions={prompt.versions.filter(version => version.runs.length > 0)}
                   activeVersion={activeVersion}
                   setActiveVersion={setActiveVersion}
                   tabSelector={tabSelector}

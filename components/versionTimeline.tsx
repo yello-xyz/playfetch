@@ -17,8 +17,6 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   setActiveVersion: (version: Version) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const timelineVersions = versions.filter(version => version.runs.length > 0)
-
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
@@ -36,20 +34,20 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     setActiveVersion(version)
   }
 
-  const filteredVersions = timelineVersions.filter(BuildVersionFilter(filters))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters))
   const previousPromptVersion = (version: Version) => {
-    const previousVersion = timelineVersions.find(v => v.id === version.previousID)
+    const previousVersion = versions.find(v => v.id === version.previousID)
     return previousVersion && IsPromptVersion(previousVersion) ? previousVersion : undefined
   }
 
   return (
     <div className='relative flex h-full'>
-      {timelineVersions.length > 0 ? (
+      {versions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
             users={activeItem.users}
             labelColors={labelColors}
-            versions={timelineVersions}
+            versions={versions}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}
@@ -62,7 +60,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 isLast={index === filteredVersions.length - 1}
                 labelColors={labelColors}
                 version={version}
-                index={timelineVersions.findIndex(v => v.id === version.id)}
+                index={versions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
                 compareVersion={previousPromptVersion(version)}
                 activeItem={activeItem}
