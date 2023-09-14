@@ -1,11 +1,8 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
-
-export const ShouldShowVersions = <Version extends PromptVersion | ChainVersion>(versions: Version[]) =>
-  versions.length > 1 || versions[0].runs.length > 0 || (!IsPromptVersion(versions[0]) && versions[0].items.length > 0)
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -20,6 +17,8 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   setActiveVersion: (version: Version) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
+  const timelineVersions = versions.filter(version => version.runs.length > 0)
+
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
@@ -37,20 +36,20 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     setActiveVersion(version)
   }
 
-  const filteredVersions = versions.filter(BuildVersionFilter(filters))
+  const filteredVersions = timelineVersions.filter(BuildVersionFilter(filters))
   const previousPromptVersion = (version: Version) => {
-    const previousVersion = versions.find(v => v.id === version.previousID)
+    const previousVersion = timelineVersions.find(v => v.id === version.previousID)
     return previousVersion && IsPromptVersion(previousVersion) ? previousVersion : undefined
   }
 
   return (
     <div className='relative flex h-full'>
-      {ShouldShowVersions(versions) ? (
+      {timelineVersions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
             users={activeItem.users}
             labelColors={labelColors}
-            versions={versions}
+            versions={timelineVersions}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}
@@ -63,7 +62,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 isLast={index === filteredVersions.length - 1}
                 labelColors={labelColors}
                 version={version}
-                index={versions.findIndex(v => v.id === version.id)}
+                index={timelineVersions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
                 compareVersion={previousPromptVersion(version)}
                 activeItem={activeItem}

@@ -18,7 +18,7 @@ import { Allotment } from 'allotment'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import VersionTimeline, { ShouldShowVersions } from './versionTimeline'
+import VersionTimeline from './versionTimeline'
 import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
@@ -196,8 +196,9 @@ export default function ChainView({
   }
 
   const [showVersions, setShowVersions] = useState(false)
-  const shouldShowVersions = ShouldShowVersions(chain.versions)
-  if (showVersions && !shouldShowVersions) {
+  // TODO should we also show versions when explicitly saved but not run?
+  const canShowVersions = chain.versions.filter(version => version.runs.length > 0).length > 0
+  if (showVersions && !canShowVersions) {
     setShowVersions(false)
   }
 
@@ -235,7 +236,7 @@ export default function ChainView({
           prompts={project.prompts}
           addPrompt={addPrompt}
           showVersions={showVersions}
-          setShowVersions={shouldShowVersions ? setShowVersions : undefined}
+          setShowVersions={canShowVersions ? setShowVersions : undefined}
         />
       </Allotment.Pane>
       {!showVersions && (
