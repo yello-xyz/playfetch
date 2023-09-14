@@ -25,6 +25,7 @@ export default function PromptPanel({
   testConfig,
   setTestConfig,
   showTestMode,
+  loadPendingVersion,
   setPreferredHeight,
 }: {
   version: PromptVersion
@@ -34,6 +35,7 @@ export default function PromptPanel({
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
   showTestMode?: boolean
+  loadPendingVersion?: () => void
   setPreferredHeight: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
@@ -73,6 +75,7 @@ export default function PromptPanel({
     contentHeight +
     (isProviderAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
+    (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
   useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
@@ -89,6 +92,7 @@ export default function PromptPanel({
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
+        {loadPendingVersion && <LoadPendingVersionBanner loadPendingVersion={loadPendingVersion} />}
         {!runPrompt && (
           <div className={`flex justify-between items-center font-medium text-gray-600`}>
             Model <ModelSelector model={config.model} setModel={updateModel} />
@@ -149,6 +153,21 @@ function ProviderWarning() {
         className='px-3 py-1.5 text-gray-700 bg-orange-100 hover:bg-orange-200 rounded-md cursor-pointer whitespace-nowrap'
         onClick={() => router.push(ClientRoute.Settings)}>
         Add API Key
+      </div>
+    </Banner>
+  )
+}
+
+function LoadPendingVersionBanner({ loadPendingVersion }: { loadPendingVersion: () => void }) {
+  return (
+    <Banner className='flex items-center justify-between gap-1 border-blue-100 bg-blue-25'>
+      <div className='flex flex-col'>
+        <span className='max-w-[384px]'>You have pending changes in a prompt that has not been run.</span>
+      </div>
+      <div
+        className='px-3 py-1.5 text-gray-700 bg-blue-100 hover:bg-blue-200 rounded-md cursor-pointer whitespace-nowrap'
+        onClick={loadPendingVersion}>
+        Load
       </div>
     </Banner>
   )

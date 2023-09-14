@@ -13,6 +13,19 @@ import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import PromptPanel from './promptPanel'
 import VersionTimeline from './versionTimeline'
 import TestDataPane from './testDataPane'
+import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
+
+const LoadPendingVersion = (
+  versions: PromptVersion[],
+  activeVersion: PromptVersion,
+  setActiveVersion: (version: PromptVersion) => void,
+  modifiedVersion: PromptVersion
+) => {
+  const pendingVersion = versions.findLast(version => version.runs.length === 0)
+  const canLoadPendingVersion =
+    !!pendingVersion && activeVersion.id !== pendingVersion.id && PromptVersionsAreEqual(activeVersion, modifiedVersion)
+  return canLoadPendingVersion ? () => setActiveVersion(pendingVersion) : undefined
+}
 
 export default function PromptView({
   prompt,
@@ -74,6 +87,8 @@ export default function PromptView({
     setActiveTab('Prompt versions')
   }
 
+  const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, setActiveVersion, currentVersion)
+
   const minWidth = 280
   const minTopPaneHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -125,6 +140,7 @@ export default function PromptView({
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
                 showTestMode={activeTab === 'Test data'}
+                loadPendingVersion={loadPendingVersion}
                 setPreferredHeight={setPromptHeight}
               />
             </div>
