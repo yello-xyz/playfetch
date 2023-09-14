@@ -14,7 +14,6 @@ export async function migrateLogs(postMerge: boolean) {
       continuationID = continuationID ?? continuationIDs[0]
       continuationIDs.forEach(id => (mapping[id] = continuationID!))
     }
-    console.log(continuationIDs, '->', continuationID)
     await getDatastore().save(
       toLogData(
         logData.projectID,

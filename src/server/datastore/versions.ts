@@ -123,7 +123,6 @@ async function saveVersionForUser(
   currentVersionID?: number,
   previousVersionID?: number
 ) {
-  console.log(currentVersionID, previousVersionID)
   const datastore = getDatastore()
 
   let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
@@ -246,13 +245,12 @@ const toVersionData = (
   excludeFromIndexes: ['prompts', 'config', 'items', 'labels'],
 })
 
-export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
-  const versionIDsWithRuns = new Set(runs.map(run => run.versionID))
+export const toUserVersions = (userID: number, versionsData: any[], runs: any[], comments: any[]) => {
+  const versions = versionsData.map(version => toVersion(version, runs, comments)).reverse()
+  const versionsWithRuns = versions.filter(version => version.runs.length > 0)
+  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && version.runs.length === 0)
 
-  return versions
-    .filter(version => version.userID === userID || versionIDsWithRuns.has(version.id))
-    .map(version => toVersion(version, runs, comments))
-    .reverse()
+  return [...versionsWithRuns, ...userVersionsWithoutRuns]
 }
 
 const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
