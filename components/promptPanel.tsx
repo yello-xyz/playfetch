@@ -144,30 +144,41 @@ function ProviderWarning() {
   const router = useRouter()
 
   return (
-    <Banner className='flex items-center justify-between gap-1 border-orange-100 bg-orange-25'>
-      <div className='flex flex-col'>
-        <span className='font-medium text-gray-600'>Missing API Key</span>
-        <span className='max-w-[384px]'>An API key is required to use certain models.</span>
-      </div>
-      <div
-        className='px-3 py-1.5 text-gray-700 bg-orange-100 hover:bg-orange-200 rounded-md cursor-pointer whitespace-nowrap'
-        onClick={() => router.push(ClientRoute.Settings)}>
-        Add API Key
-      </div>
-    </Banner>
+    <ButtonBanner type='warning' buttonTitle='Add API Key' onClick={() => router.push(ClientRoute.Settings)}>
+      <span className='font-medium text-gray-600'>Missing API Key</span>
+      <span>An API key is required to use certain models.</span>
+    </ButtonBanner>
   )
 }
 
 function LoadPendingVersionBanner({ loadPendingVersion }: { loadPendingVersion: () => void }) {
   return (
-    <Banner className='flex items-center justify-between gap-1 border-blue-100 bg-blue-25'>
-      <div className='flex flex-col'>
-        <span className='max-w-[384px]'>You have pending changes in a prompt that has not been run.</span>
-      </div>
+    <ButtonBanner type='info' buttonTitle='Load' onClick={loadPendingVersion}>
+      You have pending changes in a prompt that has not run.
+    </ButtonBanner>
+  )
+}
+
+function ButtonBanner({
+  type,
+  buttonTitle,
+  onClick,
+  children,
+}: {
+  type: 'info' | 'warning'
+  buttonTitle: string
+  onClick: () => void
+  children: ReactNode
+}) {
+  const bannerColor = type === 'info' ? 'border-blue-100 bg-blue-25' : 'border-orange-100 bg-orange-25'
+  const buttonColor = type === 'info' ? 'bg-blue-100 hover:bg-blue-200' : 'bg-orange-100 hover:bg-orange-200'
+  return (
+    <Banner className={`flex items-center justify-between gap-1 ${bannerColor}`}>
+      <div className='flex flex-col'>{children}</div>
       <div
-        className='px-3 py-1.5 text-gray-700 bg-blue-100 hover:bg-blue-200 rounded-md cursor-pointer whitespace-nowrap'
-        onClick={loadPendingVersion}>
-        Load
+        className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
+        onClick={onClick}>
+        {buttonTitle}
       </div>
     </Banner>
   )
