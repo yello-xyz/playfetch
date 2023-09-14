@@ -120,7 +120,7 @@ export default function PromptPanel({
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
-          runTitle={version.runs.length ? 'Run again' : 'Run'}
+          runTitle={version.runs.length > 0 ? 'Run again' : 'Run'}
           variables={ExtractPromptVariables(prompts, config)}
           inputValues={inputValues}
           languageModel={config.model}

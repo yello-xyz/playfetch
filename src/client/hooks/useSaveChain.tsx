@@ -20,7 +20,7 @@ export default function useSaveChain(
       setActiveVersion(equalPreviousVersion)
       return equalPreviousVersion.id
     }
-    const currentVersion = activeChain.versions.findLast(version => version.runs.length === 0) ?? activeVersion
+    const currentVersion = activeChain.versions.findLast(version => !version.didRun) ?? activeVersion
     const versionID = await api.updateChain(activeChain.id, items, currentVersion.id, activeVersion.id)
     await onSaved?.(versionID)
     return versionID

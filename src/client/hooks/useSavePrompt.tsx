@@ -26,7 +26,7 @@ export default function useSavePrompt(
       setActiveVersion(equalPreviousVersion)
       return equalPreviousVersion.id
     }
-    const currentVersion = activePrompt.versions.findLast(version => version.runs.length === 0) ?? activeVersion
+    const currentVersion = activePrompt.versions.findLast(version => !version.didRun) ?? activeVersion
     const versionID = await api.updatePrompt(
       activePrompt.id,
       modifiedVersion.prompts,

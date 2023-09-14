@@ -102,6 +102,7 @@ type Version = {
   config?: PromptConfig
   items?: ChainItemWithInputs[]
   labels: string[]
+  didRun: boolean
   runs: Run[]
   comments: Comment[]
 }

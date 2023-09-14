@@ -197,7 +197,7 @@ export default function ChainView({
 
   const [showVersions, setShowVersions] = useState(false)
   // TODO should we also show versions when explicitly saved but not run?
-  const canShowVersions = chain.versions.filter(version => version.runs.length > 0).length > 0
+  const canShowVersions = chain.versions.filter(version => version.didRun).length > 0
   if (showVersions && !canShowVersions) {
     setShowVersions(false)
   }

@@ -21,7 +21,7 @@ const LoadPendingVersion = (
   setActiveVersion: (version: PromptVersion) => void,
   modifiedVersion: PromptVersion
 ) => {
-  const pendingVersion = versions.findLast(version => version.runs.length === 0)
+  const pendingVersion = versions.findLast(version => !version.didRun)
   const canLoadPendingVersion =
     !!pendingVersion && activeVersion.id !== pendingVersion.id && PromptVersionsAreEqual(activeVersion, modifiedVersion)
   return canLoadPendingVersion ? () => setActiveVersion(pendingVersion) : undefined
@@ -106,7 +106,7 @@ export default function PromptView({
               <div className='h-full'>
                 <VersionTimeline
                   activeItem={prompt}
-                  versions={prompt.versions.filter(version => version.runs.length > 0)}
+                  versions={prompt.versions.filter(version => version.didRun)}
                   activeVersion={activeVersion}
                   setActiveVersion={setActiveVersion}
                   tabSelector={tabSelector}

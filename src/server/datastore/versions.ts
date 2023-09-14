@@ -245,12 +245,11 @@ const toVersionData = (
   excludeFromIndexes: ['prompts', 'config', 'items', 'labels'],
 })
 
-export const toUserVersions = (userID: number, versionsData: any[], runs: any[], comments: any[]) => {
-  const versions = versionsData.map(version => toVersion(version, runs, comments)).reverse()
-  const versionsWithRuns = versions.filter(version => version.runs.length > 0)
-  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && version.runs.length === 0)
+export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
+  const versionsWithRuns = versions.filter(version => version.didRun)
+  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && !version.didRun)
 
-  return [...versionsWithRuns, ...userVersionsWithoutRuns]
+  return [...userVersionsWithoutRuns, ...versionsWithRuns].map(version => toVersion(version, runs, comments)).reverse()
 }
 
 const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
@@ -263,6 +262,7 @@ const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | 
   config: data.config ? JSON.parse(data.config) : null,
   items: data.items ? JSON.parse(data.items) : null,
   labels: JSON.parse(data.labels),
+  didRun: data.didRun,
   runs: runs
     .filter(run => run.versionID === getID(data))
     .map(toRun)
