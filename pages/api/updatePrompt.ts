@@ -12,7 +12,8 @@ async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>, u
     promptID,
     req.body.prompts,
     req.body.config,
-    req.body.versionID
+    req.body.versionID,
+    req.body.previousVersionID
   )
   res.json(versionID)
 }

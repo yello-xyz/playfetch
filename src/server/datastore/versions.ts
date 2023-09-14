@@ -96,20 +96,22 @@ export async function savePromptVersionForUser(
   promptID: number,
   prompts: Prompts = { main: '' },
   config: PromptConfig = DefaultConfig,
-  currentVersionID?: number
+  currentVersionID?: number,
+  previousVersionID?: number
 ) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
-  return saveVersionForUser(userID, promptData, prompts, config, null, currentVersionID)
+  return saveVersionForUser(userID, promptData, prompts, config, null, currentVersionID, previousVersionID)
 }
 
 export async function saveChainVersionForUser(
   userID: number,
   chainID: number,
   items: ChainItemWithInputs[] = [],
-  currentVersionID?: number
+  currentVersionID?: number,
+  previousVersionID?: number
 ) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
-  return saveVersionForUser(userID, chainData, null, null, items, currentVersionID)
+  return saveVersionForUser(userID, chainData, null, null, items, currentVersionID, previousVersionID)
 }
 
 async function saveVersionForUser(
@@ -118,8 +120,10 @@ async function saveVersionForUser(
   prompts: Prompts | null,
   config: PromptConfig | null,
   items: ChainItemWithInputs[] | null,
-  currentVersionID?: number
+  currentVersionID?: number,
+  previousVersionID?: number
 ) {
+  console.log(currentVersionID, previousVersionID)
   const datastore = getDatastore()
 
   let currentVersion = currentVersionID ? await getKeyedEntity(Entity.VERSION, currentVersionID) : undefined
@@ -127,7 +131,9 @@ async function saveVersionForUser(
   const canOverwrite = currentVersionID && (isCompatible || !currentVersion.didRun)
 
   const versionID = canOverwrite ? currentVersionID : undefined
-  const previousVersionID = canOverwrite ? currentVersion.previousVersionID : currentVersionID
+  if (canOverwrite && previousVersionID === currentVersionID) {
+    previousVersionID = currentVersion.previousVersionID
+  }
   const didRun = canOverwrite ? currentVersion.didRun : false
   const labels = canOverwrite ? JSON.parse(currentVersion.labels) : []
 
