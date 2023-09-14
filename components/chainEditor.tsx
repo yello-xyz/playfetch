@@ -69,8 +69,8 @@ export default function ChainEditor({
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
-      <div className='flex flex-col items-center w-full p-8 pr-0 overflow-y-auto'>
-        <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
+      <div className='flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
+        <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
         {nodes.map((node, index) => (
           <ChainNodeBox
             key={index}
@@ -92,7 +92,7 @@ export default function ChainEditor({
             prompts={prompts}
           />
         ))}
-        <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
+        <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
       </div>
     </div>
   )
