@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ReactNode } from 'react'
 
 export default function Privacy() {
@@ -439,8 +440,18 @@ export default function Privacy() {
               <ListItem>
                 You may also have the right to lodge a complaint to your local data protection authority. If you are
                 based in the European Union, information about how to contact your local data protection authority is
-                available here. If you are based in the UK, information about how to contact your local data protection
-                authority is available here.
+                available{' '}
+                <Link
+                  href='https://ec.europa.eu/justice/data-protection/bodies/authorities/index_en.htm'
+                  target='_blank'>
+                  here
+                </Link>
+                . If you are based in the UK, information about how to contact your local data protection authority is
+                available{' '}
+                <Link href='https://ico.org.uk/global/contact-us/' target='_blank'>
+                  here
+                </Link>
+                .
               </ListItem>
             </NumberedList>
           </ListItem>
