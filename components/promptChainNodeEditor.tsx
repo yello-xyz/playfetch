@@ -10,6 +10,7 @@ import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import { LoadPendingVersion } from './promptView'
 import useInitialState from '@/src/client/hooks/useInitialState'
+import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 
 export default function PromptChainNodeEditor({
   node,
@@ -63,12 +64,7 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [currentVersion, setCurrentVersion] = useInitialState(activeVersion, (a, b) => a.id === b.id)
-  const updateVersion = (version: PromptVersion) => {
-    setCurrentVersion(version)
-    setModifiedVersion(version)
-  }
-
+  const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
   const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, selectVersion, currentVersion)
 
   const minVersionHeight = 120

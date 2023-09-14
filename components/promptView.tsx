@@ -14,6 +14,7 @@ import PromptPanel from './promptPanel'
 import VersionTimeline from './versionTimeline'
 import TestDataPane from './testDataPane'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
+import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 
 export const LoadPendingVersion = (
   versions: PromptVersion[],
@@ -50,12 +51,6 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [currentVersion, setCurrentVersion] = useInitialState(activeVersion, (a, b) => a.id === b.id)
-  const updateVersion = (version: PromptVersion) => {
-    setCurrentVersion(version)
-    setModifiedVersion(version)
-  }
-
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
   const [runVersion, partialRuns, isRunning] = useRunVersion()
@@ -71,6 +66,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
+  const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
