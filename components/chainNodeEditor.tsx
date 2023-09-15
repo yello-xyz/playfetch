@@ -11,7 +11,6 @@ import { useState } from 'react'
 import DropdownMenu from './dropdownMenu'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import { PromptCache } from './chainView'
-import PromptInput from './promptInput'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
@@ -19,10 +18,10 @@ import TestDataPane from './testDataPane'
 import RunButtons from './runButtons'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import codeIcon from '@/public/code.svg'
+import CodeChainNodeEditor from './codeChainNodeEditor'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -165,22 +164,12 @@ export default function ChainNodeEditor({
           />
         )}
         {IsCodeChainItem(activeNode) && (
-          <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <SingleTabHeader
-              label={NameForCodeChainItem(activeNode)}
-              icon={codeIcon}
-              onUpdateLabel={updateCodeBlockName}
-            />
-            <div className='p-4'>
-              <PromptInput
-                key={activeItemIndex}
-                placeholder={`'Hello World!'`}
-                value={activeNode.code}
-                setValue={updateCode}
-                preformatted
-              />
-            </div>
-          </div>
+          <CodeChainNodeEditor
+            index={activeItemIndex}
+            item={activeNode}
+            updateCode={updateCode}
+            updateName={updateCodeBlockName}
+          />
         )}
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
