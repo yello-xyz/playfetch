@@ -119,9 +119,6 @@ export default function ChainNodeEditor({
     setItems(updatedItems(newItems, activeItemIndex, { ...newItems[activeItemIndex], output }))
   }
 
-  const toggleIncludeContext = (includeContext: boolean) =>
-    updateActiveItem({ ...items[activeItemIndex], includeContext })
-
   const updateActiveItem = (item: ChainItem) => setItems(updatedItems(items, activeItemIndex, item))
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
@@ -150,10 +147,9 @@ export default function ChainNodeEditor({
         )}
         {IsPromptChainItem(activeNode) && (
           <PromptChainNodeEditor
-            node={activeNode}
-            index={activeItemIndex}
-            items={items}
-            toggleIncludeContext={toggleIncludeContext}
+            item={activeNode}
+            updateItem={updateActiveItem}
+            canIncludeContext={items.slice(0, activeItemIndex).some(IsPromptChainItem)}
             promptCache={promptCache}
             selectVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}

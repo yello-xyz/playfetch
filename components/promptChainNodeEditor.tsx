@@ -1,44 +1,41 @@
-import { ActivePrompt, ChainItem, PromptChainItem, PromptVersion } from '@/types'
+import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
-import { IsPromptChainItem } from './chainNode'
 import { Allotment } from 'allotment'
 import { SingleTabHeader } from './tabSelector'
 import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import { LoadPendingVersion } from './promptView'
-import useInitialState from '@/src/client/hooks/useInitialState'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 
 export default function PromptChainNodeEditor({
-  node,
-  index,
-  items,
-  toggleIncludeContext,
+  item,
+  updateItem,
+  canIncludeContext,
   promptCache,
   selectVersion,
   setModifiedVersion,
 }: {
-  node: PromptChainItem
-  index: number
-  items: ChainItem[]
-  toggleIncludeContext: (includeContext: boolean) => void
+  item: PromptChainItem
+  updateItem: (item: PromptChainItem) => void
+  canIncludeContext: boolean
   promptCache: PromptCache
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const loadedPrompt = promptCache.promptForItem(node)
-  const activeVersion = promptCache.versionForItem(node)
+  const loadedPrompt = promptCache.promptForItem(item)
+  const activeVersion = promptCache.versionForItem(item)
+  const setIncludeContext = (includeContext: boolean) => updateItem({ ...item, includeContext })
 
   return loadedPrompt && activeVersion ? (
     <PromptEditor
       prompt={loadedPrompt}
       activeVersion={activeVersion}
-      remainingItems={items.slice(0, index)}
-      includeContext={!!node.includeContext}
-      toggleIncludeContext={toggleIncludeContext}
+      canIncludeContext={canIncludeContext}
+      includeContext={!!item.includeContext}
+      setIncludeContext={setIncludeContext}
       selectVersion={selectVersion}
       setModifiedVersion={setModifiedVersion}
     />
@@ -50,17 +47,17 @@ export default function PromptChainNodeEditor({
 function PromptEditor({
   prompt,
   activeVersion,
-  remainingItems,
+  canIncludeContext,
   includeContext,
-  toggleIncludeContext,
+  setIncludeContext,
   selectVersion,
   setModifiedVersion,
 }: {
   prompt: ActivePrompt
   activeVersion: PromptVersion
-  remainingItems: ChainItem[]
+  canIncludeContext: boolean
   includeContext: boolean
-  toggleIncludeContext: (includeContext: boolean) => void
+  setIncludeContext: (includeContext: boolean) => void
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
@@ -83,12 +80,12 @@ function PromptEditor({
               tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
             />
           </div>
-          {remainingItems.some(IsPromptChainItem) && (
+          {canIncludeContext && (
             <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
               <Checkbox
                 label='Include previous chain context into prompt'
                 checked={includeContext}
-                setChecked={toggleIncludeContext}
+                setChecked={setIncludeContext}
               />
             </div>
           )}
