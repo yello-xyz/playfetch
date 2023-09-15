@@ -2,30 +2,35 @@
 **Please help to keep this README.md updated if you find anything missing or inaccurate (but never commit any API keys or secrets to source control). Thank you!** 
 
 *All instructions assume you are using Terminal on macOS.*
-## Get Homebrew
-Check if you have Homebrew installed:
+## Install node and npm
+
+The easiest way to install the latest version of **node** and **npm** is to run the [latest installer](https://nodejs.org/en/download). You can then skip the **Homebrew** instructions below.
+
+## Install node and npm using Homebrew
+Check if you have **Homebrew** installed:
 
 `brew -v`
 
 If not, install Homebrew:
 
 `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-## Install node and npm
-Check if you have **node** installed:
+
+Check if you have **node** installed (you need v18 or later):
 
 `node -v`
 
-If not, install node:
-
-`brew install node`
+If not: run either `brew install node` or `brew upgrade node`
 
 Check if you have **npm** installed:
 
 `npm -v`
 
-If not, install node:
+If not: `brew install npm`
 
-`brew install npm`
+You may need some additional configuration e.g. adding the line below to `~/.zshrc`:
+
+`export PATH="/opt/homebrew/opt/node@18/bin:$PATH"`
+
 ## Clone the repository
 Either [Connect to GitHub with SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) and run:
 
@@ -41,6 +46,12 @@ In order to run the app locally, you will need to add some additional variables 
 `NEXTAUTH_URL=http://localhost:3000`
 
 `NEXTAUTH_SECRET=` *[random string of at least 32 characters]*
+
+`GOOGLE_ANALYTICS_API_SECRET=` *[see "Google Analytics API" in in the 1Password Engineering vault]*
+
+`GOOGLE_ANALYTICS_MEASUREMENT_ID=G-7EW4BEVHT1`
+
+`NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
 
 - **To use Email authentication:**
 

@@ -41,7 +41,12 @@ export default function PopupMenu({
 }
 
 export function PopupContent({ children, className }: { children: any; className?: string }) {
-  return <div className={`${className} bg-white border border-gray-200 rounded-lg gap-0.5 select-none`}>{children}</div>
+  return (
+    <div
+      className={`${className} bg-white border border-gray-200 rounded-lg gap-0.5 select-none max-h-screen overflow-y-auto`}>
+      {children}
+    </div>
+  )
 }
 
 export function PopupMenuItem({

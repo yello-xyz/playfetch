@@ -6,7 +6,7 @@ import feedbackIcon from '@/public/feedback.svg'
 
 export default function Sidebar({ children }: { children: ReactNode }) {
   return (
-    <div className='flex flex-col gap-6 px-2 py-4 overflow-y-auto border-r border-gray-200'>
+    <div className='flex flex-col gap-4 px-2 pt-2 pb-4 overflow-y-auto border-r border-gray-200'>
       {children}
       <FeedbackSection />
     </div>

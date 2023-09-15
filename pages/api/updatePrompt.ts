@@ -1,15 +1,19 @@
+import logUserRequest, { CreateEvent } from '@/src/server/analytics'
 import { savePromptVersionForUser } from '@/src/server/datastore/versions'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function updatePrompt(req: NextApiRequest, res: NextApiResponse<number>, user: User) {
+  const promptID = req.body.promptID
+  logUserRequest(req, res, user.id, CreateEvent('version', promptID))
   const versionID = await savePromptVersionForUser(
     user.id,
-    req.body.promptID,
+    promptID,
     req.body.prompts,
     req.body.config,
-    req.body.versionID
+    req.body.versionID,
+    req.body.previousVersionID
   )
   res.json(versionID)
 }

@@ -20,7 +20,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
   const [email, setEmail] = useState('')
 
   return (
-    <main className={`bg-gray-25 h-screen flex flex-col items-center justify-center gap-6 p-10`}>
+    <main className='flex flex-col items-center justify-center h-screen gap-6 p-10 bg-gray-25'>
       <div className='flex flex-col items-center gap-1.5'>
         <span className='text-2xl font-semibold'>Sign in to Play/Fetch</span>
         <span className='text-sm text-center text-gray-400'>

@@ -10,7 +10,7 @@ import {
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { savePromptVersionForUser, toVersion } from './versions'
+import { savePromptVersionForUser, toUserVersions } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
@@ -59,7 +59,7 @@ export async function getPromptForUser(
 
   return {
     prompt: toPrompt(promptData),
-    versions: versions.map(version => toVersion(version, runs, comments) as RawPromptVersion).reverse(),
+    versions: toUserVersions(userID, versions, runs, comments) as RawPromptVersion[],
     inputValues,
   }
 }

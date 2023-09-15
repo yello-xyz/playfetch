@@ -14,7 +14,7 @@ import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/type
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
-import { saveChainVersionForUser, toVersion } from './versions'
+import { saveChainVersionForUser, toUserVersions } from './versions'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -80,7 +80,7 @@ export async function getChainForUser(
 
   return {
     chain: toChain(chainData),
-    versions: versions.map(version => toVersion(version, runs, comments) as RawChainVersion).reverse(),
+    versions: toUserVersions(userID, versions, runs, comments) as RawChainVersion[],
     inputValues,
   }
 }

@@ -109,7 +109,7 @@ const api = {
   getPrompt: function (promptID: number, activeProject: ActiveProject): Promise<ActivePrompt> {
     return post(this.getPrompt, { promptID }).then(BuildActivePrompt(activeProject))
   },
-  addPrompt: function (projectID: number): Promise<number> {
+  addPrompt: function (projectID: number): Promise<{ promptID: number; versionID: number }> {
     return post(this.addPrompt, { projectID })
   },
   duplicatePrompt: function (promptID: number, targetProjectID?: number): Promise<number> {
@@ -119,9 +119,10 @@ const api = {
     promptID: number,
     prompts: Prompts,
     config: PromptConfig,
-    versionID: number
+    versionID: number,
+    previousVersionID: number
   ): Promise<number> {
-    return post(this.updatePrompt, { promptID, prompts, config, versionID })
+    return post(this.updatePrompt, { promptID, prompts, config, versionID, previousVersionID })
   },
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })
@@ -141,8 +142,13 @@ const api = {
   duplicateChain: function (chainID: number): Promise<number> {
     return post(this.duplicateChain, { chainID })
   },
-  updateChain: function (chainID: number, items: ChainItemWithInputs[], versionID: number): Promise<number> {
-    return post(this.updateChain, { chainID, items, versionID })
+  updateChain: function (
+    chainID: number,
+    items: ChainItemWithInputs[],
+    versionID: number,
+    previousVersionID: number
+  ): Promise<number> {
+    return post(this.updateChain, { chainID, items, versionID, previousVersionID })
   },
   renameChain: function (chainID: number, name: string) {
     return post(this.renameChain, { chainID, name })
@@ -203,9 +209,10 @@ const api = {
     text: string,
     quote?: string,
     runID?: number,
+    itemIndex?: number,
     startIndex?: number
   ): Promise<Comment> {
-    return post(this.addComment, { versionID, text, quote, runID, startIndex })
+    return post(this.addComment, { versionID, text, quote, runID, itemIndex, startIndex })
   },
   toggleVersionLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
     return post(this.toggleVersionLabel, { versionID, projectID, label, checked })

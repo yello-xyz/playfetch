@@ -10,7 +10,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import { User } from '@/types'
 
-function withErrorRoute(handler: NextApiHandler): NextApiHandler {
+export function withErrorRoute(handler: NextApiHandler): NextApiHandler {
   return async function (req: NextApiRequest, res: NextApiResponse) {
     try {
       return await handler(req, res)
@@ -25,7 +25,7 @@ type LoggedInAPIHandler = (req: NextApiRequest, res: NextApiResponse, user: User
 
 export function withLoggedInUserRoute(handler: LoggedInAPIHandler): NextApiHandler {
   return withErrorRoute(async (req, res) => {
-    const session = await getServerSession(req, res, authOptions)
+    const session = await getServerSession(req, res, authOptions(req, res))
     if (session?.user?.id) {
       return handler(req, res, session.user)
     } else {
@@ -67,7 +67,7 @@ type LoggedInServerSideHandler = (
 
 export function withLoggedInSession(handler: LoggedInServerSideHandler): ServerSideHandler {
   return withServerSideError(async context => {
-    const session = await getServerSession(context.req, context.res, authOptions)
+    const session = await getServerSession(context.req, context.res, authOptions(context.req, context.res))
     if (session?.user?.id) {
       return handler({ ...context, user: session.user })
     } else {
@@ -88,7 +88,7 @@ export function withAdminSession(handler: LoggedInServerSideHandler) {
 
 export function withLoggedOutSession(handler: ServerSideHandler): ServerSideHandler {
   return withServerSideError(async context => {
-    const session = await getServerSession(context.req, context.res, authOptions)
+    const session = await getServerSession(context.req, context.res, authOptions(context.req, context.res))
     if (session?.user?.id) {
       return Redirect(ClientRoute.Home)
     } else {

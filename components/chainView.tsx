@@ -8,17 +8,17 @@ import {
   PromptChainItem,
   PromptVersion,
 } from '@/types'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
-import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
-import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import VersionTimeline, { ShouldShowVersions } from './versionTimeline'
+import VersionTimeline from './versionTimeline'
 import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
@@ -57,7 +57,7 @@ export default function ChainView({
     async (promptID: number) =>
       api.getPrompt(promptID, project).then(activePrompt => {
         setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
-        setNodes(
+        setNodes(nodes =>
           nodes.map(node =>
             IsPromptChainItem(node) && node.promptID === promptID
               ? {
@@ -70,7 +70,7 @@ export default function ChainView({
         )
         return activePrompt
       }),
-    [nodes, project]
+    [project]
   )
 
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
@@ -97,13 +97,15 @@ export default function ChainView({
   const getItemsToSave = (items: ChainItem[]) =>
     items.map(item => {
       const inputs = ExtractChainItemVariables(item, promptCache, false)
-      return {
-        ...item,
-        activePrompt: undefined,
-        version: undefined,
-        inputs,
-        dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
-      }
+      return IsCodeChainItem(item)
+        ? { ...item, inputs }
+        : {
+            ...item,
+            activePrompt: undefined,
+            version: undefined,
+            inputs,
+            dynamicInputs : ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
+          }
     })
   const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
   const itemsKey = getItemsKey(items)
@@ -141,6 +143,14 @@ export default function ChainView({
   const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
   const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion>()
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
+
+  const refreshProject = useRefreshProject()
+
+  const addPrompt = async () => {
+    const { promptID, versionID } = await api.addPrompt(project.id)
+    refreshProject()
+    return { promptID, versionID }
+  }
 
   const selectVersion = (version?: PromptVersion) => {
     savePrompt()
@@ -188,8 +198,9 @@ export default function ChainView({
   }
 
   const [showVersions, setShowVersions] = useState(false)
-  const shouldShowVersions = ShouldShowVersions(chain.versions)
-  if (showVersions && !shouldShowVersions) {
+  const canShowVersions = chain.versions.length > 1 || chain.versions[0].didRun || chain.versions[0].items.length > 0
+  chain.versions.filter(version => version.didRun).length > 0
+  if (showVersions && !canShowVersions) {
     setShowVersions(false)
   }
 
@@ -225,8 +236,9 @@ export default function ChainView({
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
+          addPrompt={addPrompt}
           showVersions={showVersions}
-          setShowVersions={shouldShowVersions ? setShowVersions : undefined}
+          setShowVersions={canShowVersions ? setShowVersions : undefined}
         />
       </Allotment.Pane>
       {!showVersions && (

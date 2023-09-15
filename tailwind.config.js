@@ -105,24 +105,25 @@ module.exports = {
       'orange-100': '#FBDFB5',
       'pink-50': '#F9D9F6',
       'red-50': '#FDE5E0',
+      'red-100': '#F4BBAF',
       white: '#FFFFFF',
-    },
-    fontSize: {
-      xs: '12px',
-      sm: '0.79rem',
-      base: '.9rem',
-      lg: '.95rem'
     },
     textDecorationColor: {
       'blue-100': '#B1D1F6',
     },
     extend: {
+      fontSize: {
+        xs: '12px',
+        sm: '0.79rem',
+        base: '.9rem',
+        lg: '.95rem',
+      },
       fontFamily: {
         sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
       },
       boxShadow: {
-        'sm': '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',
-      }
+        sm: '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',
+      },
     },
   },
 }

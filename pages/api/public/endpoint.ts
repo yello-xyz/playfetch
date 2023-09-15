@@ -10,8 +10,11 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/chainEngine'
 import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
 import { TryParseOutput } from '@/src/server/promptEngine'
+import { withErrorRoute } from '@/src/server/session'
+import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 
 const logResponse = (
+  clientID: string,
   endpoint: Endpoint,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>>,
@@ -33,8 +36,9 @@ const logResponse = (
     response.duration,
     response.attempts,
     cacheHit,
-    [...(continuationID ? [continuationID] : []), ...(response.continuationID ? [response.continuationID] : [])]
+    continuationID ?? response.continuationID
   )
+  logUnknownUserEvent(clientID, EndpointEvent(endpoint.parentID, response.failed, response.cost, response.duration))
 }
 
 type ResponseType = Awaited<ReturnType<typeof runChain>>
@@ -61,6 +65,7 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
         failed: false,
         attempts: 1,
         continuationID: undefined,
+        extraSteps: 0,
       }
     : null
 }
@@ -74,16 +79,18 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
     const continuation = req.headers['x-continuation-key'] as string | undefined
-    const continuationID = continuation ? Number(continuation) : undefined
 
     if (apiKey && (await checkProject(projectID, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
       if (endpoint && endpoint.enabled) {
+        const clientID = getClientID(req, res)
         const useStreaming = endpoint.useStreaming
         if (useStreaming) {
           res.setHeader('X-Accel-Buffering', 'no')
         }
 
+        const salt = (value: number) => (value ^ endpoint.id) >>> 0
+        const continuationID = continuation ? salt(Number(continuation)) : undefined
         const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
 
@@ -107,13 +114,13 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           }
         }
 
-        logResponse(endpoint, inputs, response, !!cachedResponse, continuationID)
+        logResponse(clientID, endpoint, inputs, response, !!cachedResponse, continuationID)
 
         return useStreaming
           ? res.end()
           : res.json({
               output: response.result,
-              ...(response.continuationID ? { [continuationKey]: response.continuationID.toString() } : {}),
+              ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
             })
       }
     }
@@ -122,4 +129,4 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   return res.status(401).json({ error: 'Invalid URL or API Key' })
 }
 
-export default endpoint
+export default withErrorRoute(endpoint)

@@ -50,11 +50,6 @@ export type ActivePrompt = Prompt & {
   availableLabels: string[]
 }
 
-export type ChainItemWithInputs = ChainItem & {
-  inputs: string[]
-  dynamicInputs: string[]
-}
-
 export type Chain = {
   id: number
   name: string
@@ -102,6 +97,7 @@ type Version = {
   config?: PromptConfig
   items?: ChainItemWithInputs[]
   labels: string[]
+  didRun: boolean
   runs: Run[]
   comments: Comment[]
 }
@@ -147,6 +143,7 @@ export type RunConfig = {
 
 export type CodeConfig = {
   code: string
+  name?: string
   output?: string
 }
 
@@ -155,9 +152,13 @@ export type TestConfig = {
   rowIndices: number[]
 }
 
-export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[]; dynamicInputs?: string[] }
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
-export type ChainItem = PromptChainItem | CodeChainItem
+export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[]; dynamicInputs?: string[] }
+export type ChainItem = CodeChainItem | PromptChainItem
+
+export type ChainItemWithInputs = (CodeChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
+  inputs: string[]
+}
 
 export type Endpoint = {
   id: number
@@ -209,6 +210,7 @@ export type Comment = {
   action?: CommentAction
   quote?: string
   runID?: number
+  itemIndex?: number
   startIndex?: number
 }
 
@@ -226,5 +228,5 @@ export type LogEntry = {
   error?: string
   attempts: number
   cacheHit: boolean
-  continuationIDs: number[]
+  continuationID: number
 }

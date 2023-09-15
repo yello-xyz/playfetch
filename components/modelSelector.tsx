@@ -35,9 +35,9 @@ export const AllProviders = (['openai', 'anthropic', 'google', 'cohere'] as Mode
   LabelForProvider(a).localeCompare(LabelForProvider(b))
 )
 
-export const SupportedPromptsForModel = (model: LanguageModel): (keyof Prompts)[] => [
-  'main',
+export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompts)[] => [
   ...(SupportsSystemPrompt(model) ? ['system' as keyof Prompts] : []),
+  'main',
   ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
 ]
 
@@ -67,8 +67,18 @@ export const SupportsFunctionsPrompt = (model: LanguageModel) => {
   }
 }
 
-export const LabelForSupportedPrompt = (prompt: keyof Prompts) => {
-  switch (prompt) {
+export const IsMainPromptKey = (promptKey: keyof Prompts) => {
+  switch (promptKey) {
+    case 'main':
+      return true
+    case 'system':
+    case 'functions':
+      return false
+  }
+}
+
+export const LabelForPromptKey = (promptKey: keyof Prompts) => {
+  switch (promptKey) {
     case 'main':
       return 'Prompt'
     case 'system':
@@ -78,8 +88,8 @@ export const LabelForSupportedPrompt = (prompt: keyof Prompts) => {
   }
 }
 
-export const PlaceholderForSupportedPrompt = (prompt: keyof Prompts) => {
-  switch (prompt) {
+export const PlaceholderForPromptKey = (promptKey: keyof Prompts) => {
+  switch (promptKey) {
     case 'main':
       return 'Enter prompt here. Use {{variable}} to insert dynamic values.'
     case 'system':
@@ -89,8 +99,8 @@ export const PlaceholderForSupportedPrompt = (prompt: keyof Prompts) => {
   }
 }
 
-export const ShouldPreformatSupportedPrompt = (prompt: keyof Prompts) => {
-  switch (prompt) {
+export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
+  switch (promptKey) {
     case 'main':
     case 'system':
       return false

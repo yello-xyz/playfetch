@@ -8,7 +8,7 @@ import Icon from './icon'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import api from '@/src/client/api'
 import Link from 'next/link'
-import ClientRoute from '@/src/client/clientRoute'
+import ClientRoute, { AdminRoute } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 
 const avatarColors = [
@@ -129,7 +129,7 @@ export default function UserSidebarItem() {
                 </span>
                 {user.isAdmin && (
                   <Link
-                    href={ClientRoute.Admin}
+                    href={AdminRoute.Home}
                     className='w-full px-2 py-1 leading-6 rounded select-none hover:bg-gray-50'>
                     <span className='font-medium text-gray-700 cursor-pointer'>Admin</span>
                   </Link>

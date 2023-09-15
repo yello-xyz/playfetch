@@ -1,8 +1,11 @@
 import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/components/modelSelector'
 import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
 
+const normalizeItems = (items: ChainItemWithInputs[]) =>
+  JSON.stringify(items.map(item => Object.entries(item).sort(([a], [b]) => a.localeCompare(b))))
+
 export const ChainVersionsAreEqual = (a: { items: ChainItemWithInputs[] }, b: { items: ChainItemWithInputs[] }) =>
-  JSON.stringify(a.items) === JSON.stringify(b.items)
+  normalizeItems(a.items) === normalizeItems(b.items)
 
 export const PromptConfigsAreEqual = (a: PromptConfig, b: PromptConfig) =>
   a.provider === b.provider && a.model === b.model && a.temperature === b.temperature && a.maxTokens === b.maxTokens

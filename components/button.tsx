@@ -51,11 +51,11 @@ export default function Button({
       case 'primary':
         return 'text-white bg-blue-400 hover:bg-blue-300 font-medium disabled:bg-blue-200'
       case 'secondary':
-        return 'bg-gray-200 border-gray-200 hover:bg-gray-300 font-medium disabled:opacity-50'
+        return 'text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50'
       case 'outline':
         return 'bg-white border-gray-200 hover:bg-gray-100 font-medium disabled:opacity-50'
       case 'destructive':
-        return 'bg-white text-red-500 border-gray-200 hover:bg-red-500 hover:text-white disabled:opacity-50'
+        return 'bg-white text-red-500 border-gray-200 hover:bg-red-50 hover:border-red-100 disabled:opacity-50'
     }
   }
 

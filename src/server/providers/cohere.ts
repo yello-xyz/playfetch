@@ -1,7 +1,7 @@
 import { CohereLanguageModel } from '@/types'
 import cohere from 'cohere-ai'
 import { encode } from 'gpt-3-encoder'
-import { Predictor, PromptContext } from './promptEngine'
+import { Predictor, PromptContext } from '../promptEngine'
 
 const calculateCost = (input: string, output: string) => {
   const inputTokens = encode(input).length

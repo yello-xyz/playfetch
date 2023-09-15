@@ -1,11 +1,8 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
-
-export const ShouldShowVersions = <Version extends PromptVersion | ChainVersion>(versions: Version[]) =>
-  versions.length > 1 || versions[0].runs.length > 0 || (!IsPromptVersion(versions[0]) && versions[0].items.length > 0)
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -45,7 +42,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
 
   return (
     <div className='relative flex h-full'>
-      {ShouldShowVersions(versions) ? (
+      {versions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
           <VersionFilters
             users={activeItem.users}

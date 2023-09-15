@@ -24,17 +24,9 @@ export default function useRunVersion() {
       for (const line of lines.filter(line => line.trim().length > 0)) {
         const data = line.split('data:').slice(-1)[0]
         const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
-        const output = message ?? ''
-        if (runs[index]) {
-          runs[index].output += output
-          runs[index].id = index
-          runs[index].cost = cost
-          runs[index].duration = duration
-          runs[index].timestamp = timestamp
-          runs[index].failed = failed
-        } else {
-          runs[index] = { id: index, output, cost, duration, timestamp, failed }
-        }
+        const previousOutput = runs[index]?.output ?? ''
+        const output = message ? `${previousOutput}${message}` : previousOutput
+        runs[index] = { id: index, output, cost, duration, timestamp, failed }
       }
       setPartialRuns(
         Object.entries(runs)
@@ -44,9 +36,7 @@ export default function useRunVersion() {
     }
     await refreshActiveItem(versionID)
 
-    const runsPerInput = (runs: PartialRun[]) => runs.length / (inputs.length ? inputs.length : 1)
-    const isIntermediateRun = (runs: PartialRun[], index: number) => index % runsPerInput(runs) < runsPerInput(runs) - 1
-    setPartialRuns(runs => runs.filter((run, index, runs) => run.failed || isIntermediateRun(runs, index)))
+    setPartialRuns(runs => runs.filter(run => run.timestamp))
 
     setRunning(false)
   }

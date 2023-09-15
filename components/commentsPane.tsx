@@ -9,6 +9,7 @@ import VersionComparison from './versionComparison'
 import { LabelForModel } from './modelSelector'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
+import { SingleTabHeader } from './tabSelector'
 
 export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -30,12 +31,11 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
 
   return showComments ? (
-    <div className='flex flex-col h-full px-3 pb-3 border-l border-gray-200'>
-      <div className='flex items-start justify-between py-5'>
-        <span className='font-medium text-gray-800'>Comments</span>
+    <div className='flex flex-col h-full'>
+      <SingleTabHeader label='Comments'>
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
-      </div>
-      <div className='flex flex-col gap-2 overflow-y-auto'>
+      </SingleTabHeader>
+      <div className='flex flex-col gap-2 p-3 overflow-y-auto'>
         {comments.map((comment, index) => (
           <CommentCell
             key={index}
@@ -54,13 +54,13 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
 export function CommentCell<Version extends PromptVersion | ChainVersion>({
   comment,
   user,
-  labelColors,
+  labelColors = {},
   versions = [],
   onSelect,
 }: {
   comment: Comment
   user: User
-  labelColors: Record<string, string>
+  labelColors?: Record<string, string>
   versions?: Version[]
   onSelect?: (version: Version, runID?: number) => void
 }) {

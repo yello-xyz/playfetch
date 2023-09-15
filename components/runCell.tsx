@@ -149,7 +149,7 @@ export default function RunCell({
 
   return (
     <div className={`${baseClass} ${colorClass}`}>
-      <div className={showInlineHeader ? 'flex flex-row-reverse justify-between' : 'flex flex-col gap-2.5'}>
+      <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
         {activeItem && isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
         <RunCellBody
           identifier={identifier}
@@ -171,9 +171,9 @@ type CommentInputProps = {
 function CommentInputPopup({ selection, onUpdateSelectionForComment }: CommentInputProps) {
   return (
     <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
-      <div className='p-1 bg-white rounded-lg shadow'>
+      <div className='bg-white rounded-lg shadow-md shadow whitespace-nowrap border border-gray-200 hover:border-gray-300'>
         <div
-          className='flex items-center gap-1 px-1 rounded cursor-pointer hover:bg-gray-100'
+          className='flex items-center gap-1 py-1 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onClick={() => onUpdateSelectionForComment(selection)}>
           <Icon className='max-w-[24px]' icon={commentIcon} />
           <div>Comment</div>

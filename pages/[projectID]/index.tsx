@@ -181,13 +181,18 @@ export default function Home({
   const onDeleteItem = async () => {
     const newProject = await api.getProject(activeProject.id)
     setActiveProject(newProject)
-    const promptID = newProject.prompts[0]?.id
-    if (promptID) {
-      selectPrompt(promptID)
-    } else {
-      setActiveItem(undefined)
-      updateVersion(undefined)
-      router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
+    if (
+      (activePrompt && !newProject.prompts.find(prompt => prompt.id === activePrompt.id)) ||
+      (activeChain && !newProject.chains.find(chain => chain.id === activeChain.id))
+    ) {
+      const promptID = newProject.prompts[0]?.id
+      if (promptID) {
+        selectPrompt(promptID)
+      } else {
+        setActiveItem(undefined)
+        updateVersion(undefined)
+        router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
+      }
     }
   }
 
@@ -220,7 +225,7 @@ export default function Home({
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-        <RefreshContext.Provider value={{ refreshActiveItem }}>
+        <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
           <ModalDialogContext.Provider value={{ setDialogPrompt }}>
             <GlobalPopupContext.Provider value={globalPopupProviderProps}>
               <main className='flex flex-col h-screen text-sm'>

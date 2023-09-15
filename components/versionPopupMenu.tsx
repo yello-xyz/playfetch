@@ -40,10 +40,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
 
   const router = useRouter()
   const { projectID } = ParseNumberQuery(router.query)
-  const createEndpoint = () => {
-    console.log(NewEndpointRoute(projectID!, version.parentID, version.id))
-    router.push(NewEndpointRoute(projectID!, version.parentID, version.id))
-  }
+  const createEndpoint = () => router.push(NewEndpointRoute(projectID!, version.parentID, version.id))
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [VersionPopup, { deleteVersion, createEndpoint }]
 

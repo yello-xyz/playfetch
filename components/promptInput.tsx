@@ -1,9 +1,7 @@
-import { RefObject, Suspense, useCallback, useEffect, useState } from 'react'
-import Label from './label'
+import { RefObject, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import dynamic from 'next/dynamic'
 import { CodeBlock } from './examplePane'
-import useScrollHeight from '@/src/client/hooks/useScrollHeight'
 import { RichTextFromHTML, RichTextToHTML } from './richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 const ContentEditable = dynamic(() => import('./contentEditable'))
@@ -75,39 +73,20 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
 }
 
 export default function PromptInput({
+  promptKey = 'main',
   value,
   setValue,
-  labels,
-  activeLabel,
-  setActiveLabel,
   placeholder,
   disabled,
   preformatted,
-  onUpdateScrollHeight,
 }: {
+  promptKey?: string
   value: string
   setValue: (value: string) => void
-  labels?: string[]
-  activeLabel?: string
-  setActiveLabel?: (label: string) => void
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
-  onUpdateScrollHeight?: (height: number) => void
 }) {
-  const [scrollHeight, contentEditableRef] = useScrollHeight()
-  const updateScrollHeight = useCallback(() => {
-    if (onUpdateScrollHeight && contentEditableRef.current) {
-      const styleHeight = contentEditableRef.current.style.height
-      contentEditableRef.current.style.height = '0'
-      const scrollHeight = contentEditableRef.current.scrollHeight
-      contentEditableRef.current.style.height = styleHeight
-      onUpdateScrollHeight(scrollHeight)
-    }
-  }, [contentEditableRef, onUpdateScrollHeight])
-
-  useEffect(updateScrollHeight, [scrollHeight, updateScrollHeight])
-
   const toggleInput = useCallback(
     (selection: Selection) => {
       if (!selection.isInput) {
@@ -138,6 +117,13 @@ export default function PromptInput({
     [setPopup, toggleInput, lastSelection]
   )
 
+  const contentEditableRef = useRef<HTMLDivElement>(null)
+  const [lastKey, setLastKey] = useState(promptKey)
+  if (promptKey !== lastKey) {
+    setLastKey(promptKey)
+    contentEditableRef?.current?.focus()
+  }
+
   useEffect(() => {
     const selectionChangeHandler = () => updateSelection(extractSelection(contentEditableRef))
     document.addEventListener('selectionchange', selectionChangeHandler)
@@ -151,16 +137,15 @@ export default function PromptInput({
       if (node && contentEditableRef.current) {
         contentEditableRef.current.focus()
         moveCursorToEndOfNode(contentEditableRef.current)
-        updateScrollHeight()
       }
     },
-    [contentEditableRef, updateScrollHeight]
+    [contentEditableRef]
   )
 
   const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
   const contentEditableClassName = preformatted
     ? `outline-none ${placeholderClassName}`
-    : `h-full p-4 overflow-y-auto text-gray-700 border border-gray-300 focus:border-blue-400 focus:ring-0 focus:outline-none rounded-lg ${placeholderClassName}`
+    : `h-full px-3 py-1.5 overflow-y-auto text-gray-700 border border-gray-300 focus:border-blue-400 focus:ring-0 focus:outline-none rounded-lg ${placeholderClassName}`
 
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== PromptFromHTML(htmlValue)) {
@@ -172,7 +157,6 @@ export default function PromptInput({
     updateSelection(undefined)
     setHTMLValue(html)
     setValue(PromptFromHTML(html))
-    updateScrollHeight()
   }
 
   const renderContentEditable = () => (
@@ -191,35 +175,12 @@ export default function PromptInput({
     </Suspense>
   )
 
-  const selectLabel = (label: string) => {
-    contentEditableRef.current?.focus()
-    setActiveLabel?.(label)
-  }
-
-  return (
-    <div className='h-full'>
-      <div className='flex flex-col h-full gap-2 overflow-hidden'>
-        {labels && (
-          <div className='flex items-center gap-2 mb-1 font-medium'>
-            {labels.map(label => (
-              <div
-                key={label}
-                className={label === activeLabel ? 'text-gray-600' : 'text-gray-300 cursor-pointer'}
-                onClick={() => selectLabel(label)}>
-                {label}
-              </div>
-            ))}
-          </div>
-        )}
-        {preformatted ? (
-          <CodeBlock active={!disabled} scroll>
-            {renderContentEditable()}
-          </CodeBlock>
-        ) : (
-          renderContentEditable()
-        )}
-      </div>
-    </div>
+  return preformatted ? (
+    <CodeBlock active={!disabled} scroll>
+      {renderContentEditable()}
+    </CodeBlock>
+  ) : (
+    renderContentEditable()
   )
 }
 
@@ -227,10 +188,10 @@ type VariablePopupProps = { selection: Selection; toggleInput: (selection: Selec
 
 function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
   return (
-    <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
-      <div className='p-1 bg-white rounded-lg shadow whitespace-nowrap'>
+    <div className='flex items-center justify-center overflow-visible text-center max-w-0 '>
+      <div className='bg-white border border-gray-200 rounded-lg shadow-md whitespace-nowrap hover:border-gray-300'>
         <div
-          className='px-1 text-gray-500 rounded cursor-pointer hover:bg-gray-100'
+          className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
           {selection.isInput ? 'Remove Input' : 'Create Input'}
         </div>

@@ -1,6 +1,6 @@
 import { AnthropicLanguageModel } from '@/types'
 import Anthropic from '@anthropic-ai/sdk'
-import { Predictor, PromptContext } from './promptEngine'
+import { Predictor, PromptContext } from '../promptEngine'
 
 const calculateCost = (prompt: string, result: string) =>
   (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000

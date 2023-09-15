@@ -35,10 +35,10 @@ const toCacheData = (
   excludeFromIndexes: ['key', 'value'],
 })
 
-export async function cacheExpiringValue(value: string, expirationTimeMilliseconds = 3600 * 1000) {
+export async function cacheExpiringValue(value: string, cacheID?: number, expirationTimeMilliseconds = 3600 * 1000) {
   const createdAt = new Date()
   const expiresAt = new Date(createdAt.getTime() + expirationTimeMilliseconds)
-  const cacheData = toCacheData(undefined, value, undefined, createdAt, expiresAt)
+  const cacheData = toCacheData(undefined, value, undefined, createdAt, expiresAt, cacheID)
   await getDatastore().save(cacheData)
   return getID(cacheData)
 }

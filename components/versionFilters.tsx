@@ -61,15 +61,17 @@ export default function VersionFilters<Version extends PromptVersion | ChainVers
 
   return (
     <div className='flex flex-col'>
-      {tabSelector(
-        <FilterButton
-          users={users}
-          labelColors={labelColors}
-          versions={versions}
-          filters={filters}
-          setFilters={setFilters}
-        />
-      )}
+      <div className='z-10 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
+        {tabSelector(
+          <FilterButton
+            users={users}
+            labelColors={labelColors}
+            versions={versions}
+            filters={filters}
+            setFilters={setFilters}
+          />
+        )}
+      </div>
       <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell

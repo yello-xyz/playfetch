@@ -4,7 +4,7 @@ steps:
     args: ['install']
   - name: node
     entrypoint: npm
-    args: ["run", "test"]
+    args: ['run', 'test']
   - name: node
     entrypoint: npm
     args: ['run', 'clean']
@@ -20,6 +20,11 @@ steps:
       - 'NEXTAUTH_URL=${_NEXTAUTH_URL}'
       - 'NOREPLY_EMAIL_PASSWORD=${_NOREPLY_EMAIL_PASSWORD}'
       - 'NOREPLY_EMAIL_USER=${_NOREPLY_EMAIL_USER}'
+      - 'SERVER_LOGS_URL=${_SERVER_LOGS_URL}'
+      - 'GOOGLE_ANALYTICS_DASHBOARD_URL=${_GOOGLE_ANALYTICS_DASHBOARD_URL}'
+      - 'GOOGLE_ANALYTICS_API_SECRET=${_GOOGLE_ANALYTICS_API_SECRET}'
+      - 'GOOGLE_ANALYTICS_MEASUREMENT_ID=${_GOOGLE_ANALYTICS_MEASUREMENT_ID}'
+      - 'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=${_NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}'
   - name: node
     entrypoint: npm
     args: ['run', 'build']

@@ -17,13 +17,16 @@ const buildCurlCommand = (
   const url = endpoint.url
   const inputRow = SelectAnyInputRow(inputValues, variables)
   const inputs = variables.map(variable => [variable, inputRow[variable]])
+  const stringify = (value: any) => JSON.stringify(value).replaceAll('\\', '\\\\').replaceAll("'", "\\'")
 
   return (
     `curl ${endpoint.useStreaming ? '-N ' : ''}-X POST ${url} \\\n  -H "x-api-key: ${apiKey}"` +
     (endpoint.flavor !== defaultFlavor ? ` \\\n  -H "x-environment: ${endpoint.flavor}"` : '') +
     (inputs.length > 0
       ? ` \\\n  -H "content-type: application/json"` +
-        ` \\\n  -d '{ ${inputs.map(([variable, value]) => `"${ToCamelCase(variable)}": "${value}"`).join(', ')} }'`
+        ` \\\n  -d $'{ ${inputs
+          .map(([variable, value]) => `"${ToCamelCase(variable)}": ${stringify(value)}`)
+          .join(', ')} }'`
       : '')
   )
 }
@@ -58,7 +61,7 @@ export default function ExamplePane({
           <div
             className={`flex items-center gap-1 ${copied ? '' : 'cursor-pointer'}`}
             onClick={copied ? undefined : () => copyToClipboard(curlCommand)}>
-            {copied ? <Icon className='-mt-px' icon={checkIcon} /> : <Icon icon={clipboardIcon} />}
+            {copied ? <Icon icon={checkIcon} /> : <Icon icon={clipboardIcon} />}
             <span>{copied ? 'Copied to clipboard' : 'Copy to clipboard'}</span>
           </div>
         )}
@@ -81,12 +84,12 @@ export function CodeBlock({
   scroll?: boolean
   error?: boolean
 }) {
-  const baseClass = 'px-2 py-4 text-xs rounded-lg bg-white border border-gray-200'
+  const baseClass = 'h-full p-2 text-xs rounded-lg bg-white border border-gray-200'
   const scrollClass = scroll ? 'overflow-y-auto' : ''
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
-  const borderClass = active ? 'border' : ''
+  const focusClass = active ? 'focus-within:border-blue-400' : ''
   return (
-    <div className={`${baseClass} ${scrollClass} ${textColorClass} ${borderClass}`}>
+    <div className={`${baseClass} ${scrollClass} ${textColorClass} ${focusClass}`}>
       <div className='relative overflow-hidden'>
         <pre className='break-all whitespace-pre-wrap pl-9'>{children}</pre>
         <div className='absolute top-0 left-0'>
