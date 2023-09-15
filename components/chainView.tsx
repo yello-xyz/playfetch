@@ -13,7 +13,7 @@ import api from '@/src/client/api'
 import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
-import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
@@ -97,13 +97,15 @@ export default function ChainView({
   const getItemsToSave = (items: ChainItem[]) =>
     items.map(item => {
       const inputs = ExtractChainItemVariables(item, promptCache, false)
-      return {
-        ...item,
-        activePrompt: undefined,
-        version: undefined,
-        inputs,
-        dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
-      }
+      return IsCodeChainItem(item)
+        ? { ...item, inputs }
+        : {
+            ...item,
+            activePrompt: undefined,
+            version: undefined,
+            inputs,
+            dynamicInputs : ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
+          }
     })
   const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
   const itemsKey = getItemsKey(items)
