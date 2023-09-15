@@ -36,20 +36,32 @@ export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    await datastore.save(
-      toVersionData(
-        versionData.userID,
-        versionData.parentID,
-        versionData.prompts ? JSON.parse(versionData.prompts) : null,
-        versionData.config ? JSON.parse(versionData.config) : null,
-        versionData.items ? JSON.parse(versionData.items) : null,
-        JSON.parse(versionData.labels),
-        versionData.createdAt,
-        versionData.didRun,
-        versionData.previousVersionID,
-        getID(versionData)
-      )
-    )
+    if (versionData.items) {
+      const items = JSON.parse(versionData.items)
+      for (const item of items) {
+        if (item.code !== undefined && item.dynamicInputs !== undefined) {
+          console.log(item.dynamicInputs, ' -> undefined', getID(versionData))
+          item.dynamicInputs = undefined
+        } else if (item.code === undefined && item.dynamicInputs === undefined) {
+          console.log('undefined -> []', getID(versionData))
+          item.dynamicInputs = []
+        }  
+      }
+      await datastore.save(
+        toVersionData(
+          versionData.userID,
+          versionData.parentID,
+          versionData.prompts ? JSON.parse(versionData.prompts) : null,
+          versionData.config ? JSON.parse(versionData.config) : null,
+          items,
+          JSON.parse(versionData.labels),
+          versionData.createdAt,
+          versionData.didRun,
+          versionData.previousVersionID,
+          getID(versionData)
+        )
+      )  
+    }
   }
 }
 
