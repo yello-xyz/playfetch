@@ -120,13 +120,9 @@ export default function ChainNodeEditor({
   }
 
   const toggleIncludeContext = (includeContext: boolean) =>
-    setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], includeContext }))
+    updateActiveItem({ ...items[activeItemIndex], includeContext })
 
-  const updateCode = (code: string) =>
-    setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], code }))
-
-  const updateCodeBlockName = (name: string) =>
-    setItems(updatedItems(items, activeItemIndex, { ...items[activeItemIndex], name }))
+  const updateActiveItem = (item: ChainItem) => setItems(updatedItems(items, activeItemIndex, item))
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
@@ -164,12 +160,7 @@ export default function ChainNodeEditor({
           />
         )}
         {IsCodeChainItem(activeNode) && (
-          <CodeChainNodeEditor
-            index={activeItemIndex}
-            item={activeNode}
-            updateCode={updateCode}
-            updateName={updateCodeBlockName}
-          />
+          <CodeChainNodeEditor key={activeItemIndex} item={activeNode} updateItem={updateActiveItem} />
         )}
         {activeNode === OutputNode && (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
