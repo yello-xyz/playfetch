@@ -144,6 +144,7 @@ export type RunConfig = {
 export type CodeConfig = {
   code: string
   name?: string
+  description?: string
   output?: string
 }
 
