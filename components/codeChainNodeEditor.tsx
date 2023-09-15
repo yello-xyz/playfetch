@@ -18,7 +18,11 @@ export default function CodeChainNodeEditor({
     <>
       <div className='flex flex-col flex-1 w-full overflow-y-auto'>
         <SingleTabHeader label={NameForCodeChainItem(item)} icon={codeIcon} onUpdateLabel={updateName} />
-        <div className='p-4'>
+        <div className='flex flex-col gap-2 p-4 min-h-[60%]'>
+          <div className='flex gap-1'>
+            <span className='font-medium'>Code </span>
+            <span className='text-gray-400'>JavaScript</span>
+          </div>
           <PromptInput placeholder={`'Hello World!'`} value={item.code} setValue={updateCode} preformatted />
         </div>
       </div>
