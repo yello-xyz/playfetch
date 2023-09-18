@@ -19,6 +19,7 @@ export default function ChainEditor({
   setShowVersions,
   isTestMode,
   setTestMode,
+  disabled,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -33,6 +34,7 @@ export default function ChainEditor({
   setShowVersions?: (show: boolean) => void
   isTestMode: boolean
   setTestMode: (testMode: boolean) => void
+  disabled: boolean
 }) {
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
@@ -56,7 +58,6 @@ export default function ChainEditor({
     setActiveMenuIndex(undefined)
   }
 
-  const isChainEditorDisabled = !isTestMode && activeIndex !== undefined
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
   return (
@@ -97,11 +98,11 @@ export default function ChainEditor({
         className='absolute z-30 bottom-4 right-4'
         selected={isTestMode}
         callback={setTestMode}
-        disabled={isChainEditorDisabled}>
+        disabled={disabled}>
         <Segment title='Edit' value={false} />
         <Segment title='Test' value={true} />
       </SegmentedControl>
-      {isChainEditorDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
+      {disabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
     </div>
   )
 }

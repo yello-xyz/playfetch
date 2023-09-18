@@ -9,17 +9,20 @@ import Button, { PendingButton } from './button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import { PromptCache } from '../src/client/hooks/usePromptCache'
+import { GetChainItemsSaveKey } from './chainView'
 
 export default function ChainNodeEditor({
   items,
   setItems,
   activeIndex,
+  setDirty,
   promptCache,
   dismiss,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeIndex: number
+  setDirty: (dirty: boolean) => void
   promptCache: PromptCache
   dismiss: () => void
 }) {
@@ -31,7 +34,11 @@ export default function ChainNodeEditor({
     ...items.slice(activeIndex + 1),
   ]
 
-  const updateActiveItem = (item: ChainItem, newItems = updatedItems) => setUpdatedItems(updateItems(newItems, item))
+  const updateActiveItem = (item: ChainItem, newItems = updatedItems) => {
+    const updatedItems = updateItems(newItems, item)
+    setUpdatedItems(updatedItems)
+    setDirty(GetChainItemsSaveKey(items) !== GetChainItemsSaveKey(updatedItems))
+  }
 
   const activeItem = updatedItems[activeIndex]
   const isPromptChainItemActive = IsPromptChainItem(activeItem)

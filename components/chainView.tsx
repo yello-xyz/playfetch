@@ -41,7 +41,7 @@ const AugmentItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
 const GetItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
   AugmentItemsToSave(StripItemsToSave(items), promptCache)
 
-const GetItemsKey = (items: ChainItem[]) => JSON.stringify(StripItemsToSave(items))
+export const GetChainItemsSaveKey = (items: ChainItem[]) => JSON.stringify(StripItemsToSave(items))
 
 export default function ChainView({
   chain,
@@ -69,13 +69,13 @@ export default function ChainView({
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)
-  const itemsKey = GetItemsKey(items)
+  const itemsKey = GetChainItemsSaveKey(items)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
 
   const refreshActiveItem = useRefreshActiveItem()
 
   const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
-    setSavedItemsKey(GetItemsKey(items))
+    setSavedItemsKey(GetChainItemsSaveKey(items))
     return saveChain(GetItemsToSave(items, promptCache), refreshActiveItem)
   }
 
@@ -89,7 +89,7 @@ export default function ChainView({
     if (activeNodeIndex && activeNodeIndex >= newNodes.length) {
       setActiveNodeIndex(undefined)
     }
-    setSavedItemsKey(GetItemsKey(activeVersion.items))
+    setSavedItemsKey(GetChainItemsSaveKey(activeVersion.items))
   }
 
   const refreshProject = useRefreshProject()
@@ -100,9 +100,11 @@ export default function ChainView({
     return { promptID, versionID }
   }
 
+  const [isNodeDirty, setNodeDirty] = useState(false)
   const updateActiveNodeIndex = (index: number) => {
     setActiveNodeIndex(index)
     setShowVersions(false)
+    setNodeDirty(false)
   }
 
   const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
@@ -167,6 +169,7 @@ export default function ChainView({
           setShowVersions={canShowVersions ? setShowVersions : undefined}
           isTestMode={isTestMode}
           setTestMode={updateTestMode}
+          disabled={!isTestMode && activeNodeIndex !== undefined && isNodeDirty}
         />
       </Allotment.Pane>
       {!showVersions && activeNodeIndex !== undefined && (
@@ -187,6 +190,7 @@ export default function ChainView({
               items={items}
               setItems={updateItems}
               activeIndex={activeNodeIndex - 1}
+              setDirty={setNodeDirty}
               promptCache={promptCache}
               dismiss={() => setActiveNodeIndex(undefined)}
             />
