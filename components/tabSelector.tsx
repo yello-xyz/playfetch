@@ -40,13 +40,11 @@ export default function TabSelector<T extends string>({
   onUpdateLabel?: (label: string) => void
   children?: ReactNode
 }) {
-  const [label, setLabel] = useInitialState<string>(tabs[0])
   const [isEditingLabel, setEditingLabel] = useState(false)
   const inputRef = useCallback((node: any) => node?.select(), [])
 
   const onKeyDown = (event: any) => {
     if (event.key === 'Enter') {
-      onUpdateLabel?.(label)
       setEditingLabel(false)
     }
   }
@@ -59,8 +57,8 @@ export default function TabSelector<T extends string>({
           <input
             ref={inputRef}
             className={headerClassName}
-            value={label}
-            onChange={event => setLabel(event.target.value)}
+            value={tabs[0]}
+            onChange={event => onUpdateLabel?.(event.target.value)}
             onKeyDown={onKeyDown}
           />
         ) : (
