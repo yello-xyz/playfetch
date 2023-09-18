@@ -51,9 +51,6 @@ export default function ChainEditor({
   const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
 
   const onSelect = (index: number) => {
-    if (index === 0 || index === nodes.length - 1) {
-      setTestMode(true)
-    }
     setActiveIndex(index)
     setActiveMenuIndex(undefined)
   }

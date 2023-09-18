@@ -127,12 +127,11 @@ export default function ChainView({
   const [isTestMode, setTestMode] = useState(false)
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
-    if (!testMode && (activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1)) {
-      setActiveNodeIndex(undefined)
-    } else if (testMode && activeNodeIndex === undefined) {
+    if (testMode && activeNodeIndex === undefined) {
       setActiveNodeIndex(0)
     }
   }
+  const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
 
   const minWidth = 300
   return (
@@ -174,7 +173,7 @@ export default function ChainView({
       </Allotment.Pane>
       {!showVersions && activeNodeIndex !== undefined && (
         <Allotment.Pane minSize={minWidth}>
-          {isTestMode ? (
+          {isTestMode || isInputOutputNode ? (
             <ChainNodeOutput
               chain={chain}
               activeVersion={activeVersion}
@@ -184,6 +183,7 @@ export default function ChainView({
               promptCache={promptCache}
               saveItems={items => saveItems(items).then(versionID => versionID!)}
               activeRunID={activeRunID}
+              showRunButtons={isTestMode}
             />
           ) : (
             <ChainNodeEditor

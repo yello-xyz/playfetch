@@ -35,23 +35,17 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
-      return runChain(
-        user.id,
-        version,
-        configs,
-        inputs,
-        false,
-        (index, extraSteps, message, cost, duration, failed) =>
-          sendData({
-            inputIndex,
-            configIndex: index,
-            index: index + extraSteps,
-            message,
-            timestamp: timestampIf(failed !== undefined),
-            cost,
-            duration,
-            failed,
-          })
+      return runChain(user.id, version, configs, inputs, false, (index, extraSteps, message, cost, duration, failed) =>
+        sendData({
+          inputIndex,
+          configIndex: index,
+          index: index + extraSteps,
+          message,
+          timestamp: timestampIf(failed !== undefined),
+          cost,
+          duration,
+          failed,
+        })
       ).then(response => {
         if (!response.failed) {
           sendData({ inputIndex, index: configs.length - 1 + response.extraSteps, isLast: true })
