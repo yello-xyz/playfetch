@@ -60,19 +60,19 @@ export default function ChainNodeEditor({
         {IsCodeChainItem(activeItem) && (
           <CodeChainNodeEditor key={activeItemIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
-        <div className='flex items-center justify-between w-full gap-4 px-4'>
-          {IsPromptChainItem(activeItem) || IsCodeChainItem(activeItem) ? (
+        <div className='flex items-center justify-end w-full gap-4 px-4'>
+          {(IsPromptChainItem(activeItem) || IsCodeChainItem(activeItem)) && (
             <OutputMapper
               key={activeItem.output}
               output={activeItem.output}
               inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache, false)}
               onMapOutput={mapOutput}
             />
-          ) : (
-            <div />
           )}
           <div className='flex gap-2'>
-            <Button type='outline' onClick={dismiss}>Cancel</Button>
+            <Button type='outline' onClick={dismiss}>
+              Cancel
+            </Button>
             <PendingButton title='Save and close' pendingTitle='Saving' onClick={saveAndClose} />
           </div>
         </div>
@@ -91,7 +91,7 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
 }) {
   return inputs.length > 0 ? (
-    <div className='self-start py-0.5 flex items-center gap-2'>
+    <div className='flex-1 self-start py-0.5 flex items-center gap-2'>
       <Label className='whitespace-nowrap'>Map output to</Label>
       <DropdownMenu value={output ?? 0} onChange={value => onMapOutput(Number(value) === 0 ? undefined : value)}>
         <option value={0} disabled>
@@ -104,7 +104,5 @@ function OutputMapper({
         ))}
       </DropdownMenu>
     </div>
-  ) : (
-    <div />
-  )
+  ) : null
 }

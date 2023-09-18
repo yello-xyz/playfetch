@@ -105,7 +105,7 @@ export default function ChainNodeOutput({
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
-        {activeNode === InputNode && (
+        {activeNode === InputNode && variables.length > 0 ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />
             {showTestData && (
@@ -120,8 +120,7 @@ export default function ChainNodeOutput({
               />
             )}
           </div>
-        )}
-        {activeNode === OutputNode && (
+        ) : (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
               runs={[...activeVersion.runs, ...partialRuns]}
@@ -132,9 +131,8 @@ export default function ChainNodeOutput({
             />
           </div>
         )}
-        <div className='flex items-center justify-between w-full gap-4 px-4'>
+        <div className='flex items-center justify-end w-full gap-4 px-4'>
           <RunButtons
-            runTitle='Run Chain'
             variables={variables}
             inputValues={inputValues}
             testConfig={testConfig}

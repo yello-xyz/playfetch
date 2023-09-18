@@ -18,9 +18,9 @@ export default function CodeChainNodeEditor({
 
   return (
     <>
-      <div className='flex flex-col flex-1 w-full overflow-y-auto'>
+      <div className='flex flex-col w-full overflow-y-auto'>
         <SingleTabHeader label={NameForCodeChainItem(item)} icon={codeIcon} onUpdateLabel={updateName} />
-        <div className='flex flex-col gap-2 p-4 min-h-[60%]'>
+        <div className='flex flex-col gap-2 px-4 pt-4 min-h-[350px]'>
           <span className='font-medium'>Description</span>
           <TextInput
             placeholder='Briefly describe the logic you’ve implemented'
