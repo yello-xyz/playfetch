@@ -13,6 +13,7 @@ import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 import CommentPopupMenu from './commentPopupMenu'
+import SegmentedControl, { Segment } from './segmentedControl'
 
 const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
@@ -60,6 +61,8 @@ export default function ChainEditor({
     setActiveMenuIndex(undefined)
   }
 
+  const [isTestMode, setTestMode] = useState(false)
+
   return (
     <div className='flex flex-col items-stretch h-full bg-gray-25'>
       <ChainEditorHeader
@@ -69,7 +72,7 @@ export default function ChainEditor({
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
-      <div className='flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
+      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
         <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
         {nodes.map((node, index) => (
           <ChainNodeBox
@@ -94,6 +97,10 @@ export default function ChainEditor({
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
       </div>
+      <SegmentedControl className='absolute z-30 bottom-4 right-4' selected={isTestMode} callback={setTestMode}>
+        <Segment title='Edit' value={false} />
+        <Segment title='Test' value={true} />
+      </SegmentedControl>
     </div>
   )
 }
