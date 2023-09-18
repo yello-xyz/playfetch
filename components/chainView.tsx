@@ -119,6 +119,8 @@ export default function ChainView({
     setTestMode(testMode)
     if (!testMode && (activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1)) {
       setActiveNodeIndex(undefined)
+    } else if (testMode && activeNodeIndex === undefined) {
+      setActiveNodeIndex(0)
     }
   }
 
