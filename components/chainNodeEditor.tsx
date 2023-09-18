@@ -1,6 +1,5 @@
 import { ChainItem, PromptVersion } from '@/types'
 import DropdownMenu from './dropdownMenu'
-import { PromptCache } from './chainView'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
 import { IsCodeChainItem, IsPromptChainItem } from './chainNode'
@@ -9,6 +8,7 @@ import { ExtractChainVariables } from './chainNodeOutput'
 import Button, { PendingButton } from './button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
+import { PromptCache } from '../src/client/hooks/usePromptCache'
 
 export default function ChainNodeEditor({
   items,

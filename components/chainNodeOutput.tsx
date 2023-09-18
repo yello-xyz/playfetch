@@ -1,23 +1,15 @@
-import {
-  ActiveChain,
-  ChainItem,
-  ChainItemWithInputs,
-  ChainVersion,
-  PromptInputs,
-  PromptVersion,
-  TestConfig,
-} from '@/types'
+import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, TestConfig } from '@/types'
 import { useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
-import { PromptCache } from './chainView'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import RunButtons from './runButtons'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
+import { PromptCache } from '../src/client/hooks/usePromptCache'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])

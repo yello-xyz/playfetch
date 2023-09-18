@@ -1,5 +1,4 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
-import { PromptCache } from './chainView'
 import Checkbox from './checkbox'
 import VersionTimeline from './versionTimeline'
 import PromptPanel from './promptPanel'
@@ -9,6 +8,7 @@ import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import { LoadPendingVersion } from './promptView'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import { PromptCache } from '../src/client/hooks/usePromptCache'
 
 export default function PromptChainNodeEditor({
   item,
