@@ -62,9 +62,10 @@ export default function ChainEditor({
   }
 
   const [isTestMode, setTestMode] = useState(false)
+  const isDisabled = !isTestMode && activeIndex !== undefined
 
   return (
-    <div className='flex flex-col items-stretch h-full bg-gray-25'>
+    <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
       <ChainEditorHeader
         chain={chain}
         activeVersion={activeVersion}
@@ -97,10 +98,15 @@ export default function ChainEditor({
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
       </div>
-      <SegmentedControl className='absolute z-30 bottom-4 right-4' selected={isTestMode} callback={setTestMode}>
+      <SegmentedControl
+        className='absolute z-30 bottom-4 right-4'
+        selected={isTestMode}
+        callback={setTestMode}
+        disabled={isDisabled}>
         <Segment title='Edit' value={false} />
         <Segment title='Test' value={true} />
       </SegmentedControl>
+      {isDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
     </div>
   )
 }
