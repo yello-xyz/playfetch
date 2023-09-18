@@ -6,43 +6,50 @@ import PromptChainNodeEditor from './promptChainNodeEditor'
 import { ChainNode, IsCodeChainItem, IsPromptChainItem } from './chainNode'
 import CodeChainNodeEditor from './codeChainNodeEditor'
 import { ExtractChainVariables } from './chainNodeOutput'
+import Button, { PendingButton } from './button'
+import { useState } from 'react'
 
 export default function ChainNodeEditor({
   items,
   setItems,
   activeItemIndex,
-  activeNode,
   promptCache,
   selectVersion,
   setModifiedVersion,
+  dismiss,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
   activeItemIndex: number
-  activeNode: ChainNode
   promptCache: PromptCache
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
+  dismiss: () => void
 }) {
-  const updateActiveItem = (item: ChainItem, newItems = items) => setItems([
-    ...newItems.slice(0, activeItemIndex),
-    item,
-    ...newItems.slice(activeItemIndex + 1),
-  ])
+  const [updatedItems, setUpdatedItems] = useState(items)
+
+  const updateActiveItem = (item: ChainItem, newItems = updatedItems) =>
+    setUpdatedItems([...newItems.slice(0, activeItemIndex), item, ...newItems.slice(activeItemIndex + 1)])
 
   const mapOutput = (output?: string) => {
-    const newItems = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
+    const newItems = updatedItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
     updateActiveItem({ ...newItems[activeItemIndex], output }, newItems)
   }
 
-  const colorClass = IsPromptChainItem(activeNode) ? 'bg-white' : 'bg-gray-25'
+  const activeItem = updatedItems[activeItemIndex]
+  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
+
+  const saveAndClose = () => {
+    setItems(updatedItems)
+    dismiss()
+  }
 
   return (
     <>
       <div className={`flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden ${colorClass}`}>
-        {IsPromptChainItem(activeNode) && (
+        {IsPromptChainItem(activeItem) && (
           <PromptChainNodeEditor
-            item={activeNode}
+            item={activeItem}
             updateItem={updateActiveItem}
             canIncludeContext={items.slice(0, activeItemIndex).some(IsPromptChainItem)}
             promptCache={promptCache}
@@ -50,20 +57,24 @@ export default function ChainNodeEditor({
             setModifiedVersion={setModifiedVersion}
           />
         )}
-        {IsCodeChainItem(activeNode) && (
-          <CodeChainNodeEditor key={activeItemIndex} item={activeNode} updateItem={updateActiveItem} />
+        {IsCodeChainItem(activeItem) && (
+          <CodeChainNodeEditor key={activeItemIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         <div className='flex items-center justify-between w-full gap-4 px-4'>
-          {IsPromptChainItem(activeNode) || IsCodeChainItem(activeNode) ? (
+          {IsPromptChainItem(activeItem) || IsCodeChainItem(activeItem) ? (
             <OutputMapper
-              key={activeNode.output}
-              output={activeNode.output}
+              key={activeItem.output}
+              output={activeItem.output}
               inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache, false)}
               onMapOutput={mapOutput}
             />
           ) : (
             <div />
           )}
+          <div className='flex gap-2'>
+            <Button type='outline' onClick={dismiss}>Cancel</Button>
+            <PendingButton title='Save and close' pendingTitle='Saving' onClick={saveAndClose} />
+          </div>
         </div>
       </div>
     </>

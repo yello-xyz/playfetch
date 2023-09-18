@@ -276,10 +276,10 @@ export default function ChainView({
               items={items}
               setItems={updateItems}
               activeItemIndex={activeNodeIndex - 1}
-              activeNode={activeNode}
               promptCache={promptCache}
               selectVersion={selectVersion}
               setModifiedVersion={setModifiedVersion}
+              dismiss={() => setActiveNodeIndex(undefined)}
             />
           )}
         </Allotment.Pane>
