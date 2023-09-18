@@ -13,6 +13,7 @@ import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 import CommentPopupMenu from './commentPopupMenu'
+import SegmentedControl, { Segment } from './segmentedControl'
 
 const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
@@ -28,7 +29,8 @@ export default function ChainEditor({
   addPrompt,
   showVersions,
   setShowVersions,
-  children,
+  isTestMode,
+  setTestMode,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -41,7 +43,8 @@ export default function ChainEditor({
   addPrompt: () => Promise<{ promptID: number; versionID: number }>
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
-  children?: ReactNode
+  isTestMode: boolean
+  setTestMode: (testMode: boolean) => void
 }) {
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
@@ -57,10 +60,15 @@ export default function ChainEditor({
     })
   const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
 
-  const onSelect = (index: number) => {
-    setActiveIndex(index)
-    setActiveMenuIndex(undefined)
-  }
+  const onSelect = (index: number) =>
+    isTestMode || (index > 0 && index < nodes.length - 1)
+      ? () => {
+          setActiveIndex(index)
+          setActiveMenuIndex(undefined)
+        }
+      : undefined
+
+  const isChainEditorDisabled = !isTestMode && activeIndex !== undefined
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -82,7 +90,7 @@ export default function ChainEditor({
             itemIndex={index}
             isFirst={index === 0}
             isSelected={index === activeIndex}
-            onSelect={() => onSelect(index)}
+            onSelect={onSelect(index)}
             isMenuActive={index === activeMenuIndex}
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onDelete={() => removeItem(index)}
@@ -96,7 +104,15 @@ export default function ChainEditor({
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
       </div>
-      {children}
+      <SegmentedControl
+        className='absolute z-30 bottom-4 right-4'
+        selected={isTestMode}
+        callback={setTestMode}
+        disabled={isChainEditorDisabled}>
+        <Segment title='Edit' value={false} />
+        <Segment title='Test' value={true} />
+      </SegmentedControl>
+      {isChainEditorDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
     </div>
   )
 }
@@ -123,7 +139,7 @@ function ChainNodeBox({
   itemIndex: number
   isFirst: boolean
   isSelected: boolean
-  onSelect: () => void
+  onSelect?: () => void
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
@@ -132,6 +148,7 @@ function ChainNodeBox({
   onDelete: () => void
   prompts: Prompt[]
 }) {
+  const cursorClass = onSelect ? 'cursor-pointer' : ''
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-400'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
@@ -153,7 +170,7 @@ function ChainNodeBox({
         </>
       )}
       <div
-        className={`flex items-center justify-between border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`}
+        className={`flex items-center justify-between border px-2 w-96 rounded-lg ${cursorClass} ${colorClass}`}
         onClick={onSelect}>
         <HeaderItem>
           {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}

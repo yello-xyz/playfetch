@@ -211,7 +211,6 @@ export default function ChainView({
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
   const [isTestMode, setTestMode] = useState(false)
-  const isChainEditorDisabled = !isTestMode && hasActiveNode
 
   const minWidth = 300
   return (
@@ -245,17 +244,9 @@ export default function ChainView({
           prompts={project.prompts}
           addPrompt={addPrompt}
           showVersions={showVersions}
-          setShowVersions={canShowVersions ? setShowVersions : undefined}>
-          <SegmentedControl
-            className='absolute z-30 bottom-4 right-4'
-            selected={isTestMode}
-            callback={setTestMode}
-            disabled={isChainEditorDisabled}>
-            <Segment title='Edit' value={false} />
-            <Segment title='Test' value={true} />
-          </SegmentedControl>
-          {isChainEditorDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
-        </ChainEditor>
+          setShowVersions={canShowVersions ? setShowVersions : undefined}
+          isTestMode={isTestMode}
+          setTestMode={setTestMode}/>
       </Allotment.Pane>
       {!showVersions && hasActiveNode && activeNode && (
         <Allotment.Pane minSize={minWidth}>
