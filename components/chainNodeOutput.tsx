@@ -53,48 +53,33 @@ export default function ChainNodeOutput({
   activeVersion,
   activeRunID,
   items,
-  activeItemIndex,
   activeNode,
   promptCache,
   prepareForRunning,
-  savePrompt,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   activeRunID?: number
   items: ChainItem[]
-  activeItemIndex: number
   activeNode: ChainNode
   promptCache: PromptCache
   prepareForRunning: (items: ChainItem[]) => Promise<number>
-  savePrompt: () => Promise<number>
 }) {
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const checkProviderAvailable = useCheckProvider()
-  const areProvidersAvailable = (items: ChainItem[], versionForItem = promptCache.versionForItem) =>
+  const areProvidersAvailable = (items: ChainItem[]) =>
     items
       .filter(IsPromptChainItem)
-      .map(versionForItem)
+      .map(promptCache.versionForItem)
       .every(version => !!version && checkProviderAvailable(version.config.provider))
 
   const [runVersion, partialRuns, isRunning] = useRunVersion()
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
-    let newItems = items
-    let versionForItem = promptCache.versionForItem
-    if (IsPromptChainItem(activeNode)) {
-      const versionID = await savePrompt()
-      const activePrompt = await promptCache.refreshPrompt(activeNode.promptID)
-      newItems = [...items.slice(0, activeItemIndex), { ...activeNode, versionID }, ...items.slice(activeItemIndex + 1)]
-      versionForItem = item =>
-        item.promptID === activePrompt.id
-          ? activePrompt.versions.find(version => version.id === item.versionID)
-          : promptCache.versionForItem(item)
-    }
-    if (areProvidersAvailable(newItems, versionForItem)) {
-      await runVersion(() => prepareForRunning(newItems), inputs)
+    if (areProvidersAvailable(items)) {
+      await runVersion(() => prepareForRunning(items), inputs)
     }
   }
 

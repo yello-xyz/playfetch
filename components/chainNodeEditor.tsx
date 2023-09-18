@@ -1,46 +1,72 @@
-import { ActiveChain, ChainItem, ChainVersion, PromptVersion } from '@/types'
+import { ChainItem, PromptVersion } from '@/types'
 import DropdownMenu from './dropdownMenu'
 import { PromptCache } from './chainView'
 import Label from './label'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { ChainNode, IsCodeChainItem, IsPromptChainItem } from './chainNode'
+import { IsCodeChainItem, IsPromptChainItem } from './chainNode'
 import CodeChainNodeEditor from './codeChainNodeEditor'
 import { ExtractChainVariables } from './chainNodeOutput'
 import Button, { PendingButton } from './button'
 import { useState } from 'react'
+import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 
 export default function ChainNodeEditor({
   items,
   setItems,
-  activeItemIndex,
+  activeIndex,
   promptCache,
-  selectVersion,
-  setModifiedVersion,
   dismiss,
 }: {
   items: ChainItem[]
   setItems: (items: ChainItem[]) => void
-  activeItemIndex: number
+  activeIndex: number
   promptCache: PromptCache
-  selectVersion: (version: PromptVersion) => void
-  setModifiedVersion: (version: PromptVersion) => void
   dismiss: () => void
 }) {
   const [updatedItems, setUpdatedItems] = useState(items)
 
-  const updateActiveItem = (item: ChainItem, newItems = updatedItems) =>
-    setUpdatedItems([...newItems.slice(0, activeItemIndex), item, ...newItems.slice(activeItemIndex + 1)])
+  const updateItems = (items: ChainItem[], item: ChainItem) => [
+    ...items.slice(0, activeIndex),
+    item,
+    ...items.slice(activeIndex + 1),
+  ]
+
+  const updateActiveItem = (item: ChainItem, newItems = updatedItems) => setUpdatedItems(updateItems(newItems, item))
+
+  const activeItem = updatedItems[activeIndex]
+  const isPromptChainItemActive = IsPromptChainItem(activeItem)
+  const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeItem) : undefined
+  const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeItem) : undefined
+  const [activePromptVersion, setActivePromptVersion] = useState(initialActivePromptVersion)
+  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
+
+  const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
+    if (isPromptChainItemActive) {
+      return savePrompt(async versionID => {
+        onSavePrompt?.(versionID)
+        promptCache.refreshPrompt(activeItem.promptID)
+      })
+    }
+  }
+
+  const selectVersion = (version?: PromptVersion) => {
+    saveAndRefreshPrompt()
+    setActivePromptVersion(version)
+    if (version) {
+      updateActiveItem({ ...activeItem, versionID: version.id })
+    }
+  }
 
   const mapOutput = (output?: string) => {
     const newItems = updatedItems.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
-    updateActiveItem({ ...newItems[activeItemIndex], output }, newItems)
+    updateActiveItem({ ...newItems[activeIndex], output }, newItems)
   }
 
-  const activeItem = updatedItems[activeItemIndex]
   const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
 
-  const saveAndClose = () => {
+  const saveAndClose = async () => {
     setItems(updatedItems)
+    await saveAndRefreshPrompt(versionID => setItems(updateItems(updatedItems, { ...activeItem, versionID })))
     dismiss()
   }
 
@@ -51,21 +77,21 @@ export default function ChainNodeEditor({
           <PromptChainNodeEditor
             item={activeItem}
             updateItem={updateActiveItem}
-            canIncludeContext={items.slice(0, activeItemIndex).some(IsPromptChainItem)}
+            canIncludeContext={items.slice(0, activeIndex).some(IsPromptChainItem)}
             promptCache={promptCache}
             selectVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
           />
         )}
         {IsCodeChainItem(activeItem) && (
-          <CodeChainNodeEditor key={activeItemIndex} item={activeItem} updateItem={updateActiveItem} />
+          <CodeChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         <div className='flex items-center justify-end w-full gap-4 px-4'>
           {(IsPromptChainItem(activeItem) || IsCodeChainItem(activeItem)) && (
             <OutputMapper
               key={activeItem.output}
               output={activeItem.output}
-              inputs={ExtractChainVariables(items.slice(activeItemIndex + 1), promptCache, false)}
+              inputs={ExtractChainVariables(items.slice(activeIndex + 1), promptCache, false)}
               onMapOutput={mapOutput}
             />
           )}

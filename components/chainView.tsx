@@ -11,7 +11,6 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
-import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
@@ -22,7 +21,6 @@ import VersionTimeline from './versionTimeline'
 import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
-import SegmentedControl, { Segment } from './segmentedControl'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 
 export type PromptCache = {
@@ -141,14 +139,6 @@ export default function ChainView({
     }
   }, [project, items, activePromptCache, refreshPrompt])
 
-  const hasActiveNode = activeNodeIndex !== undefined
-  const activeNode = hasActiveNode ? nodes[activeNodeIndex] : undefined
-  const isPromptChainItemActive = hasActiveNode && activeNode && IsPromptChainItem(activeNode)
-  const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeNode) : undefined
-  const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeNode) : undefined
-  const [activePromptVersion, setActivePromptVersion] = useState(initialActivePromptVersion)
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
-
   const refreshProject = useRefreshProject()
 
   const addPrompt = async () => {
@@ -157,32 +147,7 @@ export default function ChainView({
     return { promptID, versionID }
   }
 
-  const selectVersion = (version?: PromptVersion) => {
-    savePrompt()
-    setActivePromptVersion(version)
-    if (version && isPromptChainItemActive) {
-      setNodes([
-        ...nodes.slice(0, activeNodeIndex),
-        { ...activeNode, versionID: version.id },
-        ...nodes.slice(activeNodeIndex + 1),
-      ])
-    }
-  }
-
-  if (activePromptVersion?.parentID !== activePrompt?.id) {
-    selectVersion(initialActivePromptVersion)
-  } else if (
-    activePromptVersion &&
-    activePrompt &&
-    !activePrompt.versions.some(version => version.id === activePromptVersion.id)
-  ) {
-    selectVersion(activePrompt.versions.slice(-1)[0])
-  }
-
   const updateActiveNodeIndex = (index: number) => {
-    if (activePrompt) {
-      savePrompt().then(_ => promptCache.refreshPrompt(activePrompt.id))
-    }
     setActiveNodeIndex(index)
     setShowVersions(false)
   }
@@ -252,30 +217,27 @@ export default function ChainView({
           showVersions={showVersions}
           setShowVersions={canShowVersions ? setShowVersions : undefined}
           isTestMode={isTestMode}
-          setTestMode={updateTestMode}/>
+          setTestMode={updateTestMode}
+        />
       </Allotment.Pane>
-      {!showVersions && hasActiveNode && activeNode && (
+      {!showVersions && activeNodeIndex !== undefined && (
         <Allotment.Pane minSize={minWidth}>
           {isTestMode ? (
             <ChainNodeOutput
               chain={chain}
               activeVersion={activeVersion}
               items={items}
-              activeItemIndex={activeNodeIndex - 1}
-              activeNode={activeNode}
+              activeNode={nodes[activeNodeIndex]}
               promptCache={promptCache}
               prepareForRunning={prepareForRunning}
-              savePrompt={() => savePrompt().then(versionID => versionID!)}
               activeRunID={activeRunID}
             />
           ) : (
             <ChainNodeEditor
               items={items}
               setItems={updateItems}
-              activeItemIndex={activeNodeIndex - 1}
+              activeIndex={activeNodeIndex - 1}
               promptCache={promptCache}
-              selectVersion={selectVersion}
-              setModifiedVersion={setModifiedVersion}
               dismiss={() => setActiveNodeIndex(undefined)}
             />
           )}
