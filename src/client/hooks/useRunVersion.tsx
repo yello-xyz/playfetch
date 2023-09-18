@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
 import { useRefreshActiveItem } from '../context/refreshContext'
 
-export default function useRunVersion(clearFinalPartialRunsOnCompletion = false) {
+export default function useRunVersion(clearLastPartialRunsOnCompletion = false) {
   const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
@@ -23,10 +23,14 @@ export default function useRunVersion(clearFinalPartialRunsOnCompletion = false)
       const lines = text.split('\n')
       for (const line of lines.filter(line => line.trim().length > 0)) {
         const data = line.split('data:').slice(-1)[0]
-        const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed } = JSON.parse(data)
-        const previousOutput = runs[inputIndex][index]?.output ?? ''
-        const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, timestamp, failed }
+        const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, isLast } = JSON.parse(data)
+        if (isLast) {
+          runs[inputIndex][index].isLast = true  
+        } else {
+          const previousOutput = runs[inputIndex][index]?.output ?? ''
+          const output = message ? `${previousOutput}${message}` : previousOutput
+          runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, timestamp, failed }  
+        }
       }
       const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
       setPartialRuns(
@@ -42,8 +46,8 @@ export default function useRunVersion(clearFinalPartialRunsOnCompletion = false)
     }
     await refreshActiveItem(versionID)
 
-    if (clearFinalPartialRunsOnCompletion) {
-      setPartialRuns(runs => runs.filter(run => run.timestamp))
+    if (clearLastPartialRunsOnCompletion) {
+      setPartialRuns(runs => runs.filter(run => !run.isLast))
     }
 
     setRunning(false)

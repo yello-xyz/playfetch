@@ -54,8 +54,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           })
       ).then(response => {
         if (!response.failed) {
-          const configIndex = configs.length - 1
-          sendData({ inputIndex, configIndex, index: configIndex + response.extraSteps })
+          sendData({ inputIndex, index: configs.length - 1 + response.extraSteps, isLast: true })
           return logResponse(req, res, user.id, version, inputs, response)
         }
       })

@@ -118,9 +118,8 @@ export const IsPromptVersion = (version: PromptVersion | ChainVersion): version 
 
 export type PromptInputs = { [name: string]: string }
 
-export type PartialRun = {
+type CommonRun = {
   id: number
-  index?: number
   output: string
   timestamp?: number
   cost?: number
@@ -128,7 +127,12 @@ export type PartialRun = {
   failed?: boolean
 }
 
-export type Run = PartialRun & {
+export type PartialRun = CommonRun & {
+  index?: number
+  isLast?: boolean
+}
+
+export type Run = CommonRun & {
   timestamp: number
   cost: number
   duration: number
