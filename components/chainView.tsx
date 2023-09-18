@@ -211,6 +211,12 @@ export default function ChainView({
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
   const [isTestMode, setTestMode] = useState(false)
+  const updateTestMode = (testMode: boolean) => {
+    setTestMode(testMode)
+    if (!testMode && (activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1)) {
+      setActiveNodeIndex(undefined)
+    }
+  }
 
   const minWidth = 300
   return (
@@ -246,7 +252,7 @@ export default function ChainView({
           showVersions={showVersions}
           setShowVersions={canShowVersions ? setShowVersions : undefined}
           isTestMode={isTestMode}
-          setTestMode={setTestMode}/>
+          setTestMode={updateTestMode}/>
       </Allotment.Pane>
       {!showVersions && hasActiveNode && activeNode && (
         <Allotment.Pane minSize={minWidth}>

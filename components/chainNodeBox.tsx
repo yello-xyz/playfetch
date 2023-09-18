@@ -35,7 +35,7 @@ export function ChainNodeBox({
   itemIndex: number
   isFirst: boolean
   isSelected: boolean
-  onSelect?: () => void
+  onSelect: () => void
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void

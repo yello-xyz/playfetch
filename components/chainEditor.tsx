@@ -48,13 +48,13 @@ export default function ChainEditor({
     })
   const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
 
-  const onSelect = (index: number) =>
-    isTestMode || (index > 0 && index < nodes.length - 1)
-      ? () => {
-          setActiveIndex(index)
-          setActiveMenuIndex(undefined)
-        }
-      : undefined
+  const onSelect = (index: number) => {
+    if (index === 0 || index === nodes.length - 1) {
+      setTestMode(true)
+    }
+    setActiveIndex(index)
+    setActiveMenuIndex(undefined)
+  }
 
   const isChainEditorDisabled = !isTestMode && activeIndex !== undefined
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
@@ -79,7 +79,7 @@ export default function ChainEditor({
             itemIndex={index}
             isFirst={index === 0}
             isSelected={index === activeIndex}
-            onSelect={onSelect(index)}
+            onSelect={() => onSelect(index)}
             isMenuActive={index === activeMenuIndex}
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onDelete={() => removeItem(index)}
