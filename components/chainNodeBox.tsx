@@ -68,11 +68,11 @@ export function ChainNodeBox({
         className={`flex items-center justify-between border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`}
         onClick={onSelect}>
         <HeaderItem>
-          {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}
+          {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
           {chainNode === InputNode && 'Inputs'}
           {chainNode === OutputNode && 'Output'}
-          {IsPromptChainItem(chainNode) && <>{prompts.find(prompt => prompt.id === chainNode.promptID)?.name}</>}
-          {IsCodeChainItem(chainNode) && <>{NameForCodeChainItem(chainNode)}</>}
+          {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
+          {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
         </HeaderItem>
         <div className='flex items-center gap-1'>
           {savedVersion && (
