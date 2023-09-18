@@ -10,7 +10,7 @@ import {
 } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
-import ChainNodeEditor, { ExtractChainItemVariables } from './chainNodeEditor'
+import ChainNodeEditor from './chainNodeEditor'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import ChainEditor from './chainEditor'
 import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
@@ -23,6 +23,7 @@ import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
 import SegmentedControl, { Segment } from './segmentedControl'
+import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -256,22 +257,31 @@ export default function ChainView({
           {isChainEditorDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
         </ChainEditor>
       </Allotment.Pane>
-      {!showVersions && hasActiveNode && (
+      {!showVersions && hasActiveNode && activeNode && (
         <Allotment.Pane minSize={minWidth}>
-          <ChainNodeEditor
-            chain={chain}
-            activeVersion={activeVersion}
-            items={items}
-            setItems={updateItems}
-            activeItemIndex={activeNodeIndex - 1}
-            activeNode={nodes[activeNodeIndex]}
-            promptCache={promptCache}
-            prepareForRunning={prepareForRunning}
-            savePrompt={() => savePrompt().then(versionID => versionID!)}
-            selectVersion={selectVersion}
-            setModifiedVersion={setModifiedVersion}
-            activeRunID={activeRunID}
-          />
+          {isTestMode ? (
+            <ChainNodeOutput
+              chain={chain}
+              activeVersion={activeVersion}
+              items={items}
+              activeItemIndex={activeNodeIndex - 1}
+              activeNode={activeNode}
+              promptCache={promptCache}
+              prepareForRunning={prepareForRunning}
+              savePrompt={() => savePrompt().then(versionID => versionID!)}
+              activeRunID={activeRunID}
+            />
+          ) : (
+            <ChainNodeEditor
+              items={items}
+              setItems={updateItems}
+              activeItemIndex={activeNodeIndex - 1}
+              activeNode={activeNode}
+              promptCache={promptCache}
+              selectVersion={selectVersion}
+              setModifiedVersion={setModifiedVersion}
+            />
+          )}
         </Allotment.Pane>
       )}
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
