@@ -187,7 +187,7 @@ export default function EndpointSettingsPane({
           activeVersion={versions[versionIndex]}
           setActiveVersion={version => setVersionID(version.id)}
           labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
-          hideReferences
+          hideEndpointReferences
           disabled={disabled}
         />
         <Label disabled={disabled}>Name</Label>

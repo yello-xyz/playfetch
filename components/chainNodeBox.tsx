@@ -103,11 +103,11 @@ function PromptVersionHeader({ item, promptCache }: { item: PromptChainItem; pro
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
   return prompt && version ? (
-    <div className='flex flex-col gap-1 pb-3 -mt-2 pl-7'>
+    <div className='flex flex-col gap-1 pb-3 pl-6 -mt-2 ml-0.5'>
       <span className='text-xs font-medium text-gray-500'>
         {LabelForModel(version.config.model)} | Prompt version {index + 1}
       </span>
-      <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} />
+      <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
     </div>
   ) : null
 }

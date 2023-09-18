@@ -11,7 +11,8 @@ export default function VersionSelector<Version extends PromptVersion | ChainVer
   flagIfNotLatest,
   labelColors = {},
   hideLabels,
-  hideReferences,
+  hideChainReferences,
+  hideEndpointReferences,
   disabled,
 }: {
   versions: Version[]
@@ -21,7 +22,8 @@ export default function VersionSelector<Version extends PromptVersion | ChainVer
   flagIfNotLatest?: boolean
   labelColors?: Record<string, string>
   hideLabels?: boolean
-  hideReferences?: boolean
+  hideChainReferences?: boolean
+  hideEndpointReferences?: boolean
   disabled?: boolean
 }) {
   const suffixForVersionID = (versionID: number) => {
@@ -43,7 +45,12 @@ export default function VersionSelector<Version extends PromptVersion | ChainVer
         disabled={disabled}
       />
       {activeVersion && !hideLabels && (
-        <VersionLabels version={activeVersion} colors={labelColors} hideReferences={hideReferences} />
+        <VersionLabels
+          version={activeVersion}
+          colors={labelColors}
+          hideChainReferences={hideChainReferences}
+          hideEndpointReferences={hideEndpointReferences}
+        />
       )}
     </div>
   )

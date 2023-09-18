@@ -101,11 +101,13 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
 export function VersionLabels<Version extends PromptVersion | ChainVersion>({
   version,
   colors,
-  hideReferences,
+  hideChainReferences,
+  hideEndpointReferences,
 }: {
   version: Version
   colors: Record<string, string>
-  hideReferences?: boolean
+  hideChainReferences?: boolean
+  hideEndpointReferences?: boolean
 }) {
   const usedInChain = 'used in Chain'
   const usedAsEndpoint = 'used as Endpoint'
@@ -113,13 +115,13 @@ export function VersionLabels<Version extends PromptVersion | ChainVersion>({
   const extraColors = { [usedInChain]: extraColor, [usedAsEndpoint]: extraColor }
   const extraIcons = { [usedInChain]: chainIcon, [usedAsEndpoint]: endpointIcon }
   const extraLabels = [
-    ...('usedInChain' in version && version.usedInChain ? [usedInChain] : []),
-    ...(version.usedAsEndpoint ? [usedAsEndpoint] : []),
+    ...(!hideChainReferences && 'usedInChain' in version && version.usedInChain ? [usedInChain] : []),
+    ...(!hideEndpointReferences && version.usedAsEndpoint ? [usedAsEndpoint] : []),
   ]
 
   return (
     <ItemLabels
-      labels={[...version.labels, ...(hideReferences ? [] : extraLabels)]}
+      labels={[...version.labels, ...extraLabels]}
       colors={{ ...colors, ...extraColors }}
       icons={extraIcons}
     />
