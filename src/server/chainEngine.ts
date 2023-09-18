@@ -58,7 +58,14 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
-  stream?: (index: number, chunk: string, cost?: number, duration?: number, failed?: boolean) => void,
+  stream?: (
+    index: number,
+    extraSteps: number,
+    chunk: string,
+    cost?: number,
+    duration?: number,
+    failed?: boolean
+  ) => void,
   continuationID?: number
 ) {
   const continuationInputs = inputs
@@ -98,10 +105,11 @@ export default async function runChain(
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
-    const streamPartialResponse = (chunk: string) => stream?.(index + continuationCount, chunk)
+    const streamPartialResponse = (chunk: string) => stream?.(index, continuationCount, chunk)
     const streamResponse = (response: ResponseType, skipOutput = false) =>
       stream?.(
-        index + continuationCount,
+        index,
+        continuationCount,
         response.failed ? response.error : skipOutput ? '' : response.output,
         response.cost,
         response.duration,
