@@ -18,7 +18,7 @@ export function Segment<T>({
   disabled?: boolean
 }) {
   const firstLastStyle = first ? 'rounded-l-lg' : last ? 'rounded-r-lg' : ''
-  const selectedStyle = selected === value ? 'bg-gray-500 text-white rounded-lg' : ''
+  const selectedStyle = selected === value ? 'text-white rounded-lg' : ''
   const colorStyle = selected === value ? (disabled ? 'bg-gray-500' : 'bg-blue-500') : ''
   const cursorStyle = disabled || selected === value ? 'cursor-default' : 'cursor-pointer'
   return (
