@@ -35,7 +35,7 @@ export default function ChainEditor({
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
   saveItems?: () => void
-  activeIndex: number
+  activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
   addPrompt: () => Promise<{ promptID: number; versionID: number }>

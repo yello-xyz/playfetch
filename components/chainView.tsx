@@ -91,7 +91,7 @@ export default function ChainView({
     refreshPrompt,
   }
 
-  const [activeNodeIndex, setActiveNodeIndex] = useState(1)
+  const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)
   const getItemsToSave = (items: ChainItem[]) =>
@@ -125,8 +125,8 @@ export default function ChainView({
     setSyncedVersionID(activeVersion.id)
     const newNodes = [InputNode, ...activeVersion.items, OutputNode] as ChainNode[]
     setNodes(newNodes)
-    if (activeNodeIndex >= newNodes.length) {
-      setActiveNodeIndex(1)
+    if (activeNodeIndex && activeNodeIndex >= newNodes.length) {
+      setActiveNodeIndex(undefined)
     }
     setSavedItemsKey(getItemsKey(activeVersion.items))
   }
@@ -139,9 +139,12 @@ export default function ChainView({
     }
   }, [project, items, activePromptCache, refreshPrompt])
 
-  const activeNode = nodes[activeNodeIndex]
-  const activePrompt = IsPromptChainItem(activeNode) ? promptCache.promptForItem(activeNode) : undefined
-  const [activePromptVersion, setActivePromptVersion] = useState<PromptVersion>()
+  const hasActiveNode = activeNodeIndex !== undefined
+  const activeNode = hasActiveNode ? nodes[activeNodeIndex] : undefined
+  const isPromptChainItemActive = hasActiveNode && activeNode && IsPromptChainItem(activeNode)
+  const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeNode) : undefined
+  const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeNode) : undefined
+  const [activePromptVersion, setActivePromptVersion] = useState(initialActivePromptVersion)
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
   const refreshProject = useRefreshProject()
@@ -155,7 +158,7 @@ export default function ChainView({
   const selectVersion = (version?: PromptVersion) => {
     savePrompt()
     setActivePromptVersion(version)
-    if (version && IsPromptChainItem(activeNode)) {
+    if (version && isPromptChainItemActive) {
       setNodes([
         ...nodes.slice(0, activeNodeIndex),
         { ...activeNode, versionID: version.id },
@@ -165,7 +168,7 @@ export default function ChainView({
   }
 
   if (activePromptVersion?.parentID !== activePrompt?.id) {
-    selectVersion(IsPromptChainItem(activeNode) ? promptCache.versionForItem(activeNode) : undefined)
+    selectVersion(initialActivePromptVersion)
   } else if (
     activePromptVersion &&
     activePrompt &&
@@ -241,7 +244,7 @@ export default function ChainView({
           setShowVersions={canShowVersions ? setShowVersions : undefined}
         />
       </Allotment.Pane>
-      {!showVersions && (
+      {!showVersions && hasActiveNode && (
         <Allotment.Pane minSize={minWidth}>
           <ChainNodeEditor
             chain={chain}
@@ -249,7 +252,7 @@ export default function ChainView({
             items={items}
             setItems={updateItems}
             activeItemIndex={activeNodeIndex - 1}
-            activeNode={activeNode}
+            activeNode={nodes[activeNodeIndex]}
             promptCache={promptCache}
             prepareForRunning={prepareForRunning}
             savePrompt={() => savePrompt().then(versionID => versionID!)}
