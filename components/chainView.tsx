@@ -3,7 +3,7 @@ import { useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
 import ChainEditor from './chainEditor'
-import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, OutputNode } from './chainNode'
 import { Allotment } from 'allotment'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from './commentsPane'
@@ -13,7 +13,35 @@ import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
-import usePromptCache from '../src/client/hooks/usePromptCache'
+import usePromptCache, { PromptCache } from '../src/client/hooks/usePromptCache'
+
+const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
+  items.map(item => {
+    return IsCodeChainItem(item)
+      ? item
+      : {
+          ...item,
+          activePrompt: undefined,
+          version: undefined,
+        }
+  })
+
+const AugmentItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
+  items.map(item => {
+    const inputs = ExtractChainItemVariables(item, promptCache, false)
+    return IsCodeChainItem(item)
+      ? { ...item, inputs }
+      : {
+          ...item,
+          inputs,
+          dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
+        }
+  })
+
+const GetItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
+  AugmentItemsToSave(StripItemsToSave(items), promptCache)
+
+const GetItemsKey = (items: ChainItem[]) => JSON.stringify(StripItemsToSave(items))
 
 export default function ChainView({
   chain,
@@ -41,28 +69,14 @@ export default function ChainView({
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)
-  const getItemsToSave = (items: ChainItem[]) =>
-    items.map(item => {
-      const inputs = ExtractChainItemVariables(item, promptCache, false)
-      return IsCodeChainItem(item)
-        ? { ...item, inputs }
-        : {
-            ...item,
-            activePrompt: undefined,
-            version: undefined,
-            inputs,
-            dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
-          }
-    })
-  const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
-  const itemsKey = getItemsKey(items)
+  const itemsKey = GetItemsKey(items)
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
 
   const refreshActiveItem = useRefreshActiveItem()
 
   const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
-    setSavedItemsKey(getItemsKey(items))
-    return saveChain(getItemsToSave(items), refreshActiveItem)
+    setSavedItemsKey(GetItemsKey(items))
+    return saveChain(GetItemsToSave(items, promptCache), refreshActiveItem)
   }
 
   const saveItemsIfNeeded = itemsKey !== savedItemsKey ? () => saveItems(items) : undefined
@@ -75,7 +89,7 @@ export default function ChainView({
     if (activeNodeIndex && activeNodeIndex >= newNodes.length) {
       setActiveNodeIndex(undefined)
     }
-    setSavedItemsKey(getItemsKey(activeVersion.items))
+    setSavedItemsKey(GetItemsKey(activeVersion.items))
   }
 
   const refreshProject = useRefreshProject()
