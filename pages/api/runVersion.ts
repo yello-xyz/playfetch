@@ -23,7 +23,6 @@ const logResponse = (
     version.id,
     inputs,
     response.output,
-    new Date(),
     response.cost,
     response.duration,
     []
