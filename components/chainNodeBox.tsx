@@ -44,7 +44,6 @@ export function ChainNodeBox({
   onDelete: () => void
   prompts: Prompt[]
 }) {
-  const cursorClass = onSelect ? 'cursor-pointer' : ''
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-400'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
@@ -66,7 +65,7 @@ export function ChainNodeBox({
         </>
       )}
       <div
-        className={`flex items-center justify-between border px-2 w-96 rounded-lg ${cursorClass} ${colorClass}`}
+        className={`flex items-center justify-between border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`}
         onClick={onSelect}>
         <HeaderItem>
           {icon && <Icon className='mr-0.5 -ml-2' icon={promptIcon} />}

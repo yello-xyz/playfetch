@@ -50,7 +50,7 @@ export async function migrateVersions(postMerge: boolean) {
           versionData.previousVersionID,
           getID(versionData)
         )
-      )  
+      )
     }
   }
 }

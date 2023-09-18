@@ -18,7 +18,6 @@ import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import { ExtractUnboundChainInputs } from './chainNodeEditor'
 import { Allotment } from 'allotment'
 import TabSelector, { HeaderItem, SingleTabHeader } from './tabSelector'
 import LogEntriesView from './logEntriesView'
@@ -29,6 +28,7 @@ import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/client/client
 import { useRouter } from 'next/router'
 import Icon from './icon'
 import chevronIcon from '@/public/chevron.svg'
+import { ExtractUnboundChainInputs } from './chainNodeOutput'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,

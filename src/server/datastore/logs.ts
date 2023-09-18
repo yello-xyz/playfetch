@@ -26,7 +26,7 @@ export async function migrateLogs(postMerge: boolean) {
         logData.attempts,
         logData.cacheHit,
         logData.continuationID,
-        getID(logData),
+        getID(logData)
       )
     )
   }
@@ -91,7 +91,7 @@ const toLogData = (
   attempts: number,
   cacheHit: boolean,
   continuationID: number | undefined,
-  logID?: number,
+  logID?: number
 ) => ({
   key: buildKey(Entity.LOG, logID),
   data: {
