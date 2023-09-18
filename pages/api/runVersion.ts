@@ -17,7 +17,8 @@ const logResponse = (
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>> & { output: string }
 ) => {
-  saveRun(
+  logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+  return saveRun(
     userID,
     version.parentID,
     version.id,
@@ -27,7 +28,6 @@ const logResponse = (
     response.duration,
     []
   )
-  logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
 }
 
 const timestampIf = (condition: boolean) => (condition ? new Date().getTime() : undefined)
@@ -57,7 +57,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       ).then(response => {
         if (!response.failed) {
           sendData({ index: offset(configs.length - 1 + response.extraSteps) })
-          logResponse(req, res, user.id, version, inputs, response)
+          return logResponse(req, res, user.id, version, inputs, response)
         }
       })
     })
