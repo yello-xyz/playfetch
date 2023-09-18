@@ -22,6 +22,7 @@ import VersionTimeline from './versionTimeline'
 import { SingleTabHeader } from './tabSelector'
 import IconButton from './iconButton'
 import closeIcon from '@/public/close.svg'
+import SegmentedControl, { Segment } from './segmentedControl'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined
@@ -104,7 +105,7 @@ export default function ChainView({
             activePrompt: undefined,
             version: undefined,
             inputs,
-            dynamicInputs : ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
+            dynamicInputs: ExtractChainItemVariables(item, promptCache, true).filter(input => !inputs.includes(input)),
           }
     })
   const getItemsKey = (items: ChainItem[]) => JSON.stringify(getItemsToSave(items))
@@ -208,6 +209,8 @@ export default function ChainView({
   }
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
+  const [isTestMode, setTestMode] = useState(false)
+  const isChainEditorDisabled = !isTestMode && hasActiveNode
 
   const minWidth = 300
   return (
@@ -241,8 +244,17 @@ export default function ChainView({
           prompts={project.prompts}
           addPrompt={addPrompt}
           showVersions={showVersions}
-          setShowVersions={canShowVersions ? setShowVersions : undefined}
-        />
+          setShowVersions={canShowVersions ? setShowVersions : undefined}>
+          <SegmentedControl
+            className='absolute z-30 bottom-4 right-4'
+            selected={isTestMode}
+            callback={setTestMode}
+            disabled={isChainEditorDisabled}>
+            <Segment title='Edit' value={false} />
+            <Segment title='Test' value={true} />
+          </SegmentedControl>
+          {isChainEditorDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
+        </ChainEditor>
       </Allotment.Pane>
       {!showVersions && hasActiveNode && (
         <Allotment.Pane minSize={minWidth}>

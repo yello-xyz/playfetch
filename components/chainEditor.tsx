@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { ReactNode, useRef, useState } from 'react'
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
@@ -13,7 +13,6 @@ import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 import CommentPopupMenu from './commentPopupMenu'
-import SegmentedControl, { Segment } from './segmentedControl'
 
 const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
@@ -29,6 +28,7 @@ export default function ChainEditor({
   addPrompt,
   showVersions,
   setShowVersions,
+  children,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -41,6 +41,7 @@ export default function ChainEditor({
   addPrompt: () => Promise<{ promptID: number; versionID: number }>
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
+  children?: ReactNode
 }) {
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
@@ -60,9 +61,6 @@ export default function ChainEditor({
     setActiveIndex(index)
     setActiveMenuIndex(undefined)
   }
-
-  const [isTestMode, setTestMode] = useState(false)
-  const isDisabled = !isTestMode && activeIndex !== undefined
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -98,15 +96,7 @@ export default function ChainEditor({
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
       </div>
-      <SegmentedControl
-        className='absolute z-30 bottom-4 right-4'
-        selected={isTestMode}
-        callback={setTestMode}
-        disabled={isDisabled}>
-        <Segment title='Edit' value={false} />
-        <Segment title='Test' value={true} />
-      </SegmentedControl>
-      {isDisabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
+      {children}
     </div>
   )
 }
