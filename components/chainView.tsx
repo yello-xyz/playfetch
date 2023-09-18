@@ -167,8 +167,8 @@ export default function ChainView({
             <ChainNodeOutput
               chain={chain}
               activeVersion={activeVersion}
-              items={items}
-              activeNode={nodes[activeNodeIndex]}
+              nodes={nodes}
+              activeIndex={activeNodeIndex}
               promptCache={promptCache}
               prepareForRunning={prepareForRunning}
               activeRunID={activeRunID}

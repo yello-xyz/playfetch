@@ -120,6 +120,7 @@ export type PromptInputs = { [name: string]: string }
 
 export type PartialRun = {
   id: number
+  index?: number
   output: string
   timestamp?: number
   cost?: number

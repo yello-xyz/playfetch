@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
 import { useRefreshActiveItem } from '../context/refreshContext'
 
-export default function useRunVersion() {
+export default function useRunVersion(clearFinalPartialRunsOnCompletion = false) {
   const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
@@ -23,10 +23,10 @@ export default function useRunVersion() {
       const lines = text.split('\n')
       for (const line of lines.filter(line => line.trim().length > 0)) {
         const data = line.split('data:').slice(-1)[0]
-        const { inputIndex, index, message, cost, duration, timestamp, failed } = JSON.parse(data)
+        const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed } = JSON.parse(data)
         const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[inputIndex][index] = { id: index, output, cost, duration, timestamp, failed }
+        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, timestamp, failed }
       }
       const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
       setPartialRuns(
@@ -42,7 +42,9 @@ export default function useRunVersion() {
     }
     await refreshActiveItem(versionID)
 
-    setPartialRuns(runs => runs.filter(run => run.timestamp))
+    if (clearFinalPartialRunsOnCompletion) {
+      setPartialRuns(runs => runs.filter(run => run.timestamp))
+    }
 
     setRunning(false)
   }

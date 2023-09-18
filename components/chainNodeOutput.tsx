@@ -6,7 +6,7 @@ import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from './runTimeline'
 import TestDataPane from './testDataPane'
 import RunButtons from './runButtons'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem } from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from './tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { PromptCache } from '../src/client/hooks/usePromptCache'
@@ -44,19 +44,21 @@ export default function ChainNodeOutput({
   chain,
   activeVersion,
   activeRunID,
-  items,
-  activeNode,
+  nodes,
+  activeIndex,
   promptCache,
   prepareForRunning,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   activeRunID?: number
-  items: ChainItem[]
-  activeNode: ChainNode
+  nodes: ChainNode[]
+  activeIndex: number
   promptCache: PromptCache
   prepareForRunning: (items: ChainItem[]) => Promise<number>
 }) {
+  const activeNode = nodes[activeIndex]
+  const items = nodes.filter(IsChainItem)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
@@ -100,7 +102,11 @@ export default function ChainNodeOutput({
         ) : (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
-              runs={[...activeVersion.runs, ...partialRuns]}
+              runs={
+                activeNode === OutputNode
+                  ? activeVersion.runs
+                  : partialRuns.filter(run => run.index === activeIndex - 1)
+              }
               activeItem={chain}
               activeRunID={activeRunID}
               version={activeVersion}
