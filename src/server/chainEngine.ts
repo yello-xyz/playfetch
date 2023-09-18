@@ -50,7 +50,7 @@ const emptyResponse: ResponseType = {
   failed: false,
 }
 
-export const MaxContinuationCount = 10
+const MaxContinuationCount = 10
 
 export default async function runChain(
   userID: number,

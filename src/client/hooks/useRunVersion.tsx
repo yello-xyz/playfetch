@@ -13,7 +13,7 @@ export default function useRunVersion() {
     setPartialRuns([])
     const versionID = await getVersion()
     const streamReader = await api.runVersion(versionID, inputs)
-    const runs = {} as { [index: number]: PartialRun }
+    const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [index: number]: PartialRun }]))
     while (streamReader) {
       const { done, value } = await streamReader.read()
       if (done) {
@@ -23,15 +23,21 @@ export default function useRunVersion() {
       const lines = text.split('\n')
       for (const line of lines.filter(line => line.trim().length > 0)) {
         const data = line.split('data:').slice(-1)[0]
-        const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
-        const previousOutput = runs[index]?.output ?? ''
+        const { inputIndex, index, message, cost, duration, timestamp, failed } = JSON.parse(data)
+        const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[index] = { id: index, output, cost, duration, timestamp, failed }
+        runs[inputIndex][index] = { id: index, output, cost, duration, timestamp, failed }
       }
+      const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
       setPartialRuns(
         Object.entries(runs)
-          .sort(([a], [b]) => Number(a) - Number(b))
-          .map(([, run]) => run)
+          .flatMap(([inputIndex, inputRuns]) =>
+            Object.entries(inputRuns).map(([index, run]) => ({
+              ...run,
+              id: Number(inputIndex) * maxSteps + Number(index),
+            }))
+          )
+          .sort((a, b) => a.id - b.id)
       )
     }
     await refreshActiveItem(versionID)
