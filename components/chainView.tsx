@@ -169,6 +169,7 @@ export default function ChainView({
           isTestMode={isTestMode}
           setTestMode={updateTestMode}
           disabled={!isTestMode && activeNodeIndex !== undefined && isNodeDirty}
+          promptCache={promptCache}
         />
       </Allotment.Pane>
       {!showVersions && activeNodeIndex !== undefined && (

@@ -4,6 +4,7 @@ import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from './segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
+import { PromptCache } from '@/src/client/hooks/usePromptCache'
 
 export default function ChainEditor({
   chain,
@@ -20,6 +21,7 @@ export default function ChainEditor({
   isTestMode,
   setTestMode,
   disabled,
+  promptCache,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -35,6 +37,7 @@ export default function ChainEditor({
   isTestMode: boolean
   setTestMode: (testMode: boolean) => void
   disabled: boolean
+  promptCache: PromptCache
 }) {
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
@@ -87,6 +90,7 @@ export default function ChainEditor({
             }
             onInsertCodeBlock={() => insertCodeBlock(index)}
             prompts={prompts}
+            promptCache={promptCache}
           />
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
