@@ -100,12 +100,6 @@ export default function ChainView({
     })
   }
 
-  const prepareForRunning = async (items: ChainItem[]): Promise<number> => {
-    activateOutputNode()
-    const versionID = await saveItems(items)
-    return versionID!
-  }
-
   const [showVersions, setShowVersions] = useState(false)
   const canShowVersions = chain.versions.length > 1 || chain.versions[0].didRun || chain.versions[0].items.length > 0
   chain.versions.filter(version => version.didRun).length > 0
@@ -169,8 +163,9 @@ export default function ChainView({
               activeVersion={activeVersion}
               nodes={nodes}
               activeIndex={activeNodeIndex}
+              setActiveIndex={updateActiveNodeIndex}
               promptCache={promptCache}
-              prepareForRunning={prepareForRunning}
+              saveItems={items => saveItems(items).then(versionID => versionID!)}
               activeRunID={activeRunID}
             />
           ) : (

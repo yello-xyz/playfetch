@@ -46,16 +46,18 @@ export default function ChainNodeOutput({
   activeRunID,
   nodes,
   activeIndex,
+  setActiveIndex,
   promptCache,
-  prepareForRunning,
+  saveItems,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   activeRunID?: number
   nodes: ChainNode[]
   activeIndex: number
+  setActiveIndex: (index: number) => void
   promptCache: PromptCache
-  prepareForRunning: (items: ChainItem[]) => Promise<number>
+  saveItems: (items: ChainItem[]) => Promise<number>
 }) {
   const activeNode = nodes[activeIndex]
   const items = nodes.filter(IsChainItem)
@@ -69,12 +71,21 @@ export default function ChainNodeOutput({
       .map(promptCache.versionForItem)
       .every(version => !!version && checkProviderAvailable(version.config.provider))
 
-  const [runVersion, partialRuns, isRunning] = useRunVersion()
+  const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion()
+  const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
     if (areProvidersAvailable(items)) {
-      await runVersion(() => prepareForRunning(items), inputs)
+      setActiveIndex(0)
+      setRunningItemIndex(-1)
+      await runVersion(() => saveItems(items), inputs)
+      setActiveIndex(nodes.length - 1)
     }
+  }
+
+  if (highestRunIndex > runningItemIndex) {
+    setActiveIndex(highestRunIndex + 1)
+    setRunningItemIndex(highestRunIndex)
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
