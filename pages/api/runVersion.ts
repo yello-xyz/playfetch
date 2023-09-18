@@ -31,7 +31,7 @@ const logResponse = (
   logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
 }
 
-const timestampIf = (condition: boolean) => (condition ? new Date().toISOString() : undefined)
+const timestampIf = (condition: boolean) => (condition ? new Date().getTime() : undefined)
 
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID

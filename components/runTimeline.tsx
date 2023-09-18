@@ -3,12 +3,12 @@ import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from './tabSelector'
 
-const sortByTimestamp = <T extends { timestamp: string }>(items: T[]): T[] =>
-  items.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
+  items.sort((a, b) => a.timestamp - b.timestamp)
 
-const hasTimestamp = <T extends { timestamp?: string }>(run: T): run is T & { timestamp: string } => !!run.timestamp
+const hasTimestamp = <T extends { timestamp?: number }>(run: T): run is T & { timestamp: number } => !!run.timestamp
 
-const sortRuns = <T extends { timestamp?: string }>(runs: T[]): T[] => [
+const sortRuns = <T extends { timestamp?: number }>(runs: T[]): T[] => [
   ...sortByTimestamp(runs.filter(hasTimestamp)),
   ...runs.filter(run => !hasTimestamp(run)),
 ]

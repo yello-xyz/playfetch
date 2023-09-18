@@ -26,9 +26,7 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
 }) {
   const users = activeItem.users
   const labelColors = AvailableLabelColorsForItem(activeItem)
-  const comments = activeItem.versions
-    .flatMap(version => version.comments)
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  const comments = activeItem.versions.flatMap(version => version.comments).sort((a, b) => a.timestamp - b.timestamp)
 
   return showComments ? (
     <div className='flex flex-col h-full'>

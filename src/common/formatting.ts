@@ -6,15 +6,16 @@ const validEmailRegExp =
 
 export const CheckValidEmail = (email: string) => !!email.trim().toLowerCase().match(validEmailRegExp)
 
-export const FormatDate = (timestamp: string, alwaysIncludeTime = true, alwaysIncludeDate = false) => {
+export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIncludeDate = false) => {
   const toDateString = (date: Date) =>
     date.toLocaleDateString('en', {
       year: '2-digit',
       month: 'numeric',
       day: 'numeric',
     })
-  const dateString = toDateString(new Date(timestamp))
-  const timeString = new Date(timestamp).toLocaleTimeString('en', {
+  const date = new Date(timestamp)
+  const dateString = toDateString(date)
+  const timeString = date.toLocaleTimeString('en', {
     hour: 'numeric',
     minute: 'numeric',
     hour12: false,
@@ -27,7 +28,7 @@ export const FormatDate = (timestamp: string, alwaysIncludeTime = true, alwaysIn
     : dateString
 }
 
-export const FormatRelativeDate = (timestamp: string, thresholdDays = 0) => {
+export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour

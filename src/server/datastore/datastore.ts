@@ -34,7 +34,7 @@ const getKey = (entity: any) => entity[getDatastore().KEY] as Key
 
 export const getID = (entity: any) => Number((entity.key ?? getKey(entity)).id)
 
-export const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date)?.toISOString()
+export const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date)?.getTime()
 
 export const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 

@@ -20,7 +20,7 @@ export type Project = {
   id: number
   name: string
   workspaceID: number
-  timestamp: string
+  timestamp: number
   favorited: boolean
 }
 
@@ -40,7 +40,7 @@ export type Prompt = {
   name: string
   lastVersionID: number
   projectID: number
-  timestamp: string
+  timestamp: number
 }
 
 export type ActivePrompt = Prompt & {
@@ -56,7 +56,7 @@ export type Chain = {
   lastVersionID: number
   referencedItemIDs: number[]
   projectID: number
-  timestamp: string
+  timestamp: number
 }
 
 export type ActiveChain = Chain & {
@@ -92,7 +92,7 @@ type Version = {
   parentID: number
   userID: number
   previousID?: number
-  timestamp: string
+  timestamp: number
   prompts?: Prompts
   config?: PromptConfig
   items?: ChainItemWithInputs[]
@@ -121,14 +121,14 @@ export type PromptInputs = { [name: string]: string }
 export type PartialRun = {
   id: number
   output: string
-  timestamp?: string
+  timestamp?: number
   cost?: number
   duration?: number
   failed?: boolean
 }
 
 export type Run = PartialRun & {
-  timestamp: string
+  timestamp: number
   cost: number
   duration: number
   inputs: PromptInputs
@@ -168,7 +168,7 @@ export type Endpoint = {
   projectID: number
   parentID: number
   versionID: number
-  timestamp: string
+  timestamp: number
   urlPath: string
   flavor: string
   useCache: boolean
@@ -207,7 +207,7 @@ export type Comment = {
   userID: number
   versionID: number
   text: string
-  timestamp: string
+  timestamp: number
   action?: CommentAction
   quote?: string
   runID?: number
@@ -216,7 +216,7 @@ export type Comment = {
 }
 
 export type LogEntry = {
-  timestamp: string
+  timestamp: number
   endpointID: number
   urlPath: string
   flavor: string
