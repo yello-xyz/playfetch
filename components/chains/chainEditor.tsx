@@ -41,6 +41,10 @@ export default function ChainEditor({
 }) {
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
+  if (nodes.length === 2 && !activeMenuIndex) {
+    setActiveMenuIndex(1)
+  }
+
   const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
   const insertItem = (index: number, item: ChainItem) => {
     setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
