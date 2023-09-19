@@ -35,7 +35,7 @@ const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainIte
   return allChainVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
-const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache, includingDynamic: boolean) => {
+export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache, includingDynamic = true) => {
   const allInputVariables = ExtractChainVariables(chain, cache, includingDynamic)
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }

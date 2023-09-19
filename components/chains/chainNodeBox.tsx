@@ -1,5 +1,13 @@
 import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem } from '@/types'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
+import {
+  ChainNode,
+  InputNode,
+  IsChainItem,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  NameForCodeChainItem,
+  OutputNode,
+} from './chainNode'
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
@@ -12,7 +20,9 @@ import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { ChainNodeBoxConnector } from './chainNodeBoxConnector'
 import { TaggedVersionPrompt } from '../versions/versionComparison'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
+import { ExtractUnboundChainVariables } from './chainNodeOutput'
+import { InputVariableClass } from '../prompts/promptInput'
 
 export function ChainNodeBox({
   chain,
@@ -79,7 +89,7 @@ export function ChainNodeBox({
   const insertPrompt = (promptID: number, versionID?: number) =>
     insertItem({
       promptID,
-      versionID: versionID ?? prompts.find(prompt => prompt.id === promptID)!.lastVersionID
+      versionID: versionID ?? prompts.find(prompt => prompt.id === promptID)!.lastVersionID,
     })
 
   const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
@@ -141,6 +151,7 @@ export function ChainNodeBox({
         {IsPromptChainItem(chainNode) && (
           <PromptVersionContent item={chainNode} isSelected={isSelected} promptCache={promptCache} />
         )}
+        {chainNode === InputNode && <InputContent nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
       </div>
     </>
   )
@@ -155,7 +166,6 @@ function PromptVersionContent({
   isSelected: boolean
   promptCache: PromptCache
 }) {
-  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200 bg-white rounded-b-lg'
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
@@ -167,9 +177,37 @@ function PromptVersionContent({
         </span>
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
-      <div className={`p-3 border-t ${colorClass} max-h-[150px] overflow-y-auto`}>
+      <ContentBody isSelected={isSelected}>
         <TaggedVersionPrompt version={version} />
-      </div>
+      </ContentBody>
     </div>
   ) : null
+}
+
+function InputContent({
+  nodes,
+  isSelected,
+  promptCache,
+}: {
+  nodes: ChainNode[]
+  isSelected: boolean
+  promptCache: PromptCache
+}) {
+  const items = nodes.filter(IsChainItem)
+  const variables = ExtractUnboundChainVariables(items, promptCache)
+
+  return variables.length > 0 ? (
+    <ContentBody isSelected={isSelected}>
+      <div className='flex flex-wrap gap-1'>
+        {variables.map((variable, index) => (
+          <span key={index} className={`${InputVariableClass}`}>{`{{${variable}}}`}</span>
+        ))}
+      </div>
+    </ContentBody>
+  ) : null
+}
+
+function ContentBody({ isSelected, children }: { isSelected: boolean; children: ReactNode }) {
+  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200 bg-white rounded-b-lg'
+  return <div className={`p-3 border-t ${colorClass} max-h-[150px] overflow-y-auto`}>{children}</div>
 }
