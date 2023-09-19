@@ -10,6 +10,7 @@ import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import { PromptCache } from '../src/client/hooks/usePromptCache'
 import { GetChainItemsSaveKey } from './chainView'
+import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 
 export default function ChainNodeEditor({
   items,
@@ -34,10 +35,20 @@ export default function ChainNodeEditor({
     ...items.slice(activeIndex + 1),
   ]
 
+  const [areItemsDirty, setItemsDirty] = useState(false)
+  const [isPromptDirty, setPromptDirty] = useState(false)
+  const updateDirtyState = (itemsDirty: boolean, promptDirty: boolean) => {
+    setItemsDirty(itemsDirty)
+    setPromptDirty(promptDirty)
+    setDirty(itemsDirty || promptDirty)
+  }
+  const updateItemsDirty = (itemsDirty: boolean) => updateDirtyState(itemsDirty, isPromptDirty)
+  const updatePromptDirty = (promptDirty: boolean) => updateDirtyState(areItemsDirty, promptDirty)
+
   const updateActiveItem = (item: ChainItem, newItems = updatedItems) => {
     const updatedItems = updateItems(newItems, item)
     setUpdatedItems(updatedItems)
-    setDirty(GetChainItemsSaveKey(items) !== GetChainItemsSaveKey(updatedItems))
+    updateItemsDirty(GetChainItemsSaveKey(items) !== GetChainItemsSaveKey(updatedItems))
   }
 
   const activeItem = updatedItems[activeIndex]
@@ -47,13 +58,9 @@ export default function ChainNodeEditor({
   const [activePromptVersion, setActivePromptVersion] = useState(initialActivePromptVersion)
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
-  const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
-    if (isPromptChainItemActive) {
-      return savePrompt(async versionID => {
-        onSavePrompt?.(versionID)
-        promptCache.refreshPrompt(activeItem.promptID)
-      })
-    }
+  const updateVersion = (version?: PromptVersion) => {
+    setModifiedVersion(version)
+    updatePromptDirty(!!activePromptVersion && !!version && !PromptVersionsAreEqual(activePromptVersion, version))
   }
 
   const selectVersion = (version?: PromptVersion) => {
@@ -61,6 +68,16 @@ export default function ChainNodeEditor({
     setActivePromptVersion(version)
     if (version) {
       updateActiveItem({ ...activeItem, versionID: version.id })
+    }
+    updatePromptDirty(false)
+  }
+
+  const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
+    if (isPromptChainItemActive) {
+      return savePrompt(async versionID => {
+        onSavePrompt?.(versionID)
+        promptCache.refreshPrompt(activeItem.promptID)
+      })
     }
   }
 
@@ -87,7 +104,7 @@ export default function ChainNodeEditor({
             canIncludeContext={items.slice(0, activeIndex).some(IsPromptChainItem)}
             promptCache={promptCache}
             selectVersion={selectVersion}
-            setModifiedVersion={setModifiedVersion}
+            setModifiedVersion={updateVersion}
           />
         )}
         {IsCodeChainItem(activeItem) && (
