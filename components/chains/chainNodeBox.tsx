@@ -11,6 +11,7 @@ import { LabelForModel } from '../prompts/modelSelector'
 import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { ChainNodeBoxConnector } from './chainNodeBoxConnector'
+import VersionComparison from '../versions/versionComparison'
 
 export function ChainNodeBox({
   chain,
@@ -45,7 +46,8 @@ export function ChainNodeBox({
   prompts: Prompt[]
   promptCache: PromptCache
 }) {
-  const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-400'
+  const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-white border-gray-200'
+  const headerColorClass = isSelected ? '' : 'bg-gray-25'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
     <>
@@ -59,8 +61,8 @@ export function ChainNodeBox({
           onInsertCodeBlock={onInsertCodeBlock}
         />
       )}
-      <div className={`flex flex-col border px-2 w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
-        <div className='flex items-center justify-between'>
+      <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
+        <div className={`flex items-center justify-between px-2 rounded-t-lg ${headerColorClass}`}>
           <HeaderItem>
             {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
             {chainNode === InputNode && 'Inputs'}
@@ -81,22 +83,39 @@ export function ChainNodeBox({
             <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
           </div>
         </div>
-        {IsPromptChainItem(chainNode) && <PromptVersionHeader item={chainNode} promptCache={promptCache} />}
+        {IsPromptChainItem(chainNode) && (
+          <PromptVersionContent item={chainNode} isSelected={isSelected} promptCache={promptCache} />
+        )}
       </div>
     </>
   )
 }
 
-function PromptVersionHeader({ item, promptCache }: { item: PromptChainItem; promptCache: PromptCache }) {
+function PromptVersionContent({
+  item,
+  isSelected,
+  promptCache,
+}: {
+  item: PromptChainItem
+  isSelected: boolean
+  promptCache: PromptCache
+}) {
+  const headerColorClass = isSelected ? '' : 'bg-gray-25'
+  const borderClass = isSelected ? 'border-blue-100' : 'border-gray-200'
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
   return prompt && version ? (
-    <div className='flex flex-col gap-1 pb-3 pl-6 -mt-2 ml-0.5'>
-      <span className='text-xs font-medium text-gray-500'>
-        {LabelForModel(version.config.model)} | Prompt version {index + 1}
-      </span>
-      <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
+    <div className='flex flex-col'>
+      <div className={`flex flex-col gap-1 pb-3 pl-6 -mt-2 ml-0.5 ${headerColorClass}`}>
+        <span className='text-xs font-medium text-gray-500'>
+          {LabelForModel(version.config.model)} | Prompt version {index + 1}
+        </span>
+        <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
+      </div>
+      <div className={`p-3 border-t ${borderClass}`}>
+        <VersionComparison version={version} />
+      </div>
     </div>
   ) : null
 }
