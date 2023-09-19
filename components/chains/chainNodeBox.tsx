@@ -1,4 +1,4 @@
-import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User } from '@/types'
 import {
   ChainNode,
   InputNode,
@@ -54,7 +54,6 @@ export function ChainNodeBox({
   const chainNode = nodes[index]
   const isSelected = index === activeIndex
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200'
-  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
 
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
@@ -72,12 +71,9 @@ export function ChainNodeBox({
     onSelect()
   }
 
-  const [label, setLabel] = useState<string>()
-  const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
-  const submitRename = (name: string) => {
-    setNodes([...nodes.slice(0, index), { ...(chainNode as CodeChainItem), name }, ...nodes.slice(index + 1)])
-    setLabel(undefined)
-  }
+  const updateItem = (item: ChainItem) => setNodes([...nodes.slice(0, index), item, ...nodes.slice(index + 1)])
+
+  const renameItem = (name: string) => updateItem({ ...(chainNode as CodeChainItem), name })
 
   const removeItem = () => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
 
@@ -115,45 +111,93 @@ export function ChainNodeBox({
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
-        <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
-          {label !== undefined ? (
-            <EditableHeaderItem value={label} onChange={setLabel} onSubmit={() => submitRename(label)} />
-          ) : (
-            <HeaderItem>
-              {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
-              {chainNode === InputNode && 'Inputs'}
-              {chainNode === OutputNode && 'Output'}
-              {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-              {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
-            </HeaderItem>
-          )}
-          <div className='flex items-center gap-1'>
-            {savedVersion && (
-              <CommentPopupMenu
-                comments={savedVersion.comments.filter(comment => comment.itemIndex === index)}
-                itemIndex={index}
-                versionID={savedVersion.id}
-                users={chain.users}
-                selectedCell={isSelected}
-              />
-            )}
-            {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-              <ChainNodePopupMenu
-                onRename={onRename}
-                onDuplicate={duplicateItem}
-                onEdit={onEdit}
-                onDelete={removeItem}
-                selected={isSelected}
-              />
-            )}
-          </div>
-        </div>
+        <ChainNodeHeader
+          chainNode={chainNode}
+          itemIndex={index}
+          isSelected={isSelected}
+          onRename={renameItem}
+          onDuplicate={duplicateItem}
+          onEdit={onEdit}
+          onDelete={removeItem}
+          savedVersion={savedVersion}
+          prompts={prompts}
+          users={chain.users}
+        />
         {IsPromptChainItem(chainNode) && (
           <PromptVersionContent item={chainNode} isSelected={isSelected} promptCache={promptCache} />
         )}
         {chainNode === InputNode && <InputContent nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
       </div>
     </>
+  )
+}
+
+function ChainNodeHeader({
+  chainNode,
+  itemIndex,
+  isSelected,
+  onRename,
+  onDuplicate,
+  onEdit,
+  onDelete,
+  savedVersion,
+  prompts,
+  users,
+}: {
+  chainNode: ChainNode
+  itemIndex: number
+  isSelected: boolean
+  onRename: (name: string) => void
+  onDuplicate: () => void
+  onEdit: () => void
+  onDelete: () => void
+  savedVersion: ChainVersion | null
+  prompts: Prompt[]
+  users: User[]
+}) {
+  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
+
+  const [label, setLabel] = useState<string>()
+  const onRenameCodeChainItem = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
+  const submitRename = (name: string) => {
+    onRename(name)
+    setLabel(undefined)
+  }
+
+  return (
+    <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
+      {label !== undefined ? (
+        <EditableHeaderItem value={label} onChange={setLabel} onSubmit={() => submitRename(label)} />
+      ) : (
+        <HeaderItem>
+          {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
+          {chainNode === InputNode && 'Inputs'}
+          {chainNode === OutputNode && 'Output'}
+          {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
+          {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+        </HeaderItem>
+      )}
+      <div className='flex items-center gap-1'>
+        {savedVersion && (
+          <CommentPopupMenu
+            comments={savedVersion.comments.filter(comment => comment.itemIndex === itemIndex)}
+            itemIndex={itemIndex}
+            versionID={savedVersion.id}
+            users={users}
+            selectedCell={isSelected}
+          />
+        )}
+        {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
+          <ChainNodePopupMenu
+            onRename={onRenameCodeChainItem}
+            onDuplicate={onDuplicate}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            selected={isSelected}
+          />
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -171,7 +215,7 @@ function PromptVersionContent({
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
   return prompt && version ? (
     <div className='flex flex-col'>
-      <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2 ml-0.5'>
+      <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2.5 ml-0.5'>
         <span className='text-xs font-medium text-gray-500'>
           {LabelForModel(version.config.model)} | Prompt version {index + 1}
         </span>
