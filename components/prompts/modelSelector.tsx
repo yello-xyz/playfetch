@@ -182,7 +182,7 @@ export default function ModelSelector({
   setModel: (model: LanguageModel) => void
 }) {
   return (
-    <DropdownMenu size='medium' value={model} onChange={value => setModel(value as LanguageModel)}>
+    <DropdownMenu size='md' value={model} onChange={value => setModel(value as LanguageModel)}>
       {sortedModels.map((model, index) => (
         <option key={index} value={model}>
           {fullLabelForModel(model)}

@@ -145,7 +145,7 @@ export default function RunButtons({
       {showTestMode && (
         <DropdownMenu
           disabled={allInputs.length <= 1}
-          size='medium'
+          size='md'
           value={testConfig.mode}
           onChange={value => updateTestMode(value as TestConfig['mode'])}>
           {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
