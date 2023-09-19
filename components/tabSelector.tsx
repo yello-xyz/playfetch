@@ -1,7 +1,6 @@
 import { StaticImageData } from 'next/image'
 import { ReactNode, useCallback, useState } from 'react'
 import Icon from './icon'
-import useInitialState from '@/src/client/hooks/useInitialState'
 
 export function SingleTabHeader({
   label,
@@ -41,26 +40,13 @@ export default function TabSelector<T extends string>({
   children?: ReactNode
 }) {
   const [isEditingLabel, setEditingLabel] = useState(false)
-  const inputRef = useCallback((node: any) => node?.select(), [])
-
-  const onKeyDown = (event: any) => {
-    if (event.key === 'Enter') {
-      setEditingLabel(false)
-    }
-  }
 
   return (
     <CustomHeader>
       <div className='flex items-center gap-0.5'>
         {icon && !isEditingLabel && <Icon className='-mr-1.5' icon={icon} />}
-        {isEditingLabel ? (
-          <input
-            ref={inputRef}
-            className={headerClassName}
-            value={tabs[0]}
-            onChange={event => onUpdateLabel?.(event.target.value)}
-            onKeyDown={onKeyDown}
-          />
+        {isEditingLabel && onUpdateLabel ? (
+          <EditableHeaderItem value={tabs[0]} onChange={onUpdateLabel} onSubmit={() => setEditingLabel(false)} />
         ) : (
           tabs.map((tab, index) => (
             <TabButton
@@ -121,5 +107,33 @@ export function HeaderItem({
     <div className={`flex ${className} ${headerClassName} ${activeClass}`} onClick={onClick}>
       {children}
     </div>
+  )
+}
+
+export function EditableHeaderItem({
+  value,
+  onChange,
+  onSubmit,
+}: {
+  value: string
+  onChange: (value: string) => void
+  onSubmit: () => void
+}) {
+  const inputRef = useCallback((node: any) => node?.select(), [])
+
+  const onKeyDown = (event: any) => {
+    if (event.key === 'Enter') {
+      onSubmit()
+    }
+  }
+
+  return (
+    <input
+      ref={inputRef}
+      className={headerClassName}
+      value={value}
+      onChange={event => onChange(event.target.value)}
+      onKeyDown={onKeyDown}
+    />
   )
 }
