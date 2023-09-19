@@ -89,7 +89,8 @@ function TabButton<T extends string>({
   )
 }
 
-const headerClassName = 'select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700'
+const headerClassName =
+  'select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 bg-transparent'
 
 export function HeaderItem({
   active = true,
@@ -134,6 +135,7 @@ export function EditableHeaderItem({
       value={value}
       onChange={event => onChange(event.target.value)}
       onKeyDown={onKeyDown}
+      onBlur={onSubmit}
     />
   )
 }
