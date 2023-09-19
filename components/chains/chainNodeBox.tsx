@@ -55,8 +55,6 @@ export function ChainNodeBox({
 
   const updateItem = (item: ChainItem) => setNodes([...nodes.slice(0, index), item, ...nodes.slice(index + 1)])
 
-  const renameItem = (name: string) => updateItem({ ...(chainNode as CodeChainItem), name })
-
   const removeItem = () => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
 
   const insertItem = (item: ChainItem) => {
@@ -93,12 +91,11 @@ export function ChainNodeBox({
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
-        <ChainNodeBoxPreHeader nodes={nodes} index={index} isSelected={isSelected} updateItem={updateItem} />
         <ChainNodeBoxHeader
-          chainNode={chainNode}
-          itemIndex={index}
+          nodes={nodes}
+          index={index}
           isSelected={isSelected}
-          onRename={renameItem}
+          onUpdate={updateItem}
           onDuplicate={duplicateItem}
           onEdit={onEdit}
           onDelete={removeItem}
@@ -110,36 +107,4 @@ export function ChainNodeBox({
       </div>
     </>
   )
-}
-
-function ChainNodeBoxPreHeader({
-  nodes,
-  index,
-  isSelected,
-  updateItem,
-}: {
-  nodes: ChainNode[]
-  index: number
-  isSelected: boolean
-  updateItem: (item: ChainItem) => void
-}) {
-  const chainNode = nodes[index]
-  const havePreviousContext = nodes.slice(0, index).some(IsPromptChainItem)
-  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200 bg-white rounded-t-lg'
-  const identifier = `chain-node-box-pre-header-${index}`
-
-  return IsPromptChainItem(chainNode) && havePreviousContext ? (
-    <div className={`${colorClass} border-b p-3 flex items-center justify-center gap-1.5`}>
-      <input
-        type='checkbox'
-        className='cursor-pointer'
-        id={identifier}
-        checked={!!chainNode.includeContext}
-        onChange={event => updateItem({ ...chainNode, includeContext: event.target.checked })}
-      />
-      <label className='text-xs cursor-pointer' htmlFor={identifier}>
-        Include previous context
-      </label>
-    </div>
-  ) : null
 }
