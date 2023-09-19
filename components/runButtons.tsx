@@ -82,6 +82,7 @@ const selectValidRowIndices = (
 export default function RunButtons({
   runTitle,
   variables,
+  staticVariables,
   inputValues,
   languageModel,
   setLanguageModel,
@@ -93,6 +94,7 @@ export default function RunButtons({
 }: {
   runTitle?: string
   variables: string[]
+  staticVariables: string[]
   inputValues: InputValues
   languageModel?: LanguageModel
   setLanguageModel?: (model: LanguageModel) => void
@@ -156,7 +158,7 @@ export default function RunButtons({
       <PendingButton
         title={runTitle ?? 'Run'}
         pendingTitle='Running'
-        disabled={disabled || (rowIndices.length === 0 && variables.length > 0)}
+        disabled={disabled || (rowIndices.length === 0 && staticVariables.length > 0)}
         onClick={testPrompt}
       />
     </div>

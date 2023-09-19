@@ -122,6 +122,7 @@ export default function PromptPanel({
         <RunButtons
           runTitle={version.runs.length > 0 ? 'Run again' : 'Run'}
           variables={ExtractPromptVariables(prompts, config)}
+          staticVariables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}
           languageModel={config.model}
           setLanguageModel={updateModel}
