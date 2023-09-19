@@ -11,7 +11,7 @@ import { LabelForModel } from '../prompts/modelSelector'
 import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { ChainNodeBoxConnector } from './chainNodeBoxConnector'
-import VersionComparison from '../versions/versionComparison'
+import { TaggedVersionPrompt } from '../versions/versionComparison'
 
 export function ChainNodeBox({
   chain,
@@ -114,7 +114,7 @@ function PromptVersionContent({
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
       <div className={`p-3 border-t ${borderClass}`}>
-        <VersionComparison version={version} />
+        <TaggedVersionPrompt version={version} />
       </div>
     </div>
   ) : null

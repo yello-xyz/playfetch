@@ -1,5 +1,6 @@
 import { PromptVersion } from '@/types'
 import simplediff from 'simplediff'
+import { InputVariableClass } from '../prompts/promptInput'
 
 type Span = { state: ComparisonState; content: string; tagged: boolean }
 const trimmedWords = (span: Span) => span.content.trim().split(' ')
@@ -50,16 +51,16 @@ const truncate = (spans: Span[], maxLength: number) => {
 }
 
 type ComparisonState = '=' | '-' | '+'
-const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: boolean }) => {
+const classNameForDiff = ({ state, tagged }: { state: ComparisonState; tagged: boolean }, taggedClassName: string) => {
   const baseClassName = 'mr-0.5 whitespace-pre-wrap'
-  const taggedClassName = tagged ? 'font-bold' : ''
+  const classNameIfTagged = tagged ? taggedClassName : ''
   switch (state) {
     case '=':
-      return `${baseClassName} ${taggedClassName}`
+      return `${baseClassName} ${classNameIfTagged}`
     case '-':
-      return `bg-red-100 ${baseClassName} ${taggedClassName}`
+      return `bg-red-100 ${baseClassName} ${classNameIfTagged}`
     case '+':
-      return `bg-green-100 ${baseClassName} ${taggedClassName}`
+      return `bg-green-100 ${baseClassName} ${classNameIfTagged}`
   }
 }
 
@@ -87,9 +88,13 @@ const tokenize = (prompt: string) => {
 export default function VersionComparison({
   version,
   compareVersion,
+  stripSentinels = true,
+  taggedClassName = 'font-bold',
 }: {
   version: PromptVersion
   compareVersion?: PromptVersion
+  stripSentinels?: boolean
+  taggedClassName?: string
 }) {
   const parts = compareVersion
     ? simplediff.diff(tokenize(compareVersion.prompts.main), tokenize(version.prompts.main))
@@ -109,12 +114,16 @@ export default function VersionComparison({
       if (start < 0 && end < 0) {
         result.push({ state, content, tagged })
         break
-      } else if (start >= 0 && (end < 0 || start < end)) {
+      } else if (start >= 0 && (end < 0 || start < end) && (!tagged || stripSentinels || start > 0)) {
         result.push({ state, content: content.substring(0, start + (tagged ? startSentinel.length : 0)), tagged })
-        content = content.substring(start + startSentinel.length)
+        content = content.substring(start + (stripSentinels || tagged ? startSentinel.length : 0))
         tagged = true
       } else {
-        result.push({ state, content: content.substring(0, end + (tagged ? 0 : endSentinel.length)), tagged })
+        result.push({
+          state,
+          content: content.substring(0, end + (tagged && stripSentinels ? 0 : endSentinel.length)),
+          tagged,
+        })
         content = content.substring(end + endSentinel.length)
         tagged = false
       }
@@ -124,10 +133,22 @@ export default function VersionComparison({
   return (
     <>
       {truncate(result, 25).map((diff, index: number) => (
-        <span key={index} className={classNameForDiff(diff)}>
+        <span key={index} className={classNameForDiff(diff, taggedClassName)}>
           {diff.content}
         </span>
       ))}
     </>
   )
+}
+
+export function TaggedVersionPrompt({
+  version,
+  stripSentinels = false,
+  taggedClassName = InputVariableClass,
+}: {
+  version: PromptVersion
+  stripSentinels?: boolean
+  taggedClassName?: string
+}) {
+  return <VersionComparison version={version} stripSentinels={stripSentinels} taggedClassName={taggedClassName} />
 }

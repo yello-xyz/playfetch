@@ -6,7 +6,7 @@ import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 const ContentEditable = dynamic(() => import('../contentEditable'))
 
-const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
+export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
 const printVariables = (text: string) =>
   text
