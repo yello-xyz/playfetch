@@ -1,6 +1,6 @@
-import { ActiveChain, ChainVersion, Prompt, PromptChainItem } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
-import { EditableHeaderItem, HeaderItem, SingleTabHeader } from '../tabSelector'
+import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import Icon from '../icon'
@@ -16,47 +16,46 @@ import { useState } from 'react'
 
 export function ChainNodeBox({
   chain,
+  index,
+  nodes,
+  setNodes,
+  activeIndex,
+  setActiveIndex,
   savedVersion,
-  chainNode,
-  itemIndex,
-  isFirst,
-  isSelected,
   isTestMode,
   setTestMode,
-  onSelect,
-  isMenuActive,
-  setMenuActive,
-  onDelete,
-  onDuplicate,
-  onInsertPrompt,
-  onInsertNewPrompt,
-  onInsertCodeBlock,
-  onRenameCodeChainItem,
   prompts,
+  addPrompt,
   promptCache,
 }: {
   chain: ActiveChain
+  index: number
+  nodes: ChainNode[]
+  setNodes: (nodes: ChainNode[]) => void
+  activeIndex: number | undefined
+  setActiveIndex: (index: number) => void
   savedVersion: ChainVersion | null
-  chainNode: ChainNode
-  itemIndex: number
-  isFirst: boolean
-  isSelected: boolean
   isTestMode: boolean
   setTestMode: (testMode: boolean) => void
-  onSelect: () => void
-  isMenuActive: boolean
-  setMenuActive: (active: boolean) => void
-  onDelete: () => void
-  onDuplicate: () => void
-  onInsertPrompt: (promptID: number) => void
-  onInsertNewPrompt: () => void
-  onInsertCodeBlock: () => void
-  onRenameCodeChainItem: (name: string) => void
   prompts: Prompt[]
+  addPrompt: () => Promise<{ promptID: number; versionID: number }>
   promptCache: PromptCache
 }) {
+  const chainNode = nodes[index]
+  const isSelected = index === activeIndex
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
+
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
+
+  if (nodes.length === 2 && !activeMenuIndex) {
+    setActiveMenuIndex(1)
+  }
+
+  const onSelect = () => {
+    setActiveIndex(index)
+    setActiveMenuIndex(undefined)
+  }
 
   const onEdit = () => {
     setTestMode(false)
@@ -66,21 +65,43 @@ export function ChainNodeBox({
   const [label, setLabel] = useState<string>()
   const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
   const submitRename = (name: string) => {
-    onRenameCodeChainItem(name)
+    setNodes([...nodes.slice(0, index), { ...(chainNode as CodeChainItem), name }, ...nodes.slice(index + 1)])
     setLabel(undefined)
+  }
+
+  const removeItem = () => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
+
+  const insertItem = (item: ChainItem) => {
+    setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
+    setActiveIndex(index)
+  }
+
+  const insertPrompt = (promptID: number, versionID?: number) =>
+    insertItem({
+      promptID,
+      versionID: versionID ?? prompts.find(prompt => prompt.id === promptID)!.lastVersionID
+    })
+
+  const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
+
+  const insertCodeBlock = () => insertItem({ code: '' })
+
+  const duplicateItem = () => {
+    insertItem({ ...(chainNode as ChainItem), output: undefined })
+    setActiveIndex(index + 1)
   }
 
   return (
     <>
-      {!isFirst && (
+      {index > 0 && (
         <ChainNodeBoxConnector
           prompts={prompts}
           isDisabled={isTestMode}
-          isActive={isMenuActive}
-          setActive={setMenuActive}
-          onInsertPrompt={onInsertPrompt}
-          onInsertNewPrompt={onInsertNewPrompt}
-          onInsertCodeBlock={onInsertCodeBlock}
+          isActive={index === activeMenuIndex}
+          setActive={active => setActiveMenuIndex(active ? index : undefined)}
+          onInsertPrompt={insertPrompt}
+          onInsertNewPrompt={insertNewPrompt}
+          onInsertCodeBlock={insertCodeBlock}
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
@@ -99,8 +120,8 @@ export function ChainNodeBox({
           <div className='flex items-center gap-1'>
             {savedVersion && (
               <CommentPopupMenu
-                comments={savedVersion.comments.filter(comment => comment.itemIndex === itemIndex)}
-                itemIndex={itemIndex}
+                comments={savedVersion.comments.filter(comment => comment.itemIndex === index)}
+                itemIndex={index}
                 versionID={savedVersion.id}
                 users={chain.users}
                 selectedCell={isSelected}
@@ -109,9 +130,9 @@ export function ChainNodeBox({
             {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
               <ChainNodePopupMenu
                 onRename={onRename}
-                onDuplicate={onDuplicate}
+                onDuplicate={duplicateItem}
                 onEdit={onEdit}
-                onDelete={onDelete}
+                onDelete={removeItem}
                 selected={isSelected}
               />
             )}
