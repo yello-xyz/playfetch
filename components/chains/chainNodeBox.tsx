@@ -48,8 +48,7 @@ export function ChainNodeBox({
   prompts: Prompt[]
   promptCache: PromptCache
 }) {
-  const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-white border-gray-200'
-  const headerColorClass = isSelected ? '' : 'bg-gray-25'
+  const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
   return (
     <>
@@ -65,7 +64,7 @@ export function ChainNodeBox({
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
-        <div className={`flex items-center justify-between px-2 rounded-t-lg ${headerColorClass}`}>
+        <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
           <HeaderItem>
             {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
             {chainNode === InputNode && 'Inputs'}
@@ -103,20 +102,19 @@ function PromptVersionContent({
   isSelected: boolean
   promptCache: PromptCache
 }) {
-  const headerColorClass = isSelected ? '' : 'bg-gray-25'
-  const borderClass = isSelected ? 'border-blue-100' : 'border-gray-200'
+  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200 bg-white rounded-b-lg'
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
   return prompt && version ? (
     <div className='flex flex-col'>
-      <div className={`flex flex-col gap-1 pb-3 pl-6 -mt-2 ml-0.5 ${headerColorClass}`}>
+      <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2 ml-0.5'>
         <span className='text-xs font-medium text-gray-500'>
           {LabelForModel(version.config.model)} | Prompt version {index + 1}
         </span>
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
-      <div className={`p-3 border-t ${borderClass}`}>
+      <div className={`p-3 border-t ${colorClass}`}>
         <TaggedVersionPrompt version={version} />
       </div>
     </div>
