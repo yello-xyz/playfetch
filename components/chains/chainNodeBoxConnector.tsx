@@ -10,6 +10,7 @@ import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
 
 export function ChainNodeBoxConnector({
+  isDisabled,
   isActive,
   setActive,
   onInsertPrompt,
@@ -17,6 +18,7 @@ export function ChainNodeBoxConnector({
   onInsertCodeBlock,
   prompts,
 }: {
+  isDisabled: boolean
   isActive: boolean
   setActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
@@ -28,14 +30,18 @@ export function ChainNodeBoxConnector({
     <>
       <SmallDot margin='-mt-[5px] mb-0.5' />
       <DownStroke height='min-h-[12px]' />
-      <AddButton
-        prompts={prompts}
-        isActive={isActive}
-        setActive={setActive}
-        onInsertPrompt={onInsertPrompt}
-        onInsertNewPrompt={onInsertNewPrompt}
-        onInsertCodeBlock={onInsertCodeBlock}
-      />
+      {isDisabled ? (
+        <DownStroke height='min-h-[20px]' />
+      ) : (
+        <AddButton
+          prompts={prompts}
+          isActive={isActive}
+          setActive={setActive}
+          onInsertPrompt={onInsertPrompt}
+          onInsertNewPrompt={onInsertNewPrompt}
+          onInsertCodeBlock={onInsertCodeBlock}
+        />
+      )}
       <DownArrow height='min-h-[18px]' />
       <SmallDot margin='-mb-[5px] mt-1' />
     </>
@@ -47,7 +53,7 @@ const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margi
 )
 
 const DownStroke = ({ height = 'h-full', color = 'border-gray-400' }: { height?: string; color?: string }) => (
-  <div className={`${height} w-px h-4 border-l ${color}`} />
+  <div className={`${height} w-px border-l ${color}`} />
 )
 
 const DownArrow = ({ height }: { height: string }) => (

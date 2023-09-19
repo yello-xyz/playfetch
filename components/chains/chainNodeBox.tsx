@@ -21,6 +21,7 @@ export function ChainNodeBox({
   isFirst,
   isSelected,
   onSelect,
+  isMenuDisabled,
   isMenuActive,
   setMenuActive,
   onInsertPrompt,
@@ -37,6 +38,7 @@ export function ChainNodeBox({
   isFirst: boolean
   isSelected: boolean
   onSelect: () => void
+  isMenuDisabled: boolean
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
@@ -54,6 +56,7 @@ export function ChainNodeBox({
       {!isFirst && (
         <ChainNodeBoxConnector
           prompts={prompts}
+          isDisabled={isMenuDisabled}
           isActive={isMenuActive}
           setActive={setMenuActive}
           onInsertPrompt={onInsertPrompt}

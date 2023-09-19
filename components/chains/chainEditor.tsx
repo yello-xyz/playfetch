@@ -85,6 +85,7 @@ export default function ChainEditor({
             isFirst={index === 0}
             isSelected={index === activeIndex}
             onSelect={() => onSelect(index)}
+            isMenuDisabled={isTestMode}
             isMenuActive={index === activeMenuIndex}
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onDelete={() => removeItem(index)}
