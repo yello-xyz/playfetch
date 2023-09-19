@@ -53,11 +53,11 @@ function OutputMapper({
   onMapOutput: (input?: string) => void
   isSelected: boolean
 }) {
-  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200'
+  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200 bg-white rounded-b-lg'
 
   return inputs.length > 0 ? (
     <div
-      className={`flex items-center justify-center gap-2 p-2 px-3 text-xs bg-white rounded-b-lg border-t ${colorClass}`}>
+      className={`flex items-center justify-center gap-2 p-2 px-3 text-xs border-t ${colorClass}`}>
       <Label className='whitespace-nowrap'>→</Label>
       <DropdownMenu
         size='xs'
