@@ -20,8 +20,9 @@ export function ChainNodeBox({
   itemIndex,
   isFirst,
   isSelected,
+  isTestMode,
+  setTestMode,
   onSelect,
-  isMenuDisabled,
   isMenuActive,
   setMenuActive,
   onInsertPrompt,
@@ -37,8 +38,9 @@ export function ChainNodeBox({
   itemIndex: number
   isFirst: boolean
   isSelected: boolean
+  isTestMode: boolean
+  setTestMode: (testMode: boolean) => void
   onSelect: () => void
-  isMenuDisabled: boolean
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
@@ -50,12 +52,18 @@ export function ChainNodeBox({
 }) {
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
+  
+  const onEdit = () => {
+    setTestMode(false)
+    onSelect()
+  }
+
   return (
     <>
       {!isFirst && (
         <ChainNodeBoxConnector
           prompts={prompts}
-          isDisabled={isMenuDisabled}
+          isDisabled={isTestMode}
           isActive={isMenuActive}
           setActive={setMenuActive}
           onInsertPrompt={onInsertPrompt}
@@ -83,7 +91,7 @@ export function ChainNodeBox({
               />
             )}
             {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-              <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+              <ChainNodePopupMenu onDelete={onDelete} onEdit={onEdit} selected={isSelected} />
             )}
           </div>
         </div>
