@@ -26,11 +26,12 @@ export function ChainNodeBox({
   onSelect,
   isMenuActive,
   setMenuActive,
+  onDelete,
+  onDuplicate,
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertCodeBlock,
   onRenameCodeChainItem,
-  onDelete,
   prompts,
   promptCache,
 }: {
@@ -45,11 +46,12 @@ export function ChainNodeBox({
   onSelect: () => void
   isMenuActive: boolean
   setMenuActive: (active: boolean) => void
+  onDelete: () => void
+  onDuplicate: () => void
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertCodeBlock: () => void
   onRenameCodeChainItem: (name: string) => void
-  onDelete: () => void
   prompts: Prompt[]
   promptCache: PromptCache
 }) {
@@ -105,7 +107,13 @@ export function ChainNodeBox({
               />
             )}
             {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-              <ChainNodePopupMenu onDelete={onDelete} onEdit={onEdit} onRename={onRename} selected={isSelected} />
+              <ChainNodePopupMenu
+                onRename={onRename}
+                onDuplicate={onDuplicate}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                selected={isSelected}
+              />
             )}
           </div>
         </div>

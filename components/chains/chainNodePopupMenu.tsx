@@ -3,29 +3,35 @@ import dotsIcon from '@/public/dots.svg'
 import GlobalPopupMenu from '../globalPopupMenu'
 
 export default function ChainNodePopupMenu({
-  onDelete,
-  onEdit,
   onRename,
+  onDuplicate,
+  onEdit,
+  onDelete,
   selected,
 }: {
-  onDelete: () => void
-  onEdit: () => void
   onRename?: () => void
+  onDuplicate: () => void
+  onEdit: () => void
+  onDelete: () => void
   selected?: boolean
 }) {
-  const loadPopup = (): [typeof ChainNodePopup, ChainNodePopupProps] => [ChainNodePopup, { onDelete, onEdit, onRename }]
+  const loadPopup = (): [typeof ChainNodePopup, ChainNodePopupProps] => [
+    ChainNodePopup,
+    { onRename, onDuplicate, onEdit, onDelete },
+  ]
 
   return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selected} />
 }
 
 type ChainNodePopupProps = {
-  onDelete: () => void
-  onEdit: () => void
   onRename?: () => void
+  onDuplicate: () => void
+  onEdit: () => void
+  onDelete: () => void
   onDismissGlobalPopup?: () => void
 }
 
-function ChainNodePopup({ onDelete, onEdit, onRename, onDismissGlobalPopup }: ChainNodePopupProps) {
+function ChainNodePopup({ onRename, onDuplicate, onEdit, onDelete, onDismissGlobalPopup }: ChainNodePopupProps) {
   const dismissAndCallback = (callback: () => void) => () => {
     onDismissGlobalPopup?.()
     callback()
@@ -34,7 +40,8 @@ function ChainNodePopup({ onDelete, onEdit, onRename, onDismissGlobalPopup }: Ch
   return (
     <PopupContent className='w-40'>
       {onRename && <PopupMenuItem title='Rename' callback={dismissAndCallback(onRename)} first />}
-      <PopupMenuItem title='Edit' callback={dismissAndCallback(onEdit)} first={!onRename} />
+      <PopupMenuItem title='Duplicate' callback={dismissAndCallback(onDuplicate)} first={!onRename} />
+      <PopupMenuItem title='Edit' callback={dismissAndCallback(onEdit)} />
       <PopupMenuItem destructive title='Delete' callback={dismissAndCallback(onDelete)} last />
     </PopupContent>
   )

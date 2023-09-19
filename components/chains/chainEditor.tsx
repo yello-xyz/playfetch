@@ -47,17 +47,26 @@ export default function ChainEditor({
 
   const renameCodeChainItem = (index: number, name: string) =>
     setNodes([...nodes.slice(0, index), { ...(nodes[index] as CodeChainItem), name }, ...nodes.slice(index + 1)])
+
   const removeItem = (index: number) => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
+
   const insertItem = (index: number, item: ChainItem) => {
     setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
     setActiveIndex(index)
   }
+
   const insertPrompt = (index: number, promptID: number, versionID?: number) =>
     insertItem(index, {
       promptID,
       versionID: versionID ?? prompts.find(prompt => prompt.id === promptID)!.lastVersionID,
     })
+
   const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
+
+  const duplicateItem = (index: number) => {
+    insertItem(index, { ...(nodes[index] as ChainItem), output: undefined })
+    setActiveIndex(index + 1)
+  }
 
   const onSelect = (index: number) => {
     setActiveIndex(index)
@@ -93,6 +102,7 @@ export default function ChainEditor({
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             onRenameCodeChainItem={name => renameCodeChainItem(index, name)}
             onDelete={() => removeItem(index)}
+            onDuplicate={() => duplicateItem(index)}
             onInsertPrompt={promptID => insertPrompt(index, promptID)}
             onInsertNewPrompt={() =>
               addPrompt().then(({ promptID, versionID }) => insertPrompt(index, promptID, versionID))
