@@ -67,10 +67,10 @@ export default function ChainNodeEditor({
   const selectVersion = (version?: PromptVersion) => {
     saveAndRefreshPrompt()
     setActivePromptVersion(version)
+    updatePromptDirty(false)
     if (version) {
       updateActiveItem({ ...activeItem, versionID: version.id })
     }
-    updatePromptDirty(false)
   }
 
   const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
