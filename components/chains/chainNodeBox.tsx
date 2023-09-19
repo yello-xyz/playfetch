@@ -1,6 +1,6 @@
 import { ActiveChain, ChainVersion, Prompt, PromptChainItem } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
-import { HeaderItem } from '../tabSelector'
+import { EditableHeaderItem, HeaderItem, SingleTabHeader } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import Icon from '../icon'
@@ -12,6 +12,7 @@ import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { ChainNodeBoxConnector } from './chainNodeBoxConnector'
 import { TaggedVersionPrompt } from '../versions/versionComparison'
+import { useState } from 'react'
 
 export function ChainNodeBox({
   chain,
@@ -28,6 +29,7 @@ export function ChainNodeBox({
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertCodeBlock,
+  onRenameCodeChainItem,
   onDelete,
   prompts,
   promptCache,
@@ -46,16 +48,24 @@ export function ChainNodeBox({
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertCodeBlock: () => void
+  onRenameCodeChainItem: (name: string) => void
   onDelete: () => void
   prompts: Prompt[]
   promptCache: PromptCache
 }) {
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200'
   const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
-  
+
   const onEdit = () => {
     setTestMode(false)
     onSelect()
+  }
+
+  const [label, setLabel] = useState<string>()
+  const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
+  const submitRename = (name: string) => {
+    onRenameCodeChainItem(name)
+    setLabel(undefined)
   }
 
   return (
@@ -73,13 +83,17 @@ export function ChainNodeBox({
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
         <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
-          <HeaderItem>
-            {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
-            {chainNode === InputNode && 'Inputs'}
-            {chainNode === OutputNode && 'Output'}
-            {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-            {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
-          </HeaderItem>
+          {label !== undefined ? (
+            <EditableHeaderItem value={label} onChange={setLabel} onSubmit={() => submitRename(label)} />
+          ) : (
+            <HeaderItem>
+              {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
+              {chainNode === InputNode && 'Inputs'}
+              {chainNode === OutputNode && 'Output'}
+              {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
+              {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+            </HeaderItem>
+          )}
           <div className='flex items-center gap-1'>
             {savedVersion && (
               <CommentPopupMenu
@@ -91,7 +105,7 @@ export function ChainNodeBox({
               />
             )}
             {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-              <ChainNodePopupMenu onDelete={onDelete} onEdit={onEdit} selected={isSelected} />
+              <ChainNodePopupMenu onDelete={onDelete} onEdit={onEdit} onRename={onRename} selected={isSelected} />
             )}
           </div>
         </div>
