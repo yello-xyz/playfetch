@@ -172,9 +172,9 @@ export default function ChainView({
           promptCache={promptCache}
         />
       </Allotment.Pane>
-      {!showVersions && activeNodeIndex !== undefined && (
+      {!showVersions && activeNodeIndex !== undefined && (isTestMode || !isInputOutputNode) && (
         <Allotment.Pane minSize={minWidth}>
-          {isTestMode || isInputOutputNode ? (
+          {isTestMode ? (
             <ChainNodeOutput
               chain={chain}
               activeVersion={activeVersion}
