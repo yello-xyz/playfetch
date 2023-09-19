@@ -37,7 +37,6 @@ const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 've
 type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
 type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
 type ChainStepResponse = PromptResponse | CodeResponse
-const isPromptResponse = (response: ChainStepResponse): response is PromptResponse => 'interrupted' in response
 type ResponseType = Awaited<ReturnType<typeof runWithTimer<ChainStepResponse>>>
 
 const emptyResponse: ResponseType = {
@@ -135,11 +134,11 @@ export default async function runChain(
       if (lastResponse.failed) {
         continuationIndex = undefined
         break
-      } else if (isPromptResponse(lastResponse) && lastResponse.interrupted) {
+      } else if (lastResponse.functionInterrupt) {
         if (isEndpointEvaluation) {
           continuationIndex = index
           break
-        } else if (continuationCount++ < MaxContinuationCount) {
+        } else if (inputs[lastResponse.functionInterrupt] && continuationCount++ < MaxContinuationCount) {
           continuationIndex = index
           index -= 1
           continue

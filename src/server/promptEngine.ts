@@ -17,7 +17,7 @@ import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datas
 type ValidPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
 type PredictionResponse = ({ output: undefined; cost: number } | ValidPredictionResponse | ErrorPredictionResponse) & {
-  interrupted?: boolean
+  functionInterrupt?: string
 }
 
 export type PromptContext = any
@@ -37,9 +37,9 @@ const isErrorPredictionResponse = (response: PredictionResponse): response is Er
   'error' in response
 
 type RunResponse = (
-  | { result: any; output: string; error: undefined; failed: false }
+  | { result: any; output: string; error: undefined; failed: false; functionInterrupt?: string }
   | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number; interrupted: boolean }
+) & { cost: number; attempts: number }
 
 export const TryParseOutput = (output: string | undefined) => {
   try {
@@ -114,6 +114,5 @@ export default async function runPromptWithConfig(
       ? { ...result, result: TryParseOutput(result.output), error: undefined, failed: false }
       : { ...result, result: undefined, output: undefined, error: 'Received empty prediction response', failed: true }),
     attempts: Math.min(attempts, maxAttempts),
-    interrupted: result.interrupted ?? false,
   }
 }
