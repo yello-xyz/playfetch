@@ -9,7 +9,7 @@ import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
 
-export function ChainNodeBoxBody({
+export default function ChainNodeBoxBody({
   nodes,
   chainNode,
   isSelected,

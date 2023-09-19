@@ -8,7 +8,7 @@ import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { useState } from 'react'
 
-export function ChainNodeBoxHeader({
+export default function ChainNodeBoxHeader({
   nodes,
   index,
   isSelected,
