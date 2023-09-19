@@ -1,4 +1,4 @@
-import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/components/modelSelector'
+import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/components/prompts/modelSelector'
 import { PromptConfig, Prompts } from '@/types'
 
 const validEmailRegExp =

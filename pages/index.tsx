@@ -9,8 +9,8 @@ import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
-import WorkspaceGridView from '@/components/workspaceGridView'
-import WorkspaceSidebar from '@/components/workspaceSidebar'
+import WorkspaceGridView from '@/components/workspaces/workspaceGridView'
+import WorkspaceSidebar from '@/components/workspaces/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID

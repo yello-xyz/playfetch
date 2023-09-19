@@ -1,7 +1,7 @@
 import { ActiveProject, ActivePrompt, ChainItem, PromptChainItem, PromptVersion } from '@/types'
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
-import { ChainNode, IsPromptChainItem } from '../../../components/chainNode'
+import { ChainNode, IsPromptChainItem } from '../../../components/chains/chainNode'
 
 export type PromptCache = {
   promptForID: (id: number) => ActivePrompt | undefined

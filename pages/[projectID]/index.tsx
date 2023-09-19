@@ -23,10 +23,10 @@ import { RefreshContext } from '@/src/client/context/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
-import ProjectSidebar from '@/components/projectSidebar'
-import { EmptyGridView } from '@/components/emptyGridView'
+import ProjectSidebar from '@/components/projects/projectSidebar'
+import { EmptyGridView } from '@/components/projects/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
-import ProjectTopBar from '@/components/projectTopBar'
+import ProjectTopBar from '@/components/projects/projectTopBar'
 
 import dynamic from 'next/dynamic'
 import { getLogEntriesForProject } from '@/src/server/datastore/logs'
@@ -36,9 +36,9 @@ import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
-const PromptView = dynamic(() => import('@/components/promptView'))
-const ChainView = dynamic(() => import('@/components/chainView'))
-const EndpointsView = dynamic(() => import('@/components/endpointsView'))
+const PromptView = dynamic(() => import('@/components/prompts/promptView'))
+const ChainView = dynamic(() => import('@/components/chains/chainView'))
+const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
 
 const Endpoints = 'endpoints'
 type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints

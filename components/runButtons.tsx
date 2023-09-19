@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
-import ModelSelector from './modelSelector'
+import ModelSelector from './prompts/modelSelector'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
