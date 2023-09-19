@@ -1,5 +1,5 @@
 import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt } from '@/types'
-import { ChainNode } from './chainNode'
+import { ChainNode, IsPromptChainItem } from './chainNode'
 import { PromptCache } from '@/src/client/hooks/usePromptCache'
 import { ChainNodeBoxConnector } from './chainNodeBoxConnector'
 import { useState } from 'react'
@@ -93,6 +93,7 @@ export function ChainNodeBox({
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
+        <ChainNodeBoxPreHeader nodes={nodes} index={index} isSelected={isSelected} updateItem={updateItem} />
         <ChainNodeBoxHeader
           chainNode={chainNode}
           itemIndex={index}
@@ -109,4 +110,36 @@ export function ChainNodeBox({
       </div>
     </>
   )
+}
+
+function ChainNodeBoxPreHeader({
+  nodes,
+  index,
+  isSelected,
+  updateItem,
+}: {
+  nodes: ChainNode[]
+  index: number
+  isSelected: boolean
+  updateItem: (item: ChainItem) => void
+}) {
+  const chainNode = nodes[index]
+  const havePreviousContext = nodes.slice(0, index).some(IsPromptChainItem)
+  const colorClass = isSelected ? 'border-blue-100' : 'border-gray-200 bg-white rounded-t-lg'
+  const identifier = `chain-node-box-pre-header-${index}`
+
+  return IsPromptChainItem(chainNode) && havePreviousContext ? (
+    <div className={`${colorClass} border-b p-3 flex items-center justify-center gap-1.5`}>
+      <input
+        type='checkbox'
+        className='cursor-pointer'
+        id={identifier}
+        checked={!!chainNode.includeContext}
+        onChange={event => updateItem({ ...chainNode, includeContext: event.target.checked })}
+      />
+      <label className='text-xs cursor-pointer' htmlFor={identifier}>
+        Include previous context
+      </label>
+    </div>
+  ) : null
 }

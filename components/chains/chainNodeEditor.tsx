@@ -101,8 +101,6 @@ export default function ChainNodeEditor({
         {IsPromptChainItem(activeItem) && (
           <PromptChainNodeEditor
             item={activeItem}
-            updateItem={updateActiveItem}
-            canIncludeContext={items.slice(0, activeIndex).some(IsPromptChainItem)}
             promptCache={promptCache}
             selectVersion={selectVersion}
             setModifiedVersion={updateVersion}

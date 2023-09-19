@@ -1,5 +1,4 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
-import Checkbox from '../checkbox'
 import VersionTimeline from '../versions/versionTimeline'
 import PromptPanel from '../prompts/promptPanel'
 import { Allotment } from 'allotment'
@@ -12,30 +11,22 @@ import { PromptCache } from '../../src/client/hooks/usePromptCache'
 
 export default function PromptChainNodeEditor({
   item,
-  updateItem,
-  canIncludeContext,
   promptCache,
   selectVersion,
   setModifiedVersion,
 }: {
   item: PromptChainItem
-  updateItem: (item: PromptChainItem) => void
-  canIncludeContext: boolean
   promptCache: PromptCache
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
   const loadedPrompt = promptCache.promptForItem(item)
   const activeVersion = promptCache.versionForItem(item)
-  const setIncludeContext = (includeContext: boolean) => updateItem({ ...item, includeContext })
 
   return loadedPrompt && activeVersion ? (
     <PromptEditor
       prompt={loadedPrompt}
       activeVersion={activeVersion}
-      canIncludeContext={canIncludeContext}
-      includeContext={!!item.includeContext}
-      setIncludeContext={setIncludeContext}
       selectVersion={selectVersion}
       setModifiedVersion={setModifiedVersion}
     />
@@ -47,17 +38,11 @@ export default function PromptChainNodeEditor({
 function PromptEditor({
   prompt,
   activeVersion,
-  canIncludeContext,
-  includeContext,
-  setIncludeContext,
   selectVersion,
   setModifiedVersion,
 }: {
   prompt: ActivePrompt
   activeVersion: PromptVersion
-  canIncludeContext: boolean
-  includeContext: boolean
-  setIncludeContext: (includeContext: boolean) => void
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
@@ -80,15 +65,6 @@ function PromptEditor({
               tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
             />
           </div>
-          {canIncludeContext && (
-            <div className='self-start w-full px-4 py-2 border-t border-gray-200'>
-              <Checkbox
-                label='Include previous chain context into prompt'
-                checked={includeContext}
-                setChecked={setIncludeContext}
-              />
-            </div>
-          )}
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
