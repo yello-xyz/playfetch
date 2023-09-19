@@ -11,6 +11,7 @@ import useSavePrompt from '@/src/client/hooks/useSavePrompt'
 import { PromptCache } from '../../src/client/hooks/usePromptCache'
 import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function ChainNodeEditor({
   items,
@@ -27,7 +28,7 @@ export default function ChainNodeEditor({
   promptCache: PromptCache
   dismiss: () => void
 }) {
-  const [updatedItems, setUpdatedItems] = useState(items)
+  const [updatedItems, setUpdatedItems] = useInitialState(items, (a, b) => a.length === b.length)
 
   const updateItems = (items: ChainItem[], item: ChainItem) => [
     ...items.slice(0, activeIndex),
@@ -51,7 +52,7 @@ export default function ChainNodeEditor({
     updateItemsDirty(GetChainItemsSaveKey(items) !== GetChainItemsSaveKey(updatedItems))
   }
 
-  const activeItem = updatedItems[activeIndex]
+  const activeItem = updatedItems[activeIndex] ?? items[activeIndex]
   const isPromptChainItemActive = IsPromptChainItem(activeItem)
   const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeItem) : undefined
   const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeItem) : undefined
