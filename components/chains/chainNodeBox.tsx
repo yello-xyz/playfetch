@@ -82,7 +82,9 @@ export function ChainNodeBox({
                 selectedCell={isSelected}
               />
             )}
-            <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+            {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
+              <ChainNodePopupMenu onDelete={onDelete} selected={isSelected} />
+            )}
           </div>
         </div>
         {IsPromptChainItem(chainNode) && (
