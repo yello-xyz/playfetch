@@ -24,7 +24,6 @@ import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import ProjectSidebar from '@/components/projects/projectSidebar'
-import { EmptyGridView } from '@/components/projects/emptyGridView'
 import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projects/projectTopBar'
 
@@ -36,6 +35,7 @@ import GlobalPopup from '@/components/globalPopup'
 import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
+import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
@@ -284,7 +284,7 @@ export default function Home({
                         <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
                       </Suspense>
                     )}
-                    {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
+                    {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
                   </div>
                 </div>
               </main>
