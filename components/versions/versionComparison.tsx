@@ -88,11 +88,13 @@ const tokenize = (prompt: string) => {
 export default function VersionComparison({
   version,
   compareVersion,
+  shouldTruncate = true,
   stripSentinels = true,
   taggedClassName = 'font-bold',
 }: {
   version: PromptVersion
   compareVersion?: PromptVersion
+  shouldTruncate?: boolean
   stripSentinels?: boolean
   taggedClassName?: string
 }) {
@@ -132,7 +134,7 @@ export default function VersionComparison({
 
   return (
     <>
-      {truncate(result, 25).map((diff, index: number) => (
+      {(shouldTruncate ? truncate(result, 25) : result).map((diff, index: number) => (
         <span key={index} className={classNameForDiff(diff, taggedClassName)}>
           {diff.content}
         </span>
@@ -143,12 +145,21 @@ export default function VersionComparison({
 
 export function TaggedVersionPrompt({
   version,
+  shouldTruncate = false,
   stripSentinels = false,
   taggedClassName = InputVariableClass,
 }: {
   version: PromptVersion
+  shouldTruncate?: boolean
   stripSentinels?: boolean
   taggedClassName?: string
 }) {
-  return <VersionComparison version={version} stripSentinels={stripSentinels} taggedClassName={taggedClassName} />
+  return (
+    <VersionComparison
+      version={version}
+      shouldTruncate={shouldTruncate}
+      stripSentinels={stripSentinels}
+      taggedClassName={taggedClassName}
+    />
+  )
 }

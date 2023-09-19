@@ -146,7 +146,7 @@ function PromptVersionContent({
         </span>
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
-      <div className={`p-3 border-t ${colorClass}`}>
+      <div className={`p-3 border-t ${colorClass} max-h-[150px] overflow-y-auto`}>
         <TaggedVersionPrompt version={version} />
       </div>
     </div>
