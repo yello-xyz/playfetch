@@ -105,6 +105,7 @@ function IncludeContextHeader({
         id={identifier}
         checked={!!chainNode.includeContext}
         onChange={event => onUpdate({ ...chainNode, includeContext: event.target.checked })}
+        onClick={event => event.stopPropagation()}
       />
       <label className='text-xs cursor-pointer' htmlFor={identifier}>
         Include previous context
