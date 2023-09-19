@@ -1,19 +1,5 @@
-import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User } from '@/types'
-import {
-  ChainNode,
-  InputNode,
-  IsChainItem,
-  IsCodeChainItem,
-  IsPromptChainItem,
-  NameForCodeChainItem,
-  OutputNode,
-} from './chainNode'
-import { EditableHeaderItem, HeaderItem } from '../tabSelector'
-import promptIcon from '@/public/prompt.svg'
-import codeIcon from '@/public/code.svg'
-import Icon from '../icon'
-import ChainNodePopupMenu from './chainNodePopupMenu'
-import CommentPopupMenu from '../commentPopupMenu'
+import { ActiveChain, ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem } from '@/types'
+import { ChainNode, InputNode, IsChainItem, IsPromptChainItem } from './chainNode'
 import { PromptCache } from '@/src/client/hooks/usePromptCache'
 import { LabelForModel } from '../prompts/modelSelector'
 import { VersionLabels } from '../versions/versionCell'
@@ -23,6 +9,7 @@ import { TaggedVersionPrompt } from '../versions/versionComparison'
 import { ReactNode, useState } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
+import { ChainNodeBoxHeader } from './chainNodeBoxHeader'
 
 export function ChainNodeBox({
   chain,
@@ -111,7 +98,7 @@ export function ChainNodeBox({
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
-        <ChainNodeHeader
+        <ChainNodeBoxHeader
           chainNode={chainNode}
           itemIndex={index}
           isSelected={isSelected}
@@ -124,84 +111,15 @@ export function ChainNodeBox({
           users={chain.users}
         />
         {IsPromptChainItem(chainNode) && (
-          <PromptVersionContent item={chainNode} isSelected={isSelected} promptCache={promptCache} />
+          <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
         )}
-        {chainNode === InputNode && <InputContent nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
+        {chainNode === InputNode && <InputNodeBody nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
       </div>
     </>
   )
 }
 
-function ChainNodeHeader({
-  chainNode,
-  itemIndex,
-  isSelected,
-  onRename,
-  onDuplicate,
-  onEdit,
-  onDelete,
-  savedVersion,
-  prompts,
-  users,
-}: {
-  chainNode: ChainNode
-  itemIndex: number
-  isSelected: boolean
-  onRename: (name: string) => void
-  onDuplicate: () => void
-  onEdit: () => void
-  onDelete: () => void
-  savedVersion: ChainVersion | null
-  prompts: Prompt[]
-  users: User[]
-}) {
-  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
-
-  const [label, setLabel] = useState<string>()
-  const onRenameCodeChainItem = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
-  const submitRename = (name: string) => {
-    onRename(name)
-    setLabel(undefined)
-  }
-
-  return (
-    <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
-      {label !== undefined ? (
-        <EditableHeaderItem value={label} onChange={setLabel} onSubmit={() => submitRename(label)} />
-      ) : (
-        <HeaderItem>
-          {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
-          {chainNode === InputNode && 'Inputs'}
-          {chainNode === OutputNode && 'Output'}
-          {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-          {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
-        </HeaderItem>
-      )}
-      <div className='flex items-center gap-1'>
-        {savedVersion && (
-          <CommentPopupMenu
-            comments={savedVersion.comments.filter(comment => comment.itemIndex === itemIndex)}
-            itemIndex={itemIndex}
-            versionID={savedVersion.id}
-            users={users}
-            selectedCell={isSelected}
-          />
-        )}
-        {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
-          <ChainNodePopupMenu
-            onRename={onRenameCodeChainItem}
-            onDuplicate={onDuplicate}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            selected={isSelected}
-          />
-        )}
-      </div>
-    </div>
-  )
-}
-
-function PromptVersionContent({
+function PromptNodeBody({
   item,
   isSelected,
   promptCache,
@@ -228,7 +146,7 @@ function PromptVersionContent({
   ) : null
 }
 
-function InputContent({
+function InputNodeBody({
   nodes,
   isSelected,
   promptCache,
