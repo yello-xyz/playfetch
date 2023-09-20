@@ -32,7 +32,7 @@ export default function ProjectSidebar({
   workspaces: Workspace[]
   onAddPrompt: () => void
   onAddChain: () => void
-  onDeleteItem: () => void
+  onDeleteItem: (itemID: number) => void
   onRefreshItem: () => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
@@ -49,7 +49,7 @@ export default function ProjectSidebar({
       workspaces={workspaces}
       reference={reference(item)}
       onRefresh={onRefreshItem}
-      onDelete={onDeleteItem}
+      onDelete={() => onDeleteItem(item.id)}
       active={activeItem}
     />
   )

@@ -125,21 +125,10 @@ export default function Home({
     }
   }
 
-  const onDeleteItem = async () => {
-    const newProject = await api.getProject(activeProject.id)
-    setActiveProject(newProject)
-    if (
-      (activePrompt && !newProject.prompts.find(prompt => prompt.id === activePrompt.id)) ||
-      (activeChain && !newProject.chains.find(chain => chain.id === activeChain.id))
-    ) {
-      const promptID = newProject.prompts[0]?.id
-      if (promptID) {
-        selectPrompt(promptID)
-      } else {
-        setActiveItem(undefined)
-        updateVersion(undefined)
-        router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
-      }
+  const onDeleteItem = async (itemID: number) => {
+    refreshProject()
+    if (itemID === activePrompt?.id || itemID === activeChain?.id) {
+      router.push(ProjectRoute(activeProject.id))
     }
   }
 
