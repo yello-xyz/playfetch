@@ -29,7 +29,7 @@ import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveIte
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
-const CompareView = dynamic(() => import('@/components/compareView'))
+const CompareView = dynamic(() => import('@/components/compare/compareView'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, req, query }) => ({
   props: await loadActiveItem(user, query, req.headers),

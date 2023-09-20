@@ -1,6 +1,6 @@
 import { ChainItem } from '@/types'
 import { ChainNode, IsChainItem } from './chainNode'
-import { PromptCache } from '@/src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
 import { ExtractChainVariables } from './chainNodeOutput'
@@ -16,7 +16,7 @@ export default function ChainNodeBoxFooter({
   setNodes: (nodes: ChainNode[]) => void
   index: number
   isSelected: boolean
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
 }) {
   const chainNode = nodes[index]
   const inputs = ExtractChainVariables(nodes.slice(index + 1).filter(IsChainItem), promptCache, false)

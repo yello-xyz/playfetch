@@ -5,7 +5,7 @@ import CodeChainNodeEditor from './codeChainNodeEditor'
 import Button, { PendingButton } from '../button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
-import { PromptCache } from '../../src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -22,7 +22,7 @@ export default function ChainNodeEditor({
   setItems: (items: ChainItem[]) => void
   activeIndex: number
   setDirty: (dirty: boolean) => void
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
   dismiss: () => void
 }) {
   const [updatedItems, setUpdatedItems] = useInitialState(items, (a, b) => a.length === b.length)

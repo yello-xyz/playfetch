@@ -3,7 +3,7 @@ import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
-import { PromptCache } from '@/src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 
 export default function ChainEditor({
   chain,
@@ -36,7 +36,7 @@ export default function ChainEditor({
   isTestMode: boolean
   setTestMode: (testMode: boolean) => void
   disabled: boolean
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
 }) {
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 

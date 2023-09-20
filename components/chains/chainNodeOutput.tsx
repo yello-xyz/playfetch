@@ -9,14 +9,14 @@ import RunButtons from '../runButtons'
 import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import { PromptCache } from '../../src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
   return ExcludeBoundChainVariables(allChainInputs, chainWithInputs)
 }
 
-export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache, includingDynamic: boolean) => {
+export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item)) {
     return ExtractVariables(item.code)
   }
@@ -26,7 +26,7 @@ export const ExtractChainItemVariables = (item: ChainItem, cache: PromptCache, i
     : [...(item.inputs ?? []), ...(includingDynamic ? item.dynamicInputs ?? [] : [])] ?? []
 }
 
-export const ExtractChainVariables = (chain: ChainItem[], cache: PromptCache, includingDynamic: boolean) => [
+export const ExtractChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) => [
   ...new Set(chain.flatMap(item => ExtractChainItemVariables(item, cache, includingDynamic))),
 ]
 
@@ -35,7 +35,7 @@ const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainIte
   return allChainVariables.filter(variable => !boundInputVariables.includes(variable))
 }
 
-export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: PromptCache, includingDynamic = true) => {
+export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic = true) => {
   const allInputVariables = ExtractChainVariables(chain, cache, includingDynamic)
   return ExcludeBoundChainVariables(allInputVariables, chain)
 }
@@ -57,7 +57,7 @@ export default function ChainNodeOutput({
   nodes: ChainNode[]
   activeIndex: number
   setActiveIndex: (index: number) => void
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
   saveItems: (items: ChainItem[]) => Promise<number>
   showRunButtons: boolean
 }) {

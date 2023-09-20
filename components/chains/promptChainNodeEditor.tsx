@@ -7,7 +7,7 @@ import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
 import { LoadPendingVersion } from '../prompts/promptView'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
-import { PromptCache } from '../../src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
 export default function PromptChainNodeEditor({
   item,
@@ -16,7 +16,7 @@ export default function PromptChainNodeEditor({
   setModifiedVersion,
 }: {
   item: PromptChainItem
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {

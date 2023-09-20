@@ -13,7 +13,7 @@ import { SingleTabHeader } from '../tabSelector'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
-import usePromptCache, { PromptCache } from '../../src/client/hooks/usePromptCache'
+import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -26,7 +26,7 @@ const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
         }
   })
 
-const AugmentItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
+const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
   items.map(item => {
     const inputs = ExtractChainItemVariables(item, promptCache, false)
     return IsCodeChainItem(item)
@@ -38,7 +38,7 @@ const AugmentItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
         }
   })
 
-const GetItemsToSave = (items: ChainItem[], promptCache: PromptCache) =>
+const GetItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
   AugmentItemsToSave(StripItemsToSave(items), promptCache)
 
 export const GetChainItemsSaveKey = (items: ChainItem[]) => JSON.stringify(StripItemsToSave(items))
@@ -65,7 +65,7 @@ export default function ChainView({
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
 
-  const promptCache = usePromptCache(project, nodes, setNodes)
+  const promptCache = useChainPromptCache(project, nodes, setNodes)
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)

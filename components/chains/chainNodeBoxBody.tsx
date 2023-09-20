@@ -1,6 +1,6 @@
 import { PromptChainItem } from '@/types'
 import { ChainNode, InputNode, IsChainItem, IsPromptChainItem } from './chainNode'
-import { PromptCache } from '@/src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { LabelForModel } from '../prompts/modelSelector'
 import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
@@ -18,7 +18,7 @@ export default function ChainNodeBoxBody({
   nodes: ChainNode[]
   chainNode: ChainNode
   isSelected: boolean
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
 }) {
   return (
     <>
@@ -37,7 +37,7 @@ function PromptNodeBody({
 }: {
   item: PromptChainItem
   isSelected: boolean
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
 }) {
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
@@ -64,7 +64,7 @@ function InputNodeBody({
 }: {
   nodes: ChainNode[]
   isSelected: boolean
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
 }) {
   const items = nodes.filter(IsChainItem)
   const variables = ExtractUnboundChainVariables(items, promptCache)

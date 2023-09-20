@@ -1,6 +1,6 @@
 import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode } from './chainNode'
-import { PromptCache } from '@/src/client/hooks/usePromptCache'
+import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { useState } from 'react'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
@@ -32,7 +32,7 @@ export function ChainNodeBox({
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
   addPrompt: () => Promise<{ promptID: number; versionID: number }>
-  promptCache: PromptCache
+  promptCache: ChainPromptCache
 }) {
   const chainNode = nodes[index]
   const isSelected = index === activeIndex
