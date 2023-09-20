@@ -29,11 +29,20 @@ import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
 
-export async function migrateProjects() {
+export async function migrateProjects(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData }, false)
+    const labels = JSON.parse(projectData.labels)
+    if (labels.length === 0) {
+      console.log('Adding default labels to', projectData.name)
+      await updateProject({ ...projectData, labels: JSON.stringify(DefaultLabels) }, false)
+    } else {
+      console.log('Not touching labels', labels, 'in', projectData.name)
+    }
   }
 }
 
