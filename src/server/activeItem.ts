@@ -12,7 +12,7 @@ export default async function loadActiveItem(
   projectID: number,
   promptID: number | undefined,
   chainID: number | undefined,
-  compareTool: boolean,
+  compare: boolean,
   endpoints: boolean,
   urlBuilder: (path: string) => string
 ) {
@@ -20,7 +20,7 @@ export default async function loadActiveItem(
 
   const initialActiveProject = await getActiveProject(user.id, projectID!, urlBuilder)
 
-  if (!compareTool && !endpoints && !promptID && !chainID) {
+  if (!compare && !endpoints && !promptID && !chainID) {
     if (initialActiveProject.prompts.length > 0) {
       promptID = initialActiveProject.prompts[0].id
     } else {
@@ -28,7 +28,7 @@ export default async function loadActiveItem(
     }
   }
 
-  const initialActiveItem: ActiveItem | null = compareTool
+  const initialActiveItem: ActiveItem | null = compare
     ? CompareItem
     : endpoints
     ? EndpointsItem

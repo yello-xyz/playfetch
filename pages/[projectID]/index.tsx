@@ -109,7 +109,14 @@ export default function Home({
   }
 
   const router = useRouter()
-  const { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(router.query)
+  let { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(router.query)
+  if (!compare && !endpoints && !promptID && !chainID) {
+    if (activeProject.prompts.length > 0) {
+      promptID = activeProject.prompts[0].id
+    } else {
+      chainID = activeProject.chains[0]?.id
+    }
+  }
 
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
@@ -140,11 +147,7 @@ export default function Home({
     }
   }
 
-  const currentQueryState = compare
-    ? CompareItem
-    : endpoints
-    ? EndpointsItem
-    : promptID ?? chainID ?? activeProject.prompts[0]?.id ?? activeProject.chains[0]?.id
+  const currentQueryState = compare ? CompareItem : endpoints ? EndpointsItem : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -155,10 +158,6 @@ export default function Home({
       selectPrompt(promptID)
     } else if (chainID) {
       selectChain(chainID)
-    } else if (activeProject.prompts.length > 0) {
-      selectPrompt(activeProject.prompts[0].id)
-    } else if (activeProject.chains.length > 0) {
-      selectChain(activeProject.chains[0].id)
     }
     setQuery(currentQueryState)
   }
