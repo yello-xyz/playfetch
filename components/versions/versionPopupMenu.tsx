@@ -7,6 +7,7 @@ import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import GlobalPopupMenu from '../globalPopupMenu'
 import { useRouter } from 'next/router'
 import { NewEndpointRoute, ParseNumberQuery } from '@/src/client/clientRoute'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
@@ -47,18 +48,13 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
-type VersionPopupProps = { deleteVersion: () => void; createEndpoint: () => void; onDismissGlobalPopup?: () => void }
+type VersionPopupProps = { deleteVersion: () => void; createEndpoint: () => void; }
 
-function VersionPopup({ deleteVersion, createEndpoint, onDismissGlobalPopup }: VersionPopupProps) {
-  const dismissAndCallback = (callback: () => void) => () => {
-    onDismissGlobalPopup?.()
-    callback()
-  }
-
+function VersionPopup({ deleteVersion, createEndpoint, withDismiss }: VersionPopupProps & WithDismiss) {
   return (
     <PopupContent className='w-40'>
-      <PopupMenuItem title='Create Endpoint' callback={dismissAndCallback(createEndpoint)} first />
-      <PopupMenuItem destructive title='Delete' callback={dismissAndCallback(deleteVersion)} last />
+      <PopupMenuItem title='Create Endpoint' callback={withDismiss(createEndpoint)} first />
+      <PopupMenuItem destructive title='Delete' callback={withDismiss(deleteVersion)} last />
     </PopupContent>
   )
 }

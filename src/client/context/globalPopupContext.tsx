@@ -2,7 +2,7 @@ import { ReactNode, RefCallback, createContext, useContext, useState } from 'rea
 import { useContainerRect } from '../hooks/useContainerRect'
 
 export type GlobalPopupLocation = { top?: number; left?: number; bottom?: number; right?: number }
-export type GlobalPopupRender<PropsType> = (props: PropsType) => ReactNode
+export type GlobalPopupRender<PropsType> = (props: PropsType & WithDismiss) => ReactNode
 
 type GlobalPopupContextType<PropsType> = {
   setPopup: (
@@ -34,6 +34,8 @@ export type GlobalPopupProps = {
   childRef: RefCallback<HTMLDivElement>
   childRect: DOMRect | undefined
 }
+
+export type WithDismiss = { withDismiss: (callback: () => void) => () => void }
 
 export function useGlobalPopupProvider<PropsType>(): readonly [
   GlobalPopupContextType<PropsType>,

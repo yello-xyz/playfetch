@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import Icon from './icon'
 import GlobalPopupMenu from './globalPopupMenu'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 const projectLabelColors = [
   'bg-purple-300 text-white',
@@ -43,10 +44,9 @@ export type LabelsPopupProps = {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
   refreshActiveItem: () => void
-  onDismissGlobalPopup?: () => void
 }
 
-function LabelsPopup({ item, activeItem, refreshActiveItem, onDismissGlobalPopup }: LabelsPopupProps) {
+function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: LabelsPopupProps & WithDismiss) {
   const [newLabel, setNewLabel] = useState('')
 
   const trimmedLabel = newLabel.trim()
@@ -58,7 +58,6 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, onDismissGlobalPopup
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
   const toggleLabel = (label: string) => {
-    onDismissGlobalPopup?.()
     setNewLabel('')
     const checked = !item.labels.includes(label)
     const itemIsVersion = 'runs' in item
@@ -79,7 +78,9 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, onDismissGlobalPopup
         onChange={event => setNewLabel(event.target.value)}
       />
       {addingNewLabel ? (
-        <div className='flex items-center gap-1 p-1 cursor-pointer' onClick={() => toggleLabel(trimmedLabel)}>
+        <div
+          className='flex items-center gap-1 p-1 cursor-pointer'
+          onClick={withDismiss(() => toggleLabel(trimmedLabel))}>
           <Icon icon={addIcon} />
           Create new label <span className='font-medium'>“{trimmedLabel}”</span>
         </div>
@@ -88,7 +89,7 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, onDismissGlobalPopup
           <div
             className='flex items-center gap-1 px-2 py-1 cursor-pointer'
             key={index}
-            onClick={() => toggleLabel(label)}>
+            onClick={withDismiss(() => toggleLabel(label))}>
             <div className={`w-2.5 h-2.5 m-2.5 rounded-full ${colors[label]}`} />
             <div className='flex-1'>{label}</div>
             {item.labels.includes(label) && <Icon icon={checkIcon} />}

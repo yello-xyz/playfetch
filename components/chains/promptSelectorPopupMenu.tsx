@@ -4,25 +4,20 @@ import Icon from '../icon'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import { StaticImageData } from 'next/image'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 export type PromptSelectorPopupProps = {
   prompts: Prompt[]
   selectPrompt: (id: number) => void
   addPrompt: () => void
-  onDismissGlobalPopup?: () => void
 }
 
 export default function PromptSelectorPopup({
   prompts,
   selectPrompt,
   addPrompt,
-  onDismissGlobalPopup,
-}: PromptSelectorPopupProps) {
-  const dismissAndCallback = (callback: () => void) => () => {
-    onDismissGlobalPopup?.()
-    callback()
-  }
-
+  withDismiss,
+}: PromptSelectorPopupProps & WithDismiss) {
   return (
     <PopupContent className='p-3'>
       {prompts.map((prompt, index) => (
@@ -30,13 +25,13 @@ export default function PromptSelectorPopup({
           key={index}
           label={prompt.name}
           icon={promptIcon}
-          onClick={dismissAndCallback(() => selectPrompt(prompt.id))}
+          onClick={withDismiss(() => selectPrompt(prompt.id))}
         />
       ))}
       <div className='pt-1 pb-1 min-w-[200px]'>
         <div className='h-px bg-gray-200' />
       </div>
-      <PopupItem label='Create new Prompt' icon={addIcon} onClick={dismissAndCallback(addPrompt)} />
+      <PopupItem label='Create new Prompt' icon={addIcon} onClick={withDismiss(addPrompt)} />
     </PopupContent>
   )
 }
