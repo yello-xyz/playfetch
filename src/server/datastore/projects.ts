@@ -124,6 +124,7 @@ export async function getActiveProject(
 }
 
 const DefaultProjectName = 'New Project'
+const DefaultLabels = ['Experiment', 'Integration ready', 'QA ready', 'Needs updates', 'Production ready']
 
 export async function addProjectForUser(
   userID: number,
@@ -137,7 +138,15 @@ export async function addProjectForUser(
     projectNames.map(project => project.name)
   )
   const createdAt = new Date()
-  const projectData = toProjectData(workspaceID, uniqueName, [], [DefaultEndpointFlavor], createdAt, createdAt, [])
+  const projectData = toProjectData(
+    workspaceID,
+    uniqueName,
+    DefaultLabels,
+    [DefaultEndpointFlavor],
+    createdAt,
+    createdAt,
+    []
+  )
   await getDatastore().save(projectData)
   const projectID = getID(projectData)
   await addPromptForUser(userID, projectID)

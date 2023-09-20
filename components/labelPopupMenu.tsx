@@ -10,11 +10,11 @@ import Icon from './icon'
 import GlobalPopupMenu from './globalPopupMenu'
 
 const projectLabelColors = [
-  'bg-red-300 text-white',
-  'bg-orange-300 text-white',
   'bg-purple-300 text-white',
-  'bg-green-300 text-white',
   'bg-blue-300 text-white',
+  'bg-orange-300 text-white',
+  'bg-red-300 text-white',
+  'bg-green-300 text-white',
   'bg-yellow-300 text-white',
 ]
 
