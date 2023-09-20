@@ -29,6 +29,7 @@ import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveIte
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
+const CompareView = dynamic(() => import('@/components/compareView'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, req, query }) => ({
   props: await loadActiveItem(user, query, req.headers),
@@ -218,6 +219,11 @@ export default function Home({
                           setShowComments={setShowComments}
                           saveChain={saveChain}
                         />
+                      </Suspense>
+                    )}
+                    {activeItem === CompareItem && (
+                      <Suspense>
+                        <CompareView project={activeProject} />
                       </Suspense>
                     )}
                     {activeItem === EndpointsItem && (
