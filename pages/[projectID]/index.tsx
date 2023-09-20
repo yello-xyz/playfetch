@@ -144,7 +144,7 @@ export default function Home({
     ? CompareItem
     : endpoints
     ? EndpointsItem
-    : promptID ?? chainID ?? activeProject.prompts[0]?.id
+    : promptID ?? chainID ?? activeProject.prompts[0]?.id ?? activeProject.chains[0]?.id
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -157,6 +157,8 @@ export default function Home({
       selectChain(chainID)
     } else if (activeProject.prompts.length > 0) {
       selectPrompt(activeProject.prompts[0].id)
+    } else if (activeProject.chains.length > 0) {
+      selectChain(activeProject.chains[0].id)
     }
     setQuery(currentQueryState)
   }

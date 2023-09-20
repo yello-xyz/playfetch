@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, User } from '@/types'
+import { User } from '@/types'
 import { getWorkspacesForUser } from './datastore/workspaces'
 import { getActiveProject } from './datastore/projects'
 import { ActiveItem, BuildActiveChain, BuildActivePrompt, CompareItem, EndpointsItem } from '../common/activeItem'
@@ -20,22 +20,22 @@ export default async function loadActiveItem(
 
   const initialActiveProject = await getActiveProject(user.id, projectID!, urlBuilder)
 
-  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> =>
-    getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
-
-  const getActiveChain = async (chainID: number): Promise<ActiveChain> =>
-    await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
+  if (!compareTool && !endpoints && !promptID && !chainID) {
+    if (initialActiveProject.prompts.length > 0) {
+      promptID = initialActiveProject.prompts[0].id
+    } else {
+      chainID = initialActiveProject.chains[0]?.id
+    }
+  }
 
   const initialActiveItem: ActiveItem | null = compareTool
     ? CompareItem
     : endpoints
     ? EndpointsItem
     : promptID
-    ? await getActivePrompt(promptID)
+    ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
     : chainID
-    ? await getActiveChain(chainID)
-    : initialActiveProject.prompts.length > 0
-    ? await getActivePrompt(initialActiveProject.prompts[0].id)
+    ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
     : null
 
   const initialLogEntries =
