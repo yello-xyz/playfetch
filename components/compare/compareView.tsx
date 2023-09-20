@@ -1,19 +1,15 @@
 import { ActiveProject } from '@/types'
 import { Allotment } from 'allotment'
-import { ParseNumberQuery } from '@/src/client/clientRoute'
-import { useRouter } from 'next/router'
+import ComparePane from './comparePane'
 
 export default function CompareView({ project }: { project: ActiveProject }) {
-  const router = useRouter()
-  const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
-
   return (
     <Allotment>
       <Allotment.Pane>
-
+        <ComparePane project={project} />
       </Allotment.Pane>
       <Allotment.Pane>
-        
+        <ComparePane project={project} />
       </Allotment.Pane>
     </Allotment>
   )
