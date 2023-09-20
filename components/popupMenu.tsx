@@ -1,4 +1,6 @@
+import { StaticImageData } from 'next/image'
 import { RefObject, useEffect, useRef } from 'react'
+import Icon from './icon'
 
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds))
 
@@ -45,6 +47,15 @@ export function PopupContent({ children, className }: { children: any; className
     <div
       className={`${className} bg-white border border-gray-200 rounded-lg gap-0.5 select-none max-h-screen overflow-y-auto`}>
       {children}
+    </div>
+  )
+}
+
+export function PopupItem({ label, icon, onClick }: { label: string; icon: StaticImageData; onClick: () => void }) {
+  return (
+    <div className='flex items-center gap-1 p-1 rounded cursor-pointer hover:bg-gray-50' onClick={onClick}>
+      <Icon icon={icon} />
+      {label}
     </div>
   )
 }
