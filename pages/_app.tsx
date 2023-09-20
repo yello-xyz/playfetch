@@ -24,7 +24,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
   return (
     <>
       <Head>
-        <title>Play/Fetch</title>
+        <title>PlayFetch</title>
       </Head>
       <style jsx global>
         {`
