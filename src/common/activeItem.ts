@@ -13,11 +13,6 @@ export const CompareItem = 'compare'
 export const EndpointsItem = 'endpoints'
 export type ActiveItem = ActivePrompt | ActiveChain | typeof CompareItem | typeof EndpointsItem
 
-export const ActiveItemIsChain = (item: ActiveItem): item is ActiveChain =>
-  item !== CompareItem && item !== EndpointsItem && 'referencedItemIDs' in item
-export const ActiveItemIsPrompt = (item: ActiveItem): item is ActivePrompt =>
-  item !== CompareItem && item !== EndpointsItem && !ActiveItemIsChain(item)
-
 export const BuildActivePrompt =
   (project: ActiveProject) =>
   ({

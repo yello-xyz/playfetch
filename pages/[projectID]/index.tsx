@@ -2,16 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import {
-  User,
-  ActiveProject,
-  AvailableProvider,
-  Workspace,
-  LogEntry,
-  PromptVersion,
-  ChainVersion,
-  IsPromptVersion,
-} from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -31,10 +22,11 @@ import GlobalPopup from '@/components/globalPopup'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
-import { ActiveItem, ActiveItemIsChain, ActiveItemIsPrompt, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
 
 import dynamic from 'next/dynamic'
+import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
@@ -60,20 +52,11 @@ export default function Home({
   initialLogEntries: LogEntry[] | null
   availableProviders: AvailableProvider[]
 }) {
-  const router = useRouter()
-
-  const [activeProject, setActiveProject] = useState(initialActiveProject)
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
-
-  const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
-  const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
-  const activeChain = activeItem && ActiveItemIsChain(activeItem) ? activeItem : undefined
-
-  const [activeVersion, setActiveVersion] = useState<PromptVersion | ChainVersion | undefined>(
-    activeItem === CompareItem || activeItem === EndpointsItem ? undefined : activeItem?.versions?.slice(-1)?.[0]
+  const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(
+    initialActiveProject,
+    initialActiveItem
   )
-  const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
-  const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
+  const [activeVersion, setActiveVersion, activePromptVersion, activeChainVersion] = useActiveVersion(activeItem)
 
   const [refreshPrompt, selectPrompt, addPrompt, savePrompt, setModifiedVersion] = usePrompt(
     activeProject,
@@ -125,14 +108,15 @@ export default function Home({
     }
   }
 
+  const router = useRouter()
+  const { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(router.query)
+
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
     if (itemID === activePrompt?.id || itemID === activeChain?.id) {
       router.push(ProjectRoute(activeProject.id))
     }
   }
-
-  const { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(router.query)
 
   const selectCompare = () => {
     savePrompt(refreshProject)
