@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 
-export const GetNoReplyFromAddress = () => `"PlayFetch" <${process.env.NOREPLY_EMAIL_USER}>`
+export const GetNoReplyFromAddress = () => `"PlayFetch" <no-reply@playfetch.ai>`
 
 export async function sendMail(to: string, subject: string, text: string, html: string) {
   const transporter = nodemailer.createTransport({
