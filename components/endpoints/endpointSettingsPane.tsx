@@ -12,6 +12,7 @@ import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import TextInput from '../textInput'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import Button, { PendingButton } from '../button'
+import ProjectItemSelector from '../projects/projectItemSelector'
 
 export type EndpointSettings = {
   id: number | undefined
@@ -170,14 +171,12 @@ export default function EndpointSettingsPane({
         <Label disabled={disabled}>Enabled</Label>
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>
-        <DropdownMenu disabled={disabled} value={parentID ?? 0} onChange={value => updateParentID(Number(value))}>
-          {!parentID && <option value={0}>Select a Prompt or Chain</option>}
-          {parents.map((parent, index) => (
-            <option key={index} value={parent.id}>
-              {parent.name}
-            </option>
-          ))}
-        </DropdownMenu>
+        <ProjectItemSelector
+          disabled={disabled}
+          project={project}
+          selectedItemID={parentID}
+          onSelectItemID={updateParentID}
+        />
         <Label disabled={disabled} className='self-start mt-2'>
           Version
         </Label>

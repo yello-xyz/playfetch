@@ -53,7 +53,7 @@ export function PopupContent({ children, className }: { children: any; className
 
 export function PopupItem({ label, icon, onClick }: { label: string; icon: StaticImageData; onClick: () => void }) {
   return (
-    <div className='flex items-center gap-1 p-1 rounded cursor-pointer hover:bg-gray-50' onClick={onClick}>
+    <div className='flex items-center gap-1 p-1 rounded cursor-pointer hover:bg-gray-100' onClick={onClick}>
       <Icon icon={icon} />
       {label}
     </div>
