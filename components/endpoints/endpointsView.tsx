@@ -29,6 +29,7 @@ import { useRouter } from 'next/router'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
 import { ExtractUnboundChainInputs } from '../chains/chainNodeOutput'
+import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,
@@ -133,22 +134,16 @@ export default function EndpointsView({
 
   const parent = activeParentID ? FindParentInProject(activeParentID, project) : undefined
   const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
-  const [parentCache, setParentCache] = useState<Record<string, ActivePrompt | ActiveChain>>({})
+  const parentCache = useActiveItemCache(
+    project,
+    parent && !EndpointParentIsChain(parent) ? [parent.id] : [],
+    (_, activePrompt) => setActiveParent(activePrompt),
+    parent && EndpointParentIsChain(parent) ? [parent.id] : [],
+    (_, activeChain) => setActiveParent(activeChain)
+  )
   useEffect(() => {
-    if (parent && parentCache[parent.id]) {
-      setActiveParent(parentCache[parent.id])
-    } else if (EndpointParentIsChain(parent)) {
-      api.getChain(parent.id, project).then(activeChain => {
-        setParentCache({ ...parentCache, [parent.id]: activeChain })
-        setActiveParent(activeChain)
-      })
-    } else if (parent) {
-      api.getPrompt(parent.id, project).then(activePrompt => {
-        setParentCache({ ...parentCache, [parent.id]: activePrompt })
-        setActiveParent(activePrompt)
-      })
-    }
-  }, [parent, project, parentCache])
+    setActiveParent(parent ? parentCache.promptForID(parent.id) ?? parentCache.chainForID(parent.id): undefined)
+  }, [parent, parentCache])
 
   const [versionIndex, setVersionIndex] = useState(-1)
   const versions = activeParent?.versions ?? []
