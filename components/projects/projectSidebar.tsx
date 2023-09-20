@@ -62,12 +62,7 @@ export default function ProjectSidebar({
   return (
     <Sidebar>
       <SidebarSection>
-      <SidebarButton
-          title='Compare'
-          icon={compareIcon}
-          active={activeItem === Compare}
-          onClick={onSelectCompare}
-        />
+        {/* <SidebarButton title='Compare' icon={compareIcon} active={activeItem === Compare} onClick={onSelectCompare} /> */}
         <SidebarButton
           title='Endpoints'
           icon={endpointIcon}
