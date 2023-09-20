@@ -12,9 +12,9 @@ export type ActiveItemCache = {
 export default function useActiveItemCache(
   project: ActiveProject,
   promptIDs: number[],
-  onRefreshPrompt?: (promptID: number, prompt: ActivePrompt) => void,
+  onRefreshPrompt?: (prompt: ActivePrompt) => void,
   chainIDs: number[] = [],
-  onRefreshChain?: (chainID: number, item: ActiveChain) => void
+  onRefreshChain?: (item: ActiveChain) => void
 ) {
   const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
   const [activeChainCache, setActiveChainCache] = useState<Record<number, ActiveChain>>({})
@@ -23,7 +23,7 @@ export default function useActiveItemCache(
     (promptID: number) =>
       api.getPrompt(promptID, project).then(activePrompt => {
         setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
-        onRefreshPrompt?.(promptID, activePrompt)
+        onRefreshPrompt?.(activePrompt)
       }),
     [project, onRefreshPrompt]
   )
@@ -32,7 +32,7 @@ export default function useActiveItemCache(
     (chainID: number) =>
       api.getChain(chainID, project).then(activeChain => {
         setActiveChainCache(cache => ({ ...cache, [chainID]: activeChain }))
-        onRefreshChain?.(chainID, activeChain)
+        onRefreshChain?.(activeChain)
       }),
     [project, onRefreshChain]
   )

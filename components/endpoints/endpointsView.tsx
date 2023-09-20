@@ -15,7 +15,6 @@ import {
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
 import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
-import api from '@/src/client/api'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
@@ -137,12 +136,12 @@ export default function EndpointsView({
   const parentCache = useActiveItemCache(
     project,
     parent && !EndpointParentIsChain(parent) ? [parent.id] : [],
-    (_, activePrompt) => setActiveParent(activePrompt),
+    setActiveParent,
     parent && EndpointParentIsChain(parent) ? [parent.id] : [],
-    (_, activeChain) => setActiveParent(activeChain)
+    setActiveParent
   )
   useEffect(() => {
-    setActiveParent(parent ? parentCache.promptForID(parent.id) ?? parentCache.chainForID(parent.id): undefined)
+    setActiveParent(parent ? parentCache.promptForID(parent.id) ?? parentCache.chainForID(parent.id) : undefined)
   }, [parent, parentCache])
 
   const [versionIndex, setVersionIndex] = useState(-1)

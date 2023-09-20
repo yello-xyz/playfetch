@@ -17,10 +17,10 @@ export default function useChainPromptCache(
   setNodes: Dispatch<SetStateAction<ChainNode[]>>
 ) {
   const onRefreshPrompt = useCallback(
-    (promptID: number, activePrompt: ActivePrompt) =>
+    (activePrompt: ActivePrompt) =>
       setNodes(nodes =>
         nodes.map(node =>
-          IsPromptChainItem(node) && node.promptID === promptID
+          IsPromptChainItem(node) && node.promptID === activePrompt.id
             ? {
                 ...node,
                 activePrompt,
