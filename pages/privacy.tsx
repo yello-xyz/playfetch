@@ -10,7 +10,7 @@ export default function Privacy() {
           <ListItem title='ABOUT US AND THIS PRIVACY POLICY'>
             <NumberedList>
               <ListItem>
-                This privacy policy sets out how Play/Fetch (the trading name of Yello XYZ Limited) (“Play/Fetch”, “we”,
+                This privacy policy sets out how PlayFetch (the trading name of Yello XYZ Limited) (“PlayFetch”, “we”,
                 “our”, or “us”) collects, stores, processes, transfers, shares and uses data that identifies or is
                 associated with you (your “personal information”) when you use our website at https://playfetch.ai (our
                 “Website”), our SaaS platform (our “Platform” and, together with our Website, our Services), or
