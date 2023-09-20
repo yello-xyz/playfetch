@@ -3,90 +3,46 @@ import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
 import {
-  ActivePrompt,
   User,
   ActiveProject,
   AvailableProvider,
   Workspace,
   LogEntry,
-  ActiveChain,
   PromptVersion,
   ChainVersion,
   IsPromptVersion,
 } from '@/types'
-import ClientRoute, { CompareRoute, EndpointsRoute, ParseNumberQuery, ProjectRoute, WorkspaceRoute } from '@/src/client/clientRoute'
-import { getPromptForUser } from '@/src/server/datastore/prompts'
-import { getActiveProject } from '@/src/server/datastore/projects'
+import ClientRoute, {
+  CompareRoute,
+  EndpointsRoute,
+  ParseNumberQuery,
+  ProjectRoute,
+  WorkspaceRoute,
+} from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { RefreshContext } from '@/src/client/context/refreshContext'
 import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/src/client/context/userContext'
-import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import ProjectSidebar from '@/components/projects/projectSidebar'
-import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import ProjectTopBar from '@/components/projects/projectTopBar'
-
-import dynamic from 'next/dynamic'
-import { getLogEntriesForProject } from '@/src/server/datastore/logs'
-import { getChainForUser } from '@/src/server/datastore/chains'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
-import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
+import { ActiveItem, ActiveItemIsChain, ActiveItemIsPrompt, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import loadActiveItem from '@/src/server/activeItem'
+
+import dynamic from 'next/dynamic'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
 
-const Compare = 'compare'
-const Endpoints = 'endpoints'
-type ActiveItem = ActivePrompt | ActiveChain | typeof Compare | typeof Endpoints
-const IsChain = (item: ActiveItem): item is ActiveChain =>
-  item !== Compare && item !== Endpoints && 'referencedItemIDs' in item
-const IsPrompt = (item: ActiveItem): item is ActivePrompt => item !== Compare && item !== Endpoints && !IsChain(item)
-
 export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
   const { projectID, p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(query)
-
-  const workspaces = await getWorkspacesForUser(user.id)
-
   const buildURL = urlBuilderFromHeaders(req.headers)
-  const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
-
-  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> =>
-    getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
-
-  const getActiveChain = async (chainID: number): Promise<ActiveChain> =>
-    await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
-
-  const initialActiveItem: ActiveItem | null =
-    compare === 1
-      ? Compare
-      : endpoints === 1
-      ? Endpoints
-      : promptID
-      ? await getActivePrompt(promptID)
-      : chainID
-      ? await getActiveChain(chainID)
-      : initialActiveProject.prompts.length > 0
-      ? await getActivePrompt(initialActiveProject.prompts[0].id)
-      : null
-
-  const initialLogEntries = initialActiveItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
-  const availableProviders = await getAvailableProvidersForUser(user.id)
-
-  return {
-    props: {
-      user,
-      workspaces,
-      initialActiveProject,
-      initialActiveItem,
-      initialLogEntries,
-      availableProviders,
-    },
-  }
+  return { props: await loadActiveItem(user, projectID!, promptID, chainID, compare === 1, endpoints === 1, buildURL) }
 })
 
 export default function Home({
@@ -110,11 +66,11 @@ export default function Home({
   const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
 
   const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
-  const activePrompt = activeItem && IsPrompt(activeItem) ? activeItem : undefined
-  const activeChain = activeItem && IsChain(activeItem) ? activeItem : undefined
+  const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
+  const activeChain = activeItem && ActiveItemIsChain(activeItem) ? activeItem : undefined
 
   const [activeVersion, setActiveVersion] = useState<PromptVersion | ChainVersion | undefined>(
-    activeItem === Compare || activeItem === Endpoints ? undefined : activeItem?.versions?.slice(-1)?.[0]
+    activeItem === CompareItem || activeItem === EndpointsItem ? undefined : activeItem?.versions?.slice(-1)?.[0]
   )
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
   const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
@@ -164,7 +120,7 @@ export default function Home({
 
   const refresh = (versionID?: number) => {
     refreshActiveItem(versionID)
-    if (activeItem !== Compare && activeItem !== Endpoints) {
+    if (activeItem !== CompareItem && activeItem !== EndpointsItem) {
       refreshProject()
     }
   }
@@ -191,7 +147,7 @@ export default function Home({
 
   const selectCompare = () => {
     savePrompt(refreshProject)
-    setActiveItem(Compare)
+    setActiveItem(CompareItem)
     updateVersion(undefined)
     if (!compare) {
       router.push(CompareRoute(activeProject.id), undefined, { shallow: true })
@@ -201,7 +157,7 @@ export default function Home({
   const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
-    setActiveItem(Endpoints)
+    setActiveItem(EndpointsItem)
     updateVersion(undefined)
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
@@ -212,9 +168,9 @@ export default function Home({
   }
 
   const currentQueryState = compare
-    ? Compare
+    ? CompareItem
     : endpoints
-    ? Endpoints
+    ? EndpointsItem
     : promptID ?? chainID ?? activeProject.prompts[0]?.id
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
@@ -300,7 +256,7 @@ export default function Home({
                         />
                       </Suspense>
                     )}
-                    {activeItem === Endpoints && (
+                    {activeItem === EndpointsItem && (
                       <Suspense>
                         <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
                       </Suspense>
