@@ -2,6 +2,7 @@ import { ActiveProject, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
+import compareIcon from '@/public/compare.svg'
 import endpointIcon from '@/public/endpoint.svg'
 import dotsIcon from '@/public/dots.svg'
 import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
@@ -9,8 +10,9 @@ import ProjectItemPopupMenu from './projectItemPopupMenu'
 import { useState } from 'react'
 import IconButton from '../iconButton'
 
+const Compare = 'compare'
 const Endpoints = 'endpoints'
-type ActiveItem = Prompt | Chain | typeof Endpoints
+type ActiveItem = Prompt | Chain | typeof Compare | typeof Endpoints
 
 export default function ProjectSidebar({
   activeProject,
@@ -22,6 +24,7 @@ export default function ProjectSidebar({
   onRefreshItem,
   onSelectPrompt,
   onSelectChain,
+  onSelectCompare,
   onSelectEndpoints,
 }: {
   activeProject: ActiveProject
@@ -33,6 +36,7 @@ export default function ProjectSidebar({
   onRefreshItem: () => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
+  onSelectCompare: () => void
   onSelectEndpoints: () => void
 }) {
   const reference = (item: Prompt | Chain) =>
@@ -52,11 +56,18 @@ export default function ProjectSidebar({
 
   const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
   const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
-  const isActiveItem = (item: Prompt | Chain) => activeItem !== Endpoints && activeItem?.id === item.id
+  const isActiveItem = (item: Prompt | Chain) =>
+    activeItem !== Compare && activeItem !== Endpoints && activeItem?.id === item.id
 
   return (
     <Sidebar>
       <SidebarSection>
+      <SidebarButton
+          title='Compare'
+          icon={compareIcon}
+          active={activeItem === Compare}
+          onClick={onSelectCompare}
+        />
         <SidebarButton
           title='Endpoints'
           icon={endpointIcon}
@@ -118,7 +129,7 @@ function ProjectItemActionButton({
         onClick={() => setMenuExpanded(!isMenuExpanded)}
         hoverType={{ background: active ? '' : '' }}
       />
-      <div className='absolute -right-1 top-8 shadow-sm'>
+      <div className='absolute shadow-sm -right-1 top-8'>
         <ProjectItemPopupMenu
           {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
         />
