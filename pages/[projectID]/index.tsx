@@ -6,14 +6,13 @@ import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVers
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
-  ParseNumberQuery,
+  ParseActiveItemQuery,
   ProjectRoute,
   WorkspaceRoute,
 } from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { RefreshContext } from '@/src/client/context/refreshContext'
-import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/src/client/context/userContext'
 import ProjectSidebar from '@/components/projects/projectSidebar'
 import ProjectTopBar from '@/components/projects/projectTopBar'
@@ -31,11 +30,9 @@ const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
 
-export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { projectID, p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(query)
-  const buildURL = urlBuilderFromHeaders(req.headers)
-  return { props: await loadActiveItem(user, projectID!, promptID, chainID, compare === 1, endpoints === 1, buildURL) }
-})
+export const getServerSideProps = withLoggedInSession(async ({ user, req, query }) => ({
+  props: await loadActiveItem(user, query, req.headers),
+}))
 
 export default function Home({
   user,
@@ -109,14 +106,7 @@ export default function Home({
   }
 
   const router = useRouter()
-  let { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(router.query)
-  if (!compare && !endpoints && !promptID && !chainID) {
-    if (activeProject.prompts.length > 0) {
-      promptID = activeProject.prompts[0].id
-    } else {
-      chainID = activeProject.chains[0]?.id
-    }
-  }
+  const { promptID, chainID, compare, endpoints } = ParseActiveItemQuery(router.query, activeProject)
 
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
