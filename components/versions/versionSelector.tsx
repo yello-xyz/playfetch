@@ -35,11 +35,15 @@ export default function VersionSelector({
     )
   }
 
-  const selectedVersion = versions.find(version => version.id === selectedVersionID)
+  const selectedVersion = [...versions].find(version => version.id === selectedVersionID)
   const versionIndex = versions.findIndex(version => version.id === selectedVersionID)
 
   return (
-    <PopupButton disabled={disabled} fixedWidth={fixedWidth} className={className} onSetPopup={onSetPopup}>
+    <PopupButton
+      disabled={disabled || versions.length === 0}
+      fixedWidth={fixedWidth}
+      className={className}
+      onSetPopup={onSetPopup}>
       <div className='flex items-center gap-1 overflow-hidden'>
         <VersionDescriptor
           version={selectedVersion}
