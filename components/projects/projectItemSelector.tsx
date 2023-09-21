@@ -26,11 +26,16 @@ export default function ProjectItemSelector({
   const onSetPopup = (location: GlobalPopupLocation) =>
     setPopup(PropjectItemSelectorPopup, { project, onSelectItemID }, location)
 
-  const selectedItem = ItemsInProject(project).find(item => item.id === selectedItemID)
+  const items = ItemsInProject(project)
+  const selectedItem = items.find(item => item.id === selectedItemID)
   const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
 
   return (
-    <PopupButton disabled={disabled} fixedWidth={fixedWidth} className={className} onSetPopup={onSetPopup}>
+    <PopupButton
+      disabled={disabled || items.length === 0}
+      fixedWidth={fixedWidth}
+      className={className}
+      onSetPopup={onSetPopup}>
       {selectedItem && <Icon icon={isPrompt ? promptIcon : chainIcon} />}
       <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
         {selectedItem?.name ?? 'Select a Prompt or Chain'}
@@ -52,7 +57,7 @@ function PropjectItemSelectorPopup({
   const titleClass = 'p-1.5 text-xs font-medium text-gray-400'
   return (
     <PopupContent className='p-3'>
-      <div className={titleClass}>Prompts</div>
+      {project.prompts.length > 0 && <div className={titleClass}>Prompts</div>}
       {project.prompts.map((prompt, index) => (
         <PopupLabelItem
           key={index}
@@ -61,7 +66,7 @@ function PropjectItemSelectorPopup({
           onClick={withDismiss(() => onSelectItemID(prompt.id))}
         />
       ))}
-      <div className={titleClass}>Chains</div>
+      {project.chains.length > 0 && <div className={titleClass}>Chains</div>}
       {project.chains.map((chain, index) => (
         <PopupLabelItem
           key={index}
