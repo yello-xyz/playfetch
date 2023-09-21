@@ -48,7 +48,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
-type VersionPopupProps = { deleteVersion: () => void; createEndpoint: () => void; }
+type VersionPopupProps = { deleteVersion: () => void; createEndpoint: () => void }
 
 function VersionPopup({ deleteVersion, createEndpoint, withDismiss }: VersionPopupProps & WithDismiss) {
   return (
