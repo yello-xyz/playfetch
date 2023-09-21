@@ -33,6 +33,13 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
         position.top = parentRect.height - childRect.height
       }
     }
+  } else {
+    if (position.left && position.right) {
+      position.right = undefined
+    }
+    if (position.top && position.bottom) {
+      position.bottom = undefined
+    }
   }
 
   const withDismiss = (callback: () => void) => () => {
