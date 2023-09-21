@@ -105,19 +105,23 @@ export default function PromptPanel({
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
         {loadPendingVersion && <LoadPendingVersionBanner loadPendingVersion={loadPendingVersion} />}
-        {!runPrompt && setModifiedVersion && (
-          <div className={`flex justify-between items-center font-medium text-gray-600`}>
-            Model <ModelSelector model={config.model} setModel={updateModel} />
-          </div>
-        )}
         <div className='flex items-center gap-1 font-medium'>
           {tabs.map(tab => (
-            <div key={tab} className={`px-2 py-1 rounded ${classNameForTab(tab)}`} onClick={() => updateActiveTab(tab)}>
+            <div
+              key={tab}
+              className={`px-2 py-1 rounded whitespace-nowrap ${classNameForTab(tab)}`}
+              onClick={() => updateActiveTab(tab)}>
               {labelForTab(tab)}
             </div>
           ))}
-          {!runPrompt && !setModifiedVersion && (
-            <div className='flex justify-end flex-1 text-gray-600'>{FullLabelForModel(config.model)}</div>
+          {!runPrompt && (
+            <div className='flex justify-end flex-1 text-gray-600'>
+              {setModifiedVersion ? (
+                <ModelSelector size='xs' model={config.model} setModel={updateModel} />
+              ) : (
+                FullLabelForModel(config.model)
+              )}
+            </div>
           )}
         </div>
         {isSettingsTab(activeTab) ? (

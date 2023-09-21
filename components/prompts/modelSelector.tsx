@@ -177,12 +177,14 @@ const sortedModels = allModels.sort((a, b) => FullLabelForModel(a).localeCompare
 export default function ModelSelector({
   model,
   setModel,
+  size = 'md',
 }: {
   model: LanguageModel
   setModel: (model: LanguageModel) => void
+  size?: 'xs' | 'sm' | 'md'
 }) {
   return (
-    <DropdownMenu size='md' value={model} onChange={value => setModel(value as LanguageModel)}>
+    <DropdownMenu size={size} value={model} onChange={value => setModel(value as LanguageModel)}>
       {sortedModels.map((model, index) => (
         <option key={index} value={model}>
           {FullLabelForModel(model)}
