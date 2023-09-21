@@ -4,12 +4,17 @@ import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
+import { ParseNumberQuery } from '@/src/client/clientRoute'
+import { useRouter } from 'next/router'
 
 export default function CompareView({ project }: { project: ActiveProject }) {
-  const [leftItemID, setLeftItemID] = useState<number>()
-  const [rightItemID, setRightItemID] = useState<number>()
-  const [leftVersionID, setLeftVersionID] = useState<number>()
-  const [rightVersionID, setRightVersionID] = useState<number>()
+  const router = useRouter()
+  const { i: itemID, v: versionID, p: previousVersionID } = ParseNumberQuery(router.query)
+
+  const [rightItemID, setRightItemID] = useState(itemID)
+  const [rightVersionID, setRightVersionID] = useState(versionID)
+  const [leftItemID, setLeftItemID] = useState(itemID)
+  const [leftVersionID, setLeftVersionID] = useState(previousVersionID)
   const [activePromptTab, setActivePromptTab] = useState<PromptTab>()
 
   const itemCache = useActiveItemCache(project, [

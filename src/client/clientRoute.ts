@@ -27,7 +27,9 @@ export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRo
 
 export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRoute(projectID)}?c=${chainID}`
 
-export const CompareRoute = (projectID: number) => `${ProjectRoute(projectID)}?m=1`
+export const CompareRoute = (projectID: number, itemID?: number, versionID?: number, previousID?: number) =>
+  `${ProjectRoute(projectID)}?m=1` +
+  `${itemID ? `&i=${itemID}` : ''}${versionID ? `&v=${versionID}` : ''}${previousID ? `&p=${previousID}` : ''}`
 
 export const EndpointsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1`
 
