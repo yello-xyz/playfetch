@@ -1,16 +1,43 @@
-import { ActiveProject, Chain, ItemsInProject, Prompt } from '@/types'
+import { ActiveProject } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
-import { useState } from 'react'
+import VersionSelector from '../versions/versionSelector'
+import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 
-export default function ComparePane({ project }: { project: ActiveProject }) {
-  const [selectedItem, setSelectedItem] = useState<Prompt | Chain>()
+export default function ComparePane({
+  project,
+  itemID,
+  setItemID,
+  versionID,
+  setVersionID,
+  itemCache,
+}: {
+  project: ActiveProject
+  itemID?: number
+  setItemID: (itemID: number) => void
+  versionID?: number
+  setVersionID: (versionID: number) => void
+  itemCache: ActiveItemCache
+}) {
+  const activeItem = itemID ? itemCache.itemForID(itemID) : undefined
+  const activeVersion =
+    activeItem && versionID ? activeItem.versions.find(version => version.id === versionID) : undefined
+  if (activeItem && !activeVersion) {
+    setVersionID(activeItem.versions.slice(-1)[0].id)
+  }
+
   return (
     <div className='flex items-center gap-1 p-4'>
       <ProjectItemSelector
         className='w-full max-w-[200px]'
         project={project}
-        selectedItemID={selectedItem?.id}
-        onSelectItemID={itemID => setSelectedItem(ItemsInProject(project).find(item => item.id === itemID))}
+        selectedItemID={itemID}
+        onSelectItemID={setItemID}
+      />
+      <VersionSelector
+        className='w-full max-w-[200px]'
+        projectItem={activeItem}
+        selectedVersionID={versionID}
+        onSelectVersionID={setVersionID}
       />
     </div>
   )
