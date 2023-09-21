@@ -2,14 +2,9 @@ import Progress from 'nprogress'
 import { Router } from 'next/router'
 import { useEffect } from 'react'
 
-Progress.configure({
-  minimum: 0.3,
-  easing: 'ease',
-  speed: 800,
-  showSpinner: false,
-})
+Progress.configure({ showSpinner: false })
 
-export default function () {
+export default function ProgressBar() {
   useEffect(() => {
     Router.events.on('routeChangeStart', () => Progress.start())
     Router.events.on('routeChangeComplete', () => Progress.done())

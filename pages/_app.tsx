@@ -11,8 +11,8 @@ import TagManager from 'react-gtm-module'
 import { useEffect } from 'react'
 import CookieBanner from '@/components/cookieBanner'
 
-import dynamic from 'next/dynamic';
-const ProgressBar = dynamic(() => import('@/components/progressBar'), { ssr: false });
+import dynamic from 'next/dynamic'
+const ProgressBar = dynamic(() => import('@/components/progressBar'), { ssr: false })
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
