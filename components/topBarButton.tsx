@@ -11,12 +11,14 @@ export function TopBarButton({
   icon,
   onClick,
   disabled,
+  iconClassName = '',
 }: {
   type?: ButtonType
   title?: string
   icon?: StaticImageData
   onClick: () => void
   disabled?: boolean
+  iconClassName?: string
 }) {
   const baseClass = 'flex items-center gap-0.5 pl-1.5 pr-1.5 py-1 font-medium rounded-lg'
 
@@ -34,7 +36,7 @@ export function TopBarButton({
 
   return (
     <div className={`${baseClass} ${disabled ? '' : 'cursor-pointer'} ${colorForType(type)}`} onClick={onClick}>
-      {icon && <Icon icon={icon} />}
+      {icon && <Icon icon={icon} className={iconClassName} />}
       {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}
     </div>
   )

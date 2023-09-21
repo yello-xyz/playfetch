@@ -79,13 +79,11 @@ export default function Home({
     }
   }
 
-  const navigateToProject = async (projectID: number) => {
-    router.push(ProjectRoute(projectID))
-  }
+  const navigateToProject = (projectID: number) => router.push(ProjectRoute(projectID))
 
   const addProject = async () => {
     const projectID = await api.addProject(activeWorkspace.id)
-    return navigateToProject(projectID)
+    await navigateToProject(projectID)
   }
 
   const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)

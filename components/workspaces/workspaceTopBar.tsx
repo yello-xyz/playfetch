@@ -7,6 +7,7 @@ import folderIcon from '@/public/folderBig.svg'
 import Icon from '../icon'
 import { useState } from 'react'
 import WorkspacePopupMenu from './workspacePopupMenu'
+import spinnerIcon from '@/public/spinner.svg'
 
 export default function WorkspaceTopBar({
   activeWorkspace,
@@ -66,5 +67,22 @@ export default function WorkspaceTopBar({
 }
 
 export function AddProjectButton({ onAddProject }: { onAddProject: () => Promise<void> }) {
-  return <TopBarButton type='primary' title='New Project' icon={addIcon} onClick={onAddProject} />
+  const [isAdding, setAdding] = useState(false)
+
+  const addProject = async () => {
+    setAdding(true)
+    await onAddProject()
+    setAdding(false)
+  }
+
+  return (
+    <TopBarButton
+      disabled={isAdding}
+      type='primary'
+      title='New Project'
+      icon={isAdding ? spinnerIcon : addIcon}
+      iconClassName={isAdding ? 'animate-spin max-w-[24px]' : undefined}
+      onClick={addProject}
+    />
+  )
 }
