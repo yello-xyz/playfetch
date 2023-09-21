@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveChain, ActiveProject, ActivePrompt, FindParentInProject } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, FindItemInProject } from '@/types'
 import api from '@/src/client/api'
 import Label from '../label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
@@ -64,7 +64,7 @@ export default function EndpointSettingsPane({
   const [isSaving, setSaving] = useState(false)
 
   const updateParentID = (parentID?: number) => {
-    const parent = FindParentInProject(parentID, project)
+    const parent = FindItemInProject(parentID, project)
     setParentID(parentID)
     setVersionID(parent.lastVersionID)
     onSelectParentID(parentID)

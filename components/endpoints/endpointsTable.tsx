@@ -1,9 +1,9 @@
 import {
   ActiveProject,
   Chain,
-  EndpointParentIsChain,
-  EndpointParentsInProject,
-  FindParentInProject,
+  ProjectItemIsChain,
+  ItemsInProject,
+  FindItemInProject,
   Prompt,
   ResolvedEndpoint,
 } from '@/types'
@@ -28,7 +28,7 @@ export default function EndpointsTable({
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onAddEndpoint?: () => void
 }) {
-  const groups = EndpointParentsInProject(project)
+  const groups = ItemsInProject(project)
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
@@ -48,7 +48,7 @@ export default function EndpointsTable({
           groups.map((group, index) => (
             <EndpointsGroup
               key={index}
-              parent={FindParentInProject(group[0].parentID, project)}
+              parent={FindItemInProject(group[0].parentID, project)}
               endpoints={group}
               activeEndpoint={activeEndpoint}
               setActiveEndpoint={setActiveEndpoint}
@@ -76,7 +76,7 @@ function EndpointsGroup({
   return (
     <>
       <div className='flex items-center gap-1 text-gray-700 '>
-        <Icon icon={EndpointParentIsChain(parent) ? chainIcon : promptIcon} />
+        <Icon icon={ProjectItemIsChain(parent) ? chainIcon : promptIcon} />
         {parent.name}
       </div>
       <div className='mb-4 grid w-full grid-cols-[80px_repeat(2,minmax(80px,1fr))_repeat(2,80px)_120px]'>

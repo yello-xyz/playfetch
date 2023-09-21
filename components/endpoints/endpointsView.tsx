@@ -3,9 +3,9 @@ import {
   ActiveProject,
   ActivePrompt,
   Endpoint,
-  FindParentInProject,
-  EndpointParentIsChain,
-  EndpointParentsInProject,
+  FindItemInProject,
+  ProjectItemIsChain,
+  ItemsInProject,
   ResolvedEndpoint,
   LogEntry,
   ActiveChain,
@@ -89,7 +89,7 @@ export default function EndpointsView({
   )
 
   const addEndpoint =
-    EndpointParentsInProject(project).length > 0
+    ItemsInProject(project).length > 0
       ? () => {
           setNewEndpoint(NewEndpointSettings())
           setActiveParentID(undefined)
@@ -131,13 +131,13 @@ export default function EndpointsView({
     }
   }
 
-  const parent = activeParentID ? FindParentInProject(activeParentID, project) : undefined
+  const parent = activeParentID ? FindItemInProject(activeParentID, project) : undefined
   const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
   const parentCache = useActiveItemCache(
     project,
-    parent && !EndpointParentIsChain(parent) ? [parent.id] : [],
+    parent && !ProjectItemIsChain(parent) ? [parent.id] : [],
     setActiveParent,
-    parent && EndpointParentIsChain(parent) ? [parent.id] : [],
+    parent && ProjectItemIsChain(parent) ? [parent.id] : [],
     setActiveParent
   )
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function EndpointsView({
     version => version.id === activeEndpoint?.versionID
   )
   const variables = parent
-    ? EndpointParentIsChain(parent)
+    ? ProjectItemIsChain(parent)
       ? activeVersion?.items
         ? ExtractUnboundChainInputs(activeVersion.items)
         : []

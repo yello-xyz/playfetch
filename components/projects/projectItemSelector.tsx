@@ -1,5 +1,5 @@
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { ActiveProject, Chain, Prompt } from '@/types'
+import { ActiveProject, Chain, ItemsInProject, Prompt } from '@/types'
 import { useRef } from 'react'
 import { PopupContent, PopupItem } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
@@ -37,7 +37,7 @@ export default function ProjectItemSelector({
         )
       }
 
-  const selectedItem = [...project.prompts, ...project.chains].find(item => item.id === selectedItemID)
+  const selectedItem = ItemsInProject(project).find(item => item.id === selectedItemID)
   const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
   const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
   const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer'

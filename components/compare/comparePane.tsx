@@ -1,4 +1,4 @@
-import { ActiveProject, Chain, Prompt } from '@/types'
+import { ActiveProject, Chain, ItemsInProject, Prompt } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import { useState } from 'react'
 
@@ -10,9 +10,7 @@ export default function ComparePane({ project }: { project: ActiveProject }) {
         className='w-full max-w-[200px]'
         project={project}
         selectedItemID={selectedItem?.id}
-        onSelectItemID={itemID =>
-          setSelectedItem([...project.prompts, ...project.chains].find(item => item.id === itemID))
-        }
+        onSelectItemID={itemID => setSelectedItem(ItemsInProject(project).find(item => item.id === itemID))}
       />
     </div>
   )
