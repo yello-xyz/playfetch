@@ -1,5 +1,12 @@
 import { Usage } from '@/types'
-import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getID } from './datastore'
+import {
+  Entity,
+  runTransactionWithExponentialBackoff,
+  buildKey,
+  getDatastore,
+  getID,
+  getKeyedEntity,
+} from './datastore'
 
 export async function migrateUsage() {
   const datastore = getDatastore()
@@ -36,7 +43,7 @@ export async function updateUsage(
   failed: boolean
 ) {
   await runTransactionWithExponentialBackoff(async transaction => {
-    const [usageData] = await transaction.get(buildKey(Entity.USAGE, endpointID))
+    const usageData = await getKeyedEntity(Entity.USAGE, endpointID, transaction)
     transaction.save(
       toUsageData(
         endpointID,

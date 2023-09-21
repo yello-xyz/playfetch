@@ -45,25 +45,36 @@ const projectQuery = (query: Query, keys: string[]) => (keys.length > 0 ? query.
 const orderQuery = (query: Query, sortKeys: string[]) =>
   sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
-const buildQuery = (type: string, filter: EntityFilter, limit: number, sortKeys: string[], selectKeys: string[]) =>
-  projectQuery(orderQuery(getDatastore().createQuery(type).filter(filter).limit(limit), sortKeys), selectKeys)
+const buildQuery = (
+  type: string,
+  filter: EntityFilter,
+  limit: number,
+  sortKeys: string[],
+  selectKeys: string[],
+  transaction?: Transaction
+) =>
+  projectQuery(
+    orderQuery((transaction ?? getDatastore()).createQuery(type).filter(filter).limit(limit), sortKeys),
+    selectKeys
+  )
 
 const getInternalFilteredEntities = (
   type: string,
   filter: EntityFilter,
   limit = 100,
   sortKeys = [] as string[],
-  selectKeys = [] as string[]
+  selectKeys = [] as string[],
+  transaction?: Transaction
 ) =>
-  getDatastore()
+  (transaction ?? getDatastore())
     .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
 export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
   getInternalFilteredEntities(type, filter, limit)
 
-export const getFilteredEntity = (type: string, filter: EntityFilter) =>
-  getInternalFilteredEntities(type, filter, 1).then(([entity]) => entity)
+export const getFilteredEntity = (type: string, filter: EntityFilter, transaction?: Transaction) =>
+  getInternalFilteredEntities(type, filter, 1, [], [], transaction).then(([entity]) => entity)
 
 const getInternalEntities = (type: string, key: string, value: {}, limit?: number, sortKeys?: string[]) =>
   getInternalFilteredEntities(type, buildFilter(key, value), limit, sortKeys)
@@ -77,11 +88,11 @@ export const getOrderedEntities = (type: string, key: string, value: {}, sortKey
 export const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
   getInternalEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
 
-const getFilteredEntityKeys = (type: string, filter: EntityFilter, limit?: number) =>
-  getInternalFilteredEntities(type, filter, limit, [], ['__key__']).then(entities => entities.map(getKey))
+const getFilteredEntityKeys = (type: string, filter: EntityFilter, limit?: number, transaction?: Transaction) =>
+  getInternalFilteredEntities(type, filter, limit, [], ['__key__'], transaction).then(entities => entities.map(getKey))
 
-export const getFilteredEntityKey = (type: string, filter: EntityFilter) =>
-  getFilteredEntityKeys(type, filter, 1).then(([key]) => key)
+export const getFilteredEntityKey = (type: string, filter: EntityFilter, transaction?: Transaction) =>
+  getFilteredEntityKeys(type, filter, 1, transaction).then(([key]) => key)
 
 export const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
   getFilteredEntityKeys(type, buildFilter(key, value), limit)
@@ -101,15 +112,15 @@ export const getEntityIDs = (type: string, key: string, value: {}, limit?: numbe
 export const getEntityID = (type: string, key: string, value: {}) =>
   getEntityIDs(type, key, value, 1).then(([id]) => id)
 
-export const getKeyedEntities = async (type: string, ids: number[]): Promise<any[]> =>
+export const getKeyedEntities = async (type: string, ids: number[], transaction?: Transaction): Promise<any[]> =>
   ids.length
-    ? getDatastore()
+    ? (transaction ?? getDatastore())
         .get(ids.map(id => buildKey(type, id)))
         .then(([entities]) => entities)
     : Promise.resolve([])
 
-export const getKeyedEntity = async (type: string, id: number) =>
-  getKeyedEntities(type, [id]).then(([entity]) => entity)
+export const getKeyedEntity = async (type: string, id: number, transaction?: Transaction) =>
+  getKeyedEntities(type, [id], transaction).then(([entity]) => entity)
 
 export const getEntityCount = async (type: string, key: string, value: {}) => {
   const datastore = getDatastore()
@@ -140,3 +151,6 @@ export const runTransactionWithExponentialBackoff = async (
     }
   }
 }
+
+export const runTransaction = (operation: (transaction: Transaction) => Promise<void>) =>
+  runTransactionWithExponentialBackoff(operation, 1)
