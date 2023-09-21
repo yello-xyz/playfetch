@@ -1,5 +1,5 @@
 import { StaticImageData } from 'next/image'
-import { RefObject, useEffect, useRef } from 'react'
+import { ReactNode, RefObject, useEffect, useRef } from 'react'
 import Icon from './icon'
 
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -44,18 +44,41 @@ export default function PopupMenu({
 
 export function PopupContent({ children, className }: { children: any; className?: string }) {
   return (
-    <div
-      className={`${className} bg-white border border-gray-200 rounded-lg gap-0.5 select-none max-h-screen overflow-y-auto`}>
+    <div className={`${className} bg-white border border-gray-200 rounded-lg select-none max-h-screen overflow-y-auto`}>
       {children}
     </div>
   )
 }
 
-export function PopupItem({ label, icon, onClick }: { label: string; icon: StaticImageData; onClick: () => void }) {
+export function PopupLabelItem({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string
+  icon?: StaticImageData
+  onClick: () => void
+}) {
   return (
-    <div className='flex items-center gap-1 p-1 rounded cursor-pointer hover:bg-gray-100' onClick={onClick}>
-      <Icon icon={icon} />
+    <PopupItem className='flex items-center gap-1 p-1' onClick={onClick}>
+      {icon && <Icon icon={icon} />}
       {label}
+    </PopupItem>
+  )
+}
+
+export function PopupItem({
+  onClick,
+  className = '',
+  children,
+}: {
+  onClick: () => void
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <div className={`${className} rounded cursor-pointer hover:bg-gray-100`} onClick={onClick}>
+      {children}
     </div>
   )
 }

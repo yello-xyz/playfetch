@@ -186,6 +186,7 @@ export default function EndpointSettingsPane({
           onSelectVersionID={setVersionID}
           labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
           hideEndpointReferences
+          fixedWidth
           disabled={disabled}
         />
         <Label disabled={disabled}>Name</Label>

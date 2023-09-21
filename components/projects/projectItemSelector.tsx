@@ -1,7 +1,7 @@
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { ActiveProject, Chain, ItemsInProject, Prompt } from '@/types'
+import { ActiveProject, ItemsInProject } from '@/types'
 import { useRef } from 'react'
-import { PopupContent, PopupItem } from '../popupMenu'
+import { PopupContent, PopupLabelItem } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -32,7 +32,7 @@ export default function ProjectItemSelector({
         const iconRect = buttonRef.current?.getBoundingClientRect()!
         setPopup(
           PropjectItemSelectorPopup,
-          { project, selectItem: item => onSelectItemID(item.id) },
+          { project, onSelectItemID },
           { top: iconRect.y + 48, left: iconRect.x, right: fixedWidth ? iconRect.x + iconRect.width : undefined }
         )
       }
@@ -55,20 +55,34 @@ export default function ProjectItemSelector({
 
 type PropjectItemSelectorPopupProps = {
   project: ActiveProject
-  selectItem: (item: Prompt | Chain) => void
+  onSelectItemID: (itemID: number) => void
 }
 
-function PropjectItemSelectorPopup({ project, selectItem, withDismiss }: PropjectItemSelectorPopupProps & WithDismiss) {
+function PropjectItemSelectorPopup({
+  project,
+  onSelectItemID,
+  withDismiss,
+}: PropjectItemSelectorPopupProps & WithDismiss) {
   const titleClass = 'p-1.5 text-xs font-medium text-gray-400'
   return (
     <PopupContent className='p-3'>
       <div className={titleClass}>Prompts</div>
       {project.prompts.map((prompt, index) => (
-        <PopupItem key={index} label={prompt.name} icon={promptIcon} onClick={withDismiss(() => selectItem(prompt))} />
+        <PopupLabelItem
+          key={index}
+          label={prompt.name}
+          icon={promptIcon}
+          onClick={withDismiss(() => onSelectItemID(prompt.id))}
+        />
       ))}
       <div className={titleClass}>Chains</div>
       {project.chains.map((chain, index) => (
-        <PopupItem key={index} label={chain.name} icon={chainIcon} onClick={withDismiss(() => selectItem(chain))} />
+        <PopupLabelItem
+          key={index}
+          label={chain.name}
+          icon={chainIcon}
+          onClick={withDismiss(() => onSelectItemID(chain.id))}
+        />
       ))}
     </PopupContent>
   )
