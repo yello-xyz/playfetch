@@ -12,10 +12,12 @@ import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runButtons'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect } from 'react'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
+
+export type PromptTab = keyof Prompts | 'settings'
 
 export default function PromptPanel({
   version,
@@ -24,6 +26,8 @@ export default function PromptPanel({
   inputValues,
   testConfig,
   setTestConfig,
+  initialActiveTab,
+  onActiveTabChange,
   showTestMode,
   showModelSelector,
   loadPendingVersion,
@@ -35,6 +39,8 @@ export default function PromptPanel({
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
+  initialActiveTab?: PromptTab
+  onActiveTabChange?: (tab: PromptTab) => void
   showTestMode?: boolean
   showModelSelector?: boolean
   loadPendingVersion?: () => void
@@ -43,18 +49,23 @@ export default function PromptPanel({
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
-  type Tab = keyof Prompts | 'settings'
-  const isSettingsTab = (tab: Tab): tab is 'settings' => tab === 'settings'
-  const labelForTab = (tab: Tab) => (isSettingsTab(tab) ? 'Advanced Settings' : LabelForPromptKey(tab))
-  const tabs = [...SupportedPromptKeysForModel(config.model), 'settings'] as Tab[]
-  const [activeTab, setActiveTab] = useState<Tab>('main')
+  const isSettingsTab = (tab: PromptTab): tab is 'settings' => tab === 'settings'
+  const labelForTab = (tab: PromptTab) => (isSettingsTab(tab) ? 'Advanced Settings' : LabelForPromptKey(tab))
+  const tabs = [...SupportedPromptKeysForModel(config.model), 'settings'] as PromptTab[]
+  const [activeTab, setActiveTab] = useInitialState<PromptTab>(
+    initialActiveTab && tabs.includes(initialActiveTab) ? initialActiveTab : 'main'
+  )
+  const updateActiveTab = (tab: PromptTab) => {
+    setActiveTab(tab)
+    onActiveTabChange?.(tab)
+  }
 
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion?.({ ...version, prompts, config })
     if (!isSettingsTab(activeTab) && !SupportedPromptKeysForModel(config.model).includes(activeTab)) {
-      setActiveTab('main')
+      updateActiveTab('main')
     }
   }
 
@@ -82,7 +93,7 @@ export default function PromptPanel({
 
   useEffect(() => setPreferredHeight?.(preferredHeight), [preferredHeight, setPreferredHeight])
 
-  const classNameForTab = (tab: Tab) =>
+  const classNameForTab = (tab: PromptTab) =>
     tab === activeTab
       ? 'bg-gray-100 text-gray-700'
       : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
@@ -102,7 +113,7 @@ export default function PromptPanel({
         )}
         <div className='flex items-center gap-1 font-medium'>
           {tabs.map(tab => (
-            <div key={tab} className={`px-2 py-1 rounded ${classNameForTab(tab)}`} onClick={() => setActiveTab(tab)}>
+            <div key={tab} className={`px-2 py-1 rounded ${classNameForTab(tab)}`} onClick={() => updateActiveTab(tab)}>
               {labelForTab(tab)}
             </div>
           ))}

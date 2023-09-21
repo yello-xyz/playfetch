@@ -3,12 +3,14 @@ import { Allotment } from 'allotment'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useState } from 'react'
+import { PromptTab } from '../prompts/promptPanel'
 
 export default function CompareView({ project }: { project: ActiveProject }) {
   const [leftItemID, setLeftItemID] = useState<number>()
   const [rightItemID, setRightItemID] = useState<number>()
   const [leftVersionID, setLeftVersionID] = useState<number>()
   const [rightVersionID, setRightVersionID] = useState<number>()
+  const [activePromptTab, setActivePromptTab] = useState<PromptTab>()
 
   const itemCache = useActiveItemCache(project, [
     ...(leftItemID ? [leftItemID] : []),
@@ -42,6 +44,8 @@ export default function CompareView({ project }: { project: ActiveProject }) {
           setItemID={setLeftItemID}
           versionID={leftVersionID}
           setVersionID={setLeftVersionID}
+          activePromptTab={activePromptTab}
+          setActivePromptTab={setActivePromptTab}
           itemCache={itemCache}
           disabled={!leftItemID}
         />
@@ -53,6 +57,8 @@ export default function CompareView({ project }: { project: ActiveProject }) {
           setItemID={updateRightItemID}
           versionID={rightVersionID}
           setVersionID={updateRightVersionID}
+          activePromptTab={activePromptTab}
+          setActivePromptTab={setActivePromptTab}
           itemCache={itemCache}
         />
       </Allotment.Pane>

@@ -2,9 +2,9 @@ import { ActiveProject, IsPromptVersion } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import RunTimeline from '../runs/runTimeline'
-import PromptPanel from '../prompts/promptPanel'
+import PromptPanel, { PromptTab } from '../prompts/promptPanel'
 
 export default function ComparePane({
   project,
@@ -12,6 +12,8 @@ export default function ComparePane({
   setItemID,
   versionID,
   setVersionID,
+  activePromptTab,
+  setActivePromptTab,
   itemCache,
   disabled,
 }: {
@@ -20,6 +22,8 @@ export default function ComparePane({
   setItemID: (itemID: number) => void
   versionID?: number
   setVersionID: (versionID: number) => void
+  activePromptTab?: PromptTab
+  setActivePromptTab: (tab: PromptTab) => void
   itemCache: ActiveItemCache
   disabled?: boolean
 }) {
@@ -53,7 +57,11 @@ export default function ComparePane({
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
         <div className='p-4 border-b border-gray-200 min-h-[188px]'>
-        <PromptPanel version={activeVersion} />
+          <PromptPanel
+            version={activeVersion}
+            initialActiveTab={activePromptTab}
+            onActiveTabChange={setActivePromptTab}
+          />
         </div>
       )}
       {activeVersion && (
