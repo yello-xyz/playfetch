@@ -172,6 +172,7 @@ export default function EndpointSettingsPane({
         <Checkbox disabled={disabled} checked={isEnabled} setChecked={setEnabled} />
         <Label disabled={disabled}>Prompt / Chain</Label>
         <ProjectItemSelector
+          fixedWidth
           disabled={disabled}
           project={project}
           selectedItemID={parentID}

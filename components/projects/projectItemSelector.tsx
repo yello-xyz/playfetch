@@ -12,11 +12,15 @@ export default function ProjectItemSelector({
   selectedItemID,
   onSelectItemID,
   disabled,
+  fixedWidth,
+  className = '',
 }: {
   project: ActiveProject
   selectedItemID?: number
   onSelectItemID: (itemID: number) => void
   disabled?: boolean
+  fixedWidth?: boolean
+  className?: string
 }) {
   const buttonRef = useRef<HTMLDivElement>(null)
 
@@ -29,23 +33,21 @@ export default function ProjectItemSelector({
         setPopup(
           PropjectItemSelectorPopup,
           { project, selectItem: item => onSelectItemID(item.id) },
-          { top: iconRect.y + 48, left: iconRect.x, right: iconRect.x + iconRect.width }
+          { top: iconRect.y + 48, left: iconRect.x, right: fixedWidth ? iconRect.x + iconRect.width : undefined }
         )
       }
 
   const selectedItem = [...project.prompts, ...project.chains].find(item => item.id === selectedItemID)
   const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
+  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
   const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer'
 
   return (
-    <div
-      className={`flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300 ${disabledClass}`}
-      ref={buttonRef}
-      onClick={togglePopup}>
-      <div className='flex items-center gap-1'>
-        {selectedItem && <Icon icon={isPrompt ? promptIcon : chainIcon} />}
+    <div className={`${baseClass} ${disabledClass} ${className}`} ref={buttonRef} onClick={togglePopup}>
+      {selectedItem && <Icon icon={isPrompt ? promptIcon : chainIcon} />}
+      <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
         {selectedItem?.name ?? 'Select a Prompt or Chain'}
-      </div>
+      </span>
       <Icon icon={chevronIcon} />
     </div>
   )
