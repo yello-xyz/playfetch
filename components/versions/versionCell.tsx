@@ -123,7 +123,7 @@ export function VersionLabels<Version extends PromptVersion | ChainVersion>({
 
   return (
     <ItemLabels
-      labels={[...version.labels, ...version.labels, ...extraLabels]}
+      labels={[...version.labels, ...extraLabels]}
       colors={{ ...colors, ...extraColors }}
       icons={extraIcons}
       noWrap={noWrap}
