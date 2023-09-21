@@ -1,5 +1,5 @@
-import { PromptChainItem } from '@/types'
-import { ChainNode, InputNode, IsChainItem, IsPromptChainItem } from './chainNode'
+import { CodeChainItem, PromptChainItem } from '@/types'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { LabelForModel } from '../prompts/modelSelector'
 import { VersionLabels } from '../versions/versionCell'
@@ -25,6 +25,7 @@ export default function ChainNodeBoxBody({
       {IsPromptChainItem(chainNode) && (
         <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
       )}
+      {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
       {chainNode === InputNode && <InputNodeBody nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
     </>
   )
@@ -54,6 +55,14 @@ function PromptNodeBody({
         <TaggedVersionPrompt version={version} />
       </CommonBody>
     </div>
+  ) : null
+}
+
+function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: boolean }) {
+  return item.description ? (
+    <CommonBody isSelected={isSelected}>
+      <span className=''>{item.description}</span>
+    </CommonBody>
   ) : null
 }
 
