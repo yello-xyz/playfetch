@@ -3,6 +3,7 @@ import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { useEffect } from 'react'
+import RunTimeline from '../runs/runTimeline'
 
 export default function ComparePane({
   project,
@@ -32,21 +33,28 @@ export default function ComparePane({
   }, [activeItem, activeVersion, setVersionID])
 
   return (
-    <div className='flex items-center gap-1 p-4'>
-      <ProjectItemSelector
-        className='w-full max-w-[240px]'
-        project={project}
-        selectedItemID={itemID}
-        onSelectItemID={setItemID}
-        disabled={disabled}
-      />
-      <VersionSelector
-        className='w-full max-w-[240px]'
-        projectItem={activeItem}
-        selectedVersionID={versionID}
-        onSelectVersionID={setVersionID}
-        disabled={disabled}
-      />
+    <div className='flex flex-col h-full'>
+      <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
+        <ProjectItemSelector
+          className='w-full max-w-[240px]'
+          project={project}
+          selectedItemID={itemID}
+          onSelectItemID={setItemID}
+          disabled={disabled}
+        />
+        <VersionSelector
+          className='w-full max-w-[240px]'
+          projectItem={activeItem}
+          selectedVersionID={versionID}
+          onSelectVersionID={setVersionID}
+          disabled={disabled}
+        />
+      </div>
+      {activeVersion && (
+        <div className='overflow-y-auto'>
+          <RunTimeline runs={activeVersion.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+        </div>
+      )}
     </div>
   )
 }

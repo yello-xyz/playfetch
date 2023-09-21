@@ -19,12 +19,14 @@ export default function RunTimeline({
   activeItem,
   activeRunID,
   isRunning,
+  skipHeader,
 }: {
   runs: PartialRun[]
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
   isRunning?: boolean
+  skipHeader?: boolean
 }) {
   const identifierForRunID = (runID: number) => `r${runID}`
 
@@ -55,9 +57,11 @@ export default function RunTimeline({
 
   return (
     <div className='relative flex flex-col h-full'>
-      <div className='z-10 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
-        <SingleTabHeader label='Responses' />
-      </div>
+      {!skipHeader && (
+        <div className='z-10 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
+          <SingleTabHeader label='Responses' />
+        </div>
+      )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
           {sortedRuns.map(run => (
