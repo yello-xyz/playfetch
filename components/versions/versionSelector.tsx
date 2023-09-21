@@ -1,10 +1,8 @@
 import { ChainVersion, PromptVersion } from '@/types'
 import { VersionLabels } from './versionCell'
-import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent, PopupItem } from '../popupMenu'
-import { useRef } from 'react'
-import Icon from '../icon'
-import chevronIcon from '@/public/chevron.svg'
+import { PopupButton } from '../popupButton'
 
 export default function VersionSelector({
   versions,
@@ -27,33 +25,25 @@ export default function VersionSelector({
   fixedWidth?: boolean
   className?: string
 }) {
-  const buttonRef = useRef<HTMLDivElement>(null)
-
   const setPopup = useGlobalPopup<VersionSelectorPopupProps>()
 
-  const togglePopup = disabled
-    ? undefined
-    : () => {
-        const iconRect = buttonRef.current?.getBoundingClientRect()!
-        setPopup(
-          VersionSelectorPopup,
-          { versions, onSelectVersionID, labelColors, hideChainReferences, hideEndpointReferences },
-          { top: iconRect.y + 48, left: iconRect.x, right: fixedWidth ? iconRect.x + iconRect.width : undefined }
-        )
-      }
+  const onSetPopup = (location: GlobalPopupLocation) => {
+    setPopup(
+      VersionSelectorPopup,
+      { versions, onSelectVersionID, labelColors, hideChainReferences, hideEndpointReferences },
+      location
+    )
+  }
 
   const selectedVersion = versions.find(version => version.id === selectedVersionID)
   const versionIndex = versions.findIndex(version => version.id === selectedVersionID)
-  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
-  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer'
 
   return (
-    <div className={`${baseClass} ${disabledClass} ${className}`} ref={buttonRef} onClick={togglePopup}>
+    <PopupButton disabled={disabled} fixedWidth={fixedWidth} className={className} onSetPopup={onSetPopup}>
       <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
         {selectedVersion ? `Version ${versionIndex + 1}` : 'Select Version'}
       </span>
-      <Icon icon={chevronIcon} />
-    </div>
+    </PopupButton>
   )
 }
 

@@ -1,11 +1,10 @@
-import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { ActiveProject, ItemsInProject } from '@/types'
-import { useRef } from 'react'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
-import chevronIcon from '@/public/chevron.svg'
 import Icon from '../icon'
+import { PopupButton } from '../popupButton'
 
 export default function ProjectItemSelector({
   project,
@@ -22,34 +21,21 @@ export default function ProjectItemSelector({
   fixedWidth?: boolean
   className?: string
 }) {
-  const buttonRef = useRef<HTMLDivElement>(null)
-
   const setPopup = useGlobalPopup<PropjectItemSelectorPopupProps>()
 
-  const togglePopup = disabled
-    ? undefined
-    : () => {
-        const iconRect = buttonRef.current?.getBoundingClientRect()!
-        setPopup(
-          PropjectItemSelectorPopup,
-          { project, onSelectItemID },
-          { top: iconRect.y + 48, left: iconRect.x, right: fixedWidth ? iconRect.x + iconRect.width : undefined }
-        )
-      }
+  const onSetPopup = (location: GlobalPopupLocation) =>
+    setPopup(PropjectItemSelectorPopup, { project, onSelectItemID }, location)
 
   const selectedItem = ItemsInProject(project).find(item => item.id === selectedItemID)
   const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
-  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
-  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer'
 
   return (
-    <div className={`${baseClass} ${disabledClass} ${className}`} ref={buttonRef} onClick={togglePopup}>
+    <PopupButton disabled={disabled} fixedWidth={fixedWidth} className={className} onSetPopup={onSetPopup}>
       {selectedItem && <Icon icon={isPrompt ? promptIcon : chainIcon} />}
       <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
         {selectedItem?.name ?? 'Select a Prompt or Chain'}
       </span>
-      <Icon icon={chevronIcon} />
-    </div>
+    </PopupButton>
   )
 }
 
