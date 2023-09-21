@@ -15,21 +15,21 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     ...(rightItemID ? [rightItemID] : []),
   ])
 
-  const updateLeftItemID = (itemID: number) => {
-    if (itemID !== leftItemID) {
+  const updateRightItemID = (itemID: number) => {
+    if (itemID !== rightItemID) {
       setLeftItemID(itemID)
       setRightItemID(itemID)
     }
   }
 
-  const updateLeftVersionID = (versionID: number) => {
-    if (versionID !== leftVersionID) {
-      setLeftVersionID(versionID)
-      if (leftItemID && rightItemID === leftItemID) {
-        const leftVersions = itemCache.itemForID(leftItemID)?.versions ?? []
-        const leftVersion = [...leftVersions].find(version => version.id === versionID)
-        setTimeout(() => setRightVersionID(leftVersion?.previousID ?? versionID))
+  const updateRightVersionID = (versionID: number) => {
+    if (versionID !== rightVersionID) {
+      if (rightItemID && leftItemID === rightItemID) {
+        const rightVersions = itemCache.itemForID(rightItemID)?.versions ?? []
+        const rightVersion = [...rightVersions].find(version => version.id === versionID)
+        setTimeout(() => setLeftVersionID(rightVersion?.previousID ?? versionID))
       }
+      setRightVersionID(versionID)
     }
   }
 
@@ -39,9 +39,9 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         <ComparePane
           project={project}
           itemID={leftItemID}
-          setItemID={updateLeftItemID}
+          setItemID={setLeftItemID}
           versionID={leftVersionID}
-          setVersionID={updateLeftVersionID}
+          setVersionID={setLeftVersionID}
           itemCache={itemCache}
         />
       </Allotment.Pane>
@@ -49,9 +49,9 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         <ComparePane
           project={project}
           itemID={rightItemID}
-          setItemID={setRightItemID}
+          setItemID={updateRightItemID}
           versionID={rightVersionID}
-          setVersionID={setRightVersionID}
+          setVersionID={updateRightVersionID}
           itemCache={itemCache}
         />
       </Allotment.Pane>
