@@ -40,9 +40,16 @@ export default function VersionSelector({
 
   return (
     <PopupButton disabled={disabled} fixedWidth={fixedWidth} className={className} onSetPopup={onSetPopup}>
-      <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
-        {selectedVersion ? `Version ${versionIndex + 1}` : 'Select Version'}
-      </span>
+      <div className='flex items-center gap-1 overflow-hidden'>
+        <VersionDescriptor
+          version={selectedVersion}
+          index={versionIndex}
+          labelColors={labelColors}
+          hideChainReferences={hideChainReferences}
+          hideEndpointReferences={hideEndpointReferences}
+          noWrap
+        />
+      </div>
     </PopupButton>
   )
 }
@@ -70,15 +77,46 @@ function VersionSelectorPopup({
           key={index}
           className='flex items-center gap-1 p-1'
           onClick={withDismiss(() => onSelectVersionID(version.id))}>
-          <span className='pl-1 pr-2 whitespace-nowrap'>{`Version ${index + 1}`}</span>
-          <VersionLabels
+          <VersionDescriptor
             version={version}
-            colors={labelColors}
+            index={index}
+            labelColors={labelColors}
             hideChainReferences={hideChainReferences}
             hideEndpointReferences={hideEndpointReferences}
           />
         </PopupItem>
       ))}
     </PopupContent>
+  )
+}
+
+function VersionDescriptor({
+  version,
+  index,
+  labelColors,
+  hideChainReferences,
+  hideEndpointReferences,
+  noWrap,
+}: {
+  version?: PromptVersion | ChainVersion
+  index: number
+  labelColors: Record<string, string>
+  hideChainReferences?: boolean
+  hideEndpointReferences?: boolean
+  noWrap?: boolean
+}) {
+  return (
+    <>
+      <span className='pl-1 pr-2 whitespace-nowrap'>{version ? `Version ${index + 1}` : 'Select Version'}</span>
+      {version && (
+        <VersionLabels
+          version={version}
+          colors={labelColors}
+          hideChainReferences={hideChainReferences}
+          hideEndpointReferences={hideEndpointReferences}
+          noWrap={noWrap}
+        />
+      )}
+    </>
   )
 }

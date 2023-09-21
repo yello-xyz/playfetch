@@ -187,7 +187,7 @@ export default function EndpointSettingsPane({
           labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
           hideEndpointReferences
           fixedWidth
-          disabled={disabled}
+          disabled={disabled || !activeParent}
         />
         <Label disabled={disabled}>Name</Label>
         <TextInput
