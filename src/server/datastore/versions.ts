@@ -271,7 +271,7 @@ const toVersionData = (
 
 export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
   const versionsWithRuns = versions.filter(version => version.didRun)
-  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && !version.didRun)
+  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
 
   return [...userVersionsWithoutRuns, ...versionsWithRuns].map(version => toVersion(version, runs, comments)).reverse()
 }

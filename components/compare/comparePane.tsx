@@ -2,6 +2,7 @@ import { ActiveProject } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
+import { useEffect } from 'react'
 
 export default function ComparePane({
   project,
@@ -20,10 +21,13 @@ export default function ComparePane({
 }) {
   const activeItem = itemID ? itemCache.itemForID(itemID) : undefined
   const activeVersion =
-    activeItem && versionID ? activeItem.versions.find(version => version.id === versionID) : undefined
-  if (activeItem && !activeVersion) {
-    setVersionID(activeItem.versions.slice(-1)[0].id)
-  }
+    activeItem && versionID ? [...activeItem.versions].find(version => version.id === versionID) : undefined
+
+  useEffect(() => {
+    if (activeItem && !activeVersion) {
+      setVersionID(activeItem.versions.slice(-1)[0].id)
+    }
+  }, [activeItem, activeVersion, setVersionID])
 
   return (
     <div className='flex items-center gap-1 p-4'>
@@ -34,7 +38,7 @@ export default function ComparePane({
         onSelectItemID={setItemID}
       />
       <VersionSelector
-        className='w-full max-w-[200px]'
+        className='w-full max-w-[240px]'
         projectItem={activeItem}
         selectedVersionID={versionID}
         onSelectVersionID={setVersionID}
