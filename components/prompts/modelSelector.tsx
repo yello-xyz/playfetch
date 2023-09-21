@@ -160,7 +160,7 @@ const shortLabelForModel = (model: LanguageModel) => {
 export const LabelForModel = (model: LanguageModel) =>
   `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model)}`
 
-const fullLabelForModel = (model: LanguageModel) =>
+export const FullLabelForModel = (model: LanguageModel) =>
   `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}`
 
 const allModels: LanguageModel[] = [
@@ -172,7 +172,7 @@ const allModels: LanguageModel[] = [
   'command',
 ]
 
-const sortedModels = allModels.sort((a, b) => fullLabelForModel(a).localeCompare(fullLabelForModel(b)))
+const sortedModels = allModels.sort((a, b) => FullLabelForModel(a).localeCompare(FullLabelForModel(b)))
 
 export default function ModelSelector({
   model,
@@ -185,7 +185,7 @@ export default function ModelSelector({
     <DropdownMenu size='md' value={model} onChange={value => setModel(value as LanguageModel)}>
       {sortedModels.map((model, index) => (
         <option key={index} value={model}>
-          {fullLabelForModel(model)}
+          {FullLabelForModel(model)}
         </option>
       ))}
     </DropdownMenu>

@@ -2,6 +2,7 @@ import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, 
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector, {
+  FullLabelForModel,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -29,7 +30,6 @@ export default function PromptPanel({
   initialActiveTab,
   onActiveTabChange,
   showTestMode,
-  showModelSelector,
   loadPendingVersion,
   setPreferredHeight,
 }: {
@@ -42,7 +42,6 @@ export default function PromptPanel({
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
   showTestMode?: boolean
-  showModelSelector?: boolean
   loadPendingVersion?: () => void
   setPreferredHeight?: (height: number) => void
 }) {
@@ -106,7 +105,7 @@ export default function PromptPanel({
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
         {loadPendingVersion && <LoadPendingVersionBanner loadPendingVersion={loadPendingVersion} />}
-        {showModelSelector && (
+        {!runPrompt && setModifiedVersion && (
           <div className={`flex justify-between items-center font-medium text-gray-600`}>
             Model <ModelSelector model={config.model} setModel={updateModel} />
           </div>
@@ -117,6 +116,9 @@ export default function PromptPanel({
               {labelForTab(tab)}
             </div>
           ))}
+          {!runPrompt && !setModifiedVersion && (
+            <div className='flex justify-end flex-1 text-gray-600'>{FullLabelForModel(config.model)}</div>
+          )}
         </div>
         {isSettingsTab(activeTab) ? (
           <PromptSettingsPane config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />

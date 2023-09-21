@@ -74,7 +74,6 @@ function PromptEditor({
             setModifiedVersion={updateVersion}
             loadPendingVersion={loadPendingVersion}
             setPreferredHeight={setPromptHeight}
-            showModelSelector
           />
         </div>
       </Allotment.Pane>

@@ -35,9 +35,10 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     }
   }
 
+  const minWidth = 300
   return (
     <Allotment>
-      <Allotment.Pane>
+      <Allotment.Pane minSize={minWidth}>
         <ComparePane
           project={project}
           itemID={leftItemID}
@@ -50,7 +51,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
           disabled={!leftItemID}
         />
       </Allotment.Pane>
-      <Allotment.Pane>
+      <Allotment.Pane minSize={minWidth}>
         <ComparePane
           project={project}
           itemID={rightItemID}
