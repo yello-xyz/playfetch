@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveChain, ActiveProject, ActivePrompt, EndpointParentsInProject, FindParentInProject } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, FindParentInProject } from '@/types'
 import api from '@/src/client/api'
 import Label from '../label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
@@ -98,7 +98,6 @@ export default function EndpointSettingsPane({
     updateFlavor(flavor)
   }
 
-  const parents = EndpointParentsInProject(project)
   const versions = activeParent?.versions ?? []
   const versionIndex = versions.findIndex(version => version.id === versionID)
 
@@ -183,9 +182,8 @@ export default function EndpointSettingsPane({
         </Label>
         <VersionSelector
           versions={versions}
-          endpoints={project.endpoints}
-          activeVersion={versions[versionIndex]}
-          setActiveVersion={version => setVersionID(version.id)}
+          selectedVersionID={versionID}
+          onSelectVersionID={setVersionID}
           labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
           hideEndpointReferences
           disabled={disabled}
