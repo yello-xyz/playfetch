@@ -1,9 +1,10 @@
-import { ActiveProject } from '@/types'
+import { ActiveProject, IsPromptVersion } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import RunTimeline from '../runs/runTimeline'
+import PromptPanel from '../prompts/promptPanel'
 
 export default function ComparePane({
   project,
@@ -50,6 +51,11 @@ export default function ComparePane({
           disabled={disabled}
         />
       </div>
+      {activeVersion && IsPromptVersion(activeVersion) && (
+        <div className='p-4 border-b border-gray-200 min-h-[188px]'>
+        <PromptPanel version={activeVersion} />
+        </div>
+      )}
       {activeVersion && (
         <div className='overflow-y-auto'>
           <RunTimeline runs={activeVersion.runs} activeItem={activeItem} version={activeVersion} skipHeader />

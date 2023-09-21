@@ -25,18 +25,20 @@ export default function PromptPanel({
   testConfig,
   setTestConfig,
   showTestMode,
+  showModelSelector,
   loadPendingVersion,
   setPreferredHeight,
 }: {
   version: PromptVersion
-  setModifiedVersion: (version: PromptVersion) => void
+  setModifiedVersion?: (version: PromptVersion) => void
   runPrompt?: (inputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
   showTestMode?: boolean
+  showModelSelector?: boolean
   loadPendingVersion?: () => void
-  setPreferredHeight: (height: number) => void
+  setPreferredHeight?: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
@@ -50,7 +52,7 @@ export default function PromptPanel({
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
-    setModifiedVersion({ ...version, prompts, config })
+    setModifiedVersion?.({ ...version, prompts, config })
     if (!isSettingsTab(activeTab) && !SupportedPromptKeysForModel(config.model).includes(activeTab)) {
       setActiveTab('main')
     }
@@ -78,7 +80,7 @@ export default function PromptPanel({
     (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
-  useEffect(() => setPreferredHeight(preferredHeight), [preferredHeight, setPreferredHeight])
+  useEffect(() => setPreferredHeight?.(preferredHeight), [preferredHeight, setPreferredHeight])
 
   const classNameForTab = (tab: Tab) =>
     tab === activeTab
@@ -93,7 +95,7 @@ export default function PromptPanel({
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
         {loadPendingVersion && <LoadPendingVersionBanner loadPendingVersion={loadPendingVersion} />}
-        {!runPrompt && (
+        {showModelSelector && (
           <div className={`flex justify-between items-center font-medium text-gray-600`}>
             Model <ModelSelector model={config.model} setModel={updateModel} />
           </div>
@@ -106,7 +108,7 @@ export default function PromptPanel({
           ))}
         </div>
         {isSettingsTab(activeTab) ? (
-          <PromptSettingsPane config={config} setConfig={updateConfig} />
+          <PromptSettingsPane config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
         ) : (
           <PromptInput
             key={version.id}
@@ -115,6 +117,7 @@ export default function PromptPanel({
             setValue={updatePrompt}
             placeholder={PlaceholderForPromptKey(activeTab)}
             preformatted={PromptKeyNeedsPreformatted(activeTab)}
+            disabled={!setModifiedVersion}
           />
         )}
       </div>

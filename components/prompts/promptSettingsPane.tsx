@@ -10,9 +10,11 @@ const SettingsRow = ({ label, children }: { label: string; children: React.React
 export default function PromptSettingsPane({
   config,
   setConfig,
+  disabled,
 }: {
   config: PromptConfig
   setConfig: (config: PromptConfig) => void
+  disabled?: boolean
 }) {
   const updateTemperature = (temperature: number) => setConfig({ ...config, temperature })
   const updateMaxTokens = (maxTokens: number) => !isNaN(maxTokens) && setConfig({ ...config, maxTokens })
@@ -28,6 +30,7 @@ export default function PromptSettingsPane({
           step={0.01}
           value={config.temperature}
           onChange={event => updateTemperature(Number(event.target.value))}
+          disabled={disabled}
         />
         <input
           className='p-2 text-sm border border-gray-300 rounded-lg w-18 focus:border-solid focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'
@@ -37,6 +40,7 @@ export default function PromptSettingsPane({
           step={0.01}
           value={config.temperature}
           onChange={event => updateTemperature(Number(event.target.value))}
+          disabled={disabled}
         />
       </SettingsRow>
       <SettingsRow label='Maximum tokens'>
@@ -45,6 +49,7 @@ export default function PromptSettingsPane({
           type='text'
           value={config.maxTokens}
           onChange={event => updateMaxTokens(Number(event.target.value))}
+          disabled={disabled}
         />
       </SettingsRow>
     </div>
