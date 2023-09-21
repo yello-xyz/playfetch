@@ -1,6 +1,7 @@
 import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
   getEntity,
@@ -28,6 +29,7 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
+import { Transaction } from '@google-cloud/datastore'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -93,10 +95,30 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   return toVersion(versionData, [], [])
 }
 
+const DefaultPrompts = { main: '' }
+
+export async function saveFirstPromptVersion(userID: number, promptID: number, transaction: Transaction) {
+  const versionID = await allocateID(Entity.VERSION, transaction)
+  const versionData = toVersionData(
+    userID,
+    promptID,
+    DefaultPrompts,
+    DefaultConfig,
+    null,
+    [],
+    new Date(),
+    false,
+    undefined,
+    versionID
+  )
+  transaction.save(versionData)
+  return versionID
+}
+
 export async function savePromptVersionForUser(
   userID: number,
   promptID: number,
-  prompts: Prompts = { main: '' },
+  prompts: Prompts = DefaultPrompts,
   config: PromptConfig = DefaultConfig,
   currentVersionID?: number,
   previousVersionID?: number

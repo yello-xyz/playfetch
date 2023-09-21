@@ -76,11 +76,17 @@ export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: 
 export const getFilteredEntity = (type: string, filter: EntityFilter, transaction?: Transaction) =>
   getInternalFilteredEntities(type, filter, 1, [], [], transaction).then(([entity]) => entity)
 
-const getInternalEntities = (type: string, key: string, value: {}, limit?: number, sortKeys?: string[]) =>
-  getInternalFilteredEntities(type, buildFilter(key, value), limit, sortKeys)
+const getInternalEntities = (
+  type: string,
+  key: string,
+  value: {},
+  limit?: number,
+  sortKeys?: string[],
+  transaction?: Transaction
+) => getInternalFilteredEntities(type, buildFilter(key, value), limit, sortKeys, [], transaction)
 
-export const getEntities = (type: string, key: string, value: {}, limit?: number) =>
-  getInternalEntities(type, key, value, limit)
+export const getEntities = (type: string, key: string, value: {}, transaction?: Transaction) =>
+  getInternalEntities(type, key, value, undefined, [], transaction)
 
 export const getOrderedEntities = (type: string, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
   getInternalEntities(type, key, value, limit, sortKeys)
@@ -114,9 +120,7 @@ export const getEntityID = (type: string, key: string, value: {}) =>
 
 export const getKeyedEntities = async (type: string, ids: number[], transaction?: Transaction): Promise<any[]> =>
   ids.length
-    ? (transaction ?? getDatastore())
-        .get(ids.map(id => buildKey(type, id)))
-        .then(([entities]) => entities)
+    ? (transaction ?? getDatastore()).get(ids.map(id => buildKey(type, id))).then(([entities]) => entities)
     : Promise.resolve([])
 
 export const getKeyedEntity = async (type: string, id: number, transaction?: Transaction) =>
@@ -129,21 +133,27 @@ export const getEntityCount = async (type: string, key: string, value: {}) => {
   return count
 }
 
-export const runTransactionWithExponentialBackoff = async (
-  operation: (transaction: Transaction) => Promise<void>,
+export const allocateID = async (type: string, transaction?: Transaction) => {
+  const [[key]] = await (transaction ?? getDatastore()).allocateIds(buildKey(type), 1)
+  return getID({ key })
+}
+
+export const runTransactionWithExponentialBackoff = async <T>(
+  operation: (transaction: Transaction) => Promise<T>,
   maxTries: number = 10,
   currentAttempt: number = 1,
   milliseconds: number = 100
-) => {
+): Promise<T> => {
   const transaction = getDatastore().transaction()
   try {
     await transaction.run()
-    await operation(transaction)
+    const result = await operation(transaction)
     await transaction.commit()
+    return result
   } catch (error) {
     await transaction.rollback()
     if (currentAttempt < maxTries) {
-      new Promise(resolve => setTimeout(resolve, milliseconds)).then(() =>
+      return new Promise(resolve => setTimeout(resolve, milliseconds)).then(() =>
         runTransactionWithExponentialBackoff(operation, maxTries, currentAttempt + 1, milliseconds * 2)
       )
     } else {
@@ -152,5 +162,5 @@ export const runTransactionWithExponentialBackoff = async (
   }
 }
 
-export const runTransaction = (operation: (transaction: Transaction) => Promise<void>) =>
+export const runTransaction = <T>(operation: (transaction: Transaction) => Promise<T>) =>
   runTransactionWithExponentialBackoff(operation, 1)

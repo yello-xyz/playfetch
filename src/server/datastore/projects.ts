@@ -1,6 +1,7 @@
 import { createHash } from 'crypto'
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
   getEntities,
@@ -10,6 +11,7 @@ import {
   getKeyedEntity,
   getOrderedEntities,
   getTimestamp,
+  runTransaction,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
@@ -20,7 +22,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
@@ -140,26 +142,31 @@ export async function addProjectForUser(
   workspaceID: number,
   name = DefaultProjectName
 ): Promise<number> {
-  await ensureWorkspaceAccess(userID, workspaceID)
-  const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
-  const uniqueName = await getUniqueName(
-    name,
-    projectNames.map(project => project.name)
-  )
-  const createdAt = new Date()
-  const projectData = toProjectData(
-    workspaceID,
-    uniqueName,
-    DefaultLabels,
-    [DefaultEndpointFlavor],
-    createdAt,
-    createdAt,
-    []
-  )
-  await getDatastore().save(projectData)
-  const projectID = getID(projectData)
-  await addPromptForUser(userID, projectID)
-  return projectID
+  return runTransaction(async transaction => {
+    await ensureWorkspaceAccess(userID, workspaceID, transaction)
+    const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID, transaction)
+    const uniqueName = await getUniqueName(
+      name,
+      projectNames.map(project => project.name)
+    )
+    const projectID = await allocateID(Entity.PROJECT)
+    const createdAt = new Date()
+    const projectData = toProjectData(
+      workspaceID,
+      uniqueName,
+      DefaultLabels,
+      [DefaultEndpointFlavor],
+      createdAt,
+      createdAt,
+      [],
+      undefined,
+      undefined,
+      projectID
+    )
+    transaction.save(projectData)
+    await addFirstProjectPrompt(userID, projectID, transaction)
+    return projectID
+  })
 }
 
 export async function augmentProjectWithNewVersion(

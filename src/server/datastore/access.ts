@@ -1,4 +1,4 @@
-import { and } from '@google-cloud/datastore'
+import { Transaction, and } from '@google-cloud/datastore'
 import {
   Entity,
   buildFilter,
@@ -24,11 +24,15 @@ export async function migrateAccess() {
   }
 }
 
-const getUserAccessKey = (userID: number, objectID: number) =>
-  getFilteredEntityKey(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
+const getUserAccessKey = (userID: number, objectID: number, transaction?: Transaction) =>
+  getFilteredEntityKey(
+    Entity.ACCESS,
+    and([buildFilter('userID', userID), buildFilter('objectID', objectID)]),
+    transaction
+  )
 
-export async function hasUserAccess(userID: number, objectID: number) {
-  const accessKey = await getUserAccessKey(userID, objectID)
+export async function hasUserAccess(userID: number, objectID: number, transaction?: Transaction) {
+  const accessKey = await getUserAccessKey(userID, objectID, transaction)
   return !!accessKey
 }
 

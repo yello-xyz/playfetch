@@ -1,5 +1,6 @@
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
   getEntities,
@@ -10,11 +11,12 @@ import {
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { savePromptVersionForUser, toUserVersions } from './versions'
+import { saveFirstPromptVersion, savePromptVersionForUser, toUserVersions } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
+import { Transaction } from '@google-cloud/datastore'
 
 export async function migratePrompts() {
   const datastore = getDatastore()
@@ -102,6 +104,14 @@ export async function addPromptForUser(userID: number, projectID: number, name =
   const versionID = await savePromptVersionForUser(userID, getID(promptData))
   await updateProjectLastEditedAt(projectID)
   return { promptID: getID(promptData), versionID }
+}
+
+export async function addFirstProjectPrompt(userID: number, projectID: number, transaction: Transaction) {
+  const createdAt = new Date()
+  const promptID = await allocateID(Entity.PROMPT, transaction)
+  const versionID = await saveFirstPromptVersion(userID, promptID, transaction)
+  const promptData = toPromptData(projectID, DefaultPromptName, versionID, createdAt, createdAt, promptID)
+  transaction.save(promptData)
 }
 
 export async function duplicatePromptForUser(
