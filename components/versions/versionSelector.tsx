@@ -1,30 +1,32 @@
-import { ChainVersion, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PromptVersion } from '@/types'
 import { VersionLabels } from './versionCell'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent, PopupItem } from '../popupMenu'
 import { PopupButton } from '../popupButton'
+import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
 export default function VersionSelector({
-  versions,
+  projectItem,
   selectedVersionID,
   onSelectVersionID,
-  labelColors,
   hideChainReferences,
   hideEndpointReferences,
   disabled,
   fixedWidth,
   className = '',
 }: {
-  versions: PromptVersion[] | ChainVersion[]
+  projectItem: ActivePrompt | ActiveChain | undefined
   selectedVersionID?: number
   onSelectVersionID: (versionID: number) => void
-  labelColors: Record<string, string>
   hideChainReferences?: boolean
   hideEndpointReferences?: boolean
   disabled?: boolean
   fixedWidth?: boolean
   className?: string
 }) {
+  const versions = projectItem?.versions ?? []
+  const labelColors = projectItem ? AvailableLabelColorsForItem(projectItem) : {}
+
   const setPopup = useGlobalPopup<VersionSelectorPopupProps>()
 
   const onSetPopup = (location: GlobalPopupLocation) => {

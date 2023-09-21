@@ -10,7 +10,6 @@ import VersionSelector from '../versions/versionSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import TextInput from '../textInput'
-import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import Button, { PendingButton } from '../button'
 import ProjectItemSelector from '../projects/projectItemSelector'
 
@@ -181,10 +180,9 @@ export default function EndpointSettingsPane({
           Version
         </Label>
         <VersionSelector
-          versions={versions}
+          projectItem={activeParent}
           selectedVersionID={versionID}
           onSelectVersionID={setVersionID}
-          labelColors={activeParent ? AvailableLabelColorsForItem(activeParent) : {}}
           hideEndpointReferences
           fixedWidth
           disabled={disabled}
