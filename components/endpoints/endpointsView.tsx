@@ -133,16 +133,8 @@ export default function EndpointsView({
 
   const parent = activeParentID ? FindItemInProject(activeParentID, project) : undefined
   const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
-  const parentCache = useActiveItemCache(
-    project,
-    parent && !ProjectItemIsChain(parent) ? [parent.id] : [],
-    setActiveParent,
-    parent && ProjectItemIsChain(parent) ? [parent.id] : [],
-    setActiveParent
-  )
-  useEffect(() => {
-    setActiveParent(parent ? parentCache.promptForID(parent.id) ?? parentCache.chainForID(parent.id) : undefined)
-  }, [parent, parentCache])
+  const parentCache = useActiveItemCache(project, parent ? [parent.id] : [], setActiveParent)
+  useEffect(() => setActiveParent(parent ? parentCache.itemForID(parent.id) : undefined), [parent, parentCache])
 
   const [versionIndex, setVersionIndex] = useState(-1)
   const versions = activeParent?.versions ?? []

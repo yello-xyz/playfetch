@@ -1,62 +1,43 @@
-import { ActiveChain, ActiveProject, ActivePrompt } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, ItemsInProject, ProjectItemIsChain } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/src/client/api'
 
 export type ActiveItemCache = {
-  promptForID: (id: number) => ActivePrompt | undefined
-  chainForID: (id: number) => ActiveChain | undefined
-  refreshPrompt: (promptID: number) => void
-  refreshChain: (promptID: number) => void
+  itemForID: (id: number) => ActivePrompt | ActiveChain | undefined
+  refreshItem: (itemID: number) => void
 }
 
 export default function useActiveItemCache(
   project: ActiveProject,
-  promptIDs: number[],
-  onRefreshPrompt?: (prompt: ActivePrompt) => void,
-  chainIDs: number[] = [],
-  onRefreshChain?: (item: ActiveChain) => void
+  itemIDs: number[],
+  onRefreshItem?: (item: ActivePrompt | ActiveChain) => void
 ) {
-  const [activePromptCache, setActivePromptCache] = useState<Record<number, ActivePrompt>>({})
-  const [activeChainCache, setActiveChainCache] = useState<Record<number, ActiveChain>>({})
+  const [activeItemCache, setActiveItemCache] = useState<Record<number, ActivePrompt | ActiveChain>>({})
 
-  const refreshPrompt = useCallback(
-    (promptID: number) =>
-      api.getPrompt(promptID, project).then(activePrompt => {
-        setActivePromptCache(cache => ({ ...cache, [promptID]: activePrompt }))
-        onRefreshPrompt?.(activePrompt)
-      }),
-    [project, onRefreshPrompt]
+  const refreshItem = useCallback(
+    (itemID: number) => {
+      const item = ItemsInProject(project).find(item => item.id === itemID)
+      if (ProjectItemIsChain(item)) {
+        api.getChain(itemID, project).then(activeChain => {
+          setActiveItemCache(cache => ({ ...cache, [itemID]: activeChain }))
+          onRefreshItem?.(activeChain)
+        })
+      } else {
+        api.getPrompt(itemID, project).then(activePrompt => {
+          setActiveItemCache(cache => ({ ...cache, [itemID]: activePrompt }))
+          onRefreshItem?.(activePrompt)
+        })
+      }
+    },
+    [project, onRefreshItem]
   )
 
-  const refreshChain = useCallback(
-    (chainID: number) =>
-      api.getChain(chainID, project).then(activeChain => {
-        setActiveChainCache(cache => ({ ...cache, [chainID]: activeChain }))
-        onRefreshChain?.(activeChain)
-      }),
-    [project, onRefreshChain]
-  )
-
-  const activeItemCache: ActiveItemCache = {
-    promptForID: id => activePromptCache[id],
-    chainForID: id => activeChainCache[id],
-    refreshPrompt,
-    refreshChain,
-  }
-
   useEffect(() => {
-    const unloadedPromptID = promptIDs.find(promptID => !activePromptCache[promptID])
-    if (unloadedPromptID) {
-      refreshPrompt(unloadedPromptID)
+    const unloadedItemID = itemIDs.find(itemID => !activeItemCache[itemID])
+    if (unloadedItemID) {
+      refreshItem(unloadedItemID)
     }
-  }, [project, promptIDs, activePromptCache, refreshPrompt])
+  }, [project, itemIDs, activeItemCache, refreshItem])
 
-  useEffect(() => {
-    const unloadedChainID = chainIDs.find(chainID => !activeChainCache[chainID])
-    if (unloadedChainID) {
-      refreshChain(unloadedChainID)
-    }
-  }, [project, chainIDs, activeChainCache, refreshChain])
-
-  return activeItemCache
+  return { itemForID: id => activeItemCache[id], refreshItem } as ActiveItemCache
 }

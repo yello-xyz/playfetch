@@ -34,18 +34,18 @@ export default function useChainPromptCache(
 
   const promptIDs = nodes.filter(IsPromptChainItem).map(item => item.promptID)
 
-  const promptCache = useActiveItemCache(project, promptIDs, onRefreshPrompt)
+  const promptCache = useActiveItemCache(project, promptIDs, item => onRefreshPrompt(item as ActivePrompt))
+  const promptForID = (id: number) => promptCache.itemForID(id) as ActivePrompt | undefined
 
   const chainPromptCache: ChainPromptCache = {
-    promptForID: id => promptCache.promptForID(id),
-    refreshPrompt: promptCache.refreshPrompt,
-    promptForItem: item => promptCache.promptForID(item.promptID),
-    versionForItem: item =>
-      promptCache.promptForID(item.promptID)?.versions.find(version => version.id === item.versionID),
+    promptForID,
+    refreshPrompt: promptCache.refreshItem,
+    promptForItem: item => promptForID(item.promptID),
+    versionForItem: item => promptForID(item.promptID)?.versions.find(version => version.id === item.versionID),
     promptItemForID: (promptID: number) => {
       const prompt = project.prompts.find(prompt => prompt.id === promptID)!
       const versionID = prompt.lastVersionID
-      const cachedPrompt = promptCache.promptForID(promptID)
+      const cachedPrompt = promptForID(promptID)
       return {
         promptID,
         versionID,
