@@ -11,6 +11,7 @@ export default function ComparePane({
   versionID,
   setVersionID,
   itemCache,
+  disabled,
 }: {
   project: ActiveProject
   itemID?: number
@@ -18,6 +19,7 @@ export default function ComparePane({
   versionID?: number
   setVersionID: (versionID: number) => void
   itemCache: ActiveItemCache
+  disabled?: boolean
 }) {
   const activeItem = itemID ? itemCache.itemForID(itemID) : undefined
   const activeVersion =
@@ -32,16 +34,18 @@ export default function ComparePane({
   return (
     <div className='flex items-center gap-1 p-4'>
       <ProjectItemSelector
-        className='w-full max-w-[200px]'
+        className='w-full max-w-[240px]'
         project={project}
         selectedItemID={itemID}
         onSelectItemID={setItemID}
+        disabled={disabled}
       />
       <VersionSelector
         className='w-full max-w-[240px]'
         projectItem={activeItem}
         selectedVersionID={versionID}
         onSelectVersionID={setVersionID}
+        disabled={disabled}
       />
     </div>
   )

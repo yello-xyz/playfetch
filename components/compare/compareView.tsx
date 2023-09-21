@@ -43,6 +43,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
           versionID={leftVersionID}
           setVersionID={setLeftVersionID}
           itemCache={itemCache}
+          disabled={!leftItemID}
         />
       </Allotment.Pane>
       <Allotment.Pane>
