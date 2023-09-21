@@ -138,7 +138,7 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
       <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-50'>
         <span className='font-medium'>No Endpoints</span>
 
-        <span className='text-sm text-center text-gray-400 w-60'>
+        <span className='w-64 text-sm text-center text-gray-400'>
           {onAddEndpoint ? (
             <span>
               Create a <AddPromptLink label={'New Endpoint'} /> to integrate this project in your code base.

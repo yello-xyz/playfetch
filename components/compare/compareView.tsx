@@ -1,4 +1,4 @@
-import { ActiveProject } from '@/types'
+import { ActiveProject, ItemsInProject } from '@/types'
 import { Allotment } from 'allotment'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
@@ -41,7 +41,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
   }
 
   const minWidth = 300
-  return (
+  return ItemsInProject(project).length > 0 ? (
     <Allotment>
       <Allotment.Pane minSize={minWidth}>
         <ComparePane
@@ -69,5 +69,18 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         />
       </Allotment.Pane>
     </Allotment>
+  ) : <EmptyCompareView />
+}
+
+function EmptyCompareView() {
+  return (
+    <div className='h-full p-6'>
+      <div className='flex flex-col items-center justify-center h-full gap-2 p-6 rounded-lg bg-gray-25'>
+        <span className='font-medium'>No Prompts or Chains</span>
+        <span className='text-sm text-center text-gray-400 w-60'>
+          <span>Come back here later to compare existing prompt or chain versions.</span>
+        </span>
+      </div>
+    </div>
   )
 }
