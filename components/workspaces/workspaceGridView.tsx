@@ -8,10 +8,8 @@ import filledStarIcon from '@/public/filledStar.svg'
 import dotsIcon from '@/public/dots.svg'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from '../projects/projectPopupMenu'
-import WorkspaceTopBar from './workspaceTopBar'
+import WorkspaceTopBar, { AddProjectButton } from './workspaceTopBar'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
-import { TopBarButton } from '../topBarButton'
-import addIcon from '@/public/addWhite.svg'
 
 export default function WorkspaceGridView({
   workspaces,
@@ -28,7 +26,7 @@ export default function WorkspaceGridView({
   activeWorkspace: ActiveWorkspace
   isUserWorkspace: boolean
   isSharedProjects: boolean
-  onAddProject: () => void
+  onAddProject: () => Promise<void>
   onSelectProject: (projectID: number) => void
   onSelectUserWorkspace: () => void
   onRefreshWorkspace: () => void
@@ -100,7 +98,7 @@ function EmptyWorkspaceView({
 }: {
   workspace: ActiveWorkspace
   isUserWorkspace: boolean
-  onAddProject: () => void
+  onAddProject: () => Promise<void>
 }) {
   return (
     <div className='h-full px-6 pt-2 pb-6 text-gray-700'>
@@ -122,7 +120,7 @@ function EmptyWorkspaceView({
           </div>
         </div>
         <div>
-          <TopBarButton type='primary' title='New Project' icon={addIcon} onClick={onAddProject} />
+          <AddProjectButton onAddProject={onAddProject} />
         </div>
       </div>
     </div>
@@ -164,7 +162,7 @@ function ProjectCell({
         <div className='relative flex items-center gap-2'>
           <span className='mr-5 text-xs text-gray-700'>Edited {formattedDate}</span>
           <IconButton hoverType='opacity' icon={dotsIcon} onClick={() => setMenuExpanded(!isMenuExpanded)} />
-          <div className='absolute right-0 top-7 shadow-sm'>
+          <div className='absolute right-0 shadow-sm top-7'>
             <ProjectPopupMenu
               project={project}
               isMenuExpanded={isMenuExpanded}

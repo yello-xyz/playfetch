@@ -20,7 +20,7 @@ export default function WorkspaceTopBar({
   activeWorkspace: ActiveWorkspace
   isUserWorkspace: boolean
   isSharedProjects: boolean
-  onAddProject: () => void
+  onAddProject: () => Promise<void>
   setShowInviteDialog: (show: boolean) => void
   onRenamed: () => void
   onDeleted: () => void
@@ -40,7 +40,7 @@ export default function WorkspaceTopBar({
           {hasPopupMenu && (
             <>
               <Icon icon={chevronIcon} />
-              <div className='absolute -left-1 top-10 shadow-sm'>
+              <div className='absolute shadow-sm -left-1 top-10'>
                 <WorkspacePopupMenu
                   workspace={activeWorkspace}
                   isOnlyUser={activeWorkspace.users.length === 1}
@@ -58,9 +58,13 @@ export default function WorkspaceTopBar({
         <div className='flex items-center gap-2'>
           <UserAvatars users={activeWorkspace.users} />
           {!isUserWorkspace && <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />}
-          <TopBarButton type='primary' title='New Project' icon={addIcon} onClick={onAddProject} />
+          <AddProjectButton onAddProject={onAddProject} />
         </div>
       )}
     </div>
   )
+}
+
+export function AddProjectButton({ onAddProject }: { onAddProject: () => Promise<void> }) {
+  return <TopBarButton type='primary' title='New Project' icon={addIcon} onClick={onAddProject} />
 }

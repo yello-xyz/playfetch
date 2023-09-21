@@ -85,7 +85,7 @@ export default function Home({
 
   const addProject = async () => {
     const projectID = await api.addProject(activeWorkspace.id)
-    navigateToProject(projectID)
+    return navigateToProject(projectID)
   }
 
   const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
