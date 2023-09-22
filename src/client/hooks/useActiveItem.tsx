@@ -9,6 +9,8 @@ const ActiveItemIsPrompt = (item: ActiveItem): item is ActivePrompt =>
   item !== CompareItem && item !== EndpointsItem && !ActiveItemIsChain(item)
 
 const sameIDs = (a: { id: number } | undefined, b: { id: number } | undefined) => a?.id === b?.id
+const sameParentIDs = (a: { parentID: number } | undefined, b: { parentID: number } | undefined) =>
+  a?.parentID === b?.parentID
 const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
   (a === CompareItem && b === CompareItem) ||
   (a === EndpointsItem && b === EndpointsItem) ||
@@ -28,7 +30,7 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
 export function useActiveVersion(activeItem: ActiveItem | undefined) {
   const initialActiveVersion =
     activeItem === CompareItem || activeItem === EndpointsItem ? undefined : activeItem?.versions?.slice(-1)?.[0]
-  const [activeVersion, setActiveVersion] = useInitialState(initialActiveVersion, sameIDs)
+  const [activeVersion, setActiveVersion] = useInitialState(initialActiveVersion, sameParentIDs)
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
   const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
 
