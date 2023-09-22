@@ -161,7 +161,7 @@ export async function addProjectForUser(
       undefined,
       projectID
     )
-    getDatastore().save(projectData)
+    await getDatastore().save(projectData)
     await addFirstProjectPrompt(userID, projectID)
     return projectID
 }

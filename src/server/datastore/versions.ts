@@ -110,7 +110,7 @@ export async function saveFirstPromptVersion(userID: number, promptID: number) {
     undefined,
     versionID
   )
-  getDatastore().save(versionData)
+  await getDatastore().save(versionData)
   return versionID
 }
 

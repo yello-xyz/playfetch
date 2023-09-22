@@ -110,7 +110,7 @@ export async function addFirstProjectPrompt(userID: number, projectID: number) {
   const promptID = await allocateID(Entity.PROMPT)
   const versionID = await saveFirstPromptVersion(userID, promptID)
   const promptData = toPromptData(projectID, DefaultPromptName, versionID, createdAt, createdAt, promptID)
-  getDatastore().save(promptData)
+  await getDatastore().save(promptData)
 }
 
 export async function duplicatePromptForUser(
