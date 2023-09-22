@@ -96,9 +96,9 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
 
 const DefaultPrompts = { main: '' }
 
-export async function saveFirstPromptVersion(userID: number, promptID: number) {
+export async function addFirstPromptVersion(userID: number, promptID: number) {
   const versionID = await allocateID(Entity.VERSION)
-  const versionData = toVersionData(
+  return toVersionData(
     userID,
     promptID,
     DefaultPrompts,
@@ -110,8 +110,6 @@ export async function saveFirstPromptVersion(userID: number, promptID: number) {
     undefined,
     versionID
   )
-  await getDatastore().save(versionData)
-  return versionID
 }
 
 export async function savePromptVersionForUser(

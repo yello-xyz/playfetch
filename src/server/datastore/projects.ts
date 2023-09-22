@@ -57,9 +57,9 @@ const toProjectData = (
   createdAt: Date,
   lastEditedAt: Date,
   favorited: number[],
-  apiKeyHash?: string,
-  apiKeyDev?: string,
-  projectID?: number
+  apiKeyHash: string | undefined,
+  apiKeyDev: string | undefined,
+  projectID: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
   data: {
@@ -161,8 +161,8 @@ export async function addProjectForUser(
       undefined,
       projectID
     )
-    await getDatastore().save(projectData)
-    await addFirstProjectPrompt(userID, projectID)
+    const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
+    await getDatastore().save([projectData, promptData, versionData])
     return projectID
 }
 

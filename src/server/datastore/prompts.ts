@@ -11,7 +11,7 @@ import {
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { saveFirstPromptVersion, savePromptVersionForUser, toUserVersions } from './versions'
+import { addFirstPromptVersion, savePromptVersionForUser, toUserVersions } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
@@ -108,9 +108,9 @@ export async function addPromptForUser(userID: number, projectID: number, name =
 export async function addFirstProjectPrompt(userID: number, projectID: number) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
-  const versionID = await saveFirstPromptVersion(userID, promptID)
-  const promptData = toPromptData(projectID, DefaultPromptName, versionID, createdAt, createdAt, promptID)
-  await getDatastore().save(promptData)
+  const versionData = await addFirstPromptVersion(userID, promptID)
+  const promptData = toPromptData(projectID, DefaultPromptName, getID(versionData), createdAt, createdAt, promptID)
+  return [promptData, versionData]
 }
 
 export async function duplicatePromptForUser(
