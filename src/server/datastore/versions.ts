@@ -8,6 +8,7 @@ import {
   getEntityKey,
   getEntityKeys,
   getID,
+  getKeyedEntities,
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
@@ -131,6 +132,9 @@ export async function saveChainVersionForUser(
   previousVersionID?: number
 ) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
+  markVersionsAsRun([
+    ...new Set(items.flatMap(item => ('versionID' in item && item.versionID ? [item.versionID] : []))),
+  ])
   return saveVersionForUser(userID, chainData, null, null, items, currentVersionID, previousVersionID)
 }
 
@@ -182,21 +186,30 @@ async function saveVersionForUser(
   return savedVersionID
 }
 
-async function updateVersion(versionData: any) {
-  await getDatastore().save(
-    toVersionData(
-      versionData.userID,
-      versionData.parentID,
-      versionData.prompts ? JSON.parse(versionData.prompts) : null,
-      versionData.config ? JSON.parse(versionData.config) : null,
-      versionData.items ? JSON.parse(versionData.items) : null,
-      JSON.parse(versionData.labels),
-      versionData.createdAt,
-      versionData.didRun,
-      versionData.previousVersionID,
-      getID(versionData)
-    )
+async function markVersionsAsRun(versionIDs: number[]) {
+  const versionsData = await getKeyedEntities(Entity.VERSION, versionIDs)
+  const notRunVersions = versionsData.filter(versionData => !versionData.didRun)
+  if (notRunVersions.length > 0) {
+    await getDatastore().save(notRunVersions.map(versionData => updateVersionData({ ...versionData, didRun: true })))
+  }
+}
+
+const updateVersionData = (versionData: any) =>
+  toVersionData(
+    versionData.userID,
+    versionData.parentID,
+    versionData.prompts ? JSON.parse(versionData.prompts) : null,
+    versionData.config ? JSON.parse(versionData.config) : null,
+    versionData.items ? JSON.parse(versionData.items) : null,
+    JSON.parse(versionData.labels),
+    versionData.createdAt,
+    versionData.didRun,
+    versionData.previousVersionID,
+    getID(versionData)
   )
+
+async function updateVersion(versionData: any) {
+  await getDatastore().save(updateVersionData(versionData))
 }
 
 export async function processLabels(
