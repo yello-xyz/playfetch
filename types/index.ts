@@ -140,11 +140,13 @@ export type Run = CommonRun & {
   labels: string[]
 }
 
-export type RunConfig = {
-  versionID: number
+type PendingVersionRunConfig = {
+  versionID?: number
   output?: string
   includeContext?: boolean
 }
+
+export type RunConfig = PendingVersionRunConfig & { versionID: number }
 
 export type CodeConfig = {
   code: string
@@ -159,7 +161,11 @@ export type TestConfig = {
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
-export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[]; dynamicInputs?: string[] }
+export type PromptChainItem = PendingVersionRunConfig & {
+  promptID: number
+  inputs?: string[]
+  dynamicInputs?: string[]
+}
 export type ChainItem = CodeChainItem | PromptChainItem
 
 export type ChainItemWithInputs = (CodeChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {

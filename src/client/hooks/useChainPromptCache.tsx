@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, ChainItem, PromptChainItem, PromptVersion } from '@/types'
+import { ActiveProject, ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import { Dispatch, SetStateAction, useCallback } from 'react'
 import { ChainNode, IsPromptChainItem } from '../../../components/chains/chainNode'
 import useActiveItemCache from './useActiveItemCache'
@@ -14,6 +14,11 @@ export default function useChainPromptCache(
   nodes: ChainNode[],
   setNodes: Dispatch<SetStateAction<ChainNode[]>>
 ) {
+  const specifiedOrLastVersion = (versions: PromptVersion[], versionID?: number) =>
+    versionID ? versions.find(version => version.id === versionID) : versions.slice(-1)[0]
+  const selectVersion = (prompt?: ActivePrompt, versionID?: number) =>
+    specifiedOrLastVersion(prompt?.versions ?? [], versionID)
+
   const onRefreshPrompt = useCallback(
     (activePrompt: ActivePrompt) =>
       setNodes(nodes =>
@@ -22,7 +27,8 @@ export default function useChainPromptCache(
             ? {
                 ...node,
                 activePrompt,
-                version: activePrompt.versions.find(version => version.id === node.versionID),
+                versionID: node.versionID ?? selectVersion(activePrompt, node.versionID)?.id,
+                version: selectVersion(activePrompt, node.versionID),
               }
             : node
         )
@@ -33,12 +39,12 @@ export default function useChainPromptCache(
   const promptIDs = nodes.filter(IsPromptChainItem).map(item => item.promptID)
 
   const promptCache = useActiveItemCache(project, promptIDs, item => onRefreshPrompt(item as ActivePrompt))
-  const promptForID = (id: number) => promptCache.itemForID(id) as ActivePrompt | undefined
+  const promptForItem = (item: PromptChainItem) => promptCache.itemForID(item.promptID) as ActivePrompt | undefined
 
   const chainPromptCache: ChainPromptCache = {
     refreshPrompt: promptCache.refreshItem,
-    promptForItem: item => promptForID(item.promptID),
-    versionForItem: item => promptForID(item.promptID)?.versions.find(version => version.id === item.versionID),
+    promptForItem,
+    versionForItem: item => selectVersion(promptForItem(item), item.versionID),
   }
 
   return chainPromptCache

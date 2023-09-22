@@ -66,7 +66,7 @@ export function ChainNodeBox({
   const insertPrompt = (promptID: number, versionID?: number) =>
     insertItem({
       promptID,
-      versionID: versionID ?? prompts.find(prompt => prompt.id === promptID)!.lastVersionID,
+      versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
     })
 
   const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
