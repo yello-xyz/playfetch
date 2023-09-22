@@ -63,9 +63,8 @@ export default function EndpointSettingsPane({
   const [isSaving, setSaving] = useState(false)
 
   const updateParentID = (parentID?: number) => {
-    const parent = FindItemInProject(parentID, project)
     setParentID(parentID)
-    setVersionID(parent.lastVersionID)
+    setVersionID(undefined)
     onSelectParentID(parentID)
   }
 
