@@ -4,7 +4,6 @@ import {
   allocateID,
   buildKey,
   getDatastore,
-  getEntity,
   getEntityCount,
   getEntityKey,
   getEntityKeys,
@@ -267,10 +266,13 @@ const toVersionData = (
 })
 
 export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
+  const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
-  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
+  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions[0]] : []
 
-  return [...userVersionsWithoutRuns, ...versionsWithRuns].map(version => toVersion(version, runs, comments)).reverse()
+  return [...userVersion, ...versionsWithRuns, ...initialVersion]
+    .map(version => toVersion(version, runs, comments))
+    .reverse()
 }
 
 const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
