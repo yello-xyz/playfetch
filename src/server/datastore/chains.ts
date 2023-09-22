@@ -1,5 +1,6 @@
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
   getEntities,
@@ -14,7 +15,7 @@ import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/type
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
-import { saveChainVersionForUser, toUserVersions } from './versions'
+import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 
 export async function migrateChains() {
   const datastore = getDatastore()
@@ -43,7 +44,7 @@ const toChainData = (
   references: References,
   createdAt: Date,
   lastEditedAt: Date,
-  chainID?: number
+  chainID: number
 ) => ({
   key: buildKey(Entity.CHAIN, chainID),
   data: {
@@ -95,10 +96,12 @@ export async function addChainForUser(userID: number, projectID: number, name = 
     chainNames.map(chain => chain.name)
   )
   const createdAt = new Date()
-  const chainData = toChainData(projectID, uniqueName, 0, {}, createdAt, createdAt)
-  await getDatastore().save(chainData)
-  const versionID = await saveChainVersionForUser(userID, getID(chainData))
-  await updateProjectLastEditedAt(projectID)
+  const chainID = await allocateID(Entity.CHAIN)
+  const versionData = await addInitialVersion(userID, chainID, true)
+  const versionID = getID(versionData)
+  const chainData = toChainData(projectID, uniqueName, versionID, {[versionID]: []}, createdAt, createdAt, chainID)
+  await getDatastore().save([chainData, versionData])
+  updateProjectLastEditedAt(projectID)
   return { chainID: getID(chainData), versionID }
 }
 
@@ -123,7 +126,7 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
     )
   )
   if (updateLastEditedTimestamp) {
-    await updateProjectLastEditedAt(chainData.projectID)
+    updateProjectLastEditedAt(chainData.projectID)
   }
 }
 

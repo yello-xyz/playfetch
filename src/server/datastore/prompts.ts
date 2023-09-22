@@ -11,7 +11,7 @@ import {
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { addFirstPromptVersion, savePromptVersionForUser, toUserVersions } from './versions'
+import { addInitialVersion, savePromptVersionForUser, toUserVersions } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
@@ -106,7 +106,7 @@ export async function addPromptForUser(userID: number, projectID: number, name =
 export async function addFirstProjectPrompt(userID: number, projectID: number, name = DefaultPromptName) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
-  const versionData = await addFirstPromptVersion(userID, promptID)
+  const versionData = await addInitialVersion(userID, promptID, false)
   const promptData = toPromptData(projectID, name, getID(versionData), createdAt, createdAt, promptID)
   return [promptData, versionData]
 }
@@ -164,6 +164,7 @@ export async function augmentPromptDataWithNewVersion(
 }
 
 export async function updatePromptOnDeletedVersion(promptID: number, newLastVersionID: number) {
+  // TODO update previous version references in other versions
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   await updatePrompt({ ...promptData, lastVersionID: newLastVersionID }, true)
 }

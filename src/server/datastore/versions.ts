@@ -96,14 +96,14 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
 
 const DefaultPrompts = { main: '' }
 
-export async function addFirstPromptVersion(userID: number, promptID: number) {
+export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
   const versionID = await allocateID(Entity.VERSION)
   return toVersionData(
     userID,
-    promptID,
-    DefaultPrompts,
-    DefaultConfig,
-    null,
+    parentID,
+    isChainVersion ? null : DefaultPrompts,
+    isChainVersion ? null : DefaultConfig,
+    isChainVersion ? [] : null,
     [],
     new Date(),
     false,
