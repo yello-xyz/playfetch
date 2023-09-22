@@ -31,7 +31,7 @@ const toPromptData = (
   lastVersionID: number,
   createdAt: Date,
   lastEditedAt: Date,
-  promptID?: number
+  promptID: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
   data: { projectID, lastVersionID, name, createdAt, lastEditedAt },
@@ -97,19 +97,17 @@ export async function addPromptForUser(userID: number, projectID: number, name =
     name,
     promptNames.map(prompt => prompt.name)
   )
-  const createdAt = new Date()
-  const promptData = toPromptData(projectID, uniqueName, 0, createdAt, createdAt)
-  await getDatastore().save(promptData)
-  const versionID = await savePromptVersionForUser(userID, getID(promptData))
-  await updateProjectLastEditedAt(projectID)
-  return { promptID: getID(promptData), versionID }
+  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID, uniqueName)
+  await getDatastore().save([promptData, versionData])
+  updateProjectLastEditedAt(projectID)
+  return { promptID: getID(promptData), versionID: getID(versionData) }
 }
 
-export async function addFirstProjectPrompt(userID: number, projectID: number) {
+export async function addFirstProjectPrompt(userID: number, projectID: number, name = DefaultPromptName) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addFirstPromptVersion(userID, promptID)
-  const promptData = toPromptData(projectID, DefaultPromptName, getID(versionData), createdAt, createdAt, promptID)
+  const promptData = toPromptData(projectID, name, getID(versionData), createdAt, createdAt, promptID)
   return [promptData, versionData]
 }
 
@@ -147,7 +145,7 @@ async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean)
     )
   )
   if (updateLastEditedTimestamp) {
-    await updateProjectLastEditedAt(promptData.projectID)
+    updateProjectLastEditedAt(promptData.projectID)
   }
 }
 
