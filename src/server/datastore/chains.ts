@@ -18,7 +18,10 @@ import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 
-export async function migrateChains() {
+export async function migrateChains(postMerge: boolean) {
+  if (!postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   for (const chainData of allChains) {

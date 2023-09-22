@@ -18,7 +18,10 @@ import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 
-export async function migratePrompts() {
+export async function migratePrompts(postMerge: boolean) {
+  if (!postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   for (const promptData of allPrompts) {
