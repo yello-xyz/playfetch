@@ -9,16 +9,16 @@ export type ChainPromptCache = {
   refreshPrompt: (promptID: number) => void
 }
 
+const specifiedOrLastVersion = (versions: PromptVersion[], versionID?: number) =>
+  versionID ? versions.find(version => version.id === versionID) : versions.slice(-1)[0]
+const selectVersion = (prompt?: ActivePrompt, versionID?: number) =>
+  specifiedOrLastVersion(prompt?.versions ?? [], versionID)
+
 export default function useChainPromptCache(
   project: ActiveProject,
   nodes: ChainNode[],
   setNodes: Dispatch<SetStateAction<ChainNode[]>>
 ) {
-  const specifiedOrLastVersion = (versions: PromptVersion[], versionID?: number) =>
-    versionID ? versions.find(version => version.id === versionID) : versions.slice(-1)[0]
-  const selectVersion = (prompt?: ActivePrompt, versionID?: number) =>
-    specifiedOrLastVersion(prompt?.versions ?? [], versionID)
-
   const onRefreshPrompt = useCallback(
     (activePrompt: ActivePrompt) =>
       setNodes(nodes =>

@@ -7,7 +7,7 @@ import runChain from '@/src/server/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
-  version.items ?? [{ versionID: version.id }]
+  (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id }]
 
 const logResponse = (
   req: NextApiRequest,

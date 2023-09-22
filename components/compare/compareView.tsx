@@ -69,7 +69,9 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         />
       </Allotment.Pane>
     </Allotment>
-  ) : <EmptyCompareView />
+  ) : (
+    <EmptyCompareView />
+  )
 }
 
 function EmptyCompareView() {

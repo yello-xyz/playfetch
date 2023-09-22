@@ -141,29 +141,29 @@ export async function addProjectForUser(
   workspaceID: number,
   name = DefaultProjectName
 ): Promise<number> {
-    await ensureWorkspaceAccess(userID, workspaceID)
-    const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
-    const uniqueName = await getUniqueName(
-      name,
-      projectNames.map(project => project.name)
-    )
-    const projectID = await allocateID(Entity.PROJECT)
-    const createdAt = new Date()
-    const projectData = toProjectData(
-      workspaceID,
-      uniqueName,
-      DefaultLabels,
-      [DefaultEndpointFlavor],
-      createdAt,
-      createdAt,
-      [],
-      undefined,
-      undefined,
-      projectID
-    )
-    const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
-    await getDatastore().save([projectData, promptData, versionData])
-    return projectID
+  await ensureWorkspaceAccess(userID, workspaceID)
+  const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
+  const uniqueName = await getUniqueName(
+    name,
+    projectNames.map(project => project.name)
+  )
+  const projectID = await allocateID(Entity.PROJECT)
+  const createdAt = new Date()
+  const projectData = toProjectData(
+    workspaceID,
+    uniqueName,
+    DefaultLabels,
+    [DefaultEndpointFlavor],
+    createdAt,
+    createdAt,
+    [],
+    undefined,
+    undefined,
+    projectID
+  )
+  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
+  await getDatastore().save([projectData, promptData, versionData])
+  return projectID
 }
 
 export async function augmentProjectWithNewVersion(
