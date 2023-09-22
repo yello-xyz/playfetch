@@ -161,6 +161,3 @@ export const runTransactionWithExponentialBackoff = async <T>(
     }
   }
 }
-
-export const runTransaction = <T>(operation: (transaction: Transaction) => Promise<T>) =>
-  runTransactionWithExponentialBackoff(operation, 1)

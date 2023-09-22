@@ -11,7 +11,6 @@ import {
   getKeyedEntity,
   getOrderedEntities,
   getTimestamp,
-  runTransaction,
 } from './datastore'
 import { ActiveProject, Project, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
@@ -142,9 +141,8 @@ export async function addProjectForUser(
   workspaceID: number,
   name = DefaultProjectName
 ): Promise<number> {
-  return runTransaction(async transaction => {
-    await ensureWorkspaceAccess(userID, workspaceID, transaction)
-    const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID, transaction)
+    await ensureWorkspaceAccess(userID, workspaceID)
+    const projectNames = await getEntities(Entity.PROJECT, 'workspaceID', workspaceID)
     const uniqueName = await getUniqueName(
       name,
       projectNames.map(project => project.name)
@@ -163,10 +161,9 @@ export async function addProjectForUser(
       undefined,
       projectID
     )
-    transaction.save(projectData)
-    await addFirstProjectPrompt(userID, projectID, transaction)
+    getDatastore().save(projectData)
+    await addFirstProjectPrompt(userID, projectID)
     return projectID
-  })
 }
 
 export async function augmentProjectWithNewVersion(

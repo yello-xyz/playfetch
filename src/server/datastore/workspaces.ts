@@ -20,7 +20,6 @@ import {
   revokeUserAccess,
 } from './access'
 import { toUser } from './users'
-import { Transaction } from '@google-cloud/datastore'
 
 export async function migrateWorkspaces() {
   const datastore = getDatastore()
@@ -91,8 +90,8 @@ async function updateWorkspace(workspaceData: any) {
   )
 }
 
-export async function ensureWorkspaceAccess(userID: number, workspaceID: number, transaction?: Transaction) {
-  const hasAccess = await hasUserAccess(userID, workspaceID, transaction)
+export async function ensureWorkspaceAccess(userID: number, workspaceID: number) {
+  const hasAccess = await hasUserAccess(userID, workspaceID)
   if (!hasAccess) {
     throw new Error(`Workspace with ID ${workspaceID} does not exist or user has no access`)
   }

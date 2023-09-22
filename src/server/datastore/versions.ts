@@ -29,7 +29,6 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
-import { Transaction } from '@google-cloud/datastore'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -97,8 +96,8 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
 
 const DefaultPrompts = { main: '' }
 
-export async function saveFirstPromptVersion(userID: number, promptID: number, transaction: Transaction) {
-  const versionID = await allocateID(Entity.VERSION, transaction)
+export async function saveFirstPromptVersion(userID: number, promptID: number) {
+  const versionID = await allocateID(Entity.VERSION)
   const versionData = toVersionData(
     userID,
     promptID,
@@ -111,7 +110,7 @@ export async function saveFirstPromptVersion(userID: number, promptID: number, t
     undefined,
     versionID
   )
-  transaction.save(versionData)
+  getDatastore().save(versionData)
   return versionID
 }
 
