@@ -4,6 +4,7 @@ import {
   buildKey,
   getDatastore,
   getEntities,
+  getEntity,
   getEntityKey,
   getEntityKeys,
   getID,
@@ -25,7 +26,6 @@ export async function migrateChains() {
       toChainData(
         chainData.projectID,
         chainData.name,
-        chainData.lastVersionID,
         JSON.parse(chainData.references),
         chainData.createdAt,
         chainData.lastEditedAt,
@@ -40,7 +40,6 @@ type References = { [versionID: number]: number[] }
 const toChainData = (
   projectID: number,
   name: string,
-  lastVersionID: number,
   references: References,
   createdAt: Date,
   lastEditedAt: Date,
@@ -50,7 +49,6 @@ const toChainData = (
   data: {
     projectID,
     name,
-    lastVersionID,
     references: JSON.stringify(references),
     createdAt,
     lastEditedAt,
@@ -61,7 +59,6 @@ const toChainData = (
 export const toChain = (data: any): Chain => ({
   id: getID(data),
   name: data.name,
-  lastVersionID: data.lastVersionID,
   referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
@@ -99,7 +96,7 @@ export async function addChainForUser(userID: number, projectID: number, name = 
   const chainID = await allocateID(Entity.CHAIN)
   const versionData = await addInitialVersion(userID, chainID, true)
   const versionID = getID(versionData)
-  const chainData = toChainData(projectID, uniqueName, versionID, {[versionID]: []}, createdAt, createdAt, chainID)
+  const chainData = toChainData(projectID, uniqueName, { [versionID]: [] }, createdAt, createdAt, chainID)
   await getDatastore().save([chainData, versionData])
   updateProjectLastEditedAt(projectID)
   return { chainID: getID(chainData), versionID }
@@ -108,7 +105,8 @@ export async function addChainForUser(userID: number, projectID: number, name = 
 export async function duplicateChainForUser(userID: number, chainID: number): Promise<number> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const { chainID: newChainID, versionID } = await addChainForUser(userID, chainData.projectID, chainData.name)
-  const lastVersion = await getKeyedEntity(Entity.VERSION, chainData.lastVersionID)
+  // TODO select last version that was either run or created by the user
+  const lastVersion = await getEntity(Entity.VERSION, 'parentID', chainID, true)
   await saveChainVersionForUser(userID, newChainID, JSON.parse(lastVersion.items), versionID)
   return newChainID
 }
@@ -118,7 +116,6 @@ export async function updateChain(chainData: any, updateLastEditedTimestamp: boo
     toChainData(
       chainData.projectID,
       chainData.name,
-      chainData.lastVersionID,
       JSON.parse(chainData.references),
       chainData.createdAt,
       updateLastEditedTimestamp ? new Date() : chainData.lastEditedAt,
@@ -153,14 +150,14 @@ export async function augmentChainDataWithNewVersion(
 ) {
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[newVersionID] = newItems.flatMap(item => ('promptID' in item ? [item.promptID, item.versionID] : []))
-  await updateChain({ ...chainData, lastVersionID: newVersionID, references: JSON.stringify(references) }, true)
+  await updateChain({ ...chainData, references: JSON.stringify(references) }, true)
 }
 
-export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number, newLastVersionID: number) {
+export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number) {
   const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[deletedVersionID] = undefined
-  await updateChain({ ...chainData, lastVersionID: newLastVersionID, references: JSON.stringify(references) }, true)
+  await updateChain({ ...chainData, references: JSON.stringify(references) }, true)
 }
 
 export async function deleteChainForUser(userID: number, chainID: number) {

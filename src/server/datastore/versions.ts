@@ -174,7 +174,7 @@ async function saveVersionForUser(
 
   if (IsPromptVersion({ items }) && prompts !== null) {
     const lastPrompt = currentVersion ? JSON.parse(currentVersion.prompts).main : ''
-    await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompts.main, lastPrompt)
+    await augmentPromptDataWithNewVersion(parentData, prompts.main, lastPrompt)
     await augmentProjectWithNewVersion(parentData.projectID, prompts.main, lastPrompt)
   } else if (items) {
     await augmentChainDataWithNewVersion(parentData, savedVersionID, items)
@@ -320,11 +320,9 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     }
   }
 
-  const lastVersionData = await getEntity(Entity.VERSION, 'parentID', parentID, true)
-
   if (wasPromptVersion) {
-    await updatePromptOnDeletedVersion(parentID, getID(lastVersionData))
+    await updatePromptOnDeletedVersion(parentID)
   } else {
-    await updateChainOnDeletedVersion(parentID, versionID, getID(lastVersionData))
+    await updateChainOnDeletedVersion(parentID, versionID)
   }
 }

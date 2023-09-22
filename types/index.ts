@@ -38,7 +38,6 @@ export type ActiveProject = Project & {
 export type Prompt = {
   id: number
   name: string
-  lastVersionID: number
   projectID: number
   timestamp: number
 }
@@ -53,7 +52,6 @@ export type ActivePrompt = Prompt & {
 export type Chain = {
   id: number
   name: string
-  lastVersionID: number
   referencedItemIDs: number[]
   projectID: number
   timestamp: number
