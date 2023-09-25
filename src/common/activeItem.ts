@@ -9,6 +9,10 @@ import {
   RawPromptVersion,
 } from '@/types'
 
+export const CompareItem = 'compare'
+export const EndpointsItem = 'endpoints'
+export type ActiveItem = ActivePrompt | ActiveChain | typeof CompareItem | typeof EndpointsItem
+
 export const BuildActivePrompt =
   (project: ActiveProject) =>
   ({

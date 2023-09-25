@@ -1,12 +1,12 @@
 import { ActivePrompt, Comment, User, PromptVersion, ActiveChain, ChainVersion, IsPromptVersion } from '@/types'
 import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
-import { ItemLabel } from './versionCell'
+import { ItemLabel } from './versions/versionCell'
 import { UserAvatar } from './userSidebarItem'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
-import VersionComparison from './versionComparison'
-import { LabelForModel } from './modelSelector'
+import VersionComparison from './versions/versionComparison'
+import { LabelForModel } from './prompts/modelSelector'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
@@ -26,9 +26,7 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
 }) {
   const users = activeItem.users
   const labelColors = AvailableLabelColorsForItem(activeItem)
-  const comments = activeItem.versions
-    .flatMap(version => version.comments)
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  const comments = activeItem.versions.flatMap(version => version.comments).sort((a, b) => a.timestamp - b.timestamp)
 
   return showComments ? (
     <div className='flex flex-col h-full'>

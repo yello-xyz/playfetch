@@ -3,11 +3,11 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { saveRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import runChain, { MaxContinuationCount } from '@/src/server/chainEngine'
+import runChain from '@/src/server/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
-  version.items ?? [{ versionID: version.id }]
+  (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id }]
 
 const logResponse = (
   req: NextApiRequest,
@@ -17,21 +17,11 @@ const logResponse = (
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>> & { output: string }
 ) => {
-  saveRun(
-    userID,
-    version.parentID,
-    version.id,
-    inputs,
-    response.output,
-    new Date(),
-    response.cost,
-    response.duration,
-    []
-  )
   logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+  return saveRun(userID, version.parentID, version.id, inputs, response.output, response.cost, response.duration, [])
 }
 
-const timestampIf = (condition: boolean) => (condition ? new Date().toISOString() : undefined)
+const timestampIf = (condition: boolean) => (condition ? new Date().getTime() : undefined)
 
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
@@ -45,10 +35,11 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
-      const offset = (index: number) => inputIndex * (configs.length * MaxContinuationCount) + index
-      return runChain(user.id, version, configs, inputs, false, (index, message, cost, duration, failed) =>
+      return runChain(user.id, version, configs, inputs, false, (index, extraSteps, message, cost, duration, failed) =>
         sendData({
-          index: offset(index),
+          inputIndex,
+          configIndex: index,
+          index: index + extraSteps,
           message,
           timestamp: timestampIf(failed !== undefined),
           cost,
@@ -57,8 +48,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         })
       ).then(response => {
         if (!response.failed) {
-          sendData({ index: offset(configs.length - 1 + response.extraSteps) })
-          logResponse(req, res, user.id, version, inputs, response)
+          sendData({ inputIndex, index: configs.length - 1 + response.extraSteps, isLast: true })
+          return logResponse(req, res, user.id, version, inputs, response)
         }
       })
     })

@@ -3,17 +3,19 @@ import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
 import { useRefreshActiveItem } from '../context/refreshContext'
 
-export default function useRunVersion() {
+export default function useRunVersion(clearLastPartialRunsOnCompletion = false) {
   const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
+  const [highestRunIndex, setHighestRunIndex] = useState(-1)
 
   const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[]) => {
     setRunning(true)
     setPartialRuns([])
+    setHighestRunIndex(-1)
     const versionID = await getVersion()
     const streamReader = await api.runVersion(versionID, inputs)
-    const runs = {} as { [index: number]: PartialRun }
+    const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [index: number]: PartialRun }]))
     while (streamReader) {
       const { done, value } = await streamReader.read()
       if (done) {
@@ -23,23 +25,35 @@ export default function useRunVersion() {
       const lines = text.split('\n')
       for (const line of lines.filter(line => line.trim().length > 0)) {
         const data = line.split('data:').slice(-1)[0]
-        const { index, message, cost, duration, timestamp, failed } = JSON.parse(data)
-        const previousOutput = runs[index]?.output ?? ''
-        const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[index] = { id: index, output, cost, duration, timestamp, failed }
+        const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, isLast } = JSON.parse(data)
+        if (isLast) {
+          runs[inputIndex][index].isLast = true
+        } else {
+          const previousOutput = runs[inputIndex][index]?.output ?? ''
+          const output = message ? `${previousOutput}${message}` : previousOutput
+          runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, timestamp, failed }
+        }
       }
-      setPartialRuns(
-        Object.entries(runs)
-          .sort(([a], [b]) => Number(a) - Number(b))
-          .map(([, run]) => run)
-      )
+      const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
+      const sortedRuns = Object.entries(runs)
+        .flatMap(([inputIndex, inputRuns]) =>
+          Object.entries(inputRuns).map(([index, run]) => ({
+            ...run,
+            id: Number(inputIndex) * maxSteps + Number(index),
+          }))
+        )
+        .sort((a, b) => a.id - b.id)
+      setPartialRuns(sortedRuns)
+      setHighestRunIndex(Math.max(highestRunIndex, ...sortedRuns.map(run => run.index ?? 0)))
     }
     await refreshActiveItem(versionID)
 
-    setPartialRuns(runs => runs.filter(run => run.timestamp))
+    if (clearLastPartialRunsOnCompletion) {
+      setPartialRuns(runs => runs.filter(run => !run.isLast))
+    }
 
     setRunning(false)
   }
 
-  return [runVersion, partialRuns, isRunning] as const
+  return [runVersion, partialRuns, isRunning, highestRunIndex] as const
 }

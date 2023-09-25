@@ -20,7 +20,7 @@ export type Project = {
   id: number
   name: string
   workspaceID: number
-  timestamp: string
+  timestamp: number
   favorited: boolean
 }
 
@@ -38,9 +38,8 @@ export type ActiveProject = Project & {
 export type Prompt = {
   id: number
   name: string
-  lastVersionID: number
   projectID: number
-  timestamp: string
+  timestamp: number
 }
 
 export type ActivePrompt = Prompt & {
@@ -53,10 +52,9 @@ export type ActivePrompt = Prompt & {
 export type Chain = {
   id: number
   name: string
-  lastVersionID: number
   referencedItemIDs: number[]
   projectID: number
-  timestamp: string
+  timestamp: number
 }
 
 export type ActiveChain = Chain & {
@@ -92,7 +90,7 @@ type Version = {
   parentID: number
   userID: number
   previousID?: number
-  timestamp: string
+  timestamp: number
   prompts?: Prompts
   config?: PromptConfig
   items?: ChainItemWithInputs[]
@@ -118,32 +116,40 @@ export const IsPromptVersion = (version: PromptVersion | ChainVersion): version 
 
 export type PromptInputs = { [name: string]: string }
 
-export type PartialRun = {
+type CommonRun = {
   id: number
   output: string
-  timestamp?: string
+  timestamp?: number
   cost?: number
   duration?: number
   failed?: boolean
 }
 
-export type Run = PartialRun & {
-  timestamp: string
+export type PartialRun = CommonRun & {
+  index?: number
+  isLast?: boolean
+}
+
+export type Run = CommonRun & {
+  timestamp: number
   cost: number
   duration: number
   inputs: PromptInputs
   labels: string[]
 }
 
-export type RunConfig = {
-  versionID: number
+type PendingVersionRunConfig = {
+  versionID?: number
   output?: string
   includeContext?: boolean
 }
 
+export type RunConfig = PendingVersionRunConfig & { versionID: number }
+
 export type CodeConfig = {
   code: string
   name?: string
+  description?: string
   output?: string
 }
 
@@ -153,7 +159,11 @@ export type TestConfig = {
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
-export type PromptChainItem = RunConfig & { promptID: number; inputs?: string[]; dynamicInputs?: string[] }
+export type PromptChainItem = PendingVersionRunConfig & {
+  promptID: number
+  inputs?: string[]
+  dynamicInputs?: string[]
+}
 export type ChainItem = CodeChainItem | PromptChainItem
 
 export type ChainItemWithInputs = (CodeChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
@@ -167,7 +177,7 @@ export type Endpoint = {
   projectID: number
   parentID: number
   versionID: number
-  timestamp: string
+  timestamp: number
   urlPath: string
   flavor: string
   useCache: boolean
@@ -184,11 +194,11 @@ export type ResolvedPromptEndpoint = ResolvedEndpoint & {
   versionID: number
 }
 
-export const EndpointParentsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
-export const FindParentInProject = (parentID: number | undefined, project: ActiveProject) =>
-  EndpointParentsInProject(project).find(item => item.id === parentID)!
-export const EndpointParentIsChain = (parent: Chain | Prompt | undefined): parent is Chain =>
-  !!parent && 'referencedItemIDs' in parent
+export const ItemsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
+export const FindItemInProject = (itemID: number | undefined, project: ActiveProject) =>
+  ItemsInProject(project).find(item => item.id === itemID)!
+export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Chain =>
+  !!item && 'referencedItemIDs' in item
 
 export type Usage = {
   endpointID: number
@@ -206,7 +216,7 @@ export type Comment = {
   userID: number
   versionID: number
   text: string
-  timestamp: string
+  timestamp: number
   action?: CommentAction
   quote?: string
   runID?: number
@@ -215,7 +225,7 @@ export type Comment = {
 }
 
 export type LogEntry = {
-  timestamp: string
+  timestamp: number
   endpointID: number
   urlPath: string
   flavor: string

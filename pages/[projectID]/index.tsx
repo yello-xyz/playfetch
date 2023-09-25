@@ -2,88 +2,38 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import {
-  ActivePrompt,
-  User,
-  ActiveProject,
-  AvailableProvider,
-  Workspace,
-  LogEntry,
-  ActiveChain,
-  PromptVersion,
-  ChainVersion,
-  IsPromptVersion,
-} from '@/types'
-import ClientRoute, { EndpointsRoute, ParseNumberQuery, ProjectRoute, WorkspaceRoute } from '@/src/client/clientRoute'
-import { getPromptForUser } from '@/src/server/datastore/prompts'
-import { getActiveProject } from '@/src/server/datastore/projects'
+import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion } from '@/types'
+import ClientRoute, {
+  CompareRoute,
+  EndpointsRoute,
+  ParseActiveItemQuery,
+  ProjectRoute,
+  WorkspaceRoute,
+} from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { RefreshContext } from '@/src/client/context/refreshContext'
-import { urlBuilderFromHeaders } from '@/src/server/routing'
 import { UserContext } from '@/src/client/context/userContext'
-import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
-import ProjectSidebar from '@/components/projectSidebar'
-import { EmptyGridView } from '@/components/emptyGridView'
-import { getWorkspacesForUser } from '@/src/server/datastore/workspaces'
-import ProjectTopBar from '@/components/projectTopBar'
-
-import dynamic from 'next/dynamic'
-import { getLogEntriesForProject } from '@/src/server/datastore/logs'
-import { getChainForUser } from '@/src/server/datastore/chains'
+import ProjectSidebar from '@/components/projects/projectSidebar'
+import ProjectTopBar from '@/components/projects/projectTopBar'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
-import { BuildActiveChain, BuildActivePrompt } from '@/src/common/activeItem'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
-const PromptView = dynamic(() => import('@/components/promptView'))
-const ChainView = dynamic(() => import('@/components/chainView'))
-const EndpointsView = dynamic(() => import('@/components/endpointsView'))
+import { EmptyProjectView } from '@/components/projects/emptyProjectView'
+import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import loadActiveItem from '@/src/server/activeItem'
 
-const Endpoints = 'endpoints'
-type ActiveItem = ActivePrompt | ActiveChain | typeof Endpoints
-const IsChain = (item: ActiveItem): item is ActiveChain => item !== Endpoints && 'referencedItemIDs' in item
-const IsPrompt = (item: ActiveItem): item is ActivePrompt => item !== Endpoints && !IsChain(item)
+import dynamic from 'next/dynamic'
+import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
+const PromptView = dynamic(() => import('@/components/prompts/promptView'))
+const ChainView = dynamic(() => import('@/components/chains/chainView'))
+const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
+const CompareView = dynamic(() => import('@/components/compare/compareView'))
 
-export const getServerSideProps = withLoggedInSession(async ({ req, query, user }) => {
-  const { projectID, p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(query)
-
-  const workspaces = await getWorkspacesForUser(user.id)
-
-  const buildURL = urlBuilderFromHeaders(req.headers)
-  const activeProject = await getActiveProject(user.id, projectID!, buildURL)
-
-  const getActivePrompt = async (promptID: number): Promise<ActivePrompt> =>
-    getPromptForUser(user.id, promptID).then(BuildActivePrompt(activeProject))
-
-  const getActiveChain = async (chainID: number): Promise<ActiveChain> =>
-    await getChainForUser(user.id, chainID).then(BuildActiveChain(activeProject))
-
-  const initialActiveItem: ActiveItem | null =
-    endpoints === 1
-      ? Endpoints
-      : promptID
-      ? await getActivePrompt(promptID)
-      : chainID
-      ? await getActiveChain(chainID)
-      : activeProject.prompts.length > 0
-      ? await getActivePrompt(activeProject.prompts[0].id)
-      : null
-
-  const initialLogEntries = initialActiveItem === Endpoints ? await getLogEntriesForProject(user.id, projectID!) : null
-  const availableProviders = await getAvailableProvidersForUser(user.id)
-
-  return {
-    props: {
-      user,
-      workspaces,
-      initialActiveProject: activeProject,
-      initialActiveItem,
-      initialLogEntries,
-      availableProviders,
-    },
-  }
-})
+export const getServerSideProps = withLoggedInSession(async ({ user, req, query }) => ({
+  props: await loadActiveItem(user, query, req.headers),
+}))
 
 export default function Home({
   user,
@@ -100,20 +50,11 @@ export default function Home({
   initialLogEntries: LogEntry[] | null
   availableProviders: AvailableProvider[]
 }) {
-  const router = useRouter()
-
-  const [activeProject, setActiveProject] = useState(initialActiveProject)
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
-
-  const [activeItem, setActiveItem] = useState(initialActiveItem ?? undefined)
-  const activePrompt = activeItem && IsPrompt(activeItem) ? activeItem : undefined
-  const activeChain = activeItem && IsChain(activeItem) ? activeItem : undefined
-
-  const [activeVersion, setActiveVersion] = useState<PromptVersion | ChainVersion | undefined>(
-    activeItem === Endpoints ? undefined : activeItem?.versions?.slice(-1)?.[0]
+  const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(
+    initialActiveProject,
+    initialActiveItem
   )
-  const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
-  const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
+  const [activeVersion, setActiveVersion, activePromptVersion, activeChainVersion] = useActiveVersion(activeItem)
 
   const [refreshPrompt, selectPrompt, addPrompt, savePrompt, setModifiedVersion] = usePrompt(
     activeProject,
@@ -160,15 +101,34 @@ export default function Home({
 
   const refresh = (versionID?: number) => {
     refreshActiveItem(versionID)
-    if (activeItem !== Endpoints) {
+    if (activeItem !== CompareItem && activeItem !== EndpointsItem) {
       refreshProject()
+    }
+  }
+
+  const router = useRouter()
+  const { promptID, chainID, compare, endpoints } = ParseActiveItemQuery(router.query, activeProject)
+
+  const onDeleteItem = async (itemID: number) => {
+    refreshProject()
+    if (itemID === activePrompt?.id || itemID === activeChain?.id) {
+      router.push(ProjectRoute(activeProject.id))
+    }
+  }
+
+  const selectCompare = () => {
+    savePrompt(refreshProject)
+    setActiveItem(CompareItem)
+    updateVersion(undefined)
+    if (!compare) {
+      router.push(CompareRoute(activeProject.id), undefined, { shallow: true })
     }
   }
 
   const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
-    setActiveItem(Endpoints)
+    setActiveItem(EndpointsItem)
     updateVersion(undefined)
     if (!logEntries) {
       api.getLogEntries(activeProject.id).then(setLogEntries)
@@ -178,36 +138,17 @@ export default function Home({
     }
   }
 
-  const onDeleteItem = async () => {
-    const newProject = await api.getProject(activeProject.id)
-    setActiveProject(newProject)
-    if (
-      (activePrompt && !newProject.prompts.find(prompt => prompt.id === activePrompt.id)) ||
-      (activeChain && !newProject.chains.find(chain => chain.id === activeChain.id))
-    ) {
-      const promptID = newProject.prompts[0]?.id
-      if (promptID) {
-        selectPrompt(promptID)
-      } else {
-        setActiveItem(undefined)
-        updateVersion(undefined)
-        router.push(ProjectRoute(activeProject.id), undefined, { shallow: true })
-      }
-    }
-  }
-
-  const { p: promptID, c: chainID, e: endpoints } = ParseNumberQuery(router.query)
-  const currentQueryState = endpoints ? Endpoints : promptID ?? chainID ?? activeProject.prompts[0]?.id
+  const currentQueryState = compare ? CompareItem : endpoints ? EndpointsItem : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
-    if (endpoints) {
+    if (compare) {
+      selectCompare()
+    } else if (endpoints) {
       selectEndpoints()
     } else if (promptID) {
       selectPrompt(promptID)
     } else if (chainID) {
       selectChain(chainID)
-    } else if (activeProject.prompts.length > 0) {
-      selectPrompt(activeProject.prompts[0].id)
     }
     setQuery(currentQueryState)
   }
@@ -249,6 +190,7 @@ export default function Home({
                     onRefreshItem={() => refresh()}
                     onSelectPrompt={selectPrompt}
                     onSelectChain={selectChain}
+                    onSelectCompare={selectCompare}
                     onSelectEndpoints={selectEndpoints}
                   />
                   <div className='flex-1'>
@@ -279,12 +221,17 @@ export default function Home({
                         />
                       </Suspense>
                     )}
-                    {activeItem === Endpoints && (
+                    {activeItem === CompareItem && (
+                      <Suspense>
+                        <CompareView project={activeProject} />
+                      </Suspense>
+                    )}
+                    {activeItem === EndpointsItem && (
                       <Suspense>
                         <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
                       </Suspense>
                     )}
-                    {!activeItem && <EmptyGridView title='No Prompts' addLabel='New Prompt' onAddItem={addPrompt} />}
+                    {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
                   </div>
                 </div>
               </main>

@@ -10,7 +10,7 @@ export default function useSavePrompt(
 ) {
   const [modifiedVersion, setModifiedVersion] = useState<PromptVersion>()
 
-  const savePrompt = async (onSaved?: ((versionID: number) => Promise<void>) | (() => void)) => {
+  const savePrompt = async (onSaved?: (versionID: number) => Promise<void> | void) => {
     const versionNeedsSaving =
       activePrompt &&
       activeVersion &&

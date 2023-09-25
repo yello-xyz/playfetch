@@ -1,6 +1,7 @@
 import { createHash } from 'crypto'
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
   getEntities,
@@ -20,7 +21,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { addPromptForUser, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
@@ -29,11 +30,20 @@ import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
 
-export async function migrateProjects() {
+export async function migrateProjects(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData }, false)
+    const labels = JSON.parse(projectData.labels)
+    if (labels.length === 0) {
+      console.log('Adding default labels to', projectData.name)
+      await updateProject({ ...projectData, labels: JSON.stringify(DefaultLabels) }, false)
+    } else {
+      console.log('Not touching labels', labels, 'in', projectData.name)
+    }
   }
 }
 
@@ -47,9 +57,9 @@ const toProjectData = (
   createdAt: Date,
   lastEditedAt: Date,
   favorited: number[],
-  apiKeyHash?: string,
-  apiKeyDev?: string,
-  projectID?: number
+  apiKeyHash: string | undefined,
+  apiKeyDev: string | undefined,
+  projectID: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
   data: {
@@ -124,6 +134,7 @@ export async function getActiveProject(
 }
 
 const DefaultProjectName = 'New Project'
+const DefaultLabels = ['Experiment', 'Integration ready', 'QA ready', 'Needs updates', 'Production ready']
 
 export async function addProjectForUser(
   userID: number,
@@ -136,11 +147,22 @@ export async function addProjectForUser(
     name,
     projectNames.map(project => project.name)
   )
+  const projectID = await allocateID(Entity.PROJECT)
   const createdAt = new Date()
-  const projectData = toProjectData(workspaceID, uniqueName, [], [DefaultEndpointFlavor], createdAt, createdAt, [])
-  await getDatastore().save(projectData)
-  const projectID = getID(projectData)
-  await addPromptForUser(userID, projectID)
+  const projectData = toProjectData(
+    workspaceID,
+    uniqueName,
+    DefaultLabels,
+    [DefaultEndpointFlavor],
+    createdAt,
+    createdAt,
+    [],
+    undefined,
+    undefined,
+    projectID
+  )
+  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
+  await getDatastore().save([projectData, promptData, versionData])
   return projectID
 }
 

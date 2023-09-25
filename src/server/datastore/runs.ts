@@ -29,13 +29,12 @@ export async function saveRun(
   versionID: number,
   inputs: PromptInputs,
   output: string,
-  createdAt: Date,
   cost: number,
   duration: number,
   labels: string[]
 ): Promise<Run> {
   await ensurePromptOrChainAccess(userID, parentID)
-  const runData = toRunData(parentID, versionID, inputs, output, createdAt, cost, duration, labels)
+  const runData = toRunData(parentID, versionID, inputs, output, new Date(), cost, duration, labels)
   await getDatastore().save(runData)
   return {
     id: getID(runData),

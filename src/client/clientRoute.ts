@@ -1,3 +1,4 @@
+import { ActiveProject } from '@/types'
 import { GetServerSidePropsResult } from 'next'
 
 export const SharedProjectsWorkspaceID = 1
@@ -26,6 +27,10 @@ export const PromptRoute = (projectID: number, promptID: number) => `${ProjectRo
 
 export const ChainRoute = (projectID: number, chainID: number) => `${ProjectRoute(projectID)}?c=${chainID}`
 
+export const CompareRoute = (projectID: number, itemID?: number, versionID?: number, previousID?: number) =>
+  `${ProjectRoute(projectID)}?m=1` +
+  `${itemID ? `&i=${itemID}` : ''}${versionID ? `&v=${versionID}` : ''}${previousID ? `&p=${previousID}` : ''}`
+
 export const EndpointsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1`
 
 export const NewEndpointRoute = (projectID: number, parentID: number, versionID: number) =>
@@ -50,5 +55,17 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
 
 export const ParseNumberQuery = (query: NodeJS.Dict<string | string[]>): NodeJS.Dict<number> =>
   mapDictionary(ParseQuery(query), value => Number(value))
+
+export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
+  let { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(query)
+  if (!compare && !endpoints && !promptID && !chainID) {
+    if (project.prompts.length > 0) {
+      promptID = project.prompts[0].id
+    } else {
+      chainID = project.chains[0]?.id
+    }
+  }
+  return { promptID, chainID, compare, endpoints }
+}
 
 export default ClientRoute

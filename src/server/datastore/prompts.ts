@@ -1,8 +1,10 @@
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
   getEntities,
+  getEntity,
   getEntityKey,
   getEntityKeys,
   getID,
@@ -10,13 +12,16 @@ import {
   getOrderedEntities,
   getTimestamp,
 } from './datastore'
-import { savePromptVersionForUser, toUserVersions } from './versions'
+import { addInitialVersion, savePromptVersionForUser, toUserVersions } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 
-export async function migratePrompts() {
+export async function migratePrompts(postMerge: boolean) {
+  if (!postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   for (const promptData of allPrompts) {
@@ -24,23 +29,15 @@ export async function migratePrompts() {
   }
 }
 
-const toPromptData = (
-  projectID: number,
-  name: string,
-  lastVersionID: number,
-  createdAt: Date,
-  lastEditedAt: Date,
-  promptID?: number
-) => ({
+const toPromptData = (projectID: number, name: string, createdAt: Date, lastEditedAt: Date, promptID: number) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, lastVersionID, name, createdAt, lastEditedAt },
+  data: { projectID, name, createdAt, lastEditedAt },
   excludeFromIndexes: ['name'],
 })
 
 export const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
-  lastVersionID: data.lastVersionID,
   projectID: data.projectID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
 })
@@ -96,12 +93,18 @@ export async function addPromptForUser(userID: number, projectID: number, name =
     name,
     promptNames.map(prompt => prompt.name)
   )
+  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID, uniqueName)
+  await getDatastore().save([promptData, versionData])
+  updateProjectLastEditedAt(projectID)
+  return { promptID: getID(promptData), versionID: getID(versionData) }
+}
+
+export async function addFirstProjectPrompt(userID: number, projectID: number, name = DefaultPromptName) {
   const createdAt = new Date()
-  const promptData = toPromptData(projectID, uniqueName, 0, createdAt, createdAt)
-  await getDatastore().save(promptData)
-  const versionID = await savePromptVersionForUser(userID, getID(promptData))
-  await updateProjectLastEditedAt(projectID)
-  return { promptID: getID(promptData), versionID }
+  const promptID = await allocateID(Entity.PROMPT)
+  const versionData = await addInitialVersion(userID, promptID, false)
+  const promptData = toPromptData(projectID, name, createdAt, createdAt, promptID)
+  return [promptData, versionData]
 }
 
 export async function duplicatePromptForUser(
@@ -115,7 +118,8 @@ export async function duplicatePromptForUser(
   }
   const projectID = targetProjectID ?? promptData.projectID
   const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptData.name)
-  const lastVersion = await getKeyedEntity(Entity.VERSION, promptData.lastVersionID)
+  // TODO select last version that was either run or created by the user
+  const lastVersion = await getEntity(Entity.VERSION, 'parentID', promptID, true)
   await savePromptVersionForUser(
     userID,
     newPromptID,
@@ -131,20 +135,18 @@ async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean)
     toPromptData(
       promptData.projectID,
       promptData.name,
-      promptData.lastVersionID,
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
       getID(promptData)
     )
   )
   if (updateLastEditedTimestamp) {
-    await updateProjectLastEditedAt(promptData.projectID)
+    updateProjectLastEditedAt(promptData.projectID)
   }
 }
 
 export async function augmentPromptDataWithNewVersion(
   promptData: any,
-  newVersionID: number,
   newVersionPrompt: string,
   previousVersionPrompt: string
 ) {
@@ -153,12 +155,13 @@ export async function augmentPromptDataWithNewVersion(
       ? StripVariableSentinels(newVersionPrompt).split(' ').slice(0, 5).join(' ')
       : promptData.name
 
-  await updatePrompt({ ...promptData, lastVersionID: newVersionID, name: newPromptName }, true)
+  await updatePrompt({ ...promptData, name: newPromptName }, true)
 }
 
-export async function updatePromptOnDeletedVersion(promptID: number, newLastVersionID: number) {
+export async function updatePromptOnDeletedVersion(promptID: number) {
+  // TODO update previous version references in other versions
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
-  await updatePrompt({ ...promptData, lastVersionID: newLastVersionID }, true)
+  await updatePrompt({ ...promptData }, true)
 }
 
 export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {

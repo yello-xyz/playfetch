@@ -5,6 +5,7 @@ import {
   buildKey,
   getDatastore,
   getEntities,
+  getFilteredEntityKey,
   getID,
   runTransactionWithExponentialBackoff,
 } from './datastore'
@@ -30,13 +31,12 @@ const toInputData = (parentID: number, name: string, values: string[], inputID?:
 export async function saveInputValues(userID: number, parentID: number, name: string, values: string[]) {
   ensurePromptOrChainAccess(userID, parentID)
   await runTransactionWithExponentialBackoff(async transaction => {
-    const query = transaction
-      .createQuery(Entity.INPUT)
-      .filter(and([buildFilter('parentID', parentID), buildFilter('name', name)]))
-      .select('__key__')
-      .limit(1)
-    const [[inputKey]] = await transaction.runQuery(query)
-    const inputID = inputKey ? getID(inputKey) : undefined
+    const key = await getFilteredEntityKey(
+      Entity.INPUT,
+      and([buildFilter('parentID', parentID), buildFilter('name', name)]),
+      transaction
+    )
+    const inputID = key ? getID({ key }) : undefined
     transaction.save(toInputData(parentID, name, values, inputID))
   })
 }

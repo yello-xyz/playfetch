@@ -15,6 +15,7 @@ import {
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
+import Progress from 'nprogress'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
 
@@ -40,6 +41,7 @@ export async function postToAPI(
   body: Record<string, any>,
   responseType: ResponseType
 ) {
+  Progress.start()
   return fetch(`${apiPath}/${apiCall}`, {
     method: 'POST',
     headers: {
@@ -47,7 +49,9 @@ export async function postToAPI(
       'content-type': 'application/json',
     },
     body: JSON.stringify(body),
-  }).then(response => parseResponse(response, responseType))
+  })
+    .then(response => parseResponse(response, responseType))
+    .finally(() => Progress.done())
 }
 
 const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'json') => {

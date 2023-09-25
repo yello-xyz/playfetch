@@ -33,12 +33,24 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
         position.top = parentRect.height - childRect.height
       }
     }
+  } else {
+    if (position.left && position.right) {
+      position.right = undefined
+    }
+    if (position.top && position.bottom) {
+      position.bottom = undefined
+    }
+  }
+
+  const withDismiss = (callback: () => void) => () => {
+    onDismissGlobalPopup()
+    callback()
   }
 
   return render ? (
     <div ref={parentRef} onClick={onDismissGlobalPopup} className='fixed inset-0 z-30 w-full h-full text-sm '>
       <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute shadow-sm' style={position}>
-        {render({ ...other, onDismissGlobalPopup })}
+        {render({ ...other, withDismiss })}
       </div>
     </div>
   ) : null

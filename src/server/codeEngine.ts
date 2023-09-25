@@ -7,7 +7,7 @@ const codeToCamelCase = (code: string) =>
 
 const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
 
-export const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: any) =>
+const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: any) =>
   variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
@@ -17,16 +17,21 @@ export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   return context
 }
 
-const codeResponseAttributes = { cost: 0, attempts: 1 }
+const codeResponseAttributes = { cost: 0, attempts: 1, functionInterrupt: undefined }
 type CodeResponse = typeof codeResponseAttributes &
   (
     | { result: any; output: string; error: undefined; failed: false }
     | { result: undefined; output: undefined; error: string; failed: true }
   )
 
-export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
+export const runCodeInContext = async (
+  code: string,
+  context: Isolated.Context,
+  asIsolatedFunction = true
+): Promise<CodeResponse> => {
   try {
-    const result = await context.eval(codeToCamelCase(code), { timeout: 1000, copy: true })
+    const functionCode = asIsolatedFunction ? `(() => { ${codeToCamelCase(code)} })()` : codeToCamelCase(code)
+    const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
     return { result, output, error: undefined, failed: false, ...codeResponseAttributes }
   } catch (error: any) {

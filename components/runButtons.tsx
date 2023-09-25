@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import { PendingButton } from './button'
 import DropdownMenu from './dropdownMenu'
 import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
-import ModelSelector from './modelSelector'
+import ModelSelector from './prompts/modelSelector'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
@@ -82,6 +82,7 @@ const selectValidRowIndices = (
 export default function RunButtons({
   runTitle,
   variables,
+  staticVariables,
   inputValues,
   languageModel,
   setLanguageModel,
@@ -93,6 +94,7 @@ export default function RunButtons({
 }: {
   runTitle?: string
   variables: string[]
+  staticVariables: string[]
   inputValues: InputValues
   languageModel?: LanguageModel
   setLanguageModel?: (model: LanguageModel) => void
@@ -143,7 +145,7 @@ export default function RunButtons({
       {showTestMode && (
         <DropdownMenu
           disabled={allInputs.length <= 1}
-          size='medium'
+          size='md'
           value={testConfig.mode}
           onChange={value => updateTestMode(value as TestConfig['mode'])}>
           {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
@@ -156,7 +158,7 @@ export default function RunButtons({
       <PendingButton
         title={runTitle ?? 'Run'}
         pendingTitle='Running'
-        disabled={disabled || (rowIndices.length === 0 && variables.length > 0)}
+        disabled={disabled || (rowIndices.length === 0 && staticVariables.length > 0)}
         onClick={testPrompt}
       />
     </div>

@@ -36,8 +36,7 @@ const toProviderData = (
 
 export async function incrementProviderCostForUser(userID: number, provider: ModelProvider, cost: number) {
   await runTransactionWithExponentialBackoff(async transaction => {
-    const query = transaction.createQuery(Entity.PROVIDER).filter(buildProviderFilter(userID, provider)).limit(1)
-    const [[providerData]] = await transaction.runQuery(query)
+    const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider), transaction)
     if (providerData) {
       transaction.save(
         toProviderData(userID, provider, providerData.apiKey, providerData.cost + cost, getID(providerData))

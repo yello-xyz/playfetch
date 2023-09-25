@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google'
-import '@/styles/globals.css'
 import 'allotment/dist/style.css'
+import 'nprogress/nprogress.css'
+import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import Head from 'next/head'
@@ -9,6 +10,9 @@ import ClientRoute from '@/src/client/clientRoute'
 import TagManager from 'react-gtm-module'
 import { useEffect } from 'react'
 import CookieBanner from '@/components/cookieBanner'
+
+import dynamic from 'next/dynamic'
+const ProgressBar = dynamic(() => import('@/components/progressBar'), { ssr: false })
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -24,7 +28,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
   return (
     <>
       <Head>
-        <title>Play/Fetch</title>
+        <title>PlayFetch</title>
       </Head>
       <style jsx global>
         {`
@@ -38,6 +42,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
       </style>
       <ErrorBoundary fallbackRender={() => null} onError={escapeHome}>
         <CookieBanner>
+          <ProgressBar />
           <SessionProvider session={session}>
             <Component {...pageProps} />
           </SessionProvider>

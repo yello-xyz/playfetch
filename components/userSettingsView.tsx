@@ -1,7 +1,7 @@
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import Label from './label'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AllProviders, IconForProvider, LabelForProvider } from './modelSelector'
+import { AllProviders, IconForProvider, LabelForProvider } from './prompts/modelSelector'
 import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'

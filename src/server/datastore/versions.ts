@@ -1,13 +1,22 @@
-import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
+import {
+  ChainItemWithInputs,
+  CodeChainItem,
+  PromptConfig,
+  PromptInputs,
+  Prompts,
+  RawChainVersion,
+  RawPromptVersion,
+} from '@/types'
 import {
   Entity,
+  allocateID,
   buildKey,
   getDatastore,
-  getEntity,
   getEntityCount,
   getEntityKey,
   getEntityKeys,
   getID,
+  getKeyedEntities,
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
@@ -28,41 +37,84 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
+import { CreateCodeContextWithInputs, runCodeInContext } from '../codeEngine'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
     return
   }
+  const randomNumberString = () => new Uint32Array(Float64Array.of(Math.random()).buffer)[0].toString()
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
+  let migrationFailures = 0
+  let migrationSuccess = 0
+  let alreadyMigrated = 0
   for (const versionData of allVersions) {
     if (versionData.items) {
-      const items = JSON.parse(versionData.items)
-      for (const item of items) {
-        if (item.code !== undefined && item.dynamicInputs !== undefined) {
-          console.log(item.dynamicInputs, ' -> undefined', getID(versionData))
-          item.dynamicInputs = undefined
-        } else if (item.code === undefined && item.dynamicInputs === undefined) {
-          console.log('undefined -> []', getID(versionData))
-          item.dynamicInputs = []
-        }  
+      const versionID = getID(versionData)
+      const items = versionData.items ? (JSON.parse(versionData.items) as ChainItemWithInputs[]) : null
+      if (items && items.some(item => 'code' in item)) {
+        for (const [index, item] of items.entries()) {
+          if ('code' in item) {
+            const code = item.code
+            const inputs = item.inputs.reduce(
+              (inputs, input) => ({ ...inputs, [input]: randomNumberString() }),
+              {} as PromptInputs
+            )
+            const random = randomNumberString()
+            const before = await runCodeInContext(
+              code.replaceAll('Math.random()', random),
+              CreateCodeContextWithInputs(inputs),
+              false
+            )
+            const codeLines = code.split('\n')
+            const lastLine = codeLines.slice(-1)[0]
+            if (lastLine.startsWith('return ')) {
+              console.log('▶️', versionID, code)
+              alreadyMigrated++
+              continue
+            }
+            let newCode = code
+            if (!lastLine.startsWith('let ') && !lastLine.startsWith('const ')) {
+              const newLastLine = `return ${lastLine}`
+              const newCodeLines = [...codeLines.slice(0, -1), newLastLine]
+              newCode = newCodeLines.join('\n')
+            }
+            const after = await runCodeInContext(
+              newCode.replaceAll('Math.random()', random),
+              CreateCodeContextWithInputs(inputs)
+            )
+            if (before.failed === after.failed && JSON.stringify(before.result) === JSON.stringify(after.result)) {
+              migrationSuccess++
+              console.log('✅', versionID)
+              items[index] = { ...item, code: newCode }
+            } else {
+              migrationFailures++
+              console.log('❌', versionID, code, newCode, before.result, after.result)
+            }
+          }
+        }
       }
-      await datastore.save(
-        toVersionData(
-          versionData.userID,
-          versionData.parentID,
-          versionData.prompts ? JSON.parse(versionData.prompts) : null,
-          versionData.config ? JSON.parse(versionData.config) : null,
-          items,
-          JSON.parse(versionData.labels),
-          versionData.createdAt,
-          versionData.didRun,
-          versionData.previousVersionID,
-          getID(versionData)
+      if (JSON.stringify(items) !== versionData.items) {
+        console.log('Updating', versionID)
+        await datastore.save(
+          toVersionData(
+            versionData.userID,
+            versionData.parentID,
+            versionData.prompts ? JSON.parse(versionData.prompts) : null,
+            versionData.config ? JSON.parse(versionData.config) : null,
+            items,
+            JSON.parse(versionData.labels),
+            versionData.createdAt,
+            versionData.didRun,
+            versionData.previousVersionID,
+            versionID
+          )
         )
-      )  
+      }
     }
   }
+  console.log('Failures:', migrationFailures, ' - Success:', migrationSuccess, ' - Already migrated:', alreadyMigrated)
 }
 
 const IsPromptVersion = (version: { items: ChainItemWithInputs[] | null }) => !version.items
@@ -103,10 +155,28 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   return toVersion(versionData, [], [])
 }
 
+const DefaultPrompts = { main: '' }
+
+export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
+  const versionID = await allocateID(Entity.VERSION)
+  return toVersionData(
+    userID,
+    parentID,
+    isChainVersion ? null : DefaultPrompts,
+    isChainVersion ? null : DefaultConfig,
+    isChainVersion ? [] : null,
+    [],
+    new Date(),
+    false,
+    undefined,
+    versionID
+  )
+}
+
 export async function savePromptVersionForUser(
   userID: number,
   promptID: number,
-  prompts: Prompts = { main: '' },
+  prompts: Prompts = DefaultPrompts,
   config: PromptConfig = DefaultConfig,
   currentVersionID?: number,
   previousVersionID?: number
@@ -123,6 +193,9 @@ export async function saveChainVersionForUser(
   previousVersionID?: number
 ) {
   const chainData = await getVerifiedUserChainData(userID, chainID)
+  markVersionsAsRun([
+    ...new Set(items.flatMap(item => ('versionID' in item && item.versionID ? [item.versionID] : []))),
+  ])
   return saveVersionForUser(userID, chainData, null, null, items, currentVersionID, previousVersionID)
 }
 
@@ -165,7 +238,7 @@ async function saveVersionForUser(
 
   if (IsPromptVersion({ items }) && prompts !== null) {
     const lastPrompt = currentVersion ? JSON.parse(currentVersion.prompts).main : ''
-    await augmentPromptDataWithNewVersion(parentData, savedVersionID, prompts.main, lastPrompt)
+    await augmentPromptDataWithNewVersion(parentData, prompts.main, lastPrompt)
     await augmentProjectWithNewVersion(parentData.projectID, prompts.main, lastPrompt)
   } else if (items) {
     await augmentChainDataWithNewVersion(parentData, savedVersionID, items)
@@ -174,21 +247,30 @@ async function saveVersionForUser(
   return savedVersionID
 }
 
-async function updateVersion(versionData: any) {
-  await getDatastore().save(
-    toVersionData(
-      versionData.userID,
-      versionData.parentID,
-      versionData.prompts ? JSON.parse(versionData.prompts) : null,
-      versionData.config ? JSON.parse(versionData.config) : null,
-      versionData.items ? JSON.parse(versionData.items) : null,
-      JSON.parse(versionData.labels),
-      versionData.createdAt,
-      versionData.didRun,
-      versionData.previousVersionID,
-      getID(versionData)
-    )
+async function markVersionsAsRun(versionIDs: number[]) {
+  const versionsData = await getKeyedEntities(Entity.VERSION, versionIDs)
+  const notRunVersions = versionsData.filter(versionData => !versionData.didRun)
+  if (notRunVersions.length > 0) {
+    await getDatastore().save(notRunVersions.map(versionData => updateVersionData({ ...versionData, didRun: true })))
+  }
+}
+
+const updateVersionData = (versionData: any) =>
+  toVersionData(
+    versionData.userID,
+    versionData.parentID,
+    versionData.prompts ? JSON.parse(versionData.prompts) : null,
+    versionData.config ? JSON.parse(versionData.config) : null,
+    versionData.items ? JSON.parse(versionData.items) : null,
+    JSON.parse(versionData.labels),
+    versionData.createdAt,
+    versionData.didRun,
+    versionData.previousVersionID,
+    getID(versionData)
   )
+
+async function updateVersion(versionData: any) {
+  await getDatastore().save(updateVersionData(versionData))
 }
 
 export async function processLabels(
@@ -258,10 +340,13 @@ const toVersionData = (
 })
 
 export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
+  const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
-  const userVersionsWithoutRuns = versions.filter(version => version.userID === userID && !version.didRun)
+  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions[0]] : []
 
-  return [...userVersionsWithoutRuns, ...versionsWithRuns].map(version => toVersion(version, runs, comments)).reverse()
+  return [...userVersion, ...versionsWithRuns, ...initialVersion]
+    .map(version => toVersion(version, runs, comments))
+    .reverse()
 }
 
 const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
@@ -311,11 +396,9 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     }
   }
 
-  const lastVersionData = await getEntity(Entity.VERSION, 'parentID', parentID, true)
-
   if (wasPromptVersion) {
-    await updatePromptOnDeletedVersion(parentID, getID(lastVersionData))
+    await updatePromptOnDeletedVersion(parentID)
   } else {
-    await updateChainOnDeletedVersion(parentID, versionID, getID(lastVersionData))
+    await updateChainOnDeletedVersion(parentID, versionID)
   }
 }

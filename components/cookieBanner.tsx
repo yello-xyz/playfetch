@@ -20,7 +20,7 @@ export default function CookieBanner({ children }: any) {
   const [cookies, setCookie] = useCookies([consent])
   const cookieStatus: CookieStatus = cookies[consent] ?? 'unknown'
   const updateCookieStatus = useCallback(
-    (status: 'accepted' | 'denied') => setCookie(consent, status, { path: '/' }),
+    (status: 'accepted' | 'denied') => setCookie(consent, status, { path: '/', sameSite: 'lax' }),
     [setCookie]
   )
 
