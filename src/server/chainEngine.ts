@@ -1,7 +1,7 @@
 import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
-import { AugmentCodeContext, CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
+import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
 
@@ -98,7 +98,6 @@ export default async function runChain(
     }
   }
 
-  const codeContext = CreateCodeContextWithInputs(inputs)
   let lastResponse = emptyResponse
   let continuationCount = 0
 
@@ -147,16 +146,15 @@ export default async function runChain(
         continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
         const output = lastResponse.output
         AugmentInputs(inputs, config.output, output!, useCamelCase)
-        AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
     } else {
+      const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       streamResponse(lastResponse)
       if (lastResponse.failed) {
         break
       } else {
         AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
-        AugmentCodeContext(codeContext, config.output, lastResponse.result)
       }
     }
   }

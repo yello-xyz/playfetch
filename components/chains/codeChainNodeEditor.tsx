@@ -28,7 +28,7 @@ export default function CodeChainNodeEditor({
             setValue={updateDescription}
           />
           <span className='font-medium mt-2.5'>JavaScript Code</span>
-          <PromptInput placeholder={`'Hello World!'`} value={item.code} setValue={updateCode} preformatted />
+          <PromptInput placeholder={`return 'Hello World!'`} value={item.code} setValue={updateCode} preformatted />
         </div>
       </div>
     </>

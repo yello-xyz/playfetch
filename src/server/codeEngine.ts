@@ -7,7 +7,7 @@ const codeToCamelCase = (code: string) =>
 
 const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
 
-export const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: any) =>
+const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: any) =>
   variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
@@ -26,7 +26,8 @@ type CodeResponse = typeof codeResponseAttributes &
 
 export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
   try {
-    const result = await context.eval(codeToCamelCase(code), { timeout: 1000, copy: true })
+    const functionCode = `(() => { ${codeToCamelCase(code)} })()`
+    const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
     return { result, output, error: undefined, failed: false, ...codeResponseAttributes }
   } catch (error: any) {
