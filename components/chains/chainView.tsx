@@ -130,6 +130,9 @@ export default function ChainView({
     if (testMode && activeNodeIndex === undefined) {
       setActiveNodeIndex(0)
     }
+    if (testMode && showVersions) {
+      setShowVersions(false)
+    }
   }
   const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
 
