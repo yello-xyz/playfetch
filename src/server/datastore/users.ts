@@ -87,6 +87,7 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {
     await addWorkspaceForUser(getID(userData))
   }
+  return !previousUserData
 }
 
 export async function getUsersWithoutAccess() {

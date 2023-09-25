@@ -2,8 +2,9 @@ import ClientRoute from '@/src/client/clientRoute'
 import { CheckValidEmail } from '@/src/common/formatting'
 import logUserRequest, { LoginEvent, SignupEvent, logUnknownUserRequest } from '@/src/server/analytics'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
-import { getUserForEmail, markUserLogin, saveUser } from '@/src/server/datastore/users'
+import { getUserForEmail, markUserLogin } from '@/src/server/datastore/users'
 import { GetNoReplyFromAddress } from '@/src/server/email'
+import signUpNewUser from '@/src/server/waitlist'
 import { ServerResponse } from 'http'
 import { NextApiRequest, NextApiResponse } from 'next'
 import NextAuth, { Session, SessionStrategy, User } from 'next-auth'
@@ -60,9 +61,9 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         }
         return true
       } else if (CheckValidEmail(user.email ?? '')) {
-        logUnknownUserRequest(req, res, SignupEvent(account?.provider))
         // TODO should we postpone this until the email is verified and return true above otherwise?
-        await saveUser(user.email ?? '', user.name ?? '')
+        signUpNewUser(user.email ?? '', user.name ?? '')
+        logUnknownUserRequest(req, res, SignupEvent(account?.provider))
         return ClientRoute.Waitlist
       } else {
         return false
