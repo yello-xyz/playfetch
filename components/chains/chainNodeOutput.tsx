@@ -1,5 +1,5 @@
 import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, TestConfig } from '@/types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
@@ -85,10 +85,12 @@ export default function ChainNodeOutput({
     }
   }
 
-  if (highestRunIndex > runningItemIndex) {
-    setActiveIndex(highestRunIndex + 1)
-    setRunningItemIndex(highestRunIndex)
-  }
+  useEffect(() => {
+    if (highestRunIndex > runningItemIndex) {
+      setActiveIndex(highestRunIndex + 1)
+      setRunningItemIndex(highestRunIndex)
+    }
+  }, [setActiveIndex, highestRunIndex, runningItemIndex])  
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
