@@ -37,13 +37,7 @@ export async function migrateProjects(postMerge: boolean) {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    const labels = JSON.parse(projectData.labels)
-    if (labels.length === 0) {
-      console.log('Adding default labels to', projectData.name)
-      await updateProject({ ...projectData, labels: JSON.stringify(DefaultLabels) }, false)
-    } else {
-      console.log('Not touching labels', labels, 'in', projectData.name)
-    }
+    await updateProject({ ...projectData }, false)
   }
 }
 

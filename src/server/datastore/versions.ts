@@ -1,12 +1,4 @@
-import {
-  ChainItemWithInputs,
-  CodeChainItem,
-  PromptConfig,
-  PromptInputs,
-  Prompts,
-  RawChainVersion,
-  RawPromptVersion,
-} from '@/types'
+import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
 import {
   Entity,
   allocateID,
@@ -37,84 +29,31 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
-import { CreateCodeContextWithInputs, runCodeInContext } from '../codeEngine'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
     return
   }
-  const randomNumberString = () => new Uint32Array(Float64Array.of(Math.random()).buffer)[0].toString()
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  let migrationFailures = 0
-  let migrationSuccess = 0
-  let alreadyMigrated = 0
   for (const versionData of allVersions) {
     if (versionData.items) {
-      const versionID = getID(versionData)
-      const items = versionData.items ? (JSON.parse(versionData.items) as ChainItemWithInputs[]) : null
-      if (items && items.some(item => 'code' in item)) {
-        for (const [index, item] of items.entries()) {
-          if ('code' in item) {
-            const code = item.code
-            const inputs = item.inputs.reduce(
-              (inputs, input) => ({ ...inputs, [input]: randomNumberString() }),
-              {} as PromptInputs
-            )
-            const random = randomNumberString()
-            const before = await runCodeInContext(
-              code.replaceAll('Math.random()', random),
-              CreateCodeContextWithInputs(inputs),
-              false
-            )
-            const codeLines = code.split('\n')
-            const lastLine = codeLines.slice(-1)[0]
-            if (lastLine.startsWith('return ')) {
-              console.log('▶️', versionID, code)
-              alreadyMigrated++
-              continue
-            }
-            let newCode = code
-            if (!lastLine.startsWith('let ') && !lastLine.startsWith('const ')) {
-              const newLastLine = `return ${lastLine}`
-              const newCodeLines = [...codeLines.slice(0, -1), newLastLine]
-              newCode = newCodeLines.join('\n')
-            }
-            const after = await runCodeInContext(
-              newCode.replaceAll('Math.random()', random),
-              CreateCodeContextWithInputs(inputs)
-            )
-            if (before.failed === after.failed && JSON.stringify(before.result) === JSON.stringify(after.result)) {
-              migrationSuccess++
-              console.log('✅', versionID)
-              items[index] = { ...item, code: newCode }
-            } else {
-              migrationFailures++
-              console.log('❌', versionID, code, newCode, before.result, after.result)
-            }
-          }
-        }
-      }
-      if (JSON.stringify(items) !== versionData.items) {
-        console.log('Updating', versionID)
-        await datastore.save(
-          toVersionData(
-            versionData.userID,
-            versionData.parentID,
-            versionData.prompts ? JSON.parse(versionData.prompts) : null,
-            versionData.config ? JSON.parse(versionData.config) : null,
-            items,
-            JSON.parse(versionData.labels),
-            versionData.createdAt,
-            versionData.didRun,
-            versionData.previousVersionID,
-            versionID
-          )
+      await datastore.save(
+        toVersionData(
+          versionData.userID,
+          versionData.parentID,
+          versionData.prompts ? JSON.parse(versionData.prompts) : null,
+          versionData.config ? JSON.parse(versionData.config) : null,
+          versionData.items ? JSON.parse(versionData.items) : null,
+          JSON.parse(versionData.labels),
+          versionData.createdAt,
+          versionData.didRun,
+          versionData.previousVersionID,
+          getID(versionData)
         )
-      }
+      )
     }
   }
-  console.log('Failures:', migrationFailures, ' - Success:', migrationSuccess, ' - Already migrated:', alreadyMigrated)
 }
 
 const IsPromptVersion = (version: { items: ChainItemWithInputs[] | null }) => !version.items
