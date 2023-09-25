@@ -97,20 +97,20 @@ export async function migrateVersions(postMerge: boolean) {
       }
       if (JSON.stringify(items) !== versionData.items) {
         console.log('Updating', versionID)
-        // await datastore.save(
-        //   toVersionData(
-        //     versionData.userID,
-        //     versionData.parentID,
-        //     versionData.prompts ? JSON.parse(versionData.prompts) : null,
-        //     versionData.config ? JSON.parse(versionData.config) : null,
-        //     items,
-        //     JSON.parse(versionData.labels),
-        //     versionData.createdAt,
-        //     versionData.didRun,
-        //     versionData.previousVersionID,
-        //     versionID
-        //   )
-        // )
+        await datastore.save(
+          toVersionData(
+            versionData.userID,
+            versionData.parentID,
+            versionData.prompts ? JSON.parse(versionData.prompts) : null,
+            versionData.config ? JSON.parse(versionData.config) : null,
+            items,
+            JSON.parse(versionData.labels),
+            versionData.createdAt,
+            versionData.didRun,
+            versionData.previousVersionID,
+            versionID
+          )
+        )
       }
     }
   }
