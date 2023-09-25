@@ -17,4 +17,5 @@ export async function runDataMigrations(postMerge: boolean) {
   await migrateProjects(postMerge)
   await migratePrompts(postMerge)
   await migrateChains(postMerge)
+  await migrateVersions(postMerge)
 }
