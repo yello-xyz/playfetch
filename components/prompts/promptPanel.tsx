@@ -3,6 +3,7 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector, {
   FullLabelForModel,
+  IconForProvider,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -17,6 +18,7 @@ import { ReactNode, useEffect } from 'react'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
+import Icon from '../icon'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -119,7 +121,10 @@ export default function PromptPanel({
               {setModifiedVersion ? (
                 <ModelSelector model={config.model} setModel={updateModel} />
               ) : (
-                FullLabelForModel(config.model)
+                <div className='flex items-center gap-1'>
+                  <Icon icon={IconForProvider(ProviderForModel(config.model))} />
+                  {FullLabelForModel(config.model)}
+                </div>
               )}
             </div>
           )}
