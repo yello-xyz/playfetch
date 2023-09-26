@@ -4,6 +4,10 @@ import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
+import Icon from '../icon'
+import { PopupButton } from '../popupButton'
+import { PopupContent, PopupLabelItem } from '../popupMenu'
 
 export const IconForProvider = (provider: ModelProvider) => {
   switch (provider) {
@@ -177,19 +181,42 @@ const sortedModels = allModels.sort((a, b) => FullLabelForModel(a).localeCompare
 export default function ModelSelector({
   model,
   setModel,
-  size = 'md',
 }: {
   model: LanguageModel
   setModel: (model: LanguageModel) => void
-  size?: 'xs' | 'sm' | 'md'
 }) {
+  const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
+
+  const onSetPopup = (location: GlobalPopupLocation) =>
+    setPopup(ModelSelectorPopup, { selectedModel: model, onSelectModel: setModel }, location)
+
   return (
-    <DropdownMenu size={size} value={model} onChange={value => setModel(value as LanguageModel)}>
+    <PopupButton onSetPopup={onSetPopup}>
+      <Icon icon={IconForProvider(ProviderForModel(model))} />
+      <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
+        {FullLabelForModel(model)}
+      </span>
+    </PopupButton>
+  )
+}
+
+type ModelSelectorPopupProps = {
+  selectedModel: LanguageModel
+  onSelectModel: (model: LanguageModel) => void
+}
+
+function ModelSelectorPopup({ selectedModel, onSelectModel, withDismiss }: ModelSelectorPopupProps & WithDismiss) {
+  return (
+    <PopupContent className='w-64 p-3'>
       {sortedModels.map((model, index) => (
-        <option key={index} value={model}>
-          {FullLabelForModel(model)}
-        </option>
+        <PopupLabelItem
+          key={index}
+          label={FullLabelForModel(model)}
+          icon={IconForProvider(ProviderForModel(model))}
+          onClick={withDismiss(() => onSelectModel(model))}
+          checked={model === selectedModel}
+        />
       ))}
-    </DropdownMenu>
+    </PopupContent>
   )
 }

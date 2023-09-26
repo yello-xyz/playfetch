@@ -1,6 +1,7 @@
 import { StaticImageData } from 'next/image'
 import { ReactNode, RefObject, useEffect, useRef } from 'react'
 import Icon from './icon'
+import checkIcon from '@/public/check.svg'
 
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds))
 
@@ -54,15 +55,18 @@ export function PopupLabelItem({
   label,
   icon,
   onClick,
+  checked,
 }: {
   label: string
   icon?: StaticImageData
   onClick: () => void
+  checked?: boolean
 }) {
   return (
     <PopupItem className='flex items-center gap-1 p-1' onClick={onClick}>
       {icon && <Icon icon={icon} />}
       {label}
+      {checked && <Icon className='ml-auto' icon={checkIcon} />}
     </PopupItem>
   )
 }
