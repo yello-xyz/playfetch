@@ -181,9 +181,11 @@ const sortedModels = allModels.sort((a, b) => FullLabelForModel(a).localeCompare
 export default function ModelSelector({
   model,
   setModel,
+  popUpAbove,
 }: {
   model: LanguageModel
   setModel: (model: LanguageModel) => void
+  popUpAbove?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
 
@@ -191,7 +193,7 @@ export default function ModelSelector({
     setPopup(ModelSelectorPopup, { selectedModel: model, onSelectModel: setModel }, location)
 
   return (
-    <PopupButton onSetPopup={onSetPopup}>
+    <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup}>
       <Icon icon={IconForProvider(ProviderForModel(model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
         {FullLabelForModel(model)}

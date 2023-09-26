@@ -141,7 +141,9 @@ export default function RunButtons({
   const [allInputs] = selectInputs({ mode: 'all' })
   return (
     <div className='flex items-center self-end gap-3'>
-      {languageModel && setLanguageModel && <ModelSelector model={languageModel} setModel={setLanguageModel} />}
+      {languageModel && setLanguageModel && (
+        <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
+      )}
       {showTestMode && (
         <DropdownMenu
           disabled={allInputs.length <= 1}

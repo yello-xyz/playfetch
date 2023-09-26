@@ -117,7 +117,7 @@ export default function PromptPanel({
           {!runPrompt && (
             <div className='flex justify-end flex-1 text-gray-600'>
               {setModifiedVersion ? (
-                <ModelSelector size='xs' model={config.model} setModel={updateModel} />
+                <ModelSelector model={config.model} setModel={updateModel} />
               ) : (
                 FullLabelForModel(config.model)
               )}
