@@ -197,12 +197,18 @@ export const DescriptionForModel = (model: LanguageModel) => {
 export const MaxTokensForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
+      return 4097
     case 'gpt-4':
-    case 'claude-instant-1':
-    case 'claude-2':
-    case 'text-bison@001':
-    case 'command':
       return 8192
+    case 'claude-instant-1':
+      return 100000
+    case 'claude-2':
+      return 100000
+    case 'text-bison@001':
+      // TODO should we separate max input tokens vs max output tokens? (8192 vs 1024)
+      return 8192
+    case 'command':
+      return 4096
   }
 }
 
