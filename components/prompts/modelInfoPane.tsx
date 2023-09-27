@@ -1,4 +1,4 @@
-import { LanguageModel } from '@/types'
+import { LanguageModel, ModelProvider } from '@/types'
 import { PopupContent } from '../popupMenu'
 import {
   DescriptionForModel,
@@ -18,6 +18,15 @@ import Link from 'next/link'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { ProviderWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
+
+const priceSuffixForProvider = (provider: ModelProvider) => {
+  switch (PriceUnitForProvider(provider)) {
+    case 'perMillionTokens':
+      return '/ 1M tokens'
+    case 'perMillionCharacters':
+      return '/ 1M characters'
+  }
+}
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
   const checkProvider = useCheckProvider()
@@ -48,13 +57,13 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
             <HorizontalBorder />
             <span className='font-medium'>Input Pricing</span>
             <span>
-              {FormatCost(InputPriceForModel(model))} {PriceUnitForProvider(provider)}
+              {FormatCost(InputPriceForModel(model))} {priceSuffixForProvider(provider)}
             </span>
             <HorizontalBorder />
             <HorizontalBorder />
             <span className='font-medium'>Output Pricing</span>
             <span>
-              {FormatCost(OutputPriceForModel(model))} {PriceUnitForProvider(provider)}
+              {FormatCost(OutputPriceForModel(model))} {priceSuffixForProvider(provider)}
             </span>
           </>
         )}

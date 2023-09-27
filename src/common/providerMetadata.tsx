@@ -238,13 +238,15 @@ export const OutputPriceForModel = (model: LanguageModel) => {
   }
 }
 
-export const PriceUnitForProvider = (provider: ModelProvider) => {
+type PriceUnit = 'perMillionTokens' | 'perMillionCharacters'
+
+export const PriceUnitForProvider: (provider: ModelProvider) => PriceUnit = (provider: ModelProvider) => {
   switch (provider) {
     case 'openai':
     case 'cohere':
     case 'google':
-      return '/ 1M tokens'
+      return 'perMillionTokens'
     case 'anthropic':
-      return '/ 1M characters'
+      return 'perMillionCharacters'
   }
 }
