@@ -1,5 +1,4 @@
 import { LanguageModel, ModelProvider, Prompts } from '@/types'
-import DropdownMenu from '../dropdownMenu'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
@@ -8,6 +7,8 @@ import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/c
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
+import useCheckProvider from '@/src/client/hooks/useCheckProvider'
+import ModelInfoPane from './modelInfoPane'
 
 export const IconForProvider = (provider: ModelProvider) => {
   switch (provider) {
@@ -161,11 +162,13 @@ const shortLabelForModel = (model: LanguageModel) => {
   }
 }
 
-export const LabelForModel = (model: LanguageModel) =>
-  `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model)}`
+export const LabelForModel = (model: LanguageModel, includeProvider = true) =>
+  includeProvider
+    ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model)}`
+    : shortLabelForModel(model)
 
-export const FullLabelForModel = (model: LanguageModel) =>
-  `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}`
+export const FullLabelForModel = (model: LanguageModel, includeProvider = true) =>
+  includeProvider ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}` : labelForModel(model)
 
 const allModels: LanguageModel[] = [
   'gpt-4',
@@ -188,15 +191,16 @@ export default function ModelSelector({
   popUpAbove?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
+  const checkProvider = useCheckProvider()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(ModelSelectorPopup, { selectedModel: model, onSelectModel: setModel }, location)
+    setPopup(ModelSelectorPopup, { selectedModel: model, onSelectModel: setModel, checkProvider }, location)
 
   return (
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup}>
       <Icon icon={IconForProvider(ProviderForModel(model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {FullLabelForModel(model)}
+        {LabelForModel(model)}
       </span>
     </PopupButton>
   )
@@ -205,19 +209,31 @@ export default function ModelSelector({
 type ModelSelectorPopupProps = {
   selectedModel: LanguageModel
   onSelectModel: (model: LanguageModel) => void
+  checkProvider: (provider: ModelProvider) => boolean
 }
 
-function ModelSelectorPopup({ selectedModel, onSelectModel, withDismiss }: ModelSelectorPopupProps & WithDismiss) {
+function ModelSelectorPopup({
+  selectedModel,
+  onSelectModel,
+  checkProvider,
+  withDismiss,
+}: ModelSelectorPopupProps & WithDismiss) {
   return (
-    <PopupContent className='w-64 p-3'>
+    <PopupContent className='relative p-3 w-52' autoOverflow={false}>
       {sortedModels.map((model, index) => (
-        <PopupLabelItem
-          key={index}
-          label={FullLabelForModel(model)}
-          icon={IconForProvider(ProviderForModel(model))}
-          onClick={withDismiss(() => onSelectModel(model))}
-          checked={model === selectedModel}
-        />
+        <div className='group'>
+          <PopupLabelItem
+            key={index}
+            label={FullLabelForModel(model, false)}
+            icon={IconForProvider(ProviderForModel(model))}
+            onClick={withDismiss(() => onSelectModel(model))}
+            disabled={!checkProvider(ProviderForModel(model))}
+            checked={model === selectedModel}
+          />
+          <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
+            <ModelInfoPane model={model} />
+          </div>
+        </div>
       ))}
     </PopupContent>
   )

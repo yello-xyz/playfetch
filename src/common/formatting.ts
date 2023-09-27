@@ -59,6 +59,8 @@ export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
   return 'just now'
 }
 
+export const FormatLargeInteger = (value: number) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+
 export const FormatCost = (cost: number) =>
   cost ? `${cost < 0.005 ? '<' : ''}$${Math.max(cost, 0.01).toFixed(2)}` : '$0.00'
 

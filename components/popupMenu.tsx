@@ -43,12 +43,18 @@ export default function PopupMenu({
   ) : null
 }
 
-export function PopupContent({ children, className }: { children: any; className?: string }) {
-  return (
-    <div className={`${className} bg-white border border-gray-200 rounded-lg select-none max-h-screen overflow-y-auto`}>
-      {children}
-    </div>
-  )
+export function PopupContent({
+  children,
+  className,
+  autoOverflow = true,
+}: {
+  children: any
+  className?: string
+  autoOverflow?: boolean
+}) {
+  const baseClass = 'bg-white border border-gray-200 rounded-lg select-none'
+  const overflowClass = autoOverflow ? 'max-h-screen overflow-y-auto' : ''
+  return <div className={`${baseClass} ${overflowClass} ${className}`}>{children}</div>
 }
 
 export function PopupLabelItem({
@@ -56,14 +62,17 @@ export function PopupLabelItem({
   icon,
   onClick,
   checked,
+  disabled,
 }: {
   label: string
   icon?: StaticImageData
   onClick: () => void
+  disabled?: boolean
   checked?: boolean
 }) {
+  const disabledClass = disabled ? 'opacity-50' : ''
   return (
-    <PopupItem className='flex items-center gap-1 p-1' onClick={onClick}>
+    <PopupItem className={`flex items-center gap-1 p-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
       {icon && <Icon icon={icon} />}
       {label}
       {checked && <Icon className='ml-auto' icon={checkIcon} />}
@@ -76,7 +85,7 @@ export function PopupItem({
   className = '',
   children,
 }: {
-  onClick: () => void
+  onClick?: () => void
   className?: string
   children: ReactNode
 }) {

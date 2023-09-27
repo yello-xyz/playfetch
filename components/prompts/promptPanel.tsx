@@ -166,13 +166,13 @@ const Warning = ({ children }: { children: ReactNode }) => (
   <Banner className='border-pink-50 bg-pink-25'>{children}</Banner>
 )
 
-function ProviderWarning() {
+export function ProviderWarning({ includeTitle = true }: {includeTitle? :boolean }) {
   const router = useRouter()
 
   return (
     <ButtonBanner type='warning' buttonTitle='Add API Key' onClick={() => router.push(ClientRoute.Settings)}>
-      <span className='font-medium text-gray-600'>Missing API Key</span>
-      <span>An API key is required to use certain models.</span>
+      {includeTitle && <span className='font-medium text-gray-600'>Missing API Key</span>}
+      <span>An API key is required to use this model.</span>
     </ButtonBanner>
   )
 }
