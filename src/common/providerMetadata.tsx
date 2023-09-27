@@ -219,8 +219,9 @@ export const InputPriceForModel = (model: LanguageModel) => {
     case 'gpt-4':
       return 30
     case 'claude-instant-1':
+      return 1.63
     case 'claude-2':
-      return 4.6
+      return 11.02
     case 'command':
       return 15
     case 'text-bison@001':
@@ -235,24 +236,12 @@ export const OutputPriceForModel = (model: LanguageModel) => {
     case 'gpt-4':
       return 60
     case 'claude-instant-1':
+      return 5.51
     case 'claude-2':
-      return 13.8
+      return 32.68
     case 'command':
       return 15
     case 'text-bison@001':
       return 0
-  }
-}
-
-type PriceUnit = 'perMillionTokens' | 'perMillionCharacters'
-
-export const PriceUnitForProvider: (provider: ModelProvider) => PriceUnit = (provider: ModelProvider) => {
-  switch (provider) {
-    case 'openai':
-    case 'cohere':
-    case 'google':
-      return 'perMillionTokens'
-    case 'anthropic':
-      return 'perMillionCharacters'
   }
 }

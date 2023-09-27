@@ -8,7 +8,6 @@ import {
   LabelForProvider,
   MaxTokensForModel,
   OutputPriceForModel,
-  PriceUnitForProvider,
   ProviderForModel,
   WebsiteLinkForModel,
 } from '@/src/common/providerMetadata'
@@ -18,15 +17,6 @@ import Link from 'next/link'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { ProviderWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
-
-const priceSuffixForProvider = (provider: ModelProvider) => {
-  switch (PriceUnitForProvider(provider)) {
-    case 'perMillionTokens':
-      return '/ 1M tokens'
-    case 'perMillionCharacters':
-      return '/ 1M characters'
-  }
-}
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
   const checkProvider = useCheckProvider()
@@ -57,13 +47,13 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
             <HorizontalBorder />
             <span className='font-medium'>Input Pricing</span>
             <span>
-              {FormatCost(InputPriceForModel(model))} {priceSuffixForProvider(provider)}
+              {FormatCost(InputPriceForModel(model))} / 1M tokens
             </span>
             <HorizontalBorder />
             <HorizontalBorder />
             <span className='font-medium'>Output Pricing</span>
             <span>
-              {FormatCost(OutputPriceForModel(model))} {priceSuffixForProvider(provider)}
+              {FormatCost(OutputPriceForModel(model))} / 1M tokens
             </span>
           </>
         )}
