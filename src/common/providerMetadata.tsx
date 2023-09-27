@@ -173,12 +173,17 @@ export const FullLabelForModel = (model: LanguageModel, includeProvider = true) 
 export const WebsiteLinkForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
+      return 'https://platform.openai.com/docs/models/gpt-3-5'
     case 'gpt-4':
-    case 'claude-instant-1':
-    case 'claude-2':
-    case 'text-bison@001':
-    case 'command':
       return 'https://platform.openai.com/docs/models/gpt-4'
+    case 'claude-instant-1':
+      return 'https://docs.anthropic.com/claude/reference/selecting-a-model'
+    case 'claude-2':
+      return 'https://docs.anthropic.com/claude/reference/selecting-a-model'
+    case 'text-bison@001':
+      return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text'
+    case 'command':
+      return 'https://docs.cohere.com/docs/models'
   }
 }
 
