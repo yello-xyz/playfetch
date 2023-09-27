@@ -185,12 +185,17 @@ export const WebsiteLinkForModel = (model: LanguageModel) => {
 export const DescriptionForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
+      return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks.'
     case 'gpt-4':
+      return 'GPT-4 from OpenAI has broad general knowledge and domain expertise allowing it to follow complex instructions in natural language and solve difficult problems accurately.'
     case 'claude-instant-1':
+      return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension.'
     case 'claude-2':
+      return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction. It is good for complex reasoning, creativity, thoughtful dialogue, coding,and detailed content creation.'
     case 'text-bison@001':
+      return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation.'
     case 'command':
-      return 'More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.'
+      return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
   }
 }
 
