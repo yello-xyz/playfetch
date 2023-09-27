@@ -1,8 +1,8 @@
 import aiplatform from '@google-cloud/aiplatform'
-import { getProjectID } from '../datastore/datastore'
 import { GoogleLanguageModel } from '@/types'
 import { Predictor, PromptContext } from '../promptEngine'
 import { CostForModel } from './costCalculation'
+import { getProjectID } from '../storage'
 
 const { PredictionServiceClient } = aiplatform.v1
 
