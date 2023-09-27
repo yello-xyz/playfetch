@@ -1,7 +1,8 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import ModelSelector, {
+import ModelSelector from './modelSelector'
+import {
   FullLabelForModel,
   IconForProvider,
   LabelForPromptKey,
@@ -9,7 +10,7 @@ import ModelSelector, {
   PromptKeyNeedsPreformatted,
   ProviderForModel,
   SupportedPromptKeysForModel,
-} from './modelSelector'
+} from '@/src/common/providerMetadata'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -166,7 +167,7 @@ const Warning = ({ children }: { children: ReactNode }) => (
   <Banner className='border-pink-50 bg-pink-25'>{children}</Banner>
 )
 
-export function ProviderWarning({ includeTitle = true }: {includeTitle? :boolean }) {
+export function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
   const router = useRouter()
 
   return (

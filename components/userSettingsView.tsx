@@ -1,7 +1,7 @@
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import Label from './label'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AllProviders, IconForProvider, LabelForProvider } from './prompts/modelSelector'
+import { AllProviders, IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
 import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
 import PickNameDialog from './pickNameDialog'
@@ -15,7 +15,7 @@ import TextInput from './textInput'
 export default function UserSettingsView() {
   const user = useLoggedInUser()
 
-  const allProviders = AllProviders.filter(provider => provider !== DefaultProvider)
+  const allProviders = AllProviders().filter(provider => provider !== DefaultProvider)
   const [availableProviders, setAvailableProviders] = useState(user.availableProviders)
 
   const refresh = () => api.getAvailableProviders().then(setAvailableProviders)

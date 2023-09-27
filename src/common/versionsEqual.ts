@@ -1,4 +1,4 @@
-import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/components/prompts/modelSelector'
+import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
 
 const normalizeItems = (items: ChainItemWithInputs[]) =>

@@ -1,7 +1,7 @@
 import { CodeChainItem, PromptChainItem } from '@/types'
 import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { LabelForModel } from '../prompts/modelSelector'
+import { LabelForModel } from '@/src/common/providerMetadata'
 import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { TaggedVersionPrompt } from '../versions/versionComparison'
