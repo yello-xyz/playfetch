@@ -1,9 +1,7 @@
 import { AnthropicLanguageModel } from '@/types'
 import Anthropic from '@anthropic-ai/sdk'
 import { Predictor, PromptContext } from '../promptEngine'
-
-const calculateCost = (prompt: string, result: string) =>
-  (prompt.length * 4.6) / 1000000 + (result.length * 13.8) / 1000000
+import { CostForModel } from './costCalculation'
 
 export default function predict(apiKey: string, model: AnthropicLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
@@ -40,7 +38,7 @@ async function complete(
       streamChunks?.(text)
     }
 
-    const cost = calculateCost(formattedPrompt, output)
+    const cost = CostForModel(model, formattedPrompt, output)
     context.running = `${runningContext}${formattedPrompt}${output}`
 
     return { output, cost }

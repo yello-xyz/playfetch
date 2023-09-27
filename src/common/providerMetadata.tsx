@@ -206,17 +206,6 @@ export const MaxTokensForModel = (model: LanguageModel) => {
   }
 }
 
-export const PriceUnitForProvider = (provider: ModelProvider) => {
-  switch (provider) {
-    case 'openai':
-    case 'google':
-    case 'cohere':
-      return '/ 1M tokens'
-    case 'anthropic':
-      return '/ 1M characters'
-  }
-}
-
 export const InputPriceForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
@@ -226,10 +215,10 @@ export const InputPriceForModel = (model: LanguageModel) => {
     case 'claude-instant-1':
     case 'claude-2':
       return 4.6
-    case 'text-bison@001':
-      return 0
     case 'command':
       return 15
+    case 'text-bison@001':
+      return 0
   }
 }
 
@@ -242,9 +231,20 @@ export const OutputPriceForModel = (model: LanguageModel) => {
     case 'claude-instant-1':
     case 'claude-2':
       return 13.8
-    case 'text-bison@001':
-      return 0
     case 'command':
       return 15
+    case 'text-bison@001':
+      return 0
+  }
+}
+
+export const PriceUnitForProvider = (provider: ModelProvider) => {
+  switch (provider) {
+    case 'openai':
+    case 'cohere':
+    case 'google':
+      return '/ 1M tokens'
+    case 'anthropic':
+      return '/ 1M characters'
   }
 }

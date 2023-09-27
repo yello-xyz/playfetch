@@ -1,13 +1,7 @@
 import { CohereLanguageModel } from '@/types'
 import cohere from 'cohere-ai'
-import { encode } from 'gpt-3-encoder'
 import { Predictor, PromptContext } from '../promptEngine'
-
-const calculateCost = (input: string, output: string) => {
-  const inputTokens = encode(input).length
-  const outputTokens = encode(output).length
-  return ((inputTokens + outputTokens) * 15) / 1000000
-}
+import { CostForModel } from './costCalculation'
 
 export default function predict(apiKey: string, model: CohereLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
@@ -34,12 +28,12 @@ async function complete(
       max_tokens: maxTokens,
     })
 
-    const output = response.body?.generations?.[0]?.text ?? undefined
+    const output = response.body?.generations?.[0]?.text ?? ''
     if (output && streamChunks) {
       streamChunks(output)
     }
 
-    const cost = calculateCost(prompt, output)
+    const cost = CostForModel(model, prompt, output)
     context.running = `${runningContext}${prompt}\n${output}\n`
 
     return { output, cost }
