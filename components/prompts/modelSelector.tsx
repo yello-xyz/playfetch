@@ -221,9 +221,8 @@ function ModelSelectorPopup({
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
       {sortedModels.map((model, index) => (
-        <div className='group'>
+        <div key={index} className='group'>
           <PopupLabelItem
-            key={index}
             label={FullLabelForModel(model, false)}
             icon={IconForProvider(ProviderForModel(model))}
             onClick={withDismiss(() => onSelectModel(model))}
