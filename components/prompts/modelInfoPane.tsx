@@ -46,15 +46,11 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
             <HorizontalBorder />
             <HorizontalBorder />
             <span className='font-medium'>Input Pricing</span>
-            <span>
-              {FormatCost(InputPriceForModel(model))} / 1M tokens
-            </span>
+            <span>{FormatCost(InputPriceForModel(model))} / 1M tokens</span>
             <HorizontalBorder />
             <HorizontalBorder />
             <span className='font-medium'>Output Pricing</span>
-            <span>
-              {FormatCost(OutputPriceForModel(model))} / 1M tokens
-            </span>
+            <span>{FormatCost(OutputPriceForModel(model))} / 1M tokens</span>
           </>
         )}
       </div>

@@ -90,7 +90,7 @@ export default function ChainNodeOutput({
       setActiveIndex(highestRunIndex + 1)
       setRunningItemIndex(highestRunIndex)
     }
-  }, [setActiveIndex, highestRunIndex, runningItemIndex])  
+  }, [setActiveIndex, highestRunIndex, runningItemIndex])
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)

@@ -12,10 +12,14 @@ import Icon from './icon'
 import Button from './button'
 import TextInput from './textInput'
 
+const labelFor = (provider: ModelProvider) => LabelForProvider(provider)
+
 export default function UserSettingsView() {
   const user = useLoggedInUser()
 
-  const allProviders = AllProviders().filter(provider => provider !== DefaultProvider)
+  const allProviders = AllProviders.sort((a, b) => labelFor(a).localeCompare(labelFor(b))).filter(
+    provider => provider !== DefaultProvider
+  )
   const [availableProviders, setAvailableProviders] = useState(user.availableProviders)
 
   const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
@@ -66,7 +70,7 @@ function ProviderRow({
   availableProvider?: AvailableProvider
   onRefresh: () => void
 }) {
-  const label = LabelForProvider(provider)
+  const label = labelFor(provider)
 
   const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
 

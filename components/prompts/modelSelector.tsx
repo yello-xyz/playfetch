@@ -50,12 +50,13 @@ function ModelSelectorPopup({
   checkProvider,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
+  const labelFor = (model: LanguageModel) => FullLabelForModel(model, false)
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      {AllModels().map((model, index) => (
+      {AllModels.sort((a, b) => labelFor(a).localeCompare(labelFor(b))).map((model, index) => (
         <div key={index} className='group'>
           <PopupLabelItem
-            label={FullLabelForModel(model, false)}
+            label={labelFor(model)}
             icon={IconForProvider(ProviderForModel(model))}
             onClick={withDismiss(() => onSelectModel(model))}
             disabled={!checkProvider(ProviderForModel(model))}
