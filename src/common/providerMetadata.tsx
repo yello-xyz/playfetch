@@ -4,13 +4,15 @@ import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 
-export const AllProviders = () => (['openai', 'anthropic', 'google', 'cohere'] as ModelProvider[]).sort((a, b) =>
-  LabelForProvider(a).localeCompare(LabelForProvider(b))
-)
+export const AllProviders = () =>
+  (['openai', 'anthropic', 'google', 'cohere'] as ModelProvider[]).sort((a, b) =>
+    LabelForProvider(a).localeCompare(LabelForProvider(b))
+  )
 
-export const AllModels = () => (
-  ['gpt-4', 'gpt-3.5-turbo', 'claude-instant-1', 'claude-2', 'text-bison@001', 'command'] as LanguageModel[]
-).sort((a, b) => FullLabelForModel(a).localeCompare(FullLabelForModel(b)))
+export const AllModels = () =>
+  (['gpt-4', 'gpt-3.5-turbo', 'claude-instant-1', 'claude-2', 'text-bison@001', 'command'] as LanguageModel[]).sort(
+    (a, b) => FullLabelForModel(a).localeCompare(FullLabelForModel(b))
+  )
 
 export const IconForProvider = (provider: ModelProvider) => {
   switch (provider) {
@@ -204,26 +206,45 @@ export const MaxTokensForModel = (model: LanguageModel) => {
   }
 }
 
+export const PriceUnitForProvider = (provider: ModelProvider) => {
+  switch (provider) {
+    case 'openai':
+    case 'google':
+    case 'cohere':
+      return '/ 1M tokens'
+    case 'anthropic':
+      return '/ 1M characters'
+  }
+}
+
 export const InputPriceForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
+      return 1.5
     case 'gpt-4':
+      return 30
     case 'claude-instant-1':
     case 'claude-2':
+      return 4.6
     case 'text-bison@001':
+      return 0
     case 'command':
-      return 0.03
+      return 15
   }
 }
 
 export const OutputPriceForModel = (model: LanguageModel) => {
   switch (model) {
     case 'gpt-3.5-turbo':
+      return 2
     case 'gpt-4':
+      return 60
     case 'claude-instant-1':
     case 'claude-2':
+      return 13.8
     case 'text-bison@001':
+      return 0
     case 'command':
-      return 0.06
+      return 15
   }
 }

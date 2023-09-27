@@ -8,6 +8,7 @@ import {
   LabelForProvider,
   MaxTokensForModel,
   OutputPriceForModel,
+  PriceUnitForProvider,
   ProviderForModel,
   WebsiteLinkForModel,
 } from '@/src/common/providerMetadata'
@@ -41,14 +42,22 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
       <div className='grid grid-cols-[140px_180px] text-gray-500 gap-y-0.5 pb-1'>
         <span className='font-medium'>Context</span>
         <span>{FormatLargeInteger(MaxTokensForModel(model))} tokens</span>
-        <HorizontalBorder />
-        <HorizontalBorder />
-        <span className='font-medium'>Input Pricing</span>
-        <span>{FormatCost(InputPriceForModel(model))} / 1K tokens</span>
-        <HorizontalBorder />
-        <HorizontalBorder />
-        <span className='font-medium'>Output Pricing</span>
-        <span>{FormatCost(OutputPriceForModel(model))} / 1K tokens</span>
+        {(InputPriceForModel(model) > 0 || OutputPriceForModel(model) > 0) && (
+          <>
+            <HorizontalBorder />
+            <HorizontalBorder />
+            <span className='font-medium'>Input Pricing</span>
+            <span>
+              {FormatCost(InputPriceForModel(model))} {PriceUnitForProvider(provider)}
+            </span>
+            <HorizontalBorder />
+            <HorizontalBorder />
+            <span className='font-medium'>Output Pricing</span>
+            <span>
+              {FormatCost(OutputPriceForModel(model))} {PriceUnitForProvider(provider)}
+            </span>
+          </>
+        )}
       </div>
       {!isProviderAvailable && <ProviderWarning includeTitle={false} />}
     </PopupContent>
