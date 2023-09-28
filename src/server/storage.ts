@@ -21,17 +21,12 @@ const getFile = (fileName: string) => {
 }
 
 export async function uploadImageURLToStorage(fileName: string, imageURL: string): Promise<string> {
-  const projectID = await getStorage().getProjectId()
+  const projectID = await getProjectID()
   const file = getFile(fileName)
   const outputStream = file.createWriteStream({ userProject: projectID, resumable: false })
   const inputStream = await new Promise<Readable>(resolve => https.get(imageURL, response => resolve(response)))
   inputStream.pipe(outputStream)
   return new Promise<string>(resolve =>
-    outputStream
-      .on('finish', () => resolve(getFile(file.name).publicUrl()))
-      .on('error', err => {
-        console.error(err.message)
-        resolve(imageURL)
-      })
+    outputStream.on('finish', () => resolve(getFile(file.name).publicUrl())).on('error', () => resolve(imageURL))
   )
 }
