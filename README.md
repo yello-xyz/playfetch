@@ -43,9 +43,13 @@ Or just **Open with GitHub Desktop** and clone to a local directory (recommended
 
 In order to run the app locally, you will need to add some additional variables to your local `.env.local` file (this file is ignored by source control to avoid leaking keys). For most of these you should avoid using the same values as used in the production environment (e.g. generate your own API free keys so you don't risk messing up analytics or rate limits while testing locally):
 
+`API_URL=http://localhost:3000`
+
+`GCLOUD_STORAGE_BUCKET=playfetch-dev.appspot.com`
+
 `NEXTAUTH_URL=http://localhost:3000`
 
-`NEXTAUTH_SECRET=` *[random string of at least 32 characters]*
+`NEXTAUTH_SECRET=` *[random string of at least 32 characters](https://1password.com/password-generator/)*
 
 `GOOGLE_ANALYTICS_API_SECRET=` *[see "Google Analytics API" in in the 1Password Engineering vault]*
 

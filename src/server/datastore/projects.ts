@@ -90,25 +90,21 @@ export async function getProjectUsers(projectID: number): Promise<User[]> {
   return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
-async function loadEndpoints(projectID: number, apiKeyDev: string, buildEndpointURL: (path: string) => string) {
+async function loadEndpoints(projectID: number, apiKeyDev: string) {
   const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'projectID', projectID)
   const usages = await getEntities(Entity.USAGE, 'projectID', projectID)
 
   return endpoints
     .map(endpoint => ({
       ...toEndpoint(endpoint),
-      url: buildEndpointURL(`/${projectID}/${endpoint.urlPath}`),
+      url: `${process.env.API_URL}/${projectID}/${endpoint.urlPath}`,
       apiKeyDev,
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     }))
     .reverse()
 }
 
-export async function getActiveProject(
-  userID: number,
-  projectID: number,
-  buildEndpointURL: (path: string) => string
-): Promise<ActiveProject> {
+export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
   const prompts = promptData.map(toPrompt)
@@ -119,7 +115,7 @@ export async function getActiveProject(
   return {
     ...toProject(projectData, userID),
     availableFlavors: JSON.parse(projectData.flavors),
-    endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? '', buildEndpointURL),
+    endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? ''),
     prompts,
     chains,
     users,

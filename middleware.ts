@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { GetSecureURL, IsLocalHost, IsSecure } from './src/server/routing'
+
+type GetHeader = (key: string) => string | null
+
+const HTTTPS = 'https'
+const GetHost = (getHeader: GetHeader) => getHeader('host') ?? ''
+const GetSecureHeader = (getHeader: GetHeader) => getHeader('x-forwarded-proto')?.split(',')?.[0] ?? ''
+
+const IsLocalHost = (getHeader: GetHeader) => GetHost(getHeader).includes('localhost')
+const IsSecure = (getHeader: GetHeader) => GetSecureHeader(getHeader) === HTTTPS
+const GetSecureURL = (getHeader: GetHeader) => new URL(`${HTTTPS}://${GetHost(getHeader)}`)
 
 export function middleware(request: NextRequest) {
   const headers = new Headers(request.headers)

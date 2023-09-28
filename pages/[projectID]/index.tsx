@@ -31,8 +31,8 @@ const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
 const CompareView = dynamic(() => import('@/components/compare/compareView'))
 
-export const getServerSideProps = withLoggedInSession(async ({ user, req, query }) => ({
-  props: await loadActiveItem(user, query, req.headers),
+export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
+  props: await loadActiveItem(user, query),
 }))
 
 export default function Home({

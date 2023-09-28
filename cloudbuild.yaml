@@ -12,6 +12,7 @@ steps:
     entrypoint: npm
     args: ['run', 'create-env']
     env:
+      - 'API_URL=${_API_URL}'
       - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
       - 'GOOGLE_CLIENT_SECRET=${_GOOGLE_CLIENT_SECRET}'
       - 'GITHUB_CLIENT_ID=${_GITHUB_CLIENT_ID}'
