@@ -6,11 +6,13 @@ import { useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
+import SegmentedControl, { Segment } from '../segmentedControl'
 
 export default function CompareView({ project }: { project: ActiveProject }) {
   const router = useRouter()
   const { i: itemID, v: versionID, p: previousVersionID } = ParseNumberQuery(router.query)
 
+  const [isDiffMode, setDiffMode] = useState(false)
   const [rightItemID, setRightItemID] = useState(itemID)
   const [rightVersionID, setRightVersionID] = useState(versionID)
   const [leftItemID, setLeftItemID] = useState(itemID)
@@ -42,33 +44,41 @@ export default function CompareView({ project }: { project: ActiveProject }) {
 
   const minWidth = 300
   return ItemsInProject(project).length > 0 ? (
-    <Allotment>
-      <Allotment.Pane minSize={minWidth}>
-        <ComparePane
-          project={project}
-          itemID={leftItemID}
-          setItemID={setLeftItemID}
-          versionID={leftVersionID}
-          setVersionID={setLeftVersionID}
-          activePromptTab={activePromptTab}
-          setActivePromptTab={setActivePromptTab}
-          itemCache={itemCache}
-          disabled={!leftItemID}
-        />
-      </Allotment.Pane>
-      <Allotment.Pane minSize={minWidth}>
-        <ComparePane
-          project={project}
-          itemID={rightItemID}
-          setItemID={updateRightItemID}
-          versionID={rightVersionID}
-          setVersionID={updateRightVersionID}
-          activePromptTab={activePromptTab}
-          setActivePromptTab={setActivePromptTab}
-          itemCache={itemCache}
-        />
-      </Allotment.Pane>
-    </Allotment>
+    <>
+      <Allotment>
+        <Allotment.Pane minSize={minWidth}>
+          <ComparePane
+            project={project}
+            itemID={leftItemID}
+            setItemID={setLeftItemID}
+            versionID={leftVersionID}
+            setVersionID={setLeftVersionID}
+            activePromptTab={activePromptTab}
+            setActivePromptTab={setActivePromptTab}
+            itemCache={itemCache}
+            disabled={!leftItemID}
+          />
+        </Allotment.Pane>
+        <Allotment.Pane minSize={minWidth}>
+          <ComparePane
+            project={project}
+            itemID={rightItemID}
+            setItemID={updateRightItemID}
+            versionID={rightVersionID}
+            setVersionID={updateRightVersionID}
+            activePromptTab={activePromptTab}
+            setActivePromptTab={setActivePromptTab}
+            itemCache={itemCache}
+          />
+        </Allotment.Pane>
+      </Allotment>
+      {leftVersionID && rightVersionID && (
+        <SegmentedControl className='absolute z-30 bottom-4 right-4' selected={isDiffMode} callback={setDiffMode}>
+          <Segment title='Diff' value={true} />
+          <Segment title='Responses' value={false} />
+        </SegmentedControl>
+      )}
+    </>
   ) : (
     <EmptyCompareView />
   )
