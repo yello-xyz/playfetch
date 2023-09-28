@@ -16,6 +16,7 @@ export default function ComparePane({
   setActivePromptTab,
   itemCache,
   disabled,
+  includeResponses,
 }: {
   project: ActiveProject
   itemID?: number
@@ -26,6 +27,7 @@ export default function ComparePane({
   setActivePromptTab: (tab: PromptTab) => void
   itemCache: ActiveItemCache
   disabled?: boolean
+  includeResponses?: boolean
 }) {
   const activeItem = itemID ? itemCache.itemForID(itemID) : undefined
   const activeVersion =
@@ -64,7 +66,7 @@ export default function ComparePane({
           />
         </div>
       )}
-      {activeVersion && (
+      {activeVersion && includeResponses && (
         <div className='overflow-y-auto'>
           <RunTimeline runs={activeVersion.runs} activeItem={activeItem} version={activeVersion} skipHeader />
         </div>

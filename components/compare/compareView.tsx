@@ -57,6 +57,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
             setActivePromptTab={setActivePromptTab}
             itemCache={itemCache}
             disabled={!leftItemID}
+            includeResponses={!isDiffMode}
           />
         </Allotment.Pane>
         <Allotment.Pane minSize={minWidth}>
@@ -69,6 +70,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
             activePromptTab={activePromptTab}
             setActivePromptTab={setActivePromptTab}
             itemCache={itemCache}
+            includeResponses={!isDiffMode}
           />
         </Allotment.Pane>
       </Allotment>
