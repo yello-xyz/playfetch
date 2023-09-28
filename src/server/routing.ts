@@ -21,5 +21,5 @@ function buildURLForClientRoute(clientRoute: string, headers: IncomingHttpHeader
   return `${protocol}://${host}${clientRoute}`
 }
 
-export const urlBuilderFromHeaders = (headers: IncomingHttpHeaders) => (path: string) =>
+export const buildEndpointURL = (headers: IncomingHttpHeaders) => (path: string) =>
   buildURLForClientRoute(path, headers)
