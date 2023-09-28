@@ -13,4 +13,6 @@ import { migrateUsers } from './users'
 import { migrateVersions } from './versions'
 import { migrateWorkspaces } from './workspaces'
 
-export async function runDataMigrations(postMerge: boolean) {}
+export async function runDataMigrations(postMerge: boolean) {
+  await migrateVersions(postMerge)
+}
