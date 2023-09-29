@@ -11,6 +11,7 @@ import {
   ActiveChain,
   PromptVersion,
   ChainVersion,
+  Usage,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -44,10 +45,12 @@ const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSet
 export default function EndpointsView({
   project,
   logEntries = [],
+  analytics = [],
   onRefresh,
 }: {
   project: ActiveProject
   logEntries?: LogEntry[]
+  analytics?: Usage[]
   onRefresh: () => Promise<void>
 }) {
   const router = useRouter()
@@ -165,6 +168,7 @@ export default function EndpointsView({
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={updateActiveEndpoint}
             onAddEndpoint={addEndpoint}
+            analytics={analytics}
           />
         </Allotment.Pane>
       )}

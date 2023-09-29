@@ -8,7 +8,9 @@ export async function migrateLogs(postMerge: boolean) {
     return
   }
   const datastore = getDatastore()
-  const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG).order('createdAt', { descending: false }))
+  const [allLogs] = await datastore.runQuery(
+    datastore.createQuery(Entity.LOG).order('createdAt', { descending: false })
+  )
   for (const [index, logData] of allLogs.entries()) {
     console.log(`[${index + 1}/${allLogs.length}] ${getID(logData)} ${logData.createdAt}`)
     await updateAnalytics(
@@ -18,7 +20,7 @@ export async function migrateLogs(postMerge: boolean) {
       logData.cacheHit,
       logData.attempts,
       !!logData.error,
-      logData.createdAt,
+      logData.createdAt
     )
   }
 }

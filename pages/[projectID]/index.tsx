@@ -2,7 +2,16 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion, Usage } from '@/types'
+import {
+  User,
+  ActiveProject,
+  AvailableProvider,
+  Workspace,
+  LogEntry,
+  PromptVersion,
+  ChainVersion,
+  Usage,
+} from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -144,8 +153,6 @@ export default function Home({
     }
   }
 
-  console.log(analytics)
-
   const currentQueryState = compare ? CompareItem : endpoints ? EndpointsItem : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
@@ -236,7 +243,12 @@ export default function Home({
                     )}
                     {activeItem === EndpointsItem && (
                       <Suspense>
-                        <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
+                        <EndpointsView
+                          project={activeProject}
+                          logEntries={logEntries}
+                          analytics={analytics}
+                          onRefresh={refreshProject}
+                        />
                       </Suspense>
                     )}
                     {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
