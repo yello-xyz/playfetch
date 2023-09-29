@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntity,
   getEntityKey,
   getEntityKeys,
   getID,

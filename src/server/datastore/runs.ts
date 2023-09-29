@@ -32,19 +32,10 @@ export async function saveRun(
   cost: number,
   duration: number,
   labels: string[]
-): Promise<Run> {
+) {
   await ensurePromptOrChainAccess(userID, parentID)
   const runData = toRunData(parentID, versionID, inputs, output, new Date(), cost, duration, labels)
   await getDatastore().save(runData)
-  return {
-    id: getID(runData),
-    timestamp: getTimestamp(runData.data),
-    inputs,
-    output,
-    cost,
-    duration,
-    labels,
-  }
 }
 
 const getVerifiedUserRunData = async (userID: number, runID: number) => {
