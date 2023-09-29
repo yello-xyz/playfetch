@@ -4,7 +4,6 @@ import {
   allocateID,
   buildKey,
   getDatastore,
-  getEntity,
   getEntityCount,
   getEntityKey,
   getEntityKeys,
@@ -30,7 +29,6 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
-import { IsPromptChainItem } from '@/components/chains/chainNode'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -39,34 +37,20 @@ export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    if (versionData.items) {
-      const items = JSON.parse(versionData.items) as ChainItemWithInputs[]
-      if (items.some(item => IsPromptChainItem(item) && !item.versionID)) {
-        for (const item of items) {
-          if (IsPromptChainItem(item) && !item.versionID) {
-            const lastVersion = await getEntity(Entity.VERSION, 'parentID', item.promptID, true)
-            if (lastVersion) {
-              item.versionID = getID(lastVersion)
-            }
-            console.log(item.promptID, '->', item.versionID)
-          }
-        }
-        await datastore.save(
-          toVersionData(
-            versionData.userID,
-            versionData.parentID,
-            versionData.prompts ? JSON.parse(versionData.prompts) : null,
-            versionData.config ? JSON.parse(versionData.config) : null,
-            items,
-            JSON.parse(versionData.labels),
-            versionData.createdAt,
-            versionData.didRun,
-            versionData.previousVersionID,
-            getID(versionData)
-          )
-        )
-      }
-    }
+    await datastore.save(
+      toVersionData(
+        versionData.userID,
+        versionData.parentID,
+        versionData.prompts ? JSON.parse(versionData.prompts) : null,
+        versionData.config ? JSON.parse(versionData.config) : null,
+        versionData.items ? JSON.parse(versionData.items) : null,
+        JSON.parse(versionData.labels),
+        versionData.createdAt,
+        versionData.didRun,
+        versionData.previousVersionID,
+        getID(versionData)
+      )
+    )
   }
 }
 
