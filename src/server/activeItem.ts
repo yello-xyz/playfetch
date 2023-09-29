@@ -29,7 +29,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     : null
 
   const initialLogEntries =
-    initialActiveItem === EndpointsItem ? await getLogEntriesForProject(user.id, projectID!) : null
+    initialActiveItem === EndpointsItem ? await getLogEntriesForProject(user.id, projectID!, true) : null
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
