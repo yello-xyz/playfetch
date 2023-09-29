@@ -279,7 +279,7 @@ const toVersionData = (
 export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
   const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
-  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions[0]] : []
+  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
   return [...userVersion, ...versionsWithRuns, ...initialVersion]
     .map(version => toVersion(version, runs, comments))
