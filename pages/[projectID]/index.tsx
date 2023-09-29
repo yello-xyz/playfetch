@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion } from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion, Analytics } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -41,6 +41,7 @@ export default function Home({
   initialActiveProject,
   initialActiveItem,
   initialLogEntries,
+  initialAnalytics,
   availableProviders,
 }: {
   user: User
@@ -48,6 +49,7 @@ export default function Home({
   initialActiveProject: ActiveProject
   initialActiveItem: ActiveItem | null
   initialLogEntries: LogEntry[] | null
+  initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
 }) {
   const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(
@@ -126,17 +128,23 @@ export default function Home({
   }
 
   const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
+  const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(EndpointsItem)
     updateVersion(undefined)
     if (!logEntries) {
-      api.getLogEntries(activeProject.id).then(setLogEntries)
+      api.getLogEntries(activeProject.id).then(({ logs, analytics }) => {
+        setLogEntries(logs)
+        setAnalytics(analytics)
+      })
     }
     if (!endpoints) {
       router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
     }
   }
+
+  console.log(analytics)
 
   const currentQueryState = compare ? CompareItem : endpoints ? EndpointsItem : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)

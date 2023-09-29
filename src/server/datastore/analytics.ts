@@ -7,8 +7,11 @@ import {
   getID,
   buildFilter,
   getFilteredEntity,
+  getOrderedEntities,
 } from './datastore'
-import { Usage } from '@/types'
+import { Analytics, Usage } from '@/types'
+import { ensureProjectAccess } from './projects'
+import { toUsage } from './usage'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
@@ -28,9 +31,40 @@ export async function migrateAnalytics(postMerge: boolean) {
         analyticsData.cacheHits,
         analyticsData.attempts,
         analyticsData.failures,
-        getID(analyticsData),
+        getID(analyticsData)
       )
     )
+  }
+}
+
+const daysAgo = (date: Date, days: number) => {
+  const result = new Date(date)
+  result.setDate(result.getDate() - days)
+  return result
+}
+
+export async function getAnalyticsForProject(userID: number, projectID: number, trusted = false): Promise<Analytics> {
+  if (!trusted) {
+    await ensureProjectAccess(userID, projectID)
+  }
+  const today = new Date()
+  today.setUTCHours(0, 0, 0, 0)
+  const days = Array.from({ length: 30 }, (_, index) => daysAgo(today, index)).reverse()
+  const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 30)
+  const usageMap: { [timestamp: number]: Usage } = Object.fromEntries(
+    analyticsData
+      .filter(datapoint => datapoint.createdAt >= days[0])
+      .map(datapoint => [datapoint.createdAt.getTime(), toUsage(datapoint)])
+  )
+  const usages = days.map(day => usageMap[day.getTime()] as Usage | undefined)
+  const extract = (key: keyof Usage) => usages.map(usage => usage?.[key] ?? 0)
+  return {
+    requests: extract('requests'),
+    cost: extract('cost'),
+    duration: extract('duration'),
+    cacheHits: extract('cacheHits'),
+    attempts: extract('attempts'),
+    failures: extract('failures'),
   }
 }
 
@@ -46,7 +80,7 @@ export async function updateAnalytics(
 ) {
   const startOfDay = new Date(timestamp)
   startOfDay.setUTCHours(0, 0, 0, 0)
-  const filter = and([buildFilter('projectID', projectID), buildFilter('range', range), buildFilter('createdAt', startOfDay)])
+  const filter = and([buildFilter('projectID', projectID), buildFilter('createdAt', startOfDay)])
   await runTransactionWithExponentialBackoff(async transaction => {
     const previousData = await getFilteredEntity(Entity.ANALYTICS, filter, transaction)
     transaction.save(
@@ -81,13 +115,4 @@ const toAnalyticsData = (
   key: buildKey(Entity.ANALYTICS, analyticsID),
   data: { projectID, range, createdAt, requests, cost, duration, cacheHits, attempts, failures },
   excludeFromIndexes: [],
-})
-
-export const toAnalytics = (data: any): Usage => ({
-  requests: data.requests,
-  cost: data.cost,
-  duration: data.duration,
-  cacheHits: data.cacheHits,
-  attempts: data.attempts,
-  failures: data.failures,
 })

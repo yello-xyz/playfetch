@@ -80,6 +80,5 @@ indexes:
 - kind: analytics
   properties:
   - name: projectID
-  - name: range
   - name: createdAt
     direction: desc

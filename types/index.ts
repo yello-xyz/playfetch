@@ -235,3 +235,12 @@ export type LogEntry = {
   cacheHit: boolean
   continuationID: number
 }
+
+export type Analytics = {
+  requests: number[]
+  cost: number[]
+  duration: number[]
+  cacheHits: number[]
+  attempts: number[]
+  failures: number[]
+}

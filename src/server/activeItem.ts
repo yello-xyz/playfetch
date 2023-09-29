@@ -8,6 +8,7 @@ import { getLogEntriesForProject } from './datastore/logs'
 import { getAvailableProvidersForUser } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
 import { ParseActiveItemQuery, ParseNumberQuery } from '../client/clientRoute'
+import { getAnalyticsForProject } from './datastore/analytics'
 
 export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {
   const { projectID } = ParseNumberQuery(query)
@@ -30,6 +31,8 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
 
   const initialLogEntries =
     initialActiveItem === EndpointsItem ? await getLogEntriesForProject(user.id, projectID!, true) : null
+  const initialAnalytics = 
+    initialActiveItem === EndpointsItem ? await getAnalyticsForProject(user.id, projectID!, true) : null
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
@@ -38,6 +41,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialActiveProject,
     initialActiveItem,
     initialLogEntries,
+    initialAnalytics,
     availableProviders,
   }
 }
