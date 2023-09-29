@@ -12,7 +12,7 @@ import {
   ActivePrompt,
   Comment,
   Prompts,
-  Analytics,
+  Usage,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -206,7 +206,7 @@ const api = {
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
   },
-  getLogEntries: function (projectID: number): Promise<{ logs: LogEntry[]; analytics: Analytics }> {
+  getLogEntries: function (projectID: number): Promise<{ logs: LogEntry[]; analytics: Usage[] }> {
     return post(this.getLogEntries, { projectID })
   },
   addComment: function (

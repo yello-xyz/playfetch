@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion, Analytics } from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion, Usage } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -49,7 +49,7 @@ export default function Home({
   initialActiveProject: ActiveProject
   initialActiveItem: ActiveItem | null
   initialLogEntries: LogEntry[] | null
-  initialAnalytics: Analytics | null
+  initialAnalytics: Usage[] | null
   availableProviders: AvailableProvider[]
 }) {
   const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(

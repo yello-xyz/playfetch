@@ -9,7 +9,7 @@ import {
   getFilteredEntity,
   getOrderedEntities,
 } from './datastore'
-import { Analytics, Usage } from '@/types'
+import { Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
 import { toUsage } from './usage'
 
@@ -43,7 +43,7 @@ const daysAgo = (date: Date, days: number) => {
   return result
 }
 
-export async function getAnalyticsForProject(userID: number, projectID: number, trusted = false): Promise<Analytics> {
+export async function getAnalyticsForProject(userID: number, projectID: number, trusted = false): Promise<Usage[]> {
   if (!trusted) {
     await ensureProjectAccess(userID, projectID)
   }
@@ -56,16 +56,9 @@ export async function getAnalyticsForProject(userID: number, projectID: number, 
       .filter(datapoint => datapoint.createdAt >= days[0])
       .map(datapoint => [datapoint.createdAt.getTime(), toUsage(datapoint)])
   )
-  const usages = days.map(day => usageMap[day.getTime()] as Usage | undefined)
-  const extract = (key: keyof Usage) => usages.map(usage => usage?.[key] ?? 0)
-  return {
-    requests: extract('requests'),
-    cost: extract('cost'),
-    duration: extract('duration'),
-    cacheHits: extract('cacheHits'),
-    attempts: extract('attempts'),
-    failures: extract('failures'),
-  }
+  return days.map(
+    day => usageMap[day.getTime()] ?? { requests: 0, cost: 0, duration: 0, cacheHits: 0, attempts: 0, failures: 0 }
+  )
 }
 
 export async function updateAnalytics(
