@@ -40,18 +40,20 @@ export async function updateAnalytics(
   incrementalDuration: number,
   cacheHit: boolean,
   attempts: number,
-  failed: boolean
+  failed: boolean,
+  timestamp = new Date(),
+  range: 'day' = 'day'
 ) {
-  const timestamp = new Date()
-  timestamp.setUTCHours(0, 0, 0, 0)
-  const filter = and([buildFilter('projectID', projectID), buildFilter('range', 'day'), buildFilter('createdAt', timestamp)])
+  const startOfDay = new Date(timestamp)
+  startOfDay.setUTCHours(0, 0, 0, 0)
+  const filter = and([buildFilter('projectID', projectID), buildFilter('range', range), buildFilter('createdAt', startOfDay)])
   await runTransactionWithExponentialBackoff(async transaction => {
     const previousData = await getFilteredEntity(Entity.ANALYTICS, filter, transaction)
     transaction.save(
       toAnalyticsData(
         projectID,
-        'day',
-        timestamp,
+        range,
+        startOfDay,
         (previousData?.requests ?? 0) + 1,
         (previousData?.cost ?? 0) + incrementalCost,
         (previousData?.duration ?? 0) + incrementalDuration,

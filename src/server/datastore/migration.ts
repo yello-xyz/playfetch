@@ -1,4 +1,5 @@
 import { migrateAccess } from './access'
+import { migrateAnalytics } from './analytics'
 import { migrateCache } from './cache'
 import { migrateChains } from './chains'
 import { migrateComments } from './comments'
@@ -13,4 +14,6 @@ import { migrateUsers } from './users'
 import { migrateVersions } from './versions'
 import { migrateWorkspaces } from './workspaces'
 
-export async function runDataMigrations(postMerge: boolean) {}
+export async function runDataMigrations(postMerge: boolean) {
+  await migrateLogs(postMerge)
+}
