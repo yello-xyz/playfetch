@@ -76,3 +76,10 @@ indexes:
   - name: hasAccess
   - name: createdAt
     direction: desc
+
+- kind: analytics
+  properties:
+  - name: projectID
+  - name: range
+  - name: createdAt
+    direction: desc
