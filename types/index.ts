@@ -197,7 +197,6 @@ export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Ch
   !!item && 'referencedItemIDs' in item
 
 export type Usage = {
-  endpointID: number
   requests: number
   cost: number
   duration: number
