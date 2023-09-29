@@ -31,6 +31,12 @@ const buildCurlCommand = (
   )
 }
 
+const curlMarkup = [
+  ['curl', 'text-[#FF41BE]'],
+  ['-', 'text-[#0067F3]'],
+  ['POST', 'text-[#0067F3]'],
+]
+
 export default function ExamplePane({
   endpoint,
   variables,
@@ -67,7 +73,7 @@ export default function ExamplePane({
         )}
       </div>
       <CodeBlock>
-        <MarkedUpCURLCommand useStreaming={endpoint.useStreaming}>{curlCommand}</MarkedUpCURLCommand>
+        <CodeWithMarkup markup={curlMarkup}>{curlCommand}</CodeWithMarkup>
       </CodeBlock>
     </>
   )
@@ -102,46 +108,24 @@ export function CodeBlock({
   )
 }
 
-function MarkedUpCURLCommand({ children, useStreaming }: { children: ReactNode; useStreaming: boolean }) {
+function CodeWithMarkup({ children, markup }: { children: ReactNode; markup: string[][] }) {
   return (
     <>
       {children
         ?.toString()
         .split('\n')
-        .map((line, index) => (
-          <div key={index}>
-            <MarkedUpStartLine
-              line={line}
-              markup={[
-                ['curl', 'text-[#FF41BE]'],
-                ...(useStreaming ? [['-N', 'text-[#0067F3]']] : []),
-                ['-X POST', 'text-[#0067F3]'],
-              ]}>
-              <MarkedUpStartLine line={line} markup={[['  -H', 'text-[#0067F3]']]}>
-                <MarkedUpStartLine line={line} markup={[['  -d', 'text-[#0067F3]']]}>
-                  {line}
-                </MarkedUpStartLine>
-              </MarkedUpStartLine>
-            </MarkedUpStartLine>
+        .map((line, lineIndex) => (
+          <div key={lineIndex}>
+            {(line.match(/^\s+|([^\s"]+|"[^"]*")+/g) ?? []).map((span, index, spans) => (
+              <span
+                key={index}
+                className={markup.filter(([text]) => span.startsWith(text)).map(([_, color]) => color)[0] ?? {}}>
+                {span}
+                {index < spans.length - 1 && !span.endsWith(' ') ? ' ' : ''}
+              </span>
+            ))}
           </div>
         ))}
     </>
-  )
-}
-
-function MarkedUpStartLine({ line, markup, children }: { line: string; markup: string[][]; children: ReactNode }) {
-  const sentinel = markup.map(([text]) => text).join(' ')
-  return line.startsWith(sentinel) ? (
-    <>
-      {markup.map(([text, color], index) => (
-        <span key={index} className={color}>
-          {index > 0 ? ' ' : ''}
-          {text}
-        </span>
-      ))}
-      {line.replace(sentinel, '')}
-    </>
-  ) : (
-    <>{children}</>
   )
 }

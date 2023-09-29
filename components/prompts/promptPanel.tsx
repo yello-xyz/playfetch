@@ -1,14 +1,16 @@
 import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
-import ModelSelector, {
+import ModelSelector from './modelSelector'
+import {
   FullLabelForModel,
+  IconForProvider,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
   ProviderForModel,
   SupportedPromptKeysForModel,
-} from './modelSelector'
+} from '@/src/common/providerMetadata'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
@@ -17,6 +19,7 @@ import { ReactNode, useEffect } from 'react'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
+import Icon from '../icon'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -115,11 +118,16 @@ export default function PromptPanel({
             </div>
           ))}
           {!runPrompt && (
-            <div className='flex justify-end flex-1 text-gray-600'>
+            <div className='flex justify-end flex-1 overflow-hidden text-gray-600'>
               {setModifiedVersion ? (
-                <ModelSelector size='xs' model={config.model} setModel={updateModel} />
+                <ModelSelector model={config.model} setModel={updateModel} />
               ) : (
-                FullLabelForModel(config.model)
+                <div className='flex items-center min-w-0 gap-1'>
+                  <Icon icon={IconForProvider(ProviderForModel(config.model))} />
+                  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
+                    {FullLabelForModel(config.model)}
+                  </span>
+                </div>
               )}
             </div>
           )}
@@ -132,7 +140,7 @@ export default function PromptPanel({
             promptKey={activeTab}
             value={prompts[activeTab] ?? ''}
             setValue={updatePrompt}
-            placeholder={PlaceholderForPromptKey(activeTab)}
+            placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
             preformatted={PromptKeyNeedsPreformatted(activeTab)}
             disabled={!setModifiedVersion}
           />
@@ -161,13 +169,13 @@ const Warning = ({ children }: { children: ReactNode }) => (
   <Banner className='border-pink-50 bg-pink-25'>{children}</Banner>
 )
 
-function ProviderWarning() {
+export function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
   const router = useRouter()
 
   return (
     <ButtonBanner type='warning' buttonTitle='Add API Key' onClick={() => router.push(ClientRoute.Settings)}>
-      <span className='font-medium text-gray-600'>Missing API Key</span>
-      <span>An API key is required to use certain models.</span>
+      {includeTitle && <span className='font-medium text-gray-600'>Missing API Key</span>}
+      <span>An API key is required to use this model.</span>
     </ButtonBanner>
   )
 }

@@ -19,7 +19,7 @@ import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 
 export async function migratePrompts(postMerge: boolean) {
-  if (!postMerge) {
+  if (postMerge) {
     return
   }
   const datastore = getDatastore()

@@ -59,6 +59,7 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
         </TopBar>
         <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto bg-gray-25'>
           <ExternalLink href={AdminRoute.AnalyticsDashboard}>Analytics Dashboard</ExternalLink>
+          <ExternalLink href={AdminRoute.SearchConsole}>Search Console</ExternalLink>
           <ExternalLink href={AdminRoute.ServerLogs}>Server Logs</ExternalLink>
           {addedEmail && <Label>Granted access to {addedEmail}</Label>}
           <div className='flex items-center gap-2'>

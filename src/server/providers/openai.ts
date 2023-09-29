@@ -1,8 +1,8 @@
 import { OpenAILanguageModel, PromptInputs } from '@/types'
 import { ChatCompletionFunctions, Configuration, OpenAIApi } from 'openai'
 import { StreamResponseData } from '../stream'
-import { encode } from 'gpt-3-encoder'
 import { Predictor, PromptContext } from '../promptEngine'
+import { CostForModel } from './costCalculation'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
   return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
@@ -20,17 +20,6 @@ export default function predict(apiKey: string, userID: number, model: OpenAILan
       streamChunks,
       continuationInputs
     )
-}
-
-const costForTokensWithModel = (model: OpenAILanguageModel, input: string, output: string) => {
-  const inputTokens = encode(input).length
-  const outputTokens = encode(output).length
-  switch (model) {
-    case 'gpt-3.5-turbo':
-      return (inputTokens * 0.0015) / 1000 + (outputTokens * 0.002) / 1000
-    case 'gpt-4':
-      return (inputTokens * 0.03) / 1000 + (outputTokens * 0.06) / 1000
-  }
 }
 
 const getFunctionResponseMessage = (lastMessage?: any, inputs?: PromptInputs) => {
@@ -132,7 +121,7 @@ async function tryCompleteChat(
       }
     }
 
-    const cost = costForTokensWithModel(model, system ? `${system} ${prompt}` : prompt, output)
+    const cost = CostForModel(model, system ? `${system} ${prompt}` : prompt, output)
     context.messages = [
       ...previousMessages,
       ...promptMessages,

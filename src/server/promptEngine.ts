@@ -14,9 +14,9 @@ import vertexai from '@/src/server/providers/vertexai'
 import cohere from '@/src/server/providers/cohere'
 import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
 
-type ValidPredictionResponse = { output: string; cost: number }
+type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
-type PredictionResponse = ({ output: undefined; cost: number } | ValidPredictionResponse | ErrorPredictionResponse) & {
+type PredictionResponse = (ValidOrEmptyPredictionResponse | ErrorPredictionResponse) & {
   functionInterrupt?: string
 }
 
@@ -31,10 +31,12 @@ export type Predictor = (
   continuationInputs?: PromptInputs
 ) => Promise<PredictionResponse>
 
-const isValidPredictionResponse = (response: PredictionResponse): response is ValidPredictionResponse =>
-  'output' in response && !!response.output && response.output.length > 0
 const isErrorPredictionResponse = (response: PredictionResponse): response is ErrorPredictionResponse =>
   'error' in response
+const isValidOrEmptyPredictionResponse = (response: PredictionResponse): response is ValidOrEmptyPredictionResponse =>
+  'output' in response
+const isValidPredictionResponse = (response: PredictionResponse) =>
+  isValidOrEmptyPredictionResponse(response) && response.output.length > 0
 
 type RunResponse = (
   | { result: any; output: string; error: undefined; failed: false; functionInterrupt?: string }
@@ -85,7 +87,7 @@ export default async function runPromptWithConfig(
   const apiKey = await getAPIKey(config.provider)
   const predictor: Predictor = getPredictor(config.provider, apiKey ?? '')
 
-  let result: PredictionResponse = { output: undefined, cost: 0 }
+  let result: PredictionResponse = { output: '', cost: 0 }
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {

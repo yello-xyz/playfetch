@@ -7,6 +7,7 @@ export function PopupButton({
   onSetPopup,
   disabled,
   fixedWidth,
+  popUpAbove,
   className = '',
   children,
 }: {
@@ -14,6 +15,7 @@ export function PopupButton({
   disabled?: boolean
   fixedWidth?: boolean
   className?: string
+  popUpAbove?: boolean
   children: ReactNode
 }) {
   const buttonRef = useRef<HTMLDivElement>(null)
@@ -23,14 +25,15 @@ export function PopupButton({
     : () => {
         const iconRect = buttonRef.current?.getBoundingClientRect()!
         onSetPopup({
-          top: iconRect.y + 48,
-          left: iconRect.x,
-          right: fixedWidth ? iconRect.x + iconRect.width : undefined,
+          top: !popUpAbove ? iconRect.y + 48 : undefined,
+          left: !popUpAbove || fixedWidth ? iconRect.x : undefined,
+          bottom: popUpAbove ? iconRect.y - 10 : undefined,
+          right: popUpAbove || fixedWidth ? iconRect.x + iconRect.width : undefined,
         })
       }
 
   const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
-  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer'
+  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer hover:bg-gray-100'
 
   return (
     <div className={`${baseClass} ${disabledClass} ${className}`} ref={buttonRef} onClick={togglePopup}>

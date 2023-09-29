@@ -1,4 +1,4 @@
-import { PopupContent, PopupItem, PopupLabelItem } from '../popupMenu'
+import { PopupContent, PopupLabelItem } from '../popupMenu'
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'

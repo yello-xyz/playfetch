@@ -1,6 +1,7 @@
 import { User } from '@/types'
 import { Entity, buildKey, getDatastore, getEntity, getID, getKeyedEntity, getOrderedEntities } from './datastore'
 import { addWorkspaceForUser } from './workspaces'
+import { uploadImageURLToStorage } from '../storage'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -55,6 +56,9 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
 export async function markUserLogin(userID: number, fullName: string, imageURL: string) {
   const userData = await getKeyedEntity(Entity.USER, userID)
   if (userData) {
+    if (imageURL.length) {
+      imageURL = await uploadImageURLToStorage(userID.toString(), imageURL)
+    }
     await getDatastore().save(
       toUserData(
         userData.email,
@@ -87,6 +91,7 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {
     await addWorkspaceForUser(getID(userData))
   }
+  return !previousUserData
 }
 
 export async function getUsersWithoutAccess() {

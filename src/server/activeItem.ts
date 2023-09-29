@@ -7,17 +7,14 @@ import { getChainForUser } from './datastore/chains'
 import { getLogEntriesForProject } from './datastore/logs'
 import { getAvailableProvidersForUser } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
-import { IncomingHttpHeaders } from 'http'
-import { urlBuilderFromHeaders } from './routing'
 import { ParseActiveItemQuery, ParseNumberQuery } from '../client/clientRoute'
 
-export default async function loadActiveItem(user: User, query: ParsedUrlQuery, headers: IncomingHttpHeaders) {
+export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {
   const { projectID } = ParseNumberQuery(query)
-  const buildURL = urlBuilderFromHeaders(headers)
 
   const workspaces = await getWorkspacesForUser(user.id)
 
-  const initialActiveProject = await getActiveProject(user.id, projectID!, buildURL)
+  const initialActiveProject = await getActiveProject(user.id, projectID!)
 
   const { promptID, chainID, compare, endpoints } = ParseActiveItemQuery(query, initialActiveProject)
 

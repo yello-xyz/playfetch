@@ -19,7 +19,7 @@ import { getTrustedParentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 
 export async function migrateChains(postMerge: boolean) {
-  if (!postMerge) {
+  if (postMerge) {
     return
   }
   const datastore = getDatastore()

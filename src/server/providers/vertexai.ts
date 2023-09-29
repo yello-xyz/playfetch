@@ -1,7 +1,9 @@
 import aiplatform from '@google-cloud/aiplatform'
-import { getProjectID } from '../datastore/datastore'
 import { GoogleLanguageModel } from '@/types'
 import { Predictor, PromptContext } from '../promptEngine'
+import { CostForModel } from './costCalculation'
+import { getProjectID } from '../storage'
+
 const { PredictionServiceClient } = aiplatform.v1
 
 const location = 'us-central1'
@@ -46,13 +48,15 @@ async function complete(
     }
 
     const [response] = await client.predict(request)
-    const output = response.predictions?.[0]?.structValue?.fields?.content?.stringValue ?? undefined
+    const output = response.predictions?.[0]?.structValue?.fields?.content?.stringValue ?? ''
     if (output && streamChunks) {
       streamChunks(output)
     }
+
+    const cost = CostForModel(model, prompt, output)
     context.running = `${runningContext}${prompt}\n${output}\n`
 
-    return { output, cost: 0 }
+    return { output, cost }
   } catch (error: any) {
     return { error: error?.details ?? 'Unknown error' }
   }

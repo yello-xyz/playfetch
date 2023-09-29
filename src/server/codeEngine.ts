@@ -24,13 +24,9 @@ type CodeResponse = typeof codeResponseAttributes &
     | { result: undefined; output: undefined; error: string; failed: true }
   )
 
-export const runCodeInContext = async (
-  code: string,
-  context: Isolated.Context,
-  asIsolatedFunction = true
-): Promise<CodeResponse> => {
+export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
   try {
-    const functionCode = asIsolatedFunction ? `(() => { ${codeToCamelCase(code)} })()` : codeToCamelCase(code)
+    const functionCode = `(() => { ${codeToCamelCase(code)} })()`
     const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
     return { result, output, error: undefined, failed: false, ...codeResponseAttributes }

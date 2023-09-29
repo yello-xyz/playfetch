@@ -10,12 +10,7 @@ const nextConfig = {
     return [
       {
         source: '/:projectID/:endpoint',
-        has: [
-          {
-            type: 'header',
-            key: 'x-api-key',
-          },
-        ],
+        has: [{ type: 'header', key: 'x-api-key' }],
         destination: '/api/public/endpoint',
       },
     ]

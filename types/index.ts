@@ -190,10 +190,6 @@ export type ResolvedEndpoint = Endpoint & {
   usage: Usage
 }
 
-export type ResolvedPromptEndpoint = ResolvedEndpoint & {
-  versionID: number
-}
-
 export const ItemsInProject = (project: ActiveProject) => [...project.prompts, ...project.chains]
 export const FindItemInProject = (itemID: number | undefined, project: ActiveProject) =>
   ItemsInProject(project).find(item => item.id === itemID)!

@@ -14,8 +14,9 @@ enum ClientRoute {
 
 export enum AdminRoute {
   Home = '/admin',
-  AnalyticsDashboard = '/api/admin/analytics',
-  ServerLogs = '/api/admin/serverLogs',
+  AnalyticsDashboard = '/api/admin/loadURL?type=analyticsDashboard',
+  SearchConsole = '/api/admin/loadURL?type=searchConsole',
+  ServerLogs = '/api/admin/loadURL?type=serverLogs',
 }
 
 export const WorkspaceRoute = (workspaceID: number, userID: number) =>

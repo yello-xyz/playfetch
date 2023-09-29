@@ -37,13 +37,7 @@ export async function migrateProjects(postMerge: boolean) {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    const labels = JSON.parse(projectData.labels)
-    if (labels.length === 0) {
-      console.log('Adding default labels to', projectData.name)
-      await updateProject({ ...projectData, labels: JSON.stringify(DefaultLabels) }, false)
-    } else {
-      console.log('Not touching labels', labels, 'in', projectData.name)
-    }
+    await updateProject({ ...projectData }, false)
   }
 }
 
@@ -96,25 +90,21 @@ export async function getProjectUsers(projectID: number): Promise<User[]> {
   return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
-async function loadEndpoints(projectID: number, apiKeyDev: string, buildURL: (path: string) => string) {
+async function loadEndpoints(projectID: number, apiKeyDev: string) {
   const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'projectID', projectID)
   const usages = await getEntities(Entity.USAGE, 'projectID', projectID)
 
   return endpoints
     .map(endpoint => ({
       ...toEndpoint(endpoint),
-      url: buildURL(`/${projectID}/${endpoint.urlPath}`),
+      url: `${process.env.API_URL}/${projectID}/${endpoint.urlPath}`,
       apiKeyDev,
       usage: toUsage(usages.find(usage => getID(usage) === getID(endpoint))),
     }))
     .reverse()
 }
 
-export async function getActiveProject(
-  userID: number,
-  projectID: number,
-  buildURL: (path: string) => string
-): Promise<ActiveProject> {
+export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
   const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
   const prompts = promptData.map(toPrompt)
@@ -125,7 +115,7 @@ export async function getActiveProject(
   return {
     ...toProject(projectData, userID),
     availableFlavors: JSON.parse(projectData.flavors),
-    endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? '', buildURL),
+    endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? ''),
     prompts,
     chains,
     users,
