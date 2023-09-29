@@ -38,7 +38,8 @@ export default function LogEntryDetailsPane({
               {ProjectItemIsChain(parent) ? 'Chain' : 'Prompt'}
               <div className='flex items-center justify-end gap-1'>
                 <Icon icon={ProjectItemIsChain(parent) ? chainIcon : promptIcon} />
-                {`${parent.name}${versionIndex >= 0 ? ` - Version ${versionIndex + 1}` : ''}`}
+                <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>{parent.name}</span>
+                {versionIndex >= 0 && ` - Version ${versionIndex + 1}`}
               </div>
             </>
           )}
