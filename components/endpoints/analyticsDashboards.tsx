@@ -1,5 +1,5 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
-import { Usage } from '@/types'
+import { Analytics, Usage } from '@/types'
 import { ReactElement } from 'react'
 import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 
@@ -20,23 +20,25 @@ const prepareData = (analytics: Usage[]) =>
       success: usage.requests - usage.failures,
     }))
 
-export default function AnalyticsDashboards({ analytics }: { analytics: Usage[] }) {
+export default function AnalyticsDashboards({ analytics }: { analytics?: Analytics }) {
   const margin = { left: 0, right: 0, top: 10, bottom: 0 }
 
-  const totalRequests = analytics.reduce((acc, usage) => acc + usage.requests, 0)
-  const totalCost = analytics.reduce((acc, usage) => acc + usage.cost, 0)
-  const minAverageDuration = analytics.reduce((acc, usage) => {
+  const recentUsage = analytics?.recentUsage ?? []
+
+  const totalRequests = recentUsage.reduce((acc, usage) => acc + usage.requests, 0)
+  const totalCost = recentUsage.reduce((acc, usage) => acc + usage.cost, 0)
+  const minAverageDuration = recentUsage.reduce((acc, usage) => {
     return usage.duration === 0
       ? acc
       : acc === 0
       ? usage.duration / (usage.requests || 1)
       : Math.min(acc, usage.duration / (usage.requests || 1))
   }, 0)
-  const maxAverageDuration = analytics.reduce(
+  const maxAverageDuration = recentUsage.reduce(
     (acc, usage) => Math.max(acc, usage.duration / (usage.requests || 1)),
     minAverageDuration
   )
-  const data = prepareData(analytics)
+  const data = prepareData(recentUsage)
 
   return totalRequests > 0 ? (
     <div className='flex gap-4'>

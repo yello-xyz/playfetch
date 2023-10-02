@@ -9,9 +9,10 @@ import {
   getFilteredEntity,
   getOrderedEntities,
 } from './datastore'
-import { Usage } from '@/types'
+import { Analytics, Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
 import { toUsage } from './usage'
+import { getLogEntriesForProject } from './logs'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
@@ -43,22 +44,42 @@ const daysAgo = (date: Date, days: number) => {
   return result
 }
 
-export async function getAnalyticsForProject(userID: number, projectID: number, trusted = false): Promise<Usage[]> {
+export async function getAnalyticsForProject(userID: number, projectID: number, trusted = false): Promise<Analytics> {
   if (!trusted) {
     await ensureProjectAccess(userID, projectID)
   }
+
+  const range = 30
+  const recentLogEntries = await getLogEntriesForProject(userID, projectID, true)
+  const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * range)
+
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
-  const days = Array.from({ length: 30 }, (_, index) => daysAgo(today, index)).reverse()
-  const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 30)
+
+  const recentDays = Array.from({ length: range }, (_, index) => daysAgo(today, index)).reverse()
   const usageMap: { [timestamp: number]: Usage } = Object.fromEntries(
     analyticsData
-      .filter(datapoint => datapoint.createdAt >= days[0])
-      .map(datapoint => [datapoint.createdAt.getTime(), toUsage(datapoint)])
+      .filter(usage => usage.createdAt >= recentDays[0])
+      .map(usage => [usage.createdAt.getTime(), toUsage(usage)])
   )
-  return days.map(
-    day => usageMap[day.getTime()] ?? { requests: 0, cost: 0, duration: 0, cacheHits: 0, attempts: 0, failures: 0 }
+  const emptyUsage = { requests: 0, cost: 0, duration: 0, cacheHits: 0, attempts: 0, failures: 0 }
+  const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
+
+  const cutoff = daysAgo(today, 2 * range - 1)
+  const previous30Days = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
+  const aggregatePreviousUsage = previous30Days.reduce(
+    (acc, usage) => ({
+      requests: acc.requests + usage.requests,
+      cost: acc.cost + usage.cost,
+      duration: acc.duration + usage.duration,
+      cacheHits: acc.cacheHits + usage.cacheHits,
+      attempts: acc.attempts + usage.attempts,
+      failures: acc.failures + usage.failures,
+    }),
+    emptyUsage
   )
+
+  return { recentLogEntries, recentUsage, aggregatePreviousUsage }
 }
 
 export async function updateAnalytics(

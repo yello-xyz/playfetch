@@ -4,7 +4,6 @@ import { getActiveProject } from './datastore/projects'
 import { ActiveItem, BuildActiveChain, BuildActivePrompt, CompareItem, EndpointsItem } from '../common/activeItem'
 import { getPromptForUser } from './datastore/prompts'
 import { getChainForUser } from './datastore/chains'
-import { getLogEntriesForProject } from './datastore/logs'
 import { getAvailableProvidersForUser } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
 import { ParseActiveItemQuery, ParseNumberQuery } from '../client/clientRoute'
@@ -29,8 +28,6 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
     : null
 
-  const initialLogEntries =
-    initialActiveItem === EndpointsItem ? await getLogEntriesForProject(user.id, projectID!, true) : null
   const initialAnalytics =
     initialActiveItem === EndpointsItem ? await getAnalyticsForProject(user.id, projectID!, true) : null
   const availableProviders = await getAvailableProvidersForUser(user.id)
@@ -40,7 +37,6 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     workspaces,
     initialActiveProject,
     initialActiveItem,
-    initialLogEntries,
     initialAnalytics,
     availableProviders,
   }

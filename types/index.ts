@@ -235,3 +235,9 @@ export type LogEntry = {
   cacheHit: boolean
   continuationID: number
 }
+
+export type Analytics = {
+  recentLogEntries: LogEntry[]
+  recentUsage: Usage[]
+  aggregatePreviousUsage: Usage
+}

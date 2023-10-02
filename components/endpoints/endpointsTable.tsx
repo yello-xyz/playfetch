@@ -7,6 +7,7 @@ import {
   Prompt,
   ResolvedEndpoint,
   Usage,
+  Analytics,
 } from '@/types'
 import { Fragment, ReactNode } from 'react'
 import Checkbox from '../checkbox'
@@ -32,7 +33,7 @@ export default function EndpointsTable({
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onAddEndpoint?: () => void
-  analytics: Usage[]
+  analytics?: Analytics
 }) {
   const groups = ItemsInProject(project)
     .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
