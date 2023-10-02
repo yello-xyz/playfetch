@@ -207,8 +207,8 @@ const api = {
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
   },
-  getAnalytics: function (projectID: number, range = 30): Promise<Analytics> {
-    return post(this.getAnalytics, { projectID, range })
+  getAnalytics: function (projectID: number, dayRange = 30): Promise<Analytics> {
+    return post(this.getAnalytics, { projectID, dayRange })
   },
   addComment: function (
     versionID: number,

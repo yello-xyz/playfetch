@@ -48,19 +48,19 @@ export async function getAnalyticsForProject(
   userID: number,
   projectID: number,
   trusted = false,
-  range = 30
+  dayRange = 30
 ): Promise<Analytics> {
   if (!trusted) {
     await ensureProjectAccess(userID, projectID)
   }
 
   const recentLogEntries = await getLogEntriesForProject(userID, projectID, true)
-  const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * range)
+  const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * dayRange)
 
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
 
-  const recentDays = Array.from({ length: range }, (_, index) => daysAgo(today, index)).reverse()
+  const recentDays = Array.from({ length: dayRange }, (_, index) => daysAgo(today, index)).reverse()
   const usageMap: { [timestamp: number]: Usage } = Object.fromEntries(
     analyticsData
       .filter(usage => usage.createdAt >= recentDays[0])
@@ -69,7 +69,7 @@ export async function getAnalyticsForProject(
   const emptyUsage = { requests: 0, cost: 0, duration: 0, cacheHits: 0, attempts: 0, failures: 0 }
   const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
 
-  const cutoff = daysAgo(today, 2 * range - 1)
+  const cutoff = daysAgo(today, 2 * dayRange - 1)
   const previous30Days = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
   const aggregatePreviousUsage = previous30Days.reduce(
     (acc, usage) => ({

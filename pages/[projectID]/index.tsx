@@ -125,13 +125,15 @@ export default function Home({
     }
   }
 
+  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+
   const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(EndpointsItem)
     updateVersion(undefined)
     if (!analytics) {
-      api.getAnalytics(activeProject.id).then(setAnalytics)
+      refreshAnalytics()
     }
     if (!endpoints) {
       router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
@@ -228,7 +230,12 @@ export default function Home({
                     )}
                     {activeItem === EndpointsItem && (
                       <Suspense>
-                        <EndpointsView project={activeProject} analytics={analytics} onRefresh={refreshProject} />
+                        <EndpointsView
+                          project={activeProject}
+                          analytics={analytics}
+                          refreshAnalytics={refreshAnalytics}
+                          onRefresh={refreshProject}
+                        />
                       </Suspense>
                     )}
                     {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}

@@ -23,7 +23,13 @@ const prepareData = (analytics: Usage[]) =>
 const percentIncrement = (current: number, previous: number) =>
   Math.round(previous === 0 ? 100 : (100 * (current - previous)) / previous)
 
-export default function AnalyticsDashboards({ analytics }: { analytics?: Analytics }) {
+export default function AnalyticsDashboards({
+  analytics,
+  refreshAnalytics,
+}: {
+  analytics?: Analytics
+  refreshAnalytics: (dayRange: number) => void
+}) {
   const margin = { left: 0, right: 0, top: 10, bottom: 0 }
 
   const recentUsage = analytics?.recentUsage ?? []
@@ -46,13 +52,17 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
   const incrementalRequests = percentIncrement(totalRequests, analytics?.aggregatePreviousUsage?.requests ?? 0)
   const incrementalCost = percentIncrement(totalCost, analytics?.aggregatePreviousUsage?.cost ?? 0)
 
+  const dayRange = recentUsage.length
+  const toggleDayRange = () => refreshAnalytics(dayRange === 30 ? 7 : 30)
+
   return totalRequests > 0 ? (
     <div className='flex gap-4'>
       <Container
         title='Total requests'
         value={totalRequests}
         percentIncrement={incrementalRequests}
-        range={recentUsage.length}>
+        range={dayRange}
+        callback={toggleDayRange}>
         <AreaChart id='requests' data={data} margin={{ ...margin }}>
           <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='failures' stroke='#DC4F30' fill='#FDE5E0' />
           <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='success' stroke='#71B892' fill='#DDF1E7' />
@@ -65,7 +75,8 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
         value={FormatCost(totalCost)}
         percentIncrement={incrementalCost}
         lowerIsBetter
-        range={recentUsage.length}>
+        range={dayRange}
+        callback={toggleDayRange}>
         <AreaChart id='cost' data={data} margin={margin}>
           <Area type='bump' strokeWidth={1.5} dataKey='cost' stroke='#61A2EE' fill='#DCEAFA' />
           <XAxis dataKey='name' hide />
@@ -75,7 +86,8 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
       <Container
         title='Average duration'
         value={`${minAverageDuration.toFixed(2)}-${maxAverageDuration.toFixed(2)}s`}
-        range={recentUsage.length}>
+        range={recentUsage.length}
+        callback={toggleDayRange}>
         <BarChart id='duration' data={data} margin={{ ...margin, left: 10, right: 10 }}>
           <Bar type='bump' dataKey='duration' fill='#BEA4F6' />
           <XAxis dataKey='name' hide />
@@ -92,13 +104,15 @@ function Container({
   percentIncrement,
   lowerIsBetter = false,
   range,
+  callback,
   children,
 }: {
   title?: string
   value?: string | number
   percentIncrement?: number
   lowerIsBetter?: boolean
-  range?: number
+  range: number
+  callback: () => void
   children: ReactElement<any>
 }) {
   return (
@@ -106,7 +120,9 @@ function Container({
       <div className='flex flex-col px-4 pt-3'>
         <div className='flex flex-wrap items-baseline justify-between overflow-hidden max-h-[19px]'>
           <span className='font-medium text-gray-400'>{title}</span>
-          {range && <span className='text-xs font-medium text-gray-300'>last {range} days</span>}
+          <span className='text-xs font-medium text-gray-300 cursor-pointer' onClick={callback}>
+            last {range} days
+          </span>
         </div>
         <div className='flex items-center gap-2'>
           <span className='text-lg font-bold text-gray-800'>{value}</span>
