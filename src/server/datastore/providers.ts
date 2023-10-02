@@ -86,6 +86,27 @@ export async function saveProviderKey(userID: number, provider: ModelProvider, a
   await getDatastore().save(toProviderData(userID, provider, apiKey, 0, [], providerID))
 }
 
+export async function saveProviderModel(
+  userID: number,
+  provider: ModelProvider,
+  modelID: string,
+  name: string,
+  description: string,
+  enabled: boolean
+) {
+  const providerData = await getProviderData(userID, provider)
+  if (providerData) {
+    const customModels = JSON.parse(providerData.customModels) as CustomModel[]
+    const newCustomModels = [
+      ...customModels.filter(model => model.id !== modelID),
+      { id: modelID, name, description, enabled },
+    ]
+    await getDatastore().save(
+      toProviderData(userID, provider, providerData.apiKey, providerData.cost, newCustomModels, getID(providerData))
+    )
+  }
+}
+
 export async function getAvailableProvidersForUser(
   userID: number,
   reloadCustomModels = false
@@ -137,7 +158,9 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
   )
   const availableProvider = toAvailableProvider(availableProviderData)
   if (additionalModels.length > 0) {
-    availableProvider.customModels.push(...additionalModels.map(model => ({ id: model.id, name: '', enabled: false })))
+    availableProvider.customModels.push(
+      ...additionalModels.map(model => ({ id: model.id, name: '', description: '', enabled: false }))
+    )
   }
   return availableProvider
 }

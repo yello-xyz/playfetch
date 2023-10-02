@@ -238,6 +238,15 @@ const api = {
   updateProviderKey: function (provider: ModelProvider, apiKey: string | null) {
     return post(this.updateProviderKey, { provider, apiKey })
   },
+  updateProviderModel: function (
+    provider: ModelProvider,
+    modelID: string,
+    name: string,
+    description: string,
+    enabled: boolean
+  ) {
+    return post(this.updateProviderModel, { provider, modelID, name, description, enabled })
+  },
   logOut: function () {
     return post(this.logOut)
   },
