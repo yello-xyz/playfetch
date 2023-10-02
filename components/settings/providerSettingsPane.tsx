@@ -9,6 +9,7 @@ import { FormatCost } from '@/src/common/formatting'
 import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
+import SettingsPane from './settingsPane'
 
 export default function ProviderSettingsPane({
   providers,
@@ -20,23 +21,18 @@ export default function ProviderSettingsPane({
   onRefresh: () => void
 }) {
   return (
-    <>
-      <Label>Manage API keys</Label>
-      <span>
-        Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign
-        up for an account and get an API key from them.
-      </span>
-      <div className='flex flex-col w-full gap-3'>
-        {providers.map((provider, index) => (
-          <ProviderRow
-            key={index}
-            provider={provider}
-            availableProvider={availableProviders.find(p => p.provider === provider)}
-            onRefresh={onRefresh}
-          />
-        ))}
-      </div>
-    </>
+    <SettingsPane
+      title='Manage API keys'
+      description='Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'>
+      {providers.map((provider, index) => (
+        <ProviderRow
+          key={index}
+          provider={provider}
+          availableProvider={availableProviders.find(p => p.provider === provider)}
+          onRefresh={onRefresh}
+        />
+      ))}
+    </SettingsPane>
   )
 }
 
