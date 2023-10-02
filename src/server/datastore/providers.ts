@@ -157,10 +157,9 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
     model => !previousCustomModels.find(previous => previous.id === model.id)
   )
   const availableProvider = toAvailableProvider(availableProviderData)
-  if (additionalModels.length > 0) {
-    availableProvider.customModels.push(
-      ...additionalModels.map(model => ({ id: model.id, name: '', description: '', enabled: false }))
-    )
-  }
+  availableProvider.customModels = [
+    ...filteredCustomModels,
+    ...additionalModels.map(model => ({ id: model.id, name: '', description: '', enabled: false })),
+  ]
   return availableProvider
 }
