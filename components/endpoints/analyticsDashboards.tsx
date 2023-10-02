@@ -16,7 +16,6 @@ const prepareData = (analytics: Usage[]) =>
     .map((usage, index) => ({
       ...usage,
       name: FormatDate(daysAgo(new Date(), 30 - index).getTime(), false, true),
-      cost: usage.cost.toFixed(2),
       duration: (usage.duration / (usage.requests || 1)).toFixed(2),
       success: usage.requests - usage.failures,
     }))
