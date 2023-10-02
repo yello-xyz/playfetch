@@ -4,7 +4,7 @@ import { AvailableProvider, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getAvailableProviders(_: NextApiRequest, res: NextApiResponse<AvailableProvider[]>, user: User) {
-  const availableProviders = await getAvailableProvidersForUser(user.id)
+  const availableProviders = await getAvailableProvidersForUser(user.id, true)
   res.json(availableProviders)
 }
 

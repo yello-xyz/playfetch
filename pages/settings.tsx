@@ -9,7 +9,7 @@ import UserSettingsView from '@/components/userSettingsView'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
-  const availableProviders = await getAvailableProvidersForUser(user.id)
+  const availableProviders = await getAvailableProvidersForUser(user.id, true)
 
   return { props: { user, availableProviders } }
 })
