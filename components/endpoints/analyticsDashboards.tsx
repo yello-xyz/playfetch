@@ -20,6 +20,9 @@ const prepareData = (analytics: Usage[]) =>
       success: usage.requests - usage.failures,
     }))
 
+const percentIncrement = (current: number, previous: number) =>
+  Math.round(previous === 0 ? 100 : (100 * (current - previous)) / previous)
+
 export default function AnalyticsDashboards({ analytics }: { analytics?: Analytics }) {
   const margin = { left: 0, right: 0, top: 10, bottom: 0 }
 
@@ -40,9 +43,16 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
   )
   const data = prepareData(recentUsage)
 
+  const incrementalRequests = percentIncrement(totalRequests, analytics?.aggregatePreviousUsage?.requests ?? 0)
+  const incrementalCost = percentIncrement(totalCost, analytics?.aggregatePreviousUsage?.cost ?? 0)
+
   return totalRequests > 0 ? (
     <div className='flex gap-4'>
-      <Container title='Total requests' value={totalRequests}>
+      <Container
+        title='Total requests'
+        value={totalRequests}
+        percentIncrement={incrementalRequests}
+        range={recentUsage.length}>
         <AreaChart id='requests' data={data} margin={{ ...margin }}>
           <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='failures' stroke='#DC4F30' fill='#FDE5E0' />
           <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='success' stroke='#71B892' fill='#DDF1E7' />
@@ -50,14 +60,21 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
           <Tooltip cursor={false} />
         </AreaChart>
       </Container>
-      <Container title='Total cost' value={FormatCost(totalCost)}>
+      <Container
+        title='Total cost'
+        value={FormatCost(totalCost)}
+        percentIncrement={incrementalCost}
+        range={recentUsage.length}>
         <AreaChart id='cost' data={data} margin={margin}>
           <Area type='bump' strokeWidth={1.5} dataKey='cost' stroke='#61A2EE' fill='#DCEAFA' />
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} />
         </AreaChart>
       </Container>
-      <Container title='Average duration' value={`${minAverageDuration.toFixed(2)}-${maxAverageDuration.toFixed(2)}s`}>
+      <Container
+        title='Average duration'
+        value={`${minAverageDuration.toFixed(2)}-${maxAverageDuration.toFixed(2)}s`}
+        range={recentUsage.length}>
         <BarChart id='duration' data={data} margin={{ ...margin, left: 10, right: 10 }}>
           <Bar type='bump' dataKey='duration' fill='#BEA4F6' />
           <XAxis dataKey='name' hide />
@@ -71,10 +88,14 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
 function Container({
   title,
   value,
+  percentIncrement,
+  range,
   children,
 }: {
   title?: string
   value?: string | number
+  percentIncrement?: number
+  range?: number
   children: ReactElement<any>
 }) {
   return (
@@ -82,9 +103,20 @@ function Container({
       <div className='flex flex-col px-4 pt-3'>
         <div className='flex flex-wrap items-baseline justify-between overflow-hidden max-h-[19px]'>
           <span className='font-medium text-gray-400'>{title}</span>
-          <span className='text-xs font-medium text-gray-300'>last 30 days</span>
+          {range && <span className='text-xs font-medium text-gray-300'>last {range} days</span>}
         </div>
-        <span className='text-lg font-bold text-gray-800'>{value}</span>
+        <div className='flex items-center gap-2'>
+          <span className='text-lg font-bold text-gray-800'>{value}</span>
+          {percentIncrement !== undefined && (
+            <span
+              className={`flex px-1 py-px text-xs rounded ${
+                percentIncrement < 0 ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-400'
+              }`}>
+              {percentIncrement > 0 ? '+' : ''}
+              {percentIncrement}%
+            </span>
+          )}
+        </div>
       </div>
       <div className='relative w-full pb-40'>
         <div className='absolute inset-0'>
