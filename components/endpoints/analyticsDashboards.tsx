@@ -2,6 +2,7 @@ import { FormatCost, FormatDate } from '@/src/common/formatting'
 import { Analytics, Usage } from '@/types'
 import { ReactElement } from 'react'
 import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import DashboardContainer from './dashboardContainer'
 
 const daysAgo = (date: Date, days: number) => {
   const result = new Date(date)
@@ -57,7 +58,7 @@ export default function AnalyticsDashboards({
 
   return totalRequests > 0 ? (
     <div className='flex gap-4'>
-      <Container
+      <DashboardContainer
         title='Total requests'
         value={totalRequests}
         percentIncrement={incrementalRequests}
@@ -69,8 +70,8 @@ export default function AnalyticsDashboards({
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} />
         </AreaChart>
-      </Container>
-      <Container
+      </DashboardContainer>
+      <DashboardContainer
         title='Total cost'
         value={FormatCost(totalCost)}
         percentIncrement={incrementalCost}
@@ -82,8 +83,8 @@ export default function AnalyticsDashboards({
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} />
         </AreaChart>
-      </Container>
-      <Container
+      </DashboardContainer>
+      <DashboardContainer
         title='Average duration'
         value={`${minAverageDuration.toFixed(2)}-${maxAverageDuration.toFixed(2)}s`}
         range={recentUsage.length}
@@ -93,55 +94,7 @@ export default function AnalyticsDashboards({
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} />
         </BarChart>
-      </Container>
+      </DashboardContainer>
     </div>
   ) : null
-}
-
-function Container({
-  title,
-  value,
-  percentIncrement,
-  lowerIsBetter = false,
-  range,
-  callback,
-  children,
-}: {
-  title?: string
-  value?: string | number
-  percentIncrement?: number
-  lowerIsBetter?: boolean
-  range: number
-  callback: () => void
-  children: ReactElement<any>
-}) {
-  return (
-    <div className='flex flex-col flex-1 bg-white border border-gray-200 rounded-md'>
-      <div className='flex flex-col px-4 pt-3'>
-        <div className='flex flex-wrap items-baseline justify-between overflow-hidden max-h-[19px]'>
-          <span className='font-medium text-gray-400'>{title}</span>
-          <span className='text-xs font-medium text-gray-300 cursor-pointer' onClick={callback}>
-            last {range} days
-          </span>
-        </div>
-        <div className='flex items-center gap-2'>
-          <span className='text-lg font-bold text-gray-800'>{value}</span>
-          {percentIncrement !== undefined && (
-            <span
-              className={`flex px-1 py-px text-xs rounded ${
-                percentIncrement < 0 !== lowerIsBetter ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-400'
-              }`}>
-              {percentIncrement > 0 ? '+' : ''}
-              {percentIncrement}%
-            </span>
-          )}
-        </div>
-      </div>
-      <div className='relative w-full pb-40'>
-        <div className='absolute inset-0'>
-          <ResponsiveContainer>{children}</ResponsiveContainer>
-        </div>
-      </div>
-    </div>
-  )
 }
