@@ -44,12 +44,16 @@ const daysAgo = (date: Date, days: number) => {
   return result
 }
 
-export async function getAnalyticsForProject(userID: number, projectID: number, trusted = false): Promise<Analytics> {
+export async function getAnalyticsForProject(
+  userID: number,
+  projectID: number,
+  trusted = false,
+  range = 30
+): Promise<Analytics> {
   if (!trusted) {
     await ensureProjectAccess(userID, projectID)
   }
 
-  const range = 30
   const recentLogEntries = await getLogEntriesForProject(userID, projectID, true)
   const analyticsData = await getOrderedEntities(Entity.ANALYTICS, 'projectID', projectID, ['createdAt'], 2 * range)
 
