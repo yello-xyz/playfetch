@@ -34,6 +34,11 @@ const toProviderData = (
   excludeFromIndexes: ['apiKey'],
 })
 
+const toAvailableProvider = (data: any): AvailableProvider => ({
+  provider: data.provider,
+  cost: data.cost,
+})
+
 export async function incrementProviderCostForUser(userID: number, provider: ModelProvider, cost: number) {
   await runTransactionWithExponentialBackoff(async transaction => {
     const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider), transaction)
@@ -53,11 +58,11 @@ export async function saveProviderKey(userID: number, provider: ModelProvider, a
 
 export async function getAvailableProvidersForUser(userID: number): Promise<AvailableProvider[]> {
   const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
-  const providerKeys: AvailableProvider[] = providerData
+  const availableProviders: AvailableProvider[] = providerData
     .filter(data => !!data.apiKey?.length)
-    .map(data => ({ provider: data.provider, cost: data.cost }))
-  if (!providerKeys.find(key => key.provider === DefaultProvider)) {
-    providerKeys.push({ provider: DefaultProvider, cost: 0 })
+    .map(toAvailableProvider)
+  if (!availableProviders.find(key => key.provider === DefaultProvider)) {
+    availableProviders.push({ provider: DefaultProvider, cost: 0 })
   }
-  return providerKeys
+  return availableProviders
 }
