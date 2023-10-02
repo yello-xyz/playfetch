@@ -11,6 +11,7 @@ import {
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { AvailableProvider, CustomModel, ModelProvider } from '@/types'
+import { FineTunedModelsForProvider } from '../providers/integration'
 
 const buildProviderFilter = (userID: number, provider: ModelProvider) =>
   and([buildFilter('userID', userID), buildFilter('provider', provider)])
@@ -85,13 +86,58 @@ export async function saveProviderKey(userID: number, provider: ModelProvider, a
   await getDatastore().save(toProviderData(userID, provider, apiKey, 0, [], providerID))
 }
 
-export async function getAvailableProvidersForUser(userID: number): Promise<AvailableProvider[]> {
+export async function getAvailableProvidersForUser(
+  userID: number,
+  reloadCustomModels = false
+): Promise<AvailableProvider[]> {
   const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
-  const availableProviders: AvailableProvider[] = providerData
-    .filter(data => !!data.apiKey?.length)
-    .map(toAvailableProvider)
+
+  const availableProviders = [] as AvailableProvider[]
+  const providerDataToSave = [] as any[]
+  for (const availableProviderData of providerData.filter(data => !!data.apiKey?.length)) {
+    const availableProvider = reloadCustomModels
+      ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
+      : toAvailableProvider(availableProviderData)
+    availableProviders.push(availableProvider)
+  }
+  if (providerDataToSave.length > 0) {
+    await getDatastore().save(providerDataToSave)
+  }
+
   if (!availableProviders.find(key => key.provider === DefaultProvider)) {
     availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [] })
   }
+
   return availableProviders
+}
+
+async function loadProviderWithCustomModels(availableProviderData: any, providerDataToSave: any[]) {
+  const previousCustomModels = JSON.parse(availableProviderData.customModels) as CustomModel[]
+  const currentCustomModels = await FineTunedModelsForProvider(
+    availableProviderData.provider,
+    availableProviderData.apiKey
+  )
+  const filteredCustomModels = previousCustomModels.filter(
+    model => !!currentCustomModels.find(current => current.id === model.id)
+  )
+  if (filteredCustomModels.length < previousCustomModels.length) {
+    providerDataToSave.push(
+      toProviderData(
+        availableProviderData.userID,
+        availableProviderData.provider,
+        availableProviderData.apiKey,
+        availableProviderData.cost,
+        filteredCustomModels,
+        getID(availableProviderData)
+      )
+    )
+  }
+  const additionalModels = currentCustomModels.filter(
+    model => !previousCustomModels.find(previous => previous.id === model.id)
+  )
+  const availableProvider = toAvailableProvider(availableProviderData)
+  if (additionalModels.length > 0) {
+    availableProvider.customModels.push(...additionalModels.map(model => ({ id: model.id, name: '', enabled: false })))
+  }
+  return availableProvider
 }
