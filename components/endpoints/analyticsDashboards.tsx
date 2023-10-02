@@ -64,6 +64,7 @@ export default function AnalyticsDashboards({ analytics }: { analytics?: Analyti
         title='Total cost'
         value={FormatCost(totalCost)}
         percentIncrement={incrementalCost}
+        lowerIsBetter
         range={recentUsage.length}>
         <AreaChart id='cost' data={data} margin={margin}>
           <Area type='bump' strokeWidth={1.5} dataKey='cost' stroke='#61A2EE' fill='#DCEAFA' />
@@ -89,12 +90,14 @@ function Container({
   title,
   value,
   percentIncrement,
+  lowerIsBetter = false,
   range,
   children,
 }: {
   title?: string
   value?: string | number
   percentIncrement?: number
+  lowerIsBetter?: boolean
   range?: number
   children: ReactElement<any>
 }) {
@@ -110,7 +113,7 @@ function Container({
           {percentIncrement !== undefined && (
             <span
               className={`flex px-1 py-px text-xs rounded ${
-                percentIncrement < 0 ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-400'
+                percentIncrement < 0 !== lowerIsBetter ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-400'
               }`}>
               {percentIncrement > 0 ? '+' : ''}
               {percentIncrement}%
