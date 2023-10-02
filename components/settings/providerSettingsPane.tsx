@@ -1,37 +1,16 @@
-import { useLoggedInUser } from '@/src/client/context/userContext'
-import Label from './label'
-import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AllProviders, IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
+import Label from '../label'
+import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
 import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
-import PickNameDialog from './pickNameDialog'
+import PickNameDialog from '../pickNameDialog'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { FormatCost } from '@/src/common/formatting'
-import Icon from './icon'
-import Button from './button'
-import TextInput from './textInput'
+import Icon from '../icon'
+import Button from '../button'
+import TextInput from '../textInput'
 
-const labelFor = (provider: ModelProvider) => LabelForProvider(provider)
-
-export default function UserSettingsView() {
-  const user = useLoggedInUser()
-
-  const allProviders = AllProviders.sort((a, b) => labelFor(a).localeCompare(labelFor(b))).filter(
-    provider => provider !== DefaultProvider
-  )
-  const [availableProviders, setAvailableProviders] = useState(user.availableProviders)
-
-  const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
-
-  return (
-    <div className='flex flex-col items-start flex-1 gap-3 p-6 text-gray-500 max-w-[680px]'>
-      <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} onRefresh={refresh} />
-    </div>
-  )
-}
-
-function ProviderSettingsPane({
+export default function ProviderSettingsPane({
   providers,
   availableProviders,
   onRefresh,
@@ -70,7 +49,7 @@ function ProviderRow({
   availableProvider?: AvailableProvider
   onRefresh: () => void
 }) {
-  const label = labelFor(provider)
+  const label = LabelForProvider(provider)
 
   const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
 
