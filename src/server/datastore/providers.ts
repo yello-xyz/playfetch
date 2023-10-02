@@ -11,7 +11,7 @@ import {
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { AvailableProvider, CustomModel, ModelProvider } from '@/types'
-import { FineTunedModelsForProvider } from '../providers/integration'
+import { CustomModelsForProvider } from '../providers/integration'
 
 const buildProviderFilter = (userID: number, provider: ModelProvider) =>
   and([buildFilter('userID', userID), buildFilter('provider', provider)])
@@ -142,13 +142,11 @@ export async function getAvailableProvidersForUser(
 
 async function loadProviderWithCustomModels(availableProviderData: any, providerDataToSave: any[]) {
   const previousCustomModels = JSON.parse(availableProviderData.customModels) as CustomModel[]
-  const currentCustomModels = await FineTunedModelsForProvider(
+  const currentCustomModels = await CustomModelsForProvider(
     availableProviderData.provider,
     availableProviderData.apiKey
   )
-  const filteredCustomModels = previousCustomModels.filter(
-    model => !!currentCustomModels.find(current => current.id === model.id)
-  )
+  const filteredCustomModels = previousCustomModels.filter(model => currentCustomModels.includes(model.id))
   if (filteredCustomModels.length < previousCustomModels.length) {
     providerDataToSave.push(
       toProviderData(
@@ -162,12 +160,12 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
     )
   }
   const additionalModels = currentCustomModels.filter(
-    model => !previousCustomModels.find(previous => previous.id === model.id)
+    model => !previousCustomModels.find(previous => previous.id === model)
   )
   const availableProvider = toAvailableProvider(availableProviderData)
   availableProvider.customModels = [
     ...filteredCustomModels,
-    ...additionalModels.map(model => ({ id: model.id, name: '', description: '', enabled: false })),
+    ...additionalModels.map(model => ({ id: model, name: '', description: '', enabled: false })),
   ]
   return availableProvider
 }

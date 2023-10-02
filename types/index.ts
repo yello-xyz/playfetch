@@ -80,11 +80,6 @@ export type PromptConfig = {
   maxTokens: number
 }
 
-export type FineTunedModel = {
-  id: string
-  provider: ModelProvider
-}
-
 export type CustomModel = {
   id: string
   name: string

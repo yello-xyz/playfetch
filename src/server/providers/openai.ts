@@ -1,4 +1,4 @@
-import { FineTunedModel, OpenAILanguageModel, PromptInputs } from '@/types'
+import { OpenAILanguageModel, PromptInputs } from '@/types'
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../promptEngine'
 import { CostForModel } from './integration'
@@ -134,11 +134,9 @@ async function tryCompleteChat(
   }
 }
 
-export async function loadFineTunedModels(apiKey: string): Promise<FineTunedModel[]> {
+export async function loadCustomModels(apiKey: string): Promise<string[]> {
   const api = new OpenAI({ apiKey })
   const response = await api.models.list()
   const supportedRootModel: OpenAILanguageModel = 'gpt-3.5-turbo'
-  return response.data
-    .filter(model => model.id.startsWith(`ft:${supportedRootModel}`))
-    .map(model => ({ provider: 'openai', id: model.id }))
+  return response.data.filter(model => model.id.startsWith(`ft:${supportedRootModel}`)).map(model => model.id)
 }
