@@ -50,23 +50,24 @@ function ModelSelectorPopup({
   checkProvider,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
-  const labelFor = (model: LanguageModel) => FullLabelForModel(model, false)
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      {AllModels.sort((a, b) => labelFor(a).localeCompare(labelFor(b))).map((model, index) => (
-        <div key={index} className='group'>
-          <PopupLabelItem
-            label={labelFor(model)}
-            icon={IconForProvider(ProviderForModel(model))}
-            onClick={withDismiss(() => onSelectModel(model))}
-            disabled={!checkProvider(ProviderForModel(model))}
-            checked={model === selectedModel}
-          />
-          <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
-            <ModelInfoPane model={model} />
+      {AllModels.sort((a, b) => FullLabelForModel(a, true).localeCompare(FullLabelForModel(b, true))).map(
+        (model, index) => (
+          <div key={index} className='group'>
+            <PopupLabelItem
+              label={FullLabelForModel(model, false)}
+              icon={IconForProvider(ProviderForModel(model))}
+              onClick={withDismiss(() => onSelectModel(model))}
+              disabled={!checkProvider(ProviderForModel(model))}
+              checked={model === selectedModel}
+            />
+            <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
+              <ModelInfoPane model={model} />
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      )}
     </PopupContent>
   )
 }
