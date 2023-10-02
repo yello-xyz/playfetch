@@ -1,7 +1,7 @@
-import { OpenAILanguageModel, PromptInputs } from '@/types'
+import { FineTunedModel, OpenAILanguageModel, PromptInputs } from '@/types'
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../promptEngine'
-import { CostForModel } from './costCalculation'
+import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
@@ -132,4 +132,13 @@ async function tryCompleteChat(
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }
+}
+
+export async function loadFineTunedModels(apiKey: string): Promise<FineTunedModel[]> {
+  const api = new OpenAI({ apiKey })
+  const response = await api.models.list()
+  const supportedRootModel: OpenAILanguageModel = 'gpt-3.5-turbo'
+  return response.data
+    .filter(model => model.id.startsWith(`ft:${supportedRootModel}`))
+    .map(model => ({ provider: 'openai', id: model.id }))
 }

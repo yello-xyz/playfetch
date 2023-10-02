@@ -12,7 +12,8 @@ import openai from '@/src/server/providers/openai'
 import anthropic from '@/src/server/providers/anthropic'
 import vertexai from '@/src/server/providers/vertexai'
 import cohere from '@/src/server/providers/cohere'
-import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { APIKeyForProvider } from './providers/integration'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -60,17 +61,6 @@ export default async function runPromptWithConfig(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
-  const getAPIKey = async (provider: ModelProvider) => {
-    switch (provider) {
-      case 'google':
-        return null
-      case 'openai':
-      case 'anthropic':
-      case 'cohere':
-        return getProviderKey(userID, provider)
-    }
-  }
-
   const getPredictor = (provider: ModelProvider, apiKey: string): Predictor => {
     switch (provider) {
       case 'google':
@@ -84,7 +74,7 @@ export default async function runPromptWithConfig(
     }
   }
 
-  const apiKey = await getAPIKey(config.provider)
+  const apiKey = await APIKeyForProvider(userID, config.provider)
   const predictor: Predictor = getPredictor(config.provider, apiKey ?? '')
 
   let result: PredictionResponse = { output: '', cost: 0 }

@@ -80,15 +80,20 @@ export type PromptConfig = {
   maxTokens: number
 }
 
+export type FineTunedModel = {
+  id: string
+  provider: ModelProvider
+}
+
 export type CustomModel = {
-  model: string,
-  name: string,
-  enabled: boolean,
+  id: string
+  name: string
+  enabled: boolean
 }
 
 export type AvailableProvider = {
   provider: ModelProvider
-  cost: number,
+  cost: number
   customModels: CustomModel[]
 }
 

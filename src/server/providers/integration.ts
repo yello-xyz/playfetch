@@ -1,0 +1,31 @@
+import { InputPriceForModel, OutputPriceForModel } from '@/src/common/providerMetadata'
+import { LanguageModel, ModelProvider } from '@/types'
+import { encode } from 'gpt-3-encoder'
+import { getProviderKey } from '../datastore/providers'
+import { loadFineTunedModels } from './openai'
+
+export const CostForModel = (model: LanguageModel, input: string, output: string) =>
+  (encode(input).length * InputPriceForModel(model)) / 1000000 +
+  (encode(output).length * OutputPriceForModel(model)) / 1000000
+
+export const APIKeyForProvider = async (userID: number, provider: ModelProvider) => {
+  switch (provider) {
+    case 'google':
+      return null
+    case 'openai':
+    case 'anthropic':
+    case 'cohere':
+      return getProviderKey(userID, provider)
+  }
+}
+
+export const FineTunedModelsForProvider = async (provider: ModelProvider, apiKey: string) => {
+  switch (provider) {
+    case 'google':
+    case 'anthropic':
+    case 'cohere':
+      return []
+    case 'openai':
+      return loadFineTunedModels(apiKey)
+  }
+}
