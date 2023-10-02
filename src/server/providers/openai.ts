@@ -1,8 +1,8 @@
 import { OpenAILanguageModel, PromptInputs } from '@/types'
-import { ChatCompletionFunctions, Configuration, OpenAIApi } from 'openai'
-import { StreamResponseData } from '../stream'
+import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../promptEngine'
 import { CostForModel } from './costCalculation'
+import { ChatCompletionCreateParams } from 'openai/resources/chat'
 
 export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
   return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
@@ -58,7 +58,7 @@ async function tryCompleteChat(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ) {
-  let functions = [] as ChatCompletionFunctions[]
+  let functions = [] as ChatCompletionCreateParams.Function[]
   if (functionsPrompt) {
     try {
       functions = JSON.parse(functionsPrompt)
@@ -68,11 +68,11 @@ async function tryCompleteChat(
   }
 
   try {
-    const api = new OpenAIApi(new Configuration({ apiKey }))
+    const api = new OpenAI({ apiKey })
     const previousMessages = useContext ? context?.messages ?? [] : []
     const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
     const previousFunctions = useContext ? context?.functions ?? [] : []
-    const response = await api.createChatCompletion(
+    const response = await api.chat.completions.create(
       {
         model,
         messages: [...previousMessages, ...promptMessages],
@@ -82,16 +82,15 @@ async function tryCompleteChat(
         stream: true,
         functions: previousFunctions.length || functions.length ? [...previousFunctions, ...functions] : undefined,
       },
-      { responseType: 'stream', timeout: 30 * 1000 }
+      { timeout: 30 * 1000 }
     )
 
     let output = ''
     let isFunctionCall = false
-    for await (const message of StreamResponseData(response.data)) {
+    for await (const message of response) {
       let text = ''
 
-      const parsed = JSON.parse(message)
-      const choice = parsed.choices[0]
+      const choice = message.choices[0]
       const functionCall = choice.delta?.function_call
 
       if (functionCall) {
@@ -99,7 +98,7 @@ async function tryCompleteChat(
         if (functionCall.name) {
           text = `{\n  "function": {\n    "name": "${functionCall.name}",\n    "arguments": `
         }
-        text += functionCall.arguments.replaceAll('\n', '\n    ')
+        text += functionCall.arguments?.replaceAll('\n', '\n    ')
       } else {
         text = choice.delta?.content ?? ''
       }
