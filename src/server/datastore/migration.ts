@@ -8,6 +8,7 @@ import { migrateInputs } from './inputs'
 import { migrateLogs } from './logs'
 import { migrateProjects } from './projects'
 import { migratePrompts } from './prompts'
+import { migrateProviders } from './providers'
 import { migrateRuns } from './runs'
 import { migrateUsage } from './usage'
 import { migrateUsers } from './users'
@@ -16,4 +17,5 @@ import { migrateWorkspaces } from './workspaces'
 
 export async function runDataMigrations(postMerge: boolean) {
   await migrateLogs(postMerge)
+  await migrateProviders(postMerge)
 }

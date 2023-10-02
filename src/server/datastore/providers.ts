@@ -10,12 +10,32 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AvailableProvider, ModelProvider } from '@/types'
+import { AvailableProvider, CustomModel, ModelProvider } from '@/types'
 
 const buildProviderFilter = (userID: number, provider: ModelProvider) =>
   and([buildFilter('userID', userID), buildFilter('provider', provider)])
 const getProviderData = (userID: number, provider: ModelProvider) =>
   getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider))
+
+export async function migrateProviders(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
+  const datastore = getDatastore()
+  const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
+  for (const providerData of allProviders) {
+    await getDatastore().save(
+      toProviderData(
+        providerData.userID,
+        providerData.provider,
+        providerData.apiKey,
+        providerData.cost,
+        providerData.customModels ? JSON.parse(providerData.customModels) : [],
+        getID(providerData)
+      )
+    )
+  }
+}
 
 export async function getProviderKey(userID: number, provider: ModelProvider): Promise<string | null> {
   const providerData = await getProviderData(userID, provider)
@@ -27,16 +47,18 @@ const toProviderData = (
   provider: ModelProvider,
   apiKey: string | null,
   cost: number,
+  customModels: CustomModel[],
   providerID?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
-  data: { userID, provider, apiKey, cost },
-  excludeFromIndexes: ['apiKey'],
+  data: { userID, provider, apiKey, cost, customModels: JSON.stringify(customModels) },
+  excludeFromIndexes: ['apiKey', 'customModels'],
 })
 
 const toAvailableProvider = (data: any): AvailableProvider => ({
   provider: data.provider,
   cost: data.cost,
+  customModels: JSON.parse(data.customModels),
 })
 
 export async function incrementProviderCostForUser(userID: number, provider: ModelProvider, cost: number) {
@@ -44,7 +66,14 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
     const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider), transaction)
     if (providerData) {
       transaction.save(
-        toProviderData(userID, provider, providerData.apiKey, providerData.cost + cost, getID(providerData))
+        toProviderData(
+          userID,
+          provider,
+          providerData.apiKey,
+          providerData.cost + cost,
+          JSON.parse(providerData.customModels),
+          getID(providerData)
+        )
       )
     }
   })
@@ -53,7 +82,16 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
 export async function saveProviderKey(userID: number, provider: ModelProvider, apiKey: string | null) {
   const providerData = await getProviderData(userID, provider)
   const providerID = providerData ? getID(providerData) : undefined
-  await getDatastore().save(toProviderData(userID, provider, apiKey, providerData?.cost ?? 0, providerID))
+  await getDatastore().save(
+    toProviderData(
+      userID,
+      provider,
+      apiKey,
+      providerData?.cost ?? 0,
+      providerData?.customModels ? JSON.parse(providerData.customModels) : [],
+      providerID
+    )
+  )
 }
 
 export async function getAvailableProvidersForUser(userID: number): Promise<AvailableProvider[]> {
@@ -62,7 +100,7 @@ export async function getAvailableProvidersForUser(userID: number): Promise<Avai
     .filter(data => !!data.apiKey?.length)
     .map(toAvailableProvider)
   if (!availableProviders.find(key => key.provider === DefaultProvider)) {
-    availableProviders.push({ provider: DefaultProvider, cost: 0 })
+    availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [] })
   }
   return availableProviders
 }
