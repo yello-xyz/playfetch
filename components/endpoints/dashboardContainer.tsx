@@ -8,6 +8,7 @@ export default function DashboardContainer({
   lowerIsBetter = false,
   range,
   callback,
+  addBottomPadding = false,
   children,
 }: {
   title?: string
@@ -16,8 +17,10 @@ export default function DashboardContainer({
   lowerIsBetter?: boolean
   range: number
   callback: () => void
+  addBottomPadding?: boolean
   children: ReactElement<any>
 }) {
+  console.log(addBottomPadding)
   return (
     <div className='flex flex-col flex-1 bg-white border border-gray-200 rounded-md'>
       <div className='flex flex-col px-4 pt-3'>
@@ -28,7 +31,7 @@ export default function DashboardContainer({
           </span>
         </div>
         <div className='flex items-center gap-2'>
-          <span className='text-lg font-bold text-gray-800'>{value}</span>
+          <span className='text-lg font-bold text-gray-800'>{value || '\u00A0'}</span>
           {percentIncrement && (
             <span
               className={`flex px-1 py-px text-xs rounded ${
@@ -40,11 +43,13 @@ export default function DashboardContainer({
           )}
         </div>
       </div>
+      {!addBottomPadding && <div className='h-2'/>}
       <div className='relative w-full pb-40'>
         <div className='absolute inset-0'>
           <ResponsiveContainer>{children}</ResponsiveContainer>
         </div>
       </div>
+      {addBottomPadding && <div className='h-2'/>}
     </div>
   )
 }

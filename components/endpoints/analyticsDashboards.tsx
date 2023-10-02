@@ -1,7 +1,6 @@
 import { FormatCost, FormatDate } from '@/src/common/formatting'
 import { Analytics, Usage } from '@/types'
-import { ReactElement } from 'react'
-import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { Area, AreaChart, Bar, BarChart, Pie, PieChart, Sector, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from './dashboardContainer'
 
 const daysAgo = (date: Date, days: number) => {
@@ -21,7 +20,7 @@ const prepareData = (analytics: Usage[]) =>
     }))
 
 const percentIncrement = (current: number, previous: number) =>
-  Math.round(previous === 0 ? 100 : (100 * (current - previous)) / previous)
+  Math.round(previous === 0 ? (current === 0 ? 0 : 100) : (100 * (current - previous)) / previous)
 
 export default function AnalyticsDashboards({
   analytics,
@@ -33,6 +32,7 @@ export default function AnalyticsDashboards({
   const margin = { left: 0, right: 0, top: 10, bottom: 0 }
 
   const recentUsage = analytics?.recentUsage ?? []
+  const previousUsage = analytics?.aggregatePreviousUsage ?? { requests: 0, cost: 0, cacheHits: 0 }
 
   const totalRequests = recentUsage.reduce((acc, usage) => acc + usage.requests, 0)
   const totalCost = recentUsage.reduce((acc, usage) => acc + usage.cost, 0)
@@ -49,8 +49,10 @@ export default function AnalyticsDashboards({
   )
   const data = prepareData(recentUsage)
 
-  const incrementalRequests = percentIncrement(totalRequests, analytics?.aggregatePreviousUsage?.requests ?? 0)
-  const incrementalCost = percentIncrement(totalCost, analytics?.aggregatePreviousUsage?.cost ?? 0)
+  const incrementalRequests = percentIncrement(totalRequests, previousUsage.requests)
+  const incrementalCost = percentIncrement(totalCost, previousUsage.cost)
+  const cacheHits = recentUsage.reduce((acc, usage) => acc + usage.cacheHits, 0) / (totalRequests || 1)
+  const incrementalCacheHits = percentIncrement(cacheHits, previousUsage.cacheHits / (previousUsage.requests || 1))
 
   const dayRange = recentUsage.length
   const toggleDayRange = () => refreshAnalytics(dayRange === 30 ? 7 : 30)
@@ -94,6 +96,81 @@ export default function AnalyticsDashboards({
           <Tooltip cursor={false} />
         </BarChart>
       </DashboardContainer>
+      {(cacheHits > 0 || incrementalCacheHits < 0) && (
+        <DashboardContainer
+          title='Cache hit rate'
+          range={recentUsage.length}
+          callback={toggleDayRange}
+          addBottomPadding>
+          <PieChart>
+            <Pie
+              data={[{ value: 1 - cacheHits }, { name: `${(100 * cacheHits).toFixed(0)}%`, value: cacheHits }]}
+              activeIndex={1}
+              activeShape={renderPieSegment}
+              startAngle={90 - cacheHits * 360}
+              endAngle={-270 - cacheHits * 360}
+              cx='50%'
+              cy='50%'
+              innerRadius={60}
+              outerRadius={80}
+              dataKey='value'
+            />
+          </PieChart>
+        </DashboardContainer>
+      )}
     </div>
   ) : null
+}
+
+const renderPieSegment = ({
+  cx,
+  cy,
+  innerRadius,
+  outerRadius,
+  startAngle,
+  endAngle,
+  payload,
+}: {
+  cx: number
+  cy: number
+  innerRadius: number
+  outerRadius: number
+  startAngle: number
+  endAngle: number
+  payload: { name: string }
+}) => {
+  return (
+    <g>
+      <defs>
+        <linearGradient id='gradient' x1='1' y1='1' x2='0' y2='0'>
+          <stop offset='0%' stopColor='#E14BD2' stopOpacity={1} />
+          <stop offset='100%' stopColor='#E14BD2' stopOpacity={0.3} />
+        </linearGradient>
+      </defs>
+      <text x={cx} y={cy} dy={8} textAnchor='middle' fill='#333A46' fontSize={30} fontWeight={600}>
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={0}
+        endAngle={360}
+        fill='#FDF2FC'
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        cornerRadius={10}
+        forceCornerRadius
+        cornerIsExternal
+        fill='url(#gradient)'
+      />
+    </g>
+  )
 }
