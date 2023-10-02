@@ -88,6 +88,7 @@ export type FineTunedModel = {
 export type CustomModel = {
   id: string
   name: string
+  description: string
   enabled: boolean
 }
 
