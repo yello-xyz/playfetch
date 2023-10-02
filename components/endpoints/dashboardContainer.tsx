@@ -43,13 +43,13 @@ export default function DashboardContainer({
           )}
         </div>
       </div>
-      {!addBottomPadding && <div className='h-2'/>}
+      {!addBottomPadding && <div className='h-2' />}
       <div className='relative w-full pb-40'>
         <div className='absolute inset-0'>
           <ResponsiveContainer>{children}</ResponsiveContainer>
         </div>
       </div>
-      {addBottomPadding && <div className='h-2'/>}
+      {addBottomPadding && <div className='h-2' />}
     </div>
   )
 }

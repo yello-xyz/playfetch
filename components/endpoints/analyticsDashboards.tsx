@@ -1,4 +1,4 @@
-import { FormatCost, FormatDate } from '@/src/common/formatting'
+import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { Analytics, Usage } from '@/types'
 import { Area, AreaChart, Bar, BarChart, Pie, PieChart, Sector, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from './dashboardContainer'
@@ -15,7 +15,7 @@ const prepareData = (analytics: Usage[]) =>
     .map((usage, index) => ({
       ...usage,
       name: FormatDate(daysAgo(new Date(), 30 - index).getTime(), false, true),
-      duration: (usage.duration / (usage.requests || 1)).toFixed(2),
+      duration: usage.duration / (usage.requests || 1),
       success: usage.requests - usage.failures,
     }))
 
@@ -57,6 +57,12 @@ export default function AnalyticsDashboards({
   const dayRange = recentUsage.length
   const toggleDayRange = () => refreshAnalytics(dayRange === 30 ? 7 : 30)
 
+  const formatRequestPayload = (payload: any[]) =>
+    `${payload[0].value + payload[1].value} requests${payload[0].value > 0 ? ` (${payload[0].value} failures)` : ''}`
+  const formatCostPayload = (payload: any[]) => FormatCost(payload[0].value)
+  const hasDurationPayload = (payload: any[]) => payload[0].value > 0
+  const formatDurationPayload = (payload: any[]) => FormatDuration(payload[0].value)
+
   return totalRequests > 0 ? (
     <div className='flex gap-4'>
       <DashboardContainer
@@ -69,7 +75,7 @@ export default function AnalyticsDashboards({
           <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='failures' stroke='#DC4F30' fill='#FDE5E0' />
           <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='success' stroke='#71B892' fill='#DDF1E7' />
           <XAxis dataKey='name' hide />
-          <Tooltip cursor={false} />
+          <Tooltip cursor={false} content={<CustomTooltip formatter={formatRequestPayload} />} />
         </AreaChart>
       </DashboardContainer>
       <DashboardContainer
@@ -82,7 +88,7 @@ export default function AnalyticsDashboards({
         <AreaChart id='cost' data={data} margin={margin}>
           <Area type='bump' strokeWidth={1.5} dataKey='cost' stroke='#61A2EE' fill='#DCEAFA' />
           <XAxis dataKey='name' hide />
-          <Tooltip cursor={false} />
+          <Tooltip cursor={false} content={<CustomTooltip formatter={formatCostPayload} />} />
         </AreaChart>
       </DashboardContainer>
       <DashboardContainer
@@ -93,7 +99,10 @@ export default function AnalyticsDashboards({
         <BarChart id='duration' data={data} margin={{ ...margin, left: 10, right: 10 }}>
           <Bar type='bump' dataKey='duration' fill='#BEA4F6' />
           <XAxis dataKey='name' hide />
-          <Tooltip cursor={false} />
+          <Tooltip
+            cursor={false}
+            content={<CustomTooltip renderIf={hasDurationPayload} formatter={formatDurationPayload} />}
+          />
         </BarChart>
       </DashboardContainer>
       {(cacheHits > 0 || incrementalCacheHits < 0) && (
@@ -122,6 +131,25 @@ export default function AnalyticsDashboards({
   ) : null
 }
 
+const CustomTooltip = ({
+  active,
+  payload = [],
+  label,
+  formatter = payload => payload[0].value.toString(),
+  renderIf = _ => true,
+}: {
+  active?: boolean
+  payload?: any[]
+  label?: string
+  formatter?: (payload: any[]) => string
+  renderIf?: (payload: any[]) => boolean
+}) =>
+  active && payload && payload.length && renderIf(payload) ? (
+    <div className='p-2 bg-white border border-gray-300 rounded'>
+      <span>{`${label}: ${formatter(payload)}`}</span>
+    </div>
+  ) : null
+
 const renderPieSegment = ({
   cx,
   cy,
@@ -138,39 +166,37 @@ const renderPieSegment = ({
   startAngle: number
   endAngle: number
   payload: { name: string }
-}) => {
-  return (
-    <g>
-      <defs>
-        <linearGradient id='gradient' x1='1' y1='1' x2='0' y2='0'>
-          <stop offset='0%' stopColor='#E14BD2' stopOpacity={1} />
-          <stop offset='100%' stopColor='#E14BD2' stopOpacity={0.3} />
-        </linearGradient>
-      </defs>
-      <text x={cx} y={cy} dy={8} textAnchor='middle' fill='#333A46' fontSize={30} fontWeight={600}>
-        {payload.name}
-      </text>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={0}
-        endAngle={360}
-        fill='#FDF2FC'
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        cornerRadius={10}
-        forceCornerRadius
-        cornerIsExternal
-        fill='url(#gradient)'
-      />
-    </g>
-  )
-}
+}) => (
+  <g>
+    <defs>
+      <linearGradient id='gradient' x1='1' y1='1' x2='0' y2='0'>
+        <stop offset='0%' stopColor='#E14BD2' stopOpacity={1} />
+        <stop offset='100%' stopColor='#E14BD2' stopOpacity={0.3} />
+      </linearGradient>
+    </defs>
+    <text x={cx} y={cy} dy={8} textAnchor='middle' fill='#333A46' fontSize={30} fontWeight={600}>
+      {payload.name}
+    </text>
+    <Sector
+      cx={cx}
+      cy={cy}
+      innerRadius={innerRadius}
+      outerRadius={outerRadius}
+      startAngle={0}
+      endAngle={360}
+      fill='#FDF2FC'
+    />
+    <Sector
+      cx={cx}
+      cy={cy}
+      innerRadius={innerRadius}
+      outerRadius={outerRadius}
+      startAngle={startAngle}
+      endAngle={endAngle}
+      cornerRadius={10}
+      forceCornerRadius
+      cornerIsExternal
+      fill='url(#gradient)'
+    />
+  </g>
+)
