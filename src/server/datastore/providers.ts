@@ -38,8 +38,16 @@ export async function migrateProviders(postMerge: boolean) {
   }
 }
 
-export async function getProviderKey(userID: number, provider: ModelProvider): Promise<string | null> {
+export async function getProviderKey(
+  userID: number,
+  provider: ModelProvider,
+  customModel?: string
+): Promise<string | null> {
   const providerData = await getProviderData(userID, provider)
+  const customModels = providerData ? (JSON.parse(providerData.customModels) as CustomModel[]) : []
+  if (customModel && !customModels.find(model => model.id === customModel && model.enabled)) {
+    return null
+  }
   return providerData?.apiKey ?? null
 }
 
