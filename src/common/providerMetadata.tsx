@@ -70,7 +70,7 @@ export const isCustomModel = (model: LanguageModel): model is CustomLanguageMode
   }
 }
 
-// TODO generalise when we extend fine-tuning support
+// TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
 const baseModelForModel = (model: LanguageModel): DefaultLanguageModel =>
   isCustomModel(model) ? 'gpt-3.5-turbo' : model
 
@@ -242,7 +242,7 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
     case 'command':
       return 'https://docs.cohere.com/docs/models'
     default:
-      // TODO generalise when we extend fine-tuning support
+      // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
       return 'https://platform.openai.com/docs/guides/fine-tuning'
   }
 }
@@ -303,7 +303,8 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
     case 'text-bison@001':
       return 0
     default:
-      return InputPriceForModel(baseModelForModel(model))
+      // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
+      return 12
   }
 }
 
@@ -324,6 +325,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
     case 'text-bison@001':
       return 0
     default:
-      return OutputPriceForModel(baseModelForModel(model))
+      // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
+      return 16
   }
 }
