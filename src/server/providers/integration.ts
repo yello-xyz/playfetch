@@ -38,12 +38,11 @@ export const CreateEmbedding = async (userID: number, input: string | string[]) 
     throw new Error('Missing API key')
   }
 
-  const embedding = createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
+  const embedding = await createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
 
   const pricePerMillionTokens = 0.1
   const flattenedInput = Array.isArray(input) ? input.join('\n') : input
   const cost = costForTokens(flattenedInput, pricePerMillionTokens)
-  incrementProviderCostForUser(userID, 'openai', cost)
   
-  return embedding
+  return { embedding, cost }
 }
