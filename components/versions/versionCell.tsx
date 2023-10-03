@@ -10,6 +10,7 @@ import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from '../icon'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -50,6 +51,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
 
   const user = activeItem.users.find(user => user.id === version.userID)
   const formattedDate = useFormattedDate(version.timestamp)
+  const availableProviders = useAvailableProviders()
 
   return (
     <VerticalBarWrapper
@@ -65,7 +67,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-700'>
             <span className='font-medium'>
-              {IsPromptVersion(version) ? LabelForModel(version.config.model) : formattedDate}
+              {IsPromptVersion(version) ? LabelForModel(version.config.model, availableProviders) : formattedDate}
             </span>
             {IsPromptVersion(version) && version.runs.length > 0 && (
               <span>

@@ -155,7 +155,7 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   }
 }
 
-const labelForModel = (model: LanguageModel): string => {
+const labelForModel = (model: LanguageModel, providers: AvailableProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5 Turbo'
@@ -170,12 +170,11 @@ const labelForModel = (model: LanguageModel): string => {
     case 'command':
       return 'Command'
     default:
-      // TODO get from available providers
-      return labelForModel(baseModelForModel(model))
+      return customModelFromProviders(model, providers)?.name ?? 'Unavailable'
   }
 }
 
-const shortLabelForModel = (model: LanguageModel): string => {
+const shortLabelForModel = (model: LanguageModel, providers: AvailableProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT3.5'
@@ -189,18 +188,19 @@ const shortLabelForModel = (model: LanguageModel): string => {
     case 'command':
       return 'Command'
     default:
-      // TODO get from available providers
-      return shortLabelForModel(baseModelForModel(model))
+      return labelForModel(model, providers)
   }
 }
 
-export const LabelForModel = (model: LanguageModel, includeProvider = true) =>
+export const LabelForModel = (model: LanguageModel, providers: AvailableProvider[], includeProvider = true) =>
   includeProvider
-    ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model)}`
-    : shortLabelForModel(model)
+    ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model, providers)}`
+    : shortLabelForModel(model, providers)
 
-export const FullLabelForModel = (model: LanguageModel, includeProvider = true) =>
-  includeProvider ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}` : labelForModel(model)
+export const FullLabelForModel = (model: LanguageModel, providers: AvailableProvider[], includeProvider = true) =>
+  includeProvider
+    ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model, providers)}`
+    : labelForModel(model, providers)
 
 export const WebsiteLinkForModel = (model: LanguageModel): string => {
   switch (model) {
@@ -237,10 +237,7 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailablePr
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
     default:
-      return (
-        customModelFromProviders(model, providers)?.description ??
-        DescriptionForModel(baseModelForModel(model), providers)
-      )
+      return customModelFromProviders(model, providers)?.description ?? ''
   }
 }
 

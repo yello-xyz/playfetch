@@ -20,6 +20,7 @@ import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 import Icon from '../icon'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -76,6 +77,7 @@ export default function PromptPanel({
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
   const checkProviderAvailable = useCheckProvider()
+  const availableProviders = useAvailableProviders()
   const isProviderAvailable = checkProviderAvailable(config.provider)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
@@ -125,7 +127,7 @@ export default function PromptPanel({
                 <div className='flex items-center min-w-0 gap-1'>
                   <Icon icon={IconForProvider(ProviderForModel(config.model))} />
                   <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
-                    {FullLabelForModel(config.model)}
+                    {FullLabelForModel(config.model, availableProviders)}
                   </span>
                 </div>
               )}

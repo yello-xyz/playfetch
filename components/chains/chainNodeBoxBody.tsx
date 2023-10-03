@@ -8,6 +8,7 @@ import { TaggedVersionPrompt } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ChainNodeBoxBody({
   nodes,
@@ -43,11 +44,12 @@ function PromptNodeBody({
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
+  const availableProviders = useAvailableProviders()
   return prompt && version ? (
     <div className='flex flex-col'>
       <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2.5 ml-0.5'>
         <span className='text-xs font-medium text-gray-500'>
-          {LabelForModel(version.config.model)} | Prompt version {index + 1}
+          {LabelForModel(version.config.model, availableProviders)} | Prompt version {index + 1}
         </span>
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
