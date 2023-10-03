@@ -186,18 +186,17 @@ export function ModelUnavailableWarning({
   const isModelDisabled = checkModelDisabled(model)
 
   const router = useRouter()
-  const action = !isProviderAvailable || isModelDisabled ? () => router.push(ClientRoute.Settings) : undefined
 
-  const buttonTitle = isProviderAvailable ? (isModelDisabled ? 'Enable Model' : undefined) : 'Add API Key'
+  const buttonTitle = isProviderAvailable ? (isModelDisabled ? 'Enable Model' : 'View Settings') : 'Add API Key'
   const title = isProviderAvailable ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : 'Missing API Key'
   const description = isProviderAvailable
     ? isModelDisabled
       ? 'Custom models need to be enabled for use.'
-      : 'This custom model is no longer available.'
+      : 'Custom models need to be configured before use.'
     : 'An API key is required to use this model.'
 
   return (
-    <ButtonBanner type='warning' buttonTitle={buttonTitle} onClick={action}>
+    <ButtonBanner type='warning' buttonTitle={buttonTitle} onClick={() => router.push(ClientRoute.Settings)}>
       {includeTitle && <span className='font-medium text-gray-600'>{title}</span>}
       <span>{description}</span>
     </ButtonBanner>
@@ -219,8 +218,8 @@ function ButtonBanner({
   children,
 }: {
   type: 'info' | 'warning'
-  buttonTitle?: string
-  onClick?: () => void
+  buttonTitle: string
+  onClick: () => void
   children: ReactNode
 }) {
   const bannerColor = type === 'info' ? 'border-blue-100 bg-blue-25' : 'border-orange-100 bg-orange-25'
@@ -228,13 +227,11 @@ function ButtonBanner({
   return (
     <Banner className={`flex items-center justify-between gap-1 ${bannerColor}`}>
       <div className='flex flex-col'>{children}</div>
-      {onClick && buttonTitle && (
-        <div
-          className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
-          onClick={onClick}>
-          {buttonTitle}
-        </div>
-      )}
+      <div
+        className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
+        onClick={onClick}>
+        {buttonTitle}
+      </div>
     </Banner>
   )
 }

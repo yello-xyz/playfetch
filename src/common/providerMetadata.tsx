@@ -194,7 +194,7 @@ const labelForModel = (model: LanguageModel, providers: AvailableProvider[]): st
     case 'command':
       return 'Command'
     default:
-      return customModelFromProviders(model, providers)?.name ?? 'Unavailable'
+      return customModelFromProviders(model, providers)?.name ?? '(unavailable)'
   }
 }
 
