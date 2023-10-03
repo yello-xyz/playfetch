@@ -144,3 +144,14 @@ export async function loadCustomModels(apiKey: string): Promise<string[]> {
   const supportedRootModel: OpenAILanguageModel = 'gpt-3.5-turbo'
   return response.data.filter(model => model.id.startsWith(`ft:${supportedRootModel}`)).map(model => model.id)
 }
+
+export async function createEmbedding(
+  apiKey: string,
+  userID: number,
+  model: 'text-embedding-ada-002',
+  input: string | string[]
+): Promise<number[]> {
+  const api = new OpenAI({ apiKey })
+  const response = await api.embeddings.create({ input, model, user: userID.toString() })
+  return response.data[0].embedding
+}
