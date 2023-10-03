@@ -56,24 +56,30 @@ function ModelSelectorPopup({
   availableProviders,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
+  const allModels = [
+    ...AllModels,
+    ...availableProviders.flatMap(provider => provider.customModels.map(model => model.id)),
+  ]
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      {AllModels.sort((a, b) =>
-        FullLabelForModel(a, availableProviders, true).localeCompare(FullLabelForModel(b, availableProviders, true))
-      ).map((model, index) => (
-        <div key={index} className='group'>
-          <PopupLabelItem
-            label={FullLabelForModel(model, availableProviders, false)}
-            icon={IconForProvider(ProviderForModel(model))}
-            onClick={withDismiss(() => onSelectModel(model))}
-            disabled={!checkProvider(ProviderForModel(model))}
-            checked={model === selectedModel}
-          />
-          <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
-            <ModelInfoPane model={model} />
+      {allModels
+        .sort((a, b) =>
+          FullLabelForModel(a, availableProviders, true).localeCompare(FullLabelForModel(b, availableProviders, true))
+        )
+        .map((model, index) => (
+          <div key={index} className='group'>
+            <PopupLabelItem
+              label={FullLabelForModel(model, availableProviders, false)}
+              icon={IconForProvider(ProviderForModel(model))}
+              onClick={withDismiss(() => onSelectModel(model))}
+              disabled={!checkProvider(ProviderForModel(model))}
+              checked={model === selectedModel}
+            />
+            <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
+              <ModelInfoPane model={model} />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </PopupContent>
   )
 }
