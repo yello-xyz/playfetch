@@ -1,5 +1,5 @@
 import { incrementProviderCostForUser } from './datastore/providers'
-import { CreateEmbedding } from './providers/integration'
+import { APIKeyForProvider, CreateEmbedding } from './providers/integration'
 import runVectorQuery from './providers/pinecone'
 
 type QueryResponse = (
@@ -9,9 +9,15 @@ type QueryResponse = (
 
 export const runQuery = async (userID: number, indexName: string, query: string): Promise<QueryResponse> => {
   try {
-    const { embedding, cost } = await CreateEmbedding(userID, query)
+    const provider = 'openai'
+    const apiKey = await APIKeyForProvider(userID, provider)
+    if (!apiKey) {
+      throw new Error('Missing API key')
+    }
+  
+    const { embedding, cost } = await CreateEmbedding(provider, apiKey, userID, query)
 
-    incrementProviderCostForUser(userID, 'openai', cost)
+    incrementProviderCostForUser(userID, provider, cost)
 
     const result = await runVectorQuery(
       process.env.PINECONE_KEY ?? '',

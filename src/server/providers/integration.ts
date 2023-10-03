@@ -32,10 +32,13 @@ export const CustomModelsForProvider = async (provider: ModelProvider, apiKey: s
   }
 }
 
-export const CreateEmbedding = async (userID: number, input: string) => {
-  const apiKey = await APIKeyForProvider(userID, 'openai')
-  if (!apiKey) {
-    throw new Error('Missing API key')
+export const CreateEmbedding = async (provider: ModelProvider, apiKey: string, userID: number, input: string) => {
+  switch (provider) {
+    case 'google':
+    case 'anthropic':
+    case 'cohere':
+      throw new Error('Provider does not support embeddings yet')
+    case 'openai':
+      return createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
   }
-  return createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
 }
