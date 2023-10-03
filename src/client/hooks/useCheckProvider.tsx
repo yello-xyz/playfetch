@@ -1,7 +1,6 @@
-import { useLoggedInUser } from '../context/userContext'
+import useAvailableProviders from './useAvailableProviders'
 
 export default function useCheckProvider() {
-  const user = useLoggedInUser()
-
-  return (provider: string) => !!user.availableProviders.find(p => p.provider === provider)
+  const availableProviders = useAvailableProviders()
+  return (provider: string) => !!availableProviders.find(p => p.provider === provider)
 }
