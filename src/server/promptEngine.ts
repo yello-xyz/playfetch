@@ -111,7 +111,7 @@ export default async function runPromptWithConfig(
   }
 
   if (!isErrorPredictionResponse(result) && result.cost > 0) {
-    await incrementProviderCostForUser(userID, config.provider, result.cost)
+    incrementProviderCostForUser(userID, config.provider, result.cost)
   }
 
   return {

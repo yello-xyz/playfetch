@@ -43,7 +43,7 @@ export const CreateEmbedding = async (userID: number, input: string | string[]) 
   const pricePerMillionTokens = 0.1
   const flattenedInput = Array.isArray(input) ? input.join('\n') : input
   const cost = costForTokens(flattenedInput, pricePerMillionTokens)
-  await incrementProviderCostForUser(userID, 'openai', cost)
+  incrementProviderCostForUser(userID, 'openai', cost)
   
   return embedding
 }
