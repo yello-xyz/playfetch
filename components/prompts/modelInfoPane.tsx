@@ -14,7 +14,7 @@ import {
 import Icon from '../icon'
 import openInIcon from '@/public/openIn.svg'
 import Link from 'next/link'
-import { ProviderWarning } from './promptPanel'
+import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import useProviders from '@/src/client/hooks/useAvailableProviders'
 
@@ -54,7 +54,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
           </>
         )}
       </div>
-      {!isModelAvailable && <ProviderWarning includeTitle={false} />}
+      {!isModelAvailable && <ModelUnavailableWarning model={model} includeTitle={false} />}
     </PopupContent>
   )
 }

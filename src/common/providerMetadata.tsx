@@ -1,4 +1,12 @@
-import { AvailableProvider, CustomModel, DefaultLanguageModel, LanguageModel, ModelProvider, Prompts } from '@/types'
+import {
+  AvailableProvider,
+  CustomLanguageModel,
+  CustomModel,
+  DefaultLanguageModel,
+  LanguageModel,
+  ModelProvider,
+  Prompts,
+} from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
@@ -47,7 +55,7 @@ export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompt
   ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
 ]
 
-const baseModelForModel = (model: LanguageModel): DefaultLanguageModel => {
+export const isCustomModel = (model: LanguageModel): model is CustomLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
@@ -55,30 +63,32 @@ const baseModelForModel = (model: LanguageModel): DefaultLanguageModel => {
     case 'claude-2':
     case 'text-bison@001':
     case 'command':
-      return model
+      return false
     default:
-      // TODO generalise when we extend fine-tuning support
-      return 'gpt-3.5-turbo'
+      return true
   }
 }
+
+// TODO generalise when we extend fine-tuning support
+const baseModelForModel = (model: LanguageModel): DefaultLanguageModel =>
+  isCustomModel(model) ? 'gpt-3.5-turbo' : model
 
 const customModelFromProviders = (model: LanguageModel, providers: AvailableProvider[]): CustomModel | null => {
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
-export const IsModelAvailable = (model: LanguageModel, providers: AvailableProvider[]): boolean => {
-  switch (model) {
-    case 'gpt-3.5-turbo':
-    case 'gpt-4':
-    case 'claude-instant-1':
-    case 'claude-2':
-    case 'text-bison@001':
-    case 'command':
-      return !!providers.find(p => p.provider === ProviderForModel(model))
-    default:
-      return customModelFromProviders(model, providers)?.enabled ?? false
-  }
+export const IsProviderAvailable = (provider: ModelProvider, providers: AvailableProvider[]): boolean =>
+  !!providers.find(p => p.provider === provider)
+
+export const IsModelDisabled = (model: LanguageModel, providers: AvailableProvider[]): boolean => {
+  const customModel = customModelFromProviders(model, providers)
+  return !!customModel && !customModel.enabled
 }
+
+export const IsModelAvailable = (model: LanguageModel, providers: AvailableProvider[]): boolean =>
+  isCustomModel(model)
+    ? customModelFromProviders(model, providers)?.enabled ?? false
+    : IsProviderAvailable(ProviderForModel(model), providers)
 
 export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {

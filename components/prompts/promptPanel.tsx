@@ -19,7 +19,10 @@ import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 import Icon from '../icon'
-import useProviders from '@/src/client/hooks/useAvailableProviders'
+import useProviders, {
+  useCheckModelDisabled,
+  useCheckProviderAvailable,
+} from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -103,7 +106,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isModelAvailable && <ProviderWarning />}
+        {!isModelAvailable && <ModelUnavailableWarning model={config.model} />}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
@@ -169,13 +172,34 @@ const Warning = ({ children }: { children: ReactNode }) => (
   <Banner className='border-pink-50 bg-pink-25'>{children}</Banner>
 )
 
-export function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
+export function ModelUnavailableWarning({
+  model,
+  includeTitle = true,
+}: {
+  model: LanguageModel
+  includeTitle?: boolean
+}) {
+  const checkProviderAvailable = useCheckProviderAvailable()
+  const isProviderAvailable = checkProviderAvailable(ProviderForModel(model))
+
+  const checkModelDisabled = useCheckModelDisabled()
+  const isModelDisabled = checkModelDisabled(model)
+
   const router = useRouter()
+  const action = !isProviderAvailable || isModelDisabled ? () => router.push(ClientRoute.Settings) : undefined
+
+  const buttonTitle = isProviderAvailable ? (isModelDisabled ? 'Enable Model' : undefined) : 'Add API Key'
+  const title = isProviderAvailable ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : 'Missing API Key'
+  const description = isProviderAvailable
+    ? isModelDisabled
+      ? 'Custom models need to be enabled for use.'
+      : 'This custom model is no longer available.'
+    : 'An API key is required to use this model.'
 
   return (
-    <ButtonBanner type='warning' buttonTitle='Add API Key' onClick={() => router.push(ClientRoute.Settings)}>
-      {includeTitle && <span className='font-medium text-gray-600'>Missing API Key</span>}
-      <span>An API key is required to use this model.</span>
+    <ButtonBanner type='warning' buttonTitle={buttonTitle} onClick={action}>
+      {includeTitle && <span className='font-medium text-gray-600'>{title}</span>}
+      <span>{description}</span>
     </ButtonBanner>
   )
 }
@@ -195,8 +219,8 @@ function ButtonBanner({
   children,
 }: {
   type: 'info' | 'warning'
-  buttonTitle: string
-  onClick: () => void
+  buttonTitle?: string
+  onClick?: () => void
   children: ReactNode
 }) {
   const bannerColor = type === 'info' ? 'border-blue-100 bg-blue-25' : 'border-orange-100 bg-orange-25'
@@ -204,11 +228,13 @@ function ButtonBanner({
   return (
     <Banner className={`flex items-center justify-between gap-1 ${bannerColor}`}>
       <div className='flex flex-col'>{children}</div>
-      <div
-        className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
-        onClick={onClick}>
-        {buttonTitle}
-      </div>
+      {onClick && buttonTitle && (
+        <div
+          className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
+          onClick={onClick}>
+          {buttonTitle}
+        </div>
+      )}
     </Banner>
   )
 }
