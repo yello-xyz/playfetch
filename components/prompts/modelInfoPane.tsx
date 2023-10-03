@@ -14,14 +14,12 @@ import {
 import Icon from '../icon'
 import openInIcon from '@/public/openIn.svg'
 import Link from 'next/link'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { ProviderWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
-import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import useProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
-  const availableProviders = useAvailableProviders()
-  const checkProvider = useCheckProvider()
+  const [availableProviders, checkProvider] = useProviders()
 
   const provider = ProviderForModel(model)
   const isProviderAvailable = checkProvider(provider)

@@ -16,11 +16,10 @@ import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runButtons'
 import { ReactNode, useEffect } from 'react'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 import Icon from '../icon'
-import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import useProviders from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -76,9 +75,8 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
-  const checkProviderAvailable = useCheckProvider()
-  const availableProviders = useAvailableProviders()
-  const isProviderAvailable = checkProviderAvailable(config.provider)
+  const [availableProviders, checkProvider] = useProviders()
+  const isProviderAvailable = checkProvider(config.provider)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
   const outerPadding = 16 // gap-4

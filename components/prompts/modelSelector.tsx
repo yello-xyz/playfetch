@@ -3,7 +3,6 @@ import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/c
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import ModelInfoPane from './modelInfoPane'
 import {
   AllModels,
@@ -12,7 +11,7 @@ import {
   LabelForModel,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
-import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import useProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelSelector({
   model,
@@ -24,8 +23,7 @@ export default function ModelSelector({
   popUpAbove?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
-  const checkProvider = useCheckProvider()
-  const availableProviders = useAvailableProviders()
+  const [availableProviders, checkProvider] = useProviders()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
     setPopup(

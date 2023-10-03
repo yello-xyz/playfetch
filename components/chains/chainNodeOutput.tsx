@@ -2,7 +2,6 @@ import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs
 import { useEffect, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testDataPane'
 import RunButtons from '../runButtons'
@@ -10,6 +9,7 @@ import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, 
 import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import { useCheckProvider } from '@/src/client/hooks/useAvailableProviders'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -66,12 +66,12 @@ export default function ChainNodeOutput({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const checkProviderAvailable = useCheckProvider()
+  const checkProvider = useCheckProvider()
   const areProvidersAvailable = (items: ChainItem[]) =>
     items
       .filter(IsPromptChainItem)
       .map(promptCache.versionForItem)
-      .every(version => !!version && checkProviderAvailable(version.config.provider))
+      .every(version => !!version && checkProvider(version.config.provider))
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion()
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
