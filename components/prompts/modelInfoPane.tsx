@@ -1,4 +1,4 @@
-import { LanguageModel, ModelProvider } from '@/types'
+import { LanguageModel } from '@/types'
 import { PopupContent } from '../popupMenu'
 import {
   DescriptionForModel,

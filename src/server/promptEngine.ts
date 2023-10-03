@@ -7,6 +7,7 @@ import {
   CohereLanguageModel,
   Prompts,
   PromptInputs,
+  CustomLanguageModel,
 } from '@/types'
 import openai from '@/src/server/providers/openai'
 import anthropic from '@/src/server/providers/anthropic'
@@ -82,7 +83,7 @@ export default async function runPromptWithConfig(
       case 'google':
         return vertexai(config.model as GoogleLanguageModel)
       case 'openai':
-        return openai(apiKey, userID, config.model as OpenAILanguageModel)
+        return openai(apiKey, userID, config.model as OpenAILanguageModel | CustomLanguageModel)
       case 'anthropic':
         return anthropic(apiKey, config.model as AnthropicLanguageModel)
       case 'cohere':

@@ -1,10 +1,14 @@
-import { OpenAILanguageModel, PromptInputs } from '@/types'
+import { CustomLanguageModel, OpenAILanguageModel, PromptInputs } from '@/types'
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../promptEngine'
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
 
-export default function predict(apiKey: string, userID: number, model: OpenAILanguageModel): Predictor {
+export default function predict(
+  apiKey: string,
+  userID: number,
+  model: OpenAILanguageModel | CustomLanguageModel
+): Predictor {
   return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
     tryCompleteChat(
       apiKey,
@@ -47,7 +51,7 @@ const buildPromptMessages = (previousMessages: any[], prompt: string, system?: s
 async function tryCompleteChat(
   apiKey: string,
   userID: number,
-  model: OpenAILanguageModel,
+  model: OpenAILanguageModel | CustomLanguageModel,
   prompt: string,
   system: string | undefined,
   functionsPrompt: string | undefined,

@@ -71,7 +71,14 @@ export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
 export type GoogleLanguageModel = 'text-bison@001'
 export type CohereLanguageModel = 'command'
 
-export type LanguageModel = OpenAILanguageModel | AnthropicLanguageModel | GoogleLanguageModel | CohereLanguageModel
+export type DefaultLanguageModel =
+  | OpenAILanguageModel
+  | AnthropicLanguageModel
+  | GoogleLanguageModel
+  | CohereLanguageModel
+export type CustomLanguageModel = string
+
+export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
 export type PromptConfig = {
   provider: ModelProvider

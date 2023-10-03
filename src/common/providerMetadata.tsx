@@ -1,4 +1,4 @@
-import { LanguageModel, ModelProvider, Prompts } from '@/types'
+import { DefaultLanguageModel, LanguageModel, ModelProvider, Prompts } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
@@ -47,20 +47,22 @@ export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompt
   ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
 ]
 
-export const SupportsSystemPrompt = (model: LanguageModel) => {
+const BaseModelForModel = (model: LanguageModel): DefaultLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
-      return true
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison@001':
     case 'command':
-      return false
+      return model
+    default:
+      // TODO generalise when we extend fine-tuning support
+      return 'gpt-3.5-turbo'
   }
 }
 
-export const SupportsFunctionsPrompt = (model: LanguageModel) => {
+export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
@@ -70,6 +72,23 @@ export const SupportsFunctionsPrompt = (model: LanguageModel) => {
     case 'text-bison@001':
     case 'command':
       return false
+    default:
+      return SupportsSystemPrompt(BaseModelForModel(model))
+  }
+}
+
+export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+      return true
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return false
+    default:
+      return SupportsFunctionsPrompt(BaseModelForModel(model))
   }
 }
 
@@ -127,10 +146,12 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
       return 'google'
     case 'command':
       return 'cohere'
+    default:
+      return ProviderForModel(BaseModelForModel(model))
   }
 }
 
-const labelForModel = (model: LanguageModel) => {
+const labelForModel = (model: LanguageModel): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5 Turbo'
@@ -144,10 +165,13 @@ const labelForModel = (model: LanguageModel) => {
       return 'PaLM v2'
     case 'command':
       return 'Command'
+    default:
+      // TODO get from available providers
+      return labelForModel(BaseModelForModel(model))
   }
 }
 
-const shortLabelForModel = (model: LanguageModel) => {
+const shortLabelForModel = (model: LanguageModel): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT3.5'
@@ -160,6 +184,9 @@ const shortLabelForModel = (model: LanguageModel) => {
       return 'PaLM'
     case 'command':
       return 'Command'
+    default:
+      // TODO get from available providers
+      return shortLabelForModel(BaseModelForModel(model))
   }
 }
 
@@ -171,7 +198,7 @@ export const LabelForModel = (model: LanguageModel, includeProvider = true) =>
 export const FullLabelForModel = (model: LanguageModel, includeProvider = true) =>
   includeProvider ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}` : labelForModel(model)
 
-export const WebsiteLinkForModel = (model: LanguageModel) => {
+export const WebsiteLinkForModel = (model: LanguageModel): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'https://platform.openai.com/docs/models/gpt-3-5'
@@ -185,10 +212,13 @@ export const WebsiteLinkForModel = (model: LanguageModel) => {
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text'
     case 'command':
       return 'https://docs.cohere.com/docs/models'
+    default:
+      // TODO generalise when we extend fine-tuning support
+      return 'https://platform.openai.com/docs/guides/fine-tuning'
   }
 }
 
-export const DescriptionForModel = (model: LanguageModel) => {
+export const DescriptionForModel = (model: LanguageModel): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks.'
@@ -202,10 +232,13 @@ export const DescriptionForModel = (model: LanguageModel) => {
       return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation.'
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
+    default:
+      // TODO get from available providers
+      return DescriptionForModel(BaseModelForModel(model))
   }
 }
 
-export const MaxTokensForModel = (model: LanguageModel) => {
+export const MaxTokensForModel = (model: LanguageModel): number => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 4097
@@ -220,10 +253,12 @@ export const MaxTokensForModel = (model: LanguageModel) => {
       return 8192
     case 'command':
       return 4096
+    default:
+      return MaxTokensForModel(BaseModelForModel(model))
   }
 }
 
-export const InputPriceForModel = (model: LanguageModel) => {
+export const InputPriceForModel = (model: LanguageModel): number => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 1.5
@@ -237,10 +272,12 @@ export const InputPriceForModel = (model: LanguageModel) => {
       return 15
     case 'text-bison@001':
       return 0
+    default:
+      return InputPriceForModel(BaseModelForModel(model))
   }
 }
 
-export const OutputPriceForModel = (model: LanguageModel) => {
+export const OutputPriceForModel = (model: LanguageModel): number => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 2
@@ -254,5 +291,7 @@ export const OutputPriceForModel = (model: LanguageModel) => {
       return 15
     case 'text-bison@001':
       return 0
+    default:
+      return OutputPriceForModel(BaseModelForModel(model))
   }
 }
