@@ -1,13 +1,13 @@
 import { InputPriceForModel, OutputPriceForModel } from '@/src/common/providerMetadata'
 import { LanguageModel, ModelProvider } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderKey, incrementProviderCostForUser } from '../datastore/providers'
+import { getProviderKey } from '../datastore/providers'
 import { createEmbedding, loadCustomModels } from './openai'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) =>
   (encode(content).length * pricePerMillionTokens) / 1000000
 
-export const CostForModel = (model: LanguageModel, input: string, output: string) =>
+export const CostForModel = (model: LanguageModel, input: string, output = '') =>
   costForTokens(input, InputPriceForModel(model)) + costForTokens(output, OutputPriceForModel(model))
 
 export const APIKeyForProvider = async (userID: number, provider: ModelProvider, customModel?: string) => {
@@ -32,17 +32,10 @@ export const CustomModelsForProvider = async (provider: ModelProvider, apiKey: s
   }
 }
 
-export const CreateEmbedding = async (userID: number, input: string | string[]) => {
+export const CreateEmbedding = async (userID: number, input: string) => {
   const apiKey = await APIKeyForProvider(userID, 'openai')
   if (!apiKey) {
     throw new Error('Missing API key')
   }
-
-  const embedding = await createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
-
-  const pricePerMillionTokens = 0.1
-  const flattenedInput = Array.isArray(input) ? input.join('\n') : input
-  const cost = costForTokens(flattenedInput, pricePerMillionTokens)
-  
-  return { embedding, cost }
+  return createEmbedding(apiKey, userID, 'text-embedding-ada-002', input)
 }

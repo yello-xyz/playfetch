@@ -3,6 +3,7 @@ import {
   CustomLanguageModel,
   CustomModel,
   DefaultLanguageModel,
+  EmbeddingModel,
   LanguageModel,
   ModelProvider,
   Prompts,
@@ -285,8 +286,10 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
   }
 }
 
-export const InputPriceForModel = (model: LanguageModel): number => {
+export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): number => {
   switch (model) {
+    case 'text-embedding-ada-002':
+      return 0.1
     case 'gpt-3.5-turbo':
       return 1.5
     case 'gpt-4':
@@ -304,8 +307,10 @@ export const InputPriceForModel = (model: LanguageModel): number => {
   }
 }
 
-export const OutputPriceForModel = (model: LanguageModel): number => {
+export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): number => {
   switch (model) {
+    case 'text-embedding-ada-002':
+      return 0.1
     case 'gpt-3.5-turbo':
       return 2
     case 'gpt-4':
