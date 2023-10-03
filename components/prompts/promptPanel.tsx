@@ -75,8 +75,8 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
-  const [availableProviders, checkProvider] = useProviders()
-  const isProviderAvailable = checkProvider(config.provider)
+  const [availableProviders, checkModelAvailable] = useProviders()
+  const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
   const outerPadding = 16 // gap-4
@@ -88,7 +88,7 @@ export default function PromptPanel({
     tabHeight +
     padding +
     contentHeight +
-    (isProviderAvailable ? 0 : 56 + padding) +
+    (isModelAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
     (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
@@ -103,7 +103,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isProviderAvailable && <ProviderWarning />}
+        {!isModelAvailable && <ProviderWarning />}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
@@ -156,7 +156,7 @@ export default function PromptPanel({
           setLanguageModel={updateModel}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
-          disabled={!isProviderAvailable || prompts.main.trim().length === 0}
+          disabled={!isModelAvailable || prompts.main.trim().length === 0}
           callback={runPrompt}
           showTestMode={showTestMode}
         />

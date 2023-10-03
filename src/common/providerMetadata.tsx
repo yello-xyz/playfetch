@@ -66,6 +66,20 @@ const customModelFromProviders = (model: LanguageModel, providers: AvailableProv
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
+export const IsModelAvailable = (model: LanguageModel, providers: AvailableProvider[]): boolean => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return !!providers.find(p => p.provider === ProviderForModel(model))
+    default:
+      return customModelFromProviders(model, providers)?.enabled ?? false
+  }
+}
+
 export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':

@@ -23,12 +23,12 @@ export default function ModelSelector({
   popUpAbove?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
-  const [availableProviders, checkProvider] = useProviders()
+  const [availableProviders, checkModelAvailable] = useProviders()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
     setPopup(
       ModelSelectorPopup,
-      { selectedModel: model, onSelectModel: setModel, checkProvider, availableProviders },
+      { selectedModel: model, onSelectModel: setModel, checkModelAvailable, availableProviders },
       location
     )
 
@@ -45,14 +45,14 @@ export default function ModelSelector({
 type ModelSelectorPopupProps = {
   selectedModel: LanguageModel
   onSelectModel: (model: LanguageModel) => void
-  checkProvider: (provider: ModelProvider) => boolean
+  checkModelAvailable: (model: LanguageModel) => boolean
   availableProviders: AvailableProvider[]
 }
 
 function ModelSelectorPopup({
   selectedModel,
   onSelectModel,
-  checkProvider,
+  checkModelAvailable,
   availableProviders,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
@@ -72,7 +72,7 @@ function ModelSelectorPopup({
               label={FullLabelForModel(model, availableProviders, false)}
               icon={IconForProvider(ProviderForModel(model))}
               onClick={withDismiss(() => onSelectModel(model))}
-              disabled={!checkProvider(ProviderForModel(model))}
+              disabled={!checkModelAvailable(model)}
               checked={model === selectedModel}
             />
             <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>

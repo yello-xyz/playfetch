@@ -19,10 +19,10 @@ import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import useProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
-  const [availableProviders, checkProvider] = useProviders()
+  const [availableProviders, checkModelAvailable] = useProviders()
 
   const provider = ProviderForModel(model)
-  const isProviderAvailable = checkProvider(provider)
+  const isModelAvailable = checkModelAvailable(model)
   return (
     <PopupContent className='p-3 w-[480px] ml-7 flex flex-col gap-1'>
       <div className='flex items-center gap-1'>
@@ -54,7 +54,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
           </>
         )}
       </div>
-      {!isProviderAvailable && <ProviderWarning includeTitle={false} />}
+      {!isModelAvailable && <ProviderWarning includeTitle={false} />}
     </PopupContent>
   )
 }

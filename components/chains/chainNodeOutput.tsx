@@ -9,7 +9,7 @@ import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, 
 import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
-import { useCheckProvider } from '@/src/client/hooks/useAvailableProviders'
+import { useCheckModelAvailable } from '@/src/client/hooks/useAvailableProviders'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -66,12 +66,12 @@ export default function ChainNodeOutput({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const checkProvider = useCheckProvider()
+  const checkModelAvailable = useCheckModelAvailable()
   const areProvidersAvailable = (items: ChainItem[]) =>
     items
       .filter(IsPromptChainItem)
       .map(promptCache.versionForItem)
-      .every(version => !!version && checkProvider(version.config.provider))
+      .every(version => !!version && checkModelAvailable(version.config.model))
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion()
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)

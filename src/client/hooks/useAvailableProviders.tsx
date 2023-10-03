@@ -1,10 +1,12 @@
+import { LanguageModel } from '@/types'
 import { useLoggedInUser } from '../context/userContext'
+import { IsModelAvailable } from '@/src/common/providerMetadata'
 
 export default function useProviders() {
   const user = useLoggedInUser()
   const availableProviders = user.availableProviders
-  const checkProvider = (provider: string) => !!availableProviders.find(p => p.provider === provider)
-  return [availableProviders, checkProvider] as const
+  const checkModelAvailable = (model: LanguageModel) => IsModelAvailable(model, availableProviders)
+  return [availableProviders, checkModelAvailable] as const
 }
 
 export function useAvailableProviders() {
@@ -12,7 +14,7 @@ export function useAvailableProviders() {
   return availableProviders
 }
 
-export function useCheckProvider() {
-  const [_, checkProvider] = useProviders()
-  return checkProvider
+export function useCheckModelAvailable() {
+  const [_, checkModelAvailable] = useProviders()
+  return checkModelAvailable
 }
