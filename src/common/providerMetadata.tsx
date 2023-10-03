@@ -1,4 +1,4 @@
-import { DefaultLanguageModel, LanguageModel, ModelProvider, Prompts } from '@/types'
+import { AvailableProvider, CustomModel, DefaultLanguageModel, LanguageModel, ModelProvider, Prompts } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
@@ -47,7 +47,7 @@ export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompt
   ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
 ]
 
-const BaseModelForModel = (model: LanguageModel): DefaultLanguageModel => {
+const baseModelForModel = (model: LanguageModel): DefaultLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
@@ -62,6 +62,10 @@ const BaseModelForModel = (model: LanguageModel): DefaultLanguageModel => {
   }
 }
 
+const customModelFromProviders = (model: LanguageModel, providers: AvailableProvider[]): CustomModel | null => {
+  return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
+}
+
 export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':
@@ -73,7 +77,7 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'command':
       return false
     default:
-      return SupportsSystemPrompt(BaseModelForModel(model))
+      return SupportsSystemPrompt(baseModelForModel(model))
   }
 }
 
@@ -88,7 +92,7 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
     case 'command':
       return false
     default:
-      return SupportsFunctionsPrompt(BaseModelForModel(model))
+      return SupportsFunctionsPrompt(baseModelForModel(model))
   }
 }
 
@@ -147,7 +151,7 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
     case 'command':
       return 'cohere'
     default:
-      return ProviderForModel(BaseModelForModel(model))
+      return ProviderForModel(baseModelForModel(model))
   }
 }
 
@@ -167,7 +171,7 @@ const labelForModel = (model: LanguageModel): string => {
       return 'Command'
     default:
       // TODO get from available providers
-      return labelForModel(BaseModelForModel(model))
+      return labelForModel(baseModelForModel(model))
   }
 }
 
@@ -186,7 +190,7 @@ const shortLabelForModel = (model: LanguageModel): string => {
       return 'Command'
     default:
       // TODO get from available providers
-      return shortLabelForModel(BaseModelForModel(model))
+      return shortLabelForModel(baseModelForModel(model))
   }
 }
 
@@ -218,7 +222,7 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
   }
 }
 
-export const DescriptionForModel = (model: LanguageModel): string => {
+export const DescriptionForModel = (model: LanguageModel, providers: AvailableProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks.'
@@ -233,8 +237,10 @@ export const DescriptionForModel = (model: LanguageModel): string => {
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
     default:
-      // TODO get from available providers
-      return DescriptionForModel(BaseModelForModel(model))
+      return (
+        customModelFromProviders(model, providers)?.description ??
+        DescriptionForModel(baseModelForModel(model), providers)
+      )
   }
 }
 
@@ -254,7 +260,7 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
     case 'command':
       return 4096
     default:
-      return MaxTokensForModel(BaseModelForModel(model))
+      return MaxTokensForModel(baseModelForModel(model))
   }
 }
 
@@ -273,7 +279,7 @@ export const InputPriceForModel = (model: LanguageModel): number => {
     case 'text-bison@001':
       return 0
     default:
-      return InputPriceForModel(BaseModelForModel(model))
+      return InputPriceForModel(baseModelForModel(model))
   }
 }
 
@@ -292,6 +298,6 @@ export const OutputPriceForModel = (model: LanguageModel): number => {
     case 'text-bison@001':
       return 0
     default:
-      return OutputPriceForModel(BaseModelForModel(model))
+      return OutputPriceForModel(baseModelForModel(model))
   }
 }

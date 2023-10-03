@@ -17,8 +17,10 @@ import Link from 'next/link'
 import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { ProviderWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
+  const availableProviders = useAvailableProviders()
   const checkProvider = useCheckProvider()
 
   const provider = ProviderForModel(model)
@@ -37,7 +39,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
         </div>
       </div>
       <HorizontalBorder />
-      <div className='py-1 text-gray-500'>{DescriptionForModel(model)}</div>
+      <div className='py-1 text-gray-500'>{DescriptionForModel(model, availableProviders)}</div>
       <div className='grid grid-cols-[140px_180px] text-gray-500 gap-y-0.5 pb-1'>
         <span className='font-medium'>Context</span>
         <span>{FormatLargeInteger(MaxTokensForModel(model))} tokens</span>
