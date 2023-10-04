@@ -1,4 +1,13 @@
-import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
+import {
+  InputValues,
+  PromptConfig,
+  PromptInputs,
+  PromptVersion,
+  LanguageModel,
+  TestConfig,
+  Prompts,
+  ModelProvider,
+} from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
@@ -78,7 +87,7 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
-  const [availableProviders, checkModelAvailable] = useModelProviders()
+  const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
@@ -106,7 +115,9 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isModelAvailable && <ModelUnavailableWarning model={config.model} />}
+        {!isModelAvailable && (
+          <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
+        )}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
@@ -175,11 +186,12 @@ const Warning = ({ children }: { children: ReactNode }) => (
 export function ModelUnavailableWarning({
   model,
   includeTitle = true,
+  checkProviderAvailable,
 }: {
   model: LanguageModel
   includeTitle?: boolean
+  checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
-  const checkProviderAvailable = useCheckModelProviderAvailable()
   const isProviderAvailable = checkProviderAvailable(ProviderForModel(model))
 
   const checkModelDisabled = useCheckModelDisabled()

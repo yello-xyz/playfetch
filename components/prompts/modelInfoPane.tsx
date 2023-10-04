@@ -19,7 +19,7 @@ import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import useModelProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
-  const [availableProviders, checkModelAvailable] = useModelProviders()
+  const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
 
   const provider = ProviderForModel(model)
   const isModelAvailable = checkModelAvailable(model)
@@ -54,7 +54,9 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
           </>
         )}
       </div>
-      {!isModelAvailable && <ModelUnavailableWarning model={model} includeTitle={false} />}
+      {!isModelAvailable && (
+        <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
+      )}
     </PopupContent>
   )
 }
