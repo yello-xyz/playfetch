@@ -191,23 +191,46 @@ export function ModelUnavailableWarning({
 }) {
   const isProviderAvailable = checkProviderAvailable(ProviderForModel(model))
 
+  return isProviderAvailable ? (
+    <ModelWarning model={model} includeTitle={includeTitle} />
+  ) : (
+    <ProviderWarning includeTitle={includeTitle} />
+  )
+}
+
+function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; includeTitle?: boolean }) {
   const checkModelDisabled = useCheckModelDisabled()
   const isModelDisabled = checkModelDisabled(model)
 
   const router = useRouter()
 
-  const buttonTitle = isProviderAvailable ? (isModelDisabled ? 'Enable Model' : 'View Settings') : 'Add API Key'
-  const title = isProviderAvailable ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : 'Missing API Key'
-  const description = isProviderAvailable
-    ? isModelDisabled
-      ? 'Custom models need to be enabled for use.'
-      : 'Custom models need to be configured before use.'
-    : 'An API key is required to use this model.'
+  const buttonTitle = isModelDisabled ? 'Enable Model' : 'View Settings'
+  const title = includeTitle ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : undefined
+  const description = isModelDisabled
+    ? 'Custom models need to be enabled for use.'
+    : 'Custom models need to be configured before use.'
 
   return (
-    <ButtonBanner type='warning' buttonTitle={buttonTitle} onClick={() => router.push(ClientRoute.Settings)}>
-      {includeTitle && <span className='font-medium text-gray-600'>{title}</span>}
+    <ButtonBanner
+      type='warning'
+      title={title}
+      buttonTitle={buttonTitle}
+      onClick={() => router.push(ClientRoute.Settings)}>
       <span>{description}</span>
+    </ButtonBanner>
+  )
+}
+
+function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
+  const router = useRouter()
+
+  return (
+    <ButtonBanner
+      type='warning'
+      title={includeTitle ? 'Missing API Key' : undefined}
+      buttonTitle='Add API Key'
+      onClick={() => router.push(ClientRoute.Settings)}>
+      <span>An API key is required to use this model.</span>
     </ButtonBanner>
   )
 }
@@ -222,11 +245,13 @@ function LoadPendingVersionBanner({ loadPendingVersion }: { loadPendingVersion: 
 
 function ButtonBanner({
   type,
+  title,
   buttonTitle,
   onClick,
   children,
 }: {
   type: 'info' | 'warning'
+  title?: string
   buttonTitle: string
   onClick: () => void
   children: ReactNode
@@ -235,7 +260,10 @@ function ButtonBanner({
   const buttonColor = type === 'info' ? 'bg-blue-100 hover:bg-blue-200' : 'bg-orange-100 hover:bg-orange-200'
   return (
     <Banner className={`flex items-center justify-between gap-1 ${bannerColor}`}>
-      <div className='flex flex-col'>{children}</div>
+      <div className='flex flex-col'>
+        {title && <span className='font-medium text-gray-600'>{title}</span>}
+        {children}
+      </div>
       <div
         className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
         onClick={onClick}>
