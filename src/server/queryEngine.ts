@@ -1,24 +1,31 @@
+import { EmbeddingModel, QueryProvider } from '@/types'
 import { getProviderCredentials, incrementProviderCostForUser } from './datastore/providers'
 import { APIKeyForProvider, CreateEmbedding } from './providers/integration'
 import runVectorQuery from './providers/pinecone'
+import { ProviderForModel } from '../common/providerMetadata'
 
 type QueryResponse = (
   | { result: string[]; output: string; error: undefined; failed: false }
   | { result: undefined; output: undefined; error: string; failed: true }
 ) & { cost: number; attempts: number }
 
-export const runQuery = async (userID: number, indexName: string, query: string): Promise<QueryResponse> => {
+export const runQuery = async (
+  userID: number,
+  provider: QueryProvider,
+  model: EmbeddingModel,
+  indexName: string,
+  query: string
+): Promise<QueryResponse> => {
   try {
-    const embeddingProvider = 'openai'
+    const [queryAPIKey, queryEnvironment] = await getProviderCredentials(userID, provider)
+    if (!queryAPIKey || !queryEnvironment) {
+      throw new Error('Missing vector store credentials')
+    }
+
+    const embeddingProvider = ProviderForModel(model)
     const embeddingApiKey = await APIKeyForProvider(userID, embeddingProvider)
     if (!embeddingApiKey) {
       throw new Error('Missing API key')
-    }
-
-    const queryProvider = 'pinecone'
-    const [queryAPIKey, queryEnvironment] = await getProviderCredentials(userID, queryProvider)
-    if (!queryAPIKey || !queryEnvironment) {
-      throw new Error('Missing vector store credentials')
     }
 
     const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingApiKey, userID, query)

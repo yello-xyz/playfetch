@@ -35,6 +35,7 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
 
 const isRunConfig = (config: RunConfig | CodeConfig | QueryConfig): config is RunConfig => 'versionID' in config
 const isQueryConfig = (config: RunConfig | CodeConfig | QueryConfig): config is QueryConfig => 'query' in config
+const isCodeConfig = (config: RunConfig | CodeConfig | QueryConfig): config is CodeConfig => 'code' in config
 
 type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
 type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
@@ -147,12 +148,14 @@ export default async function runChain(
       }
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
-      lastResponse = await runChainStep(runQuery(userID, config.indexName, query))
+      lastResponse = await runChainStep(runQuery(userID, config.provider, config.model, config.indexName, query))
       streamResponse(lastResponse)
-    } else {
+    } else if (isCodeConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       streamResponse(lastResponse)
+    } else {
+      throw new Error('Unsupported config type in chain evaluation')
     }
     if (lastResponse.failed) {
       break
