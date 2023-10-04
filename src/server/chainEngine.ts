@@ -132,39 +132,31 @@ export default async function runChain(
         )
       )
       streamResponse(lastResponse, true)
+      const functionInterrupt = lastResponse.failed ? undefined : lastResponse.functionInterrupt
       if (lastResponse.failed) {
         continuationIndex = undefined
+      } else if (functionInterrupt && isEndpointEvaluation) {
+        continuationIndex = index
         break
-      } else if (lastResponse.functionInterrupt) {
-        if (isEndpointEvaluation) {
-          continuationIndex = index
-          break
-        } else if (inputs[lastResponse.functionInterrupt] && continuationCount++ < MaxContinuationCount) {
-          continuationIndex = index
-          index -= 1
-          continue
-        }
+      } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount++ < MaxContinuationCount) {
+        continuationIndex = index
+        index -= 1
+        continue
       } else {
         continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
-        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
       }
     } else if (isQueryConfig(config)) {
       lastResponse = await runChainStep(runQuery(userID, config.indexName, config.query))
       streamResponse(lastResponse)
-      if (lastResponse.failed) {
-        break
-      } else {
-        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
-      }
     } else {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       streamResponse(lastResponse)
-      if (lastResponse.failed) {
-        break
-      } else {
-        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
-      }
+    }
+    if (lastResponse.failed) {
+      break
+    } else {
+      AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
     }
   }
 
