@@ -4,6 +4,7 @@ import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { useState } from 'react'
 
 export default function ChainEditor({
   chain,
@@ -38,6 +39,17 @@ export default function ChainEditor({
   disabled: boolean
   promptCache: ChainPromptCache
 }) {
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
+
+  if (nodes.length === 2 && !activeMenuIndex) {
+    setActiveMenuIndex(1)
+  }
+
+  const updateActiveIndex = (index: number) => {
+    setActiveIndex(index)
+    setActiveMenuIndex(undefined)
+  }
+
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
   return (
@@ -59,7 +71,9 @@ export default function ChainEditor({
             nodes={nodes}
             setNodes={setNodes}
             activeIndex={activeIndex}
-            setActiveIndex={setActiveIndex}
+            setActiveIndex={updateActiveIndex}
+            isMenuActive={index === activeMenuIndex}
+            setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             savedVersion={saveItems ? null : activeVersion}
             isTestMode={isTestMode}
             setTestMode={setTestMode}

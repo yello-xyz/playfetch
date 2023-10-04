@@ -1,7 +1,6 @@
-import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryChainItem, QueryConfig } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryConfig } from '@/types'
 import { ChainNode } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { useState } from 'react'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
@@ -14,6 +13,8 @@ export function ChainNodeBox({
   setNodes,
   activeIndex,
   setActiveIndex,
+  isMenuActive,
+  setMenuActive,
   savedVersion,
   isTestMode,
   setTestMode,
@@ -28,6 +29,8 @@ export function ChainNodeBox({
   setNodes: (nodes: ChainNode[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
+  isMenuActive: boolean
+  setMenuActive: (active: boolean) => void
   savedVersion: ChainVersion | null
   isTestMode: boolean
   setTestMode: (testMode: boolean) => void
@@ -40,20 +43,9 @@ export function ChainNodeBox({
   const isSelected = index === activeIndex
   const colorClass = isSelected ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200'
 
-  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
-
-  if (nodes.length === 2 && !activeMenuIndex) {
-    setActiveMenuIndex(1)
-  }
-
-  const onSelect = () => {
-    setActiveIndex(index)
-    setActiveMenuIndex(undefined)
-  }
-
   const onEdit = () => {
     setTestMode(false)
-    onSelect()
+    setActiveIndex(index)
   }
 
   const updateItem = (item: ChainItem) => setNodes([...nodes.slice(0, index), item, ...nodes.slice(index + 1)])
@@ -87,15 +79,17 @@ export function ChainNodeBox({
         <ChainNodeBoxConnector
           prompts={prompts}
           isDisabled={isTestMode}
-          isActive={index === activeMenuIndex}
-          setActive={active => setActiveMenuIndex(active ? index : undefined)}
+          isActive={isMenuActive}
+          setActive={setMenuActive}
           onInsertPrompt={insertPrompt}
           onInsertNewPrompt={insertNewPrompt}
           onInsertCodeBlock={insertCodeBlock}
           onInsertQuery={insertQuery}
         />
       )}
-      <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>
+      <div
+        className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`}
+        onClick={() => setActiveIndex(index)}>
         <ChainNodeBoxHeader
           nodes={nodes}
           index={index}
