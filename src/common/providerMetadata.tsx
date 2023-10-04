@@ -15,7 +15,7 @@ import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 import pineconeIcon from '@/public/pinecone.svg'
 
-export const AllModelProviders: ModelProvider[] = ['openai', 'anthropic', 'google', 'cohere']
+export const AllModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
 export const AllQueryProviders: QueryProvider[] = ['pinecone']
 
 export const AllModels: LanguageModel[] = [
