@@ -14,6 +14,7 @@ import {
   Prompts,
   Usage,
   Analytics,
+  AvailableProvider,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -232,7 +233,7 @@ const api = {
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
-  getAvailableProviders: function () {
+  getAvailableProviders: function (): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders)
   },
   updateProviderKey: function (provider: ModelProvider, apiKey: string | null, environment?: string) {

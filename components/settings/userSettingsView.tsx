@@ -15,7 +15,8 @@ export default function UserSettingsView() {
   )
   const [availableProviders, setAvailableProviders] = useState(user.availableProviders.filter(IsModelProvider))
 
-  const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
+  const refresh = () =>
+    api.getAvailableProviders().then(providers => setAvailableProviders(providers.filter(IsModelProvider)))
 
   const haveCustomModels = availableProviders.some(provider => provider.customModels.length > 0)
 
