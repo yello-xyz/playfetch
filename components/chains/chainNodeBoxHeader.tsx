@@ -40,7 +40,13 @@ export default function ChainNodeBoxHeader({
   users: User[]
 }) {
   const chainNode = nodes[index]
-  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
+  const icon = IsPromptChainItem(chainNode)
+    ? promptIcon
+    : IsQueryChainItem(chainNode)
+    ? promptIcon // TODO use dedicated icon for query chain item
+    : IsCodeChainItem(chainNode)
+    ? codeIcon
+    : undefined
 
   const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
   const [label, setLabel] = useState<string>()
@@ -78,6 +84,7 @@ export default function ChainNodeBoxHeader({
             {chainNode === OutputNode && 'Output'}
             {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
             {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+            {IsQueryChainItem(chainNode) && 'Query'}
           </HeaderItem>
         )}
         {!canIncludeContext && (

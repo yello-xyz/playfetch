@@ -1,5 +1,5 @@
-import { CodeChainItem, PromptChainItem } from '@/types'
-import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem } from './chainNode'
+import { CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { LabelForModel } from '@/src/common/providerMetadata'
 import { VersionLabels } from '../versions/versionCell'
@@ -27,6 +27,7 @@ export default function ChainNodeBoxBody({
         <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
       )}
       {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
+      {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
       {chainNode === InputNode && <InputNodeBody nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
     </>
   )
@@ -64,6 +65,14 @@ function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: b
   return item.description ? (
     <CommonBody isSelected={isSelected}>
       <span className=''>{item.description}</span>
+    </CommonBody>
+  ) : null
+}
+
+function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected: boolean }) {
+  return item.query ? (
+    <CommonBody isSelected={isSelected}>
+      <span className=''>{item.query}</span>
     </CommonBody>
   ) : null
 }
