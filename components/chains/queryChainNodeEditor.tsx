@@ -11,6 +11,7 @@ import {
   LabelForProvider,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
+import { useCheckProviderAvailable } from '@/src/client/hooks/useAvailableProviders'
 
 export default function QueryChainNodeEditor({
   item,
@@ -25,6 +26,8 @@ export default function QueryChainNodeEditor({
   const updateIndexName = (indexName: string) => updateItem({ ...item, indexName })
   const updateQuery = (query: string) => updateItem({ ...item, query })
 
+  const checkProviderAvailable = useCheckProviderAvailable()
+
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
 
   return (
@@ -38,7 +41,7 @@ export default function QueryChainNodeEditor({
             <Label>Vector Store</Label>
             <DropdownMenu value={item.provider} onChange={value => updateProvider(value as QueryProvider)}>
               {AllQueryProviders.map(provider => (
-                <option key={provider} value={provider}>
+                <option key={provider} value={provider} disabled={!checkProviderAvailable(provider)}>
                   {LabelForProvider(provider)}
                 </option>
               ))}
@@ -46,7 +49,7 @@ export default function QueryChainNodeEditor({
             <Label>Embedding Model</Label>
             <DropdownMenu value={item.embeddingModel} onChange={value => updateModel(value as EmbeddingModel)}>
               {AllEmbeddingModels.map(model => (
-                <option key={model} value={model}>
+                <option key={model} value={model} disabled={!checkProviderAvailable(ProviderForModel(model))}>
                   {`${LabelForProvider(ProviderForModel(model))} - ${model}`}
                 </option>
               ))}
