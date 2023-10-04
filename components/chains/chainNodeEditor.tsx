@@ -1,6 +1,6 @@
 import { ChainItem, PromptVersion } from '@/types'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { IsCodeChainItem, IsPromptChainItem } from './chainNode'
+import { IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import CodeChainNodeEditor from './codeChainNodeEditor'
 import Button, { PendingButton } from '../button'
 import { useState } from 'react'
@@ -9,6 +9,7 @@ import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
+import QueryChainNodeEditor from './queryChainNodeEditor'
 
 export default function ChainNodeEditor({
   items,
@@ -100,6 +101,9 @@ export default function ChainNodeEditor({
         )}
         {IsCodeChainItem(activeItem) && (
           <CodeChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+        )}
+        {IsQueryChainItem(activeItem) && (
+          <QueryChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         <div className='flex items-center justify-end w-full gap-2 px-4'>
           <Button type='outline' onClick={dismiss}>

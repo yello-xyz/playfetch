@@ -11,6 +11,7 @@ import {
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
+import queryIcon from '@/public/query.svg' // TODO update svg so it is different from prompt icon
 import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
@@ -43,7 +44,7 @@ export default function ChainNodeBoxHeader({
   const icon = IsPromptChainItem(chainNode)
     ? promptIcon
     : IsQueryChainItem(chainNode)
-    ? promptIcon // TODO use dedicated icon for query chain item
+    ? queryIcon
     : IsCodeChainItem(chainNode)
     ? codeIcon
     : undefined
