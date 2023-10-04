@@ -182,21 +182,31 @@ export type CodeConfig = {
   output?: string
 }
 
-export type TestConfig = {
-  mode: 'custom' | 'first' | 'last' | 'random' | 'all'
-  rowIndices: number[]
+export type QueryConfig = {
+  embeddingProvider: ModelProvider
+  embeddingModel: EmbeddingModel
+  provider: QueryProvider
+  indexName: string
+  query: string
+  output?: string
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
+export type QueryChainItem = QueryConfig & { inputs?: string[] }
 export type PromptChainItem = PendingVersionRunConfig & {
   promptID: number
   inputs?: string[]
   dynamicInputs?: string[]
 }
-export type ChainItem = CodeChainItem | PromptChainItem
+export type ChainItem = CodeChainItem | QueryChainItem | PromptChainItem
 
-export type ChainItemWithInputs = (CodeChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
+export type ChainItemWithInputs = (CodeChainItem | QueryChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
   inputs: string[]
+}
+
+export type TestConfig = {
+  mode: 'custom' | 'first' | 'last' | 'random' | 'all'
+  rowIndices: number[]
 }
 
 export type Endpoint = {

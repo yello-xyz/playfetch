@@ -5,7 +5,15 @@ import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testDataPane'
 import RunButtons from '../runButtons'
-import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import {
+  ChainNode,
+  InputNode,
+  IsChainItem,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+  OutputNode,
+} from './chainNode'
 import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
@@ -19,6 +27,9 @@ export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item)) {
     return ExtractVariables(item.code)
+  }
+  if (IsQueryChainItem(item)) {
+    return ExtractVariables(item.query)
   }
   const version = cache.versionForItem(item)
   return version

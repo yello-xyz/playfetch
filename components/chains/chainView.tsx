@@ -3,7 +3,15 @@ import { useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
 import ChainEditor from './chainEditor'
-import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, OutputNode } from './chainNode'
+import {
+  ChainNode,
+  InputNode,
+  IsChainItem,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+  OutputNode,
+} from './chainNode'
 import { Allotment } from 'allotment'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from '../commentsPane'
@@ -17,7 +25,7 @@ import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/us
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
-    return IsCodeChainItem(item)
+    return IsCodeChainItem(item) || IsQueryChainItem(item)
       ? item
       : {
           ...item,
@@ -29,7 +37,7 @@ const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
 const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
   items.map(item => {
     const inputs = ExtractChainItemVariables(item, promptCache, false)
-    return IsCodeChainItem(item)
+    return IsCodeChainItem(item) || IsQueryChainItem(item)
       ? { ...item, inputs }
       : {
           ...item,

@@ -1,5 +1,13 @@
 import { ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User } from '@/types'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
+import {
+  ChainNode,
+  InputNode,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+  NameForCodeChainItem,
+  OutputNode,
+} from './chainNode'
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
@@ -122,7 +130,7 @@ function PopupMenuIcons({
           selectedCell={isSelected}
         />
       )}
-      {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
+      {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode) || IsQueryChainItem(chainNode)) && (
         <ChainNodePopupMenu
           onRename={onRename}
           onDuplicate={onDuplicate}
