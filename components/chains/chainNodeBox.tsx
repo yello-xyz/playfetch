@@ -1,4 +1,4 @@
-import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryChainItem, QueryConfig } from '@/types'
 import { ChainNode } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { useState } from 'react'
@@ -20,6 +20,7 @@ export function ChainNodeBox({
   prompts,
   addPrompt,
   promptCache,
+  defaultQueryConfig,
 }: {
   chain: ActiveChain
   index: number
@@ -33,6 +34,7 @@ export function ChainNodeBox({
   prompts: Prompt[]
   addPrompt: () => Promise<{ promptID: number; versionID: number }>
   promptCache: ChainPromptCache
+  defaultQueryConfig?: QueryConfig
 }) {
   const chainNode = nodes[index]
   const isSelected = index === activeIndex
@@ -72,6 +74,7 @@ export function ChainNodeBox({
   const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
 
   const insertCodeBlock = () => insertItem({ code: '' })
+  const insertQuery = defaultQueryConfig ? () => insertItem(defaultQueryConfig) : undefined
 
   const duplicateItem = () => {
     insertItem({ ...(chainNode as ChainItem), output: undefined })
@@ -89,6 +92,7 @@ export function ChainNodeBox({
           onInsertPrompt={insertPrompt}
           onInsertNewPrompt={insertNewPrompt}
           onInsertCodeBlock={insertCodeBlock}
+          onInsertQuery={insertQuery}
         />
       )}
       <div className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`} onClick={onSelect}>

@@ -16,9 +16,8 @@ export default function QueryChainNodeEditor({
     <>
       <div className='flex flex-col w-full overflow-y-auto'>
         <SingleTabHeader label='Query' icon={queryIcon} />
-        <div className='flex flex-col gap-2 px-4 pt-4 min-h-[350px]'>
-          <span className='font-medium'>Description</span>
-          <span className='font-medium mt-2.5'>JavaScript Code</span>
+        <div className='flex flex-col gap-2 px-4 pt-4 min-h-[160px]'>
+          <span className='font-medium mt-2.5'>Query</span>
           <PromptInput placeholder='Query' value={item.query} setValue={updateQuery} preformatted />
         </div>
       </div>
