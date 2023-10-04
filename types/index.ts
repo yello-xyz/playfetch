@@ -183,9 +183,8 @@ export type CodeConfig = {
 }
 
 export type QueryConfig = {
-  embeddingProvider: ModelProvider
-  embeddingModel: EmbeddingModel
   provider: QueryProvider
+  model: EmbeddingModel
   indexName: string
   query: string
   output?: string

@@ -1,4 +1,4 @@
-import { ActiveChain, ChainVersion, Prompt } from '@/types'
+import { ActiveChain, ChainVersion, Prompt, QueryConfig } from '@/types'
 import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
@@ -42,15 +42,9 @@ export default function ChainEditor({
   promptCache: ChainPromptCache
 }) {
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
-  const queryProvider = AllQueryProviders.find(provider => checkProviderAvailable(provider))
-  const embeddingModel = AllEmbeddingModels.find(model => checkModelAvailable(model))
-  const defaultQueryConfig = queryProvider && embeddingModel ? {
-    embeddingProvider: ProviderForModel(embeddingModel),
-    embeddingModel,
-    provider: queryProvider,
-    indexName: '',
-    query: '',
-  } : undefined
+  const provider = AllQueryProviders.find(provider => checkProviderAvailable(provider))
+  const model = AllEmbeddingModels.find(model => checkModelAvailable(model))
+  const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '' } : undefined
 
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 

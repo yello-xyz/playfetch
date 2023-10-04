@@ -23,13 +23,13 @@ export default function QueryChainNodeEditor({
 }) {
   const updateProvider = (provider: QueryProvider) => updateItem({ ...item, provider })
   const updateModel = (model: EmbeddingModel) =>
-    updateItem({ ...item, embeddingProvider: ProviderForModel(model), embeddingModel: model })
+    updateItem({ ...item, model })
   const updateIndexName = (indexName: string) => updateItem({ ...item, indexName })
   const updateQuery = (query: string) => updateItem({ ...item, query })
 
   const checkProviderAvailable = useCheckProviderAvailable()
   const isVectorStoreAvailable = checkProviderAvailable(item.provider)
-  const isEmbeddingProviderAvailable = checkProviderAvailable(ProviderForModel(item.embeddingModel))
+  const isEmbeddingProviderAvailable = checkProviderAvailable(ProviderForModel(item.model))
 
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
 
@@ -50,7 +50,7 @@ export default function QueryChainNodeEditor({
               ))}
             </DropdownMenu>
             <Label>Embedding Model</Label>
-            <DropdownMenu value={item.embeddingModel} onChange={value => updateModel(value as EmbeddingModel)}>
+            <DropdownMenu value={item.model} onChange={value => updateModel(value as EmbeddingModel)}>
               {AllEmbeddingModels.map(model => (
                 <option key={model} value={model} disabled={!checkProviderAvailable(ProviderForModel(model))}>
                   {`${LabelForProvider(ProviderForModel(model))} - ${model}`}
@@ -66,7 +66,7 @@ export default function QueryChainNodeEditor({
         {!(isVectorStoreAvailable && isEmbeddingProviderAvailable) && (
           <div className='flex flex-col gap-2 px-4 pt-4'>
             {isVectorStoreAvailable ? (
-              <ProviderWarning provider={ProviderForModel(item.embeddingModel)} />
+              <ProviderWarning provider={ProviderForModel(item.model)} />
             ) : (
               <ProviderWarning provider={item.provider} />
             )}

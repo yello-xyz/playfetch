@@ -18,6 +18,7 @@ import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
+import { ProviderForModel } from '@/src/common/providerMetadata'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
   const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
@@ -85,7 +86,7 @@ export default function ChainNodeOutput({
       .every(version => !!version && checkModelAvailable(version.config.model)) &&
     items
       .filter(IsQueryChainItem)
-      .every(item => checkProviderAvailable(item.provider) && checkProviderAvailable(item.embeddingProvider))
+      .every(item => checkProviderAvailable(item.provider) && checkProviderAvailable(ProviderForModel(item.model)))
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion()
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
