@@ -2,7 +2,6 @@ import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
 import { AvailableProvider, ModelProvider } from '@/types'
 import { useState } from 'react'
-import PickNameDialog from '../pickNameDialog'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { FormatCost } from '@/src/common/formatting'
@@ -47,12 +46,24 @@ function ProviderRow({
 }) {
   const label = LabelForProvider(provider)
 
-  const [showAPIKeyPrompt, setShowAPIKeyPrompt] = useState(false)
+  const [apiKey, setAPIKey] = useState('')
+  const [isUpdating, setUpdating] = useState(false)
+  const [isProcessing, setProcessing] = useState(false)
+
+  const toggleUpdate = () => {
+    setUpdating(!isUpdating)
+    setAPIKey('')
+  }
+
+  const updateKey = async (apiKey: string | null) => {
+    setProcessing(true)
+    await api.updateProviderKey(provider, apiKey).then(onRefresh)
+    setAPIKey('')
+    setUpdating(false)
+    setProcessing(false)
+  }
 
   const setDialogPrompt = useModalDialogPrompt()
-
-  const updateKey = (apiKey: string | null) => api.updateProviderKey(provider, apiKey).then(onRefresh)
-
   const removeKey = () => {
     setDialogPrompt({
       title: `Are you sure you want to unlink your ${label} API key? This may affect published endpoints.`,
@@ -61,7 +72,7 @@ function ProviderRow({
     })
   }
 
-  const flexLayout = availableProvider ? 'flex-col' : 'justify-between'
+  const flexLayout = availableProvider || isUpdating ? 'flex-col' : 'justify-between'
 
   return (
     <div className={`flex ${flexLayout} gap-2 p-3 bg-white border border-gray-200 rounded-lg`}>
@@ -73,27 +84,28 @@ function ProviderRow({
         )}
       </div>
       <div className='flex items-center gap-2.5'>
-        {availableProvider ? <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} /> : undefined}
+        {availableProvider && !isUpdating && (
+          <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />
+        )}
+        {isUpdating && (
+          <TextInput disabled={isProcessing} value={apiKey} setValue={setAPIKey} placeholder={`${label} API Key`} />
+        )}
         <div className='flex gap-2.5 justify-end grow cursor-pointer'>
-          <Button type='outline' onClick={() => setShowAPIKeyPrompt(true)}>
-            {availableProvider ? 'Update' : 'Configure'}
+          {isUpdating && (
+            <Button type='primary' disabled={!apiKey.length || isProcessing} onClick={() => updateKey(apiKey)}>
+              Add
+            </Button>
+          )}
+          <Button type='outline' disabled={isProcessing} onClick={toggleUpdate}>
+            {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
           </Button>
-          {availableProvider && (
-            <Button type='destructive' onClick={removeKey}>
+          {availableProvider && !isUpdating && (
+            <Button type='destructive' disabled={isProcessing} onClick={removeKey}>
               Remove
             </Button>
           )}
         </div>
       </div>
-      {showAPIKeyPrompt && (
-        <PickNameDialog
-          title='Add API Key'
-          confirmTitle='Save'
-          label={`${label} API key`}
-          onConfirm={updateKey}
-          onDismiss={() => setShowAPIKeyPrompt(false)}
-        />
-      )}
     </div>
   )
 }
