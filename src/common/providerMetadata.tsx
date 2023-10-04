@@ -7,13 +7,16 @@ import {
   LanguageModel,
   ModelProvider,
   Prompts,
+  QueryProvider,
 } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
+import pineconeIcon from '@/public/pinecone.svg'
 
 export const AllModelProviders: ModelProvider[] = ['openai', 'anthropic', 'google', 'cohere']
+export const AllQueryProviders: QueryProvider[] = ['pinecone']
 
 export const AllModels: LanguageModel[] = [
   'gpt-4',
@@ -24,7 +27,7 @@ export const AllModels: LanguageModel[] = [
   'command',
 ]
 
-export const IconForProvider = (provider: ModelProvider) => {
+export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
   switch (provider) {
     case 'openai':
       return openaiIcon
@@ -34,10 +37,12 @@ export const IconForProvider = (provider: ModelProvider) => {
       return googleIcon
     case 'cohere':
       return cohereIcon
+    case 'pinecone':
+      return pineconeIcon;
   }
 }
 
-export const LabelForProvider = (provider: ModelProvider) => {
+export const LabelForProvider = (provider: ModelProvider | QueryProvider) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -47,6 +52,8 @@ export const LabelForProvider = (provider: ModelProvider) => {
       return 'Google'
     case 'cohere':
       return 'Cohere'
+    case 'pinecone':
+      return 'Pinecone'
   }
 }
 

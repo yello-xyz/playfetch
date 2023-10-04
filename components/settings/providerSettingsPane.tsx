@@ -1,6 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, ModelProvider } from '@/types'
+import { AvailableProvider, ModelProvider, QueryProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -11,18 +11,20 @@ import TextInput from '../textInput'
 import SettingsPane from './settingsPane'
 
 export default function ProviderSettingsPane({
+  title,
+  description,
   providers,
   availableProviders,
   onRefresh,
 }: {
-  providers: ModelProvider[]
+  title: string
+  description: string
+  providers: ModelProvider[] | QueryProvider[]
   availableProviders: AvailableProvider[]
   onRefresh: () => void
 }) {
   return (
-    <SettingsPane
-      title='Manage API keys'
-      description='Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'>
+    <SettingsPane title={title} description={description}>
       {providers.map((provider, index) => (
         <ProviderRow
           key={index}
@@ -40,7 +42,7 @@ function ProviderRow({
   availableProvider,
   onRefresh,
 }: {
-  provider: ModelProvider
+  provider: ModelProvider | QueryProvider
   availableProvider?: AvailableProvider
   onRefresh: () => void
 }) {

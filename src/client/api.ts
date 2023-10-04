@@ -15,6 +15,7 @@ import {
   Usage,
   Analytics,
   AvailableProvider,
+  QueryProvider,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -236,7 +237,7 @@ const api = {
   getAvailableProviders: function (): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders)
   },
-  updateProviderKey: function (provider: ModelProvider, apiKey: string | null, environment?: string) {
+  updateProviderKey: function (provider: ModelProvider | QueryProvider, apiKey: string | null, environment?: string) {
     return post(this.updateProviderKey, { provider, apiKey, environment })
   },
   updateProviderModel: function (

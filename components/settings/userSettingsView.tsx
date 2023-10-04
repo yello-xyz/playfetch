@@ -22,7 +22,13 @@ export default function UserSettingsView() {
 
   return (
     <div className='flex flex-col items-start flex-1 gap-3 p-6 text-gray-500 max-w-[680px]'>
-      <ProviderSettingsPane providers={allProviders} availableProviders={availableProviders} onRefresh={refresh} />
+      <ProviderSettingsPane
+        title='Manage API keys'
+        description='Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'
+        providers={allProviders}
+        availableProviders={availableProviders}
+        onRefresh={refresh}
+      />
       {haveCustomModels && <CustomModelSettingsPane availableProviders={availableProviders} onRefresh={refresh} />}
     </div>
   )
