@@ -8,7 +8,7 @@ import { TaggedVersionPrompt } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
-import { useAvailableProviders } from '@/src/client/hooks/useAvailableProviders'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ChainNodeBoxBody({
   nodes,

@@ -10,7 +10,7 @@ import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
-import { useAvailableProviders } from '@/src/client/hooks/useAvailableProviders'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
   activeItem,

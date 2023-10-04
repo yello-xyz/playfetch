@@ -1,7 +1,6 @@
 import {
   AvailableModelProvider,
   AvailableProvider,
-  AvailableQueryProvider,
   CustomLanguageModel,
   CustomModel,
   DefaultLanguageModel,

@@ -11,7 +11,7 @@ import {
   LabelForModel,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
-import useModelProviders from '@/src/client/hooks/useAvailableProviders'
+import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelSelector({
   model,

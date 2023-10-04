@@ -12,7 +12,7 @@ function useProviders() {
   return [availableProviders, checkModelAvailable, checkProviderAvailable] as const
 }
 
-export default function useModelProviders() {
+export function useModelProviders() {
   const [availableProviders, checkModelAvailable] = useProviders()
   const availableModelProviders = availableProviders.filter(IsModelProvider)
   const checkModelProviderAvailable = (provider: ModelProvider) =>
@@ -20,14 +20,14 @@ export default function useModelProviders() {
   return [availableModelProviders, checkModelAvailable, checkModelProviderAvailable] as const
 }
 
+export default function useAvailableProviders() {
+  const [availableModelProviders] = useModelProviders()
+  return availableModelProviders
+}
+
 export function useCheckProviders() {
   const [_, checkModelAvailable, checkProviderAvailable] = useProviders()
   return [checkProviderAvailable, checkModelAvailable] as const
-}
-
-export function useAvailableProviders() {
-  const [availableModelProviders] = useModelProviders()
-  return availableModelProviders
 }
 
 export function useCheckModelProviderAvailable() {

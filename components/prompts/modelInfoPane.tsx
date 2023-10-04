@@ -16,7 +16,7 @@ import openInIcon from '@/public/openIn.svg'
 import Link from 'next/link'
 import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
-import useModelProviders from '@/src/client/hooks/useAvailableProviders'
+import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()

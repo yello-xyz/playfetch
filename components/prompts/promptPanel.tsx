@@ -28,10 +28,7 @@ import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 import Icon from '../icon'
-import useModelProviders, {
-  useCheckModelDisabled,
-  useCheckModelProviderAvailable,
-} from '@/src/client/hooks/useAvailableProviders'
+import { useModelProviders, useCheckModelDisabled } from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
 

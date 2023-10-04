@@ -10,7 +10,7 @@ import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointsSmall.svg'
 import Icon from '../icon'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
-import { useAvailableProviders } from '@/src/client/hooks/useAvailableProviders'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
