@@ -40,17 +40,29 @@ export async function migrateProviders(postMerge: boolean) {
   }
 }
 
+export async function getProviderCredentials(
+  userID: number,
+  provider: ModelProvider | QueryProvider,
+  customModel?: string
+): Promise<string[]> {
+  const providerData = await getProviderData(userID, provider)
+  const customModels = providerData ? (JSON.parse(providerData.customModels) as CustomModel[]) : []
+  if (customModel && !customModels.find(model => model.id === customModel && model.enabled)) {
+    return []
+  }
+  return [
+    ...(providerData?.apiKey ? [providerData.apiKey] : []),
+    ...(providerData?.environment ? [providerData.environment] : [])
+  ]
+}
+
 export async function getProviderKey(
   userID: number,
   provider: ModelProvider | QueryProvider,
   customModel?: string
 ): Promise<string | null> {
-  const providerData = await getProviderData(userID, provider)
-  const customModels = providerData ? (JSON.parse(providerData.customModels) as CustomModel[]) : []
-  if (customModel && !customModels.find(model => model.id === customModel && model.enabled)) {
-    return null
-  }
-  return providerData?.apiKey ?? null
+  const [apiKey] = await getProviderCredentials(userID, provider, customModel)
+  return apiKey ?? null
 }
 
 const toProviderData = (
