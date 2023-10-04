@@ -4,7 +4,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { LabelForModel } from '@/src/common/providerMetadata'
 import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import { TaggedVersionPrompt } from '../versions/versionComparison'
+import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
@@ -55,24 +55,20 @@ function PromptNodeBody({
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
       <CommonBody isSelected={isSelected}>
-        <TaggedVersionPrompt version={version} />
+        <TaggedContent content={version.prompts.main} />
       </CommonBody>
     </div>
   ) : null
 }
 
 function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: boolean }) {
-  return item.description ? (
-    <CommonBody isSelected={isSelected}>
-      <span className=''>{item.description}</span>
-    </CommonBody>
-  ) : null
+  return item.description ? <CommonBody isSelected={isSelected}>{item.description}</CommonBody> : null
 }
 
 function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected: boolean }) {
   return item.query ? (
     <CommonBody isSelected={isSelected}>
-      <span className=''>{item.query}</span>
+      <TaggedContent content={item.query} />
     </CommonBody>
   ) : null
 }
