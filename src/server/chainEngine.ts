@@ -1,9 +1,10 @@
-import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts } from '@/types'
+import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts, QueryConfig } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
+import { runQuery } from './queryEngine'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -32,7 +33,8 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
   return { ...result, duration }
 }
 
-const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
+const isRunConfig = (config: RunConfig | CodeConfig | QueryConfig): config is RunConfig => 'versionID' in config
+const isQueryConfig = (config: RunConfig | CodeConfig | QueryConfig): config is QueryConfig => 'query' in config
 
 type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
 type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
@@ -144,8 +146,15 @@ export default async function runChain(
         }
       } else {
         continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
-        const output = lastResponse.output
-        AugmentInputs(inputs, config.output, output!, useCamelCase)
+        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
+      }
+    } else if (isQueryConfig(config)) {
+      lastResponse = await runChainStep(runQuery(userID, config.indexName, config.query))
+      streamResponse(lastResponse)
+      if (lastResponse.failed) {
+        break
+      } else {
+        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
       }
     } else {
       const codeContext = CreateCodeContextWithInputs(inputs)
