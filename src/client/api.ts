@@ -235,8 +235,8 @@ const api = {
   getAvailableProviders: function () {
     return post(this.getAvailableProviders)
   },
-  updateProviderKey: function (provider: ModelProvider, apiKey: string | null) {
-    return post(this.updateProviderKey, { provider, apiKey })
+  updateProviderKey: function (provider: ModelProvider, apiKey: string | null, environment?: string) {
+    return post(this.updateProviderKey, { provider, apiKey, environment })
   },
   updateProviderModel: function (
     provider: ModelProvider,
