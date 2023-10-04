@@ -34,6 +34,7 @@ export default function UserSettingsView() {
         description='Provide your API credentials here to enable integration with vector stores.'
         providers={AllQueryProviders}
         availableProviders={availableQueryProviders}
+        includeEnvironment
         onRefresh={refresh}
       />
     </div>

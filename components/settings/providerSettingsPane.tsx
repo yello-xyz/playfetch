@@ -15,12 +15,14 @@ export default function ProviderSettingsPane({
   description,
   providers,
   availableProviders,
+  includeEnvironment,
   onRefresh,
 }: {
   title: string
   description: string
   providers: ModelProvider[] | QueryProvider[]
   availableProviders: AvailableProvider[]
+  includeEnvironment?: boolean
   onRefresh: () => void
 }) {
   return (
@@ -30,6 +32,7 @@ export default function ProviderSettingsPane({
           key={index}
           provider={provider}
           availableProvider={availableProviders.find(p => p.provider === provider)}
+          includeEnvironment={includeEnvironment}
           onRefresh={onRefresh}
         />
       ))}
@@ -40,29 +43,32 @@ export default function ProviderSettingsPane({
 function ProviderRow({
   provider,
   availableProvider,
+  includeEnvironment,
   onRefresh,
 }: {
   provider: ModelProvider | QueryProvider
   availableProvider?: AvailableProvider
+  includeEnvironment?: boolean
   onRefresh: () => void
 }) {
   const label = LabelForProvider(provider)
 
   const [apiKey, setAPIKey] = useState('')
+  const [environment, setEnvironment] = useState<string>()
   const [isUpdating, setUpdating] = useState(false)
   const [isProcessing, setProcessing] = useState(false)
 
-  const toggleUpdate = () => {
-    setUpdating(!isUpdating)
+  const toggleUpdate = (updating: boolean) => {
+    setUpdating(updating)
     setAPIKey('')
+    setEnvironment(undefined)
   }
 
   const updateKey = async (apiKey: string | null) => {
     setProcessing(true)
-    await api.updateProviderKey(provider, apiKey).then(onRefresh)
-    setAPIKey('')
-    setUpdating(false)
+    await api.updateProviderKey(provider, apiKey, environment).then(onRefresh)
     setProcessing(false)
+    toggleUpdate(false)
   }
 
   const setDialogPrompt = useModalDialogPrompt()
@@ -92,13 +98,24 @@ function ProviderRow({
         {isUpdating && (
           <TextInput disabled={isProcessing} value={apiKey} setValue={setAPIKey} placeholder={`${label} API Key`} />
         )}
+        {isUpdating && includeEnvironment && (
+          <TextInput
+            disabled={isProcessing}
+            value={environment ?? ''}
+            setValue={setEnvironment}
+            placeholder={`${label} Environment`}
+          />
+        )}
         <div className='flex gap-2.5 justify-end grow cursor-pointer'>
           {isUpdating && (
-            <Button type='primary' disabled={!apiKey.length || isProcessing} onClick={() => updateKey(apiKey)}>
+            <Button
+              type='primary'
+              disabled={!apiKey.length || (includeEnvironment && !environment?.length) || isProcessing}
+              onClick={() => updateKey(apiKey)}>
               Add
             </Button>
           )}
-          <Button type='outline' disabled={isProcessing} onClick={toggleUpdate}>
+          <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>
             {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
           </Button>
           {availableProvider && !isUpdating && (
