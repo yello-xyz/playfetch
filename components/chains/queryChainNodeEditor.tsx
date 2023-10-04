@@ -12,6 +12,7 @@ import {
   ProviderForModel,
 } from '@/src/common/providerMetadata'
 import { useCheckProviderAvailable } from '@/src/client/hooks/useAvailableProviders'
+import { ProviderWarning } from '../prompts/promptPanel'
 
 export default function QueryChainNodeEditor({
   item,
@@ -27,6 +28,8 @@ export default function QueryChainNodeEditor({
   const updateQuery = (query: string) => updateItem({ ...item, query })
 
   const checkProviderAvailable = useCheckProviderAvailable()
+  const isVectorStoreAvailable = checkProviderAvailable(item.provider)
+  const isEmbeddingProviderAvailable = checkProviderAvailable(ProviderForModel(item.embeddingModel))
 
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
 
@@ -60,6 +63,15 @@ export default function QueryChainNodeEditor({
           <span className='font-medium mt-2.5'>Query</span>
           <PromptInput placeholder='Query' value={item.query} setValue={updateQuery} preformatted />
         </div>
+        {!(isVectorStoreAvailable && isEmbeddingProviderAvailable) && (
+          <div className='flex flex-col gap-2 px-4 pt-4'>
+            {isVectorStoreAvailable ? (
+              <ProviderWarning provider={ProviderForModel(item.embeddingModel)} />
+            ) : (
+              <ProviderWarning provider={item.provider} />
+            )}
+          </div>
+        )}
       </div>
     </>
   )

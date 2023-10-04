@@ -7,11 +7,13 @@ import {
   TestConfig,
   Prompts,
   ModelProvider,
+  QueryProvider,
 } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
+  AllModelProviders,
   FullLabelForModel,
   IconForProvider,
   LabelForPromptKey,
@@ -189,12 +191,12 @@ export function ModelUnavailableWarning({
   includeTitle?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
 }) {
-  const isProviderAvailable = checkProviderAvailable(ProviderForModel(model))
+  const provider = ProviderForModel(model)
 
-  return isProviderAvailable ? (
+  return checkProviderAvailable(provider) ? (
     <ModelWarning model={model} includeTitle={includeTitle} />
   ) : (
-    <ProviderWarning includeTitle={includeTitle} />
+    <ProviderWarning provider={provider} includeTitle={includeTitle} />
   )
 }
 
@@ -221,7 +223,13 @@ function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; in
   )
 }
 
-function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
+export function ProviderWarning({
+  provider,
+  includeTitle = true,
+}: {
+  provider: ModelProvider | QueryProvider
+  includeTitle?: boolean
+}) {
   const router = useRouter()
 
   return (
@@ -230,7 +238,10 @@ function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
       title={includeTitle ? 'Missing API Key' : undefined}
       buttonTitle='Add API Key'
       onClick={() => router.push(ClientRoute.Settings)}>
-      <span>An API key is required to use this model.</span>
+      <span>
+        An API key is required to use this{' '}
+        {(AllModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
+      </span>
     </ButtonBanner>
   )
 }

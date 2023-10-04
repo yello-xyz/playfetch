@@ -20,7 +20,7 @@ export const AllModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'googl
 export const AllQueryProviders: QueryProvider[] = ['pinecone']
 
 export const AllEmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
-export const AllDefaultLanguageModels: LanguageModel[] = [
+export const AllDefaultLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
   'gpt-3.5-turbo',
   'claude-instant-1',
