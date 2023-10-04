@@ -10,7 +10,7 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AvailableProvider, CustomModel, ModelProvider, QueryProvider } from '@/types'
+import { AvailableModelProvider, AvailableProvider, CustomModel, ModelProvider, QueryProvider } from '@/types'
 import { CustomModelsForProvider } from '../providers/integration'
 import { AllModelProviders } from '@/src/common/providerMetadata'
 
@@ -70,7 +70,7 @@ const toProviderData = (
 const toAvailableProvider = (data: any): AvailableProvider => ({
   provider: data.provider,
   cost: data.cost,
-  customModels: JSON.parse(data.customModels),
+  ...(AllModelProviders.includes(data.provider) ? { customModels: JSON.parse(data.customModels) } : {}) 
 })
 
 export async function incrementProviderCostForUser(
@@ -184,7 +184,7 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
   const additionalModels = currentCustomModels.filter(
     model => !previousCustomModels.find(previous => previous.id === model)
   )
-  const availableProvider = toAvailableProvider(availableProviderData)
+  const availableProvider = toAvailableProvider(availableProviderData) as AvailableModelProvider
   availableProvider.customModels = [
     ...filteredCustomModels,
     ...additionalModels.map(model => ({ id: model, name: '', description: '', enabled: false })),

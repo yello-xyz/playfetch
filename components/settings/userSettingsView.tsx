@@ -5,6 +5,7 @@ import { useState } from 'react'
 import api from '@/src/client/api'
 import ProviderSettingsPane from './providerSettingsPane'
 import CustomModelSettingsPane from './customModelSettingsPane'
+import { IsModelProvider } from '@/types'
 
 export default function UserSettingsView() {
   const user = useLoggedInUser()
@@ -12,7 +13,7 @@ export default function UserSettingsView() {
   const allProviders = AllModelProviders.sort((a, b) => LabelForProvider(a).localeCompare(LabelForProvider(b))).filter(
     provider => provider !== DefaultProvider
   )
-  const [availableProviders, setAvailableProviders] = useState(user.availableProviders)
+  const [availableProviders, setAvailableProviders] = useState(user.availableProviders.filter(IsModelProvider))
 
   const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
 

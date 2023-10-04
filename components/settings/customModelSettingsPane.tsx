@@ -1,6 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, CustomModel, ModelProvider } from '@/types'
+import { AvailableModelProvider, CustomModel, ModelProvider } from '@/types'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Icon from '../icon'
@@ -14,7 +14,7 @@ export default function CustomModelSettingsPane({
   availableProviders,
   onRefresh,
 }: {
-  availableProviders: AvailableProvider[]
+  availableProviders: AvailableModelProvider[]
   onRefresh: () => void
 }) {
   const providerMap = {} as { [id: string]: ModelProvider }

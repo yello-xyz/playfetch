@@ -80,7 +80,7 @@ export type DefaultLanguageModel =
   | GoogleLanguageModel
   | CohereLanguageModel
 
-  export type CustomLanguageModel = string
+export type CustomLanguageModel = string
 
 export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
@@ -98,11 +98,20 @@ export type CustomModel = {
   enabled: boolean
 }
 
-export type AvailableProvider = {
+export type AvailableModelProvider = {
   provider: ModelProvider
   cost: number
   customModels: CustomModel[]
 }
+export type AvailableQueryProvider = {
+  provider: QueryProvider
+  cost: number
+}
+export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
+export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
+  'customModels' in provider
+
+export type QueryProvider = 'pinecone'
 
 type Version = {
   id: number

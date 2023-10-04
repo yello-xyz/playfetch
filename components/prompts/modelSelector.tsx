@@ -1,4 +1,4 @@
-import { AvailableProvider, LanguageModel, ModelProvider } from '@/types'
+import { AvailableModelProvider, LanguageModel, ModelProvider } from '@/types'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
@@ -46,7 +46,7 @@ type ModelSelectorPopupProps = {
   selectedModel: LanguageModel
   onSelectModel: (model: LanguageModel) => void
   checkModelAvailable: (model: LanguageModel) => boolean
-  availableProviders: AvailableProvider[]
+  availableProviders: AvailableModelProvider[]
 }
 
 function ModelSelectorPopup({

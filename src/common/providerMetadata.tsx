@@ -1,5 +1,5 @@
 import {
-  AvailableProvider,
+  AvailableModelProvider,
   CustomLanguageModel,
   CustomModel,
   DefaultLanguageModel,
@@ -74,19 +74,19 @@ export const isCustomModel = (model: LanguageModel): model is CustomLanguageMode
 const baseModelForModel = (model: LanguageModel): DefaultLanguageModel =>
   isCustomModel(model) ? 'gpt-3.5-turbo' : model
 
-const customModelFromProviders = (model: LanguageModel, providers: AvailableProvider[]): CustomModel | null => {
+const customModelFromProviders = (model: LanguageModel, providers: AvailableModelProvider[]): CustomModel | null => {
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
-export const IsProviderAvailable = (provider: ModelProvider, providers: AvailableProvider[]): boolean =>
+export const IsProviderAvailable = (provider: ModelProvider, providers: AvailableModelProvider[]): boolean =>
   !!providers.find(p => p.provider === provider)
 
-export const IsModelDisabled = (model: LanguageModel, providers: AvailableProvider[]): boolean => {
+export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelProvider[]): boolean => {
   const customModel = customModelFromProviders(model, providers)
   return !!customModel && !customModel.enabled
 }
 
-export const IsModelAvailable = (model: LanguageModel, providers: AvailableProvider[]): boolean =>
+export const IsModelAvailable = (model: LanguageModel, providers: AvailableModelProvider[]): boolean =>
   isCustomModel(model)
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)
@@ -180,7 +180,7 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
   }
 }
 
-const labelForModel = (model: LanguageModel, providers: AvailableProvider[]): string => {
+const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5 Turbo'
@@ -199,7 +199,7 @@ const labelForModel = (model: LanguageModel, providers: AvailableProvider[]): st
   }
 }
 
-const shortLabelForModel = (model: LanguageModel, providers: AvailableProvider[]): string => {
+const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT3.5'
@@ -217,12 +217,12 @@ const shortLabelForModel = (model: LanguageModel, providers: AvailableProvider[]
   }
 }
 
-export const LabelForModel = (model: LanguageModel, providers: AvailableProvider[], includeProvider = true) =>
+export const LabelForModel = (model: LanguageModel, providers: AvailableModelProvider[], includeProvider = true) =>
   includeProvider
     ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model, providers)}`
     : shortLabelForModel(model, providers)
 
-export const FullLabelForModel = (model: LanguageModel, providers: AvailableProvider[], includeProvider = true) =>
+export const FullLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[], includeProvider = true) =>
   includeProvider
     ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model, providers)}`
     : labelForModel(model, providers)
@@ -247,7 +247,7 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
   }
 }
 
-export const DescriptionForModel = (model: LanguageModel, providers: AvailableProvider[]): string => {
+export const DescriptionForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks.'
