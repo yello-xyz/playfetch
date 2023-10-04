@@ -119,7 +119,7 @@ export default async function runChain(
       const promptVersion = (
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
-      let prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
+      const prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
@@ -146,7 +146,8 @@ export default async function runChain(
         continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
       }
     } else if (isQueryConfig(config)) {
-      lastResponse = await runChainStep(runQuery(userID, config.indexName, config.query))
+      const query = resolvePrompt(config.query, inputs, useCamelCase)
+      lastResponse = await runChainStep(runQuery(userID, config.indexName, query))
       streamResponse(lastResponse)
     } else {
       const codeContext = CreateCodeContextWithInputs(inputs)
