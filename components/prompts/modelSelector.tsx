@@ -11,7 +11,7 @@ import {
   LabelForModel,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
-import useProviders from '@/src/client/hooks/useAvailableProviders'
+import useModelProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelSelector({
   model,
@@ -23,7 +23,7 @@ export default function ModelSelector({
   popUpAbove?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
-  const [availableProviders, checkModelAvailable] = useProviders()
+  const [availableProviders, checkModelAvailable] = useModelProviders()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
     setPopup(

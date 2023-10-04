@@ -1,30 +1,39 @@
-import { IsModelProvider, LanguageModel, ModelProvider } from '@/types'
+import { IsModelProvider, LanguageModel, ModelProvider, QueryProvider } from '@/types'
 import { useLoggedInUser } from '../context/userContext'
 import { IsModelAvailable, IsModelDisabled, IsProviderAvailable } from '@/src/common/providerMetadata'
 
-export default function useProviders() {
+function useProviders() {
   const user = useLoggedInUser()
-  const availableProviders = user.availableProviders.filter(IsModelProvider)
-  const checkModelAvailable = (model: LanguageModel) => IsModelAvailable(model, availableProviders)
-  return [availableProviders, checkModelAvailable] as const
+  const availableProviders = user.availableProviders
+  const availableModelProviders = availableProviders.filter(IsModelProvider)
+  const checkModelAvailable = (model: LanguageModel) => IsModelAvailable(model, availableModelProviders)
+  const checkProviderAvailable = (provider: ModelProvider | QueryProvider) =>
+    IsProviderAvailable(provider, availableProviders)
+  return [availableProviders, checkModelAvailable, checkProviderAvailable] as const
+}
+
+export default function useModelProviders() {
+  const [availableProviders, checkModelAvailable] = useProviders()
+  const availableModelProviders = availableProviders.filter(IsModelProvider)
+  return [availableModelProviders, checkModelAvailable] as const
+}
+
+export function useCheckProviders() {
+  const [_, checkModelAvailable, checkProviderAvailable] = useProviders()
+  return [checkProviderAvailable, checkModelAvailable] as const
 }
 
 export function useAvailableProviders() {
-  const [availableProviders] = useProviders()
-  return availableProviders
+  const [availableModelProviders] = useModelProviders()
+  return availableModelProviders
 }
 
-export function useCheckModelAvailable() {
-  const [_, checkModelAvailable] = useProviders()
-  return checkModelAvailable
-}
-
-export function useCheckProviderAvailable() {
-  const [availableProviders] = useProviders()
-  return (provider: ModelProvider) => IsProviderAvailable(provider, availableProviders)
+export function useCheckModelProviderAvailable() {
+  const [availableModelProviders] = useModelProviders()
+  return (provider: ModelProvider) => IsProviderAvailable(provider, availableModelProviders)
 }
 
 export function useCheckModelDisabled() {
-  const [availableProviders] = useProviders()
-  return (model: LanguageModel) => IsModelDisabled(model, availableProviders)
+  const [availableModelProviders] = useModelProviders()
+  return (model: LanguageModel) => IsModelDisabled(model, availableModelProviders)
 }

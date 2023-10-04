@@ -1,5 +1,7 @@
 import {
   AvailableModelProvider,
+  AvailableProvider,
+  AvailableQueryProvider,
   CustomLanguageModel,
   CustomModel,
   DefaultLanguageModel,
@@ -85,7 +87,7 @@ const customModelFromProviders = (model: LanguageModel, providers: AvailableMode
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
-export const IsProviderAvailable = (provider: ModelProvider, providers: AvailableModelProvider[]): boolean =>
+export const IsProviderAvailable = (provider: ModelProvider | QueryProvider, providers: AvailableProvider[]): boolean =>
   !!providers.find(p => p.provider === provider)
 
 export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelProvider[]): boolean => {

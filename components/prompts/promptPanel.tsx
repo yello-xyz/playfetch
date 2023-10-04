@@ -19,9 +19,9 @@ import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 import Icon from '../icon'
-import useProviders, {
+import useModelProviders, {
   useCheckModelDisabled,
-  useCheckProviderAvailable,
+  useCheckModelProviderAvailable,
 } from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
@@ -78,7 +78,7 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompts, config)
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
 
-  const [availableProviders, checkModelAvailable] = useProviders()
+  const [availableProviders, checkModelAvailable] = useModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
@@ -179,7 +179,7 @@ export function ModelUnavailableWarning({
   model: LanguageModel
   includeTitle?: boolean
 }) {
-  const checkProviderAvailable = useCheckProviderAvailable()
+  const checkProviderAvailable = useCheckModelProviderAvailable()
   const isProviderAvailable = checkProviderAvailable(ProviderForModel(model))
 
   const checkModelDisabled = useCheckModelDisabled()
