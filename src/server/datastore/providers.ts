@@ -30,6 +30,7 @@ export async function migrateProviders(postMerge: boolean) {
         providerData.userID,
         providerData.provider,
         providerData.apiKey,
+        providerData.environment ?? null,
         providerData.cost,
         providerData.customModels ? JSON.parse(providerData.customModels) : [],
         getID(providerData)
@@ -55,13 +56,14 @@ const toProviderData = (
   userID: number,
   provider: ModelProvider,
   apiKey: string | null,
+  environment: string | null,
   cost: number,
   customModels: CustomModel[],
   providerID?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
-  data: { userID, provider, apiKey, cost, customModels: JSON.stringify(customModels) },
-  excludeFromIndexes: ['apiKey', 'customModels'],
+  data: { userID, provider, apiKey, environment, cost, customModels: JSON.stringify(customModels) },
+  excludeFromIndexes: ['apiKey', 'environment', 'customModels'],
 })
 
 const toAvailableProvider = (data: any): AvailableProvider => ({
@@ -79,6 +81,7 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
           userID,
           provider,
           providerData.apiKey,
+          providerData.environment,
           providerData.cost + cost,
           JSON.parse(providerData.customModels),
           getID(providerData)
@@ -88,10 +91,15 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
   })
 }
 
-export async function saveProviderKey(userID: number, provider: ModelProvider, apiKey: string | null) {
+export async function saveProviderKey(
+  userID: number,
+  provider: ModelProvider,
+  apiKey: string | null,
+  environment: string | null
+) {
   const providerData = await getProviderData(userID, provider)
   const providerID = providerData ? getID(providerData) : undefined
-  await getDatastore().save(toProviderData(userID, provider, apiKey, 0, [], providerID))
+  await getDatastore().save(toProviderData(userID, provider, apiKey, environment, 0, [], providerID))
 }
 
 export async function saveProviderModel(
@@ -110,7 +118,15 @@ export async function saveProviderModel(
       { id: modelID, name, description, enabled },
     ]
     await getDatastore().save(
-      toProviderData(userID, provider, providerData.apiKey, providerData.cost, newCustomModels, getID(providerData))
+      toProviderData(
+        userID,
+        provider,
+        providerData.apiKey,
+        providerData.environment,
+        providerData.cost,
+        newCustomModels,
+        getID(providerData)
+      )
     )
   }
 }
@@ -153,6 +169,7 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
         availableProviderData.userID,
         availableProviderData.provider,
         availableProviderData.apiKey,
+        availableProviderData.environment,
         availableProviderData.cost,
         filteredCustomModels,
         getID(availableProviderData)
