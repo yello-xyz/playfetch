@@ -10,12 +10,13 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AvailableProvider, CustomModel, ModelProvider } from '@/types'
+import { AvailableProvider, CustomModel, ModelProvider, QueryProvider } from '@/types'
 import { CustomModelsForProvider } from '../providers/integration'
+import { AllModelProviders } from '@/src/common/providerMetadata'
 
-const buildProviderFilter = (userID: number, provider: ModelProvider) =>
+const buildProviderFilter = (userID: number, provider: ModelProvider | QueryProvider) =>
   and([buildFilter('userID', userID), buildFilter('provider', provider)])
-const getProviderData = (userID: number, provider: ModelProvider) =>
+const getProviderData = (userID: number, provider: ModelProvider | QueryProvider) =>
   getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider))
 
 export async function migrateProviders(postMerge: boolean) {
@@ -41,7 +42,7 @@ export async function migrateProviders(postMerge: boolean) {
 
 export async function getProviderKey(
   userID: number,
-  provider: ModelProvider,
+  provider: ModelProvider | QueryProvider,
   customModel?: string
 ): Promise<string | null> {
   const providerData = await getProviderData(userID, provider)
@@ -54,7 +55,7 @@ export async function getProviderKey(
 
 const toProviderData = (
   userID: number,
-  provider: ModelProvider,
+  provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   environment: string | null,
   cost: number,
@@ -72,7 +73,11 @@ const toAvailableProvider = (data: any): AvailableProvider => ({
   customModels: JSON.parse(data.customModels),
 })
 
-export async function incrementProviderCostForUser(userID: number, provider: ModelProvider, cost: number) {
+export async function incrementProviderCostForUser(
+  userID: number,
+  provider: ModelProvider | QueryProvider,
+  cost: number
+) {
   await runTransactionWithExponentialBackoff(async transaction => {
     const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider), transaction)
     if (providerData) {
@@ -93,7 +98,7 @@ export async function incrementProviderCostForUser(userID: number, provider: Mod
 
 export async function saveProviderKey(
   userID: number,
-  provider: ModelProvider,
+  provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   environment: string | null
 ) {
@@ -140,7 +145,7 @@ export async function getAvailableProvidersForUser(
   const availableProviders = [] as AvailableProvider[]
   const providerDataToSave = [] as any[]
   for (const availableProviderData of providerData.filter(data => !!data.apiKey?.length)) {
-    const availableProvider = reloadCustomModels
+    const availableProvider = reloadCustomModels && AllModelProviders.includes(availableProviderData.provider)
       ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
       : toAvailableProvider(availableProviderData)
     availableProviders.push(availableProvider)
@@ -159,7 +164,7 @@ export async function getAvailableProvidersForUser(
 async function loadProviderWithCustomModels(availableProviderData: any, providerDataToSave: any[]) {
   const previousCustomModels = JSON.parse(availableProviderData.customModels) as CustomModel[]
   const currentCustomModels = await CustomModelsForProvider(
-    availableProviderData.provider,
+    availableProviderData.provider as ModelProvider,
     availableProviderData.apiKey
   )
   const filteredCustomModels = previousCustomModels.filter(model => currentCustomModels.includes(model.id))

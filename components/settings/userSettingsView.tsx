@@ -1,6 +1,6 @@
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AllProviders, LabelForProvider } from '@/src/common/providerMetadata'
+import { AllModelProviders, LabelForProvider } from '@/src/common/providerMetadata'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import ProviderSettingsPane from './providerSettingsPane'
@@ -9,7 +9,7 @@ import CustomModelSettingsPane from './customModelSettingsPane'
 export default function UserSettingsView() {
   const user = useLoggedInUser()
 
-  const allProviders = AllProviders.sort((a, b) => LabelForProvider(a).localeCompare(LabelForProvider(b))).filter(
+  const allProviders = AllModelProviders.sort((a, b) => LabelForProvider(a).localeCompare(LabelForProvider(b))).filter(
     provider => provider !== DefaultProvider
   )
   const [availableProviders, setAvailableProviders] = useState(user.availableProviders)

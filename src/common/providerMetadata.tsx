@@ -13,7 +13,7 @@ import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 
-export const AllProviders: ModelProvider[] = ['openai', 'anthropic', 'google', 'cohere']
+export const AllModelProviders: ModelProvider[] = ['openai', 'anthropic', 'google', 'cohere']
 
 export const AllModels: LanguageModel[] = [
   'gpt-4',
