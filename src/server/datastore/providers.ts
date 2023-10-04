@@ -52,7 +52,7 @@ export async function getProviderCredentials(
   }
   return [
     ...(providerData?.apiKey ? [providerData.apiKey] : []),
-    ...(providerData?.environment ? [providerData.environment] : [])
+    ...(providerData?.environment ? [providerData.environment] : []),
   ]
 }
 
@@ -82,7 +82,9 @@ const toProviderData = (
 const toAvailableProvider = (data: any): AvailableProvider => ({
   provider: data.provider,
   cost: data.cost,
-  ...(AllModelProviders.includes(data.provider) ? { customModels: JSON.parse(data.customModels) } : {}) 
+  ...(AllModelProviders.includes(data.provider)
+    ? { customModels: JSON.parse(data.customModels) }
+    : { environment: data.environment }),
 })
 
 export async function incrementProviderCostForUser(
@@ -157,9 +159,10 @@ export async function getAvailableProvidersForUser(
   const availableProviders = [] as AvailableProvider[]
   const providerDataToSave = [] as any[]
   for (const availableProviderData of providerData.filter(data => !!data.apiKey?.length)) {
-    const availableProvider = reloadCustomModels && AllModelProviders.includes(availableProviderData.provider)
-      ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
-      : toAvailableProvider(availableProviderData)
+    const availableProvider =
+      reloadCustomModels && AllModelProviders.includes(availableProviderData.provider)
+        ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
+        : toAvailableProvider(availableProviderData)
     availableProviders.push(availableProvider)
   }
   if (providerDataToSave.length > 0) {

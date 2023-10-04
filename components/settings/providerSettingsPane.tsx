@@ -1,6 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, ModelProvider, QueryProvider } from '@/types'
+import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -52,16 +52,18 @@ function ProviderRow({
   onRefresh: () => void
 }) {
   const label = LabelForProvider(provider)
+  const previousEnvironment =
+    availableProvider && !IsModelProvider(availableProvider) ? availableProvider.environment : undefined
 
   const [apiKey, setAPIKey] = useState('')
-  const [environment, setEnvironment] = useState<string>()
+  const [environment, setEnvironment] = useState(previousEnvironment)
   const [isUpdating, setUpdating] = useState(false)
   const [isProcessing, setProcessing] = useState(false)
 
   const toggleUpdate = (updating: boolean) => {
     setUpdating(updating)
     setAPIKey('')
-    setEnvironment(undefined)
+    setEnvironment(previousEnvironment)
   }
 
   const updateKey = async (apiKey: string | null) => {
@@ -93,18 +95,23 @@ function ProviderRow({
       </div>
       <div className='flex items-center gap-2.5'>
         {availableProvider && !isUpdating && (
-          <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />
+          <>
+            <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />
+            {includeEnvironment && previousEnvironment && <TextInput disabled value={previousEnvironment} />}
+          </>
         )}
         {isUpdating && (
-          <TextInput disabled={isProcessing} value={apiKey} setValue={setAPIKey} placeholder={`${label} API Key`} />
-        )}
-        {isUpdating && includeEnvironment && (
-          <TextInput
-            disabled={isProcessing}
-            value={environment ?? ''}
-            setValue={setEnvironment}
-            placeholder={`${label} Environment`}
-          />
+          <>
+            <TextInput disabled={isProcessing} value={apiKey} setValue={setAPIKey} placeholder={`${label} API Key`} />
+            {includeEnvironment && (
+              <TextInput
+                disabled={isProcessing}
+                value={environment ?? ''}
+                setValue={setEnvironment}
+                placeholder='Environment'
+              />
+            )}
+          </>
         )}
         <div className='flex gap-2.5 justify-end grow cursor-pointer'>
           {isUpdating && (
@@ -112,7 +119,7 @@ function ProviderRow({
               type='primary'
               disabled={!apiKey.length || (includeEnvironment && !environment?.length) || isProcessing}
               onClick={() => updateKey(apiKey)}>
-              Add
+              {availableProvider ? 'Update' : 'Add'}
             </Button>
           )}
           <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>

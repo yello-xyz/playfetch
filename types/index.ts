@@ -106,6 +106,7 @@ export type AvailableModelProvider = {
 export type AvailableQueryProvider = {
   provider: QueryProvider
   cost: number
+  environment: string
 }
 export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
