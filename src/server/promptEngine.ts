@@ -2,7 +2,7 @@ import { PromptConfig, Prompts, PromptInputs } from '@/types'
 import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
 import { APIKeyForProvider, GetPredictor } from './providers/integration'
 import { DefaultProvider } from '../common/defaultConfig'
-import { AllModels } from '../common/providerMetadata'
+import { AllDefaultLanguageModels } from '../common/providerMetadata'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -50,7 +50,7 @@ export default async function runPromptWithConfig(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
-  const customModel = AllModels.includes(config.model) ? undefined : config.model
+  const customModel = AllDefaultLanguageModels.includes(config.model) ? undefined : config.model
   const apiKey = await APIKeyForProvider(userID, config.provider, customModel)
   if (config.provider !== DefaultProvider && !apiKey) {
     const defaultModelsAPIKey = customModel ? await APIKeyForProvider(userID, config.provider) : apiKey

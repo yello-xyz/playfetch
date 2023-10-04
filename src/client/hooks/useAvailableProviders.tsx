@@ -1,4 +1,4 @@
-import { IsModelProvider, LanguageModel, ModelProvider, QueryProvider } from '@/types'
+import { EmbeddingModel, IsModelProvider, LanguageModel, ModelProvider, QueryProvider } from '@/types'
 import { useLoggedInUser } from '../context/userContext'
 import { IsModelAvailable, IsModelDisabled, IsProviderAvailable } from '@/src/common/providerMetadata'
 
@@ -6,7 +6,8 @@ function useProviders() {
   const user = useLoggedInUser()
   const availableProviders = user.availableProviders
   const availableModelProviders = availableProviders.filter(IsModelProvider)
-  const checkModelAvailable = (model: LanguageModel) => IsModelAvailable(model, availableModelProviders)
+  const checkModelAvailable = (model: LanguageModel | EmbeddingModel) =>
+    IsModelAvailable(model, availableModelProviders)
   const checkProviderAvailable = (provider: ModelProvider | QueryProvider) =>
     IsProviderAvailable(provider, availableProviders)
   return [availableProviders, checkModelAvailable, checkProviderAvailable] as const

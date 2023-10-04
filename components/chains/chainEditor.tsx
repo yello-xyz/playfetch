@@ -5,6 +5,8 @@ import SegmentedControl, { Segment } from '../segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { useState } from 'react'
+import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
+import { AllEmbeddingModels, AllQueryProviders, ProviderForModel } from '@/src/common/providerMetadata'
 
 export default function ChainEditor({
   chain,
@@ -39,6 +41,17 @@ export default function ChainEditor({
   disabled: boolean
   promptCache: ChainPromptCache
 }) {
+  const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
+  const queryProvider = AllQueryProviders.find(provider => checkProviderAvailable(provider))
+  const embeddingModel = AllEmbeddingModels.find(model => checkModelAvailable(model))
+  const defaultQueryConfig = queryProvider && embeddingModel ? {
+    embeddingProvider: ProviderForModel(embeddingModel),
+    embeddingModel,
+    provider: queryProvider,
+    indexName: '',
+    query: '',
+  } : undefined
+
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 
   if (nodes.length === 2 && !activeMenuIndex) {
@@ -80,6 +93,7 @@ export default function ChainEditor({
             prompts={prompts}
             addPrompt={addPrompt}
             promptCache={promptCache}
+            defaultQueryConfig={defaultQueryConfig}
           />
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>

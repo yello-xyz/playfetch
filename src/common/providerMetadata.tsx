@@ -19,7 +19,8 @@ import pineconeIcon from '@/public/pinecone.svg'
 export const AllModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
 export const AllQueryProviders: QueryProvider[] = ['pinecone']
 
-export const AllModels: LanguageModel[] = [
+export const AllEmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
+export const AllDefaultLanguageModels: LanguageModel[] = [
   'gpt-4',
   'gpt-3.5-turbo',
   'claude-instant-1',
@@ -64,10 +65,11 @@ export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompt
   ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
 ]
 
-export const isCustomModel = (model: LanguageModel): model is CustomLanguageModel => {
+export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is CustomLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
+    case 'text-embedding-ada-002':
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison@001':
@@ -94,7 +96,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
   return !!customModel && !customModel.enabled
 }
 
-export const IsModelAvailable = (model: LanguageModel, providers: AvailableModelProvider[]): boolean =>
+export const IsModelAvailable = (model: LanguageModel | EmbeddingModel, providers: AvailableModelProvider[]): boolean =>
   isCustomModel(model)
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)
@@ -171,10 +173,11 @@ export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
   }
 }
 
-export const ProviderForModel = (model: LanguageModel): ModelProvider => {
+export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
+    case 'text-embedding-ada-002':
       return 'openai'
     case 'claude-instant-1':
     case 'claude-2':
