@@ -38,7 +38,7 @@ export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
     case 'cohere':
       return cohereIcon
     case 'pinecone':
-      return pineconeIcon;
+      return pineconeIcon
   }
 }
 

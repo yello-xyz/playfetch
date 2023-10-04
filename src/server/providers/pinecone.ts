@@ -14,5 +14,5 @@ export default async function runVectorQuery(
     vector,
     includeMetadata: true,
   })
-  return (queryResponse.matches ?? []).map(match => match.metadata?.['text'] as string ?? '')
+  return (queryResponse.matches ?? []).map(match => (match.metadata?.['text'] as string) ?? '')
 }

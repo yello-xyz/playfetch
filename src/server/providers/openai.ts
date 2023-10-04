@@ -152,11 +152,11 @@ export async function createEmbedding(
   input: string
 ): Promise<{ embedding: number[]; cost: number }> {
   const api = new OpenAI({ apiKey })
-  
+
   const response = await api.embeddings.create({ input, model, user: userID.toString() })
-  
+
   const embedding = response.data[0].embedding
   const cost = CostForModel(model, input)
 
-  return { embedding, cost } 
+  return { embedding, cost }
 }
