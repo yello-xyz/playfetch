@@ -2,7 +2,7 @@ import { PromptConfig, Prompts, PromptInputs } from '@/types'
 import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
 import { APIKeyForProvider, GetPredictor } from './providers/integration'
 import { DefaultProvider } from '../common/defaultConfig'
-import { AllDefaultLanguageModels } from '../common/providerMetadata'
+import { AllDefaultLanguageModels, ProviderForModel } from '../common/providerMetadata'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -50,10 +50,11 @@ export default async function runPromptWithConfig(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
+  const provider = ProviderForModel(config.model)
   const customModel = (AllDefaultLanguageModels as string[]).includes(config.model) ? undefined : config.model
-  const apiKey = await APIKeyForProvider(userID, config.provider, customModel)
-  if (config.provider !== DefaultProvider && !apiKey) {
-    const defaultModelsAPIKey = customModel ? await APIKeyForProvider(userID, config.provider) : apiKey
+  const apiKey = await APIKeyForProvider(userID, provider, customModel)
+  if (provider !== DefaultProvider && !apiKey) {
+    const defaultModelsAPIKey = customModel ? await APIKeyForProvider(userID, provider) : apiKey
     return {
       error: defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key',
       result: undefined,
@@ -64,7 +65,7 @@ export default async function runPromptWithConfig(
     }
   }
 
-  const predictor = GetPredictor(config.provider, apiKey ?? '', userID, config.model)
+  const predictor = GetPredictor(provider, apiKey ?? '', userID, config.model)
 
   let result: PredictionResponse = { output: '', cost: 0 }
   let attempts = 0
@@ -85,7 +86,7 @@ export default async function runPromptWithConfig(
   }
 
   if (!isErrorPredictionResponse(result) && result.cost > 0) {
-    incrementProviderCostForUser(userID, config.provider, result.cost)
+    incrementProviderCostForUser(userID, provider, result.cost)
   }
 
   return {

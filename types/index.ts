@@ -85,7 +85,6 @@ export type CustomLanguageModel = string
 export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
 export type PromptConfig = {
-  provider: ModelProvider
   model: LanguageModel
   temperature: number
   maxTokens: number
