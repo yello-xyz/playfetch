@@ -14,7 +14,8 @@ export const runQuery = async (
   provider: QueryProvider,
   model: EmbeddingModel,
   indexName: string,
-  query: string
+  query: string,
+  topK: number
 ): Promise<QueryResponse> => {
   try {
     const [queryAPIKey, queryEnvironment] = await getProviderCredentials(userID, provider)
@@ -31,7 +32,7 @@ export const runQuery = async (
     const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingApiKey, userID, query)
     incrementProviderCostForUser(userID, embeddingProvider, cost)
 
-    const result = await runVectorQuery(queryAPIKey, queryEnvironment, indexName, embedding)
+    const result = await runVectorQuery(queryAPIKey, queryEnvironment, indexName, embedding, topK)
 
     return { result, output: result.join('\n'), error: undefined, failed: false, cost, attempts: 1 }
   } catch (error: any) {

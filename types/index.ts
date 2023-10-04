@@ -186,6 +186,7 @@ export type QueryConfig = {
   model: EmbeddingModel
   indexName: string
   query: string
+  topK: number
   output?: string
 }
 

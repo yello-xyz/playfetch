@@ -5,7 +5,7 @@ export default async function runVectorQuery(
   environment: string,
   indexName: string,
   vector: number[],
-  topK = 1
+  topK: number
 ) {
   const pinecone = new Pinecone({ apiKey, environment })
   const index = pinecone.index(indexName)

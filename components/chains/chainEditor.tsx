@@ -44,7 +44,7 @@ export default function ChainEditor({
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
   const provider = AllQueryProviders.find(provider => checkProviderAvailable(provider))
   const model = AllEmbeddingModels.find(model => checkModelAvailable(model))
-  const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '' } : undefined
+  const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '', topK: 1 } : undefined
 
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
 

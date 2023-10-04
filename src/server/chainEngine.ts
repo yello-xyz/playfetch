@@ -148,7 +148,9 @@ export default async function runChain(
       }
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
-      lastResponse = await runChainStep(runQuery(userID, config.provider, config.model, config.indexName, query))
+      lastResponse = await runChainStep(
+        runQuery(userID, config.provider, config.model, config.indexName, query, config.topK)
+      )
       streamResponse(lastResponse)
     } else if (isCodeConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
