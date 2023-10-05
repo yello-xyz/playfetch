@@ -16,11 +16,12 @@ export default function CookieBanner({ children }: any) {
   const [toggledOn, setToggledOn] = useState(false)
 
   type CookieStatus = 'accepted' | 'denied' | 'unknown'
-  const consent = 'cookie-consent'
-  const [cookies, setCookie] = useCookies([consent])
-  const cookieStatus: CookieStatus = cookies[consent] ?? 'unknown'
+  const cookieName = process.env.NEXT_PUBLIC_COOKIE_NAME ?? 'dev-consent'
+  const [cookies, setCookie] = useCookies([cookieName])
+  const cookieStatus: CookieStatus = cookies[cookieName] ?? 'unknown'
   const updateCookieStatus = useCallback(
-    (status: 'accepted' | 'denied') => setCookie(consent, status, { path: '/', sameSite: 'lax' }),
+    (status: 'accepted' | 'denied') =>
+      setCookie(cookieName, status, { path: '/', sameSite: 'lax', domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN }),
     [setCookie]
   )
 
