@@ -27,11 +27,11 @@ export default function CookieBanner({ children }: any) {
 
   useEffect(() => {
     if (cookieStatus !== 'unknown') {
-      updateCookieStatus(cookieStatus)
+      updateCookieConsent(cookieStatus === 'accepted')
     } else {
       setTimeout(() => setSavedCookieStatus(false), 2000)
     }
-  }, [cookieStatus, updateCookieStatus])
+  }, [cookieStatus])
 
   const updateCookies = (accept: boolean) => () => {
     updateCookieConsent(accept)
