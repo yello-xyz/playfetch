@@ -18,4 +18,5 @@ import { migrateWorkspaces } from './workspaces'
 export async function runDataMigrations(postMerge: boolean) {
   await migrateLogs(postMerge)
   await migrateProviders(postMerge)
+  await migrateVersions(postMerge)
 }

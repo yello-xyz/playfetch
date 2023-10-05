@@ -31,26 +31,31 @@ import {
 } from './chains'
 
 export async function migrateVersions(postMerge: boolean) {
-  if (postMerge) {
+  if (!postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  for (const versionData of allVersions) {
-    await datastore.save(
-      toVersionData(
-        versionData.userID,
-        versionData.parentID,
-        versionData.prompts ? JSON.parse(versionData.prompts) : null,
-        versionData.config ? JSON.parse(versionData.config) : null,
-        versionData.items ? JSON.parse(versionData.items) : null,
-        JSON.parse(versionData.labels),
-        versionData.createdAt,
-        versionData.didRun,
-        versionData.previousVersionID,
-        getID(versionData)
+  for (const [index, versionData] of allVersions.entries()) {
+    const config = versionData.config ? JSON.parse(versionData.config) : null
+    console.log(`${config && config.provider ? '+' : '-'} [${index + 1}/${allVersions.length}] (${getID(versionData)})`)
+    if (config && config.provider) {
+      config.provider = undefined
+      await datastore.save(
+        toVersionData(
+          versionData.userID,
+          versionData.parentID,
+          versionData.prompts ? JSON.parse(versionData.prompts) : null,
+          config,
+          versionData.items ? JSON.parse(versionData.items) : null,
+          JSON.parse(versionData.labels),
+          versionData.createdAt,
+          versionData.didRun,
+          versionData.previousVersionID,
+          getID(versionData)
+        )
       )
-    )
+    }
   }
 }
 
