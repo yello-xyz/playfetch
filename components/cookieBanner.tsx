@@ -22,7 +22,7 @@ export default function CookieBanner({ children }: any) {
   const updateCookieStatus = useCallback(
     (status: 'accepted' | 'denied') =>
       setCookie(cookieName, status, { path: '/', sameSite: 'lax', domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN }),
-    [setCookie]
+    [setCookie, cookieName]
   )
 
   useEffect(() => {
@@ -39,14 +39,6 @@ export default function CookieBanner({ children }: any) {
     setSavedCookieStatus(true)
   }
 
-  const cookieMessage = (
-    <div className='text-xs'>
-      We use cookies and similar technologies to give you a better experience and to help us improve our services. You
-      can manage your cookie settings at any time. For more information, please see our{' '}
-      <Link href={ClientRoute.Privacy}>Privacy Policy</Link>.
-    </div>
-  )
-
   return (
     <div>
       {children}
@@ -57,12 +49,20 @@ export default function CookieBanner({ children }: any) {
               <Checkbox label='Strictly necessary' checked disabled>
                 Essential for the site to function. Always On.
               </Checkbox>
-              <Checkbox id='analytics' label='Analytics' checked={toggledOn} setChecked={() => setToggledOn(!toggledOn)}>
+              <Checkbox
+                id='analytics'
+                label='Analytics'
+                checked={toggledOn}
+                setChecked={() => setToggledOn(!toggledOn)}>
                 Used to measure usage and improve your experience.
               </Checkbox>
             </div>
           ) : (
-            cookieMessage
+            <div className='text-xs'>
+              We use cookies and similar technologies to give you a better experience and to help us improve our
+              services. You can manage your cookie settings at any time. For more information, please see our{' '}
+              <Link href={ClientRoute.Privacy}>Privacy Policy</Link>.
+            </div>
           )}
           <div className='flex justify-end gap-2'>
             {showingMoreOptions ? (
