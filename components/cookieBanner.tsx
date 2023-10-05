@@ -51,13 +51,13 @@ export default function CookieBanner({ children }: any) {
     <div>
       {children}
       {!savedCookieStatus && (
-        <div className='fixed z-30 flex flex-col gap-2 p-4 text-gray-700 bg-white rounded-lg shadow bottom-4 left-4 w-96'>
+        <div className='fixed z-30 flex flex-col gap-2 p-4 text-gray-700 bg-white rounded-lg shadow bottom-4 left-4 w-[392px]'>
           {showingMoreOptions ? (
-            <div className='flex flex-col gap-2'>
+            <div className='flex flex-col gap-2 pb-2 text-sm'>
               <Checkbox label='Strictly necessary' checked disabled>
                 Essential for the site to function. Always On.
               </Checkbox>
-              <Checkbox label='Analytics' checked={toggledOn} setChecked={() => setToggledOn(!toggledOn)}>
+              <Checkbox id='analytics' label='Analytics' checked={toggledOn} setChecked={() => setToggledOn(!toggledOn)}>
                 Used to measure usage and improve your experience.
               </Checkbox>
             </div>
