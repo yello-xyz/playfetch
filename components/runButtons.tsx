@@ -28,7 +28,8 @@ const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
   config: TestConfig,
-  count = 1
+  count = 1,
+  start = 0
 ): [{ [key: string]: string }[], number[]] => {
   const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
@@ -37,7 +38,13 @@ const SelectInputRows = (
   const emptyRowIndices = Array.from({ length: maxRowCount }, (_, index) => index).filter(index =>
     columns.every(column => column[index] === undefined || column[index].length === 0)
   )
-  const filteredRowIndices = config.rowIndices.filter(index => !emptyRowIndices.includes(index)).sort()
+  const isNonEmptyRow = (index: number) => !emptyRowIndices.includes(index)
+  const filteredRowIndices = config.rowIndices.filter(isNonEmptyRow).sort()
+
+  const indexArray = (count: number) => Array.from({ length: count }, (_, index) => index)
+  const startIndex = indexArray(maxRowCount)
+    .filter(isNonEmptyRow)
+    .findIndex(index => index >= start)
 
   const filteredPaddedInputs: InputValues = {}
   for (const [key, values] of Object.entries(inputs)) {
@@ -52,7 +59,7 @@ const SelectInputRows = (
   }
 
   const entries = Object.entries(filteredPaddedInputs)
-  const allRowIndices = Array.from({ length: rowCount }, (_, index) => index)
+  const allRowIndices = indexArray(rowCount)
   const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
   const selectedIndices = (() => {
     switch (config.mode) {
@@ -62,7 +69,7 @@ const SelectInputRows = (
       case 'last':
         return [rowCount - 1]
       case 'range':
-        return allRowIndices.slice(0, count)
+        return allRowIndices.slice(startIndex, startIndex + count)
       case 'random':
         return shuffleArray(allRowIndices).slice(0, count)
       case 'all':
@@ -124,7 +131,7 @@ export default function RunButtons({
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
   const selectInputs = useCallback(
-    (config: TestConfig | { mode: TestMode; count?: number }) =>
+    (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
       SelectInputRows(
         inputValues,
         variables,
@@ -132,11 +139,12 @@ export default function RunButtons({
           mode: config.mode,
           rowIndices: 'rowIndices' in config ? config.rowIndices : [],
         },
-        'rowIndices' in config ? config.rowIndices.length : config.count
+        'rowIndices' in config ? config.rowIndices.length : config.count,
+        'rowIndices' in config ? config.rowIndices[0] : config.start
       ),
     [inputValues, variables]
   )
-  const getIndicesForMode = (mode: TestMode, count?: number) => selectInputs({ mode, count })[1]
+  const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]
 
   const [, rowIndices] = selectInputs(testConfig)
   useEffect(() => {
@@ -188,7 +196,7 @@ export default function RunButtons({
 type TestDataSelectorPopupProps = {
   testConfig: TestConfig
   setTestConfig: (config: TestConfig) => void
-  getIndicesForMode: (mode: TestMode, count?: number) => number[]
+  getIndicesForMode: (mode: TestMode, count?: number, start?: number) => number[]
 }
 
 function TestDataSelectorPopup({
@@ -203,7 +211,7 @@ function TestDataSelectorPopup({
   const [mode, setMode] = useState(testConfig.mode)
   const [count, setCount] = useState(testConfig.rowIndices.length)
   const [start, setStart] = useState(testConfig.rowIndices[0] ?? validRows[0])
-  const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count) }))
+  const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count, start) }))
 
   const gridConfig = 'grid grid-cols-[110px_minmax(0,1fr)]'
 
