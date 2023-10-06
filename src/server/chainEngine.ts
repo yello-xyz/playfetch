@@ -139,7 +139,8 @@ export default async function runChain(
       } else if (functionInterrupt && isEndpointEvaluation) {
         continuationIndex = index
         break
-      } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount++ < MaxContinuationCount) {
+      } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount < MaxContinuationCount) {
+        ++continuationCount
         continuationIndex = index
         index -= 1
         continue
