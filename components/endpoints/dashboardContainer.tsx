@@ -20,7 +20,6 @@ export default function DashboardContainer({
   addBottomPadding?: boolean
   children: ReactElement<any>
 }) {
-  console.log(addBottomPadding)
   return (
     <div className='flex flex-col flex-1 bg-white border border-gray-200 rounded-md'>
       <div className='flex flex-col px-4 pt-3'>
@@ -32,12 +31,12 @@ export default function DashboardContainer({
         </div>
         <div className='flex items-center gap-2'>
           <span className='text-lg font-bold text-gray-800'>{value || '\u00A0'}</span>
-          {percentIncrement && (
+          {percentIncrement !== undefined && (
             <span
               className={`flex px-1 py-px text-xs rounded ${
                 percentIncrement < 0 !== lowerIsBetter ? 'bg-red-50 text-red-400' : 'bg-green-50 text-green-400'
               }`}>
-              {percentIncrement > 0 ? '+' : ''}
+              {percentIncrement >= 0 ? '+' : ''}
               {percentIncrement}%
             </span>
           )}
