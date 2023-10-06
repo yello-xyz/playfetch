@@ -312,11 +312,13 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
   const usageKeys = await getEntityKeys(Entity.USAGE, 'projectID', projectID)
   const logEntryKeys = await getEntityKeys(Entity.LOG, 'projectID', projectID)
+  const analyticsKeys = await getEntityKeys(Entity.ANALYTICS, 'projectID', projectID)
 
   await getDatastore().delete([
     ...accessKeys,
     ...cacheKeys,
     ...inputKeys,
+    ...analyticsKeys,
     ...logEntryKeys,
     ...usageKeys,
     ...endpointKeys,
