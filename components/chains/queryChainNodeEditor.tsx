@@ -13,6 +13,7 @@ import {
 } from '@/src/common/providerMetadata'
 import { useCheckProviderAvailable } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderWarning } from '../prompts/promptPanel'
+import RangeInput from '../rangeInput'
 
 export default function QueryChainNodeEditor({
   item,
@@ -61,24 +62,7 @@ export default function QueryChainNodeEditor({
             <TextInput value={item.indexName} setValue={updateIndexName} />
             <Label>Top-K Results</Label>
             <div className='flex items-center gap-4'>
-              <input
-                className='flex-1 border border-gray-300 accent-gray-700 focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'
-                type='range'
-                min={1}
-                max={10}
-                step={1}
-                value={item.topK}
-                onChange={event => updateTopK(Number(event.target.value))}
-              />
-              <input
-                className='p-2 text-sm border border-gray-300 rounded-lg w-18 focus:border-solid focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'
-                type='number'
-                min={1}
-                max={10}
-                step={1}
-                value={item.topK}
-                onChange={event => updateTopK(Number(event.target.value))}
-              />
+              <RangeInput className='flex-1' value={item.topK} setValue={updateTopK} min={1} max={10} step={1} />
             </div>
           </div>
           <span className='font-medium mt-2.5'>Query</span>
