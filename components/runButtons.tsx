@@ -88,7 +88,6 @@ export default function RunButtons({
   setLanguageModel,
   testConfig,
   setTestConfig,
-  showTestMode,
   disabled,
   callback,
 }: {
@@ -100,7 +99,6 @@ export default function RunButtons({
   setLanguageModel?: (model: LanguageModel) => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
-  showTestMode?: boolean
   disabled?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
@@ -144,12 +142,8 @@ export default function RunButtons({
       {languageModel && setLanguageModel && (
         <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
       )}
-      {showTestMode && (
-        <DropdownMenu
-          disabled={allInputs.length <= 1}
-          size='md'
-          value={testConfig.mode}
-          onChange={value => updateTestMode(value as TestConfig['mode'])}>
+      {allInputs.length > 1 && (
+        <DropdownMenu size='md' value={testConfig.mode} onChange={value => updateTestMode(value as TestConfig['mode'])}>
           {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
           <option value={'first'}>First</option>
           <option value={'last'}>Last</option>

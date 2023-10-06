@@ -43,7 +43,6 @@ export default function PromptPanel({
   setTestConfig,
   initialActiveTab,
   onActiveTabChange,
-  showTestMode,
   loadPendingVersion,
   setPreferredHeight,
 }: {
@@ -55,7 +54,6 @@ export default function PromptPanel({
   setTestConfig?: (testConfig: TestConfig) => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
-  showTestMode?: boolean
   loadPendingVersion?: () => void
   setPreferredHeight?: (height: number) => void
 }) {
@@ -171,7 +169,6 @@ export default function PromptPanel({
           setTestConfig={setTestConfig}
           disabled={!isModelAvailable || prompts.main.trim().length === 0}
           callback={runPrompt}
-          showTestMode={showTestMode}
         />
       )}
     </div>
