@@ -74,7 +74,7 @@ function TestDataSelectorPopup({
       <div className={`${gridConfig} w-full items-center gap-2 px-3 py-2`}>
         <Label>Type</Label>
         <DropdownMenu size='xs' value={mode} onChange={value => setMode(value as TestConfig['mode'])}>
-          {mode === 'custom' && <option value={'custom'}>Custom</option>}
+          {mode === 'custom' && <option value={'custom'}>Manual selection</option>}
           <option value={'first'}>First</option>
           <option value={'last'}>Last</option>
           {(mode === 'range' || rowCount > 2) && <option value={'range'}>Range</option>}

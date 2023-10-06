@@ -142,6 +142,7 @@ export default function RunButtons({
   const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]
 
   const [, rowIndices] = selectInputs(testConfig)
+  const fallbackIndices = getIndicesForMode('first')
   useEffect(() => {
     const validRowIndices = selectValidRowIndices(testConfig.mode, mode =>
       selectInputs({ mode, count: testConfig.rowIndices.length })
@@ -152,10 +153,9 @@ export default function RunButtons({
     ) {
       setTestConfig({ mode: testConfig.mode, rowIndices })
     } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      const rowIndices = getIndicesForMode('first')
-      setTestConfig({ mode: 'first', rowIndices })
+      setTestConfig({ mode: 'first', rowIndices: fallbackIndices })
     }
-  }, [testConfig, setTestConfig, rowIndices, selectInputs])
+  }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
 
   const testPrompt = () => {
     const [inputs, indices] = selectInputs(testConfig)
