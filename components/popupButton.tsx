@@ -18,6 +18,36 @@ export function PopupButton({
   popUpAbove?: boolean
   children: ReactNode
 }) {
+  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
+  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer hover:bg-gray-100'
+
+  return (
+    <CustomPopupButton
+      onSetPopup={onSetPopup}
+      fixedWidth={fixedWidth}
+      popUpAbove={popUpAbove}
+      className={`${baseClass} ${disabledClass} ${className}`}>
+      {children}
+      <Icon icon={chevronIcon} />
+    </CustomPopupButton>
+  )
+}
+
+export function CustomPopupButton({
+  onSetPopup,
+  className,
+  disabled,
+  fixedWidth,
+  popUpAbove,
+  children,
+}: {
+  onSetPopup: (location: GlobalPopupLocation) => void
+  className: string
+  disabled?: boolean
+  fixedWidth?: boolean
+  popUpAbove?: boolean
+  children: ReactNode
+}) {
   const buttonRef = useRef<HTMLDivElement>(null)
 
   const togglePopup = disabled
@@ -32,13 +62,9 @@ export function PopupButton({
         })
       }
 
-  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
-  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer hover:bg-gray-100'
-
   return (
-    <div className={`${baseClass} ${disabledClass} ${className}`} ref={buttonRef} onClick={togglePopup}>
+    <div className={className} ref={buttonRef} onClick={togglePopup}>
       {children}
-      <Icon icon={chevronIcon} />
     </div>
   )
 }
