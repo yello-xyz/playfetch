@@ -1,26 +1,33 @@
 import { LogEntry, PromptInputs } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp } from './datastore'
 import { ensureProjectAccess } from './projects'
-import { updateAnalytics } from './analytics'
 
 export async function migrateLogs(postMerge: boolean) {
   if (postMerge) {
     return
   }
   const datastore = getDatastore()
-  const [allLogs] = await datastore.runQuery(
-    datastore.createQuery(Entity.LOG).order('createdAt', { descending: false })
-  )
-  for (const [index, logData] of allLogs.entries()) {
-    console.log(`[${index + 1}/${allLogs.length}] ${getID(logData)} ${logData.createdAt}`)
-    await updateAnalytics(
-      logData.projectID,
-      logData.cost,
-      logData.duration,
-      logData.cacheHit,
-      logData.attempts,
-      !!logData.error,
-      logData.createdAt
+  const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG).order('createdAt', { descending: true }))
+  for (const logData of allLogs) {
+    await getDatastore().save(
+      toLogData(
+        logData.projectID,
+        logData.endpointID,
+        logData.urlPath,
+        logData.flavor,
+        logData.parentID,
+        logData.versionID,
+        JSON.parse(logData.inputs),
+        JSON.parse(logData.output),
+        logData.error,
+        logData.createdAt,
+        logData.cost,
+        logData.duration,
+        logData.attempts,
+        logData.cacheHit,
+        logData.continuationID,
+        getID(logData)
+      )
     )
   }
 }

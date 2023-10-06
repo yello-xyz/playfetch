@@ -31,9 +31,9 @@ export async function migrateProviders(postMerge: boolean) {
         providerData.userID,
         providerData.provider,
         providerData.apiKey,
-        providerData.environment ?? null,
+        providerData.environment,
         providerData.cost,
-        providerData.customModels ? JSON.parse(providerData.customModels) : [],
+        JSON.parse(providerData.customModels),
         getID(providerData)
       )
     )
