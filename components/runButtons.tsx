@@ -1,8 +1,10 @@
 import { useCallback, useEffect } from 'react'
 import { PendingButton } from './button'
-import DropdownMenu from './dropdownMenu'
 import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
 import ModelSelector from './prompts/modelSelector'
+import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
+import { PopupButton } from './popupButton'
+import { PopupContent, PopupLabelItem } from './popupMenu'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
@@ -137,19 +139,21 @@ export default function RunButtons({
   }
 
   const [allInputs] = selectInputs({ mode: 'all' })
+
+  const setPopup = useGlobalPopup<TestDataSelectorPopupProps>()
+
+  const onSetPopup = (location: GlobalPopupLocation) =>
+    setPopup(TestDataSelectorPopup, { mode: testConfig.mode, updateTestMode }, location)
+
   return (
     <div className='flex items-center self-end gap-3'>
       {languageModel && setLanguageModel && (
         <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
       )}
       {allInputs.length > 1 && (
-        <DropdownMenu size='md' value={testConfig.mode} onChange={value => updateTestMode(value as TestConfig['mode'])}>
-          {testConfig.mode === 'custom' && <option value={'custom'}>Custom</option>}
-          <option value={'first'}>First</option>
-          <option value={'last'}>Last</option>
-          <option value={'random'}>Random</option>
-          <option value={'all'}>All</option>
-        </DropdownMenu>
+        <PopupButton popUpAbove onSetPopup={onSetPopup}>
+          <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>Test Data</span>
+        </PopupButton>
       )}
       <PendingButton
         title={runTitle ?? 'Run'}
@@ -158,5 +162,24 @@ export default function RunButtons({
         onClick={testPrompt}
       />
     </div>
+  )
+}
+
+type TestDataSelectorPopupProps = {
+  mode: TestConfig['mode']
+  updateTestMode: (mode: TestConfig['mode']) => void
+}
+
+function TestDataSelectorPopup({ mode, updateTestMode, withDismiss }: TestDataSelectorPopupProps & WithDismiss) {
+  const select = (mode: TestConfig['mode']) => withDismiss(() => updateTestMode(mode))
+
+  return (
+    <PopupContent className='relative p-3 w-52' autoOverflow={false}>
+      {mode === 'custom' && <PopupLabelItem label='Custom' onClick={select('custom')} checked />}
+      <PopupLabelItem label='First' onClick={select('first')} checked={mode === 'first'} />
+      <PopupLabelItem label='Last' onClick={select('last')} checked={mode === 'last'} />
+      <PopupLabelItem label='Random' onClick={select('random')} checked={mode === 'random'} />
+      <PopupLabelItem label='All' onClick={select('all')} checked={mode === 'all'} />
+    </PopupContent>
   )
 }
