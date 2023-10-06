@@ -8,12 +8,14 @@ export function PendingButton({
   title,
   pendingTitle,
   type = 'primary',
+  roundedClass,
   disabled,
   onClick,
 }: {
   title: string
   pendingTitle?: string
   type?: ButtonType
+  roundedClass?: string
   disabled?: boolean
   onClick: () => void | Promise<void>
 }) {
@@ -26,7 +28,12 @@ export function PendingButton({
   }
 
   return (
-    <Button type={type} disabled={disabled || isPending} showSpinner={isPending} onClick={handleClick}>
+    <Button
+      type={type}
+      disabled={disabled || isPending}
+      roundedClass={roundedClass}
+      showSpinner={isPending}
+      onClick={handleClick}>
       {isPending && pendingTitle ? pendingTitle : title}
     </Button>
   )
@@ -35,12 +42,14 @@ export function PendingButton({
 export default function Button({
   type = 'primary',
   children,
+  roundedClass = 'rounded-lg',
   showSpinner,
   disabled,
   onClick,
 }: {
   type?: ButtonType
   children: ReactNode
+  roundedClass?: string
   showSpinner?: boolean
   disabled?: boolean
   onClick: () => void | Promise<void>
@@ -53,9 +62,9 @@ export default function Button({
       case 'secondary':
         return 'text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50'
       case 'outline':
-        return 'bg-white border-gray-200 hover:bg-gray-100 font-medium disabled:opacity-50'
+        return 'bg-white border border-gray-200 hover:bg-gray-100 font-medium disabled:opacity-50'
       case 'destructive':
-        return 'bg-white text-red-500 border-gray-200 hover:bg-red-50 hover:border-red-100 disabled:opacity-50'
+        return 'bg-white text-red-500 border border-gray-200 hover:bg-red-50 hover:border-red-100 disabled:opacity-50'
     }
   }
 
@@ -63,7 +72,9 @@ export default function Button({
 
   return (
     <button
-      className={`${colorForType(type)} ${paddingClass} text-sm border whitespace-nowrap rounded-lg flex items-center`}
+      className={`${colorForType(
+        type
+      )} ${paddingClass} ${roundedClass} h-9 text-sm whitespace-nowrap flex items-center`}
       disabled={disabled}
       onClick={onClick}>
       {showSpinner && <Icon icon={spinnerIcon} className='animate-spin max-w-[24px]' />}
