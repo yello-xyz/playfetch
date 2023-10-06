@@ -4,7 +4,7 @@ import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formattin
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testDataPane'
-import RunButtons from '../runButtons'
+import RunButtons from '../runs/runButtons'
 import {
   ChainNode,
   InputNode,

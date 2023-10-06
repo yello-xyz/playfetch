@@ -5,7 +5,7 @@ import { ToCamelCase } from '@/src/common/formatting'
 import Icon from '../icon'
 import clipboardIcon from '@/public/clipboard.svg'
 import checkIcon from '@/public/check.svg'
-import { SelectAnyInputRow } from '../runButtons'
+import { SelectAnyInputRow } from '../runs/runButtons'
 
 const buildCurlCommand = (
   endpoint: ResolvedEndpoint,

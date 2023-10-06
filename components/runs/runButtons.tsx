@@ -1,13 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
-import Button, { PendingButton } from './button'
+import { useCallback, useEffect } from 'react'
+import { PendingButton } from '../button'
 import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
-import ModelSelector from './prompts/modelSelector'
-import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
-import { PopupButton } from './popupButton'
-import { PopupContent } from './popupMenu'
-import DropdownMenu from './dropdownMenu'
-import Label from './label'
-import RangeInput from './rangeInput'
+import ModelSelector from '../prompts/modelSelector'
+import TestDataSelector from './testDataSelector'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
@@ -168,21 +163,12 @@ export default function RunButtons({
     return callback(inputs)
   }
 
-  const setPopup = useGlobalPopup<TestDataSelectorPopupProps>()
-
-  const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(TestDataSelectorPopup, { testConfig, setTestConfig, getIndicesForMode }, location)
-
   return (
     <div className='flex items-center self-end gap-3'>
       {languageModel && setLanguageModel && (
         <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
       )}
-      {getIndicesForMode('all').length > 1 && (
-        <PopupButton popUpAbove onSetPopup={onSetPopup}>
-          <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>Test Data</span>
-        </PopupButton>
-      )}
+      <TestDataSelector testConfig={testConfig} setTestConfig={setTestConfig} getIndicesForMode={getIndicesForMode} />
       <PendingButton
         title={runTitle ?? 'Run'}
         pendingTitle='Running'
@@ -190,92 +176,5 @@ export default function RunButtons({
         onClick={testPrompt}
       />
     </div>
-  )
-}
-
-type TestDataSelectorPopupProps = {
-  testConfig: TestConfig
-  setTestConfig: (config: TestConfig) => void
-  getIndicesForMode: (mode: TestMode, count?: number, start?: number) => number[]
-}
-
-function TestDataSelectorPopup({
-  testConfig,
-  setTestConfig,
-  getIndicesForMode,
-  withDismiss,
-}: TestDataSelectorPopupProps & WithDismiss) {
-  const validRows = getIndicesForMode('all')
-  const rowCount = validRows.length
-
-  const [mode, setMode] = useState(testConfig.mode)
-  const [count, setCount] = useState(testConfig.rowIndices.length)
-  const [start, setStart] = useState(testConfig.rowIndices[0] ?? validRows[0])
-  const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count, start) }))
-
-  const updateCount = (count: number) => {
-    setCount(count)
-    setStart(Math.min(start, validRows[rowCount - count]))
-  }
-
-  const updateStart = (start: number) => {
-    setStart(start)
-    setCount(Math.min(count, validRows.slice(validRows.findIndex(index => index >= start)).length))
-  }
-
-  const gridConfig = 'grid grid-cols-[110px_minmax(0,1fr)]'
-
-  return (
-    <PopupContent className='flex flex-col w-80' autoOverflow={false}>
-      <Label className='p-3 text-gray-800 border-b border-gray-300'>Select Test Data</Label>
-      <div className={`${gridConfig} w-full items-center gap-2 px-3 py-2`}>
-        <Label>Type</Label>
-        <DropdownMenu size='xs' value={mode} onChange={value => setMode(value as TestMode)}>
-          {mode === 'custom' && <option value={'custom'}>Custom</option>}
-          <option value={'first'}>First</option>
-          <option value={'last'}>Last</option>
-          {(mode === 'range' || rowCount > 2) && <option value={'range'}>Range</option>}
-          <option value={'random'}>Random</option>
-          <option value={'all'}>All</option>
-        </DropdownMenu>
-        {mode === 'range' && (
-          <>
-            <Label>Start Row #</Label>
-            <div className='flex items-center gap-2'>
-              <RangeInput
-                size='xs'
-                className='flex-1'
-                value={start + 1}
-                setValue={value => updateStart(value - 1)}
-                min={validRows[0] + 1}
-                max={validRows.slice(-1)[0] + 1}
-                step={1}
-              />
-            </div>
-          </>
-        )}
-        {(mode === 'range' || (mode === 'random' && rowCount > 2)) && (
-          <>
-            <Label>Number of Rows</Label>
-            <div className='flex items-center gap-2'>
-              <RangeInput
-                size='xs'
-                className='flex-1'
-                value={count}
-                setValue={updateCount}
-                min={1}
-                max={rowCount - 1}
-                step={1}
-              />
-            </div>
-          </>
-        )}
-      </div>
-      <div className='flex justify-end p-3 pt-1'>
-        <Button type='primary' onClick={confirm}>
-          Select
-        </Button>
-      </div>
-    </PopupContent>
   )
 }

@@ -25,7 +25,7 @@ import {
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import RunButtons from '../runButtons'
+import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
