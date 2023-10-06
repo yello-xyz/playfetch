@@ -213,6 +213,16 @@ function TestDataSelectorPopup({
   const [start, setStart] = useState(testConfig.rowIndices[0] ?? validRows[0])
   const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count, start) }))
 
+  const updateCount = (count: number) => {
+    setCount(count)
+    setStart(Math.min(start, validRows[rowCount - count]))
+  }
+
+  const updateStart = (start: number) => {
+    setStart(start)
+    setCount(Math.min(count, validRows.slice(validRows.findIndex(index => index >= start)).length))
+  }
+
   const gridConfig = 'grid grid-cols-[110px_minmax(0,1fr)]'
 
   return (
@@ -236,7 +246,7 @@ function TestDataSelectorPopup({
                 size='xs'
                 className='flex-1'
                 value={start + 1}
-                setValue={value => setStart(value - 1)}
+                setValue={value => updateStart(value - 1)}
                 min={validRows[0] + 1}
                 max={validRows.slice(-1)[0] + 1}
                 step={1}
@@ -252,7 +262,7 @@ function TestDataSelectorPopup({
                 size='xs'
                 className='flex-1'
                 value={count}
-                setValue={setCount}
+                setValue={updateCount}
                 min={1}
                 max={rowCount - 1}
                 step={1}
