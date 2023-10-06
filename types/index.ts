@@ -204,7 +204,7 @@ export type ChainItemWithInputs = (CodeChainItem | QueryChainItem | (PromptChain
 }
 
 export type TestConfig = {
-  mode: 'custom' | 'first' | 'last' | 'random' | 'all'
+  mode: 'custom' | 'first' | 'last' | 'range' | 'random' | 'all'
   rowIndices: number[]
 }
 

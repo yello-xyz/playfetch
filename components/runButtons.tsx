@@ -61,6 +61,8 @@ const SelectInputRows = (
         return [0]
       case 'last':
         return [rowCount - 1]
+      case 'range':
+        return allRowIndices.slice(0, count)
       case 'random':
         return shuffleArray(allRowIndices).slice(0, count)
       case 'all':
@@ -91,6 +93,7 @@ const selectValidRowIndices = (
     case 'last':
       return selectInputs(mode)[1]
     case 'custom':
+    case 'range':
     case 'random':
     case 'all':
       return selectInputs('all')[1]
@@ -210,10 +213,11 @@ function TestDataSelectorPopup({
           {mode === 'custom' && <option value={'custom'}>Custom</option>}
           <option value={'first'}>First</option>
           <option value={'last'}>Last</option>
+          {(mode === 'range' || rowCount > 2) && <option value={'range'}>Range</option>}
           <option value={'random'}>Random</option>
           <option value={'all'}>All</option>
         </DropdownMenu>
-        {mode === 'random' && rowCount > 2 && (
+        {mode === 'range' || (mode === 'random' && rowCount > 2) && (
           <>
             <Label># Rows</Label>
             <div className='flex items-center gap-2'>
