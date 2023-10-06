@@ -197,12 +197,15 @@ function TestDataSelectorPopup({
   getIndicesForMode,
   withDismiss,
 }: TestDataSelectorPopupProps & WithDismiss) {
+  const validRows = getIndicesForMode('all')
+  const rowCount = validRows.length
+
   const [mode, setMode] = useState(testConfig.mode)
   const [count, setCount] = useState(testConfig.rowIndices.length)
+  const [start, setStart] = useState(testConfig.rowIndices[0] ?? validRows[0])
   const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count) }))
 
-  const rowCount = getIndicesForMode('all').length
-  const gridConfig = 'grid grid-cols-[100px_minmax(0,1fr)]'
+  const gridConfig = 'grid grid-cols-[110px_minmax(0,1fr)]'
 
   return (
     <PopupContent className='flex flex-col w-80' autoOverflow={false}>
@@ -217,9 +220,25 @@ function TestDataSelectorPopup({
           <option value={'random'}>Random</option>
           <option value={'all'}>All</option>
         </DropdownMenu>
-        {mode === 'range' || (mode === 'random' && rowCount > 2) && (
+        {mode === 'range' && (
           <>
-            <Label># Rows</Label>
+            <Label>Start Row #</Label>
+            <div className='flex items-center gap-2'>
+              <RangeInput
+                size='xs'
+                className='flex-1'
+                value={start + 1}
+                setValue={value => setStart(value - 1)}
+                min={validRows[0] + 1}
+                max={validRows.slice(-1)[0] + 1}
+                step={1}
+              />
+            </div>
+          </>
+        )}
+        {(mode === 'range' || (mode === 'random' && rowCount > 2)) && (
+          <>
+            <Label>Number of Rows</Label>
             <div className='flex items-center gap-2'>
               <RangeInput
                 size='xs'
