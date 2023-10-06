@@ -4,6 +4,7 @@ export default function RangeInput({
   min,
   max,
   step,
+  size = 'sm',
   className = '',
   disabled,
 }: {
@@ -12,10 +13,12 @@ export default function RangeInput({
   min: number
   max: number
   step: number
+  size?: 'xs' | 'sm'
   className?: string
   disabled?: boolean
 }) {
   const borderClass = 'border border-gray-300 focus:border focus:border-blue-400 focus:ring-0 focus:outline-none'
+  const numberInputClass = size === 'xs' ? 'p-1 text-xs' : 'p-2 text-sm'
   return (
     <>
       <input
@@ -29,7 +32,7 @@ export default function RangeInput({
         disabled={disabled}
       />
       <input
-        className={`p-2 text-sm rounded-lg w-18 focus:border-solid ${borderClass}`}
+        className={`rounded-lg w-18 focus:border-solid ${numberInputClass} ${borderClass}`}
         type='number'
         min={min}
         max={max}
