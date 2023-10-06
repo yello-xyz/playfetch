@@ -6,7 +6,9 @@ import { PopupContent } from '../popupMenu'
 import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
 import RangeInput from '../rangeInput'
-import { PopupButton } from '../popupButton'
+import { CustomPopupButton } from '../popupButton'
+import chevronIcon from '@/public/chevronWhite.svg'
+import Icon from '../icon'
 
 export default function TestDataSelector({
   testConfig,
@@ -22,11 +24,16 @@ export default function TestDataSelector({
   const onSetPopup = (location: GlobalPopupLocation) =>
     setPopup(TestDataSelectorPopup, { testConfig, setTestConfig, getIndicesForMode }, location)
 
-  return getIndicesForMode('all').length > 1 ? (
-    <PopupButton popUpAbove onSetPopup={onSetPopup}>
-      <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>Test Data</span>
-    </PopupButton>
-  ) : null
+  const layoutClass = 'flex items-center justify-between gap-1 pl-4 pr-0.5 py-1.5'
+  const styleClass = 'bg-blue-400 border-r-2 border-blue-600 rounded-l-lg cursor-pointer  hover:bg-blue-300'
+  const textClass = 'overflow-hidden text-sm font-medium text-white whitespace-nowrap text-ellipsis'
+
+  return (
+    <CustomPopupButton className={`${layoutClass} ${styleClass} ${textClass}`} popUpAbove onSetPopup={onSetPopup}>
+      Test Data
+      <Icon icon={chevronIcon} />
+    </CustomPopupButton>
+  )
 }
 
 type TestDataSelectorPopupProps = {

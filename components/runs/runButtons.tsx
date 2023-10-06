@@ -163,18 +163,29 @@ export default function RunButtons({
     return callback(inputs)
   }
 
+  const showTestDataSelector = getIndicesForMode('all').length > 1
+
   return (
     <div className='flex items-center self-end gap-3'>
       {languageModel && setLanguageModel && (
         <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
       )}
-      <TestDataSelector testConfig={testConfig} setTestConfig={setTestConfig} getIndicesForMode={getIndicesForMode} />
-      <PendingButton
-        title={runTitle ?? 'Run'}
-        pendingTitle='Running'
-        disabled={disabled || (rowIndices.length === 0 && staticVariables.length > 0)}
-        onClick={testPrompt}
-      />
+      <div className='flex items-center'>
+        {showTestDataSelector && (
+          <TestDataSelector
+            testConfig={testConfig}
+            setTestConfig={setTestConfig}
+            getIndicesForMode={getIndicesForMode}
+          />
+        )}
+        <PendingButton
+          title={runTitle ?? 'Run'}
+          pendingTitle='Running'
+          roundedClass={showTestDataSelector ? 'rounded-r-lg' : undefined}
+          disabled={disabled || (rowIndices.length === 0 && staticVariables.length > 0)}
+          onClick={testPrompt}
+        />
+      </div>
     </div>
   )
 }
