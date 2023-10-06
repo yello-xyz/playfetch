@@ -1,9 +1,12 @@
-import { ActiveChain, ChainVersion, Prompt } from '@/types'
+import { ActiveChain, ChainVersion, Prompt, QueryConfig } from '@/types'
 import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { useState } from 'react'
+import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
+import { AllEmbeddingModels, AllQueryProviders, ProviderForModel } from '@/src/common/providerMetadata'
 
 export default function ChainEditor({
   chain,
@@ -38,6 +41,22 @@ export default function ChainEditor({
   disabled: boolean
   promptCache: ChainPromptCache
 }) {
+  const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
+  const provider = AllQueryProviders.find(provider => checkProviderAvailable(provider))
+  const model = AllEmbeddingModels.find(model => checkModelAvailable(model))
+  const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '', topK: 1 } : undefined
+
+  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
+
+  if (nodes.length === 2 && !activeMenuIndex) {
+    setActiveMenuIndex(1)
+  }
+
+  const updateActiveIndex = (index: number) => {
+    setActiveIndex(index)
+    setActiveMenuIndex(undefined)
+  }
+
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
   return (
@@ -59,13 +78,16 @@ export default function ChainEditor({
             nodes={nodes}
             setNodes={setNodes}
             activeIndex={activeIndex}
-            setActiveIndex={setActiveIndex}
+            setActiveIndex={updateActiveIndex}
+            isMenuActive={index === activeMenuIndex}
+            setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
             savedVersion={saveItems ? null : activeVersion}
             isTestMode={isTestMode}
             setTestMode={setTestMode}
             prompts={prompts}
             addPrompt={addPrompt}
             promptCache={promptCache}
+            defaultQueryConfig={defaultQueryConfig}
           />
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>

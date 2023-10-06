@@ -1,13 +1,14 @@
-import { CodeChainItem, PromptChainItem } from '@/types'
-import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem } from './chainNode'
+import { CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
+import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { LabelForModel } from '@/src/common/providerMetadata'
 import { VersionLabels } from '../versions/versionCell'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import { TaggedVersionPrompt } from '../versions/versionComparison'
+import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ChainNodeBoxBody({
   nodes,
@@ -26,6 +27,7 @@ export default function ChainNodeBoxBody({
         <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
       )}
       {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
+      {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
       {chainNode === InputNode && <InputNodeBody nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
     </>
   )
@@ -43,25 +45,30 @@ function PromptNodeBody({
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
+  const availableProviders = useAvailableProviders()
   return prompt && version ? (
     <div className='flex flex-col'>
       <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2.5 ml-0.5'>
         <span className='text-xs font-medium text-gray-500'>
-          {LabelForModel(version.config.model)} | Prompt version {index + 1}
+          {LabelForModel(version.config.model, availableProviders)} | Prompt version {index + 1}
         </span>
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
       <CommonBody isSelected={isSelected}>
-        <TaggedVersionPrompt version={version} />
+        <TaggedContent content={version.prompts.main} />
       </CommonBody>
     </div>
   ) : null
 }
 
 function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: boolean }) {
-  return item.description ? (
+  return item.description ? <CommonBody isSelected={isSelected}>{item.description}</CommonBody> : null
+}
+
+function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected: boolean }) {
+  return item.query ? (
     <CommonBody isSelected={isSelected}>
-      <span className=''>{item.description}</span>
+      <TaggedContent content={item.query} />
     </CommonBody>
   ) : null
 }

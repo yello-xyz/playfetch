@@ -4,7 +4,6 @@ import {
   allocateID,
   buildKey,
   getDatastore,
-  getEntity,
   getEntityCount,
   getEntityKey,
   getEntityKeys,
@@ -30,42 +29,32 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
-import { IsPromptChainItem } from '@/components/chains/chainNode'
 
 export async function migrateVersions(postMerge: boolean) {
-  if (postMerge) {
+  if (!postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  for (const versionData of allVersions) {
-    if (versionData.items) {
-      const items = JSON.parse(versionData.items) as ChainItemWithInputs[]
-      if (items.some(item => IsPromptChainItem(item) && !item.versionID)) {
-        for (const item of items) {
-          if (IsPromptChainItem(item) && !item.versionID) {
-            const lastVersion = await getEntity(Entity.VERSION, 'parentID', item.promptID, true)
-            if (lastVersion) {
-              item.versionID = getID(lastVersion)
-            }
-            console.log(item.promptID, '->', item.versionID)
-          }
-        }
-        await datastore.save(
-          toVersionData(
-            versionData.userID,
-            versionData.parentID,
-            versionData.prompts ? JSON.parse(versionData.prompts) : null,
-            versionData.config ? JSON.parse(versionData.config) : null,
-            items,
-            JSON.parse(versionData.labels),
-            versionData.createdAt,
-            versionData.didRun,
-            versionData.previousVersionID,
-            getID(versionData)
-          )
+  for (const [index, versionData] of allVersions.entries()) {
+    const config = versionData.config ? JSON.parse(versionData.config) : null
+    console.log(`${config && config.provider ? '+' : '-'} [${index + 1}/${allVersions.length}] (${getID(versionData)})`)
+    if (config && config.provider) {
+      config.provider = undefined
+      await datastore.save(
+        toVersionData(
+          versionData.userID,
+          versionData.parentID,
+          versionData.prompts ? JSON.parse(versionData.prompts) : null,
+          config,
+          versionData.items ? JSON.parse(versionData.items) : null,
+          JSON.parse(versionData.labels),
+          versionData.createdAt,
+          versionData.didRun,
+          versionData.previousVersionID,
+          getID(versionData)
         )
-      }
+      )
     }
   }
 }
@@ -295,7 +284,7 @@ const toVersionData = (
 export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
   const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
-  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions[0]] : []
+  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
   return [...userVersion, ...versionsWithRuns, ...initialVersion]
     .map(version => toVersion(version, runs, comments))

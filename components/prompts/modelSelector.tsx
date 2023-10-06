@@ -1,17 +1,17 @@
-import { LanguageModel, ModelProvider } from '@/types'
+import { AvailableModelProvider, LanguageModel, ModelProvider } from '@/types'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import ModelInfoPane from './modelInfoPane'
 import {
-  AllModels,
+  AllDefaultLanguageModels,
   FullLabelForModel,
   IconForProvider,
   LabelForModel,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
+import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelSelector({
   model,
@@ -23,16 +23,20 @@ export default function ModelSelector({
   popUpAbove?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
-  const checkProvider = useCheckProvider()
+  const [availableProviders, checkModelAvailable] = useModelProviders()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(ModelSelectorPopup, { selectedModel: model, onSelectModel: setModel, checkProvider }, location)
+    setPopup(
+      ModelSelectorPopup,
+      { selectedModel: model, onSelectModel: setModel, checkModelAvailable, availableProviders },
+      location
+    )
 
   return (
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup}>
       <Icon icon={IconForProvider(ProviderForModel(model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {LabelForModel(model)}
+        {LabelForModel(model, availableProviders)}
       </span>
     </PopupButton>
   )
@@ -41,32 +45,41 @@ export default function ModelSelector({
 type ModelSelectorPopupProps = {
   selectedModel: LanguageModel
   onSelectModel: (model: LanguageModel) => void
-  checkProvider: (provider: ModelProvider) => boolean
+  checkModelAvailable: (model: LanguageModel) => boolean
+  availableProviders: AvailableModelProvider[]
 }
 
 function ModelSelectorPopup({
   selectedModel,
   onSelectModel,
-  checkProvider,
+  checkModelAvailable,
+  availableProviders,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
-  const labelFor = (model: LanguageModel) => FullLabelForModel(model, false)
+  const allModels = [
+    ...AllDefaultLanguageModels,
+    ...availableProviders.flatMap(provider => provider.customModels.map(model => model.id)),
+  ]
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      {AllModels.sort((a, b) => labelFor(a).localeCompare(labelFor(b))).map((model, index) => (
-        <div key={index} className='group'>
-          <PopupLabelItem
-            label={labelFor(model)}
-            icon={IconForProvider(ProviderForModel(model))}
-            onClick={withDismiss(() => onSelectModel(model))}
-            disabled={!checkProvider(ProviderForModel(model))}
-            checked={model === selectedModel}
-          />
-          <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
-            <ModelInfoPane model={model} />
+      {allModels
+        .sort((a, b) =>
+          FullLabelForModel(a, availableProviders, true).localeCompare(FullLabelForModel(b, availableProviders, true))
+        )
+        .map((model, index) => (
+          <div key={index} className='group'>
+            <PopupLabelItem
+              label={FullLabelForModel(model, availableProviders, false)}
+              icon={IconForProvider(ProviderForModel(model))}
+              onClick={withDismiss(() => onSelectModel(model))}
+              disabled={!checkModelAvailable(model)}
+              checked={model === selectedModel}
+            />
+            <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
+              <ModelInfoPane model={model} />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </PopupContent>
   )
 }

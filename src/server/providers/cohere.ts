@@ -1,7 +1,7 @@
 import { CohereLanguageModel } from '@/types'
 import cohere from 'cohere-ai'
 import { Predictor, PromptContext } from '../promptEngine'
-import { CostForModel } from './costCalculation'
+import { CostForModel } from './integration'
 
 export default function predict(apiKey: string, model: CohereLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>

@@ -28,7 +28,9 @@ export default function Checkbox({
       {label && (
         <div className='flex flex-col'>
           <Label htmlFor={id}>{label}</Label>
-          <span className='text-xs text-gray-400'>{children}</span>
+          <label htmlFor={id} className='text-xs text-gray-400'>
+            {children}
+          </label>
         </div>
       )}
       <input

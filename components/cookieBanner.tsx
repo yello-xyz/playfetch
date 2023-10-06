@@ -16,21 +16,22 @@ export default function CookieBanner({ children }: any) {
   const [toggledOn, setToggledOn] = useState(false)
 
   type CookieStatus = 'accepted' | 'denied' | 'unknown'
-  const consent = 'cookie-consent'
-  const [cookies, setCookie] = useCookies([consent])
-  const cookieStatus: CookieStatus = cookies[consent] ?? 'unknown'
+  const cookieName = process.env.NEXT_PUBLIC_COOKIE_NAME ?? 'dev-consent'
+  const [cookies, setCookie] = useCookies([cookieName])
+  const cookieStatus: CookieStatus = cookies[cookieName] ?? 'unknown'
   const updateCookieStatus = useCallback(
-    (status: 'accepted' | 'denied') => setCookie(consent, status, { path: '/', sameSite: 'lax' }),
-    [setCookie]
+    (status: 'accepted' | 'denied') =>
+      setCookie(cookieName, status, { path: '/', sameSite: 'lax', domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN }),
+    [setCookie, cookieName]
   )
 
   useEffect(() => {
     if (cookieStatus !== 'unknown') {
-      updateCookieStatus(cookieStatus)
+      updateCookieConsent(cookieStatus === 'accepted')
     } else {
       setTimeout(() => setSavedCookieStatus(false), 2000)
     }
-  }, [cookieStatus, updateCookieStatus])
+  }, [cookieStatus])
 
   const updateCookies = (accept: boolean) => () => {
     updateCookieConsent(accept)
@@ -38,30 +39,30 @@ export default function CookieBanner({ children }: any) {
     setSavedCookieStatus(true)
   }
 
-  const cookieMessage = (
-    <div className='text-xs'>
-      We use cookies and similar technologies to give you a better experience and to help us improve our services. You
-      can manage your cookie settings at any time. For more information, please see our{' '}
-      <Link href={ClientRoute.Privacy}>Privacy Policy</Link>.
-    </div>
-  )
-
   return (
     <div>
       {children}
       {!savedCookieStatus && (
-        <div className='fixed z-30 flex flex-col gap-2 p-4 text-gray-700 bg-white rounded-lg shadow bottom-4 left-4 w-96'>
+        <div className='fixed z-30 flex flex-col gap-2 p-4 text-gray-700 bg-white rounded-lg shadow bottom-4 left-4 w-[392px]'>
           {showingMoreOptions ? (
-            <div className='flex flex-col gap-2'>
+            <div className='flex flex-col gap-2 pb-2 text-sm'>
               <Checkbox label='Strictly necessary' checked disabled>
                 Essential for the site to function. Always On.
               </Checkbox>
-              <Checkbox label='Analytics' checked={toggledOn} setChecked={() => setToggledOn(!toggledOn)}>
+              <Checkbox
+                id='analytics'
+                label='Analytics'
+                checked={toggledOn}
+                setChecked={() => setToggledOn(!toggledOn)}>
                 Used to measure usage and improve your experience.
               </Checkbox>
             </div>
           ) : (
-            cookieMessage
+            <div className='text-xs'>
+              We use cookies and similar technologies to give you a better experience and to help us improve our
+              services. You can manage your cookie settings at any time. For more information, please see our{' '}
+              <Link href={ClientRoute.Privacy}>Privacy Policy</Link>.
+            </div>
           )}
           <div className='flex justify-end gap-2'>
             {showingMoreOptions ? (

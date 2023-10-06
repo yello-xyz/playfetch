@@ -12,6 +12,7 @@ import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/c
 import { TryParseOutput } from '@/src/server/promptEngine'
 import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
+import { updateAnalytics } from '@/src/server/datastore/analytics'
 
 const logResponse = (
   clientID: string,
@@ -22,6 +23,7 @@ const logResponse = (
   continuationID: number | undefined
 ) => {
   updateUsage(endpoint.id, response.cost, response.duration, cacheHit, response.attempts, response.failed)
+  updateAnalytics(endpoint.projectID, response.cost, response.duration, cacheHit, response.attempts, response.failed)
   saveLogEntry(
     endpoint.projectID,
     endpoint.id,

@@ -20,12 +20,13 @@ export enum Entity {
   CACHE = 'cache',
   ACCESS = 'access',
   INPUT = 'input',
-  USAGE = 'usage',
-  LOG = 'log',
   COMMENT = 'comment',
   PROVIDER = 'provider',
   CHAIN = 'chain',
   WORKSPACE = 'workspace',
+  LOG = 'log',
+  USAGE = 'usage',
+  ANALYTICS = 'analytics',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key

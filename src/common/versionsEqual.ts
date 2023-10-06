@@ -8,7 +8,7 @@ export const ChainVersionsAreEqual = (a: { items: ChainItemWithInputs[] }, b: { 
   normalizeItems(a.items) === normalizeItems(b.items)
 
 export const PromptConfigsAreEqual = (a: PromptConfig, b: PromptConfig) =>
-  a.provider === b.provider && a.model === b.model && a.temperature === b.temperature && a.maxTokens === b.maxTokens
+  a.model === b.model && a.temperature === b.temperature && a.maxTokens === b.maxTokens
 
 export const PromptVersionsAreEqual = (
   a: { prompts: Prompts; config: PromptConfig },

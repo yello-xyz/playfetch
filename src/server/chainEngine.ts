@@ -1,9 +1,10 @@
-import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts } from '@/types'
+import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts, QueryConfig } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
 import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
+import { runQuery } from './queryEngine'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -32,7 +33,9 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
   return { ...result, duration }
 }
 
-const isRunConfig = (config: RunConfig | CodeConfig): config is RunConfig => 'versionID' in config
+const isRunConfig = (config: RunConfig | CodeConfig | QueryConfig): config is RunConfig => 'versionID' in config
+const isQueryConfig = (config: RunConfig | CodeConfig | QueryConfig): config is QueryConfig => 'query' in config
+const isCodeConfig = (config: RunConfig | CodeConfig | QueryConfig): config is CodeConfig => 'code' in config
 
 type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
 type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
@@ -117,7 +120,7 @@ export default async function runChain(
       const promptVersion = (
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
-      let prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
+      const prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
@@ -130,32 +133,37 @@ export default async function runChain(
         )
       )
       streamResponse(lastResponse, true)
+      const functionInterrupt = lastResponse.failed ? undefined : lastResponse.functionInterrupt
       if (lastResponse.failed) {
         continuationIndex = undefined
+      } else if (functionInterrupt && isEndpointEvaluation) {
+        continuationIndex = index
         break
-      } else if (lastResponse.functionInterrupt) {
-        if (isEndpointEvaluation) {
-          continuationIndex = index
-          break
-        } else if (inputs[lastResponse.functionInterrupt] && continuationCount++ < MaxContinuationCount) {
-          continuationIndex = index
-          index -= 1
-          continue
-        }
+      } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount < MaxContinuationCount) {
+        ++continuationCount
+        continuationIndex = index
+        index -= 1
+        continue
       } else {
         continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
-        const output = lastResponse.output
-        AugmentInputs(inputs, config.output, output!, useCamelCase)
       }
-    } else {
+    } else if (isQueryConfig(config)) {
+      const query = resolvePrompt(config.query, inputs, useCamelCase)
+      lastResponse = await runChainStep(
+        runQuery(userID, config.provider, config.model, config.indexName, query, config.topK)
+      )
+      streamResponse(lastResponse)
+    } else if (isCodeConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       streamResponse(lastResponse)
-      if (lastResponse.failed) {
-        break
-      } else {
-        AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
-      }
+    } else {
+      throw new Error('Unsupported config type in chain evaluation')
+    }
+    if (lastResponse.failed) {
+      break
+    } else {
+      AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
     }
   }
 

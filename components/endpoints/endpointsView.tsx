@@ -7,10 +7,10 @@ import {
   ProjectItemIsChain,
   ItemsInProject,
   ResolvedEndpoint,
-  LogEntry,
   ActiveChain,
   PromptVersion,
   ChainVersion,
+  Analytics,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -43,11 +43,13 @@ const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSet
 
 export default function EndpointsView({
   project,
-  logEntries = [],
+  analytics,
+  refreshAnalytics,
   onRefresh,
 }: {
   project: ActiveProject
-  logEntries?: LogEntry[]
+  analytics?: Analytics
+  refreshAnalytics: (dayRange: number) => void
   onRefresh: () => Promise<void>
 }) {
   const router = useRouter()
@@ -56,6 +58,7 @@ export default function EndpointsView({
   type ActiveTab = 'Endpoints' | 'Logs'
   const [activeTab, setActiveTab] = useState<ActiveTab>(showLogs ? 'Logs' : 'Endpoints')
 
+  const logEntries = analytics?.recentLogEntries ?? []
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
   const updateActiveLogEntryIndex = (index: number) => {
@@ -165,6 +168,8 @@ export default function EndpointsView({
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={updateActiveEndpoint}
             onAddEndpoint={addEndpoint}
+            analytics={analytics}
+            refreshAnalytics={refreshAnalytics}
           />
         </Allotment.Pane>
       )}
