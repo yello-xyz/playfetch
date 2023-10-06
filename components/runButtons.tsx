@@ -5,6 +5,7 @@ import ModelSelector from './prompts/modelSelector'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupButton } from './popupButton'
 import { PopupContent, PopupLabelItem } from './popupMenu'
+import DropdownMenu from './dropdownMenu'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
@@ -172,16 +173,18 @@ function TestDataSelectorPopup({
   withDismiss,
 }: TestDataSelectorPopupProps & WithDismiss) {
   const mode = testConfig.mode
-  const setMode = (mode: TestConfig['mode']) =>
+  const setMode = (mode: TestConfig['mode']) => 
     withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode) }))
 
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      {mode === 'custom' && <PopupLabelItem label='Custom' onClick={setMode('custom')} checked />}
-      <PopupLabelItem label='First' onClick={setMode('first')} checked={mode === 'first'} />
-      <PopupLabelItem label='Last' onClick={setMode('last')} checked={mode === 'last'} />
-      <PopupLabelItem label='Random' onClick={setMode('random')} checked={mode === 'random'} />
-      <PopupLabelItem label='All' onClick={setMode('all')} checked={mode === 'all'} />
+      <DropdownMenu size='xs' value={mode} onChange={value => setMode(value as TestConfig['mode'])()}>
+        {mode === 'custom' && <option value={'custom'}>Custom</option>}
+        <option value={'first'}>First</option>
+        <option value={'last'}>Last</option>
+        <option value={'random'}>Random</option>
+        <option value={'all'}>All</option>
+      </DropdownMenu>
     </PopupContent>
   )
 }
