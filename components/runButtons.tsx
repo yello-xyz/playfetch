@@ -112,6 +112,7 @@ export default function RunButtons({
       }),
     [inputValues, variables]
   )
+  const getIndicesForMode = (mode: TestConfig['mode']) => selectInputs({ mode })[1]
 
   const [, rowIndices] = selectInputs(testConfig)
   useEffect(() => {
@@ -122,15 +123,10 @@ export default function RunButtons({
     ) {
       setTestConfig({ mode: testConfig.mode, rowIndices })
     } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      const [, rowIndices] = selectInputs({ mode: 'first' })
+      const rowIndices = getIndicesForMode('first')
       setTestConfig({ mode: 'first', rowIndices })
     }
   }, [testConfig, setTestConfig, rowIndices, selectInputs])
-
-  const updateTestMode = (mode: TestConfig['mode']) => {
-    const [, rowIndices] = selectInputs({ mode })
-    setTestConfig({ mode, rowIndices })
-  }
 
   const testPrompt = () => {
     const [inputs, indices] = selectInputs(testConfig)
@@ -138,19 +134,17 @@ export default function RunButtons({
     return callback(inputs)
   }
 
-  const [allInputs] = selectInputs({ mode: 'all' })
-
   const setPopup = useGlobalPopup<TestDataSelectorPopupProps>()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(TestDataSelectorPopup, { mode: testConfig.mode, updateTestMode }, location)
+    setPopup(TestDataSelectorPopup, { testConfig, setTestConfig, getIndicesForMode }, location)
 
   return (
     <div className='flex items-center self-end gap-3'>
       {languageModel && setLanguageModel && (
         <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
       )}
-      {allInputs.length > 1 && (
+      {getIndicesForMode('all').length > 1 && (
         <PopupButton popUpAbove onSetPopup={onSetPopup}>
           <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>Test Data</span>
         </PopupButton>
@@ -166,20 +160,28 @@ export default function RunButtons({
 }
 
 type TestDataSelectorPopupProps = {
-  mode: TestConfig['mode']
-  updateTestMode: (mode: TestConfig['mode']) => void
+  testConfig: TestConfig
+  setTestConfig: (config: TestConfig) => void
+  getIndicesForMode: (mode: TestConfig['mode']) => number[]
 }
 
-function TestDataSelectorPopup({ mode, updateTestMode, withDismiss }: TestDataSelectorPopupProps & WithDismiss) {
-  const select = (mode: TestConfig['mode']) => withDismiss(() => updateTestMode(mode))
+function TestDataSelectorPopup({
+  testConfig,
+  setTestConfig,
+  getIndicesForMode,
+  withDismiss,
+}: TestDataSelectorPopupProps & WithDismiss) {
+  const mode = testConfig.mode
+  const setMode = (mode: TestConfig['mode']) =>
+    withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode) }))
 
   return (
     <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      {mode === 'custom' && <PopupLabelItem label='Custom' onClick={select('custom')} checked />}
-      <PopupLabelItem label='First' onClick={select('first')} checked={mode === 'first'} />
-      <PopupLabelItem label='Last' onClick={select('last')} checked={mode === 'last'} />
-      <PopupLabelItem label='Random' onClick={select('random')} checked={mode === 'random'} />
-      <PopupLabelItem label='All' onClick={select('all')} checked={mode === 'all'} />
+      {mode === 'custom' && <PopupLabelItem label='Custom' onClick={setMode('custom')} checked />}
+      <PopupLabelItem label='First' onClick={setMode('first')} checked={mode === 'first'} />
+      <PopupLabelItem label='Last' onClick={setMode('last')} checked={mode === 'last'} />
+      <PopupLabelItem label='Random' onClick={setMode('random')} checked={mode === 'random'} />
+      <PopupLabelItem label='All' onClick={setMode('all')} checked={mode === 'all'} />
     </PopupContent>
   )
 }
