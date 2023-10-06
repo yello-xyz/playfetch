@@ -1,11 +1,12 @@
-import { useCallback, useEffect } from 'react'
-import { PendingButton } from './button'
+import { useCallback, useEffect, useState } from 'react'
+import Button, { PendingButton } from './button'
 import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
 import ModelSelector from './prompts/modelSelector'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupButton } from './popupButton'
 import { PopupContent, PopupLabelItem } from './popupMenu'
 import DropdownMenu from './dropdownMenu'
+import Label from './label'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
@@ -172,19 +173,29 @@ function TestDataSelectorPopup({
   getIndicesForMode,
   withDismiss,
 }: TestDataSelectorPopupProps & WithDismiss) {
-  const mode = testConfig.mode
-  const setMode = (mode: TestConfig['mode']) => 
-    withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode) }))
+  const [mode, setMode] = useState(testConfig.mode)
+  const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode) }))
+
+  const gridConfig = 'grid grid-cols-[120px_minmax(0,1fr)]'
 
   return (
-    <PopupContent className='relative p-3 w-52' autoOverflow={false}>
-      <DropdownMenu size='xs' value={mode} onChange={value => setMode(value as TestConfig['mode'])()}>
-        {mode === 'custom' && <option value={'custom'}>Custom</option>}
-        <option value={'first'}>First</option>
-        <option value={'last'}>Last</option>
-        <option value={'random'}>Random</option>
-        <option value={'all'}>All</option>
-      </DropdownMenu>
+    <PopupContent className='flex flex-col w-80' autoOverflow={false}>
+      <Label className='p-3 text-gray-800 border-b border-gray-300'>Select Test Data</Label>
+      <div className={`${gridConfig} w-full items-center gap-2 px-3 py-2`}>
+        <Label>Type</Label>
+        <DropdownMenu size='xs' value={mode} onChange={value => setMode(value as TestConfig['mode'])}>
+          {mode === 'custom' && <option value={'custom'}>Custom</option>}
+          <option value={'first'}>First</option>
+          <option value={'last'}>Last</option>
+          <option value={'random'}>Random</option>
+          <option value={'all'}>All</option>
+        </DropdownMenu>
+      </div>
+      <div className='flex justify-end p-3 pt-1'>
+        <Button type='primary' onClick={confirm}>
+          Select
+        </Button>
+      </div>
     </PopupContent>
   )
 }
