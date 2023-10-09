@@ -152,7 +152,7 @@ export async function augmentPromptDataWithNewVersion(
 }
 
 export async function updatePromptOnDeletedVersion(promptID: number) {
-  // TODO update previous version references in other versions
+  // TODO update previous version references in other versions?
   const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
   await updatePrompt({ ...promptData }, true)
 }
