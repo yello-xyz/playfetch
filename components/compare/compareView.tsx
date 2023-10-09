@@ -7,6 +7,7 @@ import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import SegmentedControl, { Segment } from '../segmentedControl'
+import DiffPane from './diffPane'
 
 export default function CompareView({ project }: { project: ActiveProject }) {
   const router = useRouter()
@@ -17,7 +18,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
   const [rightVersionID, setRightVersionID] = useState(versionID)
   const [leftItemID, setLeftItemID] = useState(itemID)
   const [leftVersionID, setLeftVersionID] = useState(previousVersionID)
-  const [activePromptTab, setActivePromptTab] = useState<PromptTab>()
+  const [activePromptTab, setActivePromptTab] = useState('main' as PromptTab)
 
   const itemCache = useActiveItemCache(project, [
     ...(leftItemID ? [leftItemID] : []),
@@ -48,7 +49,6 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     }
   }
 
-
   useEffect(() => {
     if (leftItem && !leftVersion) {
       setLeftVersionID(leftItem.versions.slice(-1)[0].id)
@@ -58,12 +58,10 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     }
   }, [leftItem, leftVersion, rightItem, rightVersion])
 
-
-  const minWidth = 300
   return ItemsInProject(project).length > 0 ? (
     <>
-      <Allotment>
-        <Allotment.Pane minSize={minWidth}>
+      <div className='flex flex-col h-full'>
+        <div className='flex h-full'>
           <ComparePane
             project={project}
             activeItem={leftItem}
@@ -75,8 +73,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
             disabled={!leftItemID}
             includeResponses={!isDiffMode}
           />
-        </Allotment.Pane>
-        <Allotment.Pane minSize={minWidth}>
+          <div className='h-full border-l border-gray-200'/>
           <ComparePane
             project={project}
             activeItem={rightItem}
@@ -87,8 +84,11 @@ export default function CompareView({ project }: { project: ActiveProject }) {
             setActivePromptTab={setActivePromptTab}
             includeResponses={!isDiffMode}
           />
-        </Allotment.Pane>
-      </Allotment>
+        </div>
+        {isDiffMode && leftVersion && rightVersion && (
+          <DiffPane leftVersion={leftVersion} rightVersion={rightVersion} activePromptTab={activePromptTab} />
+        )}
+      </div>
       {leftVersionID && rightVersionID && (
         <SegmentedControl className='absolute z-30 bottom-4 right-4' selected={isDiffMode} callback={setDiffMode}>
           <Segment title='Diff' value={true} />
