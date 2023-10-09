@@ -16,7 +16,7 @@ export default function DashboardContainer({
   percentIncrement?: number
   lowerIsBetter?: boolean
   range: number
-  callback: () => void
+  callback?: () => void
   addBottomPadding?: boolean
   children: ReactElement<any>
 }) {
@@ -25,12 +25,12 @@ export default function DashboardContainer({
       <div className='flex flex-col px-4 pt-3'>
         <div className='flex flex-wrap items-baseline justify-between overflow-hidden max-h-[19px]'>
           <span className='font-medium text-gray-400'>{title}</span>
-          <span className='text-xs font-medium text-gray-300 cursor-pointer' onClick={callback}>
+          <span className={`text-xs font-medium text-gray-300 ${callback ? 'cursor-pointer' : ''}`} onClick={callback}>
             last {range} days
           </span>
         </div>
         <div className='flex items-center gap-2'>
-          <span className='text-lg font-bold text-gray-800'>{value || '\u00A0'}</span>
+          <span className='text-lg font-bold text-gray-800'>{value}</span>
           {percentIncrement !== undefined && (
             <span
               className={`flex px-1 py-px text-xs rounded ${
