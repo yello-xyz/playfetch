@@ -61,7 +61,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
   return ItemsInProject(project).length > 0 ? (
     <>
       <div className='flex flex-col h-full'>
-        <div className='flex h-full'>
+        <div className={isDiffMode ? 'flex' : 'flex h-full'}>
           <ComparePane
             project={project}
             activeItem={leftItem}
@@ -73,7 +73,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
             disabled={!leftItemID}
             includeResponses={!isDiffMode}
           />
-          <div className='h-full border-l border-gray-200'/>
+          <div className='h-full border-l border-gray-200' />
           <ComparePane
             project={project}
             activeItem={rightItem}

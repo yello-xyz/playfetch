@@ -1,10 +1,6 @@
-import { ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
-import ProjectItemSelector from '../projects/projectItemSelector'
-import VersionSelector from '../versions/versionSelector'
-import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
-import RunTimeline from '../runs/runTimeline'
-import PromptPanel, { PromptTab } from '../prompts/promptPanel'
-import ReactDiffViewer from 'react-diff-viewer-continued'
+import { ChainVersion, PromptVersion } from '@/types'
+import { PromptTab } from '../prompts/promptPanel'
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 
 const getContent = (version: ChainVersion | PromptVersion, activePromptTab: PromptTab) => {
   switch (activePromptTab) {
@@ -29,9 +25,29 @@ export default function DiffPane({
   const leftContent = leftVersion ? getContent(leftVersion, activePromptTab) : undefined
   const rightContent = rightVersion ? getContent(rightVersion, activePromptTab) : undefined
 
-  return leftContent && rightContent && rightContent !== leftContent ? (
-    <div className='h-full overflow-y-auto'>
-      <ReactDiffViewer oldValue={leftContent} newValue={rightContent} splitView={true} />
+  return leftContent && rightContent ? (
+    <div className='overflow-y-auto'>
+      <ReactDiffViewer
+        oldValue={leftContent || 'empty'}
+        newValue={rightContent || 'empty'}
+        splitView={false}
+        compareMethod={DiffMethod.WORDS}
+        showDiffOnly={false}
+        useDarkTheme={false}
+        styles={{
+          variables: {
+            light: {
+              addedBackground: '#DDF1E7',
+              addedGutterBackground: '#C0E2CF',
+              removedBackground: '#FDE5E0',
+              removedGutterBackground: '#F4BBAF',
+            },
+          },
+          contentText: { fontFamily: 'var(--font-inter)' },
+          wordAdded: { borderRadius: '0', padding: '1px', lineHeight: '100%', background: '#C0E2CF' },
+          wordRemoved: { borderRadius: '0', padding: '1px', lineHeight: '100%', background: '#F4BBAF' },
+        }}
+      />
     </div>
   ) : null
 }
