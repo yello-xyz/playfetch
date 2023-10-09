@@ -1,58 +1,44 @@
-import { ActiveProject, IsPromptVersion } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
-import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
-import { useEffect } from 'react'
 import RunTimeline from '../runs/runTimeline'
 import PromptPanel, { PromptTab } from '../prompts/promptPanel'
 
 export default function ComparePane({
   project,
-  itemID,
+  activeItem,
+  activeVersion,
   setItemID,
-  versionID,
   setVersionID,
   activePromptTab,
   setActivePromptTab,
-  itemCache,
   disabled,
   includeResponses,
 }: {
   project: ActiveProject
-  itemID?: number
+  activeItem?: ActivePrompt | ActiveChain
+  activeVersion?: PromptVersion | ChainVersion
   setItemID: (itemID: number) => void
-  versionID?: number
   setVersionID: (versionID: number) => void
   activePromptTab?: PromptTab
   setActivePromptTab: (tab: PromptTab) => void
-  itemCache: ActiveItemCache
   disabled?: boolean
   includeResponses?: boolean
 }) {
-  const activeItem = itemID ? itemCache.itemForID(itemID) : undefined
-  const activeVersion =
-    activeItem && versionID ? [...activeItem.versions].find(version => version.id === versionID) : undefined
-
-  useEffect(() => {
-    if (activeItem && !activeVersion) {
-      setVersionID(activeItem.versions.slice(-1)[0].id)
-    }
-  }, [activeItem, activeVersion, setVersionID])
-
   return (
     <div className='flex flex-col h-full'>
       <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
         <ProjectItemSelector
           className='w-full max-w-[240px]'
           project={project}
-          selectedItemID={itemID}
+          selectedItemID={activeItem?.id}
           onSelectItemID={setItemID}
           disabled={disabled}
         />
         <VersionSelector
           className='w-full max-w-[240px]'
           projectItem={activeItem}
-          selectedVersionID={versionID}
+          selectedVersionID={activeVersion?.id}
           onSelectVersionID={setVersionID}
           disabled={disabled}
         />

@@ -2,7 +2,7 @@ import { ActiveProject, ItemsInProject } from '@/types'
 import { Allotment } from 'allotment'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
@@ -24,6 +24,12 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     ...(rightItemID ? [rightItemID] : []),
   ])
 
+  const leftItem = leftItemID ? itemCache.itemForID(leftItemID) : undefined
+  const leftVersion = leftItem ? [...leftItem.versions].find(version => version.id === leftVersionID) : undefined
+
+  const rightItem = rightItemID ? itemCache.itemForID(rightItemID) : undefined
+  const rightVersion = rightItem ? [...rightItem.versions].find(version => version.id === rightVersionID) : undefined
+
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
       setLeftItemID(itemID)
@@ -42,6 +48,17 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     }
   }
 
+
+  useEffect(() => {
+    if (leftItem && !leftVersion) {
+      setLeftVersionID(leftItem.versions.slice(-1)[0].id)
+    }
+    if (rightItem && !rightVersion) {
+      updateRightVersionID(rightItem.versions.slice(-1)[0].id)
+    }
+  }, [leftItem, leftVersion, rightItem, rightVersion])
+
+
   const minWidth = 300
   return ItemsInProject(project).length > 0 ? (
     <>
@@ -49,13 +66,12 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         <Allotment.Pane minSize={minWidth}>
           <ComparePane
             project={project}
-            itemID={leftItemID}
+            activeItem={leftItem}
+            activeVersion={leftVersion}
             setItemID={setLeftItemID}
-            versionID={leftVersionID}
             setVersionID={setLeftVersionID}
             activePromptTab={activePromptTab}
             setActivePromptTab={setActivePromptTab}
-            itemCache={itemCache}
             disabled={!leftItemID}
             includeResponses={!isDiffMode}
           />
@@ -63,13 +79,12 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         <Allotment.Pane minSize={minWidth}>
           <ComparePane
             project={project}
-            itemID={rightItemID}
+            activeItem={rightItem}
+            activeVersion={rightVersion}
             setItemID={updateRightItemID}
-            versionID={rightVersionID}
             setVersionID={updateRightVersionID}
             activePromptTab={activePromptTab}
             setActivePromptTab={setActivePromptTab}
-            itemCache={itemCache}
             includeResponses={!isDiffMode}
           />
         </Allotment.Pane>
