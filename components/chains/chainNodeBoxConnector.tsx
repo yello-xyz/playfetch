@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
+import queryIcon from '@/public/query.svg'
 import Icon from '../icon'
 import addIcon from '@/public/addSmall.svg'
 import addActiveIcon from '@/public/addWhiteSmall.svg'
@@ -15,6 +16,7 @@ export default function ChainNodeBoxConnector({
   setActive,
   onInsertPrompt,
   onInsertNewPrompt,
+  onInsertQuery,
   onInsertCodeBlock,
   prompts,
 }: {
@@ -23,6 +25,7 @@ export default function ChainNodeBoxConnector({
   setActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
+  onInsertQuery?: () => void
   onInsertCodeBlock: () => void
   prompts: Prompt[]
 }) {
@@ -39,6 +42,7 @@ export default function ChainNodeBoxConnector({
           setActive={setActive}
           onInsertPrompt={onInsertPrompt}
           onInsertNewPrompt={onInsertNewPrompt}
+          onInsertQuery={onInsertQuery}
           onInsertCodeBlock={onInsertCodeBlock}
         />
       )}
@@ -69,6 +73,7 @@ const AddButton = ({
   setActive,
   onInsertPrompt,
   onInsertNewPrompt,
+  onInsertQuery,
   onInsertCodeBlock,
 }: {
   prompts: Prompt[]
@@ -76,6 +81,7 @@ const AddButton = ({
   setActive: (active: boolean) => void
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
+  onInsertQuery?: () => void
   onInsertCodeBlock: () => void
 }) => {
   const [isHovered, setHovered] = useState(false)
@@ -104,14 +110,23 @@ const AddButton = ({
     )
   }
 
+  const buttonClass = onInsertQuery ? undefined : 'w-1/2'
+  const insertCode = toggleActive(onInsertCodeBlock)
+
   return isActive ? (
     <>
       <DownArrow height='min-h-[38px]' />
       <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
-      <div ref={buttonRef} className='flex p-1 border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
-        <AddStepButton label='Add prompt' icon={promptIcon} onClick={togglePopup} />
+      <div ref={buttonRef} className='flex border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+        <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
+        {onInsertQuery && (
+          <>
+            <DownStroke color='border-blue-100' />
+            <AddStepButton label='Add query' icon={queryIcon} onClick={toggleActive(onInsertQuery)} />
+          </>
+        )}
         <DownStroke color='border-blue-100' />
-        <AddStepButton label='Add code block' icon={codeIcon} onClick={toggleActive(onInsertCodeBlock)} />
+        <AddStepButton label='Add code block' className={buttonClass} icon={codeIcon} onClick={insertCode} />
       </div>
       <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
       <DownStroke height='min-h-[32px]' />
@@ -123,11 +138,21 @@ const AddButton = ({
   )
 }
 
-const AddStepButton = ({ label, icon, onClick }: { label: string; icon: StaticImageData; onClick: () => void }) => {
+const AddStepButton = ({
+  label,
+  icon,
+  className = '',
+  onClick,
+}: {
+  label: string
+  icon: StaticImageData
+  className?: string
+  onClick: () => void
+}) => {
+  const baseClass =
+    'flex items-center justify-center gap-1 p-2 m-1 rounded cursor-pointer hover:bg-blue-50 whitespace-nowrap'
   return (
-    <div
-      className='flex items-center justify-center w-1/2 gap-1 p-2 rounded cursor-pointer hover:bg-blue-50'
-      onClick={onClick}>
+    <div className={`${baseClass} ${className}`} onClick={onClick}>
       <Icon icon={icon} />
       {label}
     </div>

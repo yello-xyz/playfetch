@@ -85,22 +85,22 @@ const tokenize = (prompt: string) => {
   return tokens
 }
 
-export default function VersionComparison({
-  version,
-  compareVersion,
-  shouldTruncate = true,
-  stripSentinels = true,
-  taggedClassName = 'font-bold',
+function Comparison({
+  currentContent,
+  compareContent,
+  shouldTruncate,
+  stripSentinels,
+  taggedClassName,
 }: {
-  version: PromptVersion
-  compareVersion?: PromptVersion
-  shouldTruncate?: boolean
-  stripSentinels?: boolean
-  taggedClassName?: string
+  currentContent: string
+  compareContent?: string
+  shouldTruncate: boolean
+  stripSentinels: boolean
+  taggedClassName: string
 }) {
-  const parts = compareVersion
-    ? simplediff.diff(tokenize(compareVersion.prompts.main), tokenize(version.prompts.main))
-    : [['=', [version.prompts.main]]]
+  const parts = compareContent
+    ? simplediff.diff(tokenize(compareContent), tokenize(currentContent))
+    : [['=', [currentContent]]]
 
   const result = []
   let tagged = false
@@ -143,20 +143,44 @@ export default function VersionComparison({
   )
 }
 
-export function TaggedVersionPrompt({
+export default function VersionComparison({
   version,
-  shouldTruncate = false,
-  stripSentinels = false,
-  taggedClassName = InputVariableClass,
+  compareVersion,
+  shouldTruncate = true,
+  stripSentinels = true,
+  taggedClassName = 'font-bold',
 }: {
   version: PromptVersion
+  compareVersion?: PromptVersion
   shouldTruncate?: boolean
   stripSentinels?: boolean
   taggedClassName?: string
 }) {
   return (
-    <VersionComparison
-      version={version}
+    <Comparison
+      currentContent={version.prompts.main}
+      compareContent={compareVersion?.prompts?.main}
+      shouldTruncate={shouldTruncate}
+      stripSentinels={stripSentinels}
+      taggedClassName={taggedClassName}
+    />
+  )
+}
+
+export function TaggedContent({
+  content,
+  shouldTruncate = false,
+  stripSentinels = false,
+  taggedClassName = InputVariableClass,
+}: {
+  content: string
+  shouldTruncate?: boolean
+  stripSentinels?: boolean
+  taggedClassName?: string
+}) {
+  return (
+    <Comparison
+      currentContent={content}
       shouldTruncate={shouldTruncate}
       stripSentinels={stripSentinels}
       taggedClassName={taggedClassName}

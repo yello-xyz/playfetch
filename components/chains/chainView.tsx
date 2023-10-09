@@ -3,7 +3,15 @@ import { useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
 import ChainEditor from './chainEditor'
-import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, OutputNode } from './chainNode'
+import {
+  ChainNode,
+  InputNode,
+  IsChainItem,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+  OutputNode,
+} from './chainNode'
 import { Allotment } from 'allotment'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import CommentsPane from '../commentsPane'
@@ -17,7 +25,7 @@ import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/us
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
-    return IsCodeChainItem(item)
+    return IsCodeChainItem(item) || IsQueryChainItem(item)
       ? item
       : {
           ...item,
@@ -29,7 +37,7 @@ const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
 const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
   items.map(item => {
     const inputs = ExtractChainItemVariables(item, promptCache, false)
-    return IsCodeChainItem(item)
+    return IsCodeChainItem(item) || IsQueryChainItem(item)
       ? { ...item, inputs }
       : {
           ...item,
@@ -135,6 +143,7 @@ export default function ChainView({
     }
   }
   const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
+  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
 
   const minWidth = 300
   return (
@@ -175,32 +184,35 @@ export default function ChainView({
           promptCache={promptCache}
         />
       </Allotment.Pane>
-      {!showVersions && activeNodeIndex !== undefined && (isTestMode || !isInputOutputNode) && (
-        <Allotment.Pane minSize={minWidth}>
-          {isTestMode ? (
-            <ChainNodeOutput
-              chain={chain}
-              activeVersion={activeVersion}
-              nodes={nodes}
-              activeIndex={activeNodeIndex}
-              setActiveIndex={updateActiveNodeIndex}
-              promptCache={promptCache}
-              saveItems={items => saveItems(items).then(versionID => versionID!)}
-              activeRunID={activeRunID}
-              showRunButtons={isTestMode}
-            />
-          ) : (
-            <ChainNodeEditor
-              items={items}
-              setItems={updateItems}
-              activeIndex={activeNodeIndex - 1}
-              setDirty={setNodeDirty}
-              promptCache={promptCache}
-              dismiss={() => setActiveNodeIndex(undefined)}
-            />
-          )}
-        </Allotment.Pane>
-      )}
+      {!showVersions &&
+        activeNodeIndex !== undefined &&
+        (isTestMode || !isInputOutputNode) &&
+        !isUnloadedPromptNode(nodes[activeNodeIndex]) && (
+          <Allotment.Pane minSize={minWidth}>
+            {isTestMode ? (
+              <ChainNodeOutput
+                chain={chain}
+                activeVersion={activeVersion}
+                nodes={nodes}
+                activeIndex={activeNodeIndex}
+                setActiveIndex={updateActiveNodeIndex}
+                promptCache={promptCache}
+                saveItems={items => saveItems(items).then(versionID => versionID!)}
+                activeRunID={activeRunID}
+                showRunButtons={isTestMode}
+              />
+            ) : (
+              <ChainNodeEditor
+                items={items}
+                setItems={updateItems}
+                activeIndex={activeNodeIndex - 1}
+                setDirty={setNodeDirty}
+                promptCache={promptCache}
+                dismiss={() => setActiveNodeIndex(undefined)}
+              />
+            )}
+          </Allotment.Pane>
+        )}
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane
           activeItem={chain}

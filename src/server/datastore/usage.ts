@@ -81,7 +81,6 @@ const toUsageData = (
 })
 
 export const toUsage = (data: any): Usage => ({
-  endpointID: getID(data),
   requests: data.requests,
   cost: data.cost,
   duration: data.duration,

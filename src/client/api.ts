@@ -12,6 +12,10 @@ import {
   ActivePrompt,
   Comment,
   Prompts,
+  Usage,
+  Analytics,
+  AvailableProvider,
+  QueryProvider,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -205,8 +209,8 @@ const api = {
   deleteEndpoint: function (endpointID: number) {
     return post(this.deleteEndpoint, { endpointID })
   },
-  getLogEntries: function (projectID: number): Promise<LogEntry[]> {
-    return post(this.getLogEntries, { projectID })
+  getAnalytics: function (projectID: number, dayRange = 30): Promise<Analytics> {
+    return post(this.getAnalytics, { projectID, dayRange })
   },
   addComment: function (
     versionID: number,
@@ -230,11 +234,20 @@ const api = {
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
-  getAvailableProviders: function () {
+  getAvailableProviders: function (): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders)
   },
-  updateProviderKey: function (provider: ModelProvider, apiKey: string | null) {
-    return post(this.updateProviderKey, { provider, apiKey })
+  updateProviderKey: function (provider: ModelProvider | QueryProvider, apiKey: string | null, environment?: string) {
+    return post(this.updateProviderKey, { provider, apiKey, environment })
+  },
+  updateProviderModel: function (
+    provider: ModelProvider,
+    modelID: string,
+    name: string,
+    description: string,
+    enabled: boolean
+  ) {
+    return post(this.updateProviderModel, { provider, modelID, name, description, enabled })
   },
   logOut: function () {
     return post(this.logOut)

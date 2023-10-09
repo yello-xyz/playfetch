@@ -89,8 +89,9 @@ export function PopupItem({
   className?: string
   children: ReactNode
 }) {
+  const cursorClass = onClick ? 'cursor-pointer' : ''
   return (
-    <div className={`${className} rounded cursor-pointer hover:bg-gray-100`} onClick={onClick}>
+    <div className={`${className} ${cursorClass} rounded hover:bg-gray-100`} onClick={onClick}>
       {children}
     </div>
   )

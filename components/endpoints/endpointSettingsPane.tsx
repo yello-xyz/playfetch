@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveChain, ActiveProject, ActivePrompt, FindItemInProject } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt } from '@/types'
 import api from '@/src/client/api'
 import Label from '../label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'

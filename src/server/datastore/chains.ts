@@ -108,9 +108,9 @@ export async function addChainForUser(userID: number, projectID: number, name = 
 export async function duplicateChainForUser(userID: number, chainID: number): Promise<number> {
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const { chainID: newChainID, versionID } = await addChainForUser(userID, chainData.projectID, chainData.name)
-  // TODO select last version that was either run or created by the user
-  const lastVersion = await getEntity(Entity.VERSION, 'parentID', chainID, true)
-  await saveChainVersionForUser(userID, newChainID, JSON.parse(lastVersion.items), versionID)
+  const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
+  const lastUserVersion = toUserVersions(userID, versions, [], []).slice(-1)[0] as RawChainVersion
+  await saveChainVersionForUser(userID, newChainID, lastUserVersion.items, versionID)
   return newChainID
 }
 

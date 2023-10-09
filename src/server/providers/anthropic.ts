@@ -1,7 +1,7 @@
 import { AnthropicLanguageModel } from '@/types'
 import Anthropic from '@anthropic-ai/sdk'
 import { Predictor, PromptContext } from '../promptEngine'
-import { CostForModel } from './costCalculation'
+import { CostForModel } from './integration'
 
 export default function predict(apiKey: string, model: AnthropicLanguageModel): Predictor {
   return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>

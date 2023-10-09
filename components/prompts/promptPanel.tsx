@@ -1,8 +1,19 @@
-import { InputValues, PromptConfig, PromptInputs, PromptVersion, LanguageModel, TestConfig, Prompts } from '@/types'
+import {
+  InputValues,
+  PromptConfig,
+  PromptInputs,
+  PromptVersion,
+  LanguageModel,
+  TestConfig,
+  Prompts,
+  ModelProvider,
+  QueryProvider,
+} from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
+  AllModelProviders,
   FullLabelForModel,
   IconForProvider,
   LabelForPromptKey,
@@ -14,12 +25,12 @@ import {
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import RunButtons from '../runButtons'
+import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
-import useCheckProvider from '@/src/client/hooks/useCheckProvider'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
 import Icon from '../icon'
+import { useModelProviders, useCheckModelDisabled } from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -32,7 +43,6 @@ export default function PromptPanel({
   setTestConfig,
   initialActiveTab,
   onActiveTabChange,
-  showTestMode,
   loadPendingVersion,
   setPreferredHeight,
 }: {
@@ -44,7 +54,6 @@ export default function PromptPanel({
   setTestConfig?: (testConfig: TestConfig) => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
-  showTestMode?: boolean
   loadPendingVersion?: () => void
   setPreferredHeight?: (height: number) => void
 }) {
@@ -73,10 +82,10 @@ export default function PromptPanel({
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, config)
-  const updateModel = (model: LanguageModel) => updateConfig({ ...config, provider: ProviderForModel(model), model })
+  const updateModel = (model: LanguageModel) => updateConfig({ ...config, model })
 
-  const checkProviderAvailable = useCheckProvider()
-  const isProviderAvailable = checkProviderAvailable(config.provider)
+  const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
+  const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
   const outerPadding = 16 // gap-4
@@ -88,7 +97,7 @@ export default function PromptPanel({
     tabHeight +
     padding +
     contentHeight +
-    (isProviderAvailable ? 0 : 56 + padding) +
+    (isModelAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
     (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
@@ -103,7 +112,9 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isProviderAvailable && <ProviderWarning />}
+        {!isModelAvailable && (
+          <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
+        )}
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
@@ -125,7 +136,7 @@ export default function PromptPanel({
                 <div className='flex items-center min-w-0 gap-1'>
                   <Icon icon={IconForProvider(ProviderForModel(config.model))} />
                   <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
-                    {FullLabelForModel(config.model)}
+                    {FullLabelForModel(config.model, availableProviders)}
                   </span>
                 </div>
               )}
@@ -156,9 +167,8 @@ export default function PromptPanel({
           setLanguageModel={updateModel}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
-          disabled={!isProviderAvailable || prompts.main.trim().length === 0}
+          disabled={!isModelAvailable || prompts.main.trim().length === 0}
           callback={runPrompt}
-          showTestMode={showTestMode}
         />
       )}
     </div>
@@ -169,13 +179,66 @@ const Warning = ({ children }: { children: ReactNode }) => (
   <Banner className='border-pink-50 bg-pink-25'>{children}</Banner>
 )
 
-export function ProviderWarning({ includeTitle = true }: { includeTitle?: boolean }) {
+export function ModelUnavailableWarning({
+  model,
+  includeTitle = true,
+  checkProviderAvailable,
+}: {
+  model: LanguageModel
+  includeTitle?: boolean
+  checkProviderAvailable: (provider: ModelProvider) => boolean
+}) {
+  const provider = ProviderForModel(model)
+
+  return checkProviderAvailable(provider) ? (
+    <ModelWarning model={model} includeTitle={includeTitle} />
+  ) : (
+    <ProviderWarning provider={provider} includeTitle={includeTitle} />
+  )
+}
+
+function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; includeTitle?: boolean }) {
+  const checkModelDisabled = useCheckModelDisabled()
+  const isModelDisabled = checkModelDisabled(model)
+
+  const router = useRouter()
+
+  const buttonTitle = isModelDisabled ? 'Enable Model' : 'View Settings'
+  const title = includeTitle ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : undefined
+  const description = isModelDisabled
+    ? 'Custom models need to be enabled for use.'
+    : 'Custom models need to be configured before use.'
+
+  return (
+    <ButtonBanner
+      type='warning'
+      title={title}
+      buttonTitle={buttonTitle}
+      onClick={() => router.push(ClientRoute.Settings)}>
+      <span>{description}</span>
+    </ButtonBanner>
+  )
+}
+
+export function ProviderWarning({
+  provider,
+  includeTitle = true,
+}: {
+  provider: ModelProvider | QueryProvider
+  includeTitle?: boolean
+}) {
   const router = useRouter()
 
   return (
-    <ButtonBanner type='warning' buttonTitle='Add API Key' onClick={() => router.push(ClientRoute.Settings)}>
-      {includeTitle && <span className='font-medium text-gray-600'>Missing API Key</span>}
-      <span>An API key is required to use this model.</span>
+    <ButtonBanner
+      type='warning'
+      title={includeTitle ? 'Missing API Key' : undefined}
+      buttonTitle='Add API Key'
+      onClick={() => router.push(ClientRoute.Settings)}>
+      <span>
+        An API key is required to use this{' '}
+        {(AllModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
+      </span>
     </ButtonBanner>
   )
 }
@@ -190,11 +253,13 @@ function LoadPendingVersionBanner({ loadPendingVersion }: { loadPendingVersion: 
 
 function ButtonBanner({
   type,
+  title,
   buttonTitle,
   onClick,
   children,
 }: {
   type: 'info' | 'warning'
+  title?: string
   buttonTitle: string
   onClick: () => void
   children: ReactNode
@@ -203,7 +268,10 @@ function ButtonBanner({
   const buttonColor = type === 'info' ? 'bg-blue-100 hover:bg-blue-200' : 'bg-orange-100 hover:bg-orange-200'
   return (
     <Banner className={`flex items-center justify-between gap-1 ${bannerColor}`}>
-      <div className='flex flex-col'>{children}</div>
+      <div className='flex flex-col'>
+        {title && <span className='font-medium text-gray-600'>{title}</span>}
+        {children}
+      </div>
       <div
         className={`px-3 py-1.5 text-gray-700 rounded-md cursor-pointer whitespace-nowrap ${buttonColor}`}
         onClick={onClick}>

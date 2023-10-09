@@ -51,13 +51,22 @@ export default function TestDataPane({
     }
   }
 
-  const toggleRow = (row: number) =>
-    setTestConfig({
-      mode: 'custom',
-      rowIndices: testConfig.rowIndices.includes(row)
-        ? testConfig.rowIndices.filter(index => index !== row)
-        : [...testConfig.rowIndices, row],
-    })
+  const toggleRow = (row: number) => {
+    const rowIndices = testConfig.rowIndices.includes(row)
+      ? testConfig.rowIndices.filter(index => index !== row)
+      : [...testConfig.rowIndices, row]
+    const mode =
+      rowIndices.length === 1
+        ? rowIndices.includes(0)
+          ? 'first'
+          : rowIndices.includes(rowCount - 1)
+          ? 'last'
+          : 'custom'
+        : rowIndices.length === rowCount
+        ? 'all'
+        : 'custom'
+    setTestConfig({ mode, rowIndices })
+  }
 
   const [activeRow, setActiveRow] = useState<number>()
 
@@ -104,7 +113,7 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex justify-center border-b border-gray-200 py-1 bg-white hover:bg-gray-50 cursor-pointer items-center font-regular'
+        className='flex items-center justify-center py-1 bg-white border-b border-gray-200 cursor-pointer hover:bg-gray-50 font-regular'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add

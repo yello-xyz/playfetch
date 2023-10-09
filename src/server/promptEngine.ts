@@ -1,18 +1,8 @@
-import {
-  PromptConfig,
-  ModelProvider,
-  OpenAILanguageModel,
-  GoogleLanguageModel,
-  AnthropicLanguageModel,
-  CohereLanguageModel,
-  Prompts,
-  PromptInputs,
-} from '@/types'
-import openai from '@/src/server/providers/openai'
-import anthropic from '@/src/server/providers/anthropic'
-import vertexai from '@/src/server/providers/vertexai'
-import cohere from '@/src/server/providers/cohere'
-import { getProviderKey, incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { PromptConfig, Prompts, PromptInputs } from '@/types'
+import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { APIKeyForProvider, GetPredictor } from './providers/integration'
+import { DefaultProvider } from '../common/defaultConfig'
+import { AllDefaultLanguageModels, ProviderForModel } from '../common/providerMetadata'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -60,32 +50,22 @@ export default async function runPromptWithConfig(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
-  const getAPIKey = async (provider: ModelProvider) => {
-    switch (provider) {
-      case 'google':
-        return null
-      case 'openai':
-      case 'anthropic':
-      case 'cohere':
-        return getProviderKey(userID, provider)
+  const provider = ProviderForModel(config.model)
+  const customModel = (AllDefaultLanguageModels as string[]).includes(config.model) ? undefined : config.model
+  const apiKey = await APIKeyForProvider(userID, provider, customModel)
+  if (provider !== DefaultProvider && !apiKey) {
+    const defaultModelsAPIKey = customModel ? await APIKeyForProvider(userID, provider) : apiKey
+    return {
+      error: defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key',
+      result: undefined,
+      output: undefined,
+      cost: 0,
+      attempts: 1,
+      failed: true,
     }
   }
 
-  const getPredictor = (provider: ModelProvider, apiKey: string): Predictor => {
-    switch (provider) {
-      case 'google':
-        return vertexai(config.model as GoogleLanguageModel)
-      case 'openai':
-        return openai(apiKey, userID, config.model as OpenAILanguageModel)
-      case 'anthropic':
-        return anthropic(apiKey, config.model as AnthropicLanguageModel)
-      case 'cohere':
-        return cohere(apiKey, config.model as CohereLanguageModel)
-    }
-  }
-
-  const apiKey = await getAPIKey(config.provider)
-  const predictor: Predictor = getPredictor(config.provider, apiKey ?? '')
+  const predictor = GetPredictor(provider, apiKey ?? '', userID, config.model)
 
   let result: PredictionResponse = { output: '', cost: 0 }
   let attempts = 0
@@ -106,7 +86,7 @@ export default async function runPromptWithConfig(
   }
 
   if (!isErrorPredictionResponse(result) && result.cost > 0) {
-    await incrementProviderCostForUser(userID, config.provider, result.cost)
+    incrementProviderCostForUser(userID, provider, result.cost)
   }
 
   return {

@@ -66,24 +66,52 @@ export type ActiveChain = Chain & {
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
 
+export type OpenAIEmbeddingModel = 'text-embedding-ada-002'
+export type EmbeddingModel = OpenAIEmbeddingModel
+
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-4'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
 export type GoogleLanguageModel = 'text-bison@001'
 export type CohereLanguageModel = 'command'
 
-export type LanguageModel = OpenAILanguageModel | AnthropicLanguageModel | GoogleLanguageModel | CohereLanguageModel
+export type DefaultLanguageModel =
+  | OpenAILanguageModel
+  | AnthropicLanguageModel
+  | GoogleLanguageModel
+  | CohereLanguageModel
+
+export type CustomLanguageModel = string
+
+export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
 export type PromptConfig = {
-  provider: ModelProvider
   model: LanguageModel
   temperature: number
   maxTokens: number
 }
 
-export type AvailableProvider = {
+export type CustomModel = {
+  id: string
+  name: string
+  description: string
+  enabled: boolean
+}
+
+export type AvailableModelProvider = {
   provider: ModelProvider
   cost: number
+  customModels: CustomModel[]
 }
+export type AvailableQueryProvider = {
+  provider: QueryProvider
+  cost: number
+  environment: string
+}
+export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
+export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
+  'customModels' in provider
+
+export type QueryProvider = 'pinecone'
 
 type Version = {
   id: number
@@ -153,21 +181,31 @@ export type CodeConfig = {
   output?: string
 }
 
-export type TestConfig = {
-  mode: 'custom' | 'first' | 'last' | 'random' | 'all'
-  rowIndices: number[]
+export type QueryConfig = {
+  provider: QueryProvider
+  model: EmbeddingModel
+  indexName: string
+  query: string
+  topK: number
+  output?: string
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
+export type QueryChainItem = QueryConfig & { inputs?: string[] }
 export type PromptChainItem = PendingVersionRunConfig & {
   promptID: number
   inputs?: string[]
   dynamicInputs?: string[]
 }
-export type ChainItem = CodeChainItem | PromptChainItem
+export type ChainItem = CodeChainItem | QueryChainItem | PromptChainItem
 
-export type ChainItemWithInputs = (CodeChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
+export type ChainItemWithInputs = (CodeChainItem | QueryChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
   inputs: string[]
+}
+
+export type TestConfig = {
+  mode: 'custom' | 'first' | 'last' | 'range' | 'random' | 'all'
+  rowIndices: number[]
 }
 
 export type Endpoint = {
@@ -197,7 +235,6 @@ export const ProjectItemIsChain = (item: Chain | Prompt | undefined): item is Ch
   !!item && 'referencedItemIDs' in item
 
 export type Usage = {
-  endpointID: number
   requests: number
   cost: number
   duration: number
@@ -235,4 +272,10 @@ export type LogEntry = {
   attempts: number
   cacheHit: boolean
   continuationID: number
+}
+
+export type Analytics = {
+  recentLogEntries: LogEntry[]
+  recentUsage: Usage[]
+  aggregatePreviousUsage: Usage
 }

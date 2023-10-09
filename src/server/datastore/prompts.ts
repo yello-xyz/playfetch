@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntity,
   getEntityKey,
   getEntityKeys,
   getID,
@@ -118,15 +117,9 @@ export async function duplicatePromptForUser(
   }
   const projectID = targetProjectID ?? promptData.projectID
   const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptData.name)
-  // TODO select last version that was either run or created by the user
-  const lastVersion = await getEntity(Entity.VERSION, 'parentID', promptID, true)
-  await savePromptVersionForUser(
-    userID,
-    newPromptID,
-    JSON.parse(lastVersion.prompts),
-    JSON.parse(lastVersion.config),
-    versionID
-  )
+  const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
+  const lastUserVersion = toUserVersions(userID, versions, [], []).slice(-1)[0] as RawPromptVersion
+  await savePromptVersionForUser(userID, newPromptID, lastUserVersion.prompts, lastUserVersion.config, versionID)
   return newPromptID
 }
 

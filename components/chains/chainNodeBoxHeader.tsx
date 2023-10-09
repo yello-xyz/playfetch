@@ -1,8 +1,17 @@
 import { ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User } from '@/types'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, NameForCodeChainItem, OutputNode } from './chainNode'
+import {
+  ChainNode,
+  InputNode,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+  NameForCodeChainItem,
+  OutputNode,
+} from './chainNode'
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
+import queryIcon from '@/public/query.svg' // TODO update svg so it is different from prompt icon
 import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
@@ -32,7 +41,13 @@ export default function ChainNodeBoxHeader({
   users: User[]
 }) {
   const chainNode = nodes[index]
-  const icon = IsPromptChainItem(chainNode) ? promptIcon : IsCodeChainItem(chainNode) ? codeIcon : undefined
+  const icon = IsPromptChainItem(chainNode)
+    ? promptIcon
+    : IsQueryChainItem(chainNode)
+    ? queryIcon
+    : IsCodeChainItem(chainNode)
+    ? codeIcon
+    : undefined
 
   const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
   const [label, setLabel] = useState<string>()
@@ -70,6 +85,7 @@ export default function ChainNodeBoxHeader({
             {chainNode === OutputNode && 'Output'}
             {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
             {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+            {IsQueryChainItem(chainNode) && 'Query'}
           </HeaderItem>
         )}
         {!canIncludeContext && (
@@ -122,7 +138,7 @@ function PopupMenuIcons({
           selectedCell={isSelected}
         />
       )}
-      {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode)) && (
+      {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode) || IsQueryChainItem(chainNode)) && (
         <ChainNodePopupMenu
           onRename={onRename}
           onDuplicate={onDuplicate}

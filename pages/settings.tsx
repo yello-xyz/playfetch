@@ -5,11 +5,11 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
-import UserSettingsView from '@/components/userSettingsView'
+import UserSettingsView from '@/components/settings/userSettingsView'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
-  const availableProviders = await getAvailableProvidersForUser(user.id)
+  const availableProviders = await getAvailableProvidersForUser(user.id, true)
 
   return { props: { user, availableProviders } }
 })

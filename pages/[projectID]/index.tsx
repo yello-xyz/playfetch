@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, LogEntry, PromptVersion, ChainVersion } from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -40,14 +40,14 @@ export default function Home({
   workspaces,
   initialActiveProject,
   initialActiveItem,
-  initialLogEntries,
+  initialAnalytics,
   availableProviders,
 }: {
   user: User
   workspaces: Workspace[]
   initialActiveProject: ActiveProject
   initialActiveItem: ActiveItem | null
-  initialLogEntries: LogEntry[] | null
+  initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
 }) {
   const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(
@@ -125,13 +125,15 @@ export default function Home({
     }
   }
 
-  const [logEntries, setLogEntries] = useState(initialLogEntries ?? undefined)
+  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+
+  const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(EndpointsItem)
     updateVersion(undefined)
-    if (!logEntries) {
-      api.getLogEntries(activeProject.id).then(setLogEntries)
+    if (!analytics) {
+      refreshAnalytics()
     }
     if (!endpoints) {
       router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
@@ -228,7 +230,12 @@ export default function Home({
                     )}
                     {activeItem === EndpointsItem && (
                       <Suspense>
-                        <EndpointsView project={activeProject} logEntries={logEntries} onRefresh={refreshProject} />
+                        <EndpointsView
+                          project={activeProject}
+                          analytics={analytics}
+                          refreshAnalytics={refreshAnalytics}
+                          onRefresh={refreshProject}
+                        />
                       </Suspense>
                     )}
                     {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}

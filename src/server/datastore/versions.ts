@@ -37,22 +37,20 @@ export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    if (versionData.items) {
-      await datastore.save(
-        toVersionData(
-          versionData.userID,
-          versionData.parentID,
-          versionData.prompts ? JSON.parse(versionData.prompts) : null,
-          versionData.config ? JSON.parse(versionData.config) : null,
-          versionData.items ? JSON.parse(versionData.items) : null,
-          JSON.parse(versionData.labels),
-          versionData.createdAt,
-          versionData.didRun,
-          versionData.previousVersionID,
-          getID(versionData)
-        )
+    await datastore.save(
+      toVersionData(
+        versionData.userID,
+        versionData.parentID,
+        versionData.prompts ? JSON.parse(versionData.prompts) : null,
+        versionData.config ? JSON.parse(versionData.config) : null,
+        versionData.items ? JSON.parse(versionData.items) : null,
+        JSON.parse(versionData.labels),
+        versionData.createdAt,
+        versionData.didRun,
+        versionData.previousVersionID,
+        getID(versionData)
       )
-    }
+    )
   }
 }
 
@@ -281,7 +279,7 @@ const toVersionData = (
 export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
   const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
-  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions[0]] : []
+  const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
   return [...userVersion, ...versionsWithRuns, ...initialVersion]
     .map(version => toVersion(version, runs, comments))

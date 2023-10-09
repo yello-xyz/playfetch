@@ -10,6 +10,7 @@ import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -69,6 +70,7 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
   const versionIndex = versions.findIndex(version => version.id === comment.versionID) + 1
 
   const selectVersion = onSelect && version ? () => onSelect(version, comment.runID) : undefined
+  const availableProviders = useAvailableProviders()
 
   return (
     <div className={selectVersion ? 'cursor-pointer' : ''} onClick={selectVersion}>
@@ -96,7 +98,7 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
               {version && (
                 <span className='font-medium'>
                   {IsPromptVersion(version)
-                    ? `${versionIndex} › ${LabelForModel(version.config.model)}`
+                    ? `${versionIndex} › ${LabelForModel(version.config.model, availableProviders)}`
                     : `version ${versionIndex}`}
                 </span>
               )}

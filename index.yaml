@@ -76,3 +76,9 @@ indexes:
   - name: hasAccess
   - name: createdAt
     direction: desc
+
+- kind: analytics
+  properties:
+  - name: projectID
+  - name: createdAt
+    direction: desc

@@ -1,12 +1,26 @@
-import { LanguageModel, ModelProvider, Prompts } from '@/types'
+import {
+  AvailableModelProvider,
+  AvailableProvider,
+  CustomLanguageModel,
+  CustomModel,
+  DefaultLanguageModel,
+  EmbeddingModel,
+  LanguageModel,
+  ModelProvider,
+  Prompts,
+  QueryProvider,
+} from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
+import pineconeIcon from '@/public/pinecone.svg'
 
-export const AllProviders: ModelProvider[] = ['openai', 'anthropic', 'google', 'cohere']
+export const AllModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
+export const AllQueryProviders: QueryProvider[] = ['pinecone']
 
-export const AllModels: LanguageModel[] = [
+export const AllEmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
+export const AllDefaultLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
   'gpt-3.5-turbo',
   'claude-instant-1',
@@ -15,7 +29,7 @@ export const AllModels: LanguageModel[] = [
   'command',
 ]
 
-export const IconForProvider = (provider: ModelProvider) => {
+export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
   switch (provider) {
     case 'openai':
       return openaiIcon
@@ -25,10 +39,12 @@ export const IconForProvider = (provider: ModelProvider) => {
       return googleIcon
     case 'cohere':
       return cohereIcon
+    case 'pinecone':
+      return pineconeIcon
   }
 }
 
-export const LabelForProvider = (provider: ModelProvider) => {
+export const LabelForProvider = (provider: ModelProvider | QueryProvider) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -38,6 +54,8 @@ export const LabelForProvider = (provider: ModelProvider) => {
       return 'Google'
     case 'cohere':
       return 'Cohere'
+    case 'pinecone':
+      return 'Pinecone'
   }
 }
 
@@ -47,20 +65,46 @@ export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompt
   ...(SupportsFunctionsPrompt(model) ? ['functions' as keyof Prompts] : []),
 ]
 
-export const SupportsSystemPrompt = (model: LanguageModel) => {
+export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is CustomLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
-      return true
+    case 'text-embedding-ada-002':
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison@001':
     case 'command':
       return false
+    default:
+      return true
   }
 }
 
-export const SupportsFunctionsPrompt = (model: LanguageModel) => {
+// TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
+const baseModelForModel = (model: LanguageModel): DefaultLanguageModel =>
+  isCustomModel(model) ? 'gpt-3.5-turbo' : model
+
+const customModelFromProviders = (model: LanguageModel, providers: AvailableModelProvider[]): CustomModel | null => {
+  return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
+}
+
+export const IsProviderAvailable = (provider: ModelProvider | QueryProvider, providers: AvailableProvider[]): boolean =>
+  !!providers.find(p => p.provider === provider)
+
+export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelProvider[]): boolean => {
+  const customModel = customModelFromProviders(model, providers)
+  return !!customModel && !customModel.enabled
+}
+
+export const IsModelAvailable = (
+  model: LanguageModel | EmbeddingModel,
+  providers: AvailableModelProvider[]
+): boolean =>
+  isCustomModel(model)
+    ? customModelFromProviders(model, providers)?.enabled ?? false
+    : IsProviderAvailable(ProviderForModel(model), providers)
+
+export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
@@ -70,6 +114,23 @@ export const SupportsFunctionsPrompt = (model: LanguageModel) => {
     case 'text-bison@001':
     case 'command':
       return false
+    default:
+      return SupportsSystemPrompt(baseModelForModel(model))
+  }
+}
+
+export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+      return true
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison@001':
+    case 'command':
+      return false
+    default:
+      return SupportsFunctionsPrompt(baseModelForModel(model))
   }
 }
 
@@ -115,10 +176,11 @@ export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
   }
 }
 
-export const ProviderForModel = (model: LanguageModel): ModelProvider => {
+export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
     case 'gpt-4':
+    case 'text-embedding-ada-002':
       return 'openai'
     case 'claude-instant-1':
     case 'claude-2':
@@ -127,10 +189,12 @@ export const ProviderForModel = (model: LanguageModel): ModelProvider => {
       return 'google'
     case 'command':
       return 'cohere'
+    default:
+      return ProviderForModel(baseModelForModel(model))
   }
 }
 
-const labelForModel = (model: LanguageModel) => {
+const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5 Turbo'
@@ -144,10 +208,12 @@ const labelForModel = (model: LanguageModel) => {
       return 'PaLM v2'
     case 'command':
       return 'Command'
+    default:
+      return customModelFromProviders(model, providers)?.name ?? '(unavailable)'
   }
 }
 
-const shortLabelForModel = (model: LanguageModel) => {
+const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT3.5'
@@ -160,18 +226,22 @@ const shortLabelForModel = (model: LanguageModel) => {
       return 'PaLM'
     case 'command':
       return 'Command'
+    default:
+      return labelForModel(model, providers)
   }
 }
 
-export const LabelForModel = (model: LanguageModel, includeProvider = true) =>
+export const LabelForModel = (model: LanguageModel, providers: AvailableModelProvider[], includeProvider = true) =>
   includeProvider
-    ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model)}`
-    : shortLabelForModel(model)
+    ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model, providers)}`
+    : shortLabelForModel(model, providers)
 
-export const FullLabelForModel = (model: LanguageModel, includeProvider = true) =>
-  includeProvider ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model)}` : labelForModel(model)
+export const FullLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[], includeProvider = true) =>
+  includeProvider
+    ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model, providers)}`
+    : labelForModel(model, providers)
 
-export const WebsiteLinkForModel = (model: LanguageModel) => {
+export const WebsiteLinkForModel = (model: LanguageModel): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'https://platform.openai.com/docs/models/gpt-3-5'
@@ -185,10 +255,13 @@ export const WebsiteLinkForModel = (model: LanguageModel) => {
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text'
     case 'command':
       return 'https://docs.cohere.com/docs/models'
+    default:
+      // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
+      return 'https://platform.openai.com/docs/guides/fine-tuning'
   }
 }
 
-export const DescriptionForModel = (model: LanguageModel) => {
+export const DescriptionForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks.'
@@ -202,10 +275,12 @@ export const DescriptionForModel = (model: LanguageModel) => {
       return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation.'
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
+    default:
+      return customModelFromProviders(model, providers)?.description ?? ''
   }
 }
 
-export const MaxTokensForModel = (model: LanguageModel) => {
+export const MaxTokensForModel = (model: LanguageModel): number => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 4097
@@ -220,11 +295,15 @@ export const MaxTokensForModel = (model: LanguageModel) => {
       return 8192
     case 'command':
       return 4096
+    default:
+      return MaxTokensForModel(baseModelForModel(model))
   }
 }
 
-export const InputPriceForModel = (model: LanguageModel) => {
+export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): number => {
   switch (model) {
+    case 'text-embedding-ada-002':
+      return 0.1
     case 'gpt-3.5-turbo':
       return 1.5
     case 'gpt-4':
@@ -237,11 +316,16 @@ export const InputPriceForModel = (model: LanguageModel) => {
       return 15
     case 'text-bison@001':
       return 0
+    default:
+      // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
+      return 12
   }
 }
 
-export const OutputPriceForModel = (model: LanguageModel) => {
+export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): number => {
   switch (model) {
+    case 'text-embedding-ada-002':
+      return 0.1
     case 'gpt-3.5-turbo':
       return 2
     case 'gpt-4':
@@ -254,5 +338,8 @@ export const OutputPriceForModel = (model: LanguageModel) => {
       return 15
     case 'text-bison@001':
       return 0
+    default:
+      // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
+      return 16
   }
 }
