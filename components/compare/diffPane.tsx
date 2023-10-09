@@ -6,7 +6,7 @@ export default function DiffPane({ leftContent, rightContent }: { leftContent: s
       <ReactDiffViewer
         oldValue={leftContent || 'empty'}
         newValue={rightContent || 'empty'}
-        splitView={false}
+        splitView={true}
         compareMethod={DiffMethod.WORDS}
         showDiffOnly={false}
         useDarkTheme={false}
