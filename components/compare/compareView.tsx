@@ -1,13 +1,38 @@
-import { ActiveProject, ItemsInProject } from '@/types'
-import { Allotment } from 'allotment'
+import { ActiveProject, ChainVersion, ItemsInProject, PromptVersion } from '@/types'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import DiffPane from './diffPane'
+
+const getContent = (version: ChainVersion | PromptVersion, activePromptTab: PromptTab) => {
+  switch (activePromptTab) {
+    case 'main':
+    case 'functions':
+    case 'system':
+      return version.prompts?.[activePromptTab]
+    case 'settings':
+      return version.config
+        ? `Model: ${version.config.model}
+Maximum Tokens: ${version.config.maxTokens}
+Temperature: ${version.config.temperature}`
+        : undefined
+  }
+}
+
+const getDifferentPromptTab = (
+  activePromptTab: PromptTab,
+  leftVersion?: ChainVersion | PromptVersion,
+  rightVersion?: ChainVersion | PromptVersion
+) =>
+  ([activePromptTab, 'main', 'functions', 'system', 'settings'] as PromptTab[]).find(
+    tab =>
+      (leftVersion ? getContent(leftVersion, tab) : undefined) !==
+      (rightVersion ? getContent(rightVersion, tab) : undefined)
+  )
 
 export default function CompareView({ project }: { project: ActiveProject }) {
   const router = useRouter()
@@ -27,9 +52,11 @@ export default function CompareView({ project }: { project: ActiveProject }) {
 
   const leftItem = leftItemID ? itemCache.itemForID(leftItemID) : undefined
   const leftVersion = leftItem ? [...leftItem.versions].find(version => version.id === leftVersionID) : undefined
+  const leftContent = leftVersion ? getContent(leftVersion, activePromptTab) : undefined
 
   const rightItem = rightItemID ? itemCache.itemForID(rightItemID) : undefined
   const rightVersion = rightItem ? [...rightItem.versions].find(version => version.id === rightVersionID) : undefined
+  const rightContent = rightVersion ? getContent(rightVersion, activePromptTab) : undefined
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
@@ -38,16 +65,26 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     }
   }
 
-  const updateRightVersionID = (versionID: number) => {
-    if (versionID !== rightVersionID) {
-      if (rightItemID && leftItemID === rightItemID) {
-        const rightVersions = itemCache.itemForID(rightItemID)?.versions ?? []
-        const rightVersion = [...rightVersions].find(version => version.id === versionID)
-        setTimeout(() => setLeftVersionID(rightVersion?.previousID ?? versionID))
+  const updateRightVersionID = useCallback(
+    (versionID: number) => {
+      if (versionID !== rightVersionID) {
+        if (rightItemID && leftItemID === rightItemID) {
+          const rightVersions = itemCache.itemForID(rightItemID)?.versions ?? []
+          const rightVersion = [...rightVersions].find(version => version.id === versionID)
+          const leftVersionID = rightVersion?.previousID ?? versionID
+          const leftVersion = [...rightVersions].find(version => version.id === leftVersionID)
+          setTimeout(() => {
+            setLeftVersionID(leftVersionID)
+            if (isDiffMode) {
+              setActivePromptTab(getDifferentPromptTab(activePromptTab, leftVersion, rightVersion) ?? activePromptTab)
+            }
+          })
+        }
+        setRightVersionID(versionID)
       }
-      setRightVersionID(versionID)
-    }
-  }
+    },
+    [activePromptTab, isDiffMode, itemCache, leftItemID, rightItemID, rightVersionID]
+  )
 
   useEffect(() => {
     if (leftItem && !leftVersion) {
@@ -56,7 +93,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
     if (rightItem && !rightVersion) {
       updateRightVersionID(rightItem.versions.slice(-1)[0].id)
     }
-  }, [leftItem, leftVersion, rightItem, rightVersion])
+  }, [leftItem, leftVersion, rightItem, rightVersion, updateRightVersionID])
 
   return ItemsInProject(project).length > 0 ? (
     <>
@@ -85,8 +122,8 @@ export default function CompareView({ project }: { project: ActiveProject }) {
             includeResponses={!isDiffMode}
           />
         </div>
-        {isDiffMode && leftVersion && rightVersion && (
-          <DiffPane leftVersion={leftVersion} rightVersion={rightVersion} activePromptTab={activePromptTab} />
+        {isDiffMode && leftContent && rightContent && (
+          <DiffPane leftContent={leftContent} rightContent={rightContent} />
         )}
       </div>
       {leftVersionID && rightVersionID && (

@@ -1,31 +1,7 @@
-import { ChainVersion, PromptVersion } from '@/types'
-import { PromptTab } from '../prompts/promptPanel'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 
-const getContent = (version: ChainVersion | PromptVersion, activePromptTab: PromptTab) => {
-  switch (activePromptTab) {
-    case 'main':
-    case 'functions':
-    case 'system':
-      return version.prompts?.[activePromptTab]
-    case 'settings':
-      return JSON.stringify(version.config ?? {}, null, 2) // TODO: format
-  }
-}
-
-export default function DiffPane({
-  leftVersion,
-  rightVersion,
-  activePromptTab,
-}: {
-  leftVersion: PromptVersion | ChainVersion
-  rightVersion: PromptVersion | ChainVersion
-  activePromptTab: PromptTab
-}) {
-  const leftContent = leftVersion ? getContent(leftVersion, activePromptTab) : undefined
-  const rightContent = rightVersion ? getContent(rightVersion, activePromptTab) : undefined
-
-  return leftContent && rightContent ? (
+export default function DiffPane({ leftContent, rightContent }: { leftContent: string; rightContent: string }) {
+  return (
     <div className='overflow-y-auto'>
       <ReactDiffViewer
         oldValue={leftContent || 'empty'}
@@ -44,10 +20,10 @@ export default function DiffPane({
             },
           },
           contentText: { fontFamily: 'var(--font-inter)' },
-          wordAdded: { borderRadius: '0', padding: '1px', lineHeight: '100%', background: '#C0E2CF' },
-          wordRemoved: { borderRadius: '0', padding: '1px', lineHeight: '100%', background: '#F4BBAF' },
+          wordAdded: { borderRadius: '0', padding: '0', lineHeight: '100%', background: '#C0E2CF' },
+          wordRemoved: { borderRadius: '0', padding: '0', lineHeight: '100%', background: '#F4BBAF' },
         }}
       />
     </div>
-  ) : null
+  )
 }
