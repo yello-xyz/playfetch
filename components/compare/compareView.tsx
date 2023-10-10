@@ -1,19 +1,30 @@
-import { ActiveProject, ChainVersion, ItemsInProject, PromptVersion } from '@/types'
+import {
+  ActiveProject,
+  ActivePrompt,
+  ChainItem,
+  ChainItemWithInputs,
+  ChainVersion,
+  IsPromptVersion,
+  ItemsInProject,
+  PromptVersion,
+} from '@/types'
 import ComparePane from './comparePane'
-import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
+import useActiveItemCache, { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import DiffPane from './diffPane'
+import { IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from '../chains/chainNode'
+import { LabelForProvider } from '@/src/common/providerMetadata'
 
-const getContent = (version: ChainVersion | PromptVersion, activePromptTab: PromptTab) => {
+const getPromptVersionContent = (version: PromptVersion, activePromptTab: PromptTab) => {
   switch (activePromptTab) {
     case 'main':
     case 'functions':
     case 'system':
-      return version.prompts?.[activePromptTab]
+      return version.prompts[activePromptTab]
     case 'settings':
       return version.config
         ? `Model: ${version.config.model}
@@ -23,15 +34,61 @@ Temperature: ${version.config.temperature}`
   }
 }
 
-const getDifferentPromptTab = (
+const getChainItemTitle = (item: ChainItemWithInputs, chainItemCache: ActiveItemCache) => {
+  if (IsCodeChainItem(item)) {
+    return `• Code block: ${item.name ?? ''}`
+  } else if (IsQueryChainItem(item)) {
+    return `• Query: ${LabelForProvider(item.provider)} “${item.indexName}” (${item.topK} Top-K)`
+  } else {
+    let versionSuffix = ''
+    const prompt = chainItemCache.itemForID(item.promptID) as ActivePrompt | undefined
+    if (prompt) {
+      const versionIndex = prompt.versions.findIndex(version => version.id === item.versionID)
+      if (versionIndex >= 0) {
+        versionSuffix = ` (Version ${versionIndex + 1})`
+      }
+    }
+    return `• Prompt: ${chainItemCache.nameForID(item.promptID)}${versionSuffix}`
+  }
+}
+
+const getChainItemBody = (item: ChainItemWithInputs, chainItemCache: ActiveItemCache) => {
+  if (IsCodeChainItem(item)) {
+    return item.code
+  } else if (IsQueryChainItem(item)) {
+    return item.query
+  } else {
+    const prompt = chainItemCache.itemForID(item.promptID) as ActivePrompt | undefined
+    if (prompt) {
+      const promptVersion = prompt.versions.find(version => version.id === item.versionID)
+      if (promptVersion) {
+        return getPromptVersionContent(promptVersion, 'main')
+      }
+    }
+    return '…'
+  }
+}
+
+const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
+  const outputSuffix = item.output ? `→ ${item.output}` : ''
+  return `${getChainItemTitle(item, itemCache)}\n${getChainItemBody(item, itemCache)}\n${outputSuffix}\n`
+}
+
+const getChainVersionContent = (version: ChainVersion, chainItemCache: ActiveItemCache) =>
+  version.items.map(item => getChainItemContent(item, chainItemCache), chainItemCache).join('\n')
+
+const getContent = (
+  version: ChainVersion | PromptVersion,
   activePromptTab: PromptTab,
-  leftVersion?: ChainVersion | PromptVersion,
-  rightVersion?: ChainVersion | PromptVersion
+  chainItemCache: ActiveItemCache
 ) =>
+  IsPromptVersion(version)
+    ? getPromptVersionContent(version, activePromptTab)
+    : getChainVersionContent(version, chainItemCache)
+
+const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVersion, rightVersion: PromptVersion) =>
   ([activePromptTab, 'main', 'functions', 'system', 'settings'] as PromptTab[]).find(
-    tab =>
-      (leftVersion ? getContent(leftVersion, tab) : undefined) !==
-      (rightVersion ? getContent(rightVersion, tab) : undefined)
+    tab => getPromptVersionContent(leftVersion, tab) !== getPromptVersionContent(rightVersion, tab)
   )
 
 export default function CompareView({ project }: { project: ActiveProject }) {
@@ -52,11 +109,21 @@ export default function CompareView({ project }: { project: ActiveProject }) {
 
   const leftItem = leftItemID ? itemCache.itemForID(leftItemID) : undefined
   const leftVersion = leftItem ? [...leftItem.versions].find(version => version.id === leftVersionID) : undefined
-  const leftContent = leftVersion ? getContent(leftVersion, activePromptTab) : undefined
 
   const rightItem = rightItemID ? itemCache.itemForID(rightItemID) : undefined
   const rightVersion = rightItem ? [...rightItem.versions].find(version => version.id === rightVersionID) : undefined
-  const rightContent = rightVersion ? getContent(rightVersion, activePromptTab) : undefined
+
+  const getChainPromptIDs = (version: PromptVersion | ChainVersion | undefined) =>
+    version && !IsPromptVersion(version)
+      ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
+      : []
+  const chainItemCache = useActiveItemCache(project, [
+    ...getChainPromptIDs(leftVersion),
+    ...getChainPromptIDs(rightVersion),
+  ])
+
+  const leftContent = leftVersion ? getContent(leftVersion, activePromptTab, chainItemCache) : undefined
+  const rightContent = rightVersion ? getContent(rightVersion, activePromptTab, chainItemCache) : undefined
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
@@ -75,7 +142,13 @@ export default function CompareView({ project }: { project: ActiveProject }) {
           const leftVersion = [...rightVersions].find(version => version.id === leftVersionID)
           setTimeout(() => {
             setLeftVersionID(leftVersionID)
-            if (isDiffMode) {
+            if (
+              isDiffMode &&
+              leftVersion &&
+              IsPromptVersion(leftVersion) &&
+              rightVersion &&
+              IsPromptVersion(rightVersion)
+            ) {
               setActivePromptTab(getDifferentPromptTab(activePromptTab, leftVersion, rightVersion) ?? activePromptTab)
             }
           })
