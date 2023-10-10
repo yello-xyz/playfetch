@@ -1,113 +1,23 @@
-import {
-  ActiveProject,
-  ActivePrompt,
-  ChainItem,
-  ChainItemWithInputs,
-  ChainVersion,
-  Endpoint,
-  IsPromptVersion,
-  ItemsInProject,
-  LogEntry,
-  ProjectItemIsChain,
-  PromptVersion,
-} from '@/types'
-import ComparePane, { IsEndpoint } from './comparePane'
-import useActiveItemCache, { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
+import { ActiveProject, Endpoint, IsPromptVersion, ItemsInProject, LogEntry, PromptVersion } from '@/types'
+import ComparePane from './comparePane'
+import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import DiffPane from './diffPane'
-import { IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from '../chains/chainNode'
-import { LabelForProvider } from '@/src/common/providerMetadata'
+import useDiffContent, { getPromptVersionContent } from '@/src/client/hooks/useDiffContent'
+import { IsEndpoint } from '@/src/common/activeItem'
 
-const getPromptVersionContent = (version: PromptVersion, activePromptTab: PromptTab) => {
-  switch (activePromptTab) {
-    case 'main':
-    case 'functions':
-    case 'system':
-      return version.prompts[activePromptTab]
-    case 'settings':
-      return version.config
-        ? `Model: ${version.config.model}
-Maximum Tokens: ${version.config.maxTokens}
-Temperature: ${version.config.temperature}`
-        : undefined
-  }
-}
-
-const getChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
-  if (IsCodeChainItem(item)) {
-    return `• Code block: ${item.name ?? ''}`
-  } else if (IsQueryChainItem(item)) {
-    return `• Query: ${LabelForProvider(item.provider)} “${item.indexName}” (${item.topK} Top-K)`
-  } else {
-    let versionSuffix = ''
-    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
-    if (prompt) {
-      const versionIndex = prompt.versions.findIndex(version => version.id === item.versionID)
-      if (versionIndex >= 0) {
-        versionSuffix = ` (Version ${versionIndex + 1})`
-      }
-    }
-    return `• Prompt: ${itemCache.nameForID(item.promptID)}${versionSuffix}`
-  }
-}
-
-const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
-  if (IsCodeChainItem(item)) {
-    return item.code
-  } else if (IsQueryChainItem(item)) {
-    return item.query
-  } else {
-    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
-    if (prompt) {
-      const promptVersion = prompt.versions.find(version => version.id === item.versionID)
-      if (promptVersion) {
-        return getPromptVersionContent(promptVersion, 'main')
-      }
-    }
-    return '…'
-  }
-}
-
-const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
-  const outputSuffix = item.output ? `→ ${item.output}` : ''
-  return `${getChainItemTitle(item, itemCache)}\n${getChainItemBody(item, itemCache)}\n${outputSuffix}\n`
-}
-
-const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCache) =>
-  version.items.map(item => getChainItemContent(item, itemCache)).join('\n')
-
-const getContent = (version: ChainVersion | PromptVersion, activePromptTab: PromptTab, itemCache: ActiveItemCache) =>
-  IsPromptVersion(version)
-    ? getPromptVersionContent(version, activePromptTab)
-    : getChainVersionContent(version, itemCache)
-
-const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVersion, rightVersion: PromptVersion) =>
+const getDifferentPromptTab = (
+  activePromptTab: PromptTab,
+  leftVersion: PromptVersion,
+  rightVersion: PromptVersion
+) =>
   ([activePromptTab, 'main', 'functions', 'system', 'settings'] as PromptTab[]).find(
     tab => getPromptVersionContent(leftVersion, tab) !== getPromptVersionContent(rightVersion, tab)
-  )
-
-const getEndpointContent = (endpoint: Endpoint, itemCache: ActiveItemCache) => {
-  let parentInfo = '…'
-  const parent = itemCache.itemForID(endpoint.parentID)
-  if (parent) {
-    const versionIndex = parent.versions.findIndex(version => version.id === endpoint.versionID)
-    if (versionIndex >= 0) {
-      const label = ProjectItemIsChain(parent) ? 'Chain' : 'Prompt'
-      parentInfo = `${label}: ${parent.name}\nVersion: ${versionIndex + 1}`
-    }
-  }
-  return `Enabled: ${endpoint.enabled ? 'Yes' : 'No'}
-${parentInfo}
-Name: ${endpoint.urlPath}
-Environment: ${endpoint.flavor}
-Cache Responses: ${endpoint.useCache ? 'Yes' : 'No'}
-Stream Responses: ${endpoint.useStreaming ? 'Yes' : 'No'}
-`
-}
+  ) ?? activePromptTab
 
 export default function CompareView({ project, logEntries = [] }: { project: ActiveProject; logEntries?: LogEntry[] }) {
   const router = useRouter()
@@ -137,27 +47,14 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
   const leftVersion = loadVersion(leftItem, leftVersionID)
   const rightVersion = loadVersion(rightItem, rightVersionID)
 
-  const getCacheItemIDs = (item: typeof leftItem, version: typeof leftVersion) =>
-    IsEndpoint(item)
-      ? [item.parentID]
-      : version && !IsPromptVersion(version)
-      ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
-      : []
-  const childItemCache = useActiveItemCache(project, [
-    ...getCacheItemIDs(leftItem, leftVersion),
-    ...getCacheItemIDs(rightItem, rightVersion),
-  ])
-
-  const leftContent = IsEndpoint(leftItem)
-    ? getEndpointContent(leftItem, childItemCache)
-    : leftVersion
-    ? getContent(leftVersion, activePromptTab, childItemCache)
-    : undefined
-  const rightContent = IsEndpoint(rightItem)
-    ? getEndpointContent(rightItem, childItemCache)
-    : rightVersion
-    ? getContent(rightVersion, activePromptTab, childItemCache)
-    : undefined
+  const [leftContent, rightContent] = useDiffContent(
+    project,
+    activePromptTab,
+    leftItem,
+    rightItem,
+    leftVersion,
+    rightVersion
+  )
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
@@ -193,7 +90,7 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
               rightVersion &&
               IsPromptVersion(rightVersion)
             ) {
-              setActivePromptTab(getDifferentPromptTab(activePromptTab, leftVersion, rightVersion) ?? activePromptTab)
+              setActivePromptTab(getDifferentPromptTab(activePromptTab, leftVersion, rightVersion))
             }
           })
         }

@@ -5,7 +5,6 @@ import {
   ChainVersion,
   IsPromptVersion,
   LogEntry,
-  PartialRun,
   PromptVersion,
   ResolvedEndpoint,
   Run,
@@ -14,9 +13,7 @@ import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import RunTimeline from '../runs/runTimeline'
 import PromptPanel, { PromptTab } from '../prompts/promptPanel'
-
-export const IsEndpoint = (item: ActivePrompt | ActiveChain | ResolvedEndpoint | undefined): item is ResolvedEndpoint =>
-  !!item && 'urlPath' in item
+import { IsEndpoint } from '@/src/common/activeItem'
 
 export default function ComparePane({
   project,

@@ -3,6 +3,7 @@ import {
   ActiveProject,
   ActivePrompt,
   Chain,
+  Endpoint,
   InputValues,
   Prompt,
   RawChainVersion,
@@ -12,6 +13,9 @@ import {
 export const CompareItem = 'compare'
 export const EndpointsItem = 'endpoints'
 export type ActiveItem = ActivePrompt | ActiveChain | typeof CompareItem | typeof EndpointsItem
+
+export const IsEndpoint = (item: ActivePrompt | ActiveChain | Endpoint | undefined): item is Endpoint =>
+  !!item && 'urlPath' in item
 
 export const BuildActivePrompt =
   (project: ActiveProject) =>
