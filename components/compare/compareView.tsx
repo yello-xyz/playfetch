@@ -8,7 +8,7 @@ import {
   ItemsInProject,
   PromptVersion,
 } from '@/types'
-import ComparePane from './comparePane'
+import ComparePane, { IsEndpoint } from './comparePane'
 import useActiveItemCache, { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
 import { PromptTab } from '../prompts/promptPanel'
@@ -102,16 +102,22 @@ export default function CompareView({ project }: { project: ActiveProject }) {
   const [leftVersionID, setLeftVersionID] = useState(previousVersionID)
   const [activePromptTab, setActivePromptTab] = useState('main' as PromptTab)
 
+  const endpointForID = (endpointID: number) => project.endpoints.find(endpoint => endpoint.id === endpointID)
+
   const itemCache = useActiveItemCache(project, [
-    ...(leftItemID ? [leftItemID] : []),
-    ...(rightItemID ? [rightItemID] : []),
+    ...(leftItemID && !endpointForID(leftItemID) ? [leftItemID] : []),
+    ...(rightItemID && !endpointForID(rightItemID) ? [rightItemID] : []),
   ])
 
-  const leftItem = leftItemID ? itemCache.itemForID(leftItemID) : undefined
-  const leftVersion = leftItem ? [...leftItem.versions].find(version => version.id === leftVersionID) : undefined
+  const leftItem = leftItemID ? endpointForID(leftItemID) ?? itemCache.itemForID(leftItemID) : undefined
+  const leftVersion =
+    leftItem && !IsEndpoint(leftItem) ? [...leftItem.versions].find(version => version.id === leftVersionID) : undefined
 
-  const rightItem = rightItemID ? itemCache.itemForID(rightItemID) : undefined
-  const rightVersion = rightItem ? [...rightItem.versions].find(version => version.id === rightVersionID) : undefined
+  const rightItem = rightItemID ? endpointForID(rightItemID) ?? itemCache.itemForID(rightItemID) : undefined
+  const rightVersion =
+    rightItem && !IsEndpoint(rightItem)
+      ? [...rightItem.versions].find(version => version.id === rightVersionID)
+      : undefined
 
   const getChainPromptIDs = (version: PromptVersion | ChainVersion | undefined) =>
     version && !IsPromptVersion(version)
@@ -160,10 +166,10 @@ export default function CompareView({ project }: { project: ActiveProject }) {
   )
 
   useEffect(() => {
-    if (leftItem && !leftVersion) {
+    if (leftItem && !IsEndpoint(leftItem) && !leftVersion) {
       setLeftVersionID(leftItem.versions.slice(-1)[0].id)
     }
-    if (rightItem && !rightVersion) {
+    if (rightItem && !IsEndpoint(rightItem) && !rightVersion) {
       updateRightVersionID(rightItem.versions.slice(-1)[0].id)
     }
   }, [leftItem, leftVersion, rightItem, rightVersion, updateRightVersionID])
