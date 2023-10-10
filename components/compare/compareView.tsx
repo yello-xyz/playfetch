@@ -4,9 +4,11 @@ import {
   ChainItem,
   ChainItemWithInputs,
   ChainVersion,
+  Endpoint,
   IsPromptVersion,
   ItemsInProject,
   LogEntry,
+  ProjectItemIsChain,
   PromptVersion,
 } from '@/types'
 import ComparePane, { IsEndpoint } from './comparePane'
@@ -35,31 +37,31 @@ Temperature: ${version.config.temperature}`
   }
 }
 
-const getChainItemTitle = (item: ChainItemWithInputs, chainItemCache: ActiveItemCache) => {
+const getChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
   if (IsCodeChainItem(item)) {
     return `• Code block: ${item.name ?? ''}`
   } else if (IsQueryChainItem(item)) {
     return `• Query: ${LabelForProvider(item.provider)} “${item.indexName}” (${item.topK} Top-K)`
   } else {
     let versionSuffix = ''
-    const prompt = chainItemCache.itemForID(item.promptID) as ActivePrompt | undefined
+    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
     if (prompt) {
       const versionIndex = prompt.versions.findIndex(version => version.id === item.versionID)
       if (versionIndex >= 0) {
         versionSuffix = ` (Version ${versionIndex + 1})`
       }
     }
-    return `• Prompt: ${chainItemCache.nameForID(item.promptID)}${versionSuffix}`
+    return `• Prompt: ${itemCache.nameForID(item.promptID)}${versionSuffix}`
   }
 }
 
-const getChainItemBody = (item: ChainItemWithInputs, chainItemCache: ActiveItemCache) => {
+const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
   if (IsCodeChainItem(item)) {
     return item.code
   } else if (IsQueryChainItem(item)) {
     return item.query
   } else {
-    const prompt = chainItemCache.itemForID(item.promptID) as ActivePrompt | undefined
+    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
     if (prompt) {
       const promptVersion = prompt.versions.find(version => version.id === item.versionID)
       if (promptVersion) {
@@ -75,22 +77,37 @@ const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCac
   return `${getChainItemTitle(item, itemCache)}\n${getChainItemBody(item, itemCache)}\n${outputSuffix}\n`
 }
 
-const getChainVersionContent = (version: ChainVersion, chainItemCache: ActiveItemCache) =>
-  version.items.map(item => getChainItemContent(item, chainItemCache), chainItemCache).join('\n')
+const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCache) =>
+  version.items.map(item => getChainItemContent(item, itemCache)).join('\n')
 
-const getContent = (
-  version: ChainVersion | PromptVersion,
-  activePromptTab: PromptTab,
-  chainItemCache: ActiveItemCache
-) =>
+const getContent = (version: ChainVersion | PromptVersion, activePromptTab: PromptTab, itemCache: ActiveItemCache) =>
   IsPromptVersion(version)
     ? getPromptVersionContent(version, activePromptTab)
-    : getChainVersionContent(version, chainItemCache)
+    : getChainVersionContent(version, itemCache)
 
 const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVersion, rightVersion: PromptVersion) =>
   ([activePromptTab, 'main', 'functions', 'system', 'settings'] as PromptTab[]).find(
     tab => getPromptVersionContent(leftVersion, tab) !== getPromptVersionContent(rightVersion, tab)
   )
+
+const getEndpointContent = (endpoint: Endpoint, itemCache: ActiveItemCache) => {
+  let parentInfo = '…'
+  const parent = itemCache.itemForID(endpoint.parentID)
+  if (parent) {
+    const versionIndex = parent.versions.findIndex(version => version.id === endpoint.versionID)
+    if (versionIndex >= 0) {
+      const label = ProjectItemIsChain(parent) ? 'Chain' : 'Prompt'
+      parentInfo = `${label}: ${parent.name}\nVersion: ${versionIndex + 1}`
+    }
+  }
+  return `Enabled: ${endpoint.enabled ? 'Yes' : 'No'}
+${parentInfo}
+Name: ${endpoint.urlPath}
+Environment: ${endpoint.flavor}
+Cache Responses: ${endpoint.useCache ? 'Yes' : 'No'}
+Stream Responses: ${endpoint.useStreaming ? 'Yes' : 'No'}
+`
+}
 
 export default function CompareView({ project, logEntries = [] }: { project: ActiveProject; logEntries?: LogEntry[] }) {
   const router = useRouter()
@@ -120,17 +137,27 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
       ? [...rightItem.versions].find(version => version.id === rightVersionID)
       : undefined
 
-  const getChainPromptIDs = (version: PromptVersion | ChainVersion | undefined) =>
-    version && !IsPromptVersion(version)
+  const getCacheItemIDs = (item: typeof leftItem, version: typeof leftVersion) =>
+    IsEndpoint(item)
+      ? [item.parentID]
+      : version && !IsPromptVersion(version)
       ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
       : []
-  const chainItemCache = useActiveItemCache(project, [
-    ...getChainPromptIDs(leftVersion),
-    ...getChainPromptIDs(rightVersion),
+  const childItemCache = useActiveItemCache(project, [
+    ...getCacheItemIDs(leftItem, leftVersion),
+    ...getCacheItemIDs(rightItem, rightVersion),
   ])
 
-  const leftContent = leftVersion ? getContent(leftVersion, activePromptTab, chainItemCache) : undefined
-  const rightContent = rightVersion ? getContent(rightVersion, activePromptTab, chainItemCache) : undefined
+  const leftContent = IsEndpoint(leftItem)
+    ? getEndpointContent(leftItem, childItemCache)
+    : leftVersion
+    ? getContent(leftVersion, activePromptTab, childItemCache)
+    : undefined
+  const rightContent = IsEndpoint(rightItem)
+    ? getEndpointContent(rightItem, childItemCache)
+    : rightVersion
+    ? getContent(rightVersion, activePromptTab, childItemCache)
+    : undefined
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
@@ -208,7 +235,7 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
           <DiffPane leftContent={leftContent} rightContent={rightContent} />
         )}
       </div>
-      {leftVersionID && rightVersionID && (
+      {(IsEndpoint(leftItem) || leftVersionID) && (IsEndpoint(rightItem) || rightVersionID) && (
         <SegmentedControl className='absolute z-30 bottom-4 right-4' selected={isDiffMode} callback={setDiffMode}>
           <Segment title='Diff' value={true} />
           <Segment title='Responses' value={false} />
