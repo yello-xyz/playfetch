@@ -14,8 +14,11 @@ export default function useActiveItemCache(
   onRefreshItem?: (item: ActivePrompt | ActiveChain) => void
 ): ActiveItemCache {
   const [activeItemCache, setActiveItemCache] = useState<Record<number, ActivePrompt | ActiveChain>>({})
-  
-  const findItemForID = useCallback((itemID: number) => ItemsInProject(project).find(item => item.id === itemID), [project])
+
+  const findItemForID = useCallback(
+    (itemID: number) => ItemsInProject(project).find(item => item.id === itemID),
+    [project]
+  )
 
   const refreshItem = useCallback(
     (itemID: number) => {

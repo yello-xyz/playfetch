@@ -45,7 +45,7 @@ export default function ComparePane({
   const logsAsRuns: Run[] = endpointLogEntries.map((log, index) => ({
     id: index,
     timestamp: log.timestamp,
-    output: JSON.stringify(log.output, null, 2),
+    output: log.error ?? JSON.stringify(log.output, null, 2),
     inputs: log.inputs,
     cost: log.cost,
     duration: log.duration,
