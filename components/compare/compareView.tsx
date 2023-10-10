@@ -127,15 +127,15 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
     ...(rightItemID && !endpointForID(rightItemID) ? [rightItemID] : []),
   ])
 
-  const leftItem = leftItemID ? endpointForID(leftItemID) ?? itemCache.itemForID(leftItemID) : undefined
-  const leftVersion =
-    leftItem && !IsEndpoint(leftItem) ? [...leftItem.versions].find(version => version.id === leftVersionID) : undefined
+  const loadItem = (itemID: number | undefined) =>
+    itemID ? endpointForID(itemID) ?? itemCache.itemForID(itemID) : undefined
+  const leftItem = loadItem(leftItemID)
+  const rightItem = loadItem(rightItemID)
 
-  const rightItem = rightItemID ? endpointForID(rightItemID) ?? itemCache.itemForID(rightItemID) : undefined
-  const rightVersion =
-    rightItem && !IsEndpoint(rightItem)
-      ? [...rightItem.versions].find(version => version.id === rightVersionID)
-      : undefined
+  const loadVersion = (item: typeof leftItem, versionID: number | undefined) =>
+    item && !IsEndpoint(item) ? [...item.versions].find(version => version.id === versionID) : undefined
+  const leftVersion = loadVersion(leftItem, leftVersionID)
+  const rightVersion = loadVersion(rightItem, rightVersionID)
 
   const getCacheItemIDs = (item: typeof leftItem, version: typeof leftVersion) =>
     IsEndpoint(item)
@@ -161,7 +161,17 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
-      setLeftItemID(itemID)
+      if (endpointForID(itemID)) {
+        const endpoint = loadItem(itemID) as Endpoint
+        const compareEndpoint =
+          project.endpoints.find(e => e.urlPath === endpoint.urlPath && e.flavor !== endpoint.flavor) ??
+          project.endpoints.find(e => e.id !== itemID && e.id === leftItemID) ??
+          project.endpoints.find(e => e.urlPath !== endpoint.urlPath) ??
+          endpoint
+        setLeftItemID(compareEndpoint.id)
+      } else {
+        setLeftItemID(itemID)
+      }
       setRightItemID(itemID)
     }
   }
