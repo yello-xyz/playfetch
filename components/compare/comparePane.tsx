@@ -4,8 +4,11 @@ import {
   ActivePrompt,
   ChainVersion,
   IsPromptVersion,
+  LogEntry,
+  PartialRun,
   PromptVersion,
   ResolvedEndpoint,
+  Run,
 } from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
@@ -17,6 +20,7 @@ export const IsEndpoint = (item: ActivePrompt | ActiveChain | ResolvedEndpoint |
 
 export default function ComparePane({
   project,
+  logEntries,
   activeItem,
   activeVersion,
   setItemID,
@@ -27,6 +31,7 @@ export default function ComparePane({
   includeResponses,
 }: {
   project: ActiveProject
+  logEntries: LogEntry[]
   activeItem?: ActivePrompt | ActiveChain | ResolvedEndpoint
   activeVersion?: PromptVersion | ChainVersion
   setItemID: (itemID: number) => void
@@ -36,6 +41,18 @@ export default function ComparePane({
   disabled?: boolean
   includeResponses?: boolean
 }) {
+  const endpointLogEntries = IsEndpoint(activeItem) ? logEntries.filter(log => log.endpointID === activeItem.id) : []
+  const logsAsRuns: Run[] = endpointLogEntries.map((log, index) => ({
+    id: index,
+    timestamp: log.timestamp,
+    output: JSON.stringify(log.output, null, 2),
+    inputs: log.inputs,
+    cost: log.cost,
+    duration: log.duration,
+    failed: !!log.error,
+    labels: [],
+  }))
+
   return (
     <div className='flex flex-col flex-grow w-1/2 h-full'>
       <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
@@ -66,9 +83,13 @@ export default function ComparePane({
           />
         </div>
       )}
-      {activeVersion && !IsEndpoint(activeItem) && includeResponses && (
+      {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
         <div className='overflow-y-auto'>
-          <RunTimeline runs={activeVersion.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+          {activeVersion && !IsEndpoint(activeItem) ? (
+            <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+          ) : (
+            <RunTimeline runs={logsAsRuns} skipHeader />
+          )}
         </div>
       )}
     </div>

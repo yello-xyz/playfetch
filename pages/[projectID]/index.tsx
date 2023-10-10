@@ -116,18 +116,21 @@ export default function Home({
     }
   }
 
+  const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
+  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+
   const selectCompare = () => {
     savePrompt(refreshProject)
     setActiveItem(CompareItem)
     updateVersion(undefined)
+    if (!analytics) {
+      refreshAnalytics()
+    }
     if (!compare) {
       router.push(CompareRoute(activeProject.id), undefined, { shallow: true })
     }
   }
 
-  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
-
-  const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(EndpointsItem)
@@ -225,7 +228,7 @@ export default function Home({
                     )}
                     {activeItem === CompareItem && (
                       <Suspense>
-                        <CompareView project={activeProject} />
+                        <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
                       </Suspense>
                     )}
                     {activeItem === EndpointsItem && (

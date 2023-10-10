@@ -6,6 +6,7 @@ import {
   ChainVersion,
   IsPromptVersion,
   ItemsInProject,
+  LogEntry,
   PromptVersion,
 } from '@/types'
 import ComparePane, { IsEndpoint } from './comparePane'
@@ -91,7 +92,7 @@ const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVe
     tab => getPromptVersionContent(leftVersion, tab) !== getPromptVersionContent(rightVersion, tab)
   )
 
-export default function CompareView({ project }: { project: ActiveProject }) {
+export default function CompareView({ project, logEntries = [] }: { project: ActiveProject; logEntries?: LogEntry[] }) {
   const router = useRouter()
   const { i: itemID, v: versionID, p: previousVersionID } = ParseNumberQuery(router.query)
 
@@ -180,6 +181,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
         <div className={isDiffMode ? 'flex' : 'flex h-full'}>
           <ComparePane
             project={project}
+            logEntries={logEntries}
             activeItem={leftItem}
             activeVersion={leftVersion}
             setItemID={setLeftItemID}
@@ -192,6 +194,7 @@ export default function CompareView({ project }: { project: ActiveProject }) {
           <div className='h-full border-l border-gray-200' />
           <ComparePane
             project={project}
+            logEntries={logEntries}
             activeItem={rightItem}
             activeVersion={rightVersion}
             setItemID={updateRightItemID}
