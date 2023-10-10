@@ -3,6 +3,7 @@ import { ActiveProject, ItemsInProject } from '@/types'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
+import endpointIcon from '@/public/endpoint.svg'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 
@@ -10,6 +11,7 @@ export default function ProjectItemSelector({
   project,
   selectedItemID,
   onSelectItemID,
+  includeEndpoints,
   disabled,
   fixedWidth,
   className = '',
@@ -17,6 +19,7 @@ export default function ProjectItemSelector({
   project: ActiveProject
   selectedItemID?: number
   onSelectItemID: (itemID: number) => void
+  includeEndpoints?: boolean
   disabled?: boolean
   fixedWidth?: boolean
   className?: string
@@ -24,11 +27,17 @@ export default function ProjectItemSelector({
   const setPopup = useGlobalPopup<PropjectItemSelectorPopupProps>()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(PropjectItemSelectorPopup, { project, onSelectItemID }, location)
+    setPopup(PropjectItemSelectorPopup, { project, onSelectItemID, includeEndpoints }, location)
 
-  const items = ItemsInProject(project)
+  const items = [...ItemsInProject(project), ...(includeEndpoints ? project.endpoints : [])]
   const selectedItem = items.find(item => item.id === selectedItemID)
   const isPrompt = selectedItem && project.prompts.some(prompt => prompt.id === selectedItemID)
+
+  const selectedName = selectedItem
+    ? 'name' in selectedItem
+      ? selectedItem.name
+      : `${selectedItem.urlPath} (${selectedItem.flavor})`
+    : undefined
 
   return (
     <PopupButton
@@ -38,7 +47,7 @@ export default function ProjectItemSelector({
       onSetPopup={onSetPopup}>
       {selectedItem && <Icon icon={isPrompt ? promptIcon : chainIcon} />}
       <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>
-        {selectedItem?.name ?? 'Select a Prompt or Chain'}
+        {selectedName ?? (includeEndpoints ? 'Select a Project Item' : 'Select a Prompt or Chain')}
       </span>
     </PopupButton>
   )
@@ -46,11 +55,13 @@ export default function ProjectItemSelector({
 
 type PropjectItemSelectorPopupProps = {
   project: ActiveProject
+  includeEndpoints?: boolean
   onSelectItemID: (itemID: number) => void
 }
 
 function PropjectItemSelectorPopup({
   project,
+  includeEndpoints,
   onSelectItemID,
   withDismiss,
 }: PropjectItemSelectorPopupProps & WithDismiss) {
@@ -75,6 +86,19 @@ function PropjectItemSelectorPopup({
           onClick={withDismiss(() => onSelectItemID(chain.id))}
         />
       ))}
+      {includeEndpoints && project.endpoints.length > 0 && <div className={titleClass}>Endpoints</div>}
+      {includeEndpoints &&
+        project.endpoints
+          .slice()
+          .sort((a, b) => a.urlPath.localeCompare(b.urlPath))
+          .map((endpoint, index) => (
+            <PopupLabelItem
+              key={index}
+              label={`${endpoint.urlPath} (${endpoint.flavor})`}
+              icon={endpointIcon}
+              onClick={withDismiss(() => onSelectItemID(endpoint.id))}
+            />
+          ))}
     </PopupContent>
   )
 }
