@@ -24,7 +24,7 @@ const resolvePrompts = (prompts: Prompts, inputs: PromptInputs, useCamelCase: bo
   ) as Prompts
 
 const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
-  variable ? (inputs[useCamelCase ? ToCamelCase(variable) : variable] = value) : undefined
+  variable ? { ...inputs, [useCamelCase ? ToCamelCase(variable) : variable]: value } : inputs
 
 const runWithTimer = async <T>(operation: Promise<T>) => {
   const startTime = process.hrtime.bigint()
@@ -163,7 +163,7 @@ export default async function runChain(
     if (lastResponse.failed) {
       break
     } else {
-      AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
+      inputs = AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
     }
   }
 
