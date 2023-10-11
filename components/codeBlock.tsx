@@ -11,8 +11,8 @@ export default function CodeBlock({
   scroll?: boolean
   error?: boolean
 }) {
-  const baseClass = 'h-full p-2 text-xs rounded-lg bg-white border border-gray-200'
-  const scrollClass = scroll ? 'overflow-y-auto' : ''
+  const baseClass = 'p-2 text-xs rounded-lg bg-white border border-gray-200'
+  const scrollClass = scroll ? 'h-full overflow-y-auto' : ''
   const textColorClass = error ? 'text-red-300' : 'text-green-300'
   const focusClass = active ? 'focus-within:border-blue-400' : ''
   return (
@@ -21,7 +21,7 @@ export default function CodeBlock({
         <pre className='break-all whitespace-pre-wrap pl-9'>{children}</pre>
         <div className='absolute top-0 left-0'>
           <pre className='w-4 text-right text-gray-400'>
-            {[...Array(100).keys()].map(i => (i + 1).toString()).join('\n')}
+            {[...Array(99).keys()].map(i => (i + 1).toString()).join('\n')}
           </pre>
         </div>
       </div>
