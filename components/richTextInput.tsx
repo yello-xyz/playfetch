@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { KeyboardEvent, Suspense, useState } from 'react'
 
 import dynamic from 'next/dynamic'
 const ContentEditable = dynamic(() => import('./contentEditable'))
@@ -53,12 +53,14 @@ export default function RichTextInput({
   setValue,
   onFocus,
   onBlur,
+  onKeyDown,
 }: {
   className?: string
   value: string
   setValue: (value: string) => void
   onFocus?: () => void
   onBlur?: () => void
+  onKeyDown?: (event: KeyboardEvent) => void
 }) {
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== RichTextFromHTML(htmlValue)) {
@@ -78,6 +80,7 @@ export default function RichTextInput({
         allowedTags={['br', 'div']}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={onKeyDown}
       />
     </Suspense>
   )

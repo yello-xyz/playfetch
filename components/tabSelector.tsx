@@ -1,5 +1,5 @@
 import { StaticImageData } from 'next/image'
-import { ReactNode, useCallback, useState } from 'react'
+import { KeyboardEvent, ReactNode, useCallback, useState } from 'react'
 import Icon from './icon'
 
 export function SingleTabHeader({
@@ -122,7 +122,7 @@ export function EditableHeaderItem({
 }) {
   const inputRef = useCallback((node: any) => node?.select(), [])
 
-  const onKeyDown = (event: any) => {
+  const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
       onSubmit()
     }

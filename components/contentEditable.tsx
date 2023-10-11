@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
+import { KeyboardEvent, RefObject, useEffect, useRef, useState } from 'react'
 import ReactContentEditable from 'react-contenteditable'
 import sanitizeHtml from 'sanitize-html'
 
@@ -8,6 +8,7 @@ export default function ContentEditable({
   onChange,
   onFocus,
   onBlur,
+  onKeyDown,
   onLoadedRef,
   innerRef,
   allowedTags = [],
@@ -20,6 +21,7 @@ export default function ContentEditable({
   onChange: (sanitizedHTMLValue: string) => void
   onFocus?: () => void
   onBlur?: () => void
+  onKeyDown?: (event: KeyboardEvent) => void
   onLoadedRef?: (node: ReactContentEditable | HTMLDivElement | null) => void
   innerRef?: RefObject<HTMLElement>
   allowedTags?: string[]
@@ -48,6 +50,9 @@ export default function ContentEditable({
     }
     if (innerElement && onBlur) {
       innerElement.onblur = onBlur
+    }
+    if (innerElement && onKeyDown) {
+      innerElement.onkeydown = onKeyDown as any
     }
   }, [innerRef, onFocus, onBlur])
 

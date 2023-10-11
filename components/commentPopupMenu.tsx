@@ -6,7 +6,7 @@ import commentIcon from '@/public/comment.svg'
 import commentBadgeIcon from '@/public/commentBadge.svg'
 import enterIcon from '@/public/enter.svg'
 import enterDisabledIcon from '@/public/enterDisabled.svg'
-import { useRef, useState } from 'react'
+import { KeyboardEvent, useRef, useState } from 'react'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import { UserAvatar } from './userSidebarItem'
 import { useLoggedInUser } from '@/src/client/context/userContext'
@@ -138,7 +138,7 @@ function CommentInput({
     }
   }
 
-  const onKeyDown = (event: any) => {
+  const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
       addComment()
     }
