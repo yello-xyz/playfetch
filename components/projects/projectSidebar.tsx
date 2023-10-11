@@ -6,9 +6,11 @@ import compareIcon from '@/public/compare.svg'
 import endpointIcon from '@/public/endpoint.svg'
 import dotsIcon from '@/public/dots.svg'
 import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
-import ProjectItemPopupMenu from './projectItemPopupMenu'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import IconButton from '../iconButton'
+
+import dynamic from 'next/dynamic'
+const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
 
 const Compare = 'compare'
 const Endpoints = 'endpoints'
@@ -125,9 +127,11 @@ function ProjectItemActionButton({
         hoverType={{ background: active ? '' : '' }}
       />
       <div className='absolute shadow-sm -right-1 top-8'>
-        <ProjectItemPopupMenu
-          {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
-        />
+        <Suspense>
+          <ProjectItemPopupMenu
+            {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
+          />
+        </Suspense>
       </div>
     </div>
   )

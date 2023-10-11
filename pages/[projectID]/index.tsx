@@ -23,9 +23,9 @@ import useChain from '@/src/client/hooks/useChain'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
+import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 
 import dynamic from 'next/dynamic'
-import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
