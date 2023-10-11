@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react'
+import { Fragment, KeyboardEvent, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import Icon from './icon'
 import { InputValues, TestConfig } from '@/types'
@@ -30,23 +30,42 @@ export default function TestDataPane({
     ...(inputValues[variable] ?? []),
     ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
   ]
-  const updateInputs = (variable: string, value: string, index: number) =>
+  const updateInputValue = (variable: string, value: string, row: number) =>
     setInputValues({
       ...inputValues,
-      [variable]: [
-        ...paddedColumn(variable, index).slice(0, index),
-        value,
-        ...paddedColumn(variable, index).slice(index + 1),
-      ],
+      [variable]: [...paddedColumn(variable, row).slice(0, row), value, ...paddedColumn(variable, row).slice(row + 1)],
     })
+
+  const isRowEmpty = (row: number) => allVariables.every(variable => (inputValues[variable]?.[row] ?? '').length === 0)
+
   const addInput = () => {
-    persistInputValuesIfNeeded()
-    if (allVariables.some(variable => (inputValues[variable]?.[rowCount - 1] ?? '').length > 0)) {
-      allVariables.forEach(variable => updateInputs(variable, '', rowCount))
+    if (!isRowEmpty(rowCount - 1)) {
+      persistInputValuesIfNeeded()
       setTimeout(() => {
-        const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
-        const lastChild = editables[editables.length - 1] as HTMLElement
-        lastChild?.focus()
+        setInputValues(
+          Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
+        )
+        setTimeout(() => {
+          const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
+          const lastChild = editables[editables.length - 1] as HTMLElement
+          lastChild?.focus()
+        })
+      })
+    }
+  }
+
+  const checkDeleteRow = (event: KeyboardEvent, row: number) => {
+    if (isRowEmpty(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
+      persistInputValuesIfNeeded()
+      setTimeout(() => {
+        setInputValues(
+          Object.fromEntries(
+            Object.entries(inputValues).map(([variable, values]) => [
+              variable,
+              [...values.slice(0, row), ...values.slice(row + 1)],
+            ])
+          )
+        )
       })
     }
   }
@@ -100,12 +119,13 @@ export default function TestDataPane({
               </div>
               {allVariables.map((variable, col) => (
                 <RichTextInput
-                  key={col}
+                  key={`${rowCount}-${col}`}
                   className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
                   value={inputValues[variable]?.[row] ?? ''}
-                  setValue={value => updateInputs(variable, value, row)}
+                  setValue={value => updateInputValue(variable, value, row)}
                   onBlur={() => persistInputValuesIfNeeded()}
                   onFocus={() => setActiveRow(row)}
+                  onKeyDown={event => checkDeleteRow(event, row)}
                 />
               ))}
             </Fragment>
