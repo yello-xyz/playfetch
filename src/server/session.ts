@@ -9,6 +9,7 @@ import {
 import { Session, getServerSession } from 'next-auth'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import { User } from '@/types'
+import logUserRequest, { PageLoadEvent, logUnknownUserRequest } from './analytics'
 
 export function withErrorRoute(handler: NextApiHandler): NextApiHandler {
   return async function (req: NextApiRequest, res: NextApiResponse) {
@@ -66,9 +67,14 @@ type ServerSideSessionHandler = (
   context: GetServerSidePropsContextWithSession
 ) => GetServerSidePropsResult<UnknownRecord> | Promise<GetServerSidePropsResult<UnknownRecord>>
 
-function withServerSideSession(handler: ServerSideSessionHandler): ServerSideHandler {
+export function withServerSideSession(handler: ServerSideSessionHandler): ServerSideHandler {
   return withServerSideError(async context => {
     const session = await getServerSession(context.req, context.res, authOptions(context.req, context.res))
+    if (session?.user?.id) {
+      logUserRequest(context.req, context.res, session.user.id, PageLoadEvent(context.resolvedUrl))
+    } else {
+      logUnknownUserRequest(context.req, context.res, PageLoadEvent(context.resolvedUrl))
+    }
     return handler({ ...context, session })
   })
 }

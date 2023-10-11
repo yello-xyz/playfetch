@@ -20,6 +20,13 @@ export function getClientID(req: Request, res: Response): string {
 type Event = { name: string; params: { [key: string]: string | number } }
 type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'endpoint'
 
+const pageFromURL = (url: string) => {
+  const page = url.split('/').slice(-1)[0].split('?')[0]
+  return page ? Number(page).toString() === page ? 'project' : page : 'home'
+}
+
+export const PageLoadEvent = (url: string): Event => ({ name: 'page_load', params: { page: pageFromURL(url) } })
+
 export const SignupEvent = (provider = 'unknown'): Event => ({ name: 'signup', params: { method: provider } })
 
 export const LoginEvent = (provider = 'unknown'): Event => ({ name: 'login', params: { method: provider } })
