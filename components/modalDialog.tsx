@@ -20,10 +20,8 @@ export default function ModalDialog({
   children?: ReactNode
 }) {
   const confirm = useCallback(() => {
-    if (prompt?.disabled !== true) {
-      prompt?.callback?.()
-      onDismiss()  
-    }
+    prompt?.callback?.()
+    onDismiss()
   }, [prompt, onDismiss])
 
   const dismiss = (event: MouseEvent) => {
@@ -31,13 +29,20 @@ export default function ModalDialog({
     onDismiss()
   }
 
-  const onKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      confirm()
-    } else if (event.key === 'Escape') {
-      onDismiss()
-    }
-  }, [confirm, onDismiss])
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        event.key === 'Enter' &&
+        prompt?.disabled !== true &&
+        (prompt?.destructive !== true || event.altKey || event.metaKey || event.shiftKey || event.ctrlKey)
+      ) {
+        confirm()
+      } else if (event.key === 'Escape') {
+        onDismiss()
+      }
+    },
+    [prompt, confirm, onDismiss]
+  )
 
   useEffect(() => {
     document.addEventListener('keydown', onKeyDown)
