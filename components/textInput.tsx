@@ -10,6 +10,7 @@ export default function TextInput({
   value,
   setValue,
   onKeyDown,
+  onLoad,
 }: {
   type?: HTMLInputTypeAttribute
   id?: string
@@ -19,6 +20,7 @@ export default function TextInput({
   value: string
   setValue?: (value: string) => void
   onKeyDown?: KeyboardEventHandler
+  onLoad?: (node: HTMLInputElement | null) => void
 }) {
   const colorStyle = disabled ? 'text-gray-300 border-gray-200' : 'text-gray-800 border-gray-300'
   return (
@@ -33,6 +35,7 @@ export default function TextInput({
         placeholder={placeholder}
         required
         onKeyDown={onKeyDown}
+        ref={onLoad}
       />
     </LabelWrapper>
   )
