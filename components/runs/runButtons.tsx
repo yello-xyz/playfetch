@@ -19,7 +19,7 @@ const shuffleArray = <T,>(source: T[]): T[] => {
   return array
 }
 
-const SelectInputRows = (
+export const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
   config: TestConfig,
