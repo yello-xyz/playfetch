@@ -118,12 +118,15 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         logResponse(clientID, endpoint, inputs, response, !!cachedResponse, continuationID)
 
-        return useStreaming
-          ? res.end()
-          : res.json({
-              output: response.result,
-              ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
-            })
+        if (useStreaming) {
+          res.end()
+          return
+        } else {
+          return res.json({
+            output: response.result,
+            ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
+          })
+        }
       }
     }
   }
