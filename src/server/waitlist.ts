@@ -10,6 +10,7 @@ const addContactToWaitlist = (name: string, email: string) =>
       Name: { type: 'title', title: [{ type: 'text', text: { content: name } }] },
       Email: { type: 'email', email },
       Tags: { type: 'multi_select', multi_select: [{ name: 'waitlist' }] },
+      Source: { type: 'select', select: { name: 'Waitlist' } },
     },
   })
 
