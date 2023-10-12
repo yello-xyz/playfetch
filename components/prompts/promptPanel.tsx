@@ -14,8 +14,8 @@ import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
   AllModelProviders,
-  FullLabelForModel,
   IconForProvider,
+  LabelForModel,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -136,7 +136,7 @@ export default function PromptPanel({
                 <div className='flex items-center min-w-0 gap-1'>
                   <Icon icon={IconForProvider(ProviderForModel(config.model))} />
                   <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
-                    {FullLabelForModel(config.model, availableProviders)}
+                    {LabelForModel(config.model, availableProviders)}
                   </span>
                 </div>
               )}
