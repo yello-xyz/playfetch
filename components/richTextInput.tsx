@@ -28,6 +28,7 @@ const divsToLines = (html: string) => {
   let flattened = html
   while (flattened !== (flattened = flattenDivs(flattened))) {}
   flattened = flattened
+    .replaceAll('\n', '<br />')
     .replaceAll('<br /></div>', '</div>')
     .replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
   const matches = [...flattened.matchAll(/(.*?)<div>(.*?)<\/div>/g)]
