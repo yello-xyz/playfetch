@@ -85,19 +85,12 @@ const tokenize = (prompt: string) => {
   return tokens
 }
 
-function Comparison({
-  currentContent,
-  compareContent,
-  shouldTruncate,
-  stripSentinels,
-  taggedClassName,
-}: {
-  currentContent: string
-  compareContent?: string
-  shouldTruncate: boolean
+export const TokenizeContent = (
+  currentContent: string,
+  compareContent: string | undefined,
+  maxLength: number,
   stripSentinels: boolean
-  taggedClassName: string
-}) {
+) => {
   const parts = compareContent
     ? simplediff.diff(tokenize(compareContent), tokenize(currentContent))
     : [['=', [currentContent]]]
@@ -132,13 +125,31 @@ function Comparison({
     }
   }
 
+  return maxLength > 0 ? truncate(result, maxLength) : result
+}
+
+function Comparison({
+  currentContent,
+  compareContent,
+  shouldTruncate,
+  stripSentinels,
+  taggedClassName,
+}: {
+  currentContent: string
+  compareContent?: string
+  shouldTruncate: boolean
+  stripSentinels: boolean
+  taggedClassName: string
+}) {
   return (
     <>
-      {(shouldTruncate ? truncate(result, 25) : result).map((diff, index: number) => (
-        <span key={index} className={classNameForDiff(diff, taggedClassName)}>
-          {diff.content}
-        </span>
-      ))}
+      {TokenizeContent(currentContent, compareContent, shouldTruncate ? 25 : 0, stripSentinels).map(
+        (diff, index: number) => (
+          <span key={index} className={classNameForDiff(diff, taggedClassName)}>
+            {diff.content}
+          </span>
+        )
+      )}
     </>
   )
 }
