@@ -41,9 +41,44 @@ testTokenizeContent(
   'hello world'
 )
 testTokenizeContent(
+  'added sentinels',
+  'hello {{world}}',
+  [token('hello '), token('world', '-'), token('{{world}}', '+', true)],
+  'hello world'
+)
+testTokenizeContent(
+  'removed sentinels',
+  'hello world',
+  [token('hello '), token('{{world}}', '-', true), token('world', '+')],
+  'hello {{world}}'
+)
+testTokenizeContent(
+  'changed sentinels',
+  '{{goodbye}} world',
+  [token('{{hello}}', '-', true), token('{{goodbye}}', '+', true), token(' world', '=')],
+  '{{hello}} world'
+)
+testTokenizeContent(
   'added stripped sentinels',
   'hello {{world}}',
-  [token('hello '), token('world', '-'), token('', '+'), token('world', '+', true)],
+  [token('hello '), token('world', '-'), token('world', '+', true)],
   'hello world',
-  0, true
+  0,
+  true
+)
+testTokenizeContent(
+  'removed stripped sentinels',
+  'hello world',
+  [token('hello '), token('world', '-', true), token('world', '+')],
+  'hello {{world}}',
+  0,
+  true
+)
+testTokenizeContent(
+  'changed stripped sentinels',
+  '{{goodbye}} world',
+  [token('hello', '-', true), token('goodbye', '+', true), token(' world', '=')],
+  '{{hello}} world',
+  0,
+  true
 )

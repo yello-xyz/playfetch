@@ -85,13 +85,15 @@ const tokenize = (prompt: string) => {
   return tokens
 }
 
+type State = '=' | '-' | '+'
+
 export const TokenizeContent = (
   currentContent: string,
   compareContent: string | undefined,
   maxLength: number,
   stripSentinels: boolean
 ) => {
-  const parts = compareContent
+  const parts: [State, string[]][] = compareContent
     ? simplediff.diff(tokenize(compareContent), tokenize(currentContent))
     : [['=', [currentContent]]]
 
@@ -125,7 +127,9 @@ export const TokenizeContent = (
     }
   }
 
-  return maxLength > 0 ? truncate(result, maxLength) : result
+  const filtered = result.filter(({ content }) => content.length > 0)
+
+  return maxLength > 0 ? truncate(filtered, maxLength) : filtered
 }
 
 function Comparison({
