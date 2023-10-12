@@ -69,7 +69,7 @@ export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
 export type OpenAIEmbeddingModel = 'text-embedding-ada-002'
 export type EmbeddingModel = OpenAIEmbeddingModel
 
-export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-4'
+export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
 export type GoogleLanguageModel = 'text-bison@001'
 export type CohereLanguageModel = 'command'
