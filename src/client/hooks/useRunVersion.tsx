@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { PartialRun, PromptInputs } from '@/types'
 import { useRefreshActiveItem } from '../context/refreshContext'
 
-export const consumeStream = async (
+export const ConsumeStream = async (
   inputs: PromptInputs[],
   streamReader: StreamReader,
   callback: (runs: PartialRun[]) => void
@@ -52,7 +52,7 @@ export default function useRunVersion(clearLastPartialRunsOnCompletion = false) 
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     const streamReader = await api.runVersion(versionID, inputs)
-    await consumeStream(inputs, streamReader, runs => {
+    await ConsumeStream(inputs, streamReader, runs => {
       setPartialRuns(runs)
       setHighestRunIndex(Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
     })

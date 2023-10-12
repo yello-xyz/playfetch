@@ -22,7 +22,7 @@ type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'co
 
 const pageFromURL = (url: string) => {
   const page = url.split('/').slice(-1)[0].split('?')[0]
-  return page ? Number(page).toString() === page ? 'project' : page : 'home'
+  return page ? (Number(page).toString() === page ? 'project' : page) : 'home'
 }
 
 export const PageLoadEvent = (url: string): Event => ({ name: 'page_load', params: { page: pageFromURL(url) } })

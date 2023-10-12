@@ -26,7 +26,7 @@ export default function PickNameDialog({
     disabled: name.length === 0,
   }
 
-  const onLoad = useCallback((node: HTMLInputElement | null) => { 
+  const onLoad = useCallback((node: HTMLInputElement | null) => {
     node?.focus()
     node?.select()
   }, [])
