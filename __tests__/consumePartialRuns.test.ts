@@ -10,7 +10,7 @@ const testConsumeStream = (
   numberOfInputs = 1
 ) =>
   test(`Test ${testDescription}`, async () => {
-    const inputs = Array.from({ length: numberOfInputs }, () => ({}) as PromptInputs)
+    const inputs = Array.from({ length: numberOfInputs }, () => ({} as PromptInputs))
     const streamReader = new ReadableStream({
       start(controller) {
         for (const data of streamedData) {
