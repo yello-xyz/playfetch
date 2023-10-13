@@ -13,7 +13,7 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
-  AllModelProviders,
+  ModelProviders,
   IconForProvider,
   LabelForModel,
   LabelForPromptKey,
@@ -237,7 +237,7 @@ export function ProviderWarning({
       onClick={() => router.push(ClientRoute.Settings)}>
       <span>
         An API key is required to use this{' '}
-        {(AllModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
+        {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
     </ButtonBanner>
   )

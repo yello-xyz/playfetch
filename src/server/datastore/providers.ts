@@ -19,7 +19,7 @@ import {
   QueryProvider,
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
-import { AllModelProviders } from '@/src/common/providerMetadata'
+import { ModelProviders } from '@/src/common/providerMetadata'
 
 const buildProviderFilter = (userID: number, provider: ModelProvider | QueryProvider) =>
   and([buildFilter('userID', userID), buildFilter('provider', provider)])
@@ -116,7 +116,7 @@ const toAvailableProvider = (data: any): AvailableProvider => {
   return {
     provider: data.provider,
     cost: data.cost,
-    ...(AllModelProviders.includes(data.provider)
+    ...(ModelProviders.includes(data.provider)
       ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
       : { environment: metadata.environment ?? '' }),
   }
@@ -186,7 +186,7 @@ export async function getAvailableProvidersForUser(
   const providerDataToSave = [] as any[]
   for (const availableProviderData of providerData.filter(data => !!data.apiKey?.length)) {
     const availableProvider =
-      reloadCustomModels && AllModelProviders.includes(availableProviderData.provider)
+      reloadCustomModels && ModelProviders.includes(availableProviderData.provider)
         ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
         : toAvailableProvider(availableProviderData)
     availableProviders.push(availableProvider)

@@ -6,8 +6,8 @@ import TextInput from '../textInput'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
 import {
-  AllEmbeddingModels,
-  AllQueryProviders,
+  EmbeddingModels,
+  QueryProviders,
   LabelForProvider,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
@@ -44,7 +44,7 @@ export default function QueryChainNodeEditor({
             className={`${gridConfig} w-full items-center gap-4 p-4 py-4 bg-white border-gray-200 border rounded-lg`}>
             <Label>Vector Store</Label>
             <DropdownMenu value={item.provider} onChange={value => updateProvider(value as QueryProvider)}>
-              {AllQueryProviders.map(provider => (
+              {QueryProviders.map(provider => (
                 <option key={provider} value={provider} disabled={!checkProviderAvailable(provider)}>
                   {LabelForProvider(provider)}
                 </option>
@@ -52,7 +52,7 @@ export default function QueryChainNodeEditor({
             </DropdownMenu>
             <Label>Embedding Model</Label>
             <DropdownMenu value={item.model} onChange={value => updateModel(value as EmbeddingModel)}>
-              {AllEmbeddingModels.map(model => (
+              {EmbeddingModels.map(model => (
                 <option key={model} value={model} disabled={!checkProviderAvailable(ProviderForModel(model))}>
                   {model}
                 </option>

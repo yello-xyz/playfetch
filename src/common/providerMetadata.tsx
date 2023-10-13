@@ -16,11 +16,11 @@ import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 import pineconeIcon from '@/public/pinecone.svg'
 
-export const AllModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
-export const AllQueryProviders: QueryProvider[] = ['pinecone']
+export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
+export const QueryProviders: QueryProvider[] = ['pinecone']
 
-export const AllEmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
-export const AllDefaultLanguageModels: DefaultLanguageModel[] = [
+export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
+export const DefaultLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
   'gpt-4-32k',
   'gpt-3.5-turbo',

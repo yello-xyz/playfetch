@@ -6,7 +6,7 @@ import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
-import { AllEmbeddingModels, AllQueryProviders, ProviderForModel } from '@/src/common/providerMetadata'
+import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
 
 export default function ChainEditor({
   chain,
@@ -42,8 +42,8 @@ export default function ChainEditor({
   promptCache: ChainPromptCache
 }) {
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
-  const provider = AllQueryProviders.find(provider => checkProviderAvailable(provider))
-  const model = AllEmbeddingModels.find(model => checkModelAvailable(model))
+  const provider = QueryProviders.find(provider => checkProviderAvailable(provider))
+  const model = EmbeddingModels.find(model => checkModelAvailable(model))
   const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '', topK: 1 } : undefined
 
   const [activeMenuIndex, setActiveMenuIndex] = useState<number>()

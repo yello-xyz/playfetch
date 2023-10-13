@@ -5,7 +5,7 @@ import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
 import ModelInfoPane from './modelInfoPane'
 import {
-  AllDefaultLanguageModels,
+  DefaultLanguageModels,
   FullLabelForModel,
   IconForProvider,
   LabelForModel,
@@ -57,7 +57,7 @@ function ModelSelectorPopup({
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
   const allModels = [
-    ...AllDefaultLanguageModels,
+    ...DefaultLanguageModels,
     ...availableProviders.flatMap(provider => provider.customModels.map(model => model.id)),
   ]
   return (
