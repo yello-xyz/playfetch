@@ -20,15 +20,17 @@ export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google',
 export const QueryProviders: QueryProvider[] = ['pinecone']
 
 export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
-export const DefaultLanguageModels: DefaultLanguageModel[] = [
+export const PublicLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
-  'gpt-4-32k',
   'gpt-3.5-turbo',
   'gpt-3.5-turbo-16k',
   'claude-instant-1',
   'claude-2',
   'text-bison@001',
   'command',
+]
+export const GatedLanguageModels: DefaultLanguageModel[] = [
+  'gpt-4-32k',
 ]
 
 export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
