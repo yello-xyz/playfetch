@@ -13,9 +13,9 @@ import { ExtractPromptVariables } from '@/src/common/formatting'
 import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
-  AllModelProviders,
-  FullLabelForModel,
+  ModelProviders,
   IconForProvider,
+  LabelForModel,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -25,7 +25,7 @@ import {
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import RunButtons from '../runButtons'
+import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/client/clientRoute'
@@ -43,8 +43,8 @@ export default function PromptPanel({
   setTestConfig,
   initialActiveTab,
   onActiveTabChange,
-  showTestMode,
   loadPendingVersion,
+  isDirty,
   setPreferredHeight,
 }: {
   version: PromptVersion
@@ -55,8 +55,8 @@ export default function PromptPanel({
   setTestConfig?: (testConfig: TestConfig) => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
-  showTestMode?: boolean
   loadPendingVersion?: () => void
+  isDirty?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
@@ -114,7 +114,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isModelAvailable && (
+        {!isModelAvailable && setModifiedVersion && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
         )}
         {showMultipleInputsWarning && (
@@ -138,7 +138,7 @@ export default function PromptPanel({
                 <div className='flex items-center min-w-0 gap-1'>
                   <Icon icon={IconForProvider(ProviderForModel(config.model))} />
                   <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
-                    {FullLabelForModel(config.model, availableProviders)}
+                    {LabelForModel(config.model, availableProviders)}
                   </span>
                 </div>
               )}
@@ -161,7 +161,7 @@ export default function PromptPanel({
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
-          runTitle={version.runs.length > 0 ? 'Run again' : 'Run'}
+          runTitle={version.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
           variables={ExtractPromptVariables(prompts, config)}
           staticVariables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}
@@ -171,7 +171,6 @@ export default function PromptPanel({
           setTestConfig={setTestConfig}
           disabled={!isModelAvailable || prompts.main.trim().length === 0}
           callback={runPrompt}
-          showTestMode={showTestMode}
         />
       )}
     </div>
@@ -240,7 +239,7 @@ export function ProviderWarning({
       onClick={() => router.push(ClientRoute.Settings)}>
       <span>
         An API key is required to use this{' '}
-        {(AllModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
+        {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
     </ButtonBanner>
   )

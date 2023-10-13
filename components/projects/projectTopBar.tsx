@@ -1,13 +1,15 @@
 import { ActiveProject, ActivePrompt, Chain, Workspace } from '@/types'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
-import { useState } from 'react'
-import ProjectPopupMenu from './projectPopupMenu'
+import { Suspense, useState } from 'react'
 import Icon from '../icon'
 import api from '@/src/client/api'
 import InviteDialog from '../inviteDialog'
 import { TopBarButton, UserAvatars } from '../topBarButton'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '../topBar'
+
+import dynamic from 'next/dynamic'
+const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 
 export default function ProjectTopBar({
   workspaces,
@@ -53,16 +55,18 @@ export default function ProjectTopBar({
           <div className='relative flex cursor-pointer' onClick={() => setMenuExpanded(!isMenuExpanded)}>
             <span className='font-medium'>{activeProject.name}</span>
             <Icon icon={chevronIcon} />
-            <div className='absolute right-0 top-8 shadow-sm'>
-              <ProjectPopupMenu
-                project={activeProject}
-                isMenuExpanded={isMenuExpanded}
-                setMenuExpanded={setMenuExpanded}
-                workspaces={workspaces}
-                isSharedProject={!workspace}
-                onRefresh={onRefreshProject}
-                onDeleted={onNavigateBack}
-              />
+            <div className='absolute right-0 shadow-sm top-8'>
+              <Suspense>
+                <ProjectPopupMenu
+                  project={activeProject}
+                  isMenuExpanded={isMenuExpanded}
+                  setMenuExpanded={setMenuExpanded}
+                  workspaces={workspaces}
+                  isSharedProject={!workspace}
+                  onRefresh={onRefreshProject}
+                  onDeleted={onNavigateBack}
+                />
+              </Suspense>
             </div>
           </div>
         </div>

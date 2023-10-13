@@ -53,7 +53,7 @@ export default function PromptView({
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
-  const [runVersion, partialRuns, isRunning] = useRunVersion(true)
+  const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
   const runPrompt = (inputs: PromptInputs[]) => runVersion(savePrompt, inputs)
 
   const testPrompt = async (inputs: Record<string, string>[]) => {
@@ -66,7 +66,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, updateVersion, isDirty] = useModifiedVersion(activeVersion, setModifiedVersion)
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
@@ -126,7 +126,7 @@ export default function PromptView({
           <Allotment.Pane
             minSize={minHeight}
             preferredSize={minHeight}
-            className='z-10 drop-shadow-[0_-4px_14px_rgba(0,0,0,0.03)]'>
+            className='z-10 drop-shadow-[0_-4px_4px_rgba(0,0,0,0.03)]'>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
                 version={activeVersion}
@@ -135,8 +135,8 @@ export default function PromptView({
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
-                showTestMode={activeTab === 'Test data'}
                 loadPendingVersion={loadPendingVersion}
+                isDirty={isDirty}
                 setPreferredHeight={setPromptHeight}
               />
             </div>

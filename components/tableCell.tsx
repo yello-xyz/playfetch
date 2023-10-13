@@ -32,7 +32,7 @@ export default function TableCell({
     ? 'border-b border-r'
     : 'border-b'
   const textClass = header ? 'font-medium text-gray-700' : ''
-  const bgClass = active ? 'bg-blue-25' : semiActive ? 'bg-gray-50' : 'bg-white'
+  const bgClass = active ? 'bg-blue-25' : semiActive ? 'bg-gray-50' : 'bg-white group-hover:bg-gray-50'
   const layoutClass = center ? 'flex justify-center' : ''
   const cursorClass = callback ? 'cursor-pointer' : ''
   const className = `${baseClass} ${borderClass} ${textClass} ${bgClass} ${layoutClass} ${cursorClass}`

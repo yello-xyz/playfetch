@@ -1,5 +1,10 @@
 ## PlayFetch Changelog
 
+### v0.11 - 2023-10-13
+- Improved test row selector
+- Text-based diffing in Compare tool for prompts, chains and endpoints
+- Support for GPT-3.5 16k and GPT-4 32k
+
 ### v0.10 - 2023-10-06
 - Analytics dashboards for endpoint requests
 - Support for fine-tuned models (GPT-3.5)

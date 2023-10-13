@@ -1,6 +1,6 @@
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AllModelProviders, AllQueryProviders } from '@/src/common/providerMetadata'
+import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import ProviderSettingsPane from './providerSettingsPane'
@@ -16,7 +16,7 @@ export default function UserSettingsView() {
 
   const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
 
-  const allModelProviders = AllModelProviders.filter(provider => provider !== DefaultProvider)
+  const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)
 
   return (
@@ -32,7 +32,7 @@ export default function UserSettingsView() {
       <ProviderSettingsPane
         title='Manage Vector Store Credentials'
         description='Provide your API credentials here to enable integration with vector stores.'
-        providers={AllQueryProviders}
+        providers={QueryProviders}
         availableProviders={availableQueryProviders}
         includeEnvironment
         onRefresh={refresh}

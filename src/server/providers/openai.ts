@@ -1,4 +1,4 @@
-import { CustomLanguageModel, OpenAILanguageModel, PromptInputs } from '@/types'
+import { CustomLanguageModel, DefaultLanguageModel, OpenAILanguageModel, PromptInputs } from '@/types'
 import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../promptEngine'
 import { CostForModel } from './integration'
@@ -138,11 +138,23 @@ async function tryCompleteChat(
   }
 }
 
-export async function loadCustomModels(apiKey: string): Promise<string[]> {
+export async function loadExtraModels(
+  apiKey: string
+): Promise<{ customModels: string[]; gatedModels: DefaultLanguageModel[] }> {
   const api = new OpenAI({ apiKey })
   const response = await api.models.list()
+
   const supportedRootModel: OpenAILanguageModel = 'gpt-3.5-turbo'
-  return response.data.filter(model => model.id.startsWith(`ft:${supportedRootModel}`)).map(model => model.id)
+  const customModels = response.data
+    .filter(model => model.id.startsWith(`ft:${supportedRootModel}`))
+    .map(model => model.id)
+
+  const supportedGatedModels: OpenAILanguageModel[] = ['gpt-4-32k']
+  const gatedModels = response.data
+    .filter(model => (supportedGatedModels as string[]).includes(model.id))
+    .map(model => model.id) as DefaultLanguageModel[]
+
+  return { customModels, gatedModels }
 }
 
 export async function createEmbedding(

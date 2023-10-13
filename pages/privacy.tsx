@@ -1,5 +1,8 @@
+import { withServerSideSession } from '@/src/server/session'
 import Link from 'next/link'
 import { ReactNode } from 'react'
+
+export const getServerSideProps = withServerSideSession(() => ({ props: {} }))
 
 export default function Privacy() {
   return (

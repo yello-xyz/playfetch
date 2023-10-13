@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react'
+import { KeyboardEvent, Suspense, useState } from 'react'
 
 import dynamic from 'next/dynamic'
 const ContentEditable = dynamic(() => import('./contentEditable'))
@@ -24,20 +24,22 @@ const flattenDivs = (html: string) =>
     .replace(/<div><div>(.*)<\/div>(.*)<\/div>/g, '<div>$1</div><div>$2</div>')
     .replace(/<div>(.*)<div>(.*)<\/div><\/div>/g, '<div>$1</div><div>$2</div>')
 
-const cleanUpWhitespace = (html: string) =>
-  html.replaceAll('<br />', '').replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
-
 const divsToLines = (html: string) => {
   let flattened = html
   while (flattened !== (flattened = flattenDivs(flattened))) {}
-  flattened = cleanUpWhitespace(flattened)
+  flattened = flattened
+    .replaceAll('\n', '<br />')
+    .replaceAll('<br /></div>', '</div>')
+    .replace(/[\u00A0\u1680​\u180e\u2000-\u2009\u200a​\u200b​\u202f\u205f​\u3000]/g, ' ')
   const matches = [...flattened.matchAll(/(.*?)<div>(.*?)<\/div>/g)]
   const divs = matches.map(match => match[0]).join('')
   const end = flattened.indexOf(divs) + divs.length
   return [
     ...matches.flatMap(match => (match[1].length ? [match[1], match[2]] : [match[2]])),
     ...(end <= flattened.length - 1 ? [flattened.substring(end)] : []),
-  ].join('\n')
+  ]
+    .join('\n')
+    .replaceAll('<br />', '\n')
 }
 
 export const RichTextToHTML = (text: string, print = (s: string) => s) =>
@@ -52,12 +54,14 @@ export default function RichTextInput({
   setValue,
   onFocus,
   onBlur,
+  onKeyDown,
 }: {
   className?: string
   value: string
   setValue: (value: string) => void
   onFocus?: () => void
   onBlur?: () => void
+  onKeyDown?: (event: KeyboardEvent) => void
 }) {
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== RichTextFromHTML(htmlValue)) {
@@ -77,6 +81,7 @@ export default function RichTextInput({
         allowedTags={['br', 'div']}
         onBlur={onBlur}
         onFocus={onFocus}
+        onKeyDown={onKeyDown}
       />
     </Suspense>
   )

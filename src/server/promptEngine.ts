@@ -2,7 +2,7 @@ import { PromptConfig, Prompts, PromptInputs } from '@/types'
 import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
 import { APIKeyForProvider, GetPredictor } from './providers/integration'
 import { DefaultProvider } from '../common/defaultConfig'
-import { AllDefaultLanguageModels, ProviderForModel } from '../common/providerMetadata'
+import { PublicLanguageModels, ProviderForModel } from '../common/providerMetadata'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -51,10 +51,10 @@ export default async function runPromptWithConfig(
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
   const provider = ProviderForModel(config.model)
-  const customModel = (AllDefaultLanguageModels as string[]).includes(config.model) ? undefined : config.model
-  const apiKey = await APIKeyForProvider(userID, provider, customModel)
+  const modelToCheck = (PublicLanguageModels as string[]).includes(config.model) ? undefined : config.model
+  const apiKey = await APIKeyForProvider(userID, provider, modelToCheck)
   if (provider !== DefaultProvider && !apiKey) {
-    const defaultModelsAPIKey = customModel ? await APIKeyForProvider(userID, provider) : apiKey
+    const defaultModelsAPIKey = modelToCheck ? await APIKeyForProvider(userID, provider) : apiKey
     return {
       error: defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key',
       result: undefined,

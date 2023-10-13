@@ -4,7 +4,7 @@ import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formattin
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testDataPane'
-import RunButtons from '../runButtons'
+import RunButtons from '../runs/runButtons'
 import {
   ChainNode,
   InputNode,
@@ -88,7 +88,7 @@ export default function ChainNodeOutput({
       .filter(IsQueryChainItem)
       .every(item => checkProviderAvailable(item.provider) && checkProviderAvailable(ProviderForModel(item.model)))
 
-  const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion()
+  const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion(activeVersion.id)
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
@@ -152,7 +152,6 @@ export default function ChainNodeOutput({
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
-              showTestMode
               disabled={!items.length || !areProvidersAvailable(items)}
               callback={runChain}
             />

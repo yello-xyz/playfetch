@@ -23,9 +23,9 @@ import useChain from '@/src/client/hooks/useChain'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
+import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 
 import dynamic from 'next/dynamic'
-import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
@@ -116,18 +116,21 @@ export default function Home({
     }
   }
 
+  const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
+  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+
   const selectCompare = () => {
     savePrompt(refreshProject)
     setActiveItem(CompareItem)
     updateVersion(undefined)
+    if (!analytics) {
+      refreshAnalytics()
+    }
     if (!compare) {
       router.push(CompareRoute(activeProject.id), undefined, { shallow: true })
     }
   }
 
-  const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
-
-  const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
   const selectEndpoints = () => {
     savePrompt(refreshProject)
     setActiveItem(EndpointsItem)
@@ -225,7 +228,7 @@ export default function Home({
                     )}
                     {activeItem === CompareItem && (
                       <Suspense>
-                        <CompareView project={activeProject} />
+                        <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
                       </Suspense>
                     )}
                     {activeItem === EndpointsItem && (

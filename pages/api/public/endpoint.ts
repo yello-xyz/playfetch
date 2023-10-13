@@ -72,6 +72,8 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
     : null
 }
 
+const stringify = (result: object) => JSON.stringify(result, null, 2)
+
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
   const projectID = Number(projectIDFromPath)
@@ -89,10 +91,12 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const useStreaming = endpoint.useStreaming
         if (useStreaming) {
           res.setHeader('X-Accel-Buffering', 'no')
+        } else {
+          res.setHeader('Content-Type', 'application/json')
         }
 
-        const salt = (value: number) => (value ^ endpoint.id) >>> 0
-        const continuationID = continuation ? salt(Number(continuation)) : undefined
+        const salt = (value: number | bigint) => (BigInt(value) ^ BigInt(endpoint.id))
+        const continuationID = continuation ? Number(salt(BigInt(continuation))) : undefined
         const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
 
@@ -118,12 +122,17 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         logResponse(clientID, endpoint, inputs, response, !!cachedResponse, continuationID)
 
-        return useStreaming
-          ? res.end()
-          : res.json({
+        if (useStreaming) {
+          res.end()
+          return
+        } else {
+          return res.send(
+            stringify({
               output: response.result,
               ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
             })
+          )
+        }
       }
     }
   }

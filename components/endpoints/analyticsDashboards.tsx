@@ -55,7 +55,9 @@ export default function AnalyticsDashboards({
   const incrementalCacheHits = percentIncrement(cacheHits, previousUsage.cacheHits / (previousUsage.requests || 1))
 
   const dayRange = recentUsage.length
-  const toggleDayRange = () => refreshAnalytics(dayRange === 30 ? 7 : 30)
+  const canToggleDayRange =
+    dayRange === 7 || recentUsage.slice(-2 * 7).reduce((acc, usage) => acc + usage.requests, 0) > 0
+  const toggleDayRange = canToggleDayRange ? () => refreshAnalytics(dayRange === 30 ? 7 : 30) : undefined
 
   const formatRequestPayload = (payload: any[]) =>
     `${payload[0].value + payload[1].value} requests${payload[0].value > 0 ? ` (${payload[0].value} failures)` : ''}`
@@ -63,7 +65,7 @@ export default function AnalyticsDashboards({
   const hasDurationPayload = (payload: any[]) => payload[0].value > 0
   const formatDurationPayload = (payload: any[]) => FormatDuration(payload[0].value)
 
-  return totalRequests > 0 ? (
+  return totalRequests > 0 || previousUsage.requests > 0 ? (
     <div className='flex gap-4'>
       <DashboardContainer
         title='Total requests'
@@ -91,20 +93,22 @@ export default function AnalyticsDashboards({
           <Tooltip cursor={false} content={<CustomTooltip formatter={formatCostPayload} />} />
         </AreaChart>
       </DashboardContainer>
-      <DashboardContainer
-        title='Average duration'
-        value={`${minAverageDuration.toFixed(2)}-${maxAverageDuration.toFixed(2)}s`}
-        range={recentUsage.length}
-        callback={toggleDayRange}>
-        <BarChart id='duration' data={data} margin={{ ...margin, left: 10, right: 10 }}>
-          <Bar type='bump' dataKey='duration' fill='#BEA4F6' />
-          <XAxis dataKey='name' hide />
-          <Tooltip
-            cursor={false}
-            content={<CustomTooltip renderIf={hasDurationPayload} formatter={formatDurationPayload} />}
-          />
-        </BarChart>
-      </DashboardContainer>
+      {totalRequests > 0 && (
+        <DashboardContainer
+          title='Average duration'
+          value={`${minAverageDuration.toFixed(2)}-${maxAverageDuration.toFixed(2)}s`}
+          range={recentUsage.length}
+          callback={toggleDayRange}>
+          <BarChart id='duration' data={data} margin={{ ...margin, left: 10, right: 10 }}>
+            <Bar type='bump' dataKey='duration' fill='#BEA4F6' />
+            <XAxis dataKey='name' hide />
+            <Tooltip
+              cursor={false}
+              content={<CustomTooltip renderIf={hasDurationPayload} formatter={formatDurationPayload} />}
+            />
+          </BarChart>
+        </DashboardContainer>
+      )}
       {(cacheHits > 0 || incrementalCacheHits < 0) && (
         <DashboardContainer
           title='Cache hit rate'

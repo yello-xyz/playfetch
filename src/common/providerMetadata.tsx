@@ -16,17 +16,21 @@ import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 import pineconeIcon from '@/public/pinecone.svg'
 
-export const AllModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
-export const AllQueryProviders: QueryProvider[] = ['pinecone']
+export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
+export const QueryProviders: QueryProvider[] = ['pinecone']
 
-export const AllEmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
-export const AllDefaultLanguageModels: DefaultLanguageModel[] = [
+export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
+export const PublicLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
   'gpt-3.5-turbo',
+  'gpt-3.5-turbo-16k',
   'claude-instant-1',
   'claude-2',
   'text-bison@001',
   'command',
+]
+export const GatedLanguageModels: DefaultLanguageModel[] = [
+  'gpt-4-32k',
 ]
 
 export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
@@ -68,7 +72,9 @@ export const SupportedPromptKeysForModel = (model: LanguageModel): (keyof Prompt
 export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is CustomLanguageModel => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
+    case 'gpt-4-32k':
     case 'text-embedding-ada-002':
     case 'claude-instant-1':
     case 'claude-2':
@@ -96,10 +102,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
   return !!customModel && !customModel.enabled
 }
 
-export const IsModelAvailable = (
-  model: LanguageModel | EmbeddingModel,
-  providers: AvailableModelProvider[]
-): boolean =>
+export const IsModelAvailable = (model: LanguageModel | EmbeddingModel, providers: AvailableModelProvider[]): boolean =>
   isCustomModel(model)
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)
@@ -107,7 +110,9 @@ export const IsModelAvailable = (
 export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
+    case 'gpt-4-32k':
       return true
     case 'claude-instant-1':
     case 'claude-2':
@@ -122,7 +127,9 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
 export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
+    case 'gpt-4-32k':
       return true
     case 'claude-instant-1':
     case 'claude-2':
@@ -179,7 +186,9 @@ export const PromptKeyNeedsPreformatted = (promptKey: keyof Prompts) => {
 export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelProvider => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
+    case 'gpt-4-32k':
     case 'text-embedding-ada-002':
       return 'openai'
     case 'claude-instant-1':
@@ -198,8 +207,12 @@ const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5 Turbo'
+    case 'gpt-3.5-turbo-16k':
+      return 'GPT-3.5 Turbo 16k'
     case 'gpt-4':
       return 'GPT-4'
+    case 'gpt-4-32k':
+      return 'GPT-4 32k'
     case 'claude-instant-1':
       return 'Claude Instant'
     case 'claude-2':
@@ -216,8 +229,10 @@ const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]
 const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
       return 'GPT3.5'
     case 'gpt-4':
+    case 'gpt-4-32k':
       return 'GPT4'
     case 'claude-instant-1':
     case 'claude-2':
@@ -244,8 +259,10 @@ export const FullLabelForModel = (model: LanguageModel, providers: AvailableMode
 export const WebsiteLinkForModel = (model: LanguageModel): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
       return 'https://platform.openai.com/docs/models/gpt-3-5'
     case 'gpt-4':
+    case 'gpt-4-32k':
       return 'https://platform.openai.com/docs/models/gpt-4'
     case 'claude-instant-1':
       return 'https://docs.anthropic.com/claude/reference/selecting-a-model'
@@ -265,8 +282,12 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'OpenAI’s most capable and cost effective model in the GPT-3.5 family optimized for chat purposes, but also works well for traditional completions tasks.'
+    case 'gpt-3.5-turbo-16k':
+      return 'This model has the same capabilities as the standard gpt-3.5-turbo model but with 4 times the context.'
     case 'gpt-4':
       return 'GPT-4 from OpenAI has broad general knowledge and domain expertise allowing it to follow complex instructions in natural language and solve difficult problems accurately.'
+    case 'gpt-4-32k':
+      return 'This model has the same capabilities as the standard gpt-4 mode but with 4 times the context.'
     case 'claude-instant-1':
       return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension.'
     case 'claude-2':
@@ -284,8 +305,12 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 4097
+    case 'gpt-3.5-turbo-16k':
+      return 16385
     case 'gpt-4':
       return 8192
+    case 'gpt-4-32k':
+      return 32768
     case 'claude-instant-1':
       return 100000
     case 'claude-2':
@@ -306,8 +331,12 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
       return 0.1
     case 'gpt-3.5-turbo':
       return 1.5
+    case 'gpt-3.5-turbo-16k':
+      return 3
     case 'gpt-4':
       return 30
+    case 'gpt-4-32k':
+      return 60
     case 'claude-instant-1':
       return 1.63
     case 'claude-2':
@@ -328,8 +357,12 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 0.1
     case 'gpt-3.5-turbo':
       return 2
+    case 'gpt-3.5-turbo-16k':
+      return 4
     case 'gpt-4':
       return 60
+    case 'gpt-4-32k':
+      return 120
     case 'claude-instant-1':
       return 5.51
     case 'claude-2':

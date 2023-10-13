@@ -1,59 +1,75 @@
-import { ActiveProject, IsPromptVersion } from '@/types'
+import {
+  ActiveChain,
+  ActiveProject,
+  ActivePrompt,
+  ChainVersion,
+  IsPromptVersion,
+  LogEntry,
+  PromptVersion,
+  ResolvedEndpoint,
+  Run,
+} from '@/types'
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
-import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
-import { useEffect } from 'react'
 import RunTimeline from '../runs/runTimeline'
 import PromptPanel, { PromptTab } from '../prompts/promptPanel'
+import { IsEndpoint } from '@/src/common/activeItem'
 
 export default function ComparePane({
   project,
-  itemID,
+  logEntries,
+  activeItem,
+  activeVersion,
   setItemID,
-  versionID,
   setVersionID,
   activePromptTab,
   setActivePromptTab,
-  itemCache,
   disabled,
+  includeResponses,
 }: {
   project: ActiveProject
-  itemID?: number
+  logEntries: LogEntry[]
+  activeItem?: ActivePrompt | ActiveChain | ResolvedEndpoint
+  activeVersion?: PromptVersion | ChainVersion
   setItemID: (itemID: number) => void
-  versionID?: number
   setVersionID: (versionID: number) => void
   activePromptTab?: PromptTab
   setActivePromptTab: (tab: PromptTab) => void
-  itemCache: ActiveItemCache
   disabled?: boolean
+  includeResponses?: boolean
 }) {
-  const activeItem = itemID ? itemCache.itemForID(itemID) : undefined
-  const activeVersion =
-    activeItem && versionID ? [...activeItem.versions].find(version => version.id === versionID) : undefined
-
-  useEffect(() => {
-    if (activeItem && !activeVersion) {
-      setVersionID(activeItem.versions.slice(-1)[0].id)
-    }
-  }, [activeItem, activeVersion, setVersionID])
+  const endpointLogEntries = IsEndpoint(activeItem) ? logEntries.filter(log => log.endpointID === activeItem.id) : []
+  const logsAsRuns: Run[] = endpointLogEntries.map((log, index) => ({
+    id: index,
+    timestamp: log.timestamp,
+    output: log.error ?? JSON.stringify(log.output, null, 2),
+    inputs: log.inputs,
+    cost: log.cost,
+    duration: log.duration,
+    failed: !!log.error,
+    labels: [],
+  }))
 
   return (
-    <div className='flex flex-col h-full'>
+    <div className='flex flex-col flex-grow w-1/2 h-full'>
       <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
         <ProjectItemSelector
           className='w-full max-w-[240px]'
           project={project}
-          selectedItemID={itemID}
+          selectedItemID={activeItem?.id}
           onSelectItemID={setItemID}
+          includeEndpoints
           disabled={disabled}
         />
-        <VersionSelector
-          className='w-full max-w-[240px]'
-          projectItem={activeItem}
-          selectedVersionID={versionID}
-          onSelectVersionID={setVersionID}
-          disabled={disabled}
-        />
+        {!IsEndpoint(activeItem) && (
+          <VersionSelector
+            className='w-full max-w-[240px]'
+            projectItem={activeItem}
+            selectedVersionID={activeVersion?.id}
+            onSelectVersionID={setVersionID}
+            disabled={disabled}
+          />
+        )}
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
         <div className='p-4 border-b border-gray-200 min-h-[188px]'>
@@ -64,9 +80,13 @@ export default function ComparePane({
           />
         </div>
       )}
-      {activeVersion && (
+      {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
         <div className='overflow-y-auto'>
-          <RunTimeline runs={activeVersion.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+          {activeVersion && !IsEndpoint(activeItem) ? (
+            <RunTimeline runs={activeVersion!.runs} activeItem={activeItem} version={activeVersion} skipHeader />
+          ) : (
+            <RunTimeline runs={logsAsRuns} skipHeader />
+          )}
         </div>
       )}
     </div>

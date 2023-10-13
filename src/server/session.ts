@@ -6,9 +6,10 @@ import {
   NextApiRequest,
   NextApiResponse,
 } from 'next'
-import { getServerSession } from 'next-auth'
+import { Session, getServerSession } from 'next-auth'
 import { authOptions } from '@/pages/api/auth/[...nextauth]'
 import { User } from '@/types'
+import logUserRequest, { PageLoadEvent, logUnknownUserRequest } from './analytics'
 
 export function withErrorRoute(handler: NextApiHandler): NextApiHandler {
   return async function (req: NextApiRequest, res: NextApiResponse) {
@@ -45,6 +46,7 @@ export function withAdminUserRoute(handler: LoggedInAPIHandler): NextApiHandler 
 }
 
 type UnknownRecord = Record<string, unknown>
+type GetServerSidePropsContextWithSession = GetServerSidePropsContext & { session: Session | null }
 type GetServerSidePropsContextWithUser = GetServerSidePropsContext & { user: User }
 type ServerSideHandler = (
   context: GetServerSidePropsContext
@@ -61,15 +63,30 @@ function withServerSideError(handler: ServerSideHandler): ServerSideHandler {
   }
 }
 
+type ServerSideSessionHandler = (
+  context: GetServerSidePropsContextWithSession
+) => GetServerSidePropsResult<UnknownRecord> | Promise<GetServerSidePropsResult<UnknownRecord>>
+
+export function withServerSideSession(handler: ServerSideSessionHandler): ServerSideHandler {
+  return withServerSideError(async context => {
+    const session = await getServerSession(context.req, context.res, authOptions(context.req, context.res))
+    if (session?.user?.id) {
+      logUserRequest(context.req, context.res, session.user.id, PageLoadEvent(context.resolvedUrl))
+    } else {
+      logUnknownUserRequest(context.req, context.res, PageLoadEvent(context.resolvedUrl))
+    }
+    return handler({ ...context, session })
+  })
+}
+
 type LoggedInServerSideHandler = (
   context: GetServerSidePropsContextWithUser
 ) => GetServerSidePropsResult<UnknownRecord> | Promise<GetServerSidePropsResult<UnknownRecord>>
 
 export function withLoggedInSession(handler: LoggedInServerSideHandler): ServerSideHandler {
-  return withServerSideError(async context => {
-    const session = await getServerSession(context.req, context.res, authOptions(context.req, context.res))
-    if (session?.user?.id) {
-      return handler({ ...context, user: session.user })
+  return withServerSideSession(async context => {
+    if (context.session?.user?.id) {
+      return handler({ ...context, user: context.session.user })
     } else {
       return Redirect(ClientRoute.Login)
     }
@@ -87,9 +104,8 @@ export function withAdminSession(handler: LoggedInServerSideHandler) {
 }
 
 export function withLoggedOutSession(handler: ServerSideHandler): ServerSideHandler {
-  return withServerSideError(async context => {
-    const session = await getServerSession(context.req, context.res, authOptions(context.req, context.res))
-    if (session?.user?.id) {
+  return withServerSideSession(async context => {
+    if (context.session?.user?.id) {
       return Redirect(ClientRoute.Home)
     } else {
       return handler(context)

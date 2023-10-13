@@ -13,14 +13,14 @@ import QueryChainNodeEditor from './queryChainNodeEditor'
 
 export default function ChainNodeEditor({
   items,
-  setItems,
+  saveItems,
   activeIndex,
   setDirty,
   promptCache,
   dismiss,
 }: {
   items: ChainItem[]
-  setItems: (items: ChainItem[]) => void
+  saveItems: (items: ChainItem[]) => void
   activeIndex: number
   setDirty: (dirty: boolean) => void
   promptCache: ChainPromptCache
@@ -83,8 +83,8 @@ export default function ChainNodeEditor({
   const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
 
   const saveAndClose = async () => {
-    setItems(updatedItems)
-    await saveAndRefreshPrompt(versionID => setItems(itemsWithUpdate({ ...activeItem, versionID })))
+    saveItems(updatedItems)
+    await saveAndRefreshPrompt(versionID => saveItems(itemsWithUpdate({ ...activeItem, versionID })))
     dismiss()
   }
 

@@ -2,10 +2,10 @@ import { RichTextFromHTML, RichTextToHTML } from '@/components/richTextInput'
 
 const testStripsDivs = (html: string) =>
   test(`Rich Text Editor strips Divs "${html}"`, () => expect(RichTextFromHTML(html).includes('<div>')).toBe(false))
-const testHTML = (html: string) =>
-  test(`Rich Text Editor Preserves HTML "${html}"`, () => expect(RichTextToHTML(RichTextFromHTML(html))).toBe(html))
-const testText = (text: string) =>
-  test(`Rich Text Editor Preserves Text "${text}"`, () => expect(RichTextFromHTML(RichTextToHTML(text))).toBe(text))
+const testHTML = (html: string, expected = html) =>
+  test(`Rich Text Editor Preserves HTML "${html}"`, () => expect(RichTextToHTML(RichTextFromHTML(html))).toBe(expected))
+const testText = (text: string, expected = text) =>
+  test(`Rich Text Editor Preserves Text "${text}"`, () => expect(RichTextFromHTML(RichTextToHTML(text))).toBe(expected))
 
 testStripsDivs('<div></div>')
 testStripsDivs('<div><div></div></div>')
@@ -33,3 +33,10 @@ testHTML('A<div><br /></div><div><br /></div>')
 testHTML('<div><br /></div><div>A<br /></div>')
 testHTML('A<div>B<br /></div>')
 testHTML('A<div>B<br /></div><div>C<br /></div>')
+
+testHTML('A<br />B', 'A<div>B<br /></div>')
+testHTML('<div>A<br />B</div>', 'A<div>B<br /></div>')
+testHTML('<div>A<br /><div>B<br />C</div></div>', 'A<div>B<br /></div><div>C<br /></div>')
+testHTML('A\nB', 'A<div>B<br /></div>')
+testHTML('<div>[\n  {</div>', '[<div>  {<br /></div>')
+testHTML('<div>[\n  {\n</div>', '[<div>  {<br /></div>')

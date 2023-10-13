@@ -119,7 +119,7 @@ function EndpointsGroup({
             </TableCell>
           )
           return (
-            <Fragment key={index}>
+            <div key={index} className='contents group'>
               <SelectableCell center first>
                 <Checkbox checked={endpoint.enabled} disabled onClick={() => setActiveEndpoint(endpoint)} />
               </SelectableCell>
@@ -128,7 +128,7 @@ function EndpointsGroup({
               <SelectableCell>{endpoint.useCache ? 'Yes' : 'No'}</SelectableCell>
               <SelectableCell>{endpoint.useStreaming ? 'Yes' : 'No'}</SelectableCell>
               <SelectableCell last>{endpoint.usage.requests} requests</SelectableCell>
-            </Fragment>
+            </div>
           )
         })}
       </div>

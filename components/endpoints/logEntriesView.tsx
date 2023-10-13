@@ -74,7 +74,7 @@ function LogEntryRow({
   const props = { active: isActive, semiActive: isSameSequenceAsActive, callback: setActive }
 
   return endpoint ? (
-    <>
+    <div className='contents group'>
       <TableCell first {...props}>
         <div className='flex items-center gap-1'>
           <Icon icon={!!endpoint.versionID ? promptIcon : chainIcon} />
@@ -89,6 +89,6 @@ function LogEntryRow({
           {logEntry.error ? 'Error' : 'Success'}
         </div>
       </TableCell>
-    </>
+    </div>
   ) : null
 }

@@ -7,6 +7,9 @@ async function loadURL(req: NextApiRequest, res: NextApiResponse) {
     case 'analyticsDashboard':
       res.redirect(process.env.GOOGLE_ANALYTICS_DASHBOARD_URL ?? '')
       break
+    case 'analyticsReports':
+      res.redirect(process.env.GOOGLE_ANALYTICS_REPORTS_URL ?? '')
+      break
     case 'searchConsole':
       res.redirect(process.env.GOOGLE_SEARCH_CONSOLE_URL ?? '')
       break

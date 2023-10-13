@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import ModalDialog from './modalDialog'
 import TextInput from './textInput'
 
@@ -26,9 +26,14 @@ export default function PickNameDialog({
     disabled: name.length === 0,
   }
 
+  const onLoad = useCallback((node: HTMLInputElement | null) => {
+    node?.focus()
+    node?.select()
+  }, [])
+
   return (
     <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <TextInput id='name' label={label} value={name} setValue={setName} />
+      <TextInput onLoad={onLoad} id='name' label={label} value={name} setValue={setName} />
     </ModalDialog>
   )
 }

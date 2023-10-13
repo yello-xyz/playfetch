@@ -1,9 +1,9 @@
 import { RefObject, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import dynamic from 'next/dynamic'
-import { CodeBlock } from '../endpoints/examplePane'
 import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import CodeBlock from '../codeBlock'
 const ContentEditable = dynamic(() => import('../contentEditable'))
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'

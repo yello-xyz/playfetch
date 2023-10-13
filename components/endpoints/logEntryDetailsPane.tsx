@@ -6,9 +6,9 @@ import Icon from '../icon'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import Label from '../label'
-import { CodeBlock } from './examplePane'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { SingleTabHeader } from '../tabSelector'
+import CodeBlock from '../codeBlock'
 
 export default function LogEntryDetailsPane({
   logEntry,
@@ -36,9 +36,9 @@ export default function LogEntryDetailsPane({
           {parent && (
             <>
               {ProjectItemIsChain(parent) ? 'Chain' : 'Prompt'}
-              <div className='flex items-center justify-end gap-1'>
+              <div className='flex items-center justify-end gap-1 whitespace-nowrap'>
                 <Icon icon={ProjectItemIsChain(parent) ? chainIcon : promptIcon} />
-                <span className='flex-1 overflow-hidden whitespace-nowrap text-ellipsis'>{parent.name}</span>
+                <span className='flex-shrink overflow-hidden whitespace-nowrap text-ellipsis'>{parent.name}</span>
                 {versionIndex >= 0 && ` - Version ${versionIndex + 1}`}
               </div>
             </>

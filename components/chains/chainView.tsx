@@ -115,7 +115,10 @@ export default function ChainView({
     setNodeDirty(false)
   }
 
-  const updateItems = (items: ChainItem[]) => setNodes([InputNode, ...items, OutputNode])
+  const updateItems = (items: ChainItem[]) => {
+    setNodes([InputNode, ...items, OutputNode])
+    saveItems(items)
+  }
 
   const activateOutputNode = () => {
     setNodes(nodes => {
@@ -204,7 +207,7 @@ export default function ChainView({
             ) : (
               <ChainNodeEditor
                 items={items}
-                setItems={updateItems}
+                saveItems={updateItems}
                 activeIndex={activeNodeIndex - 1}
                 setDirty={setNodeDirty}
                 promptCache={promptCache}

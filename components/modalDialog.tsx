@@ -1,4 +1,4 @@
-import { MouseEvent, ReactNode } from 'react'
+import { MouseEvent, ReactNode, useCallback, useEffect } from 'react'
 import Button from './button'
 
 export type DialogPrompt = {
@@ -19,15 +19,35 @@ export default function ModalDialog({
   onDismiss: () => void
   children?: ReactNode
 }) {
-  const confirm = () => {
+  const confirm = useCallback(() => {
     prompt?.callback?.()
     onDismiss()
-  }
+  }, [prompt, onDismiss])
 
   const dismiss = (event: MouseEvent) => {
     event.stopPropagation()
     onDismiss()
   }
+
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        event.key === 'Enter' &&
+        prompt?.disabled !== true &&
+        (prompt?.destructive !== true || event.altKey || event.metaKey || event.shiftKey || event.ctrlKey)
+      ) {
+        confirm()
+      } else if (event.key === 'Escape') {
+        onDismiss()
+      }
+    },
+    [prompt, confirm, onDismiss]
+  )
+
+  useEffect(() => {
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [onKeyDown])
 
   return prompt ? (
     <div

@@ -10,31 +10,53 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AvailableModelProvider, AvailableProvider, CustomModel, ModelProvider, QueryProvider } from '@/types'
-import { CustomModelsForProvider } from '../providers/integration'
-import { AllModelProviders } from '@/src/common/providerMetadata'
+import {
+  AvailableModelProvider,
+  AvailableProvider,
+  CustomModel,
+  DefaultLanguageModel,
+  ModelProvider,
+  QueryProvider,
+} from '@/types'
+import { ExtraModelsForProvider } from '../providers/integration'
+import { ModelProviders } from '@/src/common/providerMetadata'
 
 const buildProviderFilter = (userID: number, provider: ModelProvider | QueryProvider) =>
   and([buildFilter('userID', userID), buildFilter('provider', provider)])
 const getProviderData = (userID: number, provider: ModelProvider | QueryProvider) =>
   getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider))
 
+type ProviderMetadata = {
+  customModels?: CustomModel[]
+  gatedModels?: DefaultLanguageModel[]
+  environment?: string
+}
+
 export async function migrateProviders(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
   for (const providerData of allProviders) {
+    const metadata: ProviderMetadata = postMerge ? JSON.parse(providerData.metadata) : {}
+    if (!postMerge) {
+      const customModels = JSON.parse(providerData.customModels) as CustomModel[]
+      if (customModels.length > 0) {
+        metadata.customModels = customModels
+      }
+      const environment = providerData.environment as string | null
+      if (environment !== null) {
+        metadata.environment = environment
+      }
+    }
     await getDatastore().save(
       toProviderData(
         providerData.userID,
         providerData.provider,
         providerData.apiKey,
-        providerData.environment ?? null,
+        metadata,
         providerData.cost,
-        providerData.customModels ? JSON.parse(providerData.customModels) : [],
-        getID(providerData)
+        getID(providerData),
+        postMerge ? undefined : providerData.environment,
+        postMerge ? undefined : JSON.parse(providerData.customModels)
       )
     )
   }
@@ -43,25 +65,31 @@ export async function migrateProviders(postMerge: boolean) {
 export async function getProviderCredentials(
   userID: number,
   provider: ModelProvider | QueryProvider,
-  customModel?: string
+  modelToCheck?: string
 ): Promise<string[]> {
   const providerData = await getProviderData(userID, provider)
-  const customModels = providerData ? (JSON.parse(providerData.customModels) as CustomModel[]) : []
-  if (customModel && !customModels.find(model => model.id === customModel && model.enabled)) {
+  const metadata = providerData ? (JSON.parse(providerData.metadata) as ProviderMetadata) : {}
+  const customModels = metadata.customModels ?? []
+  const gatedModels = metadata.gatedModels ?? []
+  if (
+    modelToCheck &&
+    !(gatedModels as string[]).includes(modelToCheck) &&
+    !customModels.find(model => model.id === modelToCheck && model.enabled)
+  ) {
     return []
   }
   return [
     ...(providerData?.apiKey ? [providerData.apiKey] : []),
-    ...(providerData?.environment ? [providerData.environment] : []),
+    ...(metadata.environment ? [metadata.environment] : []),
   ]
 }
 
 export async function getProviderKey(
   userID: number,
   provider: ModelProvider | QueryProvider,
-  customModel?: string
+  modelToCheck?: string
 ): Promise<string | null> {
-  const [apiKey] = await getProviderCredentials(userID, provider, customModel)
+  const [apiKey] = await getProviderCredentials(userID, provider, modelToCheck)
   return apiKey ?? null
 }
 
@@ -69,23 +97,35 @@ const toProviderData = (
   userID: number,
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
-  environment: string | null,
+  metadata: ProviderMetadata,
   cost: number,
-  customModels: CustomModel[],
-  providerID?: number
+  providerID?: number,
+  environment?: string | null,
+  customModels?: CustomModel[]
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
-  data: { userID, provider, apiKey, environment, cost, customModels: JSON.stringify(customModels) },
-  excludeFromIndexes: ['apiKey', 'environment', 'customModels'],
+  data: {
+    userID,
+    provider,
+    apiKey,
+    metadata: JSON.stringify(metadata),
+    cost,
+    environment,
+    customModels: customModels ? JSON.stringify(customModels) : customModels,
+  },
+  excludeFromIndexes: ['apiKey', 'metadata', 'environment', 'customModels'], // TODO remove environment/customModels after push
 })
 
-const toAvailableProvider = (data: any): AvailableProvider => ({
-  provider: data.provider,
-  cost: data.cost,
-  ...(AllModelProviders.includes(data.provider)
-    ? { customModels: JSON.parse(data.customModels) }
-    : { environment: data.environment }),
-})
+const toAvailableProvider = (data: any): AvailableProvider => {
+  const metadata = JSON.parse(data.metadata) as ProviderMetadata
+  return {
+    provider: data.provider,
+    cost: data.cost,
+    ...(ModelProviders.includes(data.provider)
+      ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
+      : { environment: metadata.environment ?? '' }),
+  }
+}
 
 export async function incrementProviderCostForUser(
   userID: number,
@@ -100,9 +140,8 @@ export async function incrementProviderCostForUser(
           userID,
           provider,
           providerData.apiKey,
-          providerData.environment,
+          JSON.parse(providerData.metadata),
           providerData.cost + cost,
-          JSON.parse(providerData.customModels),
           getID(providerData)
         )
       )
@@ -114,11 +153,11 @@ export async function saveProviderKey(
   userID: number,
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
-  environment: string | null
+  environment: string | undefined
 ) {
   const providerData = await getProviderData(userID, provider)
   const providerID = providerData ? getID(providerData) : undefined
-  await getDatastore().save(toProviderData(userID, provider, apiKey, environment, 0, [], providerID))
+  await getDatastore().save(toProviderData(userID, provider, apiKey, { environment }, 0, providerID))
 }
 
 export async function saveProviderModel(
@@ -131,21 +170,13 @@ export async function saveProviderModel(
 ) {
   const providerData = await getProviderData(userID, provider)
   if (providerData) {
-    const customModels = JSON.parse(providerData.customModels) as CustomModel[]
-    const newCustomModels = [
-      ...customModels.filter(model => model.id !== modelID),
+    const metadata = JSON.parse(providerData.metadata) as ProviderMetadata
+    metadata.customModels = [
+      ...(metadata.customModels ?? []).filter(model => model.id !== modelID),
       { id: modelID, name, description, enabled },
     ]
     await getDatastore().save(
-      toProviderData(
-        userID,
-        provider,
-        providerData.apiKey,
-        providerData.environment,
-        providerData.cost,
-        newCustomModels,
-        getID(providerData)
-      )
+      toProviderData(userID, provider, providerData.apiKey, metadata, providerData.cost, getID(providerData))
     )
   }
 }
@@ -160,7 +191,7 @@ export async function getAvailableProvidersForUser(
   const providerDataToSave = [] as any[]
   for (const availableProviderData of providerData.filter(data => !!data.apiKey?.length)) {
     const availableProvider =
-      reloadCustomModels && AllModelProviders.includes(availableProviderData.provider)
+      reloadCustomModels && ModelProviders.includes(availableProviderData.provider)
         ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
         : toAvailableProvider(availableProviderData)
     availableProviders.push(availableProvider)
@@ -170,28 +201,32 @@ export async function getAvailableProvidersForUser(
   }
 
   if (!availableProviders.find(key => key.provider === DefaultProvider)) {
-    availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [] })
+    availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [], gatedModels: [] })
   }
 
   return availableProviders
 }
 
 async function loadProviderWithCustomModels(availableProviderData: any, providerDataToSave: any[]) {
-  const previousCustomModels = JSON.parse(availableProviderData.customModels) as CustomModel[]
-  const currentCustomModels = await CustomModelsForProvider(
+  const previousMetadata = JSON.parse(availableProviderData.metadata) as ProviderMetadata
+  const previousCustomModels = previousMetadata.customModels ?? []
+  const previousGatedModels = previousMetadata.gatedModels ?? []
+  const { customModels: currentCustomModels, gatedModels: currentGatedModels } = await ExtraModelsForProvider(
     availableProviderData.provider as ModelProvider,
     availableProviderData.apiKey
   )
   const filteredCustomModels = previousCustomModels.filter(model => currentCustomModels.includes(model.id))
-  if (filteredCustomModels.length < previousCustomModels.length) {
+  const differentGatedModels =
+    currentGatedModels.some(model => !previousGatedModels.includes(model)) ||
+    previousGatedModels.some(model => !currentGatedModels.includes(model))
+  if (filteredCustomModels.length < previousCustomModels.length || differentGatedModels) {
     providerDataToSave.push(
       toProviderData(
         availableProviderData.userID,
         availableProviderData.provider,
         availableProviderData.apiKey,
-        availableProviderData.environment,
+        { ...previousMetadata, customModels: filteredCustomModels, gatedModels: currentGatedModels },
         availableProviderData.cost,
-        filteredCustomModels,
         getID(availableProviderData)
       )
     )
@@ -204,5 +239,6 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
     ...filteredCustomModels,
     ...additionalModels.map(model => ({ id: model, name: '', description: '', enabled: false })),
   ]
+  availableProvider.gatedModels = currentGatedModels
   return availableProvider
 }

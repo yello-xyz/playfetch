@@ -26,9 +26,11 @@ export default function PromptSelectorPopup({
           onClick={withDismiss(() => selectPrompt(prompt.id))}
         />
       ))}
-      <div className='pt-1 pb-1 min-w-[200px]'>
-        <div className='h-px bg-gray-200' />
-      </div>
+      {prompts.length > 0 && (
+        <div className='pt-1 pb-1 min-w-[200px]'>
+          <div className='h-px bg-gray-200' />
+        </div>
+      )}
       <PopupLabelItem label='Create new Prompt' icon={addIcon} onClick={withDismiss(addPrompt)} />
     </PopupContent>
   )
