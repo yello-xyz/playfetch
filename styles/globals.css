@@ -9,11 +9,9 @@
 @tailwind utilities;
 
 #nprogress .bar {
-  background: #FF4DE2;
+  background: #ff4de2;
 }
 
 #nprogress .peg {
-  box-shadow:
-    0 0 10px #FF4DE2,
-    0 0 5px #FF4DE2;
+  box-shadow: 0 0 10px #ff4de2, 0 0 5px #ff4de2;
 }
