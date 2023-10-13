@@ -72,6 +72,8 @@ const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promi
     : null
 }
 
+const stringify = (result: object) => JSON.stringify(result, null, 2)
+
 async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const { projectID: projectIDFromPath, endpoint: endpointName } = ParseQuery(req.query)
   const projectID = Number(projectIDFromPath)
@@ -89,6 +91,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const useStreaming = endpoint.useStreaming
         if (useStreaming) {
           res.setHeader('X-Accel-Buffering', 'no')
+        } else {
+          res.setHeader('Content-Type', 'application/json')
         }
 
         const salt = (value: number) => (value ^ endpoint.id) >>> 0
@@ -122,10 +126,12 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.end()
           return
         } else {
-          return res.json({
-            output: response.result,
-            ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
-          })
+          return res.send(
+            stringify({
+              output: response.result,
+              ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
+            })
+          )
         }
       }
     }
