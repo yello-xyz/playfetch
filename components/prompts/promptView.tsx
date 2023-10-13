@@ -53,7 +53,7 @@ export default function PromptView({
 
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
-  const [runVersion, partialRuns, isRunning] = useRunVersion(true)
+  const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
   const runPrompt = (inputs: PromptInputs[]) => runVersion(savePrompt, inputs)
 
   const testPrompt = async (inputs: Record<string, string>[]) => {

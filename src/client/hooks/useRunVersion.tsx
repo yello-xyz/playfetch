@@ -40,17 +40,27 @@ export const ConsumeStream = async (
   }
 }
 
-export default function useRunVersion(clearLastPartialRunsOnCompletion = false) {
+export default function useRunVersion(activeVersionID: number, clearLastPartialRunsOnCompletion = false) {
   const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
   const [highestRunIndex, setHighestRunIndex] = useState(-1)
+
+  const [runningVersionID, setRunningVersionID] = useState(activeVersionID)
+  const [lastActiveVersionID, setLastActiveVersionID] = useState(activeVersionID)
+  if (activeVersionID !== lastActiveVersionID && activeVersionID !== runningVersionID) {
+    setLastActiveVersionID(activeVersionID)
+    setRunning(false)
+    setPartialRuns([])
+    setHighestRunIndex(-1)
+  }
 
   const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[]) => {
     setRunning(true)
     setPartialRuns([])
     setHighestRunIndex(-1)
     const versionID = await getVersion()
+    setRunningVersionID(versionID)
     const streamReader = await api.runVersion(versionID, inputs)
     await ConsumeStream(inputs, streamReader, runs => {
       setPartialRuns(runs)

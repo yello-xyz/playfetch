@@ -88,7 +88,7 @@ export default function ChainNodeOutput({
       .filter(IsQueryChainItem)
       .every(item => checkProviderAvailable(item.provider) && checkProviderAvailable(ProviderForModel(item.model)))
 
-  const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion()
+  const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion(activeVersion.id)
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
   const runChain = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
