@@ -101,6 +101,7 @@ export type AvailableModelProvider = {
   provider: ModelProvider
   cost: number
   customModels: CustomModel[]
+  gatedModels: DefaultLanguageModel[]
 }
 export type AvailableQueryProvider = {
   provider: QueryProvider

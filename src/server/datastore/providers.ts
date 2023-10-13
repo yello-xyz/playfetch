@@ -10,8 +10,15 @@ import {
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { AvailableModelProvider, AvailableProvider, CustomModel, ModelProvider, QueryProvider } from '@/types'
-import { CustomModelsForProvider } from '../providers/integration'
+import {
+  AvailableModelProvider,
+  AvailableProvider,
+  CustomModel,
+  DefaultLanguageModel,
+  ModelProvider,
+  QueryProvider,
+} from '@/types'
+import { ExtraModelsForProvider } from '../providers/integration'
 import { AllModelProviders } from '@/src/common/providerMetadata'
 
 const buildProviderFilter = (userID: number, provider: ModelProvider | QueryProvider) =>
@@ -21,6 +28,7 @@ const getProviderData = (userID: number, provider: ModelProvider | QueryProvider
 
 type ProviderMetadata = {
   customModels?: CustomModel[]
+  gatedModels?: DefaultLanguageModel[]
   environment?: string
 }
 
@@ -109,7 +117,7 @@ const toAvailableProvider = (data: any): AvailableProvider => {
     provider: data.provider,
     cost: data.cost,
     ...(AllModelProviders.includes(data.provider)
-      ? { customModels: metadata.customModels ?? [] }
+      ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
       : { environment: metadata.environment ?? '' }),
   }
 }
@@ -188,7 +196,7 @@ export async function getAvailableProvidersForUser(
   }
 
   if (!availableProviders.find(key => key.provider === DefaultProvider)) {
-    availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [] })
+    availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [], gatedModels: [] })
   }
 
   return availableProviders
@@ -197,18 +205,22 @@ export async function getAvailableProvidersForUser(
 async function loadProviderWithCustomModels(availableProviderData: any, providerDataToSave: any[]) {
   const previousMetadata = JSON.parse(availableProviderData.metadata) as ProviderMetadata
   const previousCustomModels = previousMetadata.customModels ?? []
-  const currentCustomModels = await CustomModelsForProvider(
+  const previousGatedModels = previousMetadata.gatedModels ?? []
+  const { customModels: currentCustomModels, gatedModels: currentGatedModels } = await ExtraModelsForProvider(
     availableProviderData.provider as ModelProvider,
     availableProviderData.apiKey
   )
   const filteredCustomModels = previousCustomModels.filter(model => currentCustomModels.includes(model.id))
-  if (filteredCustomModels.length < previousCustomModels.length) {
+  const differentGatedModels =
+    currentGatedModels.some(model => !previousGatedModels.includes(model)) ||
+    previousGatedModels.some(model => !currentGatedModels.includes(model))
+  if (filteredCustomModels.length < previousCustomModels.length || differentGatedModels) {
     providerDataToSave.push(
       toProviderData(
         availableProviderData.userID,
         availableProviderData.provider,
         availableProviderData.apiKey,
-        { ...previousMetadata, customModels: filteredCustomModels },
+        { ...previousMetadata, customModels: filteredCustomModels, gatedModels: currentGatedModels },
         availableProviderData.cost,
         getID(availableProviderData)
       )
@@ -222,5 +234,6 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
     ...filteredCustomModels,
     ...additionalModels.map(model => ({ id: model, name: '', description: '', enabled: false })),
   ]
+  availableProvider.gatedModels = currentGatedModels
   return availableProvider
 }

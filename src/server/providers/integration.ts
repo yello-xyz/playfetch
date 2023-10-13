@@ -3,6 +3,7 @@ import {
   AnthropicLanguageModel,
   CohereLanguageModel,
   CustomLanguageModel,
+  DefaultLanguageModel,
   GoogleLanguageModel,
   LanguageModel,
   ModelProvider,
@@ -10,7 +11,7 @@ import {
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
 import { getProviderKey } from '../datastore/providers'
-import openai, { createEmbedding, loadCustomModels } from './openai'
+import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
@@ -32,14 +33,17 @@ export const APIKeyForProvider = (userID: number, provider: ModelProvider, custo
   }
 }
 
-export const CustomModelsForProvider = (provider: ModelProvider, apiKey: string): Promise<string[]> => {
+export const ExtraModelsForProvider = (
+  provider: ModelProvider,
+  apiKey: string
+): Promise<{ customModels: string[]; gatedModels: DefaultLanguageModel[] }> => {
   switch (provider) {
     case 'google':
     case 'anthropic':
     case 'cohere':
-      return Promise.resolve([])
+      return Promise.resolve({ customModels: [], gatedModels: [] })
     case 'openai':
-      return loadCustomModels(apiKey)
+      return loadExtraModels(apiKey)
   }
 }
 
