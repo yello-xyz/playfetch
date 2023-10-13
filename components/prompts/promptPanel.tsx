@@ -44,6 +44,7 @@ export default function PromptPanel({
   initialActiveTab,
   onActiveTabChange,
   loadPendingVersion,
+  isDirty,
   setPreferredHeight,
 }: {
   version: PromptVersion
@@ -55,6 +56,7 @@ export default function PromptPanel({
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
   loadPendingVersion?: () => void
+  isDirty?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
@@ -159,7 +161,7 @@ export default function PromptPanel({
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
-          runTitle={version.runs.length > 0 ? 'Run again' : 'Run'}
+          runTitle={version.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
           variables={ExtractPromptVariables(prompts, config)}
           staticVariables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}

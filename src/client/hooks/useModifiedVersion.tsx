@@ -1,5 +1,6 @@
-import { ChainVersion, PromptVersion } from '@/types'
+import { ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import useInitialState from './useInitialState'
+import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 
 export default function useModifiedVersion<Version extends PromptVersion | ChainVersion>(
   activeVersion: Version,
@@ -11,5 +12,10 @@ export default function useModifiedVersion<Version extends PromptVersion | Chain
     setModifiedVersion(version)
   }
 
-  return [currentVersion, updateVersion] as const
+  const isDirty = IsPromptVersion(activeVersion)
+    ? !PromptVersionsAreEqual(activeVersion, currentVersion as PromptVersion)
+    : !ChainVersionsAreEqual(activeVersion, currentVersion as ChainVersion)
+
+
+  return [currentVersion, updateVersion, isDirty] as const
 }

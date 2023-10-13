@@ -66,7 +66,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, updateVersion, isDirty] = useModifiedVersion(activeVersion, setModifiedVersion)
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
@@ -136,6 +136,7 @@ export default function PromptView({
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
                 loadPendingVersion={loadPendingVersion}
+                isDirty={isDirty}
                 setPreferredHeight={setPromptHeight}
               />
             </div>
