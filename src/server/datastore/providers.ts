@@ -33,30 +33,20 @@ type ProviderMetadata = {
 }
 
 export async function migrateProviders(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
   for (const providerData of allProviders) {
-    const metadata: ProviderMetadata = postMerge ? JSON.parse(providerData.metadata) : {}
-    if (!postMerge) {
-      const customModels = JSON.parse(providerData.customModels) as CustomModel[]
-      if (customModels.length > 0) {
-        metadata.customModels = customModels
-      }
-      const environment = providerData.environment as string | null
-      if (environment !== null) {
-        metadata.environment = environment
-      }
-    }
     await getDatastore().save(
       toProviderData(
         providerData.userID,
         providerData.provider,
         providerData.apiKey,
-        metadata,
+        JSON.parse(providerData.metadata),
         providerData.cost,
-        getID(providerData),
-        postMerge ? undefined : providerData.environment,
-        postMerge ? undefined : JSON.parse(providerData.customModels)
+        getID(providerData)
       )
     )
   }
@@ -99,9 +89,7 @@ const toProviderData = (
   apiKey: string | null,
   metadata: ProviderMetadata,
   cost: number,
-  providerID?: number,
-  environment?: string | null,
-  customModels?: CustomModel[]
+  providerID?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
@@ -109,11 +97,9 @@ const toProviderData = (
     provider,
     apiKey,
     metadata: JSON.stringify(metadata),
-    cost,
-    environment,
-    customModels: customModels ? JSON.stringify(customModels) : customModels,
+    cost
   },
-  excludeFromIndexes: ['apiKey', 'metadata', 'environment', 'customModels'], // TODO remove environment/customModels after push
+  excludeFromIndexes: ['apiKey', 'metadata'],
 })
 
 const toAvailableProvider = (data: any): AvailableProvider => {
