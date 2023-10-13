@@ -65,12 +65,17 @@ export async function migrateProviders(postMerge: boolean) {
 export async function getProviderCredentials(
   userID: number,
   provider: ModelProvider | QueryProvider,
-  customModel?: string
+  modelToCheck?: string
 ): Promise<string[]> {
   const providerData = await getProviderData(userID, provider)
   const metadata = providerData ? (JSON.parse(providerData.metadata) as ProviderMetadata) : {}
   const customModels = metadata.customModels ?? []
-  if (customModel && !customModels.find(model => model.id === customModel && model.enabled)) {
+  const gatedModels = metadata.gatedModels ?? []
+  if (
+    modelToCheck &&
+    !(gatedModels as string[]).includes(modelToCheck) &&
+    !customModels.find(model => model.id === modelToCheck && model.enabled)
+  ) {
     return []
   }
   return [
@@ -82,9 +87,9 @@ export async function getProviderCredentials(
 export async function getProviderKey(
   userID: number,
   provider: ModelProvider | QueryProvider,
-  customModel?: string
+  modelToCheck?: string
 ): Promise<string | null> {
-  const [apiKey] = await getProviderCredentials(userID, provider, customModel)
+  const [apiKey] = await getProviderCredentials(userID, provider, modelToCheck)
   return apiKey ?? null
 }
 

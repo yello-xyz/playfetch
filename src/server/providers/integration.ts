@@ -22,14 +22,14 @@ const costForTokens = (content: string, pricePerMillionTokens: number) =>
 export const CostForModel = (model: LanguageModel, input: string, output = '') =>
   costForTokens(input, InputPriceForModel(model)) + costForTokens(output, OutputPriceForModel(model))
 
-export const APIKeyForProvider = (userID: number, provider: ModelProvider, customModel?: string) => {
+export const APIKeyForProvider = (userID: number, provider: ModelProvider, modelToCheck?: string) => {
   switch (provider) {
     case 'google':
       return Promise.resolve(null)
     case 'openai':
     case 'anthropic':
     case 'cohere':
-      return getProviderKey(userID, provider, customModel)
+      return getProviderKey(userID, provider, modelToCheck)
   }
 }
 

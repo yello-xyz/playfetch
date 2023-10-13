@@ -51,10 +51,10 @@ export default async function runPromptWithConfig(
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
   const provider = ProviderForModel(config.model)
-  const customModel = (DefaultLanguageModels as string[]).includes(config.model) ? undefined : config.model
-  const apiKey = await APIKeyForProvider(userID, provider, customModel)
+  const modelToCheck = (DefaultLanguageModels as string[]).includes(config.model) ? undefined : config.model
+  const apiKey = await APIKeyForProvider(userID, provider, modelToCheck)
   if (provider !== DefaultProvider && !apiKey) {
-    const defaultModelsAPIKey = customModel ? await APIKeyForProvider(userID, provider) : apiKey
+    const defaultModelsAPIKey = modelToCheck ? await APIKeyForProvider(userID, provider) : apiKey
     return {
       error: defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key',
       result: undefined,
