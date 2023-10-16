@@ -24,7 +24,7 @@ import {
   revokeUserAccess,
 } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
-import { toUser } from './users'
+import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess } from './workspaces'
@@ -364,10 +364,15 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
 
   const analytics = await getAnalyticsForProject(0, projectID, true)
 
+  const projectUserIDs = await getAccessingUserIDs(projectID, 'project')
+  const workspaceUserIDs = await getAccessingUserIDs(workspaceID, 'workspace')
+  const users = await getActiveUsers([...new Set([...projectUserIDs, ...workspaceUserIDs])])
+
   return {
     promptCount,
     chainCount,
     endpointCount,
     analytics,
+    users,
   }
 }

@@ -22,7 +22,7 @@ export default function RecentProjects({
         {recentProjects.length > 0 && (
           <>
             <Label>Active Projects (data since {FormatDate(startDate)})</Label>
-            <div className={`${gridConfig} w-full bg-white items-center border-gray-200 border rounded-lg`}>
+            <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
               <TableCell />
               <TableCell>
                 <Label>Name</Label>

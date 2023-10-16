@@ -42,7 +42,9 @@ export const getServerSideProps = withAdminSession(async ({ query }) => {
     ? await getMetricsForProject(recentProject.id, recentProject.workspaceID)
     : null
 
-  return { props: { initialActiveItem, initialUserMetrics, initialProjectMetrics, activeUsers, waitlistUsers, recentProjects } }
+  return {
+    props: { initialActiveItem, initialUserMetrics, initialProjectMetrics, activeUsers, waitlistUsers, recentProjects },
+  }
 })
 
 export default function Admin({
@@ -90,7 +92,7 @@ export default function Admin({
   if (currentQueryState !== query) {
     setUserMetrics(null)
     setProjectMetrics(null)
-    const activeUser = activeUsers.find(user => user.id === itemID)
+    const activeUser = [...activeUsers, ...(projectMetrics?.users ?? [])].find(user => user.id === itemID)
     const recentProject = recentProjects.find(project => project.id === itemID)
     if (activeUser) {
       setActiveItem(activeUser)
@@ -128,7 +130,12 @@ export default function Admin({
               <ActiveUserMetrics user={activeItem} metrics={userMetrics} onDismiss={() => router.back()} />
             )}
             {projectMetrics && activeItemIsProject(activeItem) && (
-              <RecentProjectMetrics project={activeItem} metrics={projectMetrics} onDismiss={() => router.back()} />
+              <RecentProjectMetrics
+                project={activeItem}
+                metrics={projectMetrics}
+                onSelectUser={selectItem}
+                onDismiss={() => router.back()}
+              />
             )}
           </div>
         </div>

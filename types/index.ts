@@ -312,4 +312,5 @@ export type ProjectMetrics = {
   chainCount: number
   endpointCount: number
   analytics: Analytics
+  users: ActiveUser[]
 }

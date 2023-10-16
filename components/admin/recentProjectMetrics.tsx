@@ -4,14 +4,17 @@ import Icon from '../icon'
 import backIcon from '@/public/back.svg'
 import AnalyticsDashboards from '../endpoints/analyticsDashboards'
 import { FormatDate } from '@/src/common/formatting'
+import ActiveUsers from './activeUsers'
 
 export default function RecentProjectMetrics({
   project,
   metrics,
+  onSelectUser,
   onDismiss,
 }: {
   project: RecentProject
   metrics: ProjectMetrics
+  onSelectUser: (userID: number) => void
   onDismiss: () => void
 }) {
   return (
@@ -21,10 +24,10 @@ export default function RecentProjectMetrics({
           <Icon icon={backIcon} />
           Back to Active Projects
         </Label>
-        <div className='flex flex-col w-full gap-4 p-4 bg-white border border-gray-200 rounded-lg'>
+        <div className='flex flex-col gap-4 p-4 bg-white border border-gray-200 rounded-lg'>
           <div className='flex items-center gap-2'>
             <Label>
-              {project.name} ← {project.workspace} ({project.creator})
+              {project.name} • {project.workspace} ({project.creator})
             </Label>
           </div>
           <Label>Last Modified: {FormatDate(project.timestamp, true, true)}</Label>
@@ -34,9 +37,10 @@ export default function RecentProjectMetrics({
             <Label>Number of endpoints: {metrics.endpointCount}</Label>
           </div>
         </div>
-        <div className='w-full'>
+        <div className='w-full '>
           <AnalyticsDashboards analytics={metrics.analytics} />
         </div>
+        <ActiveUsers activeUsers={metrics.users} onSelectUser={onSelectUser} embedded />
       </div>
     </>
   )

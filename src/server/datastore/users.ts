@@ -115,20 +115,24 @@ export async function getUsersWithoutAccess() {
   return usersData.map(toUser)
 }
 
-export async function getActiveUsers(limit = 100): Promise<ActiveUser[]> {
+export async function getActiveUsers(userIDs?: number[], limit = 100): Promise<ActiveUser[]> {
   const recentVersions = await getRecentVersions(limit)
   const startTimestamp = recentVersions.slice(-1)[0].timestamp
 
   const recentComments = await getRecentComments(startTimestamp, limit)
   const recentEndpoints = await getRecentEndpoints(startTimestamp, limit)
 
-  const usersData = await getKeyedEntities(Entity.USER, [
-    ...new Set([
-      ...recentVersions.map(version => version.userID),
-      ...recentComments.map(comment => comment.userID),
-      ...recentEndpoints.map(endpoint => endpoint.userID),
-    ]),
-  ])
+  const usersData = await getKeyedEntities(
+    Entity.USER,
+    userIDs ?? [
+      ...new Set([
+        ...recentVersions.map(version => version.userID),
+        ...recentComments.map(comment => comment.userID),
+        ...recentEndpoints.map(endpoint => endpoint.userID),
+      ]),
+    ]
+  )
+
   return usersData
     .map(usersData => toActiveUser(usersData, recentVersions, recentComments, recentEndpoints))
     .sort((a, b) => b.lastActive - a.lastActive)
@@ -183,7 +187,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   const createdVersionCount = await getEntityCount(Entity.VERSION, 'userID', userID)
   const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
   const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
-  
+
   return {
     createdWorkspaceCount,
     workspaceAccessCount,
