@@ -68,7 +68,7 @@ export default function ChainEditor({
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
-      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
+      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto bg-[url("/dotPattern.png")] bg-[length:18px_18px]'>
         <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
         {nodes.map((_, index, nodes) => (
           <ChainNodeBox

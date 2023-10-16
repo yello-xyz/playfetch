@@ -97,7 +97,7 @@ const toProviderData = (
     provider,
     apiKey,
     metadata: JSON.stringify(metadata),
-    cost
+    cost,
   },
   excludeFromIndexes: ['apiKey', 'metadata'],
 })

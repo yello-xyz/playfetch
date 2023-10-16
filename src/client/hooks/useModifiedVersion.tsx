@@ -16,6 +16,5 @@ export default function useModifiedVersion<Version extends PromptVersion | Chain
     ? !PromptVersionsAreEqual(activeVersion, currentVersion as PromptVersion)
     : !ChainVersionsAreEqual(activeVersion, currentVersion as ChainVersion)
 
-
   return [currentVersion, updateVersion, isDirty] as const
 }
