@@ -5,7 +5,13 @@ import { FormatDate } from '@/src/common/formatting'
 import Icon from '../icon'
 import fileIcon from '@/public/file.svg'
 
-export default function RecentProjects({ recentProjects }: { recentProjects: RecentProject[] }) {
+export default function RecentProjects({
+  recentProjects,
+  onSelectProject,
+}: {
+  recentProjects: RecentProject[]
+  onSelectProject: (projectID: number) => void
+}) {
   const gridConfig = 'grid grid-cols-[40px_minmax(0,1fr)_200px_200px_200px]'
 
   const startDate = Math.min(...recentProjects.map(project => project.timestamp))
@@ -17,7 +23,7 @@ export default function RecentProjects({ recentProjects }: { recentProjects: Rec
           <>
             <Label>Active Projects (data since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} w-full bg-white items-center border-gray-200 border rounded-lg`}>
-            <TableCell/>
+              <TableCell />
               <TableCell>
                 <Label>Name</Label>
               </TableCell>
@@ -31,8 +37,13 @@ export default function RecentProjects({ recentProjects }: { recentProjects: Rec
                 <Label>Workspace Creator</Label>
               </TableCell>
               {recentProjects.map(project => (
-                <div key={project.id} className='cursor-pointer contents group'>
-                  <TableCell><Icon icon={fileIcon} /></TableCell>
+                <div
+                  key={project.id}
+                  className='cursor-pointer contents group'
+                  onClick={() => onSelectProject(project.id)}>
+                  <TableCell>
+                    <Icon icon={fileIcon} />
+                  </TableCell>
                   <TableCell>{project.name}</TableCell>
                   <TableCell>{FormatDate(project.timestamp, false)}</TableCell>
                   <TableCell>{project.workspace}</TableCell>

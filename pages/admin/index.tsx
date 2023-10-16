@@ -1,5 +1,5 @@
 import { withAdminSession } from '@/src/server/session'
-import { ActiveUser, RecentProject, User, UserMetrics } from '@/types'
+import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics } from '@/types'
 import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '@/src/server/datastore/users'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
@@ -10,49 +10,59 @@ import { useState } from 'react'
 import ActiveUsers from '@/components/admin/activeUsers'
 import ActiveUserMetrics from '@/components/admin/activeUserMetrics'
 import api from '@/src/client/admin/api'
-import { getRecentProjects } from '@/src/server/datastore/projects'
+import { getMetricsForProject, getRecentProjects } from '@/src/server/datastore/projects'
 import RecentProjects from '@/components/admin/recentProjects'
+import RecentProjectMetrics from '@/components/admin/recentProjectMetrics'
 
 const WaitlistItem = 'waitlist'
 const ActiveUsersItem = 'activeUsers'
 const RecentProjectsItem = 'recentProjects'
-type ActiveItem = typeof WaitlistItem | typeof ActiveUsersItem | ActiveUser | typeof RecentProjectsItem
+type ActiveItem = typeof WaitlistItem | typeof ActiveUsersItem | typeof RecentProjectsItem | ActiveUser | RecentProject
+const activeItemIsUser = (item: ActiveItem): item is ActiveUser => typeof item === 'object' && 'fullName' in item
+const activeItemIsProject = (item: ActiveItem): item is RecentProject => typeof item === 'object' && 'name' in item
 
 export const getServerSideProps = withAdminSession(async ({ query }) => {
-  const { w: waitlist, u: userID, r: projects } = ParseNumberQuery(query)
+  const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(query)
 
   const activeUsers = await getActiveUsers()
   const waitlistUsers = await getUsersWithoutAccess()
   const recentProjects = await getRecentProjects()
 
+  const activeUser = activeUsers.find(user => user.id === itemID)
+  const recentProject = recentProjects.find(project => project.id === itemID)
+
   const initialActiveItem: ActiveItem = waitlist
     ? WaitlistItem
     : projects
     ? RecentProjectsItem
-    : userID
-    ? { ...activeUsers.find(user => user.id === userID)! }
-    : ActiveUsersItem
+    : activeUser ?? recentProject ?? ActiveUsersItem
 
-  const initialUserMetrics = userID ? await getMetricsForUser(userID) : null
+  const initialUserMetrics = activeUser ? await getMetricsForUser(activeUser.id) : null
+  const initialProjectMetrics = recentProject
+    ? await getMetricsForProject(recentProject.id, recentProject.workspaceID)
+    : null
 
-  return { props: { initialActiveItem, initialUserMetrics, activeUsers, waitlistUsers, recentProjects } }
+  return { props: { initialActiveItem, initialUserMetrics, initialProjectMetrics, activeUsers, waitlistUsers, recentProjects } }
 })
 
 export default function Admin({
   initialActiveItem,
   initialUserMetrics,
+  initialProjectMetrics,
   activeUsers,
-  waitlistUsers,
   recentProjects,
+  waitlistUsers,
 }: {
   initialActiveItem: ActiveItem
   initialUserMetrics: UserMetrics | null
+  initialProjectMetrics: ProjectMetrics | null
   activeUsers: ActiveUser[]
   waitlistUsers: User[]
   recentProjects: RecentProject[]
 }) {
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const [userMetrics, setUserMetrics] = useState(initialUserMetrics)
+  const [projectMetrics, setProjectMetrics] = useState(initialProjectMetrics)
 
   const router = useRouter()
 
@@ -62,9 +72,9 @@ export default function Admin({
         item === WaitlistItem
           ? '?w=1'
           : item === RecentProjectsItem
-          ? '?r=1'
+          ? '?p=1'
           : item !== ActiveUsersItem
-          ? `?u=${item}`
+          ? `?i=${item}`
           : ''
       }`,
       undefined,
@@ -74,14 +84,20 @@ export default function Admin({
     )
   }
 
-  const { w: waitlist, u: userID, r: projects } = ParseNumberQuery(router.query)
-  const currentQueryState = waitlist ? WaitlistItem : projects ? RecentProjectsItem : userID ?? ActiveUsersItem
+  const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(router.query)
+  const currentQueryState = waitlist ? WaitlistItem : projects ? RecentProjectsItem : itemID ?? ActiveUsersItem
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     setUserMetrics(null)
-    if (userID) {
-      setActiveItem(activeUsers.find(user => user.id === userID)!)
-      api.getUserMetrics(userID).then(setUserMetrics)
+    setProjectMetrics(null)
+    const activeUser = activeUsers.find(user => user.id === itemID)
+    const recentProject = recentProjects.find(project => project.id === itemID)
+    if (activeUser) {
+      setActiveItem(activeUser)
+      api.getUserMetrics(activeUser.id).then(setUserMetrics)
+    } else if (recentProject) {
+      setActiveItem(recentProject)
+      api.getProjectMetrics(recentProject.id, recentProject.workspaceID).then(setProjectMetrics)
     } else {
       setActiveItem(waitlist ? WaitlistItem : projects ? RecentProjectsItem : ActiveUsersItem)
     }
@@ -103,15 +119,17 @@ export default function Admin({
             onSelectRecentProjects={() => selectItem(RecentProjectsItem)}
           />
           <div className='flex flex-col flex-1 bg-gray-25'>
-            {activeItem === WaitlistItem ? (
-              <Waitlist initialWaitlistUsers={waitlistUsers} />
-            ) : activeItem === ActiveUsersItem ? (
-              <ActiveUsers activeUsers={activeUsers} onSelectUser={selectItem} />
-            ) : activeItem === RecentProjectsItem ? (
-              <RecentProjects recentProjects={recentProjects} />
-            ) : userMetrics ? (
+            {activeItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
+            {activeItem === ActiveUsersItem && <ActiveUsers activeUsers={activeUsers} onSelectUser={selectItem} />}
+            {activeItem === RecentProjectsItem && (
+              <RecentProjects recentProjects={recentProjects} onSelectProject={selectItem} />
+            )}
+            {userMetrics && activeItemIsUser(activeItem) && (
               <ActiveUserMetrics user={activeItem} metrics={userMetrics} onDismiss={() => router.back()} />
-            ) : null}
+            )}
+            {projectMetrics && activeItemIsProject(activeItem) && (
+              <RecentProjectMetrics project={activeItem} metrics={projectMetrics} onDismiss={() => router.back()} />
+            )}
           </div>
         </div>
       </main>

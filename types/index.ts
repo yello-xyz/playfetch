@@ -306,3 +306,9 @@ export type RecentProject = Project & {
   workspace: string
   creator: string
 }
+
+export type ProjectMetrics = {
+  promptCount: number
+  chainCount: number
+  endpointCount: number
+}

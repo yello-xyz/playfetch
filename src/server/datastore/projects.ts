@@ -5,6 +5,7 @@ import {
   buildKey,
   getDatastore,
   getEntities,
+  getEntityCount,
   getEntityKeys,
   getID,
   getKeyedEntities,
@@ -13,7 +14,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, Project, RecentProject, User } from '@/types'
+import { ActiveProject, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import {
   getAccessibleObjectIDs,
@@ -84,11 +85,6 @@ async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: numbe
   const workspaceUserIDs = await getAccessingUserIDs(workspaceID, 'workspace')
   const users = await getKeyedEntities(Entity.USER, [...new Set([...projectUserIDs, ...workspaceUserIDs])])
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
-}
-
-export async function getProjectUsers(projectID: number): Promise<User[]> {
-  const projectData = await getTrustedProjectData(projectID)
-  return getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 }
 
 async function loadEndpoints(projectID: number, apiKeyDev: string) {
@@ -348,18 +344,26 @@ export async function getRecentProjects(limit = 100): Promise<RecentProject[]> {
     .sort((a, b) => b.timestamp - a.timestamp)
 }
 
-const toRecentProject = (
-  projectData: any,
-  workspacesData: any[],
-  usersData: any[]
-): RecentProject => {
+const toRecentProject = (projectData: any, workspacesData: any[], usersData: any[]): RecentProject => {
   const project = toProject(projectData, 0)
-  
+
   const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
   const workspace = workspaceData.name
-  
+
   const userData = usersData.find(user => getID(user) === workspaceData.userID)
   const creator = userData.fullName
 
   return { ...project, workspace, creator }
+}
+
+export async function getMetricsForProject(projectID: number, workspaceID: number): Promise<ProjectMetrics> {
+  const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', projectID)
+  const chainCount = await getEntityCount(Entity.CHAIN, 'projectID', projectID)
+  const endpointCount = await getEntityCount(Entity.ENDPOINT, 'projectID', projectID)
+
+  return {
+    promptCount,
+    chainCount,
+    endpointCount,
+  }
 }
