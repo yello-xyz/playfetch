@@ -4,14 +4,47 @@ import { getUsersWithoutAccess } from '@/src/server/datastore/users'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
 import Waitlist from '@/components/admin/waitlist'
+import { ParseNumberQuery } from '@/src/client/clientRoute'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import ActiveUsers from '@/components/admin/activeUsers'
 
-export const getServerSideProps = withAdminSession(async () => {
+type ActiveItem = 'waitlist' | 'activeUsers'
+
+export const getServerSideProps = withAdminSession(async ({ query }) => {
+  const { w: waitlist } = ParseNumberQuery(query)
+
+  const initialActiveItem = waitlist ? 'waitlist' : 'activeUsers'
+
   const initialWaitlistUsers = await getUsersWithoutAccess()
 
-  return { props: { initialWaitlistUsers } }
+  return { props: { initialActiveItem, initialWaitlistUsers } }
 })
 
-export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: User[] }) {
+export default function Admin({
+  initialActiveItem,
+  initialWaitlistUsers,
+}: {
+  initialActiveItem: ActiveItem
+  initialWaitlistUsers: User[]
+}) {
+  const [activeItem, setActiveItem] = useState(initialActiveItem)
+
+  const router = useRouter()
+
+  const { w: waitlist } = ParseNumberQuery(router.query)
+  const currentQueryState = waitlist
+  const [query, setQuery] = useState(currentQueryState)
+  if (currentQueryState !== query) {
+    setActiveItem(waitlist ? 'waitlist' : 'activeUsers')
+    setQuery(currentQueryState)
+  }
+
+  const selectItem = (item: ActiveItem) => {
+    setActiveItem(item)
+    router.push(`/admin${item === 'waitlist' ? '?w=1' : ''}`, undefined, { shallow: true })
+  }
+
   return (
     <>
       <main className='flex flex-col h-screen text-sm'>
@@ -21,9 +54,13 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
           <TopBarAccessoryItem />
         </TopBar>
         <div className='flex items-stretch flex-1 overflow-hidden'>
-          <AdminSidebar />
+          <AdminSidebar
+            onSelectWaitlist={() => selectItem('waitlist')}
+            onSelectActiveUsers={() => selectItem('activeUsers')}
+          />
           <div className='flex flex-col flex-1 bg-gray-25'>
-            <Waitlist initialWaitlistUsers={initialWaitlistUsers} />
+            {activeItem === 'activeUsers' && <ActiveUsers activeUsers={initialWaitlistUsers} />}
+            {activeItem === 'waitlist' && <Waitlist initialWaitlistUsers={initialWaitlistUsers} />}
           </div>
         </div>
       </main>
