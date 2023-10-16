@@ -5,6 +5,8 @@ import backIcon from '@/public/back.svg'
 import AnalyticsDashboards from '../endpoints/analyticsDashboards'
 import { FormatDate } from '@/src/common/formatting'
 import ActiveUsers from './activeUsers'
+import fileIcon from '@/public/file.svg'
+import folderIcon from '@/public/folder.svg'
 
 export default function RecentProjectMetrics({
   project,
@@ -25,9 +27,12 @@ export default function RecentProjectMetrics({
           Back to Active Projects
         </Label>
         <div className='flex flex-col gap-4 p-4 bg-white border border-gray-200 rounded-lg'>
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center'>
+            <Icon icon={fileIcon} />
+            <Label>{project.name} • </Label>
+            <Icon icon={folderIcon} />
             <Label>
-              {project.name} • {project.workspace} ({project.creator})
+              {project.workspace} ({project.creator})
             </Label>
           </div>
           <Label>Last Modified: {FormatDate(project.timestamp, true, true)}</Label>

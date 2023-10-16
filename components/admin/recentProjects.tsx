@@ -4,6 +4,8 @@ import Label from '@/components/label'
 import { FormatDate } from '@/src/common/formatting'
 import Icon from '../icon'
 import fileIcon from '@/public/file.svg'
+import folderIcon from '@/public/folder.svg'
+import userIcon from '@/public/user.svg'
 
 export default function RecentProjects({
   recentProjects,
@@ -12,7 +14,7 @@ export default function RecentProjects({
   recentProjects: RecentProject[]
   onSelectProject: (projectID: number) => void
 }) {
-  const gridConfig = 'grid grid-cols-[40px_minmax(0,1fr)_200px_200px_200px]'
+  const gridConfig = 'grid grid-cols-[100px_minmax(0,1fr)_200px_200px]'
 
   const startDate = Math.min(...recentProjects.map(project => project.timestamp))
 
@@ -23,12 +25,11 @@ export default function RecentProjects({
           <>
             <Label>Active Projects (data since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
-              <TableCell />
-              <TableCell>
-                <Label>Name</Label>
+            <TableCell>
+                <Label>Last Edited</Label>
               </TableCell>
               <TableCell>
-                <Label>Last Edited</Label>
+                <Label>Project</Label>
               </TableCell>
               <TableCell>
                 <Label>Workspace</Label>
@@ -41,13 +42,19 @@ export default function RecentProjects({
                   key={project.id}
                   className='cursor-pointer contents group'
                   onClick={() => onSelectProject(project.id)}>
+                  <TableCell>{FormatDate(project.timestamp, false)}</TableCell>
                   <TableCell>
                     <Icon icon={fileIcon} />
+                    {project.name}
                   </TableCell>
-                  <TableCell>{project.name}</TableCell>
-                  <TableCell>{FormatDate(project.timestamp, false)}</TableCell>
-                  <TableCell>{project.workspace}</TableCell>
-                  <TableCell>{project.creator}</TableCell>
+                  <TableCell>
+                    <Icon icon={folderIcon} />
+                    {project.workspace}
+                  </TableCell>
+                  <TableCell>
+                    <Icon icon={userIcon} />
+                    {project.creator}
+                  </TableCell>
                 </div>
               ))}
             </div>
@@ -58,7 +65,7 @@ export default function RecentProjects({
   )
 }
 
-const TableCell = ({ children }: { children?: ReactNode }) => (
+const TableCell = ({ children }: { children: ReactNode }) => (
   <div className='flex items-center h-10 px-2 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50'>
     {children}
   </div>
