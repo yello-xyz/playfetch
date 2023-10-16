@@ -17,14 +17,30 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
             <Label>Active Users (since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg`}>
               <TableCell />
-              <TableCell><Label>Email</Label></TableCell>
-              <TableCell><Label>Name</Label></TableCell>
-              <TableCell center><Label>Last Active</Label></TableCell>
-              <TableCell center><Label># Comments</Label></TableCell>
-              <TableCell center><Label># Versions</Label></TableCell>
-              <TableCell center><Label># Prompts</Label></TableCell>
-              <TableCell center><Label># Chains</Label></TableCell>
-              <TableCell center><Label># Endpoints</Label></TableCell>
+              <TableCell>
+                <Label>Email</Label>
+              </TableCell>
+              <TableCell>
+                <Label>Name</Label>
+              </TableCell>
+              <TableCell center>
+                <Label>Last Active</Label>
+              </TableCell>
+              <TableCell center>
+                <Label># Comments</Label>
+              </TableCell>
+              <TableCell center>
+                <Label># Versions</Label>
+              </TableCell>
+              <TableCell center>
+                <Label># Prompts</Label>
+              </TableCell>
+              <TableCell center>
+                <Label># Chains</Label>
+              </TableCell>
+              <TableCell center>
+                <Label># Endpoints</Label>
+              </TableCell>
               {activeUsers.map(user => (
                 <Fragment key={user.id}>
                   <UserAvatar user={user} />

@@ -142,7 +142,8 @@ export const IsRawPromptVersion = (version: RawPromptVersion | RawChainVersion):
 
 export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
 export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
-export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion => IsRawPromptVersion(version)
+export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion =>
+  IsRawPromptVersion(version)
 
 export type PromptInputs = { [name: string]: string }
 

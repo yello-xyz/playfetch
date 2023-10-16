@@ -1,5 +1,5 @@
 import { AdminRoute } from '@/src/client/clientRoute'
-import { FeedbackSection, SidebarButton, SidebarSection } from '../sidebar'
+import { SidebarButton, SidebarSection } from '../sidebar'
 import linkIcon from '@/public/chain.svg'
 import userIcon from '@/public/user.svg'
 
@@ -27,10 +27,9 @@ export default function AdminSidebar({
           <SidebarButton title='Analytics Reports' icon={linkIcon} link={AdminRoute.AnalyticsReports} target='_blank' />
           <SidebarButton title='Search Console' icon={linkIcon} link={AdminRoute.SearchConsole} target='_blank' />
         </SidebarSection>
-        <SidebarSection className='flex-1' title='Debug'>
+        <SidebarSection title='Debug'>
           <SidebarButton title='Server Logs' icon={linkIcon} link={AdminRoute.ServerLogs} target='_blank' />
         </SidebarSection>
-        <FeedbackSection />
       </div>
     </>
   )
