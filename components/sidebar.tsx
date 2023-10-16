@@ -16,7 +16,7 @@ export default function Sidebar({ children }: { children: ReactNode }) {
 export function FeedbackSection() {
   return (
     <SidebarSection>
-      <SidebarButton title='Feedback' icon={feedbackIcon} link='mailto:hello@playfetch.ai?subject=PlayFetch Feedback' />
+      <SidebarButton title='Support' icon={feedbackIcon} link='mailto:hello@playfetch.ai?subject=PlayFetch Feedback' />
     </SidebarSection>
   )
 }
