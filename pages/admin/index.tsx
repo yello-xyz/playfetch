@@ -42,20 +42,12 @@ export default function Admin({
 
   const router = useRouter()
 
-  const selectItem = (item: ActiveItem) => {
-    setActiveItem(item)
+  const selectItem = (item: typeof WaitlistItem | typeof ActiveUsersItem | number) => {
     router.push(
-      `/admin${item === WaitlistItem ? '?w=1' : item !== ActiveUsersItem ? `?u=${item.id}` : ''}`,
+      `/admin${item === WaitlistItem ? '?w=1' : item !== ActiveUsersItem ? `?u=${item}` : ''}`,
       undefined,
       { shallow: true }
     )
-  }
-
-  const selectUser = (userID: number) => {
-    const user = activeUsers.find(user => user.id === userID)
-    if (user) {
-      selectItem(user)
-    }
   }
 
   const { w: waitlist, u: userID } = ParseNumberQuery(router.query)
@@ -63,9 +55,9 @@ export default function Admin({
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (userID) {
-      selectUser(userID)
+      setActiveItem(activeUsers.find(user => user.id === userID)!)
     } else {
-      selectItem(waitlist ? WaitlistItem : ActiveUsersItem)
+      setActiveItem(waitlist ? WaitlistItem : ActiveUsersItem)
     }
     setQuery(currentQueryState)
   }
@@ -87,7 +79,7 @@ export default function Admin({
             {activeItem === WaitlistItem ? (
               <Waitlist initialWaitlistUsers={waitlistUsers} />
             ) : activeItem === ActiveUsersItem ? (
-              <ActiveUsers activeUsers={activeUsers} onSelectUser={selectUser} />
+              <ActiveUsers activeUsers={activeUsers} onSelectUser={selectItem} />
             ) : (
               <UserMetrics user={activeItem} />
             )}
