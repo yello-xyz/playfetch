@@ -300,6 +300,7 @@ export type UserMetrics = {
   createdVersionCount: number
   createdCommentCount: number
   createdEndpointCount: number
+  providers: { provider: ModelProvider | QueryProvider; cost: number }[]
 }
 
 export type RecentProject = Project & {

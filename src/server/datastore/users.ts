@@ -4,6 +4,7 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
+  getEntities,
   getEntity,
   getEntityCount,
   getFilteredEntityCount,
@@ -188,6 +189,9 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
   const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
 
+  const providersData = await getEntities(Entity.PROVIDER, 'userID', userID)
+  const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
+
   return {
     createdWorkspaceCount,
     workspaceAccessCount,
@@ -195,5 +199,6 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     createdVersionCount,
     createdCommentCount,
     createdEndpointCount,
+    providers,
   }
 }

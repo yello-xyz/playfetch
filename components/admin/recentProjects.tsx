@@ -25,7 +25,7 @@ export default function RecentProjects({
           <>
             <Label>Active Projects (data since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
-            <TableCell>
+              <TableCell>
                 <Label>Last Edited</Label>
               </TableCell>
               <TableCell>

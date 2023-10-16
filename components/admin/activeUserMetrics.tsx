@@ -1,9 +1,10 @@
 import { ActiveUser, UserMetrics } from '@/types'
 import Label from '@/components/label'
 import { UserAvatar } from '@/components/userSidebarItem'
-import { FormatDate } from '@/src/common/formatting'
+import { FormatCost, FormatDate } from '@/src/common/formatting'
 import Icon from '../icon'
 import backIcon from '@/public/back.svg'
+import { LabelForProvider } from '@/src/common/providerMetadata'
 
 export default function ActiveUserMetrics({
   user,
@@ -41,6 +42,14 @@ export default function ActiveUserMetrics({
             <Label>Total number of versions created: {metrics.createdVersionCount}</Label>
             <Label>Total number of comments made: {metrics.createdCommentCount}</Label>
             <Label>Total number of endpoints published: {metrics.createdEndpointCount}</Label>
+          </div>
+          <Label>Registered Providers:</Label>
+          <div className='flex flex-col gap-1'>
+            {metrics.providers.map((provider, index) => (
+              <Label key={index}>
+                • {LabelForProvider(provider.provider)} ({FormatCost(provider.cost)})
+              </Label>
+            ))}
           </div>
         </div>
       </div>
