@@ -1,5 +1,5 @@
 import { Comment, CommentAction } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp } from './datastore'
 import { ensurePromptOrChainAccess } from './chains'
 import { PropertyFilter } from '@google-cloud/datastore'
 
@@ -84,13 +84,6 @@ export const toComment = (data: any): Comment => ({
 })
 
 export async function getRecentComments(since: number, limit: number): Promise<Comment[]> {
-  const datastore = getDatastore()
-  const [recentVersionsData] = await datastore.runQuery(
-    datastore
-      .createQuery(Entity.COMMENT)
-      .filter(new PropertyFilter('createdAt', '>=', new Date(since)))
-      .order('createdAt', { descending: true })
-      .limit(limit)
-  )
+  const recentVersionsData = await getRecentEntities(Entity.COMMENT, limit, new Date(since))
   return recentVersionsData.map(toComment)
 }

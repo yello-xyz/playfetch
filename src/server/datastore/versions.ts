@@ -10,6 +10,7 @@ import {
   getID,
   getKeyedEntities,
   getKeyedEntity,
+  getRecentEntities,
   getTimestamp,
 } from './datastore'
 import { toRun } from './runs'
@@ -341,9 +342,6 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
 }
 
 export async function getRecentVersions(limit: number): Promise<(RawPromptVersion | RawChainVersion)[]> {
-  const datastore = getDatastore()
-  const [recentVersionsData] = await datastore.runQuery(
-    datastore.createQuery(Entity.VERSION).order('createdAt', { descending: true }).limit(limit)
-  )
+  const recentVersionsData = await getRecentEntities(Entity.VERSION, limit)
   return recentVersionsData.map(data => toVersion(data, [], []))
 }

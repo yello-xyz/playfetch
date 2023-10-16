@@ -72,6 +72,9 @@ const getInternalFilteredEntities = (
     .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
+export const getRecentEntities = (type: string, limit?: number, since?: Date, sortKey = 'createdAt') =>
+  getInternalFilteredEntities(type, since ? new PropertyFilter(sortKey, '>=', since) : undefined, limit, [sortKey])
+
 export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
   getInternalFilteredEntities(type, filter, limit)
 

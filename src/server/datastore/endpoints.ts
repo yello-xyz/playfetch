@@ -10,6 +10,7 @@ import {
   getFilteredEntity,
   getID,
   getKeyedEntity,
+  getRecentEntities,
   getTimestamp,
 } from './datastore'
 import { getUniqueNameWithFormat } from './prompts'
@@ -214,13 +215,6 @@ export const toEndpoint = (data: any): Endpoint => ({
 })
 
 export async function getRecentEndpoints(since: number, limit: number): Promise<Endpoint[]> {
-  const datastore = getDatastore()
-  const [recentVersionsData] = await datastore.runQuery(
-    datastore
-      .createQuery(Entity.ENDPOINT)
-      .filter(new PropertyFilter('createdAt', '>=', new Date(since)))
-      .order('createdAt', { descending: true })
-      .limit(limit)
-  )
+  const recentVersionsData = await getRecentEntities(Entity.ENDPOINT, limit, new Date(since))
   return recentVersionsData.map(toEndpoint)
 }
