@@ -1,10 +1,12 @@
 import { ActiveUser, IsRawPromptVersion, User, UserMetrics } from '@/types'
 import {
   Entity,
+  buildFilter,
   buildKey,
   getDatastore,
   getEntity,
   getEntityCount,
+  getFilteredEntityCount,
   getID,
   getKeyedEntities,
   getKeyedEntity,
@@ -15,6 +17,7 @@ import { uploadImageURLToStorage } from '../storage'
 import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
 import { getRecentEndpoints } from './endpoints'
+import { PropertyFilter, and } from '@google-cloud/datastore'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -168,6 +171,14 @@ const toActiveUser = (
 }
 
 export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
-  const workspaceCount = await getEntityCount(Entity.WORKSPACE, 'userID', userID)
-  return { workspaceCount }
+  const createdWorkspaceCount = await getEntityCount(Entity.WORKSPACE, 'userID', userID)
+  const workspaceAccessCount = await getFilteredEntityCount(
+    Entity.ACCESS,
+    and([buildFilter('userID', userID), buildFilter('kind', 'workspace')])
+  )
+  const projectAccessCount = await getFilteredEntityCount(
+    Entity.ACCESS,
+    and([buildFilter('userID', userID), buildFilter('kind', 'project')])
+  )
+  return { createdWorkspaceCount, workspaceAccessCount, projectAccessCount }
 }

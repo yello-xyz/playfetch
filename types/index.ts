@@ -294,5 +294,7 @@ export type ActiveUser = User & {
 }
 
 export type UserMetrics = {
-  workspaceCount: number
+  createdWorkspaceCount: number
+  workspaceAccessCount: number
+  projectAccessCount: number
 }

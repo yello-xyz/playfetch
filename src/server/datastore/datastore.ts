@@ -131,12 +131,15 @@ export const getKeyedEntities = async (type: string, ids: number[], transaction?
 export const getKeyedEntity = async (type: string, id: number, transaction?: Transaction) =>
   getKeyedEntities(type, [id], transaction).then(([entity]) => entity)
 
-export const getEntityCount = async (type: string, key: string, value: {}) => {
+export const getFilteredEntityCount = async (type: string, filter: EntityFilter) => {
   const datastore = getDatastore()
-  const query = datastore.createQuery(type).filter(buildFilter(key, value))
+  const query = datastore.createQuery(type).filter(filter)
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
   return count
 }
+
+export const getEntityCount = async (type: string, key: string, value: {}) =>
+  getFilteredEntityCount(type, buildFilter(key, value))
 
 export const allocateID = async (type: string, transaction?: Transaction) => {
   const [[key]] = await (transaction ?? getDatastore()).allocateIds(buildKey(type), 1)
