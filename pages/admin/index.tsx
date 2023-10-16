@@ -8,16 +8,23 @@ import { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import ActiveUsers from '@/components/admin/activeUsers'
+import UserMetrics from '@/components/admin/userMetrics'
 
-type ActiveItem = 'waitlist' | 'activeUsers'
+const WaitlistItem = 'waitlist'
+const ActiveUsersItem = 'activeUsers'
+type ActiveItem = typeof WaitlistItem | typeof ActiveUsersItem | ActiveUser
 
 export const getServerSideProps = withAdminSession(async ({ query }) => {
-  const { w: waitlist } = ParseNumberQuery(query)
-
-  const initialActiveItem = waitlist ? 'waitlist' : 'activeUsers'
+  const { w: waitlist, u: userID } = ParseNumberQuery(query)
 
   const activeUsers = await getActiveUsers()
   const waitlistUsers = await getUsersWithoutAccess()
+
+  const initialActiveItem: ActiveItem = waitlist
+    ? WaitlistItem
+    : userID
+    ? { ...activeUsers.find(user => user.id === userID)! }
+    : ActiveUsersItem
 
   return { props: { initialActiveItem, activeUsers, waitlistUsers } }
 })
@@ -35,17 +42,32 @@ export default function Admin({
 
   const router = useRouter()
 
-  const { w: waitlist } = ParseNumberQuery(router.query)
-  const currentQueryState = waitlist
-  const [query, setQuery] = useState(currentQueryState)
-  if (currentQueryState !== query) {
-    setActiveItem(waitlist ? 'waitlist' : 'activeUsers')
-    setQuery(currentQueryState)
-  }
-
   const selectItem = (item: ActiveItem) => {
     setActiveItem(item)
-    router.push(`/admin${item === 'waitlist' ? '?w=1' : ''}`, undefined, { shallow: true })
+    router.push(
+      `/admin${item === WaitlistItem ? '?w=1' : item !== ActiveUsersItem ? `?u=${item.id}` : ''}`,
+      undefined,
+      { shallow: true }
+    )
+  }
+
+  const selectUser = (userID: number) => {
+    const user = activeUsers.find(user => user.id === userID)
+    if (user) {
+      selectItem(user)
+    }
+  }
+
+  const { w: waitlist, u: userID } = ParseNumberQuery(router.query)
+  const currentQueryState = waitlist ? WaitlistItem : userID ?? ActiveUsersItem
+  const [query, setQuery] = useState(currentQueryState)
+  if (currentQueryState !== query) {
+    if (userID) {
+      selectUser(userID)
+    } else {
+      selectItem(waitlist ? WaitlistItem : ActiveUsersItem)
+    }
+    setQuery(currentQueryState)
   }
 
   return (
@@ -58,12 +80,17 @@ export default function Admin({
         </TopBar>
         <div className='flex items-stretch flex-1 overflow-hidden'>
           <AdminSidebar
-            onSelectWaitlist={() => selectItem('waitlist')}
-            onSelectActiveUsers={() => selectItem('activeUsers')}
+            onSelectWaitlist={() => selectItem(WaitlistItem)}
+            onSelectActiveUsers={() => selectItem(ActiveUsersItem)}
           />
           <div className='flex flex-col flex-1 bg-gray-25'>
-            {activeItem === 'activeUsers' && <ActiveUsers activeUsers={activeUsers} />}
-            {activeItem === 'waitlist' && <Waitlist initialWaitlistUsers={waitlistUsers} />}
+            {activeItem === WaitlistItem ? (
+              <Waitlist initialWaitlistUsers={waitlistUsers} />
+            ) : activeItem === ActiveUsersItem ? (
+              <ActiveUsers activeUsers={activeUsers} />
+            ) : (
+              <UserMetrics user={activeItem} />
+            )}
           </div>
         </div>
       </main>

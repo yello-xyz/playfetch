@@ -14,7 +14,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
         {activeUsers.length > 0 && (
           <>
-            <Label>Active Users (since {FormatDate(startDate)})</Label>
+            <Label>Active Users (data since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg`}>
               <TableCell />
               <TableCell>
