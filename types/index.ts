@@ -292,3 +292,7 @@ export type ActiveUser = User & {
   commentCount: number
   endpointCount: number
 }
+
+export type UserMetrics = {
+  workspaceCount: number
+}

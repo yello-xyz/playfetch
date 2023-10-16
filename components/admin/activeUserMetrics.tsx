@@ -1,10 +1,20 @@
 import { ReactNode } from 'react'
-import { ActiveUser } from '@/types'
+import { ActiveUser, UserMetrics } from '@/types'
 import Label from '@/components/label'
 import { UserAvatar } from '@/components/userSidebarItem'
 import { FormatDate } from '@/src/common/formatting'
+import Icon from '../icon'
+import backIcon from '@/public/back.svg'
 
-export default function UserMetrics({ user }: { user: ActiveUser }) {
+export default function ActiveUserMetrics({
+  user,
+  metrics,
+  onDismiss,
+}: {
+  user: ActiveUser
+  metrics: UserMetrics
+  onDismiss: () => void
+}) {
   const gridConfig = 'grid grid-cols-[28px_minmax(0,1fr)_200px_100px_100px_100px_100px_100px_100px]'
 
   const startDate = user.startTimestamp
@@ -12,7 +22,10 @@ export default function UserMetrics({ user }: { user: ActiveUser }) {
   return (
     <>
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
-        <Label>Active Users (data since {FormatDate(startDate)})</Label>
+        <Label onClick={onDismiss} className='flex items-center cursor-pointer'>
+          <Icon icon={backIcon} />
+          Back to Active Users
+        </Label>
         <div className={`${gridConfig} w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg`}>
           <TableCell />
           <TableCell>

@@ -1,9 +1,10 @@
-import { ActiveUser, IsRawPromptVersion, User } from '@/types'
+import { ActiveUser, IsRawPromptVersion, User, UserMetrics } from '@/types'
 import {
   Entity,
   buildKey,
   getDatastore,
   getEntity,
+  getEntityCount,
   getID,
   getKeyedEntities,
   getKeyedEntity,
@@ -164,4 +165,9 @@ const toActiveUser = (
   const chainCount = new Set(chainVersions.map(version => version.parentID)).size
 
   return { ...user, lastActive, startTimestamp, commentCount, endpointCount, versionCount, promptCount, chainCount }
+}
+
+export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
+  const workspaceCount = await getEntityCount(Entity.WORKSPACE, 'userID', userID)
+  return { workspaceCount }
 }
