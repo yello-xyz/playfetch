@@ -19,16 +19,13 @@ export default function AdminSidebar({
         <SidebarSection title='Manage Access'>
           <SidebarButton title='Waitlist' icon={userIcon} onClick={onSelectWaitlist} />
         </SidebarSection>
-        <SidebarSection title='Analytics'>
+        <SidebarSection title='Recent Activity'>
           <SidebarButton title='Active Users' icon={userIcon} onClick={onSelectActiveUsers} />
           <SidebarButton title='Active Projects' icon={fileIcon} onClick={onSelectRecentProjects} />
-          <SidebarButton
-            title='Analytics Dashboard'
-            icon={linkIcon}
-            link={AdminRoute.AnalyticsDashboard}
-            target='_blank'
-          />
-          <SidebarButton title='Analytics Reports' icon={linkIcon} link={AdminRoute.AnalyticsReports} target='_blank' />
+        </SidebarSection>
+        <SidebarSection title='Google Analytics'>
+          <SidebarButton title='Dashboard' icon={linkIcon} link={AdminRoute.AnalyticsDashboard} target='_blank' />
+          <SidebarButton title='Reports' icon={linkIcon} link={AdminRoute.AnalyticsReports} target='_blank' />
           <SidebarButton title='Search Console' icon={linkIcon} link={AdminRoute.SearchConsole} target='_blank' />
         </SidebarSection>
         <SidebarSection title='Debug'>
