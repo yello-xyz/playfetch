@@ -110,6 +110,7 @@ export default function EndpointsView({
 
   if (newEndpoint && !isEditing) {
     setNewEndpoint(undefined)
+    router.push(EndpointsRoute(project.id), undefined, { shallow: true })
   }
 
   const [activeEndpointID, setActiveEndpointID] = useState<number>()
