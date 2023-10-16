@@ -87,7 +87,7 @@ export default function Admin({
             {activeItem === WaitlistItem ? (
               <Waitlist initialWaitlistUsers={waitlistUsers} />
             ) : activeItem === ActiveUsersItem ? (
-              <ActiveUsers activeUsers={activeUsers} />
+              <ActiveUsers activeUsers={activeUsers} onSelectUser={selectUser} />
             ) : (
               <UserMetrics user={activeItem} />
             )}

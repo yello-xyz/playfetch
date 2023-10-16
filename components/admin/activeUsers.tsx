@@ -4,8 +4,14 @@ import Label from '@/components/label'
 import { UserAvatar } from '@/components/userSidebarItem'
 import { FormatDate } from '@/src/common/formatting'
 
-export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[] }) {
-  const gridConfig = 'grid grid-cols-[28px_minmax(0,1fr)_200px_100px_100px_100px_100px_100px_100px]'
+export default function ActiveUsers({
+  activeUsers,
+  onSelectUser,
+}: {
+  activeUsers: ActiveUser[]
+  onSelectUser: (userID: number) => void
+}) {
+  const gridConfig = 'grid grid-cols-[44px_minmax(0,1fr)_200px_100px_100px_100px_100px_100px_100px]'
 
   const startDate = Math.min(...activeUsers.map(user => user.startTimestamp))
 
@@ -15,7 +21,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
         {activeUsers.length > 0 && (
           <>
             <Label>Active Users (data since {FormatDate(startDate)})</Label>
-            <div className={`${gridConfig} w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg`}>
+            <div className={`${gridConfig} w-full bg-white items-center border-gray-200 border rounded-lg`}>
               <TableCell />
               <TableCell>
                 <Label>Email</Label>
@@ -42,8 +48,8 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
                 <Label># Endpoints</Label>
               </TableCell>
               {activeUsers.map(user => (
-                <Fragment key={user.id}>
-                  <UserAvatar user={user} />
+                <div key={user.id} className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
+                  <TableCell><UserAvatar user={user} /></TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.fullName}</TableCell>
                   <TableCell center>{FormatDate(user.lastActive, false)}</TableCell>
@@ -52,7 +58,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
                   <TableCell center>{user.promptCount}</TableCell>
                   <TableCell center>{user.chainCount}</TableCell>
                   <TableCell center>{user.endpointCount}</TableCell>
-                </Fragment>
+                </div>
               ))}
             </div>
           </>
@@ -63,5 +69,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
 }
 
 const TableCell = ({ children, center }: { children?: ReactNode; center?: boolean }) => (
-  <div className={`overflow-hidden font-medium text-ellipsis ${center ? 'text-center' : ''}`}>{children}</div>
+  <div className={`flex items-center px-2 h-10 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50 ${center ? 'justify-center' : ''}`}>
+    {children}
+  </div>
 )
