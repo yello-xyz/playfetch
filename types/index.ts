@@ -285,6 +285,7 @@ export type Analytics = {
 export type ActiveUser = User & {
   lastActive: number
   startTimestamp: number
+  commentCount: number
   versionCount: number
   promptCount: number
   chainCount: number
