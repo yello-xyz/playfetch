@@ -14,6 +14,7 @@ import { AdminRoute } from '@/src/client/clientRoute'
 import Link from 'next/link'
 import Icon from '@/components/icon'
 import chainIcon from '@/public/chainSmall.svg'
+import AdminSidebar from '@/components/admin/adminSidebar'
 
 export const getServerSideProps = withAdminSession(async () => {
   const initialWaitlistUsers = await getUsersWithoutAccess()
@@ -51,44 +52,49 @@ export default function Admin({ initialWaitlistUsers }: { initialWaitlistUsers: 
 
   return (
     <>
-      <main className='flex flex-col h-screen overflow-hidden text-sm'>
+      <main className='flex flex-col h-screen text-sm'>
         <TopBar>
           <TopBarBackItem />
           <span className='text-base font-medium'>Admin</span>
           <TopBarAccessoryItem />
         </TopBar>
-        <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto bg-gray-25'>
-          <ExternalLink href={AdminRoute.AnalyticsDashboard}>Analytics Dashboard</ExternalLink>
-          <ExternalLink href={AdminRoute.AnalyticsReports}>Analytics Reports</ExternalLink>
-          <ExternalLink href={AdminRoute.SearchConsole}>Search Console</ExternalLink>
-          <ExternalLink href={AdminRoute.ServerLogs}>Server Logs</ExternalLink>
-          {addedEmail && <Label>Granted access to {addedEmail}</Label>}
-          <div className='flex items-center gap-2'>
-            <TextInput placeholder='Email' value={email} setValue={setEmail} />
-            <TextInput placeholder='Full Name (optional)' value={fullName} setValue={setFullName} />
-            <PendingButton title='Grant Access' disabled={!CheckValidEmail(email) || adding} onClick={addUser} />
-          </div>
-          {waitlistUsers.length > 0 && (
-            <>
-              <Label>Waitlist</Label>
-              <div className='grid grid-cols-[28px_240px_minmax(0,1fr)_160px] w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg'>
-                {waitlistUsers.map(user => (
-                  <Fragment key={user.id}>
-                    <UserAvatar user={user} />
-                    <div className='overflow-hidden text-ellipsis'>{user.email}</div>
-                    <div className='font-medium'>{user.fullName}</div>
-                    <div className='flex justify-end'>
-                      <PendingButton
-                        title='Grant Access'
-                        onClick={() => grantWaitlistUserAccess(user)}
-                        disabled={adding}
-                      />
-                    </div>
-                  </Fragment>
-                ))}
+        <div className='flex items-stretch flex-1 overflow-hidden'>
+          <AdminSidebar />
+          <div className='flex flex-col flex-1'>
+            <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto bg-gray-25'>
+              <ExternalLink href={AdminRoute.AnalyticsDashboard}>Analytics Dashboard</ExternalLink>
+              <ExternalLink href={AdminRoute.AnalyticsReports}>Analytics Reports</ExternalLink>
+              <ExternalLink href={AdminRoute.SearchConsole}>Search Console</ExternalLink>
+              <ExternalLink href={AdminRoute.ServerLogs}>Server Logs</ExternalLink>
+              {addedEmail && <Label>Granted access to {addedEmail}</Label>}
+              <div className='flex items-center gap-2'>
+                <TextInput placeholder='Email' value={email} setValue={setEmail} />
+                <TextInput placeholder='Full Name (optional)' value={fullName} setValue={setFullName} />
+                <PendingButton title='Grant Access' disabled={!CheckValidEmail(email) || adding} onClick={addUser} />
               </div>
-            </>
-          )}
+              {waitlistUsers.length > 0 && (
+                <>
+                  <Label>Waitlist</Label>
+                  <div className='grid grid-cols-[28px_240px_minmax(0,1fr)_160px] w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg'>
+                    {waitlistUsers.map(user => (
+                      <Fragment key={user.id}>
+                        <UserAvatar user={user} />
+                        <div className='overflow-hidden text-ellipsis'>{user.email}</div>
+                        <div className='font-medium'>{user.fullName}</div>
+                        <div className='flex justify-end'>
+                          <PendingButton
+                            title='Grant Access'
+                            onClick={() => grantWaitlistUserAccess(user)}
+                            disabled={adding}
+                          />
+                        </div>
+                      </Fragment>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </main>
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
