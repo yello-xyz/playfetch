@@ -4,7 +4,7 @@ import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '@/src/
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
 import Waitlist from '@/components/admin/waitlist'
-import { ParseNumberQuery } from '@/src/client/clientRoute'
+import ClientRoute, { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import ActiveUsers from '@/components/admin/activeUsers'
@@ -72,7 +72,7 @@ export default function Admin({
     <>
       <main className='flex flex-col h-screen text-sm'>
         <TopBar>
-          <TopBarBackItem />
+        <TopBarBackItem title='Back to overview' onNavigateBack={() => router.push(ClientRoute.Home)} />
           <span className='text-base font-medium'>Admin</span>
           <TopBarAccessoryItem />
         </TopBar>
