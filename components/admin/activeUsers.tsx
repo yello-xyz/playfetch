@@ -13,7 +13,7 @@ export default function ActiveUsers({
   onSelectUser: (userID: number) => void
   embedded?: boolean
 }) {
-  const gridConfig = 'grid grid-cols-[44px_200px_minmax(0,1fr)_100px_100px_100px_100px_100px_100px]'
+  const gridConfig = 'grid grid-cols-[100px_200px_minmax(0,1fr)_100px_100px_100px_100px_100px]'
 
   const startDate = Math.min(...activeUsers.map(user => user.startTimestamp))
 
@@ -24,15 +24,14 @@ export default function ActiveUsers({
           <>
             <Label>Active Users (data since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
-              <TableCell />
+              <TableCell>
+                <Label>Last Active</Label>
+              </TableCell>
               <TableCell>
                 <Label>Name</Label>
               </TableCell>
               <TableCell>
                 <Label>Email</Label>
-              </TableCell>
-              <TableCell center>
-                <Label>Last Active</Label>
               </TableCell>
               <TableCell center>
                 <Label># Comments</Label>
@@ -51,12 +50,11 @@ export default function ActiveUsers({
               </TableCell>
               {activeUsers.map(user => (
                 <div key={user.id} className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
+                  <TableCell>{FormatDate(user.lastActive, false)}</TableCell>
                   <TableCell>
-                    <UserAvatar user={user} />
+                    <UserAvatar user={user} /> {user.fullName}
                   </TableCell>
-                  <TableCell>{user.fullName}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell center>{FormatDate(user.lastActive, false)}</TableCell>
                   <TableCell center>{user.commentCount}</TableCell>
                   <TableCell center>{user.versionCount}</TableCell>
                   <TableCell center>{user.promptCount}</TableCell>
@@ -72,9 +70,9 @@ export default function ActiveUsers({
   )
 }
 
-const TableCell = ({ children, center }: { children?: ReactNode; center?: boolean }) => (
+const TableCell = ({ children, center }: { children: ReactNode; center?: boolean }) => (
   <div
-    className={`flex items-center px-2 h-10 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50 ${
+    className={`flex items-center gap-2 px-2 h-10 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50 ${
       center ? 'justify-center' : ''
     }`}>
     {children}
