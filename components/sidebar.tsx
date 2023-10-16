@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { HTMLAttributeAnchorTarget, ReactNode } from 'react'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import Link from 'next/link'
@@ -51,6 +51,7 @@ export function SidebarButton({
   active = false,
   onClick,
   link,
+  target,
   actionComponent,
 }: {
   title: string
@@ -58,6 +59,7 @@ export function SidebarButton({
   active?: boolean
   onClick?: () => void
   link?: string
+  target?: HTMLAttributeAnchorTarget
   actionComponent?: ReactNode
 }) {
   const activeClass = 'bg-blue-50 '
@@ -65,7 +67,7 @@ export function SidebarButton({
   const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg group w-[220px]'
   const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
-    <LinkWrapper link={link}>
+    <LinkWrapper link={link} target={target}>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
         <div className='flex-1 w-40 overflow-hidden font-normal text-gray-700 text-ellipsis whitespace-nowrap'>
@@ -77,6 +79,20 @@ export function SidebarButton({
   )
 }
 
-function LinkWrapper({ link, children }: { link?: string; children: ReactNode }) {
-  return link ? <Link href={link}>{children}</Link> : <>{children}</>
+function LinkWrapper({
+  link,
+  target,
+  children,
+}: {
+  link?: string
+  target?: HTMLAttributeAnchorTarget
+  children: ReactNode
+}) {
+  return link ? (
+    <Link href={link} target={target}>
+      {children}
+    </Link>
+  ) : (
+    <>{children}</>
+  )
 }
