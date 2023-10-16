@@ -39,6 +39,9 @@ export const buildKey = (type: string, id?: number) => getDatastore().key([type,
 
 export const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
 
+const filterQuery = (query: Query, filter: EntityFilter | undefined) =>
+  filter !== undefined ? query.filter(filter) : query
+
 const projectQuery = (query: Query, keys: string[]) => (keys.length > 0 ? query.select(keys) : query)
 
 const orderQuery = (query: Query, sortKeys: string[]) =>
@@ -46,20 +49,20 @@ const orderQuery = (query: Query, sortKeys: string[]) =>
 
 const buildQuery = (
   type: string,
-  filter: EntityFilter,
+  filter: EntityFilter | undefined,
   limit: number,
   sortKeys: string[],
   selectKeys: string[],
   transaction?: Transaction
 ) =>
   projectQuery(
-    orderQuery((transaction ?? getDatastore()).createQuery(type).filter(filter).limit(limit), sortKeys),
+    orderQuery(filterQuery((transaction ?? getDatastore()).createQuery(type), filter).limit(limit), sortKeys),
     selectKeys
   )
 
 const getInternalFilteredEntities = (
   type: string,
-  filter: EntityFilter,
+  filter?: EntityFilter,
   limit = 100,
   sortKeys = [] as string[],
   selectKeys = [] as string[],
