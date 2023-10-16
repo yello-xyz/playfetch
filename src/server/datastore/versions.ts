@@ -4,7 +4,6 @@ import {
   allocateID,
   buildKey,
   getDatastore,
-  getEntityCount,
   getEntityKey,
   getEntityKeys,
   getID,
@@ -317,8 +316,6 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   }
 
   const parentID = versionData.parentID
-  const versionCount = await getEntityCount(Entity.VERSION, 'parentID', parentID)
-  const wasLastVersion = versionCount === 1
   const wasPromptVersion = IsPromptVersion(versionData)
 
   const runKeys = await getEntityKeys(Entity.RUN, 'versionID', versionID)
@@ -326,7 +323,8 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const cacheKeys = await getEntityKeys(Entity.CACHE, 'versionID', versionID)
   await getDatastore().delete([...cacheKeys, ...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
 
-  if (wasLastVersion) {
+  const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
+  if (!anyVersionWithSameParentKey) {
     if (wasPromptVersion) {
       await savePromptVersionForUser(userID, parentID)
     } else {

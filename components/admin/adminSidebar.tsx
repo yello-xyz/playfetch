@@ -24,7 +24,7 @@ export default function AdminSidebar({
           <SidebarButton title='Active Projects' icon={fileIcon} onClick={onSelectRecentProjects} />
         </SidebarSection>
         <SidebarSection title='Google Analytics'>
-          <SidebarButton title='Dashboard' icon={linkIcon} link={AdminRoute.AnalyticsDashboard} target='_blank' />
+          <SidebarButton title='Dashboards' icon={linkIcon} link={AdminRoute.AnalyticsDashboard} target='_blank' />
           <SidebarButton title='Reports' icon={linkIcon} link={AdminRoute.AnalyticsReports} target='_blank' />
           <SidebarButton title='Search Console' icon={linkIcon} link={AdminRoute.SearchConsole} target='_blank' />
         </SidebarSection>
