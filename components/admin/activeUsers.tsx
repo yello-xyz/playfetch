@@ -1,11 +1,11 @@
-import { Fragment } from 'react'
+import { Fragment, ReactNode } from 'react'
 import { ActiveUser } from '@/types'
 import Label from '@/components/label'
 import { UserAvatar } from '@/components/userSidebarItem'
 import { FormatDate } from '@/src/common/formatting'
 
 export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[] }) {
-  const gridConfig = 'grid grid-cols-[28px_minmax(0,1fr)_240px]'
+  const gridConfig = 'grid grid-cols-[28px_minmax(0,1fr)_200px_100px_100px_100px_100px]'
 
   const startDate = Math.min(...activeUsers.map(user => user.startTimestamp))
 
@@ -16,11 +16,22 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
           <>
             <Label>Active Users (since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} w-full bg-white items-center gap-2 p-2 border-gray-200 border rounded-lg`}>
+              <TableCell />
+              <TableCell><Label>Email</Label></TableCell>
+              <TableCell><Label>Name</Label></TableCell>
+              <TableCell center><Label>Last Active</Label></TableCell>
+              <TableCell center><Label># Versions</Label></TableCell>
+              <TableCell center><Label># Prompts</Label></TableCell>
+              <TableCell center><Label># Chains</Label></TableCell>
               {activeUsers.map(user => (
                 <Fragment key={user.id}>
                   <UserAvatar user={user} />
-                  <div className='overflow-hidden text-ellipsis'>{user.email}</div>
-                  <div className='font-medium'>{user.fullName}</div>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.fullName}</TableCell>
+                  <TableCell center>{FormatDate(user.lastActive, false)}</TableCell>
+                  <TableCell center>{user.versionCount}</TableCell>
+                  <TableCell center>{user.promptCount}</TableCell>
+                  <TableCell center>{user.chainCount}</TableCell>
                 </Fragment>
               ))}
             </div>
@@ -30,3 +41,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
     </>
   )
 }
+
+const TableCell = ({ children, center }: { children?: ReactNode; center?: boolean }) => (
+  <div className={`overflow-hidden font-medium text-ellipsis ${center ? 'text-center' : ''}`}>{children}</div>
+)
