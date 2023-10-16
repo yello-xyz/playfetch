@@ -6,13 +6,15 @@ import AdminSidebar from '@/components/admin/adminSidebar'
 import Waitlist from '@/components/admin/waitlist'
 import ClientRoute, { ParseNumberQuery } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import ActiveUsers from '@/components/admin/activeUsers'
-import ActiveUserMetrics from '@/components/admin/activeUserMetrics'
 import api from '@/src/client/admin/api'
 import { getMetricsForProject, getRecentProjects } from '@/src/server/datastore/projects'
 import RecentProjects from '@/components/admin/recentProjects'
-import RecentProjectMetrics from '@/components/admin/recentProjectMetrics'
+
+import dynamic from 'next/dynamic'
+const ActiveUserMetrics = dynamic(() => import('@/components/admin/activeUserMetrics'))
+const RecentProjectMetrics = dynamic(() => import('@/components/admin/recentProjectMetrics'))
 
 const WaitlistItem = 'waitlist'
 const ActiveUsersItem = 'activeUsers'
@@ -127,15 +129,19 @@ export default function Admin({
               <RecentProjects recentProjects={recentProjects} onSelectProject={selectItem} />
             )}
             {userMetrics && activeItemIsUser(activeItem) && (
-              <ActiveUserMetrics user={activeItem} metrics={userMetrics} onDismiss={() => router.back()} />
+              <Suspense>
+                <ActiveUserMetrics user={activeItem} metrics={userMetrics} onDismiss={() => router.back()} />
+              </Suspense>
             )}
             {projectMetrics && activeItemIsProject(activeItem) && (
-              <RecentProjectMetrics
-                project={activeItem}
-                metrics={projectMetrics}
-                onSelectUser={selectItem}
-                onDismiss={() => router.back()}
-              />
+              <Suspense>
+                <RecentProjectMetrics
+                  project={activeItem}
+                  metrics={projectMetrics}
+                  onSelectUser={selectItem}
+                  onDismiss={() => router.back()}
+                />
+              </Suspense>
             )}
           </div>
         </div>
