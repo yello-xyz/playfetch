@@ -13,6 +13,7 @@ import { addWorkspaceForUser } from './workspaces'
 import { uploadImageURLToStorage } from '../storage'
 import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
+import { getRecentEndpoints } from './endpoints'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -115,18 +116,25 @@ export async function getActiveUsers(limit = 100): Promise<ActiveUser[]> {
   const startTimestamp = recentVersions.slice(-1)[0].timestamp
 
   const recentComments = await getRecentComments(startTimestamp, limit)
+  const recentEndpoints = await getRecentEndpoints(startTimestamp, limit)
+
   const usersData = await getKeyedEntities(Entity.USER, [
-    ...new Set([...recentVersions.map(version => version.userID), ...recentComments.map(comment => comment.userID)]),
+    ...new Set([
+      ...recentVersions.map(version => version.userID),
+      ...recentComments.map(comment => comment.userID),
+      ...recentEndpoints.map(endpoint => endpoint.userID),
+    ]),
   ])
   return usersData
-    .map(usersData => toActiveUser(usersData, recentVersions, recentComments))
+    .map(usersData => toActiveUser(usersData, recentVersions, recentComments, recentEndpoints))
     .sort((a, b) => b.lastActive - a.lastActive)
 }
 
 const toActiveUser = (
   userData: any,
   recentVersions: Awaited<ReturnType<typeof getRecentVersions>>,
-  recentComments: Awaited<ReturnType<typeof getRecentComments>>
+  recentComments: Awaited<ReturnType<typeof getRecentComments>>,
+  recentEndpoints: Awaited<ReturnType<typeof getRecentEndpoints>>
 ): ActiveUser => {
   const user = toUser(userData)
 
@@ -136,10 +144,18 @@ const toActiveUser = (
   const userComments = recentComments.filter(comment => comment.userID === user.id)
   const commentCount = userComments.length
 
-  const lastActive = Math.max(userVersions[0]?.timestamp ?? 0, userComments[0]?.timestamp ?? 0)
+  const userEndpoints = recentEndpoints.filter(endpoint => endpoint.userID === user.id)
+  const endpointCount = userEndpoints.length
+
+  const lastActive = Math.max(
+    ...[userVersions[0]?.timestamp ?? 0, userComments[0]?.timestamp ?? 0, userEndpoints[0]?.timestamp ?? 0]
+  )
   const startTimestamp = Math.min(
-    userVersions.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
-    userComments.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE
+    ...[
+      userVersions.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
+      userComments.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
+      userEndpoints.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
+    ]
   )
 
   const promptVersions = userVersions.filter(IsRawPromptVersion)
@@ -147,5 +163,5 @@ const toActiveUser = (
   const chainVersions = userVersions.filter(version => !IsRawPromptVersion(version))
   const chainCount = new Set(chainVersions.map(version => version.parentID)).size
 
-  return { ...user, lastActive, startTimestamp, commentCount, versionCount, promptCount, chainCount }
+  return { ...user, lastActive, startTimestamp, commentCount, endpointCount, versionCount, promptCount, chainCount }
 }

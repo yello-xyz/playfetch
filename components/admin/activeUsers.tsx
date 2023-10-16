@@ -5,7 +5,7 @@ import { UserAvatar } from '@/components/userSidebarItem'
 import { FormatDate } from '@/src/common/formatting'
 
 export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[] }) {
-  const gridConfig = 'grid grid-cols-[28px_minmax(0,1fr)_200px_100px_100px_100px_100px_100px]'
+  const gridConfig = 'grid grid-cols-[28px_minmax(0,1fr)_200px_100px_100px_100px_100px_100px_100px]'
 
   const startDate = Math.min(...activeUsers.map(user => user.startTimestamp))
 
@@ -24,6 +24,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
               <TableCell center><Label># Versions</Label></TableCell>
               <TableCell center><Label># Prompts</Label></TableCell>
               <TableCell center><Label># Chains</Label></TableCell>
+              <TableCell center><Label># Endpoints</Label></TableCell>
               {activeUsers.map(user => (
                 <Fragment key={user.id}>
                   <UserAvatar user={user} />
@@ -34,6 +35,7 @@ export default function ActiveUsers({ activeUsers }: { activeUsers: ActiveUser[]
                   <TableCell center>{user.versionCount}</TableCell>
                   <TableCell center>{user.promptCount}</TableCell>
                   <TableCell center>{user.chainCount}</TableCell>
+                  <TableCell center>{user.endpointCount}</TableCell>
                 </Fragment>
               ))}
             </div>

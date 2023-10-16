@@ -1,5 +1,5 @@
 import { Endpoint } from '@/types'
-import { and } from '@google-cloud/datastore'
+import { PropertyFilter, and } from '@google-cloud/datastore'
 import {
   Entity,
   buildFilter,
@@ -212,3 +212,15 @@ export const toEndpoint = (data: any): Endpoint => ({
   useCache: data.useCache,
   useStreaming: data.useStreaming,
 })
+
+export async function getRecentEndpoints(since: number, limit: number): Promise<Endpoint[]> {
+  const datastore = getDatastore()
+  const [recentVersionsData] = await datastore.runQuery(
+    datastore
+      .createQuery(Entity.ENDPOINT)
+      .filter(new PropertyFilter('createdAt', '>=', new Date(since)))
+      .order('createdAt', { descending: true })
+      .limit(limit)
+  )
+  return recentVersionsData.map(toEndpoint)
+}
