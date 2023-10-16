@@ -311,4 +311,5 @@ export type ProjectMetrics = {
   promptCount: number
   chainCount: number
   endpointCount: number
+  analytics: Analytics
 }

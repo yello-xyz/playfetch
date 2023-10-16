@@ -31,6 +31,7 @@ import { ensureWorkspaceAccess } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
+import { getAnalyticsForProject } from './analytics'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -361,9 +362,12 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
   const chainCount = await getEntityCount(Entity.CHAIN, 'projectID', projectID)
   const endpointCount = await getEntityCount(Entity.ENDPOINT, 'projectID', projectID)
 
+  const analytics = await getAnalyticsForProject(0, projectID, true)
+
   return {
     promptCount,
     chainCount,
     endpointCount,
+    analytics,
   }
 }

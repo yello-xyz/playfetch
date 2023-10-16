@@ -28,25 +28,22 @@ export default function ActiveUserMetrics({
               {user.fullName} ({user.email})
             </Label>
           </div>
-          <div className='flex flex-col gap-1'>
           <Label>Last Active: {FormatDate(user.lastActive, true, true)}</Label>
+          <div className='flex flex-col gap-1'>
+            <Label>Number of additional workspaces created: {metrics.createdWorkspaceCount - 1}</Label>
+            <Label>
+              Number of additional workspaces shared with user:{' '}
+              {metrics.workspaceAccessCount - metrics.createdWorkspaceCount}
+            </Label>
+            <Label>Number of additional projects shared with user: {metrics.projectAccessCount}</Label>
           </div>
           <div className='flex flex-col gap-1'>
-          <Label>Number of additional workspaces created: {metrics.createdWorkspaceCount - 1}</Label>
-          <Label>
-            Number of additional workspaces shared with user:{' '}
-            {metrics.workspaceAccessCount - metrics.createdWorkspaceCount}
-          </Label>
-          <Label>Number of additional projects shared with user: {metrics.projectAccessCount}</Label>
-          </div>
-          <div className='flex flex-col gap-1'>
-          <Label>Total number of versions created: {metrics.createdVersionCount}</Label>
-          <Label>Total number of comments made: {metrics.createdCommentCount}</Label>
-          <Label>Total number of endpoints published: {metrics.createdEndpointCount}</Label>
+            <Label>Total number of versions created: {metrics.createdVersionCount}</Label>
+            <Label>Total number of comments made: {metrics.createdCommentCount}</Label>
+            <Label>Total number of endpoints published: {metrics.createdEndpointCount}</Label>
           </div>
         </div>
       </div>
     </>
   )
 }
-
