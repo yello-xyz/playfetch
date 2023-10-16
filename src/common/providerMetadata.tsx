@@ -29,9 +29,7 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
   'text-bison@001',
   'command',
 ]
-export const GatedLanguageModels: DefaultLanguageModel[] = [
-  'gpt-4-32k',
-]
+export const GatedLanguageModels: DefaultLanguageModel[] = ['gpt-4-32k']
 
 export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
   switch (provider) {

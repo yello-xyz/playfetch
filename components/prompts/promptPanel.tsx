@@ -238,8 +238,7 @@ export function ProviderWarning({
       buttonTitle='Add API Key'
       onClick={() => router.push(ClientRoute.Settings)}>
       <span>
-        An API key is required to use this{' '}
-        {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
+        An API key is required to use this {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
     </ButtonBanner>
   )
