@@ -1,7 +1,17 @@
-import { User } from '@/types'
-import { Entity, buildKey, getDatastore, getEntity, getID, getKeyedEntity, getOrderedEntities } from './datastore'
+import { ActiveUser, IsRawPromptVersion, RawChainVersion, RawPromptVersion, User } from '@/types'
+import {
+  Entity,
+  buildKey,
+  getDatastore,
+  getEntity,
+  getID,
+  getKeyedEntities,
+  getKeyedEntity,
+  getOrderedEntities,
+} from './datastore'
 import { addWorkspaceForUser } from './workspaces'
 import { uploadImageURLToStorage } from '../storage'
+import { getRecentVersions } from './versions'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -97,4 +107,26 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
 export async function getUsersWithoutAccess() {
   const usersData = await getOrderedEntities(Entity.USER, 'hasAccess', false)
   return usersData.map(toUser)
+}
+
+export async function getActiveUsers(limit = 100): Promise<ActiveUser[]> {
+  const recentVersions = await getRecentVersions(limit)
+  const usersData = await getKeyedEntities(Entity.USER, [...new Set(recentVersions.map(version => version.userID))])
+  return usersData.map(usersData => toActiveUser(usersData, recentVersions))
+}
+
+const toActiveUser = (userData: any, recentVersions: Awaited<ReturnType<typeof getRecentVersions>>): ActiveUser => {
+  const user = toUser(userData)
+
+  const userVersions = recentVersions.filter(version => version.userID === user.id)
+  const versionCount = userVersions.length
+  const lastActive = userVersions[0].timestamp
+  const startTimestamp = userVersions.slice(-1)[0].timestamp
+
+  const promptVersions = userVersions.filter(IsRawPromptVersion)
+  const promptCount = new Set(promptVersions.map(version => version.parentID)).size
+  const chainVersions = userVersions.filter(version => !IsRawPromptVersion(version))
+  const chainCount = new Set(chainVersions.map(version => version.parentID)).size
+
+  return { ...user, lastActive, startTimestamp, versionCount, promptCount, chainCount }
 }

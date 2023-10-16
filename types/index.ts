@@ -137,11 +137,12 @@ export type Prompts = {
 
 export type RawPromptVersion = Version & { prompts: Prompts; config: PromptConfig }
 export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
+export const IsRawPromptVersion = (version: RawPromptVersion | RawChainVersion): version is RawPromptVersion =>
+  'prompts' in version && version.prompts !== undefined && version.prompts !== null
 
 export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
 export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
-export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion =>
-  'prompts' in version && version.prompts !== undefined && version.prompts !== null
+export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion => IsRawPromptVersion(version)
 
 export type PromptInputs = { [name: string]: string }
 
@@ -279,4 +280,12 @@ export type Analytics = {
   recentLogEntries: LogEntry[]
   recentUsage: Usage[]
   aggregatePreviousUsage: Usage
+}
+
+export type ActiveUser = User & {
+  lastActive: number
+  startTimestamp: number
+  versionCount: number
+  promptCount: number
+  chainCount: number
 }

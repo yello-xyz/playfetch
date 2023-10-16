@@ -339,3 +339,11 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
     await updateChainOnDeletedVersion(parentID, versionID)
   }
 }
+
+export async function getRecentVersions(limit: number): Promise<(RawPromptVersion | RawChainVersion)[]> {
+  const datastore = getDatastore()
+  const [recentVersionsData] = await datastore.runQuery(
+    datastore.createQuery(Entity.VERSION).order('createdAt', { descending: true }).limit(limit)
+  )
+  return recentVersionsData.map(data => toVersion(data, [], []))
+}

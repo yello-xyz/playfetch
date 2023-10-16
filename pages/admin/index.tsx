@@ -1,6 +1,6 @@
 import { withAdminSession } from '@/src/server/session'
-import { User } from '@/types'
-import { getUsersWithoutAccess } from '@/src/server/datastore/users'
+import { ActiveUser, User } from '@/types'
+import { getActiveUsers, getUsersWithoutAccess } from '@/src/server/datastore/users'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
 import Waitlist from '@/components/admin/waitlist'
@@ -16,17 +16,20 @@ export const getServerSideProps = withAdminSession(async ({ query }) => {
 
   const initialActiveItem = waitlist ? 'waitlist' : 'activeUsers'
 
-  const initialWaitlistUsers = await getUsersWithoutAccess()
+  const activeUsers = await getActiveUsers()
+  const waitlistUsers = await getUsersWithoutAccess()
 
-  return { props: { initialActiveItem, initialWaitlistUsers } }
+  return { props: { initialActiveItem, activeUsers, waitlistUsers } }
 })
 
 export default function Admin({
   initialActiveItem,
-  initialWaitlistUsers,
+  activeUsers,
+  waitlistUsers,
 }: {
   initialActiveItem: ActiveItem
-  initialWaitlistUsers: User[]
+  activeUsers: ActiveUser[]
+  waitlistUsers: User[]
 }) {
   const [activeItem, setActiveItem] = useState(initialActiveItem)
 
@@ -59,8 +62,8 @@ export default function Admin({
             onSelectActiveUsers={() => selectItem('activeUsers')}
           />
           <div className='flex flex-col flex-1 bg-gray-25'>
-            {activeItem === 'activeUsers' && <ActiveUsers activeUsers={initialWaitlistUsers} />}
-            {activeItem === 'waitlist' && <Waitlist initialWaitlistUsers={initialWaitlistUsers} />}
+            {activeItem === 'activeUsers' && <ActiveUsers activeUsers={activeUsers} />}
+            {activeItem === 'waitlist' && <Waitlist initialWaitlistUsers={waitlistUsers} />}
           </div>
         </div>
       </main>
