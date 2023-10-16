@@ -180,5 +180,16 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', 'project')])
   )
-  return { createdWorkspaceCount, workspaceAccessCount, projectAccessCount }
+  const createdVersionCount = await getEntityCount(Entity.VERSION, 'userID', userID)
+  const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
+  const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
+  
+  return {
+    createdWorkspaceCount,
+    workspaceAccessCount,
+    projectAccessCount,
+    createdVersionCount,
+    createdCommentCount,
+    createdEndpointCount,
+  }
 }

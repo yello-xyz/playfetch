@@ -10,9 +10,10 @@ import {
   getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
+  getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, Project, User } from '@/types'
+import { ActiveProject, Project, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import {
   getAccessibleObjectIDs,
@@ -329,4 +330,36 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
     ...chainKeys,
     buildKey(Entity.PROJECT, projectID),
   ])
+}
+
+export async function getRecentProjects(limit = 100): Promise<RecentProject[]> {
+  const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, 'lastEditedAt')
+
+  const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [
+    ...new Set([...recentProjectsData.map(projectData => projectData.workspaceID)]),
+  ])
+
+  const usersData = await getKeyedEntities(Entity.USER, [
+    ...new Set([...workspacesData.map(workspaceData => workspaceData.userID)]),
+  ])
+
+  return recentProjectsData
+    .map(projectData => toRecentProject(projectData, workspacesData, usersData))
+    .sort((a, b) => b.timestamp - a.timestamp)
+}
+
+const toRecentProject = (
+  projectData: any,
+  workspacesData: any[],
+  usersData: any[]
+): RecentProject => {
+  const project = toProject(projectData, 0)
+  
+  const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
+  const workspace = workspaceData.name
+  
+  const userData = usersData.find(user => getID(user) === workspaceData.userID)
+  const creator = userData.fullName
+
+  return { ...project, workspace, creator }
 }

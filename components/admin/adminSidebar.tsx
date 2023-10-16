@@ -2,13 +2,16 @@ import { AdminRoute } from '@/src/client/clientRoute'
 import { SidebarButton, SidebarSection } from '../sidebar'
 import linkIcon from '@/public/chain.svg'
 import userIcon from '@/public/user.svg'
+import fileIcon from '@/public/file.svg'
 
 export default function AdminSidebar({
   onSelectWaitlist,
   onSelectActiveUsers,
+  onSelectRecentProjects,
 }: {
   onSelectWaitlist: () => void
   onSelectActiveUsers: () => void
+  onSelectRecentProjects: () => void
 }) {
   return (
     <>
@@ -18,6 +21,7 @@ export default function AdminSidebar({
         </SidebarSection>
         <SidebarSection title='Analytics'>
           <SidebarButton title='Active Users' icon={userIcon} onClick={onSelectActiveUsers} />
+          <SidebarButton title='Active Projects' icon={fileIcon} onClick={onSelectRecentProjects} />
           <SidebarButton
             title='Analytics Dashboard'
             icon={linkIcon}

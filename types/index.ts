@@ -297,4 +297,12 @@ export type UserMetrics = {
   createdWorkspaceCount: number
   workspaceAccessCount: number
   projectAccessCount: number
+  createdVersionCount: number
+  createdCommentCount: number
+  createdEndpointCount: number
+}
+
+export type RecentProject = Project & {
+  workspace: string
+  creator: string
 }

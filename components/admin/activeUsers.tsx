@@ -1,4 +1,4 @@
-import { Fragment, ReactNode } from 'react'
+import { ReactNode } from 'react'
 import { ActiveUser } from '@/types'
 import Label from '@/components/label'
 import { UserAvatar } from '@/components/userSidebarItem'
@@ -11,7 +11,7 @@ export default function ActiveUsers({
   activeUsers: ActiveUser[]
   onSelectUser: (userID: number) => void
 }) {
-  const gridConfig = 'grid grid-cols-[44px_minmax(0,1fr)_200px_100px_100px_100px_100px_100px_100px]'
+  const gridConfig = 'grid grid-cols-[44px_200px_minmax(0,1fr)_100px_100px_100px_100px_100px_100px]'
 
   const startDate = Math.min(...activeUsers.map(user => user.startTimestamp))
 
@@ -24,10 +24,10 @@ export default function ActiveUsers({
             <div className={`${gridConfig} w-full bg-white items-center border-gray-200 border rounded-lg`}>
               <TableCell />
               <TableCell>
-                <Label>Email</Label>
+                <Label>Name</Label>
               </TableCell>
               <TableCell>
-                <Label>Name</Label>
+                <Label>Email</Label>
               </TableCell>
               <TableCell center>
                 <Label>Last Active</Label>
@@ -50,8 +50,8 @@ export default function ActiveUsers({
               {activeUsers.map(user => (
                 <div key={user.id} className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
                   <TableCell><UserAvatar user={user} /></TableCell>
-                  <TableCell>{user.email}</TableCell>
                   <TableCell>{user.fullName}</TableCell>
+                  <TableCell>{user.email}</TableCell>
                   <TableCell center>{FormatDate(user.lastActive, false)}</TableCell>
                   <TableCell center>{user.commentCount}</TableCell>
                   <TableCell center>{user.versionCount}</TableCell>
