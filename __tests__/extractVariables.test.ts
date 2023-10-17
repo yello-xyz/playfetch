@@ -52,7 +52,7 @@ const testExtractChainVariables = (
   outputs: string[] = []
 ) =>
   test(`Test ${testDescription}`, () => {
-    expect(ExtractUnboundChainInputs(buildChain(inputs, outputs))).toStrictEqual(expectedVariables)
+    expect(ExtractUnboundChainInputs(buildChain(inputs, outputs), false)).toStrictEqual(expectedVariables)
   })
 
 testExtractChainVariables('empty chain', [], [], [])

@@ -38,8 +38,10 @@ export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPro
     chain.map(item => ({ inputs: ExtractChainItemVariables(item, cache, includingDynamic), output: item.output }))
   )
 
-export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) =>
-  excludeBoundChainVariables(chainWithInputs.map(item => ({ inputs: item.inputs ?? [], output: item.output })))
+export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[], includingDynamic: boolean) =>
+  excludeBoundChainVariables(
+    chainWithInputs.map(item => ({ inputs: extractChainItemInputs(item, includingDynamic), output: item.output }))
+  )
 
 const excludeBoundChainVariables = (chain: { inputs: string[]; output?: string }[]) => {
   const allChainVariables = [...new Set(chain.flatMap(item => item.inputs))]

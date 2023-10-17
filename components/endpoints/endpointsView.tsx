@@ -148,7 +148,7 @@ export default function EndpointsView({
   const variables = parent
     ? ProjectItemIsChain(parent)
       ? activeVersion?.items
-        ? ExtractUnboundChainInputs(activeVersion.items)
+        ? ExtractUnboundChainInputs(activeVersion.items, false)
         : []
       : activeVersion?.prompts && activeVersion?.config
       ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
