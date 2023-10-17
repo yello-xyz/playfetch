@@ -16,7 +16,7 @@ export default function InviteButton({ users, onInvite }: { users: User[]; onInv
   }
 
   return (
-    <CustomPopupButton onSetPopup={onSetPopup} fixedWidth>
+    <CustomPopupButton onSetPopup={onSetPopup} alignRight>
       <TopBarButton title='Invite' />
     </CustomPopupButton>
   )
@@ -35,16 +35,20 @@ function InvitePopup({ users, onInvite, withDismiss }: InvitePopupProps & WithDi
     .map(email => email.trim())
     .filter(email => email.length > 0)
 
+  const previousEmails = new Set(users.map(user => user.email))
+  const emailsAreValid =
+    emails.length > 0 && emails.every(email => CheckValidEmail(email) && !previousEmails.has(email))
+
   const onLoad = useCallback((node: HTMLInputElement | null) => node?.focus(), [])
 
   return (
-    <PopupContent className='flex flex-col gap-1 p-3'>
-      <TextInput onLoad={onLoad} id='email' label='Email addresses' value={email} setValue={setEmail} />
-      <Button
-        disabled={!emails.length || !emails.every(email => CheckValidEmail(email))}
-        onClick={() => onInvite(emails)}>
-        Invite
-      </Button>
+    <PopupContent className='flex flex-col gap-1 p-3 w-[460px]'>
+      <div className='flex items-center gap-2.5'>
+        <TextInput placeholder='Add email addresses' onLoad={onLoad} value={email} setValue={setEmail} />
+        <Button disabled={!emailsAreValid} onClick={() => onInvite(emails)}>
+          Invite
+        </Button>
+      </div>
     </PopupContent>
   )
 }

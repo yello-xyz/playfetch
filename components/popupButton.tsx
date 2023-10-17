@@ -39,6 +39,7 @@ export function CustomPopupButton({
   disabled,
   fixedWidth,
   popUpAbove,
+  alignRight,
   children,
 }: {
   onSetPopup: (location: GlobalPopupLocation) => void
@@ -46,6 +47,7 @@ export function CustomPopupButton({
   disabled?: boolean
   fixedWidth?: boolean
   popUpAbove?: boolean
+  alignRight?: boolean
   children: ReactNode
 }) {
   const buttonRef = useRef<HTMLDivElement>(null)
@@ -56,9 +58,9 @@ export function CustomPopupButton({
         const iconRect = buttonRef.current?.getBoundingClientRect()!
         onSetPopup({
           top: !popUpAbove ? iconRect.y + 48 : undefined,
-          left: !popUpAbove || fixedWidth ? iconRect.x : undefined,
+          left: (!alignRight && !popUpAbove) || fixedWidth ? iconRect.x : undefined,
           bottom: popUpAbove ? iconRect.y - 10 : undefined,
-          right: popUpAbove || fixedWidth ? iconRect.x + iconRect.width : undefined,
+          right: (alignRight || popUpAbove) || fixedWidth ? iconRect.x + iconRect.width : undefined,
         })
       }
 
