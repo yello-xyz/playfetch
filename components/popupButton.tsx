@@ -60,7 +60,7 @@ export function CustomPopupButton({
           top: !popUpAbove ? iconRect.y + 48 : undefined,
           left: (!alignRight && !popUpAbove) || fixedWidth ? iconRect.x : undefined,
           bottom: popUpAbove ? iconRect.y - 10 : undefined,
-          right: (alignRight || popUpAbove) || fixedWidth ? iconRect.x + iconRect.width : undefined,
+          right: alignRight || popUpAbove || fixedWidth ? iconRect.x + iconRect.width : undefined,
         })
       }
 

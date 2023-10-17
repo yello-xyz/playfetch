@@ -1,9 +1,9 @@
 import UserAvatar from './userAvatar'
 import { User } from '@/types'
 
-export default function UserBadge({ user }: { user: User }) {
+export default function UserBadge({ user, padding = 'p-2' }: { user: User; padding?: string }) {
   return (
-    <div className='flex items-center gap-2.5 p-2'>
+    <div className={`flex items-center gap-2.5 ${padding}`}>
       <UserAvatar user={user} />
       <div className='flex flex-col min-w-0'>
         <span className='overflow-hidden font-semibold text-gray-700 select-none text-ellipsis'>{user.fullName}</span>
