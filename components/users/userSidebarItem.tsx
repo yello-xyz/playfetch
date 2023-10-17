@@ -35,7 +35,7 @@ export default function UserSidebarItem() {
         {isMenuExpanded && (
           <div className='absolute top-0 left-1.5 shadow-sm'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-              <div className='flex flex-col items-stretch gap-0.5 p-3 select-none'>
+              <div className='flex flex-col items-stretch gap-0.5 p-3 pt-1 select-none'>
                 <UserBadge user={user} />
                 <span
                   className='px-2 py-1 font-medium leading-6 text-gray-700 rounded cursor-pointer select-none hover:bg-gray-50'
