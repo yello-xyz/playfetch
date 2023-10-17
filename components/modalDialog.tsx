@@ -52,7 +52,7 @@ export default function ModalDialog({
   return prompt ? (
     <div
       onClick={dismiss}
-      className='fixed inset-0 z-30 flex items-center justify-center w-full h-full bg-gray-600 bg-opacity-50'>
+      className='fixed inset-0 z-40 flex items-center justify-center w-full h-full bg-gray-600 bg-opacity-50'>
       <div onClick={event => event.stopPropagation()} className='p-4 bg-white rounded-lg w-72 drop-shadow'>
         <div className='flex flex-col gap-4 text-center'>
           <h3 className='text-base font-semibold'>{prompt.title ?? 'Are you sure?'}</h3>
