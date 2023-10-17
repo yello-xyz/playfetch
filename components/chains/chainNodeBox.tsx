@@ -88,7 +88,7 @@ export function ChainNodeBox({
         />
       )}
       <div
-        className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`}
+        className={`flex flex-col border w-96 rounded-lg cursor-pointer drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)] ${colorClass}`}
         onClick={() => setActiveIndex(index)}>
         <ChainNodeBoxHeader
           nodes={nodes}
