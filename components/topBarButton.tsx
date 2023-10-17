@@ -14,7 +14,7 @@ export function TopBarButton({
   type?: ButtonType
   title?: string
   icon?: StaticImageData
-  onClick: () => void
+  onClick?: () => void
   disabled?: boolean
   iconClassName?: string
 }) {

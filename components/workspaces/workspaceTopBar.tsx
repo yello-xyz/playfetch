@@ -9,13 +9,14 @@ import Icon from '../icon'
 import { useState } from 'react'
 import WorkspacePopupMenu from './workspacePopupMenu'
 import spinnerIcon from '@/public/spinner.svg'
+import InviteButton from '../users/inviteButton'
 
 export default function WorkspaceTopBar({
   activeWorkspace,
   isUserWorkspace,
   isSharedProjects,
   onAddProject,
-  setShowInviteDialog,
+  onInviteMembers,
   onRenamed,
   onDeleted,
 }: {
@@ -23,7 +24,7 @@ export default function WorkspaceTopBar({
   isUserWorkspace: boolean
   isSharedProjects: boolean
   onAddProject: () => Promise<void>
-  setShowInviteDialog: (show: boolean) => void
+  onInviteMembers: (emails: string[]) => void
   onRenamed: () => void
   onDeleted: () => void
 }) {
@@ -59,7 +60,7 @@ export default function WorkspaceTopBar({
       {!isSharedProjects && (
         <div className='flex items-center gap-2'>
           <UserAvatars users={activeWorkspace.users} />
-          {!isUserWorkspace && <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />}
+          {!isUserWorkspace && <InviteButton users={activeWorkspace.users} onInvite={onInviteMembers} />}
           <AddProjectButton onAddProject={onAddProject} />
         </div>
       )}

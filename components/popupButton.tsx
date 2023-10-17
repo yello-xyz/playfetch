@@ -35,14 +35,14 @@ export function PopupButton({
 
 export function CustomPopupButton({
   onSetPopup,
-  className,
+  className = '',
   disabled,
   fixedWidth,
   popUpAbove,
   children,
 }: {
   onSetPopup: (location: GlobalPopupLocation) => void
-  className: string
+  className?: string
   disabled?: boolean
   fixedWidth?: boolean
   popUpAbove?: boolean

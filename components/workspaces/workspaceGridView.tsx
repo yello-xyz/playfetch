@@ -1,6 +1,5 @@
 import { ActiveWorkspace, Project, Workspace } from '@/types'
 import { useState } from 'react'
-import InviteDialog from '../inviteDialog'
 import api from '@/src/client/api'
 import IconButton from '../iconButton'
 import starIcon from '@/public/star.svg'
@@ -32,8 +31,6 @@ export default function WorkspaceGridView({
   onRefreshWorkspace: () => void
   onRefreshWorkspaces: () => void
 }) {
-  const [showInviteDialog, setShowInviteDialog] = useState(false)
-
   const inviteMembers = async (emails: string[]) => {
     await api.inviteToWorkspace(activeWorkspace.id, emails)
     onRefreshWorkspace()
@@ -58,7 +55,7 @@ export default function WorkspaceGridView({
         isUserWorkspace={isUserWorkspace}
         isSharedProjects={isSharedProjects}
         onAddProject={onAddProject}
-        setShowInviteDialog={setShowInviteDialog}
+        onInviteMembers={inviteMembers}
         onRenamed={refresh}
         onDeleted={resetWorkspaces}
       />
@@ -83,9 +80,6 @@ export default function WorkspaceGridView({
         </>
       ) : (
         <EmptyWorkspaceView workspace={activeWorkspace} isUserWorkspace={isUserWorkspace} onAddProject={onAddProject} />
-      )}
-      {showInviteDialog && (
-        <InviteDialog label='workspace' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
       )}
     </div>
   )
