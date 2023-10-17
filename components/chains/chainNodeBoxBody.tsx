@@ -83,7 +83,7 @@ function InputNodeBody({
   promptCache: ChainPromptCache
 }) {
   const items = nodes.filter(IsChainItem)
-  const variables = ExtractUnboundChainVariables(items, promptCache)
+  const variables = ExtractUnboundChainVariables(items, promptCache, false)
 
   return variables.length > 0 ? (
     <CommonBody isSelected={isSelected}>
