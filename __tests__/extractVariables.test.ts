@@ -61,5 +61,5 @@ testExtractChainVariables('multi step single chain input', ['hello'], ['', 'hell
 testExtractChainVariables('multi step repeated chain input', ['hello'], ['hello', '', 'hello'])
 testExtractChainVariables('multi step multi chain input', ['hello', 'world'], ['hello', '', 'world'])
 testExtractChainVariables('mapped input', ['world'], ['', 'hello', 'world'], ['hello'])
-// testExtractChainVariables('mapped later', ['hello'], ['hello', 'hello'], ['hello'])
-// testExtractChainVariables('mapped too late', ['hello'], ['', 'hello'], ['', 'hello'])
+testExtractChainVariables('mapped too late', ['hello'], ['hello', ''], ['', 'hello'])
+testExtractChainVariables('mapped later too', ['hello', 'world'], ['hello', 'world', 'hello'], ['', 'hello'])

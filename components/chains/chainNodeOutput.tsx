@@ -43,11 +43,17 @@ export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]
     chainWithInputs.map(item => ({ inputs: extractChainItemInputs(item, includingDynamic), output: item.output }))
   )
 
-const excludeBoundChainVariables = (chain: { inputs: string[]; output?: string }[]) => {
-  const allChainVariables = [...new Set(chain.flatMap(item => item.inputs))]
-  const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
-  return allChainVariables.filter(variable => !boundInputVariables.includes(variable))
-}
+const excludeBoundChainVariables = (chain: { inputs: string[]; output?: string }[]) => [
+  ...new Set(
+    chain.reduce(
+      ([unmappedInputs, mappedOutputs], { inputs, output }) => [
+        [...unmappedInputs, ...inputs.filter(input => !mappedOutputs.includes(input))],
+        output ? [...mappedOutputs, output] : mappedOutputs,
+      ],
+      [[] as string[], [] as string[]]
+    )[0]
+  ),
+]
 
 const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
   ...(item.inputs ?? []),
