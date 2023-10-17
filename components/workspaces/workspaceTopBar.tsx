@@ -1,5 +1,6 @@
 import { ActiveWorkspace } from '@/types'
-import { TopBarButton, UserAvatars } from '../topBarButton'
+import { TopBarButton } from '../topBarButton'
+import { UserAvatars } from '@/components/users/userAvatars'
 import addIcon from '@/public/addWhite.svg'
 import chevronIcon from '@/public/chevron.svg'
 import fileIcon from '@/public/file.svg'
