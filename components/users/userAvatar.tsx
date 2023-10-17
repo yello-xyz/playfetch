@@ -22,7 +22,7 @@ const getAvatarColor = (user: User) => {
 
 type Size = 'xs' | 'sm' | 'md' | 'lg'
 
-export default function UserAvatar({ user, size = 'lg', border }: { user: User; size?: Size; border?: boolean }) {
+export default function UserAvatar({ user, size = 'lg', outline }: { user: User; size?: Size; outline?: boolean }) {
   const width = (size: Size) => {
     switch (size) {
       case 'xs':
@@ -56,21 +56,21 @@ export default function UserAvatar({ user, size = 'lg', border }: { user: User; 
       case 'md':
         return 'text-xs'
       case 'lg':
-        return `font-medium ${border ? 'text-xs' : 'text-sm'}`
+        return 'font-medium text-sm'
     }
   }
-  const borderClass = border ? 'border-2 border-white' : ''
+  const outlineClass = outline ? 'outline outline-2 outline-white' : ''
   const baseClass = 'rounded-full flex items-center justify-center'
   return user.imageURL.length ? (
     <Image
       width={width(size)}
       height={width(size)}
-      className={`${sizeClass(size)} ${borderClass} rounded-full`}
+      className={`${sizeClass(size)} ${outlineClass} rounded-full`}
       src={user.imageURL}
       alt='avatar'
     />
   ) : (
-    <div className={`${sizeClass(size)} ${borderClass} ${textClass(size)} ${getAvatarColor(user)} ${baseClass}`}>
+    <div className={`${sizeClass(size)} ${outlineClass} ${textClass(size)} ${getAvatarColor(user)} ${baseClass}`}>
       {user.fullName.slice(0, 1).toUpperCase()}
     </div>
   )
