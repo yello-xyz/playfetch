@@ -43,7 +43,7 @@ function InvitePopup({ users, onInvite, withDismiss }: InvitePopupProps & WithDi
   const onLoad = useCallback((node: HTMLInputElement | null) => node?.focus(), [])
 
   return (
-    <PopupContent className='flex flex-col gap-3.5 p-3 w-[460px]'>
+    <PopupContent className='flex flex-col gap-3.5 p-3 w-[485px]'>
       <div className='flex items-center gap-2.5'>
         <TextInput placeholder='Add email addresses' onLoad={onLoad} value={email} setValue={setEmail} />
         <Button disabled={!emailsAreValid} onClick={withDismiss(() => onInvite(emails))}>
