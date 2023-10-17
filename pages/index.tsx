@@ -12,6 +12,8 @@ import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore
 import WorkspaceGridView from '@/components/workspaces/workspaceGridView'
 import WorkspaceSidebar from '@/components/workspaces/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
+import GlobalPopup from '@/components/globalPopup'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
@@ -96,37 +98,42 @@ export default function Home({
     setQuery(currentQueryState)
   }
 
+  const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
+
   return (
     <>
       <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-          <main className='flex items-stretch h-screen text-sm'>
-            <WorkspaceSidebar
-              workspaces={workspaces}
-              activeWorkspace={activeWorkspace}
-              sharedProjects={sharedProjects}
-              onSelectWorkspace={selectWorkspace}
-              onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
-              onRefreshWorkspaces={refreshWorkspaces}
-            />
-            <div className='flex flex-col flex-1'>
-              <div className='flex-1 overflow-hidden'>
-                <WorkspaceGridView
-                  workspaces={workspaces}
-                  activeWorkspace={activeWorkspace}
-                  isUserWorkspace={activeWorkspace.id === user.id}
-                  isSharedProjects={IsSharedProjects(activeWorkspace)}
-                  onAddProject={addProject}
-                  onSelectProject={navigateToProject}
-                  onSelectUserWorkspace={() => selectWorkspace(user.id)}
-                  onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                  onRefreshWorkspaces={refreshWorkspaces}
-                />
+        <GlobalPopupContext.Provider value={globalPopupProviderProps}>
+          <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+            <main className='flex items-stretch h-screen text-sm'>
+              <WorkspaceSidebar
+                workspaces={workspaces}
+                activeWorkspace={activeWorkspace}
+                sharedProjects={sharedProjects}
+                onSelectWorkspace={selectWorkspace}
+                onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
+                onRefreshWorkspaces={refreshWorkspaces}
+              />
+              <div className='flex flex-col flex-1'>
+                <div className='flex-1 overflow-hidden'>
+                  <WorkspaceGridView
+                    workspaces={workspaces}
+                    activeWorkspace={activeWorkspace}
+                    isUserWorkspace={activeWorkspace.id === user.id}
+                    isSharedProjects={IsSharedProjects(activeWorkspace)}
+                    onAddProject={addProject}
+                    onSelectProject={navigateToProject}
+                    onSelectUserWorkspace={() => selectWorkspace(user.id)}
+                    onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                    onRefreshWorkspaces={refreshWorkspaces}
+                  />
+                </div>
               </div>
-            </div>
-          </main>
-        </UserContext.Provider>
+            </main>
+          </UserContext.Provider>
+        </GlobalPopupContext.Provider>
       </ModalDialogContext.Provider>
+      <GlobalPopup {...globalPopupProps} {...popupProps} />
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
     </>
   )
