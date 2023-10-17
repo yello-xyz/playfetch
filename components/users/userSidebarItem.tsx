@@ -9,6 +9,7 @@ import Link from 'next/link'
 import ClientRoute, { AdminRoute } from '@/src/client/clientRoute'
 import { useRouter } from 'next/router'
 import UserAvatar from './userAvatar'
+import UserBadge from './userBadge'
 
 export default function UserSidebarItem() {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
@@ -35,17 +36,7 @@ export default function UserSidebarItem() {
           <div className='absolute top-0 left-1.5 shadow-sm'>
             <PopupMenu className='w-60' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
               <div className='flex flex-col items-stretch gap-0.5 p-3 select-none'>
-                <div className='flex items-center gap-2.5 pb-2 px-2'>
-                  <UserAvatar user={user} />
-                  <div className='flex flex-col min-w-0'>
-                    <span className='overflow-hidden font-semibold text-gray-700 select-none text-ellipsis'>
-                      {user.fullName}
-                    </span>
-                    <span className='overflow-hidden text-xs text-gray-400 select-none text-ellipsis'>
-                      {user.email}
-                    </span>
-                  </div>
-                </div>
+                <UserBadge user={user} />
                 <span
                   className='px-2 py-1 font-medium leading-6 text-gray-700 rounded cursor-pointer select-none hover:bg-gray-50'
                   onClick={selectSettings}>
