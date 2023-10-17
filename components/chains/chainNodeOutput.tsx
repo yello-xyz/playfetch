@@ -33,6 +33,11 @@ export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCac
     : extractChainItemInputs(item, includingDynamic)
 }
 
+const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
+  ...(item.inputs ?? []),
+  ...(includingDynamic && IsPromptChainItem(item) ? item.dynamicInputs ?? [] : []),
+]
+
 export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) =>
   excludeBoundChainVariables(
     chain.map(item => ({ inputs: ExtractChainItemVariables(item, cache, includingDynamic), output: item.output }))
@@ -53,11 +58,6 @@ const excludeBoundChainVariables = (chain: { inputs: string[]; output?: string }
       [[] as string[], [] as string[]]
     )[0]
   ),
-]
-
-const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
-  ...(item.inputs ?? []),
-  ...(includingDynamic && IsPromptChainItem(item) ? item.dynamicInputs ?? [] : []),
 ]
 
 export default function ChainNodeOutput({

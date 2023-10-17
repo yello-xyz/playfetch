@@ -1,4 +1,4 @@
-import { ActiveChain, ChainVersion, Prompt, QueryConfig } from '@/types'
+import { ActiveChain, ChainVersion, Prompt } from '@/types'
 import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'

@@ -109,7 +109,7 @@ export default function ChainView({
   }
 
   const [isNodeDirty, setNodeDirty] = useState(false)
-  const updateActiveNodeIndex = (index: number) => {
+  const updateActiveNodeIndex = (index: number | undefined) => {
     setActiveNodeIndex(index)
     setShowVersions(false)
     setNodeDirty(false)
@@ -139,9 +139,8 @@ export default function ChainView({
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
     if (testMode && activeNodeIndex === undefined) {
-      setActiveNodeIndex(0)
-    }
-    if (testMode && showVersions) {
+      updateActiveNodeIndex(0)
+    } else if (testMode && showVersions) {
       setShowVersions(false)
     }
   }
@@ -211,7 +210,7 @@ export default function ChainView({
                 activeIndex={activeNodeIndex - 1}
                 setDirty={setNodeDirty}
                 promptCache={promptCache}
-                dismiss={() => setActiveNodeIndex(undefined)}
+                dismiss={() => updateActiveNodeIndex(undefined)}
               />
             )}
           </Allotment.Pane>
