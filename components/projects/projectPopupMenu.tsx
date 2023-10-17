@@ -31,7 +31,9 @@ export default function ProjectPopupMenu({
   const leaveProject = () => {
     setMenuExpanded(false)
     setDialogPrompt({
-      title: 'Are you sure you want to leave this project?',
+      title: `Are you sure you want to leave “${project.name}”?`,
+      content: 'If you leave this project, you will no longer have access to any of its prompts or chains.',
+      confirmTitle: 'Leave Shared Project',
       callback: () => api.leaveProject(project.id).then(onDeleted),
       destructive: true,
     })
