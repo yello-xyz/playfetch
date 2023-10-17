@@ -38,10 +38,6 @@ export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCac
     : [...(item.inputs ?? []), ...(includingDynamic ? item.dynamicInputs ?? [] : [])] ?? []
 }
 
-export const ExtractChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) => [
-  ...new Set(chain.flatMap(item => ExtractChainItemVariables(item, cache, includingDynamic))),
-]
-
 const ExcludeBoundChainVariables = (chainInputs: string[][], chain: { output?: string }[]) => {
   const allChainVariables = [...new Set(chainInputs.flat())]
   const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]

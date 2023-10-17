@@ -3,7 +3,7 @@ import { ChainNode, IsChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
-import { ExtractChainVariables } from './chainNodeOutput'
+import { ExtractChainItemVariables } from './chainNodeOutput'
 
 export default function ChainNodeBoxFooter({
   nodes,
@@ -19,7 +19,14 @@ export default function ChainNodeBoxFooter({
   promptCache: ChainPromptCache
 }) {
   const chainNode = nodes[index]
-  const inputs = ExtractChainVariables(nodes.slice(index + 1).filter(IsChainItem), promptCache, false)
+  const inputs = [
+    ...new Set(
+      nodes
+        .slice(index + 1)
+        .filter(IsChainItem)
+        .flatMap(item => ExtractChainItemVariables(item, promptCache, false))
+    ),
+  ]
   const mapOutput = (output?: string) => {
     const newNodes = nodes.map(node =>
       IsChainItem(node) ? { ...node, output: node.output === output ? undefined : node.output } : node
