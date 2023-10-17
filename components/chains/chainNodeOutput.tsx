@@ -21,7 +21,7 @@ import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
-  const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
+  const allChainInputs = [...new Set(chainWithInputs.flatMap(item => item.inputs ?? []))]
   return ExcludeBoundChainVariables(allChainInputs, chainWithInputs)
 }
 

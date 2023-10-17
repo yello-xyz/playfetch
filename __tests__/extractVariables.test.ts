@@ -58,7 +58,7 @@ const testExtractChainVariables = (
 testExtractChainVariables('empty chain', [], [], [])
 testExtractChainVariables('single step single chain input', ['hello'], ['hello'])
 testExtractChainVariables('multi step single chain input', ['hello'], ['', 'hello'])
-// testExtractChainVariables('multi step repeated chain input', ['hello'], ['hello', '', 'hello'])
+testExtractChainVariables('multi step repeated chain input', ['hello'], ['hello', '', 'hello'])
 testExtractChainVariables('multi step multi chain input', ['hello', 'world'], ['hello', '', 'world'])
 testExtractChainVariables('mapped input', ['world'], ['', 'hello', 'world'], ['hello'])
 // testExtractChainVariables('mapped later', ['hello'], ['hello', 'hello'], ['hello'])
