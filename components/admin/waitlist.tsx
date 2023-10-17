@@ -6,7 +6,7 @@ import { CheckValidEmail } from '@/src/common/formatting'
 import { User } from '@/types'
 import Label from '@/components/label'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
-import { UserAvatar } from '@/components/userSidebarItem'
+import UserAvatar from '@/components/users/userAvatar'
 
 export default function Waitlist({ initialWaitlistUsers }: { initialWaitlistUsers: User[] }) {
   const [waitlistUsers, setWaitlistUsers] = useState<User[]>(initialWaitlistUsers)

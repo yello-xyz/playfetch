@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { ActiveUser } from '@/types'
 import Label from '@/components/label'
-import { UserAvatar } from '@/components/userSidebarItem'
+import UserAvatar from '@/components/users/userAvatar'
 import { FormatDate } from '@/src/common/formatting'
 
 export default function ActiveUsers({

@@ -2,7 +2,7 @@ import { ActivePrompt, Comment, User, PromptVersion, ActiveChain, ChainVersion, 
 import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versions/versionCell'
-import { UserAvatar } from './userSidebarItem'
+import UserAvatar from '@/components/users/userAvatar'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versions/versionComparison'

@@ -1,5 +1,5 @@
 import { User } from '@/types'
-import { UserAvatar } from './userSidebarItem'
+import UserAvatar from '@/components/users/userAvatar'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 

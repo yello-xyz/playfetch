@@ -3,7 +3,7 @@ import { ActivePrompt, User, PromptVersion, ChainVersion, IsPromptVersion, Activ
 import VersionPopupMenu from './versionPopupMenu'
 import VersionComparison from './versionComparison'
 import LabelPopupMenu from '../labelPopupMenu'
-import { UserAvatar } from '../userSidebarItem'
+import UserAvatar from '@/components/users/userAvatar'
 import CommentPopupMenu from '../commentPopupMenu'
 import { LabelForModel } from '@/src/common/providerMetadata'
 import chainIcon from '@/public/chainSmall.svg'

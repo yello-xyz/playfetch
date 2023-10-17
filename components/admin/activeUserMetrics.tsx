@@ -1,6 +1,6 @@
 import { ActiveUser, UserMetrics } from '@/types'
 import Label from '@/components/label'
-import { UserAvatar } from '@/components/userSidebarItem'
+import UserAvatar from '@/components/users/userAvatar'
 import { FormatCost, FormatDate } from '@/src/common/formatting'
 import Icon from '../icon'
 import backIcon from '@/public/back.svg'
