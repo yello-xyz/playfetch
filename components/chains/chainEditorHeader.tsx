@@ -9,13 +9,13 @@ import { StaticImageData } from 'next/image'
 export default function ChainEditorHeader({
   chain,
   activeVersion,
-  saveItems,
+  versionIsSaved,
   showVersions,
   setShowVersions,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  saveItems?: () => void
+  versionIsSaved: boolean
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
@@ -24,7 +24,7 @@ export default function ChainEditorHeader({
   return (
     <CustomHeader>
       <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-      <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
+      <HeaderTitle chainName={chain.name} versionIndex={!versionIsSaved || !setShowVersions ? undefined : versionIndex} />
     </CustomHeader>
   )
 }

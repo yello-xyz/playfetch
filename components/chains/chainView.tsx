@@ -87,8 +87,6 @@ export default function ChainView({
     return saveChain(GetItemsToSave(items, promptCache), refreshActiveItem)
   }
 
-  const saveItemsIfNeeded = itemsKey !== savedItemsKey ? () => saveItems(items) : undefined
-
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
   if (syncedVersionID !== activeVersion.id) {
     setSyncedVersionID(activeVersion.id)
@@ -171,9 +169,9 @@ export default function ChainView({
         <ChainEditor
           chain={chain}
           activeVersion={activeVersion}
+          versionIsSaved={itemsKey === savedItemsKey}
           nodes={nodes}
           setNodes={setNodes}
-          saveItems={saveItemsIfNeeded}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}

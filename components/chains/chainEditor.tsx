@@ -11,9 +11,9 @@ import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
 export default function ChainEditor({
   chain,
   activeVersion,
+  versionIsSaved,
   nodes,
   setNodes,
-  saveItems,
   activeIndex,
   setActiveIndex,
   prompts,
@@ -27,9 +27,9 @@ export default function ChainEditor({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
+  versionIsSaved: boolean
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
-  saveItems?: () => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
@@ -64,7 +64,7 @@ export default function ChainEditor({
       <ChainEditorHeader
         chain={chain}
         activeVersion={activeVersion}
-        saveItems={saveItems}
+        versionIsSaved={versionIsSaved}
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
@@ -81,7 +81,7 @@ export default function ChainEditor({
             setActiveIndex={updateActiveIndex}
             isMenuActive={index === activeMenuIndex}
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
-            savedVersion={saveItems ? null : activeVersion}
+            savedVersion={versionIsSaved ? activeVersion : null}
             isTestMode={isTestMode}
             setTestMode={setTestMode}
             prompts={prompts}
