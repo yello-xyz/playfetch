@@ -82,8 +82,9 @@ export const toProject = (data: any, userID: number): Project => ({
 })
 
 async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<User[]> {
-  const projectUserIDs = await getAccessingUserIDs(projectID, 'project')
-  const workspaceUserIDs = await getAccessingUserIDs(workspaceID, 'workspace')
+  // TODO expose users with pending invitations
+  const [projectUserIDs] = await getAccessingUserIDs(projectID, 'project')
+  const [workspaceUserIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
   const users = await getKeyedEntities(Entity.USER, [...new Set([...projectUserIDs, ...workspaceUserIDs])])
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
@@ -277,7 +278,8 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 }
 
 export async function getSharedProjectsForUser(userID: number): Promise<Project[]> {
-  const projectIDs = await getAccessibleObjectIDs(userID, 'project')
+  // TODO expose pending invitations
+  const [projectIDs] = await getAccessibleObjectIDs(userID, 'project')
   const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
   return projects.sort((a, b) => b.lastEditedAt - a.lastEditedAt).map(project => toProject(project, userID))
 }
@@ -364,8 +366,9 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
 
   const analytics = await getAnalyticsForProject(0, projectID, true)
 
-  const projectUserIDs = await getAccessingUserIDs(projectID, 'project')
-  const workspaceUserIDs = await getAccessingUserIDs(workspaceID, 'workspace')
+  // TODO (maybe) expose users with pending invitations
+  const [projectUserIDs] = await getAccessingUserIDs(projectID, 'project')
+  const [workspaceUserIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
   const users = await getActiveUsers([...new Set([...projectUserIDs, ...workspaceUserIDs])])
 
   return {

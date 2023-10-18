@@ -84,20 +84,24 @@ export async function revokeUserAccess(userID: number, objectID: number) {
   }
 }
 
-export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<number[]> {
+export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<[number[], number[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
-  return entities.filter(entity => entity.state === 'default').map(entity => entity.objectID)
+  return ['default', 'pending'].map(state =>
+    entities.filter(entity => entity.state === state).map(entity => entity.objectID)
+  ) as [number[], number[]]
 }
 
-export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<number[]> {
+export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<[number[], number[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
-  return entities.filter(entity => entity.state === 'default').map(entity => entity.userID)
+  return ['default', 'pending'].map(state =>
+    entities.filter(entity => entity.state === state).map(entity => entity.userID)
+  ) as [number[], number[]]
 }
 
 export async function grantUsersAccess(

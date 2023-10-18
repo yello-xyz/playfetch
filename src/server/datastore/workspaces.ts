@@ -41,7 +41,8 @@ const toWorkspace = (data: any): Workspace => ({
 })
 
 export async function getWorkspaceUsers(workspaceID: number): Promise<User[]> {
-  const userIDs = await getAccessingUserIDs(workspaceID, 'workspace')
+    // TODO expose users with pending invitations
+  const [userIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
   const users = await getKeyedEntities(Entity.USER, userIDs)
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
 }
@@ -111,7 +112,8 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 }
 
 export async function getWorkspacesForUser(userID: number): Promise<Workspace[]> {
-  const workspaceIDs = await getAccessibleObjectIDs(userID, 'workspace')
+    // TODO expose pending invitations
+  const [workspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
   const workspaces = await getKeyedEntities(Entity.WORKSPACE, workspaceIDs)
   return workspaces.sort((a, b) => b.createdAt - a.createdAt).map(toWorkspace)
 }
