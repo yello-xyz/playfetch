@@ -63,7 +63,7 @@ const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'j
 }
 
 const api = {
-  getWorkspaces: function (): Promise<Workspace[]> {
+  getWorkspaces: function (): Promise<[Workspace[], Workspace[]]> {
     return post(this.getWorkspaces)
   },
   getWorkspace: function (workspaceID: number): Promise<ActiveWorkspace> {

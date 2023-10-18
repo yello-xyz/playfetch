@@ -26,7 +26,7 @@ export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace =>
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
   const { w: workspaceID } = ParseNumberQuery(query)
 
-  const initialWorkspaces = await getWorkspacesForUser(user.id)
+  const [initialWorkspaces] = await getWorkspacesForUser(user.id)
 
   const projects = await getSharedProjectsForUser(user.id)
   const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects) : null
@@ -88,7 +88,7 @@ export default function Home({
     await navigateToProject(projectID)
   }
 
-  const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
+  const refreshWorkspaces = () => api.getWorkspaces().then(([workspaces]) => setWorkspaces(workspaces))
 
   const { w: workspaceID } = ParseNumberQuery(router.query)
   const currentQueryState = workspaceID

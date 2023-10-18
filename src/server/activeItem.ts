@@ -12,7 +12,7 @@ import { getAnalyticsForProject } from './datastore/analytics'
 export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {
   const { projectID } = ParseNumberQuery(query)
 
-  const workspaces = await getWorkspacesForUser(user.id)
+  const [workspaces] = await getWorkspacesForUser(user.id)
 
   const initialActiveProject = await getActiveProject(user.id, projectID!)
 

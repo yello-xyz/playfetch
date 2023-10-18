@@ -41,7 +41,7 @@ const toWorkspace = (data: any): Workspace => ({
 })
 
 export async function getWorkspaceUsers(workspaceID: number): Promise<User[]> {
-    // TODO expose users with pending invitations
+  // TODO expose users with pending invitations
   const [userIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
   const users = await getKeyedEntities(Entity.USER, userIDs)
   return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
@@ -111,11 +111,15 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
   await updateWorkspace({ ...workspaceData, name })
 }
 
-export async function getWorkspacesForUser(userID: number): Promise<Workspace[]> {
-    // TODO expose pending invitations
-  const [workspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
-  const workspaces = await getKeyedEntities(Entity.WORKSPACE, workspaceIDs)
-  return workspaces.sort((a, b) => b.createdAt - a.createdAt).map(toWorkspace)
+export async function getWorkspacesForUser(userID: number): Promise<[Workspace[], Workspace[]]> {
+  const [workspaceIDs, pendingWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
+  const workspaces = await getKeyedEntities(Entity.WORKSPACE, [...workspaceIDs, ...pendingWorkspaceIDs])
+  const sortAndMap = (workspaces: any[], isPending: boolean) =>
+    workspaces
+      .filter(workspaceData => pendingWorkspaceIDs.includes(getID(workspaceData)) === isPending)
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(workspaceData => toWorkspace(workspaceData))
+  return [sortAndMap(workspaces, false), sortAndMap(workspaces, true)]
 }
 
 export async function deleteWorkspaceForUser(userID: number, workspaceID: number) {
