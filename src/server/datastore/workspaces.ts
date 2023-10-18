@@ -9,7 +9,7 @@ import {
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { ActiveWorkspace, User, Workspace } from '@/types'
+import { ActiveWorkspace, PendingWorkspace, User, Workspace } from '@/types'
 import { deleteProjectForUser, toProject } from './projects'
 import {
   getAccessibleObjectIDs,
@@ -111,15 +111,42 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
   await updateWorkspace({ ...workspaceData, name })
 }
 
-export async function getWorkspacesForUser(userID: number): Promise<[Workspace[], Workspace[]]> {
-  const [workspaceIDs, pendingWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
-  const workspaces = await getKeyedEntities(Entity.WORKSPACE, [...workspaceIDs, ...pendingWorkspaceIDs])
-  const sortAndMap = (workspaces: any[], isPending: boolean) =>
-    workspaces
-      .filter(workspaceData => pendingWorkspaceIDs.includes(getID(workspaceData)) === isPending)
+const toPendingWorkspace = (
+  workspaceData: any,
+  { invitedBy, timestamp }: { invitedBy: number; timestamp: number },
+  invitingUsers: User[]
+): PendingWorkspace => ({
+  ...toWorkspace(workspaceData),
+  invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
+  timestamp,
+})
+
+export async function getWorkspacesForUser(userID: number): Promise<[Workspace[], PendingWorkspace[]]> {
+  const [workspaceIDs, pendingWorkspaces] = await getAccessibleObjectIDs(userID, 'workspace')
+
+  const pendingWorkspaceIDs = pendingWorkspaces.map(access => access.objectID)
+  const invitingUserIDs = pendingWorkspaces.map(access => access.invitedBy)
+
+  const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [...workspaceIDs, ...pendingWorkspaceIDs])
+  const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
+  const invitingUsers = invitingUsersData.map(toUser)
+
+  return [
+    workspacesData
+      .filter(workspaceData => !pendingWorkspaceIDs.includes(getID(workspaceData)))
       .sort((a, b) => b.createdAt - a.createdAt)
-      .map(workspaceData => toWorkspace(workspaceData))
-  return [sortAndMap(workspaces, false), sortAndMap(workspaces, true)]
+      .map(toWorkspace),
+    workspacesData
+      .filter(workspaceData => pendingWorkspaceIDs.includes(getID(workspaceData)))
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(workspaceData =>
+        toPendingWorkspace(
+          workspaceData,
+          pendingWorkspaces.find(access => access.objectID === getID(workspaceData))!,
+          invitingUsers
+        )
+      ),
+  ]
 }
 
 export async function deleteWorkspaceForUser(userID: number, workspaceID: number) {

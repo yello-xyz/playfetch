@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { User, AvailableProvider, Workspace, ActiveWorkspace, Project } from '@/types'
+import { User, AvailableProvider, Workspace, ActiveWorkspace, Project, PendingWorkspace } from '@/types'
 import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
@@ -60,7 +60,7 @@ export default function Home({
   user: User
   sharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
-  initialPendingWorkspaces: Workspace[]
+  initialPendingWorkspaces: PendingWorkspace[]
   initialActiveWorkspace: ActiveWorkspace
   availableProviders: AvailableProvider[]
 }) {

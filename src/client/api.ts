@@ -16,6 +16,7 @@ import {
   Analytics,
   AvailableProvider,
   QueryProvider,
+  PendingWorkspace,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -63,7 +64,7 @@ const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'j
 }
 
 const api = {
-  getWorkspaces: function (): Promise<[Workspace[], Workspace[]]> {
+  getWorkspaces: function (): Promise<[Workspace[], PendingWorkspace[]]> {
     return post(this.getWorkspaces)
   },
   getWorkspace: function (workspaceID: number): Promise<ActiveWorkspace> {

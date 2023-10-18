@@ -9,6 +9,7 @@ import {
   getFilteredEntityKey,
   getID,
   getKeyedEntity,
+  getTimestamp,
 } from './datastore'
 import { getUserForEmail } from './users'
 
@@ -84,24 +85,26 @@ export async function revokeUserAccess(userID: number, objectID: number) {
   }
 }
 
-export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<[number[], number[]]> {
+export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
-  return ['default', 'pending'].map(state =>
-    entities.filter(entity => entity.state === state).map(entity => entity.objectID)
-  ) as [number[], number[]]
+  return [
+    entities.filter(entity => entity.state === 'default').map(entity => entity.objectID),
+    entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
+  ]
 }
 
-export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<[number[], number[]]> {
+export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
-  return ['default', 'pending'].map(state =>
-    entities.filter(entity => entity.state === state).map(entity => entity.userID)
-  ) as [number[], number[]]
+  return [
+    entities.filter(entity => entity.state === 'default').map(entity => entity.userID),
+    entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
+  ]
 }
 
 export async function grantUsersAccess(
@@ -121,6 +124,20 @@ export async function grantUsersAccess(
     }
   }
 }
+
+type PendingAccess = {
+  userID: number
+  objectID: number
+  invitedBy: number
+  timestamp: number
+}
+
+const toPendingAccess = (accessData: any): PendingAccess => ({
+  userID: accessData.userID,
+  objectID: accessData.objectID,
+  invitedBy: accessData.grantedBy,
+  timestamp: getTimestamp(accessData),
+})
 
 const toAccessData = (
   userID: number,

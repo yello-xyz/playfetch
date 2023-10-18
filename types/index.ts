@@ -11,6 +11,11 @@ export type Workspace = {
   name: string
 }
 
+export type PendingWorkspace = Workspace & {
+  invitedBy: User
+  timestamp: number
+}
+
 export type ActiveWorkspace = Workspace & {
   projects: Project[]
   users: User[]
