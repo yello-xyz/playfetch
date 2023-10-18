@@ -171,7 +171,6 @@ export default function ChainView({
           activeVersion={activeVersion}
           isVersionSaved={itemsKey === savedItemsKey}
           nodes={nodes}
-          setNodes={setNodes}
           saveItems={updateItems}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}

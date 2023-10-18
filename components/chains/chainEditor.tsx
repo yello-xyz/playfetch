@@ -13,7 +13,6 @@ export default function ChainEditor({
   activeVersion,
   isVersionSaved,
   nodes,
-  setNodes,
   saveItems,
   activeIndex,
   setActiveIndex,
@@ -30,7 +29,6 @@ export default function ChainEditor({
   activeVersion: ChainVersion
   isVersionSaved: boolean
   nodes: ChainNode[]
-  setNodes: (nodes: ChainNode[]) => void
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
@@ -78,7 +76,6 @@ export default function ChainEditor({
             chain={chain}
             index={index}
             nodes={nodes}
-            setNodes={setNodes}
             saveItems={saveItems}
             activeIndex={activeIndex}
             setActiveIndex={updateActiveIndex}

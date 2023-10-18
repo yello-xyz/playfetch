@@ -11,7 +11,6 @@ export function ChainNodeBox({
   index,
   nodes,
   saveItems,
-  setNodes,
   activeIndex,
   setActiveIndex,
   isMenuActive,
@@ -28,7 +27,6 @@ export function ChainNodeBox({
   index: number
   nodes: ChainNode[]
   saveItems: (items: ChainItem[]) => void
-  setNodes: (nodes: ChainNode[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   isMenuActive: boolean
@@ -51,13 +49,14 @@ export function ChainNodeBox({
   }
 
   const items = nodes.filter(IsChainItem)
+  const itemIndex = index - 1
 
-  const updateItem = (item: ChainItem) => setNodes([...nodes.slice(0, index), item, ...nodes.slice(index + 1)])
+  const updateItem = (item: ChainItem) => saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex + 1)])
 
-  const removeItem = () => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
+  const removeItem = () => saveItems([...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)])
 
   const insertItem = (item: ChainItem) => {
-    setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
+    saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex)])
     setActiveIndex(index)
   }
 
