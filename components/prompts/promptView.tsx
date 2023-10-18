@@ -54,11 +54,9 @@ export default function PromptView({
   const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
-  const runPrompt = (inputs: PromptInputs[]) => runVersion(savePrompt, inputs)
-
-  const testPrompt = async (inputs: Record<string, string>[]) => {
+  const runPrompt = (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
-    return runPrompt(inputs)
+    return runVersion(savePrompt, inputs)
   }
 
   const selectTab = (tab: ActiveTab) => {
@@ -131,7 +129,7 @@ export default function PromptView({
               <PromptPanel
                 version={activeVersion}
                 setModifiedVersion={updateVersion}
-                runPrompt={activeTab === 'Test data' ? testPrompt : runPrompt}
+                runPrompt={runPrompt}
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
