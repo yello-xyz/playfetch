@@ -6,13 +6,11 @@ import {
   getDatastore,
   getFilteredEntities,
   getFilteredEntity,
-  getFilteredEntityKey,
   getID,
   getKeyedEntity,
   getTimestamp,
 } from './datastore'
 import { getUserForEmail } from './users'
-import { access } from 'fs'
 
 type Kind = 'project' | 'workspace'
 type State = 'default' | 'pending'

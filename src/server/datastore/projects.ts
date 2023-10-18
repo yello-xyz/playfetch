@@ -14,7 +14,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, PendingProject, Project, ProjectMetrics, RecentProject, User } from '@/types'
+import { ActiveProject, PendingProject, Project, ProjectMetrics, RecentProject, User, Workspace } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import {
   getAccessibleObjectIDs,
@@ -277,42 +277,40 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
-const toPendingProject = (
+export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
+  getAccessibleObjectsForUser(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
+
+export async function getAccessibleObjectsForUser<T>(
   userID: number,
-  projectData: any,
-  { invitedBy, timestamp }: { invitedBy: number; timestamp: number },
-  invitingUsers: User[]
-): PendingProject => ({
-  ...toProject(projectData, userID),
-  invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
-  timestamp,
-})
+  kind: 'project' | 'workspace',
+  entityType: string,
+  toObject: (data: any) => T
+): Promise<[T[], (T & { invitedBy: User; timestamp: number })[]]> {
+  const [objectIDs, pendingObjects] = await getAccessibleObjectIDs(userID, kind)
 
-export async function getSharedProjectsForUser(userID: number): Promise<[Project[], PendingProject[]]> {
-  const [projectIDs, pendingProjects] = await getAccessibleObjectIDs(userID, 'project')
+  const pendingObjectIDs = pendingObjects.map(access => access.objectID)
+  const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
 
-  const pendingProjectIDs = pendingProjects.map(access => access.objectID)
-  const invitingUserIDs = pendingProjects.map(access => access.invitedBy)
-
-  const projectsData = await getKeyedEntities(Entity.PROJECT, [...projectIDs, ...pendingProjectIDs])
+  const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
   const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
   const invitingUsers = invitingUsersData.map(toUser)
 
+  const toPendingObject = (object: T, { invitedBy, timestamp }: { invitedBy: number; timestamp: number }) => ({
+    ...object,
+    invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
+    timestamp,
+  })
+
   return [
-    projectsData
-      .filter(projectData => !pendingProjectIDs.includes(getID(projectData)))
+    objectsData
+      .filter(objectData => !pendingObjectIDs.includes(getID(objectData)))
       .sort((a, b) => b.createdAt - a.createdAt)
-      .map(project => toProject(project, userID)),
-    projectsData
-      .filter(projectData => pendingProjectIDs.includes(getID(projectData)))
+      .map(toObject),
+    objectsData
+      .filter(objectData => pendingObjectIDs.includes(getID(objectData)))
       .sort((a, b) => b.createdAt - a.createdAt)
-      .map(projectData =>
-        toPendingProject(
-          userID,
-          projectData,
-          pendingProjects.find(access => access.objectID === getID(projectData))!,
-          invitingUsers
-        )
+      .map(objectData =>
+        toPendingObject(toObject(objectData), pendingObjects.find(access => access.objectID === getID(objectData))!)
       ),
   ]
 }
