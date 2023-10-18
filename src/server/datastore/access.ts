@@ -16,11 +16,7 @@ export async function migrateAccess() {
   const datastore = getDatastore()
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const accessData of allAccess) {
-    datastore.save({
-      key: buildKey(Entity.ACCESS, getID(accessData)),
-      data: { userID: accessData.userID, objectID: accessData.objectID, kind: accessData.kind },
-      excludeFromIndexes: [],
-    })
+    datastore.save(toAccessData(accessData.userID, accessData.objectID, accessData.kind, getID(accessData)))
   }
 }
 
@@ -35,11 +31,7 @@ export async function hasUserAccess(userID: number, objectID: number) {
 export async function grantUserAccess(userID: number, objectID: number, kind: Kind) {
   const hasAccess = await hasUserAccess(userID, objectID)
   if (!hasAccess) {
-    await getDatastore().save({
-      key: buildKey(Entity.ACCESS),
-      data: { userID, objectID, kind },
-      excludeFromIndexes: [],
-    })
+    await getDatastore().save(toAccessData(userID, objectID, kind))
   }
 }
 
@@ -78,3 +70,9 @@ export async function grantUsersAccess(emails: string[], objectID: number, kind:
     }
   }
 }
+
+const toAccessData = (userID: number, objectID: number, kind: Kind, accessID?: number) => ({
+  key: buildKey(Entity.ACCESS, accessID),
+  data: { userID, objectID, kind },
+  excludeFromIndexes: [],
+})
