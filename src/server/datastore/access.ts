@@ -12,6 +12,7 @@ import {
 import { getUserForEmail } from './users'
 
 type Kind = 'project' | 'workspace'
+type State = 'default' | 'pending'
 
 export async function migrateAccess(postMerge: boolean) {
   if (postMerge) {
@@ -32,6 +33,7 @@ export async function migrateAccess(postMerge: boolean) {
           accessData.userID,
           accessData.objectID,
           accessData.kind,
+          'default',
           workspaceData.userID,
           workspaceData.createdAt,
           getID(accessData)
@@ -52,7 +54,8 @@ export async function hasUserAccess(userID: number, objectID: number) {
 export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
   const hasAccess = await hasUserAccess(userID, objectID)
   if (!hasAccess) {
-    await getDatastore().save(toAccessData(userID, objectID, kind, grantedBy, new Date()))
+    const state = userID === grantedBy ? 'default' : 'pending'
+    await getDatastore().save(toAccessData(userID, objectID, kind, state, grantedBy, new Date()))
   }
 }
 
@@ -101,11 +104,12 @@ const toAccessData = (
   userID: number,
   objectID: number,
   kind: Kind,
+  state: State,
   grantedBy: number,
   createdAt: Date,
   accessID?: number
 ) => ({
   key: buildKey(Entity.ACCESS, accessID),
-  data: { userID, objectID, kind, grantedBy, createdAt },
+  data: { userID, objectID, kind, state, grantedBy, createdAt },
   excludeFromIndexes: [],
 })
