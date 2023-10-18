@@ -7,16 +7,37 @@ import {
   getFilteredEntities,
   getFilteredEntityKey,
   getID,
+  getKeyedEntity,
 } from './datastore'
 import { getUserForEmail } from './users'
 
 type Kind = 'project' | 'workspace'
 
-export async function migrateAccess() {
+export async function migrateAccess(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const accessData of allAccess) {
-    datastore.save(toAccessData(accessData.userID, accessData.objectID, accessData.kind, getID(accessData)))
+    if (!accessData.grantedBy && !accessData.createdAt) {
+      let workspaceID = accessData.objectID
+      if (accessData.kind === 'project') {
+        const projectData = await getKeyedEntity(Entity.PROJECT, accessData.objectID)
+        workspaceID = projectData.workspaceID
+      }
+      const workspaceData = await getKeyedEntity(Entity.WORKSPACE, workspaceID)
+      datastore.save(
+        toAccessData(
+          accessData.userID,
+          accessData.objectID,
+          accessData.kind,
+          workspaceData.userID,
+          workspaceData.createdAt,
+          getID(accessData)
+        )
+      )
+    }
   }
 }
 
@@ -28,10 +49,10 @@ export async function hasUserAccess(userID: number, objectID: number) {
   return !!accessKey
 }
 
-export async function grantUserAccess(userID: number, objectID: number, kind: Kind) {
+export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
   const hasAccess = await hasUserAccess(userID, objectID)
   if (!hasAccess) {
-    await getDatastore().save(toAccessData(userID, objectID, kind))
+    await getDatastore().save(toAccessData(userID, objectID, kind, grantedBy, new Date()))
   }
 }
 
@@ -58,11 +79,16 @@ export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise
   return entities.map(entity => entity.userID)
 }
 
-export async function grantUsersAccess(emails: string[], objectID: number, kind: 'project' | 'workspace') {
+export async function grantUsersAccess(
+  userID: number,
+  emails: string[],
+  objectID: number,
+  kind: 'project' | 'workspace'
+) {
   for (const email of emails) {
     const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
-      await grantUserAccess(user.id, objectID, kind)
+      await grantUserAccess(userID, user.id, objectID, kind)
       // TODO send notification (but only if they already have access)
     } else {
       // TODO send invite to sign up (if we automatically want to give people access)
@@ -71,8 +97,15 @@ export async function grantUsersAccess(emails: string[], objectID: number, kind:
   }
 }
 
-const toAccessData = (userID: number, objectID: number, kind: Kind, accessID?: number) => ({
+const toAccessData = (
+  userID: number,
+  objectID: number,
+  kind: Kind,
+  grantedBy: number,
+  createdAt: Date,
+  accessID?: number
+) => ({
   key: buildKey(Entity.ACCESS, accessID),
-  data: { userID, objectID, kind },
+  data: { userID, objectID, kind, grantedBy, createdAt },
   excludeFromIndexes: [],
 })

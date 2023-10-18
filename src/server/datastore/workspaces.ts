@@ -68,7 +68,7 @@ export async function addWorkspaceForUser(userID: number, workspaceName?: string
   )
   await getDatastore().save(workspaceData)
   const workspaceID = getID(workspaceData)
-  await grantUserAccess(userID, workspaceID, 'workspace')
+  await grantUserAccess(userID, userID, workspaceID, 'workspace')
   return workspaceID
 }
 
@@ -77,7 +77,7 @@ export async function inviteMembersToWorkspace(userID: number, workspaceID: numb
     throw new Error('Cannot invite to Drafts workspace')
   }
   await getVerifiedUserWorkspaceData(userID, workspaceID)
-  await grantUsersAccess(emails, workspaceID, 'workspace')
+  await grantUsersAccess(userID, emails, workspaceID, 'workspace')
 }
 
 export async function revokeMemberAccessForWorkspace(userID: number, workspaceID: number) {

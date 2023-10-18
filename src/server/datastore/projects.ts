@@ -172,7 +172,7 @@ export async function augmentProjectWithNewVersion(
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
   await getVerifiedUserProjectData(userID, projectID)
-  await grantUsersAccess(emails, projectID, 'project')
+  await grantUsersAccess(userID, emails, projectID, 'project')
 }
 
 export async function revokeMemberAccessForProject(userID: number, projectID: number) {
