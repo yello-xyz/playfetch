@@ -7,31 +7,30 @@ import { ExtractChainItemVariables } from './chainNodeOutput'
 
 export default function ChainNodeBoxFooter({
   nodes,
-  setNodes,
   index,
+  saveItems,
   isSelected,
   promptCache,
 }: {
   nodes: ChainNode[]
-  setNodes: (nodes: ChainNode[]) => void
   index: number
+  saveItems: (items: ChainItem[]) => void
   isSelected: boolean
   promptCache: ChainPromptCache
 }) {
   const chainNode = nodes[index]
+  const items = nodes.filter(IsChainItem)
+  const itemIndex = index - 1
   const inputs = [
-    ...new Set(
-      nodes
-        .slice(index + 1)
-        .filter(IsChainItem)
-        .flatMap(item => ExtractChainItemVariables(item, promptCache, false))
-    ),
+    ...new Set(items.slice(itemIndex + 1).flatMap(item => ExtractChainItemVariables(item, promptCache, false))),
   ]
   const mapOutput = (output?: string) => {
-    const newNodes = nodes.map(node =>
-      IsChainItem(node) ? { ...node, output: node.output === output ? undefined : node.output } : node
-    )
-    setNodes([...newNodes.slice(0, index), { ...(newNodes[index] as ChainItem), output }, ...newNodes.slice(index + 1)])
+    const newItems = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
+    saveItems([
+      ...newItems.slice(0, itemIndex),
+      { ...(newItems[itemIndex] as ChainItem), output },
+      ...newItems.slice(itemIndex + 1),
+    ])
   }
 
   return (

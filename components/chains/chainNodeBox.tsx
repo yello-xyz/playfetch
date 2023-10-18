@@ -109,8 +109,8 @@ export function ChainNodeBox({
         <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} promptCache={promptCache} />
         <ChainNodeBoxFooter
           nodes={nodes}
-          setNodes={setNodes}
           index={index}
+          saveItems={saveItems}
           isSelected={isSelected}
           promptCache={promptCache}
         />
