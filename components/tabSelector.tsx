@@ -39,21 +39,30 @@ export default function TabSelector<T extends string>({
   onUpdateLabel?: (label: string) => void
   children?: ReactNode
 }) {
-  const [isEditingLabel, setEditingLabel] = useState(false)
+  const [label, setLabel] = useState<string>()
+  const submitRename = (name: string) => {
+    onUpdateLabel?.(name)
+    setLabel(undefined)
+  }
 
   return (
     <CustomHeader>
       <div className='flex items-center gap-0.5'>
-        {icon && !isEditingLabel && <Icon className='-mr-1.5' icon={icon} />}
-        {isEditingLabel && onUpdateLabel ? (
-          <EditableHeaderItem value={tabs[0]} onChange={onUpdateLabel} onSubmit={() => setEditingLabel(false)} />
+        {icon && label === undefined && <Icon className='-mr-1.5' icon={icon} />}
+        {label !== undefined ? (
+          <EditableHeaderItem
+            value={label}
+            onChange={setLabel}
+            onSubmit={() => submitRename(label)}
+            onCancel={() => setLabel(undefined)}
+          />
         ) : (
           tabs.map((tab, index) => (
             <TabButton
               key={index}
               tab={tab}
               activeTab={tabs.length > 1 ? activeTab : undefined}
-              setActiveTab={tabs.length > 1 ? setActiveTab : onUpdateLabel ? () => setEditingLabel(true) : undefined}
+              setActiveTab={tabs.length > 1 ? setActiveTab : onUpdateLabel ? () => setLabel(tabs[0]) : undefined}
             />
           ))
         )}
@@ -115,16 +124,20 @@ export function EditableHeaderItem({
   value,
   onChange,
   onSubmit,
+  onCancel,
 }: {
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
+  onCancel: () => void
 }) {
   const inputRef = useCallback((node: any) => node?.select(), [])
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
       onSubmit()
+    } else if (event.key === 'Escape') {
+      onCancel()
     }
   }
 
