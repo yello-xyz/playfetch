@@ -14,7 +14,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, Project, ProjectMetrics, RecentProject, User } from '@/types'
+import { ActiveProject, PendingProject, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import {
   getAccessibleObjectIDs,
@@ -277,11 +277,44 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
-export async function getSharedProjectsForUser(userID: number): Promise<Project[]> {
-  // TODO expose pending invitations
-  const [projectIDs] = await getAccessibleObjectIDs(userID, 'project')
-  const projects = await getKeyedEntities(Entity.PROJECT, projectIDs)
-  return projects.sort((a, b) => b.lastEditedAt - a.lastEditedAt).map(project => toProject(project, userID))
+const toPendingProject = (
+  userID: number,
+  projectData: any,
+  { invitedBy, timestamp }: { invitedBy: number; timestamp: number },
+  invitingUsers: User[]
+): PendingProject => ({
+  ...toProject(projectData, userID),
+  invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
+  timestamp,
+})
+
+export async function getSharedProjectsForUser(userID: number): Promise<[Project[], PendingProject[]]> {
+  const [projectIDs, pendingProjects] = await getAccessibleObjectIDs(userID, 'project')
+
+  const pendingProjectIDs = pendingProjects.map(access => access.objectID)
+  const invitingUserIDs = pendingProjects.map(access => access.invitedBy)
+
+  const projectsData = await getKeyedEntities(Entity.PROJECT, [...projectIDs, ...pendingProjectIDs])
+  const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
+  const invitingUsers = invitingUsersData.map(toUser)
+
+  return [
+    projectsData
+      .filter(projectData => !pendingProjectIDs.includes(getID(projectData)))
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(project => toProject(project, userID)),
+    projectsData
+      .filter(projectData => pendingProjectIDs.includes(getID(projectData)))
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(projectData =>
+        toPendingProject(
+          userID,
+          projectData,
+          pendingProjects.find(access => access.objectID === getID(projectData))!,
+          invitingUsers
+        )
+      ),
+  ]
 }
 
 export async function deleteProjectForUser(userID: number, projectID: number) {

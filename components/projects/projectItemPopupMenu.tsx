@@ -76,7 +76,7 @@ export default function ProjectItemPopupMenu({
 
   const copyPromptToProject = () => {
     setMenuExpanded(false)
-    api.getSharedProjects().then(setSharedProjects)
+    api.getSharedProjects().then(([projects]) => setSharedProjects(projects))
     setShowMovePromptDialog(true)
   }
 

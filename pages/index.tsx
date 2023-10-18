@@ -37,7 +37,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
-  const projects = await getSharedProjectsForUser(user.id)
+  const [projects] = await getSharedProjectsForUser(user.id)
   const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects) : null
   const initialActiveWorkspace =
     workspaceID === SharedProjectsWorkspaceID
@@ -85,7 +85,7 @@ export default function Home({
 
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
-      ? api.getSharedProjects().then(projects => setActiveWorkspace(SharedProjectsWorkspace(projects)))
+      ? api.getSharedProjects().then(([projects]) => setActiveWorkspace(SharedProjectsWorkspace(projects)))
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {

@@ -32,6 +32,11 @@ export type Project = {
   favorited: boolean
 }
 
+export type PendingProject = Project & {
+  invitedBy: User
+  timestamp: number
+}
+
 export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {

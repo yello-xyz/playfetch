@@ -17,6 +17,7 @@ import {
   AvailableProvider,
   QueryProvider,
   PendingWorkspace,
+  PendingProject,
 } from '@/types'
 import ClientRoute from './clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -70,7 +71,7 @@ const api = {
   getWorkspace: function (workspaceID: number): Promise<ActiveWorkspace> {
     return post(this.getWorkspace, { workspaceID })
   },
-  getSharedProjects: function (): Promise<Project[]> {
+  getSharedProjects: function (): Promise<[Project[], PendingProject[]]> {
     return post(this.getSharedProjects)
   },
   addWorkspace: function (name: string): Promise<number> {
