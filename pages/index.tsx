@@ -117,7 +117,7 @@ export default function Home({
               <WorkspaceSidebar
                 workspaces={workspaces}
                 pendingWorkspaces={pendingWorkspaces}
-                activeWorkspace={activeWorkspace}
+                activeWorkspaceID={activeWorkspace.id}
                 sharedProjects={sharedProjects}
                 onSelectWorkspace={selectWorkspace}
                 onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}

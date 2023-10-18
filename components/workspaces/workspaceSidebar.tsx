@@ -12,7 +12,7 @@ import { FeedbackSection, SidebarButton, SidebarSection } from '../sidebar'
 export default function WorkspaceSidebar({
   workspaces,
   pendingWorkspaces,
-  activeWorkspace,
+  activeWorkspaceID,
   sharedProjects,
   onSelectWorkspace,
   onSelectSharedProjects,
@@ -20,7 +20,7 @@ export default function WorkspaceSidebar({
 }: {
   workspaces: Workspace[]
   pendingWorkspaces: Workspace[]
-  activeWorkspace: ActiveWorkspace
+  activeWorkspaceID: number
   sharedProjects?: ActiveWorkspace
   onSelectWorkspace: (workspaceID: number) => void
   onSelectSharedProjects?: () => void
@@ -50,7 +50,7 @@ export default function WorkspaceSidebar({
             <SidebarButton
               title={userWorkspace.name}
               icon={fileIcon}
-              active={activeWorkspace.id === userWorkspace.id}
+              active={activeWorkspaceID === userWorkspace.id}
               onClick={() => onSelectWorkspace(userWorkspace.id)}
             />
           )}
@@ -58,7 +58,7 @@ export default function WorkspaceSidebar({
             <SidebarButton
               title={sharedProjects.name}
               icon={folderIcon}
-              active={activeWorkspace.id === sharedProjects.id}
+              active={activeWorkspaceID === sharedProjects.id}
               onClick={onSelectSharedProjects}
             />
           )}
@@ -69,7 +69,7 @@ export default function WorkspaceSidebar({
               key={workspaceIndex}
               title={workspace.name}
               icon={folderIcon}
-              active={activeWorkspace.id === workspace.id}
+              active={activeWorkspaceID === workspace.id}
               onClick={isPendingWorkspace(workspace) ? undefined : () => onSelectWorkspace(workspace.id)}
             />
           ))}
