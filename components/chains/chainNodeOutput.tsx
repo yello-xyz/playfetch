@@ -160,6 +160,7 @@ export default function ChainNodeOutput({
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
+              onShowTestConfig={activeIndex !== 0 ? () => setActiveIndex(0) : undefined}
               disabled={!items.length || !areProvidersAvailable(items)}
               callback={runChain}
             />

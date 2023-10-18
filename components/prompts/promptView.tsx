@@ -133,6 +133,7 @@ export default function PromptView({
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
+                onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
                 loadPendingVersion={loadPendingVersion}
                 isDirty={isDirty}
                 setPreferredHeight={setPromptHeight}

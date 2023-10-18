@@ -41,6 +41,7 @@ export default function PromptPanel({
   inputValues,
   testConfig,
   setTestConfig,
+  onShowTestConfig,
   initialActiveTab,
   onActiveTabChange,
   loadPendingVersion,
@@ -53,6 +54,7 @@ export default function PromptPanel({
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
+  onShowTestConfig?: () => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
   loadPendingVersion?: () => void
@@ -169,6 +171,7 @@ export default function PromptPanel({
           setLanguageModel={updateModel}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
+          onShowTestConfig={onShowTestConfig}
           disabled={!isModelAvailable || prompts.main.trim().length === 0}
           callback={runPrompt}
         />
