@@ -22,12 +22,29 @@ export async function migrateAccess(postMerge: boolean) {
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const accessData of allAccess) {
     if (!accessData.grantedBy && !accessData.createdAt) {
+      console.log(`Migrating access key ${getID(accessData)} (${accessData.kind} ${accessData.objectID})`)
       let workspaceID = accessData.objectID
       if (accessData.kind === 'project') {
         const projectData = await getKeyedEntity(Entity.PROJECT, accessData.objectID)
+        if (!projectData) {
+          console.log('→ dangling project acces key?')
+          continue
+        }
         workspaceID = projectData.workspaceID
       }
       const workspaceData = await getKeyedEntity(Entity.WORKSPACE, workspaceID)
+      if (!workspaceData) {
+        if (accessData.userID === workspaceID) {
+          const userData = await getKeyedEntity(Entity.USER, accessData.userID)
+          if (!userData) {
+            console.log('Deleting dangling workspace access key for deleted user and workspace')
+            datastore.delete(buildKey(Entity.ACCESS, getID(accessData)))
+            continue
+          }
+        }
+        console.log('→ dangling workspace?')
+        continue
+      }
       datastore.save(
         toAccessData(
           accessData.userID,
