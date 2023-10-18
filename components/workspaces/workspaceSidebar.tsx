@@ -11,6 +11,7 @@ import { FeedbackSection, SidebarButton, SidebarSection } from '../sidebar'
 
 export default function WorkspaceSidebar({
   workspaces,
+  pendingWorkspaces,
   activeWorkspace,
   sharedProjects,
   onSelectWorkspace,
@@ -18,6 +19,7 @@ export default function WorkspaceSidebar({
   onRefreshWorkspaces,
 }: {
   workspaces: Workspace[]
+  pendingWorkspaces: Workspace[]
   activeWorkspace: ActiveWorkspace
   sharedProjects?: ActiveWorkspace
   onSelectWorkspace: (workspaceID: number) => void
@@ -35,6 +37,7 @@ export default function WorkspaceSidebar({
 
   const userWorkspace = workspaces.find(workspace => workspace.id === user.id)
   const properWorkspaces = workspaces.filter(workspace => workspace.id !== user.id)
+  const isPendingWorkspace = (workspace: Workspace) => pendingWorkspaces.some(pending => pending.id === workspace.id)
 
   return (
     <>
@@ -61,13 +64,13 @@ export default function WorkspaceSidebar({
           )}
         </SidebarSection>
         <SidebarSection title='Workspaces' className='flex-1'>
-          {properWorkspaces.map((workspace, workspaceIndex) => (
+          {[...pendingWorkspaces, ...properWorkspaces].map((workspace, workspaceIndex) => (
             <SidebarButton
               key={workspaceIndex}
               title={workspace.name}
               icon={folderIcon}
               active={activeWorkspace.id === workspace.id}
-              onClick={() => onSelectWorkspace(workspace.id)}
+              onClick={isPendingWorkspace(workspace) ? undefined : () => onSelectWorkspace(workspace.id)}
             />
           ))}
           <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
