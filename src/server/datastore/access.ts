@@ -5,6 +5,7 @@ import {
   buildKey,
   getDatastore,
   getFilteredEntities,
+  getFilteredEntity,
   getFilteredEntityKey,
   getID,
   getKeyedEntity,
@@ -60,12 +61,12 @@ export async function migrateAccess(postMerge: boolean) {
   }
 }
 
-const getUserAccessKey = (userID: number, objectID: number) =>
-  getFilteredEntityKey(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
+const getAccessData = (userID: number, objectID: number) =>
+  getFilteredEntity(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
 
 export async function hasUserAccess(userID: number, objectID: number) {
-  const accessKey = await getUserAccessKey(userID, objectID)
-  return !!accessKey
+  const accessData = await getAccessData(userID, objectID)
+  return !!accessData && accessData.state === 'default'
 }
 
 export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
@@ -77,9 +78,9 @@ export async function grantUserAccess(grantedBy: number, userID: number, objectI
 }
 
 export async function revokeUserAccess(userID: number, objectID: number) {
-  const accessKey = await getUserAccessKey(userID, objectID)
-  if (accessKey) {
-    await getDatastore().delete(accessKey)
+  const accessData = await getAccessData(userID, objectID)
+  if (accessData) {
+    await getDatastore().delete(buildKey(Entity.ACCESS, getID(accessData)))
   }
 }
 
@@ -88,7 +89,7 @@ export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promis
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
-  return entities.map(entity => entity.objectID)
+  return entities.filter(entity => entity.state === 'default').map(entity => entity.objectID)
 }
 
 export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<number[]> {
@@ -96,7 +97,7 @@ export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
-  return entities.map(entity => entity.userID)
+  return entities.filter(entity => entity.state === 'default').map(entity => entity.userID)
 }
 
 export async function grantUsersAccess(
