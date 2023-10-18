@@ -12,6 +12,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { getUserForEmail } from './users'
+import { access } from 'fs'
 
 type Kind = 'project' | 'workspace'
 type State = 'default' | 'pending'
@@ -82,6 +83,19 @@ export async function revokeUserAccess(userID: number, objectID: number) {
   const accessData = await getAccessData(userID, objectID)
   if (accessData) {
     await getDatastore().delete(buildKey(Entity.ACCESS, getID(accessData)))
+  }
+}
+
+export async function updateAccessForUser(userID: number, objectID: number, accept: boolean) {
+  const accessData = await getAccessData(userID, objectID)
+  if (accessData && accessData.state === 'pending') {
+    if (accept) {
+      await getDatastore().save(
+        toAccessData(userID, objectID, accessData.kind, 'default', accessData.grantedBy, accessData.createdAt)
+      )
+    } else {
+      await getDatastore().delete(buildKey(Entity.ACCESS, getID(accessData)))
+    }
   }
 }
 

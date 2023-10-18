@@ -88,6 +88,9 @@ const api = {
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
   },
+  respondToInvite: function (objectID: number, accept: boolean) {
+    return post(this.respondToInvite, { objectID, accept })
+  },
   getProject: function (projectID: number): Promise<ActiveProject> {
     return post(this.getProject, { projectID })
   },

@@ -2,7 +2,15 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { User, AvailableProvider, Workspace, ActiveWorkspace, Project, PendingWorkspace, IsPendingWorkspace } from '@/types'
+import {
+  User,
+  AvailableProvider,
+  Workspace,
+  ActiveWorkspace,
+  Project,
+  PendingWorkspace,
+  IsPendingWorkspace,
+} from '@/types'
 import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
@@ -105,6 +113,16 @@ export default function Home({
       setPendingWorkspaces(pendingWorkspaces)
     })
 
+  const respondToInvite = (workspaceID: number, accept: boolean) =>
+    api.respondToInvite(workspaceID, accept).then(() => {
+      if (accept) {
+        refreshWorkspace(workspaceID)
+      } else {
+        selectWorkspace(user.id)
+        refreshWorkspaces()
+      }
+    })
+
   const { w: workspaceID } = ParseNumberQuery(router.query)
   const currentQueryState = workspaceID
   const [query, setQuery] = useState(currentQueryState)
@@ -133,7 +151,10 @@ export default function Home({
               <div className='flex flex-col flex-1'>
                 <div className='flex-1 overflow-hidden'>
                   {IsPendingWorkspace(activeWorkspace) ? (
-                    <WorkspaceInvite workspace={activeWorkspace} />
+                    <WorkspaceInvite
+                      workspace={activeWorkspace}
+                      onRespond={accept => respondToInvite(activeWorkspace.id, accept)}
+                    />
                   ) : (
                     <WorkspaceGridView
                       workspaces={workspaces}
