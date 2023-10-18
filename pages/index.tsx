@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { User, AvailableProvider, Workspace, ActiveWorkspace, Project, PendingWorkspace } from '@/types'
+import { User, AvailableProvider, Workspace, ActiveWorkspace, Project, PendingWorkspace, IsPendingWorkspace } from '@/types'
 import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
@@ -14,7 +14,7 @@ import WorkspaceSidebar from '@/components/workspaces/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
-import { FormatDate } from '@/src/common/formatting'
+import WorkspaceInvite from '@/components/workspaces/workspaceInvite'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
@@ -114,8 +114,6 @@ export default function Home({
   }
 
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
-  const isPendingWorkspace = (workspace: ActiveWorkspace | PendingWorkspace): workspace is PendingWorkspace =>
-    'invitedBy' in workspace
 
   return (
     <>
@@ -134,11 +132,8 @@ export default function Home({
               />
               <div className='flex flex-col flex-1'>
                 <div className='flex-1 overflow-hidden'>
-                  {isPendingWorkspace(activeWorkspace) ? (
-                    <div>
-                      Invited to {activeWorkspace.name} by {activeWorkspace.invitedBy.fullName} on{' '}
-                      {FormatDate(activeWorkspace.timestamp)}
-                    </div>
+                  {IsPendingWorkspace(activeWorkspace) ? (
+                    <WorkspaceInvite workspace={activeWorkspace} />
                   ) : (
                     <WorkspaceGridView
                       workspaces={workspaces}

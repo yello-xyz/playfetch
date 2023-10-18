@@ -21,6 +21,9 @@ export type ActiveWorkspace = Workspace & {
   users: User[]
 }
 
+export const IsPendingWorkspace = (workspace: ActiveWorkspace | PendingWorkspace): workspace is PendingWorkspace =>
+  'invitedBy' in workspace
+
 export type Project = {
   id: number
   name: string

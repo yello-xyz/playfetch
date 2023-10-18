@@ -1,4 +1,4 @@
-import { ActiveWorkspace } from '@/types'
+import { ActiveWorkspace, IsPendingWorkspace, PendingWorkspace } from '@/types'
 import { TopBarButton } from '../topBarButton'
 import { UserAvatars } from '@/components/users/userAvatars'
 import addIcon from '@/public/addWhite.svg'
@@ -20,27 +20,28 @@ export default function WorkspaceTopBar({
   onRenamed,
   onDeleted,
 }: {
-  activeWorkspace: ActiveWorkspace
-  isUserWorkspace: boolean
-  isSharedProjects: boolean
-  onAddProject: () => Promise<void>
-  onInviteMembers: (emails: string[]) => void
-  onRenamed: () => void
-  onDeleted: () => void
+  activeWorkspace: ActiveWorkspace | PendingWorkspace
+  isUserWorkspace?: boolean
+  isSharedProjects?: boolean
+  onAddProject?: () => Promise<void>
+  onInviteMembers?: (emails: string[]) => void
+  onRenamed?: () => void
+  onDeleted?: () => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
-  const hasPopupMenu = !isUserWorkspace && !isSharedProjects
+  const hasIcon = !isUserWorkspace && !isSharedProjects
+  const hasPopupMenu = hasIcon && !IsPendingWorkspace(activeWorkspace)
 
   return (
     <div className='flex items-center justify-between pt-3 pb-2.5 px-5'>
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
-        {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
+        {hasIcon && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <div className='flex items-center gap-0'>
           <span className='text-lg font-medium leading-8 text-gray-700'>{activeWorkspace.name}</span>
-          {hasPopupMenu && (
+          {hasPopupMenu && onRenamed && onDeleted && (
             <>
               <Icon icon={chevronIcon} />
               <div className='absolute shadow-sm -left-1 top-10'>
@@ -57,11 +58,11 @@ export default function WorkspaceTopBar({
           )}
         </div>
       </div>
-      {!isSharedProjects && (
+      {!isSharedProjects && !IsPendingWorkspace(activeWorkspace) && (
         <div className='flex items-center gap-2'>
           <UserAvatars users={activeWorkspace.users} />
-          {!isUserWorkspace && <InviteButton users={activeWorkspace.users} onInvite={onInviteMembers} />}
-          <AddProjectButton onAddProject={onAddProject} />
+          {!isUserWorkspace && onInviteMembers && <InviteButton users={activeWorkspace.users} onInvite={onInviteMembers} />}
+          {onAddProject && <AddProjectButton onAddProject={onAddProject} />}
         </div>
       )}
     </div>
