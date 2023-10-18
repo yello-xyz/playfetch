@@ -25,7 +25,6 @@ export default function ChainEditorHeader({
     <CustomHeader>
       <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
       <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
-      <SaveVersionButton saveItems={saveItems} />
     </CustomHeader>
   )
 }
@@ -60,10 +59,6 @@ const ShowVersionsButton = ({
     justify='justify-start'
     hideIfInactive
   />
-)
-
-const SaveVersionButton = ({ saveItems }: { saveItems?: () => void }) => (
-  <HeaderButton onClick={saveItems} title='Save version' icon={saveIcon} justify='justify-end' />
 )
 
 function HeaderButton({

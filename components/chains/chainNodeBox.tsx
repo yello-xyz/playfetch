@@ -48,6 +48,8 @@ export function ChainNodeBox({
     setActiveIndex(index)
   }
 
+  const items = nodes.filter(IsChainItem)
+
   const updateItem = (item: ChainItem) => setNodes([...nodes.slice(0, index), item, ...nodes.slice(index + 1)])
 
   const removeItem = () => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
@@ -72,8 +74,6 @@ export function ChainNodeBox({
     insertItem({ ...(chainNode as ChainItem), output: undefined })
     setActiveIndex(index + 1)
   }
-
-  const items = nodes.filter(IsChainItem)
 
   return (
     <>
