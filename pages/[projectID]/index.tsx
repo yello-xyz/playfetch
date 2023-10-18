@@ -99,11 +99,9 @@ export default function Home({
     }
   }
 
-  const refresh = (versionID?: number) => {
-    refreshActiveItem(versionID)
-    if (activeItem !== CompareItem && activeItem !== EndpointsItem) {
-      refreshProject()
-    }
+  const refreshOnSavePrompt = (promptID: number) => (versionID?: number) => {
+    refreshPrompt(promptID, versionID)
+    refreshProject()
   }
 
   const router = useRouter()
@@ -192,7 +190,6 @@ export default function Home({
                     onAddPrompt={addPrompt}
                     onAddChain={addChain}
                     onDeleteItem={onDeleteItem}
-                    onRefreshItem={() => refresh()}
                     onSelectPrompt={selectPrompt}
                     onSelectChain={selectChain}
                     onSelectCompare={selectCompare}
@@ -208,7 +205,9 @@ export default function Home({
                           setModifiedVersion={setModifiedVersion}
                           showComments={showComments}
                           setShowComments={setShowComments}
-                          savePrompt={() => savePrompt(refresh).then(versionID => versionID!)}
+                          savePrompt={() =>
+                            savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)
+                          }
                         />
                       </Suspense>
                     )}
