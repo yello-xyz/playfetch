@@ -14,6 +14,7 @@ import WorkspaceSidebar from '@/components/workspaces/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
+import { FormatDate } from '@/src/common/formatting'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
@@ -33,7 +34,8 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
   const initialActiveWorkspace =
     workspaceID === SharedProjectsWorkspaceID
       ? sharedProjects
-      : await getActiveWorkspace(user.id, workspaceID ?? user.id)
+      : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
+        (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
@@ -61,7 +63,7 @@ export default function Home({
   sharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialPendingWorkspaces: PendingWorkspace[]
-  initialActiveWorkspace: ActiveWorkspace
+  initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
   availableProviders: AvailableProvider[]
 }) {
   const router = useRouter()
@@ -80,7 +82,12 @@ export default function Home({
 
   const selectWorkspace = async (workspaceID: number) => {
     if (workspaceID !== activeWorkspace.id) {
-      await refreshWorkspace(workspaceID)
+      const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
+      if (pendingWorkspace) {
+        setActiveWorkspace(pendingWorkspace)
+      } else {
+        await refreshWorkspace(workspaceID)
+      }
       router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
     }
   }
@@ -107,6 +114,8 @@ export default function Home({
   }
 
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
+  const isPendingWorkspace = (workspace: ActiveWorkspace | PendingWorkspace): workspace is PendingWorkspace =>
+    'invitedBy' in workspace
 
   return (
     <>
@@ -125,17 +134,24 @@ export default function Home({
               />
               <div className='flex flex-col flex-1'>
                 <div className='flex-1 overflow-hidden'>
-                  <WorkspaceGridView
-                    workspaces={workspaces}
-                    activeWorkspace={activeWorkspace}
-                    isUserWorkspace={activeWorkspace.id === user.id}
-                    isSharedProjects={IsSharedProjects(activeWorkspace)}
-                    onAddProject={addProject}
-                    onSelectProject={navigateToProject}
-                    onSelectUserWorkspace={() => selectWorkspace(user.id)}
-                    onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                    onRefreshWorkspaces={refreshWorkspaces}
-                  />
+                  {isPendingWorkspace(activeWorkspace) ? (
+                    <div>
+                      Invited to {activeWorkspace.name} by {activeWorkspace.invitedBy.fullName} on{' '}
+                      {FormatDate(activeWorkspace.timestamp)}
+                    </div>
+                  ) : (
+                    <WorkspaceGridView
+                      workspaces={workspaces}
+                      activeWorkspace={activeWorkspace}
+                      isUserWorkspace={activeWorkspace.id === user.id}
+                      isSharedProjects={IsSharedProjects(activeWorkspace)}
+                      onAddProject={addProject}
+                      onSelectProject={navigateToProject}
+                      onSelectUserWorkspace={() => selectWorkspace(user.id)}
+                      onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                      onRefreshWorkspaces={refreshWorkspaces}
+                    />
+                  )}
                 </div>
               </div>
             </main>

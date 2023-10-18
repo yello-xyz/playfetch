@@ -70,7 +70,7 @@ export default function WorkspaceSidebar({
               title={workspace.name}
               icon={folderIcon}
               active={activeWorkspaceID === workspace.id}
-              onClick={isPendingWorkspace(workspace) ? undefined : () => onSelectWorkspace(workspace.id)}
+              onClick={() => onSelectWorkspace(workspace.id)}
             />
           ))}
           <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
