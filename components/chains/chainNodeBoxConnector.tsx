@@ -15,6 +15,7 @@ export default function ChainNodeBoxConnector({
   isDisabled,
   isActive,
   setActive,
+  canDismiss,
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertQuery,
@@ -24,6 +25,7 @@ export default function ChainNodeBoxConnector({
   isDisabled: boolean
   isActive: boolean
   setActive: (active: boolean) => void
+  canDismiss: boolean
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
@@ -41,6 +43,7 @@ export default function ChainNodeBoxConnector({
           prompts={prompts}
           isActive={isActive}
           setActive={setActive}
+          canDismiss={canDismiss}
           onInsertPrompt={onInsertPrompt}
           onInsertNewPrompt={onInsertNewPrompt}
           onInsertQuery={onInsertQuery}
@@ -72,6 +75,7 @@ const AddButton = ({
   prompts,
   isActive,
   setActive,
+  canDismiss,
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertQuery,
@@ -80,6 +84,7 @@ const AddButton = ({
   prompts: Prompt[]
   isActive: boolean
   setActive: (active: boolean) => void
+  canDismiss: boolean
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
@@ -128,11 +133,13 @@ const AddButton = ({
         )}
         <DownStroke color='border-blue-100' />
         <AddStepButton label='Add code block' className={buttonClass} icon={codeIcon} onClick={insertCode} />
-        <div
-          className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
-          onClick={toggleActive()}>
-          <Icon icon={closeIcon} />
-        </div>
+        {canDismiss && (
+          <div
+            className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
+            onClick={toggleActive()}>
+            <Icon icon={closeIcon} />
+          </div>
+        )}
       </div>
       <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
       <DownStroke height='min-h-[32px]' />

@@ -84,6 +84,7 @@ export function ChainNodeBox({
           isDisabled={isTestMode}
           isActive={isMenuActive}
           setActive={setMenuActive}
+          canDismiss={nodes.length > 2}
           onInsertPrompt={insertPrompt}
           onInsertNewPrompt={insertNewPrompt}
           onInsertCodeBlock={insertCodeBlock}
