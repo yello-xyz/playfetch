@@ -42,10 +42,11 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
   const [projects, pendingProjects] = await getSharedProjectsForUser(user.id)
-  const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects, pendingProjects) : null
+  const initialSharedProjects =
+    projects.length > 0 || pendingProjects.length > 0 ? SharedProjectsWorkspace(projects, pendingProjects) : null
   const initialActiveWorkspace =
     workspaceID === SharedProjectsWorkspaceID
-      ? sharedProjects
+      ? initialSharedProjects ?? (await getActiveWorkspace(user.id, user.id))
       : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
         (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
@@ -54,7 +55,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
   return {
     props: {
       user,
-      sharedProjects,
+      initialSharedProjects,
       initialWorkspaces,
       initialPendingWorkspaces,
       initialActiveWorkspace,
@@ -65,14 +66,14 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
 export default function Home({
   user,
-  sharedProjects,
+  initialSharedProjects,
   initialWorkspaces,
   initialPendingWorkspaces,
   initialActiveWorkspace,
   availableProviders,
 }: {
   user: User
-  sharedProjects?: ActiveWorkspace
+  initialSharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialPendingWorkspaces: PendingWorkspace[]
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
@@ -84,14 +85,19 @@ export default function Home({
 
   const [workspaces, setWorkspaces] = useState(initialWorkspaces)
   const [pendingWorkspaces, setPendingWorkspaces] = useState(initialPendingWorkspaces)
+  const [sharedProjects, setSharedProjects] = useState(initialSharedProjects)
 
   const [activeWorkspace, setActiveWorkspace] = useState(initialActiveWorkspace)
 
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
-      ? api
-          .getSharedProjects()
-          .then(([projects, pendingProjects]) => setActiveWorkspace(SharedProjectsWorkspace(projects, pendingProjects)))
+      ? api.getSharedProjects().then(([projects, pendingProjects]) => {
+          if (projects.length > 0 || pendingProjects.length > 0) {
+            setActiveWorkspace(SharedProjectsWorkspace(projects, pendingProjects))
+          } else {
+            selectWorkspace(user.id)
+          }
+        })
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
@@ -130,7 +136,12 @@ export default function Home({
     })
 
   const respondToProjectInvite = (projectID: number, accept: boolean) =>
-    api.respondToInvite(projectID, accept).then(() => refreshWorkspace(activeWorkspace.id))
+    api.respondToInvite(projectID, accept).then(() => {
+      refreshWorkspace(activeWorkspace.id)
+      if (sharedProjects && sharedProjects.projects.every(project => project.id === projectID)) {
+        setSharedProjects(undefined)
+      }
+    })
 
   const { w: workspaceID } = ParseNumberQuery(router.query)
   const currentQueryState = workspaceID

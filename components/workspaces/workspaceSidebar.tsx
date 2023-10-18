@@ -37,7 +37,6 @@ export default function WorkspaceSidebar({
 
   const userWorkspace = workspaces.find(workspace => workspace.id === user.id)
   const properWorkspaces = workspaces.filter(workspace => workspace.id !== user.id)
-  const isPendingWorkspace = (workspace: Workspace) => pendingWorkspaces.some(pending => pending.id === workspace.id)
 
   return (
     <>
