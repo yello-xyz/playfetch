@@ -91,7 +91,15 @@ export async function updateAccessForUser(userID: number, objectID: number, acce
   if (accessData && accessData.state === 'pending') {
     if (accept) {
       await getDatastore().save(
-        toAccessData(userID, objectID, accessData.kind, 'default', accessData.grantedBy, accessData.createdAt)
+        toAccessData(
+          userID,
+          objectID,
+          accessData.kind,
+          'default',
+          accessData.grantedBy,
+          accessData.createdAt,
+          getID(accessData)
+        )
       )
     } else {
       await getDatastore().delete(buildKey(Entity.ACCESS, getID(accessData)))
