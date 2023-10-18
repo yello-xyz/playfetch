@@ -10,6 +10,7 @@ export function ChainNodeBox({
   chain,
   index,
   nodes,
+  saveItems,
   setNodes,
   activeIndex,
   setActiveIndex,
@@ -26,6 +27,7 @@ export function ChainNodeBox({
   chain: ActiveChain
   index: number
   nodes: ChainNode[]
+  saveItems: (items: ChainItem[]) => void
   setNodes: (nodes: ChainNode[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void

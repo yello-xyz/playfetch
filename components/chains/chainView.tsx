@@ -172,6 +172,7 @@ export default function ChainView({
           versionIsSaved={itemsKey === savedItemsKey}
           nodes={nodes}
           setNodes={setNodes}
+          saveItems={updateItems}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}

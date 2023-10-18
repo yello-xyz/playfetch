@@ -1,4 +1,4 @@
-import { ActiveChain, ChainVersion, Prompt } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
@@ -14,6 +14,7 @@ export default function ChainEditor({
   versionIsSaved,
   nodes,
   setNodes,
+  saveItems,
   activeIndex,
   setActiveIndex,
   prompts,
@@ -30,6 +31,7 @@ export default function ChainEditor({
   versionIsSaved: boolean
   nodes: ChainNode[]
   setNodes: (nodes: ChainNode[]) => void
+  saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
@@ -77,6 +79,7 @@ export default function ChainEditor({
             index={index}
             nodes={nodes}
             setNodes={setNodes}
+            saveItems={saveItems}
             activeIndex={activeIndex}
             setActiveIndex={updateActiveIndex}
             isMenuActive={index === activeMenuIndex}
