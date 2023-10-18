@@ -37,6 +37,8 @@ export type PendingProject = Project & {
   timestamp: number
 }
 
+export const IsPendingProject = (project: Project | PendingProject): project is PendingProject => 'invitedBy' in project
+
 export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {

@@ -1,4 +1,4 @@
-import { ActiveWorkspace, Project, Workspace } from '@/types'
+import { ActiveWorkspace, IsPendingProject, PendingProject, Project, Workspace } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import IconButton from '../iconButton'
@@ -9,12 +9,14 @@ import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from '../projects/projectPopupMenu'
 import WorkspaceTopBar, { AddProjectButton } from './workspaceTopBar'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { InviteCell } from './inviteCell'
 
 export default function WorkspaceGridView({
   workspaces,
   activeWorkspace,
   isUserWorkspace,
   isSharedProjects,
+  onRespondToProjectInvite,
   onAddProject,
   onSelectProject,
   onSelectUserWorkspace,
@@ -25,6 +27,7 @@ export default function WorkspaceGridView({
   activeWorkspace: ActiveWorkspace
   isUserWorkspace: boolean
   isSharedProjects: boolean
+  onRespondToProjectInvite: (projectID: number, accept: boolean) => void
   onAddProject: () => Promise<void>
   onSelectProject: (projectID: number) => void
   onSelectUserWorkspace: () => void
@@ -74,6 +77,7 @@ export default function WorkspaceGridView({
                 onRefreshWorkspace={onRefreshWorkspace}
                 onDeleted={onDeleted}
                 workspaces={workspaces}
+                onRespondToInvite={accept => onRespondToProjectInvite(project.id, accept)}
               />
             ))}
           </div>
@@ -128,19 +132,23 @@ function ProjectCell({
   onSelectProject,
   onRefreshWorkspace,
   onDeleted,
+  onRespondToInvite,
 }: {
   workspaces: Workspace[]
-  project: Project
+  project: Project | PendingProject
   isSharedProjects: boolean
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
   onDeleted: () => void
+  onRespondToInvite: (accept: boolean) => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const formattedDate = useFormattedDate(project.timestamp, FormatRelativeDate)
 
-  return (
+  return IsPendingProject(project) ? (
+    <InviteCell item={project} label='project' onRespond={onRespondToInvite} />
+  ) : (
     <div
       className='flex flex-col w-full gap-6 p-4 border border-gray-200 rounded-lg cursor-pointer select-none bg-gray-25 hover:bg-gray-50 hover:border-gray-200'
       onClick={() => onSelectProject(project.id)}>

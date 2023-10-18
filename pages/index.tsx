@@ -10,6 +10,7 @@ import {
   Project,
   PendingWorkspace,
   IsPendingWorkspace,
+  PendingProject,
 } from '@/types'
 import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/client/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
@@ -25,10 +26,13 @@ import GlobalPopup from '@/components/globalPopup'
 import WorkspaceInvite from '@/components/workspaces/workspaceInvite'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
-export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
+export const SharedProjectsWorkspace = (
+  projects: Project[],
+  pendingProjects: PendingProject[] = []
+): ActiveWorkspace => ({
   id: SharedProjectsWorkspaceID,
   name: 'Shared Projects',
-  projects,
+  projects: [...pendingProjects, ...projects],
   users: [],
 })
 
@@ -37,8 +41,8 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
-  const [projects] = await getSharedProjectsForUser(user.id)
-  const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects) : null
+  const [projects, pendingProjects] = await getSharedProjectsForUser(user.id)
+  const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects, pendingProjects) : null
   const initialActiveWorkspace =
     workspaceID === SharedProjectsWorkspaceID
       ? sharedProjects
@@ -85,7 +89,9 @@ export default function Home({
 
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
-      ? api.getSharedProjects().then(([projects]) => setActiveWorkspace(SharedProjectsWorkspace(projects)))
+      ? api
+          .getSharedProjects()
+          .then(([projects, pendingProjects]) => setActiveWorkspace(SharedProjectsWorkspace(projects, pendingProjects)))
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
@@ -113,7 +119,7 @@ export default function Home({
       setPendingWorkspaces(pendingWorkspaces)
     })
 
-  const respondToInvite = (workspaceID: number, accept: boolean) =>
+  const respondToWorkspaceInvite = (workspaceID: number, accept: boolean) =>
     api.respondToInvite(workspaceID, accept).then(() => {
       if (accept) {
         refreshWorkspace(workspaceID)
@@ -122,6 +128,9 @@ export default function Home({
         refreshWorkspaces()
       }
     })
+
+  const respondToProjectInvite = (projectID: number, accept: boolean) =>
+    api.respondToInvite(projectID, accept).then(() => refreshWorkspace(activeWorkspace.id))
 
   const { w: workspaceID } = ParseNumberQuery(router.query)
   const currentQueryState = workspaceID
@@ -153,7 +162,7 @@ export default function Home({
                   {IsPendingWorkspace(activeWorkspace) ? (
                     <WorkspaceInvite
                       workspace={activeWorkspace}
-                      onRespond={accept => respondToInvite(activeWorkspace.id, accept)}
+                      onRespond={accept => respondToWorkspaceInvite(activeWorkspace.id, accept)}
                     />
                   ) : (
                     <WorkspaceGridView
@@ -161,6 +170,7 @@ export default function Home({
                       activeWorkspace={activeWorkspace}
                       isUserWorkspace={activeWorkspace.id === user.id}
                       isSharedProjects={IsSharedProjects(activeWorkspace)}
+                      onRespondToProjectInvite={respondToProjectInvite}
                       onAddProject={addProject}
                       onSelectProject={navigateToProject}
                       onSelectUserWorkspace={() => selectWorkspace(user.id)}
