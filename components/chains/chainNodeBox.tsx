@@ -1,5 +1,5 @@
 import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryConfig } from '@/types'
-import { ChainNode } from './chainNode'
+import { ChainNode, IsChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
@@ -73,6 +73,8 @@ export function ChainNodeBox({
     setActiveIndex(index + 1)
   }
 
+  const items = nodes.filter(IsChainItem)
+
   return (
     <>
       {index > 0 && (
@@ -102,7 +104,7 @@ export function ChainNodeBox({
           prompts={prompts}
           users={chain.users}
         />
-        <ChainNodeBoxBody chainNode={chainNode} nodes={nodes} isSelected={isSelected} promptCache={promptCache} />
+        <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} promptCache={promptCache} />
         <ChainNodeBoxFooter
           nodes={nodes}
           setNodes={setNodes}
