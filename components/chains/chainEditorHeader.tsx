@@ -2,20 +2,19 @@ import { ActiveChain, ChainVersion } from '@/types'
 import { CustomHeader } from '../tabSelector'
 import Icon from '../icon'
 import chainIcon from '@/public/chain.svg'
-import saveIcon from '@/public/save.svg'
 import historyIcon from '@/public/history.svg'
 import { StaticImageData } from 'next/image'
 
 export default function ChainEditorHeader({
   chain,
   activeVersion,
-  versionIsSaved,
+  isVersionSaved,
   showVersions,
   setShowVersions,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  versionIsSaved: boolean
+  isVersionSaved: boolean
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
@@ -24,7 +23,8 @@ export default function ChainEditorHeader({
   return (
     <CustomHeader>
       <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-      <HeaderTitle chainName={chain.name} versionIndex={!versionIsSaved || !setShowVersions ? undefined : versionIndex} />
+      <HeaderTitle chainName={chain.name} versionIndex={!isVersionSaved || !setShowVersions ? undefined : versionIndex} />
+      <HiddenHeaderButton />
     </CustomHeader>
   )
 }
@@ -60,6 +60,8 @@ const ShowVersionsButton = ({
     hideIfInactive
   />
 )
+
+const HiddenHeaderButton = () => <ShowVersionsButton showVersions />
 
 function HeaderButton({
   title,

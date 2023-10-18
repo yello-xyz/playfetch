@@ -169,7 +169,7 @@ export default function ChainView({
         <ChainEditor
           chain={chain}
           activeVersion={activeVersion}
-          versionIsSaved={itemsKey === savedItemsKey}
+          isVersionSaved={itemsKey === savedItemsKey}
           nodes={nodes}
           setNodes={setNodes}
           saveItems={updateItems}
