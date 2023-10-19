@@ -8,7 +8,7 @@ type GlobalPopupContextType<PropsType> = {
   setPopup: (
     render: GlobalPopupRender<PropsType> | undefined,
     props: PropsType | undefined,
-    location: GlobalPopupLocation
+    location?: GlobalPopupLocation
   ) => void
 }
 
@@ -19,7 +19,7 @@ export const GlobalPopupContext = createContext<GlobalPopupContextType<any>>({
 export default function useGlobalPopup<PropsType>(): (
   render: GlobalPopupRender<PropsType> | undefined,
   props: PropsType | undefined,
-  location: GlobalPopupLocation
+  location?: GlobalPopupLocation
 ) => void {
   const context = useContext(GlobalPopupContext)
   return context.setPopup
@@ -51,7 +51,7 @@ export function useGlobalPopupProvider<PropsType>(): readonly [
   const setPopup: GlobalPopupContextType<PropsType>['setPopup'] = (render, props, location) => {
     setPopupRender(() => render)
     setPopupProps(props)
-    setPopupLocation(location)
+    setPopupLocation(location ?? {})
   }
 
   return [
