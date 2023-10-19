@@ -5,10 +5,12 @@ import UserAvatar from '@/components/users/userAvatar'
 import { FormatDate } from '@/src/common/formatting'
 
 export default function ActiveUsers({
+  title = 'Active Users',
   activeUsers,
   onSelectUser,
   embedded,
 }: {
+  title?: string
   activeUsers: ActiveUser[]
   onSelectUser: (userID: number) => void
   embedded?: boolean
@@ -19,10 +21,10 @@ export default function ActiveUsers({
 
   return (
     <>
-      <div className={`flex flex-col items-start h-full gap-4 ${embedded ? '' : 'p-6 overflow-y-auto'}`}>
+      <div className={`flex flex-col items-start gap-4 ${embedded ? '' : 'p-6 overflow-y-auto'}`}>
         {activeUsers.length > 0 && (
           <>
-            <Label>Active Users (data since {FormatDate(startDate)})</Label>
+            <Label>{title} (data since {FormatDate(startDate)})</Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
               <TableCell>
                 <Label>Last Active</Label>

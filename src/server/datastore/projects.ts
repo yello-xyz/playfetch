@@ -14,7 +14,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
+import { ActivePendingUser, ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import { getAccessingUserIDs, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
@@ -366,16 +366,16 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
 
   const analytics = await getAnalyticsForProject(0, projectID, true)
 
-  // TODO (maybe) expose users with pending invitations
-  const [projectUserIDs] = await getAccessingUserIDs(projectID, 'project')
-  const [workspaceUserIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
-  const users = await getActiveUsers([...new Set([...projectUserIDs, ...workspaceUserIDs])])
+  const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, workspaceID)
+  const activeUsers = await getActiveUsers(users)
+  const activePendingUsers = await getActiveUsers(pendingUsers) as ActivePendingUser[]
 
   return {
     promptCount,
     chainCount,
     endpointCount,
     analytics,
-    users,
+    users: activeUsers,
+    pendingUsers: activePendingUsers,
   }
 }

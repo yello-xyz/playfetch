@@ -6,20 +6,19 @@ export type User = {
   isAdmin: boolean
 }
 
-export type PendingUser = User & {
+type PendingAttributes = {
   invitedBy: User
   timestamp: number
 }
+
+export type PendingUser = User & PendingAttributes
 
 export type Workspace = {
   id: number
   name: string
 }
 
-export type PendingWorkspace = Workspace & {
-  invitedBy: User
-  timestamp: number
-}
+export type PendingWorkspace = Workspace & PendingAttributes
 
 export type ActiveWorkspace = Workspace & {
   projects: Project[]
@@ -38,10 +37,7 @@ export type Project = {
   favorited: boolean
 }
 
-export type PendingProject = Project & {
-  invitedBy: User
-  timestamp: number
-}
+export type PendingProject = Project & PendingAttributes
 
 export const IsPendingProject = (project: Project | PendingProject): project is PendingProject => 'invitedBy' in project
 
@@ -315,6 +311,8 @@ export type ActiveUser = User & {
   endpointCount: number
 }
 
+export type ActivePendingUser = ActiveUser & PendingAttributes
+
 export type UserMetrics = {
   createdWorkspaceCount: number
   workspaceAccessCount: number
@@ -336,4 +334,5 @@ export type ProjectMetrics = {
   endpointCount: number
   analytics: Analytics
   users: ActiveUser[]
+  pendingUsers: ActivePendingUser[]
 }

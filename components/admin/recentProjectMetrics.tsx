@@ -45,7 +45,15 @@ export default function RecentProjectMetrics({
         <div className='w-full '>
           <AnalyticsDashboards analytics={metrics.analytics} />
         </div>
-        <ActiveUsers activeUsers={metrics.users} onSelectUser={onSelectUser} embedded />
+        <ActiveUsers title='Active Project Users' activeUsers={metrics.users} onSelectUser={onSelectUser} embedded />
+        {metrics.pendingUsers.length > 0 && (
+          <ActiveUsers
+            title='Pending Invitations'
+            activeUsers={metrics.pendingUsers}
+            onSelectUser={onSelectUser}
+            embedded
+          />
+        )}
       </div>
     </>
   )

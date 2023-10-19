@@ -116,37 +116,35 @@ export async function getUsersWithoutAccess() {
   return usersData.map(toUser)
 }
 
-export async function getActiveUsers(userIDs?: number[], limit = 100): Promise<ActiveUser[]> {
+export async function getActiveUsers(users?: User[], limit = 100): Promise<ActiveUser[]> {
   const recentVersions = await getRecentVersions(limit)
   const startTimestamp = recentVersions.slice(-1)[0].timestamp
 
   const recentComments = await getRecentComments(startTimestamp, limit)
   const recentEndpoints = await getRecentEndpoints(startTimestamp, limit)
 
-  const usersData = await getKeyedEntities(
-    Entity.USER,
-    userIDs ?? [
+  if (!users) {
+    const usersData = await getKeyedEntities(Entity.USER, [
       ...new Set([
         ...recentVersions.map(version => version.userID),
         ...recentComments.map(comment => comment.userID),
         ...recentEndpoints.map(endpoint => endpoint.userID),
       ]),
-    ]
-  )
+    ])
+    users = usersData.map(toUser)
+  }
 
-  return usersData
-    .map(usersData => toActiveUser(usersData, recentVersions, recentComments, recentEndpoints))
+  return users
+    .map(user => toActiveUser(user, recentVersions, recentComments, recentEndpoints))
     .sort((a, b) => b.lastActive - a.lastActive)
 }
 
 const toActiveUser = (
-  userData: any,
+  user: User,
   recentVersions: Awaited<ReturnType<typeof getRecentVersions>>,
   recentComments: Awaited<ReturnType<typeof getRecentComments>>,
   recentEndpoints: Awaited<ReturnType<typeof getRecentEndpoints>>
 ): ActiveUser => {
-  const user = toUser(userData)
-
   const userVersions = recentVersions.filter(version => version.userID === user.id)
   const versionCount = userVersions.length
 
