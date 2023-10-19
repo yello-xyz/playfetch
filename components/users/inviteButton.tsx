@@ -46,7 +46,7 @@ function InvitePopup({ users, pendingUsers, onInvite, withDismiss }: InvitePopup
     .map(email => email.trim())
     .filter(email => email.length > 0)
 
-  const previousEmails = new Set(users.map(user => user.email))
+  const previousEmails = new Set([...users, ...pendingUsers].map(user => user.email))
   const emailsAreValid =
     emails.length > 0 && emails.every(email => CheckValidEmail(email) && !previousEmails.has(email))
 
