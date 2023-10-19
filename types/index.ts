@@ -6,6 +6,11 @@ export type User = {
   isAdmin: boolean
 }
 
+export type PendingUser = User & {
+  invitedBy: User
+  timestamp: number
+}
+
 export type Workspace = {
   id: number
   name: string
@@ -19,6 +24,7 @@ export type PendingWorkspace = Workspace & {
 export type ActiveWorkspace = Workspace & {
   projects: Project[]
   users: User[]
+  pendingUsers: PendingUser[]
 }
 
 export const IsPendingWorkspace = (workspace: ActiveWorkspace | PendingWorkspace): workspace is PendingWorkspace =>

@@ -34,6 +34,7 @@ export const SharedProjectsWorkspace = (
   name: 'Shared Projects',
   projects: [...pendingProjects, ...projects],
   users: [],
+  pendingUsers: [],
 })
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {

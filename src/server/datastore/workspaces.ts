@@ -9,9 +9,10 @@ import {
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { ActiveWorkspace, PendingWorkspace, User, Workspace } from '@/types'
-import { deleteProjectForUser, getAccessibleObjectsForUser, toProject } from './projects'
+import { ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace } from '@/types'
+import { deleteProjectForUser, toProject } from './projects'
 import {
+  getAccessibleObjectIDs,
   getAccessingUserIDs,
   grantUserAccess,
   grantUsersAccess,
@@ -39,23 +40,20 @@ const toWorkspace = (data: any): Workspace => ({
   name: data.name,
 })
 
-export async function getWorkspaceUsers(workspaceID: number): Promise<User[]> {
-  // TODO expose users with pending invitations
-  const [userIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
-  const users = await getKeyedEntities(Entity.USER, userIDs)
-  return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
-}
+export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
 
 export async function getActiveWorkspace(userID: number, workspaceID: number): Promise<ActiveWorkspace> {
   const workspaceData = await getVerifiedUserWorkspaceData(userID, workspaceID)
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID, ['lastEditedAt'])
   const projects = projectData.map(project => toProject(project, userID))
-  const users = await getWorkspaceUsers(workspaceID)
+  const [users, pendingUsers] = await getWorkspaceUsers(workspaceID)
 
   return {
     ...toWorkspace(workspaceData),
     projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
     users,
+    pendingUsers,
   }
 }
 
@@ -111,7 +109,49 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 }
 
 export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
-  getAccessibleObjectsForUser(userID, 'workspace', Entity.WORKSPACE, toWorkspace)
+  getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace)
+
+export async function getPendingAccessObjects<T>(
+  sourceID: number,
+  kind: 'project' | 'workspace',
+  entityType: string,
+  toObject: (data: any) => T
+): Promise<[T[], (T & { invitedBy: User; timestamp: number })[]]> {
+  const sourceIsUser = entityType !== Entity.USER
+  const [objectIDs, pendingObjects] = sourceIsUser
+    ? await getAccessibleObjectIDs(sourceID, kind)
+    : await getAccessingUserIDs(sourceID, kind)
+
+  const pendingObjectIDs = pendingObjects.map(access => access.objectID)
+  const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
+
+  const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
+  const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
+  const invitingUsers = invitingUsersData.map(toUser)
+
+  const toPendingObject = (object: T, { invitedBy, timestamp }: { invitedBy: number; timestamp: number }) => ({
+    ...object,
+    invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
+    timestamp,
+  })
+
+  const sortObjects = sourceIsUser
+    ? (a: any, b: any) => b.createdAt - a.createdAt
+    : (a: any, b: any) => a.fullName.localeCompare(b.fullName)
+
+  return [
+    objectsData
+      .filter(objectData => !pendingObjectIDs.includes(getID(objectData)))
+      .sort(sortObjects)
+      .map(toObject),
+    objectsData
+      .filter(objectData => pendingObjectIDs.includes(getID(objectData)))
+      .sort(sortObjects)
+      .map(objectData =>
+        toPendingObject(toObject(objectData), pendingObjects.find(access => access.objectID === getID(objectData))!)
+      ),
+  ]
+}
 
 export async function deleteWorkspaceForUser(userID: number, workspaceID: number) {
   await ensureWorkspaceAccess(userID, workspaceID)

@@ -14,20 +14,14 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, PendingProject, Project, ProjectMetrics, RecentProject, User, Workspace } from '@/types'
+import { ActiveProject, PendingProject, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
-import {
-  getAccessibleObjectIDs,
-  getAccessingUserIDs,
-  grantUsersAccess,
-  hasUserAccess,
-  revokeUserAccess,
-} from './access'
+import { getAccessingUserIDs, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
-import { ensureWorkspaceAccess } from './workspaces'
+import { ensureWorkspaceAccess, getPendingAccessObjects } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
@@ -278,42 +272,7 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 }
 
 export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
-  getAccessibleObjectsForUser(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
-
-export async function getAccessibleObjectsForUser<T>(
-  userID: number,
-  kind: 'project' | 'workspace',
-  entityType: string,
-  toObject: (data: any) => T
-): Promise<[T[], (T & { invitedBy: User; timestamp: number })[]]> {
-  const [objectIDs, pendingObjects] = await getAccessibleObjectIDs(userID, kind)
-
-  const pendingObjectIDs = pendingObjects.map(access => access.objectID)
-  const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
-
-  const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
-  const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
-  const invitingUsers = invitingUsersData.map(toUser)
-
-  const toPendingObject = (object: T, { invitedBy, timestamp }: { invitedBy: number; timestamp: number }) => ({
-    ...object,
-    invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
-    timestamp,
-  })
-
-  return [
-    objectsData
-      .filter(objectData => !pendingObjectIDs.includes(getID(objectData)))
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .map(toObject),
-    objectsData
-      .filter(objectData => pendingObjectIDs.includes(getID(objectData)))
-      .sort((a, b) => b.createdAt - a.createdAt)
-      .map(objectData =>
-        toPendingObject(toObject(objectData), pendingObjects.find(access => access.objectID === getID(objectData))!)
-      ),
-  ]
-}
+  getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
 
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
