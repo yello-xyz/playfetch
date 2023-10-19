@@ -6,6 +6,7 @@ import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
 import MoveProjectPopup, { MoveProjectPopupProps } from './moveProjectPopup'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import { useRouter } from 'next/router'
 
 export default function ProjectPopupMenu({
   project,
@@ -54,13 +55,18 @@ export default function ProjectPopupMenu({
   }
 
   const setPopup = useGlobalPopup<MoveProjectPopupProps>()
+  const router = useRouter()
+  const refreshAfterMove = (workspaceID: number) =>
+    workspaces.some(workspace => workspace.id === workspaceID) ? onRefresh() : router.reload()
 
   const moveProject = () => {
     setMenuExpanded(false)
     setPopup(MoveProjectPopup, {
       workspaces,
       project,
-      selectWorkspace: workspaceID => api.moveProject(project.id, workspaceID).then(onRefresh),
+      moveToWorkspace: workspaceID =>
+        api.moveProject(project.id, workspaceID).then(() => refreshAfterMove(workspaceID)),
+      addNewWorkspace: (workspaceName: string) => api.addWorkspace(workspaceName),
     })
   }
 

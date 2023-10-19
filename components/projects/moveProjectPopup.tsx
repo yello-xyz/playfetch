@@ -1,85 +1,90 @@
-import { useState } from 'react'
-import ModalDialog from '../modalDialog'
+import { useCallback, useState } from 'react'
 import { Project, Workspace } from '@/types'
-import DropdownMenu from '../dropdownMenu'
-import api from '@/src/client/api'
 import { PopupContent, PopupLabelItem, PopupSectionDivider, PopupSectionTitle } from '../popupMenu'
 import addIcon from '@/public/add.svg'
 import folderIcon from '@/public/folder.svg'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { useLoggedInUser } from '@/src/client/context/userContext'
-
-function MoveProjectDialog({
-  workspaces,
-  project,
-  onRefresh,
-  onDismiss,
-}: {
-  workspaces: Workspace[]
-  project: Project
-  onRefresh: () => void
-  onDismiss: () => void
-}) {
-  const [workspaceID, setWorkspaceID] = useState(project.workspaceID)
-
-  const dialogPrompt = {
-    title: `Move “${project.name}”`,
-    confirmTitle: 'Move',
-    callback: () => api.moveProject(project.id, workspaceID).then(onRefresh),
-    disabled: workspaceID === project.workspaceID,
-  }
-
-  return (
-    <ModalDialog prompt={dialogPrompt} onDismiss={onDismiss}>
-      <DropdownMenu className='w-full' value={workspaceID} onChange={value => setWorkspaceID(Number(value))}>
-        {workspaces.map((workspace, index) => (
-          <option key={index} value={workspace.id}>
-            {workspace.name}
-          </option>
-        ))}
-      </DropdownMenu>
-    </ModalDialog>
-  )
-}
+import TextInput from '../textInput'
+import Button from '../button'
 
 export type MoveProjectPopupProps = {
   workspaces: Workspace[]
   project: Project
-  selectWorkspace: (id: number) => void
+  moveToWorkspace: (id: number) => void
+  addNewWorkspace: (name: string) => Promise<number>
 }
 
 export default function MoveProjectPopup({
   workspaces,
   project,
-  selectWorkspace,
+  moveToWorkspace,
+  addNewWorkspace,
   withDismiss,
 }: MoveProjectPopupProps & WithDismiss) {
   const user = useLoggedInUser()
   const userWorkspace = workspaces.find(workspace => workspace.id === user.id)
 
+  const [newWorkspaceName, setNewWorkspaceName] = useState<string>()
+  const [addedWorkspaces, setAddedWorkspaces] = useState<{ id: number; name: string }[]>([])
+  const isAddingNewWorkspace = newWorkspaceName !== undefined
+
+  const addWorkspace = () =>
+    addNewWorkspace(newWorkspaceName!).then(workspaceID => {
+      setAddedWorkspaces([...addedWorkspaces, { id: workspaceID, name: newWorkspaceName! }])
+      setNewWorkspaceName(undefined)
+    })
+
+  const onLoadTextInput = useCallback((node: HTMLInputElement | null) => node?.focus(), [])
+
   return (
-    <PopupContent className='p-3 min-w-[340px]'>
-      <h3 className='p-1 pb-2 text-base font-semibold'>Move “{project.name}”</h3>
-      {userWorkspace && (
-        <PopupLabelItem
-          label={userWorkspace.name}
-          icon={folderIcon}
-          onClick={withDismiss(() => selectWorkspace(userWorkspace.id))}
-          checked={project.workspaceID === userWorkspace.id}
-        />
-      )}
-      <PopupSectionTitle>Workspaces</PopupSectionTitle>
-      {workspaces
-        .filter(workspace => workspace.id !== user.id)
-        .map((workspace, index) => (
-          <PopupLabelItem
-            key={index}
-            label={workspace.name}
-            icon={folderIcon}
-            onClick={withDismiss(() => selectWorkspace(workspace.id))}
-            checked={project.workspaceID === workspace.id}
+    <PopupContent className='p-4 min-w-[340px]'>
+      <h3 className='p-1 pb-2 text-base font-semibold'>
+        {isAddingNewWorkspace ? 'Create new Workspace' : `Move “${project.name}”`}
+      </h3>
+      {isAddingNewWorkspace ? (
+        <>
+          <TextInput
+            placeholder='Workspace name'
+            onLoad={onLoadTextInput}
+            value={newWorkspaceName}
+            setValue={setNewWorkspaceName}
           />
-        ))}
+          <div className='flex justify-end gap-4 pt-4'>
+            <Button type='secondary' onClick={() => setNewWorkspaceName(undefined)}>
+              Cancel
+            </Button>
+            <Button type='primary' disabled={newWorkspaceName.length === 0} onClick={addWorkspace}>
+              Create Workspace
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          {userWorkspace && (
+            <PopupLabelItem
+              label={userWorkspace.name}
+              icon={folderIcon}
+              onClick={withDismiss(() => moveToWorkspace(userWorkspace.id))}
+              checked={project.workspaceID === userWorkspace.id}
+            />
+          )}
+          <PopupSectionTitle>Workspaces</PopupSectionTitle>
+          {[...workspaces, ...addedWorkspaces]
+            .filter(workspace => workspace.id !== user.id)
+            .map((workspace, index) => (
+              <PopupLabelItem
+                key={index}
+                label={workspace.name}
+                icon={folderIcon}
+                onClick={withDismiss(() => moveToWorkspace(workspace.id))}
+                checked={project.workspaceID === workspace.id}
+              />
+            ))}
+          <PopupSectionDivider />
+          <PopupLabelItem label='Add new Workspace' icon={addIcon} onClick={() => setNewWorkspaceName('')} />{' '}
+        </>
+      )}
     </PopupContent>
   )
 }
