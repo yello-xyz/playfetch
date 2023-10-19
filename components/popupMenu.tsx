@@ -80,6 +80,16 @@ export function PopupLabelItem({
   )
 }
 
+export const PopupSectionTitle = ({ children }: { children: string }) => (
+  <div className='p-1.5 text-xs font-medium text-gray-400'>{children}</div>
+)
+
+export const PopupSectionDivider = () => (
+  <div className='pt-1 pb-1'>
+    <div className='h-px bg-gray-200' />
+  </div>
+)
+
 export function PopupItem({
   onClick,
   className = '',
