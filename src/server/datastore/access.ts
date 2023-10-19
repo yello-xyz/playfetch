@@ -11,7 +11,7 @@ import {
   getTimestamp,
 } from './datastore'
 import { getUserForEmail } from './users'
-import { sendProjectInviteEmail } from '../email'
+import { sendInviteEmail } from '../email'
 
 type Kind = 'project' | 'workspace'
 type State = 'default' | 'pending'
@@ -138,11 +138,7 @@ export async function grantUsersAccess(
     const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
       await grantUserAccess(userID, user.id, objectID, kind)
-      if (kind === 'project') {
-        sendProjectInviteEmail(userID, email, objectID)
-      } else {
-        // TODO send notification (but only if they already have access)
-      }
+      sendInviteEmail(userID, email, objectID, kind)
     } else {
       // TODO send invite to sign up (if we automatically want to give people access)
       // Or even automatically sign them up to the waitlist (but maybe not?)

@@ -195,6 +195,8 @@ export async function ensureProjectAccess(userID: number, projectID: number) {
 
 const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
 
+export const getProjectNameForID = (projectID: number) => getTrustedProjectData(projectID).then(data => data.name)
+
 const getVerifiedUserProjectData = async (userID: number, projectID: number) => {
   const projectData = await getTrustedProjectData(projectID)
   if (!projectData) {
@@ -206,9 +208,6 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
   }
   return projectData
 }
-
-export const getUserProjectForID = (userID: number, projectID: number) =>
-  getVerifiedUserProjectData(userID, projectID).then(projectData => toProject(projectData, userID))
 
 // TODO Also call this when deleting prompts/chains or updating endpoints etc.
 export async function updateProjectLastEditedAt(projectID: number) {

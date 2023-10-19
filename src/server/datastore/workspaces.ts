@@ -97,6 +97,9 @@ const getVerifiedUserWorkspaceData = async (userID: number, workspaceID: number)
   return getKeyedEntity(Entity.WORKSPACE, workspaceID)
 }
 
+export const getWorkspaceNameForID = (workspaceID: number) =>
+  getKeyedEntity(Entity.WORKSPACE, workspaceID).then(data => data.name)
+
 export async function updateWorkspaceName(userID: number, workspaceID: number, name: string) {
   if (workspaceID === userID) {
     throw new Error('Cannot rename Drafts workspace')

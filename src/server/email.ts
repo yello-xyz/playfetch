@@ -2,8 +2,9 @@ import nodemailer from 'nodemailer'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { getUserForID } from './datastore/users'
-import { getUserProjectForID } from './datastore/projects'
-import ClientRoute from '../common/clientRoute'
+import { getProjectNameForID } from './datastore/projects'
+import ClientRoute, { WorkspaceRoute } from '../common/clientRoute'
+import { getWorkspaceNameForID } from './datastore/workspaces'
 
 export const GetEmailServerConfig = () => ({
   host: 'smtp.gmail.com',
@@ -33,22 +34,29 @@ function resolveContent(fileName: string, variables: { [key: string]: string }) 
   return content
 }
 
-export async function sendProjectInviteEmail(fromUserID: number, toEmail: string, projectID: number) {
+export async function sendInviteEmail(
+  fromUserID: number,
+  toEmail: string,
+  objectID: number,
+  kind: 'project' | 'workspace'
+) {
   const inviter = await getUserForID(fromUserID)
-  const project = await getUserProjectForID(fromUserID, projectID)
+  const objectName = kind === 'project' ? await getProjectNameForID(objectID) : await getWorkspaceNameForID(objectID)
+  const inviteRoute = kind === 'project' ? ClientRoute.SharedProjects : WorkspaceRoute(objectID, 0)
 
   const variables = {
+    __ENTITY_NAME__: kind,
     __INVITER_NAME__: inviter.fullName,
     __INVITER_EMAIL__: inviter.email,
-    __PROJECT_NAME__: project.name,
-    __INVITATION_LINK__: `${process.env.NEXTAUTH_URL}${ClientRoute.SharedProjects}`,
+    __PROJECT_NAME__: objectName,
+    __INVITATION_LINK__: `${process.env.NEXTAUTH_URL}${inviteRoute}`,
   }
 
   await sendMail(
     toEmail,
-    `Project shared with you: "${project.name}"`,
-    resolveContent('projectInvite.txt', variables),
-    resolveContent('projectInvite.html', variables),
+    `${kind[0].toUpperCase()}${kind.slice(1)} shared with you: "${objectName}"`,
+    resolveContent('invite.txt', variables),
+    resolveContent('invite.html', variables),
     inviter.fullName
   )
 }
