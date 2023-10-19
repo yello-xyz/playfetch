@@ -158,9 +158,9 @@ export default function Home({
 
   return (
     <>
-      <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <GlobalPopupContext.Provider value={globalPopupProviderProps}>
-          <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+        <ModalDialogContext.Provider value={{ setDialogPrompt }}>
+          <GlobalPopupContext.Provider value={globalPopupProviderProps}>
             <main className='flex items-stretch h-screen text-sm'>
               <WorkspaceSidebar
                 workspaces={workspaces}
@@ -195,11 +195,11 @@ export default function Home({
                 </div>
               </div>
             </main>
-          </UserContext.Provider>
-        </GlobalPopupContext.Provider>
-      </ModalDialogContext.Provider>
-      <GlobalPopup {...globalPopupProps} {...popupProps} />
-      <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+          </GlobalPopupContext.Provider>
+        </ModalDialogContext.Provider>
+        <GlobalPopup {...globalPopupProps} {...popupProps} />
+        <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+      </UserContext.Provider>
     </>
   )
 }

@@ -25,8 +25,8 @@ export default function Settings({
 
   return (
     <>
-      <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+        <ModalDialogContext.Provider value={{ setDialogPrompt }}>
           <main className='flex flex-col h-screen overflow-hidden text-sm'>
             <TopBar>
               <TopBarBackItem />
@@ -37,9 +37,9 @@ export default function Settings({
               <UserSettingsView />
             </div>
           </main>
-        </UserContext.Provider>
-      </ModalDialogContext.Provider>
-      <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+        </ModalDialogContext.Provider>
+        <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+      </UserContext.Provider>
     </>
   )
 }
