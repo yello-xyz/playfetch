@@ -2,18 +2,26 @@ import { useCallback, useState } from 'react'
 import { CheckValidEmail } from '@/src/common/formatting'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../popupMenu'
-import { CustomPopupButton, PopupButton } from '../popupButton'
+import { CustomPopupButton } from '../popupButton'
 import Button from '../button'
-import { User } from '@/types'
+import { PendingUser, User } from '@/types'
 import TextInput from '../textInput'
 import { TopBarButton } from '../topBarButton'
 import UserBadge from './userBadge'
 
-export default function InviteButton({ users, onInvite }: { users: User[]; onInvite: (emails: string[]) => void }) {
+export default function InviteButton({
+  users,
+  pendingUsers,
+  onInvite,
+}: {
+  users: User[]
+  pendingUsers: PendingUser[]
+  onInvite: (emails: string[]) => void
+}) {
   const setPopup = useGlobalPopup<InvitePopupProps>()
 
   const onSetPopup = (location: GlobalPopupLocation) => {
-    setPopup(InvitePopup, { users, onInvite }, location)
+    setPopup(InvitePopup, { users, pendingUsers, onInvite }, location)
   }
 
   return (
@@ -25,10 +33,11 @@ export default function InviteButton({ users, onInvite }: { users: User[]; onInv
 
 type InvitePopupProps = {
   users: User[]
+  pendingUsers: PendingUser[]
   onInvite: (emails: string[]) => void
 }
 
-function InvitePopup({ users, onInvite, withDismiss }: InvitePopupProps & WithDismiss) {
+function InvitePopup({ users, pendingUsers, onInvite, withDismiss }: InvitePopupProps & WithDismiss) {
   const [email, setEmail] = useState('')
 
   const emails = email
@@ -50,10 +59,22 @@ function InvitePopup({ users, onInvite, withDismiss }: InvitePopupProps & WithDi
           Invite
         </Button>
       </div>
-      <span className='text-xs font-medium text-gray-400'>People with access</span>
+      <SectionHeader>People with access</SectionHeader>
       {users.map((user, index) => (
         <UserBadge key={index} user={user} padding='' />
       ))}
+      {pendingUsers.length > 0 && (
+        <>
+          <SectionHeader>Pending invitations</SectionHeader>
+          {pendingUsers.map((user, index) => (
+            <UserBadge key={index} user={user} padding='' />
+          ))}
+        </>
+      )}
     </PopupContent>
   )
 }
+
+const SectionHeader = ({ children }: { children: string }) => (
+  <span className='text-xs font-medium text-gray-400'>{children}</span>
+)

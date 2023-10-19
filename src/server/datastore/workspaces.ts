@@ -40,9 +40,6 @@ const toWorkspace = (data: any): Workspace => ({
   name: data.name,
 })
 
-export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
-  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
-
 export async function getActiveWorkspace(userID: number, workspaceID: number): Promise<ActiveWorkspace> {
   const workspaceData = await getVerifiedUserWorkspaceData(userID, workspaceID)
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID, ['lastEditedAt'])
@@ -111,6 +108,9 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
   getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace)
 
+export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
+
 export async function getPendingAccessObjects<T>(
   sourceID: number,
   kind: 'project' | 'workspace',
@@ -122,7 +122,8 @@ export async function getPendingAccessObjects<T>(
     ? await getAccessibleObjectIDs(sourceID, kind)
     : await getAccessingUserIDs(sourceID, kind)
 
-  const pendingObjectIDs = pendingObjects.map(access => access.objectID)
+  const getAccessID = (access: any) => (sourceIsUser ? access.objectID : access.userID)
+  const pendingObjectIDs = pendingObjects.map(getAccessID)
   const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
 
   const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
@@ -148,7 +149,7 @@ export async function getPendingAccessObjects<T>(
       .filter(objectData => pendingObjectIDs.includes(getID(objectData)))
       .sort(sortObjects)
       .map(objectData =>
-        toPendingObject(toObject(objectData), pendingObjects.find(access => access.objectID === getID(objectData))!)
+        toPendingObject(toObject(objectData), pendingObjects.find(access => getAccessID(access) === getID(objectData))!)
       ),
   ]
 }

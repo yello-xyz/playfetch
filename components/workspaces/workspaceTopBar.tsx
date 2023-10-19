@@ -61,7 +61,13 @@ export default function WorkspaceTopBar({
       {!isSharedProjects && !IsPendingWorkspace(activeWorkspace) && (
         <div className='flex items-center gap-2'>
           <UserAvatars users={activeWorkspace.users} />
-          {!isUserWorkspace && onInviteMembers && <InviteButton users={activeWorkspace.users} onInvite={onInviteMembers} />}
+          {!isUserWorkspace && onInviteMembers && (
+            <InviteButton
+              users={activeWorkspace.users}
+              pendingUsers={activeWorkspace.pendingUsers}
+              onInvite={onInviteMembers}
+            />
+          )}
           {onAddProject && <AddProjectButton onAddProject={onAddProject} />}
         </div>
       )}
