@@ -63,6 +63,7 @@ export default function TabSelector<T extends string>({
               tab={tab}
               activeTab={tabs.length > 1 ? activeTab : undefined}
               setActiveTab={tabs.length > 1 ? setActiveTab : onUpdateLabel ? () => setLabel(tabs[0]) : undefined}
+              cursor={onUpdateLabel ? 'cursor-text' : undefined}
             />
           ))
         )}
@@ -83,15 +84,17 @@ function TabButton<T extends string>({
   tab,
   activeTab,
   setActiveTab,
+  cursor = 'cursor-pointer',
 }: {
   tab: T
   activeTab?: T
   setActiveTab?: (tab: T) => void
+  cursor?: string
 }) {
   return (
     <HeaderItem
       active={activeTab === undefined || activeTab === tab}
-      className={activeTab === tab ? 'border-b border-black -mb-px' : 'cursor-pointer'}
+      className={activeTab === tab ? 'border-b border-black -mb-px' : cursor}
       onClick={() => setActiveTab?.(tab)}>
       {tab}
     </HeaderItem>
