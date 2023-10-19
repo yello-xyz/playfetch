@@ -36,6 +36,11 @@ export const CreateEvent = (type: EntityType, parentID: number): Event => ({
   params: { content_type: type, item_id: parentID.toString() },
 })
 
+export const InviteEvent = (type: EntityType, objectID: number): Event => ({
+  name: 'invite',
+  params: { content_type: type, item_id: objectID.toString() },
+})
+
 export const RunEvent = (
   parentID: number,
   failed: boolean,
