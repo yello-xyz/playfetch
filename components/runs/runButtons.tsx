@@ -166,7 +166,7 @@ export default function RunButtons({
   }
 
   const showTestDataSelector = getIndicesForMode('all').length > 1
-  const isMissingTestData = (rowIndices.length === 0 && staticVariables.length > 0)
+  const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
 
   return (
     <div className='flex items-center self-end gap-3'>

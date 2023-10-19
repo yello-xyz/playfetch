@@ -311,8 +311,6 @@ export type ActiveUser = User & {
   endpointCount: number
 }
 
-export type ActivePendingUser = ActiveUser & PendingAttributes
-
 export type UserMetrics = {
   createdWorkspaceCount: number
   workspaceAccessCount: number
@@ -334,5 +332,5 @@ export type ProjectMetrics = {
   endpointCount: number
   analytics: Analytics
   users: ActiveUser[]
-  pendingUsers: ActivePendingUser[]
+  pendingUsers: ActiveUser[]
 }

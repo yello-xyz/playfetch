@@ -72,7 +72,11 @@ export default function ProjectTopBar({
         </div>
         <TopBarAccessoryItem className='flex items-center justify-end gap-4'>
           <UserAvatars users={activeProject.users} />
-          <InviteButton users={activeProject.users} pendingUsers={activeProject.pendingUsers} onInvite={inviteMembers} />
+          <InviteButton
+            users={activeProject.users}
+            pendingUsers={activeProject.pendingUsers}
+            onInvite={inviteMembers}
+          />
           {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
         </TopBarAccessoryItem>
       </TopBar>

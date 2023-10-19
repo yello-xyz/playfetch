@@ -14,7 +14,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActivePendingUser, ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
+import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import { getAccessingUserIDs, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
@@ -367,15 +367,14 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
   const analytics = await getAnalyticsForProject(0, projectID, true)
 
   const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, workspaceID)
-  const activeUsers = await getActiveUsers(users)
-  const activePendingUsers = await getActiveUsers(pendingUsers) as ActivePendingUser[]
+  const activeUsers = await getActiveUsers([...users, ...pendingUsers])
 
   return {
     promptCount,
     chainCount,
     endpointCount,
     analytics,
-    users: activeUsers,
-    pendingUsers: activePendingUsers,
+    users: activeUsers.filter(user => users.some(u => u.id === user.id)),
+    pendingUsers: activeUsers.filter(user => pendingUsers.some(u => u.id === user.id)),
   }
 }

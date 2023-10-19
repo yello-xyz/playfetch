@@ -123,9 +123,7 @@ function ProjectItemActionButton({
       />
       <div className='absolute shadow-sm -right-1 top-8'>
         <Suspense>
-          <ProjectItemPopupMenu
-            {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }}
-          />
+          <ProjectItemPopupMenu {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }} />
         </Suspense>
       </div>
     </div>

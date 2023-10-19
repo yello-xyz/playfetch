@@ -23,7 +23,10 @@ export default function ChainEditorHeader({
   return (
     <CustomHeader>
       <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-      <HeaderTitle chainName={chain.name} versionIndex={!isVersionSaved || !setShowVersions ? undefined : versionIndex} />
+      <HeaderTitle
+        chainName={chain.name}
+        versionIndex={!isVersionSaved || !setShowVersions ? undefined : versionIndex}
+      />
       <HiddenHeaderButton />
     </CustomHeader>
   )

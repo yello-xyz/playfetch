@@ -24,7 +24,9 @@ export default function ActiveUsers({
       <div className={`flex flex-col items-start gap-4 ${embedded ? '' : 'p-6 overflow-y-auto'}`}>
         {activeUsers.length > 0 && (
           <>
-            <Label>{title} (data since {FormatDate(startDate)})</Label>
+            <Label>
+              {title} (data since {FormatDate(startDate)})
+            </Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
               <TableCell>
                 <Label>Last Active</Label>
