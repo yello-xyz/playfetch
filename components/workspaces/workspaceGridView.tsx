@@ -109,8 +109,7 @@ function EmptyWorkspaceView({
               </p>
             ) : (
               <p>
-                Inviting people to this workspace will give them access to all projects in it. Get started by creating
-                your first project.
+                A workspace is a collection of projects. All workspace members can access the projects that are part of this workspace.
               </p>
             )}
           </div>
