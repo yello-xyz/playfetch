@@ -2,16 +2,17 @@ import { useState } from 'react'
 import ModalDialog from '../modalDialog'
 import { Project, Workspace } from '@/types'
 import DropdownMenu from '../dropdownMenu'
+import api from '@/src/client/api'
 
 export default function MoveProjectDialog({
   workspaces,
   project,
-  onConfirm,
+  onRefresh,
   onDismiss,
 }: {
   workspaces: Workspace[]
   project: Project
-  onConfirm: (workspaceID: number) => void
+  onRefresh: () => void
   onDismiss: () => void
 }) {
   const [workspaceID, setWorkspaceID] = useState(project.workspaceID)
@@ -19,7 +20,7 @@ export default function MoveProjectDialog({
   const dialogPrompt = {
     title: `Move “${project.name}”`,
     confirmTitle: 'Move',
-    callback: () => onConfirm(workspaceID),
+    callback: () => api.moveProject(project.id, workspaceID).then(onRefresh),
     disabled: workspaceID === project.workspaceID,
   }
 

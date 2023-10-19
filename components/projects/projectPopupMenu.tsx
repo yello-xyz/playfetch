@@ -83,7 +83,7 @@ export default function ProjectPopupMenu({
         <MoveProjectDialog
           workspaces={workspaces}
           project={project}
-          onConfirm={workspaceID => api.moveProject(project.id, workspaceID).then(onRefresh)}
+          onRefresh={onRefresh}
           onDismiss={() => setShowMoveProjectDialog(false)}
         />
       )}
