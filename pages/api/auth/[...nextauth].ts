@@ -3,7 +3,7 @@ import { CheckValidEmail } from '@/src/common/formatting'
 import logUserRequest, { LoginEvent, SignupEvent, logUnknownUserRequest } from '@/src/server/analytics'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import { getUserForEmail, markUserLogin } from '@/src/server/datastore/users'
-import { GetNoReplyFromAddress } from '@/src/server/email'
+import { GetEmailServerConfig, GetNoReplyFromAddress } from '@/src/server/email'
 import signUpNewUser from '@/src/server/waitlist'
 import { ServerResponse } from 'http'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -23,15 +23,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
   },
   providers: [
     EmailProvider({
-      server: {
-        host: 'smtp.gmail.com',
-        port: 587,
-        auth: {
-          user: process.env.NOREPLY_EMAIL_USER,
-          pass: process.env.NOREPLY_EMAIL_PASSWORD,
-        },
-        tls: { ciphers: 'SSLv3' },
-      },
+      server: GetEmailServerConfig(),
       from: GetNoReplyFromAddress(),
     }),
     GoogleProvider({
