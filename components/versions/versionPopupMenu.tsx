@@ -6,7 +6,7 @@ import dotsIcon from '@/public/dots.svg'
 import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
 import GlobalPopupMenu from '../globalPopupMenu'
 import { useRouter } from 'next/router'
-import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/client/clientRoute'
+import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/common/clientRoute'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({

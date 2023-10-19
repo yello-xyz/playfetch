@@ -6,7 +6,7 @@ import { getPromptForUser } from './datastore/prompts'
 import { getChainForUser } from './datastore/chains'
 import { getAvailableProvidersForUser } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
-import { ParseActiveItemQuery, ParseNumberQuery } from '../client/clientRoute'
+import { ParseActiveItemQuery, ParseNumberQuery } from '../common/clientRoute'
 import { getAnalyticsForProject } from './datastore/analytics'
 
 export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {

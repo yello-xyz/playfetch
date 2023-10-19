@@ -1,6 +1,6 @@
 import { withLoggedOutSession } from '@/src/server/session'
 import { getCsrfToken, signIn } from 'next-auth/react'
-import ClientRoute, { ParseNumberQuery } from '@/src/client/clientRoute'
+import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import githubIcon from '@/public/github.svg'
 import googleIcon from '@/public/google.svg'
 import Icon from '@/components/icon'

@@ -4,7 +4,7 @@ import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '@/src/
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
 import Waitlist from '@/components/admin/waitlist'
-import ClientRoute, { ParseNumberQuery } from '@/src/client/clientRoute'
+import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import { Suspense, useState } from 'react'
 import ActiveUsers from '@/components/admin/activeUsers'

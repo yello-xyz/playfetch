@@ -1,4 +1,4 @@
-import ClientRoute from '@/src/client/clientRoute'
+import ClientRoute from '@/src/common/clientRoute'
 import { CheckValidEmail } from '@/src/common/formatting'
 import logUserRequest, { LoginEvent, SignupEvent, logUnknownUserRequest } from '@/src/server/analytics'
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'

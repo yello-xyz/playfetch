@@ -19,7 +19,7 @@ import {
   PendingWorkspace,
   PendingProject,
 } from '@/types'
-import ClientRoute from './clientRoute'
+import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
 import Progress from 'nprogress'
 

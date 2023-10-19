@@ -9,7 +9,7 @@ import ClientRoute, {
   ParseActiveItemQuery,
   ProjectRoute,
   WorkspaceRoute,
-} from '@/src/client/clientRoute'
+} from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { RefreshContext } from '@/src/client/context/refreshContext'

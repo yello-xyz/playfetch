@@ -1,4 +1,4 @@
-import { AdminRoute } from '@/src/client/clientRoute'
+import { AdminRoute } from '@/src/common/clientRoute'
 import { SidebarButton, SidebarSection } from '../sidebar'
 import linkIcon from '@/public/chain.svg'
 import userIcon from '@/public/user.svg'

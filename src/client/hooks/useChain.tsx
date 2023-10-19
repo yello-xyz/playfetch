@@ -2,7 +2,7 @@ import api from '@/src/client/api'
 import { ActiveChain, ActiveProject, ChainVersion } from '@/types'
 import useSaveChain from './useSaveChain'
 import { useRouter } from 'next/router'
-import { ChainRoute } from '../clientRoute'
+import { ChainRoute } from '../../common/clientRoute'
 
 export default function useChain(
   activeProject: ActiveProject,
