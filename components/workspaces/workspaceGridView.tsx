@@ -49,8 +49,6 @@ export default function WorkspaceGridView({
     onRefreshWorkspaces()
   }
 
-  const onDeleted = isSharedProjects && activeWorkspace.projects.length === 1 ? resetWorkspaces : onRefreshWorkspace
-
   return (
     <div className='flex flex-col h-full'>
       <WorkspaceTopBar
@@ -75,7 +73,7 @@ export default function WorkspaceGridView({
                 isSharedProjects={isSharedProjects}
                 onSelectProject={onSelectProject}
                 onRefreshWorkspace={onRefreshWorkspace}
-                onDeleted={onDeleted}
+                onDeleted={onRefreshWorkspace}
                 workspaces={workspaces}
                 onRespondToInvite={accept => onRespondToProjectInvite(project.id, accept)}
               />

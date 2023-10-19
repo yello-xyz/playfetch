@@ -96,6 +96,7 @@ export default function Home({
             setActiveWorkspace(SharedProjectsWorkspace(projects, pendingProjects))
           } else {
             selectWorkspace(user.id)
+            setSharedProjects(undefined)
           }
         })
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
@@ -137,9 +138,10 @@ export default function Home({
 
   const respondToProjectInvite = (projectID: number, accept: boolean) =>
     api.respondToInvite(projectID, accept).then(() => {
-      refreshWorkspace(activeWorkspace.id)
-      if (sharedProjects && sharedProjects.projects.every(project => project.id === projectID)) {
-        setSharedProjects(undefined)
+      if (accept) {
+        navigateToProject(projectID)
+      } else {
+        refreshWorkspace(activeWorkspace.id)
       }
     })
 
