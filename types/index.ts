@@ -53,6 +53,7 @@ export type ActiveProject = Project & {
   prompts: Prompt[]
   chains: Chain[]
   users: User[]
+  pendingUsers: PendingUser[]
   availableLabels: string[]
 }
 

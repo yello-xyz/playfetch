@@ -14,7 +14,7 @@ import {
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { ActiveProject, PendingProject, Project, ProjectMetrics, RecentProject, User } from '@/types'
+import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
 import { getAccessingUserIDs, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
@@ -75,14 +75,6 @@ export const toProject = (data: any, userID: number): Project => ({
   favorited: JSON.parse(data.favorited).includes(userID),
 })
 
-async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<User[]> {
-  // TODO expose users with pending invitations
-  const [projectUserIDs] = await getAccessingUserIDs(projectID, 'project')
-  const [workspaceUserIDs] = await getAccessingUserIDs(workspaceID, 'workspace')
-  const users = await getKeyedEntities(Entity.USER, [...new Set([...projectUserIDs, ...workspaceUserIDs])])
-  return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
-}
-
 async function loadEndpoints(projectID: number, apiKeyDev: string) {
   const endpoints = await getOrderedEntities(Entity.ENDPOINT, 'projectID', projectID)
   const usages = await getEntities(Entity.USAGE, 'projectID', projectID)
@@ -103,7 +95,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const prompts = promptData.map(toPrompt)
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
   const chains = chainData.map(toChain)
-  const users = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
+  const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
     ...toProject(projectData, userID),
@@ -112,6 +104,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     prompts,
     chains,
     users,
+    pendingUsers,
     availableLabels: JSON.parse(projectData.labels),
   }
 }
@@ -273,6 +266,20 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 
 export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
   getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
+
+async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<[User[], PendingUser[]]> {
+  const [projectUsers, pendingProjectUsers] = await getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
+  const [workspaceUsers, pendingWorkspaceUsers] = await getPendingAccessObjects(
+    workspaceID,
+    'workspace',
+    Entity.USER,
+    toUser
+  )
+  return [
+    [...projectUsers, ...workspaceUsers.filter(user => !projectUsers.some(u => u.id === user.id))],
+    [...pendingProjectUsers, ...pendingWorkspaceUsers.filter(user => !pendingProjectUsers.some(u => u.id === user.id))],
+  ]
+}
 
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
