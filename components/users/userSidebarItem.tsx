@@ -1,4 +1,4 @@
-import PopupMenu from '../popupMenu'
+import PopupMenu, { PopupSectionDivider } from '../popupMenu'
 import chevronIcon from '@/public/chevron.svg'
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
@@ -49,9 +49,7 @@ export default function UserSidebarItem() {
                     <span className='font-medium text-gray-700 cursor-pointer'>Admin</span>
                   </Link>
                 )}
-                <div className='pt-1 pb-1'>
-                  <div className='h-px bg-gray-200' />
-                </div>
+                <PopupSectionDivider />
                 <span
                   className='px-2 py-1 font-medium leading-6 text-red-500 rounded cursor-pointer select-none hover:bg-red-50'
                   onClick={logOut}>

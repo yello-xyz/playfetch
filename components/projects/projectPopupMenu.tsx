@@ -4,7 +4,8 @@ import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
-import MoveProjectDialog from './moveProjectDialog'
+import MoveProjectPopup, { MoveProjectPopupProps } from './moveProjectPopup'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
 
 export default function ProjectPopupMenu({
   project,
@@ -26,7 +27,6 @@ export default function ProjectPopupMenu({
   const setDialogPrompt = useModalDialogPrompt()
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
-  const [showMoveProjectDialog, setShowMoveProjectDialog] = useState(false)
 
   const leaveProject = () => {
     setMenuExpanded(false)
@@ -53,9 +53,15 @@ export default function ProjectPopupMenu({
     setShowPickNamePrompt(true)
   }
 
+  const setPopup = useGlobalPopup<MoveProjectPopupProps>()
+
   const moveProject = () => {
     setMenuExpanded(false)
-    setShowMoveProjectDialog(true)
+    setPopup(MoveProjectPopup, {
+      workspaces,
+      project,
+      selectWorkspace: workspaceID => api.moveProject(project.id, workspaceID).then(onRefresh),
+    })
   }
 
   return (
@@ -77,14 +83,6 @@ export default function ProjectPopupMenu({
           initialName={project.name}
           onConfirm={name => api.renameProject(project.id, name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
-        />
-      )}
-      {showMoveProjectDialog && workspaces && (
-        <MoveProjectDialog
-          workspaces={workspaces}
-          project={project}
-          onRefresh={onRefresh}
-          onDismiss={() => setShowMoveProjectDialog(false)}
         />
       )}
     </>
