@@ -109,7 +109,8 @@ function EmptyWorkspaceView({
               </p>
             ) : (
               <p>
-                A workspace is a collection of projects. All workspace members can access the projects that are part of this workspace.
+                A workspace is a collection of projects. All workspace members can access the projects that are part of
+                this workspace.
               </p>
             )}
           </div>

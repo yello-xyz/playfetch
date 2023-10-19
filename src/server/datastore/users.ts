@@ -108,7 +108,9 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
   )
   await getDatastore().save(userData)
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {
-    await addWorkspaceForUser(getID(userData))
+    const userID = getID(userData)
+    await addWorkspaceForUser(userID)
+    await addWorkspaceForUser(userID, 'My first workspace')
   }
   return !previousUserData
 }
