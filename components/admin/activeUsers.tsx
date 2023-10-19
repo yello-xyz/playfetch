@@ -27,7 +27,7 @@ export default function ActiveUsers({
             <Label>
               {title} (data since {FormatDate(startDate)})
             </Label>
-            <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg`}>
+            <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg p-2`}>
               <TableCell>
                 <Label>Last Active</Label>
               </TableCell>
