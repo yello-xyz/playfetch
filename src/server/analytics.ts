@@ -87,7 +87,7 @@ function logEventInternal(clientID: string, userID: number | undefined, event: E
       user_id: userID?.toString(),
       client_id: clientID,
       non_personalized_ads: true,
-      events: [{ name: event.name, params: event.params }],
+      events: [{ name: event.name, params: { ...event.params, app_version: process.env.npm_package_version } }],
     }),
   })
 }
