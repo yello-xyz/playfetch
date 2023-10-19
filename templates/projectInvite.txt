@@ -1,0 +1,7 @@
+__INVITER_NAME__ shared a project on PlayFetch
+
+__INVITER_NAME__ (__INVITER_EMAIL__) has invited you to the project “__PROJECT_NAME__”
+
+Open the following link to accept or decline the invitation: __INVITATION_LINK__
+
+You have received this email because __INVITER_EMAIL__ shared a project with you from PlayFetch.

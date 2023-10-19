@@ -18,7 +18,7 @@ import { uploadImageURLToStorage } from '../storage'
 import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
 import { getRecentEndpoints } from './endpoints'
-import { PropertyFilter, and } from '@google-cloud/datastore'
+import { and } from '@google-cloud/datastore'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -64,6 +64,8 @@ export const toUser = (data: any): User => ({
   imageURL: data.imageURL,
   isAdmin: data.isAdmin,
 })
+
+export const getUserForID = (userID: number) => getKeyedEntity(Entity.USER, userID).then(toUser)
 
 export async function getUserForEmail(email: string, includingWithoutAccess = false) {
   const userData = await getEntity(Entity.USER, 'email', email)

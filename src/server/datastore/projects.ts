@@ -16,7 +16,7 @@ import {
 } from './datastore'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
-import { getAccessingUserIDs, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
+import { grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
@@ -206,6 +206,9 @@ const getVerifiedUserProjectData = async (userID: number, projectID: number) => 
   }
   return projectData
 }
+
+export const getUserProjectForID = (userID: number, projectID: number) =>
+  getVerifiedUserProjectData(userID, projectID).then(projectData => toProject(projectData, userID))
 
 // TODO Also call this when deleting prompts/chains or updating endpoints etc.
 export async function updateProjectLastEditedAt(projectID: number) {
