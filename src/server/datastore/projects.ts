@@ -277,7 +277,10 @@ async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: numbe
   )
   return [
     [...projectUsers, ...workspaceUsers.filter(user => !projectUsers.some(u => u.id === user.id))],
-    [...pendingProjectUsers, ...pendingWorkspaceUsers.filter(user => !pendingProjectUsers.some(u => u.id === user.id))],
+    [
+      ...pendingProjectUsers.filter(user => !workspaceUsers.some(u => u.id === user.id)),
+      ...pendingWorkspaceUsers.filter(user => ![...projectUsers, ...pendingProjectUsers].some(u => u.id === user.id)),
+    ],
   ]
 }
 
