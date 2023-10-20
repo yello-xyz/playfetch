@@ -11,9 +11,6 @@
   "bugs": {
     "url": "https://github.com/yello-xyz/playfetch/issues"
   },
-  "engines": {
-    "node": "18.x"
-  },
   "scripts": {
     "test": "jest",
     "clean": "npx next telemetry disable && rm -rf ./build",
