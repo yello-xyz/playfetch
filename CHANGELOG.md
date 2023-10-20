@@ -1,5 +1,10 @@
 ## PlayFetch Changelog
 
+### v0.12 - 2023-10-20
+- Admin dashboards for active users and projects
+- Project and workspace invites with notifications
+- Implicit saving for chains
+
 ### v0.11 - 2023-10-13
 - Improved test row selector
 - Text-based diffing in Compare tool for prompts, chains and endpoints
