@@ -8,19 +8,29 @@ import ActiveUsers from './activeUsers'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { useState } from 'react'
+import api from '@/src/client/admin/api'
 
 export default function RecentProjectMetrics({
   project,
-  metrics,
+  projectMetrics,
   onSelectUser,
   onDismiss,
 }: {
   project: RecentProject
-  metrics: ProjectMetrics
+  projectMetrics: ProjectMetrics
   onSelectUser: (userID: number) => void
   onDismiss: () => void
 }) {
+  const [metrics, setMetrics] = useState(projectMetrics)
   const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, true, true))
+
+  const firstActiveUserVersionTimestamp = Math.min(
+    ...[...metrics.users, ...metrics.pendingUsers].map(user => user.startTimestamp)
+  )
+
+  const fetchProjectMetricsWithActiveUsersBefore = () =>
+    api.getProjectMetrics(project.id, project.workspaceID, firstActiveUserVersionTimestamp).then(setMetrics)
 
   return (
     <>
@@ -48,7 +58,13 @@ export default function RecentProjectMetrics({
         <div className='w-full '>
           <AnalyticsDashboards analytics={metrics.analytics} />
         </div>
-        <ActiveUsers title='Active Project Users' activeUsers={metrics.users} onSelectUser={onSelectUser} embedded />
+        <ActiveUsers
+          title='Active Project Users'
+          activeUsers={metrics.users}
+          onFetchBefore={fetchProjectMetricsWithActiveUsersBefore}
+          onSelectUser={onSelectUser}
+          embedded
+        />
         {metrics.pendingUsers.length > 0 && (
           <ActiveUsers
             title='Pending Invitations'

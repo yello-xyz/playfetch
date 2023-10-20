@@ -136,11 +136,7 @@ export default function Admin({
           <div className='flex flex-col flex-1 bg-gray-25'>
             {activeItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
             {activeItem === ActiveUsersItem && (
-              <ActiveUsers
-                activeUsers={activeUsers}
-                onFetchBefore={fetchActiveUsersBefore}
-                onSelectUser={selectItem}
-              />
+              <ActiveUsers activeUsers={activeUsers} onFetchBefore={fetchActiveUsersBefore} onSelectUser={selectItem} />
             )}
             {activeItem === RecentProjectsItem && (
               <RecentProjects recentProjects={recentProjects} onSelectProject={selectItem} />
@@ -154,7 +150,7 @@ export default function Admin({
               <Suspense>
                 <RecentProjectMetrics
                   project={activeItem}
-                  metrics={projectMetrics}
+                  projectMetrics={projectMetrics}
                   onSelectUser={selectItem}
                   onDismiss={() => router.back()}
                 />

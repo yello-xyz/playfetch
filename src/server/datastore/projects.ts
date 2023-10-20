@@ -361,7 +361,11 @@ const toRecentProject = (projectData: any, workspacesData: any[], usersData: any
   return { ...project, workspace, creator }
 }
 
-export async function getMetricsForProject(projectID: number, workspaceID: number): Promise<ProjectMetrics> {
+export async function getMetricsForProject(
+  projectID: number,
+  workspaceID: number,
+  before?: Date
+): Promise<ProjectMetrics> {
   const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', projectID)
   const chainCount = await getEntityCount(Entity.CHAIN, 'projectID', projectID)
   const endpointCount = await getEntityCount(Entity.ENDPOINT, 'projectID', projectID)
@@ -369,7 +373,7 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
   const analytics = await getAnalyticsForProject(0, projectID, true)
 
   const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, workspaceID)
-  const activeUsers = await getActiveUsers([...users, ...pendingUsers])
+  const activeUsers = await getActiveUsers([...users, ...pendingUsers], before)
 
   return {
     promptCount,

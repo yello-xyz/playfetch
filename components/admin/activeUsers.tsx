@@ -21,13 +21,14 @@ export default function ActiveUsers({
   const gridConfig = 'grid grid-cols-[100px_200px_minmax(0,1fr)_100px_100px_100px_100px_100px]'
 
   const startDate = useFormattedDate(Math.min(...activeUsers.map(user => user.startTimestamp)))
+  const canFetchBefore = onFetchBefore && activeUsers.length > 0
 
   return (
     <>
       <div className={`flex flex-col items-start gap-4 ${embedded ? '' : 'p-6 overflow-y-auto'}`}>
         <Label>
-          {title} {activeUsers.length > 0 && `(data since ${startDate})`}
-          {onFetchBefore && activeUsers.length > 0 && (
+          {title} {canFetchBefore && `(data since ${startDate})`}
+          {canFetchBefore && (
             <span className='px-2 font-medium underline cursor-pointer' onClick={onFetchBefore}>
               fetch earlier data
             </span>

@@ -18,8 +18,8 @@ const api = {
   getUserMetrics: async function (userID: number): Promise<UserMetrics> {
     return post(this.getUserMetrics, { userID })
   },
-  getProjectMetrics: async function (projectID: number, workspaceID: number): Promise<ProjectMetrics> {
-    return post(this.getProjectMetrics, { projectID, workspaceID })
+  getProjectMetrics: async function (projectID: number, workspaceID: number, before?: number): Promise<ProjectMetrics> {
+    return post(this.getProjectMetrics, { projectID, workspaceID, before })
   },
 }
 
