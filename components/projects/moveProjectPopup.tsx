@@ -36,6 +36,7 @@ export default function MoveProjectPopup({
     })
 
   const onLoadTextInput = useCallback((node: HTMLInputElement | null) => node?.focus(), [])
+  const allWorkspaces = [...workspaces, ...addedWorkspaces]
 
   return (
     <PopupContent className='p-4 min-w-[340px]'>
@@ -69,8 +70,8 @@ export default function MoveProjectPopup({
               checked={project.workspaceID === userWorkspace.id}
             />
           )}
-          <PopupSectionTitle>Workspaces</PopupSectionTitle>
-          {[...workspaces, ...addedWorkspaces]
+          {allWorkspaces.length > 0 && <PopupSectionTitle>Workspaces</PopupSectionTitle>}
+          {allWorkspaces
             .filter(workspace => workspace.id !== user.id)
             .map((workspace, index) => (
               <PopupLabelItem
