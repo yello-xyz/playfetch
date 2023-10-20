@@ -5,76 +5,171 @@ import {
   buildKey,
   getDatastore,
   getFilteredEntities,
-  getFilteredEntityKey,
+  getFilteredEntity,
   getID,
+  getKeyedEntity,
+  getTimestamp,
 } from './datastore'
 import { getUserForEmail } from './users'
+import { sendInviteEmail } from '../email'
 
 type Kind = 'project' | 'workspace'
+type State = 'default' | 'pending'
 
-export async function migrateAccess() {
+export async function migrateAccess(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
   for (const accessData of allAccess) {
-    datastore.save({
-      key: buildKey(Entity.ACCESS, getID(accessData)),
-      data: { userID: accessData.userID, objectID: accessData.objectID, kind: accessData.kind },
-      excludeFromIndexes: [],
-    })
+    if (!accessData.grantedBy && !accessData.createdAt) {
+      console.log(`Migrating access key ${getID(accessData)} (${accessData.kind} ${accessData.objectID})`)
+      let workspaceID = accessData.objectID
+      if (accessData.kind === 'project') {
+        const projectData = await getKeyedEntity(Entity.PROJECT, accessData.objectID)
+        if (!projectData) {
+          console.log('→ dangling project acces key?')
+          continue
+        }
+        workspaceID = projectData.workspaceID
+      }
+      const workspaceData = await getKeyedEntity(Entity.WORKSPACE, workspaceID)
+      if (!workspaceData) {
+        if (accessData.userID === workspaceID) {
+          const userData = await getKeyedEntity(Entity.USER, accessData.userID)
+          if (!userData) {
+            console.log('Deleting dangling workspace access key for deleted user and workspace')
+            datastore.delete(buildKey(Entity.ACCESS, getID(accessData)))
+            continue
+          }
+        }
+        console.log('→ dangling workspace?')
+        continue
+      }
+      datastore.save(
+        toAccessData(
+          accessData.userID,
+          accessData.objectID,
+          accessData.kind,
+          'default',
+          workspaceData.userID,
+          workspaceData.createdAt,
+          getID(accessData)
+        )
+      )
+    }
   }
 }
 
-const getUserAccessKey = (userID: number, objectID: number) =>
-  getFilteredEntityKey(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
+const getAccessData = (userID: number, objectID: number) =>
+  getFilteredEntity(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
 
 export async function hasUserAccess(userID: number, objectID: number) {
-  const accessKey = await getUserAccessKey(userID, objectID)
-  return !!accessKey
+  const accessData = await getAccessData(userID, objectID)
+  return !!accessData && accessData.state === 'default'
 }
 
-export async function grantUserAccess(userID: number, objectID: number, kind: Kind) {
+export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
   const hasAccess = await hasUserAccess(userID, objectID)
   if (!hasAccess) {
-    await getDatastore().save({
-      key: buildKey(Entity.ACCESS),
-      data: { userID, objectID, kind },
-      excludeFromIndexes: [],
-    })
+    const state = userID === grantedBy ? 'default' : 'pending'
+    await getDatastore().save(toAccessData(userID, objectID, kind, state, grantedBy, new Date()))
   }
 }
 
 export async function revokeUserAccess(userID: number, objectID: number) {
-  const accessKey = await getUserAccessKey(userID, objectID)
-  if (accessKey) {
-    await getDatastore().delete(accessKey)
+  const accessData = await getAccessData(userID, objectID)
+  if (accessData) {
+    await getDatastore().delete(buildKey(Entity.ACCESS, getID(accessData)))
   }
 }
 
-export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<number[]> {
+export async function updateAccessForUser(userID: number, objectID: number, accept: boolean) {
+  const accessData = await getAccessData(userID, objectID)
+  if (accessData && accessData.state === 'pending') {
+    if (accept) {
+      await getDatastore().save(
+        toAccessData(
+          userID,
+          objectID,
+          accessData.kind,
+          'default',
+          accessData.grantedBy,
+          accessData.createdAt,
+          getID(accessData)
+        )
+      )
+    } else {
+      await getDatastore().delete(buildKey(Entity.ACCESS, getID(accessData)))
+    }
+  }
+}
+
+export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
-  return entities.map(entity => entity.objectID)
+  return [
+    entities.filter(entity => entity.state === 'default').map(entity => entity.objectID),
+    entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
+  ]
 }
 
-export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<number[]> {
+export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
-  return entities.map(entity => entity.userID)
+  return [
+    entities.filter(entity => entity.state === 'default').map(entity => entity.userID),
+    entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
+  ]
 }
 
-export async function grantUsersAccess(emails: string[], objectID: number, kind: 'project' | 'workspace') {
+export async function grantUsersAccess(
+  userID: number,
+  emails: string[],
+  objectID: number,
+  kind: 'project' | 'workspace'
+) {
   for (const email of emails) {
     const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
-      await grantUserAccess(user.id, objectID, kind)
-      // TODO send notification (but only if they already have access)
+      await grantUserAccess(userID, user.id, objectID, kind)
+      sendInviteEmail(userID, email, objectID, kind)
     } else {
       // TODO send invite to sign up (if we automatically want to give people access)
       // Or even automatically sign them up to the waitlist (but maybe not?)
     }
   }
 }
+
+type PendingAccess = {
+  userID: number
+  objectID: number
+  invitedBy: number
+  timestamp: number
+}
+
+const toPendingAccess = (accessData: any): PendingAccess => ({
+  userID: accessData.userID,
+  objectID: accessData.objectID,
+  invitedBy: accessData.grantedBy,
+  timestamp: getTimestamp(accessData),
+})
+
+const toAccessData = (
+  userID: number,
+  objectID: number,
+  kind: Kind,
+  state: State,
+  grantedBy: number,
+  createdAt: Date,
+  accessID?: number
+) => ({
+  key: buildKey(Entity.ACCESS, accessID),
+  data: { userID, objectID, kind, state, grantedBy, createdAt },
+  excludeFromIndexes: [],
+})

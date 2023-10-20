@@ -1,4 +1,4 @@
-import { ActiveChain, ChainVersion, Prompt, QueryConfig } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
@@ -11,8 +11,8 @@ import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
 export default function ChainEditor({
   chain,
   activeVersion,
+  isVersionSaved,
   nodes,
-  setNodes,
   saveItems,
   activeIndex,
   setActiveIndex,
@@ -27,9 +27,9 @@ export default function ChainEditor({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
+  isVersionSaved: boolean
   nodes: ChainNode[]
-  setNodes: (nodes: ChainNode[]) => void
-  saveItems?: () => void
+  saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
@@ -64,11 +64,11 @@ export default function ChainEditor({
       <ChainEditorHeader
         chain={chain}
         activeVersion={activeVersion}
-        saveItems={saveItems}
+        isVersionSaved={isVersionSaved}
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
-      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto'>
+      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px]'>
         <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
         {nodes.map((_, index, nodes) => (
           <ChainNodeBox
@@ -76,12 +76,12 @@ export default function ChainEditor({
             chain={chain}
             index={index}
             nodes={nodes}
-            setNodes={setNodes}
+            saveItems={saveItems}
             activeIndex={activeIndex}
             setActiveIndex={updateActiveIndex}
             isMenuActive={index === activeMenuIndex}
             setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
-            savedVersion={saveItems ? null : activeVersion}
+            savedVersion={isVersionSaved ? activeVersion : null}
             isTestMode={isTestMode}
             setTestMode={setTestMode}
             prompts={prompts}

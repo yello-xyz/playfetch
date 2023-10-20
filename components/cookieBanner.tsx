@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Button from '../components/button'
 import TagManager from 'react-gtm-module'
-import ClientRoute from '@/src/client/clientRoute'
+import ClientRoute from '@/src/common/clientRoute'
 import Checkbox from './checkbox'
 import { useCookies } from 'react-cookie'
 

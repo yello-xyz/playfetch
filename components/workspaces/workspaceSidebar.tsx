@@ -4,21 +4,23 @@ import api from '@/src/client/api'
 import folderIcon from '@/public/folder.svg'
 import fileIcon from '@/public/file.svg'
 import addIcon from '@/public/add.svg'
-import UserSidebarItem from '../userSidebarItem'
+import UserSidebarItem from '../users/userSidebarItem'
 import PickNameDialog from '../pickNameDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { FeedbackSection, SidebarButton, SidebarSection } from '../sidebar'
 
 export default function WorkspaceSidebar({
   workspaces,
-  activeWorkspace,
+  pendingWorkspaces,
+  activeWorkspaceID,
   sharedProjects,
   onSelectWorkspace,
   onSelectSharedProjects,
   onRefreshWorkspaces,
 }: {
   workspaces: Workspace[]
-  activeWorkspace: ActiveWorkspace
+  pendingWorkspaces: Workspace[]
+  activeWorkspaceID: number
   sharedProjects?: ActiveWorkspace
   onSelectWorkspace: (workspaceID: number) => void
   onSelectSharedProjects?: () => void
@@ -47,7 +49,7 @@ export default function WorkspaceSidebar({
             <SidebarButton
               title={userWorkspace.name}
               icon={fileIcon}
-              active={activeWorkspace.id === userWorkspace.id}
+              active={activeWorkspaceID === userWorkspace.id}
               onClick={() => onSelectWorkspace(userWorkspace.id)}
             />
           )}
@@ -55,18 +57,18 @@ export default function WorkspaceSidebar({
             <SidebarButton
               title={sharedProjects.name}
               icon={folderIcon}
-              active={activeWorkspace.id === sharedProjects.id}
+              active={activeWorkspaceID === sharedProjects.id}
               onClick={onSelectSharedProjects}
             />
           )}
         </SidebarSection>
         <SidebarSection title='Workspaces' className='flex-1'>
-          {properWorkspaces.map((workspace, workspaceIndex) => (
+          {[...pendingWorkspaces, ...properWorkspaces].map((workspace, workspaceIndex) => (
             <SidebarButton
               key={workspaceIndex}
               title={workspace.name}
               icon={folderIcon}
-              active={activeWorkspace.id === workspace.id}
+              active={activeWorkspaceID === workspace.id}
               onClick={() => onSelectWorkspace(workspace.id)}
             />
           ))}

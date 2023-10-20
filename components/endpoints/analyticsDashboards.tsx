@@ -27,7 +27,7 @@ export default function AnalyticsDashboards({
   refreshAnalytics,
 }: {
   analytics?: Analytics
-  refreshAnalytics: (dayRange: number) => void
+  refreshAnalytics?: (dayRange: number) => void
 }) {
   const margin = { left: 0, right: 0, top: 10, bottom: 0 }
 
@@ -57,7 +57,8 @@ export default function AnalyticsDashboards({
   const dayRange = recentUsage.length
   const canToggleDayRange =
     dayRange === 7 || recentUsage.slice(-2 * 7).reduce((acc, usage) => acc + usage.requests, 0) > 0
-  const toggleDayRange = canToggleDayRange ? () => refreshAnalytics(dayRange === 30 ? 7 : 30) : undefined
+  const toggleDayRange =
+    canToggleDayRange && refreshAnalytics ? () => refreshAnalytics(dayRange === 30 ? 7 : 30) : undefined
 
   const formatRequestPayload = (payload: any[]) =>
     `${payload[0].value + payload[1].value} requests${payload[0].value > 0 ? ` (${payload[0].value} failures)` : ''}`
@@ -74,8 +75,8 @@ export default function AnalyticsDashboards({
         range={dayRange}
         callback={toggleDayRange}>
         <AreaChart id='requests' data={data} margin={{ ...margin }}>
-          <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='failures' stroke='#DC4F30' fill='#FDE5E0' />
-          <Area type='bump' strokeWidth={1.5} stackId='1' dataKey='success' stroke='#71B892' fill='#DDF1E7' />
+          <Area type='bump' strokeWidth={1} stackId='1' dataKey='failures' stroke='#DC4F30' fill='#FDE5E0' />
+          <Area type='bump' strokeWidth={1} stackId='1' dataKey='success' stroke='#71B892' fill='#DDF1E7' />
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} content={<CustomTooltip formatter={formatRequestPayload} />} />
         </AreaChart>
@@ -88,7 +89,7 @@ export default function AnalyticsDashboards({
         range={dayRange}
         callback={toggleDayRange}>
         <AreaChart id='cost' data={data} margin={margin}>
-          <Area type='bump' strokeWidth={1.5} dataKey='cost' stroke='#61A2EE' fill='#DCEAFA' />
+          <Area type='bump' strokeWidth={1} dataKey='cost' stroke='#61A2EE' fill='#DCEAFA' />
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} content={<CustomTooltip formatter={formatCostPayload} />} />
         </AreaChart>

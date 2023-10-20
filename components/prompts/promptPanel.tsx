@@ -28,7 +28,7 @@ import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import ClientRoute from '@/src/client/clientRoute'
+import ClientRoute from '@/src/common/clientRoute'
 import Icon from '../icon'
 import { useModelProviders, useCheckModelDisabled } from '@/src/client/hooks/useAvailableProviders'
 
@@ -41,6 +41,7 @@ export default function PromptPanel({
   inputValues,
   testConfig,
   setTestConfig,
+  onShowTestConfig,
   initialActiveTab,
   onActiveTabChange,
   loadPendingVersion,
@@ -53,6 +54,7 @@ export default function PromptPanel({
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
+  onShowTestConfig?: () => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
   loadPendingVersion?: () => void
@@ -169,6 +171,7 @@ export default function PromptPanel({
           setLanguageModel={updateModel}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
+          onShowTestConfig={onShowTestConfig}
           disabled={!isModelAvailable || prompts.main.trim().length === 0}
           callback={runPrompt}
         />
@@ -238,8 +241,7 @@ export function ProviderWarning({
       buttonTitle='Add API Key'
       onClick={() => router.push(ClientRoute.Settings)}>
       <span>
-        An API key is required to use this{' '}
-        {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
+        An API key is required to use this {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
     </ButtonBanner>
   )

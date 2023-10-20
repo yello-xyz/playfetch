@@ -1,6 +1,5 @@
-import { ActiveWorkspace, Project, Workspace } from '@/types'
+import { ActiveWorkspace, IsPendingProject, PendingProject, Project, Workspace } from '@/types'
 import { useState } from 'react'
-import InviteDialog from '../inviteDialog'
 import api from '@/src/client/api'
 import IconButton from '../iconButton'
 import starIcon from '@/public/star.svg'
@@ -10,12 +9,14 @@ import { FormatRelativeDate } from '@/src/common/formatting'
 import ProjectPopupMenu from '../projects/projectPopupMenu'
 import WorkspaceTopBar, { AddProjectButton } from './workspaceTopBar'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { InviteCell } from './inviteCell'
 
 export default function WorkspaceGridView({
   workspaces,
   activeWorkspace,
   isUserWorkspace,
   isSharedProjects,
+  onRespondToProjectInvite,
   onAddProject,
   onSelectProject,
   onSelectUserWorkspace,
@@ -26,14 +27,13 @@ export default function WorkspaceGridView({
   activeWorkspace: ActiveWorkspace
   isUserWorkspace: boolean
   isSharedProjects: boolean
+  onRespondToProjectInvite: (projectID: number, accept: boolean) => void
   onAddProject: () => Promise<void>
   onSelectProject: (projectID: number) => void
   onSelectUserWorkspace: () => void
   onRefreshWorkspace: () => void
   onRefreshWorkspaces: () => void
 }) {
-  const [showInviteDialog, setShowInviteDialog] = useState(false)
-
   const inviteMembers = async (emails: string[]) => {
     await api.inviteToWorkspace(activeWorkspace.id, emails)
     onRefreshWorkspace()
@@ -49,8 +49,6 @@ export default function WorkspaceGridView({
     onRefreshWorkspaces()
   }
 
-  const onDeleted = isSharedProjects && activeWorkspace.projects.length === 1 ? resetWorkspaces : onRefreshWorkspace
-
   return (
     <div className='flex flex-col h-full'>
       <WorkspaceTopBar
@@ -58,7 +56,7 @@ export default function WorkspaceGridView({
         isUserWorkspace={isUserWorkspace}
         isSharedProjects={isSharedProjects}
         onAddProject={onAddProject}
-        setShowInviteDialog={setShowInviteDialog}
+        onInviteMembers={inviteMembers}
         onRenamed={refresh}
         onDeleted={resetWorkspaces}
       />
@@ -75,17 +73,15 @@ export default function WorkspaceGridView({
                 isSharedProjects={isSharedProjects}
                 onSelectProject={onSelectProject}
                 onRefreshWorkspace={onRefreshWorkspace}
-                onDeleted={onDeleted}
+                onDeleted={onRefreshWorkspace}
                 workspaces={workspaces}
+                onRespondToInvite={accept => onRespondToProjectInvite(project.id, accept)}
               />
             ))}
           </div>
         </>
       ) : (
         <EmptyWorkspaceView workspace={activeWorkspace} isUserWorkspace={isUserWorkspace} onAddProject={onAddProject} />
-      )}
-      {showInviteDialog && (
-        <InviteDialog label='workspace' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
       )}
     </div>
   )
@@ -113,8 +109,8 @@ function EmptyWorkspaceView({
               </p>
             ) : (
               <p>
-                Inviting people to this workspace will give them access to all projects in it. Get started by creating
-                your first project.
+                A workspace is a collection of projects. All workspace members can access the projects that are part of
+                this workspace.
               </p>
             )}
           </div>
@@ -134,24 +130,28 @@ function ProjectCell({
   onSelectProject,
   onRefreshWorkspace,
   onDeleted,
+  onRespondToInvite,
 }: {
   workspaces: Workspace[]
-  project: Project
+  project: Project | PendingProject
   isSharedProjects: boolean
   onSelectProject: (projectID: number) => void
   onRefreshWorkspace: () => void
   onDeleted: () => void
+  onRespondToInvite: (accept: boolean) => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const formattedDate = useFormattedDate(project.timestamp, FormatRelativeDate)
 
-  return (
+  return IsPendingProject(project) ? (
+    <InviteCell item={project} label='project' onRespond={onRespondToInvite} />
+  ) : (
     <div
-      className={`flex flex-col gap-1 px-4 py-4 rounded-lg cursor-pointer gap-6 w-full bg-gray-25 border border-gray-200 hover:bg-gray-50 hover:border-gray-200 select-none`}
+      className='flex flex-col w-full gap-6 p-4 border border-gray-200 rounded-lg cursor-pointer select-none bg-gray-25 hover:bg-gray-50 hover:border-gray-200'
       onClick={() => onSelectProject(project.id)}>
       <div className='flex items-start justify-between gap-2'>
-        <div className='flex flex-row gap-1.5 justify-center'>
+        <div className='flex gap-1.5 justify-center'>
           <IconButton
             hoverType={project.favorited ? 'none' : 'opacity'}
             icon={project.favorited ? filledStarIcon : starIcon}

@@ -1,4 +1,4 @@
-import { CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
+import { ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
 import { ChainNode, InputNode, IsChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { LabelForModel } from '@/src/common/providerMetadata'
@@ -11,12 +11,12 @@ import { InputVariableClass } from '../prompts/promptInput'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function ChainNodeBoxBody({
-  nodes,
+  items,
   chainNode,
   isSelected,
   promptCache,
 }: {
-  nodes: ChainNode[]
+  items: ChainItem[]
   chainNode: ChainNode
   isSelected: boolean
   promptCache: ChainPromptCache
@@ -28,7 +28,7 @@ export default function ChainNodeBoxBody({
       )}
       {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
       {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
-      {chainNode === InputNode && <InputNodeBody nodes={nodes} isSelected={isSelected} promptCache={promptCache} />}
+      {chainNode === InputNode && <InputNodeBody items={items} isSelected={isSelected} promptCache={promptCache} />}
     </>
   )
 }
@@ -74,16 +74,15 @@ function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected:
 }
 
 function InputNodeBody({
-  nodes,
+  items,
   isSelected,
   promptCache,
 }: {
-  nodes: ChainNode[]
+  items: ChainItem[]
   isSelected: boolean
   promptCache: ChainPromptCache
 }) {
-  const items = nodes.filter(IsChainItem)
-  const variables = ExtractUnboundChainVariables(items, promptCache)
+  const variables = ExtractUnboundChainVariables(items, promptCache, false)
 
   return variables.length > 0 ? (
     <CommonBody isSelected={isSelected}>

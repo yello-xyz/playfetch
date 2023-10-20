@@ -6,15 +6,28 @@ export type User = {
   isAdmin: boolean
 }
 
+type PendingAttributes = {
+  invitedBy: User
+  timestamp: number
+}
+
+export type PendingUser = User & PendingAttributes
+
 export type Workspace = {
   id: number
   name: string
 }
 
+export type PendingWorkspace = Workspace & PendingAttributes
+
 export type ActiveWorkspace = Workspace & {
   projects: Project[]
   users: User[]
+  pendingUsers: PendingUser[]
 }
+
+export const IsPendingWorkspace = (workspace: ActiveWorkspace | PendingWorkspace): workspace is PendingWorkspace =>
+  'invitedBy' in workspace
 
 export type Project = {
   id: number
@@ -24,6 +37,10 @@ export type Project = {
   favorited: boolean
 }
 
+export type PendingProject = Project & PendingAttributes
+
+export const IsPendingProject = (project: Project | PendingProject): project is PendingProject => 'invitedBy' in project
+
 export type InputValues = { [name: string]: string[] }
 
 export type ActiveProject = Project & {
@@ -32,6 +49,7 @@ export type ActiveProject = Project & {
   prompts: Prompt[]
   chains: Chain[]
   users: User[]
+  pendingUsers: PendingUser[]
   availableLabels: string[]
 }
 
@@ -137,11 +155,13 @@ export type Prompts = {
 
 export type RawPromptVersion = Version & { prompts: Prompts; config: PromptConfig }
 export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
+export const IsRawPromptVersion = (version: RawPromptVersion | RawChainVersion): version is RawPromptVersion =>
+  'prompts' in version && version.prompts !== undefined && version.prompts !== null
 
 export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
 export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
 export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion =>
-  'prompts' in version && version.prompts !== undefined && version.prompts !== null
+  IsRawPromptVersion(version)
 
 export type PromptInputs = { [name: string]: string }
 
@@ -279,4 +299,38 @@ export type Analytics = {
   recentLogEntries: LogEntry[]
   recentUsage: Usage[]
   aggregatePreviousUsage: Usage
+}
+
+export type ActiveUser = User & {
+  lastActive: number
+  startTimestamp: number
+  versionCount: number
+  promptCount: number
+  chainCount: number
+  commentCount: number
+  endpointCount: number
+}
+
+export type UserMetrics = {
+  createdWorkspaceCount: number
+  workspaceAccessCount: number
+  projectAccessCount: number
+  createdVersionCount: number
+  createdCommentCount: number
+  createdEndpointCount: number
+  providers: { provider: ModelProvider | QueryProvider; cost: number }[]
+}
+
+export type RecentProject = Project & {
+  workspace: string
+  creator: string
+}
+
+export type ProjectMetrics = {
+  promptCount: number
+  chainCount: number
+  endpointCount: number
+  analytics: Analytics
+  users: ActiveUser[]
+  pendingUsers: ActiveUser[]
 }

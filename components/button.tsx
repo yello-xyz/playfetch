@@ -11,6 +11,7 @@ export function PendingButton({
   roundedClass,
   disabled,
   onClick,
+  onDisabledClick,
 }: {
   title: string
   pendingTitle?: string
@@ -18,6 +19,7 @@ export function PendingButton({
   roundedClass?: string
   disabled?: boolean
   onClick: () => void | Promise<void>
+  onDisabledClick?: () => void
 }) {
   const [isPending, setPending] = useState(false)
 
@@ -33,7 +35,8 @@ export function PendingButton({
       disabled={disabled || isPending}
       roundedClass={roundedClass}
       showSpinner={isPending}
-      onClick={handleClick}>
+      onClick={handleClick}
+      onDisabledClick={onDisabledClick}>
       {isPending && pendingTitle ? pendingTitle : title}
     </Button>
   )
@@ -46,6 +49,7 @@ export default function Button({
   showSpinner,
   disabled,
   onClick,
+  onDisabledClick,
 }: {
   type?: ButtonType
   children: ReactNode
@@ -53,6 +57,7 @@ export default function Button({
   showSpinner?: boolean
   disabled?: boolean
   onClick: () => void | Promise<void>
+  onDisabledClick?: () => void
 }) {
   const colorForType = (type: ButtonType) => {
     switch (type) {
@@ -71,14 +76,17 @@ export default function Button({
   const paddingClass = showSpinner ? 'pr-4 pl-2.5 py-1.5' : 'px-4 py-2'
 
   return (
-    <button
-      className={`${colorForType(
-        type
-      )} ${paddingClass} ${roundedClass} h-9 text-sm whitespace-nowrap flex items-center`}
-      disabled={disabled}
-      onClick={onClick}>
-      {showSpinner && <Icon icon={spinnerIcon} className='animate-spin max-w-[24px]' />}
-      {children}
-    </button>
+    <div className='relative'>
+      <button
+        className={`${colorForType(
+          type
+        )} ${paddingClass} ${roundedClass} h-9 text-sm whitespace-nowrap flex items-center`}
+        disabled={disabled}
+        onClick={onClick}>
+        {showSpinner && <Icon icon={spinnerIcon} className='animate-spin max-w-[24px]' />}
+        {children}
+      </button>
+      {onDisabledClick && <div className='absolute inset-0 cursor-pointer' onClick={onDisabledClick} />}
+    </div>
   )
 }

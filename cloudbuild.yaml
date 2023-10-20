@@ -1,14 +1,17 @@
 steps:
-  - name: node
+  - name: node:18
+    entrypoint: node
+    args: ['--version']
+  - name: node:18
     entrypoint: npm
     args: ['install']
-  - name: node
+  - name: node:18
     entrypoint: npm
     args: ['run', 'test']
-  - name: node
+  - name: node:18
     entrypoint: npm
     args: ['run', 'clean']
-  - name: node
+  - name: node:18
     entrypoint: npm
     args: ['run', 'create-env']
     env:
@@ -33,7 +36,7 @@ steps:
       - 'NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=${_NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}'
       - 'NEXT_PUBLIC_COOKIE_DOMAIN=${_NEXT_PUBLIC_COOKIE_DOMAIN}'
       - 'NEXT_PUBLIC_COOKIE_NAME=${_NEXT_PUBLIC_COOKIE_NAME}'
-  - name: node
+  - name: node:18
     entrypoint: npm
     args: ['run', 'build']
   - name: 'gcr.io/cloud-builders/gcloud'

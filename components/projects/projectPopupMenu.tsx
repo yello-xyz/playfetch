@@ -4,7 +4,9 @@ import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
-import MoveProjectDialog from './moveProjectDialog'
+import MoveProjectPopup, { MoveProjectPopupProps } from './moveProjectPopup'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import { useRouter } from 'next/router'
 
 export default function ProjectPopupMenu({
   project,
@@ -26,12 +28,13 @@ export default function ProjectPopupMenu({
   const setDialogPrompt = useModalDialogPrompt()
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
-  const [showMoveProjectDialog, setShowMoveProjectDialog] = useState(false)
 
   const leaveProject = () => {
     setMenuExpanded(false)
     setDialogPrompt({
-      title: 'Are you sure you want to leave this project?',
+      title: `Are you sure you want to leave “${project.name}”?`,
+      content: 'If you leave this project, you will no longer have access to any of its prompts or chains.',
+      confirmTitle: 'Leave Shared Project',
       callback: () => api.leaveProject(project.id).then(onDeleted),
       destructive: true,
     })
@@ -51,9 +54,20 @@ export default function ProjectPopupMenu({
     setShowPickNamePrompt(true)
   }
 
+  const setPopup = useGlobalPopup<MoveProjectPopupProps>()
+  const router = useRouter()
+  const refreshAfterMove = (workspaceID: number) =>
+    workspaces.some(workspace => workspace.id === workspaceID) ? onRefresh() : router.reload()
+
   const moveProject = () => {
     setMenuExpanded(false)
-    setShowMoveProjectDialog(true)
+    setPopup(MoveProjectPopup, {
+      workspaces,
+      project,
+      moveToWorkspace: workspaceID =>
+        api.moveProject(project.id, workspaceID).then(() => refreshAfterMove(workspaceID)),
+      addNewWorkspace: (workspaceName: string) => api.addWorkspace(workspaceName),
+    })
   }
 
   return (
@@ -75,14 +89,6 @@ export default function ProjectPopupMenu({
           initialName={project.name}
           onConfirm={name => api.renameProject(project.id, name).then(onRefresh)}
           onDismiss={() => setShowPickNamePrompt(false)}
-        />
-      )}
-      {showMoveProjectDialog && workspaces && (
-        <MoveProjectDialog
-          workspaces={workspaces}
-          project={project}
-          onConfirm={workspaceID => api.moveProject(project.id, workspaceID).then(onRefresh)}
-          onDismiss={() => setShowMoveProjectDialog(false)}
         />
       )}
     </>

@@ -87,8 +87,6 @@ export default function ChainView({
     return saveChain(GetItemsToSave(items, promptCache), refreshActiveItem)
   }
 
-  const saveItemsIfNeeded = itemsKey !== savedItemsKey ? () => saveItems(items) : undefined
-
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
   if (syncedVersionID !== activeVersion.id) {
     setSyncedVersionID(activeVersion.id)
@@ -109,7 +107,7 @@ export default function ChainView({
   }
 
   const [isNodeDirty, setNodeDirty] = useState(false)
-  const updateActiveNodeIndex = (index: number) => {
+  const updateActiveNodeIndex = (index: number | undefined) => {
     setActiveNodeIndex(index)
     setShowVersions(false)
     setNodeDirty(false)
@@ -139,9 +137,8 @@ export default function ChainView({
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
     if (testMode && activeNodeIndex === undefined) {
-      setActiveNodeIndex(0)
-    }
-    if (testMode && showVersions) {
+      updateActiveNodeIndex(0)
+    } else if (testMode && showVersions) {
       setShowVersions(false)
     }
   }
@@ -172,9 +169,9 @@ export default function ChainView({
         <ChainEditor
           chain={chain}
           activeVersion={activeVersion}
+          isVersionSaved={itemsKey === savedItemsKey}
           nodes={nodes}
-          setNodes={setNodes}
-          saveItems={saveItemsIfNeeded}
+          saveItems={updateItems}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
           prompts={project.prompts}
@@ -211,7 +208,7 @@ export default function ChainView({
                 activeIndex={activeNodeIndex - 1}
                 setDirty={setNodeDirty}
                 promptCache={promptCache}
-                dismiss={() => setActiveNodeIndex(undefined)}
+                dismiss={() => updateActiveNodeIndex(undefined)}
               />
             )}
           </Allotment.Pane>

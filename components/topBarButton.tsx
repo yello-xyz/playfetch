@@ -1,5 +1,3 @@
-import { User } from '@/types'
-import { UserAvatar } from './userSidebarItem'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 
@@ -16,7 +14,7 @@ export function TopBarButton({
   type?: ButtonType
   title?: string
   icon?: StaticImageData
-  onClick: () => void
+  onClick?: () => void
   disabled?: boolean
   iconClassName?: string
 }) {
@@ -40,18 +38,4 @@ export function TopBarButton({
       {title && <div className={icon ? 'pr-2' : 'px-2 py-0.5'}>{title}</div>}
     </div>
   )
-}
-
-export function UserAvatars({ users }: { users: User[] }) {
-  return users.length > 1 ? (
-    <div
-      className='flex flex-row-reverse space-x-reverse -space-x-[50px]'
-      style={{ marginRight: `${(users.length - 1) * 22}px` }}>
-      {users.map((user, index) => (
-        <div key={index}>
-          <UserAvatar user={user} border />
-        </div>
-      ))}
-    </div>
-  ) : null
 }

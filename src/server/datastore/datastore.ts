@@ -39,6 +39,9 @@ export const buildKey = (type: string, id?: number) => getDatastore().key([type,
 
 export const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
 
+const filterQuery = (query: Query, filter: EntityFilter | undefined) =>
+  filter !== undefined ? query.filter(filter) : query
+
 const projectQuery = (query: Query, keys: string[]) => (keys.length > 0 ? query.select(keys) : query)
 
 const orderQuery = (query: Query, sortKeys: string[]) =>
@@ -46,20 +49,20 @@ const orderQuery = (query: Query, sortKeys: string[]) =>
 
 const buildQuery = (
   type: string,
-  filter: EntityFilter,
+  filter: EntityFilter | undefined,
   limit: number,
   sortKeys: string[],
   selectKeys: string[],
   transaction?: Transaction
 ) =>
   projectQuery(
-    orderQuery((transaction ?? getDatastore()).createQuery(type).filter(filter).limit(limit), sortKeys),
+    orderQuery(filterQuery((transaction ?? getDatastore()).createQuery(type), filter).limit(limit), sortKeys),
     selectKeys
   )
 
 const getInternalFilteredEntities = (
   type: string,
-  filter: EntityFilter,
+  filter?: EntityFilter,
   limit = 100,
   sortKeys = [] as string[],
   selectKeys = [] as string[],
@@ -68,6 +71,9 @@ const getInternalFilteredEntities = (
   (transaction ?? getDatastore())
     .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
+
+export const getRecentEntities = (type: string, limit?: number, since?: Date, sortKey = 'createdAt') =>
+  getInternalFilteredEntities(type, since ? new PropertyFilter(sortKey, '>=', since) : undefined, limit, [sortKey])
 
 export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
   getInternalFilteredEntities(type, filter, limit)
@@ -125,12 +131,15 @@ export const getKeyedEntities = async (type: string, ids: number[], transaction?
 export const getKeyedEntity = async (type: string, id: number, transaction?: Transaction) =>
   getKeyedEntities(type, [id], transaction).then(([entity]) => entity)
 
-export const getEntityCount = async (type: string, key: string, value: {}) => {
+export const getFilteredEntityCount = async (type: string, filter: EntityFilter) => {
   const datastore = getDatastore()
-  const query = datastore.createQuery(type).filter(buildFilter(key, value))
+  const query = datastore.createQuery(type).filter(filter)
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
   return count
 }
+
+export const getEntityCount = async (type: string, key: string, value: {}) =>
+  getFilteredEntityCount(type, buildFilter(key, value))
 
 export const allocateID = async (type: string, transaction?: Transaction) => {
   const [[key]] = await (transaction ?? getDatastore()).allocateIds(buildKey(type), 1)

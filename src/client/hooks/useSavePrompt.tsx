@@ -1,7 +1,7 @@
 import api from '@/src/client/api'
 import { useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
-import { PromptVersionsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
+import { PromptConfigsAreEqual, PromptVersionsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 
 export default function useSavePrompt(
   activePrompt: ActivePrompt | undefined,
@@ -15,8 +15,9 @@ export default function useSavePrompt(
       activePrompt &&
       activeVersion &&
       modifiedVersion &&
-      VersionHasNonEmptyPrompts(modifiedVersion) &&
-      !PromptVersionsAreEqual(activeVersion, modifiedVersion)
+      !PromptVersionsAreEqual(activeVersion, modifiedVersion) &&
+      (VersionHasNonEmptyPrompts(modifiedVersion) ||
+        !PromptConfigsAreEqual(activeVersion.config, modifiedVersion.config))
     setModifiedVersion(undefined)
     if (!versionNeedsSaving) {
       return activeVersion?.id

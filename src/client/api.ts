@@ -16,8 +16,10 @@ import {
   Analytics,
   AvailableProvider,
   QueryProvider,
+  PendingWorkspace,
+  PendingProject,
 } from '@/types'
-import ClientRoute from './clientRoute'
+import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
 import Progress from 'nprogress'
 
@@ -63,13 +65,13 @@ const post = (apiCall: Function, json: any = {}, responseType: ResponseType = 'j
 }
 
 const api = {
-  getWorkspaces: function (): Promise<Workspace[]> {
+  getWorkspaces: function (): Promise<[Workspace[], PendingWorkspace[]]> {
     return post(this.getWorkspaces)
   },
   getWorkspace: function (workspaceID: number): Promise<ActiveWorkspace> {
     return post(this.getWorkspace, { workspaceID })
   },
-  getSharedProjects: function (): Promise<Project[]> {
+  getSharedProjects: function (): Promise<[Project[], PendingProject[]]> {
     return post(this.getSharedProjects)
   },
   addWorkspace: function (name: string): Promise<number> {
@@ -86,6 +88,9 @@ const api = {
   },
   inviteToWorkspace: function (workspaceID: number, emails: string[]) {
     return post(this.inviteToWorkspace, { workspaceID, emails })
+  },
+  respondToInvite: function (objectID: number, accept: boolean) {
+    return post(this.respondToInvite, { objectID, accept })
   },
   getProject: function (projectID: number): Promise<ActiveProject> {
     return post(this.getProject, { projectID })

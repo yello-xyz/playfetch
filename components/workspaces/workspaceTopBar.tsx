@@ -1,5 +1,6 @@
-import { ActiveWorkspace } from '@/types'
-import { TopBarButton, UserAvatars } from '../topBarButton'
+import { ActiveWorkspace, IsPendingWorkspace, PendingWorkspace } from '@/types'
+import { TopBarButton } from '../topBarButton'
+import { UserAvatars } from '@/components/users/userAvatars'
 import addIcon from '@/public/addWhite.svg'
 import chevronIcon from '@/public/chevron.svg'
 import fileIcon from '@/public/file.svg'
@@ -8,37 +9,39 @@ import Icon from '../icon'
 import { useState } from 'react'
 import WorkspacePopupMenu from './workspacePopupMenu'
 import spinnerIcon from '@/public/spinner.svg'
+import InviteButton from '../users/inviteButton'
 
 export default function WorkspaceTopBar({
   activeWorkspace,
   isUserWorkspace,
   isSharedProjects,
   onAddProject,
-  setShowInviteDialog,
+  onInviteMembers,
   onRenamed,
   onDeleted,
 }: {
-  activeWorkspace: ActiveWorkspace
-  isUserWorkspace: boolean
-  isSharedProjects: boolean
-  onAddProject: () => Promise<void>
-  setShowInviteDialog: (show: boolean) => void
-  onRenamed: () => void
-  onDeleted: () => void
+  activeWorkspace: ActiveWorkspace | PendingWorkspace
+  isUserWorkspace?: boolean
+  isSharedProjects?: boolean
+  onAddProject?: () => Promise<void>
+  onInviteMembers?: (emails: string[]) => void
+  onRenamed?: () => void
+  onDeleted?: () => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
-  const hasPopupMenu = !isUserWorkspace && !isSharedProjects
+  const hasIcon = !isUserWorkspace && !isSharedProjects
+  const hasPopupMenu = hasIcon && !IsPendingWorkspace(activeWorkspace)
 
   return (
     <div className='flex items-center justify-between pt-3 pb-2.5 px-5'>
       <div
         className={`flex items-center gap-1 py-1.5 ${hasPopupMenu ? 'relative cursor-pointer' : ''}`}
         onClick={hasPopupMenu ? () => setMenuExpanded(!isMenuExpanded) : undefined}>
-        {hasPopupMenu && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
+        {hasIcon && <Icon icon={isUserWorkspace ? fileIcon : folderIcon} />}
         <div className='flex items-center gap-0'>
           <span className='text-lg font-medium leading-8 text-gray-700'>{activeWorkspace.name}</span>
-          {hasPopupMenu && (
+          {hasPopupMenu && onRenamed && onDeleted && (
             <>
               <Icon icon={chevronIcon} />
               <div className='absolute shadow-sm -left-1 top-10'>
@@ -55,11 +58,17 @@ export default function WorkspaceTopBar({
           )}
         </div>
       </div>
-      {!isSharedProjects && (
+      {!isSharedProjects && !IsPendingWorkspace(activeWorkspace) && (
         <div className='flex items-center gap-2'>
           <UserAvatars users={activeWorkspace.users} />
-          {!isUserWorkspace && <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />}
-          <AddProjectButton onAddProject={onAddProject} />
+          {!isUserWorkspace && onInviteMembers && (
+            <InviteButton
+              users={activeWorkspace.users}
+              pendingUsers={activeWorkspace.pendingUsers}
+              onInvite={onInviteMembers}
+            />
+          )}
+          {onAddProject && <AddProjectButton onAddProject={onAddProject} />}
         </div>
       )}
     </div>

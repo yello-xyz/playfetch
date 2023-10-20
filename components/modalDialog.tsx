@@ -3,6 +3,7 @@ import Button from './button'
 
 export type DialogPrompt = {
   title?: string
+  content?: string
   confirmTitle?: string
   callback?: () => void
   destructive?: boolean
@@ -52,11 +53,14 @@ export default function ModalDialog({
   return prompt ? (
     <div
       onClick={dismiss}
-      className='fixed inset-0 z-30 flex items-center justify-center w-full h-full bg-gray-600 bg-opacity-50'>
+      className='fixed inset-0 z-40 flex items-center justify-center w-full h-full bg-gray-600 bg-opacity-50'>
       <div onClick={event => event.stopPropagation()} className='p-4 bg-white rounded-lg w-72 drop-shadow'>
-        <div className='flex flex-col gap-4 text-center'>
-          <h3 className='text-base font-semibold'>{prompt.title ?? 'Are you sure?'}</h3>
-          <div className='text-left'>{children}</div>
+        <div className='flex flex-col gap-4'>
+          <h3 className='text-base font-semibold text-center'>
+            <span className='inline-block text-left'>{prompt.title ?? 'Are you sure?'}</span>
+          </h3>
+          {prompt.content && <div className='text-sm text-gray-600'>{prompt.content}</div>}
+          {(children || !prompt.content) && <div className='text-left'>{children}</div>}
           <div className='flex justify-end gap-4'>
             {prompt.cancellable !== false && (
               <Button type='secondary' onClick={onDismiss}>

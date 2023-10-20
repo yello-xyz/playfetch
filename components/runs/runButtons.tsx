@@ -111,6 +111,7 @@ export default function RunButtons({
   setLanguageModel,
   testConfig,
   setTestConfig,
+  onShowTestConfig,
   disabled,
   callback,
 }: {
@@ -122,6 +123,7 @@ export default function RunButtons({
   setLanguageModel?: (model: LanguageModel) => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  onShowTestConfig?: () => void
   disabled?: boolean
   callback: (inputs: PromptInputs[]) => Promise<void>
 }) {
@@ -164,6 +166,7 @@ export default function RunButtons({
   }
 
   const showTestDataSelector = getIndicesForMode('all').length > 1
+  const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
 
   return (
     <div className='flex items-center self-end gap-3'>
@@ -182,8 +185,9 @@ export default function RunButtons({
           title={runTitle ?? 'Run'}
           pendingTitle='Running'
           roundedClass={showTestDataSelector ? 'rounded-r-lg' : undefined}
-          disabled={disabled || (rowIndices.length === 0 && staticVariables.length > 0)}
+          disabled={disabled || isMissingTestData}
           onClick={testPrompt}
+          onDisabledClick={!disabled && isMissingTestData ? onShowTestConfig : undefined}
         />
       </div>
     </div>

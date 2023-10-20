@@ -1,4 +1,4 @@
-import { ParseQuery } from '@/src/client/clientRoute'
+import { ParseQuery } from '@/src/common/clientRoute'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getActiveEndpointFromPath } from '@/src/server/datastore/endpoints'
 import { checkProject } from '@/src/server/datastore/projects'
@@ -95,7 +95,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.setHeader('Content-Type', 'application/json')
         }
 
-        const salt = (value: number | bigint) => (BigInt(value) ^ BigInt(endpoint.id))
+        const salt = (value: number | bigint) => BigInt(value) ^ BigInt(endpoint.id)
         const continuationID = continuation ? Number(salt(BigInt(continuation))) : undefined
         const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)

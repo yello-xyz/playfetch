@@ -20,11 +20,6 @@ import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 
-export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[]) => {
-  const allChainInputs = chainWithInputs.flatMap(item => item.inputs ?? [])
-  return ExcludeBoundChainVariables(allChainInputs, chainWithInputs)
-}
-
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item)) {
     return ExtractVariables(item.code)
@@ -35,22 +30,35 @@ export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCac
   const version = cache.versionForItem(item)
   return version
     ? ExtractPromptVariables(version.prompts, version.config, includingDynamic)
-    : [...(item.inputs ?? []), ...(includingDynamic ? item.dynamicInputs ?? [] : [])] ?? []
+    : extractChainItemInputs(item, includingDynamic)
 }
 
-export const ExtractChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) => [
-  ...new Set(chain.flatMap(item => ExtractChainItemVariables(item, cache, includingDynamic))),
+const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
+  ...(item.inputs ?? []),
+  ...(includingDynamic && IsPromptChainItem(item) ? item.dynamicInputs ?? [] : []),
 ]
 
-const ExcludeBoundChainVariables = (allChainVariables: string[], chain: ChainItem[]) => {
-  const boundInputVariables = chain.map(item => item.output).filter(output => !!output) as string[]
-  return allChainVariables.filter(variable => !boundInputVariables.includes(variable))
-}
+export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) =>
+  excludeBoundChainVariables(
+    chain.map(item => ({ inputs: ExtractChainItemVariables(item, cache, includingDynamic), output: item.output }))
+  )
 
-export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic = true) => {
-  const allInputVariables = ExtractChainVariables(chain, cache, includingDynamic)
-  return ExcludeBoundChainVariables(allInputVariables, chain)
-}
+export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[], includingDynamic: boolean) =>
+  excludeBoundChainVariables(
+    chainWithInputs.map(item => ({ inputs: extractChainItemInputs(item, includingDynamic), output: item.output }))
+  )
+
+const excludeBoundChainVariables = (chain: { inputs: string[]; output?: string }[]) => [
+  ...new Set(
+    chain.reduce(
+      ([unmappedInputs, mappedOutputs], { inputs, output }) => [
+        [...unmappedInputs, ...inputs.filter(input => !mappedOutputs.includes(input))],
+        output ? [...mappedOutputs, output] : mappedOutputs,
+      ],
+      [[] as string[], [] as string[]]
+    )[0]
+  ),
+]
 
 export default function ChainNodeOutput({
   chain,
@@ -152,6 +160,7 @@ export default function ChainNodeOutput({
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}
+              onShowTestConfig={activeIndex !== 0 ? () => setActiveIndex(0) : undefined}
               disabled={!items.length || !areProvidersAvailable(items)}
               callback={runChain}
             />

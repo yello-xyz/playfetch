@@ -77,7 +77,12 @@ export default function ChainNodeBoxHeader({
       )}
       <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
         {label !== undefined ? (
-          <EditableHeaderItem value={label} onChange={setLabel} onSubmit={() => submitRename(label)} />
+          <EditableHeaderItem
+            value={label}
+            onChange={setLabel}
+            onSubmit={() => submitRename(label)}
+            onCancel={() => setLabel(undefined)}
+          />
         ) : (
           <HeaderItem>
             {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}

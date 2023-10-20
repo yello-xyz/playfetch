@@ -9,7 +9,7 @@ import {
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { ActiveWorkspace, User, Workspace } from '@/types'
+import { ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace } from '@/types'
 import { deleteProjectForUser, toProject } from './projects'
 import {
   getAccessibleObjectIDs,
@@ -40,22 +40,17 @@ const toWorkspace = (data: any): Workspace => ({
   name: data.name,
 })
 
-export async function getWorkspaceUsers(workspaceID: number): Promise<User[]> {
-  const userIDs = await getAccessingUserIDs(workspaceID, 'workspace')
-  const users = await getKeyedEntities(Entity.USER, userIDs)
-  return users.sort((a, b) => a.fullName.localeCompare(b.fullName)).map(toUser)
-}
-
 export async function getActiveWorkspace(userID: number, workspaceID: number): Promise<ActiveWorkspace> {
   const workspaceData = await getVerifiedUserWorkspaceData(userID, workspaceID)
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID, ['lastEditedAt'])
   const projects = projectData.map(project => toProject(project, userID))
-  const users = await getWorkspaceUsers(workspaceID)
+  const [users, pendingUsers] = await getWorkspaceUsers(workspaceID)
 
   return {
     ...toWorkspace(workspaceData),
     projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
     users,
+    pendingUsers,
   }
 }
 
@@ -68,7 +63,7 @@ export async function addWorkspaceForUser(userID: number, workspaceName?: string
   )
   await getDatastore().save(workspaceData)
   const workspaceID = getID(workspaceData)
-  await grantUserAccess(userID, workspaceID, 'workspace')
+  await grantUserAccess(userID, userID, workspaceID, 'workspace')
   return workspaceID
 }
 
@@ -77,7 +72,7 @@ export async function inviteMembersToWorkspace(userID: number, workspaceID: numb
     throw new Error('Cannot invite to Drafts workspace')
   }
   await getVerifiedUserWorkspaceData(userID, workspaceID)
-  await grantUsersAccess(emails, workspaceID, 'workspace')
+  await grantUsersAccess(userID, emails, workspaceID, 'workspace')
 }
 
 export async function revokeMemberAccessForWorkspace(userID: number, workspaceID: number) {
@@ -102,6 +97,9 @@ const getVerifiedUserWorkspaceData = async (userID: number, workspaceID: number)
   return getKeyedEntity(Entity.WORKSPACE, workspaceID)
 }
 
+export const getWorkspaceNameForID = (workspaceID: number) =>
+  getKeyedEntity(Entity.WORKSPACE, workspaceID).then(data => data.name)
+
 export async function updateWorkspaceName(userID: number, workspaceID: number, name: string) {
   if (workspaceID === userID) {
     throw new Error('Cannot rename Drafts workspace')
@@ -110,10 +108,53 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
   await updateWorkspace({ ...workspaceData, name })
 }
 
-export async function getWorkspacesForUser(userID: number): Promise<Workspace[]> {
-  const workspaceIDs = await getAccessibleObjectIDs(userID, 'workspace')
-  const workspaces = await getKeyedEntities(Entity.WORKSPACE, workspaceIDs)
-  return workspaces.sort((a, b) => b.createdAt - a.createdAt).map(toWorkspace)
+export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
+  getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace)
+
+export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
+
+export async function getPendingAccessObjects<T>(
+  sourceID: number,
+  kind: 'project' | 'workspace',
+  entityType: string,
+  toObject: (data: any) => T
+): Promise<[T[], (T & { invitedBy: User; timestamp: number })[]]> {
+  const sourceIsUser = entityType !== Entity.USER
+  const [objectIDs, pendingObjects] = sourceIsUser
+    ? await getAccessibleObjectIDs(sourceID, kind)
+    : await getAccessingUserIDs(sourceID, kind)
+
+  const getAccessID = (access: any) => (sourceIsUser ? access.objectID : access.userID)
+  const pendingObjectIDs = pendingObjects.map(getAccessID)
+  const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
+
+  const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
+  const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
+  const invitingUsers = invitingUsersData.map(toUser)
+
+  const toPendingObject = (object: T, { invitedBy, timestamp }: { invitedBy: number; timestamp: number }) => ({
+    ...object,
+    invitedBy: invitingUsers.find(user => user.id === invitedBy)!,
+    timestamp,
+  })
+
+  const sortObjects = sourceIsUser
+    ? (a: any, b: any) => b.createdAt - a.createdAt
+    : (a: any, b: any) => a.fullName.localeCompare(b.fullName)
+
+  return [
+    objectsData
+      .filter(objectData => !pendingObjectIDs.includes(getID(objectData)))
+      .sort(sortObjects)
+      .map(toObject),
+    objectsData
+      .filter(objectData => pendingObjectIDs.includes(getID(objectData)))
+      .sort(sortObjects)
+      .map(objectData =>
+        toPendingObject(toObject(objectData), pendingObjects.find(access => getAccessID(access) === getID(objectData))!)
+      ),
+  ]
 }
 
 export async function deleteWorkspaceForUser(userID: number, workspaceID: number) {

@@ -2,8 +2,17 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { useState } from 'react'
-import { User, AvailableProvider, Workspace, ActiveWorkspace, Project } from '@/types'
-import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/client/clientRoute'
+import {
+  User,
+  AvailableProvider,
+  Workspace,
+  ActiveWorkspace,
+  Project,
+  PendingWorkspace,
+  IsPendingWorkspace,
+  PendingProject,
+} from '@/types'
+import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
@@ -12,34 +21,44 @@ import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore
 import WorkspaceGridView from '@/components/workspaces/workspaceGridView'
 import WorkspaceSidebar from '@/components/workspaces/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
+import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
+import GlobalPopup from '@/components/globalPopup'
+import WorkspaceInvite from '@/components/workspaces/workspaceInvite'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
-export const SharedProjectsWorkspace = (projects: Project[]): ActiveWorkspace => ({
+export const SharedProjectsWorkspace = (
+  projects: Project[],
+  pendingProjects: PendingProject[] = []
+): ActiveWorkspace => ({
   id: SharedProjectsWorkspaceID,
   name: 'Shared Projects',
-  projects,
+  projects: [...pendingProjects, ...projects],
   users: [],
+  pendingUsers: [],
 })
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
   const { w: workspaceID } = ParseNumberQuery(query)
 
-  const initialWorkspaces = await getWorkspacesForUser(user.id)
+  const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
-  const projects = await getSharedProjectsForUser(user.id)
-  const sharedProjects = projects.length > 0 ? SharedProjectsWorkspace(projects) : null
+  const [projects, pendingProjects] = await getSharedProjectsForUser(user.id)
+  const initialSharedProjects =
+    projects.length > 0 || pendingProjects.length > 0 ? SharedProjectsWorkspace(projects, pendingProjects) : null
   const initialActiveWorkspace =
     workspaceID === SharedProjectsWorkspaceID
-      ? sharedProjects
-      : await getActiveWorkspace(user.id, workspaceID ?? user.id)
+      ? initialSharedProjects ?? (await getActiveWorkspace(user.id, user.id))
+      : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
+        (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
 
   return {
     props: {
       user,
-      sharedProjects,
+      initialSharedProjects,
       initialWorkspaces,
+      initialPendingWorkspaces,
       initialActiveWorkspace,
       availableProviders,
     },
@@ -48,15 +67,17 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
 export default function Home({
   user,
-  sharedProjects,
+  initialSharedProjects,
   initialWorkspaces,
+  initialPendingWorkspaces,
   initialActiveWorkspace,
   availableProviders,
 }: {
   user: User
-  sharedProjects?: ActiveWorkspace
+  initialSharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
-  initialActiveWorkspace: ActiveWorkspace
+  initialPendingWorkspaces: PendingWorkspace[]
+  initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
   availableProviders: AvailableProvider[]
 }) {
   const router = useRouter()
@@ -64,17 +85,31 @@ export default function Home({
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const [workspaces, setWorkspaces] = useState(initialWorkspaces)
+  const [pendingWorkspaces, setPendingWorkspaces] = useState(initialPendingWorkspaces)
+  const [sharedProjects, setSharedProjects] = useState(initialSharedProjects)
 
   const [activeWorkspace, setActiveWorkspace] = useState(initialActiveWorkspace)
 
   const refreshWorkspace = (workspaceID: number) =>
     workspaceID === SharedProjectsWorkspaceID
-      ? api.getSharedProjects().then(projects => setActiveWorkspace(SharedProjectsWorkspace(projects)))
+      ? api.getSharedProjects().then(([projects, pendingProjects]) => {
+          if (projects.length > 0 || pendingProjects.length > 0) {
+            setActiveWorkspace(SharedProjectsWorkspace(projects, pendingProjects))
+          } else {
+            selectWorkspace(user.id)
+            setSharedProjects(undefined)
+          }
+        })
       : api.getWorkspace(workspaceID).then(setActiveWorkspace)
 
   const selectWorkspace = async (workspaceID: number) => {
     if (workspaceID !== activeWorkspace.id) {
-      await refreshWorkspace(workspaceID)
+      const pendingWorkspace = pendingWorkspaces.find(workspace => workspace.id === workspaceID)
+      if (pendingWorkspace) {
+        setActiveWorkspace(pendingWorkspace)
+      } else {
+        await refreshWorkspace(workspaceID)
+      }
       router.push(WorkspaceRoute(workspaceID, user.id), undefined, { shallow: true })
     }
   }
@@ -86,7 +121,30 @@ export default function Home({
     await navigateToProject(projectID)
   }
 
-  const refreshWorkspaces = () => api.getWorkspaces().then(setWorkspaces)
+  const refreshWorkspaces = () =>
+    api.getWorkspaces().then(([workspaces, pendingWorkspaces]) => {
+      setWorkspaces(workspaces)
+      setPendingWorkspaces(pendingWorkspaces)
+    })
+
+  const respondToWorkspaceInvite = (workspaceID: number, accept: boolean) =>
+    api.respondToInvite(workspaceID, accept).then(() => {
+      if (accept) {
+        refreshWorkspace(workspaceID)
+      } else {
+        selectWorkspace(user.id)
+        refreshWorkspaces()
+      }
+    })
+
+  const respondToProjectInvite = (projectID: number, accept: boolean) =>
+    api.respondToInvite(projectID, accept).then(() => {
+      if (accept) {
+        navigateToProject(projectID)
+      } else {
+        refreshWorkspace(activeWorkspace.id)
+      }
+    })
 
   const { w: workspaceID } = ParseNumberQuery(router.query)
   const currentQueryState = workspaceID
@@ -96,38 +154,52 @@ export default function Home({
     setQuery(currentQueryState)
   }
 
+  const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
+
   return (
     <>
-      <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-        <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-          <main className='flex items-stretch h-screen text-sm'>
-            <WorkspaceSidebar
-              workspaces={workspaces}
-              activeWorkspace={activeWorkspace}
-              sharedProjects={sharedProjects}
-              onSelectWorkspace={selectWorkspace}
-              onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
-              onRefreshWorkspaces={refreshWorkspaces}
-            />
-            <div className='flex flex-col flex-1'>
-              <div className='flex-1 overflow-hidden'>
-                <WorkspaceGridView
-                  workspaces={workspaces}
-                  activeWorkspace={activeWorkspace}
-                  isUserWorkspace={activeWorkspace.id === user.id}
-                  isSharedProjects={IsSharedProjects(activeWorkspace)}
-                  onAddProject={addProject}
-                  onSelectProject={navigateToProject}
-                  onSelectUserWorkspace={() => selectWorkspace(user.id)}
-                  onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                  onRefreshWorkspaces={refreshWorkspaces}
-                />
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+        <ModalDialogContext.Provider value={{ setDialogPrompt }}>
+          <GlobalPopupContext.Provider value={globalPopupProviderProps}>
+            <main className='flex items-stretch h-screen text-sm'>
+              <WorkspaceSidebar
+                workspaces={workspaces}
+                pendingWorkspaces={pendingWorkspaces}
+                activeWorkspaceID={activeWorkspace.id}
+                sharedProjects={sharedProjects}
+                onSelectWorkspace={selectWorkspace}
+                onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
+                onRefreshWorkspaces={refreshWorkspaces}
+              />
+              <div className='flex flex-col flex-1'>
+                <div className='flex-1 overflow-hidden'>
+                  {IsPendingWorkspace(activeWorkspace) ? (
+                    <WorkspaceInvite
+                      workspace={activeWorkspace}
+                      onRespond={accept => respondToWorkspaceInvite(activeWorkspace.id, accept)}
+                    />
+                  ) : (
+                    <WorkspaceGridView
+                      workspaces={workspaces}
+                      activeWorkspace={activeWorkspace}
+                      isUserWorkspace={activeWorkspace.id === user.id}
+                      isSharedProjects={IsSharedProjects(activeWorkspace)}
+                      onRespondToProjectInvite={respondToProjectInvite}
+                      onAddProject={addProject}
+                      onSelectProject={navigateToProject}
+                      onSelectUserWorkspace={() => selectWorkspace(user.id)}
+                      onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                      onRefreshWorkspaces={refreshWorkspaces}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          </main>
-        </UserContext.Provider>
-      </ModalDialogContext.Provider>
-      <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+            </main>
+          </GlobalPopupContext.Provider>
+        </ModalDialogContext.Provider>
+        <GlobalPopup {...globalPopupProps} {...popupProps} />
+        <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+      </UserContext.Provider>
     </>
   )
 }

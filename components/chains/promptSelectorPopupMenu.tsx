@@ -1,4 +1,4 @@
-import { PopupContent, PopupLabelItem } from '../popupMenu'
+import { PopupContent, PopupLabelItem, PopupSectionDivider } from '../popupMenu'
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
@@ -17,7 +17,7 @@ export default function PromptSelectorPopup({
   withDismiss,
 }: PromptSelectorPopupProps & WithDismiss) {
   return (
-    <PopupContent className='p-3'>
+    <PopupContent className='p-3 min-w-[224px]'>
       {prompts.map((prompt, index) => (
         <PopupLabelItem
           key={index}
@@ -26,11 +26,7 @@ export default function PromptSelectorPopup({
           onClick={withDismiss(() => selectPrompt(prompt.id))}
         />
       ))}
-      {prompts.length > 0 && (
-        <div className='pt-1 pb-1 min-w-[200px]'>
-          <div className='h-px bg-gray-200' />
-        </div>
-      )}
+      {prompts.length > 0 && <PopupSectionDivider />}
       <PopupLabelItem label='Create new Prompt' icon={addIcon} onClick={withDismiss(addPrompt)} />
     </PopupContent>
   )

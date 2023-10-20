@@ -1,6 +1,6 @@
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { ActiveProject, ItemsInProject } from '@/types'
-import { PopupContent, PopupLabelItem } from '../popupMenu'
+import { PopupContent, PopupLabelItem, PopupSectionTitle } from '../popupMenu'
 import promptIcon from '@/public/prompt.svg'
 import chainIcon from '@/public/chain.svg'
 import endpointIcon from '@/public/endpoint.svg'
@@ -65,10 +65,9 @@ function PropjectItemSelectorPopup({
   onSelectItemID,
   withDismiss,
 }: PropjectItemSelectorPopupProps & WithDismiss) {
-  const titleClass = 'p-1.5 text-xs font-medium text-gray-400'
   return (
     <PopupContent className='p-3'>
-      {project.prompts.length > 0 && <div className={titleClass}>Prompts</div>}
+      {project.prompts.length > 0 && <PopupSectionTitle>Prompts</PopupSectionTitle>}
       {project.prompts.map((prompt, index) => (
         <PopupLabelItem
           key={index}
@@ -77,7 +76,7 @@ function PropjectItemSelectorPopup({
           onClick={withDismiss(() => onSelectItemID(prompt.id))}
         />
       ))}
-      {project.chains.length > 0 && <div className={titleClass}>Chains</div>}
+      {project.chains.length > 0 && <PopupSectionTitle>Chains</PopupSectionTitle>}
       {project.chains.map((chain, index) => (
         <PopupLabelItem
           key={index}
@@ -86,7 +85,7 @@ function PropjectItemSelectorPopup({
           onClick={withDismiss(() => onSelectItemID(chain.id))}
         />
       ))}
-      {includeEndpoints && project.endpoints.length > 0 && <div className={titleClass}>Endpoints</div>}
+      {includeEndpoints && project.endpoints.length > 0 && <PopupSectionTitle>Endpoints</PopupSectionTitle>}
       {includeEndpoints &&
         project.endpoints
           .slice()

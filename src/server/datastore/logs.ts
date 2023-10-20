@@ -7,7 +7,7 @@ export async function migrateLogs(postMerge: boolean) {
     return
   }
   const datastore = getDatastore()
-  const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG).order('createdAt', { descending: true }))
+  const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   for (const logData of allLogs) {
     await getDatastore().save(
       toLogData(

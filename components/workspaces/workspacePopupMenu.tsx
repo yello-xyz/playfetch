@@ -36,7 +36,9 @@ export default function WorkspacePopupMenu({
   const leaveWorkspace = () => {
     setMenuExpanded(false)
     setDialogPrompt({
-      title: 'Are you sure you want to leave this workspace?',
+      title: `Are you sure you want to leave “${workspace.name}”?`,
+      content: 'If you leave this workspace, you will no longer have access to any of its projects.',
+      confirmTitle: 'Leave Workspace',
       callback: () => api.leaveWorkspace(workspace.id).then(onDeleted),
       destructive: true,
     })

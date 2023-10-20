@@ -4,6 +4,7 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
   const { render, location, onDismissGlobalPopup, parentRef, parentRect, childRect, childRef, ...other } = props
 
   const position: GlobalPopupLocation = { ...location }
+  const isModalDialog = Object.keys(position).length === 0
   if (parentRect && childRect) {
     if (position.right !== undefined) {
       position.right = parentRect.width - position.right
@@ -32,6 +33,9 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
       } else if (position.top + childRect.height > parentRect.height) {
         position.top = parentRect.height - childRect.height
       }
+    } else if (isModalDialog) {
+      position.left = (parentRect.width - childRect.width) / 2
+      position.top = (parentRect.height - childRect.height) / 2
     }
   } else {
     if (position.left && position.right) {
@@ -48,7 +52,10 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
   }
 
   return render ? (
-    <div ref={parentRef} onClick={onDismissGlobalPopup} className='fixed inset-0 z-40 w-full h-full text-sm '>
+    <div
+      ref={parentRef}
+      onClick={onDismissGlobalPopup}
+      className={`fixed inset-0 z-40 w-full h-full text-sm ${isModalDialog ? 'bg-gray-600 bg-opacity-50' : ''}`}>
       <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute shadow-sm' style={position}>
         {render({ ...other, withDismiss })}
       </div>

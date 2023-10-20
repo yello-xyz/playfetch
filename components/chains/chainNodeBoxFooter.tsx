@@ -3,28 +3,34 @@ import { ChainNode, IsChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
-import { ExtractChainVariables } from './chainNodeOutput'
+import { ExtractChainItemVariables } from './chainNodeOutput'
 
 export default function ChainNodeBoxFooter({
   nodes,
-  setNodes,
   index,
+  saveItems,
   isSelected,
   promptCache,
 }: {
   nodes: ChainNode[]
-  setNodes: (nodes: ChainNode[]) => void
   index: number
+  saveItems: (items: ChainItem[]) => void
   isSelected: boolean
   promptCache: ChainPromptCache
 }) {
   const chainNode = nodes[index]
-  const inputs = ExtractChainVariables(nodes.slice(index + 1).filter(IsChainItem), promptCache, false)
+  const items = nodes.filter(IsChainItem)
+  const itemIndex = index - 1
+  const inputs = [
+    ...new Set(items.slice(itemIndex + 1).flatMap(item => ExtractChainItemVariables(item, promptCache, false))),
+  ]
   const mapOutput = (output?: string) => {
-    const newNodes = nodes.map(node =>
-      IsChainItem(node) ? { ...node, output: node.output === output ? undefined : node.output } : node
-    )
-    setNodes([...newNodes.slice(0, index), { ...(newNodes[index] as ChainItem), output }, ...newNodes.slice(index + 1)])
+    const newItems = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
+    saveItems([
+      ...newItems.slice(0, itemIndex),
+      { ...(newItems[itemIndex] as ChainItem), output },
+      ...newItems.slice(itemIndex + 1),
+    ])
   }
 
   return (

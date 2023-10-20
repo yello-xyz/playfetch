@@ -4,11 +4,12 @@ import chevronIcon from '@/public/chevron.svg'
 import { Suspense, useState } from 'react'
 import Icon from '../icon'
 import api from '@/src/client/api'
-import InviteDialog from '../inviteDialog'
-import { TopBarButton, UserAvatars } from '../topBarButton'
+import { TopBarButton } from '../topBarButton'
+import { UserAvatars } from '@/components/users/userAvatars'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '../topBar'
 
 import dynamic from 'next/dynamic'
+import InviteButton from '../users/inviteButton'
 const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 
 export default function ProjectTopBar({
@@ -29,7 +30,6 @@ export default function ProjectTopBar({
   setShowComments: (show: boolean) => void
 }) {
   const [isMenuExpanded, setMenuExpanded] = useState(false)
-  const [showInviteDialog, setShowInviteDialog] = useState(false)
 
   const inviteMembers = async (emails: string[]) => {
     await api.inviteToProject(activeProject.id, emails)
@@ -72,13 +72,14 @@ export default function ProjectTopBar({
         </div>
         <TopBarAccessoryItem className='flex items-center justify-end gap-4'>
           <UserAvatars users={activeProject.users} />
-          <TopBarButton title='Invite' onClick={() => setShowInviteDialog(true)} />
+          <InviteButton
+            users={activeProject.users}
+            pendingUsers={activeProject.pendingUsers}
+            onInvite={inviteMembers}
+          />
           {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
         </TopBarAccessoryItem>
       </TopBar>
-      {showInviteDialog && (
-        <InviteDialog label='project' onConfirm={inviteMembers} onDismiss={() => setShowInviteDialog(false)} />
-      )}
     </>
   )
 }

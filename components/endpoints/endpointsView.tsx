@@ -23,7 +23,7 @@ import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from '../iconButton'
 import collapseIcon from '@/public/collapse.svg'
-import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/client/clientRoute'
+import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
@@ -110,6 +110,7 @@ export default function EndpointsView({
 
   if (newEndpoint && !isEditing) {
     setNewEndpoint(undefined)
+    router.push(EndpointsRoute(project.id), undefined, { shallow: true })
   }
 
   const [activeEndpointID, setActiveEndpointID] = useState<number>()
@@ -147,7 +148,7 @@ export default function EndpointsView({
   const variables = parent
     ? ProjectItemIsChain(parent)
       ? activeVersion?.items
-        ? ExtractUnboundChainInputs(activeVersion.items)
+        ? ExtractUnboundChainInputs(activeVersion.items, false)
         : []
       : activeVersion?.prompts && activeVersion?.config
       ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)

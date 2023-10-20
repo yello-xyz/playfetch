@@ -1,5 +1,5 @@
 import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryConfig } from '@/types'
-import { ChainNode } from './chainNode'
+import { ChainNode, IsChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
@@ -10,7 +10,7 @@ export function ChainNodeBox({
   chain,
   index,
   nodes,
-  setNodes,
+  saveItems,
   activeIndex,
   setActiveIndex,
   isMenuActive,
@@ -26,7 +26,7 @@ export function ChainNodeBox({
   chain: ActiveChain
   index: number
   nodes: ChainNode[]
-  setNodes: (nodes: ChainNode[]) => void
+  saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   isMenuActive: boolean
@@ -48,12 +48,15 @@ export function ChainNodeBox({
     setActiveIndex(index)
   }
 
-  const updateItem = (item: ChainItem) => setNodes([...nodes.slice(0, index), item, ...nodes.slice(index + 1)])
+  const items = nodes.filter(IsChainItem)
+  const itemIndex = index - 1
 
-  const removeItem = () => setNodes([...nodes.slice(0, index), ...nodes.slice(index + 1)])
+  const updateItem = (item: ChainItem) => saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex + 1)])
+
+  const removeItem = () => saveItems([...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)])
 
   const insertItem = (item: ChainItem) => {
-    setNodes([...nodes.slice(0, index), item, ...nodes.slice(index)])
+    saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex)])
     setActiveIndex(index)
   }
 
@@ -81,6 +84,7 @@ export function ChainNodeBox({
           isDisabled={isTestMode}
           isActive={isMenuActive}
           setActive={setMenuActive}
+          canDismiss={nodes.length > 2}
           onInsertPrompt={insertPrompt}
           onInsertNewPrompt={insertNewPrompt}
           onInsertCodeBlock={insertCodeBlock}
@@ -88,7 +92,7 @@ export function ChainNodeBox({
         />
       )}
       <div
-        className={`flex flex-col border w-96 rounded-lg cursor-pointer ${colorClass}`}
+        className={`flex flex-col border w-96 rounded-lg cursor-pointer drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)] ${colorClass}`}
         onClick={() => setActiveIndex(index)}>
         <ChainNodeBoxHeader
           nodes={nodes}
@@ -102,11 +106,11 @@ export function ChainNodeBox({
           prompts={prompts}
           users={chain.users}
         />
-        <ChainNodeBoxBody chainNode={chainNode} nodes={nodes} isSelected={isSelected} promptCache={promptCache} />
+        <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} promptCache={promptCache} />
         <ChainNodeBoxFooter
           nodes={nodes}
-          setNodes={setNodes}
           index={index}
+          saveItems={saveItems}
           isSelected={isSelected}
           promptCache={promptCache}
         />

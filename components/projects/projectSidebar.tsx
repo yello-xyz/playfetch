@@ -23,7 +23,6 @@ export default function ProjectSidebar({
   onAddPrompt,
   onAddChain,
   onDeleteItem,
-  onRefreshItem,
   onSelectPrompt,
   onSelectChain,
   onSelectCompare,
@@ -35,7 +34,6 @@ export default function ProjectSidebar({
   onAddPrompt: () => void
   onAddChain: () => void
   onDeleteItem: (itemID: number) => void
-  onRefreshItem: () => void
   onSelectPrompt: (promptID: number) => void
   onSelectChain: (chainID: number) => void
   onSelectCompare: () => void
@@ -50,7 +48,6 @@ export default function ProjectSidebar({
       item={item}
       workspaces={workspaces}
       reference={reference(item)}
-      onRefresh={onRefreshItem}
       onDelete={() => onDeleteItem(item.id)}
       active={activeItem}
     />
@@ -104,14 +101,12 @@ function ProjectItemActionButton({
   item,
   workspaces,
   reference,
-  onRefresh,
   onDelete,
   active,
 }: {
   item: Prompt | Chain
   workspaces: Workspace[]
   reference: Chain | Endpoint | undefined
-  onRefresh: () => void
   onDelete: () => void
   active?: boolean
 }) {
@@ -128,9 +123,7 @@ function ProjectItemActionButton({
       />
       <div className='absolute shadow-sm -right-1 top-8'>
         <Suspense>
-          <ProjectItemPopupMenu
-            {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onRefresh, onDelete }}
-          />
+          <ProjectItemPopupMenu {...{ item, workspaces, reference, isMenuExpanded, setMenuExpanded, onDelete }} />
         </Suspense>
       </div>
     </div>

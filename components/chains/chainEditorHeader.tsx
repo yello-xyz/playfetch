@@ -1,47 +1,84 @@
 import { ActiveChain, ChainVersion } from '@/types'
-import { CustomHeader } from '../tabSelector'
+import { CustomHeader, EditableHeaderItem } from '../tabSelector'
 import Icon from '../icon'
 import chainIcon from '@/public/chain.svg'
-import saveIcon from '@/public/save.svg'
 import historyIcon from '@/public/history.svg'
 import { StaticImageData } from 'next/image'
+import { useState } from 'react'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
+import api from '@/src/client/api'
 
 export default function ChainEditorHeader({
   chain,
   activeVersion,
-  saveItems,
+  isVersionSaved,
   showVersions,
   setShowVersions,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  saveItems?: () => void
+  isVersionSaved: boolean
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
   const versionIndex = chain.versions.findIndex(version => version.id === activeVersion.id)
 
+  const refreshActiveItem = useRefreshActiveItem()
+  const refreshProject = useRefreshProject()
+  const renameChain = (name: string) =>
+    api.renameChain(chain.id, name).then(() => {
+      refreshProject()
+      return refreshActiveItem()
+    })
+
   return (
     <CustomHeader>
       <ShowVersionsButton showVersions={showVersions} setShowVersions={setShowVersions} />
-      <HeaderTitle chainName={chain.name} versionIndex={saveItems || !setShowVersions ? undefined : versionIndex} />
-      <SaveVersionButton saveItems={saveItems} />
+      <HeaderTitle
+        chainName={chain.name}
+        onRename={renameChain}
+        versionIndex={!isVersionSaved || !setShowVersions ? undefined : versionIndex}
+      />
+      <HiddenHeaderButton />
     </CustomHeader>
   )
 }
 
-function HeaderTitle({ chainName, versionIndex }: { chainName: string; versionIndex?: number }) {
+function HeaderTitle({
+  chainName,
+  versionIndex,
+  onRename,
+}: {
+  chainName: string
+  versionIndex?: number
+  onRename: (name: string) => Promise<void>
+}) {
+  const [label, setLabel] = useState<string>()
+  const submitRename = (name: string) => onRename(name).then(() => setLabel(undefined))
+
   return (
     <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-11'>
-      <div className='flex items-center h-full font-medium select-none whitespace-nowrap'>
-        <Icon icon={chainIcon} className='h-full py-2.5' />
-        {chainName}
+      <div
+        className='flex items-center h-full font-medium select-none whitespace-nowrap cursor-text'
+        onClick={() => setLabel(chainName)}>
+        {label === undefined && <Icon icon={chainIcon} className='h-full py-2.5' />}
+        {label !== undefined ? (
+          <EditableHeaderItem
+            value={label}
+            onChange={setLabel}
+            onSubmit={() => submitRename(label)}
+            onCancel={() => setLabel(undefined)}
+          />
+        ) : (
+          chainName
+        )}
       </div>
-      {versionIndex === undefined ? (
-        <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
-      ) : (
-        <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
-      )}
+      {label === undefined &&
+        (versionIndex === undefined ? (
+          <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
+        ) : (
+          <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
+        ))}
     </div>
   )
 }
@@ -62,9 +99,7 @@ const ShowVersionsButton = ({
   />
 )
 
-const SaveVersionButton = ({ saveItems }: { saveItems?: () => void }) => (
-  <HeaderButton onClick={saveItems} title='Save version' icon={saveIcon} justify='justify-end' />
-)
+const HiddenHeaderButton = () => <ShowVersionsButton showVersions />
 
 function HeaderButton({
   title,

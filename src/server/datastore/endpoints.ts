@@ -1,5 +1,5 @@
 import { Endpoint } from '@/types'
-import { and } from '@google-cloud/datastore'
+import { PropertyFilter, and } from '@google-cloud/datastore'
 import {
   Entity,
   buildFilter,
@@ -10,6 +10,7 @@ import {
   getFilteredEntity,
   getID,
   getKeyedEntity,
+  getRecentEntities,
   getTimestamp,
 } from './datastore'
 import { getUniqueNameWithFormat } from './prompts'
@@ -212,3 +213,8 @@ export const toEndpoint = (data: any): Endpoint => ({
   useCache: data.useCache,
   useStreaming: data.useStreaming,
 })
+
+export async function getRecentEndpoints(since: number, limit: number): Promise<Endpoint[]> {
+  const recentVersionsData = await getRecentEntities(Entity.ENDPOINT, limit, new Date(since))
+  return recentVersionsData.map(toEndpoint)
+}
