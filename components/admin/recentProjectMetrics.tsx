@@ -7,6 +7,7 @@ import { FormatDate } from '@/src/common/formatting'
 import ActiveUsers from './activeUsers'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function RecentProjectMetrics({
   project,
@@ -19,6 +20,8 @@ export default function RecentProjectMetrics({
   onSelectUser: (userID: number) => void
   onDismiss: () => void
 }) {
+  const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, true, true))
+
   return (
     <>
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
@@ -35,7 +38,7 @@ export default function RecentProjectMetrics({
               {project.workspace} ({project.creator})
             </Label>
           </div>
-          <Label>Last Modified: {FormatDate(project.timestamp, true, true)}</Label>
+          <Label>Last Modified: {lastModified}</Label>
           <div className='flex flex-col gap-1'>
             <Label>Number of prompts: {metrics.promptCount}</Label>
             <Label>Number of chains: {metrics.chainCount}</Label>

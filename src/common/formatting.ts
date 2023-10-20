@@ -6,7 +6,8 @@ const validEmailRegExp =
 
 export const CheckValidEmail = (email: string) => !!email.trim().toLowerCase().match(validEmailRegExp)
 
-const isValidTimestamp = (timestamp: number) => timestamp > 0 && timestamp < Number.MAX_VALUE && !Number.isNaN(timestamp)
+const isValidTimestamp = (timestamp: number) =>
+  timestamp > 0 && timestamp < Number.MAX_VALUE && !Number.isNaN(timestamp)
 
 export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIncludeDate = false) => {
   if (!isValidTimestamp(timestamp)) {

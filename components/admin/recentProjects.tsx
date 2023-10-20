@@ -6,6 +6,7 @@ import Icon from '../icon'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
 import userIcon from '@/public/user.svg'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function RecentProjects({
   recentProjects,
@@ -16,14 +17,14 @@ export default function RecentProjects({
 }) {
   const gridConfig = 'grid grid-cols-[100px_minmax(0,1fr)_200px_200px]'
 
-  const startDate = Math.min(...recentProjects.map(project => project.timestamp))
+  const startDate = useFormattedDate(Math.min(...recentProjects.map(project => project.timestamp)))
 
   return (
     <>
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
         {recentProjects.length > 0 && (
           <>
-            <Label>Active Projects (data since {FormatDate(startDate)})</Label>
+            <Label>Active Projects (data since {startDate})</Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg p-2`}>
               <TableCell>
                 <Label>Last Edited</Label>
@@ -38,30 +39,41 @@ export default function RecentProjects({
                 <Label>Workspace Creator</Label>
               </TableCell>
               {recentProjects.map(project => (
-                <div
-                  key={project.id}
-                  className='cursor-pointer contents group'
-                  onClick={() => onSelectProject(project.id)}>
-                  <TableCell>{FormatDate(project.timestamp, false)}</TableCell>
-                  <TableCell>
-                    <Icon icon={fileIcon} />
-                    <TruncatedSpan>{project.name}</TruncatedSpan>
-                  </TableCell>
-                  <TableCell>
-                    <Icon icon={folderIcon} />
-                    <TruncatedSpan>{project.workspace}</TruncatedSpan>
-                  </TableCell>
-                  <TableCell>
-                    <Icon icon={userIcon} />
-                    <TruncatedSpan>{project.creator}</TruncatedSpan>
-                  </TableCell>
-                </div>
+                <ProjectRow key={project.id} project={project} onSelectProject={onSelectProject} />
               ))}
             </div>
           </>
         )}
       </div>
     </>
+  )
+}
+
+function ProjectRow({
+  project,
+  onSelectProject,
+}: {
+  project: RecentProject
+  onSelectProject: (projectID: number) => void
+}) {
+  const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, false))
+
+  return (
+    <div key={project.id} className='cursor-pointer contents group' onClick={() => onSelectProject(project.id)}>
+      <TableCell>{lastModified}</TableCell>
+      <TableCell>
+        <Icon icon={fileIcon} />
+        <TruncatedSpan>{project.name}</TruncatedSpan>
+      </TableCell>
+      <TableCell>
+        <Icon icon={folderIcon} />
+        <TruncatedSpan>{project.workspace}</TruncatedSpan>
+      </TableCell>
+      <TableCell>
+        <Icon icon={userIcon} />
+        <TruncatedSpan>{project.creator}</TruncatedSpan>
+      </TableCell>
+    </div>
   )
 }
 

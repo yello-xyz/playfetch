@@ -3,6 +3,7 @@ import { ActiveUser } from '@/types'
 import Label from '@/components/label'
 import UserAvatar from '@/components/users/userAvatar'
 import { FormatDate } from '@/src/common/formatting'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function ActiveUsers({
   title = 'Active Users',
@@ -17,7 +18,7 @@ export default function ActiveUsers({
 }) {
   const gridConfig = 'grid grid-cols-[100px_200px_minmax(0,1fr)_100px_100px_100px_100px_100px]'
 
-  const startDate = Math.min(...activeUsers.map(user => user.startTimestamp))
+  const startDate = useFormattedDate(Math.min(...activeUsers.map(user => user.startTimestamp)))
 
   return (
     <>
@@ -25,7 +26,7 @@ export default function ActiveUsers({
         {activeUsers.length > 0 && (
           <>
             <Label>
-              {title} (data since {FormatDate(startDate)})
+              {title} (data since {startDate})
             </Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg p-2`}>
               <TableCell>
@@ -53,26 +54,35 @@ export default function ActiveUsers({
                 <Label># Endpoints</Label>
               </TableCell>
               {activeUsers.map(user => (
-                <div key={user.id} className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
-                  <TableCell>{FormatDate(user.lastActive, false)}</TableCell>
-                  <TableCell>
-                    <UserAvatar user={user} /><TruncatedSpan>{user.fullName}</TruncatedSpan>
-                  </TableCell>
-                  <TableCell>
-                    <TruncatedSpan>{user.email}</TruncatedSpan>
-                  </TableCell>
-                  <TableCell center>{user.commentCount}</TableCell>
-                  <TableCell center>{user.versionCount}</TableCell>
-                  <TableCell center>{user.promptCount}</TableCell>
-                  <TableCell center>{user.chainCount}</TableCell>
-                  <TableCell center>{user.endpointCount}</TableCell>
-                </div>
+                <UserRow key={user.id} user={user} onSelectUser={onSelectUser} />
               ))}
             </div>
           </>
         )}
       </div>
     </>
+  )
+}
+
+function UserRow({ user, onSelectUser }: { user: ActiveUser; onSelectUser: (userID: number) => void }) {
+  const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, false))
+
+  return (
+    <div className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
+      <TableCell>{lastActive}</TableCell>
+      <TableCell>
+        <UserAvatar user={user} />
+        <TruncatedSpan>{user.fullName}</TruncatedSpan>
+      </TableCell>
+      <TableCell>
+        <TruncatedSpan>{user.email}</TruncatedSpan>
+      </TableCell>
+      <TableCell center>{user.commentCount}</TableCell>
+      <TableCell center>{user.versionCount}</TableCell>
+      <TableCell center>{user.promptCount}</TableCell>
+      <TableCell center>{user.chainCount}</TableCell>
+      <TableCell center>{user.endpointCount}</TableCell>
+    </div>
   )
 }
 

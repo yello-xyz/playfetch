@@ -5,6 +5,7 @@ import { FormatCost, FormatDate } from '@/src/common/formatting'
 import Icon from '../icon'
 import backIcon from '@/public/back.svg'
 import { LabelForProvider } from '@/src/common/providerMetadata'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function ActiveUserMetrics({
   user,
@@ -15,6 +16,8 @@ export default function ActiveUserMetrics({
   metrics: UserMetrics
   onDismiss: () => void
 }) {
+  const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, true, true))
+
   return (
     <>
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
@@ -29,7 +32,7 @@ export default function ActiveUserMetrics({
               {user.fullName} ({user.email})
             </Label>
           </div>
-          <Label>Last Active: {FormatDate(user.lastActive, true, true)}</Label>
+          <Label>Last Active: {lastActive}</Label>
           <div className='flex flex-col gap-1'>
             <Label>Number of additional workspaces created: {metrics.createdWorkspaceCount - 1}</Label>
             <Label>
