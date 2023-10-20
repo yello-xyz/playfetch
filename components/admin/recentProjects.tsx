@@ -45,15 +45,15 @@ export default function RecentProjects({
                   <TableCell>{FormatDate(project.timestamp, false)}</TableCell>
                   <TableCell>
                     <Icon icon={fileIcon} />
-                    {project.name}
+                    <TruncatedSpan>{project.name}</TruncatedSpan>
                   </TableCell>
                   <TableCell>
                     <Icon icon={folderIcon} />
-                    {project.workspace}
+                    <TruncatedSpan>{project.workspace}</TruncatedSpan>
                   </TableCell>
                   <TableCell>
                     <Icon icon={userIcon} />
-                    {project.creator}
+                    <TruncatedSpan>{project.creator}</TruncatedSpan>
                   </TableCell>
                 </div>
               ))}
@@ -69,4 +69,8 @@ const TableCell = ({ children }: { children: ReactNode }) => (
   <div className='flex items-center h-10 px-2 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50'>
     {children}
   </div>
+)
+
+const TruncatedSpan = ({ children }: { children: ReactNode }) => (
+  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>{children}</span>
 )

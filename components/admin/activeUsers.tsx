@@ -56,9 +56,11 @@ export default function ActiveUsers({
                 <div key={user.id} className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
                   <TableCell>{user.lastActive > 0 ? FormatDate(user.lastActive, false) : '?'}</TableCell>
                   <TableCell>
-                    <UserAvatar user={user} /> {user.fullName}
+                    <UserAvatar user={user} /><TruncatedSpan>{user.fullName}</TruncatedSpan>
                   </TableCell>
-                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <TruncatedSpan>{user.email}</TruncatedSpan>
+                  </TableCell>
                   <TableCell center>{user.commentCount}</TableCell>
                   <TableCell center>{user.versionCount}</TableCell>
                   <TableCell center>{user.promptCount}</TableCell>
@@ -76,9 +78,13 @@ export default function ActiveUsers({
 
 const TableCell = ({ children, center }: { children: ReactNode; center?: boolean }) => (
   <div
-    className={`flex items-center gap-2 px-2 h-10 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50 ${
+    className={`flex items-center gap-2 px-2 h-10 font-medium group-hover:bg-gray-50 ${
       center ? 'justify-center' : ''
     }`}>
     {children}
   </div>
+)
+
+const TruncatedSpan = ({ children }: { children: ReactNode }) => (
+  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>{children}</span>
 )
