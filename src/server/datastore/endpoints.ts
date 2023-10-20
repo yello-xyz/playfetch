@@ -214,7 +214,7 @@ export const toEndpoint = (data: any): Endpoint => ({
   useStreaming: data.useStreaming,
 })
 
-export async function getRecentEndpoints(since: number, limit: number): Promise<Endpoint[]> {
-  const recentVersionsData = await getRecentEntities(Entity.ENDPOINT, limit, new Date(since))
+export async function getRecentEndpoints(since: Date, before: Date | undefined, limit: number): Promise<Endpoint[]> {
+  const recentVersionsData = await getRecentEntities(Entity.ENDPOINT, limit, since, before)
   return recentVersionsData.map(toEndpoint)
 }

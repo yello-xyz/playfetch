@@ -1,6 +1,6 @@
 import { Datastore, Key, PropertyFilter, Query, Transaction } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
-import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
+import { EntityFilter, and } from '@google-cloud/datastore/build/src/filter'
 
 let datastore: Datastore
 export const getDatastore = () => {
@@ -72,8 +72,19 @@ const getInternalFilteredEntities = (
     .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
-export const getRecentEntities = (type: string, limit?: number, since?: Date, sortKey = 'createdAt') =>
-  getInternalFilteredEntities(type, since ? new PropertyFilter(sortKey, '>=', since) : undefined, limit, [sortKey])
+const sinceFilter = (key: string, since: Date) => new PropertyFilter(key, '>=', since)
+const beforeFilter = (key: string, before: Date) => new PropertyFilter(key, '<', before)
+const dateFilter = (key: string, since?: Date, before?: Date) =>
+  since && before
+    ? and([sinceFilter(key, since), beforeFilter(key, before)])
+    : since
+    ? sinceFilter(key, since)
+    : before
+    ? beforeFilter(key, before)
+    : undefined
+
+export const getRecentEntities = (type: string, limit?: number, since?: Date, before?: Date, sortKey = 'createdAt') =>
+  getInternalFilteredEntities(type, dateFilter(sortKey, since, before), limit, [sortKey])
 
 export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
   getInternalFilteredEntities(type, filter, limit)

@@ -83,7 +83,7 @@ export const toComment = (data: any): Comment => ({
   startIndex: data.startIndex ?? null,
 })
 
-export async function getRecentComments(since: number, limit: number): Promise<Comment[]> {
-  const recentVersionsData = await getRecentEntities(Entity.COMMENT, limit, new Date(since))
+export async function getRecentComments(since: Date, before: Date | undefined, limit: number): Promise<Comment[]> {
+  const recentVersionsData = await getRecentEntities(Entity.COMMENT, limit, since, before)
   return recentVersionsData.map(toComment)
 }

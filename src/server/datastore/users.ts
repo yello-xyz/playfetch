@@ -122,10 +122,10 @@ export async function getUsersWithoutAccess() {
 
 export async function getActiveUsers(users?: User[], limit = 100): Promise<ActiveUser[]> {
   const recentVersions = await getRecentVersions(limit)
-  const startTimestamp = recentVersions.slice(-1)[0].timestamp
+  const since = new Date(recentVersions.slice(-1)[0].timestamp)
 
-  const recentComments = await getRecentComments(startTimestamp, limit)
-  const recentEndpoints = await getRecentEndpoints(startTimestamp, limit)
+  const recentComments = await getRecentComments(since, undefined, limit)
+  const recentEndpoints = await getRecentEndpoints(since, undefined, limit)
 
   if (!users) {
     const usersData = await getKeyedEntities(Entity.USER, [
