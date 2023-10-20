@@ -9,11 +9,13 @@ export default function ActiveUsers({
   title = 'Active Users',
   activeUsers,
   onSelectUser,
+  onFetchBefore,
   embedded,
 }: {
   title?: string
   activeUsers: ActiveUser[]
   onSelectUser: (userID: number) => void
+  onFetchBefore?: () => void
   embedded?: boolean
 }) {
   const gridConfig = 'grid grid-cols-[100px_200px_minmax(0,1fr)_100px_100px_100px_100px_100px]'
@@ -23,42 +25,43 @@ export default function ActiveUsers({
   return (
     <>
       <div className={`flex flex-col items-start gap-4 ${embedded ? '' : 'p-6 overflow-y-auto'}`}>
-        {activeUsers.length > 0 && (
-          <>
-            <Label>
-              {title} (data since {startDate})
-            </Label>
-            <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg p-2`}>
-              <TableCell>
-                <Label>Last Active</Label>
-              </TableCell>
-              <TableCell>
-                <Label>Name</Label>
-              </TableCell>
-              <TableCell>
-                <Label>Email</Label>
-              </TableCell>
-              <TableCell center>
-                <Label># Comments</Label>
-              </TableCell>
-              <TableCell center>
-                <Label># Versions</Label>
-              </TableCell>
-              <TableCell center>
-                <Label># Prompts</Label>
-              </TableCell>
-              <TableCell center>
-                <Label># Chains</Label>
-              </TableCell>
-              <TableCell center>
-                <Label># Endpoints</Label>
-              </TableCell>
-              {activeUsers.map(user => (
-                <UserRow key={user.id} user={user} onSelectUser={onSelectUser} />
-              ))}
-            </div>
-          </>
-        )}
+        <Label>
+          {title} {activeUsers.length > 0 && `(data since ${startDate})`}
+          {onFetchBefore && activeUsers.length > 0 && (
+            <span className='px-2 font-medium underline cursor-pointer' onClick={onFetchBefore}>
+              fetch earlier data
+            </span>
+          )}
+        </Label>
+        <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg p-2`}>
+          <TableCell>
+            <Label>Last Active</Label>
+          </TableCell>
+          <TableCell>
+            <Label>Name</Label>
+          </TableCell>
+          <TableCell>
+            <Label>Email</Label>
+          </TableCell>
+          <TableCell center>
+            <Label># Comments</Label>
+          </TableCell>
+          <TableCell center>
+            <Label># Versions</Label>
+          </TableCell>
+          <TableCell center>
+            <Label># Prompts</Label>
+          </TableCell>
+          <TableCell center>
+            <Label># Chains</Label>
+          </TableCell>
+          <TableCell center>
+            <Label># Endpoints</Label>
+          </TableCell>
+          {activeUsers.map(user => (
+            <UserRow key={user.id} user={user} onSelectUser={onSelectUser} />
+          ))}
+        </div>
       </div>
     </>
   )

@@ -339,7 +339,10 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   }
 }
 
-export async function getRecentVersions(limit: number): Promise<(RawPromptVersion | RawChainVersion)[]> {
-  const recentVersionsData = await getRecentEntities(Entity.VERSION, limit)
+export async function getRecentVersions(
+  before: Date | undefined,
+  limit: number
+): Promise<(RawPromptVersion | RawChainVersion)[]> {
+  const recentVersionsData = await getRecentEntities(Entity.VERSION, limit, undefined, before)
   return recentVersionsData.map(data => toVersion(data, [], []))
 }

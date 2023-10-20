@@ -26,11 +26,11 @@ const activeItemIsProject = (item: ActiveItem): item is RecentProject => typeof 
 export const getServerSideProps = withAdminSession(async ({ query }) => {
   const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(query)
 
-  const activeUsers = await getActiveUsers()
+  const initialActiveUsers = await getActiveUsers()
   const waitlistUsers = await getUsersWithoutAccess()
   const recentProjects = await getRecentProjects()
 
-  const activeUser = activeUsers.find(user => user.id === itemID)
+  const activeUser = initialActiveUsers.find(user => user.id === itemID)
   const recentProject = recentProjects.find(project => project.id === itemID)
 
   const initialActiveItem: ActiveItem = waitlist
@@ -45,7 +45,14 @@ export const getServerSideProps = withAdminSession(async ({ query }) => {
     : null
 
   return {
-    props: { initialActiveItem, initialUserMetrics, initialProjectMetrics, activeUsers, waitlistUsers, recentProjects },
+    props: {
+      initialActiveItem,
+      initialUserMetrics,
+      initialProjectMetrics,
+      initialActiveUsers,
+      waitlistUsers,
+      recentProjects,
+    },
   }
 })
 
@@ -53,20 +60,21 @@ export default function Admin({
   initialActiveItem,
   initialUserMetrics,
   initialProjectMetrics,
-  activeUsers,
+  initialActiveUsers,
   recentProjects,
   waitlistUsers,
 }: {
   initialActiveItem: ActiveItem
   initialUserMetrics: UserMetrics | null
   initialProjectMetrics: ProjectMetrics | null
-  activeUsers: ActiveUser[]
+  initialActiveUsers: ActiveUser[]
   waitlistUsers: User[]
   recentProjects: RecentProject[]
 }) {
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const [userMetrics, setUserMetrics] = useState(initialUserMetrics)
   const [projectMetrics, setProjectMetrics] = useState(initialProjectMetrics)
+  const [activeUsers, setActiveUsers] = useState(initialActiveUsers)
 
   const router = useRouter()
 
@@ -87,6 +95,9 @@ export default function Admin({
       }
     )
   }
+
+  const fetchActiveUsersBefore = () =>
+    api.getActiveUsers(Math.min(...activeUsers.map(user => user.startTimestamp))).then(setActiveUsers)
 
   const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(router.query)
   const currentQueryState = waitlist ? WaitlistItem : projects ? RecentProjectsItem : itemID ?? ActiveUsersItem
@@ -124,7 +135,13 @@ export default function Admin({
           />
           <div className='flex flex-col flex-1 bg-gray-25'>
             {activeItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
-            {activeItem === ActiveUsersItem && <ActiveUsers activeUsers={activeUsers} onSelectUser={selectItem} />}
+            {activeItem === ActiveUsersItem && (
+              <ActiveUsers
+                activeUsers={activeUsers}
+                onFetchBefore={fetchActiveUsersBefore}
+                onSelectUser={selectItem}
+              />
+            )}
             {activeItem === RecentProjectsItem && (
               <RecentProjects recentProjects={recentProjects} onSelectProject={selectItem} />
             )}
