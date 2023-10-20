@@ -36,7 +36,7 @@ export default function MoveProjectPopup({
     })
 
   const onLoadTextInput = useCallback((node: HTMLInputElement | null) => node?.focus(), [])
-  const allWorkspaces = [...workspaces, ...addedWorkspaces]
+  const properWorkspaces = [...workspaces, ...addedWorkspaces].filter(workspace => workspace.id !== user.id)
 
   return (
     <PopupContent className='p-4 min-w-[340px]'>
@@ -70,18 +70,16 @@ export default function MoveProjectPopup({
               checked={project.workspaceID === userWorkspace.id}
             />
           )}
-          {allWorkspaces.length > 0 && <PopupSectionTitle>Workspaces</PopupSectionTitle>}
-          {allWorkspaces
-            .filter(workspace => workspace.id !== user.id)
-            .map((workspace, index) => (
-              <PopupLabelItem
-                key={index}
-                label={workspace.name}
-                icon={folderIcon}
-                onClick={withDismiss(() => moveToWorkspace(workspace.id))}
-                checked={project.workspaceID === workspace.id}
-              />
-            ))}
+          {properWorkspaces.length > 0 && <PopupSectionTitle>Workspaces</PopupSectionTitle>}
+          {properWorkspaces.map((workspace, index) => (
+            <PopupLabelItem
+              key={index}
+              label={workspace.name}
+              icon={folderIcon}
+              onClick={withDismiss(() => moveToWorkspace(workspace.id))}
+              checked={project.workspaceID === workspace.id}
+            />
+          ))}
           <PopupSectionDivider />
           <PopupLabelItem label='Add new Workspace' icon={addIcon} onClick={() => setNewWorkspaceName('')} />{' '}
         </>
