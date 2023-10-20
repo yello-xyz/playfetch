@@ -29,7 +29,7 @@ export default function ActiveUserMetrics({
               {user.fullName} ({user.email})
             </Label>
           </div>
-          <Label>Last Active: {FormatDate(user.lastActive, true, true)}</Label>
+          <Label>Last Active: {user.lastActive ? FormatDate(user.lastActive, true, true) : '?'}</Label>
           <div className='flex flex-col gap-1'>
             <Label>Number of additional workspaces created: {metrics.createdWorkspaceCount - 1}</Label>
             <Label>

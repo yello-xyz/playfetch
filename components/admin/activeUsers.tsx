@@ -54,7 +54,7 @@ export default function ActiveUsers({
               </TableCell>
               {activeUsers.map(user => (
                 <div key={user.id} className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
-                  <TableCell>{FormatDate(user.lastActive, false)}</TableCell>
+                  <TableCell>{user.lastActive > 0 ? FormatDate(user.lastActive, false) : '?'}</TableCell>
                   <TableCell>
                     <UserAvatar user={user} /> {user.fullName}
                   </TableCell>
