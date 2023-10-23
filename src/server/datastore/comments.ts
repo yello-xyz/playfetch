@@ -1,7 +1,6 @@
 import { Comment, CommentAction } from '@/types'
 import {
   Entity,
-  beforeDateFilter,
   buildFilter,
   buildKey,
   getDatastore,
@@ -11,7 +10,6 @@ import {
   getTimestamp,
 } from './datastore'
 import { ensurePromptOrChainAccess } from './chains'
-import { and } from '@google-cloud/datastore'
 
 const IsReplyToComment = (comment: Comment) => (candidate: Comment) =>
   candidate.versionID === comment.versionID &&
@@ -132,13 +130,4 @@ export async function getRecentComments(
 ): Promise<Comment[]> {
   const recentCommentsData = await getRecentEntities(Entity.COMMENT, limit, since, before, 'createdAt', pagingBackwards)
   return recentCommentsData.map(toComment)
-}
-
-export async function getEarlierCommentsForVersion(versionID: number, before: Date, limit: number): Promise<Comment[]> {
-  const earlierComments = await getFilteredEntities(
-    Entity.COMMENT,
-    and([buildFilter('versionID', versionID), beforeDateFilter(before)]),
-    limit
-  )
-  return earlierComments.map(toComment)
 }

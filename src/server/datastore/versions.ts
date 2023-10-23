@@ -293,13 +293,11 @@ export const toUserVersions = (userID: number, versions: any[], runs: any[], com
   const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
   return [...userVersion, ...versionsWithRuns, ...initialVersion]
-    .map(version => toVersion(version, runs, comments.map(toComment)))
+    .map(version => toVersion(version, runs, comments))
     .reverse()
 }
 
-export const toVersionWithComments = (data: any, comments: Comment[]) => toVersion(data, [], comments)
-
-const toVersion = (data: any, runs: any[], comments: Comment[]): RawPromptVersion | RawChainVersion => ({
+const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
   id: getID(data),
   parentID: data.parentID,
   userID: data.userID,
@@ -314,7 +312,10 @@ const toVersion = (data: any, runs: any[], comments: Comment[]): RawPromptVersio
     .filter(run => run.versionID === getID(data))
     .map(toRun)
     .reverse(),
-  comments: comments.filter(comment => comment.versionID === getID(data)).reverse(),
+  comments: comments
+    .filter(comment => comment.versionID === getID(data))
+    .map(toComment)
+    .reverse(),
 })
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
