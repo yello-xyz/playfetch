@@ -11,6 +11,7 @@ export const getDatastore = () => {
 }
 
 export enum Entity {
+  ENVIRONMENT = 'environment',
   USER = 'user',
   PROJECT = 'project',
   PROMPT = 'prompt',
