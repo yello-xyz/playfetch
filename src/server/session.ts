@@ -45,6 +45,17 @@ export function withAdminUserRoute(handler: LoggedInAPIHandler): NextApiHandler 
   })
 }
 
+export function withCronRoute(handler: NextApiHandler) {
+  return withErrorRoute(async (req: NextApiRequest, res: NextApiResponse) => {
+    // "[S]et internally by App Engine. If a [different] client sends these headers, they are removed from the request"
+    if (req.headers['x-appengine-cron'] === 'true') {
+      return await handler(req, res)
+    } else {
+      res.status(401).json(null)
+    }
+  })
+}
+
 type UnknownRecord = Record<string, unknown>
 type GetServerSidePropsContextWithSession = GetServerSidePropsContext & { session: Session | null }
 type GetServerSidePropsContextWithUser = GetServerSidePropsContext & { user: User }
