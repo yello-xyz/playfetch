@@ -1,6 +1,17 @@
 import { Comment, CommentAction } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp } from './datastore'
+import {
+  Entity,
+  beforeDateFilter,
+  buildFilter,
+  buildKey,
+  getDatastore,
+  getFilteredEntities,
+  getID,
+  getRecentEntities,
+  getTimestamp,
+} from './datastore'
 import { ensurePromptOrChainAccess } from './chains'
+import { and } from '@google-cloud/datastore'
 
 export async function migrateComments() {
   const datastore = getDatastore()
@@ -90,4 +101,13 @@ export async function getRecentComments(
 ): Promise<Comment[]> {
   const recentCommentsData = await getRecentEntities(Entity.COMMENT, limit, since, before, 'createdAt', pagingBackwards)
   return recentCommentsData.map(toComment)
+}
+
+export async function getEarlierCommentsForVersion(versionID: number, before: Date, limit: number): Promise<Comment[]> {
+  const earlierComments = await getFilteredEntities(
+    Entity.COMMENT,
+    and([buildFilter('versionID', versionID), beforeDateFilter(before)]),
+    limit
+  )
+  return earlierComments.map(toComment)
 }

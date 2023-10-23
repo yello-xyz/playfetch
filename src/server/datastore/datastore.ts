@@ -73,17 +73,17 @@ const getInternalFilteredEntities = (
     .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
-const sinceFilter = (key: string, since: Date, inclusive: boolean) =>
+export const afterDateFilter = (since: Date, key = 'createdAt', inclusive = false) =>
   new PropertyFilter(key, inclusive ? '>=' : '>', since)
-const beforeFilter = (key: string, before: Date, inclusive: boolean) =>
+export const beforeDateFilter = (before: Date, key = 'createdAt', inclusive = false) =>
   new PropertyFilter(key, inclusive ? '<=' : '<', before)
 const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = false) =>
   since && before
-    ? and([sinceFilter(key, since, !pagingBackwards), beforeFilter(key, before, pagingBackwards)])
+    ? and([afterDateFilter(since, key, !pagingBackwards), beforeDateFilter(before, key, pagingBackwards)])
     : since
-    ? sinceFilter(key, since, !pagingBackwards)
+    ? afterDateFilter(since, key, !pagingBackwards)
     : before
-    ? beforeFilter(key, before, pagingBackwards)
+    ? beforeDateFilter(before, key, pagingBackwards)
     : undefined
 
 export const getRecentEntities = (
