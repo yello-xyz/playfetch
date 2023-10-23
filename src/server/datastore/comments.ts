@@ -13,28 +13,51 @@ import {
 import { ensurePromptOrChainAccess } from './chains'
 import { and } from '@google-cloud/datastore'
 
-export async function migrateComments() {
+const IsReplyToComment = (comment: Comment) => (candidate: Comment) =>
+  candidate.versionID === comment.versionID &&
+  candidate.timestamp < comment.timestamp &&
+  candidate.userID !== comment.userID &&
+  candidate.runID === comment.runID &&
+  candidate.itemIndex === comment.itemIndex &&
+  candidate.startIndex === comment.startIndex &&
+  ((!comment.action && !candidate.action) ||
+    (comment.action && candidate.action && candidate.action !== comment.action && candidate.text === comment.text))
+
+export async function migrateComments(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   for (const commentData of allComments) {
-    // TODO implement migration to backfill replyTo
-    const replyTo = 0
-    await datastore.save(
-      toCommentData(
-        commentData.userID,
-        commentData.parentID,
-        commentData.versionID,
-        commentData.text,
-        commentData.createdAt,
-        replyTo,
-        commentData.action,
-        commentData.quote,
-        commentData.runID,
-        commentData.itemIndex,
-        commentData.startIndex,
-        getID(commentData)
+    const comment = toComment(commentData)
+    let replyTo = comment.replyTo
+    if (!replyTo) {
+      const previousCommentsData = await getFilteredEntities(
+        Entity.COMMENT,
+        buildFilter('versionID', comment.versionID)
       )
-    )
+      const previousComments = previousCommentsData.map(toComment)
+      const replyToComment = previousComments.find(IsReplyToComment(comment))
+      if (replyToComment) {
+        await datastore.save(
+          toCommentData(
+            commentData.userID,
+            commentData.parentID,
+            commentData.versionID,
+            commentData.text,
+            commentData.createdAt,
+            replyToComment.id,
+            commentData.action,
+            commentData.quote,
+            commentData.runID,
+            commentData.itemIndex,
+            commentData.startIndex,
+            getID(commentData)
+          )
+        )
+      }
+    }
   }
 }
 
