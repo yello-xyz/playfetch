@@ -7,12 +7,10 @@ import {
   ActiveWorkspace,
   Workspace,
   ChainItemWithInputs,
-  LogEntry,
   ActiveChain,
   ActivePrompt,
   Comment,
   Prompts,
-  Usage,
   Analytics,
   AvailableProvider,
   QueryProvider,
@@ -220,18 +218,25 @@ const api = {
   addComment: function (
     versionID: number,
     text: string,
+    replyTo?: number,
     quote?: string,
     runID?: number,
     itemIndex?: number,
     startIndex?: number
   ): Promise<Comment> {
-    return post(this.addComment, { versionID, text, quote, runID, itemIndex, startIndex })
+    return post(this.addComment, { versionID, text, replyTo, quote, runID, itemIndex, startIndex })
   },
-  toggleVersionLabel: function (versionID: number, projectID: number, label: string, checked: boolean) {
-    return post(this.toggleVersionLabel, { versionID, projectID, label, checked })
+  toggleVersionLabel: function (
+    versionID: number,
+    projectID: number,
+    label: string,
+    checked: boolean,
+    replyTo?: number
+  ) {
+    return post(this.toggleVersionLabel, { versionID, projectID, label, checked, replyTo })
   },
-  toggleRunLabel: function (runID: number, projectID: number, label: string, checked: boolean) {
-    return post(this.toggleRunLabel, { runID, projectID, label, checked })
+  toggleRunLabel: function (runID: number, projectID: number, label: string, checked: boolean, replyTo?: number) {
+    return post(this.toggleRunLabel, { runID, projectID, label, checked, replyTo })
   },
   updateInputValues: function (parentID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { parentID, name, values })

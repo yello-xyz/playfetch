@@ -52,7 +52,8 @@ export async function updateRunLabel(
   runID: number,
   projectID: number,
   label: string,
-  checked: boolean
+  checked: boolean,
+  replyTo?: number
 ) {
   const runData = await getVerifiedUserRunData(userID, runID)
   const labels = JSON.parse(runData.labels) as string[]
@@ -64,6 +65,7 @@ export async function updateRunLabel(
     projectID,
     label,
     checked,
+    replyTo,
     runID
   )
   if (newLabels) {

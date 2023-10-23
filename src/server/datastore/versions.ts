@@ -218,6 +218,7 @@ export async function processLabels(
   projectID: number,
   label: string,
   checked: boolean,
+  replyTo?: number,
   runID?: number
 ) {
   if (checked !== labels.includes(label)) {
@@ -225,7 +226,7 @@ export async function processLabels(
     if (checked) {
       await ensureProjectLabel(userID, projectID, label)
     }
-    await saveComment(userID, parentID, versionID, label, checked ? 'addLabel' : 'removeLabel', runID)
+    await saveComment(userID, parentID, versionID, label, replyTo, checked ? 'addLabel' : 'removeLabel', runID)
     return newLabels
   }
   return undefined
@@ -236,11 +237,21 @@ export async function updateVersionLabel(
   versionID: number,
   projectID: number,
   label: string,
-  checked: boolean
+  checked: boolean,
+  replyTo?: number
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
   const labels = JSON.parse(versionData.labels) as string[]
-  const newLabels = await processLabels(labels, userID, versionID, versionData.parentID, projectID, label, checked)
+  const newLabels = await processLabels(
+    labels,
+    userID,
+    versionID,
+    versionData.parentID,
+    projectID,
+    label,
+    checked,
+    replyTo
+  )
   if (newLabels) {
     await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
   }

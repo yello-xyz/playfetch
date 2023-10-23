@@ -131,7 +131,7 @@ function CommentInput({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(versionID, trimmedComment, selection, runID, itemIndex, startIndex).then(comment => {
+      api.addComment(versionID, trimmedComment, undefined, selection, runID, itemIndex, startIndex).then(comment => {
         refreshActiveItem()
         callback?.(comment)
       })

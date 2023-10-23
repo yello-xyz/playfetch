@@ -17,6 +17,8 @@ export async function migrateComments() {
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   for (const commentData of allComments) {
+    // TODO implement migration to backfill replyTo
+    const replyTo = 0
     await datastore.save(
       toCommentData(
         commentData.userID,
@@ -24,6 +26,7 @@ export async function migrateComments() {
         commentData.versionID,
         commentData.text,
         commentData.createdAt,
+        replyTo,
         commentData.action,
         commentData.quote,
         commentData.runID,
@@ -40,6 +43,7 @@ export async function saveComment(
   parentID: number,
   versionID: number,
   text: string,
+  replyTo?: number,
   action?: CommentAction,
   runID?: number,
   quote?: string,
@@ -53,6 +57,7 @@ export async function saveComment(
     versionID,
     text,
     new Date(),
+    replyTo,
     action,
     quote,
     runID,
@@ -69,6 +74,7 @@ const toCommentData = (
   versionID: number,
   text: string,
   createdAt: Date,
+  replyTo?: number,
   action?: CommentAction,
   quote?: string,
   runID?: number,
@@ -77,7 +83,7 @@ const toCommentData = (
   commentID?: number
 ) => ({
   key: buildKey(Entity.COMMENT, commentID),
-  data: { userID, parentID, versionID, text, createdAt, action, quote, runID, itemIndex, startIndex },
+  data: { userID, parentID, versionID, replyTo, text, createdAt, action, quote, runID, itemIndex, startIndex },
   excludeFromIndexes: ['text', 'action', 'quote', 'runID', 'itemIndex', 'startIndex'],
 })
 
