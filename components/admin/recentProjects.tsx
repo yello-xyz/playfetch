@@ -9,11 +9,15 @@ import userIcon from '@/public/user.svg'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function RecentProjects({
+  title = 'Active Projects',
   recentProjects,
   onSelectProject,
+  embedded,
 }: {
+  title?: string
   recentProjects: RecentProject[]
   onSelectProject: (projectID: number) => void
+  embedded?: boolean
 }) {
   const gridConfig = 'grid grid-cols-[100px_minmax(0,1fr)_200px_200px]'
 
@@ -21,10 +25,10 @@ export default function RecentProjects({
 
   return (
     <>
-      <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
+      <div className={`flex flex-col items-start h-full gap-4 ${embedded ? '' : 'p-6 overflow-y-auto'}`}>
         {recentProjects.length > 0 && (
           <>
-            <Label>Active Projects (data since {startDate})</Label>
+            <Label>{title}{!embedded && ` (data since ${startDate})`}</Label>
             <div className={`${gridConfig} bg-white items-center border-gray-200 border rounded-lg p-2`}>
               <TableCell>
                 <Label>Last Edited</Label>

@@ -19,6 +19,7 @@ import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
 import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
+import { getRecentProjects, getSharedProjectsForUser } from './projects'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -187,6 +188,11 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', 'project')])
   )
+
+  const [sharedProjects, pendingSharedProjects] = await getSharedProjectsForUser(userID)
+  const sharedProjectsAsRecent = await getRecentProjects(sharedProjects)
+  const pendingSharedProjectsAsRecent = await getRecentProjects(pendingSharedProjects)
+
   const createdVersionCount = await getEntityCount(Entity.VERSION, 'userID', userID)
   const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
   const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
@@ -202,5 +208,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     createdCommentCount,
     createdEndpointCount,
     providers,
+    sharedProjects: sharedProjectsAsRecent,
+    pendingSharedProjects: pendingSharedProjectsAsRecent,
   }
 }

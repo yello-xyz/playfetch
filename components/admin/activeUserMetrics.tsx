@@ -6,14 +6,17 @@ import Icon from '../icon'
 import backIcon from '@/public/back.svg'
 import { LabelForProvider } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import RecentProjects from './recentProjects'
 
 export default function ActiveUserMetrics({
   user,
   metrics,
+  onSelectProject,
   onDismiss,
 }: {
   user: ActiveUser
   metrics: UserMetrics
+  onSelectProject: (projectID: number) => void
   onDismiss: () => void
 }) {
   const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, true, true))
@@ -55,6 +58,22 @@ export default function ActiveUserMetrics({
             ))}
           </div>
         </div>
+        {metrics.sharedProjects.length > 0 && (
+          <RecentProjects
+            title='Shared Projects'
+            embedded
+            recentProjects={metrics.sharedProjects}
+            onSelectProject={onSelectProject}
+          />
+        )}
+        {metrics.pendingSharedProjects.length > 0 && (
+          <RecentProjects
+            title='Pending Project Invitations'
+            embedded
+            recentProjects={metrics.pendingSharedProjects}
+            onSelectProject={onSelectProject}
+          />
+        )}
       </div>
     </>
   )

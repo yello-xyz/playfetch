@@ -143,7 +143,12 @@ export default function Admin({
             )}
             {userMetrics && activeItemIsUser(activeItem) && (
               <Suspense>
-                <ActiveUserMetrics user={activeItem} metrics={userMetrics} onDismiss={() => router.back()} />
+                <ActiveUserMetrics
+                  user={activeItem}
+                  metrics={userMetrics}
+                  onDismiss={() => router.back()}
+                  onSelectProject={selectItem}
+                />
               </Suspense>
             )}
             {projectMetrics && activeItemIsProject(activeItem) && (
