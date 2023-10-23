@@ -1,7 +1,6 @@
 import { Comment, CommentAction } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp } from './datastore'
 import { ensurePromptOrChainAccess } from './chains'
-import { PropertyFilter } from '@google-cloud/datastore'
 
 export async function migrateComments() {
   const datastore = getDatastore()
