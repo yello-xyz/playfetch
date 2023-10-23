@@ -73,6 +73,7 @@ export function CommentsPopup({
   const [allComments, setAllComments] = useInitialState(comments, (a, b) => JSON.stringify(a) === JSON.stringify(b))
 
   const haveComments = allComments.length > 0
+  const sameRunComments = allComments.filter(comment => comment.runID === runID)
 
   return (
     <PopupContent>
@@ -93,7 +94,7 @@ export function CommentsPopup({
           versionID={versionID}
           selection={selection}
           runID={runID}
-          replyTo={allComments.slice(-1)[0]?.id}
+          replyTo={sameRunComments.slice(-1)[0]?.id}
           startIndex={startIndex}
           itemIndex={itemIndex}
           callback={comment => setAllComments([...allComments, comment])}
