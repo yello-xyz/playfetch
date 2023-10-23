@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { MouseEventHandler, ReactNode } from 'react'
 
 export const TableRow = ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
   <div className='cursor-pointer contents group' onClick={onClick}>
@@ -6,11 +6,20 @@ export const TableRow = ({ children, onClick }: { children: ReactNode; onClick?:
   </div>
 )
 
-export const TableCell = ({ children, center }: { children: ReactNode; center?: boolean }) => (
+export const TableCell = ({
+  children,
+  center,
+  onClick,
+}: {
+  children: ReactNode
+  center?: boolean
+  onClick?: MouseEventHandler<HTMLDivElement>
+}) => (
   <div
     className={`flex items-center h-10 gap-2 px-2 font-medium group-hover:bg-gray-50 ${
       center ? 'justify-center' : ''
-    }`}>
+    } ${onClick ? 'hover:underline' : ''}`}
+    onClick={onClick}>
     {children}
   </div>
 )

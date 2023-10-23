@@ -119,6 +119,8 @@ export default function Admin({
     setQuery(currentQueryState)
   }
 
+  const selectWorkspace = (workspaceID: number) => console.log(workspaceID)
+
   return (
     <>
       <main className='flex flex-col h-screen text-sm'>
@@ -139,7 +141,11 @@ export default function Admin({
               <ActiveUsers activeUsers={activeUsers} onFetchBefore={fetchActiveUsersBefore} onSelectUser={selectItem} />
             )}
             {activeItem === RecentProjectsItem && (
-              <RecentProjects recentProjects={recentProjects} onSelectProject={selectItem} />
+              <RecentProjects
+                recentProjects={recentProjects}
+                onSelectProject={selectItem}
+                onSelectWorkspace={selectWorkspace}
+              />
             )}
             {userMetrics && activeItemIsUser(activeItem) && (
               <Suspense>
@@ -148,6 +154,7 @@ export default function Admin({
                   metrics={userMetrics}
                   onDismiss={() => router.back()}
                   onSelectProject={selectItem}
+                  onSelectWorkspace={selectWorkspace}
                 />
               </Suspense>
             )}

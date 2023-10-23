@@ -13,11 +13,13 @@ export default function ActiveUserMetrics({
   user,
   metrics,
   onSelectProject,
+  onSelectWorkspace,
   onDismiss,
 }: {
   user: ActiveUser
   metrics: UserMetrics
   onSelectProject: (projectID: number) => void
+  onSelectWorkspace: (workspaceID: number) => void
   onDismiss: () => void
 }) {
   const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, true, true))
@@ -59,7 +61,7 @@ export default function ActiveUserMetrics({
             ))}
           </div>
         </div>
-        <Workspaces title='Workspaces' workspaces={metrics.workspaces} onSelectWorkspace={() => {}} />
+        <Workspaces title='Workspaces' workspaces={metrics.workspaces} onSelectWorkspace={onSelectWorkspace} />
         {metrics.pendingWorkspaces.length > 0 && (
           <Workspaces
             title='Pending Workspace Invitations'
@@ -73,6 +75,7 @@ export default function ActiveUserMetrics({
             embedded
             recentProjects={metrics.sharedProjects}
             onSelectProject={onSelectProject}
+            onSelectWorkspace={onSelectWorkspace}
           />
         )}
         {metrics.pendingSharedProjects.length > 0 && (
@@ -81,6 +84,7 @@ export default function ActiveUserMetrics({
             embedded
             recentProjects={metrics.pendingSharedProjects}
             onSelectProject={onSelectProject}
+            onSelectWorkspace={onSelectWorkspace}
           />
         )}
       </div>
