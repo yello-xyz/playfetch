@@ -46,6 +46,8 @@ export type LabelsPopupProps = {
   refreshActiveItem: () => void
 }
 
+const IsVersion = (item: LabelsPopupProps['item']): item is PromptVersion | ChainVersion => 'runs' in item
+
 function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: LabelsPopupProps & WithDismiss) {
   const [newLabel, setNewLabel] = useState('')
 
@@ -57,14 +59,20 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: Label
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
+  const itemComments = IsVersion(item)
+    ? item.comments
+    : activeItem.versions.flatMap(version => version.comments).filter(comment => comment.runID === item.id)
+
   const toggleLabel = (label: string) => {
     setNewLabel('')
     const checked = !item.labels.includes(label)
-    const itemIsVersion = 'runs' in item
-    if (itemIsVersion) {
-      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked).then(_ => refreshActiveItem())
+    const replyTo = itemComments.findLast(
+      comment => comment.text === label && comment.action === (checked ? 'removeLabel' : 'addLabel')
+    )?.id
+    if (IsVersion(item)) {
+      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked, replyTo).then(_ => refreshActiveItem())
     } else {
-      api.toggleRunLabel(item.id, activeItem.projectID, label, checked).then(_ => refreshActiveItem())
+      api.toggleRunLabel(item.id, activeItem.projectID, label, checked, replyTo).then(_ => refreshActiveItem())
     }
   }
 
