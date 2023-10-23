@@ -333,25 +333,26 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   ])
 }
 
-export async function getRecentProjects(limit = 100): Promise<RecentProject[]> {
-  const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, undefined, 'lastEditedAt')
+export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {
+  if (!projects) {
+    const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, undefined, 'lastEditedAt')
+    projects = recentProjectsData.map(projectData => toProject(projectData, 0))  
+  }
 
   const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [
-    ...new Set([...recentProjectsData.map(projectData => projectData.workspaceID)]),
+    ...new Set([...projects.map(project => project.workspaceID)]),
   ])
 
   const usersData = await getKeyedEntities(Entity.USER, [
     ...new Set([...workspacesData.map(workspaceData => workspaceData.userID)]),
   ])
 
-  return recentProjectsData
-    .map(projectData => toRecentProject(projectData, workspacesData, usersData))
+  return projects
+    .map(project => toRecentProject(project, workspacesData, usersData))
     .sort((a, b) => b.timestamp - a.timestamp)
 }
 
-const toRecentProject = (projectData: any, workspacesData: any[], usersData: any[]): RecentProject => {
-  const project = toProject(projectData, 0)
-
+const toRecentProject = (project: Project, workspacesData: any[], usersData: any[]): RecentProject => {
   const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
   const workspace = workspaceData.name
 
