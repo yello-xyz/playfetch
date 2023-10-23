@@ -65,7 +65,7 @@ export async function saveComment(
     startIndex
   )
   await getDatastore().save(commentData)
-  return toComment(commentData.data)
+  return toComment({ ...commentData.data, key: commentData.key })
 }
 
 const toCommentData = (
