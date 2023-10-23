@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import { RecentProject } from '@/types'
 import Label from '@/components/label'
 import { FormatDate } from '@/src/common/formatting'
@@ -7,6 +6,7 @@ import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
 import userIcon from '@/public/user.svg'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import TableRow, { TableCell, TruncatedSpan } from './tableRow'
 
 export default function RecentProjects({
   title = 'Active Projects',
@@ -63,7 +63,7 @@ function ProjectRow({
   const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, false))
 
   return (
-    <div className='cursor-pointer contents group' onClick={() => onSelectProject(project.id)}>
+    <TableRow onClick={() => onSelectProject(project.id)}>
       <TableCell>{lastModified}</TableCell>
       <TableCell>
         <Icon icon={fileIcon} />
@@ -77,16 +77,6 @@ function ProjectRow({
         <Icon icon={userIcon} />
         <TruncatedSpan>{project.creator}</TruncatedSpan>
       </TableCell>
-    </div>
+    </TableRow>
   )
 }
-
-const TableCell = ({ children }: { children: ReactNode }) => (
-  <div className='flex items-center h-10 px-2 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50'>
-    {children}
-  </div>
-)
-
-const TruncatedSpan = ({ children }: { children: ReactNode }) => (
-  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>{children}</span>
-)

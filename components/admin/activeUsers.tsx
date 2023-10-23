@@ -1,9 +1,9 @@
-import { ReactNode } from 'react'
 import { ActiveUser } from '@/types'
 import Label from '@/components/label'
 import UserAvatar from '@/components/users/userAvatar'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import TableRow, { TableCell, TruncatedSpan } from './tableRow'
 
 export default function ActiveUsers({
   title = 'Active Users',
@@ -72,7 +72,7 @@ function UserRow({ user, onSelectUser }: { user: ActiveUser; onSelectUser: (user
   const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, false))
 
   return (
-    <div className='cursor-pointer contents group' onClick={() => onSelectUser(user.id)}>
+    <TableRow onClick={() => onSelectUser(user.id)}>
       <TableCell>{lastActive}</TableCell>
       <TableCell>
         <UserAvatar user={user} />
@@ -86,19 +86,6 @@ function UserRow({ user, onSelectUser }: { user: ActiveUser; onSelectUser: (user
       <TableCell center>{user.promptCount}</TableCell>
       <TableCell center>{user.chainCount}</TableCell>
       <TableCell center>{user.endpointCount}</TableCell>
-    </div>
+    </TableRow>
   )
 }
-
-const TableCell = ({ children, center }: { children: ReactNode; center?: boolean }) => (
-  <div
-    className={`flex items-center gap-2 px-2 h-10 font-medium group-hover:bg-gray-50 ${
-      center ? 'justify-center' : ''
-    }`}>
-    {children}
-  </div>
-)
-
-const TruncatedSpan = ({ children }: { children: ReactNode }) => (
-  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>{children}</span>
-)

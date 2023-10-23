@@ -1,8 +1,8 @@
-import { ReactNode } from 'react'
 import { Workspace } from '@/types'
 import Label from '@/components/label'
 import Icon from '../icon'
 import folderIcon from '@/public/folder.svg'
+import TableRow, { TableCell, TruncatedSpan } from './tableRow'
 
 export default function Workspaces({
   title,
@@ -36,21 +36,11 @@ function WorkspaceRow({
   onSelectWorkspace: (workspaceID: number) => void
 }) {
   return (
-    <div className='cursor-pointer contents group' onClick={() => onSelectWorkspace(workspace.id)}>
+    <TableRow onClick={() => onSelectWorkspace(workspace.id)}>
       <TableCell>
         <Icon icon={folderIcon} />
         <TruncatedSpan>{workspace.name}</TruncatedSpan>
       </TableCell>
-    </div>
+    </TableRow>
   )
 }
-
-const TableCell = ({ children }: { children: ReactNode }) => (
-  <div className='flex items-center h-10 px-2 overflow-hidden font-medium text-ellipsis group-hover:bg-gray-50'>
-    {children}
-  </div>
-)
-
-const TruncatedSpan = ({ children }: { children: ReactNode }) => (
-  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>{children}</span>
-)
