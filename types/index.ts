@@ -267,10 +267,12 @@ export type Usage = {
 export type CommentAction = 'addLabel' | 'removeLabel'
 
 export type Comment = {
+  id: number
   userID: number
   versionID: number
   text: string
   timestamp: number
+  replyTo?: number
   action?: CommentAction
   quote?: string
   runID?: number

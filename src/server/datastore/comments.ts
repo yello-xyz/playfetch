@@ -88,10 +88,12 @@ const toCommentData = (
 })
 
 export const toComment = (data: any): Comment => ({
+  id: getID(data),
   userID: data.userID,
   versionID: data.versionID,
   text: data.text,
   timestamp: getTimestamp(data),
+  replyTo: data.replyTo ?? null,
   action: data.action ?? null,
   quote: data.quote ?? null,
   runID: data.runID ?? null,
