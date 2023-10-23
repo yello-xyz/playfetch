@@ -326,8 +326,8 @@ export type UserMetrics = {
 }
 
 export type RecentProject = Project & {
-  workspace: string
-  creator: string
+  workspaceName: string
+  workspaceCreator: string
 }
 
 export type ProjectMetrics = {

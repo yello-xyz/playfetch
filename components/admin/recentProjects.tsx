@@ -89,11 +89,11 @@ function ProjectRow({
       </TableCell>
       <TableCell onClick={selectWorkspace}>
         <Icon icon={folderIcon} />
-        <TruncatedSpan>{project.workspace}</TruncatedSpan>
+        <TruncatedSpan>{project.workspaceName}</TruncatedSpan>
       </TableCell>
       <TableCell>
         <Icon icon={userIcon} />
-        <TruncatedSpan>{project.creator}</TruncatedSpan>
+        <TruncatedSpan>{project.workspaceCreator}</TruncatedSpan>
       </TableCell>
     </TableRow>
   )

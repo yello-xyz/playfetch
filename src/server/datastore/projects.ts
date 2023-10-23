@@ -354,12 +354,12 @@ export async function getRecentProjects(projects?: Project[], limit = 100): Prom
 
 const toRecentProject = (project: Project, workspacesData: any[], usersData: any[]): RecentProject => {
   const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
-  const workspace = workspaceData.name
+  const workspaceName = workspaceData.name
 
   const userData = usersData.find(user => getID(user) === workspaceData.userID)
-  const creator = userData.fullName
+  const workspaceCreator = userData.fullName
 
-  return { ...project, workspace, creator }
+  return { ...project, workspaceName, workspaceCreator }
 }
 
 export async function getMetricsForProject(

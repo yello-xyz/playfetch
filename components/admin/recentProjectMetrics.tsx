@@ -45,7 +45,7 @@ export default function RecentProjectMetrics({
             <Label>{project.name} • </Label>
             <Icon icon={folderIcon} />
             <Label>
-              {project.workspace} ({project.creator})
+              {project.workspaceName} ({project.workspaceCreator})
             </Label>
           </div>
           <Label>Last Modified: {lastModified}</Label>
