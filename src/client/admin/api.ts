@@ -21,8 +21,8 @@ const api = {
   getProjectMetrics: async function (projectID: number, workspaceID: number, before?: number): Promise<ProjectMetrics> {
     return post(this.getProjectMetrics, { projectID, workspaceID, before })
   },
-  getWorkspaceMetrics: async function (workspaceID: number): Promise<WorkspaceMetrics> {
-    return post(this.getWorkspaceMetrics, { workspaceID })
+  getWorkspaceMetrics: async function (workspaceID: number, before?: number): Promise<WorkspaceMetrics> {
+    return post(this.getWorkspaceMetrics, { workspaceID, before })
   },
 }
 

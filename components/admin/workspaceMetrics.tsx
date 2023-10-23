@@ -1,28 +1,32 @@
-import { ProjectMetrics, RecentProject, WorkspaceMetrics } from '@/types'
+import { WorkspaceMetrics } from '@/types'
 import Label from '@/components/label'
 import Icon from '../icon'
 import backIcon from '@/public/back.svg'
-import AnalyticsDashboards from '../endpoints/analyticsDashboards'
-import { FormatDate } from '@/src/common/formatting'
 import ActiveUsers from './activeUsers'
-import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { useState } from 'react'
 import api from '@/src/client/admin/api'
 import RecentProjects from './recentProjects'
 
 export default function WorkspaceMetrics({
-  metrics,
+  workspaceMetrics,
   onSelectUser,
   onSelectProject,
   onDismiss,
 }: {
-  metrics: WorkspaceMetrics
+  workspaceMetrics: WorkspaceMetrics
   onSelectUser: (userID: number) => void
   onSelectProject: (projectID: number) => void
   onDismiss: () => void
 }) {
+  const [metrics, setMetrics] = useState(workspaceMetrics)
+  const firstActiveUserVersionTimestamp = Math.min(
+    ...[...metrics.users, ...metrics.pendingUsers].map(user => user.startTimestamp)
+  )
+
+  const fetchWorkspaceMetricsWithActiveUsersBefore = () =>
+    api.getWorkspaceMetrics(workspaceMetrics.id, firstActiveUserVersionTimestamp).then(setMetrics)
+
   return (
     <>
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
@@ -33,9 +37,7 @@ export default function WorkspaceMetrics({
         <div className='flex flex-col gap-4 p-4 bg-white border border-gray-200 rounded-lg'>
           <div className='flex items-center'>
             <Icon icon={folderIcon} />
-            <Label>
-              {metrics.name}
-            </Label>
+            <Label>{metrics.name}</Label>
           </div>
         </div>
         {metrics.projects.length > 0 && (
@@ -49,6 +51,7 @@ export default function WorkspaceMetrics({
         <ActiveUsers
           title='Active Workspace Users'
           activeUsers={metrics.users}
+          onFetchBefore={fetchWorkspaceMetricsWithActiveUsersBefore}
           onSelectUser={onSelectUser}
           embedded
         />

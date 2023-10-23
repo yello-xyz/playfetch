@@ -4,7 +4,8 @@ import { WorkspaceMetrics } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getWorkspaceMetrics(req: NextApiRequest, res: NextApiResponse<WorkspaceMetrics>) {
-  const workspace = await getMetricsForWorkspace(req.body.workspaceID)
+  const before = req.body.before ? new Date(req.body.before) : undefined
+  const workspace = await getMetricsForWorkspace(req.body.workspaceID, before)
   res.json(workspace)
 }
 

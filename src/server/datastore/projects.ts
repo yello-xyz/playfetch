@@ -336,7 +336,7 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
 export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {
   if (!projects) {
     const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, undefined, 'lastEditedAt')
-    projects = recentProjectsData.map(projectData => toProject(projectData, 0))  
+    projects = recentProjectsData.map(projectData => toProject(projectData, 0))
   }
 
   const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [

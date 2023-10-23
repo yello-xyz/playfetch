@@ -213,6 +213,6 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     sharedProjects: sharedProjectsAsRecent,
     pendingSharedProjects: pendingSharedProjectsAsRecent,
     workspaces,
-    pendingWorkspaces
+    pendingWorkspaces,
   }
 }

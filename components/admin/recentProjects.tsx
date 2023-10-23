@@ -75,10 +75,12 @@ function ProjectRow({
 }) {
   const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, false))
 
-  const selectWorkspace = onSelectWorkspace ? (event: MouseEvent) => {
-    event.stopPropagation()
-    onSelectWorkspace(project.workspaceID)
-  } : undefined
+  const selectWorkspace = onSelectWorkspace
+    ? (event: MouseEvent) => {
+        event.stopPropagation()
+        onSelectWorkspace(project.workspaceID)
+      }
+    : undefined
 
   return (
     <TableRow onClick={() => onSelectProject(project.id)}>

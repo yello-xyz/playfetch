@@ -179,15 +179,15 @@ export async function deleteWorkspaceForUser(userID: number, workspaceID: number
   await getDatastore().delete([...accessKeys, buildKey(Entity.WORKSPACE, workspaceID)])
 }
 
-export async function getMetricsForWorkspace(workspaceID: number): Promise<WorkspaceMetrics> {
+export async function getMetricsForWorkspace(workspaceID: number, before?: Date): Promise<WorkspaceMetrics> {
   const workspaceData = await getTrustedWorkspaceData(workspaceID)
   const activeWorkspace = await loadActiveWorkspace(0, toWorkspace(workspaceData))
 
   const recentProjects = await getRecentProjects(activeWorkspace.projects)
-  const activeUsers = (await getActiveUsers([
-    ...activeWorkspace.users,
-    ...activeWorkspace.pendingUsers,
-  ])) as (PendingUser & ActiveUser)[]
+  const activeUsers = (await getActiveUsers(
+    [...activeWorkspace.users, ...activeWorkspace.pendingUsers],
+    before
+  )) as (PendingUser & ActiveUser)[]
 
   return {
     ...activeWorkspace,

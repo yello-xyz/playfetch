@@ -199,7 +199,7 @@ export default function Admin({
             {workspaceMetrics && (
               <Suspense>
                 <WorkspaceMetrics
-                  metrics={workspaceMetrics}
+                  workspaceMetrics={workspaceMetrics}
                   onSelectUser={selectItem}
                   onSelectProject={selectItem}
                   onDismiss={() => router.back()}
