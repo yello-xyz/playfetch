@@ -19,7 +19,7 @@ export default function RecentProjects({
   title?: string
   recentProjects: RecentProject[]
   onSelectProject: (projectID: number) => void
-  onSelectWorkspace: (workspaceID: number) => void
+  onSelectWorkspace?: (workspaceID: number) => void
   embedded?: boolean
 }) {
   const gridConfig = 'grid grid-cols-[100px_minmax(0,1fr)_200px_200px]'
@@ -71,14 +71,14 @@ function ProjectRow({
 }: {
   project: RecentProject
   onSelectProject: (projectID: number) => void
-  onSelectWorkspace: (workspaceID: number) => void
+  onSelectWorkspace?: (workspaceID: number) => void
 }) {
   const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, false))
 
-  const selectWorkspace = (event: MouseEvent) => {
+  const selectWorkspace = onSelectWorkspace ? (event: MouseEvent) => {
     event.stopPropagation()
     onSelectWorkspace(project.workspaceID)
-  }
+  } : undefined
 
   return (
     <TableRow onClick={() => onSelectProject(project.id)}>
