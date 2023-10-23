@@ -63,7 +63,7 @@ function ProjectRow({
   const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, false))
 
   return (
-    <div key={project.id} className='cursor-pointer contents group' onClick={() => onSelectProject(project.id)}>
+    <div className='cursor-pointer contents group' onClick={() => onSelectProject(project.id)}>
       <TableCell>{lastModified}</TableCell>
       <TableCell>
         <Icon icon={fileIcon} />

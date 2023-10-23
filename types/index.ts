@@ -321,6 +321,8 @@ export type UserMetrics = {
   providers: { provider: ModelProvider | QueryProvider; cost: number }[]
   sharedProjects: RecentProject[]
   pendingSharedProjects: RecentProject[]
+  workspaces: Workspace[]
+  pendingWorkspaces: Workspace[]
 }
 
 export type RecentProject = Project & {

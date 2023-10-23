@@ -13,7 +13,7 @@ import {
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { addWorkspaceForUser } from './workspaces'
+import { addWorkspaceForUser, getWorkspacesForUser } from './workspaces'
 import { uploadImageURLToStorage } from '../storage'
 import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
@@ -193,6 +193,8 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   const sharedProjectsAsRecent = await getRecentProjects(sharedProjects)
   const pendingSharedProjectsAsRecent = await getRecentProjects(pendingSharedProjects)
 
+  const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
+
   const createdVersionCount = await getEntityCount(Entity.VERSION, 'userID', userID)
   const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
   const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
@@ -210,5 +212,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     providers,
     sharedProjects: sharedProjectsAsRecent,
     pendingSharedProjects: pendingSharedProjectsAsRecent,
+    workspaces,
+    pendingWorkspaces
   }
 }

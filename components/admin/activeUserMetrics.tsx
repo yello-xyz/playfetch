@@ -7,6 +7,7 @@ import backIcon from '@/public/back.svg'
 import { LabelForProvider } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import RecentProjects from './recentProjects'
+import Workspaces from './workspaces'
 
 export default function ActiveUserMetrics({
   user,
@@ -58,6 +59,14 @@ export default function ActiveUserMetrics({
             ))}
           </div>
         </div>
+        <Workspaces title='Workspaces' workspaces={metrics.workspaces} onSelectWorkspace={() => {}} />
+        {metrics.pendingWorkspaces.length > 0 && (
+          <Workspaces
+            title='Pending Workspace Invitations'
+            workspaces={metrics.pendingWorkspaces}
+            onSelectWorkspace={() => {}}
+          />
+        )}
         {metrics.sharedProjects.length > 0 && (
           <RecentProjects
             title='Shared Projects'
