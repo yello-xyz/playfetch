@@ -20,18 +20,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const recentComments = await getRecentComments(lastProcessedCommentDate, cutoffDate, limit, true)
   const replyToCommentIDs = [...new Set(recentComments.map(comment => comment.replyTo ?? 0))]
-  const replyToCommentsData = await getKeyedEntities(Entity.COMMENT, replyToCommentIDs.filter(id => id))
+  const replyToCommentsData = await getKeyedEntities(
+    Entity.COMMENT,
+    replyToCommentIDs.filter(id => id)
+  )
 
   const versionIDs = [...new Set(recentComments.map(comment => comment.versionID))]
   const versionsData = await getKeyedEntities(Entity.VERSION, versionIDs)
 
-  const targetToComments: { [userID: number]: Comment[] } = {}
+  const targetToComments: { [userID: number]: { [parentID: number]: Comment[] } } = {}
   for (const comment of recentComments.slice().reverse()) {
     const version = versionsData.find(data => getID(data) === comment.versionID)
     const replyToComment = replyToCommentsData.find(data => getID(data) === comment.replyTo)
     const targetUserID = replyToComment?.userID ?? version?.userID
-    if (targetUserID && targetUserID !== comment.userID) {
-      targetToComments[targetUserID] = [...(targetToComments[targetUserID] ?? []), comment]
+    if (version && targetUserID && targetUserID !== comment.userID) {
+      const parentID = version.parentID
+      const commentsForTarget = targetToComments[targetUserID] ?? {}
+      const commentsWithSameParent = commentsForTarget[parentID] ?? []
+      commentsForTarget[parentID] = [...commentsWithSameParent, comment]
+      targetToComments[targetUserID] = commentsForTarget
     }
   }
 
@@ -46,14 +53,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   for (const [targetUserID, commentsForTarget] of Object.entries(targetToComments)) {
     const targetUser = users.find(user => user.id === Number(targetUserID))
-    for (const comment of commentsForTarget) {
-      const commenter = users.find(user => user.id === comment.userID)
-      const version = versionsData.find(data => getID(data) === comment.versionID)
-      const chain = chainsData.find(data => getID(data) === version.parentID)
-      const prompt = promptsData.find(data => getID(data) === version.parentID)
-      console.log(
-        `Sending notification to ${targetUser?.email} about comment from ${commenter?.email} on ${chain ? 'chain' : 'prompt'} ${chain ? chain.name : prompt?.name}`
-      )
+    for (const [parentID, comments] of Object.entries(commentsForTarget).sort(
+      ([_, [a]], [__, [b]]) => a.timestamp - b.timestamp
+    )) {
+      const chain = chainsData.find(data => getID(data) === Number(parentID))
+      const prompt = promptsData.find(data => getID(data) === Number(parentID))
+      for (const comment of comments) {
+        const commenter = users.find(user => user.id === comment.userID)
+        console.log(
+          `To ${targetUser?.email} from ${commenter?.email} on ${
+            chain ? 'chain' : 'prompt'
+          } ${chain ? chain.name : prompt?.name} (${new Date(comment.timestamp)})`
+        )
+      }
     }
   }
 
