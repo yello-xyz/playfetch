@@ -51,6 +51,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const chainIDs = versionsData.filter(data => !!data.items).map(data => data.parentID)
   const chainsData = await getKeyedEntities(Entity.CHAIN, chainIDs)
 
+  const projectIDs = [...new Set([...promptsData, ...chainsData].map(data => data.projectID))]
+  const projectsData = await getKeyedEntities(Entity.PROJECT, projectIDs)
+
   for (const [targetUserID, commentsForTarget] of Object.entries(targetToComments)) {
     const targetUser = users.find(user => user.id === Number(targetUserID))
     for (const [parentID, comments] of Object.entries(commentsForTarget).sort(
@@ -58,12 +61,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     )) {
       const chain = chainsData.find(data => getID(data) === Number(parentID))
       const prompt = promptsData.find(data => getID(data) === Number(parentID))
+      const parent = chain ?? prompt
+      const project = projectsData.find(data => getID(data) === parent?.projectID)
       for (const comment of comments) {
         const commenter = users.find(user => user.id === comment.userID)
         console.log(
-          `To ${targetUser?.email} from ${commenter?.email} on ${
-            chain ? 'chain' : 'prompt'
-          } ${chain ? chain.name : prompt?.name} (${new Date(comment.timestamp)})`
+          `To ${targetUser?.email} from ${commenter?.email} on ${chain ? 'chain' : 'prompt'} ${
+            chain ? chain.name : prompt?.name
+          } (${new Date(comment.timestamp)}) [${project?.name}]`
         )
       }
     }
@@ -76,4 +81,5 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.status(200).json({})
 }
 
+// TODO switch back to withCronRoute AND uncomment line above
 export default withAdminUserRoute(handler)
