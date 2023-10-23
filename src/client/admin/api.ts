@@ -1,5 +1,5 @@
 import { postToAPI } from '@/src/client/api'
-import { ActiveUser, ProjectMetrics, User, UserMetrics } from '@/types'
+import { ActiveUser, ProjectMetrics, User, UserMetrics, WorkspaceMetrics } from '@/types'
 
 const post = (apiCall: Function, json: any = {}) => {
   return postToAPI('/api/admin', apiCall.name, json, 'json')
@@ -20,6 +20,9 @@ const api = {
   },
   getProjectMetrics: async function (projectID: number, workspaceID: number, before?: number): Promise<ProjectMetrics> {
     return post(this.getProjectMetrics, { projectID, workspaceID, before })
+  },
+  getWorkspaceMetrics: async function (workspaceID: number): Promise<WorkspaceMetrics> {
+    return post(this.getWorkspaceMetrics, { workspaceID })
   },
 }
 

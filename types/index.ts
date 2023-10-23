@@ -338,3 +338,9 @@ export type ProjectMetrics = {
   users: ActiveUser[]
   pendingUsers: ActiveUser[]
 }
+
+export type WorkspaceMetrics = ActiveWorkspace & {
+  projects: RecentProject[]
+  users: ActiveUser[]
+  pendingUsers: ActiveUser[]
+}

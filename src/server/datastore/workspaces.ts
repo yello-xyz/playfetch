@@ -9,8 +9,8 @@ import {
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace } from '@/types'
-import { deleteProjectForUser, toProject } from './projects'
+import { ActiveUser, ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace, WorkspaceMetrics } from '@/types'
+import { deleteProjectForUser, getRecentProjects, toProject } from './projects'
 import {
   getAccessibleObjectIDs,
   getAccessingUserIDs,
@@ -19,7 +19,7 @@ import {
   hasUserAccess,
   revokeUserAccess,
 } from './access'
-import { toUser } from './users'
+import { getActiveUsers, toUser } from './users'
 
 export async function migrateWorkspaces() {
   const datastore = getDatastore()
@@ -42,12 +42,16 @@ const toWorkspace = (data: any): Workspace => ({
 
 export async function getActiveWorkspace(userID: number, workspaceID: number): Promise<ActiveWorkspace> {
   const workspaceData = await getVerifiedUserWorkspaceData(userID, workspaceID)
-  const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspaceID, ['lastEditedAt'])
+  return loadActiveWorkspace(userID, toWorkspace(workspaceData))
+}
+
+async function loadActiveWorkspace(userID: number, workspace: Workspace): Promise<ActiveWorkspace> {
+  const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspace.id, ['lastEditedAt'])
   const projects = projectData.map(project => toProject(project, userID))
-  const [users, pendingUsers] = await getWorkspaceUsers(workspaceID)
+  const [users, pendingUsers] = await getWorkspaceUsers(workspace.id)
 
   return {
-    ...toWorkspace(workspaceData),
+    ...workspace,
     projects: [...projects.filter(project => project.favorited), ...projects.filter(project => !project.favorited)],
     users,
     pendingUsers,
@@ -94,11 +98,13 @@ export async function ensureWorkspaceAccess(userID: number, workspaceID: number)
 
 const getVerifiedUserWorkspaceData = async (userID: number, workspaceID: number) => {
   await ensureWorkspaceAccess(userID, workspaceID)
-  return getKeyedEntity(Entity.WORKSPACE, workspaceID)
+  return getTrustedWorkspaceData(workspaceID)
 }
 
+const getTrustedWorkspaceData = async (workspaceID: number) => getKeyedEntity(Entity.WORKSPACE, workspaceID)
+
 export const getWorkspaceNameForID = (workspaceID: number) =>
-  getKeyedEntity(Entity.WORKSPACE, workspaceID).then(data => data.name)
+  getTrustedWorkspaceData(workspaceID).then(data => data.name)
 
 export async function updateWorkspaceName(userID: number, workspaceID: number, name: string) {
   if (workspaceID === userID) {
@@ -171,4 +177,22 @@ export async function deleteWorkspaceForUser(userID: number, workspaceID: number
     await deleteProjectForUser(userID, projectID)
   }
   await getDatastore().delete([...accessKeys, buildKey(Entity.WORKSPACE, workspaceID)])
+}
+
+export async function getMetricsForWorkspace(workspaceID: number): Promise<WorkspaceMetrics> {
+  const workspaceData = await getTrustedWorkspaceData(workspaceID)
+  const activeWorkspace = await loadActiveWorkspace(0, toWorkspace(workspaceData))
+
+  const recentProjects = await getRecentProjects(activeWorkspace.projects)
+  const activeUsers = (await getActiveUsers([
+    ...activeWorkspace.users,
+    ...activeWorkspace.pendingUsers,
+  ])) as (PendingUser & ActiveUser)[]
+
+  return {
+    ...activeWorkspace,
+    projects: recentProjects,
+    users: activeUsers.filter(user => activeWorkspace.users.some(u => u.id === user.id)),
+    pendingUsers: activeUsers.filter(user => activeWorkspace.pendingUsers.some(u => u.id === user.id)),
+  }
 }
