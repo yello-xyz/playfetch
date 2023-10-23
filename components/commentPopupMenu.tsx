@@ -93,6 +93,7 @@ export function CommentsPopup({
           versionID={versionID}
           selection={selection}
           runID={runID}
+          replyTo={allComments.slice(-1)[0]?.id}
           startIndex={startIndex}
           itemIndex={itemIndex}
           callback={comment => setAllComments([...allComments, comment])}
@@ -107,6 +108,7 @@ function CommentInput({
   versionID,
   selection,
   runID,
+  replyTo,
   itemIndex,
   startIndex,
   haveComments,
@@ -115,6 +117,7 @@ function CommentInput({
   versionID: number
   selection?: string
   runID?: number
+  replyTo?: number
   itemIndex?: number
   startIndex?: number
   haveComments: boolean
@@ -131,7 +134,7 @@ function CommentInput({
   const addComment = () => {
     if (canAddComment) {
       setNewComment('')
-      api.addComment(versionID, trimmedComment, undefined, selection, runID, itemIndex, startIndex).then(comment => {
+      api.addComment(versionID, trimmedComment, replyTo, selection, runID, itemIndex, startIndex).then(comment => {
         refreshActiveItem()
         callback?.(comment)
       })
