@@ -5,6 +5,8 @@ import { getRecentComments } from '@/src/server/datastore/comments'
 import { Entity, getID, getKeyedEntities } from '@/src/server/datastore/datastore'
 import { Comment } from '@/types'
 import { toUser } from '@/src/server/datastore/users'
+import { FormatDate } from '@/src/common/formatting'
+import { ChainRoute, PromptRoute } from '@/src/common/clientRoute'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const now = new Date()
@@ -56,21 +58,37 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   for (const [targetUserID, commentsForTarget] of Object.entries(targetToComments)) {
     const targetUser = users.find(user => user.id === Number(targetUserID))
-    for (const [parentID, comments] of Object.entries(commentsForTarget).sort(
+    console.log(`================================================================================`)
+    console.log(`Notifications for ${targetUser?.fullName} (${targetUser?.email}):`)
+    console.log(`================================================================================`)
+    for (const [parentIDKey, comments] of Object.entries(commentsForTarget).sort(
       ([_, [a]], [__, [b]]) => a.timestamp - b.timestamp
     )) {
-      const chain = chainsData.find(data => getID(data) === Number(parentID))
-      const prompt = promptsData.find(data => getID(data) === Number(parentID))
+      const parentID = Number(parentIDKey)
+      const chain = chainsData.find(data => getID(data) === parentID)
+      const prompt = promptsData.find(data => getID(data) === parentID)
       const parent = chain ?? prompt
+      const parentName = `${chain ? 'chain' : 'prompt'} “${parent?.name}”`
       const project = projectsData.find(data => getID(data) === parent?.projectID)
+      const route = chain ? ChainRoute(parent.projectID, parentID) : PromptRoute(parent.projectID, parentID)
+      console.log(`→ New comments on ${parentName} in project “${project.name}”:`)
       for (const comment of comments) {
         const commenter = users.find(user => user.id === comment.userID)
-        console.log(
-          `To ${targetUser?.email} from ${commenter?.email} on ${chain ? 'chain' : 'prompt'} ${
-            chain ? chain.name : prompt?.name
-          } (${new Date(comment.timestamp)}) [${project?.name}]`
-        )
+        const textForComment = (comment: Comment) => {
+          switch (comment.action) {
+            case 'addLabel':
+              return `Added “${comment.text}”`
+            case 'removeLabel':
+              return `Removed “${comment.text}”`
+            default:
+              return comment.text
+          }
+        }
+        console.log(`• ${commenter?.fullName} (${commenter?.email}) ${FormatDate(comment.timestamp)}`)
+        console.log(textForComment(comment))
       }
+      console.log(`View: ${process.env.NEXTAUTH_URL}${route}`)
+      console.log('--------------------------------------------------------------------------------')
     }
   }
 
