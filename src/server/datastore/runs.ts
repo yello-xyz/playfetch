@@ -3,12 +3,16 @@ import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp } f
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 
-export async function migrateRuns() {
+export async function migrateRuns(postMerge: boolean) {
+  if (!postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
     await datastore.save(
       toRunData(
+        runData.userID,
         runData.parentID,
         runData.versionID,
         JSON.parse(runData.inputs),
@@ -34,7 +38,7 @@ export async function saveRun(
   labels: string[]
 ) {
   await ensurePromptOrChainAccess(userID, parentID)
-  const runData = toRunData(parentID, versionID, inputs, output, new Date(), cost, duration, labels)
+  const runData = toRunData(userID, parentID, versionID, inputs, output, new Date(), cost, duration, labels)
   await getDatastore().save(runData)
 }
 
@@ -76,6 +80,7 @@ export async function updateRunLabel(
 async function updateRun(runData: any) {
   await getDatastore().save(
     toRunData(
+      runData.userID,
       runData.parentID,
       runData.versionID,
       JSON.parse(runData.inputs),
@@ -90,6 +95,7 @@ async function updateRun(runData: any) {
 }
 
 const toRunData = (
+  userID: number,
   parentID: number,
   versionID: number,
   inputs: PromptInputs,
@@ -102,6 +108,7 @@ const toRunData = (
 ) => ({
   key: buildKey(Entity.RUN, runID),
   data: {
+    userID,
     parentID,
     versionID,
     inputs: JSON.stringify(inputs),
