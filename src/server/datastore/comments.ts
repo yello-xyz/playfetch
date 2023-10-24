@@ -1,14 +1,5 @@
 import { Comment, CommentAction } from '@/types'
-import {
-  Entity,
-  buildFilter,
-  buildKey,
-  getDatastore,
-  getFilteredEntities,
-  getID,
-  getRecentEntities,
-  getTimestamp,
-} from './datastore'
+import { Entity, buildKey, getDatastore, getEntities, getID, getRecentEntities, getTimestamp } from './datastore'
 import { ensurePromptOrChainAccess } from './chains'
 
 const IsReplyToComment = (comment: Comment) => (candidate: Comment) =>
@@ -31,10 +22,7 @@ export async function migrateComments(postMerge: boolean) {
     const comment = toComment(commentData)
     let replyTo = comment.replyTo
     if (!replyTo) {
-      const previousCommentsData = await getFilteredEntities(
-        Entity.COMMENT,
-        buildFilter('versionID', comment.versionID)
-      )
+      const previousCommentsData = await getEntities(Entity.COMMENT, 'versionID', comment.versionID)
       const previousComments = previousCommentsData.map(toComment)
       const replyToComment = previousComments.find(IsReplyToComment(comment))
       if (replyToComment) {
