@@ -1,12 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { withAdminUserRoute, withCronRoute } from '@/src/server/session'
+import { withCronRoute } from '@/src/server/session'
 import { getLastProcessedCommentDate, saveLastProcessedCommentDate } from '@/src/server/datastore/environment'
 import { getRecentComments } from '@/src/server/datastore/comments'
 import { Entity, getID, getKeyedEntities } from '@/src/server/datastore/datastore'
-import { Comment } from '@/types'
+import { Comment, User } from '@/types'
 import { toUser } from '@/src/server/datastore/users'
-import { FormatDate } from '@/src/common/formatting'
 import { ChainRoute, PromptRoute } from '@/src/common/clientRoute'
+import { sendCommentsEmail } from '@/src/server/email'
+
+type CommentData = {
+  commenter: User
+  timestamp: number
+  text: string
+}
+
+type CommentBlock = {
+  parentName: string
+  projectName: string
+  parentRoute: string
+  comments: CommentData[]
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const now = new Date()
@@ -58,9 +71,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   for (const [targetUserID, commentsForTarget] of Object.entries(targetToComments)) {
     const targetUser = users.find(user => user.id === Number(targetUserID))
-    console.log(`================================================================================`)
-    console.log(`Notifications for ${targetUser?.fullName} (${targetUser?.email}):`)
-    console.log(`================================================================================`)
+    if (!targetUser) {
+      continue
+    }
+    const commentBlocks = [] as CommentBlock[]
     for (const [parentIDKey, comments] of Object.entries(commentsForTarget).sort(
       ([_, [a]], [__, [b]]) => a.timestamp - b.timestamp
     )) {
@@ -70,10 +84,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const parent = chain ?? prompt
       const parentName = `${chain ? 'chain' : 'prompt'} “${parent?.name}”`
       const project = projectsData.find(data => getID(data) === parent?.projectID)
-      const route = chain ? ChainRoute(parent.projectID, parentID) : PromptRoute(parent.projectID, parentID)
-      console.log(`→ New comments on ${parentName} in project “${project.name}”:`)
+      const parentRoute = chain ? ChainRoute(parent.projectID, parentID) : PromptRoute(parent.projectID, parentID)
+      const commentsData = [] as CommentData[]
       for (const comment of comments) {
         const commenter = users.find(user => user.id === comment.userID)
+        if (!commenter) {
+          continue
+        }
         const textForComment = (comment: Comment) => {
           switch (comment.action) {
             case 'addLabel':
@@ -84,20 +101,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               return comment.text
           }
         }
-        console.log(`• ${commenter?.fullName} (${commenter?.email}) ${FormatDate(comment.timestamp)}`)
-        console.log(textForComment(comment))
+        commentsData.push({ commenter, timestamp: comment.timestamp, text: textForComment(comment) })
       }
-      console.log(`View: ${process.env.NEXTAUTH_URL}${route}`)
-      console.log('--------------------------------------------------------------------------------')
+      commentBlocks.push({
+        parentName,
+        projectName: project.name,
+        parentRoute: parentRoute,
+        comments: commentsData,
+      })
     }
+    await sendCommentsEmail(targetUser.email, commentBlocks)
   }
 
   if (recentComments.length > 0) {
-    // await saveLastProcessedCommentDate(new Date(recentComments[0].timestamp))
+    await saveLastProcessedCommentDate(new Date(recentComments[0].timestamp))
   }
 
   res.status(200).json({})
 }
 
-// TODO switch back to withCronRoute AND uncomment line above
-export default withAdminUserRoute(handler)
+export default withCronRoute(handler)

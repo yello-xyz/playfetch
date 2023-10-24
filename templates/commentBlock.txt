@@ -1,4 +1,4 @@
-New comments on prompt “__PARENT_NAME__” in project “__PROJECT_NAME__:
+New comments on __PARENT_NAME__ in project “__PROJECT_NAME__”:
 
 __COMMENTS__ 
 
