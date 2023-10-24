@@ -26,6 +26,7 @@ import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
 import { getAnalyticsForProject } from './analytics'
+import { toComment } from './comments'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -95,6 +96,8 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const prompts = promptData.map(toPrompt)
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
   const chains = chainData.map(toChain)
+  const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
+  const comments = commentsData.map(toComment)
   const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
@@ -106,6 +109,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     users,
     pendingUsers,
     availableLabels: JSON.parse(projectData.labels),
+    comments
   }
 }
 

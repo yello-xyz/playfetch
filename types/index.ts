@@ -51,6 +51,7 @@ export type ActiveProject = Project & {
   users: User[]
   pendingUsers: PendingUser[]
   availableLabels: string[]
+  comments: Comment[]
 }
 
 export type Prompt = {
