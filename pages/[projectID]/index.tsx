@@ -234,6 +234,7 @@ export default function Home({
                               savePrompt={() =>
                                 savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)
                               }
+                              activeRunID={activeRunID}
                             />
                           </Suspense>
                         )}
@@ -246,6 +247,7 @@ export default function Home({
                               setActiveVersion={selectVersion}
                               project={activeProject}
                               saveChain={saveChain}
+                              activeRunID={activeRunID}
                             />
                           </Suspense>
                         )}
