@@ -78,7 +78,7 @@ export async function sendCommentsEmail(
 ) {
   const anyProjectName = commentBlocks[0].projectName
   const anyComment = commentBlocks[0].comments[0]
-  
+
   const contentForType = (type: 'txt' | 'html') =>
     resolveContent('comments', type, {
       __ANY_COMMENTER_EMAIL__: anyComment.commenter.email,

@@ -109,7 +109,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     users,
     pendingUsers,
     availableLabels: JSON.parse(projectData.labels),
-    comments
+    comments,
   }
 }
 

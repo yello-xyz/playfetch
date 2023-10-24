@@ -75,7 +75,7 @@ export function CommentCell({
   labelColors?: Record<string, string>
   project?: ActiveProject
   versions?: (PromptVersion | ChainVersion)[]
-  onSelect: (parentID: number, versionID: number, runID?: number) => void
+  onSelect?: (parentID: number, versionID: number, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 
@@ -88,12 +88,12 @@ export function CommentCell({
   const versionIndex =
     versions.filter(v => v.parentID === version?.parentID).findIndex(v => v.id === comment.versionID) + 1
 
-  const selectComment = () => onSelect(comment.parentID, comment.versionID, comment.runID)
+  const selectComment = onSelect ? () => onSelect(comment.parentID, comment.versionID, comment.runID) : undefined
   const availableProviders = useAvailableProviders()
   const userName = user ? user.fullName : 'Unknown user'
 
   return (
-    <div className='cursor-pointer' onClick={selectComment}>
+    <div className={selectComment ? 'cursor-pointer' : ''} onClick={selectComment}>
       {comment.action ? (
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
           {user && <UserAvatar user={user} size='sm' />}
@@ -101,9 +101,9 @@ export function CommentCell({
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
           <ItemLabel label={comment.text} colors={labelColors} />
           {(version || parentName) &&
-            `${comment.action === 'addLabel' ? ' to' : ' from'} ${
-              comment.runID ? 'response in ' : ''
-            }${version ? `version ${versionIndex}` : parentName} · `}
+            `${comment.action === 'addLabel' ? ' to' : ' from'} ${comment.runID ? 'response in ' : ''}${
+              version ? `version ${versionIndex}` : parentName
+            } · `}
           <span className='text-gray-400'>{formattedDate}</span>
         </div>
       ) : (
