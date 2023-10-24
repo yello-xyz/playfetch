@@ -216,7 +216,6 @@ export default function ChainView({
       <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
         <CommentsPane
           activeItem={chain}
-          versions={chain.versions}
           onSelectComment={selectComment}
           showComments={showComments}
           setShowComments={setShowComments}

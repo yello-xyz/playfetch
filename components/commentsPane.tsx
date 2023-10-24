@@ -14,20 +14,19 @@ import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
 export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
   activeItem,
-  versions,
   showComments,
   setShowComments,
   onSelectComment,
 }: {
   activeItem: ActivePrompt | ActiveChain
-  versions: Version[]
   showComments: boolean
   setShowComments: (show: boolean) => void
   onSelectComment: (version: Version, runID?: number) => void
 }) {
   const users = activeItem.users
   const labelColors = AvailableLabelColorsForItem(activeItem)
-  const comments = activeItem.versions.flatMap(version => version.comments).sort((a, b) => a.timestamp - b.timestamp)
+  const versions = activeItem.versions as Version[]
+  const comments = versions.flatMap(version => version.comments).sort((a, b) => a.timestamp - b.timestamp)
 
   return showComments ? (
     <div className='flex flex-col h-full'>
