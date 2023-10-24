@@ -51,7 +51,7 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, version => Promise.resolve(setActiveVersion(version)))
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
   const runPrompt = (inputs: PromptInputs[]) => {

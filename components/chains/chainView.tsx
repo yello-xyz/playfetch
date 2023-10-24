@@ -132,7 +132,11 @@ export default function ChainView({
     setShowVersions(false)
   }
 
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion, activateOutputNode)
+  const [activeRunID, selectComment] = useCommentSelection(
+    activeVersion,
+    version => Promise.resolve(setActiveVersion(version)),
+    activateOutputNode
+  )
   const [isTestMode, setTestMode] = useState(false)
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
