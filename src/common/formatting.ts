@@ -83,6 +83,8 @@ export const FormatDuration = (durationInSeconds: number) =>
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
 
+export const Capitalize = (text: string) => `${text.charAt(0).toUpperCase()}${text.slice(1)}`
+
 export const ToCamelCase = (s: string) =>
   s.replace(/(?:^\w|[A-Z]|\b\w)/g, (ch, i) => (i === 0 ? ch.toLowerCase() : ch.toUpperCase())).replace(/\s+/g, '')
 

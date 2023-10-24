@@ -7,9 +7,11 @@ import {
   ActiveProject,
   ActivePrompt,
   ActiveChain,
+  Prompt,
+  Chain,
 } from '@/types'
 import { ReactNode } from 'react'
-import { FormatRelativeDate } from '@/src/common/formatting'
+import { Capitalize, FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versions/versionCell'
 import UserAvatar from '@/components/users/userAvatar'
 import collapseIcon from '@/public/collapse.svg'
@@ -50,6 +52,7 @@ export default function CommentsPane({
             comment={comment}
             user={users.find(user => user.id === comment.userID)!}
             labelColors={labelColors}
+            project={project}
             versions={versions}
             onSelect={onSelectComment}
           />
@@ -63,16 +66,22 @@ export function CommentCell({
   comment,
   user,
   labelColors = {},
+  project,
   versions = [],
   onSelect,
 }: {
   comment: Comment
   user?: User
   labelColors?: Record<string, string>
+  project?: ActiveProject
   versions?: (PromptVersion | ChainVersion)[]
   onSelect: (parentID: number, versionID: number, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
+
+  const prompt = project?.prompts?.find(parent => parent.id === comment.parentID)
+  const chain = project?.chains?.find(parent => parent.id === comment.parentID)
+  const parentName = prompt ? `prompt “${prompt.name}”` : chain ? `chain “${chain.name}”` : undefined
 
   const version = versions.find(version => version.id === comment.versionID)
   const compareVersion = versions.find(v => v.id === version?.previousID)
@@ -91,10 +100,10 @@ export function CommentCell({
           <span className='font-medium'>{userName}</span>
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
           <ItemLabel label={comment.text} colors={labelColors} />
-          {version &&
+          {(version || parentName) &&
             `${comment.action === 'addLabel' ? ' to' : ' from'} ${
               comment.runID ? 'response in ' : ''
-            }version ${versionIndex} · `}
+            }${version ? `version ${versionIndex}` : parentName} · `}
           <span className='text-gray-400'>{formattedDate}</span>
         </div>
       ) : (
@@ -104,7 +113,7 @@ export function CommentCell({
             <span className='font-medium'>{userName}</span>
             <span className='text-gray-400'>{formattedDate}</span>
           </div>
-          {(version || comment.quote) && (
+          {(version || parentName || comment.quote) && (
             <CommentQuote>
               {version && (
                 <span className='font-medium'>
@@ -113,6 +122,7 @@ export function CommentCell({
                     : `version ${versionIndex}`}
                 </span>
               )}
+              {!version && parentName && <span className='font-medium'>{Capitalize(parentName)}</span>}
               <div className='line-clamp-2'>
                 {comment.quote ? (
                   <span>{comment.quote}</span>

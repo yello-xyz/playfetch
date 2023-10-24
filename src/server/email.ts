@@ -6,7 +6,7 @@ import { getProjectNameForID } from './datastore/projects'
 import ClientRoute, { WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
 import { User } from '@/types'
-import { FormatDate } from '../common/formatting'
+import { Capitalize, FormatDate } from '../common/formatting'
 
 export const GetEmailServerConfig = () => ({
   host: 'smtp.gmail.com',
@@ -56,7 +56,7 @@ export async function sendInviteEmail(
 
   await sendMail(
     toEmail,
-    `${kind[0].toUpperCase()}${kind.slice(1)} shared with you: "${objectName}"`,
+    `${Capitalize(kind)} shared with you: "${objectName}"`,
     resolveContent('invite', 'txt', variables),
     resolveContent('invite', 'html', variables),
     inviter.fullName
