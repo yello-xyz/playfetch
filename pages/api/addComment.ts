@@ -9,7 +9,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function addComment(req: NextApiRequest, res: NextApiResponse<Comment>, user: User) {
   const versionID = req.body.versionID
-  const version = await getTrustedVersion(versionID)
+  const version = await getTrustedVersion(versionID, true)
   const parentID = version.parentID
   const parent = IsRawPromptVersion(version) ? await getTrustedPrompt(parentID) : await getTrustedChain(parentID)
   const projectID = parent.projectID

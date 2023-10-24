@@ -262,7 +262,7 @@ export async function updateVersionLabel(
     replyTo
   )
   if (newLabels) {
-    await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
+    await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
   }
 }
 
@@ -301,9 +301,7 @@ export const toUserVersions = (userID: number, versions: any[], runs: any[]) => 
   const versionsWithRuns = versions.filter(version => version.didRun)
   const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
-  return [...userVersion, ...versionsWithRuns, ...initialVersion]
-    .map(version => toVersion(version, runs))
-    .reverse()
+  return [...userVersion, ...versionsWithRuns, ...initialVersion].map(version => toVersion(version, runs)).reverse()
 }
 
 const toVersion = (data: any, runs: any[]): RawPromptVersion | RawChainVersion => ({
