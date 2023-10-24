@@ -1,6 +1,6 @@
 import api from '@/src/client/api'
 import { ActiveChain, ActiveProject, ActivePrompt, IsPromptVersion } from '@/types'
-import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import { ActiveItem, BuildActiveChain, BuildActivePrompt, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import useInitialState from './useInitialState'
 
 const ActiveItemIsChain = (item: ActiveItem): item is ActiveChain =>
@@ -18,7 +18,28 @@ const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
 
 export default function useActiveItem(initialActiveProject: ActiveProject, initialActiveItem: ActiveItem | null) {
   const [activeProject, setActiveProject] = useInitialState(initialActiveProject, sameIDs)
-  const refreshProject = () => api.getProject(activeProject.id).then(setActiveProject)
+
+  const refreshProject = () =>
+    api.getProject(activeProject.id).then(project => {
+      setActiveProject(project)
+      if (activeItem && ActiveItemIsPrompt(activeItem)) {
+        setActiveItem(
+          BuildActivePrompt(project)({
+            prompt: activeItem,
+            versions: activeItem.versions,
+            inputValues: activeItem.inputValues,
+          })
+        )
+      } else if (activeItem && ActiveItemIsChain(activeItem)) {
+        setActiveItem(
+          BuildActiveChain(project)({
+            chain: activeItem,
+            versions: activeItem.versions,
+            inputValues: activeItem.inputValues,
+          })
+        )
+      }
+    })
 
   const [activeItem, setActiveItem] = useInitialState(initialActiveItem ?? undefined, sameItems)
   const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
