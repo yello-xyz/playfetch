@@ -57,7 +57,7 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
   onSelect,
 }: {
   comment: Comment
-  user: User
+  user?: User
   labelColors?: Record<string, string>
   versions?: Version[]
   onSelect?: (version: Version, runID?: number) => void
@@ -70,13 +70,14 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
 
   const selectVersion = onSelect && version ? () => onSelect(version, comment.runID) : undefined
   const availableProviders = useAvailableProviders()
+  const userName = user ? user.fullName : 'Unknown user'
 
   return (
     <div className={selectVersion ? 'cursor-pointer' : ''} onClick={selectVersion}>
       {comment.action ? (
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
-          <UserAvatar user={user} size='sm' />
-          <span className='font-medium'>{user.fullName}</span>
+          {user && <UserAvatar user={user} size='sm' />}
+          <span className='font-medium'>{userName}</span> 
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
           <ItemLabel label={comment.text} colors={labelColors} />
           {version &&
@@ -88,8 +89,8 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
       ) : (
         <div className='flex flex-col gap-2 text-xs text-gray-600'>
           <div className='flex items-center gap-1'>
-            <UserAvatar user={user} size='sm' />
-            <span className='font-medium'>{user.fullName}</span>
+            {user && <UserAvatar user={user} size='sm' />}
+            <span className='font-medium'>{userName}</span>
             <span className='text-gray-400'>{formattedDate}</span>
           </div>
           {(version || comment.quote) && (
