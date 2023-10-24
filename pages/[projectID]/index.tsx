@@ -259,6 +259,7 @@ export default function Home({
                         visible={showComments}>
                         <CommentsPane
                           project={activeProject}
+                          activeItem={activePrompt ?? activeChain}
                           onSelectComment={selectComment}
                           showComments={showComments}
                           setShowComments={setShowComments}
