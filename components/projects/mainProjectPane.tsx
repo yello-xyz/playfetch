@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import {
   ActiveProject,
   PromptVersion,
@@ -11,13 +10,11 @@ import {
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import { Allotment } from 'allotment'
-
-import dynamic from 'next/dynamic'
-const PromptView = dynamic(() => import('@/components/prompts/promptView'))
-const ChainView = dynamic(() => import('@/components/chains/chainView'))
-const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
-const CompareView = dynamic(() => import('@/components/compare/compareView'))
-const CommentsPane = dynamic(() => import('@/components/commentsPane'))
+import PromptView from '../prompts/promptView'
+import ChainView from '../chains/chainView'
+import CompareView from '../compare/compareView'
+import EndpointsView from '../endpoints/endpointsView'
+import CommentsPane from '../commentsPane'
 
 export default function MainProjectPane({
   activeProject,
@@ -67,57 +64,45 @@ export default function MainProjectPane({
     <Allotment>
       <Allotment.Pane>
         {activePrompt && activePromptVersion && (
-          <Suspense>
-            <PromptView
-              prompt={activePrompt}
-              activeVersion={activePromptVersion}
-              setActiveVersion={selectVersion}
-              setModifiedVersion={setModifiedVersion}
-              savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
-              activeRunID={activeRunID}
-            />
-          </Suspense>
+          <PromptView
+            prompt={activePrompt}
+            activeVersion={activePromptVersion}
+            setActiveVersion={selectVersion}
+            setModifiedVersion={setModifiedVersion}
+            savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
+            activeRunID={activeRunID}
+          />
         )}
         {activeChain && activeChainVersion && (
-          <Suspense>
-            <ChainView
-              key={activeChain.id}
-              chain={activeChain}
-              activeVersion={activeChainVersion}
-              setActiveVersion={selectVersion}
-              project={activeProject}
-              saveChain={saveChain}
-              activeRunID={activeRunID}
-            />
-          </Suspense>
+          <ChainView
+            key={activeChain.id}
+            chain={activeChain}
+            activeVersion={activeChainVersion}
+            setActiveVersion={selectVersion}
+            project={activeProject}
+            saveChain={saveChain}
+            activeRunID={activeRunID}
+          />
         )}
-        {activeItem === CompareItem && (
-          <Suspense>
-            <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
-          </Suspense>
-        )}
+        {activeItem === CompareItem && <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />}
         {activeItem === EndpointsItem && (
-          <Suspense>
-            <EndpointsView
-              project={activeProject}
-              analytics={analytics}
-              refreshAnalytics={refreshAnalytics}
-              onRefresh={refreshProject}
-            />
-          </Suspense>
+          <EndpointsView
+            project={activeProject}
+            analytics={analytics}
+            refreshAnalytics={refreshAnalytics}
+            onRefresh={refreshProject}
+          />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>
-        <Suspense>
-          <CommentsPane
-            project={activeProject}
-            activeItem={activePrompt ?? activeChain}
-            onSelectComment={selectComment}
-            showComments={showComments}
-            setShowComments={setShowComments}
-          />
-        </Suspense>
+        <CommentsPane
+          project={activeProject}
+          activeItem={activePrompt ?? activeChain}
+          onSelectComment={selectComment}
+          showComments={showComments}
+          setShowComments={setShowComments}
+        />
       </Allotment.Pane>
     </Allotment>
   )
