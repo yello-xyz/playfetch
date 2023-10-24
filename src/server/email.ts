@@ -25,8 +25,8 @@ async function sendMail(to: string, subject: string, text: string, html: string,
   await transporter.sendMail({ from: GetNoReplyFromAddress(delegatedFrom), to, subject, text, html })
 }
 
-function resolveContent(fileName: string, variables: { [key: string]: string }) {
-  const templatePath = path.join(process.cwd(), 'templates', fileName)
+function resolveContent(fileName: string, fileType: 'txt' | 'html', variables: { [key: string]: string }) {
+  const templatePath = path.join(process.cwd(), 'templates', `${fileName}.${fileType}`)
   let content = readFileSync(templatePath, 'utf8')
   Object.entries(variables).forEach(([key, value]) => {
     content = content.replace(new RegExp(key, 'g'), value)
@@ -55,8 +55,8 @@ export async function sendInviteEmail(
   await sendMail(
     toEmail,
     `${kind[0].toUpperCase()}${kind.slice(1)} shared with you: "${objectName}"`,
-    resolveContent('invite.txt', variables),
-    resolveContent('invite.html', variables),
+    resolveContent('invite', 'txt', variables),
+    resolveContent('invite', 'html', variables),
     inviter.fullName
   )
 }
