@@ -2,15 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import {
-  User,
-  ActiveProject,
-  AvailableProvider,
-  Workspace,
-  PromptVersion,
-  ChainVersion,
-  Analytics,
-} from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -32,15 +24,15 @@ import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
+import { Allotment } from 'allotment'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 import dynamic from 'next/dynamic'
-import { Allotment } from 'allotment'
-import CommentsPane from '@/components/commentsPane'
-import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
 const CompareView = dynamic(() => import('@/components/compare/compareView'))
+const CommentsPane = dynamic(() => import('@/components/commentsPane'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
   props: await loadActiveItem(user, query),
@@ -275,13 +267,15 @@ export default function Home({
                         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
                       </Allotment.Pane>
                       <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>
-                        <CommentsPane
-                          project={activeProject}
-                          activeItem={activePrompt ?? activeChain}
-                          onSelectComment={selectComment}
-                          showComments={showComments}
-                          setShowComments={setShowComments}
-                        />
+                        <Suspense>
+                          <CommentsPane
+                            project={activeProject}
+                            activeItem={activePrompt ?? activeChain}
+                            onSelectComment={selectComment}
+                            showComments={showComments}
+                            setShowComments={setShowComments}
+                          />
+                        </Suspense>
                       </Allotment.Pane>
                     </Allotment>
                   </div>
