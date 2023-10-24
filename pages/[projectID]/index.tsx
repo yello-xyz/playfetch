@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics } from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics, IsPromptVersion } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -26,6 +26,7 @@ import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 
 import dynamic from 'next/dynamic'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
 const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
@@ -165,6 +166,16 @@ export default function Home({
   const [showComments, setShowComments] = useState(false)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
+
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, async version => {
+    if (IsPromptVersion(version) && (version.parentID !== activePrompt?.id)) {
+      return selectPrompt(version.parentID, version.id)
+    } else if (!IsPromptVersion(version) && (version.parentID !== activeChain?.id)) {
+      return selectChain(version.parentID, version.id)
+    } else {
+      return setActiveVersion(version)
+    }
+  })
 
   return (
     <>
