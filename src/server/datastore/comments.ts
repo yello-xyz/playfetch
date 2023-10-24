@@ -124,6 +124,7 @@ const toCommentData = (
 export const toComment = (data: any): Comment => ({
   id: getID(data),
   userID: data.userID,
+  parentID: data.parentID,
   versionID: data.versionID,
   text: data.text,
   timestamp: getTimestamp(data),
