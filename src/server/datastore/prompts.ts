@@ -151,9 +151,13 @@ export async function augmentPromptDataWithNewVersion(
   await updatePrompt({ ...promptData, name: newPromptName }, true)
 }
 
+const getPromptData = (promptID: number) => getKeyedEntity(Entity.PROMPT, promptID)
+
+export const getTrustedPrompt = (promptID: number) => getPromptData(promptID).then(toPrompt)
+
 export async function updatePromptOnDeletedVersion(promptID: number) {
   // TODO update previous version references in other versions?
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  const promptData = await getPromptData(promptID)
   await updatePrompt({ ...promptData }, true)
 }
 

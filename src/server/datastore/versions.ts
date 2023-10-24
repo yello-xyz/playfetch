@@ -226,7 +226,16 @@ export async function processLabels(
     if (checked) {
       await ensureProjectLabel(userID, projectID, label)
     }
-    await saveComment(userID, parentID, versionID, label, replyTo, checked ? 'addLabel' : 'removeLabel', runID)
+    await saveComment(
+      userID,
+      projectID,
+      parentID,
+      versionID,
+      label,
+      replyTo,
+      checked ? 'addLabel' : 'removeLabel',
+      runID
+    )
     return newLabels
   }
   return undefined

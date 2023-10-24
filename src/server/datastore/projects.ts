@@ -189,9 +189,7 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
   )
 }
 
-export async function ensureProjectAccess(userID: number, projectID: number) {
-  await getVerifiedUserProjectData(userID, projectID)
-}
+export const ensureProjectAccess = (userID: number, projectID: number) => getVerifiedUserProjectData(userID, projectID)
 
 const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
 

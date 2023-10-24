@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntity,
   getEntityKey,
   getEntityKeys,
   getID,
@@ -156,8 +155,12 @@ export async function augmentChainDataWithNewVersion(
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)
 }
 
+const getChainData = (chainID: number) => getKeyedEntity(Entity.CHAIN, chainID)
+
+export const getTrustedChain = (chainID: number) => getChainData(chainID).then(toChain)
+
 export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number) {
-  const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
+  const chainData = await getChainData(chainID)
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[deletedVersionID] = undefined
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)

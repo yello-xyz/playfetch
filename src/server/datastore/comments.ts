@@ -1,6 +1,6 @@
 import { Comment, CommentAction } from '@/types'
 import { Entity, buildKey, getDatastore, getEntities, getID, getRecentEntities, getTimestamp } from './datastore'
-import { ensurePromptOrChainAccess } from './chains'
+import { ensureProjectAccess } from './projects'
 
 const IsReplyToComment = (comment: Comment) => (candidate: Comment) =>
   candidate.versionID === comment.versionID &&
@@ -29,6 +29,7 @@ export async function migrateComments(postMerge: boolean) {
         await datastore.save(
           toCommentData(
             commentData.userID,
+            commentData.projectID,
             commentData.parentID,
             commentData.versionID,
             commentData.text,
@@ -49,6 +50,7 @@ export async function migrateComments(postMerge: boolean) {
 
 export async function saveComment(
   userID: number,
+  projectID: number,
   parentID: number,
   versionID: number,
   text: string,
@@ -59,9 +61,10 @@ export async function saveComment(
   itemIndex?: number,
   startIndex?: number
 ) {
-  await ensurePromptOrChainAccess(userID, parentID)
+  await ensureProjectAccess(userID, projectID)
   const commentData = toCommentData(
     userID,
+    projectID,
     parentID,
     versionID,
     text,
@@ -79,6 +82,7 @@ export async function saveComment(
 
 const toCommentData = (
   userID: number,
+  projectID: number,
   parentID: number,
   versionID: number,
   text: string,
@@ -92,7 +96,20 @@ const toCommentData = (
   commentID?: number
 ) => ({
   key: buildKey(Entity.COMMENT, commentID),
-  data: { userID, parentID, versionID, replyTo, text, createdAt, action, quote, runID, itemIndex, startIndex },
+  data: {
+    userID,
+    projectID,
+    parentID,
+    versionID,
+    replyTo,
+    text,
+    createdAt,
+    action,
+    quote,
+    runID,
+    itemIndex,
+    startIndex,
+  },
   excludeFromIndexes: ['text', 'action', 'quote', 'runID', 'itemIndex', 'startIndex'],
 })
 
