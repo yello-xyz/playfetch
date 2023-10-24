@@ -21,6 +21,7 @@ import { getRecentComments } from './comments'
 import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
+import { getRecentRuns } from './runs'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -126,12 +127,14 @@ export async function getActiveUsers(users?: User[], before?: Date, limit = 100)
   const recentVersions = await getRecentVersions(before, limit)
   const since = new Date(recentVersions.slice(-1)[0]?.timestamp ?? 0)
 
+  const recentRuns = recentVersions.length > 0 ? await getRecentRuns(since, before, limit) : []
   const recentComments = recentVersions.length > 0 ? await getRecentComments(since, before, limit) : []
   const recentEndpoints = recentVersions.length > 0 ? await getRecentEndpoints(since, before, limit) : []
 
   if (!users) {
     const usersData = await getKeyedEntities(Entity.USER, [
       ...new Set([
+        ...recentRuns.map(run => run.userID),
         ...recentVersions.map(version => version.userID),
         ...recentComments.map(comment => comment.userID),
         ...recentEndpoints.map(endpoint => endpoint.userID),
@@ -141,18 +144,22 @@ export async function getActiveUsers(users?: User[], before?: Date, limit = 100)
   }
 
   return users
-    .map(user => toActiveUser(user, recentVersions, recentComments, recentEndpoints))
+    .map(user => toActiveUser(user, recentVersions, recentRuns, recentComments, recentEndpoints))
     .sort((a, b) => b.lastActive - a.lastActive)
 }
 
 const toActiveUser = (
   user: User,
   recentVersions: Awaited<ReturnType<typeof getRecentVersions>>,
+  recentRuns: Awaited<ReturnType<typeof getRecentRuns>>,
   recentComments: Awaited<ReturnType<typeof getRecentComments>>,
   recentEndpoints: Awaited<ReturnType<typeof getRecentEndpoints>>
 ): ActiveUser => {
   const userVersions = recentVersions.filter(version => version.userID === user.id)
   const versionCount = userVersions.length
+
+  const userRuns = recentRuns.filter(run => run.userID === user.id)
+  const runCount = userRuns.length
 
   const userComments = recentComments.filter(comment => comment.userID === user.id)
   const commentCount = userComments.length
@@ -161,11 +168,17 @@ const toActiveUser = (
   const endpointCount = userEndpoints.length
 
   const lastActive = Math.max(
-    ...[userVersions[0]?.timestamp ?? 0, userComments[0]?.timestamp ?? 0, userEndpoints[0]?.timestamp ?? 0]
+    ...[
+      userVersions[0]?.timestamp ?? 0,
+      userRuns[0]?.timestamp ?? 0,
+      userComments[0]?.timestamp ?? 0,
+      userEndpoints[0]?.timestamp ?? 0,
+    ]
   )
   const startTimestamp = Math.min(
     ...[
       userVersions.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
+      userRuns.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
       userComments.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
       userEndpoints.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
     ]
@@ -176,7 +189,17 @@ const toActiveUser = (
   const chainVersions = userVersions.filter(version => !IsRawPromptVersion(version))
   const chainCount = new Set(chainVersions.map(version => version.parentID)).size
 
-  return { ...user, lastActive, startTimestamp, commentCount, endpointCount, versionCount, promptCount, chainCount }
+  return {
+    ...user,
+    lastActive,
+    startTimestamp,
+    commentCount,
+    endpointCount,
+    versionCount,
+    runCount,
+    promptCount,
+    chainCount,
+  }
 }
 
 export async function getMetricsForUser(userID: number): Promise<UserMetrics> {

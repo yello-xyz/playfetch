@@ -307,6 +307,7 @@ export type ActiveUser = User & {
   lastActive: number
   startTimestamp: number
   versionCount: number
+  runCount: number
   promptCount: number
   chainCount: number
   commentCount: number

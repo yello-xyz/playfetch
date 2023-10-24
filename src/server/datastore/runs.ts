@@ -1,5 +1,5 @@
 import { PromptInputs, Run } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getTimestamp } from './datastore'
+import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 
@@ -142,3 +142,13 @@ export const toRun = (data: any): Run => ({
   duration: data.duration,
   labels: JSON.parse(data.labels),
 })
+
+export async function getRecentRuns(
+  since: Date,
+  before: Date | undefined,
+  limit: number,
+  pagingBackwards = false
+): Promise<(Run & { userID: number })[]> {
+  const recentRunsData = await getRecentEntities(Entity.RUN, limit, since, before, 'createdAt', pagingBackwards)
+  return recentRunsData.map(runData => ({ ...toRun(runData), userID: runData.userID }))
+}
