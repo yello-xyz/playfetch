@@ -5,7 +5,7 @@ import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useState } from 'react'
-import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
+import { useRefreshProject } from '@/src/client/context/refreshContext'
 import Icon from './icon'
 import GlobalPopupMenu from './globalPopupMenu'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
@@ -33,9 +33,9 @@ export default function LabelPopupMenu({
   activeItem: ActivePrompt | ActiveChain
   selectedCell?: boolean
 }) {
-  const refreshActiveItem = useRefreshActiveItem()
+  const refreshProject = useRefreshProject()
 
-  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [LabelsPopup, { item, activeItem, refreshActiveItem }]
+  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [LabelsPopup, { item, activeItem, refreshProject }]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
@@ -43,12 +43,12 @@ export default function LabelPopupMenu({
 export type LabelsPopupProps = {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
-  refreshActiveItem: () => void
+  refreshProject: () => void
 }
 
 const IsVersion = (item: LabelsPopupProps['item']): item is PromptVersion | ChainVersion => 'runs' in item
 
-function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: LabelsPopupProps & WithDismiss) {
+function LabelsPopup({ item, activeItem, refreshProject, withDismiss }: LabelsPopupProps & WithDismiss) {
   const [newLabel, setNewLabel] = useState('')
 
   const trimmedLabel = newLabel.trim()
@@ -70,9 +70,9 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: Label
       comment => comment.text === label && comment.action === (checked ? 'removeLabel' : 'addLabel')
     )?.id
     if (IsVersion(item)) {
-      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked, replyTo).then(_ => refreshActiveItem())
+      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refreshProject)
     } else {
-      api.toggleRunLabel(item.id, activeItem.projectID, label, checked, replyTo).then(_ => refreshActiveItem())
+      api.toggleRunLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refreshProject)
     }
   }
 
