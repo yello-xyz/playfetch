@@ -82,3 +82,21 @@ indexes:
   - name: projectID
   - name: createdAt
     direction: desc
+
+- kind: version
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: comment
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: endpoint
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc

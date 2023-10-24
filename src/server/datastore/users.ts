@@ -12,6 +12,7 @@ import {
   getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
+  getTimestamp,
 } from './datastore'
 import { addWorkspaceForUser, getWorkspacesForUser } from './workspaces'
 import { uploadImageURLToStorage } from '../storage'
@@ -195,9 +196,12 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
 
   const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
 
-  const createdVersionCount = await getEntityCount(Entity.VERSION, 'userID', userID)
-  const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
-  const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
+  const getTimestamps = (type: string, userID: number) =>
+    getDatastore().runQuery(getDatastore().createQuery(type).filter(buildFilter('userID', userID)).select('createdAt'))
+
+  const [versionTimestamps] = await getTimestamps(Entity.VERSION, userID)
+  const [commentTimestamps] = await getTimestamps(Entity.COMMENT, userID)
+  const [endpointTimestamps] = await getTimestamps(Entity.ENDPOINT, userID)
 
   const providersData = await getEntities(Entity.PROVIDER, 'userID', userID)
   const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
@@ -206,9 +210,9 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     createdWorkspaceCount,
     workspaceAccessCount,
     projectAccessCount,
-    createdVersionCount,
-    createdCommentCount,
-    createdEndpointCount,
+    versionTimestamps: versionTimestamps.map(({ createdAt }) => createdAt),
+    commentTimestamps: commentTimestamps.map(({ createdAt }) => createdAt),
+    endpointTimestamps: endpointTimestamps.map(({ createdAt }) => createdAt),
     providers,
     sharedProjects: sharedProjectsAsRecent,
     pendingSharedProjects: pendingSharedProjectsAsRecent,
