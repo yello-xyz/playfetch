@@ -38,9 +38,6 @@ export default function ProjectTopBar({
 
   const workspace = workspaces.find(workspace => workspace.id === activeProject.workspaceID)
 
-  const promptHasComments =
-    activeItem && 'versions' in activeItem && (activeItem?.versions ?? []).some(version => version.comments.length > 0)
-
   return (
     <>
       <TopBar>
@@ -72,8 +69,14 @@ export default function ProjectTopBar({
         </div>
         <TopBarAccessoryItem className='flex items-center justify-end gap-4'>
           <UserAvatars users={activeProject.users} />
-          <InviteButton users={activeProject.users} pendingUsers={activeProject.pendingUsers} onInvite={inviteMembers} />
-          {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
+          <InviteButton
+            users={activeProject.users}
+            pendingUsers={activeProject.pendingUsers}
+            onInvite={inviteMembers}
+          />
+          {activeProject.comments.length > 0 && (
+            <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />
+          )}
         </TopBarAccessoryItem>
       </TopBar>
     </>
