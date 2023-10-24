@@ -17,4 +17,5 @@ import { migrateWorkspaces } from './workspaces'
 
 export async function runDataMigrations(postMerge: boolean) {
   await migrateComments(postMerge)
+  await migrateRuns(postMerge)
 }
