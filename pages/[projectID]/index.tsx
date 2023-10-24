@@ -10,7 +10,6 @@ import {
   PromptVersion,
   ChainVersion,
   Analytics,
-  IsPromptVersion,
 } from '@/types'
 import ClientRoute, {
   CompareRoute,
@@ -32,7 +31,7 @@ import useChain from '@/src/client/hooks/useChain'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
-import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
+import useActiveItem from '@/src/client/hooks/useActiveItem'
 
 import dynamic from 'next/dynamic'
 import { Allotment } from 'allotment'
@@ -62,11 +61,18 @@ export default function Home({
   initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
 }) {
-  const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(
-    initialActiveProject,
-    initialActiveItem
-  )
-  const [activeVersion, setActiveVersion, activePromptVersion, activeChainVersion] = useActiveVersion(activeItem)
+  const [
+    activeProject,
+    refreshProject,
+    activeItem,
+    setActiveItem,
+    activePrompt,
+    activeChain,
+    activeVersion,
+    setActiveVersion,
+    activePromptVersion,
+    activeChainVersion,
+  ] = useActiveItem(initialActiveProject, initialActiveItem)
 
   const [refreshPrompt, selectPrompt, addPrompt, savePrompt, setModifiedVersion] = usePrompt(
     activeProject,

@@ -45,15 +45,22 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
   const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && ActiveItemIsChain(activeItem) ? activeItem : undefined
 
-  return [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] as const
-}
-
-export function useActiveVersion(activeItem: ActiveItem | undefined) {
   const initialActiveVersion =
     activeItem === CompareItem || activeItem === EndpointsItem ? undefined : activeItem?.versions?.slice(-1)?.[0]
   const [activeVersion, setActiveVersion] = useInitialState(initialActiveVersion, sameParentIDs)
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
   const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
 
-  return [activeVersion, setActiveVersion, activePromptVersion, activeChainVersion] as const
+  return [
+    activeProject,
+    refreshProject,
+    activeItem,
+    setActiveItem,
+    activePrompt,
+    activeChain,
+    activeVersion,
+    setActiveVersion,
+    activePromptVersion,
+    activeChainVersion,
+  ] as const
 }
