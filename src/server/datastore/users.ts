@@ -200,6 +200,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     getDatastore().runQuery(getDatastore().createQuery(type).filter(buildFilter('userID', userID)).select('createdAt'))
 
   const [versionsData] = await getTimestamps(Entity.VERSION, userID)
+  const [runsData] = await getTimestamps(Entity.RUN, userID)
   const [commentsData] = await getTimestamps(Entity.COMMENT, userID)
   const [endpointsData] = await getTimestamps(Entity.ENDPOINT, userID)
 
@@ -209,17 +210,20 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   const daysAgo = (timestamp: number) => (today - toDay(timestamp)) / millisecondsInDay
 
   const versionTimestamps = versionsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+  const runTimestamps = runsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
   const commentTimestamps = commentsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
   const endpointTimestamps = endpointsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
 
-  const maxDaysAgo = Math.max(...versionTimestamps, ...commentTimestamps, ...endpointTimestamps)
+  const maxDaysAgo = Math.max(...versionTimestamps, ...runTimestamps, ...commentTimestamps, ...endpointTimestamps)
   const activity = Array.from({ length: maxDaysAgo + 1 }, (_, daysAgo) => ({
     timestamp: today - (maxDaysAgo - daysAgo) * millisecondsInDay,
     versions: 0,
+    runs: 0,
     comments: 0,
     endpoints: 0,
   }))
   versionTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].versions++)
+  runTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].runs++)
   commentTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].comments++)
   endpointTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].endpoints++)
 

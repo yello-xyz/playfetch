@@ -27,13 +27,15 @@ export default function ActiveUserMetrics({
 }) {
   const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, true, true))
 
-  const activityData = metrics.activity.map(({ timestamp, versions, comments, endpoints }) => ({
+  const activityData = metrics.activity.map(({ timestamp, versions, runs, comments, endpoints }) => ({
     date: FormatDate(timestamp, false, true),
     versions,
+    runs,
     comments,
     endpoints,
   }))
   const versionCount = activityData.reduce((acc, activity) => acc + activity.versions, 0)
+  const runCount = activityData.reduce((acc, activity) => acc + activity.runs, 0)
   const commentCount = activityData.reduce((acc, activity) => acc + activity.comments, 0)
   const endpointCount = activityData.reduce((acc, activity) => acc + activity.endpoints, 0)
 
@@ -62,6 +64,7 @@ export default function ActiveUserMetrics({
           </div>
           <div className='flex flex-col gap-1'>
             <Label>Total number of versions created: {versionCount}</Label>
+            <Label>Total number of runs executed: {runCount}</Label>
             <Label>Total number of comments made: {commentCount}</Label>
             <Label>Total number of endpoints published: {endpointCount}</Label>
           </div>
@@ -79,9 +82,10 @@ export default function ActiveUserMetrics({
             <div className='w-full'>
               <DashboardContainer title='User Activity' range={activityData.length}>
                 <LineChart id='requests' data={activityData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
-                  <Line type='bump' dot={false} strokeWidth={1} dataKey='versions' stroke='#3B8CEB' />
-                  <Line type='bump' dot={false} strokeWidth={1} dataKey='comments' stroke='#7D48EF' />
-                  <Line type='bump' dot={false} strokeWidth={1} dataKey='endpoints' stroke='#E14BD2' />
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='versions' stroke='#E14BD2' />
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='runs' stroke='#7D48EF' />
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='comments' stroke='#3B8CEB' />
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='endpoints' stroke='#F2A93C' />
                   <Tooltip />
                   <Legend />
                   <XAxis dataKey='date' hide />
