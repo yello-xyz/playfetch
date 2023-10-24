@@ -20,19 +20,13 @@ import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context
 import GlobalPopup from '@/components/globalPopup'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
-import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
-import { Allotment } from 'allotment'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 import dynamic from 'next/dynamic'
-const PromptView = dynamic(() => import('@/components/prompts/promptView'))
-const ChainView = dynamic(() => import('@/components/chains/chainView'))
-const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
-const CompareView = dynamic(() => import('@/components/compare/compareView'))
-const CommentsPane = dynamic(() => import('@/components/commentsPane'))
+const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
   props: await loadActiveItem(user, query),
@@ -220,64 +214,29 @@ export default function Home({
                     onSelectEndpoints={selectEndpoints}
                   />
                   <div className='flex-1'>
-                    <Allotment>
-                      <Allotment.Pane>
-                        {activePrompt && activePromptVersion && (
-                          <Suspense>
-                            <PromptView
-                              prompt={activePrompt}
-                              activeVersion={activePromptVersion}
-                              setActiveVersion={selectVersion}
-                              setModifiedVersion={setModifiedVersion}
-                              savePrompt={() =>
-                                savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)
-                              }
-                              activeRunID={activeRunID}
-                            />
-                          </Suspense>
-                        )}
-                        {activeChain && activeChainVersion && (
-                          <Suspense>
-                            <ChainView
-                              key={activeChain.id}
-                              chain={activeChain}
-                              activeVersion={activeChainVersion}
-                              setActiveVersion={selectVersion}
-                              project={activeProject}
-                              saveChain={saveChain}
-                              activeRunID={activeRunID}
-                            />
-                          </Suspense>
-                        )}
-                        {activeItem === CompareItem && (
-                          <Suspense>
-                            <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
-                          </Suspense>
-                        )}
-                        {activeItem === EndpointsItem && (
-                          <Suspense>
-                            <EndpointsView
-                              project={activeProject}
-                              analytics={analytics}
-                              refreshAnalytics={refreshAnalytics}
-                              onRefresh={refreshProject}
-                            />
-                          </Suspense>
-                        )}
-                        {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
-                      </Allotment.Pane>
-                      <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>
-                        <Suspense>
-                          <CommentsPane
-                            project={activeProject}
-                            activeItem={activePrompt ?? activeChain}
-                            onSelectComment={selectComment}
-                            showComments={showComments}
-                            setShowComments={setShowComments}
-                          />
-                        </Suspense>
-                      </Allotment.Pane>
-                    </Allotment>
+                    <Suspense>
+                      <MainProjectPane
+                        activeProject={activeProject}
+                        refreshProject={refreshProject}
+                        activeItem={activeItem}
+                        activePrompt={activePrompt}
+                        activeChain={activeChain}
+                        activePromptVersion={activePromptVersion}
+                        activeChainVersion={activeChainVersion}
+                        selectVersion={selectVersion}
+                        setModifiedVersion={setModifiedVersion}
+                        addPrompt={addPrompt}
+                        savePrompt={savePrompt}
+                        saveChain={saveChain}
+                        refreshOnSavePrompt={refreshOnSavePrompt}
+                        activeRunID={activeRunID}
+                        analytics={analytics}
+                        refreshAnalytics={refreshAnalytics}
+                        showComments={showComments}
+                        setShowComments={setShowComments}
+                        selectComment={selectComment}
+                      />
+                    </Suspense>
                   </div>
                 </div>
               </main>

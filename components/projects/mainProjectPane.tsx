@@ -1,0 +1,124 @@
+import { Suspense } from 'react'
+import {
+  ActiveProject,
+  PromptVersion,
+  ChainVersion,
+  Analytics,
+  ActivePrompt,
+  ActiveChain,
+  ChainItemWithInputs,
+} from '@/types'
+import { EmptyProjectView } from '@/components/projects/emptyProjectView'
+import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import { Allotment } from 'allotment'
+
+import dynamic from 'next/dynamic'
+const PromptView = dynamic(() => import('@/components/prompts/promptView'))
+const ChainView = dynamic(() => import('@/components/chains/chainView'))
+const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
+const CompareView = dynamic(() => import('@/components/compare/compareView'))
+const CommentsPane = dynamic(() => import('@/components/commentsPane'))
+
+export default function MainProjectPane({
+  activeProject,
+  refreshProject,
+  activeItem,
+  activePrompt,
+  activeChain,
+  activePromptVersion,
+  activeChainVersion,
+  selectVersion,
+  setModifiedVersion,
+  addPrompt,
+  savePrompt,
+  saveChain,
+  refreshOnSavePrompt,
+  activeRunID,
+  analytics,
+  refreshAnalytics,
+  showComments,
+  setShowComments,
+  selectComment,
+}: {
+  activeProject: ActiveProject
+  refreshProject: () => Promise<void>
+  activeItem: ActiveItem | undefined
+  activePrompt: ActivePrompt | undefined
+  activeChain: ActiveChain | undefined
+  activePromptVersion: PromptVersion | undefined
+  activeChainVersion: ChainVersion | undefined
+  selectVersion: (version: PromptVersion | ChainVersion) => void
+  setModifiedVersion: (version: PromptVersion) => void
+  addPrompt: () => Promise<void>
+  savePrompt: (onSaved?: (versionID: number) => Promise<void> | void) => Promise<number | undefined>
+  saveChain: (
+    items: ChainItemWithInputs[],
+    onSaved?: ((versionID: number) => Promise<void>) | (() => void)
+  ) => Promise<number | undefined>
+  refreshOnSavePrompt: (promptID: number) => (versionID?: number) => void
+  activeRunID: number | undefined
+  analytics: Analytics | undefined
+  refreshAnalytics: (dayRange?: number) => Promise<void>
+  showComments: boolean
+  setShowComments: (show: boolean) => void
+  selectComment: (parentID: number, versionID: number, runID?: number) => void
+}) {
+  return (
+    <Allotment>
+      <Allotment.Pane>
+        {activePrompt && activePromptVersion && (
+          <Suspense>
+            <PromptView
+              prompt={activePrompt}
+              activeVersion={activePromptVersion}
+              setActiveVersion={selectVersion}
+              setModifiedVersion={setModifiedVersion}
+              savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
+              activeRunID={activeRunID}
+            />
+          </Suspense>
+        )}
+        {activeChain && activeChainVersion && (
+          <Suspense>
+            <ChainView
+              key={activeChain.id}
+              chain={activeChain}
+              activeVersion={activeChainVersion}
+              setActiveVersion={selectVersion}
+              project={activeProject}
+              saveChain={saveChain}
+              activeRunID={activeRunID}
+            />
+          </Suspense>
+        )}
+        {activeItem === CompareItem && (
+          <Suspense>
+            <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
+          </Suspense>
+        )}
+        {activeItem === EndpointsItem && (
+          <Suspense>
+            <EndpointsView
+              project={activeProject}
+              analytics={analytics}
+              refreshAnalytics={refreshAnalytics}
+              onRefresh={refreshProject}
+            />
+          </Suspense>
+        )}
+        {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
+      </Allotment.Pane>
+      <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>
+        <Suspense>
+          <CommentsPane
+            project={activeProject}
+            activeItem={activePrompt ?? activeChain}
+            onSelectComment={selectComment}
+            showComments={showComments}
+            setShowComments={setShowComments}
+          />
+        </Suspense>
+      </Allotment.Pane>
+    </Allotment>
+  )
+}
