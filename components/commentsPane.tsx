@@ -66,7 +66,8 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
 
   const version = versions.find(version => version.id === comment.versionID)
   const compareVersion = versions.find(v => v.id === version?.previousID)
-  const versionIndex = versions.findIndex(version => version.id === comment.versionID) + 1
+  const versionIndex =
+    versions.filter(v => v.parentID === version?.parentID).findIndex(v => v.id === comment.versionID) + 1
 
   const selectVersion = onSelect && version ? () => onSelect(version, comment.runID) : undefined
   const availableProviders = useAvailableProviders()
@@ -77,7 +78,7 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
       {comment.action ? (
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
           {user && <UserAvatar user={user} size='sm' />}
-          <span className='font-medium'>{userName}</span> 
+          <span className='font-medium'>{userName}</span>
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
           <ItemLabel label={comment.text} colors={labelColors} />
           {version &&
