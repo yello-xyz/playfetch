@@ -199,9 +199,29 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   const getTimestamps = (type: string, userID: number) =>
     getDatastore().runQuery(getDatastore().createQuery(type).filter(buildFilter('userID', userID)).select('createdAt'))
 
-  const [versionTimestamps] = await getTimestamps(Entity.VERSION, userID)
-  const [commentTimestamps] = await getTimestamps(Entity.COMMENT, userID)
-  const [endpointTimestamps] = await getTimestamps(Entity.ENDPOINT, userID)
+  const [versionsData] = await getTimestamps(Entity.VERSION, userID)
+  const [commentsData] = await getTimestamps(Entity.COMMENT, userID)
+  const [endpointsData] = await getTimestamps(Entity.ENDPOINT, userID)
+
+  const toDay = (timestamp: number) => new Date(timestamp).setUTCHours(0, 0, 0, 0)
+  const today = toDay(new Date().getTime())
+  const millisecondsInDay = 24 * 60 * 60 * 1000
+  const daysAgo = (timestamp: number) => (today - toDay(timestamp)) / millisecondsInDay
+
+  const versionTimestamps = versionsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+  const commentTimestamps = commentsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+  const endpointTimestamps = endpointsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+
+  const maxDaysAgo = Math.max(...versionTimestamps, ...commentTimestamps, ...endpointTimestamps)
+  const activity = Array.from({ length: maxDaysAgo + 1 }, (_, daysAgo) => ({
+    timestamp: today - (maxDaysAgo - daysAgo) * millisecondsInDay,
+    versions: 0,
+    comments: 0,
+    endpoints: 0,
+  }))
+  versionTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].versions++)
+  commentTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].comments++)
+  endpointTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].endpoints++)
 
   const providersData = await getEntities(Entity.PROVIDER, 'userID', userID)
   const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
@@ -210,9 +230,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     createdWorkspaceCount,
     workspaceAccessCount,
     projectAccessCount,
-    versionTimestamps: versionTimestamps.map(({ createdAt }) => createdAt),
-    commentTimestamps: commentTimestamps.map(({ createdAt }) => createdAt),
-    endpointTimestamps: endpointTimestamps.map(({ createdAt }) => createdAt),
+    activity,
     providers,
     sharedProjects: sharedProjectsAsRecent,
     pendingSharedProjects: pendingSharedProjectsAsRecent,

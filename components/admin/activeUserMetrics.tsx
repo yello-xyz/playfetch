@@ -8,6 +8,9 @@ import { LabelForProvider } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import RecentProjects from './recentProjects'
 import Workspaces from './workspaces'
+import DashboardContainer from '../endpoints/dashboardContainer'
+import { Legend, Line, LineChart, Tooltip, XAxis } from 'recharts'
+import { Suspense } from 'react'
 
 export default function ActiveUserMetrics({
   user,
@@ -23,6 +26,16 @@ export default function ActiveUserMetrics({
   onDismiss: () => void
 }) {
   const lastActive = useFormattedDate(user.lastActive, timestamp => FormatDate(timestamp, true, true))
+
+  const activityData = metrics.activity.map(({ timestamp, versions, comments, endpoints }) => ({
+    date: FormatDate(timestamp, false, true),
+    versions,
+    comments,
+    endpoints,
+  }))
+  const versionCount = activityData.reduce((acc, activity) => acc + activity.versions, 0)
+  const commentCount = activityData.reduce((acc, activity) => acc + activity.comments, 0)
+  const endpointCount = activityData.reduce((acc, activity) => acc + activity.endpoints, 0)
 
   return (
     <>
@@ -48,9 +61,9 @@ export default function ActiveUserMetrics({
             <Label>Number of additional projects shared with user: {metrics.projectAccessCount}</Label>
           </div>
           <div className='flex flex-col gap-1'>
-            <Label>Total number of versions created: {metrics.versionTimestamps.length}</Label>
-            <Label>Total number of comments made: {metrics.commentTimestamps.length}</Label>
-            <Label>Total number of endpoints published: {metrics.endpointTimestamps.length}</Label>
+            <Label>Total number of versions created: {versionCount}</Label>
+            <Label>Total number of comments made: {commentCount}</Label>
+            <Label>Total number of endpoints published: {endpointCount}</Label>
           </div>
           <Label>Registered Providers:</Label>
           <div className='flex flex-col gap-1'>
@@ -61,6 +74,22 @@ export default function ActiveUserMetrics({
             ))}
           </div>
         </div>
+        {activityData.length > 0 && (
+          <Suspense>
+            <div className='w-full'>
+              <DashboardContainer title='User Activity' range={activityData.length}>
+                <LineChart id='requests' data={activityData} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='versions' stroke='#3B8CEB' />
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='comments' stroke='#7D48EF' />
+                  <Line type='bump' dot={false} strokeWidth={1} dataKey='endpoints' stroke='#E14BD2' />
+                  <Tooltip />
+                  <Legend />
+                  <XAxis dataKey='date' hide />
+                </LineChart>
+              </DashboardContainer>
+            </div>
+          </Suspense>
+        )}
         <Workspaces title='Workspaces' workspaces={metrics.workspaces} onSelectWorkspace={onSelectWorkspace} />
         {metrics.pendingWorkspaces.length > 0 && (
           <Workspaces

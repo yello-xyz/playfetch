@@ -317,9 +317,7 @@ export type UserMetrics = {
   createdWorkspaceCount: number
   workspaceAccessCount: number
   projectAccessCount: number
-  versionTimestamps: number[]
-  commentTimestamps: number[]
-  endpointTimestamps: number[]
+  activity: { timestamp: number; versions: number; comments: number; endpoints: number }[]
   providers: { provider: ModelProvider | QueryProvider; cost: number }[]
   sharedProjects: RecentProject[]
   pendingSharedProjects: RecentProject[]
