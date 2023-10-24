@@ -5,6 +5,8 @@ import { getUserForID } from './datastore/users'
 import { getProjectNameForID } from './datastore/projects'
 import ClientRoute, { WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
+import { User } from '@/types'
+import { FormatDate } from '../common/formatting'
 
 export const GetEmailServerConfig = () => ({
   host: 'smtp.gmail.com',
@@ -58,5 +60,54 @@ export async function sendInviteEmail(
     resolveContent('invite', 'txt', variables),
     resolveContent('invite', 'html', variables),
     inviter.fullName
+  )
+}
+
+export async function sendCommentsEmail(
+  toEmail: string,
+  commentBlocks: {
+    parentName: string
+    projectName: string
+    parentRoute: string
+    comments: {
+      commenter: User
+      timestamp: number
+      text: string
+    }[]
+  }[]
+) {
+  const anyProjectName = commentBlocks[0].projectName
+  const anyComment = commentBlocks[0].comments[0]
+  
+  const contentForType = (type: 'txt' | 'html') =>
+    resolveContent('comments', type, {
+      __ANY_COMMENTER_EMAIL__: anyComment.commenter.email,
+      __COMMENT_BLOCKS__: commentBlocks
+        .map(({ parentName, projectName, parentRoute, comments }) =>
+          resolveContent('commentBlock', type, {
+            __PARENT_NAME__: parentName,
+            __PARENT_LINK__: `${process.env.NEXTAUTH_URL}${parentRoute}`,
+            __PROJECT_NAME__: projectName,
+            __COMMENTS__: comments
+              .map(({ commenter, timestamp, text }) =>
+                resolveContent('comment', type, {
+                  __COMMENTER_NAME__: commenter.fullName,
+                  __COMMENTER_EMAIL__: commenter.email,
+                  __COMMENT_DATE__: FormatDate(timestamp),
+                  __COMMENT_TEXT__: text,
+                })
+              )
+              .join('\n'),
+          })
+        )
+        .join('\n'),
+    })
+
+  await sendMail(
+    toEmail,
+    `New comments on project "${anyProjectName}"`,
+    contentForType('txt'),
+    contentForType('html'),
+    anyComment.commenter.fullName
   )
 }
