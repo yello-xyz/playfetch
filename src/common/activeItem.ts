@@ -43,6 +43,7 @@ export const BuildActivePrompt =
       ...prompt,
       versions: versions.map(version => ({
         ...version,
+        comments: project.comments.filter(comment => comment.versionID === version.id),
         usedInChain: chainReferencedItemIDs[version.id] ?? null,
         usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
       })),
@@ -71,6 +72,7 @@ export const BuildActiveChain =
       ...chain,
       versions: versions.map(version => ({
         ...version,
+        comments: project.comments.filter(comment => comment.versionID === version.id),
         usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
       })),
       inputValues,

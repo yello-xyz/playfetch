@@ -89,7 +89,7 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   if (markAsRun && !versionData.didRun) {
     await updateVersion({ ...versionData, didRun: true })
   }
-  return toVersion(versionData, [], [])
+  return toVersion(versionData, [])
 }
 
 const DefaultPrompts = { main: '' }
@@ -296,17 +296,17 @@ const toVersionData = (
   excludeFromIndexes: ['prompts', 'config', 'items', 'labels'],
 })
 
-export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
+export const toUserVersions = (userID: number, versions: any[], runs: any[]) => {
   const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
   const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
   return [...userVersion, ...versionsWithRuns, ...initialVersion]
-    .map(version => toVersion(version, runs, comments))
+    .map(version => toVersion(version, runs))
     .reverse()
 }
 
-const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
+const toVersion = (data: any, runs: any[]): RawPromptVersion | RawChainVersion => ({
   id: getID(data),
   parentID: data.parentID,
   userID: data.userID,
@@ -320,10 +320,6 @@ const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | 
   runs: runs
     .filter(run => run.versionID === getID(data))
     .map(toRun)
-    .reverse(),
-  comments: comments
-    .filter(comment => comment.versionID === getID(data))
-    .map(toComment)
     .reverse(),
 })
 
@@ -364,5 +360,5 @@ export async function getRecentVersions(
   limit: number
 ): Promise<(RawPromptVersion | RawChainVersion)[]> {
   const recentVersionsData = await getRecentEntities(Entity.VERSION, limit, undefined, before)
-  return recentVersionsData.map(data => toVersion(data, [], []))
+  return recentVersionsData.map(data => toVersion(data, []))
 }

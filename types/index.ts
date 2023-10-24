@@ -145,7 +145,6 @@ type Version = {
   labels: string[]
   didRun: boolean
   runs: Run[]
-  comments: Comment[]
 }
 
 export type Prompts = {
@@ -159,8 +158,12 @@ export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
 export const IsRawPromptVersion = (version: RawPromptVersion | RawChainVersion): version is RawPromptVersion =>
   'prompts' in version && version.prompts !== undefined && version.prompts !== null
 
-export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
-export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
+export type PromptVersion = RawPromptVersion & {
+  comments: Comment[]
+  usedInChain: string | null
+  usedAsEndpoint: boolean
+}
+export type ChainVersion = RawChainVersion & { comments: Comment[]; usedAsEndpoint: boolean }
 export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion =>
   IsRawPromptVersion(version)
 

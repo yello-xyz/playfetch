@@ -56,7 +56,7 @@ indexes:
 
 - kind: comment
   properties:
-  - name: parentID
+  - name: projectID
   - name: createdAt
     direction: desc
 

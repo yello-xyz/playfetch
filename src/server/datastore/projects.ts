@@ -97,7 +97,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
   const chains = chainData.map(toChain)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
-  const comments = commentsData.map(toComment)
+  const comments = commentsData.map(toComment).reverse()
   const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
