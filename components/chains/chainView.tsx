@@ -56,20 +56,18 @@ export default function ChainView({
   activeVersion,
   setActiveVersion,
   project,
-  showComments,
-  setShowComments,
   saveChain,
+  activeRunID,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   setActiveVersion: (version: ChainVersion) => void
   project: ActiveProject
-  showComments: boolean
-  setShowComments: (show: boolean) => void
   saveChain: (
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
+  activeRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
 
@@ -118,13 +116,6 @@ export default function ChainView({
     saveItems(items)
   }
 
-  const activateOutputNode = () => {
-    setNodes(nodes => {
-      setActiveNodeIndex(nodes.indexOf(OutputNode))
-      return nodes
-    })
-  }
-
   const [showVersions, setShowVersions] = useState(false)
   const canShowVersions = chain.versions.length > 1 || chain.versions[0].didRun || chain.versions[0].items.length > 0
   chain.versions.filter(version => version.didRun).length > 0
@@ -132,11 +123,6 @@ export default function ChainView({
     setShowVersions(false)
   }
 
-  const [activeRunID, selectComment] = useCommentSelection(
-    activeVersion,
-    version => Promise.resolve(setActiveVersion(version)),
-    activateOutputNode
-  )
   const [isTestMode, setTestMode] = useState(false)
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
@@ -217,14 +203,6 @@ export default function ChainView({
             )}
           </Allotment.Pane>
         )}
-      <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
-        <CommentsPane
-          activeItem={chain}
-          onSelectComment={selectComment}
-          showComments={showComments}
-          setShowComments={setShowComments}
-        />
-      </Allotment.Pane>
     </Allotment>
   )
 }

@@ -1,4 +1,13 @@
-import { ActivePrompt, Comment, User, PromptVersion, ActiveChain, ChainVersion, IsPromptVersion } from '@/types'
+import {
+  Comment,
+  User,
+  PromptVersion,
+  ChainVersion,
+  IsPromptVersion,
+  ActiveProject,
+  ActivePrompt,
+  ActiveChain,
+} from '@/types'
 import { ReactNode } from 'react'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versions/versionCell'
@@ -12,21 +21,22 @@ import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
-export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
+export default function CommentsPane({
+  project,
   activeItem,
   showComments,
   setShowComments,
   onSelectComment,
 }: {
-  activeItem: ActivePrompt | ActiveChain
+  project: ActiveProject
+  activeItem?: ActivePrompt | ActiveChain
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: Version, runID?: number) => void
+  onSelectComment: (version: PromptVersion | ChainVersion, runID?: number) => void
 }) {
-  const users = activeItem.users
-  const labelColors = AvailableLabelColorsForItem(activeItem)
-  const versions = activeItem.versions as Version[]
-  const comments = versions.flatMap(version => version.comments).sort((a, b) => a.timestamp - b.timestamp)
+  const users = project.users
+  const labelColors = AvailableLabelColorsForItem(project)
+  const versions = activeItem?.versions
 
   return showComments ? (
     <div className='flex flex-col h-full'>
@@ -34,7 +44,7 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
       </SingleTabHeader>
       <div className='flex flex-col gap-2 p-3 overflow-y-auto'>
-        {comments.map((comment, index) => (
+        {project.comments.map((comment, index) => (
           <CommentCell
             key={index}
             comment={comment}

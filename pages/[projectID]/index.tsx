@@ -26,6 +26,8 @@ import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
 
 import dynamic from 'next/dynamic'
+import { Allotment } from 'allotment'
+import CommentsPane from '@/components/commentsPane'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 const PromptView = dynamic(() => import('@/components/prompts/promptView'))
 const ChainView = dynamic(() => import('@/components/chains/chainView'))
@@ -207,51 +209,62 @@ export default function Home({
                     onSelectEndpoints={selectEndpoints}
                   />
                   <div className='flex-1'>
-                    {activePrompt && activePromptVersion && (
-                      <Suspense>
-                        <PromptView
-                          prompt={activePrompt}
-                          activeVersion={activePromptVersion}
-                          setActiveVersion={selectVersion}
-                          setModifiedVersion={setModifiedVersion}
+                    <Allotment>
+                      <Allotment.Pane>
+                        {activePrompt && activePromptVersion && (
+                          <Suspense>
+                            <PromptView
+                              prompt={activePrompt}
+                              activeVersion={activePromptVersion}
+                              setActiveVersion={selectVersion}
+                              setModifiedVersion={setModifiedVersion}
+                              savePrompt={() =>
+                                savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)
+                              }
+                            />
+                          </Suspense>
+                        )}
+                        {activeChain && activeChainVersion && (
+                          <Suspense>
+                            <ChainView
+                              key={activeChain.id}
+                              chain={activeChain}
+                              activeVersion={activeChainVersion}
+                              setActiveVersion={selectVersion}
+                              project={activeProject}
+                              saveChain={saveChain}
+                            />
+                          </Suspense>
+                        )}
+                        {activeItem === CompareItem && (
+                          <Suspense>
+                            <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
+                          </Suspense>
+                        )}
+                        {activeItem === EndpointsItem && (
+                          <Suspense>
+                            <EndpointsView
+                              project={activeProject}
+                              analytics={analytics}
+                              refreshAnalytics={refreshAnalytics}
+                              onRefresh={refreshProject}
+                            />
+                          </Suspense>
+                        )}
+                        {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
+                      </Allotment.Pane>
+                      <Allotment.Pane
+                        minSize={showComments ? 300 : 0}
+                        preferredSize={300}
+                        visible={showComments}>
+                        <CommentsPane
+                          project={activeProject}
+                          onSelectComment={selectComment}
                           showComments={showComments}
                           setShowComments={setShowComments}
-                          savePrompt={() =>
-                            savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)
-                          }
                         />
-                      </Suspense>
-                    )}
-                    {activeChain && activeChainVersion && (
-                      <Suspense>
-                        <ChainView
-                          key={activeChain.id}
-                          chain={activeChain}
-                          activeVersion={activeChainVersion}
-                          setActiveVersion={selectVersion}
-                          project={activeProject}
-                          showComments={showComments}
-                          setShowComments={setShowComments}
-                          saveChain={saveChain}
-                        />
-                      </Suspense>
-                    )}
-                    {activeItem === CompareItem && (
-                      <Suspense>
-                        <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
-                      </Suspense>
-                    )}
-                    {activeItem === EndpointsItem && (
-                      <Suspense>
-                        <EndpointsView
-                          project={activeProject}
-                          analytics={analytics}
-                          refreshAnalytics={refreshAnalytics}
-                          onRefresh={refreshProject}
-                        />
-                      </Suspense>
-                    )}
-                    {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
+                      </Allotment.Pane>
+                    </Allotment>
                   </div>
                 </div>
               </main>

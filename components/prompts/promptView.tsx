@@ -33,25 +33,21 @@ export default function PromptView({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
-  showComments,
-  setShowComments,
   savePrompt,
+  activeRunID,
 }: {
   prompt: ActivePrompt
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  showComments: boolean
-  setShowComments: (show: boolean) => void
   savePrompt: () => Promise<number>
+  activeRunID?: number
 }) {
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
-
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, version => Promise.resolve(setActiveVersion(version)))
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
   const runPrompt = (inputs: PromptInputs[]) => {
@@ -89,11 +85,7 @@ export default function PromptView({
   const minHeight = promptHeight + 2 * 16
   return (
     <Allotment>
-      <Allotment.Pane
-        key={showComments.toString()}
-        className='bg-gray-25'
-        minSize={minWidth}
-        preferredSize={showComments ? '40%' : '50%'}>
+      <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
         <Allotment vertical>
           <Allotment.Pane minSize={minTopPaneHeight}>
             {activeTab === 'Prompt versions' ? (
@@ -152,14 +144,6 @@ export default function PromptView({
             isRunning={isRunning}
           />
         </div>
-      </Allotment.Pane>
-      <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
-        <CommentsPane
-          activeItem={prompt}
-          onSelectComment={selectComment}
-          showComments={showComments}
-          setShowComments={setShowComments}
-        />
       </Allotment.Pane>
     </Allotment>
   )
