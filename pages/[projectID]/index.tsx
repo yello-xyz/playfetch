@@ -2,7 +2,16 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics, IsPromptVersion } from '@/types'
+import {
+  User,
+  ActiveProject,
+  AvailableProvider,
+  Workspace,
+  PromptVersion,
+  ChainVersion,
+  Analytics,
+  IsPromptVersion,
+} from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -169,13 +178,17 @@ export default function Home({
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, async version => {
-    if (IsPromptVersion(version) && (version.parentID !== activePrompt?.id)) {
-      return selectPrompt(version.parentID, version.id)
-    } else if (!IsPromptVersion(version) && (version.parentID !== activeChain?.id)) {
-      return selectChain(version.parentID, version.id)
-    } else {
-      return setActiveVersion(version)
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, async (parentID, versionID) => {
+    const prompt = activeProject.prompts.find(prompt => prompt.id === parentID)
+    const chain = activeProject.chains.find(chain => chain.id === parentID)
+    if (prompt && prompt.id === activePrompt?.id) {
+      return selectVersion(activePrompt.versions.find(version => version.id === versionID)!)
+    } else if (prompt) {
+      return selectPrompt(prompt.id, versionID)
+    } else if (chain && chain.id === activeChain?.id) {
+      return selectVersion(activeChain.versions.find(version => version.id === versionID)!)
+    } else if (chain) {
+      return selectChain(chain.id, versionID)
     }
   })
 
@@ -253,10 +266,7 @@ export default function Home({
                         )}
                         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
                       </Allotment.Pane>
-                      <Allotment.Pane
-                        minSize={showComments ? 300 : 0}
-                        preferredSize={300}
-                        visible={showComments}>
+                      <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>
                         <CommentsPane
                           project={activeProject}
                           activeItem={activePrompt ?? activeChain}

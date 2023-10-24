@@ -32,7 +32,7 @@ export default function CommentsPane({
   activeItem?: ActivePrompt | ActiveChain
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: PromptVersion | ChainVersion, runID?: number) => void
+  onSelectComment: (parentID: number, versionID: number, runID?: number) => void
 }) {
   const users = project.users
   const labelColors = AvailableLabelColorsForItem(project)
@@ -59,7 +59,7 @@ export default function CommentsPane({
   ) : null
 }
 
-export function CommentCell<Version extends PromptVersion | ChainVersion>({
+export function CommentCell({
   comment,
   user,
   labelColors = {},
@@ -69,8 +69,8 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
   comment: Comment
   user?: User
   labelColors?: Record<string, string>
-  versions?: Version[]
-  onSelect?: (version: Version, runID?: number) => void
+  versions?: (PromptVersion | ChainVersion)[]
+  onSelect: (parentID: number, versionID: number, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 
@@ -79,12 +79,12 @@ export function CommentCell<Version extends PromptVersion | ChainVersion>({
   const versionIndex =
     versions.filter(v => v.parentID === version?.parentID).findIndex(v => v.id === comment.versionID) + 1
 
-  const selectVersion = onSelect && version ? () => onSelect(version, comment.runID) : undefined
+  const selectComment = () => onSelect(comment.parentID, comment.versionID, comment.runID)
   const availableProviders = useAvailableProviders()
   const userName = user ? user.fullName : 'Unknown user'
 
   return (
-    <div className={selectVersion ? 'cursor-pointer' : ''} onClick={selectVersion}>
+    <div className='cursor-pointer' onClick={selectComment}>
       {comment.action ? (
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
           {user && <UserAvatar user={user} size='sm' />}

@@ -3,15 +3,15 @@ import { useState } from 'react'
 
 export default function useCommentSelection(
   activeVersion: PromptVersion | ChainVersion | undefined,
-  setActiveVersion: (version: PromptVersion | ChainVersion) => Promise<void>,
+  selectVersion: (parentID: number, versionID: number) => Promise<void>,
   onSelectRun?: () => void
 ) {
   const [activeRunID, setActiveRunID] = useState<number>()
 
-  const selectComment = (version: PromptVersion | ChainVersion, runID?: number) => {
-    if (version.id !== activeVersion?.id) {
+  const selectComment = (parentID: number, versionID: number, runID?: number) => {
+    if (versionID !== activeVersion?.id) {
       setActiveRunID(undefined)
-      setActiveVersion(version).then(() =>
+      selectVersion(parentID, versionID).then(() =>
         setTimeout(() => {
           onSelectRun?.()
           setActiveRunID(runID)

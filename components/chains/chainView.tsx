@@ -14,8 +14,6 @@ import {
 } from './chainNode'
 import { Allotment } from 'allotment'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
-import CommentsPane from '../commentsPane'
-import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import VersionTimeline from '../versions/versionTimeline'
 import { SingleTabHeader } from '../tabSelector'
 import IconButton from '../iconButton'
