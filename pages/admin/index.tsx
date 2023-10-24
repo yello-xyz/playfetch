@@ -13,6 +13,7 @@ import { getMetricsForProject, getRecentProjects } from '@/src/server/datastore/
 import RecentProjects from '@/components/admin/recentProjects'
 
 import dynamic from 'next/dynamic'
+import { getMetricsForWorkspace } from '@/src/server/datastore/workspaces'
 const ActiveUserMetrics = dynamic(() => import('@/components/admin/activeUserMetrics'))
 const RecentProjectMetrics = dynamic(() => import('@/components/admin/recentProjectMetrics'))
 const WorkspaceMetrics = dynamic(() => import('@/components/admin/workspaceMetrics'))
@@ -32,7 +33,7 @@ const activeItemIsProject = (item: ActiveItem): item is RecentProject =>
   typeof item === 'object' && 'workspaceName' in item
 
 export const getServerSideProps = withAdminSession(async ({ query }) => {
-  const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(query)
+  const { w: waitlist, p: projects, i: itemID, s: isWorkspace } = ParseNumberQuery(query)
 
   const initialActiveUsers = await getActiveUsers()
   const waitlistUsers = await getUsersWithoutAccess()
@@ -41,22 +42,24 @@ export const getServerSideProps = withAdminSession(async ({ query }) => {
   const activeUser = initialActiveUsers.find(user => user.id === itemID)
   const recentProject = recentProjects.find(project => project.id === itemID)
 
-  const initialActiveItem: ActiveItem = waitlist
-    ? WaitlistItem
-    : projects
-    ? RecentProjectsItem
-    : activeUser ?? recentProject ?? ActiveUsersItem
-
+  const initialWorkspaceMetrics = isWorkspace && itemID ? await getMetricsForWorkspace(itemID) : null
   const initialUserMetrics = activeUser ? await getMetricsForUser(activeUser.id) : null
   const initialProjectMetrics = recentProject
     ? await getMetricsForProject(recentProject.id, recentProject.workspaceID)
     : null
+
+  const initialActiveItem: ActiveItem = waitlist
+    ? WaitlistItem
+    : projects
+    ? RecentProjectsItem
+    : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
 
   return {
     props: {
       initialActiveItem,
       initialUserMetrics,
       initialProjectMetrics,
+      initialWorkspaceMetrics,
       initialActiveUsers,
       waitlistUsers,
       recentProjects,
@@ -68,6 +71,7 @@ export default function Admin({
   initialActiveItem,
   initialUserMetrics,
   initialProjectMetrics,
+  initialWorkspaceMetrics,
   initialActiveUsers,
   recentProjects,
   waitlistUsers,
@@ -75,6 +79,7 @@ export default function Admin({
   initialActiveItem: ActiveItem
   initialUserMetrics: UserMetrics | null
   initialProjectMetrics: ProjectMetrics | null
+  initialWorkspaceMetrics: WorkspaceMetrics | null
   initialActiveUsers: ActiveUser[]
   waitlistUsers: User[]
   recentProjects: RecentProject[]
@@ -82,12 +87,15 @@ export default function Admin({
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const [userMetrics, setUserMetrics] = useState(initialUserMetrics)
   const [projectMetrics, setProjectMetrics] = useState(initialProjectMetrics)
-  const [workspaceMetrics, setWorkspaceMetrics] = useState<WorkspaceMetrics>()
+  const [workspaceMetrics, setWorkspaceMetrics] = useState(initialWorkspaceMetrics)
   const [activeUsers, setActiveUsers] = useState(initialActiveUsers)
 
   const router = useRouter()
 
-  const selectItem = (item: typeof WaitlistItem | typeof ActiveUsersItem | typeof RecentProjectsItem | number) => {
+  const selectItem = (
+    item: typeof WaitlistItem | typeof ActiveUsersItem | typeof RecentProjectsItem | number,
+    isWorkspace = false
+  ) => {
     router.push(
       `/admin${
         item === WaitlistItem
@@ -97,7 +105,7 @@ export default function Admin({
           : item !== ActiveUsersItem
           ? `?i=${item}`
           : ''
-      }`,
+      }${isWorkspace ? '&s=1' : ''}`,
       undefined,
       {
         shallow: true,
@@ -108,8 +116,14 @@ export default function Admin({
   const fetchActiveUsersBefore = () =>
     api.getActiveUsers(Math.min(...activeUsers.map(user => user.startTimestamp))).then(setActiveUsers)
 
-  const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(router.query)
-  const currentQueryState = waitlist ? WaitlistItem : projects ? RecentProjectsItem : itemID ?? ActiveUsersItem
+  const { w: waitlist, p: projects, i: itemID, s: isWorkspace } = ParseNumberQuery(router.query)
+  const currentQueryState = waitlist
+    ? WaitlistItem
+    : projects
+    ? RecentProjectsItem
+    : isWorkspace
+    ? `${itemID}s`
+    : itemID ?? ActiveUsersItem
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     const knownUsers = [
@@ -125,13 +139,13 @@ export default function Admin({
       ...recentProjects.map(project => ({ id: project.workspaceID, name: project.workspaceName })),
     ]
 
-    const activeUser = knownUsers.find(user => user.id === itemID)
+    const activeUser = !isWorkspace ? knownUsers.find(user => user.id === itemID) : undefined
+    const workspace = isWorkspace ? knownWorkspaces.find(workspace => workspace.id === itemID) : undefined
     const recentProject = knownProjects.find(project => project.id === itemID)
-    const workspace = knownWorkspaces.find(workspace => workspace.id === itemID)
 
     setUserMetrics(null)
     setProjectMetrics(null)
-    setWorkspaceMetrics(undefined)
+    setWorkspaceMetrics(null)
 
     if (activeUser) {
       setActiveItem(activeUser)
@@ -172,7 +186,7 @@ export default function Admin({
               <RecentProjects
                 recentProjects={recentProjects}
                 onSelectProject={selectItem}
-                onSelectWorkspace={selectItem}
+                onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
               />
             )}
             {userMetrics && activeItemIsUser(activeItem) && (
@@ -182,7 +196,7 @@ export default function Admin({
                   metrics={userMetrics}
                   onDismiss={() => router.back()}
                   onSelectProject={selectItem}
-                  onSelectWorkspace={selectItem}
+                  onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
                 />
               </Suspense>
             )}

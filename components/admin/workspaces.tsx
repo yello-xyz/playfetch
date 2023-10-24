@@ -14,9 +14,9 @@ export default function Workspaces({
   onSelectWorkspace: (workspaceID: number) => void
 }) {
   return (
-    <div className={`flex flex-col items-start h-full gap-4`}>
+    <div className='flex flex-col items-start gap-4'>
       <Label>{title}</Label>
-      <div className={`bg-white items-center border-gray-200 border rounded-lg p-2`}>
+      <div className='items-center p-2 bg-white border border-gray-200 rounded-lg'>
         {workspaces.map(workspace => (
           <WorkspaceRow key={workspace.id} workspace={workspace} onSelectWorkspace={onSelectWorkspace} />
         ))}

@@ -29,7 +29,7 @@ export default function WorkspaceMetrics({
 
   return (
     <>
-      <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
+      <div className='flex flex-col items-start gap-4 p-6 overflow-y-auto'>
         <Label onClick={onDismiss} className='flex items-center cursor-pointer'>
           <Icon icon={backIcon} />
           Back to Workspaces
