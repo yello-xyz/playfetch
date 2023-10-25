@@ -221,7 +221,7 @@ export default function Privacy() {
               <ListItem>
                 More information about the cookies we use and how long they remain on your device is set out in the
                 table below.
-                <Table cols='grid-cols-[repeat(4,minmax(0,1fr))]'>
+                <Table cols='grid-cols-4'>
                   <TableCell>Cookie Name</TableCell>
                   <TableCell>Type of cookie</TableCell>
                   <TableCell>When is the cookie set?</TableCell>
@@ -510,7 +510,7 @@ const ListItem = ({ title, children }: { title?: string; children: ReactNode }) 
 
 const Title = ({ children }: { children: ReactNode }) => <div className='px-2 pt-4 font-semibold'>{children}</div>
 
-const Table = ({ children, cols = 'grid-cols-[repeat(2,minmax(0,1fr))]' }: { children: ReactNode; cols?: string }) => (
+const Table = ({ children, cols = 'grid-cols-2' }: { children: ReactNode; cols?: string }) => (
   <div className={`mt-4 grid ${cols} border`}>{children}</div>
 )
 
