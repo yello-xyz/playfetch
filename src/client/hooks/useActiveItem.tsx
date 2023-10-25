@@ -19,27 +19,26 @@ const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
 export default function useActiveItem(initialActiveProject: ActiveProject, initialActiveItem: ActiveItem | null) {
   const [activeProject, setActiveProject] = useInitialState(initialActiveProject, sameIDs)
 
-  const refreshProject = () =>
-    api.getProject(activeProject.id).then(project => {
-      setActiveProject(project)
+  const refreshProject = () => api.getProject(activeProject.id).then(project => {
+    setActiveProject(project)
+    setActiveItem(activeItem => {
       if (activeItem && ActiveItemIsPrompt(activeItem)) {
-        setActiveItem(
-          BuildActivePrompt(project)({
-            prompt: activeItem,
-            versions: activeItem.versions,
-            inputValues: activeItem.inputValues,
-          })
-        )
+        return BuildActivePrompt(project)({
+          prompt: activeItem,
+          versions: activeItem.versions,
+          inputValues: activeItem.inputValues,
+        })
       } else if (activeItem && ActiveItemIsChain(activeItem)) {
-        setActiveItem(
-          BuildActiveChain(project)({
-            chain: activeItem,
-            versions: activeItem.versions,
-            inputValues: activeItem.inputValues,
-          })
-        )
+        return BuildActiveChain(project)({
+          chain: activeItem,
+          versions: activeItem.versions,
+          inputValues: activeItem.inputValues,
+        })
+      } else {
+        return activeItem
       }
     })
+  })
 
   const [activeItem, setActiveItem] = useInitialState(initialActiveItem ?? undefined, sameItems)
   const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
