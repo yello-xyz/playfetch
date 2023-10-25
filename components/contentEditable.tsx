@@ -22,7 +22,7 @@ const getCharacterCount = (node: Node, sentinel?: Node): number => {
   }
 }
 
-const getCursorPosition = (node: Node): number => {
+export const GetCursorPosition = (node: Node): number => {
   const selection = node.ownerDocument?.getSelection()
   if (selection && selection.rangeCount === 1) {
     const range = selection.getRangeAt(0)
@@ -36,7 +36,7 @@ const getCursorPosition = (node: Node): number => {
   return -1
 }
 
-const setCursorPosition = (node: Node, position: number): void => {
+export const SetCursorPosition = (node: Node, position: number): void => {
   if (node.nodeType === Node.TEXT_NODE || node.childNodes.length === 0) {
     const range = document.createRange()
     range.selectNode(node)
@@ -53,7 +53,7 @@ const setCursorPosition = (node: Node, position: number): void => {
     for (let i = 0; i < children.length; i++) {
       const count = getCharacterCount(children[i])
       if (isEmptyTextNode(children[i]) ? count > position : count >= position) {
-        return setCursorPosition(children[i], position)
+        return SetCursorPosition(children[i], position)
       }
       position -= count
     }
@@ -61,13 +61,13 @@ const setCursorPosition = (node: Node, position: number): void => {
 }
 
 const withPersistedCursor = (node: Node | null, action: () => void) => {
-  const beforePosition = node ? getCursorPosition(node) : -1
+  const beforePosition = node ? GetCursorPosition(node) : -1
   action()
   if (node && beforePosition >= 0) {
     setTimeout(() => {
-      const afterPosition = getCursorPosition(node)
+      const afterPosition = GetCursorPosition(node)
       if (beforePosition >= 0 && afterPosition >= 0 && afterPosition !== beforePosition) {
-        setCursorPosition(node, beforePosition)
+        SetCursorPosition(node, beforePosition)
       }
     })
   }

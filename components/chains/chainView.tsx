@@ -68,7 +68,7 @@ export default function ChainView({
   activeRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
-  
+
   const promptCache = useChainPromptCache(project, nodes, setNodes)
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
@@ -136,7 +136,7 @@ export default function ChainView({
     setLastActiveRunID(activeRunID)
     if (!isNodeDirty) {
       updateTestMode(true)
-      setActiveNodeIndex(nodes.indexOf(OutputNode))      
+      setActiveNodeIndex(nodes.indexOf(OutputNode))
     }
   }
 

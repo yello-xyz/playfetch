@@ -156,16 +156,16 @@ export default function PromptInput({
   }
 
   const renderContentEditable = () => (
-      <ContentEditable
-        placeholder={placeholder}
-        disabled={disabled}
-        className={contentEditableClassName}
-        htmlValue={htmlValue}
-        onChange={updateHTMLValue}
-        allowedTags={['br', 'div', 'b']}
-        allowedAttributes={{ b: ['class'] }}
-        innerRef={contentEditableRef}
-      />
+    <ContentEditable
+      placeholder={placeholder}
+      disabled={disabled}
+      className={contentEditableClassName}
+      htmlValue={htmlValue}
+      onChange={updateHTMLValue}
+      allowedTags={['br', 'div', 'b']}
+      allowedAttributes={{ b: ['class'] }}
+      innerRef={contentEditableRef}
+    />
   )
 
   return preformatted ? (
