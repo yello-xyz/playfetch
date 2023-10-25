@@ -68,7 +68,7 @@ export default function ChainView({
   activeRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
-
+  
   const promptCache = useChainPromptCache(project, nodes, setNodes)
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
@@ -130,6 +130,16 @@ export default function ChainView({
       setShowVersions(false)
     }
   }
+
+  const [lastActiveRunID, setLastActiveRunID] = useState<number>()
+  if (activeRunID !== lastActiveRunID) {
+    setLastActiveRunID(activeRunID)
+    if (!isNodeDirty) {
+      updateTestMode(true)
+      setActiveNodeIndex(nodes.indexOf(OutputNode))      
+    }
+  }
+
   const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
   const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
 
