@@ -9,7 +9,6 @@ export default function ContentEditable({
   onFocus,
   onBlur,
   onKeyDown,
-  onLoadedRef,
   innerRef,
   allowedTags = [],
   allowedAttributes = {},
@@ -22,7 +21,6 @@ export default function ContentEditable({
   onFocus?: () => void
   onBlur?: () => void
   onKeyDown?: (event: KeyboardEvent) => void
-  onLoadedRef?: (node: ReactContentEditable | HTMLDivElement | null) => void
   innerRef?: RefObject<HTMLElement>
   allowedTags?: string[]
   allowedAttributes?: Record<string, string[]>
@@ -64,7 +62,6 @@ export default function ContentEditable({
       html={rawHTML}
       onChange={event => updateRawHTML(event.currentTarget.innerHTML)}
       innerRef={innerRef ?? ownRef}
-      ref={onLoadedRef}
     />
   )
 }

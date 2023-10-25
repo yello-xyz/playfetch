@@ -1,7 +1,5 @@
-import { KeyboardEvent, Suspense, useState } from 'react'
-
-import dynamic from 'next/dynamic'
-const ContentEditable = dynamic(() => import('./contentEditable'))
+import { KeyboardEvent, useState } from 'react'
+import ContentEditable from './contentEditable'
 
 const escapeSpecialCharacters = (text: string) =>
   text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -73,16 +71,14 @@ export default function RichTextInput({
   }
 
   return (
-    <Suspense>
-      <ContentEditable
-        className={className}
-        htmlValue={htmlValue}
-        onChange={updateHTMLValue}
-        allowedTags={['br', 'div']}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        onKeyDown={onKeyDown}
-      />
-    </Suspense>
+    <ContentEditable
+      className={className}
+      htmlValue={htmlValue}
+      onChange={updateHTMLValue}
+      allowedTags={['br', 'div']}
+      onBlur={onBlur}
+      onFocus={onFocus}
+      onKeyDown={onKeyDown}
+    />
   )
 }

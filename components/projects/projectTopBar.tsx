@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Chain, Workspace } from '@/types'
+import { ActiveProject, Workspace } from '@/types'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { Suspense, useState } from 'react'
@@ -15,7 +15,6 @@ const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 export default function ProjectTopBar({
   workspaces,
   activeProject,
-  activeItem,
   onRefreshProject,
   onNavigateBack,
   showComments,
@@ -23,7 +22,6 @@ export default function ProjectTopBar({
 }: {
   workspaces: Workspace[]
   activeProject: ActiveProject
-  activeItem?: ActivePrompt | Chain
   onRefreshProject: () => void
   onNavigateBack: () => void
   showComments: boolean

@@ -194,7 +194,6 @@ export default function Home({
                 <ProjectTopBar
                   workspaces={workspaces}
                   activeProject={activeProject}
-                  activeItem={activePrompt ?? activeChain}
                   onRefreshProject={refreshProject}
                   onNavigateBack={navigateBack}
                   showComments={showComments}
