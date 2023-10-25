@@ -41,7 +41,7 @@ const setCursorPosition = (node: Node, position: number): void => {
     const range = document.createRange()
     range.selectNode(node)
     range.setStart(node, 0)
-    range.setEnd(node, position)
+    range.setEnd(node, Math.min(position, node.textContent?.length ?? 0))
     range.collapse(false)
     const selection = node.ownerDocument?.getSelection()
     if (selection) {
