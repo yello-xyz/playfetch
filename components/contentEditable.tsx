@@ -2,11 +2,13 @@ import { KeyboardEvent, RefObject, useEffect, useRef, useState } from 'react'
 import ReactContentEditable from 'react-contenteditable'
 import sanitizeHtml from 'sanitize-html'
 
+const isEmptyTextNode = (node: Node) => node.textContent?.length === 0
+
 const getCharacterCount = (node: Node, sentinel?: Node): number => {
   if (node === sentinel) {
     return 0
   } else if (node.nodeType === Node.TEXT_NODE || node.childNodes.length === 0) {
-    return node.textContent?.length ?? 0
+    return isEmptyTextNode(node) ? 1 : node.textContent?.length ?? 0
   } else {
     const children = node.childNodes
     let count = 0
@@ -50,8 +52,8 @@ const setCursorPosition = (node: Node, position: number): void => {
     const children = node.childNodes
     for (let i = 0; i < children.length; i++) {
       const count = getCharacterCount(children[i])
-      if (count >= position) {
-        return setCursorPosition(children[i], position)        
+      if (isEmptyTextNode(children[i]) ? count > position : count >= position) {
+        return setCursorPosition(children[i], position)
       }
       position -= count
     }
@@ -67,7 +69,7 @@ const withPersistedCursor = (node: Node | null, action: () => void) => {
       if (beforePosition >= 0 && afterPosition >= 0 && afterPosition !== beforePosition) {
         setCursorPosition(node, beforePosition)
       }
-    })  
+    })
   }
 }
 
