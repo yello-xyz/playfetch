@@ -119,7 +119,7 @@ export function CommentCell({
                 <span className='font-medium'>
                   {IsPromptVersion(version)
                     ? `${versionIndex} › ${LabelForModel(version.config.model, availableProviders)}`
-                    : `version ${versionIndex}`}
+                    : `Version ${versionIndex}`}
                 </span>
               )}
               {!version && parentName && <span className='font-medium'>{Capitalize(parentName)}</span>}
