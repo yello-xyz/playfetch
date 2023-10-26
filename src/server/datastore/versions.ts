@@ -1,4 +1,4 @@
-import { ChainItemWithInputs, Comment, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
+import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
 import {
   Entity,
   allocateID,
@@ -20,7 +20,7 @@ import {
   updatePromptOnDeletedVersion,
 } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
-import { saveComment, toComment } from './comments'
+import { saveComment } from './comments'
 import { DefaultConfig } from '@/src/common/defaultConfig'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
@@ -37,20 +37,24 @@ export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   for (const versionData of allVersions) {
-    await datastore.save(
-      toVersionData(
-        versionData.userID,
-        versionData.parentID,
-        versionData.prompts ? JSON.parse(versionData.prompts) : null,
-        versionData.config ? JSON.parse(versionData.config) : null,
-        versionData.items ? JSON.parse(versionData.items) : null,
-        JSON.parse(versionData.labels),
-        versionData.createdAt,
-        versionData.didRun,
-        versionData.previousVersionID,
-        getID(versionData)
+    if (versionData.items) {
+      const items = JSON.parse(versionData.items) as Omit<ChainItemWithInputs, 'branch'>[]
+      const migratedItems = items.map(item => ({ ...item, branch: 0 } as ChainItemWithInputs))
+      await datastore.save(
+        toVersionData(
+          versionData.userID,
+          versionData.parentID,
+          versionData.prompts ? JSON.parse(versionData.prompts) : null,
+          versionData.config ? JSON.parse(versionData.config) : null,
+          migratedItems,
+          JSON.parse(versionData.labels),
+          versionData.createdAt,
+          versionData.didRun,
+          versionData.previousVersionID,
+          getID(versionData)
+        )
       )
-    )
+    }
   }
 }
 
