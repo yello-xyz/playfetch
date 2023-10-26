@@ -107,6 +107,7 @@ export function ChainNodeBox({
           onInsertPrompt={insertPrompt}
           onInsertNewPrompt={insertNewPrompt}
           onInsertCodeBlock={insertCodeBlock}
+          onInsertBranch={insertBranch}
           onInsertQuery={insertQuery}
         />
       )}

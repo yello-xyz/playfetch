@@ -64,7 +64,7 @@ const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margi
   <div className={`${margin} ${color} z-10 w-2.5 h-2.5 rounded-full min-h-[10px]`} />
 )
 
-const DownStroke = ({ height = 'h-full', color = 'border-gray-400' }: { height?: string; color?: string }) => (
+const DownStroke = ({ height = '', color = 'border-gray-400' }: { height?: string; color?: string }) => (
   <div className={`${height} w-px border-l ${color}`} />
 )
 
@@ -129,7 +129,8 @@ const AddButton = ({
     <>
       <DownArrow height='min-h-[38px]' />
       <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
-      <div ref={buttonRef} className='relative flex border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+      <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+      <div className='flex'>
         <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
         <DownStroke color='border-blue-100' />
         {onInsertQuery ? (
@@ -155,7 +156,7 @@ const AddButton = ({
         )}
       </div>
       {onInsertQuery && (
-        <div className='relative flex border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+        <div className='flex border-t border-blue-100'>
           <AddCodeAndBranchButtons
             buttonClass={buttonClass}
             onInsertCodeBlock={insertCode}
@@ -163,6 +164,7 @@ const AddButton = ({
           />
         </div>
       )}
+      </div>
       <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
       <DownStroke height='min-h-[32px]' />
     </>
