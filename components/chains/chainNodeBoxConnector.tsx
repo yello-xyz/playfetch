@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
+import branchIcon from '@/public/branch.svg'
 import queryIcon from '@/public/query.svg'
 import closeIcon from '@/public/closeWhite.svg'
 import Icon from '../icon'
@@ -20,6 +21,7 @@ export default function ChainNodeBoxConnector({
   onInsertNewPrompt,
   onInsertQuery,
   onInsertCodeBlock,
+  onInsertBranch,
   prompts,
 }: {
   isDisabled: boolean
@@ -30,6 +32,7 @@ export default function ChainNodeBoxConnector({
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
   onInsertCodeBlock: () => void
+  onInsertBranch: () => void
   prompts: Prompt[]
 }) {
   return (
@@ -48,6 +51,7 @@ export default function ChainNodeBoxConnector({
           onInsertNewPrompt={onInsertNewPrompt}
           onInsertQuery={onInsertQuery}
           onInsertCodeBlock={onInsertCodeBlock}
+          onInsertBranch={onInsertBranch}
         />
       )}
       <DownArrow height='min-h-[18px]' />
@@ -80,6 +84,7 @@ const AddButton = ({
   onInsertNewPrompt,
   onInsertQuery,
   onInsertCodeBlock,
+  onInsertBranch,
 }: {
   prompts: Prompt[]
   isActive: boolean
@@ -89,6 +94,7 @@ const AddButton = ({
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
   onInsertCodeBlock: () => void
+  onInsertBranch: () => void
 }) => {
   const [isHovered, setHovered] = useState(false)
   const hoverClass = isHovered ? 'bg-blue-200' : 'border border-gray-400'
@@ -116,7 +122,7 @@ const AddButton = ({
     )
   }
 
-  const buttonClass = onInsertQuery ? undefined : 'w-1/2'
+  const buttonClass = onInsertQuery ? 'w-1/2' : undefined
   const insertCode = toggleActive(onInsertCodeBlock)
 
   return isActive ? (
@@ -125,14 +131,21 @@ const AddButton = ({
       <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
       <div ref={buttonRef} className='relative flex border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
         <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
-        {onInsertQuery && (
-          <>
-            <DownStroke color='border-blue-100' />
-            <AddStepButton label='Add query' icon={queryIcon} onClick={toggleActive(onInsertQuery)} />
-          </>
-        )}
         <DownStroke color='border-blue-100' />
-        <AddStepButton label='Add code block' className={buttonClass} icon={codeIcon} onClick={insertCode} />
+        {onInsertQuery ? (
+          <AddStepButton
+            label='Add query'
+            className={buttonClass}
+            icon={queryIcon}
+            onClick={toggleActive(onInsertQuery)}
+          />
+        ) : (
+          <AddCodeAndBranchButtons
+            buttonClass={buttonClass}
+            onInsertCodeBlock={insertCode}
+            onInsertBranch={onInsertBranch}
+          />
+        )}
         {canDismiss && (
           <div
             className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
@@ -141,6 +154,15 @@ const AddButton = ({
           </div>
         )}
       </div>
+      {onInsertQuery && (
+        <div className='relative flex border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+          <AddCodeAndBranchButtons
+            buttonClass={buttonClass}
+            onInsertCodeBlock={insertCode}
+            onInsertBranch={onInsertBranch}
+          />
+        </div>
+      )}
       <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
       <DownStroke height='min-h-[32px]' />
     </>
@@ -150,6 +172,22 @@ const AddButton = ({
     </div>
   )
 }
+
+const AddCodeAndBranchButtons = ({
+  buttonClass,
+  onInsertCodeBlock,
+  onInsertBranch,
+}: {
+  buttonClass?: string
+  onInsertCodeBlock: () => void
+  onInsertBranch: () => void
+}) => (
+  <>
+    <AddStepButton label='Add code block' className={buttonClass} icon={codeIcon} onClick={onInsertCodeBlock} />
+    <DownStroke color='border-blue-100' />
+    <AddStepButton label='Add branch' className={buttonClass} icon={branchIcon} onClick={onInsertBranch} />
+  </>
+)
 
 const AddStepButton = ({
   label,
