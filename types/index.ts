@@ -192,28 +192,30 @@ export type Run = CommonRun & {
   labels: string[]
 }
 
-type PendingVersionRunConfig = {
-  versionID?: number
+type CommonConfigAttributes = {
   output?: string
+  branch: number
+}
+
+type PendingVersionRunConfig = CommonConfigAttributes & {
+  versionID?: number
   includeContext?: boolean
 }
 
 export type RunConfig = PendingVersionRunConfig & { versionID: number }
 
-export type CodeConfig = {
+export type CodeConfig = CommonConfigAttributes & {
   code: string
   name?: string
   description?: string
-  output?: string
 }
 
-export type QueryConfig = {
+export type QueryConfig = CommonConfigAttributes & {
   provider: QueryProvider
   model: EmbeddingModel
   indexName: string
   query: string
   topK: number
-  output?: string
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }

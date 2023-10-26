@@ -37,7 +37,7 @@ export function ChainNodeBox({
   prompts: Prompt[]
   addPrompt: () => Promise<{ promptID: number; versionID: number }>
   promptCache: ChainPromptCache
-  defaultQueryConfig?: QueryConfig
+  defaultQueryConfig?: Omit<QueryConfig, 'branch'>
 }) {
   const chainNode = nodes[index]
   const isSelected = index === activeIndex
@@ -64,12 +64,13 @@ export function ChainNodeBox({
     insertItem({
       promptID,
       versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
+      branch: 0,
     })
 
   const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
 
-  const insertCodeBlock = () => insertItem({ code: '' })
-  const insertQuery = defaultQueryConfig ? () => insertItem(defaultQueryConfig) : undefined
+  const insertCodeBlock = () => insertItem({ code: '', branch: 0 })
+  const insertQuery = defaultQueryConfig ? () => insertItem({ ...defaultQueryConfig, branch: 0 }) : undefined
 
   const duplicateItem = () => {
     insertItem({ ...(chainNode as ChainItem), output: undefined })

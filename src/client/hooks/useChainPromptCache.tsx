@@ -4,8 +4,8 @@ import { ChainNode, IsPromptChainItem } from '../../../components/chains/chainNo
 import useActiveItemCache from './useActiveItemCache'
 
 export type ChainPromptCache = {
-  promptForItem: (item: PromptChainItem) => ActivePrompt | undefined
-  versionForItem: (item: PromptChainItem) => PromptVersion | undefined
+  promptForItem: (item: Omit<PromptChainItem, 'branch'>) => ActivePrompt | undefined
+  versionForItem: (item: Omit<PromptChainItem, 'branch'>) => PromptVersion | undefined
   refreshPrompt: (promptID: number) => void
 }
 
@@ -39,7 +39,8 @@ export default function useChainPromptCache(
   const promptIDs = nodes.filter(IsPromptChainItem).map(item => item.promptID)
 
   const promptCache = useActiveItemCache(project, promptIDs, item => onRefreshPrompt(item as ActivePrompt))
-  const promptForItem = (item: PromptChainItem) => promptCache.itemForID(item.promptID) as ActivePrompt | undefined
+  const promptForItem = (item: Omit<PromptChainItem, 'branch'>) =>
+    promptCache.itemForID(item.promptID) as ActivePrompt | undefined
 
   const chainPromptCache: ChainPromptCache = {
     refreshPrompt: promptCache.refreshItem,
