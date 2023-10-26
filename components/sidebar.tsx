@@ -93,7 +93,7 @@ function LinkWrapper({
   prefetch: boolean
 }) {
   return link ? (
-    <Link href={link} target={target} prefetch={prefetch}>
+    <Link href={link} target={target} prefetch={prefetch ? undefined : false}>
       {children}
     </Link>
   ) : (
