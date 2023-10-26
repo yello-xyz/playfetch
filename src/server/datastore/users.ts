@@ -66,6 +66,7 @@ export const toUser = (data: any): User => ({
   fullName: data.fullName,
   imageURL: data.imageURL,
   isAdmin: data.isAdmin,
+  lastLoginAt: getTimestamp(data, 'lastLoginAt') ?? null,
 })
 
 export const getUserForID = (userID: number) => getKeyedEntity(Entity.USER, userID).then(toUser)
@@ -174,7 +175,7 @@ const toActiveUser = (
       userComments[0]?.timestamp ?? 0,
       userEndpoints[0]?.timestamp ?? 0,
     ]
-  )
+  ) || user.lastLoginAt
   const startTimestamp = Math.min(
     ...[
       userVersions.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
