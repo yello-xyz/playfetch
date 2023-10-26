@@ -4,7 +4,7 @@ export type User = {
   fullName: string
   imageURL: string
   isAdmin: boolean
-  lastLoginAt?: number
+  lastLoginAt: number | null
 }
 
 type PendingAttributes = {
