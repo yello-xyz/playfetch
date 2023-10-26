@@ -3,6 +3,7 @@ import {
   ChainNode,
   InputNode,
   IsBranchChainItem,
+  IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
@@ -96,6 +97,8 @@ export default function ChainNodeBoxHeader({
             {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
             {IsBranchChainItem(chainNode) && 'Branch'}
             {IsQueryChainItem(chainNode) && 'Query'}
+            {/* // TODO remove this before merging into dev */}
+            {IsChainItem(chainNode) && ` [${chainNode.branch}]`}
           </HeaderItem>
         )}
         {!canIncludeContext && (
