@@ -168,14 +168,15 @@ const toActiveUser = (
   const userEndpoints = recentEndpoints.filter(endpoint => endpoint.userID === user.id)
   const endpointCount = userEndpoints.length
 
+  const fallback = user.lastLoginAt ?? 0
   const lastActive = Math.max(
     ...[
-      userVersions[0]?.timestamp ?? 0,
-      userRuns[0]?.timestamp ?? 0,
-      userComments[0]?.timestamp ?? 0,
-      userEndpoints[0]?.timestamp ?? 0,
+      userVersions[0]?.timestamp ?? fallback,
+      userRuns[0]?.timestamp ?? fallback,
+      userComments[0]?.timestamp ?? fallback,
+      userEndpoints[0]?.timestamp ?? fallback,
     ]
-  ) || user.lastLoginAt
+  )
   const startTimestamp = Math.min(
     ...[
       userVersions.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,

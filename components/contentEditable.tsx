@@ -127,7 +127,7 @@ export default function ContentEditable({
     if (innerElement && onKeyDown) {
       innerElement.onkeydown = onKeyDown as any
     }
-  }, [innerRef, onFocus, onBlur, onKeyDown])
+  }, [ref, onFocus, onBlur, onKeyDown])
 
   return (
     <ReactContentEditable
