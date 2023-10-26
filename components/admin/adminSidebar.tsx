@@ -24,12 +24,36 @@ export default function AdminSidebar({
           <SidebarButton title='Active Projects' icon={fileIcon} onClick={onSelectRecentProjects} />
         </SidebarSection>
         <SidebarSection title='Google Analytics'>
-          <SidebarButton title='Dashboards' icon={linkIcon} link={AdminRoute.AnalyticsDashboard} target='_blank' />
-          <SidebarButton title='Reports' icon={linkIcon} link={AdminRoute.AnalyticsReports} target='_blank' />
-          <SidebarButton title='Search Console' icon={linkIcon} link={AdminRoute.SearchConsole} target='_blank' />
+          <SidebarButton
+            title='Dashboards'
+            icon={linkIcon}
+            link={AdminRoute.AnalyticsDashboard}
+            target='_blank'
+            prefetch={false}
+          />
+          <SidebarButton
+            title='Reports'
+            icon={linkIcon}
+            link={AdminRoute.AnalyticsReports}
+            target='_blank'
+            prefetch={false}
+          />
+          <SidebarButton
+            title='Search Console'
+            icon={linkIcon}
+            link={AdminRoute.SearchConsole}
+            target='_blank'
+            prefetch={false}
+          />
         </SidebarSection>
         <SidebarSection title='Debug'>
-          <SidebarButton title='Server Logs' icon={linkIcon} link={AdminRoute.ServerLogs} target='_blank' />
+          <SidebarButton
+            title='Server Logs'
+            icon={linkIcon}
+            link={AdminRoute.ServerLogs}
+            target='_blank'
+            prefetch={false}
+          />
         </SidebarSection>
       </div>
     </>
