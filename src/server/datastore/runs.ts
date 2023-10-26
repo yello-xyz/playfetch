@@ -4,38 +4,26 @@ import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 
 export async function migrateRuns(postMerge: boolean) {
-  if (!postMerge) {
+  if (postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
-  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  const versionMap = new Map<number, number>()
-  for (const versionData of allVersions) {
-    versionMap.set(getID(versionData), versionData.userID)
-  }
   for (const runData of allRuns) {
-    if (!runData.userID) {
-      const userID = versionMap.get(runData.versionID)
-      if (userID) {
-        await datastore.save(
-          toRunData(
-            userID,
-            runData.parentID,
-            runData.versionID,
-            JSON.parse(runData.inputs),
-            runData.output,
-            runData.createdAt,
-            runData.cost,
-            runData.duration,
-            JSON.parse(runData.labels),
-            getID(runData)
-          )
-        )
-      } else {
-        console.log(`Unknown version for run ID ${getID(runData)}`)
-      }
-    }
+    await datastore.save(
+      toRunData(
+        runData.userID,
+        runData.parentID,
+        runData.versionID,
+        JSON.parse(runData.inputs),
+        runData.output,
+        runData.createdAt,
+        runData.cost,
+        runData.duration,
+        JSON.parse(runData.labels),
+        getID(runData)
+      )
+    )
   }
 }
 
