@@ -81,7 +81,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         fullName: token.fullName as string,
         imageURL: token.imageURL as string,
         isAdmin: token.isAdmin as boolean,
-        lastLoginAt: token.lastLoginAt as number | undefined,
+        lastLoginAt: token.lastLoginAt as number | null,
       }
       return session
     },
