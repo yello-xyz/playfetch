@@ -1,20 +1,51 @@
 import PromptInput from '../prompts/promptInput'
 import { SingleTabHeader } from '../tabSelector'
 import branchIcon from '@/public/branch.svg'
-import { BranchChainItem } from '@/types'
+import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
 
+const placeholderSuffix = (branchIndex: number) => {
+  switch (branchIndex) {
+    case 0:
+      return ' (e.g. left)'
+    case 1:
+      return ' (e.g. right)'
+    default:
+      return ''
+  }
+}
+
 export default function BranchNodeEditor({
-  item,
-  updateItem,
+  index,
+  items,
+  updateItems,
 }: {
-  item: BranchChainItem
-  updateItem: (item: BranchChainItem) => void
+  index: number
+  items: ChainItem[]
+  updateItems: (items: ChainItem[]) => void
 }) {
-  const updateCode = (code: string) => updateItem({ ...item, code })
-  const updateBranches = (branches: string[]) => updateItem({ ...item, branches })
+  const item = items[index] as BranchChainItem
+
+  const updateSingleItem = (item: BranchChainItem) =>
+    updateItems([...items.slice(0, index), item, ...items.slice(index + 1)])
+  const updateCode = (code: string) => updateSingleItem({ ...item, code })
+
+  const updateBranches = (branches: string[]) => ({ ...item, branches })
+  const updateBranchName = (branchIndex: number, name: string) =>
+    updateSingleItem(
+      updateBranches([...item.branches.slice(0, branchIndex), name, ...item.branches.slice(branchIndex + 1)])
+    )
+
+  const addBranch = () => {
+    // TODO shift branch number of other items and call updateItems instead
+    updateSingleItem(updateBranches([...item.branches, '']))
+  }
+  const deleteBranch = (branchIndex: number) => {
+    // TODO delete subtree and call updateItems instead
+    updateSingleItem(updateBranches([...item.branches.slice(0, branchIndex), ...item.branches.slice(branchIndex + 1)]))
+  }
 
   const showDeleteButtons = item.branches.length > 2
   const gridConfig = showDeleteButtons
@@ -29,26 +60,22 @@ export default function BranchNodeEditor({
           <span className='font-medium'>Branches</span>
           <div
             className={`${gridConfig} w-full items-center gap-2 p-4 py-4 bg-white border-gray-200 border rounded-lg`}>
-            {item.branches.map((branch, index, branches) => (
-              <Fragment key={index}>
-                <span className='pl-2 font-medium'>Branch {index + 1}</span>
+            {item.branches.map((branch, branchIndex) => (
+              <Fragment key={branchIndex}>
+                <span className='pl-2 font-medium'>Branch {branchIndex + 1}</span>
                 <TextInput
-                  placeholder={`Name of branch ${index + 1}${
-                    index === 0 ? ' (e.g. left)' : index === 1 ? ' (e.g. right)' : ''
-                  }`}
+                  placeholder={`Name of branch ${branchIndex + 1}${placeholderSuffix(branchIndex)}`}
                   value={branch}
-                  setValue={value => updateBranches([...branches.slice(0, index), value, ...branches.slice(index + 1)])}
+                  setValue={value => updateBranchName(branchIndex, value)}
                 />
                 {showDeleteButtons && (
-                  <Button
-                    type='destructive'
-                    onClick={() => updateBranches([...branches.slice(0, index), ...branches.slice(index + 1)])}>
+                  <Button type='destructive' onClick={() => deleteBranch(branchIndex)}>
                     Delete
                   </Button>
                 )}
               </Fragment>
             ))}
-            <Button type='outline' onClick={() => updateBranches([...item.branches, ''])}>
+            <Button type='outline' onClick={addBranch}>
               Add Branch
             </Button>
           </div>

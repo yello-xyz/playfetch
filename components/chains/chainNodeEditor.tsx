@@ -35,11 +35,12 @@ export default function ChainNodeEditor({
     ...updatedItems.slice(activeIndex + 1),
   ]
 
-  const updateActiveItem = (item: ChainItem) => {
-    const updatedItems = itemsWithUpdate(item)
+  const updateItems = (updatedItems: ChainItem[]) => {
     setUpdatedItems(updatedItems)
     updateItemsDirty(GetChainItemsSaveKey(items) !== GetChainItemsSaveKey(updatedItems))
   }
+
+  const updateActiveItem = (item: ChainItem) => updateItems(itemsWithUpdate(item))
 
   const [areItemsDirty, setItemsDirty] = useState(false)
   const [isPromptDirty, setPromptDirty] = useState(false)
@@ -103,9 +104,8 @@ export default function ChainNodeEditor({
         {IsCodeChainItem(activeItem) && (
           <CodeNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
-        {/* // TODO updating a branch node may require updating or deleting other nodes as well */}
         {IsBranchChainItem(activeItem) && (
-          <BranchNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <BranchNodeEditor key={activeIndex} index={activeIndex} items={updatedItems} updateItems={updateItems} />
         )}
         {IsQueryChainItem(activeItem) && (
           <QueryNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
