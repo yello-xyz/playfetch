@@ -1,5 +1,9 @@
 ## PlayFetch Changelog
 
+### v0.13 - 2023-10-26
+- Improved admin dashboards
+- Send comment notification emails
+
 ### v0.12 - 2023-10-20
 - Admin dashboards for active users and projects
 - Project and workspace invites with notifications
