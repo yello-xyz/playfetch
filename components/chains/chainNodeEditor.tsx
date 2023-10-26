@@ -1,6 +1,6 @@
 import { ChainItem, PromptVersion } from '@/types'
 import PromptChainNodeEditor from './promptChainNodeEditor'
-import { IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
+import { IsBranchChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import CodeChainNodeEditor from './codeChainNodeEditor'
 import Button, { PendingButton } from '../button'
 import { useState } from 'react'
@@ -10,6 +10,7 @@ import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import QueryChainNodeEditor from './queryChainNodeEditor'
+import BranchChainNodeEditor from './branchChainNodeEditor'
 
 export default function ChainNodeEditor({
   items,
@@ -102,7 +103,10 @@ export default function ChainNodeEditor({
         {IsCodeChainItem(activeItem) && (
           <CodeChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
-        {/* // TODO add branch node editor */}
+        {/* // TODO updating a branch node may require updating or deleting other nodes as well */}
+        {IsBranchChainItem(activeItem) && (
+          <BranchChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+        )}
         {IsQueryChainItem(activeItem) && (
           <QueryChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}

@@ -87,7 +87,7 @@ export function ChainNodeBox({
   const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
 
   const insertCodeBlock = () => insertItem({ code: '' })
-  const insertBranch = () => insertItem({ code: 'return "left"', branches: ['left', 'right'] })
+  const insertBranch = () => insertItem({ code: '', branches: ['left', 'right'] })
   const insertQuery = defaultQueryConfig ? () => insertItem({ ...defaultQueryConfig }) : undefined
 
   const duplicateItem = () => {
