@@ -24,17 +24,21 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
       setActiveProject(project)
       setActiveItem(activeItem => {
         if (activeItem && ActiveItemIsPrompt(activeItem)) {
-          return BuildActivePrompt(project)({
+          const updatedPrompt = BuildActivePrompt(project)({
             prompt: activeItem,
             versions: activeItem.versions,
             inputValues: activeItem.inputValues,
           })
+          setActiveVersion(version => updatedPrompt.versions.find(v => v.id === version?.id) ?? version)
+          return updatedPrompt
         } else if (activeItem && ActiveItemIsChain(activeItem)) {
-          return BuildActiveChain(project)({
+          const updatedChain = BuildActiveChain(project)({
             chain: activeItem,
             versions: activeItem.versions,
             inputValues: activeItem.inputValues,
           })
+          setActiveVersion(version => updatedChain.versions.find(v => v.id === version?.id) ?? version)
+          return updatedChain
         } else {
           return activeItem
         }
