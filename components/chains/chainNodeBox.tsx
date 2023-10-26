@@ -1,5 +1,6 @@
 import {
   ActiveChain,
+  BranchChainItem,
   ChainItem,
   ChainVersion,
   CodeChainItem,
@@ -65,7 +66,11 @@ export function ChainNodeBox({
   const removeItem = () => saveItems([...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)])
 
   const insertItem = (
-    item: Omit<CodeChainItem, 'branch'> | Omit<QueryChainItem, 'branch'> | Omit<PromptChainItem, 'branch'>
+    item:
+      | Omit<CodeChainItem, 'branch'>
+      | Omit<BranchChainItem, 'branch'>
+      | Omit<QueryChainItem, 'branch'>
+      | Omit<PromptChainItem, 'branch'>
   ) => {
     const currentBranch = items[itemIndex]?.branch ?? 0
     const itemWithBranch = { ...item, branch: currentBranch }

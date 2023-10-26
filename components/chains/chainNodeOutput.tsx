@@ -8,6 +8,7 @@ import RunButtons from '../runs/runButtons'
 import {
   ChainNode,
   InputNode,
+  IsBranchChainItem,
   IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
@@ -21,7 +22,7 @@ import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
-  if (IsCodeChainItem(item)) {
+  if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
     return ExtractVariables(item.code)
   }
   if (IsQueryChainItem(item)) {

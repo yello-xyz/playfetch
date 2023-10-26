@@ -102,6 +102,7 @@ export default function ChainNodeEditor({
         {IsCodeChainItem(activeItem) && (
           <CodeChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
+        {/* // TODO add branch node editor */}
         {IsQueryChainItem(activeItem) && (
           <QueryChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}

@@ -1,4 +1,13 @@
-import { PromptInputs, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion, Prompts, QueryConfig } from '@/types'
+import {
+  PromptInputs,
+  RunConfig,
+  CodeConfig,
+  RawPromptVersion,
+  RawChainVersion,
+  Prompts,
+  QueryConfig,
+  BranchConfig,
+} from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
@@ -33,9 +42,14 @@ const runWithTimer = async <T>(operation: Promise<T>) => {
   return { ...result, duration }
 }
 
-const isRunConfig = (config: RunConfig | CodeConfig | QueryConfig): config is RunConfig => 'versionID' in config
-const isQueryConfig = (config: RunConfig | CodeConfig | QueryConfig): config is QueryConfig => 'query' in config
-const isCodeConfig = (config: RunConfig | CodeConfig | QueryConfig): config is CodeConfig => 'code' in config
+const isRunConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is RunConfig =>
+  'versionID' in config
+const isQueryConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is QueryConfig =>
+  'query' in config
+const isBranchConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is BranchConfig =>
+  'branches' in config
+const isCodeConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is CodeConfig =>
+  'code' in config && !isBranchConfig(config)
 
 type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
 type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
@@ -153,7 +167,8 @@ export default async function runChain(
         runQuery(userID, config.provider, config.model, config.indexName, query, config.topK)
       )
       streamResponse(lastResponse)
-    } else if (isCodeConfig(config)) {
+    } else if (isCodeConfig(config) || isBranchConfig(config)) {
+      // TODO implement branching
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       streamResponse(lastResponse)

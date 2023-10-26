@@ -27,6 +27,7 @@ export default function ChainNodeBoxBody({
         <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
       )}
       {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
+      {/* // TODO add branch node body */}
       {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
       {chainNode === InputNode && <InputNodeBody items={items} isSelected={isSelected} promptCache={promptCache} />}
     </>

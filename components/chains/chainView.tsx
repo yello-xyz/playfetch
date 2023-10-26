@@ -6,6 +6,7 @@ import ChainEditor from './chainEditor'
 import {
   ChainNode,
   InputNode,
+  IsBranchChainItem,
   IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
@@ -23,7 +24,7 @@ import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/us
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
-    return IsCodeChainItem(item) || IsQueryChainItem(item)
+    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
       ? item
       : {
           ...item,
@@ -35,7 +36,7 @@ const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
 const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
   items.map(item => {
     const inputs = ExtractChainItemVariables(item, promptCache, false)
-    return IsCodeChainItem(item) || IsQueryChainItem(item)
+    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
       ? { ...item, inputs }
       : {
           ...item,

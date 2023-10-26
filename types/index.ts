@@ -210,6 +210,11 @@ export type CodeConfig = CommonConfigAttributes & {
   description?: string
 }
 
+export type BranchConfig = CommonConfigAttributes & {
+  code: string
+  branches: string[]
+}
+
 export type QueryConfig = CommonConfigAttributes & {
   provider: QueryProvider
   model: EmbeddingModel
@@ -219,15 +224,21 @@ export type QueryConfig = CommonConfigAttributes & {
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
+export type BranchChainItem = BranchConfig & { inputs?: string[] }
 export type QueryChainItem = QueryConfig & { inputs?: string[] }
 export type PromptChainItem = PendingVersionRunConfig & {
   promptID: number
   inputs?: string[]
   dynamicInputs?: string[]
 }
-export type ChainItem = CodeChainItem | QueryChainItem | PromptChainItem
+export type ChainItem = CodeChainItem | BranchChainItem | QueryChainItem | PromptChainItem
 
-export type ChainItemWithInputs = (CodeChainItem | QueryChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
+export type ChainItemWithInputs = (
+  | CodeChainItem
+  | BranchChainItem
+  | QueryChainItem
+  | (PromptChainItem & { dynamicInputs: string[] })
+) & {
   inputs: string[]
 }
 
