@@ -1,7 +1,7 @@
 import { ChainItem, PromptVersion } from '@/types'
-import PromptChainNodeEditor from './promptChainNodeEditor'
+import PromptNodeEditor from './promptNodeEditor'
 import { IsBranchChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
-import CodeChainNodeEditor from './codeChainNodeEditor'
+import CodeNodeEditor from './codeNodeEditor'
 import Button, { PendingButton } from '../button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
@@ -9,8 +9,8 @@ import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import QueryChainNodeEditor from './queryChainNodeEditor'
-import BranchChainNodeEditor from './branchChainNodeEditor'
+import QueryNodeEditor from './queryNodeEditor'
+import BranchNodeEditor from './branchNodeEditor'
 
 export default function ChainNodeEditor({
   items,
@@ -93,7 +93,7 @@ export default function ChainNodeEditor({
     <>
       <div className={`flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden ${colorClass}`}>
         {IsPromptChainItem(activeItem) && (
-          <PromptChainNodeEditor
+          <PromptNodeEditor
             item={activeItem}
             promptCache={promptCache}
             selectVersion={selectVersion}
@@ -101,14 +101,14 @@ export default function ChainNodeEditor({
           />
         )}
         {IsCodeChainItem(activeItem) && (
-          <CodeChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <CodeNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         {/* // TODO updating a branch node may require updating or deleting other nodes as well */}
         {IsBranchChainItem(activeItem) && (
-          <BranchChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <BranchNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         {IsQueryChainItem(activeItem) && (
-          <QueryChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <QueryNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         <div className='flex items-center justify-end w-full gap-2 px-4'>
           <Button type='outline' onClick={dismiss}>

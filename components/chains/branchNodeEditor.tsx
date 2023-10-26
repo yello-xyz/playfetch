@@ -6,7 +6,7 @@ import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
 
-export default function BranchChainNodeEditor({
+export default function BranchNodeEditor({
   item,
   updateItem,
 }: {

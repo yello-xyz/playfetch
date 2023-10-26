@@ -10,7 +10,7 @@ import { useCheckProviderAvailable } from '@/src/client/hooks/useAvailableProvid
 import { ProviderWarning } from '../prompts/promptPanel'
 import RangeInput from '../rangeInput'
 
-export default function QueryChainNodeEditor({
+export default function QueryNodeEditor({
   item,
   updateItem,
 }: {
