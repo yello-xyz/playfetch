@@ -24,11 +24,13 @@ export function withErrorRoute(handler: NextApiHandler): NextApiHandler {
 
 type LoggedInAPIHandler = (req: NextApiRequest, res: NextApiResponse, user: User) => Promise<void> | void
 
+const ensureLastLoginAt = (user: User) => ({ ...user, lastLoginAt: user.lastLoginAt ?? null })
+
 export function withLoggedInUserRoute(handler: LoggedInAPIHandler): NextApiHandler {
   return withErrorRoute(async (req, res) => {
     const session = await getServerSession(req, res, authOptions(req, res))
     if (session?.user?.id) {
-      return handler(req, res, session.user)
+      return handler(req, res, ensureLastLoginAt(session.user))
     } else {
       return res.status(401).json(null)
     }
@@ -97,7 +99,7 @@ type LoggedInServerSideHandler = (
 export function withLoggedInSession(handler: LoggedInServerSideHandler): ServerSideHandler {
   return withServerSideSession(async context => {
     if (context.session?.user?.id) {
-      return handler({ ...context, user: context.session.user })
+      return handler({ ...context, user: ensureLastLoginAt(context.session.user) })
     } else {
       return Redirect(ClientRoute.Login)
     }
