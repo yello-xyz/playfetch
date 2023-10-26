@@ -6,7 +6,14 @@ const validEmailRegExp =
 
 export const CheckValidEmail = (email: string) => !!email.trim().toLowerCase().match(validEmailRegExp)
 
+const isValidTimestamp = (timestamp: number) =>
+  timestamp > 0 && timestamp < Number.MAX_VALUE && !Number.isNaN(timestamp)
+
 export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIncludeDate = false) => {
+  if (!isValidTimestamp(timestamp)) {
+    return '?'
+  }
+
   const toDateString = (date: Date) =>
     date.toLocaleDateString('en', {
       year: '2-digit',
@@ -29,6 +36,10 @@ export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIn
 }
 
 export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
+  if (!isValidTimestamp(timestamp)) {
+    return '?'
+  }
+
   const minute = 60 * 1000
   const hour = 60 * minute
   const day = 24 * hour
@@ -71,6 +82,8 @@ export const FormatDuration = (durationInSeconds: number) =>
 
 export const Truncate = (text: string, length: number) =>
   text.length <= length ? text : text.slice(0, length).trim() + '…'
+
+export const Capitalize = (text: string) => `${text.charAt(0).toUpperCase()}${text.slice(1)}`
 
 export const ToCamelCase = (s: string) =>
   s.replace(/(?:^\w|[A-Z]|\b\w)/g, (ch, i) => (i === 0 ? ch.toLowerCase() : ch.toUpperCase())).replace(/\s+/g, '')

@@ -1,6 +1,17 @@
-import { ActivePrompt, Comment, User, PromptVersion, ActiveChain, ChainVersion, IsPromptVersion } from '@/types'
+import {
+  Comment,
+  User,
+  PromptVersion,
+  ChainVersion,
+  IsPromptVersion,
+  ActiveProject,
+  ActivePrompt,
+  ActiveChain,
+  Prompt,
+  Chain,
+} from '@/types'
 import { ReactNode } from 'react'
-import { FormatRelativeDate } from '@/src/common/formatting'
+import { Capitalize, FormatRelativeDate } from '@/src/common/formatting'
 import { ItemLabel } from './versions/versionCell'
 import UserAvatar from '@/components/users/userAvatar'
 import collapseIcon from '@/public/collapse.svg'
@@ -12,22 +23,22 @@ import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 
-export default function CommentsPane<Version extends PromptVersion | ChainVersion>({
+export default function CommentsPane({
+  project,
   activeItem,
-  versions,
   showComments,
   setShowComments,
   onSelectComment,
 }: {
-  activeItem: ActivePrompt | ActiveChain
-  versions: Version[]
+  project: ActiveProject
+  activeItem?: ActivePrompt | ActiveChain
   showComments: boolean
   setShowComments: (show: boolean) => void
-  onSelectComment: (version: Version, runID?: number) => void
+  onSelectComment: (parentID: number, versionID: number, runID?: number) => void
 }) {
-  const users = activeItem.users
-  const labelColors = AvailableLabelColorsForItem(activeItem)
-  const comments = activeItem.versions.flatMap(version => version.comments).sort((a, b) => a.timestamp - b.timestamp)
+  const users = project.users
+  const labelColors = AvailableLabelColorsForItem(project)
+  const versions = activeItem?.versions
 
   return showComments ? (
     <div className='flex flex-col h-full'>
@@ -35,12 +46,13 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
       </SingleTabHeader>
       <div className='flex flex-col gap-2 p-3 overflow-y-auto'>
-        {comments.map((comment, index) => (
+        {project.comments.map((comment, index) => (
           <CommentCell
             key={index}
             comment={comment}
             user={users.find(user => user.id === comment.userID)!}
             labelColors={labelColors}
+            project={project}
             versions={versions}
             onSelect={onSelectComment}
           />
@@ -50,58 +62,67 @@ export default function CommentsPane<Version extends PromptVersion | ChainVersio
   ) : null
 }
 
-export function CommentCell<Version extends PromptVersion | ChainVersion>({
+export function CommentCell({
   comment,
   user,
   labelColors = {},
+  project,
   versions = [],
   onSelect,
 }: {
   comment: Comment
-  user: User
+  user?: User
   labelColors?: Record<string, string>
-  versions?: Version[]
-  onSelect?: (version: Version, runID?: number) => void
+  project?: ActiveProject
+  versions?: (PromptVersion | ChainVersion)[]
+  onSelect?: (parentID: number, versionID: number, runID?: number) => void
 }) {
   const formattedDate = useFormattedDate(comment.timestamp, timestamp => FormatRelativeDate(timestamp, 1))
 
+  const prompt = project?.prompts?.find(parent => parent.id === comment.parentID)
+  const chain = project?.chains?.find(parent => parent.id === comment.parentID)
+  const parentName = prompt ? `prompt “${prompt.name}”` : chain ? `chain “${chain.name}”` : undefined
+
   const version = versions.find(version => version.id === comment.versionID)
   const compareVersion = versions.find(v => v.id === version?.previousID)
-  const versionIndex = versions.findIndex(version => version.id === comment.versionID) + 1
+  const versionIndex =
+    versions.filter(v => v.parentID === version?.parentID).findIndex(v => v.id === comment.versionID) + 1
 
-  const selectVersion = onSelect && version ? () => onSelect(version, comment.runID) : undefined
+  const selectComment = onSelect ? () => onSelect(comment.parentID, comment.versionID, comment.runID) : undefined
   const availableProviders = useAvailableProviders()
+  const userName = user ? user.fullName : 'Unknown user'
 
   return (
-    <div className={selectVersion ? 'cursor-pointer' : ''} onClick={selectVersion}>
+    <div className={selectComment ? 'cursor-pointer' : ''} onClick={selectComment}>
       {comment.action ? (
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
-          <UserAvatar user={user} size='sm' />
-          <span className='font-medium'>{user.fullName}</span>
+          {user && <UserAvatar user={user} size='sm' />}
+          <span className='font-medium'>{userName}</span>
           {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
           <ItemLabel label={comment.text} colors={labelColors} />
-          {version &&
-            `${comment.action === 'addLabel' ? ' to' : ' from'} ${
-              comment.runID ? 'response in ' : ''
-            }version ${versionIndex} · `}
+          {(version || parentName) &&
+            `${comment.action === 'addLabel' ? ' to' : ' from'} ${comment.runID ? 'response in ' : ''}${
+              version ? `version ${versionIndex}` : parentName
+            } · `}
           <span className='text-gray-400'>{formattedDate}</span>
         </div>
       ) : (
         <div className='flex flex-col gap-2 text-xs text-gray-600'>
           <div className='flex items-center gap-1'>
-            <UserAvatar user={user} size='sm' />
-            <span className='font-medium'>{user.fullName}</span>
+            {user && <UserAvatar user={user} size='sm' />}
+            <span className='font-medium'>{userName}</span>
             <span className='text-gray-400'>{formattedDate}</span>
           </div>
-          {(version || comment.quote) && (
+          {(version || parentName || comment.quote) && (
             <CommentQuote>
               {version && (
                 <span className='font-medium'>
                   {IsPromptVersion(version)
                     ? `${versionIndex} › ${LabelForModel(version.config.model, availableProviders)}`
-                    : `version ${versionIndex}`}
+                    : `Version ${versionIndex}`}
                 </span>
               )}
+              {!version && parentName && <span className='font-medium'>{Capitalize(parentName)}</span>}
               <div className='line-clamp-2'>
                 {comment.quote ? (
                   <span>{comment.quote}</span>

@@ -1,5 +1,5 @@
 import { withAdminSession } from '@/src/server/session'
-import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics } from '@/types'
+import { ActiveUser, ProjectMetrics, RecentProject, User, UserMetrics, Workspace, WorkspaceMetrics } from '@/types'
 import { getActiveUsers, getMetricsForUser, getUsersWithoutAccess } from '@/src/server/datastore/users'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import AdminSidebar from '@/components/admin/adminSidebar'
@@ -13,39 +13,57 @@ import { getMetricsForProject, getRecentProjects } from '@/src/server/datastore/
 import RecentProjects from '@/components/admin/recentProjects'
 
 import dynamic from 'next/dynamic'
+import { getMetricsForWorkspace } from '@/src/server/datastore/workspaces'
 const ActiveUserMetrics = dynamic(() => import('@/components/admin/activeUserMetrics'))
 const RecentProjectMetrics = dynamic(() => import('@/components/admin/recentProjectMetrics'))
+const WorkspaceMetrics = dynamic(() => import('@/components/admin/workspaceMetrics'))
 
 const WaitlistItem = 'waitlist'
 const ActiveUsersItem = 'activeUsers'
 const RecentProjectsItem = 'recentProjects'
-type ActiveItem = typeof WaitlistItem | typeof ActiveUsersItem | typeof RecentProjectsItem | ActiveUser | RecentProject
+type ActiveItem =
+  | typeof WaitlistItem
+  | typeof ActiveUsersItem
+  | typeof RecentProjectsItem
+  | ActiveUser
+  | RecentProject
+  | Workspace
 const activeItemIsUser = (item: ActiveItem): item is ActiveUser => typeof item === 'object' && 'fullName' in item
-const activeItemIsProject = (item: ActiveItem): item is RecentProject => typeof item === 'object' && 'name' in item
+const activeItemIsProject = (item: ActiveItem): item is RecentProject =>
+  typeof item === 'object' && 'workspaceName' in item
 
 export const getServerSideProps = withAdminSession(async ({ query }) => {
-  const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(query)
+  const { w: waitlist, p: projects, i: itemID, s: isWorkspace } = ParseNumberQuery(query)
 
-  const activeUsers = await getActiveUsers()
+  const initialActiveUsers = await getActiveUsers()
   const waitlistUsers = await getUsersWithoutAccess()
   const recentProjects = await getRecentProjects()
 
-  const activeUser = activeUsers.find(user => user.id === itemID)
+  const activeUser = initialActiveUsers.find(user => user.id === itemID)
   const recentProject = recentProjects.find(project => project.id === itemID)
 
-  const initialActiveItem: ActiveItem = waitlist
-    ? WaitlistItem
-    : projects
-    ? RecentProjectsItem
-    : activeUser ?? recentProject ?? ActiveUsersItem
-
+  const initialWorkspaceMetrics = isWorkspace && itemID ? await getMetricsForWorkspace(itemID) : null
   const initialUserMetrics = activeUser ? await getMetricsForUser(activeUser.id) : null
   const initialProjectMetrics = recentProject
     ? await getMetricsForProject(recentProject.id, recentProject.workspaceID)
     : null
 
+  const initialActiveItem: ActiveItem = waitlist
+    ? WaitlistItem
+    : projects
+    ? RecentProjectsItem
+    : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
+
   return {
-    props: { initialActiveItem, initialUserMetrics, initialProjectMetrics, activeUsers, waitlistUsers, recentProjects },
+    props: {
+      initialActiveItem,
+      initialUserMetrics,
+      initialProjectMetrics,
+      initialWorkspaceMetrics,
+      initialActiveUsers,
+      waitlistUsers,
+      recentProjects,
+    },
   }
 })
 
@@ -53,24 +71,31 @@ export default function Admin({
   initialActiveItem,
   initialUserMetrics,
   initialProjectMetrics,
-  activeUsers,
+  initialWorkspaceMetrics,
+  initialActiveUsers,
   recentProjects,
   waitlistUsers,
 }: {
   initialActiveItem: ActiveItem
   initialUserMetrics: UserMetrics | null
   initialProjectMetrics: ProjectMetrics | null
-  activeUsers: ActiveUser[]
+  initialWorkspaceMetrics: WorkspaceMetrics | null
+  initialActiveUsers: ActiveUser[]
   waitlistUsers: User[]
   recentProjects: RecentProject[]
 }) {
   const [activeItem, setActiveItem] = useState(initialActiveItem)
   const [userMetrics, setUserMetrics] = useState(initialUserMetrics)
   const [projectMetrics, setProjectMetrics] = useState(initialProjectMetrics)
+  const [workspaceMetrics, setWorkspaceMetrics] = useState(initialWorkspaceMetrics)
+  const [activeUsers, setActiveUsers] = useState(initialActiveUsers)
 
   const router = useRouter()
 
-  const selectItem = (item: typeof WaitlistItem | typeof ActiveUsersItem | typeof RecentProjectsItem | number) => {
+  const selectItem = (
+    item: typeof WaitlistItem | typeof ActiveUsersItem | typeof RecentProjectsItem | number,
+    isWorkspace = false
+  ) => {
     router.push(
       `/admin${
         item === WaitlistItem
@@ -80,7 +105,7 @@ export default function Admin({
           : item !== ActiveUsersItem
           ? `?i=${item}`
           : ''
-      }`,
+      }${isWorkspace ? '&s=1' : ''}`,
       undefined,
       {
         shallow: true,
@@ -88,23 +113,53 @@ export default function Admin({
     )
   }
 
-  const { w: waitlist, p: projects, i: itemID } = ParseNumberQuery(router.query)
-  const currentQueryState = waitlist ? WaitlistItem : projects ? RecentProjectsItem : itemID ?? ActiveUsersItem
+  const fetchActiveUsersBefore = () =>
+    api.getActiveUsers(Math.min(...activeUsers.map(user => user.startTimestamp))).then(setActiveUsers)
+
+  const { w: waitlist, p: projects, i: itemID, s: isWorkspace } = ParseNumberQuery(router.query)
+  const currentQueryState = waitlist
+    ? WaitlistItem
+    : projects
+    ? RecentProjectsItem
+    : isWorkspace
+    ? `${itemID}s`
+    : itemID ?? ActiveUsersItem
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
+    const knownUsers = [
+      ...activeUsers,
+      ...(projectMetrics?.users ?? []),
+      ...(workspaceMetrics?.users ?? []),
+      ...(workspaceMetrics?.pendingUsers ?? []),
+    ]
+    const knownProjects = [...recentProjects, ...(workspaceMetrics?.projects ?? [])]
+    const knownWorkspaces: Workspace[] = [
+      ...(userMetrics?.workspaces ?? []),
+      ...(userMetrics?.pendingWorkspaces ?? []),
+      ...recentProjects.map(project => ({ id: project.workspaceID, name: project.workspaceName })),
+    ]
+
+    const activeUser = !isWorkspace ? knownUsers.find(user => user.id === itemID) : undefined
+    const workspace = isWorkspace ? knownWorkspaces.find(workspace => workspace.id === itemID) : undefined
+    const recentProject = knownProjects.find(project => project.id === itemID)
+
     setUserMetrics(null)
     setProjectMetrics(null)
-    const activeUser = [...activeUsers, ...(projectMetrics?.users ?? [])].find(user => user.id === itemID)
-    const recentProject = recentProjects.find(project => project.id === itemID)
+    setWorkspaceMetrics(null)
+
     if (activeUser) {
       setActiveItem(activeUser)
       api.getUserMetrics(activeUser.id).then(setUserMetrics)
     } else if (recentProject) {
       setActiveItem(recentProject)
       api.getProjectMetrics(recentProject.id, recentProject.workspaceID).then(setProjectMetrics)
+    } else if (workspace) {
+      setActiveItem(workspace)
+      api.getWorkspaceMetrics(workspace.id).then(setWorkspaceMetrics)
     } else {
       setActiveItem(waitlist ? WaitlistItem : projects ? RecentProjectsItem : ActiveUsersItem)
     }
+
     setQuery(currentQueryState)
   }
 
@@ -124,21 +179,43 @@ export default function Admin({
           />
           <div className='flex flex-col flex-1 bg-gray-25'>
             {activeItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
-            {activeItem === ActiveUsersItem && <ActiveUsers activeUsers={activeUsers} onSelectUser={selectItem} />}
+            {activeItem === ActiveUsersItem && (
+              <ActiveUsers activeUsers={activeUsers} onFetchBefore={fetchActiveUsersBefore} onSelectUser={selectItem} />
+            )}
             {activeItem === RecentProjectsItem && (
-              <RecentProjects recentProjects={recentProjects} onSelectProject={selectItem} />
+              <RecentProjects
+                recentProjects={recentProjects}
+                onSelectProject={selectItem}
+                onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
+              />
             )}
             {userMetrics && activeItemIsUser(activeItem) && (
               <Suspense>
-                <ActiveUserMetrics user={activeItem} metrics={userMetrics} onDismiss={() => router.back()} />
+                <ActiveUserMetrics
+                  user={activeItem}
+                  metrics={userMetrics}
+                  onDismiss={() => router.back()}
+                  onSelectProject={selectItem}
+                  onSelectWorkspace={workspaceID => selectItem(workspaceID, true)}
+                />
               </Suspense>
             )}
             {projectMetrics && activeItemIsProject(activeItem) && (
               <Suspense>
                 <RecentProjectMetrics
                   project={activeItem}
-                  metrics={projectMetrics}
+                  projectMetrics={projectMetrics}
                   onSelectUser={selectItem}
+                  onDismiss={() => router.back()}
+                />
+              </Suspense>
+            )}
+            {workspaceMetrics && (
+              <Suspense>
+                <WorkspaceMetrics
+                  workspaceMetrics={workspaceMetrics}
+                  onSelectUser={selectItem}
+                  onSelectProject={selectItem}
                   onDismiss={() => router.back()}
                 />
               </Suspense>

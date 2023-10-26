@@ -1,10 +1,9 @@
-import { RefObject, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
-import dynamic from 'next/dynamic'
 import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CodeBlock from '../codeBlock'
-const ContentEditable = dynamic(() => import('../contentEditable'))
+import ContentEditable from '../contentEditable'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
@@ -132,15 +131,12 @@ export default function PromptInput({
     }
   }, [contentEditableRef, updateSelection])
 
-  const onSuspenseLoaded = useCallback(
-    (node: any) => {
-      if (node && contentEditableRef.current) {
-        contentEditableRef.current.focus()
-        moveCursorToEndOfNode(contentEditableRef.current)
-      }
-    },
-    [contentEditableRef]
-  )
+  useEffect(() => {
+    if (contentEditableRef.current) {
+      contentEditableRef.current.focus()
+      moveCursorToEndOfNode(contentEditableRef.current)
+    }
+  }, [contentEditableRef])
 
   const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
   const contentEditableClassName = preformatted
@@ -160,19 +156,16 @@ export default function PromptInput({
   }
 
   const renderContentEditable = () => (
-    <Suspense>
-      <ContentEditable
-        placeholder={placeholder}
-        disabled={disabled}
-        className={contentEditableClassName}
-        htmlValue={htmlValue}
-        onChange={updateHTMLValue}
-        allowedTags={['br', 'div', 'b']}
-        allowedAttributes={{ b: ['class'] }}
-        innerRef={contentEditableRef}
-        onLoadedRef={onSuspenseLoaded}
-      />
-    </Suspense>
+    <ContentEditable
+      placeholder={placeholder}
+      disabled={disabled}
+      className={contentEditableClassName}
+      htmlValue={htmlValue}
+      onChange={updateHTMLValue}
+      allowedTags={['br', 'div', 'b']}
+      allowedAttributes={{ b: ['class'] }}
+      innerRef={contentEditableRef}
+    />
   )
 
   return preformatted ? (

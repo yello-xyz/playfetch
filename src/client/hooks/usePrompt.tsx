@@ -25,10 +25,10 @@ export default function usePrompt(
     setModifiedVersion(undefined)
   }
 
-  const selectPrompt = async (promptID: number) => {
+  const selectPrompt = async (promptID: number, focusVersionID?: number) => {
     if (promptID !== activePrompt?.id) {
       savePrompt(refreshProject)
-      await refreshPrompt(promptID)
+      await refreshPrompt(promptID, focusVersionID)
       router.push(PromptRoute(activeProject.id, promptID), undefined, { shallow: true })
     }
   }

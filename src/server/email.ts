@@ -5,6 +5,8 @@ import { getUserForID } from './datastore/users'
 import { getProjectNameForID } from './datastore/projects'
 import ClientRoute, { WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
+import { User } from '@/types'
+import { Capitalize, FormatDate } from '../common/formatting'
 
 export const GetEmailServerConfig = () => ({
   host: 'smtp.gmail.com',
@@ -25,8 +27,8 @@ async function sendMail(to: string, subject: string, text: string, html: string,
   await transporter.sendMail({ from: GetNoReplyFromAddress(delegatedFrom), to, subject, text, html })
 }
 
-function resolveContent(fileName: string, variables: { [key: string]: string }) {
-  const templatePath = path.join(process.cwd(), 'templates', fileName)
+function resolveContent(fileName: string, fileType: 'txt' | 'html', variables: { [key: string]: string }) {
+  const templatePath = path.join(process.cwd(), 'templates', `${fileName}.${fileType}`)
   let content = readFileSync(templatePath, 'utf8')
   Object.entries(variables).forEach(([key, value]) => {
     content = content.replace(new RegExp(key, 'g'), value)
@@ -54,9 +56,58 @@ export async function sendInviteEmail(
 
   await sendMail(
     toEmail,
-    `${kind[0].toUpperCase()}${kind.slice(1)} shared with you: "${objectName}"`,
-    resolveContent('invite.txt', variables),
-    resolveContent('invite.html', variables),
+    `${Capitalize(kind)} shared with you: "${objectName}"`,
+    resolveContent('invite', 'txt', variables),
+    resolveContent('invite', 'html', variables),
     inviter.fullName
+  )
+}
+
+export async function sendCommentsEmail(
+  toEmail: string,
+  commentBlocks: {
+    parentName: string
+    projectName: string
+    parentRoute: string
+    comments: {
+      commenter: User
+      timestamp: number
+      text: string
+    }[]
+  }[]
+) {
+  const anyProjectName = commentBlocks[0].projectName
+  const anyComment = commentBlocks[0].comments[0]
+
+  const contentForType = (type: 'txt' | 'html') =>
+    resolveContent('comments', type, {
+      __ANY_COMMENTER_EMAIL__: anyComment.commenter.email,
+      __COMMENT_BLOCKS__: commentBlocks
+        .map(({ parentName, projectName, parentRoute, comments }) =>
+          resolveContent('commentBlock', type, {
+            __PARENT_NAME__: parentName,
+            __PARENT_LINK__: `${process.env.NEXTAUTH_URL}${parentRoute}`,
+            __PROJECT_NAME__: projectName,
+            __COMMENTS__: comments
+              .map(({ commenter, timestamp, text }) =>
+                resolveContent('comment', type, {
+                  __COMMENTER_NAME__: commenter.fullName,
+                  __COMMENTER_EMAIL__: commenter.email,
+                  __COMMENT_DATE__: FormatDate(timestamp),
+                  __COMMENT_TEXT__: text,
+                })
+              )
+              .join('\n'),
+          })
+        )
+        .join('\n'),
+    })
+
+  await sendMail(
+    toEmail,
+    `New comments on project "${anyProjectName}"`,
+    contentForType('txt'),
+    contentForType('html'),
+    anyComment.commenter.fullName
   )
 }

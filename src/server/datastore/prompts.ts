@@ -49,13 +49,12 @@ export async function getPromptForUser(
 
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
   const runs = await getOrderedEntities(Entity.RUN, 'parentID', promptID)
-  const comments = await getOrderedEntities(Entity.COMMENT, 'parentID', promptID)
 
   const inputValues = await getTrustedParentInputValues(promptID)
 
   return {
     prompt: toPrompt(promptData),
-    versions: toUserVersions(userID, versions, runs, comments) as RawPromptVersion[],
+    versions: toUserVersions(userID, versions, runs) as RawPromptVersion[],
     inputValues,
   }
 }
@@ -118,7 +117,7 @@ export async function duplicatePromptForUser(
   const projectID = targetProjectID ?? promptData.projectID
   const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptData.name)
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
-  const lastUserVersion = toUserVersions(userID, versions, [], []).slice(-1)[0] as RawPromptVersion
+  const lastUserVersion = toUserVersions(userID, versions, []).slice(-1)[0] as RawPromptVersion
   await savePromptVersionForUser(userID, newPromptID, lastUserVersion.prompts, lastUserVersion.config, versionID)
   return newPromptID
 }
@@ -151,9 +150,13 @@ export async function augmentPromptDataWithNewVersion(
   await updatePrompt({ ...promptData, name: newPromptName }, true)
 }
 
+const getPromptData = (promptID: number) => getKeyedEntity(Entity.PROMPT, promptID)
+
+export const getTrustedPrompt = (promptID: number) => getPromptData(promptID).then(toPrompt)
+
 export async function updatePromptOnDeletedVersion(promptID: number) {
   // TODO update previous version references in other versions?
-  const promptData = await getKeyedEntity(Entity.PROMPT, promptID)
+  const promptData = await getPromptData(promptID)
   await updatePrompt({ ...promptData }, true)
 }
 

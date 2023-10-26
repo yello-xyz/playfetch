@@ -7,18 +7,31 @@ import { FormatDate } from '@/src/common/formatting'
 import ActiveUsers from './activeUsers'
 import fileIcon from '@/public/file.svg'
 import folderIcon from '@/public/folder.svg'
+import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { useState } from 'react'
+import api from '@/src/client/admin/api'
 
 export default function RecentProjectMetrics({
   project,
-  metrics,
+  projectMetrics,
   onSelectUser,
   onDismiss,
 }: {
   project: RecentProject
-  metrics: ProjectMetrics
+  projectMetrics: ProjectMetrics
   onSelectUser: (userID: number) => void
   onDismiss: () => void
 }) {
+  const [metrics, setMetrics] = useState(projectMetrics)
+  const lastModified = useFormattedDate(project.timestamp, timestamp => FormatDate(timestamp, true, true))
+
+  const firstActiveUserVersionTimestamp = Math.min(
+    ...[...metrics.users, ...metrics.pendingUsers].map(user => user.startTimestamp)
+  )
+
+  const fetchProjectMetricsWithActiveUsersBefore = () =>
+    api.getProjectMetrics(project.id, project.workspaceID, firstActiveUserVersionTimestamp).then(setMetrics)
+
   return (
     <>
       <div className='flex flex-col items-start h-full gap-4 p-6 overflow-y-auto'>
@@ -32,10 +45,10 @@ export default function RecentProjectMetrics({
             <Label>{project.name} • </Label>
             <Icon icon={folderIcon} />
             <Label>
-              {project.workspace} ({project.creator})
+              {project.workspaceName} ({project.workspaceCreator})
             </Label>
           </div>
-          <Label>Last Modified: {FormatDate(project.timestamp, true, true)}</Label>
+          <Label>Last Modified: {lastModified}</Label>
           <div className='flex flex-col gap-1'>
             <Label>Number of prompts: {metrics.promptCount}</Label>
             <Label>Number of chains: {metrics.chainCount}</Label>
@@ -45,7 +58,13 @@ export default function RecentProjectMetrics({
         <div className='w-full '>
           <AnalyticsDashboards analytics={metrics.analytics} />
         </div>
-        <ActiveUsers title='Active Project Users' activeUsers={metrics.users} onSelectUser={onSelectUser} embedded />
+        <ActiveUsers
+          title='Active Project Users'
+          activeUsers={metrics.users}
+          onFetchBefore={fetchProjectMetricsWithActiveUsersBefore}
+          onSelectUser={onSelectUser}
+          embedded
+        />
         {metrics.pendingUsers.length > 0 && (
           <ActiveUsers
             title='Pending Invitations'

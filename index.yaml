@@ -56,7 +56,7 @@ indexes:
 
 - kind: comment
   properties:
-  - name: parentID
+  - name: projectID
   - name: createdAt
     direction: desc
 
@@ -80,5 +80,29 @@ indexes:
 - kind: analytics
   properties:
   - name: projectID
+  - name: createdAt
+    direction: desc
+
+- kind: version
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: run
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: comment
+  properties:
+  - name: userID
+  - name: createdAt
+    direction: desc
+
+- kind: endpoint
+  properties:
+  - name: userID
   - name: createdAt
     direction: desc

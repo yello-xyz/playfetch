@@ -23,10 +23,10 @@ export default function useChain(
     setActiveVersion(newChain.versions.find(version => version.id === focusVersionID) ?? newChain.versions.slice(-1)[0])
   }
 
-  const selectChain = async (chainID: number) => {
+  const selectChain = async (chainID: number, focusVersionID?: number) => {
     if (chainID !== activeChain?.id) {
       savePrompt(refreshProject)
-      await refreshChain(chainID)
+      await refreshChain(chainID, focusVersionID)
       router.push(ChainRoute(activeProject.id, chainID), undefined, { shallow: true })
     }
   }

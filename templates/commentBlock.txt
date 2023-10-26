@@ -1,0 +1,5 @@
+New comments on __PARENT_NAME__ in project “__PROJECT_NAME__”:
+
+__COMMENTS__ 
+
+Open the following link to view the comments: __PARENT_LINK__

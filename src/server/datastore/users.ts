@@ -12,13 +12,16 @@ import {
   getKeyedEntities,
   getKeyedEntity,
   getOrderedEntities,
+  getTimestamp,
 } from './datastore'
-import { addWorkspaceForUser } from './workspaces'
+import { addWorkspaceForUser, getWorkspacesForUser } from './workspaces'
 import { uploadImageURLToStorage } from '../storage'
 import { getRecentVersions } from './versions'
 import { getRecentComments } from './comments'
 import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
+import { getRecentProjects, getSharedProjectsForUser } from './projects'
+import { getRecentRuns } from './runs'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -63,6 +66,7 @@ export const toUser = (data: any): User => ({
   fullName: data.fullName,
   imageURL: data.imageURL,
   isAdmin: data.isAdmin,
+  lastLoginAt: getTimestamp(data, 'lastLoginAt') ?? null,
 })
 
 export const getUserForID = (userID: number) => getKeyedEntity(Entity.USER, userID).then(toUser)
@@ -120,16 +124,18 @@ export async function getUsersWithoutAccess() {
   return usersData.map(toUser)
 }
 
-export async function getActiveUsers(users?: User[], limit = 100): Promise<ActiveUser[]> {
-  const recentVersions = await getRecentVersions(limit)
-  const startTimestamp = recentVersions.slice(-1)[0].timestamp
+export async function getActiveUsers(users?: User[], before?: Date, limit = 100): Promise<ActiveUser[]> {
+  const recentVersions = await getRecentVersions(before, limit)
+  const since = new Date(recentVersions.slice(-1)[0]?.timestamp ?? 0)
 
-  const recentComments = await getRecentComments(startTimestamp, limit)
-  const recentEndpoints = await getRecentEndpoints(startTimestamp, limit)
+  const recentRuns = recentVersions.length > 0 ? await getRecentRuns(since, before, limit) : []
+  const recentComments = recentVersions.length > 0 ? await getRecentComments(since, before, limit) : []
+  const recentEndpoints = recentVersions.length > 0 ? await getRecentEndpoints(since, before, limit) : []
 
   if (!users) {
     const usersData = await getKeyedEntities(Entity.USER, [
       ...new Set([
+        ...recentRuns.map(run => run.userID),
         ...recentVersions.map(version => version.userID),
         ...recentComments.map(comment => comment.userID),
         ...recentEndpoints.map(endpoint => endpoint.userID),
@@ -139,18 +145,22 @@ export async function getActiveUsers(users?: User[], limit = 100): Promise<Activ
   }
 
   return users
-    .map(user => toActiveUser(user, recentVersions, recentComments, recentEndpoints))
+    .map(user => toActiveUser(user, recentVersions, recentRuns, recentComments, recentEndpoints))
     .sort((a, b) => b.lastActive - a.lastActive)
 }
 
 const toActiveUser = (
   user: User,
   recentVersions: Awaited<ReturnType<typeof getRecentVersions>>,
+  recentRuns: Awaited<ReturnType<typeof getRecentRuns>>,
   recentComments: Awaited<ReturnType<typeof getRecentComments>>,
   recentEndpoints: Awaited<ReturnType<typeof getRecentEndpoints>>
 ): ActiveUser => {
   const userVersions = recentVersions.filter(version => version.userID === user.id)
   const versionCount = userVersions.length
+
+  const userRuns = recentRuns.filter(run => run.userID === user.id)
+  const runCount = userRuns.length
 
   const userComments = recentComments.filter(comment => comment.userID === user.id)
   const commentCount = userComments.length
@@ -158,12 +168,19 @@ const toActiveUser = (
   const userEndpoints = recentEndpoints.filter(endpoint => endpoint.userID === user.id)
   const endpointCount = userEndpoints.length
 
+  const fallback = user.lastLoginAt ?? 0
   const lastActive = Math.max(
-    ...[userVersions[0]?.timestamp ?? 0, userComments[0]?.timestamp ?? 0, userEndpoints[0]?.timestamp ?? 0]
+    ...[
+      userVersions[0]?.timestamp ?? fallback,
+      userRuns[0]?.timestamp ?? fallback,
+      userComments[0]?.timestamp ?? fallback,
+      userEndpoints[0]?.timestamp ?? fallback,
+    ]
   )
   const startTimestamp = Math.min(
     ...[
       userVersions.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
+      userRuns.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
       userComments.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
       userEndpoints.slice(-1)[0]?.timestamp ?? Number.MAX_VALUE,
     ]
@@ -174,7 +191,17 @@ const toActiveUser = (
   const chainVersions = userVersions.filter(version => !IsRawPromptVersion(version))
   const chainCount = new Set(chainVersions.map(version => version.parentID)).size
 
-  return { ...user, lastActive, startTimestamp, commentCount, endpointCount, versionCount, promptCount, chainCount }
+  return {
+    ...user,
+    lastActive,
+    startTimestamp,
+    commentCount,
+    endpointCount,
+    versionCount,
+    runCount,
+    promptCount,
+    chainCount,
+  }
 }
 
 export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
@@ -187,9 +214,43 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', 'project')])
   )
-  const createdVersionCount = await getEntityCount(Entity.VERSION, 'userID', userID)
-  const createdCommentCount = await getEntityCount(Entity.COMMENT, 'userID', userID)
-  const createdEndpointCount = await getEntityCount(Entity.ENDPOINT, 'userID', userID)
+
+  const [sharedProjects, pendingSharedProjects] = await getSharedProjectsForUser(userID)
+  const sharedProjectsAsRecent = await getRecentProjects(sharedProjects)
+  const pendingSharedProjectsAsRecent = await getRecentProjects(pendingSharedProjects)
+
+  const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
+
+  const getTimestamps = (type: string, userID: number) =>
+    getDatastore().runQuery(getDatastore().createQuery(type).filter(buildFilter('userID', userID)).select('createdAt'))
+
+  const [versionsData] = await getTimestamps(Entity.VERSION, userID)
+  const [runsData] = await getTimestamps(Entity.RUN, userID)
+  const [commentsData] = await getTimestamps(Entity.COMMENT, userID)
+  const [endpointsData] = await getTimestamps(Entity.ENDPOINT, userID)
+
+  const toDay = (timestamp: number) => new Date(timestamp).setUTCHours(0, 0, 0, 0)
+  const today = toDay(new Date().getTime())
+  const millisecondsInDay = 24 * 60 * 60 * 1000
+  const daysAgo = (timestamp: number) => (today - toDay(timestamp)) / millisecondsInDay
+
+  const versionTimestamps = versionsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+  const runTimestamps = runsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+  const commentTimestamps = commentsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+  const endpointTimestamps = endpointsData.map(({ createdAt }) => daysAgo(createdAt / 1000))
+
+  const maxDaysAgo = Math.max(...versionTimestamps, ...runTimestamps, ...commentTimestamps, ...endpointTimestamps)
+  const activity = Array.from({ length: maxDaysAgo + 1 }, (_, daysAgo) => ({
+    timestamp: today - (maxDaysAgo - daysAgo) * millisecondsInDay,
+    versions: 0,
+    runs: 0,
+    comments: 0,
+    endpoints: 0,
+  }))
+  versionTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].versions++)
+  runTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].runs++)
+  commentTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].comments++)
+  endpointTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].endpoints++)
 
   const providersData = await getEntities(Entity.PROVIDER, 'userID', userID)
   const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
@@ -198,9 +259,11 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     createdWorkspaceCount,
     workspaceAccessCount,
     projectAccessCount,
-    createdVersionCount,
-    createdCommentCount,
-    createdEndpointCount,
+    activity,
     providers,
+    sharedProjects: sharedProjectsAsRecent,
+    pendingSharedProjects: pendingSharedProjectsAsRecent,
+    workspaces,
+    pendingWorkspaces,
   }
 }

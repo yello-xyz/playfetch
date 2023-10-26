@@ -1,11 +1,11 @@
-import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion } from '@/types'
+import { ActivePrompt, Run, PromptVersion, ActiveChain, ChainVersion, ActiveProject } from '@/types'
 import api from '@/src/client/api'
 import { PopupContent } from './popupMenu'
 import addIcon from '@/public/add.svg'
 import labelIcon from '@/public/label.svg'
 import checkIcon from '@/public/check.svg'
 import { useState } from 'react'
-import { useRefreshActiveItem } from '@/src/client/context/refreshContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import Icon from './icon'
 import GlobalPopupMenu from './globalPopupMenu'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
@@ -19,7 +19,7 @@ const projectLabelColors = [
   'bg-yellow-300 text-white',
 ]
 
-export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain) =>
+export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain | ActiveProject) =>
   Object.fromEntries(
     prompt.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
@@ -33,9 +33,11 @@ export default function LabelPopupMenu({
   activeItem: ActivePrompt | ActiveChain
   selectedCell?: boolean
 }) {
+  const refreshProject = useRefreshProject()
   const refreshActiveItem = useRefreshActiveItem()
+  const refresh = () => refreshActiveItem().then(refreshProject)
 
-  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [LabelsPopup, { item, activeItem, refreshActiveItem }]
+  const loadPopup = (): [typeof LabelsPopup, LabelsPopupProps] => [LabelsPopup, { item, activeItem, refresh }]
 
   return <GlobalPopupMenu icon={labelIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
@@ -43,10 +45,12 @@ export default function LabelPopupMenu({
 export type LabelsPopupProps = {
   item: PromptVersion | ChainVersion | Run
   activeItem: ActivePrompt | ActiveChain
-  refreshActiveItem: () => void
+  refresh: () => void
 }
 
-function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: LabelsPopupProps & WithDismiss) {
+const IsVersion = (item: LabelsPopupProps['item']): item is PromptVersion | ChainVersion => 'runs' in item
+
+function LabelsPopup({ item, activeItem, refresh, withDismiss }: LabelsPopupProps & WithDismiss) {
   const [newLabel, setNewLabel] = useState('')
 
   const trimmedLabel = newLabel.trim()
@@ -57,14 +61,20 @@ function LabelsPopup({ item, activeItem, refreshActiveItem, withDismiss }: Label
 
   const addingNewLabel = trimmedLabel.length > 0 && !labels.includes(trimmedLabel)
 
+  const itemComments = IsVersion(item)
+    ? item.comments
+    : activeItem.versions.flatMap(version => version.comments).filter(comment => comment.runID === item.id)
+
   const toggleLabel = (label: string) => {
     setNewLabel('')
     const checked = !item.labels.includes(label)
-    const itemIsVersion = 'runs' in item
-    if (itemIsVersion) {
-      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked).then(_ => refreshActiveItem())
+    const replyTo = itemComments.findLast(
+      comment => comment.text === label && comment.action === (checked ? 'removeLabel' : 'addLabel')
+    )?.id
+    if (IsVersion(item)) {
+      api.toggleVersionLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refresh)
     } else {
-      api.toggleRunLabel(item.id, activeItem.projectID, label, checked).then(_ => refreshActiveItem())
+      api.toggleRunLabel(item.id, activeItem.projectID, label, checked, replyTo).then(refresh)
     }
   }
 

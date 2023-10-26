@@ -20,16 +20,13 @@ import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context
 import GlobalPopup from '@/components/globalPopup'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
-import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
-import useActiveItem, { useActiveVersion } from '@/src/client/hooks/useActiveItem'
+import useActiveItem from '@/src/client/hooks/useActiveItem'
+import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 import dynamic from 'next/dynamic'
-const PromptView = dynamic(() => import('@/components/prompts/promptView'))
-const ChainView = dynamic(() => import('@/components/chains/chainView'))
-const EndpointsView = dynamic(() => import('@/components/endpoints/endpointsView'))
-const CompareView = dynamic(() => import('@/components/compare/compareView'))
+const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
   props: await loadActiveItem(user, query),
@@ -50,11 +47,18 @@ export default function Home({
   initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
 }) {
-  const [activeProject, refreshProject, activeItem, setActiveItem, activePrompt, activeChain] = useActiveItem(
-    initialActiveProject,
-    initialActiveItem
-  )
-  const [activeVersion, setActiveVersion, activePromptVersion, activeChainVersion] = useActiveVersion(activeItem)
+  const [
+    activeProject,
+    refreshProject,
+    activeItem,
+    setActiveItem,
+    activePrompt,
+    activeChain,
+    activeVersion,
+    setActiveVersion,
+    activePromptVersion,
+    activeChainVersion,
+  ] = useActiveItem(initialActiveProject, initialActiveItem)
 
   const [refreshPrompt, selectPrompt, addPrompt, savePrompt, setModifiedVersion] = usePrompt(
     activeProject,
@@ -166,6 +170,20 @@ export default function Home({
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
+  const [activeRunID, selectComment] = useCommentSelection(activeVersion, async (parentID, versionID) => {
+    const prompt = activeProject.prompts.find(prompt => prompt.id === parentID)
+    const chain = activeProject.chains.find(chain => chain.id === parentID)
+    if (prompt && prompt.id === activePrompt?.id) {
+      return selectVersion(activePrompt.versions.find(version => version.id === versionID)!)
+    } else if (prompt) {
+      return selectPrompt(prompt.id, versionID)
+    } else if (chain && chain.id === activeChain?.id) {
+      return selectVersion(activeChain.versions.find(version => version.id === versionID)!)
+    } else if (chain) {
+      return selectChain(chain.id, versionID)
+    }
+  })
+
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
@@ -176,7 +194,6 @@ export default function Home({
                 <ProjectTopBar
                   workspaces={workspaces}
                   activeProject={activeProject}
-                  activeItem={activePrompt ?? activeChain}
                   onRefreshProject={refreshProject}
                   onNavigateBack={navigateBack}
                   showComments={showComments}
@@ -196,51 +213,29 @@ export default function Home({
                     onSelectEndpoints={selectEndpoints}
                   />
                   <div className='flex-1'>
-                    {activePrompt && activePromptVersion && (
-                      <Suspense>
-                        <PromptView
-                          prompt={activePrompt}
-                          activeVersion={activePromptVersion}
-                          setActiveVersion={selectVersion}
-                          setModifiedVersion={setModifiedVersion}
-                          showComments={showComments}
-                          setShowComments={setShowComments}
-                          savePrompt={() =>
-                            savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)
-                          }
-                        />
-                      </Suspense>
-                    )}
-                    {activeChain && activeChainVersion && (
-                      <Suspense>
-                        <ChainView
-                          key={activeChain.id}
-                          chain={activeChain}
-                          activeVersion={activeChainVersion}
-                          setActiveVersion={selectVersion}
-                          project={activeProject}
-                          showComments={showComments}
-                          setShowComments={setShowComments}
-                          saveChain={saveChain}
-                        />
-                      </Suspense>
-                    )}
-                    {activeItem === CompareItem && (
-                      <Suspense>
-                        <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />
-                      </Suspense>
-                    )}
-                    {activeItem === EndpointsItem && (
-                      <Suspense>
-                        <EndpointsView
-                          project={activeProject}
-                          analytics={analytics}
-                          refreshAnalytics={refreshAnalytics}
-                          onRefresh={refreshProject}
-                        />
-                      </Suspense>
-                    )}
-                    {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
+                    <Suspense>
+                      <MainProjectPane
+                        activeProject={activeProject}
+                        refreshProject={refreshProject}
+                        activeItem={activeItem}
+                        activePrompt={activePrompt}
+                        activeChain={activeChain}
+                        activePromptVersion={activePromptVersion}
+                        activeChainVersion={activeChainVersion}
+                        selectVersion={selectVersion}
+                        setModifiedVersion={setModifiedVersion}
+                        addPrompt={addPrompt}
+                        savePrompt={savePrompt}
+                        saveChain={saveChain}
+                        refreshOnSavePrompt={refreshOnSavePrompt}
+                        activeRunID={activeRunID}
+                        analytics={analytics}
+                        refreshAnalytics={refreshAnalytics}
+                        showComments={showComments}
+                        setShowComments={setShowComments}
+                        selectComment={selectComment}
+                      />
+                    </Suspense>
                   </div>
                 </div>
               </main>

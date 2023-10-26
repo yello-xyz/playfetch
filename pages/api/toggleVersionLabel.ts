@@ -4,7 +4,14 @@ import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function toggleVersionLabel(req: NextApiRequest, res: NextApiResponse, user: User) {
-  await updateVersionLabel(user.id, req.body.versionID, req.body.projectID, req.body.label, req.body.checked)
+  await updateVersionLabel(
+    user.id,
+    req.body.versionID,
+    req.body.projectID,
+    req.body.label,
+    req.body.checked,
+    req.body.replyTo
+  )
   res.json({})
 }
 

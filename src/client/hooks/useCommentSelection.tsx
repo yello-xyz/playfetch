@@ -1,23 +1,17 @@
 import { ChainVersion, PromptVersion } from '@/types'
 import { useState } from 'react'
 
-export default function useCommentSelection<Version extends PromptVersion | ChainVersion>(
-  activeVersion: Version,
-  setActiveVersion: (version: Version) => void,
-  onSelectRun?: () => void
+export default function useCommentSelection(
+  activeVersion: PromptVersion | ChainVersion | undefined,
+  selectVersion: (parentID: number, versionID: number) => Promise<void>
 ) {
   const [activeRunID, setActiveRunID] = useState<number>()
 
-  const selectComment = (version: Version, runID?: number) => {
-    if (version.id !== activeVersion.id) {
+  const selectComment = (parentID: number, versionID: number, runID?: number) => {
+    if (versionID !== activeVersion?.id) {
       setActiveRunID(undefined)
-      setActiveVersion(version)
-      setTimeout(() => {
-        onSelectRun?.()
-        setActiveRunID(runID)
-      }, 1000)
+      selectVersion(parentID, versionID).then(() => setTimeout(() => setActiveRunID(runID), 1000))
     } else {
-      onSelectRun?.()
       setActiveRunID(runID)
     }
   }

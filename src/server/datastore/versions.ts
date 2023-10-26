@@ -1,4 +1,4 @@
-import { ChainItemWithInputs, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
+import { ChainItemWithInputs, Comment, PromptConfig, Prompts, RawChainVersion, RawPromptVersion } from '@/types'
 import {
   Entity,
   allocateID,
@@ -89,7 +89,7 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   if (markAsRun && !versionData.didRun) {
     await updateVersion({ ...versionData, didRun: true })
   }
-  return toVersion(versionData, [], [])
+  return toVersion(versionData, [])
 }
 
 const DefaultPrompts = { main: '' }
@@ -218,6 +218,7 @@ export async function processLabels(
   projectID: number,
   label: string,
   checked: boolean,
+  replyTo?: number,
   runID?: number
 ) {
   if (checked !== labels.includes(label)) {
@@ -225,7 +226,16 @@ export async function processLabels(
     if (checked) {
       await ensureProjectLabel(userID, projectID, label)
     }
-    await saveComment(userID, parentID, versionID, label, checked ? 'addLabel' : 'removeLabel', runID)
+    await saveComment(
+      userID,
+      projectID,
+      parentID,
+      versionID,
+      label,
+      replyTo,
+      checked ? 'addLabel' : 'removeLabel',
+      runID
+    )
     return newLabels
   }
   return undefined
@@ -236,13 +246,23 @@ export async function updateVersionLabel(
   versionID: number,
   projectID: number,
   label: string,
-  checked: boolean
+  checked: boolean,
+  replyTo?: number
 ) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)
   const labels = JSON.parse(versionData.labels) as string[]
-  const newLabels = await processLabels(labels, userID, versionID, versionData.parentID, projectID, label, checked)
+  const newLabels = await processLabels(
+    labels,
+    userID,
+    versionID,
+    versionData.parentID,
+    projectID,
+    label,
+    checked,
+    replyTo
+  )
   if (newLabels) {
-    await updateVersion({ ...versionData, labels: JSON.stringify(newLabels) })
+    await updateVersion({ ...versionData, labels: JSON.stringify(newLabels), didRun: true })
   }
 }
 
@@ -276,17 +296,15 @@ const toVersionData = (
   excludeFromIndexes: ['prompts', 'config', 'items', 'labels'],
 })
 
-export const toUserVersions = (userID: number, versions: any[], runs: any[], comments: any[]) => {
+export const toUserVersions = (userID: number, versions: any[], runs: any[]) => {
   const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
   const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
-  return [...userVersion, ...versionsWithRuns, ...initialVersion]
-    .map(version => toVersion(version, runs, comments))
-    .reverse()
+  return [...userVersion, ...versionsWithRuns, ...initialVersion].map(version => toVersion(version, runs)).reverse()
 }
 
-const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | RawChainVersion => ({
+const toVersion = (data: any, runs: any[]): RawPromptVersion | RawChainVersion => ({
   id: getID(data),
   parentID: data.parentID,
   userID: data.userID,
@@ -300,10 +318,6 @@ const toVersion = (data: any, runs: any[], comments: any[]): RawPromptVersion | 
   runs: runs
     .filter(run => run.versionID === getID(data))
     .map(toRun)
-    .reverse(),
-  comments: comments
-    .filter(comment => comment.versionID === getID(data))
-    .map(toComment)
     .reverse(),
 })
 
@@ -339,7 +353,10 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   }
 }
 
-export async function getRecentVersions(limit: number): Promise<(RawPromptVersion | RawChainVersion)[]> {
-  const recentVersionsData = await getRecentEntities(Entity.VERSION, limit)
-  return recentVersionsData.map(data => toVersion(data, [], []))
+export async function getRecentVersions(
+  before: Date | undefined,
+  limit: number
+): Promise<(RawPromptVersion | RawChainVersion)[]> {
+  const recentVersionsData = await getRecentEntities(Entity.VERSION, limit, undefined, before)
+  return recentVersionsData.map(data => toVersion(data, []))
 }

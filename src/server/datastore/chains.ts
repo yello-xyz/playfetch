@@ -4,7 +4,6 @@ import {
   buildKey,
   getDatastore,
   getEntities,
-  getEntity,
   getEntityKey,
   getEntityKeys,
   getID,
@@ -75,13 +74,12 @@ export async function getChainForUser(
 
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
   const runs = await getOrderedEntities(Entity.RUN, 'parentID', chainID)
-  const comments = await getOrderedEntities(Entity.COMMENT, 'parentID', chainID)
 
   const inputValues = await getTrustedParentInputValues(chainID)
 
   return {
     chain: toChain(chainData),
-    versions: toUserVersions(userID, versions, runs, comments) as RawChainVersion[],
+    versions: toUserVersions(userID, versions, runs) as RawChainVersion[],
     inputValues,
   }
 }
@@ -109,7 +107,7 @@ export async function duplicateChainForUser(userID: number, chainID: number): Pr
   const chainData = await getVerifiedUserChainData(userID, chainID)
   const { chainID: newChainID, versionID } = await addChainForUser(userID, chainData.projectID, chainData.name)
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
-  const lastUserVersion = toUserVersions(userID, versions, [], []).slice(-1)[0] as RawChainVersion
+  const lastUserVersion = toUserVersions(userID, versions, []).slice(-1)[0] as RawChainVersion
   await saveChainVersionForUser(userID, newChainID, lastUserVersion.items, versionID)
   return newChainID
 }
@@ -156,8 +154,12 @@ export async function augmentChainDataWithNewVersion(
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)
 }
 
+const getChainData = (chainID: number) => getKeyedEntity(Entity.CHAIN, chainID)
+
+export const getTrustedChain = (chainID: number) => getChainData(chainID).then(toChain)
+
 export async function updateChainOnDeletedVersion(chainID: number, deletedVersionID: number) {
-  const chainData = await getKeyedEntity(Entity.CHAIN, chainID)
+  const chainData = await getChainData(chainID)
   const references = chainData.references ? JSON.parse(chainData.references) : {}
   references[deletedVersionID] = undefined
   await updateChain({ ...chainData, references: JSON.stringify(references) }, true)

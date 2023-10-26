@@ -162,15 +162,15 @@ const renderPieSegment = ({
   outerRadius,
   startAngle,
   endAngle,
-  payload,
+  name,
 }: {
-  cx: number
-  cy: number
-  innerRadius: number
-  outerRadius: number
-  startAngle: number
-  endAngle: number
-  payload: { name: string }
+  cx?: number
+  cy?: number
+  innerRadius?: number
+  outerRadius?: number
+  startAngle?: number
+  endAngle?: number
+  name?: string
 }) => (
   <g>
     <defs>
@@ -180,7 +180,7 @@ const renderPieSegment = ({
       </linearGradient>
     </defs>
     <text x={cx} y={cy} dy={8} textAnchor='middle' fill='#333A46' fontSize={30} fontWeight={600}>
-      {payload.name}
+      {name}
     </text>
     <Sector
       cx={cx}

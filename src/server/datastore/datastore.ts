@@ -1,6 +1,6 @@
 import { Datastore, Key, PropertyFilter, Query, Transaction } from '@google-cloud/datastore'
 import { AggregateQuery } from '@google-cloud/datastore/build/src/aggregate'
-import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
+import { EntityFilter, and } from '@google-cloud/datastore/build/src/filter'
 
 let datastore: Datastore
 export const getDatastore = () => {
@@ -11,6 +11,7 @@ export const getDatastore = () => {
 }
 
 export enum Entity {
+  ENVIRONMENT = 'environment',
   USER = 'user',
   PROJECT = 'project',
   PROMPT = 'prompt',
@@ -72,8 +73,27 @@ const getInternalFilteredEntities = (
     .runQuery(buildQuery(type, filter, limit, sortKeys, selectKeys))
     .then(([entities]) => entities)
 
-export const getRecentEntities = (type: string, limit?: number, since?: Date, sortKey = 'createdAt') =>
-  getInternalFilteredEntities(type, since ? new PropertyFilter(sortKey, '>=', since) : undefined, limit, [sortKey])
+export const afterDateFilter = (since: Date, key = 'createdAt', inclusive = false) =>
+  new PropertyFilter(key, inclusive ? '>=' : '>', since)
+export const beforeDateFilter = (before: Date, key = 'createdAt', inclusive = false) =>
+  new PropertyFilter(key, inclusive ? '<=' : '<', before)
+const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = false) =>
+  since && before
+    ? and([afterDateFilter(since, key, !pagingBackwards), beforeDateFilter(before, key, pagingBackwards)])
+    : since
+    ? afterDateFilter(since, key, !pagingBackwards)
+    : before
+    ? beforeDateFilter(before, key, pagingBackwards)
+    : undefined
+
+export const getRecentEntities = (
+  type: string,
+  limit?: number,
+  since?: Date,
+  before?: Date,
+  sortKey = 'createdAt',
+  pagingBackwards = false
+) => getInternalFilteredEntities(type, dateFilter(sortKey, since, before, pagingBackwards), limit, [sortKey])
 
 export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
   getInternalFilteredEntities(type, filter, limit)

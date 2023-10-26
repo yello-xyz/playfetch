@@ -26,6 +26,7 @@ import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
 import { getAnalyticsForProject } from './analytics'
+import { toComment } from './comments'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -95,6 +96,8 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const prompts = promptData.map(toPrompt)
   const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
   const chains = chainData.map(toChain)
+  const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
+  const comments = commentsData.map(toComment).reverse()
   const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
 
   return {
@@ -106,6 +109,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     users,
     pendingUsers,
     availableLabels: JSON.parse(projectData.labels),
+    comments,
   }
 }
 
@@ -189,9 +193,7 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
   )
 }
 
-export async function ensureProjectAccess(userID: number, projectID: number) {
-  await getVerifiedUserProjectData(userID, projectID)
-}
+export const ensureProjectAccess = (userID: number, projectID: number) => getVerifiedUserProjectData(userID, projectID)
 
 const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
 
@@ -297,16 +299,15 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
 
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
   const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
+  const commentKeys = await getEntityKeys(Entity.COMMENT, 'projectID', projectID)
 
   const versionKeys = [] as Key[]
   const runKeys = [] as Key[]
-  const commentKeys = [] as Key[]
   const inputKeys = [] as Key[]
   const cacheKeys = [] as Key[]
   for (const parentID of [...promptKeys, ...chainKeys].map(key => getID({ key }))) {
     versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', parentID)))
     runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', parentID)))
-    commentKeys.push(...(await getEntityKeys(Entity.COMMENT, 'parentID', parentID)))
     inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', parentID)))
     cacheKeys.push(...(await getEntityKeys(Entity.CACHE, 'parentID', parentID)))
   }
@@ -333,35 +334,40 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
   ])
 }
 
-export async function getRecentProjects(limit = 100): Promise<RecentProject[]> {
-  const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, 'lastEditedAt')
+export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {
+  if (!projects) {
+    const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, undefined, 'lastEditedAt')
+    projects = recentProjectsData.map(projectData => toProject(projectData, 0))
+  }
 
   const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [
-    ...new Set([...recentProjectsData.map(projectData => projectData.workspaceID)]),
+    ...new Set([...projects.map(project => project.workspaceID)]),
   ])
 
   const usersData = await getKeyedEntities(Entity.USER, [
     ...new Set([...workspacesData.map(workspaceData => workspaceData.userID)]),
   ])
 
-  return recentProjectsData
-    .map(projectData => toRecentProject(projectData, workspacesData, usersData))
+  return projects
+    .map(project => toRecentProject(project, workspacesData, usersData))
     .sort((a, b) => b.timestamp - a.timestamp)
 }
 
-const toRecentProject = (projectData: any, workspacesData: any[], usersData: any[]): RecentProject => {
-  const project = toProject(projectData, 0)
-
+const toRecentProject = (project: Project, workspacesData: any[], usersData: any[]): RecentProject => {
   const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
-  const workspace = workspaceData.name
+  const workspaceName = workspaceData.name
 
   const userData = usersData.find(user => getID(user) === workspaceData.userID)
-  const creator = userData.fullName
+  const workspaceCreator = userData.fullName
 
-  return { ...project, workspace, creator }
+  return { ...project, workspaceName, workspaceCreator }
 }
 
-export async function getMetricsForProject(projectID: number, workspaceID: number): Promise<ProjectMetrics> {
+export async function getMetricsForProject(
+  projectID: number,
+  workspaceID: number,
+  before?: Date
+): Promise<ProjectMetrics> {
   const promptCount = await getEntityCount(Entity.PROMPT, 'projectID', projectID)
   const chainCount = await getEntityCount(Entity.CHAIN, 'projectID', projectID)
   const endpointCount = await getEntityCount(Entity.ENDPOINT, 'projectID', projectID)
@@ -369,7 +375,7 @@ export async function getMetricsForProject(projectID: number, workspaceID: numbe
   const analytics = await getAnalyticsForProject(0, projectID, true)
 
   const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, workspaceID)
-  const activeUsers = await getActiveUsers([...users, ...pendingUsers])
+  const activeUsers = await getActiveUsers([...users, ...pendingUsers], before)
 
   return {
     promptCount,

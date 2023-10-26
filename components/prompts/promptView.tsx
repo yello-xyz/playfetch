@@ -2,14 +2,11 @@ import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
-import CommentsPane from '../commentsPane'
 import { ReactNode, useState } from 'react'
 import TabSelector from '../tabSelector'
-import useInitialState from '@/src/client/hooks/useInitialState'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testDataPane'
@@ -33,25 +30,21 @@ export default function PromptView({
   activeVersion,
   setActiveVersion,
   setModifiedVersion,
-  showComments,
-  setShowComments,
   savePrompt,
+  activeRunID,
 }: {
   prompt: ActivePrompt
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  showComments: boolean
-  setShowComments: (show: boolean) => void
   savePrompt: () => Promise<number>
+  activeRunID?: number
 }) {
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
-
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, setActiveVersion)
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
   const runPrompt = (inputs: PromptInputs[]) => {
@@ -89,11 +82,7 @@ export default function PromptView({
   const minHeight = promptHeight + 2 * 16
   return (
     <Allotment>
-      <Allotment.Pane
-        key={showComments.toString()}
-        className='bg-gray-25'
-        minSize={minWidth}
-        preferredSize={showComments ? '40%' : '50%'}>
+      <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
         <Allotment vertical>
           <Allotment.Pane minSize={minTopPaneHeight}>
             {activeTab === 'Prompt versions' ? (
@@ -152,15 +141,6 @@ export default function PromptView({
             isRunning={isRunning}
           />
         </div>
-      </Allotment.Pane>
-      <Allotment.Pane minSize={showComments ? minWidth : 0} preferredSize={minWidth} visible={showComments}>
-        <CommentsPane
-          activeItem={prompt}
-          versions={prompt.versions}
-          onSelectComment={selectComment}
-          showComments={showComments}
-          setShowComments={setShowComments}
-        />
       </Allotment.Pane>
     </Allotment>
   )

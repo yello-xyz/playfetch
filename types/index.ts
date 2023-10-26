@@ -4,6 +4,7 @@ export type User = {
   fullName: string
   imageURL: string
   isAdmin: boolean
+  lastLoginAt?: number
 }
 
 type PendingAttributes = {
@@ -51,6 +52,7 @@ export type ActiveProject = Project & {
   users: User[]
   pendingUsers: PendingUser[]
   availableLabels: string[]
+  comments: Comment[]
 }
 
 export type Prompt = {
@@ -144,7 +146,6 @@ type Version = {
   labels: string[]
   didRun: boolean
   runs: Run[]
-  comments: Comment[]
 }
 
 export type Prompts = {
@@ -158,8 +159,12 @@ export type RawChainVersion = Version & { items: ChainItemWithInputs[] }
 export const IsRawPromptVersion = (version: RawPromptVersion | RawChainVersion): version is RawPromptVersion =>
   'prompts' in version && version.prompts !== undefined && version.prompts !== null
 
-export type PromptVersion = RawPromptVersion & { usedInChain: string | null; usedAsEndpoint: boolean }
-export type ChainVersion = RawChainVersion & { usedAsEndpoint: boolean }
+export type PromptVersion = RawPromptVersion & {
+  comments: Comment[]
+  usedInChain: string | null
+  usedAsEndpoint: boolean
+}
+export type ChainVersion = RawChainVersion & { comments: Comment[]; usedAsEndpoint: boolean }
 export const IsPromptVersion = (version: PromptVersion | ChainVersion): version is PromptVersion =>
   IsRawPromptVersion(version)
 
@@ -267,10 +272,13 @@ export type Usage = {
 export type CommentAction = 'addLabel' | 'removeLabel'
 
 export type Comment = {
+  id: number
   userID: number
+  parentID: number
   versionID: number
   text: string
   timestamp: number
+  replyTo?: number
   action?: CommentAction
   quote?: string
   runID?: number
@@ -305,6 +313,7 @@ export type ActiveUser = User & {
   lastActive: number
   startTimestamp: number
   versionCount: number
+  runCount: number
   promptCount: number
   chainCount: number
   commentCount: number
@@ -315,15 +324,17 @@ export type UserMetrics = {
   createdWorkspaceCount: number
   workspaceAccessCount: number
   projectAccessCount: number
-  createdVersionCount: number
-  createdCommentCount: number
-  createdEndpointCount: number
+  activity: { timestamp: number; versions: number; runs: number; comments: number; endpoints: number }[]
   providers: { provider: ModelProvider | QueryProvider; cost: number }[]
+  sharedProjects: RecentProject[]
+  pendingSharedProjects: RecentProject[]
+  workspaces: Workspace[]
+  pendingWorkspaces: Workspace[]
 }
 
 export type RecentProject = Project & {
-  workspace: string
-  creator: string
+  workspaceName: string
+  workspaceCreator: string
 }
 
 export type ProjectMetrics = {
@@ -331,6 +342,12 @@ export type ProjectMetrics = {
   chainCount: number
   endpointCount: number
   analytics: Analytics
+  users: ActiveUser[]
+  pendingUsers: ActiveUser[]
+}
+
+export type WorkspaceMetrics = ActiveWorkspace & {
+  projects: RecentProject[]
   users: ActiveUser[]
   pendingUsers: ActiveUser[]
 }

@@ -1,4 +1,4 @@
-import { ActiveProject, ActivePrompt, Chain, Workspace } from '@/types'
+import { ActiveProject, Workspace } from '@/types'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { Suspense, useState } from 'react'
@@ -15,7 +15,6 @@ const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 export default function ProjectTopBar({
   workspaces,
   activeProject,
-  activeItem,
   onRefreshProject,
   onNavigateBack,
   showComments,
@@ -23,7 +22,6 @@ export default function ProjectTopBar({
 }: {
   workspaces: Workspace[]
   activeProject: ActiveProject
-  activeItem?: ActivePrompt | Chain
   onRefreshProject: () => void
   onNavigateBack: () => void
   showComments: boolean
@@ -37,9 +35,6 @@ export default function ProjectTopBar({
   }
 
   const workspace = workspaces.find(workspace => workspace.id === activeProject.workspaceID)
-
-  const promptHasComments =
-    activeItem && 'versions' in activeItem && (activeItem?.versions ?? []).some(version => version.comments.length > 0)
 
   return (
     <>
@@ -77,7 +72,9 @@ export default function ProjectTopBar({
             pendingUsers={activeProject.pendingUsers}
             onInvite={inviteMembers}
           />
-          {promptHasComments && <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />}
+          {activeProject.comments.length > 0 && (
+            <TopBarButton icon={commentIcon} onClick={() => setShowComments(!showComments)} />
+          )}
         </TopBarAccessoryItem>
       </TopBar>
     </>
