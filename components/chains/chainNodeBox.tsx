@@ -9,7 +9,7 @@ import {
   QueryChainItem,
   QueryConfig,
 } from '@/types'
-import { ChainNode, IsChainItem } from './chainNode'
+import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
@@ -72,9 +72,9 @@ export function ChainNodeBox({
       | Omit<QueryChainItem, 'branch'>
       | Omit<PromptChainItem, 'branch'>
   ) => {
-    const currentBranch = items[itemIndex]?.branch ?? 0
-    const itemWithBranch = { ...item, branch: currentBranch }
-    saveItems([...items.slice(0, itemIndex), itemWithBranch, ...items.slice(itemIndex)])
+    const itemWithBranch = { ...item, branch: items[itemIndex]?.branch ?? 0 }
+    const shiftedItems = shiftBranchesForItemInsertion(items, itemIndex, itemWithBranch)
+    saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
     setActiveIndex(index)
   }
 
@@ -135,4 +135,26 @@ export function ChainNodeBox({
       </div>
     </>
   )
+}
+
+const shiftBranchesForItemInsertion = (items: ChainItem[], index: number, newItem: ChainItem) => {
+  if (IsBranchChainItem(newItem)) {
+    const currentNode: ChainItem | undefined = items[index]
+    const currentNodeIsBranch = currentNode && IsBranchChainItem(currentNode)
+    const nextNode: ChainItem | undefined = items[index + 1]
+    const nextNodeIsSibling =
+      nextNode && nextNode.branch > newItem.branch + (currentNodeIsBranch ? currentNode.branches.length - 1 : 0)
+    const siblingNode = nextNodeIsSibling ? nextNode : undefined
+    const nextNodes = items.slice(index)
+    const maxSubTreeBranch = Math.max(
+      newItem.branch,
+      ...nextNodes.filter(node => !siblingNode || node.branch < siblingNode.branch).map(node => node.branch)
+    )
+    return items.map(item => ({
+      ...item,
+      branch: item.branch > maxSubTreeBranch ? item.branch + newItem.branches.length - 1 : item.branch,
+    }))
+  } else {
+    return items
+  }
 }
