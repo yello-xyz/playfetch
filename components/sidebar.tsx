@@ -53,6 +53,7 @@ export function SidebarButton({
   link,
   target,
   actionComponent,
+  prefetch = true,
 }: {
   title: string
   icon?: StaticImageData
@@ -61,13 +62,14 @@ export function SidebarButton({
   link?: string
   target?: HTMLAttributeAnchorTarget
   actionComponent?: ReactNode
+  prefetch?: boolean
 }) {
   const activeClass = 'bg-blue-50 '
   const baseHoverClass = 'hover:bg-gray-100'
   const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg group w-[220px]'
   const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
-    <LinkWrapper link={link} target={target}>
+    <LinkWrapper link={link} target={target} prefetch={prefetch}>
       <div className={className} onClick={onClick}>
         {icon && <Icon icon={icon} />}
         <div className='flex-1 w-40 overflow-hidden font-normal text-gray-700 text-ellipsis whitespace-nowrap'>
@@ -83,13 +85,15 @@ function LinkWrapper({
   link,
   target,
   children,
+  prefetch,
 }: {
   link?: string
   target?: HTMLAttributeAnchorTarget
   children: ReactNode
+  prefetch: boolean
 }) {
   return link ? (
-    <Link href={link} target={target}>
+    <Link href={link} target={target} prefetch={prefetch}>
       {children}
     </Link>
   ) : (
