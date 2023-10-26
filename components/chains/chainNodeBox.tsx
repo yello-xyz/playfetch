@@ -1,4 +1,13 @@
-import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryConfig } from '@/types'
+import {
+  ActiveChain,
+  ChainItem,
+  ChainVersion,
+  CodeChainItem,
+  Prompt,
+  PromptChainItem,
+  QueryChainItem,
+  QueryConfig,
+} from '@/types'
 import { ChainNode, IsChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
@@ -55,8 +64,12 @@ export function ChainNodeBox({
 
   const removeItem = () => saveItems([...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)])
 
-  const insertItem = (item: ChainItem) => {
-    saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex)])
+  const insertItem = (
+    item: Omit<CodeChainItem, 'branch'> | Omit<QueryChainItem, 'branch'> | Omit<PromptChainItem, 'branch'>
+  ) => {
+    const currentBranch = items[itemIndex]?.branch ?? 0
+    const itemWithBranch = { ...item, branch: currentBranch }
+    saveItems([...items.slice(0, itemIndex), itemWithBranch, ...items.slice(itemIndex)])
     setActiveIndex(index)
   }
 
@@ -64,13 +77,12 @@ export function ChainNodeBox({
     insertItem({
       promptID,
       versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
-      branch: 0,
     })
 
   const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
 
-  const insertCodeBlock = () => insertItem({ code: '', branch: 0 })
-  const insertQuery = defaultQueryConfig ? () => insertItem({ ...defaultQueryConfig, branch: 0 }) : undefined
+  const insertCodeBlock = () => insertItem({ code: '' })
+  const insertQuery = defaultQueryConfig ? () => insertItem({ ...defaultQueryConfig }) : undefined
 
   const duplicateItem = () => {
     insertItem({ ...(chainNode as ChainItem), output: undefined })
