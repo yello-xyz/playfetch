@@ -57,7 +57,7 @@ export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
 }
 
 export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
-  const maxSubTreeBranch = Math.max(-1, ...SubtreeForNode(nodes, index).map(node => node.branch))
+  const maxSubTreeBranch = Math.max(nodes[index]?.branch ?? 0, ...SubtreeForNode(nodes, index).map(node => node.branch))
   return nodes.map(node => node.branch > maxSubTreeBranch ? ({ ...node, branch: node.branch + 1 }) : node)
 }
 

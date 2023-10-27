@@ -34,6 +34,7 @@ testSibling(4, true)
 testSibling(5, false)
 testSibling(6, true)
 testSibling(7, true)
+testSibling(8, false)
 
 const testSubtree = (index: number, expected: number[]) =>
   test(`Subtree at position ${index} is [${expected}]`, () => expectItemsToBe(SubtreeForNode(chain, index), expected))
@@ -46,6 +47,7 @@ testSubtree(4, [4])
 testSubtree(5, [5])
 testSubtree(6, [6])
 testSubtree(7, [7])
+testSubtree(8, [])
 
 const testBranch = (index: number, branchIndex: number, expected: number[]) =>
   test(`Branch ${branchIndex} for branch at position ${index} is [${expected}]`, () =>
@@ -80,6 +82,7 @@ testShiftRight(4, [])
 testShiftRight(5, [3, 4, 6, 7])
 testShiftRight(6, [4, 7])
 testShiftRight(7, [4])
+testShiftRight(8, [3, 4, 6, 7])
 
 const testShiftDown = (index: number, expected = chain.map((_, index) => index)) =>
   test(`Shift down at position ${index} yields [${expected}]`, () =>
@@ -93,3 +96,4 @@ testShiftDown(4, [0, 1, 2, 3, 5, 6, 7, 4])
 testShiftDown(5, [0, 1, 2, 3, 4, 6, 7, 5])
 testShiftDown(6, [0, 1, 2, 3, 4, 5, 7, 6])
 testShiftDown(7)
+testShiftDown(8)
