@@ -20,3 +20,18 @@ export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot 
     .slice(index + (includingRoot ? 0 : 1))
     .filter(node => node.branch > lowerBound && node.branch < upperBound)
 }
+
+export const ChildrenForNode = (nodes: ChainItem[], index: number) =>
+  takeWhile(SubtreeForNode(nodes, index, false), (_, index) => index === 0 || IsSiblingNode(nodes, index))
+
+const takeWhile = <T>(array: T[], predicate: (value: T, index: number) => boolean) => {
+  const result = []
+  for (let index = 0; index < array.length; ++index) {
+    const value = array[index]
+    if (!predicate(value, index)) {
+      break
+    }
+    result.push(value)
+  }
+  return result
+}
