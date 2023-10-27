@@ -15,6 +15,7 @@ import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
+import { IsSiblingNode } from '@/src/common/branching'
 
 export function ChainNodeBox({
   chain,
@@ -141,12 +142,8 @@ export function ChainNodeBox({
 
 const shiftBranchesForItemInsertion = (items: ChainItem[], index: number, newItem: ChainItem) => {
   if (IsBranchChainItem(newItem)) {
-    const currentNode: ChainItem | undefined = items[index]
-    const currentNodeIsBranch = currentNode && IsBranchChainItem(currentNode)
     const nextNode: ChainItem | undefined = items[index + 1]
-    const nextNodeIsSibling =
-      nextNode && nextNode.branch > newItem.branch + (currentNodeIsBranch ? currentNode.branches.length - 1 : 0)
-    const siblingNode = nextNodeIsSibling ? nextNode : undefined
+    const siblingNode = IsSiblingNode(items, index + 1) ? nextNode : undefined
     const nextNodes = items.slice(index)
     const maxSubTreeBranch = Math.max(
       newItem.branch,
