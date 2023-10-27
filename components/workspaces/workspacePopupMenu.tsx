@@ -1,4 +1,4 @@
-import { Workspace } from '@/types'
+import { ActiveWorkspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -7,14 +7,12 @@ import PickNameDialog from '../pickNameDialog'
 
 export default function WorkspacePopupMenu({
   workspace,
-  isOnlyUser,
   isMenuExpanded,
   setMenuExpanded,
   onRenamed,
   onDeleted,
 }: {
-  workspace: Workspace
-  isOnlyUser: boolean
+  workspace: ActiveWorkspace
   isMenuExpanded: boolean
   setMenuExpanded: (isExpanded: boolean) => void
   onRenamed: () => void
@@ -53,7 +51,7 @@ export default function WorkspacePopupMenu({
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
         <PopupMenuItem title='Rename Workspace…' callback={renameWorkspace} first />
-        {isOnlyUser ? (
+        {workspace.users.length === 1 ? (
           <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} last />
         ) : (
           <PopupMenuItem separated destructive title='Leave Workspace' callback={leaveWorkspace} last />

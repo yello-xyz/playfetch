@@ -47,7 +47,6 @@ export default function WorkspaceTopBar({
               <div className='absolute shadow-sm -left-1 top-10'>
                 <WorkspacePopupMenu
                   workspace={activeWorkspace}
-                  isOnlyUser={activeWorkspace.users.length === 1}
                   isMenuExpanded={isMenuExpanded}
                   setMenuExpanded={setMenuExpanded}
                   onRenamed={onRenamed}
