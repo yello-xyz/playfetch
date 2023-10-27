@@ -21,7 +21,7 @@ import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } fr
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
-import { ensureWorkspaceAccess, getPendingAccessObjects } from './workspaces'
+import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
@@ -271,14 +271,12 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
   getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
 
+const getProjectUsers = (projectID: number): Promise<[User[], PendingUser[]]> =>
+  getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
+
 async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<[User[], PendingUser[]]> {
-  const [projectUsers, pendingProjectUsers] = await getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
-  const [workspaceUsers, pendingWorkspaceUsers] = await getPendingAccessObjects(
-    workspaceID,
-    'workspace',
-    Entity.USER,
-    toUser
-  )
+  const [projectUsers, pendingProjectUsers] = await getProjectUsers(projectID)
+  const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
   return [
     [...projectUsers, ...workspaceUsers.filter(user => !projectUsers.some(u => u.id === user.id))],
     [
@@ -291,12 +289,13 @@ async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: numbe
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectAccess(userID, projectID)
-  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
-  if (accessKeys.length > 1) {
+  const [users] = await getProjectUsers(projectID)
+  if (users.some(user => user.id !== userID)) {
     // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
     throw new Error('Cannot delete multi-user project')
   }
 
+  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
   const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
   const commentKeys = await getEntityKeys(Entity.COMMENT, 'projectID', projectID)
