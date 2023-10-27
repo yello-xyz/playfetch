@@ -5,7 +5,7 @@ import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
-import { SubtreeForBranchOfNode, ShiftBranchesForBranchAddedAtNode } from '@/src/common/branching'
+import { SubtreeForBranchOfNode, ShiftRight } from '@/src/common/branching'
 
 const placeholderSuffix = (branchIndex: number) => {
   switch (branchIndex) {
@@ -37,8 +37,7 @@ export default function BranchNodeEditor({
   const updateBranchName = (branchIndex: number, name: string) =>
     updateItem(updateBranches([...item.branches.slice(0, branchIndex), name, ...item.branches.slice(branchIndex + 1)]))
 
-  const addBranch = () =>
-    updateItem(updateBranches([...item.branches, '']), ShiftBranchesForBranchAddedAtNode(items, index))
+  const addBranch = () => updateItem(updateBranches([...item.branches, '']), ShiftRight(items, index))
 
   const deleteBranch = (branchIndex: number) =>
     updateItem(

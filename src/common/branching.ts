@@ -1,7 +1,7 @@
 import { ChainItem } from '@/types'
 import { IsBranchChainItem } from '@/components/chains/chainNode'
 
-export const IsSiblingNode = (nodes: ChainItem[], index: number) => {
+export const IsSiblingNode = (nodes: ChainItem[], index: number): boolean => {
   if (index <= 0 || index > nodes.length - 1) {
     return false
   }
@@ -10,7 +10,7 @@ export const IsSiblingNode = (nodes: ChainItem[], index: number) => {
   return node.branch > previousNode.branch + (IsBranchChainItem(previousNode) ? previousNode.branches.length - 1 : 0)
 }
 
-export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot = true) => {
+export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot = true): ChainItem[] => {
   if (index < 0 || index > nodes.length - 1) {
     return []
   }
@@ -21,7 +21,7 @@ export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot 
     .filter(node => node.branch > lowerBound && node.branch < upperBound)
 }
 
-export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number) => {
+export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number): ChainItem[] => {
   const descendants = SubtreeForNode(nodes, index, false)
   const children = takeWhile(descendants, (_, index) => index === 0 || IsSiblingNode(nodes, index))
 
@@ -40,11 +40,47 @@ export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branch
   return branchIndex < branches.length ? branches[branchIndex] : []
 }
 
-export const ShiftBranchesForBranchAddedAtNode = (items: ChainItem[], index: number) => {
-  const maxSubTreeBranch = Math.max(-1, ...SubtreeForNode(items, index).map(node => node.branch))
-  return items.map(node => node.branch > maxSubTreeBranch ? ({ ...node, branch: node.branch + 1 }) : node)
+export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
+  const splits = [] as ChainItem[][]
+  let split = [] as ChainItem[]
+  for (const [index, node] of nodes.entries()) {
+    if (IsSiblingNode(nodes, index)) {
+      split.push(node)
+    } else if (split.length > 0) {
+      splits.push(split)
+      split = []
+    }
+  }
+  return splits
 }
-  
+
+export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
+  const maxSubTreeBranch = Math.max(-1, ...SubtreeForNode(nodes, index).map(node => node.branch))
+  return nodes.map(node => node.branch > maxSubTreeBranch ? ({ ...node, branch: node.branch + 1 }) : node)
+}
+
+export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
+  const splits = SplitNodes(nodes)
+
+  const subtree = SubtreeForNode(nodes, index)
+  const leftBranch = Math.min(...subtree.map(node => node.branch))
+  const rightBranch = Math.max(...subtree.map(node => node.branch))
+  const inSubtree = (node: ChainItem) => node.branch >= leftBranch && node.branch <= rightBranch
+
+  const resultSplits = [] as ChainItem[][]
+  for (const [index, split] of [...splits, []].entries()) {
+    const previousSplit = index > 0 ? splits[index - 1] : []
+    const previousSubtreeSplit = previousSplit.filter(inSubtree)
+    resultSplits.push([
+      ...split.filter(node => node.branch < leftBranch),
+      ...previousSubtreeSplit,
+      ...split.filter(node => node.branch > rightBranch),
+    ])
+  }
+
+  return resultSplits.filter(split => split.length > 0).flat()
+}
+
 const takeWhile = <T>(array: T[], predicate: (value: T, index: number) => boolean) => {
   const result = []
   for (let index = 0; index < array.length; ++index) {

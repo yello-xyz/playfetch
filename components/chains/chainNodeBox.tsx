@@ -15,7 +15,7 @@ import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
-import { ShiftBranchesForBranchAddedAtNode } from '@/src/common/branching'
+import { ShiftRight, ShiftDown } from '@/src/common/branching'
 
 export function ChainNodeBox({
   chain,
@@ -74,7 +74,7 @@ export function ChainNodeBox({
       | Omit<PromptChainItem, 'branch'>
   ) => {
     const itemWithBranch = { ...item, branch: items[itemIndex]?.branch ?? 0 }
-    const shiftedItems = IsBranchChainItem(itemWithBranch) ? ShiftBranchesForBranchAddedAtNode(items, itemIndex) : items
+    const shiftedItems = ShiftDown(IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex) : items, itemIndex)
     saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
     setActiveIndex(index)
   }
