@@ -271,11 +271,11 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
   getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
 
-const getProjectUsers = (projectID: number): Promise<[User[], PendingUser[]]> =>
+const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
 
 async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<[User[], PendingUser[]]> {
-  const [projectUsers, pendingProjectUsers] = await getProjectUsers(projectID)
+  const [projectUsers, pendingProjectUsers] = await getSharedProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
   return [
     [...projectUsers, ...workspaceUsers.filter(user => !projectUsers.some(u => u.id === user.id))],
@@ -289,10 +289,9 @@ async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: numbe
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectAccess(userID, projectID)
-  const [users] = await getProjectUsers(projectID)
-  if (users.some(user => user.id !== userID)) {
-    // TODO this doesn't stop you from deleting a project in a shared workspace that wasn't shared separately.
-    throw new Error('Cannot delete multi-user project')
+  const [users] = await getSharedProjectUsers(projectID)
+  if (users.some(user => user.id === userID)) {
+    throw new Error('Cannot delete project that was shared with user who is trying to delete it')
   }
 
   const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
