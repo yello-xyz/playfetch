@@ -11,6 +11,7 @@ import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import QueryNodeEditor from './queryNodeEditor'
 import BranchNodeEditor from './branchNodeEditor'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 
 export default function ChainNodeEditor({
   items,
@@ -82,13 +83,29 @@ export default function ChainNodeEditor({
     }
   }
 
-  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
+  const setDialogPrompt = useModalDialogPrompt()
 
   const saveAndClose = async () => {
     saveItems(updatedItems)
     await saveAndRefreshPrompt(versionID => saveItems(itemsWithUpdate({ ...activeItem, versionID })))
     dismiss()
   }
+
+  const promptSaveAndClose = () => {
+    const prunedNodeCount = items.length - updatedItems.length
+    if (prunedNodeCount > 0) {
+      setDialogPrompt({
+        title: `This will prune a branch with ${prunedNodeCount} item${prunedNodeCount > 1 ? 's' : ''} from the chain.`,
+        confirmTitle: 'Proceed',
+        callback: saveAndClose,
+        destructive: true,
+      })
+    } else {
+      saveAndClose()
+    }
+  }
+
+  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
 
   return (
     <>
@@ -114,7 +131,7 @@ export default function ChainNodeEditor({
           <Button type='outline' onClick={dismiss}>
             Cancel
           </Button>
-          <PendingButton title='Save and close' pendingTitle='Saving' onClick={saveAndClose} />
+          <PendingButton title='Save and close' pendingTitle='Saving' onClick={promptSaveAndClose} />
         </div>
       </div>
     </>

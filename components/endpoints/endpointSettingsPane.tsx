@@ -118,7 +118,7 @@ export default function EndpointSettingsPane({
     setEditing(false)
   }
 
-  const saveChanges = () => {
+  const saveChanges = () =>
     setDialogPrompt({
       title: 'Updating a published endpoint may break existing integrations',
       confirmTitle: 'Proceed',
@@ -140,7 +140,6 @@ export default function EndpointSettingsPane({
       },
       destructive: true,
     })
-  }
 
   const deleteEndpoint = () => {
     setDialogPrompt({
