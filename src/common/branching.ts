@@ -21,8 +21,24 @@ export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot 
     .filter(node => node.branch > lowerBound && node.branch < upperBound)
 }
 
-export const ChildrenForNode = (nodes: ChainItem[], index: number) =>
-  takeWhile(SubtreeForNode(nodes, index, false), (_, index) => index === 0 || IsSiblingNode(nodes, index))
+export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number) => {
+  const descendants = SubtreeForNode(nodes, index, false)
+  const children = takeWhile(descendants, (_, index) => index === 0 || IsSiblingNode(nodes, index))
+
+  let branch = nodes[index]?.branch
+  let branches = [] as ChainItem[][]
+  for (const [childIndex, child] of children.entries()) {
+    while (branch < child.branch) {
+      branches.push([])
+      branch++
+    }  
+    const subtree = SubtreeForNode(descendants, childIndex)
+    branches.push(subtree)
+    branch = 1 + Math.max(...subtree.map(node => node.branch))
+  }
+  
+  return branchIndex < branches.length ? branches[branchIndex] : []
+}
 
 export const ShiftBranchesForBranchAddedAtNode = (items: ChainItem[], index: number) => {
   const maxSubTreeBranch = Math.max(-1, ...SubtreeForNode(items, index).map(node => node.branch))

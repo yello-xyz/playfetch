@@ -5,7 +5,7 @@ import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
-import { ChildrenForNode, ShiftBranchesForBranchAddedAtNode } from '@/src/common/branching'
+import { SubtreeForBranchOfNode, ShiftBranchesForBranchAddedAtNode } from '@/src/common/branching'
 
 const placeholderSuffix = (branchIndex: number) => {
   switch (branchIndex) {
@@ -94,9 +94,6 @@ export default function BranchNodeEditor({
 }
 
 const pruneBranchBeforeDeleting = (items: ChainItem[], index: number, branchIndex: number) => {
-  const nextNodes = items.slice(index + 1)
-  const children = ChildrenForNode(items, index)
-  const lowerBound = children[branchIndex]?.branch ?? Infinity
-  const upperBound = children[branchIndex + 1]?.branch ?? Infinity
-  return [...items.slice(0, index + 1), ...nextNodes.filter(node => node.branch < lowerBound || node.branch >= upperBound)]
+  const subtree = SubtreeForBranchOfNode(items, index, branchIndex)
+  return items.filter(node => !subtree.includes(node))
 }
