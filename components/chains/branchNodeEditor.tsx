@@ -5,7 +5,7 @@ import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
-import { IsSiblingNode } from '@/src/common/branching'
+import { IsSiblingNode, SubtreeForNode } from '@/src/common/branching'
 
 const placeholderSuffix = (branchIndex: number) => {
   switch (branchIndex) {
@@ -94,24 +94,14 @@ export default function BranchNodeEditor({
 }
 
 const shiftBranchesBeforeAddingBranch = (items: ChainItem[], index: number) => {
-  const item = items[index] as BranchChainItem
-  const nextNode: ChainItem | undefined = items[index + 1]
-  const siblingNode = IsSiblingNode(items, index + 1) ? nextNode : undefined
-  const subTree = items
-    .slice(index + 1)
-    .filter(node => node.branch >= item.branch && (!siblingNode || node.branch < siblingNode.branch))
-  const maxSubTreeBranch = Math.max(item.branch, ...subTree.map(node => node.branch))
+  const subTree = SubtreeForNode(items, index)
+  const maxSubTreeBranch = Math.max(...subTree.map(node => node.branch))
   return items.map(node => ({ ...node, branch: node.branch > maxSubTreeBranch ? node.branch + 1 : node.branch }))
 }
 
 const pruneBranchBeforeDeleting = (items: ChainItem[], index: number, branchIndex: number) => {
-  const item = items[index] as BranchChainItem
-  const nextNode: ChainItem | undefined = items[index + 1]
-  const siblingNode = IsSiblingNode(items, index + 1) ? nextNode : undefined
   const nextNodes = items.slice(index + 1)
-  const subTree = nextNodes.filter(
-    node => node.branch >= item.branch && (!siblingNode || node.branch < siblingNode.branch)
-  )
+  const subTree = SubtreeForNode(items, index, false)
   const children = subTree.filter((node, index, nodes) => index === 0 || node.branch > nodes[index - 1].branch)
   const lowerBound = children[branchIndex]?.branch ?? Infinity
   const upperBound = children[branchIndex + 1]?.branch ?? Infinity
