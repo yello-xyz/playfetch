@@ -5,7 +5,7 @@ import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'
 import Button from '../button'
 import { Fragment } from 'react'
-import { ChildrenForNode, IsSiblingNode, SubtreeForNode } from '@/src/common/branching'
+import { ChildrenForNode, ShiftBranchesForBranchAddedAtNode } from '@/src/common/branching'
 
 const placeholderSuffix = (branchIndex: number) => {
   switch (branchIndex) {
@@ -38,7 +38,7 @@ export default function BranchNodeEditor({
     updateItem(updateBranches([...item.branches.slice(0, branchIndex), name, ...item.branches.slice(branchIndex + 1)]))
 
   const addBranch = () =>
-    updateItem(updateBranches([...item.branches, '']), shiftBranchesBeforeAddingBranch(items, index))
+    updateItem(updateBranches([...item.branches, '']), ShiftBranchesForBranchAddedAtNode(items, index))
 
   const deleteBranch = (branchIndex: number) =>
     updateItem(
@@ -91,12 +91,6 @@ export default function BranchNodeEditor({
       </div>
     </>
   )
-}
-
-const shiftBranchesBeforeAddingBranch = (items: ChainItem[], index: number) => {
-  const subTree = SubtreeForNode(items, index)
-  const maxSubTreeBranch = Math.max(...subTree.map(node => node.branch))
-  return items.map(node => ({ ...node, branch: node.branch > maxSubTreeBranch ? node.branch + 1 : node.branch }))
 }
 
 const pruneBranchBeforeDeleting = (items: ChainItem[], index: number, branchIndex: number) => {

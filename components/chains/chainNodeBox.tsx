@@ -15,7 +15,7 @@ import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
-import { IsSiblingNode, SubtreeForNode } from '@/src/common/branching'
+import { ShiftBranchesForBranchAddedAtNode } from '@/src/common/branching'
 
 export function ChainNodeBox({
   chain,
@@ -74,7 +74,7 @@ export function ChainNodeBox({
       | Omit<PromptChainItem, 'branch'>
   ) => {
     const itemWithBranch = { ...item, branch: items[itemIndex]?.branch ?? 0 }
-    const shiftedItems = shiftBranchesForItemInsertion(items, itemIndex, itemWithBranch)
+    const shiftedItems = IsBranchChainItem(itemWithBranch) ? ShiftBranchesForBranchAddedAtNode(items, itemIndex) : items
     saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
     setActiveIndex(index)
   }
@@ -138,17 +138,4 @@ export function ChainNodeBox({
       </div>
     </>
   )
-}
-
-const shiftBranchesForItemInsertion = (items: ChainItem[], index: number, newItem: ChainItem) => {
-  if (IsBranchChainItem(newItem)) {
-    const subtree = SubtreeForNode(items, index)
-    const maxSubTreeBranch = Math.max(...subtree.map(node => node.branch))
-    return items.map(item => ({
-      ...item,
-      branch: item.branch > maxSubTreeBranch ? item.branch + newItem.branches.length - 1 : item.branch,
-    }))
-  } else {
-    return items
-  }
 }
