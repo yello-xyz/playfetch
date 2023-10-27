@@ -23,7 +23,7 @@ export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot 
 
 export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number): ChainItem[] => {
   const descendants = SubtreeForNode(nodes, index, false)
-  const children = takeWhile(descendants, (_, index) => index === 0 || IsSiblingNode(nodes, index))
+  const children = takeWhile(descendants, (_, index) => index === 0 || IsSiblingNode(descendants, index))
 
   let branch = nodes[index]?.branch
   let branches = [] as ChainItem[][]
@@ -44,12 +44,14 @@ export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
   const splits = [] as ChainItem[][]
   let split = [] as ChainItem[]
   for (const [index, node] of nodes.entries()) {
-    if (IsSiblingNode(nodes, index)) {
-      split.push(node)
-    } else if (split.length > 0) {
+    if (!IsSiblingNode(nodes, index) && split.length > 0) {
       splits.push(split)
       split = []
     }
+    split.push(node)
+  }
+  if (split.length > 0) {
+    splits.push(split)
   }
   return splits
 }
@@ -65,17 +67,18 @@ export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
   const subtree = SubtreeForNode(nodes, index)
   const leftBranch = Math.min(...subtree.map(node => node.branch))
   const rightBranch = Math.max(...subtree.map(node => node.branch))
-  const inSubtree = (node: ChainItem) => node.branch >= leftBranch && node.branch <= rightBranch
+  const inSubtree = (node: ChainItem) => subtree.includes(node)
 
   const resultSplits = [] as ChainItem[][]
   for (const [index, split] of [...splits, []].entries()) {
     const previousSplit = index > 0 ? splits[index - 1] : []
-    const previousSubtreeSplit = previousSplit.filter(inSubtree)
-    resultSplits.push([
+    const previousSubSplit = previousSplit.filter(inSubtree)
+    const subSplit = split.filter(inSubtree)
+    resultSplits.push(subSplit.length > 0 || previousSubSplit.length > 0 ? [
       ...split.filter(node => node.branch < leftBranch),
-      ...previousSubtreeSplit,
+      ...previousSubSplit,
       ...split.filter(node => node.branch > rightBranch),
-    ])
+    ] : split)
   }
 
   return resultSplits.filter(split => split.length > 0).flat()
