@@ -28,24 +28,22 @@ export default function BranchNodeEditor({
 }) {
   const item = items[index] as BranchChainItem
 
-  const updateSingleItem = (item: BranchChainItem) =>
-    updateItems([...items.slice(0, index), item, ...items.slice(index + 1)])
-  const updateCode = (code: string) => updateSingleItem({ ...item, code })
+  const updateItem = (item: BranchChainItem, updatedItems = items) =>
+    updateItems([...updatedItems.slice(0, index), item, ...updatedItems.slice(index + 1)])
+  const updateCode = (code: string) => updateItem({ ...item, code })
 
   const updateBranches = (branches: string[]) => ({ ...item, branches })
   const updateBranchName = (branchIndex: number, name: string) =>
-    updateSingleItem(
-      updateBranches([...item.branches.slice(0, branchIndex), name, ...item.branches.slice(branchIndex + 1)])
-    )
+    updateItem(updateBranches([...item.branches.slice(0, branchIndex), name, ...item.branches.slice(branchIndex + 1)]))
 
-  const addBranch = () => {
-    // TODO shift branch number of other items and call updateItems instead
-    updateSingleItem(updateBranches([...item.branches, '']))
-  }
-  const deleteBranch = (branchIndex: number) => {
-    // TODO delete subtree and call updateItems instead
-    updateSingleItem(updateBranches([...item.branches.slice(0, branchIndex), ...item.branches.slice(branchIndex + 1)]))
-  }
+  const addBranch = () =>
+    updateItem(updateBranches([...item.branches, '']), shiftBranchesBeforeAddingBranch(items, index))
+
+  const deleteBranch = (branchIndex: number) =>
+    updateItem(
+      updateBranches([...item.branches.slice(0, branchIndex), ...item.branches.slice(branchIndex + 1)]),
+      pruneBranchBeforeDeleting(items, index, branchIndex)
+    )
 
   const showDeleteButtons = item.branches.length > 2
   const gridConfig = showDeleteButtons
@@ -92,4 +90,31 @@ export default function BranchNodeEditor({
       </div>
     </>
   )
+}
+
+const shiftBranchesBeforeAddingBranch = (items: ChainItem[], index: number) => {
+  const item = items[index] as BranchChainItem
+  const nextNode: ChainItem | undefined = items[index + 1]
+  const nextNodeIsSibling = nextNode && nextNode.branch > item.branch + item.branches.length - 1
+  const siblingNode = nextNodeIsSibling ? nextNode : undefined
+  const subTree = items
+    .slice(index + 1)
+    .filter(node => node.branch >= item.branch && (!siblingNode || node.branch < siblingNode.branch))
+  const maxSubTreeBranch = Math.max(item.branch, ...subTree.map(node => node.branch))
+  return items.map(node => ({ ...node, branch: node.branch > maxSubTreeBranch ? node.branch + 1 : node.branch }))
+}
+
+const pruneBranchBeforeDeleting = (items: ChainItem[], index: number, branchIndex: number) => {
+  const item = items[index] as BranchChainItem
+  const nextNode: ChainItem | undefined = items[index + 1]
+  const nextNodeIsSibling = nextNode && nextNode.branch > item.branch + item.branches.length - 1
+  const siblingNode = nextNodeIsSibling ? nextNode : undefined
+  const nextNodes = items.slice(index + 1)
+  const subTree = nextNodes.filter(
+    node => node.branch >= item.branch && (!siblingNode || node.branch < siblingNode.branch)
+  )
+  const children = subTree.filter((node, index, nodes) => index === 0 || node.branch > nodes[index - 1].branch)
+  const lowerBound = children[branchIndex]?.branch ?? Infinity
+  const upperBound = children[branchIndex + 1]?.branch ?? Infinity
+  return [...items.slice(0, index + 1), ...nextNodes.filter(node => node.branch < lowerBound || node.branch >= upperBound)]
 }

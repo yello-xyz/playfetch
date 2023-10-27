@@ -39,7 +39,7 @@ export async function migrateVersions(postMerge: boolean) {
   for (const versionData of allVersions) {
     if (versionData.items) {
       const items = JSON.parse(versionData.items) as Omit<ChainItemWithInputs, 'branch'>[]
-      const migratedItems = items.map(item => ({ ...item, branch: 0 } as ChainItemWithInputs))
+      const migratedItems = items.map(item => ({ ...item, branch: 0 }) as ChainItemWithInputs)
       await datastore.save(
         toVersionData(
           versionData.userID,

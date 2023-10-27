@@ -130,40 +130,40 @@ const AddButton = ({
       <DownArrow height='min-h-[38px]' />
       <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
       <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
-      <div className='flex'>
-        <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
-        <DownStroke color='border-blue-100' />
-        {onInsertQuery ? (
-          <AddStepButton
-            label='Add query'
-            className={buttonClass}
-            icon={queryIcon}
-            onClick={toggleActive(onInsertQuery)}
-          />
-        ) : (
-          <AddCodeAndBranchButtons
-            buttonClass={buttonClass}
-            onInsertCodeBlock={insertCode}
-            onInsertBranch={onInsertBranch}
-          />
-        )}
-        {canDismiss && (
-          <div
-            className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
-            onClick={toggleActive()}>
-            <Icon icon={closeIcon} />
+        <div className='flex'>
+          <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
+          <DownStroke color='border-blue-100' />
+          {onInsertQuery ? (
+            <AddStepButton
+              label='Add query'
+              className={buttonClass}
+              icon={queryIcon}
+              onClick={toggleActive(onInsertQuery)}
+            />
+          ) : (
+            <AddCodeAndBranchButtons
+              buttonClass={buttonClass}
+              onInsertCodeBlock={insertCode}
+              onInsertBranch={onInsertBranch}
+            />
+          )}
+          {canDismiss && (
+            <div
+              className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
+              onClick={toggleActive()}>
+              <Icon icon={closeIcon} />
+            </div>
+          )}
+        </div>
+        {onInsertQuery && (
+          <div className='flex border-t border-blue-100'>
+            <AddCodeAndBranchButtons
+              buttonClass={buttonClass}
+              onInsertCodeBlock={insertCode}
+              onInsertBranch={onInsertBranch}
+            />
           </div>
         )}
-      </div>
-      {onInsertQuery && (
-        <div className='flex border-t border-blue-100'>
-          <AddCodeAndBranchButtons
-            buttonClass={buttonClass}
-            onInsertCodeBlock={insertCode}
-            onInsertBranch={onInsertBranch}
-          />
-        </div>
-      )}
       </div>
       <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
       <DownStroke height='min-h-[32px]' />
