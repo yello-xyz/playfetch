@@ -40,7 +40,7 @@ export default function ChainNodeBoxConnector({
   return (
     <div className='flex flex-col items-center'>
       <SmallDot margin='-mt-[5px] mb-0.5' />
-      <DownStroke height='min-h-[12px] flex-1' />
+      <DownStroke height='min-h-[12px]' grow />
       {isDisabled ? (
         <DownStroke height='min-h-[20px]' />
       ) : (
@@ -58,11 +58,11 @@ export default function ChainNodeBoxConnector({
       )}
       {hasNext ? (
         <>
-          <DownArrow height='min-h-[18px] flex-1' />
+          <DownArrow height='min-h-[18px]' grow />
           <SmallDot margin='-mb-[5px] mt-1' />
         </>
       ) : (
-        <DownStroke height='min-h-[18px]' />
+        <DownStroke height='min-h-[18px]' grow />
       )}
     </div>
   )
@@ -72,13 +72,19 @@ const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margi
   <div className={`${margin} ${color} z-10 w-2.5 h-2.5 rounded-full min-h-[10px]`} />
 )
 
-const DownStroke = ({ height = '', color = 'border-gray-400' }: { height?: string; color?: string }) => (
-  <div className={`${height} w-px border-l ${color}`} />
-)
+const DownStroke = ({
+  height = '',
+  color = 'border-gray-400',
+  grow = false,
+}: {
+  height?: string
+  color?: string
+  grow?: boolean
+}) => <div className={`${height} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
 
-const DownArrow = ({ height }: { height: string }) => (
+const DownArrow = ({ height, grow }: { height: string; grow: boolean }) => (
   <>
-    <DownStroke height={height} />
+    <DownStroke height={height} grow={grow} />
     <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
   </>
 )
