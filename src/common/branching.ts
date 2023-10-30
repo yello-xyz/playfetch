@@ -31,14 +31,17 @@ export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branch
     while (branch < child.branch) {
       branches.push([])
       branch++
-    }  
+    }
     const subtree = SubtreeForNode(descendants, childIndex)
     branches.push(subtree)
-    branch = 1 + Math.max(...subtree.map(node => node.branch))
+    branch = 1 + MaxBranch(subtree)
   }
-  
+
   return branchIndex < branches.length ? branches[branchIndex] : []
 }
+
+export const MaxBranch = (nodes: ChainItem[]): number =>
+  Math.max(0, ...nodes.map(node => node.branch + (IsBranchChainItem(node) ? node.branches.length - 1 : 0)))
 
 export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
   const splits = [] as ChainItem[][]
@@ -57,8 +60,8 @@ export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
 }
 
 export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
-  const maxSubTreeBranch = Math.max(nodes[index]?.branch ?? 0, ...SubtreeForNode(nodes, index).map(node => node.branch))
-  return nodes.map(node => node.branch > maxSubTreeBranch ? ({ ...node, branch: node.branch + 1 }) : node)
+  const maxSubTreeBranch = MaxBranch(SubtreeForNode(nodes, index))
+  return nodes.map(node => (node.branch > maxSubTreeBranch ? { ...node, branch: node.branch + 1 } : node))
 }
 
 export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
@@ -66,7 +69,7 @@ export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
 
   const subtree = SubtreeForNode(nodes, index)
   const leftBranch = Math.min(...subtree.map(node => node.branch))
-  const rightBranch = Math.max(...subtree.map(node => node.branch))
+  const rightBranch = MaxBranch(subtree)
   const inSubtree = (node: ChainItem) => subtree.includes(node)
 
   const resultSplits = [] as ChainItem[][]
@@ -74,11 +77,15 @@ export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
     const previousSplit = index > 0 ? splits[index - 1] : []
     const previousSubSplit = previousSplit.filter(inSubtree)
     const subSplit = split.filter(inSubtree)
-    resultSplits.push(subSplit.length > 0 || previousSubSplit.length > 0 ? [
-      ...split.filter(node => node.branch < leftBranch),
-      ...previousSubSplit,
-      ...split.filter(node => node.branch > rightBranch),
-    ] : split)
+    resultSplits.push(
+      subSplit.length > 0 || previousSubSplit.length > 0
+        ? [
+            ...split.filter(node => node.branch < leftBranch),
+            ...previousSubSplit,
+            ...split.filter(node => node.branch > rightBranch),
+          ]
+        : split
+    )
   }
 
   return resultSplits.filter(split => split.length > 0).flat()

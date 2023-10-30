@@ -7,7 +7,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
-import { SplitNodes } from '@/src/common/branching'
+import { MaxBranch, SplitNodes } from '@/src/common/branching'
 
 export default function ChainEditor({
   chain,
@@ -62,8 +62,7 @@ export default function ChainEditor({
 
   const items = nodes.slice(1, -1) as ChainItem[]
   const itemRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
-  const maxBranch = Math.max(0, ...items.map(item => item.branch))
-  const gridConfig = gridConfigs[Math.min(maxBranch, gridConfigs.length - 1)]
+  const gridConfig = gridConfigs[Math.min(MaxBranch(items), gridConfigs.length - 1)]
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
