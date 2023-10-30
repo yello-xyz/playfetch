@@ -8,7 +8,7 @@ import {
   PromptChainItem,
   QueryChainItem,
 } from '@/types'
-import { ChainNode, IsBranchChainItem } from './chainNode'
+import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
@@ -114,7 +114,7 @@ export default function ChainEditor({
         setShowVersions={setShowVersions}
       />
       <div className='flex flex-col h-full bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px] overflow-auto'>
-        <div className={`relative p-8 pr-0 grid ${gridConfig} m-auto justify-items-center`}>
+        <div className={`relative p-8 m-auto min-w-max grid ${gridConfig} gap-x-8 justify-items-center`}>
           <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
           <RowFiller start={1} end={maxBranch} />
           {nodeRows.map((row, rowIndex) => (
@@ -139,13 +139,14 @@ export default function ChainEditor({
                   <RowFiller start={row.length} end={maxBranch} />
                 </>
               )}
-              {row.map((node, columnIndex) => (
-                <ChainNodeBox
-                  key={columnIndex}
+              {Array.from({ length: maxBranch + 1 }, (_, branch) =>  (
+                <NodeCell
+                  key={branch}
                   chain={chain}
-                  index={nodes.indexOf(node)}
                   nodes={nodes}
-                  insertItem={item => insertItem(nodes.indexOf(node), item)}
+                  row={row}
+                  branch={branch}
+                  insertItem={insertItem}
                   saveItems={saveItems}
                   activeIndex={activeIndex}
                   setActiveIndex={updateActiveIndex}
@@ -155,7 +156,6 @@ export default function ChainEditor({
                   promptCache={promptCache}
                 />
               ))}
-              <RowFiller start={row.length} end={maxBranch} />
             </Fragment>
           ))}
           <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
@@ -173,6 +173,52 @@ export default function ChainEditor({
       {disabled && <div className='absolute inset-0 z-30 w-full h-full bg-gray-300 opacity-20' />}
     </div>
   )
+}
+
+const NodeCell = ({
+  chain,
+  nodes,
+  row,
+  branch,
+  insertItem,
+  saveItems,
+  activeIndex,
+  setActiveIndex,
+  savedVersion,
+  setTestMode,
+  prompts,
+  promptCache,
+}: {
+  chain: ActiveChain
+  nodes: ChainNode[]
+  row: ChainNode[]
+  branch: number
+  insertItem: (index: number, item: ChainItem) => void
+  saveItems: (items: ChainItem[]) => void
+  activeIndex: number | undefined
+  setActiveIndex: (index: number) => void
+  savedVersion: ChainVersion | null
+  setTestMode: (testMode: boolean) => void
+  prompts: Prompt[]
+  promptCache: ChainPromptCache
+}) => {
+  const node = row.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  const index = node ? nodes.indexOf(node) : -1
+  return node ? (
+    <ChainNodeBox
+      chain={chain}
+      nodes={nodes}
+      index={index}
+      insertItem={item => insertItem(index, item)}
+      saveItems={saveItems}
+      activeIndex={activeIndex}
+      setActiveIndex={setActiveIndex}
+      savedVersion={savedVersion}
+      setTestMode={setTestMode}
+      prompts={prompts}
+      promptCache={promptCache}
+    />
+  ) : <div />
 }
 
 const RowFiller = ({ start, end }: { start: number; end: number }) => (
