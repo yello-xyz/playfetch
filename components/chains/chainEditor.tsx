@@ -64,10 +64,10 @@ export default function ChainEditor({
   const model = EmbeddingModels.find(model => checkModelAvailable(model))
   const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '', topK: 1 } : undefined
 
-  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
+  const [activeMenuIndex, setActiveMenuIndex] = useState<[number, number]>()
 
   if (nodes.length === 2 && !activeMenuIndex) {
-    setActiveMenuIndex(1)
+    setActiveMenuIndex([1, 0])
   }
 
   const updateActiveIndex = (index: number) => {
@@ -205,8 +205,8 @@ const ConnectorCell = ({
   previousRow: ChainNode[]
   nextRow: ChainNode[]
   isDisabled: boolean
-  activeMenuIndex?: number
-  setActiveMenuIndex: (index: number | undefined) => void
+  activeMenuIndex?: [number, number]
+  setActiveMenuIndex: (index: [number, number] | undefined) => void
   insertPrompt: (index: number, branch: number, promptID: number) => void
   insertNewPrompt: (index: number, branch: number) => void
   insertQuery?: (index: number, branch: number) => void
@@ -233,8 +233,8 @@ const ConnectorCell = ({
     <ChainNodeBoxConnector
       prompts={prompts}
       isDisabled={isDisabled}
-      isActive={index === activeMenuIndex}
-      setActive={active => setActiveMenuIndex(active ? index : undefined)}
+      isActive={index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]}
+      setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
       onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
       onInsertNewPrompt={() => insertNewPrompt(index, branch)}
