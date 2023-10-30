@@ -72,7 +72,7 @@ const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margi
   <div className={`${margin} ${color} z-10 w-2.5 h-2.5 rounded-full min-h-[10px]`} />
 )
 
-const DownStroke = ({
+export const DownStroke = ({
   height = '',
   color = 'border-gray-400',
   grow = false,
@@ -82,7 +82,7 @@ const DownStroke = ({
   grow?: boolean
 }) => <div className={`${height} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
 
-const DownArrow = ({ height, grow }: { height: string; grow: boolean }) => (
+const DownArrow = ({ height, grow }: { height: string; grow?: boolean }) => (
   <>
     <DownStroke height={height} grow={grow} />
     <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
