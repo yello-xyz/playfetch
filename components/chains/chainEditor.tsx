@@ -62,6 +62,8 @@ export default function ChainEditor({
 
   const items = nodes.slice(1, -1) as ChainItem[]
   const itemRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
+  const maxBranch = Math.max(0, ...items.map(item => item.branch))
+  const gridConfig = gridConfigs[Math.min(maxBranch, gridConfigs.length - 1)]
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -72,33 +74,35 @@ export default function ChainEditor({
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
-      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px]'>
-        <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
-        {itemRows.map((row, rowIndex) => (
-          <Fragment key={rowIndex}>
-            {row.map((node, columnIndex) => (
-              <ChainNodeBox
-                key={columnIndex}
-                chain={chain}
-                index={nodes.indexOf(node)}
-                nodes={nodes}
-                saveItems={saveItems}
-                activeIndex={activeIndex}
-                setActiveIndex={updateActiveIndex}
-                isMenuActive={nodes.indexOf(node) === activeMenuIndex}
-                setMenuActive={active => setActiveMenuIndex(active ? nodes.indexOf(node) : undefined)}
-                savedVersion={isVersionSaved ? activeVersion : null}
-                isTestMode={isTestMode}
-                setTestMode={setTestMode}
-                prompts={prompts}
-                addPrompt={addPrompt}
-                promptCache={promptCache}
-                defaultQueryConfig={defaultQueryConfig}
-              />
-            ))}
-          </Fragment>
-        ))}
-        <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
+      <div className='flex flex-col h-full bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px] overflow-auto'>
+        <div className={`relative p-8 pr-0 grid ${gridConfig} mt-auto mb-auto justify-items-center`}>
+          <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
+          {itemRows.map((row, rowIndex) => (
+            <Fragment key={rowIndex}>
+              {row.map((node, columnIndex) => (
+                <ChainNodeBox
+                  key={columnIndex}
+                  chain={chain}
+                  index={nodes.indexOf(node)}
+                  nodes={nodes}
+                  saveItems={saveItems}
+                  activeIndex={activeIndex}
+                  setActiveIndex={updateActiveIndex}
+                  isMenuActive={nodes.indexOf(node) === activeMenuIndex}
+                  setMenuActive={active => setActiveMenuIndex(active ? nodes.indexOf(node) : undefined)}
+                  savedVersion={isVersionSaved ? activeVersion : null}
+                  isTestMode={isTestMode}
+                  setTestMode={setTestMode}
+                  prompts={prompts}
+                  addPrompt={addPrompt}
+                  promptCache={promptCache}
+                  defaultQueryConfig={defaultQueryConfig}
+                />
+              ))}
+            </Fragment>
+          ))}
+          <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
+        </div>
       </div>
       <SegmentedControl
         className='absolute z-30 bottom-4 right-4'
@@ -112,3 +116,26 @@ export default function ChainEditor({
     </div>
   )
 }
+
+const gridConfigs = [
+  'grid-cols-[repeat(1,minmax(0,1fr))]',
+  'grid-cols-[repeat(2,minmax(0,1fr))]',
+  'grid-cols-[repeat(3,minmax(0,1fr))]',
+  'grid-cols-[repeat(4,minmax(0,1fr))]',
+  'grid-cols-[repeat(5,minmax(0,1fr))]',
+  'grid-cols-[repeat(6,minmax(0,1fr))]',
+  'grid-cols-[repeat(7,minmax(0,1fr))]',
+  'grid-cols-[repeat(8,minmax(0,1fr))]',
+  'grid-cols-[repeat(9,minmax(0,1fr))]',
+  'grid-cols-[repeat(10,minmax(0,1fr))]',
+  'grid-cols-[repeat(11,minmax(0,1fr))]',
+  'grid-cols-[repeat(12,minmax(0,1fr))]',
+  'grid-cols-[repeat(13,minmax(0,1fr))]',
+  'grid-cols-[repeat(14,minmax(0,1fr))]',
+  'grid-cols-[repeat(15,minmax(0,1fr))]',
+  'grid-cols-[repeat(16,minmax(0,1fr))]',
+  'grid-cols-[repeat(17,minmax(0,1fr))]',
+  'grid-cols-[repeat(18,minmax(0,1fr))]',
+  'grid-cols-[repeat(19,minmax(0,1fr))]',
+  'grid-cols-[repeat(20,minmax(0,1fr))]',
+]
