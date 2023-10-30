@@ -234,6 +234,7 @@ const ConnectorCell = ({
       isActive={index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]}
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
+      hasPrevious={!!precedingNode}
       hasNext={!!nextNode}
       onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
       onInsertNewPrompt={() => insertNewPrompt(index, branch)}

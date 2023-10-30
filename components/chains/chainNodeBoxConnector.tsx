@@ -17,6 +17,7 @@ export default function ChainNodeBoxConnector({
   isActive,
   setActive,
   canDismiss,
+  hasPrevious,
   hasNext,
   onInsertPrompt,
   onInsertNewPrompt,
@@ -29,6 +30,7 @@ export default function ChainNodeBoxConnector({
   isActive: boolean
   setActive: (active: boolean) => void
   canDismiss: boolean
+  hasPrevious: boolean
   hasNext: boolean
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
@@ -39,8 +41,14 @@ export default function ChainNodeBoxConnector({
 }) {
   return (
     <div className='flex flex-col items-center'>
-      <SmallDot margin='-mt-[5px] mb-0.5' />
-      <DownStroke height='min-h-[12px]' grow />
+      {hasPrevious ? (
+        <>
+          <SmallDot margin='-mt-[5px] mb-0.5' />
+          <DownStroke height='min-h-[12px]' grow />
+        </>
+      ) : (
+        <DownStroke height='min-h-[12px]' grow />
+      )}
       {isDisabled ? (
         <DownStroke height='min-h-[20px]' />
       ) : (
