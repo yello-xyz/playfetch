@@ -82,7 +82,7 @@ export default function ChainEditor({
     const itemWithBranch = { ...item, branch: items[itemIndex]?.branch ?? 0 }
     const shiftedItems = ShiftDown(IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex) : items, itemIndex)
     saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
-    setActiveIndex(index)
+    updateActiveIndex(index)
   }
 
   const insertPrompt = (index: number, promptID: number, versionID?: number) =>
