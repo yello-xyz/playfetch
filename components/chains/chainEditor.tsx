@@ -100,7 +100,7 @@ export default function ChainEditor({
 
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
-  const itemRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
+  const nodeRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
   const maxBranch = MaxBranch(items)
   const gridConfig = gridConfigs[Math.min(maxBranch, gridConfigs.length - 1)]
 
@@ -117,24 +117,28 @@ export default function ChainEditor({
         <div className={`relative p-8 pr-0 grid ${gridConfig} m-auto justify-items-center`}>
           <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
           <RowFiller start={1} end={maxBranch} />
-          {itemRows.map((row, rowIndex) => (
+          {nodeRows.map((row, rowIndex) => (
             <Fragment key={rowIndex}>
-              {rowIndex > 0 &&
-                row.map((node, columnIndex) => (
-                  <ChainNodeBoxConnector
-                    key={columnIndex}
-                    prompts={prompts}
-                    isDisabled={isTestMode}
-                    isActive={nodes.indexOf(node) === activeMenuIndex}
-                    setActive={active => setActiveMenuIndex(active ? nodes.indexOf(node) : undefined)}
-                    canDismiss={nodes.length > 2}
-                    onInsertPrompt={promptID => insertPrompt(nodes.indexOf(node), promptID)}
-                    onInsertNewPrompt={() => insertNewPrompt(nodes.indexOf(node))}
-                    onInsertCodeBlock={() => insertCodeBlock(nodes.indexOf(node))}
-                    onInsertBranch={() => insertBranch(nodes.indexOf(node))}
-                    onInsertQuery={insertQuery ? () => insertQuery(nodes.indexOf(node)) : undefined}
-                  />
-                ))}
+              {rowIndex > 0 && (
+                <>
+                  {row.map((node, columnIndex) => (
+                    <ChainNodeBoxConnector
+                      key={columnIndex}
+                      prompts={prompts}
+                      isDisabled={isTestMode}
+                      isActive={nodes.indexOf(node) === activeMenuIndex}
+                      setActive={active => setActiveMenuIndex(active ? nodes.indexOf(node) : undefined)}
+                      canDismiss={nodes.length > 2}
+                      onInsertPrompt={promptID => insertPrompt(nodes.indexOf(node), promptID)}
+                      onInsertNewPrompt={() => insertNewPrompt(nodes.indexOf(node))}
+                      onInsertCodeBlock={() => insertCodeBlock(nodes.indexOf(node))}
+                      onInsertBranch={() => insertBranch(nodes.indexOf(node))}
+                      onInsertQuery={insertQuery ? () => insertQuery(nodes.indexOf(node)) : undefined}
+                    />
+                  ))}
+                  <RowFiller start={row.length} end={maxBranch} />
+                </>
+              )}
               {row.map((node, columnIndex) => (
                 <ChainNodeBox
                   key={columnIndex}

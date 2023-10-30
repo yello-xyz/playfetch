@@ -36,7 +36,7 @@ export default function ChainNodeBoxConnector({
   prompts: Prompt[]
 }) {
   return (
-    <>
+    <div className='flex flex-col items-center'>
       <SmallDot margin='-mt-[5px] mb-0.5' />
       <DownStroke height='min-h-[12px]' />
       {isDisabled ? (
@@ -56,7 +56,7 @@ export default function ChainNodeBoxConnector({
       )}
       <DownArrow height='min-h-[18px]' />
       <SmallDot margin='-mb-[5px] mt-1' />
-    </>
+    </div>
   )
 }
 
