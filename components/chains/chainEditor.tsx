@@ -88,7 +88,8 @@ export default function ChainEditor({
   ) => {
     const itemIndex = index - 1
     const itemWithBranch = { ...item, branch }
-    const shiftedItems = ShiftDown(IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex) : items, itemIndex)
+    let shiftedItems = IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex) : items
+    shiftedItems = branch === items[itemIndex]?.branch ? ShiftDown(shiftedItems, itemIndex) : shiftedItems
     saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
     updateActiveIndex(index)
   }
@@ -225,7 +226,7 @@ const ConnectorCell = ({
     )
     if (isStartOfBranch) {
       const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]
-      nextNode = nextRow.find(node => !IsBranchChainItem(node) || node.branch > branch)
+      nextNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
       index = nextNode ? nodes.indexOf(nextNode) : nodes.indexOf(previousNodes.slice(-1)[0]) + 1
     }
   }
