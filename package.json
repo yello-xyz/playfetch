@@ -16,7 +16,7 @@
     "clean": "npx next telemetry disable && rm -rf ./build",
     "build": "next build",
     "create-env": "printenv > .env.local",
-    "start": "next start --keepAliveTimeout 700000 --failIfRun",
+    "start": "next start --keepAliveTimeout 700000",
     "dev": "next dev",
     "lint": "next lint",
     "watch": "jest --watch",
