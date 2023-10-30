@@ -4,7 +4,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
-import { PruneBranchAndShiftLeft } from '@/src/common/branching'
+import { PruneBranchAndShiftLeft, PruneNodeAndShiftUp } from '@/src/common/branching'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 
 export function ChainNodeBox({
@@ -55,7 +55,7 @@ export function ChainNodeBox({
         updatedItems = PruneBranchAndShiftLeft(updatedItems, itemIndex, branchIndex)
       }
     }
-    updatedItems = updatedItems.filter(item => item !== chainNode)
+    updatedItems = PruneNodeAndShiftUp(updatedItems, itemIndex)
     const prunedNodeCount = (items.length - updatedItems.length) - 1
     if (prunedNodeCount > 0) {
       const nodeDescription = `${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''}`

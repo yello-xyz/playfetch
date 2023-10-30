@@ -3,6 +3,7 @@ import {
   IsSiblingNode,
   MaxBranch,
   PruneBranchAndShiftLeft,
+  PruneNodeAndShiftUp,
   ShiftDown,
   ShiftRight,
   SplitNodes,
@@ -177,3 +178,16 @@ testShiftDown(5, [0, 1, 2, 3, 4, 6, 7, 5])
 testShiftDown(6, [0, 1, 2, 3, 4, 5, 7, 6])
 testShiftDown(7)
 testShiftDown(8)
+
+const testPruneNode = (index: number, expected = chain1.map((_, index) => index)) =>
+  test(`Prune node at position ${index} yields [${expected}]`, () =>
+    expect(PruneNodeAndShiftUp(chain1, index)).toStrictEqual(expected.map(index => chain1[index])))
+
+testPruneNode(0, [1, 2, 3, 4, 5, 6, 7])
+testPruneNode(1, [0, 2, 3, 4, 5, 6, 7])
+testPruneNode(2, [0, 1, 5, 3, 4, 6, 7])
+testPruneNode(3, [0, 1, 2, 6, 7, 4, 5])
+testPruneNode(4, [0, 1, 2, 3, 5, 6, 7])
+testPruneNode(5, [0, 1, 2, 3, 4, 6, 7])
+testPruneNode(6, [0, 1, 2, 3, 4, 5, 7])
+testPruneNode(7, [0, 1, 2, 3, 4, 5, 6])

@@ -85,33 +85,6 @@ export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
   return ShiftHorizontal(nodes, maxSubTreeBranch, 1)
 }
 
-export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
-  const splits = SplitNodes(nodes)
-
-  const subtree = SubtreeForNode(nodes, index)
-  const leftBranch = Math.min(...subtree.map(node => node.branch))
-  const rightBranch = MaxBranch(subtree)
-  const inSubtree = (node: ChainItem) => subtree.includes(node)
-
-  const resultSplits = [] as ChainItem[][]
-  for (const [index, split] of [...splits, []].entries()) {
-    const previousSplit = index > 0 ? splits[index - 1] : []
-    const previousSubSplit = previousSplit.filter(inSubtree)
-    const subSplit = split.filter(inSubtree)
-    resultSplits.push(
-      subSplit.length > 0 || previousSubSplit.length > 0
-        ? [
-            ...split.filter(node => node.branch < leftBranch),
-            ...previousSubSplit,
-            ...split.filter(node => node.branch > rightBranch),
-          ]
-        : split
-    )
-  }
-
-  return resultSplits.filter(split => split.length > 0).flat()
-}
-
 export const PruneBranchAndShiftLeft = (items: ChainItem[], index: number, branchIndex: number) => {
   const subtree = SubtreeForBranchOfNode(items, index, branchIndex)
   if (subtree.length === 0) {
@@ -132,4 +105,58 @@ const takeWhile = <T>(array: T[], predicate: (value: T, index: number) => boolea
     result.push(value)
   }
   return result
+}
+
+export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
+  const splits = SplitNodes(nodes)
+
+  const subtree = SubtreeForNode(nodes, index)
+  const leftBranch = Math.min(...subtree.map(node => node.branch))
+  const rightBranch = MaxBranch(subtree)
+  const inSubtree = (node: ChainItem) => subtree.includes(node)
+
+  const resultSplits = [] as ChainItem[][]
+  for (const [splitIndex, split] of [...splits, []].entries()) {
+    const previousSplit = splitIndex > 0 ? splits[splitIndex - 1] : []
+    const previousSubSplit = previousSplit.filter(inSubtree)
+    const subSplit = split.filter(inSubtree)
+    resultSplits.push(
+      subSplit.length > 0 || previousSubSplit.length > 0
+        ? [
+            ...split.filter(node => node.branch < leftBranch),
+            ...previousSubSplit,
+            ...split.filter(node => node.branch > rightBranch),
+          ]
+        : split
+    )
+  }
+
+  return resultSplits.filter(split => split.length > 0).flat()
+}
+
+export const PruneNodeAndShiftUp = (nodes: ChainItem[], index: number): ChainItem[] => {
+  const splits = SplitNodes(nodes)
+
+  const subtree = SubtreeForNode(nodes, index)
+  const leftBranch = Math.min(...subtree.map(node => node.branch))
+  const rightBranch = MaxBranch(subtree)
+  const inSubtree = (node: ChainItem) => subtree.includes(node)
+
+  const resultSplits = [] as ChainItem[][]
+  for (const [splitIndex, split] of splits.entries()) {
+    const nextSplit = splitIndex < splits.length - 1 ? splits[splitIndex + 1] : []
+    const nextSubSplit = nextSplit.filter(inSubtree).filter(item => item !== nodes[index])
+    const subSplit = split.filter(inSubtree)
+    resultSplits.push(
+      subSplit.length > 0 || nextSubSplit.length > 0
+        ? [
+            ...split.filter(node => node.branch < leftBranch),
+            ...nextSubSplit,
+            ...split.filter(node => node.branch > rightBranch),
+          ]
+        : split
+    )
+  }
+
+  return resultSplits.filter(split => split.length > 0).flat()
 }
