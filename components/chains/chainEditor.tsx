@@ -124,25 +124,6 @@ export default function ChainEditor({
           <RowFiller start={1} end={maxBranch} />
           {nodeRows.map((row, rowIndex, rows) => (
             <Fragment key={rowIndex}>
-              {rowIndex > 0 &&
-                Array.from({ length: maxBranch + 1 }, (_, branch) => (
-                  <ConnectorCell
-                    key={branch}
-                    nodes={nodes}
-                    previousRow={rows[rowIndex - 1]}
-                    nextRow={row}
-                    branch={branch}
-                    prompts={prompts}
-                    isDisabled={isTestMode}
-                    activeMenuIndex={activeMenuIndex}
-                    setActiveMenuIndex={setActiveMenuIndex}
-                    insertPrompt={insertPrompt}
-                    insertNewPrompt={insertNewPrompt}
-                    insertCodeBlock={insertCodeBlock}
-                    insertBranch={insertBranch}
-                    insertQuery={insertQuery}
-                  />
-                ))}
               {Array.from({ length: maxBranch + 1 }, (_, branch) => (
                 <NodeCell
                   key={branch}
@@ -160,6 +141,25 @@ export default function ChainEditor({
                   promptCache={promptCache}
                 />
               ))}
+              {rowIndex < rows.length - 1 &&
+                Array.from({ length: maxBranch + 1 }, (_, branch) => (
+                  <ConnectorCell
+                    key={branch}
+                    nodes={nodes}
+                    previousRow={row}
+                    nextRow={rows[rowIndex + 1]}
+                    branch={branch}
+                    prompts={prompts}
+                    isDisabled={isTestMode}
+                    activeMenuIndex={activeMenuIndex}
+                    setActiveMenuIndex={setActiveMenuIndex}
+                    insertPrompt={insertPrompt}
+                    insertNewPrompt={insertNewPrompt}
+                    insertCodeBlock={insertCodeBlock}
+                    insertBranch={insertBranch}
+                    insertQuery={insertQuery}
+                  />
+                ))}
             </Fragment>
           ))}
           <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
@@ -208,24 +208,23 @@ const ConnectorCell = ({
   insertBranch: (index: number, branch: number) => void
   prompts: Prompt[]
 }) => {
+  const precedingNode = previousRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  const items = nodes.filter(IsChainItem)
+  const isStartOfBranch = previousRow.some(
+    node =>
+      IsBranchChainItem(node) &&
+      node.branches.some(
+        (_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch
+      )
+  )
   let nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
   let index = nextNode ? nodes.indexOf(nextNode) : -1
   if (index < 0) {
-    const items = nodes.filter(IsChainItem)
-    const isStartOfBranch = previousRow.some(
-      node =>
-        IsBranchChainItem(node) &&
-        node.branches.some(
-          (_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch
-        )
-    )
-    if (isStartOfBranch) {
-      const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]
-      nextNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
-      index = nextNode ? nodes.indexOf(nextNode) : nodes.indexOf(previousNodes.slice(-1)[0]) + 1
-    }
+    const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]
+    nextNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
+    index = nextNode ? nodes.indexOf(nextNode) : nodes.indexOf(previousNodes.slice(-1)[0]) + 1
   }
-  return index >= 0 ? (
+  return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
       isDisabled={isDisabled}
