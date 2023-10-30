@@ -17,6 +17,7 @@ export default function ChainNodeBoxConnector({
   isActive,
   setActive,
   canDismiss,
+  hasNext,
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertQuery,
@@ -28,6 +29,7 @@ export default function ChainNodeBoxConnector({
   isActive: boolean
   setActive: (active: boolean) => void
   canDismiss: boolean
+  hasNext: boolean
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
@@ -54,8 +56,14 @@ export default function ChainNodeBoxConnector({
           onInsertBranch={onInsertBranch}
         />
       )}
-      <DownArrow height='min-h-[18px] flex-1' />
-      <SmallDot margin='-mb-[5px] mt-1' />
+      {hasNext ? (
+        <>
+          <DownArrow height='min-h-[18px] flex-1' />
+          <SmallDot margin='-mb-[5px] mt-1' />
+        </>
+      ) : (
+        <DownStroke height='min-h-[18px]' />
+      )}
     </div>
   )
 }

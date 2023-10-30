@@ -217,12 +217,12 @@ const ConnectorCell = ({
         (_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch
       )
   )
-  let nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  const nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
   let index = nextNode ? nodes.indexOf(nextNode) : -1
   if (index < 0) {
     const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]
-    nextNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
-    index = nextNode ? nodes.indexOf(nextNode) : nodes.indexOf(previousNodes.slice(-1)[0]) + 1
+    const targetNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
+    index = targetNode ? nodes.indexOf(targetNode) : nodes.indexOf(previousNodes.slice(-1)[0]) + 1
   }
   return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
@@ -231,6 +231,7 @@ const ConnectorCell = ({
       isActive={index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]}
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
+      hasNext={!!nextNode}
       onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
       onInsertNewPrompt={() => insertNewPrompt(index, branch)}
       onInsertCodeBlock={() => insertCodeBlock(index, branch)}
