@@ -77,10 +77,16 @@ export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
   return splits
 }
 
-export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
+const ShiftHorizontal = (nodes: ChainItem[], index: number, positions: number): ChainItem[] => {
   const maxSubTreeBranch = MaxBranch(SubtreeForNode(nodes, index))
-  return nodes.map(node => (node.branch > maxSubTreeBranch ? { ...node, branch: node.branch + 1 } : node))
+  return nodes.map(node => (node.branch > maxSubTreeBranch ? { ...node, branch: node.branch + positions } : node))
 }
+
+export const ShiftRight = (nodes: ChainItem[], index: number, positions = 1): ChainItem[] =>
+  ShiftHorizontal(nodes, index, positions)
+
+export const ShiftLeft = (nodes: ChainItem[], index: number, positions = 1): ChainItem[] =>
+  ShiftHorizontal(nodes, index, -positions)
 
 export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
   const splits = SplitNodes(nodes)
