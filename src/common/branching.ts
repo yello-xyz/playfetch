@@ -77,16 +77,13 @@ export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
   return splits
 }
 
-const ShiftHorizontal = (nodes: ChainItem[], index: number, positions: number): ChainItem[] => {
+const ShiftHorizontal = (nodes: ChainItem[], threshold: number, positions: number): ChainItem[] =>
+  nodes.map(node => (node.branch > threshold ? { ...node, branch: node.branch + positions } : node))
+
+export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
   const maxSubTreeBranch = MaxBranch(SubtreeForNode(nodes, index))
-  return nodes.map(node => (node.branch > maxSubTreeBranch ? { ...node, branch: node.branch + positions } : node))
+  return ShiftHorizontal(nodes, maxSubTreeBranch, 1)
 }
-
-export const ShiftRight = (nodes: ChainItem[], index: number, positions = 1): ChainItem[] =>
-  ShiftHorizontal(nodes, index, positions)
-
-export const ShiftLeft = (nodes: ChainItem[], index: number, positions = 1): ChainItem[] =>
-  ShiftHorizontal(nodes, index, -positions)
 
 export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
   const splits = SplitNodes(nodes)
@@ -113,6 +110,16 @@ export const ShiftDown = (nodes: ChainItem[], index: number): ChainItem[] => {
   }
 
   return resultSplits.filter(split => split.length > 0).flat()
+}
+
+export const PruneBranchAndShiftLeft = (items: ChainItem[], index: number, branchIndex: number) => {
+  const subtree = SubtreeForBranchOfNode(items, index, branchIndex)
+  if (subtree.length === 0) {
+    return items
+  }
+  const maxBranch = MaxBranch(subtree)
+  const branchDecrease = maxBranch - FirstBranchForBranchOfNode(items, index, branchIndex)
+  return ShiftHorizontal(items.filter(node => !subtree.includes(node)), maxBranch, -branchDecrease)
 }
 
 const takeWhile = <T>(array: T[], predicate: (value: T, index: number) => boolean) => {

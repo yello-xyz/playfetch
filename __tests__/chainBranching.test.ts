@@ -2,8 +2,8 @@ import {
   FirstBranchForBranchOfNode,
   IsSiblingNode,
   MaxBranch,
+  PruneBranchAndShiftLeft,
   ShiftDown,
-  ShiftLeft,
   ShiftRight,
   SplitNodes,
   SubtreeForBranchOfNode,
@@ -140,17 +140,29 @@ testShiftRight(6, [4, 7])
 testShiftRight(7, [4])
 testShiftRight(8, [3, 4, 6, 7])
 
-const testShiftLeft = (index: number, positions: number, expected: number[], chain = chain1) =>
-  test(`Shift left at position ${index} shifts [${expected}]`, () =>
-    expect(ShiftLeft(chain, index, positions)).toStrictEqual(
-      chain.map(node =>
-        expected.includes(chain.indexOf(node)) ? { ...node, branch: node.branch - positions } : node
-      )
+const testPruneBranch = (
+  index: number,
+  branchIndex: number,
+  expectDeleted: number[] = [],
+  expectShifted: number[] = [],
+  expectedPositions: number = 1,
+  chain = chain1
+) =>
+  test(`Prune branch ${branchIndex} for branch at position ${index} yields [${expectDeleted}][${expectShifted}]`, () =>
+    expect(PruneBranchAndShiftLeft(chain, index, branchIndex)).toStrictEqual(
+      chain
+        .map(node =>
+          expectShifted.includes(chain.indexOf(node)) ? { ...node, branch: node.branch - expectedPositions } : node
+        )
+        .filter((_, index) => !expectDeleted.includes(index))
     ))
 
-testShiftLeft(3, 1, [4])
-testShiftLeft(3, 2, [4])
-testShiftLeft(1, 1, [2], chain2)
+testPruneBranch(1, 0, [2, 5])
+testPruneBranch(1, 1, [3, 6, 7], [4], 2)
+testPruneBranch(1, 2, [4])
+testPruneBranch(3, 0, [6])
+testPruneBranch(3, 1)
+testPruneBranch(3, 2, [7])
 
 const testShiftDown = (index: number, expected = chain1.map((_, index) => index)) =>
   test(`Shift down at position ${index} yields [${expected}]`, () =>
