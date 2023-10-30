@@ -117,13 +117,14 @@ export default function ChainEditor({
         <div className={`relative p-8 m-auto min-w-max grid ${gridConfig} gap-x-8 justify-items-center`}>
           <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
           <RowFiller start={1} end={maxBranch} />
-          {nodeRows.map((row, rowIndex) => (
+          {nodeRows.map((row, rowIndex, rows) => (
             <Fragment key={rowIndex}>
               {rowIndex > 0 &&
                 Array.from({ length: maxBranch + 1 }, (_, branch) => (
                   <ConnectorCell
                     key={branch}
                     nodes={nodes}
+                    previousRow={rows[rowIndex - 1]}
                     nextRow={row}
                     branch={branch}
                     prompts={prompts}
@@ -176,6 +177,7 @@ export default function ChainEditor({
 const ConnectorCell = ({
   nodes,
   branch,
+  previousRow,
   nextRow,
   isDisabled,
   activeMenuIndex,
@@ -189,6 +191,7 @@ const ConnectorCell = ({
 }: {
   nodes: ChainNode[]
   branch: number
+  previousRow: ChainNode[]
   nextRow: ChainNode[]
   isDisabled: boolean
   activeMenuIndex?: number
@@ -202,6 +205,24 @@ const ConnectorCell = ({
 }) => {
   let nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
   let index = nextNode ? nodes.indexOf(nextNode) : -1
+  if (index < 0) {
+    const items = nodes.filter(IsChainItem)
+    const isStartOfBranch = previousRow.some(
+      node =>
+        IsBranchChainItem(node) &&
+        node.branches
+          .slice(-1)
+          .some(
+            (_, branchIndex) =>
+              MaxBranch(SubtreeForBranchOfNode(items, nodes.indexOf(node), branchIndex)) + 1 === branch
+          )
+    )
+    if (isStartOfBranch) {
+      const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]
+      nextNode = nextRow.find(node => !IsBranchChainItem(node) || node.branch > branch)
+      index = nextNode ? nodes.indexOf(nextNode) : nodes.indexOf(previousNodes.slice(-1)[0]) + 1
+    }
+  }
   return index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
