@@ -95,7 +95,7 @@ export default function ChainNodeEditor({
     const prunedNodeCount = items.length - updatedItems.length
     if (prunedNodeCount > 0) {
       setDialogPrompt({
-        title: `This will prune a branch with ${prunedNodeCount} item${prunedNodeCount > 1 ? 's' : ''} from the chain.`,
+        title: `This will prune a branch with ${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''} from the chain.`,
         confirmTitle: 'Proceed',
         callback: saveAndClose,
         destructive: true,

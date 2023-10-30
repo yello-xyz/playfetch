@@ -16,6 +16,7 @@ import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
 import { ShiftRight, ShiftDown, SubtreeForBranchOfNode } from '@/src/common/branching'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 
 export function ChainNodeBox({
   chain,
@@ -64,6 +65,10 @@ export function ChainNodeBox({
 
   const updateItem = (item: ChainItem) => saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex + 1)])
 
+  const setDialogPrompt = useModalDialogPrompt()
+
+  const removeItems = (items: ChainItem[]) => saveItems(items.filter(item => !items.includes(item)))
+
   const removeItem = () => {
     const prunedItems = [items[itemIndex]]
     if (IsBranchChainItem(chainNode)) {
@@ -71,7 +76,20 @@ export function ChainNodeBox({
         prunedItems.push(...SubtreeForBranchOfNode(items, index, branchIndex))
       }
     }
-    saveItems(items.filter(item => !prunedItems.includes(item)))
+    const prunedNodeCount = prunedItems.length - 1
+    if (prunedNodeCount > 0) {
+      const nodeDescription = `${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''}`
+      const prunedBranchCount = (chainNode as BranchChainItem).branches.length - 1
+      const branchDescription = `${prunedBranchCount} branch${prunedBranchCount > 1 ? 'es' : ''}`
+      setDialogPrompt({
+        title: `This will prune ${branchDescription} with ${nodeDescription} from the chain.`,
+        confirmTitle: 'Proceed',
+        callback: () => removeItems(prunedItems),
+        destructive: true,
+      })
+    } else {
+      removeItems(prunedItems)
+    }
   }
 
   const insertItem = (
