@@ -38,7 +38,7 @@ export default function ChainNodeBoxConnector({
   return (
     <div className='flex flex-col items-center'>
       <SmallDot margin='-mt-[5px] mb-0.5' />
-      <DownStroke height='min-h-[12px]' />
+      <DownStroke height='min-h-[12px] flex-1' />
       {isDisabled ? (
         <DownStroke height='min-h-[20px]' />
       ) : (
@@ -54,7 +54,7 @@ export default function ChainNodeBoxConnector({
           onInsertBranch={onInsertBranch}
         />
       )}
-      <DownArrow height='min-h-[18px]' />
+      <DownArrow height='min-h-[18px] flex-1' />
       <SmallDot margin='-mb-[5px] mt-1' />
     </div>
   )
