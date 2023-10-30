@@ -67,7 +67,7 @@ export function ChainNodeBox({
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const removeItems = (items: ChainItem[]) => saveItems(items.filter(item => !items.includes(item)))
+  const removeItems = (itemsToRemove: ChainItem[]) => saveItems(items.filter(item => !itemsToRemove.includes(item)))
 
   const removeItem = () => {
     const prunedItems = [items[itemIndex]]
