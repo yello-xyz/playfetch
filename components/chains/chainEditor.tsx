@@ -72,6 +72,7 @@ export default function ChainEditor({
 
   const insertItem = (
     index: number,
+    branch: number,
     item:
       | Omit<CodeChainItem, 'branch'>
       | Omit<BranchChainItem, 'branch'>
@@ -79,24 +80,27 @@ export default function ChainEditor({
       | Omit<PromptChainItem, 'branch'>
   ) => {
     const itemIndex = index - 1
-    const itemWithBranch = { ...item, branch: items[itemIndex]?.branch ?? 0 }
+    const itemWithBranch = { ...item, branch }
     const shiftedItems = ShiftDown(IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex) : items, itemIndex)
     saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
     updateActiveIndex(index)
   }
 
-  const insertPrompt = (index: number, promptID: number, versionID?: number) =>
-    insertItem(index, {
+  const insertPrompt = (index: number, branch: number, promptID: number, versionID?: number) =>
+    insertItem(index, branch, {
       promptID,
       versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
     })
 
-  const insertNewPrompt = (index: number) =>
-    addPrompt().then(({ promptID, versionID }) => insertPrompt(index, promptID, versionID))
+  const insertNewPrompt = (index: number, branch: number) =>
+    addPrompt().then(({ promptID, versionID }) => insertPrompt(index, branch, promptID, versionID))
 
-  const insertCodeBlock = (index: number) => insertItem(index, { code: '' })
-  const insertBranch = (index: number) => insertItem(index, { code: '', branches: ['left', 'right'] })
-  const insertQuery = defaultQueryConfig ? (index: number) => insertItem(index, { ...defaultQueryConfig }) : undefined
+  const insertCodeBlock = (index: number, branch: number) => insertItem(index, branch, { code: '' })
+  const insertBranch = (index: number, branch: number) =>
+    insertItem(index, branch, { code: '', branches: ['left', 'right'] })
+  const insertQuery = defaultQueryConfig
+    ? (index: number, branch: number) => insertItem(index, branch, { ...defaultQueryConfig })
+    : undefined
 
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
@@ -196,11 +200,11 @@ const ConnectorCell = ({
   isDisabled: boolean
   activeMenuIndex?: number
   setActiveMenuIndex: (index: number | undefined) => void
-  insertPrompt: (index: number, promptID: number) => void
-  insertNewPrompt: (index: number) => void
-  insertQuery?: (index: number) => void
-  insertCodeBlock: (index: number) => void
-  insertBranch: (index: number) => void
+  insertPrompt: (index: number, branch: number, promptID: number) => void
+  insertNewPrompt: (index: number, branch: number) => void
+  insertQuery?: (index: number, branch: number) => void
+  insertCodeBlock: (index: number, branch: number) => void
+  insertBranch: (index: number, branch: number) => void
   prompts: Prompt[]
 }) => {
   let nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
@@ -230,11 +234,11 @@ const ConnectorCell = ({
       isActive={index === activeMenuIndex}
       setActive={active => setActiveMenuIndex(active ? index : undefined)}
       canDismiss={nodes.length > 2}
-      onInsertPrompt={promptID => insertPrompt(index, promptID)}
-      onInsertNewPrompt={() => insertNewPrompt(index)}
-      onInsertCodeBlock={() => insertCodeBlock(index)}
-      onInsertBranch={() => insertBranch(index)}
-      onInsertQuery={insertQuery ? () => insertQuery(index) : undefined}
+      onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
+      onInsertNewPrompt={() => insertNewPrompt(index, branch)}
+      onInsertCodeBlock={() => insertCodeBlock(index, branch)}
+      onInsertBranch={() => insertBranch(index, branch)}
+      onInsertQuery={insertQuery ? () => insertQuery(index, branch) : undefined}
     />
   ) : (
     <div />
@@ -259,7 +263,7 @@ const NodeCell = ({
   nodes: ChainNode[]
   row: ChainNode[]
   branch: number
-  insertItem: (index: number, item: ChainItem) => void
+  insertItem: (index: number, branch: number, item: ChainItem) => void
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
@@ -275,7 +279,7 @@ const NodeCell = ({
       chain={chain}
       nodes={nodes}
       index={index}
-      insertItem={item => insertItem(index, item)}
+      insertItem={item => insertItem(index, branch, item)}
       saveItems={saveItems}
       activeIndex={activeIndex}
       setActiveIndex={setActiveIndex}
