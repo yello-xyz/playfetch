@@ -165,9 +165,9 @@ testPruneBranch(3, 0, [6])
 testPruneBranch(3, 1)
 testPruneBranch(3, 2, [7])
 
-const testShiftDown = (index: number, expected = chain1.map((_, index) => index)) =>
+const testShiftDown = (index: number, expected = chain1.map((_, index) => index), chain = chain1) =>
   test(`Shift down at position ${index} yields [${expected}]`, () =>
-    expect(ShiftDown(chain1, index)).toStrictEqual(expected.map(index => chain1[index])))
+    expect(ShiftDown(chain, index)).toStrictEqual(expected.map(index => chain[index])))
 
 testShiftDown(0)
 testShiftDown(1)
@@ -179,9 +179,15 @@ testShiftDown(6, [0, 1, 2, 3, 4, 5, 7, 6])
 testShiftDown(7)
 testShiftDown(8)
 
-const testPruneNode = (index: number, expected = chain1.map((_, index) => index)) =>
+testShiftDown(0, [0, 1, 2, 3], chain2)
+testShiftDown(1, [0, 2, 1, 3], chain2)
+testShiftDown(2, [0, 1, 3, 2], chain2)
+testShiftDown(3, [0, 1, 2, 3], chain2)
+testShiftDown(4, [0, 1, 2, 3], chain2)
+
+const testPruneNode = (index: number, expected = chain1.map((_, index) => index), chain = chain1) =>
   test(`Prune node at position ${index} yields [${expected}]`, () =>
-    expect(PruneNodeAndShiftUp(chain1, index)).toStrictEqual(expected.map(index => chain1[index])))
+    expect(PruneNodeAndShiftUp(chain, index)).toStrictEqual(expected.map(index => chain[index])))
 
 testPruneNode(0, [1, 2, 3, 4, 5, 6, 7])
 testPruneNode(1, [0, 2, 3, 4, 5, 6, 7])
@@ -191,3 +197,9 @@ testPruneNode(4, [0, 1, 2, 3, 5, 6, 7])
 testPruneNode(5, [0, 1, 2, 3, 4, 6, 7])
 testPruneNode(6, [0, 1, 2, 3, 4, 5, 7])
 testPruneNode(7, [0, 1, 2, 3, 4, 5, 6])
+testPruneNode(8, [0, 1, 2, 3, 4, 5, 6, 7])
+
+testPruneNode(0, [1, 2, 3], chain2)
+testPruneNode(1, [0, 3, 2], chain2)
+testPruneNode(2, [0, 1, 3], chain2)
+testPruneNode(3, [0, 1, 2], chain2)
