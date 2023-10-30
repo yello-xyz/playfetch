@@ -4,9 +4,10 @@ import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
+import { SplitNodes } from '@/src/common/branching'
 
 export default function ChainEditor({
   chain,
@@ -59,6 +60,9 @@ export default function ChainEditor({
 
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
+  const items = nodes.slice(1, -1) as ChainItem[]
+  const itemRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
+
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
       <ChainEditorHeader
@@ -70,25 +74,29 @@ export default function ChainEditor({
       />
       <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px]'>
         <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
-        {nodes.map((_, index, nodes) => (
-          <ChainNodeBox
-            key={index}
-            chain={chain}
-            index={index}
-            nodes={nodes}
-            saveItems={saveItems}
-            activeIndex={activeIndex}
-            setActiveIndex={updateActiveIndex}
-            isMenuActive={index === activeMenuIndex}
-            setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
-            savedVersion={isVersionSaved ? activeVersion : null}
-            isTestMode={isTestMode}
-            setTestMode={setTestMode}
-            prompts={prompts}
-            addPrompt={addPrompt}
-            promptCache={promptCache}
-            defaultQueryConfig={defaultQueryConfig}
-          />
+        {itemRows.map((row, rowIndex) => (
+          <Fragment key={rowIndex}>
+            {row.map((node, columnIndex) => (
+              <ChainNodeBox
+                key={columnIndex}
+                chain={chain}
+                index={nodes.indexOf(node)}
+                nodes={nodes}
+                saveItems={saveItems}
+                activeIndex={activeIndex}
+                setActiveIndex={updateActiveIndex}
+                isMenuActive={nodes.indexOf(node) === activeMenuIndex}
+                setMenuActive={active => setActiveMenuIndex(active ? nodes.indexOf(node) : undefined)}
+                savedVersion={isVersionSaved ? activeVersion : null}
+                isTestMode={isTestMode}
+                setTestMode={setTestMode}
+                prompts={prompts}
+                addPrompt={addPrompt}
+                promptCache={promptCache}
+                defaultQueryConfig={defaultQueryConfig}
+              />
+            ))}
+          </Fragment>
         ))}
         <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
       </div>

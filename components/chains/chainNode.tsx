@@ -2,7 +2,7 @@ import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainI
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
-export type ChainNode = PromptChainItem | QueryChainItem | CodeChainItem | typeof InputNode | typeof OutputNode
+export type ChainNode = ChainItem | typeof InputNode | typeof OutputNode
 
 export const IsChainItem = (item: ChainNode): item is ChainItem => item !== InputNode && item !== OutputNode
 export const IsPromptChainItem = (item: ChainNode): item is PromptChainItem => IsChainItem(item) && 'promptID' in item
