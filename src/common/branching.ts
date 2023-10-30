@@ -21,23 +21,41 @@ export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot 
     .filter(node => node.branch > lowerBound && node.branch < upperBound)
 }
 
-export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number): ChainItem[] => {
+const SubtreeAndFirstBranchForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number) => {
   const descendants = SubtreeForNode(nodes, index, false)
   const children = takeWhile(descendants, (_, index) => index === 0 || IsSiblingNode(descendants, index))
 
   let branch = nodes[index]?.branch
   let branches = [] as ChainItem[][]
+  let startBranches = [] as number[]
   for (const [childIndex, child] of children.entries()) {
     while (branch < child.branch) {
+      startBranches.push(branch)
       branches.push([])
       branch++
     }
     const subtree = SubtreeForNode(descendants, childIndex)
+    startBranches.push(branch)
     branches.push(subtree)
     branch = 1 + MaxBranch(subtree)
   }
+  while (branches.length <= branchIndex) {
+    startBranches.push(branch)
+    branches.push([])
+    branch++
+  }
 
-  return branchIndex < branches.length ? branches[branchIndex] : []
+  return [branches[branchIndex], startBranches[branchIndex]] as const
+}
+
+export const SubtreeForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number): ChainItem[] => {
+  const [subtree] = SubtreeAndFirstBranchForBranchOfNode(nodes, index, branchIndex)
+  return subtree
+}
+
+export const FirstBranchForBranchOfNode = (nodes: ChainItem[], index: number, branchIndex: number): number => {
+  const [, firstBranch] = SubtreeAndFirstBranchForBranchOfNode(nodes, index, branchIndex)
+  return firstBranch
 }
 
 export const MaxBranch = (nodes: ChainItem[]): number =>

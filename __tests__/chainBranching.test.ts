@@ -1,4 +1,5 @@
 import {
+  FirstBranchForBranchOfNode,
   IsSiblingNode,
   MaxBranch,
   ShiftDown,
@@ -9,7 +10,7 @@ import {
 } from '@/src/common/branching'
 import { ChainItem } from '@/types'
 
-const chain: ChainItem[] = [
+const chain1: ChainItem[] = [
   { branch: 0, code: '0 [A0]' },
   { branch: 0, code: '1 [B0]', branches: ['0', '1', '4'] },
   { branch: 0, code: '2 [C0]' },
@@ -27,13 +28,15 @@ const chain2: ChainItem[] = [
   { branch: 0, code: '3 [C0]' },
 ]
 
-const getChainItems = (indexes: number[], items = chain) => indexes.map(index => items[index])
-const expectItemsToBe = (items: ChainItem[], expected: number[], sourceItems = chain) =>
+const chain3: ChainItem[] = [{ branch: 0, code: '0 [A0]', branches: ['0', '1', '2'] }]
+
+const getChainItems = (indexes: number[], items = chain1) => indexes.map(index => items[index])
+const expectItemsToBe = (items: ChainItem[], expected: number[], sourceItems = chain1) =>
   expect(items).toStrictEqual(getChainItems(expected, sourceItems))
 
 const testSibling = (index: number, isSibling: boolean) =>
   test(`Node at position ${index} is${isSibling ? '' : 'not '} a sibling`, () =>
-    expect(IsSiblingNode(chain, index)).toBe(isSibling))
+    expect(IsSiblingNode(chain1, index)).toBe(isSibling))
 
 testSibling(0, false)
 testSibling(1, false)
@@ -46,7 +49,7 @@ testSibling(7, true)
 testSibling(8, false)
 
 const testSubtree = (index: number, expected: number[]) =>
-  test(`Subtree at position ${index} is [${expected}]`, () => expectItemsToBe(SubtreeForNode(chain, index), expected))
+  test(`Subtree at position ${index} is [${expected}]`, () => expectItemsToBe(SubtreeForNode(chain1, index), expected))
 
 testSubtree(0, [0, 1, 2, 3, 4, 5, 6, 7])
 testSubtree(1, [1, 2, 3, 4, 5, 6, 7])
@@ -58,7 +61,7 @@ testSubtree(6, [6])
 testSubtree(7, [7])
 testSubtree(8, [])
 
-const testMaxBranch = (index: number, expected: number, items = chain) =>
+const testMaxBranch = (index: number, expected: number, items = chain1) =>
   test(`Max branch for subtree at position ${index} is ${expected}`, () =>
     expect(MaxBranch(SubtreeForNode(items, index))).toBe(expected))
 
@@ -76,7 +79,7 @@ testMaxBranch(1, 1, chain2)
 testMaxBranch(2, 2, chain2)
 testMaxBranch(3, 0, chain2)
 
-const testBranch = (index: number, branchIndex: number, expected: number[], items = chain) =>
+const testBranch = (index: number, branchIndex: number, expected: number[], items = chain1) =>
   test(`Branch ${branchIndex} for branch at position ${index} is [${expected}]`, () =>
     expectItemsToBe(SubtreeForBranchOfNode(items, index, branchIndex), expected, items))
 
@@ -92,8 +95,28 @@ testBranch(0, 1, [2], chain2)
 testBranch(1, 0, [3], chain2)
 testBranch(1, 1, [], chain2)
 
+const testBranchStart = (index: number, branchIndex: number, expected: number, items = chain1) =>
+  test(`Start of branch ${branchIndex} for branch at position ${index} is ${expected}`, () =>
+    expect(FirstBranchForBranchOfNode(items, index, branchIndex)).toBe(expected))
+
+testBranchStart(1, 0, 0)
+testBranchStart(1, 1, 1)
+testBranchStart(1, 2, 4)
+testBranchStart(3, 0, 1)
+testBranchStart(3, 1, 2)
+testBranchStart(3, 2, 3)
+
+testBranchStart(0, 0, 0, chain2)
+testBranchStart(0, 1, 2, chain2)
+testBranchStart(1, 0, 0, chain2)
+testBranchStart(1, 1, 1, chain2)
+
+testBranchStart(0, 0, 0, chain3)
+testBranchStart(0, 1, 1, chain3)
+testBranchStart(0, 2, 2, chain3)
+
 test('Split nodes', () =>
-  expect(SplitNodes(chain)).toStrictEqual([
+  expect(SplitNodes(chain1)).toStrictEqual([
     getChainItems([0]),
     getChainItems([1]),
     getChainItems([2, 3, 4]),
@@ -102,8 +125,8 @@ test('Split nodes', () =>
 
 const testShiftRight = (index: number, expected: number[]) =>
   test(`Shift right at position ${index} shifts [${expected}]`, () =>
-    expect(ShiftRight(chain, index)).toStrictEqual(
-      chain.map(node => (expected.includes(chain.indexOf(node)) ? { ...node, branch: node.branch + 1 } : node))
+    expect(ShiftRight(chain1, index)).toStrictEqual(
+      chain1.map(node => (expected.includes(chain1.indexOf(node)) ? { ...node, branch: node.branch + 1 } : node))
     ))
 
 testShiftRight(0, [])
@@ -116,9 +139,9 @@ testShiftRight(6, [4, 7])
 testShiftRight(7, [4])
 testShiftRight(8, [3, 4, 6, 7])
 
-const testShiftDown = (index: number, expected = chain.map((_, index) => index)) =>
+const testShiftDown = (index: number, expected = chain1.map((_, index) => index)) =>
   test(`Shift down at position ${index} yields [${expected}]`, () =>
-    expect(ShiftDown(chain, index)).toStrictEqual(expected.map(index => chain[index])))
+    expect(ShiftDown(chain1, index)).toStrictEqual(expected.map(index => chain1[index])))
 
 testShiftDown(0)
 testShiftDown(1)
