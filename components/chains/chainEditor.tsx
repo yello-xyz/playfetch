@@ -16,14 +16,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
-import {
-  FirstBranchForBranchOfNode,
-  MaxBranch,
-  ShiftDown,
-  ShiftRight,
-  SplitNodes,
-  SubtreeForBranchOfNode,
-} from '@/src/common/branching'
+import { FirstBranchForBranchOfNode, MaxBranch, ShiftDown, ShiftRight, SplitNodes } from '@/src/common/branching'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 
 export default function ChainEditor({
@@ -222,7 +215,9 @@ const ConnectorCell = ({
     const isStartOfBranch = previousRow.some(
       node =>
         IsBranchChainItem(node) &&
-        node.branches.some((_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch)
+        node.branches.some(
+          (_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch
+        )
     )
     if (isStartOfBranch) {
       const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]

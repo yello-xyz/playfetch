@@ -4,7 +4,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
-import { SubtreeForBranchOfNode } from '@/src/common/branching'
+import { PruneBranchAndShiftLeft } from '@/src/common/branching'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 
 export function ChainNodeBox({
@@ -48,16 +48,15 @@ export function ChainNodeBox({
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const removeItems = (itemsToRemove: ChainItem[]) => saveItems(items.filter(item => !itemsToRemove.includes(item)))
-
   const removeItem = () => {
-    const prunedItems = [items[itemIndex]]
+    let updatedItems = items
     if (IsBranchChainItem(chainNode)) {
-      for (let branchIndex = 1; branchIndex < chainNode.branches.length; branchIndex++) {
-        prunedItems.push(...SubtreeForBranchOfNode(items, index, branchIndex))
+      for (let branchIndex = chainNode.branches.length - 1; branchIndex > 0; branchIndex--) {
+        updatedItems = PruneBranchAndShiftLeft(updatedItems, itemIndex, branchIndex)
       }
     }
-    const prunedNodeCount = prunedItems.length - 1
+    updatedItems = updatedItems.filter(item => item !== chainNode)
+    const prunedNodeCount = (items.length - updatedItems.length) - 1
     if (prunedNodeCount > 0) {
       const nodeDescription = `${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''}`
       const prunedBranchCount = (chainNode as BranchChainItem).branches.length - 1
@@ -65,11 +64,11 @@ export function ChainNodeBox({
       setDialogPrompt({
         title: `This will prune ${branchDescription} with ${nodeDescription} from the chain.`,
         confirmTitle: 'Proceed',
-        callback: () => removeItems(prunedItems),
+        callback: () => saveItems(updatedItems),
         destructive: true,
       })
     } else {
-      removeItems(prunedItems)
+      saveItems(updatedItems)
     }
   }
 
