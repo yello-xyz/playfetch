@@ -62,7 +62,8 @@ export default function ChainEditor({
 
   const items = nodes.slice(1, -1) as ChainItem[]
   const itemRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
-  const gridConfig = gridConfigs[Math.min(MaxBranch(items), gridConfigs.length - 1)]
+  const maxBranch = MaxBranch(items)
+  const gridConfig = gridConfigs[Math.min(maxBranch, gridConfigs.length - 1)]
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -74,8 +75,9 @@ export default function ChainEditor({
         setShowVersions={setShowVersions}
       />
       <div className='flex flex-col h-full bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px] overflow-auto'>
-        <div className={`relative p-8 pr-0 grid ${gridConfig} mt-auto mb-auto justify-items-center`}>
+        <div className={`relative p-8 pr-0 grid ${gridConfig} m-auto justify-items-center`}>
           <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
+          <RowFiller start={1} end={maxBranch} />
           {itemRows.map((row, rowIndex) => (
             <Fragment key={rowIndex}>
               {row.map((node, columnIndex) => (
@@ -98,9 +100,11 @@ export default function ChainEditor({
                   defaultQueryConfig={defaultQueryConfig}
                 />
               ))}
+              <RowFiller start={row.length} end={maxBranch} />
             </Fragment>
           ))}
           <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
+          <RowFiller start={1} end={maxBranch} />
         </div>
       </div>
       <SegmentedControl
@@ -115,6 +119,14 @@ export default function ChainEditor({
     </div>
   )
 }
+
+const RowFiller = ({ start, end }: { start: number; end: number }) => (
+  <>
+    {Array.from({ length: end + 1 - start }, (_, index) => (
+      <div key={index + start} />
+    ))}
+  </>
+)
 
 const gridConfigs = [
   'grid-cols-[repeat(1,minmax(0,1fr))]',
