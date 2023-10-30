@@ -15,7 +15,7 @@ import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
-import { ShiftRight, ShiftDown } from '@/src/common/branching'
+import { ShiftRight, ShiftDown, SubtreeForBranchOfNode } from '@/src/common/branching'
 
 export function ChainNodeBox({
   chain,
@@ -64,7 +64,15 @@ export function ChainNodeBox({
 
   const updateItem = (item: ChainItem) => saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex + 1)])
 
-  const removeItem = () => saveItems([...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)])
+  const removeItem = () => {
+    const prunedItems = [items[itemIndex]]
+    if (IsBranchChainItem(chainNode)) {
+      for (let branchIndex = 1; branchIndex < chainNode.branches.length; branchIndex++) {
+        prunedItems.push(...SubtreeForBranchOfNode(items, index, branchIndex))
+      }
+    }
+    saveItems(items.filter(item => !prunedItems.includes(item)))
+  }
 
   const insertItem = (
     item:
