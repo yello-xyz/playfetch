@@ -16,7 +16,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
-import { MaxBranch, ShiftDown, ShiftRight, SplitNodes } from '@/src/common/branching'
+import { MaxBranch, ShiftDown, ShiftRight, SplitNodes, SubtreeForBranchOfNode } from '@/src/common/branching'
 import ChainNodeBoxConnector from './chainNodeBoxConnector'
 
 export default function ChainEditor({
@@ -119,27 +119,25 @@ export default function ChainEditor({
           <RowFiller start={1} end={maxBranch} />
           {nodeRows.map((row, rowIndex) => (
             <Fragment key={rowIndex}>
-              {rowIndex > 0 && (
-                <>
-                  {row.map((node, columnIndex) => (
-                    <ChainNodeBoxConnector
-                      key={columnIndex}
-                      prompts={prompts}
-                      isDisabled={isTestMode}
-                      isActive={nodes.indexOf(node) === activeMenuIndex}
-                      setActive={active => setActiveMenuIndex(active ? nodes.indexOf(node) : undefined)}
-                      canDismiss={nodes.length > 2}
-                      onInsertPrompt={promptID => insertPrompt(nodes.indexOf(node), promptID)}
-                      onInsertNewPrompt={() => insertNewPrompt(nodes.indexOf(node))}
-                      onInsertCodeBlock={() => insertCodeBlock(nodes.indexOf(node))}
-                      onInsertBranch={() => insertBranch(nodes.indexOf(node))}
-                      onInsertQuery={insertQuery ? () => insertQuery(nodes.indexOf(node)) : undefined}
-                    />
-                  ))}
-                  <RowFiller start={row.length} end={maxBranch} />
-                </>
-              )}
-              {Array.from({ length: maxBranch + 1 }, (_, branch) =>  (
+              {rowIndex > 0 &&
+                Array.from({ length: maxBranch + 1 }, (_, branch) => (
+                  <ConnectorCell
+                    key={branch}
+                    nodes={nodes}
+                    nextRow={row}
+                    branch={branch}
+                    prompts={prompts}
+                    isDisabled={isTestMode}
+                    activeMenuIndex={activeMenuIndex}
+                    setActiveMenuIndex={setActiveMenuIndex}
+                    insertPrompt={insertPrompt}
+                    insertNewPrompt={insertNewPrompt}
+                    insertCodeBlock={insertCodeBlock}
+                    insertBranch={insertBranch}
+                    insertQuery={insertQuery}
+                  />
+                ))}
+              {Array.from({ length: maxBranch + 1 }, (_, branch) => (
                 <NodeCell
                   key={branch}
                   chain={chain}
@@ -175,6 +173,53 @@ export default function ChainEditor({
   )
 }
 
+const ConnectorCell = ({
+  nodes,
+  branch,
+  nextRow,
+  isDisabled,
+  activeMenuIndex,
+  setActiveMenuIndex,
+  insertPrompt,
+  insertNewPrompt,
+  insertQuery,
+  insertCodeBlock,
+  insertBranch,
+  prompts,
+}: {
+  nodes: ChainNode[]
+  branch: number
+  nextRow: ChainNode[]
+  isDisabled: boolean
+  activeMenuIndex?: number
+  setActiveMenuIndex: (index: number | undefined) => void
+  insertPrompt: (index: number, promptID: number) => void
+  insertNewPrompt: (index: number) => void
+  insertQuery?: (index: number) => void
+  insertCodeBlock: (index: number) => void
+  insertBranch: (index: number) => void
+  prompts: Prompt[]
+}) => {
+  let nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  let index = nextNode ? nodes.indexOf(nextNode) : -1
+  return index >= 0 ? (
+    <ChainNodeBoxConnector
+      prompts={prompts}
+      isDisabled={isDisabled}
+      isActive={index === activeMenuIndex}
+      setActive={active => setActiveMenuIndex(active ? index : undefined)}
+      canDismiss={nodes.length > 2}
+      onInsertPrompt={promptID => insertPrompt(index, promptID)}
+      onInsertNewPrompt={() => insertNewPrompt(index)}
+      onInsertCodeBlock={() => insertCodeBlock(index)}
+      onInsertBranch={() => insertBranch(index)}
+      onInsertQuery={insertQuery ? () => insertQuery(index) : undefined}
+    />
+  ) : (
+    <div />
+  )
+}
+
 const NodeCell = ({
   chain,
   nodes,
@@ -204,7 +249,7 @@ const NodeCell = ({
 }) => {
   const node = row.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
   const index = node ? nodes.indexOf(node) : -1
-  return node ? (
+  return index >= 0 ? (
     <ChainNodeBox
       chain={chain}
       nodes={nodes}
@@ -218,7 +263,9 @@ const NodeCell = ({
       prompts={prompts}
       promptCache={promptCache}
     />
-  ) : <div />
+  ) : (
+    <div />
+  )
 }
 
 const RowFiller = ({ start, end }: { start: number; end: number }) => (
