@@ -14,6 +14,7 @@ import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/code
 import runPromptWithConfig from '@/src/server/promptEngine'
 import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
 import { runQuery } from './queryEngine'
+import { FirstBranchForBranchOfNode } from '../common/branching'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -117,6 +118,7 @@ export default async function runChain(
 
   let lastResponse = emptyResponse
   let continuationCount = 0
+  let branch = 0
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
@@ -130,6 +132,9 @@ export default async function runChain(
         response.duration,
         response.failed
       )
+    if (config.branch !== branch) {
+      continue
+    }
     if (isRunConfig(config)) {
       const promptVersion = (
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
@@ -168,10 +173,17 @@ export default async function runChain(
       )
       streamResponse(lastResponse)
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
-      // TODO implement branching
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
       streamResponse(lastResponse)
+      if (!lastResponse.failed && isBranchConfig(config)) {
+        const branchIndex = config.branches.indexOf(lastResponse.output)
+        if (branchIndex >= 0) {
+          branch = FirstBranchForBranchOfNode(configs.map(item => ({ ...item, code: '' })), index, branchIndex)
+        } else {
+          throw new Error(`Invalid branch "${lastResponse.output}"`)
+        }
+      }
     } else {
       throw new Error('Unsupported config type in chain evaluation')
     }

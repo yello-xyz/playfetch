@@ -20,7 +20,7 @@ export const ConsumeStream = async (
       const data = line.split('data:').slice(-1)[0]
       const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, isLast } = JSON.parse(data)
       if (isLast) {
-        runs[inputIndex][index].isLast = true
+        runs[inputIndex][Math.max(...Object.keys(runs[inputIndex]).map(Number))].isLast = true
       } else {
         const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
