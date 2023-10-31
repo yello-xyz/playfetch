@@ -38,21 +38,32 @@ testExtractPromptVariables('functions prompt', ['hello', 'world'], buildPrompt('
 testExtractPromptVariables('include dynamic', ['hello_world'], buildPrompt('', '', '[{ "name": "hello_world" }]'))
 testExtractPromptVariables('exclude dynamic', [], buildPrompt('', '', '[{ "name": "hello_world" }]'), false)
 
-const buildChain = (inputs: string[], outputs: string[]): ChainItemWithInputs[] =>
+const buildChain = (
+  inputs: string[],
+  outputs: string[],
+  branchNumbers: number[] = [],
+  branchCounts: number[] = []
+): ChainItemWithInputs[] =>
   inputs.map((input, index) => ({
     code: '',
     inputs: input ? [input] : [],
     output: outputs[index],
+    branch: branchNumbers[index] ?? 0,
+    ...(branchCounts[index] ? { branches: Array.from({ length: branchCounts[index] }, (_, index) => `${index}`) } : {}),
   }))
 
 const testExtractChainVariables = (
   testDescription: string,
   expectedVariables: string[],
   inputs: string[],
-  outputs: string[] = []
+  outputs: string[] = [],
+  branchNumbers: number[] = [],
+  branchCounts: number[] = []
 ) =>
   test(`Test ${testDescription}`, () => {
-    expect(ExtractUnboundChainInputs(buildChain(inputs, outputs), false)).toStrictEqual(expectedVariables)
+    expect(ExtractUnboundChainInputs(buildChain(inputs, outputs, branchNumbers, branchCounts), false)).toStrictEqual(
+      expectedVariables
+    )
   })
 
 testExtractChainVariables('empty chain', [], [], [])
@@ -63,3 +74,12 @@ testExtractChainVariables('multi step multi chain input', ['hello', 'world'], ['
 testExtractChainVariables('mapped input', ['world'], ['', 'hello', 'world'], ['hello'])
 testExtractChainVariables('mapped too late', ['hello'], ['hello', ''], ['', 'hello'])
 testExtractChainVariables('mapped later too', ['hello', 'world'], ['hello', 'world', 'hello'], ['', 'hello'])
+
+testExtractChainVariables(
+  'branched chain',
+  ['world'],
+  ['', '', 'hello', '', '', 'world', 'hello', 'world'],
+  ['', 'hello', '', 'world', '', '', '', ''],
+  [0, 0, 0, 1, 4, 0, 1, 3],
+  [0, 3, 0, 3, 0, 0, 0, 0]
+)
