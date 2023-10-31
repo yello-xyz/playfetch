@@ -124,7 +124,7 @@ export default function ChainEditor({
           <RowFiller start={1} end={maxBranch} />
           {nodeRows.map((row, rowIndex, rows) => (
             <Fragment key={rowIndex}>
-              {rowIndex === rows.length - 1 && <EndConnector maxBranch={maxBranch} />}
+              {rowIndex === rows.length - 1 && <EndBranchConnector maxBranch={maxBranch} />}
               {Array.from({ length: maxBranch + 1 }, (_, branch) => (
                 <NodeCell
                   key={branch}
@@ -238,7 +238,7 @@ const ConnectorCell = ({
       isActive={index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]}
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
-      hasPrevious={!!precedingNode}
+      hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}
       hasNext={!!nextNode}
       onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
       onInsertNewPrompt={() => insertNewPrompt(index, branch)}
@@ -306,7 +306,7 @@ const NodeCell = ({
   )
 }
 
-const EndConnector = ({ maxBranch }: { maxBranch: number }) => (
+const EndBranchConnector = ({ maxBranch }: { maxBranch: number }) => (
   <>
     <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
     <div className='flex flex-col items-center'>
