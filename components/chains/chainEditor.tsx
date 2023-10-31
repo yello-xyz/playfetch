@@ -142,6 +142,7 @@ export default function ChainEditor({
                   promptCache={promptCache}
                 />
               ))}
+              {<StartBranchConnector row={row} maxBranch={maxBranch} />}
               {rowIndex < rows.length - 1 &&
                 Array.from({ length: maxBranch + 1 }, (_, branch) => (
                   <ConnectorCell
@@ -306,12 +307,23 @@ const NodeCell = ({
   )
 }
 
+const StartBranchConnector = ({ maxBranch, row }: { maxBranch: number; row: ChainNode[] }) =>
+  row.filter(IsChainItem).some(IsBranchChainItem) ? (
+    <>
+      <div className='flex flex-col items-center'>
+        <DownStroke height='min-h-[18px]' includeDot />
+      </div>
+      <RowFiller start={1} end={maxBranch} />
+      <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
+    </>
+  ) : null
+
 const EndBranchConnector = ({ maxBranch }: { maxBranch: number }) => (
   <>
     <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
     <div className='flex flex-col items-center'>
-    <DownConnector height='min-h-[18px]' />
-      </div>
+      <DownConnector height='min-h-[18px]' />
+    </div>
     <RowFiller start={1} end={maxBranch} />
   </>
 )

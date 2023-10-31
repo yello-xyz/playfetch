@@ -41,14 +41,7 @@ export default function ChainNodeBoxConnector({
 }) {
   return (
     <div className='flex flex-col items-center'>
-      {hasPrevious ? (
-        <>
-          <SmallDot margin='-mt-[5px] mb-0.5' />
-          <DownStroke height='min-h-[12px]' grow />
-        </>
-      ) : (
-        <DownStroke height='min-h-[12px]' grow />
-      )}
+      {hasPrevious ? <DownStroke height='min-h-[12px]' grow includeDot /> : <DownStroke height='min-h-[12px]' grow />}
       {isDisabled ? (
         <DownStroke height='min-h-[20px]' />
       ) : (
@@ -64,11 +57,7 @@ export default function ChainNodeBoxConnector({
           onInsertBranch={onInsertBranch}
         />
       )}
-      {hasNext ? (
-        <DownConnector height='min-h-[18px]' grow />
-      ) : (
-        <DownStroke height='min-h-[18px]' grow />
-      )}
+      {hasNext ? <DownConnector height='min-h-[18px]' grow /> : <DownStroke height='min-h-[18px]' grow />}
     </div>
   )
 }
@@ -81,11 +70,20 @@ export const DownStroke = ({
   height = '',
   color = 'border-gray-400',
   grow = false,
+  includeDot = false,
+  dotColor,
 }: {
   height?: string
   color?: string
   grow?: boolean
-}) => <div className={`${height} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
+  includeDot?: boolean
+  dotColor?: string
+}) => (
+  <>
+    {includeDot && <SmallDot margin='-mt-[5px] mb-0.5' color={dotColor} />}
+    <div className={`${height} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
+  </>
+)
 
 export const DownConnector = ({
   height = '',
@@ -155,7 +153,7 @@ const AddButton = ({
 
   return isActive ? (
     <>
-      <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'}color='bg-blue-200' />
+      <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} color='bg-blue-200' />
       <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
         <div className='flex'>
           <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
@@ -192,8 +190,7 @@ const AddButton = ({
           </div>
         )}
       </div>
-      <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
-      <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} />
+      <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} includeDot dotColor='bg-blue-200' />
     </>
   ) : (
     <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onClick={toggleActive()}>
