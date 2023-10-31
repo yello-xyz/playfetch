@@ -49,8 +49,8 @@ export const SelectInputRows = (
     ].filter((_, index) => !emptyRowIndices.includes(index))
   }
   const rowCount = Math.max(...Object.values(filteredPaddedInputs).map(values => values.length))
-  if (rowCount === 0) {
-    return [[], []]
+  if (rowCount <= 0) {
+    return [[{}], []]
   }
 
   const entries = Object.entries(filteredPaddedInputs)

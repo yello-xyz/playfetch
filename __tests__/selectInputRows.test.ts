@@ -1,6 +1,14 @@
 import { SelectInputRows } from '@/components/runs/runButtons'
 import { InputValues, TestConfig } from '@/types'
 
+const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({ mode, rowIndices })
+
+test('No inputs yields single empty prompt input', () =>
+  expect(SelectInputRows({}, [], config('first'))[0]).toStrictEqual([{}]))
+
+test('Inputs without values yield single empty prompt input', () =>
+  expect(SelectInputRows({}, ['a', 'b'], config('first'))[0]).toStrictEqual([{}]))
+
 const testRowSelection = (
   testDescription: string,
   inputValues: InputValues,
@@ -13,8 +21,6 @@ const testRowSelection = (
   test(testDescription, () =>
     expect(SelectInputRows(inputValues, variables, config, count, start)[1]).toStrictEqual(expectedIndices)
   )
-
-const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({ mode, rowIndices })
 
 const testAllDefaultModes = (
   testDescription: string,
