@@ -116,10 +116,10 @@ export default function ChainEditor({
       />
       <div className='flex flex-col h-full bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px] overflow-auto'>
         <div className={`relative p-8 m-auto min-w-max grid ${gridConfigs[maxBranch]} gap-x-8 justify-items-center`}>
-          <StartRow maxBranch={maxBranch} />
+          <StartRow maxBranch={maxBranch} colSpans={colSpans} />
           {nodeRows.map((row, rowIndex, rows) => (
             <Fragment key={rowIndex}>
-              {rowIndex === rows.length - 1 && <EndBranchConnector maxBranch={maxBranch} />}
+              {rowIndex === rows.length - 1 && <EndBranchConnector maxBranch={maxBranch} colSpans={colSpans} />}
               <NodesRow
                 chain={chain}
                 nodes={nodes}
@@ -134,7 +134,7 @@ export default function ChainEditor({
                 prompts={prompts}
                 promptCache={promptCache}
               />
-              {<StartBranchConnector row={row} maxBranch={maxBranch} nodes={nodes} />}
+              {<StartBranchConnector row={row} maxBranch={maxBranch} nodes={nodes} colSpans={colSpans} />}
               {rowIndex < rows.length - 1 && (
                 <ConnectorRow
                   nodes={nodes}
@@ -154,7 +154,7 @@ export default function ChainEditor({
               )}
             </Fragment>
           ))}
-          <EndRow maxBranch={maxBranch} />
+          <EndRow maxBranch={maxBranch} colSpans={colSpans} />
         </div>
       </div>
       <SegmentedControl
@@ -183,4 +183,19 @@ const gridConfigs = [
   'grid-cols-10',
   'grid-cols-11',
   'grid-cols-12',
+]
+
+const colSpans = [
+  'col-span-1',
+  'col-span-2',
+  'col-span-3',
+  'col-span-4',
+  'col-span-5',
+  'col-span-6',
+  'col-span-7',
+  'col-span-8',
+  'col-span-9',
+  'col-span-10',
+  'col-span-11',
+  'col-span-12',
 ]

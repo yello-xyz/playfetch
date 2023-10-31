@@ -16,21 +16,7 @@ const startsBranch = (nodes: ChainNode[], branch: number) => (node: ChainNode) =
   )
 }
 
-export const ConnectorRow = ({
-  nodes,
-  maxBranch,
-  previousRow,
-  nextRow,
-  isDisabled,
-  activeMenuIndex,
-  setActiveMenuIndex,
-  insertPrompt,
-  insertNewPrompt,
-  insertQuery,
-  insertCodeBlock,
-  insertBranch,
-  prompts,
-}: {
+export const ConnectorRow = (props: {
   nodes: ChainNode[]
   maxBranch: number
   previousRow: ChainNode[]
@@ -46,26 +32,14 @@ export const ConnectorRow = ({
   prompts: Prompt[]
 }) => (
   <>
-    {Array.from({ length: maxBranch + 1 }, (_, branch) => (
-      <ConnectorCell
-        key={branch}
-        nodes={nodes}
-        previousRow={previousRow}
-        nextRow={nextRow}
-        branch={branch}
-        prompts={prompts}
-        isDisabled={isDisabled}
-        activeMenuIndex={activeMenuIndex}
-        setActiveMenuIndex={setActiveMenuIndex}
-        insertPrompt={insertPrompt}
-        insertNewPrompt={insertNewPrompt}
-        insertCodeBlock={insertCodeBlock}
-        insertBranch={insertBranch}
-        insertQuery={insertQuery}
-      />
+    {Array.from({ length: props.maxBranch + 1 }, (_, branch) => (
+      <ConnectorCell key={branch} {...props} branch={branch} />
     ))}
   </>
 )
+
+const hasStartedBranchInColumn = (nodes: ChainNode[], previousIndex: number, branch: number) =>
+  nodes.slice(0, previousIndex).some(startsBranch(nodes, branch))
 
 const ConnectorCell = ({
   nodes,
@@ -106,7 +80,6 @@ const ConnectorCell = ({
     const targetNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
     index = targetNode ? nodes.indexOf(targetNode) : previousNodeIndex + 1
   }
-  const hasStartedBranchInColumn = nodes.slice(0, previousNodeIndex).some(startsBranch(nodes, branch))
   return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
@@ -122,27 +95,14 @@ const ConnectorCell = ({
       onInsertBranch={() => insertBranch(index, branch)}
       onInsertQuery={insertQuery ? () => insertQuery(index, branch) : undefined}
     />
-  ) : hasStartedBranchInColumn ? (
+  ) : hasStartedBranchInColumn(nodes, previousNodeIndex, branch) ? (
     <DownStroke />
   ) : (
     <div />
   )
 }
 
-export const NodesRow = ({
-  chain,
-  nodes,
-  row,
-  maxBranch,
-  insertItem,
-  saveItems,
-  activeIndex,
-  setActiveIndex,
-  savedVersion,
-  setTestMode,
-  prompts,
-  promptCache,
-}: {
+export const NodesRow = (props: {
   chain: ActiveChain
   nodes: ChainNode[]
   row: ChainNode[]
@@ -157,22 +117,8 @@ export const NodesRow = ({
   promptCache: ChainPromptCache
 }) => (
   <>
-    {Array.from({ length: maxBranch + 1 }, (_, branch) => (
-      <NodeCell
-        key={branch}
-        chain={chain}
-        nodes={nodes}
-        row={row}
-        branch={branch}
-        insertItem={insertItem}
-        saveItems={saveItems}
-        activeIndex={activeIndex}
-        setActiveIndex={setActiveIndex}
-        savedVersion={savedVersion}
-        setTestMode={setTestMode}
-        prompts={prompts}
-        promptCache={promptCache}
-      />
+    {Array.from({ length: props.maxBranch + 1 }, (_, branch) => (
+      <NodeCell key={branch} {...props} branch={branch} />
     ))}
   </>
 )
@@ -208,7 +154,6 @@ const NodeCell = ({
   const index = node ? nodes.indexOf(node) : -1
   const firstNodeOfRowIndex = nodes.indexOf(row[0])
   const isLastRow = firstNodeOfRowIndex === nodes.length - 1
-  const hasStartedBranchInColumn = nodes.slice(0, firstNodeOfRowIndex).some(startsBranch(nodes, branch))
   return index >= 0 ? (
     <ChainNodeBox
       chain={chain}
@@ -223,7 +168,7 @@ const NodeCell = ({
       prompts={prompts}
       promptCache={promptCache}
     />
-  ) : !isLastRow && hasStartedBranchInColumn ? (
+  ) : !isLastRow && hasStartedBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (
     <DownStroke />
   ) : (
     <div />
@@ -234,10 +179,12 @@ export const StartBranchConnector = ({
   maxBranch,
   row,
   nodes,
+  colSpans
 }: {
   maxBranch: number
   row: ChainNode[]
   nodes: ChainNode[]
+  colSpans: string[]
 }) => {
   const items = nodes.filter(IsChainItem)
   const ranges = row
@@ -280,46 +227,31 @@ export const StartBranchConnector = ({
   )
 }
 
-export const EndBranchConnector = ({ maxBranch }: { maxBranch: number }) => (
+export const EndBranchConnector = ({ maxBranch, colSpans }: { maxBranch: number; colSpans: string[] }) => (
   <>
     <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
     <div className='flex flex-col items-center'>
       <DownConnector height='min-h-[18px]' />
     </div>
-    <RowFiller start={1} end={maxBranch} />
+    <RowFiller start={1} end={maxBranch} colSpans={colSpans} />
   </>
 )
 
 const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
-export const StartRow = ({ maxBranch }: { maxBranch: number }) => (
+export const StartRow = ({ maxBranch, colSpans }: { maxBranch: number; colSpans: string[] }) => (
   <>
     <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80`}>Start</div>
-    <RowFiller start={1} end={maxBranch} />
+    <RowFiller start={1} end={maxBranch} colSpans={colSpans} />
   </>
 )
 
-export const EndRow = ({ maxBranch }: { maxBranch: number }) => (
+export const EndRow = ({ maxBranch, colSpans }: { maxBranch: number; colSpans: string[] }) => (
   <>
     <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80`}>End</div>
-    <RowFiller start={1} end={maxBranch} />
+    <RowFiller start={1} end={maxBranch} colSpans={colSpans} />
   </>
 )
 
-export const RowFiller = ({ start, end }: { start: number; end: number }) =>
+export const RowFiller = ({ start, end, colSpans }: { start: number; end: number; colSpans: string[] }) =>
   end + 1 > start ? <div className={colSpans[end + 1 - start]} /> : null
-
-const colSpans = [
-  'col-span-1',
-  'col-span-2',
-  'col-span-3',
-  'col-span-4',
-  'col-span-5',
-  'col-span-6',
-  'col-span-7',
-  'col-span-8',
-  'col-span-9',
-  'col-span-10',
-  'col-span-11',
-  'col-span-12',
-]
