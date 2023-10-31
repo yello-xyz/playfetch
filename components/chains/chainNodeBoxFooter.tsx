@@ -1,5 +1,5 @@
 import { ChainItem } from '@/types'
-import { ChainNode, IsChainItem } from './chainNode'
+import { ChainNode, IsChainItem, SubtreeForChainNode } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
@@ -22,7 +22,9 @@ export default function ChainNodeBoxFooter({
   const items = nodes.filter(IsChainItem)
   const itemIndex = index - 1
   const inputs = [
-    ...new Set(items.slice(itemIndex + 1).flatMap(item => ExtractChainItemVariables(item, promptCache, false))),
+    ...new Set(
+      SubtreeForChainNode(chainNode, nodes, false).flatMap(item => ExtractChainItemVariables(item, promptCache, false))
+    ),
   ]
   const mapOutput = (output?: string) => {
     const newItems = items.map(item => ({ ...item, output: item.output === output ? undefined : item.output }))
