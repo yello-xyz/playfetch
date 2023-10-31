@@ -240,7 +240,7 @@ const ConnectorCell = ({
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
       hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}
-      hasNext={!!nextNode}
+      hasNext={!!nextNode && IsChainItem(nextNode)}
       onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
       onInsertNewPrompt={() => insertNewPrompt(index, branch)}
       onInsertCodeBlock={() => insertCodeBlock(index, branch)}
