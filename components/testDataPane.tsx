@@ -87,6 +87,15 @@ export default function TestDataPane({
     setTestConfig({ mode, rowIndices })
   }
 
+  const toggleAll = () => {
+    const nonEmptyRowIndices = Array.from({ length: rowCount }, (_, index) => index).filter(row => !isRowEmpty(row))
+    if (testConfig.rowIndices.length < nonEmptyRowIndices.length) {
+      setTestConfig({ mode: 'all', rowIndices: nonEmptyRowIndices })
+    } else if (nonEmptyRowIndices.length > 1) {
+      setTestConfig({ mode: 'first', rowIndices: nonEmptyRowIndices.slice(0, 1) })
+    }
+  }
+
   const [activeRow, setActiveRow] = useState<number>()
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
@@ -97,7 +106,7 @@ export default function TestDataPane({
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
-        <div className='border-b border-gray-200 bg-gray-25' />
+        <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={toggleAll} />
         {allVariables.map((variable, index) => (
           <div
             key={index}

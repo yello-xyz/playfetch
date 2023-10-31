@@ -28,21 +28,19 @@ const chunk = (
   message?: string,
   configIndex = 0,
   inputIndex = 0,
-  timestamp?: number,
   cost?: number,
   duration?: number,
   failed?: boolean
-) => ({ inputIndex, configIndex, index: configIndex, message, timestamp, cost, duration, failed })
+) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed })
 
 const run = (
   output: string,
   index = 0,
   id = index,
-  timestamp?: number,
   cost?: number,
   duration?: number,
   failed?: boolean
-) => ({ id, index, output, timestamp, cost, duration, failed })
+) => ({ id, index, output, cost, duration, failed })
 
 testConsumeStream('no chunks', [], [])
 testConsumeStream('single chunk', [chunk('hello')], [run('hello')])
@@ -78,4 +76,4 @@ testConsumeStream(
   2
 )
 
-testConsumeStream('attributes', [chunk('hello', 0, 0, 2, 3, 4, true)], [run('hello', 0, 0, 2, 3, 4, true)])
+testConsumeStream('attributes', [chunk('hello', 0, 0, 3, 4, true)], [run('hello', 0, 0, 3, 4, true)])

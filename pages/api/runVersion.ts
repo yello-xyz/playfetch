@@ -23,8 +23,6 @@ const logResponse = (
     : saveRun(userID, version.parentID, version.id, inputs, response.output, response.cost, response.duration, [])
 }
 
-const timestampIf = (condition: boolean) => (condition ? new Date().getTime() : undefined)
-
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
@@ -35,7 +33,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
-  await Promise.all(
+  const responses = await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
       return runChain(user.id, version, configs, inputs, false, (index, extraSteps, message, cost, duration, failed) =>
         sendData({
@@ -43,19 +41,18 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           configIndex: index,
           index: index + extraSteps,
           message,
-          timestamp: timestampIf(failed !== undefined),
           cost,
           duration,
           failed,
         })
-      ).then(response => {
-        if (!response.failed) {
-          sendData({ inputIndex, isLast: true })
-        }
-        return logResponse(req, res, user.id, version, inputs, response)
-      })
+      )
     })
   )
+
+  for (const [index, response] of responses.entries()) {
+    sendData({ inputIndex: index, timestamp: new Date().getTime(), isLast: !response.failed })
+    await logResponse(req, res, user.id, version, multipleInputs[index], response)
+  }
 
   res.end()
 }

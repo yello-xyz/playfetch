@@ -12,9 +12,9 @@ const daysAgo = (date: Date, days: number) => {
 const prepareData = (analytics: Usage[]) =>
   analytics
     .reduce((acc, usage) => [...acc, { ...usage, cost: (acc[acc.length - 1]?.cost ?? 0) + usage.cost }], [] as Usage[])
-    .map((usage, index) => ({
+    .map((usage, index, usages) => ({
       ...usage,
-      name: FormatDate(daysAgo(new Date(), 30 - index).getTime(), false, true),
+      name: FormatDate(daysAgo(new Date(), usages.length - 1 - index).getTime(), false, true),
       duration: usage.duration / (usage.requests || 1),
       success: usage.requests - usage.failures,
     }))

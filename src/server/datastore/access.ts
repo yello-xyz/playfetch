@@ -112,7 +112,9 @@ export async function grantUsersAccess(
     const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
       await grantUserAccess(userID, user.id, objectID, kind)
-      sendInviteEmail(userID, email, objectID, kind)
+      hasUserAccess(user.id, user.id).then(hasAccess =>
+        hasAccess ? sendInviteEmail(userID, email, objectID, kind) : {}
+      )
     } else {
       // TODO send invite to sign up (if we automatically want to give people access)
       // Or even automatically sign them up to the waitlist (but maybe not?)
