@@ -175,15 +175,25 @@ export default async function runChain(
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
-      streamResponse(lastResponse)
       if (!lastResponse.failed && isBranchConfig(config)) {
         const branchIndex = config.branches.indexOf(lastResponse.output)
         if (branchIndex >= 0) {
-          branch = FirstBranchForBranchOfNode(configs.map(item => ({ ...item, code: '' })), index, branchIndex)
+          branch = FirstBranchForBranchOfNode(
+            configs.map(item => ({ ...item, code: '' })),
+            index,
+            branchIndex
+          )
         } else {
-          throw new Error(`Invalid branch "${lastResponse.output}"`)
+          lastResponse = {
+            ...lastResponse,
+            output: undefined,
+            result: undefined,
+            error: `Invalid branch "${lastResponse.output}"`,
+            failed: true,
+          }
         }
       }
+      streamResponse(lastResponse)
     } else {
       throw new Error('Unsupported config type in chain evaluation')
     }
