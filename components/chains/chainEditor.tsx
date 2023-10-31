@@ -303,33 +303,35 @@ const NodeCell = ({
   )
 }
 
-const RowFiller = ({ start, end }: { start: number; end: number }) => (
-  <>
-    {Array.from({ length: end + 1 - start }, (_, index) => (
-      <div key={index + start} />
-    ))}
-  </>
-)
+const RowFiller = ({ start, end }: { start: number; end: number }) =>
+  end + 1 > start ? <div className={colSpans[Math.min(end + 1 - start, colSpans.length - 1)]} /> : null
 
 const gridConfigs = [
-  'grid-cols-[repeat(1,minmax(0,1fr))]',
-  'grid-cols-[repeat(2,minmax(0,1fr))]',
-  'grid-cols-[repeat(3,minmax(0,1fr))]',
-  'grid-cols-[repeat(4,minmax(0,1fr))]',
-  'grid-cols-[repeat(5,minmax(0,1fr))]',
-  'grid-cols-[repeat(6,minmax(0,1fr))]',
-  'grid-cols-[repeat(7,minmax(0,1fr))]',
-  'grid-cols-[repeat(8,minmax(0,1fr))]',
-  'grid-cols-[repeat(9,minmax(0,1fr))]',
-  'grid-cols-[repeat(10,minmax(0,1fr))]',
-  'grid-cols-[repeat(11,minmax(0,1fr))]',
-  'grid-cols-[repeat(12,minmax(0,1fr))]',
-  'grid-cols-[repeat(13,minmax(0,1fr))]',
-  'grid-cols-[repeat(14,minmax(0,1fr))]',
-  'grid-cols-[repeat(15,minmax(0,1fr))]',
-  'grid-cols-[repeat(16,minmax(0,1fr))]',
-  'grid-cols-[repeat(17,minmax(0,1fr))]',
-  'grid-cols-[repeat(18,minmax(0,1fr))]',
-  'grid-cols-[repeat(19,minmax(0,1fr))]',
-  'grid-cols-[repeat(20,minmax(0,1fr))]',
+  'grid-cols-1',
+  'grid-cols-2',
+  'grid-cols-3',
+  'grid-cols-4',
+  'grid-cols-5',
+  'grid-cols-6',
+  'grid-cols-7',
+  'grid-cols-8',
+  'grid-cols-9',
+  'grid-cols-10',
+  'grid-cols-11',
+  'grid-cols-12',
+]
+
+const colSpans = [
+  'col-span-1',
+  'col-span-2',
+  'col-span-3',
+  'col-span-4',
+  'col-span-5',
+  'col-span-6',
+  'col-span-7',
+  'col-span-8',
+  'col-span-9',
+  'col-span-10',
+  'col-span-11',
+  'col-span-12',
 ]
