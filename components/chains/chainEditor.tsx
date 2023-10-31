@@ -179,6 +179,17 @@ export default function ChainEditor({
   )
 }
 
+const sameBranch = (branch: number) => (node: ChainNode) => (IsChainItem(node) ? node.branch : 0) === branch
+const startsBranch = (nodes: ChainNode[], branch: number) => (node: ChainNode) => {
+  const items = nodes.filter(IsChainItem)
+  return (
+    IsBranchChainItem(node) &&
+    node.branches.some(
+      (_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch
+    )
+  )
+}
+
 const ConnectorCell = ({
   nodes,
   branch,
@@ -208,25 +219,17 @@ const ConnectorCell = ({
   insertBranch: (index: number, branch: number) => void
   prompts: Prompt[]
 }) => {
-  const sameBranch = (node: ChainNode) => (IsChainItem(node) ? node.branch : 0) === branch
-  const precedingNode = previousRow.find(sameBranch)
-  const items = nodes.filter(IsChainItem)
-  const isStartOfBranch = previousRow.some(
-    node =>
-      IsBranchChainItem(node) &&
-      node.branches.some(
-        (_, branchIndex) => FirstBranchForBranchOfNode(items, items.indexOf(node), branchIndex) === branch
-      )
-  )
+  const precedingNode = previousRow.find(sameBranch(branch))
+  const isStartOfBranch = previousRow.some(startsBranch(nodes, branch))
   const previousNodes = [...previousRow, ...nextRow.filter(node => IsChainItem(node) && node.branch < branch)]
   const previousNodeIndex = nodes.indexOf(previousNodes.slice(-1)[0])
-  const nextNode = nextRow.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  const nextNode = nextRow.find(sameBranch(branch))
   let index = nextNode ? nodes.indexOf(nextNode) : -1
   if (index < 0) {
     const targetNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
     index = targetNode ? nodes.indexOf(targetNode) : previousNodeIndex + 1
   }
-  const hasPreviousNodeInColumn = nodes.slice(0, previousNodeIndex).some(sameBranch)
+  const hasStartedBranchInColumn = nodes.slice(0, previousNodeIndex).some(startsBranch(nodes, branch))
   return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
@@ -242,7 +245,7 @@ const ConnectorCell = ({
       onInsertBranch={() => insertBranch(index, branch)}
       onInsertQuery={insertQuery ? () => insertQuery(index, branch) : undefined}
     />
-  ) : hasPreviousNodeInColumn ? (
+  ) : hasStartedBranchInColumn ? (
     <DownStroke />
   ) : (
     <div />
@@ -276,12 +279,11 @@ const NodeCell = ({
   prompts: Prompt[]
   promptCache: ChainPromptCache
 }) => {
-  const node = row.find(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  const node = row.find(sameBranch(branch))
   const index = node ? nodes.indexOf(node) : -1
   const indexOfPreviousNode = nodes.indexOf(row.slice(-1)[0])
-  const hasPreviousNodeInColumn =
-    indexOfPreviousNode < nodes.length - 1 &&
-    nodes.slice(0, indexOfPreviousNode).some(node => (IsChainItem(node) ? node.branch : 0) === branch)
+  const isLastRow = indexOfPreviousNode === nodes.length - 1
+  const hasStartedBranchInColumn = nodes.slice(0, indexOfPreviousNode).some(startsBranch(nodes, branch))
   return index >= 0 ? (
     <ChainNodeBox
       chain={chain}
@@ -296,7 +298,7 @@ const NodeCell = ({
       prompts={prompts}
       promptCache={promptCache}
     />
-  ) : hasPreviousNodeInColumn ? (
+  ) : !isLastRow && hasStartedBranchInColumn ? (
     <DownStroke />
   ) : (
     <div />
