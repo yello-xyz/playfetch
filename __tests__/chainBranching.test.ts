@@ -32,6 +32,11 @@ const chain2: ChainItem[] = [
 
 const chain3: ChainItem[] = [{ branch: 0, code: '0 [A0]', branches: ['0', '1', '2'] }]
 
+const chain4: ChainItem[] = [
+  { branch: 0, code: '0 [A0]', branches: ['0', '2'] },
+  { branch: 0, code: '1 [B0]', branches: ['0', '1'] },
+]
+
 const getChainItems = (indexes: number[], chain = chain1) => indexes.map(index => chain[index])
 const expectItemsToBe = (items: ChainItem[], expected: number[], chain = chain1) =>
   expect(items).toStrictEqual(getChainItems(expected, chain))
@@ -80,6 +85,11 @@ testMaxBranch(0, 2, chain2)
 testMaxBranch(1, 1, chain2)
 testMaxBranch(2, 2, chain2)
 testMaxBranch(3, 0, chain2)
+
+testMaxBranch(0, 2, chain3)
+
+testMaxBranch(0, 2, chain4)
+testMaxBranch(1, 1, chain4)
 
 const testBranch = (index: number, branchIndex: number, expected: number[], chain = chain1) =>
   test(`Branch ${branchIndex} for branch at position ${index} is [${expected}]`, () =>

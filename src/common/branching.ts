@@ -71,7 +71,7 @@ export const FirstBranchForBranchOfNode = (nodes: ChainItem[], index: number, br
 }
 
 export const MaxBranch = (nodes: ChainItem[]): number =>
-  Math.max(0, ...nodes.map(node => node.branch + (IsBranchChainItem(node) ? node.branches.length - 1 : 0)))
+  nodes.reduce((max, node) => max + (IsBranchChainItem(node) ? node.branches.length - 1 : 0), nodes[0]?.branch ?? 0)
 
 export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
   const splits = [] as ChainItem[][]
