@@ -97,7 +97,7 @@ export function ChainNodeBox({
       <ChainNodeBoxFooter
         nodes={nodes}
         index={index}
-        saveItems={saveItems}
+        onUpdate={updateItem}
         isSelected={isSelected}
         promptCache={promptCache}
       />
