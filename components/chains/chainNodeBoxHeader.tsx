@@ -9,6 +9,7 @@ import {
   IsQueryChainItem,
   NameForCodeChainItem,
   OutputNode,
+  SubtreeForChainNode,
 } from './chainNode'
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
@@ -19,6 +20,7 @@ import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { ReactNode, useState } from 'react'
+import { SubtreeForNode } from '@/src/common/branching'
 
 export default function ChainNodeBoxHeader({
   nodes,
@@ -61,7 +63,11 @@ export default function ChainNodeBoxHeader({
     setLabel(undefined)
   }
 
-  const canIncludeContext = IsPromptChainItem(chainNode) && nodes.slice(0, index).some(IsPromptChainItem)
+  const canIncludeContext =
+    IsPromptChainItem(chainNode) &&
+    nodes
+      .slice(0, index)
+      .some(node => IsPromptChainItem(node) && SubtreeForChainNode(node, nodes).includes(chainNode))
 
   return (
     <>

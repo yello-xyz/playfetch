@@ -22,7 +22,6 @@ import {
   ShiftDown,
   ShiftRight,
   SplitNodes,
-  SubtreeForNode,
 } from '@/src/common/branching'
 import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
 

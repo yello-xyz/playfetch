@@ -1,3 +1,4 @@
+import { SubtreeForNode } from '@/src/common/branching'
 import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
 
 export const InputNode = 'input'
@@ -11,3 +12,14 @@ export const IsCodeChainItem = (item: ChainNode): item is CodeChainItem =>
   IsChainItem(item) && !IsBranchChainItem(item) && 'code' in item
 export const IsQueryChainItem = (item: ChainNode): item is QueryChainItem => IsChainItem(item) && 'query' in item
 export const NameForCodeChainItem = (item: CodeChainItem) => item.name || 'Code block'
+
+export const SubtreeForChainNode = (node: ChainNode, nodes: ChainNode[]): ChainItem[] => {
+  const items = nodes.filter(IsChainItem)
+  if (node === InputNode) {
+    return items
+  } else if (node === OutputNode) {
+    return []
+  } else {
+    return SubtreeForNode(items, items.indexOf(node))
+  }
+}
