@@ -65,10 +65,7 @@ export default function ChainNodeBoxConnector({
         />
       )}
       {hasNext ? (
-        <>
-          <DownArrow height='min-h-[18px]' grow />
-          <SmallDot margin='-mb-[5px] mt-1' />
-        </>
+        <DownConnector height='min-h-[18px]' grow />
       ) : (
         <DownStroke height='min-h-[18px]' grow />
       )}
@@ -90,10 +87,19 @@ export const DownStroke = ({
   grow?: boolean
 }) => <div className={`${height} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
 
-const DownArrow = ({ height, grow }: { height: string; grow?: boolean }) => (
+export const DownConnector = ({
+  height = '',
+  color,
+  grow = false,
+}: {
+  height?: string
+  color?: string
+  grow?: boolean
+}) => (
   <>
     <DownStroke height={height} grow={grow} />
     <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
+    <SmallDot margin='-mb-[5px] mt-1' color={color} />
   </>
 )
 
@@ -149,8 +155,7 @@ const AddButton = ({
 
   return isActive ? (
     <>
-      <DownArrow height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />
-      <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
+      <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'}color='bg-blue-200' />
       <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
         <div className='flex'>
           <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />

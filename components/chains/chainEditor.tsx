@@ -17,7 +17,7 @@ import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
 import { FirstBranchForBranchOfNode, MaxBranch, ShiftDown, ShiftRight, SplitNodes } from '@/src/common/branching'
-import ChainNodeBoxConnector, { DownStroke } from './chainNodeBoxConnector'
+import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
 
 export default function ChainEditor({
   chain,
@@ -106,8 +106,8 @@ export default function ChainEditor({
   const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
 
   const nodeRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
-  const maxBranch = MaxBranch(items)
-  const gridConfig = gridConfigs[Math.min(maxBranch, gridConfigs.length - 1)]
+  const maxBranch = Math.min(MaxBranch(items), gridConfigs.length)
+  const gridConfig = gridConfigs[maxBranch]
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -124,6 +124,7 @@ export default function ChainEditor({
           <RowFiller start={1} end={maxBranch} />
           {nodeRows.map((row, rowIndex, rows) => (
             <Fragment key={rowIndex}>
+              {rowIndex === rows.length - 1 && <EndConnector maxBranch={maxBranch} />}
               {Array.from({ length: maxBranch + 1 }, (_, branch) => (
                 <NodeCell
                   key={branch}
@@ -305,8 +306,18 @@ const NodeCell = ({
   )
 }
 
+const EndConnector = ({ maxBranch }: { maxBranch: number }) => (
+  <>
+    <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
+    <div className='flex flex-col items-center'>
+    <DownConnector height='min-h-[18px]' />
+      </div>
+    <RowFiller start={1} end={maxBranch} />
+  </>
+)
+
 const RowFiller = ({ start, end }: { start: number; end: number }) =>
-  end + 1 > start ? <div className={colSpans[Math.min(end + 1 - start, colSpans.length - 1)]} /> : null
+  end + 1 > start ? <div className={colSpans[end + 1 - start]} /> : null
 
 const gridConfigs = [
   'grid-cols-1',
