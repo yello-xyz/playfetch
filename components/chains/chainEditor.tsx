@@ -88,7 +88,7 @@ export default function ChainEditor({
   ) => {
     const itemIndex = index - 1
     const itemWithBranch = { ...item, branch }
-    let shiftedItems = IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex) : items
+    let shiftedItems = IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex, branch) : items
     shiftedItems = branch === items[itemIndex]?.branch ? ShiftDown(shiftedItems, itemIndex) : shiftedItems
     saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
     updateActiveIndex(index)

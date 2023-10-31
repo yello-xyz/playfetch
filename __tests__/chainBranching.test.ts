@@ -135,9 +135,9 @@ test('Split nodes', () =>
     getChainItems([5, 6, 7]),
   ]))
 
-const testShiftRight = (index: number, expected: number[]) =>
+const testShiftRight = (index: number, expected: number[], branch?: number) =>
   test(`Shift right at position ${index} shifts [${expected}]`, () =>
-    expect(ShiftRight(chain1, index)).toStrictEqual(
+    expect(ShiftRight(chain1, index, branch)).toStrictEqual(
       chain1.map(node => (expected.includes(chain1.indexOf(node)) ? { ...node, branch: node.branch + 1 } : node))
     ))
 
@@ -150,6 +150,9 @@ testShiftRight(5, [3, 4, 6, 7])
 testShiftRight(6, [4, 7])
 testShiftRight(7, [4])
 testShiftRight(8, [3, 4, 6, 7])
+
+testShiftRight(7, [4], 3)
+testShiftRight(7, [4, 7], 2)
 
 const testPruneBranch = (
   index: number,

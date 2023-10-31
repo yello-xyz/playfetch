@@ -92,9 +92,13 @@ export const SplitNodes = (nodes: ChainItem[]): ChainItem[][] => {
 const ShiftHorizontally = (nodes: ChainItem[], threshold: number, positions: number): ChainItem[] =>
   nodes.map(node => (node.branch > threshold ? { ...node, branch: node.branch + positions } : node))
 
-export const ShiftRight = (nodes: ChainItem[], index: number): ChainItem[] => {
-  const maxSubTreeBranch = MaxBranch(SubtreeForNode(nodes, index))
-  return ShiftHorizontally(nodes, maxSubTreeBranch, 1)
+export const ShiftRight = (nodes: ChainItem[], index: number, branch?: number): ChainItem[] => {
+  if (branch === undefined || nodes[index]?.branch === branch) {
+    const maxSubTreeBranch = MaxBranch(SubtreeForNode(nodes, index))
+    return ShiftHorizontally(nodes, maxSubTreeBranch, 1)
+  } else {
+    return ShiftHorizontally(nodes, branch, 1)
+  }
 }
 
 export const PruneBranchAndShiftLeft = (items: ChainItem[], index: number, branchIndex: number) => {
