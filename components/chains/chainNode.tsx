@@ -13,13 +13,13 @@ export const IsCodeChainItem = (item: ChainNode): item is CodeChainItem =>
 export const IsQueryChainItem = (item: ChainNode): item is QueryChainItem => IsChainItem(item) && 'query' in item
 export const NameForCodeChainItem = (item: CodeChainItem) => item.name || 'Code block'
 
-export const SubtreeForChainNode = (node: ChainNode, nodes: ChainNode[]): ChainItem[] => {
+export const SubtreeForChainNode = (node: ChainNode, nodes: ChainNode[], includeRoot = true): ChainItem[] => {
   const items = nodes.filter(IsChainItem)
   if (node === InputNode) {
     return items
   } else if (node === OutputNode) {
     return []
   } else {
-    return SubtreeForNode(items, items.indexOf(node))
+    return SubtreeForNode(items, items.indexOf(node), includeRoot)
   }
 }

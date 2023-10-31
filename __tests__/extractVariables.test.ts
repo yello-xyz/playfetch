@@ -77,9 +77,9 @@ testExtractChainVariables('mapped later too', ['hello', 'world'], ['hello', 'wor
 
 testExtractChainVariables(
   'branched chain',
-  ['world'],
-  ['', '', 'hello', '', '', 'world', 'hello', 'world'],
-  ['', 'hello', '', 'world', '', '', '', ''],
+  ['goodbye', 'world'],
+  ['', '', 'hello', '', 'goodbye', 'world', 'hello', 'world'],
+  ['', 'hello', '', 'world', 'goodbye', '', '', ''],
   [0, 0, 0, 1, 4, 0, 1, 3],
   [0, 3, 0, 3, 0, 0, 0, 0]
 )

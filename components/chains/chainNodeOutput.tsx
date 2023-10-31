@@ -62,7 +62,7 @@ const excludeBoundChainVariables = (chain: Omit<ChainItemWithInputs, 'dynamicInp
     item.inputs.forEach(input => {
       if (
         !(outputToSubtreeIndex[input] ?? []).some(index =>
-          SubtreeForChainNode(chain[index] as ChainNode, chain as ChainNode[]).includes(item as ChainItem)
+          SubtreeForChainNode(chain[index] as ChainNode, chain as ChainNode[], false).includes(item as ChainItem)
         )
       ) {
         unmappedInputs.push(input)
