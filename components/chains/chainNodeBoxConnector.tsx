@@ -149,7 +149,7 @@ const AddButton = ({
 
   return isActive ? (
     <>
-      <DownArrow height='min-h-[38px]' />
+      <DownArrow height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />
       <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
       <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
         <div className='flex'>
@@ -188,7 +188,7 @@ const AddButton = ({
         )}
       </div>
       <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
-      <DownStroke height='min-h-[32px]' />
+      <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} />
     </>
   ) : (
     <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onClick={toggleActive()}>
