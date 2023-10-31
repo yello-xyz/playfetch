@@ -283,9 +283,9 @@ const NodeCell = ({
 }) => {
   const node = row.find(sameBranch(branch))
   const index = node ? nodes.indexOf(node) : -1
-  const indexOfPreviousNode = nodes.indexOf(row.slice(-1)[0])
-  const isLastRow = indexOfPreviousNode === nodes.length - 1
-  const hasStartedBranchInColumn = nodes.slice(0, indexOfPreviousNode).some(startsBranch(nodes, branch))
+  const firstNodeOfRowIndex = nodes.indexOf(row[0])
+  const isLastRow = firstNodeOfRowIndex === nodes.length - 1
+  const hasStartedBranchInColumn = nodes.slice(0, firstNodeOfRowIndex).some(startsBranch(nodes, branch))
   return index >= 0 ? (
     <ChainNodeBox
       chain={chain}
