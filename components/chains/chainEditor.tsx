@@ -16,7 +16,14 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
-import { FirstBranchForBranchOfNode, MaxBranch, ShiftDown, ShiftRight, SplitNodes } from '@/src/common/branching'
+import {
+  FirstBranchForBranchOfNode,
+  MaxBranch,
+  ShiftDown,
+  ShiftRight,
+  SplitNodes,
+  SubtreeForNode,
+} from '@/src/common/branching'
 import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
 
 export default function ChainEditor({
@@ -142,7 +149,7 @@ export default function ChainEditor({
                   promptCache={promptCache}
                 />
               ))}
-              {<StartBranchConnector row={row} maxBranch={maxBranch} />}
+              {<StartBranchConnector row={row} maxBranch={maxBranch} nodes={nodes} />}
               {rowIndex < rows.length - 1 &&
                 Array.from({ length: maxBranch + 1 }, (_, branch) => (
                   <ConnectorCell
@@ -307,16 +314,55 @@ const NodeCell = ({
   )
 }
 
-const StartBranchConnector = ({ maxBranch, row }: { maxBranch: number; row: ChainNode[] }) =>
-  row.filter(IsChainItem).some(IsBranchChainItem) ? (
+const StartBranchConnector = ({
+  maxBranch,
+  row,
+  nodes,
+}: {
+  maxBranch: number
+  row: ChainNode[]
+  nodes: ChainNode[]
+}) => {
+  const items = nodes.filter(IsChainItem)
+  const ranges = row
+    .filter(IsBranchChainItem)
+    .map(node => [node.branch, FirstBranchForBranchOfNode(items, items.indexOf(node), node.branches.length - 1)])
+  const rangeForBranch = (branch: number) => ranges.find(([start, end]) => start <= branch && branch <= end)
+  const hasRangeAtBranch = (branch: number) => !!rangeForBranch(branch)
+  const rangeStartsAtBranch = (branch: number) => rangeForBranch(branch)?.[0] === branch
+  const colSpanForBranch = (branch: number) => {
+    const range = rangeForBranch(branch) ?? [0, 0]
+    return colSpans[range[1] - range[0]]
+  }
+  const firstNodeOfRowIndex = nodes.indexOf(row[0])
+  const hasStartedBranchInColumn = (branch: number) =>
+    nodes.slice(0, firstNodeOfRowIndex).some(startsBranch(nodes, branch))
+  return (
     <>
-      <div className='flex flex-col items-center'>
-        <DownStroke height='min-h-[18px]' includeDot />
-      </div>
-      <RowFiller start={1} end={maxBranch} />
-      <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
+      {Array.from({ length: maxBranch + 1 }, (_, branch) =>
+        rangeStartsAtBranch(branch) ? (
+          <div key={branch} className='flex flex-col items-center'>
+            <DownStroke height='min-h-[18px]' includeDot />
+          </div>
+        ) : hasStartedBranchInColumn(branch) ? (
+          <DownStroke key={branch} />
+        ) : (
+          <div key={branch} />
+        )
+      )}
+      {Array.from({ length: maxBranch + 1 }, (_, branch) =>
+        rangeStartsAtBranch(branch) ? (
+          <div
+            key={branch}
+            className={`${colSpanForBranch(branch)} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`}
+          />
+        ) : hasRangeAtBranch(branch) ? null : (
+          <div key={branch} />
+        )
+      )}
     </>
-  ) : null
+  )
+}
 
 const EndBranchConnector = ({ maxBranch }: { maxBranch: number }) => (
   <>
