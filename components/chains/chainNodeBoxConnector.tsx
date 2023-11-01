@@ -44,7 +44,7 @@ export default function ChainNodeBoxConnector({
     <div className='flex flex-col items-center'>
       <DownStroke height='min-h-[12px]' spacer={hasPrevious} />
       {isDisabled ? (
-        <DownStroke height='min-h-[20px]' />
+        <DownStroke height='min-h-[22px]' />
       ) : (
         <AddButton
           prompts={prompts}
@@ -212,7 +212,7 @@ export const DownStroke = ({
   color?: string
   grow?: boolean
   spacer?: boolean
-}) => <div className={`${height} ${spacer ? 'mt-1.5' : ''} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
+}) => <div className={`${height} ${spacer ? 'mt-[7px]' : ''} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
 
 export const DownConnector = ({ height = '', grow = false }: { height?: string; grow?: boolean }) => (
   <>

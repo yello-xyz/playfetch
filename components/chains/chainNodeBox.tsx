@@ -122,4 +122,4 @@ export const SmallDot = ({
 }) => <div className={`${layoutForPosition(position)} ${color} absolute self-center z-10 w-2.5 h-2.5 rounded-full`} />
 
 const layoutForPosition = (position: 'top' | 'bottom') =>
-  position === 'top' ? 'top-0 -mt-[5px] mb-0.5' : 'bottom-0 -mb-[5px] mt-1'
+  position === 'top' ? 'top-0 -mt-1.5' : 'bottom-0 -mb-1.5'
