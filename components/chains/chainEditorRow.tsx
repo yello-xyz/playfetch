@@ -5,6 +5,27 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { FirstBranchForBranchOfNode } from '@/src/common/branching'
 import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
 
+export type InsertActions = {
+  insertItem: (index: number, branch: number, item: ChainItem) => void
+  insertPrompt: (index: number, branch: number, promptID: number, versionID?: number) => void
+  insertNewPrompt: (index: number, branch: number) => void
+  insertCodeBlock: (index: number, branch: number) => void
+  insertBranch: (index: number, branch: number) => void
+  insertQuery?: (index: number, branch: number) => void
+}
+
+const bindInsertActions = (
+  { insertPrompt, insertNewPrompt, insertCodeBlock, insertBranch, insertQuery }: InsertActions,
+  index: number,
+  branch: number
+) => ({
+  onInsertPrompt: (promptID: number) => insertPrompt(index, branch, promptID),
+  onInsertNewPrompt: () => insertNewPrompt(index, branch),
+  onInsertCodeBlock: () => insertCodeBlock(index, branch),
+  onInsertBranch: () => insertBranch(index, branch),
+  onInsertQuery: insertQuery ? () => insertQuery(index, branch) : undefined,
+})
+
 const sameBranch = (branch: number) => (node: ChainNode) => (IsChainItem(node) ? node.branch : 0) === branch
 const startsBranch = (nodes: ChainNode[], branch: number) => (node: ChainNode) => {
   const items = nodes.filter(IsChainItem)
@@ -24,11 +45,7 @@ export const ConnectorRow = (props: {
   isDisabled: boolean
   activeMenuIndex?: [number, number]
   setActiveMenuIndex: (index: [number, number] | undefined) => void
-  insertPrompt: (index: number, branch: number, promptID: number) => void
-  insertNewPrompt: (index: number, branch: number) => void
-  insertQuery?: (index: number, branch: number) => void
-  insertCodeBlock: (index: number, branch: number) => void
-  insertBranch: (index: number, branch: number) => void
+  insertActions: InsertActions
   prompts: Prompt[]
 }) => (
   <>
@@ -49,11 +66,7 @@ const ConnectorCell = ({
   isDisabled,
   activeMenuIndex,
   setActiveMenuIndex,
-  insertPrompt,
-  insertNewPrompt,
-  insertQuery,
-  insertCodeBlock,
-  insertBranch,
+  insertActions,
   prompts,
 }: {
   nodes: ChainNode[]
@@ -63,11 +76,7 @@ const ConnectorCell = ({
   isDisabled: boolean
   activeMenuIndex?: [number, number]
   setActiveMenuIndex: (index: [number, number] | undefined) => void
-  insertPrompt: (index: number, branch: number, promptID: number) => void
-  insertNewPrompt: (index: number, branch: number) => void
-  insertQuery?: (index: number, branch: number) => void
-  insertCodeBlock: (index: number, branch: number) => void
-  insertBranch: (index: number, branch: number) => void
+  insertActions: InsertActions
   prompts: Prompt[]
 }) => {
   const precedingNode = previousRow.find(sameBranch(branch))
@@ -80,20 +89,17 @@ const ConnectorCell = ({
     const targetNode = nextRow.find(node => !IsChainItem(node) || node.branch > branch)
     index = targetNode ? nodes.indexOf(targetNode) : previousNodeIndex + 1
   }
+  const isActive = index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]
   return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
       isDisabled={isDisabled}
-      isActive={index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]}
+      isActive={isActive}
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
       hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}
       hasNext={!!nextNode && IsChainItem(nextNode)}
-      onInsertPrompt={promptID => insertPrompt(index, branch, promptID)}
-      onInsertNewPrompt={() => insertNewPrompt(index, branch)}
-      onInsertCodeBlock={() => insertCodeBlock(index, branch)}
-      onInsertBranch={() => insertBranch(index, branch)}
-      onInsertQuery={insertQuery ? () => insertQuery(index, branch) : undefined}
+      {...bindInsertActions(insertActions, index, branch)}
     />
   ) : hasStartedBranchInColumn(nodes, previousNodeIndex, branch) ? (
     <DownStroke />
@@ -107,7 +113,7 @@ export const NodesRow = (props: {
   nodes: ChainNode[]
   row: ChainNode[]
   maxBranch: number
-  insertItem: (index: number, branch: number, item: ChainItem) => void
+  insertActions: InsertActions
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
@@ -128,7 +134,7 @@ const NodeCell = ({
   nodes,
   row,
   branch,
-  insertItem,
+  insertActions,
   saveItems,
   activeIndex,
   setActiveIndex,
@@ -141,7 +147,7 @@ const NodeCell = ({
   nodes: ChainNode[]
   row: ChainNode[]
   branch: number
-  insertItem: (index: number, branch: number, item: ChainItem) => void
+  insertActions: InsertActions
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
@@ -159,7 +165,7 @@ const NodeCell = ({
       chain={chain}
       nodes={nodes}
       index={index}
-      insertItem={item => insertItem(index, branch, item)}
+      insertItem={item => insertActions.insertItem(index, branch, item)}
       saveItems={saveItems}
       activeIndex={activeIndex}
       setActiveIndex={setActiveIndex}

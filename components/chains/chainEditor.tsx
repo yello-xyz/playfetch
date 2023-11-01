@@ -102,6 +102,8 @@ export default function ChainEditor({
     ? (index: number, branch: number) => insertItem(index, branch, { ...defaultQueryConfig })
     : undefined
 
+  const insertActions = { insertItem, insertPrompt, insertNewPrompt, insertCodeBlock, insertBranch, insertQuery }
+
   const nodeRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
   const maxBranch = Math.min(MaxBranch(items), gridConfigs.length)
 
@@ -125,7 +127,7 @@ export default function ChainEditor({
                 nodes={nodes}
                 row={row}
                 maxBranch={maxBranch}
-                insertItem={insertItem}
+                insertActions={insertActions}
                 saveItems={saveItems}
                 activeIndex={activeIndex}
                 setActiveIndex={updateActiveIndex}
@@ -145,11 +147,7 @@ export default function ChainEditor({
                   isDisabled={isTestMode}
                   activeMenuIndex={activeMenuIndex}
                   setActiveMenuIndex={setActiveMenuIndex}
-                  insertPrompt={insertPrompt}
-                  insertNewPrompt={insertNewPrompt}
-                  insertCodeBlock={insertCodeBlock}
-                  insertBranch={insertBranch}
-                  insertQuery={insertQuery}
+                  insertActions={insertActions}
                 />
               )}
             </Fragment>
