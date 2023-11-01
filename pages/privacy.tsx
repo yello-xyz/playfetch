@@ -146,6 +146,35 @@ export default function Privacy() {
                   </ListItem>
                 </NumberedList>
               </ListItem>
+
+              <ListItem>
+                We collect personal information when you sign in using your Google account or Github account. This information
+                consists of your email address, full name, and avatar image (if available).
+                <Table>
+                  <TableCell>How we use this personal information</TableCell>
+                  <TableCell>Legal basis we rely on</TableCell>
+                  <TableCell>
+                    <BulletList>
+                      <Bullet>
+                        We use this information to communicate with you about our Services and to set up and manage your
+                        account with us.
+                      </Bullet>
+                      <Bullet>
+                        We expose this information to other customers when you collaborate with them in our products.
+                      </Bullet>
+                      <Bullet>
+                        See below for further information on how this information is stored and transferred (including
+                        our data retention policies).
+                      </Bullet>
+                    </BulletList>
+                  </TableCell>
+                  <TableCell>
+                    The processing is necessary for our legitimate interests, namely providing and administering
+                    accounts and communicating with customers, prospective customers, and business contacts.
+                  </TableCell>
+                </Table>
+              </ListItem>
+
               <Title>Information we collect automatically</Title>
               <ListItem>
                 We also automatically collect certain personal information about you and about how you access the
