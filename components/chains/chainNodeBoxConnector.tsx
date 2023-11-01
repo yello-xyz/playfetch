@@ -214,17 +214,9 @@ export const DownStroke = ({
   spacer?: boolean
 }) => <div className={`${height} ${spacer ? 'mt-1.5' : ''} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
 
-export const DownConnector = ({
-  height = '',
-  grow = false,
-  spacer = true, // false still needed?
-}: {
-  height?: string
-  grow?: boolean
-  spacer?: boolean
-}) => (
+export const DownConnector = ({ height = '', grow = false }: { height?: string; grow?: boolean }) => (
   <>
     <DownStroke height={height} grow={grow} />
-    <div className={`${spacer ? 'mb-[9px]' : 'mb-px'} p-1 -mt-2.5 rotate-45 border-b border-r border-gray-400`} />
+    <div className='p-1 -mt-2.5 mb-[9px] rotate-45 border-b border-r border-gray-400' />
   </>
 )

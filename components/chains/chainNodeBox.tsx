@@ -6,6 +6,7 @@ import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
 import { PruneBranchAndShiftLeft, PruneNodeAndShiftUp } from '@/src/common/branching'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import { DownStroke } from './chainNodeBoxConnector'
 
 export function ChainNodeBox({
   chain,
@@ -80,31 +81,34 @@ export function ChainNodeBox({
   const dropShadow = 'drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)]'
 
   return (
-    <div
-      className={`relative flex flex-col border w-96 rounded-lg cursor-pointer ${dropShadow} ${colorClass}`}
-      onClick={() => setActiveIndex(index)}>
-      {chainNode !== InputNode && <SmallDot position='top' />}
-      <ChainNodeBoxHeader
-        nodes={nodes}
-        index={index}
-        isSelected={isSelected}
-        onUpdate={updateItem}
-        onDuplicate={duplicateItem}
-        onEdit={onEdit}
-        onDelete={removeItem}
-        savedVersion={savedVersion}
-        prompts={prompts}
-        users={chain.users}
-      />
-      <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} promptCache={promptCache} />
-      <ChainNodeBoxFooter
-        nodes={nodes}
-        index={index}
-        onUpdate={updateItem}
-        isSelected={isSelected}
-        promptCache={promptCache}
-      />
-      {chainNode !== OutputNode && <SmallDot position='bottom' />}
+    <div className='flex flex-col items-center h-full'>
+      <div
+        className={`relative flex flex-col border w-96 rounded-lg cursor-pointer ${dropShadow} ${colorClass} self-start`}
+        onClick={() => setActiveIndex(index)}>
+        {chainNode !== InputNode && <SmallDot position='top' />}
+        <ChainNodeBoxHeader
+          nodes={nodes}
+          index={index}
+          isSelected={isSelected}
+          onUpdate={updateItem}
+          onDuplicate={duplicateItem}
+          onEdit={onEdit}
+          onDelete={removeItem}
+          savedVersion={savedVersion}
+          prompts={prompts}
+          users={chain.users}
+        />
+        <ChainNodeBoxBody chainNode={chainNode} items={items} isSelected={isSelected} promptCache={promptCache} />
+        <ChainNodeBoxFooter
+          nodes={nodes}
+          index={index}
+          onUpdate={updateItem}
+          isSelected={isSelected}
+          promptCache={promptCache}
+        />
+        {chainNode !== OutputNode && <SmallDot position='bottom' />}
+      </div>
+      <DownStroke height='-mb-[6px]' spacer grow />
     </div>
   )
 }
