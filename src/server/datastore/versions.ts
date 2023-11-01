@@ -36,24 +36,48 @@ export async function migrateVersions(postMerge: boolean) {
   }
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  for (const versionData of allVersions) {
-    if (versionData.items) {
-      const items = JSON.parse(versionData.items) as Omit<ChainItemWithInputs, 'branch'>[]
-      const migratedItems = items.map(item => ({ ...item, branch: 0 }) as ChainItemWithInputs)
-      await datastore.save(
-        toVersionData(
-          versionData.userID,
-          versionData.parentID,
-          versionData.prompts ? JSON.parse(versionData.prompts) : null,
-          versionData.config ? JSON.parse(versionData.config) : null,
-          migratedItems,
-          JSON.parse(versionData.labels),
-          versionData.createdAt,
-          versionData.didRun,
-          versionData.previousVersionID,
-          getID(versionData)
+  for (const userID of [...new Set(allVersions.map(versionData => versionData.userID))]) {
+    const userVersions = allVersions.filter(versionData => versionData.userID === userID)
+    const oldPendingVersionIDs = new Set(
+      userVersions
+        .filter(versionData => !versionData.didRun)
+        .sort((a, b) => getTimestamp(b) - getTimestamp(a))
+        .slice(1)
+        .map(versionData => getID(versionData))
+    )
+    for (const versionData of userVersions) {
+      const versionID = getID(versionData)
+      const isOldPendingVersion = oldPendingVersionIDs.has(versionID)
+      if (versionData.items || isOldPendingVersion) {
+        const items = versionData.items ? (JSON.parse(versionData.items) as ChainItemWithInputs[]) : null
+        const migratedItems = items
+          ? items.map(item => ({ ...item, branch: item.branch ?? 0 }))
+          : versionData.items
+        const didRun = isOldPendingVersion ? !versionData.didRun : versionData.didRun
+
+        const description = `version ${versionID} parent ${versionData.parentID} user ${userID}`
+        if (isOldPendingVersion) {
+          console.log(`Migrating pending ${description} to ${didRun}`)
+        }
+        if ((migratedItems ? JSON.stringify(migratedItems) : migratedItems) !== versionData.items) {
+          console.log(`Migrating items in ${description}`)
+        }
+
+        await datastore.save(
+          toVersionData(
+            versionData.userID,
+            versionData.parentID,
+            versionData.prompts ? JSON.parse(versionData.prompts) : null,
+            versionData.config ? JSON.parse(versionData.config) : null,
+            migratedItems,
+            JSON.parse(versionData.labels),
+            versionData.createdAt,
+            didRun,
+            versionData.previousVersionID,
+            versionID
+          )
         )
-      )
+      }
     }
   }
 }
