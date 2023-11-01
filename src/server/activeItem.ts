@@ -59,6 +59,9 @@ const analyticsFromQuery = (query: ParsedUrlQuery, endpoints: ResolvedEndpoint[]
       endpointID: endpoints[entry.endpointID].id,
       parentID: endpoints[entry.endpointID].parentID,
       versionID: endpoints[entry.endpointID].versionID,
+      flavor: endpoints[entry.endpointID].flavor,
+      urlPath: endpoints[entry.endpointID].urlPath,
+      timestamp: new Date(entry.timestamp).getTime(),
     })),
   }
 }
