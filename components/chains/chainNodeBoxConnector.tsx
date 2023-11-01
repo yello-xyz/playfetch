@@ -42,7 +42,7 @@ export default function ChainNodeBoxConnector({
 }) {
   return (
     <div className='flex flex-col items-center'>
-      <DownStroke height='min-h-[12px]' grow spacer={hasPrevious} />
+      <DownStroke height='min-h-[12px]' spacer={hasPrevious} />
       {isDisabled ? (
         <DownStroke height='min-h-[20px]' />
       ) : (
