@@ -179,7 +179,7 @@ export const StartBranchConnector = ({
   maxBranch,
   row,
   nodes,
-  colSpans
+  colSpans,
 }: {
   maxBranch: number
   row: ChainNode[]
@@ -204,9 +204,7 @@ export const StartBranchConnector = ({
     <>
       {Array.from({ length: maxBranch + 1 }, (_, branch) =>
         rangeStartsAtBranch(branch) ? (
-          <div key={branch} className='flex flex-col items-center'>
-            <DownStroke height='min-h-[18px]' includeDot />
-          </div>
+          <DownStroke key={branch} height='min-h-[18px]' spacer />
         ) : hasStartedBranchInColumn(branch) ? (
           <DownStroke key={branch} />
         ) : (

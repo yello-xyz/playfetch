@@ -11,6 +11,7 @@ import addActiveIcon from '@/public/addWhiteSmall.svg'
 import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
+import { SmallDot } from './chainNodeBox'
 
 export default function ChainNodeBoxConnector({
   isDisabled,
@@ -41,7 +42,7 @@ export default function ChainNodeBoxConnector({
 }) {
   return (
     <div className='flex flex-col items-center'>
-      {hasPrevious ? <DownStroke height='min-h-[12px]' grow includeDot /> : <DownStroke height='min-h-[12px]' grow />}
+      <DownStroke height='min-h-[12px]' grow spacer={hasPrevious} />
       {isDisabled ? (
         <DownStroke height='min-h-[20px]' />
       ) : (
@@ -61,45 +62,6 @@ export default function ChainNodeBoxConnector({
     </div>
   )
 }
-
-const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margin: string; color?: string }) => (
-  <div className={`${margin} ${color} z-10 w-2.5 h-2.5 rounded-full min-h-[10px]`} />
-)
-
-export const DownStroke = ({
-  height = '',
-  color = 'border-gray-400',
-  grow = false,
-  includeDot = false,
-  dotColor,
-}: {
-  height?: string
-  color?: string
-  grow?: boolean
-  includeDot?: boolean
-  dotColor?: string
-}) => (
-  <>
-    {includeDot && <SmallDot margin='-mt-[5px] mb-0.5' color={dotColor} />}
-    <div className={`${height} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
-  </>
-)
-
-export const DownConnector = ({
-  height = '',
-  color,
-  grow = false,
-}: {
-  height?: string
-  color?: string
-  grow?: boolean
-}) => (
-  <>
-    <DownStroke height={height} grow={grow} />
-    <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
-    <SmallDot margin='-mb-[5px] mt-1' color={color} />
-  </>
-)
 
 const AddButton = ({
   prompts,
@@ -153,44 +115,48 @@ const AddButton = ({
 
   return isActive ? (
     <>
-      <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} color='bg-blue-200' />
-      <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
-        <div className='flex'>
-          <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
-          <DownStroke color='border-blue-100' />
-          {onInsertQuery ? (
-            <AddStepButton
-              label='Add query'
-              className={buttonClass}
-              icon={queryIcon}
-              onClick={toggleActive(onInsertQuery)}
-            />
-          ) : (
-            <AddCodeAndBranchButtons
-              buttonClass={buttonClass}
-              onInsertCodeBlock={insertCode}
-              onInsertBranch={onInsertBranch}
-            />
-          )}
-          {canDismiss && (
-            <div
-              className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
-              onClick={toggleActive()}>
-              <Icon icon={closeIcon} />
+      <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />
+      <div className='relative flex flex-col items-center mb-2'>
+        <SmallDot position='top' color='bg-blue-200' />
+        <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+          <div className='flex'>
+            <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
+            <DownStroke color='border-blue-100' />
+            {onInsertQuery ? (
+              <AddStepButton
+                label='Add query'
+                className={buttonClass}
+                icon={queryIcon}
+                onClick={toggleActive(onInsertQuery)}
+              />
+            ) : (
+              <AddCodeAndBranchButtons
+                buttonClass={buttonClass}
+                onInsertCodeBlock={insertCode}
+                onInsertBranch={onInsertBranch}
+              />
+            )}
+            {canDismiss && (
+              <div
+                className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
+                onClick={toggleActive()}>
+                <Icon icon={closeIcon} />
+              </div>
+            )}
+          </div>
+          {onInsertQuery && (
+            <div className='flex border-t border-blue-100'>
+              <AddCodeAndBranchButtons
+                buttonClass={buttonClass}
+                onInsertCodeBlock={insertCode}
+                onInsertBranch={onInsertBranch}
+              />
             </div>
           )}
         </div>
-        {onInsertQuery && (
-          <div className='flex border-t border-blue-100'>
-            <AddCodeAndBranchButtons
-              buttonClass={buttonClass}
-              onInsertCodeBlock={insertCode}
-              onInsertBranch={onInsertBranch}
-            />
-          </div>
-        )}
+        <SmallDot position='bottom' color='bg-blue-200' />
       </div>
-      <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} includeDot dotColor='bg-blue-200' />
+      <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} />
     </>
   ) : (
     <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onClick={toggleActive()}>
@@ -235,3 +201,30 @@ const AddStepButton = ({
     </div>
   )
 }
+
+export const DownStroke = ({
+  height = '',
+  color = 'border-gray-400',
+  grow = false,
+  spacer = false,
+}: {
+  height?: string
+  color?: string
+  grow?: boolean
+  spacer?: boolean
+}) => <div className={`${height} ${spacer ? 'mt-1.5' : ''} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
+
+export const DownConnector = ({
+  height = '',
+  grow = false,
+  spacer = true, // false still needed?
+}: {
+  height?: string
+  grow?: boolean
+  spacer?: boolean
+}) => (
+  <>
+    <DownStroke height={height} grow={grow} />
+    <div className={`${spacer ? 'mb-[9px]' : 'mb-px'} p-1 -mt-2.5 rotate-45 border-b border-r border-gray-400`} />
+  </>
+)

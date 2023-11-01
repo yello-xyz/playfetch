@@ -33,14 +33,14 @@ const chunk = (
   failed?: boolean
 ) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed })
 
-const run = (
-  output: string,
-  index = 0,
-  id = index,
-  cost?: number,
-  duration?: number,
-  failed?: boolean
-) => ({ id, index, output, cost, duration, failed })
+const run = (output: string, index = 0, id = index, cost?: number, duration?: number, failed?: boolean) => ({
+  id,
+  index,
+  output,
+  cost,
+  duration,
+  failed,
+})
 
 testConsumeStream('no chunks', [], [])
 testConsumeStream('single chunk', [chunk('hello')], [run('hello')])

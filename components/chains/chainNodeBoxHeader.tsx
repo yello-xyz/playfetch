@@ -65,9 +65,7 @@ export default function ChainNodeBoxHeader({
 
   const canIncludeContext =
     IsPromptChainItem(chainNode) &&
-    nodes
-      .slice(0, index)
-      .some(node => IsPromptChainItem(node) && SubtreeForChainNode(node, nodes).includes(chainNode))
+    nodes.slice(0, index).some(node => IsPromptChainItem(node) && SubtreeForChainNode(node, nodes).includes(chainNode))
 
   return (
     <>

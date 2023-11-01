@@ -1,5 +1,5 @@
 import { ActiveChain, BranchChainItem, ChainItem, ChainVersion, Prompt } from '@/types'
-import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
+import { ChainNode, InputNode, IsBranchChainItem, IsChainItem, OutputNode } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
@@ -56,7 +56,7 @@ export function ChainNodeBox({
       }
     }
     updatedItems = PruneNodeAndShiftUp(updatedItems, itemIndex)
-    const prunedNodeCount = (items.length - updatedItems.length) - 1
+    const prunedNodeCount = items.length - updatedItems.length - 1
     if (prunedNodeCount > 0) {
       const nodeDescription = `${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''}`
       const prunedBranchCount = (chainNode as BranchChainItem).branches.length - 1
@@ -77,10 +77,13 @@ export function ChainNodeBox({
     setActiveIndex(index + 1)
   }
 
+  const dropShadow = 'drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)]'
+
   return (
     <div
-      className={`flex flex-col border w-96 rounded-lg cursor-pointer drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)] ${colorClass}`}
+      className={`relative flex flex-col border w-96 rounded-lg cursor-pointer ${dropShadow} ${colorClass}`}
       onClick={() => setActiveIndex(index)}>
+      {chainNode !== InputNode && <SmallDot position='top' />}
       <ChainNodeBoxHeader
         nodes={nodes}
         index={index}
@@ -101,6 +104,18 @@ export function ChainNodeBox({
         isSelected={isSelected}
         promptCache={promptCache}
       />
+      {chainNode !== OutputNode && <SmallDot position='bottom' />}
     </div>
   )
 }
+
+export const SmallDot = ({
+  position,
+  color = 'bg-white border border-gray-400',
+}: {
+  position: 'top' | 'bottom'
+  color?: string
+}) => <div className={`${layoutForPosition(position)} ${color} absolute self-center z-10 w-2.5 h-2.5 rounded-full`} />
+
+const layoutForPosition = (position: 'top' | 'bottom') =>
+  position === 'top' ? 'top-0 -mt-[5px] mb-0.5' : 'bottom-0 -mb-[5px] mt-1'
