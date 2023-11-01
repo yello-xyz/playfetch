@@ -1,4 +1,4 @@
-import { Analytics, Usage, User } from '@/types'
+import { Analytics, ResolvedEndpoint, User } from '@/types'
 import { getWorkspacesForUser } from './datastore/workspaces'
 import { getActiveProject } from './datastore/projects'
 import { ActiveItem, BuildActiveChain, BuildActivePrompt, CompareItem, EndpointsItem } from '../common/activeItem'
@@ -32,17 +32,9 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
 
   let initialAnalytics: Analytics | null =
     initialActiveItem === EndpointsItem || initialActiveItem === CompareItem
-      ? await getAnalyticsForProject(user.id, projectID!, true)
+      ? analyticsFromQuery(query, initialActiveProject.endpoints) ??
+        (await getAnalyticsForProject(user.id, projectID!, true))
       : null
-  const { ud: usageData } = ParseQuery(query)
-  if (initialAnalytics && usageData) {
-    const usage: Usage[] = JSON.parse(usageData)
-    initialAnalytics = {
-      ...initialAnalytics,
-      aggregatePreviousUsage: usage[0],
-      recentUsage: usage.slice(1),
-    }
-  }
 
   return {
     user,
@@ -51,5 +43,22 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialActiveItem,
     initialAnalytics,
     availableProviders,
+  }
+}
+
+const analyticsFromQuery = (query: ParsedUrlQuery, endpoints: ResolvedEndpoint[]): Analytics | null => {
+  const { ad: analyticsData } = ParseQuery(query)
+  if (!analyticsData) {
+    return null
+  }
+  const analytics = JSON.parse(analyticsData) as Analytics
+  return {
+    ...analytics,
+    recentLogEntries: analytics.recentLogEntries.map(entry => ({
+      ...entry,
+      endpointID: endpoints[entry.endpointID].id,
+      parentID: endpoints[entry.endpointID].parentID,
+      versionID: endpoints[entry.endpointID].versionID,
+    })),
   }
 }
