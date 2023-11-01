@@ -122,12 +122,15 @@ export default function ChainView({
     setShowVersions(false)
   }
 
+  const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
+  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
+
   const [isTestMode, setTestMode] = useState(false)
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
     if (testMode && activeNodeIndex === undefined) {
       updateActiveNodeIndex(0)
-    } else if (testMode && showVersions) {
+    } else if (showVersions && (testMode || (activeNodeIndex !== undefined && !isInputOutputNode))) {
       setShowVersions(false)
     }
   }
@@ -140,9 +143,6 @@ export default function ChainView({
       setActiveNodeIndex(nodes.indexOf(OutputNode))
     }
   }
-
-  const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
-  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
 
   const minWidth = 300
   return (
