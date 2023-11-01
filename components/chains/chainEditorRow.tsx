@@ -37,6 +37,9 @@ const startsBranch = (nodes: ChainNode[], branch: number) => (node: ChainNode) =
   )
 }
 
+const didStartBranchInColumn = (nodes: ChainNode[], previousIndex: number, branch: number) =>
+  nodes.slice(0, previousIndex).some(startsBranch(nodes, branch))
+
 export const ConnectorRow = (props: {
   nodes: ChainNode[]
   maxBranch: number
@@ -54,9 +57,6 @@ export const ConnectorRow = (props: {
     ))}
   </>
 )
-
-const hasStartedBranchInColumn = (nodes: ChainNode[], previousIndex: number, branch: number) =>
-  nodes.slice(0, previousIndex).some(startsBranch(nodes, branch))
 
 const ConnectorCell = ({
   nodes,
@@ -90,10 +90,11 @@ const ConnectorCell = ({
     index = targetNode ? nodes.indexOf(targetNode) : previousNodeIndex + 1
   }
   const isActive = index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]
+  const hasSpotOnNextRow = !nextNode && nodes.indexOf(nextRow[0]) !== nodes.length - 1
   return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
-      isDisabled={isDisabled}
+      isDisabled={isDisabled || (isActive && hasSpotOnNextRow)}
       isActive={isActive}
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
@@ -101,7 +102,7 @@ const ConnectorCell = ({
       hasNext={!!nextNode && IsChainItem(nextNode)}
       {...bindInsertActions(insertActions, index, branch)}
     />
-  ) : hasStartedBranchInColumn(nodes, previousNodeIndex, branch) ? (
+  ) : didStartBranchInColumn(nodes, previousNodeIndex, branch) ? (
     <DownStroke />
   ) : (
     <div />
@@ -117,6 +118,8 @@ export const NodesRow = (props: {
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
+  activeMenuIndex?: [number, number]
+  setActiveMenuIndex: (index: [number, number] | undefined) => void
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
@@ -138,6 +141,8 @@ const NodeCell = ({
   saveItems,
   activeIndex,
   setActiveIndex,
+  activeMenuIndex,
+  setActiveMenuIndex,
   savedVersion,
   setTestMode,
   prompts,
@@ -151,30 +156,63 @@ const NodeCell = ({
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
+  activeMenuIndex?: [number, number]
+  setActiveMenuIndex: (index: [number, number] | undefined) => void
   savedVersion: ChainVersion | null
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
   promptCache: ChainPromptCache
 }) => {
-  const node = row.find(sameBranch(branch))
-  const index = node ? nodes.indexOf(node) : -1
   const firstNodeOfRowIndex = nodes.indexOf(row[0])
   const isLastRow = firstNodeOfRowIndex === nodes.length - 1
+  const node = row.find(sameBranch(branch))
+  let index = node ? nodes.indexOf(node) : -1
+
+  if (!node && !isLastRow && branch === activeMenuIndex?.[1]) {
+    const rowItems = row.filter(IsChainItem)
+    const nextNode = rowItems.find(item => item.branch > branch)
+    const previousNode = rowItems.findLast(item => item.branch < branch)
+    const nextIndex = nextNode ? nodes.indexOf(nextNode) : nodes.indexOf(previousNode!) + 1
+
+    const didStartBranch = didStartBranchInColumn(nodes, firstNodeOfRowIndex, branch)
+    const previousRowItems = nodes.slice(0, firstNodeOfRowIndex).filter(IsChainItem)
+    const previousRowItem = previousRowItems.findLast(item => item.branch <= branch)
+    const hasSpotOnPreviousRow =
+      previousRowItem && previousRowItem.branch < branch && !startsBranch(nodes, branch)(previousRowItem)
+    if (nextIndex === activeMenuIndex[0] && didStartBranch && !hasSpotOnPreviousRow) {
+      index = nextIndex
+    }
+  }
+
   return index >= 0 ? (
-    <ChainNodeBox
-      chain={chain}
-      nodes={nodes}
-      index={index}
-      insertItem={item => insertActions.insertItem(index, branch, item)}
-      saveItems={saveItems}
-      activeIndex={activeIndex}
-      setActiveIndex={setActiveIndex}
-      savedVersion={savedVersion}
-      setTestMode={setTestMode}
-      prompts={prompts}
-      promptCache={promptCache}
-    />
-  ) : !isLastRow && hasStartedBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (
+    node === undefined ? (
+      <ChainNodeBoxConnector
+        prompts={prompts}
+        isDisabled={false}
+        isActive={true}
+        setActive={_ => setActiveMenuIndex(undefined)}
+        canDismiss={true}
+        hasPrevious={false}
+        hasNext={false}
+        skipConnector
+        {...bindInsertActions(insertActions, index, branch)}
+      />
+    ) : (
+      <ChainNodeBox
+        chain={chain}
+        nodes={nodes}
+        index={index}
+        insertItem={item => insertActions.insertItem(index, branch, item)}
+        saveItems={saveItems}
+        activeIndex={activeIndex}
+        setActiveIndex={setActiveIndex}
+        savedVersion={savedVersion}
+        setTestMode={setTestMode}
+        prompts={prompts}
+        promptCache={promptCache}
+      />
+    )
+  ) : !isLastRow && didStartBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (
     <DownStroke />
   ) : (
     <div />

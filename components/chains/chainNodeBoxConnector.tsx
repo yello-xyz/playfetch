@@ -26,6 +26,7 @@ export default function ChainNodeBoxConnector({
   onInsertCodeBlock,
   onInsertBranch,
   prompts,
+  skipConnector,
 }: {
   isDisabled: boolean
   isActive: boolean
@@ -39,10 +40,11 @@ export default function ChainNodeBoxConnector({
   onInsertCodeBlock: () => void
   onInsertBranch: () => void
   prompts: Prompt[]
+  skipConnector?: boolean
 }) {
   return (
     <div className='flex flex-col items-center'>
-      <DownStroke height='min-h-[12px]' spacer={hasPrevious} />
+      {!skipConnector && <DownStroke height='min-h-[12px]' spacer={hasPrevious} />}
       {isDisabled ? (
         <DownStroke height='min-h-[22px]' />
       ) : (
@@ -56,9 +58,14 @@ export default function ChainNodeBoxConnector({
           onInsertQuery={onInsertQuery}
           onInsertCodeBlock={onInsertCodeBlock}
           onInsertBranch={onInsertBranch}
+          hasConnector={!skipConnector}
         />
       )}
-      {hasNext ? <DownConnector height='min-h-[18px]' grow /> : <DownStroke height='min-h-[18px]' grow />}
+      {hasNext || (isDisabled && isActive) ? (
+        <DownConnector height='min-h-[18px]' grow />
+      ) : (
+        <DownStroke height='min-h-[18px]' grow />
+      )}
     </div>
   )
 }
@@ -73,6 +80,7 @@ const AddButton = ({
   onInsertQuery,
   onInsertCodeBlock,
   onInsertBranch,
+  hasConnector,
 }: {
   prompts: Prompt[]
   isActive: boolean
@@ -83,6 +91,7 @@ const AddButton = ({
   onInsertQuery?: () => void
   onInsertCodeBlock: () => void
   onInsertBranch: () => void
+  hasConnector: boolean
 }) => {
   const [isHovered, setHovered] = useState(false)
   const hoverClass = isHovered ? 'bg-blue-200' : 'border border-gray-400'
@@ -115,7 +124,7 @@ const AddButton = ({
 
   return isActive ? (
     <>
-      <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />
+      {hasConnector && <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />}
       <div className='relative flex flex-col items-center mb-2'>
         <SmallDot position='top' color='bg-blue-200' />
         <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>

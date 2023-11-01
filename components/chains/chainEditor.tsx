@@ -131,6 +131,8 @@ export default function ChainEditor({
                 saveItems={saveItems}
                 activeIndex={activeIndex}
                 setActiveIndex={updateActiveIndex}
+                activeMenuIndex={activeMenuIndex}
+                setActiveMenuIndex={setActiveMenuIndex}
                 savedVersion={isVersionSaved ? activeVersion : null}
                 setTestMode={setTestMode}
                 prompts={prompts}

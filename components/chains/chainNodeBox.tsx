@@ -121,5 +121,4 @@ export const SmallDot = ({
   color?: string
 }) => <div className={`${layoutForPosition(position)} ${color} absolute self-center z-10 w-2.5 h-2.5 rounded-full`} />
 
-const layoutForPosition = (position: 'top' | 'bottom') =>
-  position === 'top' ? 'top-0 -mt-1.5' : 'bottom-0 -mb-1.5'
+const layoutForPosition = (position: 'top' | 'bottom') => (position === 'top' ? 'top-0 -mt-1.5' : 'bottom-0 -mb-1.5')
