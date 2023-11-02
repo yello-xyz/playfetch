@@ -62,6 +62,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             cost,
             duration,
             failed,
+            continuationID,
           }),
         continuationID
       )

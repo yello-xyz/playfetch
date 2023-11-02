@@ -18,7 +18,8 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, isLast } = JSON.parse(data)
+      const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, continuationID, isLast } =
+        JSON.parse(data)
       if (isLast || timestamp) {
         const lastIndex = Math.max(...Object.keys(runs[inputIndex]).map(Number))
         runs[inputIndex][lastIndex].isLast = isLast ?? false
@@ -26,7 +27,7 @@ export const ConsumeStream = async (
       } else {
         const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, failed }
+        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, failed, continuationID }
       }
     }
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
