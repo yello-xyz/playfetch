@@ -106,6 +106,7 @@ export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
 export type PromptConfig = {
   model: LanguageModel
+  isChat: boolean
   temperature: number
   maxTokens: number
 }
