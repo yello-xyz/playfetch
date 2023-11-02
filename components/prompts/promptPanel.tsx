@@ -98,7 +98,7 @@ export default function PromptPanel({
   const padding = 12 // gap-3
   const modelSelectorHeight = 37
   const tabHeight = 27
-  const contentHeight = 116
+  const contentHeight = SupportsChatMode(config.model) ? 148 : 116
   const preferredHeight =
     tabHeight +
     padding +
