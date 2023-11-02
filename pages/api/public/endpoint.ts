@@ -122,14 +122,18 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         logResponse(clientID, endpoint, inputs, response, !!cachedResponse, continuationID)
 
+        const newContinuationKey = response.continuationID ? salt(response.continuationID).toString() : undefined
         if (useStreaming) {
+          if (newContinuationKey && newContinuationKey !== continuationKey) {
+            res.write(`\n${continuationHeaderKey}: ${newContinuationKey}`)
+          }
           res.end()
           return
         } else {
           return res.send(
             stringify({
               output: response.result,
-              ...(response.continuationID ? { [continuationHeaderKey]: salt(response.continuationID).toString() } : {}),
+              ...(newContinuationKey ? { [continuationHeaderKey]: newContinuationKey } : {}),
             })
           )
         }
