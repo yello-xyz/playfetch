@@ -31,7 +31,7 @@ export async function migrateRuns(postMerge: boolean) {
           runData.continuationID, // will save as null rather than undefined
           getID(runData)
         )
-      )  
+      )
     }
   }
   console.log('✅ Processed all remaining runs')

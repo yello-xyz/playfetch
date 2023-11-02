@@ -10,7 +10,7 @@ const testConsumeStream = (
   numberOfInputs = 1
 ) =>
   test(`Test ${testDescription}`, async () => {
-    const inputs = Array.from({ length: numberOfInputs }, () => ({}) as PromptInputs)
+    const inputs = Array.from({ length: numberOfInputs }, () => ({} as PromptInputs))
     const streamReader = new ReadableStream({
       start(controller) {
         for (const data of streamedData) {
@@ -30,16 +30,26 @@ const chunk = (
   inputIndex = 0,
   cost?: number,
   duration?: number,
-  failed?: boolean
-) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed })
+  failed?: boolean,
+  continuationID?: number
+) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed, continuationID })
 
-const run = (output: string, index = 0, id = index, cost?: number, duration?: number, failed?: boolean) => ({
+const run = (
+  output: string,
+  index = 0,
+  id = index,
+  cost?: number,
+  duration?: number,
+  failed?: boolean,
+  continuationID?: number
+) => ({
   id,
   index,
   output,
   cost,
   duration,
   failed,
+  continuationID,
 })
 
 testConsumeStream('no chunks', [], [])
