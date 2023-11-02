@@ -36,6 +36,7 @@ const logResponse = (
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
+  const continuationID = req.body.continuationID
 
   const version = await getTrustedVersion(versionID, true)
   const configs = loadConfigsFromVersion(version)
@@ -45,16 +46,23 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   const responses = await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
-      return runChain(user.id, version, configs, inputs, false, (index, extraSteps, message, cost, duration, failed) =>
-        sendData({
-          inputIndex,
-          configIndex: index,
-          index: index + extraSteps,
-          message,
-          cost,
-          duration,
-          failed,
-        })
+      return runChain(
+        user.id,
+        version,
+        configs,
+        inputs,
+        false,
+        (index, extraSteps, message, cost, duration, failed) =>
+          sendData({
+            inputIndex,
+            configIndex: index,
+            index: index + extraSteps,
+            message,
+            cost,
+            duration,
+            failed,
+          }),
+        continuationID
       )
     })
   )

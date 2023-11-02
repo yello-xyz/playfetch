@@ -57,13 +57,13 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     setHighestRunIndex(-1)
   }
 
-  const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[]) => {
+  const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     setRunning(true)
     setPartialRuns([])
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     setRunningVersionID(versionID)
-    const streamReader = await api.runVersion(versionID, inputs)
+    const streamReader = await api.runVersion(versionID, inputs, continuationID)
     await ConsumeStream(inputs, streamReader, runs => {
       setPartialRuns(runs)
       setHighestRunIndex(Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
