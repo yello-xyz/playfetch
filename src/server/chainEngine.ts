@@ -15,6 +15,7 @@ import runPromptWithConfig from '@/src/server/promptEngine'
 import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../common/branching'
+import { DefaultChatContinuationInputKey } from '../common/defaultConfig'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -32,6 +33,10 @@ const resolvePrompts = (prompts: Prompts, inputs: PromptInputs, useCamelCase: bo
   Object.fromEntries(
     Object.entries(prompts).map(([key, value]) => [key, resolvePrompt(value, inputs, useCamelCase)])
   ) as Prompts
+
+const getReplyPromptFromInputs = (inputs: PromptInputs): Prompts => ({
+  main: inputs[DefaultChatContinuationInputKey] ?? Object.values(inputs)[0],
+})
 
 const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
   variable ? { ...inputs, [useCamelCase ? ToCamelCase(variable) : variable]: value } : inputs
@@ -108,7 +113,7 @@ export default async function runChain(
       const continuation = JSON.parse(cachedValue)
       continuationIndex = continuation.continuationIndex
       requestContinuation = continuation.requestContinuation ?? false
-      inputs = { ...inputs, ...continuation.inputs }
+      inputs = { ...continuation.inputs, ...inputs }
       promptContext = continuation.promptContext
     } else {
       continuationIndex = 0
@@ -141,7 +146,7 @@ export default async function runChain(
       ) as RawPromptVersion
       const isContinuedChat = index === continuationIndex && promptVersion.config.isChat
       const prompts = isContinuedChat
-        ? { main: Object.values(inputs)[0] }
+        ? getReplyPromptFromInputs(inputs)
         : resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runPromptWithConfig(
