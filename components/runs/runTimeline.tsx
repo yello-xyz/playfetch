@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion } from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
@@ -18,6 +18,7 @@ export default function RunTimeline({
   version,
   activeItem,
   activeRunID,
+  runVersion,
   isRunning,
   skipHeader,
 }: {
@@ -25,6 +26,7 @@ export default function RunTimeline({
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
+  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<void>
   isRunning?: boolean
   skipHeader?: boolean
 }) {
@@ -55,6 +57,12 @@ export default function RunTimeline({
     setPreviousLastRunID(lastPartialRunID)
   }
 
+  const runContinuation =
+    version && runVersion
+      ? async (continuationID: number, message: string) =>
+          runVersion(() => Promise.resolve(version.id), [{ message: message }], continuationID)
+      : undefined
+
   return (
     <div className='relative flex flex-col h-full'>
       {!skipHeader && (
@@ -71,6 +79,8 @@ export default function RunTimeline({
               run={run}
               version={version}
               activeItem={activeItem}
+              isRunning={isRunning}
+              runContinuation={runContinuation}
             />
           ))}
         </div>

@@ -160,6 +160,7 @@ export default function ChainNodeOutput({
               activeItem={chain}
               activeRunID={activeRunID}
               version={activeVersion}
+              runVersion={runVersion}
               isRunning={isRunning}
             />
           </div>

@@ -8,6 +8,8 @@ import RunCellBody from './runCellBody'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import Icon from '../icon'
 import commentIcon from '@/public/comment.svg'
+import TextInput from '../textInput'
+import { PendingButton } from '../button'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -52,12 +54,17 @@ export default function RunCell({
   run,
   version,
   activeItem,
+  isRunning,
+  runContinuation,
 }: {
   identifier: string
   run: PartialRun
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
+  isRunning?: boolean
+  runContinuation?: (continuationID: number, message: string) => void
 }) {
+  const [replyMessage, setReplyMessage] = useState('')
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
 
   const setPopup = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
@@ -147,6 +154,15 @@ export default function RunCell({
   const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
   const showInlineHeader = isProperRun && !Object.keys(run.inputs).length && !run.labels.length
 
+  const continuationID = run.continuationID
+  const sendReply =
+    runContinuation && continuationID
+      ? () => {
+          runContinuation(continuationID, replyMessage)
+          setReplyMessage('')
+        }
+      : undefined
+
   return (
     <div className={`${baseClass} ${colorClass}`}>
       <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
@@ -159,6 +175,17 @@ export default function RunCell({
         />
       </div>
       <RunCellFooter run={run} />
+      {sendReply && (
+        <div className='flex items-center gap-2'>
+          <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
+          <PendingButton
+            title='Reply'
+            pendingTitle='Running'
+            disabled={replyMessage.length === 0 || isRunning}
+            onClick={sendReply}
+          />
+        </div>
+      )}
     </div>
   )
 }
