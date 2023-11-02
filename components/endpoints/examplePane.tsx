@@ -26,7 +26,7 @@ const buildCurlCommand = (
     (inputs.length > 0
       ? ` \\\n  -H "content-type: application/json"` +
         ` \\\n  -d $'{ ${inputs
-          .map(([variable, value]) => `"${ToCamelCase(variable)}": ${stringify(value)}`)
+          .map(([variable, value]) => `"${ToCamelCase(variable)}": ${stringify(value ?? '')}`)
           .join(', ')} }'`
       : '')
   )
