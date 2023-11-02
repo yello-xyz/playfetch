@@ -8,24 +8,33 @@ export async function migrateRuns(postMerge: boolean) {
     return
   }
   const datastore = getDatastore()
+  let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    await datastore.save(
-      toRunData(
-        runData.userID,
-        runData.parentID,
-        runData.versionID,
-        JSON.parse(runData.inputs),
-        runData.output,
-        runData.createdAt,
-        runData.cost,
-        runData.duration,
-        JSON.parse(runData.labels),
-        runData.continuationID,
-        getID(runData)
-      )
-    )
+    const continuationID = runData.continuationID
+    if (continuationID === undefined) {
+      if (remainingSaveCount-- <= 0) {
+        console.log('‼️  Please run this migration again to process remaining runs')
+        return
+      }
+      await datastore.save(
+        toRunData(
+          runData.userID,
+          runData.parentID,
+          runData.versionID,
+          JSON.parse(runData.inputs),
+          runData.output,
+          runData.createdAt,
+          runData.cost,
+          runData.duration,
+          JSON.parse(runData.labels),
+          runData.continuationID, // will save as null rather than undefined
+          getID(runData)
+        )
+      )  
+    }
   }
+  console.log('✅ Processed all remaining runs')
 }
 
 export async function saveRun(
