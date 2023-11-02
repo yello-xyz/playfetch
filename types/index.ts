@@ -184,6 +184,7 @@ type CommonRun = {
 export type PartialRun = CommonRun & {
   index?: number
   isLast?: boolean
+  continuations?: PartialRun[]
 }
 
 export type Run = CommonRun & {
