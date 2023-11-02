@@ -21,6 +21,7 @@ export async function migrateRuns(postMerge: boolean) {
         runData.cost,
         runData.duration,
         JSON.parse(runData.labels),
+        runData.continuationID,
         getID(runData)
       )
     )
@@ -35,10 +36,22 @@ export async function saveRun(
   output: string,
   cost: number,
   duration: number,
-  labels: string[]
+  labels: string[],
+  continuationID?: number
 ) {
   await ensurePromptOrChainAccess(userID, parentID)
-  const runData = toRunData(userID, parentID, versionID, inputs, output, new Date(), cost, duration, labels)
+  const runData = toRunData(
+    userID,
+    parentID,
+    versionID,
+    inputs,
+    output,
+    new Date(),
+    cost,
+    duration,
+    labels,
+    continuationID
+  )
   await getDatastore().save(runData)
 }
 
@@ -89,6 +102,7 @@ async function updateRun(runData: any) {
       runData.cost,
       runData.duration,
       JSON.parse(runData.labels),
+      runData.continuationID,
       getID(runData)
     )
   )
@@ -104,6 +118,7 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
+  continuationID: number | undefined,
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
@@ -117,6 +132,7 @@ const toRunData = (
     cost,
     duration,
     labels: JSON.stringify(labels),
+    continuationID: continuationID ?? null,
   },
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })
