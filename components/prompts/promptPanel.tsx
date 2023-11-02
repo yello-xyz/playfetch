@@ -21,6 +21,7 @@ import {
   PromptKeyNeedsPreformatted,
   ProviderForModel,
   SupportedPromptKeysForModel,
+  SupportsChatMode,
 } from '@/src/common/providerMetadata'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
@@ -85,7 +86,8 @@ export default function PromptPanel({
   }
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
-  const updateConfig = (config: PromptConfig) => update(prompts, config)
+  const updateConfig = (config: PromptConfig) =>
+    update(prompts, { ...config, isChat: SupportsChatMode(config.model) ? config.isChat : false })
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, model })
 
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
