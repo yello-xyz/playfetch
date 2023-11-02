@@ -20,7 +20,17 @@ const logResponse = (
   logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
   return response.failed
     ? Promise.resolve()
-    : saveRun(userID, version.parentID, version.id, inputs, response.output, response.cost, response.duration, [])
+    : saveRun(
+        userID,
+        version.parentID,
+        version.id,
+        inputs,
+        response.output,
+        response.cost,
+        response.duration,
+        [],
+        response.continuationID
+      )
 }
 
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
