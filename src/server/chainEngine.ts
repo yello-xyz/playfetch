@@ -108,7 +108,7 @@ export default async function runChain(
       const continuation = JSON.parse(cachedValue)
       continuationIndex = continuation.continuationIndex
       requestContinuation = continuation.requestContinuation ?? false
-      inputs = { ...continuation.inputs, ...inputs }
+      inputs = { ...inputs, ...continuation.inputs }
       promptContext = continuation.promptContext
     } else {
       continuationIndex = 0
@@ -139,7 +139,10 @@ export default async function runChain(
       const promptVersion = (
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
-      const prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
+      const isContinuedChat = index === continuationIndex && promptVersion.config.isChat
+      const prompts = isContinuedChat
+        ? { main: Object.values(inputs)[0] }
+        : resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
