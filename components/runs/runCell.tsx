@@ -191,6 +191,7 @@ export default function RunCell({
       </LeftBordered>
       {(run.continuations ?? []).map(continuation => (
         <Fragment key={continuation.id}>
+          {/* // TODO for partial run, use the current user instead */}
           <RoleHeader
             user={activeItem?.users?.find(user => 'userID' in continuation && user.id === continuation.userID)}
             role='User'
