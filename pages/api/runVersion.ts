@@ -15,7 +15,8 @@ const logResponse = (
   userID: number,
   version: RawPromptVersion | RawChainVersion,
   inputs: PromptInputs,
-  response: Awaited<ReturnType<typeof runChain>>
+  response: Awaited<ReturnType<typeof runChain>>,
+  continuationID: number | undefined
 ) => {
   logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
   return response.failed
@@ -29,7 +30,7 @@ const logResponse = (
         response.cost,
         response.duration,
         [],
-        response.continuationID
+        continuationID ?? response.continuationID
       )
 }
 
@@ -69,7 +70,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   for (const [index, response] of responses.entries()) {
     sendData({ inputIndex: index, timestamp: new Date().getTime(), isLast: !response.failed })
-    await logResponse(req, res, user.id, version, multipleInputs[index], response)
+    await logResponse(req, res, user.id, version, multipleInputs[index], response, continuationID)
   }
 
   res.end()
