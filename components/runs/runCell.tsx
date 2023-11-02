@@ -152,10 +152,6 @@ export default function RunCell({
     }
   }, [isProperRun, identifier, updateSelection])
 
-  const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
-  const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
-  const showInlineHeader = isProperRun && !Object.keys(run.inputs).length && !run.labels.length
-
   const continuationID = run.continuationID
   const isContinuation = !!continuationID
   const sendReply =
@@ -167,19 +163,25 @@ export default function RunCell({
         }
       : undefined
 
+  const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
+  const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
+  const showInlineHeader = isProperRun && !Object.keys(run.inputs).length && !run.labels.length
+
   return (
     <div className={`${baseClass} ${colorClass}`}>
       <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
         {isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
-        {isContinuation && <CircledHeading role='Assistant' />}
-        <LeftBordered border={isContinuation}>
-          <RunCellBody
-            identifier={identifier}
-            output={run.output}
-            selectionRanges={selectionRanges}
-            onSelectComment={selectComment}
-          />
-        </LeftBordered>
+        <div className='flex flex-col gap-2.5 flex-1'>
+          {isContinuation && <CircledHeading role='Assistant' />}
+          <LeftBordered border={isContinuation}>
+            <RunCellBody
+              identifier={identifier}
+              output={run.output}
+              selectionRanges={selectionRanges}
+              onSelectComment={selectComment}
+            />
+          </LeftBordered>
+        </div>
       </div>
       <LeftBordered border={isContinuation} bridgeGap>
         <RunCellFooter run={run} />
