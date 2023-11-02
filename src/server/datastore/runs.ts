@@ -8,23 +8,33 @@ export async function migrateRuns(postMerge: boolean) {
     return
   }
   const datastore = getDatastore()
+  let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    await datastore.save(
-      toRunData(
-        runData.userID,
-        runData.parentID,
-        runData.versionID,
-        JSON.parse(runData.inputs),
-        runData.output,
-        runData.createdAt,
-        runData.cost,
-        runData.duration,
-        JSON.parse(runData.labels),
-        getID(runData)
-      )
-    )
+    const continuationID = runData.continuationID
+    if (continuationID === undefined) {
+      if (remainingSaveCount-- <= 0) {
+        console.log('‼️  Please run this migration again to process remaining runs')
+        return
+      }
+      await datastore.save(
+        toRunData(
+          runData.userID,
+          runData.parentID,
+          runData.versionID,
+          JSON.parse(runData.inputs),
+          runData.output,
+          runData.createdAt,
+          runData.cost,
+          runData.duration,
+          JSON.parse(runData.labels),
+          runData.continuationID, // will save as null rather than undefined
+          getID(runData)
+        )
+      )  
+    }
   }
+  console.log('✅ Processed all remaining runs')
 }
 
 export async function saveRun(
@@ -35,10 +45,22 @@ export async function saveRun(
   output: string,
   cost: number,
   duration: number,
-  labels: string[]
+  labels: string[],
+  continuationID?: number
 ) {
   await ensurePromptOrChainAccess(userID, parentID)
-  const runData = toRunData(userID, parentID, versionID, inputs, output, new Date(), cost, duration, labels)
+  const runData = toRunData(
+    userID,
+    parentID,
+    versionID,
+    inputs,
+    output,
+    new Date(),
+    cost,
+    duration,
+    labels,
+    continuationID
+  )
   await getDatastore().save(runData)
 }
 
@@ -89,6 +111,7 @@ async function updateRun(runData: any) {
       runData.cost,
       runData.duration,
       JSON.parse(runData.labels),
+      runData.continuationID,
       getID(runData)
     )
   )
@@ -104,6 +127,7 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
+  continuationID: number | undefined,
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
@@ -117,6 +141,7 @@ const toRunData = (
     cost,
     duration,
     labels: JSON.stringify(labels),
+    continuationID: continuationID ?? null,
   },
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })
@@ -129,6 +154,7 @@ export const toRun = (data: any): Run => ({
   cost: data.cost,
   duration: data.duration,
   labels: JSON.parse(data.labels),
+  continuationID: data.continuationID ?? null,
 })
 
 export async function getRecentRuns(

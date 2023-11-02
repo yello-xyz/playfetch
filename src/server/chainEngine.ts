@@ -15,6 +15,7 @@ import runPromptWithConfig from '@/src/server/promptEngine'
 import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../common/branching'
+import { DefaultChatContinuationInputKey } from '../common/defaultConfig'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(
@@ -32,6 +33,10 @@ const resolvePrompts = (prompts: Prompts, inputs: PromptInputs, useCamelCase: bo
   Object.fromEntries(
     Object.entries(prompts).map(([key, value]) => [key, resolvePrompt(value, inputs, useCamelCase)])
   ) as Prompts
+
+const getReplyPromptFromInputs = (inputs: PromptInputs): Prompts => ({
+  main: inputs[DefaultChatContinuationInputKey] ?? Object.values(inputs)[0],
+})
 
 const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
   variable ? { ...inputs, [useCamelCase ? ToCamelCase(variable) : variable]: value } : inputs
@@ -98,7 +103,7 @@ export default async function runChain(
     return response
   }
 
-  let continuationIndex = undefined
+  let continuationIndex: number | undefined = undefined
   let requestContinuation = false
   let promptContext = {}
 
@@ -139,7 +144,10 @@ export default async function runChain(
       const promptVersion = (
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
-      const prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
+      const isContinuedChat = index === continuationIndex && promptVersion.config.isChat
+      const prompts = isContinuedChat
+        ? getReplyPromptFromInputs(inputs)
+        : resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
@@ -155,7 +163,7 @@ export default async function runChain(
       const functionInterrupt = lastResponse.failed ? undefined : lastResponse.functionInterrupt
       if (lastResponse.failed) {
         continuationIndex = undefined
-      } else if (functionInterrupt && isEndpointEvaluation) {
+      } else if (promptVersion.config.isChat || (functionInterrupt && isEndpointEvaluation)) {
         continuationIndex = index
         break
       } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount < MaxContinuationCount) {

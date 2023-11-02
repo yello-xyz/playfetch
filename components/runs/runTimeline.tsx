@@ -1,7 +1,8 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion } from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
+import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 
 const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
   items.sort((a, b) => a.timestamp - b.timestamp)
@@ -18,6 +19,7 @@ export default function RunTimeline({
   version,
   activeItem,
   activeRunID,
+  runVersion,
   isRunning,
   skipHeader,
 }: {
@@ -25,6 +27,7 @@ export default function RunTimeline({
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
+  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<void>
   isRunning?: boolean
   skipHeader?: boolean
 }) {
@@ -47,13 +50,33 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const sortedRuns = sortRuns(runs)
+  const sortedRuns = sortRuns(runs).reduce(
+    (sortedRuns, run) =>
+      run.continuationID && run.continuationID === sortedRuns.slice(-1)[0]?.continuationID
+        ? [
+            ...sortedRuns.slice(0, -1),
+            { ...sortedRuns.slice(-1)[0], continuations: [...(sortedRuns.slice(-1)[0].continuations ?? []), run] },
+          ]
+        : [...sortedRuns, run],
+
+    [] as PartialRun[]
+  )
   const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
     focusRun(lastPartialRunID)
     setPreviousLastRunID(lastPartialRunID)
   }
+
+  const runContinuation =
+    version && runVersion
+      ? async (continuationID: number, message: string) =>
+          runVersion(
+            () => Promise.resolve(version.id),
+            [{ [DefaultChatContinuationInputKey]: message }],
+            continuationID
+          )
+      : undefined
 
   return (
     <div className='relative flex flex-col h-full'>
@@ -71,6 +94,8 @@ export default function RunTimeline({
               run={run}
               version={version}
               activeItem={activeItem}
+              isRunning={isRunning}
+              runContinuation={runContinuation}
             />
           ))}
         </div>

@@ -106,6 +106,7 @@ export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
 export type PromptConfig = {
   model: LanguageModel
+  isChat: boolean
   temperature: number
   maxTokens: number
 }
@@ -177,11 +178,13 @@ type CommonRun = {
   cost?: number
   duration?: number
   failed?: boolean
+  continuationID?: number
 }
 
 export type PartialRun = CommonRun & {
   index?: number
   isLast?: boolean
+  continuations?: PartialRun[]
 }
 
 export type Run = CommonRun & {

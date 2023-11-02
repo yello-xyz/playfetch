@@ -89,6 +89,7 @@ export const getPromptVersionContent = (version: PromptVersion, activePromptTab:
     case 'settings':
       return version.config
         ? `Model: ${version.config.model}
+Chat: ${version.config.isChat}
 Maximum Tokens: ${version.config.maxTokens}
 Temperature: ${version.config.temperature}`
         : undefined
