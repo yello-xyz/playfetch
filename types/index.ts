@@ -178,6 +178,7 @@ type CommonRun = {
   cost?: number
   duration?: number
   failed?: boolean
+  continuationID?: number
 }
 
 export type PartialRun = CommonRun & {
