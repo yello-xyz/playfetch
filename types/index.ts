@@ -193,6 +193,7 @@ export type Run = CommonRun & {
   duration: number
   inputs: PromptInputs
   labels: string[]
+  userID: number
 }
 
 type CommonConfigAttributes = {

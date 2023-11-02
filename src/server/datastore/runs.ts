@@ -148,6 +148,7 @@ const toRunData = (
 
 export const toRun = (data: any): Run => ({
   id: getID(data),
+  userID: data.userID,
   timestamp: getTimestamp(data),
   inputs: JSON.parse(data.inputs),
   output: data.output,

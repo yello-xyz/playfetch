@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
 import { Fragment, MouseEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '../commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
@@ -11,6 +11,8 @@ import commentIcon from '@/public/comment.svg'
 import TextInput from '../textInput'
 import { PendingButton } from '../button'
 import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
+import UserAvatar from '../users/userAvatar'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -152,6 +154,7 @@ export default function RunCell({
     }
   }, [isProperRun, identifier, updateSelection])
 
+  const user = useLoggedInUser()
   const continuationID = run.continuationID
   const isContinuation = !!continuationID
   const sendReply =
@@ -172,7 +175,7 @@ export default function RunCell({
       <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
         {isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
         <div className='flex flex-col gap-2.5 flex-1'>
-          {isContinuation && <CircledHeading role='Assistant' />}
+          {isContinuation && <RoleHeader role='Assistant' />}
           <LeftBordered border={isContinuation}>
             <RunCellBody
               identifier={identifier}
@@ -188,13 +191,16 @@ export default function RunCell({
       </LeftBordered>
       {(run.continuations ?? []).map(continuation => (
         <Fragment key={continuation.id}>
-          <CircledHeading role='User' />
+          <RoleHeader
+            user={activeItem?.users?.find(user => 'userID' in continuation && user.id === continuation.userID)}
+            role='User'
+          />
           <LeftBordered>
             <div className='flex-1'>
               {'inputs' in continuation ? (continuation as Run).inputs[DefaultChatContinuationInputKey] : lastReply}
             </div>
           </LeftBordered>
-          <CircledHeading role='Assistant' />
+          <RoleHeader role='Assistant' />
           <LeftBordered>
             <div className='flex-1'>{continuation.output}</div>
           </LeftBordered>
@@ -205,7 +211,7 @@ export default function RunCell({
       ))}
       {sendReply && (
         <>
-          <CircledHeading role='User' />
+          <RoleHeader user={user} role='User' />
           <LeftBordered>
             <div className='flex items-center flex-1 gap-2'>
               <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
@@ -223,12 +229,16 @@ export default function RunCell({
   )
 }
 
-const CircledHeading = ({ role }: { role: string }) => (
+const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
   <div className='flex items-center gap-2'>
-    <div className='flex items-center justify-center w-5 h-5 pt-px text-xs font-medium text-white rounded-full bg-dark-gray-700'>
-      {role.slice(0, 1)}
-    </div>
-    <span className='font-medium text-gray-700'>{role}</span>
+    {user ? (
+      <UserAvatar user={user} size='md' />
+    ) : (
+      <span className='flex items-center justify-center w-[22px] h-[22px] pt-px text-xs font-medium text-white rounded-full bg-dark-gray-700'>
+        {role.slice(0, 1)}
+      </span>
+    )}
+    <span className='font-medium text-gray-700'>{user?.fullName ?? role}</span>
   </div>
 )
 
