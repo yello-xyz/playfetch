@@ -98,7 +98,7 @@ export default async function runChain(
     return response
   }
 
-  let continuationIndex = undefined
+  let continuationIndex: number | undefined = undefined
   let requestContinuation = false
   let promptContext = {}
 
@@ -155,7 +155,7 @@ export default async function runChain(
       const functionInterrupt = lastResponse.failed ? undefined : lastResponse.functionInterrupt
       if (lastResponse.failed) {
         continuationIndex = undefined
-      } else if (functionInterrupt && isEndpointEvaluation) {
+      } else if (promptVersion.config.isChat || (functionInterrupt && isEndpointEvaluation)) {
         continuationIndex = index
         break
       } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount < MaxContinuationCount) {
