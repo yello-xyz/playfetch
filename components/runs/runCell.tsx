@@ -1,5 +1,5 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run } from '@/types'
-import { MouseEvent, useCallback, useEffect, useState } from 'react'
+import { Fragment, MouseEvent, ReactNode, useCallback, useEffect, useState } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '../commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import RunCellHeader from './runCellHeader'
@@ -10,6 +10,7 @@ import Icon from '../icon'
 import commentIcon from '@/public/comment.svg'
 import TextInput from '../textInput'
 import { PendingButton } from '../button'
+import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 
 type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
@@ -65,6 +66,7 @@ export default function RunCell({
   runContinuation?: (continuationID: number, message: string) => void
 }) {
   const [replyMessage, setReplyMessage] = useState('')
+  const [lastReply, setLastReply] = useState('')
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
 
   const setPopup = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
@@ -155,10 +157,12 @@ export default function RunCell({
   const showInlineHeader = isProperRun && !Object.keys(run.inputs).length && !run.labels.length
 
   const continuationID = run.continuationID
+  const isContinuation = !!continuationID
   const sendReply =
     runContinuation && continuationID
       ? () => {
           runContinuation(continuationID, replyMessage)
+          setLastReply(replyMessage)
           setReplyMessage('')
         }
       : undefined
@@ -167,28 +171,81 @@ export default function RunCell({
     <div className={`${baseClass} ${colorClass}`}>
       <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
         {isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
-        <RunCellBody
-          identifier={identifier}
-          output={run.output}
-          selectionRanges={selectionRanges}
-          onSelectComment={selectComment}
-        />
-      </div>
-      <RunCellFooter run={run} />
-      {sendReply && (
-        <div className='flex items-center gap-2'>
-          <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
-          <PendingButton
-            title='Reply'
-            pendingTitle='Running'
-            disabled={replyMessage.length === 0 || isRunning}
-            onClick={sendReply}
+        {isContinuation && <CircledHeading role='Assistant' />}
+        <LeftBordered border={isContinuation}>
+          <RunCellBody
+            identifier={identifier}
+            output={run.output}
+            selectionRanges={selectionRanges}
+            onSelectComment={selectComment}
           />
-        </div>
+        </LeftBordered>
+      </div>
+      <LeftBordered border={isContinuation} bridgeGap>
+        <RunCellFooter run={run} />
+      </LeftBordered>
+      {(run.continuations ?? []).map(continuation => (
+        <Fragment key={continuation.id}>
+          <CircledHeading role='User' />
+          <LeftBordered>
+            <div className='flex-1'>
+              {'inputs' in continuation ? (continuation as Run).inputs[DefaultChatContinuationInputKey] : lastReply}
+            </div>
+          </LeftBordered>
+          <CircledHeading role='Assistant' />
+          <LeftBordered>
+            <div className='flex-1'>{continuation.output}</div>
+          </LeftBordered>
+          <LeftBordered border bridgeGap>
+            <RunCellFooter run={continuation} />
+          </LeftBordered>
+        </Fragment>
+      ))}
+      {sendReply && (
+        <>
+          <CircledHeading role='User' />
+          <LeftBordered>
+            <div className='flex items-center flex-1 gap-2'>
+              <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
+              <PendingButton
+                title='Reply'
+                pendingTitle='Running'
+                disabled={replyMessage.length === 0 || isRunning}
+                onClick={sendReply}
+              />
+            </div>
+          </LeftBordered>
+        </>
       )}
     </div>
   )
 }
+
+const CircledHeading = ({ role }: { role: string }) => (
+  <div className='flex items-center gap-2'>
+    <div className='flex items-center justify-center w-5 h-5 pt-px text-xs font-medium text-white rounded-full bg-dark-gray-700'>
+      {role.slice(0, 1)}
+    </div>
+    <span className='font-medium text-gray-700'>{role}</span>
+  </div>
+)
+
+const LeftBordered = ({
+  border = true,
+  bridgeGap,
+  children,
+}: {
+  border?: boolean
+  bridgeGap?: boolean
+  children: ReactNode
+}) =>
+  border ? (
+    <div className={`${bridgeGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
+      {children}
+    </div>
+  ) : (
+    <>{children}</>
+  )
 
 type CommentInputProps = {
   selection: Selection
