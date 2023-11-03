@@ -174,7 +174,7 @@ export default function ChainNodeOutput({
               testConfig={testConfig}
               setTestConfig={setTestConfig}
               onShowTestConfig={activeIndex !== 0 ? () => setActiveIndex(0) : undefined}
-              disabled={!items.length || !areProvidersAvailable(items)}
+              disabled={!items.length || !areProvidersAvailable(items) || isRunning}
               callback={runChain}
             />
           </div>

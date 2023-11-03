@@ -46,6 +46,7 @@ export default function PromptPanel({
   onActiveTabChange,
   loadPendingVersion,
   isDirty,
+  isRunning,
   setPreferredHeight,
 }: {
   version: PromptVersion
@@ -59,6 +60,7 @@ export default function PromptPanel({
   onActiveTabChange?: (tab: PromptTab) => void
   loadPendingVersion?: () => void
   isDirty?: boolean
+  isRunning?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
@@ -172,7 +174,7 @@ export default function PromptPanel({
           testConfig={testConfig}
           setTestConfig={setTestConfig}
           onShowTestConfig={onShowTestConfig}
-          disabled={!isModelAvailable || prompts.main.trim().length === 0}
+          disabled={!isModelAvailable || prompts.main.trim().length === 0 || isRunning}
           callback={runPrompt}
         />
       )}
