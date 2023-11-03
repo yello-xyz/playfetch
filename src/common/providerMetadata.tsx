@@ -139,24 +139,6 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
   }
 }
 
-export const SupportsChatMode = (model: LanguageModel): boolean => {
-  switch (model) {
-    case 'gpt-3.5-turbo':
-    case 'gpt-3.5-turbo-16k':
-    case 'gpt-4':
-    case 'gpt-4-32k':
-    case 'claude-instant-1':
-    case 'claude-2':
-      return true
-    case 'text-bison@001':
-    case 'command':
-      // TODO add support for other models too.
-      return false
-    default:
-      return SupportsChatMode(baseModelForModel(model))
-  }
-}
-
 export const IsMainPromptKey = (promptKey: keyof Prompts) => {
   switch (promptKey) {
     case 'main':
