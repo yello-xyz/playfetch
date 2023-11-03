@@ -1,6 +1,6 @@
 import { CohereLanguageModel } from '@/types'
 import cohere from 'cohere-ai'
-import { Predictor, PromptContext } from '../promptEngine'
+import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 
 export default function predict(apiKey: string, model: CohereLanguageModel): Predictor {

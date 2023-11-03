@@ -1,6 +1,6 @@
 import aiplatform from '@google-cloud/aiplatform'
 import { GoogleLanguageModel } from '@/types'
-import { Predictor, PromptContext } from '../promptEngine'
+import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { getProjectID } from '../storage'
 

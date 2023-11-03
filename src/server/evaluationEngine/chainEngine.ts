@@ -10,11 +10,11 @@ import {
 } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
-import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
-import runPromptWithConfig from '@/src/server/promptEngine'
+import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/evaluationEngine/codeEngine'
+import runPromptWithConfig from '@/src/server/evaluationEngine/promptEngine'
 import { runQuery } from './queryEngine'
-import { FirstBranchForBranchOfNode } from '../common/branching'
-import { DefaultChatContinuationInputKey } from '../common/defaultConfig'
+import { FirstBranchForBranchOfNode } from '../../common/branching'
+import { DefaultChatContinuationInputKey } from '../../common/defaultConfig'
 import { MaxContinuationCount, loadContinuation, saveContinuation } from './continuation'
 
 const promptToCamelCase = (prompt: string) =>

@@ -1,8 +1,8 @@
 import { EmbeddingModel, QueryProvider } from '@/types'
-import { getProviderCredentials, incrementProviderCostForUser } from './datastore/providers'
-import { APIKeyForProvider, CreateEmbedding } from './providers/integration'
-import runVectorQuery from './providers/pinecone'
-import { ProviderForModel } from '../common/providerMetadata'
+import { getProviderCredentials, incrementProviderCostForUser } from '../datastore/providers'
+import { APIKeyForProvider, CreateEmbedding } from '../providers/integration'
+import runVectorQuery from '../providers/pinecone'
+import { ProviderForModel } from '../../common/providerMetadata'
 
 type QueryResponse = (
   | { result: string[]; output: string; error: undefined; failed: false }
