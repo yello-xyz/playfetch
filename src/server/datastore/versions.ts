@@ -53,7 +53,7 @@ export async function migrateVersions(postMerge: boolean) {
       let items: ChainItemWithInputs[] | null = versionData.items ? JSON.parse(versionData.items) : null
       let didRun: boolean = versionData.didRun
 
-      const needToUpdateConfig = !!config && config.isChat === undefined
+      const needToUpdateConfig = !!config && (config.isChat === undefined || config.model === 'text-bison@001')
       const needToUpdateItems = !!items && items.some(item => item.branch === undefined)
       const needToUpdateDidRun = oldPendingVersionIDs.has(versionID)
 
@@ -66,7 +66,7 @@ export async function migrateVersions(postMerge: boolean) {
 
         if (needToUpdateConfig) {
           console.log(`Migrating config in ${description}`)
-          config = { ...config!, isChat: false }
+          config = { ...config!, isChat: false, model: config!.model.split('@')[0] }
         }
         if (needToUpdateItems) {
           console.log(`Migrating items in ${description}`)
