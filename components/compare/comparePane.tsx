@@ -48,6 +48,8 @@ export default function ComparePane({
     duration: log.duration,
     failed: !!log.error,
     labels: [],
+    continuationID: log.continuationID,
+    userID: 0
   }))
 
   return (
