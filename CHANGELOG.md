@@ -1,5 +1,9 @@
 ## PlayFetch Changelog
 
+### v0.14 - 2023-11-03
+- Support for branching in chains
+- Test chat conversations in the UI
+
 ### v0.13 - 2023-10-26
 - Improved admin dashboards
 - Send comment notification emails
