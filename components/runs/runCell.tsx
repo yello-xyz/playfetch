@@ -128,7 +128,7 @@ export default function RunCell({
       {isContinuation && (
         <RunCellContinuation
           continuations={run.continuations ?? []}
-          users={activeItem?.users ?? []}
+          activeItem={activeItem}
           isRunning={isRunning}
           runContinuation={runContinuation ? message => runContinuation(continuationID, message) : undefined}
         />

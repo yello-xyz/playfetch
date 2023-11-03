@@ -1,4 +1,4 @@
-import { PartialRun, Run, User } from '@/types'
+import { ActiveChain, ActivePrompt, PartialRun, Run, User } from '@/types'
 import { Fragment, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
@@ -9,12 +9,12 @@ import { useLoggedInUser } from '@/src/client/context/userContext'
 
 export default function RunCellContinuation({
   continuations,
-  users,
+  activeItem,
   isRunning,
   runContinuation,
 }: {
   continuations: (PartialRun | Run)[]
-  users: User[]
+  activeItem?: ActivePrompt | ActiveChain
   isRunning?: boolean
   runContinuation?: (message: string) => void
 }) {
@@ -29,6 +29,7 @@ export default function RunCellContinuation({
   }
 
   const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
+  const users = activeItem?.users ?? []
 
   return (
     <>
@@ -36,7 +37,13 @@ export default function RunCellContinuation({
         <Fragment key={run.id}>
           <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
           <BorderedSection>
-            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[DefaultChatContinuationInputKey]}</div>
+            <div className='flex-1'>
+              {isPartialRun(run)
+                ? lastReply
+                : activeItem
+                ? run.inputs[DefaultChatContinuationInputKey]
+                : JSON.stringify(run.inputs, null, 2)}
+            </div>
           </BorderedSection>
           <AssistantHeader />
           <BorderedSection>
