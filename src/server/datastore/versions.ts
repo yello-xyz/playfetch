@@ -37,64 +37,67 @@ export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   let remainingSaveCount = 100
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  for (const userID of [...new Set(allVersions.map(versionData => versionData.userID))]) {
-    const userVersions = allVersions.filter(versionData => versionData.userID === userID)
-    const oldPendingVersionIDs = new Set(
-      userVersions
-        .filter(versionData => !versionData.didRun)
-        .sort((a, b) => getTimestamp(b) - getTimestamp(a))
-        .slice(1)
-        .map(versionData => getID(versionData))
-    )
-    for (const versionData of userVersions) {
-      const versionID = getID(versionData)
+  for (const parentID of [...new Set(allVersions.map(versionData => versionData.parentID))]) {
+    const sameParentVersions = allVersions.filter(versionData => versionData.parentID === parentID)
+    for (const userID of [...new Set(sameParentVersions.map(versionData => versionData.userID))]) {
+      const userVersions = sameParentVersions.filter(versionData => versionData.userID === userID)
+      const oldPendingVersionIDs = new Set(
+        userVersions
+          .filter(versionData => !versionData.didRun)
+          .sort((a, b) => getTimestamp(b) - getTimestamp(a))
+          .slice(1)
+          .map(versionData => getID(versionData))
+      )
+      for (const versionData of userVersions) {
+        const versionID = getID(versionData)
 
-      let config: PromptConfig | null = versionData.config ? JSON.parse(versionData.config) : null
-      let items: ChainItemWithInputs[] | null = versionData.items ? JSON.parse(versionData.items) : null
-      let didRun: boolean = versionData.didRun
+        let config: PromptConfig | null = versionData.config ? JSON.parse(versionData.config) : null
+        let items: ChainItemWithInputs[] | null = versionData.items ? JSON.parse(versionData.items) : null
+        let didRun: boolean = versionData.didRun
 
-      const needToUpdateConfig = !!config && (config.isChat === undefined || config.model === 'text-bison@001')
-      const needToUpdateItems = !!items && items.some(item => item.branch === undefined)
-      const needToUpdateDidRun = oldPendingVersionIDs.has(versionID)
+        const needToUpdateConfig = !!config && (config.isChat === undefined || config.model === 'text-bison@001')
+        const needToUpdateItems = !!items && items.some(item => item.branch === undefined)
+        const needToUpdateDidRun = oldPendingVersionIDs.has(versionID)
 
-      if (needToUpdateConfig || needToUpdateItems || needToUpdateDidRun) {
-        if (remainingSaveCount-- <= 0) {
-          console.log('‼️  Please run this migration again to process remaining versions')
-          return
-        }
-        const description = `version ${versionID} parent ${versionData.parentID} user ${userID}`
-
-        if (!!config && needToUpdateConfig) {
-          console.log(`Migrating config in ${description}`)
-          config = {
-            ...config,
-            isChat: config.isChat === undefined ? false : config.isChat,
-            model: config.model.split('@')[0],
+        if (needToUpdateConfig || needToUpdateItems || needToUpdateDidRun) {
+          if (remainingSaveCount-- <= 0) {
+            console.log('‼️  Please run this migration again to process remaining versions')
+            return
           }
-        }
-        if (!!items && needToUpdateItems) {
-          console.log(`Migrating items in ${description}`)
-          items = items.map(item => ({ ...item, branch: item.branch ?? 0 }))
-        }
-        if (needToUpdateDidRun) {
-          didRun = !didRun
-          console.log(`Migrating pending ${description} to ${didRun}`)
-        }
+          const description = `version ${versionID} parent ${versionData.parentID} user ${userID}`
 
-        await datastore.save(
-          toVersionData(
-            versionData.userID,
-            versionData.parentID,
-            versionData.prompts ? JSON.parse(versionData.prompts) : null,
-            config,
-            items,
-            JSON.parse(versionData.labels),
-            versionData.createdAt,
-            didRun,
-            versionData.previousVersionID,
-            versionID
+          if (!!config && needToUpdateConfig) {
+            console.log(`Migrating config in ${description}`)
+            config = {
+              ...config,
+              isChat: config.isChat === undefined ? false : config.isChat,
+              model: config.model.split('@')[0],
+            }
+          }
+          if (!!items && needToUpdateItems) {
+            console.log(`Migrating items in ${description}`)
+            items = items.map(item => ({ ...item, branch: item.branch ?? 0 }))
+          }
+          if (needToUpdateDidRun) {
+            didRun = !didRun
+            console.log(`Migrating pending ${description} to ${didRun}`)
+          }
+
+          await datastore.save(
+            toVersionData(
+              versionData.userID,
+              versionData.parentID,
+              versionData.prompts ? JSON.parse(versionData.prompts) : null,
+              config,
+              items,
+              JSON.parse(versionData.labels),
+              versionData.createdAt,
+              didRun,
+              versionData.previousVersionID,
+              versionID
+            )
           )
-        )
+        }
       }
     }
   }
