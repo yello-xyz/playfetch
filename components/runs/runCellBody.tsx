@@ -1,4 +1,4 @@
-import { AssistantHeader, BorderedSection } from './runCellContinuation'
+import { BorderedSection, RoleHeader } from './runCellContinuation'
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run } from '@/types'
 import { MouseEvent, useCallback } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '../commentPopupMenu'
@@ -124,7 +124,7 @@ export default function RunCellBody({
 
   return (
     <>
-      {isContinuation && <AssistantHeader />}
+      {isContinuation && <RoleHeader role='Assistant' />}
       <BorderedSection border={isContinuation}>
         <div className='flex-1' id={identifierForRun(run.id)}>
           {spans}

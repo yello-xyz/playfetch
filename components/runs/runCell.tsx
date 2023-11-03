@@ -45,7 +45,9 @@ export default function RunCell({
       {isContinuation && (
         <RunCellContinuation
           continuations={run.continuations ?? []}
+          identifierForRun={identifierForRun}
           activeItem={activeItem}
+          version={version}
           isRunning={isRunning}
           runContinuation={runContinuation ? message => runContinuation(continuationID, message) : undefined}
         />

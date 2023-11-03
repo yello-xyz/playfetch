@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, PartialRun, Run, User } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
 import { Fragment, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
@@ -6,15 +6,20 @@ import { PendingButton } from '../button'
 import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
+import RunCellBody from './runCellBody'
 
 export default function RunCellContinuation({
   continuations,
+  identifierForRun,
   activeItem,
+  version,
   isRunning,
   runContinuation,
 }: {
   continuations: (PartialRun | Run)[]
+  identifierForRun: (runID: number) => string
   activeItem?: ActivePrompt | ActiveChain
+  version?: PromptVersion | ChainVersion
   isRunning?: boolean
   runContinuation?: (message: string) => void
 }) {
@@ -45,10 +50,13 @@ export default function RunCellContinuation({
                 : JSON.stringify(run.inputs, null, 2)}
             </div>
           </BorderedSection>
-          <AssistantHeader />
-          <BorderedSection>
-            <div className='flex-1'>{run.output}</div>
-          </BorderedSection>
+          <RunCellBody
+            identifierForRun={identifierForRun}
+            run={run}
+            version={version}
+            activeItem={activeItem}
+            isContinuation
+          />
           <RunCellFooter run={run} isContinuation />
         </Fragment>
       ))}
@@ -72,9 +80,7 @@ export default function RunCellContinuation({
   )
 }
 
-export const AssistantHeader = () => <RoleHeader role='Assistant' />
-
-const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
+export const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
   <div className='flex items-center gap-2'>
     {user ? (
       <UserAvatar user={user} size='md' />
