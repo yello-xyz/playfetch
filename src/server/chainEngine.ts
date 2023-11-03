@@ -11,7 +11,7 @@ import {
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
-import runPromptWithConfig from '@/src/server/promptEngine'
+import runPromptWithConfig, { PromptContext } from '@/src/server/promptEngine'
 import { cacheExpiringValue, cacheValue, getCachedValue, getExpiringCachedValue } from './datastore/cache'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../common/branching'
@@ -80,6 +80,29 @@ const MaxContinuationCount = 10
 const getCachedContinuation = (continuationID: number, isEndpointEvaluation: boolean) =>
   isEndpointEvaluation ? getExpiringCachedValue(continuationID) : getCachedValue(continuationID)
 
+const loadContinuation = async (
+  continuationID: number | undefined,
+  inputs: PromptInputs,
+  isEndpointEvaluation: boolean
+): Promise<readonly [number | undefined, boolean, PromptContext, PromptInputs]> => {
+  if (continuationID) {
+    const cachedValue = await getCachedContinuation(continuationID, isEndpointEvaluation)
+    if (cachedValue) {
+      const continuation = JSON.parse(cachedValue)
+      return [
+        continuation.continuationIndex,
+        continuation.requestContinuation ?? false,
+        continuation.promptContext,
+        { ...continuation.inputs, ...inputs },
+      ] as const
+    } else {
+      return [0, true, {}, inputs] as const
+    }
+  } else {
+    return [undefined, false, {}, inputs] as const
+  }
+}
+
 const cacheContinuation = (
   continuation: string,
   continuationID: number | undefined,
@@ -89,6 +112,24 @@ const cacheContinuation = (
   isEndpointEvaluation
     ? cacheExpiringValue(continuation, continuationID)
     : cacheValue(continuation, continuationID, { versionID: version.id, parentID: version.parentID })
+
+const saveContinuation = async (
+  continuationID: number | undefined,
+  continuationIndex: number | undefined,
+  requestContinuation: boolean,
+  promptContext: PromptContext,
+  inputs: PromptInputs,
+  version: RawPromptVersion | RawChainVersion,
+  isEndpointEvaluation: boolean
+): Promise<number | undefined> =>
+  continuationIndex !== undefined
+    ? await cacheContinuation(
+        JSON.stringify({ continuationIndex, inputs, promptContext, requestContinuation }),
+        continuationID,
+        version,
+        isEndpointEvaluation
+      )
+    : undefined
 
 export default async function runChain(
   userID: number,
@@ -119,23 +160,11 @@ export default async function runChain(
     return response
   }
 
-  let continuationIndex: number | undefined = undefined
-  let requestContinuation = false
-  let promptContext = {}
-
-  if (continuationID) {
-    const cachedValue = await getCachedContinuation(continuationID, isEndpointEvaluation)
-    if (cachedValue) {
-      const continuation = JSON.parse(cachedValue)
-      continuationIndex = continuation.continuationIndex
-      requestContinuation = continuation.requestContinuation ?? false
-      inputs = { ...continuation.inputs, ...inputs }
-      promptContext = continuation.promptContext
-    } else {
-      continuationIndex = 0
-      requestContinuation = true
-    }
-  }
+  const continuation = await loadContinuation(continuationID, inputs, isEndpointEvaluation)
+  let continuationIndex = continuation[0]
+  const requestContinuation = continuation[1]
+  const promptContext = continuation[2]
+  inputs = continuation[3]
 
   let lastResponse = emptyResponse
   let continuationCount = 0
@@ -228,15 +257,15 @@ export default async function runChain(
     }
   }
 
-  continuationID =
-    continuationIndex !== undefined
-      ? await cacheContinuation(
-          JSON.stringify({ continuationIndex, inputs, promptContext, requestContinuation }),
-          continuationID,
-          version,
-          isEndpointEvaluation
-        )
-      : undefined
+  continuationID = await saveContinuation(
+    continuationID,
+    continuationIndex,
+    requestContinuation,
+    promptContext,
+    inputs,
+    version,
+    isEndpointEvaluation
+  )
 
   return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID, extraSteps: continuationCount }
 }
