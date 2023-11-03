@@ -12,7 +12,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/codeEngine'
 import runPromptWithConfig from '@/src/server/promptEngine'
-import { cacheExpiringValue, getExpiringCachedValue } from './datastore/cache'
+import { cacheExpiringValue, cacheValue, getCachedValue, getExpiringCachedValue } from './datastore/cache'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../common/branching'
 import { DefaultChatContinuationInputKey } from '../common/defaultConfig'
@@ -77,6 +77,19 @@ const emptyResponse: ResponseType = {
 
 const MaxContinuationCount = 10
 
+const getCachedContinuation = (continuationID: number, isEndpointEvaluation: boolean) =>
+  isEndpointEvaluation ? getExpiringCachedValue(continuationID) : getCachedValue(continuationID)
+
+const cacheContinuation = (
+  continuation: string,
+  continuationID: number | undefined,
+  version: RawPromptVersion | RawChainVersion,
+  isEndpointEvaluation: boolean
+) =>
+  isEndpointEvaluation
+    ? cacheExpiringValue(continuation, continuationID)
+    : cacheValue(continuation, continuationID, { versionID: version.id, parentID: version.parentID })
+
 export default async function runChain(
   userID: number,
   version: RawPromptVersion | RawChainVersion,
@@ -111,7 +124,7 @@ export default async function runChain(
   let promptContext = {}
 
   if (continuationID) {
-    const cachedValue = await getExpiringCachedValue(continuationID)
+    const cachedValue = await getCachedContinuation(continuationID, isEndpointEvaluation)
     if (cachedValue) {
       const continuation = JSON.parse(cachedValue)
       continuationIndex = continuation.continuationIndex
@@ -217,9 +230,11 @@ export default async function runChain(
 
   continuationID =
     continuationIndex !== undefined
-      ? await cacheExpiringValue(
+      ? await cacheContinuation(
           JSON.stringify({ continuationIndex, inputs, promptContext, requestContinuation }),
-          continuationID
+          continuationID,
+          version,
+          isEndpointEvaluation
         )
       : undefined
 
