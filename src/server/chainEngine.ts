@@ -23,11 +23,14 @@ const promptToCamelCase = (prompt: string) =>
     prompt
   )
 
-const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boolean) =>
-  Object.entries(inputs).reduce(
-    (prompt, [variable, value]) => prompt.replaceAll(`{{${variable}}}`, value),
-    useCamelCase ? promptToCamelCase(prompt) : prompt
+const resolveVariables = (prompt: string, inputs: PromptInputs) =>
+  ExtractVariables(prompt).reduce(
+    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, inputs[variable] ?? ''),
+    prompt
   )
+
+const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boolean) =>
+  resolveVariables(useCamelCase ? promptToCamelCase(prompt) : prompt, inputs)
 
 const resolvePrompts = (prompts: Prompts, inputs: PromptInputs, useCamelCase: boolean) =>
   Object.fromEntries(
