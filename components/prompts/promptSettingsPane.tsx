@@ -1,5 +1,6 @@
 import { PromptConfig } from '@/types'
 import RangeInput from '../rangeInput'
+import Checkbox from '../checkbox'
 
 const SettingsRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className='flex items-center w-full gap-4'>
@@ -17,11 +18,15 @@ export default function PromptSettingsPane({
   setConfig: (config: PromptConfig) => void
   disabled?: boolean
 }) {
+  const updateChatMode = (isChat: boolean) => setConfig({ ...config, isChat })
   const updateTemperature = (temperature: number) => setConfig({ ...config, temperature })
   const updateMaxTokens = (maxTokens: number) => !isNaN(maxTokens) && setConfig({ ...config, maxTokens })
 
   return (
     <div className='flex flex-col h-full gap-2 px-6 py-4 border border-gray-200 border-solid rounded-lg bg-gray-25'>
+      <SettingsRow label='Chat Mode'>
+        <Checkbox checked={config.isChat} setChecked={() => updateChatMode(!config.isChat)} />
+      </SettingsRow>
       <SettingsRow label='Temperature'>
         <RangeInput
           className='w-1/3'

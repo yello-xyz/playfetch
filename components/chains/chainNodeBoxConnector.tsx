@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Prompt } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
+import branchIcon from '@/public/branch.svg'
 import queryIcon from '@/public/query.svg'
 import closeIcon from '@/public/closeWhite.svg'
 import Icon from '../icon'
@@ -10,34 +11,42 @@ import addActiveIcon from '@/public/addWhiteSmall.svg'
 import { StaticImageData } from 'next/image'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import PromptSelectorPopup, { PromptSelectorPopupProps } from './promptSelectorPopupMenu'
+import { SmallDot } from './chainNodeBox'
 
 export default function ChainNodeBoxConnector({
   isDisabled,
   isActive,
   setActive,
   canDismiss,
+  hasPrevious,
+  hasNext,
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertQuery,
   onInsertCodeBlock,
+  onInsertBranch,
   prompts,
+  skipConnector,
 }: {
   isDisabled: boolean
   isActive: boolean
   setActive: (active: boolean) => void
   canDismiss: boolean
+  hasPrevious: boolean
+  hasNext: boolean
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
   onInsertCodeBlock: () => void
+  onInsertBranch: () => void
   prompts: Prompt[]
+  skipConnector?: boolean
 }) {
   return (
-    <>
-      <SmallDot margin='-mt-[5px] mb-0.5' />
-      <DownStroke height='min-h-[12px]' />
+    <div className='flex flex-col items-center'>
+      {!skipConnector && <DownStroke height='min-h-[12px]' spacer={hasPrevious} />}
       {isDisabled ? (
-        <DownStroke height='min-h-[20px]' />
+        <DownStroke height='min-h-[22px]' />
       ) : (
         <AddButton
           prompts={prompts}
@@ -48,28 +57,18 @@ export default function ChainNodeBoxConnector({
           onInsertNewPrompt={onInsertNewPrompt}
           onInsertQuery={onInsertQuery}
           onInsertCodeBlock={onInsertCodeBlock}
+          onInsertBranch={onInsertBranch}
+          hasConnector={!skipConnector}
         />
       )}
-      <DownArrow height='min-h-[18px]' />
-      <SmallDot margin='-mb-[5px] mt-1' />
-    </>
+      {hasNext || (isDisabled && isActive) ? (
+        <DownConnector height='min-h-[18px]' grow />
+      ) : (
+        <DownStroke height={skipConnector ? '' : 'min-h-[18px]'} grow />
+      )}
+    </div>
   )
 }
-
-const SmallDot = ({ margin, color = 'bg-white border border-gray-400' }: { margin: string; color?: string }) => (
-  <div className={`${margin} ${color} z-10 w-2.5 h-2.5 rounded-full min-h-[10px]`} />
-)
-
-const DownStroke = ({ height = 'h-full', color = 'border-gray-400' }: { height?: string; color?: string }) => (
-  <div className={`${height} w-px border-l ${color}`} />
-)
-
-const DownArrow = ({ height }: { height: string }) => (
-  <>
-    <DownStroke height={height} />
-    <div className='p-1 mb-px -mt-2.5 rotate-45 border-b border-r border-gray-400' />
-  </>
-)
 
 const AddButton = ({
   prompts,
@@ -80,6 +79,8 @@ const AddButton = ({
   onInsertNewPrompt,
   onInsertQuery,
   onInsertCodeBlock,
+  onInsertBranch,
+  hasConnector,
 }: {
   prompts: Prompt[]
   isActive: boolean
@@ -89,6 +90,8 @@ const AddButton = ({
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
   onInsertCodeBlock: () => void
+  onInsertBranch: () => void
+  hasConnector: boolean
 }) => {
   const [isHovered, setHovered] = useState(false)
   const hoverClass = isHovered ? 'bg-blue-200' : 'border border-gray-400'
@@ -116,33 +119,53 @@ const AddButton = ({
     )
   }
 
-  const buttonClass = onInsertQuery ? undefined : 'w-1/2'
+  const buttonClass = onInsertQuery ? 'w-1/2' : undefined
   const insertCode = toggleActive(onInsertCodeBlock)
 
   return isActive ? (
     <>
-      <DownArrow height='min-h-[38px]' />
-      <SmallDot margin='-mb-[5px] mt-1' color='bg-blue-200' />
-      <div ref={buttonRef} className='relative flex border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
-        <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
-        {onInsertQuery && (
-          <>
+      {hasConnector && <DownConnector height={onInsertQuery ? 'min-h-[18px]' : 'min-h-[38px]'} />}
+      <div className='relative flex flex-col items-center mb-2'>
+        <SmallDot position='top' color='bg-blue-200' />
+        <div ref={buttonRef} className='relative border border-blue-100 border-dashed rounded-lg w-96 bg-blue-25'>
+          <div className='flex'>
+            <AddStepButton label='Add prompt' className={buttonClass} icon={promptIcon} onClick={togglePopup} />
             <DownStroke color='border-blue-100' />
-            <AddStepButton label='Add query' icon={queryIcon} onClick={toggleActive(onInsertQuery)} />
-          </>
-        )}
-        <DownStroke color='border-blue-100' />
-        <AddStepButton label='Add code block' className={buttonClass} icon={codeIcon} onClick={insertCode} />
-        {canDismiss && (
-          <div
-            className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
-            onClick={toggleActive()}>
-            <Icon icon={closeIcon} />
+            {onInsertQuery ? (
+              <AddStepButton
+                label='Add query'
+                className={buttonClass}
+                icon={queryIcon}
+                onClick={toggleActive(onInsertQuery)}
+              />
+            ) : (
+              <AddCodeAndBranchButtons
+                buttonClass={buttonClass}
+                onInsertCodeBlock={insertCode}
+                onInsertBranch={onInsertBranch}
+              />
+            )}
+            {canDismiss && (
+              <div
+                className='absolute flex items-center justify-center w-5 h-5 bg-blue-200 rounded-full -top-2.5 -right-2.5 hover:bg-blue-400 hover:cursor-pointer'
+                onClick={toggleActive()}>
+                <Icon icon={closeIcon} />
+              </div>
+            )}
           </div>
-        )}
+          {onInsertQuery && (
+            <div className='flex border-t border-blue-100'>
+              <AddCodeAndBranchButtons
+                buttonClass={buttonClass}
+                onInsertCodeBlock={insertCode}
+                onInsertBranch={onInsertBranch}
+              />
+            </div>
+          )}
+        </div>
+        <SmallDot position='bottom' color='bg-blue-200' />
       </div>
-      <SmallDot margin='-mt-[5px] mb-0.5' color='bg-blue-200' />
-      <DownStroke height='min-h-[32px]' />
+      {hasConnector && <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} />}
     </>
   ) : (
     <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onClick={toggleActive()}>
@@ -150,6 +173,22 @@ const AddButton = ({
     </div>
   )
 }
+
+const AddCodeAndBranchButtons = ({
+  buttonClass,
+  onInsertCodeBlock,
+  onInsertBranch,
+}: {
+  buttonClass?: string
+  onInsertCodeBlock: () => void
+  onInsertBranch: () => void
+}) => (
+  <>
+    <AddStepButton label='Add code block' className={buttonClass} icon={codeIcon} onClick={onInsertCodeBlock} />
+    <DownStroke color='border-blue-100' />
+    <AddStepButton label='Add branch' className={buttonClass} icon={branchIcon} onClick={onInsertBranch} />
+  </>
+)
 
 const AddStepButton = ({
   label,
@@ -171,3 +210,22 @@ const AddStepButton = ({
     </div>
   )
 }
+
+export const DownStroke = ({
+  height = '',
+  color = 'border-gray-400',
+  grow = false,
+  spacer = false,
+}: {
+  height?: string
+  color?: string
+  grow?: boolean
+  spacer?: boolean
+}) => <div className={`${height} ${spacer ? 'mt-[7px]' : ''} w-px border-l ${color} ${grow ? 'flex-1' : ''}`} />
+
+export const DownConnector = ({ height = '', grow = false }: { height?: string; grow?: boolean }) => (
+  <>
+    <DownStroke height={height} grow={grow} />
+    <div className='p-1 -mt-2.5 mb-[9px] rotate-45 border-b border-r border-gray-400' />
+  </>
+)

@@ -41,6 +41,7 @@ export async function migrateAnalytics(postMerge: boolean) {
 const daysAgo = (date: Date, days: number) => {
   const result = new Date(date)
   result.setDate(result.getDate() - days)
+  result.setUTCHours(0, 0, 0, 0)
   return result
 }
 

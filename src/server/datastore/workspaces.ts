@@ -168,14 +168,15 @@ export async function deleteWorkspaceForUser(userID: number, workspaceID: number
   if (workspaceID === userID) {
     throw new Error('Cannot delete Drafts workspace')
   }
-  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', workspaceID)
-  if (accessKeys.length > 1) {
+  const [users] = await getWorkspaceUsers(workspaceID)
+  if (users.some(user => user.id !== userID)) {
     throw new Error('Cannot delete multi-user workspace')
   }
   const projectIDs = await getEntityIDs(Entity.PROJECT, 'workspaceID', workspaceID)
   for (const projectID of projectIDs) {
     await deleteProjectForUser(userID, projectID)
   }
+  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', workspaceID)
   await getDatastore().delete([...accessKeys, buildKey(Entity.WORKSPACE, workspaceID)])
 }
 

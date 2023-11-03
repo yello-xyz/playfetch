@@ -1,4 +1,4 @@
-import { IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from '@/components/chains/chainNode'
+import { IsBranchChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from '@/components/chains/chainNode'
 import { IsEndpoint } from '@/src/common/activeItem'
 import {
   ActiveChain,
@@ -89,6 +89,7 @@ export const getPromptVersionContent = (version: PromptVersion, activePromptTab:
     case 'settings':
       return version.config
         ? `Model: ${version.config.model}
+Chat: ${version.config.isChat}
 Maximum Tokens: ${version.config.maxTokens}
 Temperature: ${version.config.temperature}`
         : undefined
@@ -106,6 +107,8 @@ const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCac
 const getChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
   if (IsCodeChainItem(item)) {
     return `• Code block: ${item.name ?? ''}`
+  } else if (IsBranchChainItem(item)) {
+    return `• Branch: ${item.branches.join(' | ')}`
   } else if (IsQueryChainItem(item)) {
     return `• Query: ${LabelForProvider(item.provider)} “${item.indexName}” (${item.topK} Top-K)`
   } else {
@@ -122,7 +125,7 @@ const getChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache
 }
 
 const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
-  if (IsCodeChainItem(item)) {
+  if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
     return item.code
   } else if (IsQueryChainItem(item)) {
     return item.query

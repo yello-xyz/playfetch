@@ -125,6 +125,7 @@ export default function PromptView({
                 onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
                 loadPendingVersion={loadPendingVersion}
                 isDirty={isDirty}
+                isRunning={isRunning}
                 setPreferredHeight={setPromptHeight}
               />
             </div>
@@ -138,6 +139,7 @@ export default function PromptView({
             activeItem={prompt}
             version={activeVersion}
             activeRunID={activeRunID}
+            runVersion={runVersion}
             isRunning={isRunning}
           />
         </div>

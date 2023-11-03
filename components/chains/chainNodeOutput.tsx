@@ -8,11 +8,13 @@ import RunButtons from '../runs/runButtons'
 import {
   ChainNode,
   InputNode,
+  IsBranchChainItem,
   IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
   OutputNode,
+  SubtreeForChainNode,
 } from './chainNode'
 import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
@@ -21,7 +23,7 @@ import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
-  if (IsCodeChainItem(item)) {
+  if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
     return ExtractVariables(item.code)
   }
   if (IsQueryChainItem(item)) {
@@ -40,25 +42,35 @@ const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
 
 export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) =>
   excludeBoundChainVariables(
-    chain.map(item => ({ inputs: ExtractChainItemVariables(item, cache, includingDynamic), output: item.output }))
+    chain.map(item => ({ ...item, inputs: ExtractChainItemVariables(item, cache, includingDynamic) }))
   )
 
 export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[], includingDynamic: boolean) =>
   excludeBoundChainVariables(
-    chainWithInputs.map(item => ({ inputs: extractChainItemInputs(item, includingDynamic), output: item.output }))
+    chainWithInputs.map(item => ({ ...item, inputs: extractChainItemInputs(item, includingDynamic) }))
   )
 
-const excludeBoundChainVariables = (chain: { inputs: string[]; output?: string }[]) => [
-  ...new Set(
-    chain.reduce(
-      ([unmappedInputs, mappedOutputs], { inputs, output }) => [
-        [...unmappedInputs, ...inputs.filter(input => !mappedOutputs.includes(input))],
-        output ? [...mappedOutputs, output] : mappedOutputs,
-      ],
-      [[] as string[], [] as string[]]
-    )[0]
-  ),
-]
+const excludeBoundChainVariables = (chain: Omit<ChainItemWithInputs, 'dynamicInputs'>[]) => {
+  const outputToSubtreeIndex = {} as Record<string, number[]>
+  chain.forEach(({ output }, index) => {
+    if (output) {
+      outputToSubtreeIndex[output] = [...(outputToSubtreeIndex[output] ?? []), index]
+    }
+  })
+  const unmappedInputs = [] as string[]
+  chain.forEach(item => {
+    item.inputs.forEach(input => {
+      if (
+        !(outputToSubtreeIndex[input] ?? []).some(index =>
+          SubtreeForChainNode(chain[index] as ChainNode, chain as ChainNode[], false).includes(item as ChainItem)
+        )
+      ) {
+        unmappedInputs.push(input)
+      }
+    })
+  })
+  return [...new Set(unmappedInputs)]
+}
 
 export default function ChainNodeOutput({
   chain,
@@ -148,6 +160,7 @@ export default function ChainNodeOutput({
               activeItem={chain}
               activeRunID={activeRunID}
               version={activeVersion}
+              runVersion={runVersion}
               isRunning={isRunning}
             />
           </div>
@@ -161,7 +174,7 @@ export default function ChainNodeOutput({
               testConfig={testConfig}
               setTestConfig={setTestConfig}
               onShowTestConfig={activeIndex !== 0 ? () => setActiveIndex(0) : undefined}
-              disabled={!items.length || !areProvidersAvailable(items)}
+              disabled={!items.length || !areProvidersAvailable(items) || isRunning}
               callback={runChain}
             />
           </div>

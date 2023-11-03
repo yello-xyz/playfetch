@@ -2,20 +2,25 @@ import { ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User }
 import {
   ChainNode,
   InputNode,
+  IsBranchChainItem,
+  IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
   NameForCodeChainItem,
   OutputNode,
+  SubtreeForChainNode,
 } from './chainNode'
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import queryIcon from '@/public/query.svg' // TODO update svg so it is different from prompt icon
+import branchIcon from '@/public/branch.svg' // TODO update svg so it is different from code icon
 import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { ReactNode, useState } from 'react'
+import { SubtreeForNode } from '@/src/common/branching'
 
 export default function ChainNodeBoxHeader({
   nodes,
@@ -47,6 +52,8 @@ export default function ChainNodeBoxHeader({
     ? queryIcon
     : IsCodeChainItem(chainNode)
     ? codeIcon
+    : IsBranchChainItem(chainNode)
+    ? branchIcon
     : undefined
 
   const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
@@ -56,7 +63,9 @@ export default function ChainNodeBoxHeader({
     setLabel(undefined)
   }
 
-  const canIncludeContext = IsPromptChainItem(chainNode) && nodes.slice(0, index).some(IsPromptChainItem)
+  const canIncludeContext =
+    IsPromptChainItem(chainNode) &&
+    nodes.slice(0, index).some(node => IsPromptChainItem(node) && SubtreeForChainNode(node, nodes).includes(chainNode))
 
   return (
     <>
@@ -90,6 +99,7 @@ export default function ChainNodeBoxHeader({
             {chainNode === OutputNode && 'Output'}
             {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
             {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+            {IsBranchChainItem(chainNode) && 'Branch'}
             {IsQueryChainItem(chainNode) && 'Query'}
           </HeaderItem>
         )}
@@ -143,7 +153,10 @@ function PopupMenuIcons({
           selectedCell={isSelected}
         />
       )}
-      {(IsPromptChainItem(chainNode) || IsCodeChainItem(chainNode) || IsQueryChainItem(chainNode)) && (
+      {(IsPromptChainItem(chainNode) ||
+        IsCodeChainItem(chainNode) ||
+        IsBranchChainItem(chainNode) ||
+        IsQueryChainItem(chainNode)) && (
         <ChainNodePopupMenu
           onRename={onRename}
           onDuplicate={onDuplicate}

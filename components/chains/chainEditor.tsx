@@ -1,12 +1,22 @@
-import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
-import { ChainNode } from './chainNode'
+import {
+  ActiveChain,
+  BranchChainItem,
+  ChainItem,
+  ChainVersion,
+  CodeChainItem,
+  Prompt,
+  PromptChainItem,
+  QueryChainItem,
+} from '@/types'
+import { ChainNode, IsBranchChainItem } from './chainNode'
 import ChainEditorHeader from './chainEditorHeader'
 import SegmentedControl, { Segment } from '../segmentedControl'
-import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
+import { MaxBranch, ShiftDown, ShiftRight, SplitNodes } from '@/src/common/branching'
+import { ConnectorRow, EndBranchConnector, EndRow, NodesRow, StartBranchConnector, StartRow } from './chainEditorRow'
 
 export default function ChainEditor({
   chain,
@@ -46,10 +56,10 @@ export default function ChainEditor({
   const model = EmbeddingModels.find(model => checkModelAvailable(model))
   const defaultQueryConfig = provider && model ? { provider, model, indexName: '', query: '', topK: 1 } : undefined
 
-  const [activeMenuIndex, setActiveMenuIndex] = useState<number>()
+  const [activeMenuIndex, setActiveMenuIndex] = useState<[number, number]>()
 
   if (nodes.length === 2 && !activeMenuIndex) {
-    setActiveMenuIndex(1)
+    setActiveMenuIndex([1, 0])
   }
 
   const updateActiveIndex = (index: number) => {
@@ -57,7 +67,45 @@ export default function ChainEditor({
     setActiveMenuIndex(undefined)
   }
 
-  const tinyLabelClass = 'text-white px-2 py-px text-[11px] font-medium'
+  const items = nodes.slice(1, -1) as ChainItem[]
+
+  const insertItem = (
+    index: number,
+    branch: number,
+    item:
+      | Omit<CodeChainItem, 'branch'>
+      | Omit<BranchChainItem, 'branch'>
+      | Omit<QueryChainItem, 'branch'>
+      | Omit<PromptChainItem, 'branch'>
+  ) => {
+    const itemIndex = index - 1
+    const itemWithBranch = { ...item, branch }
+    let shiftedItems = IsBranchChainItem(itemWithBranch) ? ShiftRight(items, itemIndex, branch) : items
+    shiftedItems = branch === items[itemIndex]?.branch ? ShiftDown(shiftedItems, itemIndex) : shiftedItems
+    saveItems([...shiftedItems.slice(0, itemIndex), itemWithBranch, ...shiftedItems.slice(itemIndex)])
+    updateActiveIndex(index)
+  }
+
+  const insertPrompt = (index: number, branch: number, promptID: number, versionID?: number) =>
+    insertItem(index, branch, {
+      promptID,
+      versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
+    })
+
+  const insertNewPrompt = (index: number, branch: number) =>
+    addPrompt().then(({ promptID, versionID }) => insertPrompt(index, branch, promptID, versionID))
+
+  const insertCodeBlock = (index: number, branch: number) => insertItem(index, branch, { code: '' })
+  const insertBranch = (index: number, branch: number) =>
+    insertItem(index, branch, { code: '', branches: ['left', 'right'] })
+  const insertQuery = defaultQueryConfig
+    ? (index: number, branch: number) => insertItem(index, branch, { ...defaultQueryConfig })
+    : undefined
+
+  const insertActions = { insertItem, insertPrompt, insertNewPrompt, insertCodeBlock, insertBranch, insertQuery }
+
+  const nodeRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
+  const maxBranch = Math.min(MaxBranch(items), gridConfigs.length)
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -68,29 +116,46 @@ export default function ChainEditor({
         showVersions={showVersions}
         setShowVersions={setShowVersions}
       />
-      <div className='relative flex flex-col items-center w-full h-full p-8 pr-0 overflow-y-auto bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px]'>
-        <div className={`${tinyLabelClass} bg-green-300 rounded-t mr-80 mt-auto`}>Start</div>
-        {nodes.map((_, index, nodes) => (
-          <ChainNodeBox
-            key={index}
-            chain={chain}
-            index={index}
-            nodes={nodes}
-            saveItems={saveItems}
-            activeIndex={activeIndex}
-            setActiveIndex={updateActiveIndex}
-            isMenuActive={index === activeMenuIndex}
-            setMenuActive={active => setActiveMenuIndex(active ? index : undefined)}
-            savedVersion={isVersionSaved ? activeVersion : null}
-            isTestMode={isTestMode}
-            setTestMode={setTestMode}
-            prompts={prompts}
-            addPrompt={addPrompt}
-            promptCache={promptCache}
-            defaultQueryConfig={defaultQueryConfig}
-          />
-        ))}
-        <div className={`${tinyLabelClass} bg-red-300 rounded-b ml-80 mb-auto`}>End</div>
+      <div className='flex flex-col h-full bg-local bg-[url("/dotPattern.png")] bg-[length:18px_18px] overflow-auto'>
+        <div className={`relative p-8 m-auto min-w-max grid ${gridConfigs[maxBranch]} gap-x-8 justify-items-center`}>
+          <StartRow maxBranch={maxBranch} colSpans={colSpans} />
+          {nodeRows.map((row, rowIndex, rows) => (
+            <Fragment key={rowIndex}>
+              {rowIndex === rows.length - 1 && <EndBranchConnector maxBranch={maxBranch} colSpans={colSpans} />}
+              <NodesRow
+                chain={chain}
+                nodes={nodes}
+                row={row}
+                maxBranch={maxBranch}
+                insertActions={insertActions}
+                saveItems={saveItems}
+                activeIndex={activeIndex}
+                setActiveIndex={updateActiveIndex}
+                activeMenuIndex={activeMenuIndex}
+                setActiveMenuIndex={setActiveMenuIndex}
+                savedVersion={isVersionSaved ? activeVersion : null}
+                setTestMode={setTestMode}
+                prompts={prompts}
+                promptCache={promptCache}
+              />
+              {<StartBranchConnector row={row} maxBranch={maxBranch} nodes={nodes} colSpans={colSpans} />}
+              {rowIndex < rows.length - 1 && (
+                <ConnectorRow
+                  nodes={nodes}
+                  previousRow={row}
+                  nextRow={rows[rowIndex + 1]}
+                  maxBranch={maxBranch}
+                  prompts={prompts}
+                  isDisabled={isTestMode}
+                  activeMenuIndex={activeMenuIndex}
+                  setActiveMenuIndex={setActiveMenuIndex}
+                  insertActions={insertActions}
+                />
+              )}
+            </Fragment>
+          ))}
+          <EndRow maxBranch={maxBranch} colSpans={colSpans} />
+        </div>
       </div>
       <SegmentedControl
         className='absolute z-30 bottom-4 right-4'
@@ -104,3 +169,33 @@ export default function ChainEditor({
     </div>
   )
 }
+
+const gridConfigs = [
+  'grid-cols-1',
+  'grid-cols-2',
+  'grid-cols-3',
+  'grid-cols-4',
+  'grid-cols-5',
+  'grid-cols-6',
+  'grid-cols-7',
+  'grid-cols-8',
+  'grid-cols-9',
+  'grid-cols-10',
+  'grid-cols-11',
+  'grid-cols-12',
+]
+
+const colSpans = [
+  'col-span-1',
+  'col-span-2',
+  'col-span-3',
+  'col-span-4',
+  'col-span-5',
+  'col-span-6',
+  'col-span-7',
+  'col-span-8',
+  'col-span-9',
+  'col-span-10',
+  'col-span-11',
+  'col-span-12',
+]

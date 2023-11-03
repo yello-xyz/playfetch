@@ -48,9 +48,19 @@ export async function getExpiringCachedValue(cacheID: number) {
   return cacheData && new Date() < cacheData.expiresAt ? cacheData.value : undefined
 }
 
-export async function cacheValueForKey(key: string, value: string, indices = {}) {
-  await getDatastore().save(toCacheData(key, value, indices, new Date(), undefined, hashValue(key)))
+export async function cacheValue(value: string, cacheID?: number, indices = {}) {
+  const cacheData = toCacheData(undefined, value, indices, new Date(), undefined, cacheID)
+  await getDatastore().save(cacheData)
+  return getID(cacheData)
 }
+
+export async function getCachedValue(cacheID: number) {
+  const cacheData = await getKeyedEntity(Entity.CACHE, cacheID)
+  return cacheData?.value
+}
+
+export const cacheValueForKey = (key: string, value: string, indices = {}) =>
+  getDatastore().save(toCacheData(key, value, indices, new Date(), undefined, hashValue(key)))
 
 export async function getCachedValueForKey(key: string) {
   const cacheData = await getKeyedEntity(Entity.CACHE, hashValue(key))

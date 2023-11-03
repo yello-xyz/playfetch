@@ -141,8 +141,8 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  runVersion: function (versionID: number, inputs: PromptInputs[]): Promise<StreamReader> {
-    return post(this.runVersion, { versionID, inputs }, 'stream')
+  runVersion: function (versionID: number, inputs: PromptInputs[], continuationID?: number): Promise<StreamReader> {
+    return post(this.runVersion, { versionID, inputs, continuationID }, 'stream')
   },
   getChain: function (chainID: number, activeProject: ActiveProject): Promise<ActiveChain> {
     return post(this.getChain, { chainID }).then(BuildActiveChain(activeProject))

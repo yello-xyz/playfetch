@@ -1,7 +1,7 @@
 import { ChainItem, PromptVersion } from '@/types'
-import PromptChainNodeEditor from './promptChainNodeEditor'
-import { IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
-import CodeChainNodeEditor from './codeChainNodeEditor'
+import PromptNodeEditor from './promptNodeEditor'
+import { IsBranchChainItem, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
+import CodeNodeEditor from './codeNodeEditor'
 import Button, { PendingButton } from '../button'
 import { useState } from 'react'
 import useSavePrompt from '@/src/client/hooks/useSavePrompt'
@@ -9,7 +9,9 @@ import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { GetChainItemsSaveKey } from './chainView'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import QueryChainNodeEditor from './queryChainNodeEditor'
+import QueryNodeEditor from './queryNodeEditor'
+import BranchNodeEditor from './branchNodeEditor'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 
 export default function ChainNodeEditor({
   items,
@@ -34,11 +36,12 @@ export default function ChainNodeEditor({
     ...updatedItems.slice(activeIndex + 1),
   ]
 
-  const updateActiveItem = (item: ChainItem) => {
-    const updatedItems = itemsWithUpdate(item)
+  const updateItems = (updatedItems: ChainItem[]) => {
     setUpdatedItems(updatedItems)
     updateItemsDirty(GetChainItemsSaveKey(items) !== GetChainItemsSaveKey(updatedItems))
   }
+
+  const updateActiveItem = (item: ChainItem) => updateItems(itemsWithUpdate(item))
 
   const [areItemsDirty, setItemsDirty] = useState(false)
   const [isPromptDirty, setPromptDirty] = useState(false)
@@ -80,7 +83,7 @@ export default function ChainNodeEditor({
     }
   }
 
-  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
+  const setDialogPrompt = useModalDialogPrompt()
 
   const saveAndClose = async () => {
     saveItems(updatedItems)
@@ -88,11 +91,27 @@ export default function ChainNodeEditor({
     dismiss()
   }
 
+  const promptSaveAndClose = () => {
+    const prunedNodeCount = items.length - updatedItems.length
+    if (prunedNodeCount > 0) {
+      setDialogPrompt({
+        title: `This will prune a branch with ${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''} from the chain.`,
+        confirmTitle: 'Proceed',
+        callback: saveAndClose,
+        destructive: true,
+      })
+    } else {
+      saveAndClose()
+    }
+  }
+
+  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
+
   return (
     <>
       <div className={`flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden ${colorClass}`}>
         {IsPromptChainItem(activeItem) && (
-          <PromptChainNodeEditor
+          <PromptNodeEditor
             item={activeItem}
             promptCache={promptCache}
             selectVersion={selectVersion}
@@ -100,16 +119,19 @@ export default function ChainNodeEditor({
           />
         )}
         {IsCodeChainItem(activeItem) && (
-          <CodeChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <CodeNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+        )}
+        {IsBranchChainItem(activeItem) && (
+          <BranchNodeEditor key={activeIndex} index={activeIndex} items={updatedItems} updateItems={updateItems} />
         )}
         {IsQueryChainItem(activeItem) && (
-          <QueryChainNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
+          <QueryNodeEditor key={activeIndex} item={activeItem} updateItem={updateActiveItem} />
         )}
         <div className='flex items-center justify-end w-full gap-2 px-4'>
           <Button type='outline' onClick={dismiss}>
             Cancel
           </Button>
-          <PendingButton title='Save and close' pendingTitle='Saving' onClick={saveAndClose} />
+          <PendingButton title='Save and close' pendingTitle='Saving' onClick={promptSaveAndClose} />
         </div>
       </div>
     </>

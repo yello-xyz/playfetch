@@ -1,7 +1,8 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
+import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 
 const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
   items.sort((a, b) => a.timestamp - b.timestamp)
@@ -18,22 +19,24 @@ export default function RunTimeline({
   version,
   activeItem,
   activeRunID,
+  runVersion,
   isRunning,
   skipHeader,
 }: {
-  runs: PartialRun[]
+  runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
+  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<void>
   isRunning?: boolean
   skipHeader?: boolean
 }) {
-  const identifierForRunID = (runID: number) => `r${runID}`
+  const identifierForRun = (runID: number) => `r${runID}`
 
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
       setTimeout(() => {
-        const element = document.getElementById(identifierForRunID(focusRunID))
+        const element = document.getElementById(identifierForRun(focusRunID))
         if (runs.length > 1 && element) {
           element.scrollIntoView({ behavior: 'auto', block: 'start' })
         }
@@ -47,13 +50,33 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const sortedRuns = sortRuns(runs)
+  const sortedRuns = sortRuns(runs).reduce(
+    (sortedRuns, run) =>
+      run.continuationID && run.continuationID === sortedRuns.slice(-1)[0]?.continuationID
+        ? [
+            ...sortedRuns.slice(0, -1),
+            { ...sortedRuns.slice(-1)[0], continuations: [...(sortedRuns.slice(-1)[0].continuations ?? []), run] },
+          ]
+        : [...sortedRuns, run],
+
+    [] as PartialRun[]
+  )
   const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
     focusRun(lastPartialRunID)
     setPreviousLastRunID(lastPartialRunID)
   }
+
+  const runContinuation =
+    version && runVersion
+      ? async (continuationID: number, message: string) =>
+          runVersion(
+            () => Promise.resolve(version.id),
+            [{ [DefaultChatContinuationInputKey]: message }],
+            continuationID
+          )
+      : undefined
 
   return (
     <div className='relative flex flex-col h-full'>
@@ -67,10 +90,12 @@ export default function RunTimeline({
           {sortedRuns.map(run => (
             <RunCell
               key={run.id}
-              identifier={identifierForRunID(run.id)}
+              identifierForRun={identifierForRun}
               run={run}
               version={version}
               activeItem={activeItem}
+              isRunning={isRunning}
+              runContinuation={runContinuation}
             />
           ))}
         </div>

@@ -1,43 +1,37 @@
-import { ActiveChain, ChainItem, ChainVersion, Prompt, QueryConfig } from '@/types'
-import { ChainNode, IsChainItem } from './chainNode'
+import { ActiveChain, BranchChainItem, ChainItem, ChainVersion, Prompt } from '@/types'
+import { ChainNode, InputNode, IsBranchChainItem, IsChainItem, OutputNode } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import ChainNodeBoxConnector from './chainNodeBoxConnector'
 import ChainNodeBoxHeader from './chainNodeBoxHeader'
 import ChainNodeBoxBody from './chainNodeBoxBody'
 import ChainNodeBoxFooter from './chainNodeBoxFooter'
+import { PruneBranchAndShiftLeft, PruneNodeAndShiftUp } from '@/src/common/branching'
+import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
+import { DownStroke } from './chainNodeBoxConnector'
 
 export function ChainNodeBox({
   chain,
   index,
   nodes,
+  insertItem,
   saveItems,
   activeIndex,
   setActiveIndex,
-  isMenuActive,
-  setMenuActive,
   savedVersion,
-  isTestMode,
   setTestMode,
   prompts,
-  addPrompt,
   promptCache,
-  defaultQueryConfig,
 }: {
   chain: ActiveChain
   index: number
   nodes: ChainNode[]
+  insertItem: (item: ChainItem) => void
   saveItems: (items: ChainItem[]) => void
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
-  isMenuActive: boolean
-  setMenuActive: (active: boolean) => void
   savedVersion: ChainVersion | null
-  isTestMode: boolean
   setTestMode: (testMode: boolean) => void
   prompts: Prompt[]
-  addPrompt: () => Promise<{ promptID: number; versionID: number }>
   promptCache: ChainPromptCache
-  defaultQueryConfig?: QueryConfig
 }) {
   const chainNode = nodes[index]
   const isSelected = index === activeIndex
@@ -53,47 +47,45 @@ export function ChainNodeBox({
 
   const updateItem = (item: ChainItem) => saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex + 1)])
 
-  const removeItem = () => saveItems([...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)])
+  const setDialogPrompt = useModalDialogPrompt()
 
-  const insertItem = (item: ChainItem) => {
-    saveItems([...items.slice(0, itemIndex), item, ...items.slice(itemIndex)])
-    setActiveIndex(index)
+  const removeItem = () => {
+    let updatedItems = items
+    if (IsBranchChainItem(chainNode)) {
+      for (let branchIndex = chainNode.branches.length - 1; branchIndex > 0; branchIndex--) {
+        updatedItems = PruneBranchAndShiftLeft(updatedItems, itemIndex, branchIndex)
+      }
+    }
+    updatedItems = PruneNodeAndShiftUp(updatedItems, itemIndex)
+    const prunedNodeCount = items.length - updatedItems.length - 1
+    if (prunedNodeCount > 0) {
+      const nodeDescription = `${prunedNodeCount} node${prunedNodeCount > 1 ? 's' : ''}`
+      const prunedBranchCount = (chainNode as BranchChainItem).branches.length - 1
+      const branchDescription = `${prunedBranchCount} branch${prunedBranchCount > 1 ? 'es' : ''}`
+      setDialogPrompt({
+        title: `This will prune ${branchDescription} with ${nodeDescription} from the chain.`,
+        confirmTitle: 'Proceed',
+        callback: () => saveItems(updatedItems),
+        destructive: true,
+      })
+    } else {
+      saveItems(updatedItems)
+    }
   }
-
-  const insertPrompt = (promptID: number, versionID?: number) =>
-    insertItem({
-      promptID,
-      versionID: versionID ?? promptCache.versionForItem({ promptID })?.id,
-    })
-
-  const insertNewPrompt = () => addPrompt().then(({ promptID, versionID }) => insertPrompt(promptID, versionID))
-
-  const insertCodeBlock = () => insertItem({ code: '' })
-  const insertQuery = defaultQueryConfig ? () => insertItem(defaultQueryConfig) : undefined
 
   const duplicateItem = () => {
     insertItem({ ...(chainNode as ChainItem), output: undefined })
     setActiveIndex(index + 1)
   }
 
+  const dropShadow = 'drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)]'
+
   return (
-    <>
-      {index > 0 && (
-        <ChainNodeBoxConnector
-          prompts={prompts}
-          isDisabled={isTestMode}
-          isActive={isMenuActive}
-          setActive={setMenuActive}
-          canDismiss={nodes.length > 2}
-          onInsertPrompt={insertPrompt}
-          onInsertNewPrompt={insertNewPrompt}
-          onInsertCodeBlock={insertCodeBlock}
-          onInsertQuery={insertQuery}
-        />
-      )}
+    <div className='flex flex-col items-center h-full'>
       <div
-        className={`flex flex-col border w-96 rounded-lg cursor-pointer drop-shadow-[0_8px_8px_rgba(0,0,0,0.02)] ${colorClass}`}
+        className={`relative flex flex-col border w-96 rounded-lg cursor-pointer ${dropShadow} ${colorClass} self-start`}
         onClick={() => setActiveIndex(index)}>
+        {chainNode !== InputNode && <SmallDot position='top' />}
         <ChainNodeBoxHeader
           nodes={nodes}
           index={index}
@@ -110,11 +102,23 @@ export function ChainNodeBox({
         <ChainNodeBoxFooter
           nodes={nodes}
           index={index}
-          saveItems={saveItems}
+          onUpdate={updateItem}
           isSelected={isSelected}
           promptCache={promptCache}
         />
+        {chainNode !== OutputNode && <SmallDot position='bottom' />}
       </div>
-    </>
+      <DownStroke height='-mb-[6px]' spacer grow />
+    </div>
   )
 }
+
+export const SmallDot = ({
+  position,
+  color = 'bg-white border border-gray-400',
+}: {
+  position: 'top' | 'bottom'
+  color?: string
+}) => <div className={`${layoutForPosition(position)} ${color} absolute self-center z-10 w-2.5 h-2.5 rounded-full`} />
+
+const layoutForPosition = (position: 'top' | 'bottom') => (position === 'top' ? 'top-0 -mt-1.5' : 'bottom-0 -mb-1.5')

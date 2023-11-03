@@ -9,7 +9,7 @@ import { LoadPendingVersion } from '../prompts/promptView'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
-export default function PromptChainNodeEditor({
+export default function PromptNodeEditor({
   item,
   promptCache,
   selectVersion,

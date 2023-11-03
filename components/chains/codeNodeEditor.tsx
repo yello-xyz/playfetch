@@ -5,7 +5,7 @@ import codeIcon from '@/public/code.svg'
 import { CodeChainItem } from '@/types'
 import TextInput from '../textInput'
 
-export default function CodeChainNodeEditor({
+export default function CodeNodeEditor({
   item,
   updateItem,
 }: {

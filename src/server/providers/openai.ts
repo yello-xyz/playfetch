@@ -1,6 +1,6 @@
 import { CustomLanguageModel, DefaultLanguageModel, OpenAILanguageModel, PromptInputs } from '@/types'
 import OpenAI from 'openai'
-import { Predictor, PromptContext } from '../promptEngine'
+import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
 

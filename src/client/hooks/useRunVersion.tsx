@@ -18,13 +18,16 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, isLast } = JSON.parse(data)
-      if (isLast) {
-        runs[inputIndex][index].isLast = true
+      const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, continuationID, isLast } =
+        JSON.parse(data)
+      if (isLast || timestamp) {
+        const lastIndex = Math.max(...Object.keys(runs[inputIndex]).map(Number))
+        runs[inputIndex][lastIndex].isLast = isLast ?? false
+        runs[inputIndex][lastIndex].timestamp = timestamp
       } else {
         const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, timestamp, failed }
+        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, failed, continuationID }
       }
     }
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
@@ -55,13 +58,13 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     setHighestRunIndex(-1)
   }
 
-  const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[]) => {
+  const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     setRunning(true)
     setPartialRuns([])
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     setRunningVersionID(versionID)
-    const streamReader = await api.runVersion(versionID, inputs)
+    const streamReader = await api.runVersion(versionID, inputs, continuationID)
     await ConsumeStream(inputs, streamReader, runs => {
       setPartialRuns(runs)
       setHighestRunIndex(Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
@@ -69,7 +72,15 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     await refreshActiveItem(versionID)
 
     if (clearLastPartialRunsOnCompletion) {
-      setPartialRuns(runs => runs.filter(run => !run.isLast))
+      setPartialRuns(runs => {
+        const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp).map(run => run.timestamp!))
+        const addTimestamp = minTimestamp > 0 && minTimestamp < Infinity
+        return runs
+          .filter(run => !run.isLast)
+          .map((run, index, runs) =>
+            addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
+          )
+      })
     }
 
     setRunning(false)

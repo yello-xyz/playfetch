@@ -7,9 +7,9 @@ import { Endpoint, PromptInputs } from '@/types'
 import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import runChain from '@/src/server/chainEngine'
+import runChain from '@/src/server/evaluationEngine/chainEngine'
 import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
-import { TryParseOutput } from '@/src/server/promptEngine'
+import { TryParseOutput } from '@/src/server/evaluationEngine/promptEngine'
 import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 import { updateAnalytics } from '@/src/server/datastore/analytics'
@@ -79,10 +79,10 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
   const projectID = Number(projectIDFromPath)
 
   if (projectID && endpointName) {
-    const continuationKey = 'x-continuation-key'
     const apiKey = req.headers['x-api-key'] as string
     const flavor = req.headers['x-environment'] as string | undefined
-    const continuation = req.headers['x-continuation-key'] as string | undefined
+    const continuationHeaderKey = 'x-continuation-key'
+    const continuationKey = req.headers['x-continuation-key'] as string | undefined
 
     if (apiKey && (await checkProject(projectID, apiKey))) {
       const endpoint = await getActiveEndpointFromPath(projectID, endpointName, flavor)
@@ -96,7 +96,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         }
 
         const salt = (value: number | bigint) => BigInt(value) ^ BigInt(endpoint.id)
-        const continuationID = continuation ? Number(salt(BigInt(continuation))) : undefined
+        const continuationID = continuationKey ? Number(salt(BigInt(continuationKey))) : undefined
         const versionID = endpoint.versionID
         const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
 
@@ -122,14 +122,18 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         logResponse(clientID, endpoint, inputs, response, !!cachedResponse, continuationID)
 
+        const newContinuationKey = response.continuationID ? salt(response.continuationID).toString() : undefined
         if (useStreaming) {
+          if (newContinuationKey && newContinuationKey !== continuationKey) {
+            res.write(`\n${continuationHeaderKey}: ${newContinuationKey}`)
+          }
           res.end()
           return
         } else {
           return res.send(
             stringify({
               output: response.result,
-              ...(response.continuationID ? { [continuationKey]: salt(response.continuationID).toString() } : {}),
+              ...(newContinuationKey ? { [continuationHeaderKey]: newContinuationKey } : {}),
             })
           )
         }

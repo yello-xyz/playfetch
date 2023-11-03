@@ -1,8 +1,8 @@
 import { PromptConfig, Prompts, PromptInputs } from '@/types'
 import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
-import { APIKeyForProvider, GetPredictor } from './providers/integration'
-import { DefaultProvider } from '../common/defaultConfig'
-import { PublicLanguageModels, ProviderForModel } from '../common/providerMetadata'
+import { APIKeyForProvider, GetPredictor } from '../providers/integration'
+import { DefaultProvider } from '../../common/defaultConfig'
+import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }

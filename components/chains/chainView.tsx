@@ -6,6 +6,7 @@ import ChainEditor from './chainEditor'
 import {
   ChainNode,
   InputNode,
+  IsBranchChainItem,
   IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
@@ -23,7 +24,7 @@ import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/us
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
-    return IsCodeChainItem(item) || IsQueryChainItem(item)
+    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
       ? item
       : {
           ...item,
@@ -35,7 +36,7 @@ const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
 const AugmentItemsToSave = (items: ChainItem[], promptCache: ChainPromptCache) =>
   items.map(item => {
     const inputs = ExtractChainItemVariables(item, promptCache, false)
-    return IsCodeChainItem(item) || IsQueryChainItem(item)
+    return IsCodeChainItem(item) || IsBranchChainItem(item) || IsQueryChainItem(item)
       ? { ...item, inputs }
       : {
           ...item,
@@ -121,12 +122,15 @@ export default function ChainView({
     setShowVersions(false)
   }
 
+  const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
+  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
+
   const [isTestMode, setTestMode] = useState(false)
   const updateTestMode = (testMode: boolean) => {
     setTestMode(testMode)
     if (testMode && activeNodeIndex === undefined) {
       updateActiveNodeIndex(0)
-    } else if (testMode && showVersions) {
+    } else if (showVersions && (testMode || (activeNodeIndex !== undefined && !isInputOutputNode))) {
       setShowVersions(false)
     }
   }
@@ -139,9 +143,6 @@ export default function ChainView({
       setActiveNodeIndex(nodes.indexOf(OutputNode))
     }
   }
-
-  const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
-  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
 
   const minWidth = 300
   return (

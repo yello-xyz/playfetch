@@ -46,6 +46,7 @@ export default function PromptPanel({
   onActiveTabChange,
   loadPendingVersion,
   isDirty,
+  isRunning,
   setPreferredHeight,
 }: {
   version: PromptVersion
@@ -59,6 +60,7 @@ export default function PromptPanel({
   onActiveTabChange?: (tab: PromptTab) => void
   loadPendingVersion?: () => void
   isDirty?: boolean
+  isRunning?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
   const [prompts, setPrompts] = useInitialState(version.prompts)
@@ -85,7 +87,7 @@ export default function PromptPanel({
   }
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
-  const updateConfig = (config: PromptConfig) => update(prompts, config)
+  const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, model })
 
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
@@ -96,7 +98,7 @@ export default function PromptPanel({
   const padding = 12 // gap-3
   const modelSelectorHeight = 37
   const tabHeight = 27
-  const contentHeight = 116
+  const contentHeight = 148
   const preferredHeight =
     tabHeight +
     padding +
@@ -172,7 +174,7 @@ export default function PromptPanel({
           testConfig={testConfig}
           setTestConfig={setTestConfig}
           onShowTestConfig={onShowTestConfig}
-          disabled={!isModelAvailable || prompts.main.trim().length === 0}
+          disabled={!isModelAvailable || prompts.main.trim().length === 0 || isRunning}
           callback={runPrompt}
         />
       )}

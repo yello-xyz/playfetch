@@ -91,7 +91,7 @@ export type EmbeddingModel = OpenAIEmbeddingModel
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-32k'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
-export type GoogleLanguageModel = 'text-bison@001'
+export type GoogleLanguageModel = 'text-bison'
 export type CohereLanguageModel = 'command'
 
 export type DefaultLanguageModel =
@@ -106,6 +106,7 @@ export type LanguageModel = DefaultLanguageModel | CustomLanguageModel
 
 export type PromptConfig = {
   model: LanguageModel
+  isChat: boolean
   temperature: number
   maxTokens: number
 }
@@ -177,6 +178,8 @@ type CommonRun = {
   cost?: number
   duration?: number
   failed?: boolean
+  continuationID?: number
+  continuations?: (PartialRun | Run)[]
 }
 
 export type PartialRun = CommonRun & {
@@ -190,42 +193,56 @@ export type Run = CommonRun & {
   duration: number
   inputs: PromptInputs
   labels: string[]
+  userID: number
 }
 
-type PendingVersionRunConfig = {
-  versionID?: number
+type CommonConfigAttributes = {
   output?: string
+  branch: number
+}
+
+type PendingVersionRunConfig = CommonConfigAttributes & {
+  versionID?: number
   includeContext?: boolean
 }
 
 export type RunConfig = PendingVersionRunConfig & { versionID: number }
 
-export type CodeConfig = {
+export type CodeConfig = CommonConfigAttributes & {
   code: string
   name?: string
   description?: string
-  output?: string
 }
 
-export type QueryConfig = {
+export type BranchConfig = CommonConfigAttributes & {
+  code: string
+  branches: string[]
+}
+
+export type QueryConfig = CommonConfigAttributes & {
   provider: QueryProvider
   model: EmbeddingModel
   indexName: string
   query: string
   topK: number
-  output?: string
 }
 
 export type CodeChainItem = CodeConfig & { inputs?: string[] }
+export type BranchChainItem = BranchConfig & { inputs?: string[] }
 export type QueryChainItem = QueryConfig & { inputs?: string[] }
 export type PromptChainItem = PendingVersionRunConfig & {
   promptID: number
   inputs?: string[]
   dynamicInputs?: string[]
 }
-export type ChainItem = CodeChainItem | QueryChainItem | PromptChainItem
+export type ChainItem = CodeChainItem | BranchChainItem | QueryChainItem | PromptChainItem
 
-export type ChainItemWithInputs = (CodeChainItem | QueryChainItem | (PromptChainItem & { dynamicInputs: string[] })) & {
+export type ChainItemWithInputs = (
+  | CodeChainItem
+  | BranchChainItem
+  | QueryChainItem
+  | (PromptChainItem & { dynamicInputs: string[] })
+) & {
   inputs: string[]
 }
 
