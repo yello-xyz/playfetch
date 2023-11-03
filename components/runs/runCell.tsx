@@ -7,7 +7,7 @@ import RunCellFooter from './runCellFooter'
 import RunCellBody from './runCellBody'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
-import RunCellContinuation, { LeftBordered, RoleHeader } from './runCellContinuation'
+import RunCellContinuation from './runCellContinuation'
 
 export default function RunCell({
   identifier,
@@ -115,20 +115,16 @@ export default function RunCell({
       <div className={showInlineHeader ? 'flex flex-row-reverse justify-between gap-4' : 'flex flex-col gap-2.5'}>
         {isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
         <div className='flex flex-col gap-2.5 flex-1'>
-          {isContinuation && <RoleHeader role='Assistant' />}
-          <LeftBordered border={isContinuation}>
-            <RunCellBody
-              identifier={identifier}
-              output={run.output}
-              selectionRanges={selectionRanges}
-              onSelectComment={selectComment}
-            />
-          </LeftBordered>
+          <RunCellBody
+            identifier={identifier}
+            output={run.output}
+            selectionRanges={selectionRanges}
+            onSelectComment={selectComment}
+            isContinuation={isContinuation}
+          />
         </div>
       </div>
-      <LeftBordered border={isContinuation} bridgeGap>
-        <RunCellFooter run={run} />
-      </LeftBordered>
+      <RunCellFooter run={run} isContinuation={isContinuation} />
       {isContinuation && (
         <RunCellContinuation
           continuations={run.continuations ?? []}

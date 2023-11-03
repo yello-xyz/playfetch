@@ -1,8 +1,9 @@
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
 import { PartialRun } from '@/types'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { BorderedSection } from './runCellContinuation'
 
-export default function RunCellFooter({ run }: { run: PartialRun }) {
+export default function RunCellFooter({ run, isContinuation }: { run: PartialRun; isContinuation: boolean }) {
   const formattedDate = useFormattedDate(run.timestamp)
 
   const attributes = [] as string[]
@@ -16,5 +17,9 @@ export default function RunCellFooter({ run }: { run: PartialRun }) {
     attributes.push(formattedDate)
   }
 
-  return attributes.length > 0 ? <div className='self-end text-xs text-gray-500'>{attributes.join(' · ')}</div> : null
+  return attributes.length > 0 ? (
+    <BorderedSection border={isContinuation} bridgingGap>
+      <div className='self-end text-xs text-gray-500'>{attributes.join(' · ')}</div>
+    </BorderedSection>
+  ) : null
 }

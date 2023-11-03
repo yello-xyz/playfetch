@@ -37,24 +37,22 @@ export default function RunCellContinuation({
             user={users.find(user => 'userID' in continuation && user.id === continuation.userID)}
             role='User'
           />
-          <LeftBordered>
+          <BorderedSection>
             <div className='flex-1'>
               {'inputs' in continuation ? (continuation as Run).inputs[DefaultChatContinuationInputKey] : lastReply}
             </div>
-          </LeftBordered>
-          <RoleHeader role='Assistant' />
-          <LeftBordered>
+          </BorderedSection>
+          <AssistantHeader />
+          <BorderedSection>
             <div className='flex-1'>{continuation.output}</div>
-          </LeftBordered>
-          <LeftBordered border bridgeGap>
-            <RunCellFooter run={continuation} />
-          </LeftBordered>
+          </BorderedSection>
+          <RunCellFooter run={continuation} isContinuation />
         </Fragment>
       ))}
       {runContinuation && (
         <>
           <RoleHeader user={user} role='User' />
-          <LeftBordered>
+          <BorderedSection>
             <div className='flex items-center flex-1 gap-2'>
               <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
               <PendingButton
@@ -64,14 +62,16 @@ export default function RunCellContinuation({
                 onClick={sendReply(runContinuation)}
               />
             </div>
-          </LeftBordered>
+          </BorderedSection>
         </>
       )}
     </>
   )
 }
 
-export const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
+export const AssistantHeader = () => <RoleHeader role='Assistant' />
+
+const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
   <div className='flex items-center gap-2'>
     {user ? (
       <UserAvatar user={user} size='md' />
@@ -84,17 +84,20 @@ export const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
   </div>
 )
 
-export const LeftBordered = ({
+export const BorderedSection = ({
   border = true,
-  bridgeGap,
+  bridgingGap,
   children,
 }: {
   border?: boolean
-  bridgeGap?: boolean
+  bridgingGap?: boolean
   children: ReactNode
 }) =>
   border ? (
-    <div className={`${bridgeGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
+    <div
+      className={`${
+        bridgingGap ? '-mt-2.5 pt-2.5' : ''
+      } ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
       {children}
     </div>
   ) : (

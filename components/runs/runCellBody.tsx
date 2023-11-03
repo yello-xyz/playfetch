@@ -1,15 +1,18 @@
 import { MouseEvent } from 'react'
+import { AssistantHeader, BorderedSection } from './runCellContinuation'
 
 export default function RunCellBody({
   identifier,
   output,
   selectionRanges,
   onSelectComment,
+  isContinuation,
 }: {
   identifier: string
   output: string
   selectionRanges: { startIndex: number; endIndex: number }[]
   onSelectComment: (event: MouseEvent, startIndex: number) => void
+  isContinuation: boolean
 }) {
   const spans = []
 
@@ -36,8 +39,13 @@ export default function RunCellBody({
   }
 
   return (
-    <div className='flex-1' id={identifier}>
-      {spans}
-    </div>
+    <>
+      {isContinuation && <AssistantHeader />}
+      <BorderedSection border={isContinuation}>
+        <div className='flex-1' id={identifier}>
+          {spans}
+        </div>
+      </BorderedSection>
+    </>
   )
 }
