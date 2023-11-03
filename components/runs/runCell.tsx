@@ -6,14 +6,12 @@ import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellBody from './runCellBody'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
-import Icon from '../icon'
-import commentIcon from '@/public/comment.svg'
 import TextInput from '../textInput'
 import { PendingButton } from '../button'
 import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
-import useExtractSelection, { Selection } from '@/src/client/hooks/useExtractSelection'
+import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
 
 export default function RunCell({
   identifier,
@@ -63,7 +61,7 @@ export default function RunCell({
     }))
 
   const updateSelectionForComment = useCallback(
-    (selection?: Selection) => {
+    (selection?: CommentSelection) => {
       if (selection && version && activeItem) {
         let selectionForComment = selection
         const start = selection.startIndex
@@ -95,18 +93,21 @@ export default function RunCell({
     [activeItem, version, comments, run, selectionRanges, setPopup]
   )
 
-  const onUpdateSelection = useCallback((selection: Selection | undefined) => {
-    if (selection && version) {
-      setPopup(
-        props => CommentInputPopup(props as CommentInputProps),
-        { selection, onUpdateSelectionForComment: updateSelectionForComment },
-        { left: selection.popupPoint.x, top: selection.popupPoint.y }
-      )
-    }
-  }, [version, setPopup, updateSelectionForComment])
+  const onUpdateSelection = useCallback(
+    (selection: CommentSelection | undefined) => {
+      if (selection && version) {
+        setPopup(
+          props => CommentInputPopup(props as CommentInputProps),
+          { selection, onUpdateSelectionForComment: updateSelectionForComment },
+          { left: selection.popupPoint.x, top: selection.popupPoint.y }
+        )
+      }
+    },
+    [version, setPopup, updateSelectionForComment]
+  )
 
   const isProperRun = ((item): item is Run => 'labels' in item)(run)
-  useExtractSelection(isProperRun ? identifier : null, onUpdateSelection)
+  useExtractCommentSelection(isProperRun ? identifier : null, onUpdateSelection)
 
   const user = useLoggedInUser()
   const continuationID = run.continuationID
@@ -213,23 +214,3 @@ const LeftBordered = ({
   ) : (
     <>{children}</>
   )
-
-type CommentInputProps = {
-  selection: Selection
-  onUpdateSelectionForComment: (selection?: Selection) => void
-}
-
-function CommentInputPopup({ selection, onUpdateSelectionForComment }: CommentInputProps) {
-  return (
-    <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
-      <div className='bg-white border border-gray-200 rounded-lg shadow shadow-md whitespace-nowrap hover:border-gray-300'>
-        <div
-          className='flex items-center gap-1 px-2 py-1 text-gray-600 rounded rounded-lg cursor-pointer hover:bg-gray-50 hover:text-gray-700'
-          onClick={() => onUpdateSelectionForComment(selection)}>
-          <Icon className='max-w-[24px]' icon={commentIcon} />
-          <div>Comment</div>
-        </div>
-      </div>
-    </div>
-  )
-}

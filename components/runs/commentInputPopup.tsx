@@ -1,8 +1,10 @@
+import Icon from '../icon'
+import commentIcon from '@/public/comment.svg'
 import { useCallback, useEffect, useState } from 'react'
 
-export type Selection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
+export type CommentSelection = { text: string; startIndex: number; popupPoint: { x: number; y: number } }
 
-const extractSelection = (identifier: string): Selection | undefined => {
+const extractSelection = (identifier: string): CommentSelection | undefined => {
   const selection = document.getSelection()
   if (!selection) {
     return undefined
@@ -38,11 +40,11 @@ const extractSelection = (identifier: string): Selection | undefined => {
   return { text, popupPoint, startIndex: range.startOffset + spanOffset }
 }
 
-export default function useExtractSelection(
+export function useExtractCommentSelection(
   identifier: string | null,
-  onUpdateSelection: (selection: Selection | undefined) => void
+  onUpdateSelection: (selection: CommentSelection | undefined) => void
 ) {
-  const [selection, setSelection] = useState<Selection | undefined>(undefined)
+  const [selection, setSelection] = useState<CommentSelection | undefined>(undefined)
 
   const updateSelection = useCallback(() => onUpdateSelection(selection), [selection, onUpdateSelection])
 
@@ -57,4 +59,24 @@ export default function useExtractSelection(
   }, [identifier, updateSelection])
 
   return selection
+}
+
+export type CommentInputProps = {
+  selection: CommentSelection
+  onUpdateSelectionForComment: (selection?: CommentSelection) => void
+}
+
+export default function CommentInputPopup({ selection, onUpdateSelectionForComment }: CommentInputProps) {
+  return (
+    <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
+      <div className='bg-white border border-gray-200 rounded-lg shadow shadow-md whitespace-nowrap hover:border-gray-300'>
+        <div
+          className='flex items-center gap-1 px-2 py-1 text-gray-600 rounded rounded-lg cursor-pointer hover:bg-gray-50 hover:text-gray-700'
+          onClick={() => onUpdateSelectionForComment(selection)}>
+          <Icon className='max-w-[24px]' icon={commentIcon} />
+          <div>Comment</div>
+        </div>
+      </div>
+    </div>
+  )
 }
