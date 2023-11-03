@@ -28,25 +28,21 @@ export default function RunCellContinuation({
     setReplyMessage('')
   }
 
+  const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
+
   return (
     <>
-      {continuations.map(continuation => (
-        <Fragment key={continuation.id}>
-          {/* // TODO for partial run, use the current user instead */}
-          <RoleHeader
-            user={users.find(user => 'userID' in continuation && user.id === continuation.userID)}
-            role='User'
-          />
+      {continuations.map(run => (
+        <Fragment key={run.id}>
+          <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
           <BorderedSection>
-            <div className='flex-1'>
-              {'inputs' in continuation ? (continuation as Run).inputs[DefaultChatContinuationInputKey] : lastReply}
-            </div>
+            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[DefaultChatContinuationInputKey]}</div>
           </BorderedSection>
           <AssistantHeader />
           <BorderedSection>
-            <div className='flex-1'>{continuation.output}</div>
+            <div className='flex-1'>{run.output}</div>
           </BorderedSection>
-          <RunCellFooter run={continuation} isContinuation />
+          <RunCellFooter run={run} isContinuation />
         </Fragment>
       ))}
       {runContinuation && (
@@ -94,10 +90,7 @@ export const BorderedSection = ({
   children: ReactNode
 }) =>
   border ? (
-    <div
-      className={`${
-        bridgingGap ? '-mt-2.5 pt-2.5' : ''
-      } ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
+    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
       {children}
     </div>
   ) : (

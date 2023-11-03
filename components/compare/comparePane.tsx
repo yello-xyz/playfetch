@@ -49,7 +49,7 @@ export default function ComparePane({
     failed: !!log.error,
     labels: [],
     continuationID: log.continuationID,
-    userID: 0
+    userID: 0,
   }))
 
   return (
