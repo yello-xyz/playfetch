@@ -64,7 +64,7 @@ export default function ChainNodeBoxConnector({
       {hasNext || (isDisabled && isActive) ? (
         <DownConnector height='min-h-[18px]' grow />
       ) : (
-        <DownStroke height='min-h-[18px]' grow />
+        <DownStroke height={skipConnector ? '' : 'min-h-[18px]'} grow />
       )}
     </div>
   )
@@ -165,7 +165,7 @@ const AddButton = ({
         </div>
         <SmallDot position='bottom' color='bg-blue-200' />
       </div>
-      <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} />
+      {hasConnector && <DownStroke height={onInsertQuery ? 'min-h-[12px]' : 'min-h-[32px]'} />}
     </>
   ) : (
     <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onClick={toggleActive()}>
