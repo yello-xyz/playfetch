@@ -4,45 +4,16 @@ import {
   CodeConfig,
   RawPromptVersion,
   RawChainVersion,
-  Prompts,
   QueryConfig,
   BranchConfig,
 } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/evaluationEngine/codeEngine'
 import runPromptWithConfig from '@/src/server/evaluationEngine/promptEngine'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../../common/branching'
-import { DefaultChatContinuationInputKey } from '../../common/defaultConfig'
 import { MaxContinuationCount, loadContinuation, saveContinuation } from './continuation'
-
-const promptToCamelCase = (prompt: string) =>
-  ExtractVariables(prompt).reduce(
-    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, `{{${ToCamelCase(variable)}}}`),
-    prompt
-  )
-
-const resolveVariables = (prompt: string, inputs: PromptInputs) =>
-  ExtractVariables(prompt).reduce(
-    (prompt, variable) => prompt.replaceAll(`{{${variable}}}`, inputs[variable] ?? ''),
-    prompt
-  )
-
-const resolvePrompt = (prompt: string, inputs: PromptInputs, useCamelCase: boolean) =>
-  resolveVariables(useCamelCase ? promptToCamelCase(prompt) : prompt, inputs)
-
-const resolvePrompts = (prompts: Prompts, inputs: PromptInputs, useCamelCase: boolean) =>
-  Object.fromEntries(
-    Object.entries(prompts).map(([key, value]) => [key, resolvePrompt(value, inputs, useCamelCase)])
-  ) as Prompts
-
-const getReplyPromptFromInputs = (inputs: PromptInputs): Prompts => ({
-  main: inputs[DefaultChatContinuationInputKey] ?? Object.values(inputs)[0],
-})
-
-const AugmentInputs = (inputs: PromptInputs, variable: string | undefined, value: string, useCamelCase: boolean) =>
-  variable ? { ...inputs, [useCamelCase ? ToCamelCase(variable) : variable]: value } : inputs
+import { AugmentInputs, resolvePrompt, resolvePrompts } from './resolveEngine'
 
 const runWithTimer = async <T>(operation: Promise<T>) => {
   const startTime = process.hrtime.bigint()
@@ -134,9 +105,7 @@ export default async function runChain(
         config.versionID === version.id ? version : await getTrustedVersion(config.versionID, true)
       ) as RawPromptVersion
       const isContinuedChat = index === continuationIndex && promptVersion.config.isChat
-      const prompts = isContinuedChat
-        ? getReplyPromptFromInputs(inputs)
-        : resolvePrompts(promptVersion.prompts, inputs, useCamelCase)
+      const prompts = resolvePrompts(promptVersion.prompts, inputs, useCamelCase, isContinuedChat)
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
