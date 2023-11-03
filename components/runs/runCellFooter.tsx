@@ -1,9 +1,9 @@
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
-import { PartialRun } from '@/types'
+import { PartialRun, Run } from '@/types'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { BorderedSection } from './runCellContinuation'
 
-export default function RunCellFooter({ run, isContinuation }: { run: PartialRun; isContinuation: boolean }) {
+export default function RunCellFooter({ run, isContinuation }: { run: PartialRun | Run; isContinuation: boolean }) {
   const formattedDate = useFormattedDate(run.timestamp)
 
   const attributes = [] as string[]

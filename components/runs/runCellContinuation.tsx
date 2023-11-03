@@ -13,7 +13,7 @@ export default function RunCellContinuation({
   isRunning,
   runContinuation,
 }: {
-  continuations: PartialRun[]
+  continuations: (PartialRun | Run)[]
   users: User[]
   isRunning?: boolean
   runContinuation?: (message: string) => void

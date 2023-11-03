@@ -179,12 +179,12 @@ type CommonRun = {
   duration?: number
   failed?: boolean
   continuationID?: number
+  continuations?: (PartialRun | Run)[]
 }
 
 export type PartialRun = CommonRun & {
   index?: number
   isLast?: boolean
-  continuations?: PartialRun[]
 }
 
 export type Run = CommonRun & {

@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
@@ -23,7 +23,7 @@ export default function RunTimeline({
   isRunning,
   skipHeader,
 }: {
-  runs: PartialRun[]
+  runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number

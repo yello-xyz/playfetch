@@ -18,7 +18,7 @@ export default function RunCell({
   runContinuation,
 }: {
   identifier: string
-  run: PartialRun
+  run: PartialRun | Run
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   isRunning?: boolean
