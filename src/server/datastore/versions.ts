@@ -64,13 +64,17 @@ export async function migrateVersions(postMerge: boolean) {
         }
         const description = `version ${versionID} parent ${versionData.parentID} user ${userID}`
 
-        if (needToUpdateConfig) {
+        if (!!config && needToUpdateConfig) {
           console.log(`Migrating config in ${description}`)
-          config = { ...config!, isChat: false, model: config!.model.split('@')[0] }
+          config = {
+            ...config,
+            isChat: config.isChat === undefined ? false : config.isChat,
+            model: config.model.split('@')[0],
+          }
         }
-        if (needToUpdateItems) {
+        if (!!items && needToUpdateItems) {
           console.log(`Migrating items in ${description}`)
-          items = items!.map(item => ({ ...item, branch: item.branch ?? 0 }))
+          items = items.map(item => ({ ...item, branch: item.branch ?? 0 }))
         }
         if (needToUpdateDidRun) {
           didRun = !didRun
@@ -340,7 +344,12 @@ const toVersionData = (
 })
 
 export const toUserVersions = (userID: number, versions: any[], runs: any[]) => {
-  const userVersion = versions.filter(version => version.userID === userID && !version.didRun).slice(0, 1)
+  const pendingUserVersions = versions.filter(version => version.userID === userID && !version.didRun)
+  if (pendingUserVersions.length > 1) {
+    console.error(`‼️ found ${pendingUserVersions.length} pending versions for user ${userID}`)
+  }
+
+  const userVersion = pendingUserVersions.slice(0, 1)
   const versionsWithRuns = versions.filter(version => version.didRun)
   const initialVersion = !versionsWithRuns.length && !userVersion.length ? [versions.slice(-1)[0]] : []
 
