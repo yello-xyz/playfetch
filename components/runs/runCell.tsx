@@ -1,17 +1,13 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
-import { Fragment, MouseEvent, ReactNode, useCallback, useState } from 'react'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run } from '@/types'
+import { MouseEvent, useCallback } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '../commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellBody from './runCellBody'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
-import TextInput from '../textInput'
-import { PendingButton } from '../button'
-import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
-import UserAvatar from '../users/userAvatar'
-import { useLoggedInUser } from '@/src/client/context/userContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
+import RunCellContinuation, { LeftBordered, RoleHeader } from './runCellContinuation'
 
 export default function RunCell({
   identifier,
@@ -28,8 +24,6 @@ export default function RunCell({
   isRunning?: boolean
   runContinuation?: (continuationID: number, message: string) => void
 }) {
-  const [replyMessage, setReplyMessage] = useState('')
-  const [lastReply, setLastReply] = useState('')
   const comments = (version?.comments ?? []).filter(comment => comment.runID === run.id)
 
   const setPopup = useGlobalPopup<CommentInputProps | CommentsPopupProps>()
@@ -109,17 +103,8 @@ export default function RunCell({
   const isProperRun = ((item): item is Run => 'labels' in item)(run)
   useExtractCommentSelection(isProperRun ? identifier : null, onUpdateSelection)
 
-  const user = useLoggedInUser()
   const continuationID = run.continuationID
   const isContinuation = !!continuationID
-  const sendReply =
-    runContinuation && continuationID
-      ? () => {
-          runContinuation(continuationID, replyMessage)
-          setLastReply(replyMessage)
-          setReplyMessage('')
-        }
-      : undefined
 
   const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
@@ -144,73 +129,14 @@ export default function RunCell({
       <LeftBordered border={isContinuation} bridgeGap>
         <RunCellFooter run={run} />
       </LeftBordered>
-      {(run.continuations ?? []).map(continuation => (
-        <Fragment key={continuation.id}>
-          {/* // TODO for partial run, use the current user instead */}
-          <RoleHeader
-            user={activeItem?.users?.find(user => 'userID' in continuation && user.id === continuation.userID)}
-            role='User'
-          />
-          <LeftBordered>
-            <div className='flex-1'>
-              {'inputs' in continuation ? (continuation as Run).inputs[DefaultChatContinuationInputKey] : lastReply}
-            </div>
-          </LeftBordered>
-          <RoleHeader role='Assistant' />
-          <LeftBordered>
-            <div className='flex-1'>{continuation.output}</div>
-          </LeftBordered>
-          <LeftBordered border bridgeGap>
-            <RunCellFooter run={continuation} />
-          </LeftBordered>
-        </Fragment>
-      ))}
-      {sendReply && (
-        <>
-          <RoleHeader user={user} role='User' />
-          <LeftBordered>
-            <div className='flex items-center flex-1 gap-2'>
-              <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
-              <PendingButton
-                title='Reply'
-                pendingTitle='Running'
-                disabled={replyMessage.length === 0 || isRunning}
-                onClick={sendReply}
-              />
-            </div>
-          </LeftBordered>
-        </>
+      {isContinuation && (
+        <RunCellContinuation
+          continuations={run.continuations ?? []}
+          users={activeItem?.users ?? []}
+          isRunning={isRunning}
+          runContinuation={runContinuation ? message => runContinuation(continuationID, message) : undefined}
+        />
       )}
     </div>
   )
 }
-
-const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
-  <div className='flex items-center gap-2'>
-    {user ? (
-      <UserAvatar user={user} size='md' />
-    ) : (
-      <span className='flex items-center justify-center w-[22px] h-[22px] pt-px text-xs font-medium text-white rounded-full bg-dark-gray-700'>
-        {role.slice(0, 1)}
-      </span>
-    )}
-    <span className='font-medium text-gray-700'>{user?.fullName ?? role}</span>
-  </div>
-)
-
-const LeftBordered = ({
-  border = true,
-  bridgeGap,
-  children,
-}: {
-  border?: boolean
-  bridgeGap?: boolean
-  children: ReactNode
-}) =>
-  border ? (
-    <div className={`${bridgeGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
-      {children}
-    </div>
-  ) : (
-    <>{children}</>
-  )
