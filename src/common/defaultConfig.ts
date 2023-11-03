@@ -2,7 +2,7 @@ import { PromptConfig, ModelProvider } from '@/types'
 
 export const DefaultProvider: ModelProvider = 'google'
 
-const DefaultModel = 'text-bison@001'
+const DefaultModel = 'text-bison'
 
 export const DefaultConfig: PromptConfig = {
   model: DefaultModel,

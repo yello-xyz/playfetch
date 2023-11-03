@@ -91,7 +91,7 @@ export type EmbeddingModel = OpenAIEmbeddingModel
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-32k'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
-export type GoogleLanguageModel = 'text-bison@001'
+export type GoogleLanguageModel = 'text-bison'
 export type CohereLanguageModel = 'command'
 
 export type DefaultLanguageModel =
