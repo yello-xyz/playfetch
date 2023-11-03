@@ -100,10 +100,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
   return !!customModel && !customModel.enabled
 }
 
-export const IsModelAvailable = (
-  model: LanguageModel | EmbeddingModel,
-  providers: AvailableModelProvider[]
-): boolean =>
+export const IsModelAvailable = (model: LanguageModel | EmbeddingModel, providers: AvailableModelProvider[]): boolean =>
   isCustomModel(model)
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)
@@ -148,12 +145,12 @@ export const SupportsChatMode = (model: LanguageModel): boolean => {
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
     case 'gpt-4-32k':
-      return true
     case 'claude-instant-1':
     case 'claude-2':
+      return true
     case 'text-bison@001':
     case 'command':
-      // TODO add support for Anthropic (and maybe other models too).
+      // TODO add support for other models too.
       return false
     default:
       return SupportsChatMode(baseModelForModel(model))
