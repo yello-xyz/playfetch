@@ -7,13 +7,13 @@ import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
 
 export default function RunCellBody({
-  identifier,
+  identifierForRun,
   run,
   version,
   activeItem,
   isContinuation,
 }: {
-  identifier: string
+  identifierForRun: (runID: number) => string
   run: PartialRun | Run
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
@@ -96,7 +96,7 @@ export default function RunCellBody({
   )
 
   const isProperRun = ((item): item is Run => 'labels' in item)(run)
-  useExtractCommentSelection(isProperRun ? identifier : null, onUpdateSelection)
+  useExtractCommentSelection(isProperRun ? identifierForRun(run.id) : null, onUpdateSelection)
 
   const spans = []
 
@@ -126,7 +126,7 @@ export default function RunCellBody({
     <>
       {isContinuation && <AssistantHeader />}
       <BorderedSection border={isContinuation}>
-        <div className='flex-1' id={identifier}>
+        <div className='flex-1' id={identifierForRun(run.id)}>
           {spans}
         </div>
       </BorderedSection>

@@ -5,14 +5,14 @@ import RunCellBody from './runCellBody'
 import RunCellContinuation from './runCellContinuation'
 
 export default function RunCell({
-  identifier,
+  identifierForRun,
   run,
   version,
   activeItem,
   isRunning,
   runContinuation,
 }: {
-  identifier: string
+  identifierForRun: (runID: number) => string
   run: PartialRun | Run
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
@@ -33,7 +33,7 @@ export default function RunCell({
         {isProperRun && <RunCellHeader run={run} activeItem={activeItem} />}
         <div className='flex flex-col gap-2.5 flex-1'>
           <RunCellBody
-            identifier={identifier}
+            identifierForRun={identifierForRun}
             run={run}
             version={version}
             activeItem={activeItem}

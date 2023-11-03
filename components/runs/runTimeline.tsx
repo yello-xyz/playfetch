@@ -31,12 +31,12 @@ export default function RunTimeline({
   isRunning?: boolean
   skipHeader?: boolean
 }) {
-  const identifierForRunID = (runID: number) => `r${runID}`
+  const identifierForRun = (runID: number) => `r${runID}`
 
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
       setTimeout(() => {
-        const element = document.getElementById(identifierForRunID(focusRunID))
+        const element = document.getElementById(identifierForRun(focusRunID))
         if (runs.length > 1 && element) {
           element.scrollIntoView({ behavior: 'auto', block: 'start' })
         }
@@ -90,7 +90,7 @@ export default function RunTimeline({
           {sortedRuns.map(run => (
             <RunCell
               key={run.id}
-              identifier={identifierForRunID(run.id)}
+              identifierForRun={identifierForRun}
               run={run}
               version={version}
               activeItem={activeItem}
