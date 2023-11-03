@@ -12,7 +12,7 @@ import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/eval
 import runPromptWithConfig from '@/src/server/evaluationEngine/promptEngine'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../../common/branching'
-import { MaxContinuationCount, loadContinuation, saveContinuation } from './continuation'
+import { loadContinuation, saveContinuation } from './continuationCache'
 import { AugmentInputs, resolvePrompt, resolvePrompts } from './resolveEngine'
 
 const runWithTimer = async <T>(operation: Promise<T>) => {
@@ -45,6 +45,8 @@ const emptyResponse: ResponseType = {
   attempts: 1,
   failed: false,
 }
+
+export const MaxContinuationCount = 10
 
 export default async function runChain(
   userID: number,
