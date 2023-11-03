@@ -72,7 +72,15 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     await refreshActiveItem(versionID)
 
     if (clearLastPartialRunsOnCompletion) {
-      setPartialRuns(runs => runs.filter(run => !run.isLast))
+      setPartialRuns(runs => {
+        const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp).map(run => run.timestamp!))
+        const addTimestamp = minTimestamp > 0 && minTimestamp < Infinity
+        return runs
+          .filter(run => !run.isLast)
+          .map((run, index, runs) =>
+            addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
+          )
+      })
     }
 
     setRunning(false)
