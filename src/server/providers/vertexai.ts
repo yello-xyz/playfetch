@@ -27,7 +27,7 @@ async function complete(
     const projectID = await getProjectID()
     const runningContext = usePreviousContext ? context.running ?? '' : ''
     const request = {
-      endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/text-bison`,
+      endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/${model}`,
       instances: [
         {
           structValue: {
