@@ -28,14 +28,18 @@ export default async function loadAdminItem(query: ParsedUrlQuery) {
     : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
 
   return {
-    props: {
-      initialAdminItem,
-      initialUserMetrics,
-      initialProjectMetrics,
-      initialWorkspaceMetrics,
-      initialActiveUsers,
-      waitlistUsers,
-      recentProjects,
-    },
+    initialAdminItem,
+    initialUserMetrics,
+    initialProjectMetrics,
+    initialWorkspaceMetrics,
+    initialActiveUsers,
+    waitlistUsers,
+    recentProjects,
+    analyticsLinks: [
+      ['Dashboards', process.env.GOOGLE_ANALYTICS_DASHBOARD_URL ?? ''],
+      ['Reports', process.env.GOOGLE_ANALYTICS_REPORTS_URL ?? ''],
+      ['Search Console', process.env.GOOGLE_SEARCH_CONSOLE_URL ?? ''],
+    ].filter(([_, url]) => url),
+    debugLinks: [['Server Logs', process.env.SERVER_LOGS_URL ?? '']].filter(([_, url]) => url),
   }
 }

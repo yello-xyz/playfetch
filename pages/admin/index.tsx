@@ -36,6 +36,8 @@ export default function Admin({
   initialActiveUsers,
   recentProjects,
   waitlistUsers,
+  analyticsLinks,
+  debugLinks,
 }: {
   initialAdminItem: AdminItem
   initialUserMetrics: UserMetrics | null
@@ -44,6 +46,8 @@ export default function Admin({
   initialActiveUsers: ActiveUser[]
   waitlistUsers: User[]
   recentProjects: RecentProject[]
+  analyticsLinks: [string, string]
+  debugLinks: [string, string]
 }) {
   const [adminItem, setAdminItem] = useState(initialAdminItem)
   const [userMetrics, setUserMetrics] = useState(initialUserMetrics)
@@ -137,6 +141,8 @@ export default function Admin({
             onSelectWaitlist={() => selectItem(WaitlistItem)}
             onSelectActiveUsers={() => selectItem(ActiveUsersItem)}
             onSelectRecentProjects={() => selectItem(RecentProjectsItem)}
+            analyticsLinks={analyticsLinks}
+            debugLinks={debugLinks}
           />
           <div className='flex flex-col flex-1 bg-gray-25'>
             {adminItem === WaitlistItem && <Waitlist initialWaitlistUsers={waitlistUsers} />}
