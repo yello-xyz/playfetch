@@ -317,7 +317,7 @@ export type LogEntry = {
   error?: string
   attempts: number
   cacheHit: boolean
-  continuationID: number
+  continuationID?: number
 }
 
 export type Analytics = {

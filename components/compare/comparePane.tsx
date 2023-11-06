@@ -14,6 +14,7 @@ import VersionSelector from '../versions/versionSelector'
 import RunTimeline from '../runs/runTimeline'
 import PromptPanel, { PromptTab } from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
+import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 
 export default function ComparePane({
   project,
@@ -39,11 +40,16 @@ export default function ComparePane({
   includeResponses?: boolean
 }) {
   const endpointLogEntries = IsEndpoint(activeItem) ? logEntries.filter(log => log.endpointID === activeItem.id) : []
-  const logsAsRuns: Run[] = endpointLogEntries.map((log, index) => ({
+  const isContinuation = (log: LogEntry, logs: LogEntry[]) =>
+    !!log.continuationID &&
+    logs.some(entry => entry.continuationID === log.continuationID && entry.timestamp < log.timestamp)
+  const logsAsRuns: Run[] = endpointLogEntries.map((log, index, logs) => ({
     id: index,
     timestamp: log.timestamp,
     output: log.error ?? JSON.stringify(log.output, null, 2),
-    inputs: log.inputs,
+    inputs: isContinuation(log, logs)
+      ? { [DefaultChatContinuationInputKey]: JSON.stringify(log.inputs, null, 2) }
+      : log.inputs,
     cost: log.cost,
     duration: log.duration,
     failed: !!log.error,

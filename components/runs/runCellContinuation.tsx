@@ -42,13 +42,7 @@ export default function RunCellContinuation({
         <Fragment key={run.id}>
           <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
           <BorderedSection>
-            <div className='flex-1'>
-              {isPartialRun(run)
-                ? lastReply
-                : activeItem
-                ? run.inputs[DefaultChatContinuationInputKey]
-                : JSON.stringify(run.inputs, null, 2)}
-            </div>
+            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[DefaultChatContinuationInputKey]}</div>
           </BorderedSection>
           <RunCellBody
             identifierForRun={identifierForRun}
