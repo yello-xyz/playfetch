@@ -3,39 +3,18 @@ import ClientRoute, { Redirect } from '@/src/common/clientRoute'
 import Button from '@/components/button'
 import { ReactNode, useState } from 'react'
 import TextInput from '@/components/textInput'
+import { OnboardingResponse } from '@/types'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) =>
   user.didCompleteOnboarding ? Redirect(ClientRoute.Home) : { props: {} }
 )
-
-type OnboardingResponse = {
-  useCase: {
-    iteration: boolean
-    testing: boolean
-    collaboration: boolean
-    monitoring: boolean
-    deploying: boolean
-    feedback: boolean
-  }
-  otherUseCase?: string
-  role?: 'executive' | 'manager' | 'individual' | 'contractor'
-  area: {
-    product: boolean
-    engineering: boolean
-    marketing: boolean
-    content: boolean
-    design: boolean
-    sales: boolean
-  }
-  otherArea?: string
-}
 
 const emptyUseCase: OnboardingResponse['useCase'] = {
   iteration: false,
   testing: false,
   collaboration: false,
   monitoring: false,
-  deploying: false,
+  deployment: false,
   feedback: false,
 }
 
@@ -119,7 +98,7 @@ const UseCaseStep = ({
         valueKey='collaboration'
       />
       <OptionCheckbox title='Monitoring LLM requests' value={useCase} setValue={setUseCase} valueKey='monitoring' />
-      <OptionCheckbox title='Deploying LLM API endpoints' value={useCase} setValue={setUseCase} valueKey='deploying' />
+      <OptionCheckbox title='Deploying LLM API endpoints' value={useCase} setValue={setUseCase} valueKey='deployment' />
       <OptionCheckbox
         title='Create a feedback loop to improve my prompt'
         value={useCase}

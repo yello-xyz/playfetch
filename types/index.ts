@@ -369,3 +369,25 @@ export type WorkspaceMetrics = ActiveWorkspace & {
   users: ActiveUser[]
   pendingUsers: ActiveUser[]
 }
+
+export type OnboardingResponse = {
+  useCase: {
+    iteration: boolean
+    testing: boolean
+    collaboration: boolean
+    monitoring: boolean
+    deployment: boolean
+    feedback: boolean
+  }
+  otherUseCase?: string
+  role?: 'executive' | 'manager' | 'individual' | 'contractor'
+  area: {
+    product: boolean
+    engineering: boolean
+    marketing: boolean
+    content: boolean
+    design: boolean
+    sales: boolean
+  }
+  otherArea?: string
+}
