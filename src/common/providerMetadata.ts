@@ -377,3 +377,6 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 16
   }
 }
+
+export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean =>
+  InputPriceForModel(model) === 0 && OutputPriceForModel(model) === 0

@@ -5,6 +5,7 @@ import {
   FullLabelForModel,
   IconForProvider,
   InputPriceForModel,
+  IsModelFreeToUse,
   LabelForProvider,
   MaxTokensForModel,
   OutputPriceForModel,
@@ -29,6 +30,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
         <span className='font-medium'>{FullLabelForModel(model, availableProviders, false)}</span>
+        {IsModelFreeToUse(model) && <FreeLabel />}
         <div className='flex justify-end flex-1'>
           <Link className='flex items-center' href={WebsiteLinkForModel(model)} target='_blank'>
             <span className='text-gray-500'>Website</span>
@@ -41,7 +43,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
       <div className='grid grid-cols-[140px_180px] text-gray-500 gap-y-0.5 pb-1'>
         <span className='font-medium'>Context</span>
         <span>{FormatLargeInteger(MaxTokensForModel(model))} tokens</span>
-        {(InputPriceForModel(model) > 0 || OutputPriceForModel(model) > 0) && (
+        {!IsModelFreeToUse(model) && (
           <>
             <HorizontalBorder />
             <HorizontalBorder />
@@ -62,3 +64,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
 }
 
 const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
+
+const FreeLabel = () => (
+  <span className='px-1 ml-1 text-[10px] leading-[17px] font-medium text-white bg-gray-400 rounded'>Free</span>
+)
