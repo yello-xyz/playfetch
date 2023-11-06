@@ -36,6 +36,7 @@ export async function migrateUsers(postMerge: boolean) {
         userData.fullName,
         userData.imageURL,
         userData.hasAccess,
+        userData.didCompleteOnboarding,
         userData.isAdmin,
         userData.createdAt,
         userData.lastLoginAt,
@@ -50,13 +51,14 @@ const toUserData = (
   fullName: string,
   imageURL: string,
   hasAccess: boolean,
+  didCompleteOnboarding: boolean,
   isAdmin: boolean,
   createdAt: Date,
   lastLoginAt?: Date,
   userID?: number
 ) => ({
   key: buildKey(Entity.USER, userID),
-  data: { email, fullName, imageURL, hasAccess, isAdmin, createdAt, lastLoginAt },
+  data: { email, fullName, imageURL, hasAccess, didCompleteOnboarding, isAdmin, createdAt, lastLoginAt },
   excludeFromIndexes: ['fullName', 'imageURL'],
 })
 
@@ -89,6 +91,7 @@ export async function markUserLogin(userID: number, fullName: string, imageURL: 
         fullName.length ? fullName : userData.fullName,
         imageURL.length ? imageURL : userData.imageURL,
         userData.hasAccess,
+        userData.didCompleteOnboarding,
         userData.isAdmin,
         userData.createdAt,
         new Date(),
