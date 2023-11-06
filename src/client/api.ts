@@ -16,6 +16,7 @@ import {
   QueryProvider,
   PendingWorkspace,
   PendingProject,
+  OnboardingResponse,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -261,6 +262,9 @@ const api = {
   },
   logOut: function () {
     return post(this.logOut)
+  },
+  completeOnboarding: function (response: OnboardingResponse) {
+    return post(this.completeOnboarding, { response })
   },
 }
 

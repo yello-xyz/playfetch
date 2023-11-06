@@ -37,7 +37,7 @@ const richTextIfDefined = (label: string, content: string | undefined) =>
       }
     : {}
 
-export const addOnboardingResponse = (name: string, email: string, response: OnboardingResponse) =>
+export const addOnboardingResponse = (email: string, name: string, response: OnboardingResponse) =>
   NotionClient.pages.create({
     parent: { type: 'database_id', database_id: process.env.NOTION_ONBOARDING_PAGE_ID ?? '' },
     properties: {

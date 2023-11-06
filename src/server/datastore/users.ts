@@ -84,6 +84,25 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
   return userData && (includingWithoutAccess || userData.hasAccess) ? toUser(userData) : undefined
 }
 
+export async function markUserAsOnboarded(userID: number) {
+  const userData = await getKeyedEntity(Entity.USER, userID)
+  if (userData) {
+    await getDatastore().save(
+      toUserData(
+        userData.email,
+        userData.fullName,
+        userData.imageURL,
+        userData.hasAccess,
+        true,
+        userData.isAdmin,
+        userData.createdAt,
+        userData.lastLoginAt,
+        userID
+      )
+    )
+  }
+}
+
 export async function markUserLogin(userID: number, fullName: string, imageURL: string) {
   const userData = await getKeyedEntity(Entity.USER, userID)
   if (userData) {
