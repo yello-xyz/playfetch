@@ -43,18 +43,15 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
       <div className='grid grid-cols-[140px_180px] text-gray-500 gap-y-0.5 pb-1'>
         <span className='font-medium'>Context</span>
         <span>{FormatLargeInteger(MaxTokensForModel(model))} tokens</span>
-        {!IsModelFreeToUse(model) && (
-          <>
-            <HorizontalBorder />
-            <HorizontalBorder />
-            <span className='font-medium'>Input Pricing</span>
-            <span>{FormatCost(InputPriceForModel(model))} / 1M tokens</span>
-            <HorizontalBorder />
-            <HorizontalBorder />
-            <span className='font-medium'>Output Pricing</span>
-            <span>{FormatCost(OutputPriceForModel(model))} / 1M tokens</span>
-          </>
-        )}
+        <HorizontalBorder />
+        <HorizontalBorder />
+        <span className='font-medium'>Input Pricing</span>
+        <ModelCost model={model} price={InputPriceForModel} />
+        <HorizontalBorder />
+        <HorizontalBorder />
+        <span className='font-medium'>Output Pricing</span>
+        <ModelCost model={model} price={OutputPriceForModel} />
+        {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (
         <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
@@ -68,3 +65,13 @@ const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 export const FreeLabel = () => (
   <span className='px-1 ml-1 text-[10px] leading-[17px] font-medium text-white bg-gray-400 rounded'>Free</span>
 )
+
+const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: LanguageModel) => number }) => {
+  return IsModelFreeToUse(model) ? (
+    <span>
+      <span className='line-through'>{FormatCost(0.5)}</span> $0 / 1M characters*
+    </span>
+  ) : (
+    <span>{FormatCost(price(model))} / 1M tokens</span>
+  )
+}
