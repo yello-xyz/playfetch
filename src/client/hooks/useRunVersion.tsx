@@ -82,7 +82,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     }
 
     setRunning(false)
-    
+
     return partialRuns.every(run => !run.failed)
   }
 
