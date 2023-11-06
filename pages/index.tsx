@@ -12,7 +12,7 @@ import {
   IsPendingWorkspace,
   PendingProject,
 } from '@/types'
-import { ParseNumberQuery, ProjectRoute, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/common/clientRoute'
+import ClientRoute, { ParseNumberQuery, ProjectRoute, Redirect, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
@@ -38,6 +38,10 @@ export const SharedProjectsWorkspace = (
 })
 
 export const getServerSideProps = withLoggedInSession(async ({ query, user }) => {
+  if (!user.didCompleteOnboarding) {
+    return Redirect(ClientRoute.Onboarding)
+  }
+
   const { w: workspaceID } = ParseNumberQuery(query)
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
