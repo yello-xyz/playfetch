@@ -7,6 +7,8 @@ import Icon from '@/components/icon'
 import { useState } from 'react'
 import { CheckValidEmail } from '@/src/common/formatting'
 import { useRouter } from 'next/router'
+import logo from '@/public/logo.svg'
+import Image from 'next/image'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
@@ -20,9 +22,9 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
   const [email, setEmail] = useState('')
 
   return (
-    <main className='flex flex-col items-center justify-center h-screen gap-6 p-10 bg-gray-25'>
+    <main className='flex flex-col items-center justify-center h-screen gap-4 p-10 bg-gray-25'>
       <div className='flex flex-col items-center gap-1.5'>
-        <span className='text-2xl font-semibold'>Sign in to PlayFetch</span>
+        <Image className='pb-2' width={logo.width} height={logo.height} src={logo.src} alt='logo' />
         <span className='text-sm text-center text-gray-400'>
           {joinedWaitList ? (
             <>
@@ -30,7 +32,10 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
               <p>but will notify you when we open up more broadly.</p>
             </>
           ) : (
-            <p>Don’t have an account? Sign in to join our waitlist…</p>
+            <>
+              <p>Sign in to your PlayFetch account below.</p>
+              <p>Don’t have an account? Sign in to join our waitlist…</p>
+            </>
           )}
         </span>
       </div>
