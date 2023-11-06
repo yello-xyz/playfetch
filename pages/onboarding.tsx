@@ -2,6 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import ClientRoute, { Redirect } from '@/src/common/clientRoute'
 import Button from '@/components/button'
 import { ReactNode, useState } from 'react'
+import TextInput from '@/components/textInput'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) =>
   user.didCompleteOnboarding ? Redirect(ClientRoute.Home) : { props: {} }
@@ -16,6 +17,7 @@ type OnboardingResponse = {
     deploying: boolean
     feedback: boolean
   }
+  otherUseCase?: string
   role?: 'executive' | 'manager' | 'individual' | 'contractor'
   area: {
     product: boolean
@@ -25,6 +27,7 @@ type OnboardingResponse = {
     design: boolean
     sales: boolean
   }
+  otherArea?: string
 }
 
 const emptyUseCase: OnboardingResponse['useCase'] = {
@@ -95,10 +98,11 @@ const UseCaseStep = ({
   setResponse: (response: OnboardingResponse) => void
   onNextStep: () => void
 }) => {
-  const [otherUseCase, setOtherUseCase] = useState<string>('')
+  const [otherUseCase, setOtherUseCase] = useState<string>()
   const useCase = response.useCase
   const setUseCase = (useCase: OnboardingResponse['useCase']) => setResponse({ ...response, useCase })
-  const isValidUseCase = Object.values(useCase).some(u => u) || otherUseCase.trim() !== ''
+  const hasOtherUseCase = otherUseCase !== undefined
+  const isValidUseCase = Object.values(useCase).some(u => u) || (hasOtherUseCase && otherUseCase.trim().length > 0)
 
   return (
     <OnboardingStep
@@ -122,6 +126,14 @@ const UseCaseStep = ({
         setValue={setUseCase}
         valueKey='feedback'
       />
+      <Checkbox title='Other' value={hasOtherUseCase} setValue={val => setOtherUseCase(val ? '' : undefined)} />
+      {hasOtherUseCase && (
+        <TextInput
+          value={otherUseCase}
+          setValue={setOtherUseCase}
+          placeholder='Briefly explain your use case if it’s not listed above.'
+        />
+      )}
     </OnboardingStep>
   )
 }
@@ -158,10 +170,11 @@ const AreaStep = ({
   setResponse: (response: OnboardingResponse) => void
   onNextStep: () => void
 }) => {
-  const [otherArea, setOtherArea] = useState<string>('')
+  const [otherArea, setOtherArea] = useState<string>()
   const area = response.area
   const setArea = (area: OnboardingResponse['area']) => setResponse({ ...response, area })
-  const isValidArea = Object.values(area).some(a => a) || otherArea.trim() !== ''
+  const hasOtherArea = otherArea !== undefined
+  const isValidArea = Object.values(area).some(a => a) || (hasOtherArea && otherArea.trim().length > 0)
 
   return (
     <OnboardingStep title='What kind of work do you do?' isValid={isValidArea} onNextStep={onNextStep}>
@@ -171,6 +184,14 @@ const AreaStep = ({
       <OptionCheckbox title='Content Strategy' value={area} setValue={setArea} valueKey='content' />
       <OptionCheckbox title='Design' value={area} setValue={setArea} valueKey='design' />
       <OptionCheckbox title='Sales' value={area} setValue={setArea} valueKey='sales' />
+      <Checkbox title='Other' value={hasOtherArea} setValue={val => setOtherArea(val ? '' : undefined)} />
+      {hasOtherArea && (
+        <TextInput
+          value={otherArea}
+          setValue={setOtherArea}
+          placeholder='Briefly explain the kind of work you do if it’s not listed above.'
+        />
+      )}
     </OnboardingStep>
   )
 }
@@ -185,17 +206,27 @@ const OptionCheckbox = <T extends Record<string, boolean>>({
   value: T
   setValue: (value: T) => void
   valueKey: keyof T
+}) => <Checkbox title={title} value={value[valueKey]} setValue={val => setValue({ ...value, [valueKey]: val })} />
+
+const Checkbox = ({
+  title,
+  value,
+  setValue,
+}: {
+  title: string
+  value: boolean
+  setValue: (value: boolean) => void
 }) => {
   return (
     <div className='flex items-center gap-3'>
       <input
         type='checkbox'
         className='w-5 h-5 cursor-pointer'
-        id={valueKey?.toString()}
-        checked={value[valueKey]}
-        onChange={() => setValue({ ...value, [valueKey]: !value[valueKey] })}
+        id={title}
+        checked={value}
+        onChange={() => setValue(!value)}
       />
-      <label className='font-medium cursor-pointer' htmlFor={valueKey?.toString()}>
+      <label className='font-medium cursor-pointer' htmlFor={title}>
         {title}
       </label>
     </div>
