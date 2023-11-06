@@ -58,14 +58,16 @@ export function PopupContent({
 }
 
 export function PopupLabelItem({
-  label,
+  title,
   icon,
+  label,
   onClick,
   checked,
   disabled,
 }: {
-  label: string
+  title: string
   icon?: StaticImageData
+  label?: ReactNode
   onClick: () => void
   disabled?: boolean
   checked?: boolean
@@ -74,6 +76,7 @@ export function PopupLabelItem({
   return (
     <PopupItem className={`flex items-center gap-1 p-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
       {icon && <Icon icon={icon} />}
+      {title}
       {label}
       {checked && <Icon className='ml-auto' icon={checkIcon} />}
     </PopupItem>

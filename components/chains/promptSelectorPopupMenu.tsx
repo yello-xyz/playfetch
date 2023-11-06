@@ -21,13 +21,13 @@ export default function PromptSelectorPopup({
       {prompts.map((prompt, index) => (
         <PopupLabelItem
           key={index}
-          label={prompt.name}
+          title={prompt.name}
           icon={promptIcon}
           onClick={withDismiss(() => selectPrompt(prompt.id))}
         />
       ))}
       {prompts.length > 0 && <PopupSectionDivider />}
-      <PopupLabelItem label='Create new Prompt' icon={addIcon} onClick={withDismiss(addPrompt)} />
+      <PopupLabelItem title='Create new Prompt' icon={addIcon} onClick={withDismiss(addPrompt)} />
     </PopupContent>
   )
 }

@@ -65,6 +65,6 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
 
 const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 
-const FreeLabel = () => (
+export const FreeLabel = () => (
   <span className='px-1 ml-1 text-[10px] leading-[17px] font-medium text-white bg-gray-400 rounded'>Free</span>
 )

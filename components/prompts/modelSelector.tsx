@@ -3,7 +3,7 @@ import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/c
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
-import ModelInfoPane from './modelInfoPane'
+import ModelInfoPane, { FreeLabel } from './modelInfoPane'
 import {
   PublicLanguageModels,
   FullLabelForModel,
@@ -11,6 +11,7 @@ import {
   IconForProvider,
   LabelForModel,
   ProviderForModel,
+  IsModelFreeToUse,
 } from '@/src/common/providerMetadata'
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
@@ -72,8 +73,9 @@ function ModelSelectorPopup({
         .map((model, index) => (
           <div key={index} className='group'>
             <PopupLabelItem
-              label={FullLabelForModel(model, availableProviders, false)}
+              title={FullLabelForModel(model, availableProviders, false)}
               icon={IconForProvider(ProviderForModel(model))}
+              label={IsModelFreeToUse(model) ? <FreeLabel /> : undefined}
               onClick={withDismiss(() => onSelectModel(model))}
               disabled={!checkModelAvailable(model)}
               checked={model === selectedModel}

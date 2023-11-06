@@ -71,7 +71,7 @@ function PropjectItemSelectorPopup({
       {project.prompts.map((prompt, index) => (
         <PopupLabelItem
           key={index}
-          label={prompt.name}
+          title={prompt.name}
           icon={promptIcon}
           onClick={withDismiss(() => onSelectItemID(prompt.id))}
         />
@@ -80,7 +80,7 @@ function PropjectItemSelectorPopup({
       {project.chains.map((chain, index) => (
         <PopupLabelItem
           key={index}
-          label={chain.name}
+          title={chain.name}
           icon={chainIcon}
           onClick={withDismiss(() => onSelectItemID(chain.id))}
         />
@@ -93,7 +93,7 @@ function PropjectItemSelectorPopup({
           .map((endpoint, index) => (
             <PopupLabelItem
               key={index}
-              label={`${endpoint.urlPath} (${endpoint.flavor})`}
+              title={`${endpoint.urlPath} (${endpoint.flavor})`}
               icon={endpointIcon}
               onClick={withDismiss(() => onSelectItemID(endpoint.id))}
             />

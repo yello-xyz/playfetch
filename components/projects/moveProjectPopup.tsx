@@ -64,7 +64,7 @@ export default function MoveProjectPopup({
         <>
           {userWorkspace && (
             <PopupLabelItem
-              label={userWorkspace.name}
+              title={userWorkspace.name}
               icon={folderIcon}
               onClick={withDismiss(() => moveToWorkspace(userWorkspace.id))}
               checked={project.workspaceID === userWorkspace.id}
@@ -74,14 +74,14 @@ export default function MoveProjectPopup({
           {properWorkspaces.map((workspace, index) => (
             <PopupLabelItem
               key={index}
-              label={workspace.name}
+              title={workspace.name}
               icon={folderIcon}
               onClick={withDismiss(() => moveToWorkspace(workspace.id))}
               checked={project.workspaceID === workspace.id}
             />
           ))}
           <PopupSectionDivider />
-          <PopupLabelItem label='Add new Workspace' icon={addIcon} onClick={() => setNewWorkspaceName('')} />{' '}
+          <PopupLabelItem title='Add new Workspace' icon={addIcon} onClick={() => setNewWorkspaceName('')} />{' '}
         </>
       )}
     </PopupContent>
