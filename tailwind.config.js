@@ -118,6 +118,7 @@ module.exports = {
         sm: '0.79rem',
         base: '.9rem',
         lg: '.95rem',
+        xl: '1.125rem',
       },
       fontFamily: {
         sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
