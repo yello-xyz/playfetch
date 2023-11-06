@@ -79,9 +79,10 @@ const UseCaseStep = ({
   setResponse: (response: OnboardingResponse) => void
   onNextStep: () => void
 }) => {
-  const [otherUseCase, setOtherUseCase] = useState<string>()
   const useCase = response.useCase
   const setUseCase = (useCase: OnboardingResponse['useCase']) => setResponse({ ...response, useCase })
+  const otherUseCase = response.otherUseCase
+  const setOtherUseCase = (otherUseCase: string | undefined) => setResponse({ ...response, otherUseCase })
   const hasOtherUseCase = otherUseCase !== undefined
   const isValidUseCase = Object.values(useCase).some(u => u) || (hasOtherUseCase && otherUseCase.trim().length > 0)
 
@@ -149,9 +150,10 @@ const AreaStep = ({
   response: OnboardingResponse
   setResponse: (response: OnboardingResponse) => void
 }) => {
-  const [otherArea, setOtherArea] = useState<string>()
   const area = response.area
   const setArea = (area: OnboardingResponse['area']) => setResponse({ ...response, area })
+  const otherArea = response.otherArea
+  const setOtherArea = (otherArea: string | undefined) => setResponse({ ...response, otherArea })
   const hasOtherArea = otherArea !== undefined
   const isValidArea = Object.values(area).some(a => a) || (hasOtherArea && otherArea.trim().length > 0)
 
