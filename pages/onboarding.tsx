@@ -4,6 +4,8 @@ import Button from '@/components/button'
 import { ReactNode, useState } from 'react'
 import TextInput from '@/components/textInput'
 import { OnboardingResponse } from '@/types'
+import api from '@/src/client/api'
+import { useRouter } from 'next/router'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) =>
   user.didCompleteOnboarding ? Redirect(ClientRoute.Home) : { props: {} }
@@ -29,7 +31,6 @@ const emptyArea: OnboardingResponse['area'] = {
 
 export default function Onboarding() {
   const [response, setResponse] = useState<OnboardingResponse>({ useCase: emptyUseCase, area: emptyArea })
-
   const [step, setStep] = useState<'useCase' | 'role' | 'area'>('useCase')
 
   return (
@@ -38,7 +39,7 @@ export default function Onboarding() {
         <UseCaseStep response={response} setResponse={setResponse} onNextStep={() => setStep('role')} />
       )}
       {step === 'role' && <RoleStep response={response} setResponse={setResponse} onNextStep={() => setStep('area')} />}
-      {step === 'area' && <AreaStep response={response} setResponse={setResponse} onNextStep={() => {}} />}
+      {step === 'area' && <AreaStep response={response} setResponse={setResponse} />}
     </main>
   )
 }
@@ -143,11 +144,9 @@ const RoleStep = ({
 const AreaStep = ({
   response,
   setResponse,
-  onNextStep,
 }: {
   response: OnboardingResponse
   setResponse: (response: OnboardingResponse) => void
-  onNextStep: () => void
 }) => {
   const [otherArea, setOtherArea] = useState<string>()
   const area = response.area
@@ -155,8 +154,20 @@ const AreaStep = ({
   const hasOtherArea = otherArea !== undefined
   const isValidArea = Object.values(area).some(a => a) || (hasOtherArea && otherArea.trim().length > 0)
 
+  const [isProcessing, setProcessing] = useState(false)
+  const router = useRouter()
+
+  const completeOnboarding = async () => {
+    setProcessing(true)
+    await api.completeOnboarding(response)
+    router.push(ClientRoute.Home)
+  }
+
   return (
-    <OnboardingStep title='What kind of work do you do?' isValid={isValidArea} onNextStep={onNextStep}>
+    <OnboardingStep
+      title='What kind of work do you do?'
+      isValid={isValidArea && !isProcessing}
+      onNextStep={completeOnboarding}>
       <OptionCheckbox title='Product' value={area} setValue={setArea} valueKey='product' />
       <OptionCheckbox title='Engineering' value={area} setValue={setArea} valueKey='engineering' />
       <OptionCheckbox title='Marketing' value={area} setValue={setArea} valueKey='marketing' />

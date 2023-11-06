@@ -5,7 +5,7 @@ import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function completeOnboarding(req: NextApiRequest, res: NextApiResponse, user: User) {
-  await addOnboardingResponse(user.email, user.fullName, req.body)
+  await addOnboardingResponse(user.email, user.fullName, req.body.response)
   await markUserAsOnboarded(user.id)
   res.json({})
 }
