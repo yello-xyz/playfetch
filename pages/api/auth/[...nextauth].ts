@@ -7,7 +7,7 @@ import { GetEmailServerConfig, GetNoReplyFromAddress } from '@/src/server/email'
 import signUpNewUser from '@/src/server/waitlist'
 import { ServerResponse } from 'http'
 import { NextApiRequest, NextApiResponse } from 'next'
-import NextAuth, { Session, SessionStrategy, User } from 'next-auth'
+import NextAuth, { NextAuthOptions, Session, SessionStrategy, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
 import EmailProvider from 'next-auth/providers/email'
 import GithubProvider from 'next-auth/providers/github'
@@ -16,7 +16,7 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 
 const getRegisteredUser = async (email?: string | null) => (email ? getUserForEmail(email) : undefined)
 
-export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse) => ({
+export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse): NextAuthOptions => ({
   adapter: NextAuthAdapter(),
   session: {
     strategy: 'jwt' as SessionStrategy,
@@ -70,6 +70,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
           token.imageURL = registeredUser.imageURL
           token.isAdmin = registeredUser.isAdmin
           token.lastLoginAt = registeredUser.lastLoginAt
+          token.didCompleteOnboarding = registeredUser.didCompleteOnboarding
         }
       }
       return token
@@ -82,6 +83,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         imageURL: token.imageURL as string,
         isAdmin: token.isAdmin as boolean,
         lastLoginAt: token.lastLoginAt as number | null,
+        didCompleteOnboarding: token.didCompleteOnboarding as boolean
       }
       return session
     },

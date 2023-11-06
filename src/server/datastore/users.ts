@@ -67,6 +67,7 @@ export const toUser = (data: any): User => ({
   imageURL: data.imageURL,
   isAdmin: data.isAdmin,
   lastLoginAt: getTimestamp(data, 'lastLoginAt') ?? null,
+  didCompleteOnboarding: data.didCompleteOnboarding ?? true,
 })
 
 export const getUserForID = (userID: number) => getKeyedEntity(Entity.USER, userID).then(toUser)
