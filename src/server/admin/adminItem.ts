@@ -40,6 +40,9 @@ export default async function loadAdminItem(query: ParsedUrlQuery) {
       ['Reports', process.env.GOOGLE_ANALYTICS_REPORTS_URL ?? ''],
       ['Search Console', process.env.GOOGLE_SEARCH_CONSOLE_URL ?? ''],
     ].filter(([_, url]) => url),
-    debugLinks: [['Server Logs', process.env.SERVER_LOGS_URL ?? '']].filter(([_, url]) => url),
+    debugLinks: [
+      ['Integration Test', process.env.INTEGRATION_TEST_URL ?? ''],
+      ['Server Logs', process.env.SERVER_LOGS_URL ?? ''],
+    ].filter(([_, url]) => url),
   }
 }
