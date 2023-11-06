@@ -61,9 +61,10 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         return false
       }
     },
-    async jwt({ token, user }: { user: User; token: JWT }) {
-      if (user) {
-        const registeredUser = await getRegisteredUser(user.email)
+    async jwt({ token, user, trigger }: { user: User; token: JWT;trigger?: "signIn" | "signUp" | "update" }) {
+      const email = user ? user.email : trigger === 'update' ? token.email : undefined
+      if (email) {
+        const registeredUser = await getRegisteredUser(email)
         if (registeredUser) {
           token.id = registeredUser.id
           token.fullName = registeredUser.fullName

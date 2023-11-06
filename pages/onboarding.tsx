@@ -6,6 +6,7 @@ import TextInput from '@/components/textInput'
 import { OnboardingResponse } from '@/types'
 import api from '@/src/client/api'
 import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) =>
   user.didCompleteOnboarding ? Redirect(ClientRoute.Home) : { props: {} }
@@ -156,10 +157,12 @@ const AreaStep = ({
 
   const [isProcessing, setProcessing] = useState(false)
   const router = useRouter()
+  const { update } = useSession()
 
   const completeOnboarding = async () => {
     setProcessing(true)
     await api.completeOnboarding(response)
+    await update()
     router.push(ClientRoute.Home)
   }
 
