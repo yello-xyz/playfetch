@@ -13,6 +13,7 @@ import { TryParseOutput } from '@/src/server/evaluationEngine/promptEngine'
 import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 import { updateAnalytics } from '@/src/server/datastore/analytics'
+import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 
 const logResponse = (
   clientID: string,
@@ -98,7 +99,8 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const salt = (value: number | bigint) => BigInt(value) ^ BigInt(endpoint.id)
         const continuationID = continuationKey ? Number(salt(BigInt(continuationKey))) : undefined
         const versionID = endpoint.versionID
-        const inputs = typeof req.body === 'string' ? {} : (req.body as PromptInputs)
+        const inputs =
+          typeof req.body === 'string' ? { [DefaultChatContinuationInputKey]: req.body } : (req.body as PromptInputs)
 
         const cachedResponse = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
         if (cachedResponse && useStreaming) {
