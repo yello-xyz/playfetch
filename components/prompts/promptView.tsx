@@ -47,9 +47,9 @@ export default function PromptView({
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
-  const runPrompt = (inputs: PromptInputs[]) => {
+  const runPrompt = async (inputs: PromptInputs[]) => {
     persistInputValuesIfNeeded()
-    return runVersion(savePrompt, inputs)
+    await runVersion(savePrompt, inputs)
   }
 
   const selectTab = (tab: ActiveTab) => {

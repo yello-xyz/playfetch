@@ -27,7 +27,7 @@ export default function RunTimeline({
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
-  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<void>
+  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
   isRunning?: boolean
   skipHeader?: boolean
 }) {

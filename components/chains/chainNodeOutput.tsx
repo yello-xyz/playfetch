@@ -115,8 +115,10 @@ export default function ChainNodeOutput({
     if (areProvidersAvailable(items)) {
       setActiveIndex(0)
       setRunningItemIndex(-1)
-      await runVersion(() => saveItems(items), inputs)
-      setActiveIndex(nodes.length - 1)
+      const succeeded = await runVersion(() => saveItems(items), inputs)
+      if (succeeded) {
+        setActiveIndex(nodes.length - 1)
+      }
     }
   }
 
