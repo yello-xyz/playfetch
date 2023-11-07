@@ -61,7 +61,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         return false
       }
     },
-    async jwt({ token, user, trigger }: { user: User; token: JWT;trigger?: "signIn" | "signUp" | "update" }) {
+    async jwt({ token, user, trigger }: { user: User; token: JWT; trigger?: 'signIn' | 'signUp' | 'update' }) {
       const email = user ? user.email : trigger === 'update' ? token.email : undefined
       if (email) {
         const registeredUser = await getRegisteredUser(email)
@@ -84,7 +84,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         imageURL: token.imageURL as string,
         isAdmin: token.isAdmin as boolean,
         lastLoginAt: token.lastLoginAt as number | null,
-        didCompleteOnboarding: token.didCompleteOnboarding as boolean
+        didCompleteOnboarding: token.didCompleteOnboarding as boolean,
       }
       return session
     },

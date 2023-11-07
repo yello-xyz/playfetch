@@ -12,7 +12,13 @@ import {
   IsPendingWorkspace,
   PendingProject,
 } from '@/types'
-import ClientRoute, { ParseNumberQuery, ProjectRoute, Redirect, SharedProjectsWorkspaceID, WorkspaceRoute } from '@/src/common/clientRoute'
+import ClientRoute, {
+  ParseNumberQuery,
+  ProjectRoute,
+  Redirect,
+  SharedProjectsWorkspaceID,
+  WorkspaceRoute,
+} from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
