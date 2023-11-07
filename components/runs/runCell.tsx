@@ -11,7 +11,7 @@ export default function RunCell({
   activeItem,
   isRunning,
   runContinuation,
-  inputValues,
+  selectInputValue,
 }: {
   identifierForRun: (runID: number) => string
   run: PartialRun | Run
@@ -19,7 +19,7 @@ export default function RunCell({
   activeItem?: ActivePrompt | ActiveChain
   isRunning?: boolean
   runContinuation?: (continuationID: number, message: string, inputKey: string) => void
-  inputValues: InputValues
+  selectInputValue: (inputKey: string) => string | undefined
 }) {
   const isProperRun = ((item): item is Run => 'labels' in item)(run)
   const continuationID = run.continuationID
@@ -55,7 +55,7 @@ export default function RunCell({
           runContinuation={
             runContinuation ? (message, inputKey) => runContinuation(continuationID, message, inputKey) : undefined
           }
-          inputValues={inputValues}
+          selectInputValue={selectInputValue}
         />
       )}
     </div>

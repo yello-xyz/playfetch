@@ -4,7 +4,7 @@ import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formattin
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testDataPane'
-import RunButtons from '../runs/runButtons'
+import RunButtons, { SelectAnyInputValue } from '../runs/runButtons'
 import {
   ChainNode,
   InputNode,
@@ -163,7 +163,7 @@ export default function ChainNodeOutput({
               activeRunID={activeRunID}
               version={activeVersion}
               runVersion={runVersion}
-              inputValues={inputValues}
+              selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
             />
           </div>

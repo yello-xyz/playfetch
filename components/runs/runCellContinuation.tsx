@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, InputValues, PartialRun, PromptVersion, Run, User } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
 import { Fragment, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
@@ -7,7 +7,7 @@ import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import RunCellBody from './runCellBody'
 import { ExtractInputKey } from '@/src/common/formatting'
-import { SelectAnyInputRow } from './runButtons'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function RunCellContinuation({
   run,
@@ -17,7 +17,7 @@ export default function RunCellContinuation({
   version,
   isRunning,
   runContinuation,
-  inputValues
+  selectInputValue,
 }: {
   run: PartialRun | Run
   continuations: (PartialRun | Run)[]
@@ -26,14 +26,13 @@ export default function RunCellContinuation({
   version?: PromptVersion | ChainVersion
   isRunning?: boolean
   runContinuation?: (message: string, inputKey: string) => void
-  inputValues: InputValues
+  selectInputValue: (inputKey: string) => string | undefined
 }) {
   const getInputKey = (run: PartialRun | Run) => ExtractInputKey(run)
   const getPreviousInputKey = (index: number) => getInputKey([run, ...continuations][index])
   const lastInputKey = getPreviousInputKey(continuations.length)
 
-  const inputRow = SelectAnyInputRow(inputValues, [lastInputKey])
-  const [replyMessage, setReplyMessage] = useState(inputRow[lastInputKey] ?? '')
+  const [replyMessage, setReplyMessage] = useInitialState(selectInputValue(lastInputKey) ?? '')
   const [lastReply, setLastReply] = useState('')
 
   const user = useLoggedInUser()

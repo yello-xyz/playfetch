@@ -12,6 +12,7 @@ import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testDataPane'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import { SelectAnyInputValue } from '../runs/runButtons'
 
 export const LoadPendingVersion = (
   versions: PromptVersion[],
@@ -140,7 +141,7 @@ export default function PromptView({
             version={activeVersion}
             activeRunID={activeRunID}
             runVersion={runVersion}
-            inputValues={inputValues}
+            selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
             isRunning={isRunning}
           />
         </div>

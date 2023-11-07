@@ -8,6 +8,12 @@ export const SelectAnyInputRow = (inputValues: InputValues, variables: string[])
   SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
   Object.fromEntries(variables.map(variable => [variable, '']))
 
+export const SelectAnyInputValue =
+  (inputValues: InputValues, config: TestConfig) =>
+  (variable: string): string | undefined =>
+    SelectInputRows(inputValues, [variable], config)[0][0]?.[variable] ??
+    SelectAnyInputRow(inputValues, [variable])[variable]
+
 type TestMode = TestConfig['mode']
 
 const shuffleArray = <T,>(source: T[]): T[] => {
