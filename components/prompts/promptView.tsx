@@ -12,7 +12,7 @@ import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testDataPane'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
-import { SelectAnyInputValue } from '../runs/runButtons'
+import { SelectAnyInputValue } from '@/src/client/inputRows'
 
 export const LoadPendingVersion = (
   versions: PromptVersion[],

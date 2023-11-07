@@ -1,4 +1,4 @@
-import { SelectInputRows } from '@/components/runs/runButtons'
+import { SelectInputRows } from '@/src/client/inputRows'
 import { InputValues, TestConfig } from '@/types'
 
 const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({ mode, rowIndices })

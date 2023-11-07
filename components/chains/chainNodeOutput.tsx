@@ -4,7 +4,7 @@ import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formattin
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testDataPane'
-import RunButtons, { SelectAnyInputValue } from '../runs/runButtons'
+import RunButtons from '../runs/runButtons'
 import {
   ChainNode,
   InputNode,
@@ -21,6 +21,7 @@ import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderForModel } from '@/src/common/providerMetadata'
+import { SelectAnyInputValue } from '@/src/client/inputRows'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
