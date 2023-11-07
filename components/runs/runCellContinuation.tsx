@@ -7,8 +7,10 @@ import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import RunCellBody from './runCellBody'
+import { ExtractFunctionName } from '@/src/common/formatting'
 
 export default function RunCellContinuation({
+  run,
   continuations,
   identifierForRun,
   activeItem,
@@ -16,19 +18,24 @@ export default function RunCellContinuation({
   isRunning,
   runContinuation,
 }: {
+  run: PartialRun | Run
   continuations: (PartialRun | Run)[]
   identifierForRun: (runID: number) => string
   activeItem?: ActivePrompt | ActiveChain
   version?: PromptVersion | ChainVersion
   isRunning?: boolean
-  runContinuation?: (message: string) => void
+  runContinuation?: (message: string, inputKey: string) => void
 }) {
   const [replyMessage, setReplyMessage] = useState('')
   const [lastReply, setLastReply] = useState('')
 
+  const getInputKey = (run: PartialRun | Run) => ExtractFunctionName(run) ?? DefaultChatContinuationInputKey
+  const getPreviousInputKey = (index: number) => getInputKey([run, ...continuations][index])
+  const lastInputKey = getPreviousInputKey(continuations.length)
+
   const user = useLoggedInUser()
-  const sendReply = (runContinuation: (message: string) => void) => () => {
-    runContinuation(replyMessage)
+  const sendReply = (runContinuation: (message: string, inputKey: string) => void) => () => {
+    runContinuation(replyMessage, lastInputKey)
     setLastReply(replyMessage)
     setReplyMessage('')
   }
@@ -38,11 +45,11 @@ export default function RunCellContinuation({
 
   return (
     <>
-      {continuations.map(run => (
+      {continuations.map((run, index) => (
         <Fragment key={run.id}>
           <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
           <BorderedSection>
-            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[DefaultChatContinuationInputKey]}</div>
+            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[getPreviousInputKey(index)]}</div>
           </BorderedSection>
           <RunCellBody
             identifierForRun={identifierForRun}

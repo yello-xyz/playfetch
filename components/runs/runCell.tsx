@@ -17,7 +17,7 @@ export default function RunCell({
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   isRunning?: boolean
-  runContinuation?: (continuationID: number, message: string) => void
+  runContinuation?: (continuationID: number, message: string, inputKey: string) => void
 }) {
   const isProperRun = ((item): item is Run => 'labels' in item)(run)
   const continuationID = run.continuationID
@@ -44,12 +44,15 @@ export default function RunCell({
       <RunCellFooter run={run} isContinuation={isContinuation} />
       {isContinuation && (
         <RunCellContinuation
+          run={run}
           continuations={run.continuations ?? []}
           identifierForRun={identifierForRun}
           activeItem={activeItem}
           version={version}
           isRunning={isRunning}
-          runContinuation={runContinuation ? message => runContinuation(continuationID, message) : undefined}
+          runContinuation={
+            runContinuation ? (message, inputKey) => runContinuation(continuationID, message, inputKey) : undefined
+          }
         />
       )}
     </div>

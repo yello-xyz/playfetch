@@ -107,6 +107,11 @@ const ExtractFunctionNames = (text: string) => {
   return Array.isArray(json) ? json.map(item => item?.name as string).filter(name => name) : []
 }
 
+export const ExtractFunctionName = (run: { output: string }) => {
+  const json = TryParseJSON(run.output)
+  return json?.function?.name as string
+}
+
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic = true) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
