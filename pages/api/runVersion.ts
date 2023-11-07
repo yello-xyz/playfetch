@@ -71,7 +71,12 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   )
 
   for (const [index, response] of responses.entries()) {
-    sendData({ inputIndex: index, timestamp: new Date().getTime(), isLast: !response.failed })
+    sendData({
+      inputIndex: index,
+      timestamp: new Date().getTime(),
+      isLast: !response.failed,
+      canContinue: !!response.continuationID,
+    })
     await logResponse(req, res, user.id, version, multipleInputs[index], response, continuationID)
   }
 

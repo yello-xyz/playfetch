@@ -10,7 +10,7 @@ export const SelectAnyInputValue =
     SelectInputRows(inputValues, [variable], config)[0][0]?.[variable] ??
     SelectAnyInputRow(inputValues, [variable])[variable]
 
-const shuffleArray = <T,>(source: T[]): T[] => {
+const shuffleArray = <T>(source: T[]): T[] => {
   const array = [...source]
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))

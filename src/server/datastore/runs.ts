@@ -164,6 +164,7 @@ export const toRun = (data: any): Run => ({
   duration: data.duration,
   labels: JSON.parse(data.labels),
   continuationID: data.continuationID ?? null,
+  canContinue: data.canContinue ?? false,
 })
 
 export async function getRecentRuns(

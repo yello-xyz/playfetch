@@ -63,7 +63,7 @@ export default function RunCellContinuation({
           <RunCellFooter run={run} isContinuation />
         </Fragment>
       ))}
-      {runContinuation && (
+      {!!runContinuation && !![run, ...continuations].slice(-1)[0].canContinue && (
         <>
           <RoleHeader user={user} role='User' />
           <BorderedSection>

@@ -180,6 +180,7 @@ type CommonRun = {
   duration?: number
   failed?: boolean
   continuationID?: number
+  canContinue?: boolean
   continuations?: (PartialRun | Run)[]
 }
 
