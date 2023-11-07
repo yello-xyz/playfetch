@@ -13,7 +13,7 @@ import { TryParseOutput } from '@/src/server/evaluationEngine/promptEngine'
 import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 import { updateAnalytics } from '@/src/server/datastore/analytics'
-import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
+import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
 
 const logResponse = (
   clientID: string,

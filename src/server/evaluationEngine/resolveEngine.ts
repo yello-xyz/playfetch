@@ -1,6 +1,5 @@
 import { PromptInputs, Prompts } from '@/types'
-import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
-import { DefaultChatContinuationInputKey } from '../../common/defaultConfig'
+import { DefaultChatContinuationInputKey, ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 
 const promptToCamelCase = (prompt: string) =>
   ExtractVariables(prompt).reduce(

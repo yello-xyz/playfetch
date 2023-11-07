@@ -10,5 +10,3 @@ export const DefaultConfig: PromptConfig = {
   temperature: 0.5,
   maxTokens: 250,
 }
-
-export const DefaultChatContinuationInputKey = 'message'

@@ -3,11 +3,10 @@ import { Fragment, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
 import { PendingButton } from '../button'
-import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import RunCellBody from './runCellBody'
-import { ExtractFunctionName } from '@/src/common/formatting'
+import { ExtractInputKey } from '@/src/common/formatting'
 
 export default function RunCellContinuation({
   run,
@@ -29,7 +28,7 @@ export default function RunCellContinuation({
   const [replyMessage, setReplyMessage] = useState('')
   const [lastReply, setLastReply] = useState('')
 
-  const getInputKey = (run: PartialRun | Run) => ExtractFunctionName(run) ?? DefaultChatContinuationInputKey
+  const getInputKey = (run: PartialRun | Run) => ExtractInputKey(run)
   const getPreviousInputKey = (index: number) => getInputKey([run, ...continuations][index])
   const lastInputKey = getPreviousInputKey(continuations.length)
 

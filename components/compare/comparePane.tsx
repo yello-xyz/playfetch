@@ -14,7 +14,7 @@ import VersionSelector from '../versions/versionSelector'
 import RunTimeline from '../runs/runTimeline'
 import PromptPanel, { PromptTab } from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
-import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
+import { ExtractInputKey } from '@/src/common/formatting'
 
 export default function ComparePane({
   project,
@@ -39,16 +39,26 @@ export default function ComparePane({
   disabled?: boolean
   includeResponses?: boolean
 }) {
+  const precedesContinuation = (continuation: LogEntry) => (log: LogEntry) =>
+    !!continuation.continuationID &&
+    log.continuationID === continuation.continuationID &&
+    log.timestamp < continuation.timestamp
+  const precedingRun = (log: LogEntry, logs: LogEntry[]) =>
+    logs
+      .filter(precedesContinuation(log))
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .slice(-1)[0]
+  const isContinuation = (log: LogEntry, logs: LogEntry[]) => !!precedingRun(log, logs)
+  const extractInputKey = (log: LogEntry, logs: LogEntry[]) =>
+    ExtractInputKey({ output: JSON.stringify(precedingRun(log, logs).output) })
+
   const endpointLogEntries = IsEndpoint(activeItem) ? logEntries.filter(log => log.endpointID === activeItem.id) : []
-  const isContinuation = (log: LogEntry, logs: LogEntry[]) =>
-    !!log.continuationID &&
-    logs.some(entry => entry.continuationID === log.continuationID && entry.timestamp < log.timestamp)
   const logsAsRuns: Run[] = endpointLogEntries.map((log, index, logs) => ({
     id: index,
     timestamp: log.timestamp,
     output: log.error ?? JSON.stringify(log.output, null, 2),
     inputs: isContinuation(log, logs)
-      ? { [DefaultChatContinuationInputKey]: JSON.stringify(log.inputs, null, 2) }
+      ? { [extractInputKey(log, logs)]: JSON.stringify(log.inputs, null, 2) }
       : log.inputs,
     cost: log.cost,
     duration: log.duration,
