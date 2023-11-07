@@ -2,6 +2,7 @@ import { PromptInputs, Run } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
+import { PropertyFilter } from '@google-cloud/datastore'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -9,28 +10,32 @@ export async function migrateRuns(postMerge: boolean) {
   }
   const datastore = getDatastore()
   let remainingSaveCount = 100
-  const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
-  for (const runData of allRuns) {
-    if (remainingSaveCount-- <= 0) {
-      console.log('‼️  Please run this migration again to process remaining runs')
-      return
-    }
-    await datastore.save(
-      toRunData(
-        runData.userID,
-        runData.parentID,
-        runData.versionID,
-        JSON.parse(runData.inputs),
-        runData.output,
-        runData.createdAt,
-        runData.cost,
-        runData.duration,
-        JSON.parse(runData.labels),
-        runData.continuationID,
-        runData.canContinue,
-        getID(runData)
+  const [continuationRuns] = await datastore.runQuery(
+    datastore.createQuery(Entity.RUN).filter(new PropertyFilter('continuationID', '!=', null))
+  )
+  for (const runData of continuationRuns) {
+    if (runData.canContinue === undefined) {
+      if (remainingSaveCount-- <= 0) {
+        console.log('‼️  Please run this migration again to process remaining runs')
+        return
+      }
+      await datastore.save(
+        toRunData(
+          runData.userID,
+          runData.parentID,
+          runData.versionID,
+          JSON.parse(runData.inputs),
+          runData.output,
+          runData.createdAt,
+          runData.cost,
+          runData.duration,
+          JSON.parse(runData.labels),
+          runData.continuationID,
+          true,
+          getID(runData)
+        )
       )
-    )
+    }
   }
   console.log('✅ Processed all remaining runs')
 }
