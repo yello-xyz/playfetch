@@ -78,7 +78,8 @@ async function tryCompleteChat(
     const previousFunctions = useContext ? context?.functions ?? [] : []
     const response = await api.chat.completions.create(
       {
-        model,
+        // TODO remove this after Dec 11th (when the former points to the latter)
+        model : model.replaceAll('gpt-3.5-turbo-16k', 'gpt-3.5-turbo-1106'),
         messages: [...previousMessages, ...promptMessages],
         temperature,
         max_tokens: maxTokens,
