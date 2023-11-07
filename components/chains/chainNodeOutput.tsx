@@ -111,20 +111,22 @@ export default function ChainNodeOutput({
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion(activeVersion.id)
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
-  const runChain = async (inputs: PromptInputs[]) => {
+  const runChain = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     persistInputValuesIfNeeded()
     if (areProvidersAvailable(items)) {
       setActiveIndex(0)
       setRunningItemIndex(-1)
-      const succeeded = await runVersion(() => saveItems(items), inputs)
+      const succeeded = await runVersion(getVersion, inputs, continuationID)
       if (succeeded) {
         setActiveIndex(nodes.length - 1)
       }
     }
   }
+  const saveAndRun = async (inputs: PromptInputs[]) => runChain(() => saveItems(items), inputs)
 
   useEffect(() => {
     if (highestRunIndex > runningItemIndex) {
+      console.log(runningItemIndex, '->', highestRunIndex)
       setActiveIndex(highestRunIndex + 1)
       setRunningItemIndex(highestRunIndex)
     }
@@ -163,7 +165,7 @@ export default function ChainNodeOutput({
               activeItem={chain}
               activeRunID={activeRunID}
               version={activeVersion}
-              runVersion={runVersion}
+              runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
             />
@@ -179,7 +181,7 @@ export default function ChainNodeOutput({
               setTestConfig={setTestConfig}
               onShowTestConfig={activeIndex !== 0 ? () => setActiveIndex(0) : undefined}
               disabled={!items.length || !areProvidersAvailable(items) || isRunning}
-              callback={runChain}
+              callback={saveAndRun}
             />
           </div>
         )}
