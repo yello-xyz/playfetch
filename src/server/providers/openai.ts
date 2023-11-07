@@ -66,6 +66,9 @@ async function tryCompleteChat(
   if (functionsPrompt) {
     try {
       functions = JSON.parse(functionsPrompt)
+      if (!Array.isArray(functions)) {
+        functions = [functions]
+      }
     } catch (error: any) {
       return { error: `Failed to parse functions as JSON array.\n${error?.message ?? ''}` }
     }
