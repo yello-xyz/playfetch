@@ -30,7 +30,8 @@ const logResponse = (
         response.cost,
         response.duration,
         [],
-        continuationID ?? response.continuationID
+        continuationID ?? response.continuationID,
+        !!response.continuationID
       )
 }
 
