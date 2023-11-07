@@ -46,8 +46,6 @@ const emptyResponse: ResponseType = {
   failed: false,
 }
 
-export const MaxContinuationCount = 10
-
 export default async function runChain(
   userID: number,
   version: RawPromptVersion | RawChainVersion,
@@ -123,14 +121,9 @@ export default async function runChain(
       const functionInterrupt = lastResponse.failed ? undefined : lastResponse.functionInterrupt
       if (lastResponse.failed) {
         continuationIndex = undefined
-      } else if (promptVersion.config.isChat || (functionInterrupt && isEndpointEvaluation)) {
+      } else if (promptVersion.config.isChat || functionInterrupt) {
         continuationIndex = index
         break
-      } else if (functionInterrupt && inputs[functionInterrupt] && continuationCount < MaxContinuationCount) {
-        ++continuationCount
-        continuationIndex = index
-        index -= 1
-        continue
       } else {
         continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
       }
