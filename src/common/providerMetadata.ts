@@ -363,7 +363,7 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
-      return 12
+      return 3
   }
 }
 
@@ -391,7 +391,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
-      return 16
+      return 6
   }
 }
 
