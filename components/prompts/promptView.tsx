@@ -140,6 +140,7 @@ export default function PromptView({
             version={activeVersion}
             activeRunID={activeRunID}
             runVersion={runVersion}
+            inputValues={inputValues}
             isRunning={isRunning}
           />
         </div>

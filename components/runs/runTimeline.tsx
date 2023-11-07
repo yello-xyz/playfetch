@@ -1,4 +1,13 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
+import {
+  ActiveChain,
+  ActivePrompt,
+  ChainVersion,
+  InputValues,
+  PartialRun,
+  PromptInputs,
+  PromptVersion,
+  Run,
+} from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
@@ -19,6 +28,7 @@ export default function RunTimeline({
   activeItem,
   activeRunID,
   runVersion,
+  inputValues = {},
   isRunning,
   skipHeader,
 }: {
@@ -27,6 +37,7 @@ export default function RunTimeline({
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
   runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
+  inputValues?: InputValues
   isRunning?: boolean
   skipHeader?: boolean
 }) {
@@ -91,6 +102,7 @@ export default function RunTimeline({
               activeItem={activeItem}
               isRunning={isRunning}
               runContinuation={runContinuation}
+              inputValues={inputValues}
             />
           ))}
         </div>
