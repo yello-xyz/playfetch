@@ -85,7 +85,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
           addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
         )
       )
-      setHighestRunIndex(Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
+      setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
     })
     await refreshActiveItem(versionID)
 
