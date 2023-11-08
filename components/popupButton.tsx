@@ -19,13 +19,14 @@ export function PopupButton({
   children: ReactNode
 }) {
   const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
-  const disabledClass = disabled ? 'opacity-40' : 'cursor-pointer hover:bg-gray-100'
+  const disabledClass = disabled ? 'opacity-40 select-none' : 'cursor-pointer hover:bg-gray-100'
 
   return (
     <CustomPopupButton
       onSetPopup={onSetPopup}
       fixedWidth={fixedWidth}
       popUpAbove={popUpAbove}
+      disabled={disabled}
       className={`${baseClass} ${disabledClass} ${className}`}>
       {children}
       <Icon icon={chevronIcon} />
