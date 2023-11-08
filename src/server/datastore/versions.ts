@@ -212,9 +212,7 @@ const updateVersionData = (versionData: any) =>
     getID(versionData)
   )
 
-async function updateVersion(versionData: any) {
-  await getDatastore().save(updateVersionData(versionData))
-}
+const updateVersion = (versionData: any) => getDatastore().save(updateVersionData(versionData))
 
 export async function processLabels(
   labels: string[],

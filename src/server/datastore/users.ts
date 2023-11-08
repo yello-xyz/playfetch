@@ -52,6 +52,22 @@ export async function migrateUsers(postMerge: boolean) {
   }
 }
 
+const updateUserData = (userData: any) =>
+  toUserData(
+    userData.email,
+    userData.fullName,
+    userData.imageURL,
+    userData.hasAccess,
+    userData.didCompleteOnboarding,
+    userData.isAdmin,
+    userData.createdAt,
+    userData.lastLoginAt,
+    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
+    getID(userData)
+  )
+
+const updateUser = (userData: any) => getDatastore().save(updateUserData(userData))
+
 const toUserData = (
   email: string,
   fullName: string,
@@ -99,20 +115,7 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
 export async function markUserAsOnboarded(userID: number) {
   const userData = await getKeyedEntity(Entity.USER, userID)
   if (userData) {
-    await getDatastore().save(
-      toUserData(
-        userData.email,
-        userData.fullName,
-        userData.imageURL,
-        userData.hasAccess,
-        true,
-        userData.isAdmin,
-        userData.createdAt,
-        userData.lastLoginAt,
-        userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-        userID
-      )
-    )
+    await updateUser({ ...userData, didCompleteOnboarding: true })
   }
 }
 
@@ -122,20 +125,12 @@ export async function markUserLogin(userID: number, fullName: string, imageURL: 
     if (imageURL.length) {
       imageURL = await uploadImageURLToStorage(userID.toString(), imageURL)
     }
-    await getDatastore().save(
-      toUserData(
-        userData.email,
-        fullName.length ? fullName : userData.fullName,
-        imageURL.length ? imageURL : userData.imageURL,
-        userData.hasAccess,
-        userData.didCompleteOnboarding,
-        userData.isAdmin,
-        userData.createdAt,
-        new Date(),
-        userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-        userID
-      )
-    )
+    await updateUser({
+      ...userData,
+      fullName: fullName.length ? fullName : userData.fullName,
+      imageURL: imageURL.length ? imageURL : userData.imageURL,
+      lastLoginAt: new Date(),
+    })
   }
   return userData ? toUser(userData) : undefined
 }
