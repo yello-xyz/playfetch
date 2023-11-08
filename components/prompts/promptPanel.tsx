@@ -10,7 +10,6 @@ import {
   QueryProvider,
 } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import ModelSelector from './modelSelector'
 import {
   ModelProviders,
   LabelForPromptKey,
@@ -27,6 +26,7 @@ import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import PromptConfigSettings from './promptConfigSettings'
 
 export type PromptTab = keyof Prompts
 
@@ -82,7 +82,6 @@ export default function PromptPanel({
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
-  const updateModel = (model: LanguageModel) => updateConfig({ ...config, model })
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
@@ -138,9 +137,7 @@ export default function PromptPanel({
           preformatted={PromptKeyNeedsPreformatted(activeTab)}
           disabled={!setModifiedVersion}
         />
-        <div className='flex flex-wrap items-center gap-2.5'>
-          <ModelSelector model={config.model} setModel={updateModel} disabled={!setModifiedVersion} />
-        </div>
+        <PromptConfigSettings config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons

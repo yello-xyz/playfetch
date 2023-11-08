@@ -1,15 +1,27 @@
-import { PromptConfig } from '@/types'
+import { LanguageModel, PromptConfig } from '@/types'
 import RangeInput from '../rangeInput'
 import Checkbox from '../checkbox'
+import ModelSelector from './modelSelector'
 
-const SettingsRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className='flex items-center w-full gap-4'>
-    <div className='w-1/3 font-medium text-gray700'>{label}</div>
-    {children}
-  </div>
-)
+export default function PromptConfigSettings({
+  config,
+  setConfig,
+  disabled,
+}: {
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
+  disabled?: boolean
+}) {
+  const updateModel = (model: LanguageModel) => setConfig({ ...config, model })
 
-export default function PromptSettingsPane({
+  return (
+    <div className='flex flex-wrap items-center gap-2.5'>
+      <ModelSelector popUpAbove model={config.model} setModel={updateModel} disabled={disabled} />
+    </div>
+  )
+}
+
+function OldPromptSettingsPane({
   config,
   setConfig,
   disabled,
@@ -21,7 +33,6 @@ export default function PromptSettingsPane({
   const updateChatMode = (isChat: boolean) => setConfig({ ...config, isChat })
   const updateTemperature = (temperature: number) => setConfig({ ...config, temperature })
   const updateMaxTokens = (maxTokens: number) => !isNaN(maxTokens) && setConfig({ ...config, maxTokens })
-
   return (
     <div className='flex flex-col h-full gap-2 px-6 py-4 border border-gray-200 border-solid rounded-lg bg-gray-25'>
       <SettingsRow label='Chat Mode'>
@@ -50,3 +61,10 @@ export default function PromptSettingsPane({
     </div>
   )
 }
+
+const SettingsRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className='flex items-center w-full gap-4'>
+    <div className='w-1/3 font-medium text-gray700'>{label}</div>
+    {children}
+  </div>
+)
