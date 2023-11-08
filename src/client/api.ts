@@ -245,6 +245,9 @@ const api = {
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
+  updateDefaultConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
+    return post(this.updateDefaultConfig, { defaultPromptConfig })
+  },
   getAvailableProviders: function (): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders)
   },

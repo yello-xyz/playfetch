@@ -124,6 +124,16 @@ export async function getDefaultPromptConfigForUser(userID: number): Promise<Pro
   return { ...DefaultPromptConfig, ...userConfig }
 }
 
+export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {
+  const userData = await getUserData(userID)
+  if (userData) {
+    const userConfig: Partial<PromptConfig> = userData.defaultPromptConfig
+    ? JSON.parse(userData.defaultPromptConfig)
+    : {}
+    await updateUser({ ...userData, defaultPromptConfig: JSON.stringify({ ...userConfig, ...config }) })
+  }
+}
+
 export async function markUserAsOnboarded(userID: number) {
   const userData = await getUserData(userID)
   if (userData) {
