@@ -22,31 +22,43 @@ export default async function signUpNewUser(email: string, fullName: string) {
   }
 }
 
-const trueKeysAsNames = (obj: { [key: string]: boolean }) =>
-  Object.keys(obj)
-    .filter(key => obj[key])
-    .map(key => ({ name: key }))
-
-const richTextIfDefined = (label: string, content: string | undefined) =>
-  content
-    ? {
-        [label]: {
-          type: 'rich_text',
-          rich_text: [{ type: 'text', text: { content: content } }],
-        },
-      }
-    : {}
-
 export const addOnboardingResponse = (email: string, name: string, response: OnboardingResponse) =>
   NotionClient.pages.create({
     parent: { type: 'database_id', database_id: process.env.NOTION_ONBOARDING_PAGE_ID ?? '' },
     properties: {
       Name: { type: 'title', title: [{ type: 'text', text: { content: name } }] },
       Email: { type: 'email', email },
-      ...(response.role ? { Role: { type: 'select', select: { name: response.role! } } } : {}),
-      'Use Case': { type: 'multi_select', multi_select: trueKeysAsNames(response.useCase) },
+      ...selectIfDefined('Role', response.role),
+      ...multiSelect('Use Case', response.useCase),
       ...richTextIfDefined('Other Use Case', response.otherUseCase),
-      Area: { type: 'multi_select', multi_select: trueKeysAsNames(response.area) },
+      ...selectIfDefined('Area', response.area),
       ...richTextIfDefined('Other Area', response.otherArea),
     },
   })
+
+const select = (label: string, name: string) => ({
+  [label]: {
+    type: 'select',
+    select: { name },
+  },
+})
+
+const selectIfDefined = (label: string, name: string | undefined) => (name ? select(label, name) : {})
+
+const multiSelect = (label: string, obj: { [key: string]: boolean }) => ({
+  [label]: {
+    type: 'multi_select',
+    multi_select: Object.keys(obj)
+      .filter(key => obj[key])
+      .map(key => ({ name: key })),
+  },
+})
+
+const richText = (label: string, content: string) => ({
+  [label]: {
+    type: 'rich_text',
+    rich_text: [{ type: 'text', text: { content } }],
+  },
+})
+
+const richTextIfDefined = (label: string, content: string | undefined) => (content ? richText(label, content) : {})

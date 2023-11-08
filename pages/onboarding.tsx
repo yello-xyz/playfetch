@@ -21,17 +21,8 @@ const emptyUseCase: OnboardingResponse['useCase'] = {
   feedback: false,
 }
 
-const emptyArea: OnboardingResponse['area'] = {
-  product: false,
-  engineering: false,
-  marketing: false,
-  content: false,
-  design: false,
-  sales: false,
-}
-
 export default function Onboarding() {
-  const [response, setResponse] = useState<OnboardingResponse>({ useCase: emptyUseCase, area: emptyArea })
+  const [response, setResponse] = useState<OnboardingResponse>({ useCase: emptyUseCase })
   const [step, setStep] = useState<'useCase' | 'role' | 'area'>('useCase')
 
   return (
@@ -152,10 +143,11 @@ const AreaStep = ({
 }) => {
   const area = response.area
   const setArea = (area: OnboardingResponse['area']) => setResponse({ ...response, area })
+  const setOther = () => setResponse({ ...response, area: undefined, otherArea: '' })
   const otherArea = response.otherArea
   const setOtherArea = (otherArea: string | undefined) => setResponse({ ...response, otherArea })
-  const hasOtherArea = otherArea !== undefined
-  const isValidArea = Object.values(area).some(a => a) || (hasOtherArea && otherArea.trim().length > 0)
+  const hasOtherArea = area === undefined && otherArea !== undefined
+  const isValidArea = area !== undefined || (hasOtherArea && otherArea.trim().length > 0)
 
   const [isProcessing, setProcessing] = useState(false)
   const router = useRouter()
@@ -173,13 +165,13 @@ const AreaStep = ({
       title='What kind of work do you do?'
       isValid={isValidArea && !isProcessing}
       onNextStep={completeOnboarding}>
-      <OptionCheckbox title='Product' value={area} setValue={setArea} valueKey='product' />
-      <OptionCheckbox title='Engineering' value={area} setValue={setArea} valueKey='engineering' />
-      <OptionCheckbox title='Marketing' value={area} setValue={setArea} valueKey='marketing' />
-      <OptionCheckbox title='Content Strategy' value={area} setValue={setArea} valueKey='content' />
-      <OptionCheckbox title='Design' value={area} setValue={setArea} valueKey='design' />
-      <OptionCheckbox title='Sales' value={area} setValue={setArea} valueKey='sales' />
-      <Checkbox title='Other' value={hasOtherArea} setValue={val => setOtherArea(val ? '' : undefined)} />
+      <RadioOption title='Product' value={area} setValue={setArea} activeValue='product' />
+      <RadioOption title='Engineering' value={area} setValue={setArea} activeValue='engineering' />
+      <RadioOption title='Marketing' value={area} setValue={setArea} activeValue='marketing' />
+      <RadioOption title='Content Strategy' value={area} setValue={setArea} activeValue='content' />
+      <RadioOption title='Design' value={area} setValue={setArea} activeValue='design' />
+      <RadioOption title='Sales' value={area} setValue={setArea} activeValue='sales' />
+      <RadioOption title='Other' value='other' setValue={setOther} activeValue={area ?? (hasOtherArea ? 'other' : 0)} />
       {hasOtherArea && (
         <TextInput
           value={otherArea}

@@ -382,13 +382,6 @@ export type OnboardingResponse = {
   }
   otherUseCase?: string
   role?: 'executive' | 'manager' | 'individual' | 'contractor'
-  area: {
-    product: boolean
-    engineering: boolean
-    marketing: boolean
-    content: boolean
-    design: boolean
-    sales: boolean
-  }
+  area?: 'product' | 'engineering' | 'marketing' | 'content' | 'design' | 'sales'
   otherArea?: string
 }
