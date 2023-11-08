@@ -59,6 +59,7 @@ export function PopupContent({
 
 export function PopupLabelItem({
   title,
+  description,
   icon,
   label,
   onClick,
@@ -66,6 +67,7 @@ export function PopupLabelItem({
   disabled,
 }: {
   title: string
+  description?: string
   icon?: StaticImageData
   label?: ReactNode
   onClick: () => void
@@ -74,11 +76,14 @@ export function PopupLabelItem({
 }) {
   const disabledClass = disabled ? 'opacity-50' : ''
   return (
-    <PopupItem className={`flex items-center gap-1 p-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
-      {icon && <Icon icon={icon} />}
-      {title}
-      {label}
-      {checked && <Icon className='ml-auto' icon={checkIcon} />}
+    <PopupItem className={`flex flex-col gap-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
+      <div className={`flex items-center gap-1 ${description ? 'py-2 px-3' : 'p-1'}`}>
+        {icon && <Icon icon={icon} />}
+        {title}
+        {label}
+        {checked && <Icon className='ml-auto' icon={checkIcon} />}
+      </div>
+      {description && <span className='px-3 pb-2 -mt-3 text-gray-400'>{description}</span>}
     </PopupItem>
   )
 }
