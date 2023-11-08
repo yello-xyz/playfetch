@@ -7,7 +7,8 @@ import costIcon from '@/public/cost.svg'
 import dateIcon from '@/public/date.svg'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
-import LabelPopupMenu from '../labelPopupMenu'
+import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { ItemLabels } from '../versions/versionCell'
 
 export default function RunCellFooter({
   run,
@@ -23,12 +24,17 @@ export default function RunCellFooter({
 
   return run.duration || run.cost || formattedDate ? (
     <BorderedSection border={isContinuation} bridgingGap>
-      <div className='flex items-center w-full gap-3 pt-2 border-t border-gray-200'>
-        {run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
-        {run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
-        {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
-        <div className='flex-1' />
-        {isProperRun && activeItem && <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />}
+      <div className='flex flex-col w-full gap-2 pt-2 border-t border-gray-200'>
+        {isProperRun && run.labels.length > 0 && activeItem && (
+          <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
+        )}
+        <div className='flex items-center gap-3'>
+          {!!run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
+          {!!run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
+          {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
+          <div className='flex-1' />
+          {isProperRun && activeItem && <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />}
+        </div>
       </div>
     </BorderedSection>
   ) : null
