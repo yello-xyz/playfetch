@@ -118,8 +118,8 @@ export default function ChainNodeOutput({
         setActiveIndex(0)
         setRunningItemIndex(-1)
       }
-      const succeeded = await runVersion(getVersion, inputs, continuationID)
-      if (succeeded) {
+      const isFinished = await runVersion(getVersion, inputs, continuationID)
+      if (isFinished) {
         setActiveIndex(nodes.length - 1)
       }
     }

@@ -68,6 +68,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     const versionID = await getVersion()
     setRunningVersionID(versionID)
     const streamReader = await api.runVersion(versionID, inputs, continuationID)
+    let isFinished = false
     await ConsumeStream(inputs, streamReader, runs => {
       const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp && !run.failed).map(run => run.timestamp!))
       const addTimestamp = clearLastPartialRunsOnCompletion && minTimestamp > 0 && minTimestamp < Infinity
@@ -77,6 +78,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
         )
       )
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
+      isFinished = !runs.some(run => !!run.failed || run.canContinue)
     })
     await refreshActiveItem(versionID)
 
@@ -86,7 +88,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
 
     setRunning(false)
 
-    return partialRuns.every(run => !run.failed)
+    return isFinished
   }
 
   return [runVersion, partialRuns, isRunning, highestRunIndex] as const
