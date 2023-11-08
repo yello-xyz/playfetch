@@ -1,7 +1,7 @@
 import { LanguageModel, PromptConfig } from '@/types'
 import RangeInput from '../rangeInput'
-import Checkbox from '../checkbox'
 import ModelSelector from './modelSelector'
+import ChatModePopupButton from './chatModePopupButton'
 
 export default function PromptConfigSettings({
   config,
@@ -17,6 +17,7 @@ export default function PromptConfigSettings({
   return (
     <div className='flex flex-wrap items-center gap-2.5'>
       <ModelSelector popUpAbove model={config.model} setModel={updateModel} disabled={disabled} />
+      <ChatModePopupButton config={config} setConfig={setConfig} disabled={disabled} />
     </div>
   )
 }
@@ -30,14 +31,10 @@ function OldPromptSettingsPane({
   setConfig: (config: PromptConfig) => void
   disabled?: boolean
 }) {
-  const updateChatMode = (isChat: boolean) => setConfig({ ...config, isChat })
   const updateTemperature = (temperature: number) => setConfig({ ...config, temperature })
   const updateMaxTokens = (maxTokens: number) => !isNaN(maxTokens) && setConfig({ ...config, maxTokens })
   return (
     <div className='flex flex-col h-full gap-2 px-6 py-4 border border-gray-200 border-solid rounded-lg bg-gray-25'>
-      <SettingsRow label='Chat Mode'>
-        <Checkbox checked={config.isChat} setChecked={() => updateChatMode(!config.isChat)} />
-      </SettingsRow>
       <SettingsRow label='Temperature'>
         <RangeInput
           className='w-1/3'
