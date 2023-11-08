@@ -2,7 +2,7 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics } from '@/types'
+import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics, PromptConfig } from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -39,6 +39,7 @@ export default function Home({
   initialActiveItem,
   initialAnalytics,
   availableProviders,
+  defaultPromptConfig,
 }: {
   user: User
   workspaces: Workspace[]
@@ -46,6 +47,7 @@ export default function Home({
   initialActiveItem: ActiveItem | null
   initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
+  defaultPromptConfig: PromptConfig
 }) {
   const [
     activeProject,
@@ -186,7 +188,7 @@ export default function Home({
 
   return (
     <>
-      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders, defaultPromptConfig }}>
         <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
           <ModalDialogContext.Provider value={{ setDialogPrompt }}>
             <GlobalPopupContext.Provider value={globalPopupProviderProps}>

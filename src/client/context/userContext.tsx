@@ -1,9 +1,10 @@
 import { createContext, useContext } from 'react'
-import { AvailableProvider, User } from '@/types'
+import { AvailableProvider, PromptConfig, User } from '@/types'
 
 type UserContextType = {
   loggedInUser?: User
   availableProviders?: AvailableProvider[]
+  defaultPromptConfig?: PromptConfig
 }
 
 export const UserContext = createContext<UserContextType>({})
@@ -13,5 +14,6 @@ export const useLoggedInUser = () => {
   return {
     ...context.loggedInUser!,
     availableProviders: context.availableProviders!,
+    defaultPromptConfig: context.defaultPromptConfig!,
   }
 }

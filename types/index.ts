@@ -6,7 +6,6 @@ export type User = {
   isAdmin: boolean
   lastLoginAt: number | null
   didCompleteOnboarding: boolean
-  defaultPromptConfig?: PromptConfig
 }
 
 type PendingAttributes = {
