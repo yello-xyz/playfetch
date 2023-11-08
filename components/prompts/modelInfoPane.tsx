@@ -29,7 +29,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
-        <span className='font-medium'>{FullLabelForModel(model, availableProviders, false)}</span>
+        <span className='font-medium'>{FullLabelForModel(model, availableProviders)}</span>
         {IsModelFreeToUse(model) && <FreeLabel />}
         <div className='flex justify-end flex-1'>
           <Link className='flex items-center' href={WebsiteLinkForModel(model)} target='_blank'>

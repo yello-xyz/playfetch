@@ -38,7 +38,7 @@ export default function ModelSelector({
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup}>
       <Icon icon={IconForProvider(ProviderForModel(model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {LabelForModel(model, availableProviders)}
+        {FullLabelForModel(model, availableProviders)}
       </span>
     </PopupButton>
   )
@@ -73,7 +73,7 @@ function ModelSelectorPopup({
         .map((model, index) => (
           <div key={index} className='group'>
             <PopupLabelItem
-              title={FullLabelForModel(model, availableProviders, false)}
+              title={FullLabelForModel(model, availableProviders)}
               icon={IconForProvider(ProviderForModel(model))}
               label={IsModelFreeToUse(model) ? <FreeLabel /> : undefined}
               onClick={withDismiss(() => onSelectModel(model))}
