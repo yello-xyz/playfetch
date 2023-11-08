@@ -27,7 +27,7 @@ import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
-import { useModelProviders, useCheckModelDisabled } from '@/src/client/hooks/useAvailableProviders'
+import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
 
@@ -87,7 +87,7 @@ export default function PromptPanel({
   const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
   const updateModel = (model: LanguageModel) => updateConfig({ ...config, model })
 
-  const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
+  const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
@@ -131,8 +131,6 @@ export default function PromptPanel({
               {labelForTab(tab)}
             </div>
           ))}
-          <div className='flex-1' />
-          <ModelSelector model={config.model} setModel={updateModel} disabled={!setModifiedVersion} />
         </div>
         {isSettingsTab(activeTab) ? (
           <PromptSettingsPane config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
@@ -147,6 +145,9 @@ export default function PromptPanel({
             disabled={!setModifiedVersion}
           />
         )}
+        <div className='flex flex-wrap items-center gap-2.5'>
+          <ModelSelector model={config.model} setModel={updateModel} disabled={!setModifiedVersion} />
+        </div>
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
