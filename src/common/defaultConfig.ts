@@ -4,7 +4,7 @@ export const DefaultProvider: ModelProvider = 'google'
 
 const DefaultModel = 'text-bison'
 
-export const DefaultConfig: PromptConfig = {
+export const DefaultPromptConfig: PromptConfig = {
   model: DefaultModel,
   isChat: false,
   temperature: 0.5,

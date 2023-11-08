@@ -1,6 +1,6 @@
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
-import { DefaultConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 import { ExtractUnboundChainInputs } from '@/components/chains/chainNodeOutput'
 
 const testExtractVariables = (testDescription: string, expectedVariables: string[], content: string) =>
@@ -15,7 +15,7 @@ testExtractVariables('single variable', ['hello'], '{{hello}}')
 testExtractVariables('single variable start', ['hello'], '{{hello}} world')
 testExtractVariables('single variable end', ['world'], 'hello {{world}}')
 
-const configWithFunctionsSupport: PromptConfig = { ...DefaultConfig, model: 'gpt-4' }
+const configWithFunctionsSupport: PromptConfig = { ...DefaultPromptConfig, model: 'gpt-4' }
 
 const buildPrompt = (main: string, system?: string, functions?: string): Prompts => ({ main, system, functions })
 

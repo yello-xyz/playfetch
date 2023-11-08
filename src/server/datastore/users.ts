@@ -22,6 +22,7 @@ import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
+import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -113,15 +114,24 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
   return userData && (includingWithoutAccess || userData.hasAccess) ? toUser(userData) : undefined
 }
 
+const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
+
+export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
+  const userData = await getUserData(userID)
+  return userData?.defaultPromptConfig
+    ? (JSON.parse(userData.defaultPromptConfig) as PromptConfig)
+    : DefaultPromptConfig
+}
+
 export async function markUserAsOnboarded(userID: number) {
-  const userData = await getKeyedEntity(Entity.USER, userID)
+  const userData = await getUserData(userID)
   if (userData) {
     await updateUser({ ...userData, didCompleteOnboarding: true })
   }
 }
 
 export async function markUserLogin(userID: number, fullName: string, imageURL: string) {
-  const userData = await getKeyedEntity(Entity.USER, userID)
+  const userData = await getUserData(userID)
   if (userData) {
     if (imageURL.length) {
       imageURL = await uploadImageURLToStorage(userID.toString(), imageURL)

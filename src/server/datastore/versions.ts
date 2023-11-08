@@ -21,7 +21,7 @@ import {
 } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment } from './comments'
-import { DefaultConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
   augmentChainDataWithNewVersion,
@@ -29,6 +29,7 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
+import { getDefaultPromptConfigForUser } from './users'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -102,11 +103,12 @@ const DefaultPrompts = { main: '' }
 
 export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
   const versionID = await allocateID(Entity.VERSION)
+  const promptConfig = isChainVersion ? null : await getDefaultPromptConfigForUser(userID)
   return toVersionData(
     userID,
     parentID,
     isChainVersion ? null : DefaultPrompts,
-    isChainVersion ? null : DefaultConfig,
+    promptConfig,
     isChainVersion ? [] : null,
     [],
     new Date(),
@@ -119,8 +121,8 @@ export async function addInitialVersion(userID: number, parentID: number, isChai
 export async function savePromptVersionForUser(
   userID: number,
   promptID: number,
-  prompts: Prompts = DefaultPrompts,
-  config: PromptConfig = DefaultConfig,
+  prompts: Prompts,
+  config: PromptConfig,
   currentVersionID?: number,
   previousVersionID?: number
 ) {
@@ -131,7 +133,7 @@ export async function savePromptVersionForUser(
 export async function saveChainVersionForUser(
   userID: number,
   chainID: number,
-  items: ChainItemWithInputs[] = [],
+  items: ChainItemWithInputs[],
   currentVersionID?: number,
   previousVersionID?: number
 ) {
@@ -349,9 +351,10 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   if (!anyVersionWithSameParentKey) {
     if (wasPromptVersion) {
-      await savePromptVersionForUser(userID, parentID)
+      const promptConfig = await getDefaultPromptConfigForUser(userID)
+      await savePromptVersionForUser(userID, parentID, DefaultPrompts, promptConfig)
     } else {
-      await saveChainVersionForUser(userID, parentID)
+      await saveChainVersionForUser(userID, parentID, [])
     }
   }
 
