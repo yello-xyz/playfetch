@@ -66,7 +66,7 @@ export default function RunCellContinuation({
             activeItem={activeItem}
             isContinuation
           />
-          <RunCellFooter run={run} isContinuation />
+          <RunCellFooter run={run} activeItem={activeItem} isContinuation />
         </Fragment>
       ))}
       {!!runContinuation && !![run, ...continuations].slice(-1)[0].canContinue && (
