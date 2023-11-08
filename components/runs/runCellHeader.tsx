@@ -36,7 +36,7 @@ const BorderedRow = ({
   children: ReactNode
   className?: string
   addBorder?: boolean
-}) => <div className={`${className} ${addBorder ? 'border-b border-b-1 border-gray-300 pb-2.5' : ''}`}>{children}</div>
+}) => <div className={`${className} ${addBorder ? 'border-b border-b-1 border-gray-200 pb-2.5' : ''}`}>{children}</div>
 
 function RunInputs({ inputs }: { inputs: PromptInputs }) {
   return Object.entries(inputs).length > 0 ? (

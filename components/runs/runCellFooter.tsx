@@ -13,7 +13,7 @@ export default function RunCellFooter({ run, isContinuation }: { run: PartialRun
 
   return run.duration || run.cost || formattedDate ? (
     <BorderedSection border={isContinuation} bridgingGap>
-      <div className='flex items-center gap-3'>
+      <div className='flex items-center w-full gap-3 pt-2 border-t border-gray-200'>
       {run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
       {run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
       {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}

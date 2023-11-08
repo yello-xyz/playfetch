@@ -117,7 +117,7 @@ export const BorderedSection = ({
   children: ReactNode
 }) =>
   border ? (
-    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
+    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-200`}>
       {children}
     </div>
   ) : (
