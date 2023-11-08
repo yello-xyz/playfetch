@@ -2,7 +2,16 @@ import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
-import { User, ActiveProject, AvailableProvider, Workspace, PromptVersion, ChainVersion, Analytics, PromptConfig } from '@/types'
+import {
+  User,
+  ActiveProject,
+  AvailableProvider,
+  Workspace,
+  PromptVersion,
+  ChainVersion,
+  Analytics,
+  PromptConfig,
+} from '@/types'
 import ClientRoute, {
   CompareRoute,
   EndpointsRoute,
@@ -26,6 +35,7 @@ import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 import dynamic from 'next/dynamic'
+import { PromptConfigContext } from '@/src/client/context/promptConfigContext'
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
@@ -39,7 +49,7 @@ export default function Home({
   initialActiveItem,
   initialAnalytics,
   availableProviders,
-  defaultPromptConfig,
+  initialPromptConfig,
 }: {
   user: User
   workspaces: Workspace[]
@@ -47,7 +57,7 @@ export default function Home({
   initialActiveItem: ActiveItem | null
   initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
-  defaultPromptConfig: PromptConfig
+  initialPromptConfig: PromptConfig
 }) {
   const [
     activeProject,
@@ -186,66 +196,70 @@ export default function Home({
     }
   })
 
+  const [defaultPromptConfig, setDefaultPromptConfig] = useState(initialPromptConfig)
+
   return (
     <>
-      <UserContext.Provider value={{ loggedInUser: user, availableProviders, defaultPromptConfig }}>
-        <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
-          <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-            <GlobalPopupContext.Provider value={globalPopupProviderProps}>
-              <main className='flex flex-col h-screen text-sm'>
-                <ProjectTopBar
-                  workspaces={workspaces}
-                  activeProject={activeProject}
-                  onRefreshProject={refreshProject}
-                  onNavigateBack={navigateBack}
-                  showComments={showComments}
-                  setShowComments={setShowComments}
-                />
-                <div className='flex items-stretch flex-1 overflow-hidden'>
-                  <ProjectSidebar
-                    activeProject={activeProject}
-                    activeItem={activeItem}
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+        <PromptConfigContext.Provider value={{ defaultPromptConfig, setDefaultPromptConfig }}>
+          <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
+            <ModalDialogContext.Provider value={{ setDialogPrompt }}>
+              <GlobalPopupContext.Provider value={globalPopupProviderProps}>
+                <main className='flex flex-col h-screen text-sm'>
+                  <ProjectTopBar
                     workspaces={workspaces}
-                    onAddPrompt={addPrompt}
-                    onAddChain={addChain}
-                    onDeleteItem={onDeleteItem}
-                    onSelectPrompt={selectPrompt}
-                    onSelectChain={selectChain}
-                    onSelectCompare={selectCompare}
-                    onSelectEndpoints={selectEndpoints}
+                    activeProject={activeProject}
+                    onRefreshProject={refreshProject}
+                    onNavigateBack={navigateBack}
+                    showComments={showComments}
+                    setShowComments={setShowComments}
                   />
-                  <div className='flex-1'>
-                    <Suspense>
-                      <MainProjectPane
-                        activeProject={activeProject}
-                        refreshProject={refreshProject}
-                        activeItem={activeItem}
-                        activePrompt={activePrompt}
-                        activeChain={activeChain}
-                        activePromptVersion={activePromptVersion}
-                        activeChainVersion={activeChainVersion}
-                        selectVersion={selectVersion}
-                        setModifiedVersion={setModifiedVersion}
-                        addPrompt={addPrompt}
-                        savePrompt={savePrompt}
-                        saveChain={saveChain}
-                        refreshOnSavePrompt={refreshOnSavePrompt}
-                        activeRunID={activeRunID}
-                        analytics={analytics}
-                        refreshAnalytics={refreshAnalytics}
-                        showComments={showComments}
-                        setShowComments={setShowComments}
-                        selectComment={selectComment}
-                      />
-                    </Suspense>
+                  <div className='flex items-stretch flex-1 overflow-hidden'>
+                    <ProjectSidebar
+                      activeProject={activeProject}
+                      activeItem={activeItem}
+                      workspaces={workspaces}
+                      onAddPrompt={addPrompt}
+                      onAddChain={addChain}
+                      onDeleteItem={onDeleteItem}
+                      onSelectPrompt={selectPrompt}
+                      onSelectChain={selectChain}
+                      onSelectCompare={selectCompare}
+                      onSelectEndpoints={selectEndpoints}
+                    />
+                    <div className='flex-1'>
+                      <Suspense>
+                        <MainProjectPane
+                          activeProject={activeProject}
+                          refreshProject={refreshProject}
+                          activeItem={activeItem}
+                          activePrompt={activePrompt}
+                          activeChain={activeChain}
+                          activePromptVersion={activePromptVersion}
+                          activeChainVersion={activeChainVersion}
+                          selectVersion={selectVersion}
+                          setModifiedVersion={setModifiedVersion}
+                          addPrompt={addPrompt}
+                          savePrompt={savePrompt}
+                          saveChain={saveChain}
+                          refreshOnSavePrompt={refreshOnSavePrompt}
+                          activeRunID={activeRunID}
+                          analytics={analytics}
+                          refreshAnalytics={refreshAnalytics}
+                          showComments={showComments}
+                          setShowComments={setShowComments}
+                          selectComment={selectComment}
+                        />
+                      </Suspense>
+                    </div>
                   </div>
-                </div>
-              </main>
-            </GlobalPopupContext.Provider>
-          </ModalDialogContext.Provider>
-          <GlobalPopup {...globalPopupProps} {...popupProps} />
-          <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
-        </RefreshContext.Provider>
+                </main>
+              </GlobalPopupContext.Provider>
+            </ModalDialogContext.Provider>
+            <GlobalPopup {...globalPopupProps} {...popupProps} />
+            <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+          </RefreshContext.Provider>
+        </PromptConfigContext.Provider>
       </UserContext.Provider>
     </>
   )

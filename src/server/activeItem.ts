@@ -30,7 +30,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     : null
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
-  const defaultPromptConfig = await getDefaultPromptConfigForUser(user.id)
+  const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)
 
   let initialAnalytics: Analytics | null =
     initialActiveItem === EndpointsItem || initialActiveItem === CompareItem
@@ -45,7 +45,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialActiveItem,
     initialAnalytics,
     availableProviders,
-    defaultPromptConfig,
+    initialPromptConfig,
   }
 }
 

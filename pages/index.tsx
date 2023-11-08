@@ -11,7 +11,6 @@ import {
   PendingWorkspace,
   IsPendingWorkspace,
   PendingProject,
-  PromptConfig,
 } from '@/types'
 import ClientRoute, {
   ParseNumberQuery,
@@ -31,7 +30,6 @@ import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import WorkspaceInvite from '@/components/workspaces/workspaceInvite'
-import { getDefaultPromptConfigForUser } from '@/src/server/datastore/users'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (
@@ -64,7 +62,6 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
         (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
-  const defaultPromptConfig = await getDefaultPromptConfigForUser(user.id)
 
   return {
     props: {
@@ -74,7 +71,6 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       initialPendingWorkspaces,
       initialActiveWorkspace,
       availableProviders,
-      defaultPromptConfig,
     },
   }
 })
@@ -86,7 +82,6 @@ export default function Home({
   initialPendingWorkspaces,
   initialActiveWorkspace,
   availableProviders,
-  defaultPromptConfig,
 }: {
   user: User
   initialSharedProjects?: ActiveWorkspace
@@ -94,7 +89,6 @@ export default function Home({
   initialPendingWorkspaces: PendingWorkspace[]
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
   availableProviders: AvailableProvider[]
-  defaultPromptConfig: PromptConfig
 }) {
   const router = useRouter()
 
@@ -174,7 +168,7 @@ export default function Home({
 
   return (
     <>
-      <UserContext.Provider value={{ loggedInUser: user, availableProviders, defaultPromptConfig }}>
+      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
         <ModalDialogContext.Provider value={{ setDialogPrompt }}>
           <GlobalPopupContext.Provider value={globalPopupProviderProps}>
             <main className='flex items-stretch h-screen text-sm'>
