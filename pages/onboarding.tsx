@@ -135,10 +135,10 @@ const RoleStep = ({
 
   return (
     <OnboardingStep title='What is your role?' isValid={isValidRole} onNextStep={onNextStep}>
-      <RoleOption title='Executive' value={role} setValue={setRole} role='executive' />
-      <RoleOption title='Management' value={role} setValue={setRole} role='manager' />
-      <RoleOption title='Individual Contributor' value={role} setValue={setRole} role='individual' />
-      <RoleOption title='Freelance or Contractor' value={role} setValue={setRole} role='contractor' />
+      <RadioOption title='Executive' value={role} setValue={setRole} activeValue='executive' />
+      <RadioOption title='Management' value={role} setValue={setRole} activeValue='manager' />
+      <RadioOption title='Individual Contributor' value={role} setValue={setRole} activeValue='individual' />
+      <RadioOption title='Freelance or Contractor' value={role} setValue={setRole} activeValue='contractor' />
     </OnboardingStep>
   )
 }
@@ -228,19 +228,24 @@ const Checkbox = ({
   )
 }
 
-const RoleOption = ({
+const RadioOption = <T,>({
   title,
   value,
   setValue,
-  role,
+  activeValue,
 }: {
   title: string
-  value: OnboardingResponse['role']
-  setValue: (value: OnboardingResponse['role']) => void
-  role: OnboardingResponse['role']
+  value: T
+  setValue: (value: T) => void
+  activeValue: T
 }) => (
   <label className='flex items-center gap-3'>
-    <input type='radio' className='w-5 h-5 cursor-pointer' checked={role === value} onChange={() => setValue(role)} />
+    <input
+      type='radio'
+      className='w-5 h-5 cursor-pointer'
+      checked={value === activeValue}
+      onChange={() => setValue(activeValue)}
+    />
     <span className='font-medium cursor-pointer'>{title}</span>
   </label>
 )
