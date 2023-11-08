@@ -1,4 +1,4 @@
-import { AvailableModelProvider, LanguageModel } from '@/types'
+import { AvailableModelProvider, LanguageModel, PromptConfig } from '@/types'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
@@ -14,13 +14,13 @@ import {
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelSelector({
-  model,
-  setModel,
+  config,
+  setConfig,
   popUpAbove,
   disabled,
 }: {
-  model: LanguageModel
-  setModel: (model: LanguageModel) => void
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
   popUpAbove?: boolean
   disabled?: boolean
 }) {
@@ -30,32 +30,32 @@ export default function ModelSelector({
   const onSetPopup = (location: GlobalPopupLocation) =>
     setPopup(
       ModelSelectorPopup,
-      { selectedModel: model, onSelectModel: setModel, checkModelAvailable, availableProviders },
+      { config, setConfig, checkModelAvailable, availableProviders },
       location
     )
 
   return (
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup} disabled={disabled}>
-      <Icon icon={IconForProvider(ProviderForModel(model))} />
+      <Icon icon={IconForProvider(ProviderForModel(config.model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {FullLabelForModel(model, availableProviders)}
+        {FullLabelForModel(config.model, availableProviders)}
       </span>
     </PopupButton>
   )
 }
 
 type ModelSelectorPopupProps = {
-  selectedModel: LanguageModel
-  onSelectModel: (model: LanguageModel) => void
   checkModelAvailable: (model: LanguageModel) => boolean
   availableProviders: AvailableModelProvider[]
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
 }
 
 function ModelSelectorPopup({
-  selectedModel,
-  onSelectModel,
   checkModelAvailable,
   availableProviders,
+  config,
+  setConfig,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
   const gatedModels = availableProviders.flatMap(provider => provider.gatedModels)
@@ -64,6 +64,9 @@ function ModelSelectorPopup({
     ...GatedLanguageModels.filter(model => gatedModels.includes(model)),
     ...availableProviders.flatMap(provider => provider.customModels.map(model => model.id)),
   ]
+
+  const onSelectModel = (model: LanguageModel) => setConfig({ ...config, model })
+
   return (
     <PopupContent className='relative w-64 p-3' autoOverflow={false}>
       {allModels
@@ -78,10 +81,10 @@ function ModelSelectorPopup({
               label={<LabelForModel model={model} />}
               onClick={withDismiss(() => onSelectModel(model))}
               disabled={!checkModelAvailable(model)}
-              checked={model === selectedModel}
+              checked={model === config.model}
             />
             <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block'>
-              <ModelInfoPane model={model} />
+              <ModelInfoPane config={config} setConfig={setConfig} />
             </div>
           </div>
         ))}

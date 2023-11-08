@@ -1,4 +1,4 @@
-import { LanguageModel } from '@/types'
+import { LanguageModel, PromptConfig } from '@/types'
 import { PopupContent, PopupMenuItem } from '../popupMenu'
 import {
   DescriptionForModel,
@@ -16,15 +16,21 @@ import Icon from '../icon'
 import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
-import { useDefaultPromptConfig } from '@/src/client/context/userContext'
 import { useState } from 'react'
 import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'
-import api from '@/src/client/api'
+import { useDefaultPromptConfig } from '@/src/client/context/promptConfigContext'
 
-export default function ModelInfoPane({ model }: { model: LanguageModel }) {
+export default function ModelInfoPane({
+  config,
+  setConfig,
+}: {
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
+}) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
 
+  const model = config.model
   const provider = ProviderForModel(model)
   const isModelAvailable = checkModelAvailable(model)
 
@@ -59,7 +65,9 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
       {!isModelAvailable && (
         <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
       )}
-      {showActionMenu && <ActionMenu model={model} onDismiss={() => setShowActionMenu(false)} />}
+      {showActionMenu && (
+        <ActionMenu config={config} setConfig={setConfig} onDismiss={() => setShowActionMenu(false)} />
+      )}
     </PopupContent>
   )
 }
@@ -67,7 +75,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
 const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 
 export const LabelForModel = ({ model }: { model: LanguageModel }) => {
-  const defaultPromptConfig = useDefaultPromptConfig()
+  const [defaultPromptConfig] = useDefaultPromptConfig()
 
   return IsModelFreeToUse(model) ? (
     <ModelLabel label='Free' />
@@ -89,8 +97,17 @@ const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: Lang
   )
 }
 
-const ActionMenu = ({ model, onDismiss }: { model: LanguageModel; onDismiss: () => void }) => {
-  const defaultPromptConfig = useDefaultPromptConfig()
+const ActionMenu = ({
+  config,
+  setConfig,
+  onDismiss,
+}: {
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
+  onDismiss: () => void
+}) => {
+  const model = config.model
+  const [defaultPromptConfig, updateDefaultPromptConfig] = useDefaultPromptConfig()
   const canSaveModel = model !== defaultPromptConfig.model
 
   const withDismiss = (callback: () => void) => () => {
@@ -98,7 +115,7 @@ const ActionMenu = ({ model, onDismiss }: { model: LanguageModel; onDismiss: () 
     callback()
   }
 
-  const saveModelAsDefault = canSaveModel ? withDismiss(() => api.updateDefaultConfig({ model })) : undefined
+  const saveModelAsDefault = canSaveModel ? withDismiss(() => updateDefaultPromptConfig({ model })) : undefined
 
   const viewWebsite = () => window.open(WebsiteLinkForModel(model), '_blank')
 
