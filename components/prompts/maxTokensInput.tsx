@@ -14,17 +14,21 @@ export default function MaxTokensInput({
   const updateMaxTokens = (maxTokens: number) => !isNaN(maxTokens) && setConfig({ ...config, maxTokens })
 
   const span = useRef<HTMLSpanElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [width, setWidth] = useState(0)
   const [isFocused, setFocused] = useState(false)
 
-  useEffect(() => setWidth((span.current?.clientWidth ?? 0) + 20), [maxTokens, span.current])
+  useEffect(() => setWidth((span.current?.clientWidth ?? 0) + 20), [maxTokens])
+  const focusOnInput = () => inputRef.current?.focus()
 
   const borderColor = isFocused ? 'border-blue-400' : 'border-gray-300'
   const disabledClass = disabled ? 'opacity-40 select-none' : ''
 
   return (
     <div className={`flex h-8 border rounded-lg text-gray-700 ${borderColor} ${disabledClass}`}>
-      <span className='flex items-center pl-3 pr-2 rounded-l-lg bg-gray-25'>Max Tokens</span>
+      <span className='flex items-center pl-3 pr-2 rounded-l-lg cursor-pointer bg-gray-25' onClick={focusOnInput}>
+        Max Tokens
+      </span>
       <span className='absolute whitespace-pre-wrap opacity-0 -z-100' ref={span}>
         {maxTokens}
       </span>
@@ -33,6 +37,7 @@ export default function MaxTokensInput({
         className='p-2 text-sm min-w-[44px] rounded-r-lg focus:border-0 focus:ring-0 focus:outline-none'
         style={{ width }}
         type='text'
+        ref={inputRef}
         value={maxTokens}
         onChange={event => updateMaxTokens(Number(event.target.value))}
         onFocus={() => setFocused(true)}

@@ -91,7 +91,7 @@ export default function PromptPanel({
   const padding = 12 // gap-3
   const modelSelectorHeight = 37
   const tabHeight = 27
-  const contentHeight = 148 // keep ComparePane in sync when updating this
+  const contentHeight = 154 // keep ComparePane in sync when updating this
   const preferredHeight =
     tabHeight +
     padding +
