@@ -78,7 +78,7 @@ const toUserData = (
   isAdmin: boolean,
   createdAt: Date,
   lastLoginAt?: Date,
-  defaultPromptConfig?: PromptConfig,
+  defaultPromptConfig?: Partial<PromptConfig>,
   userID?: number
 ) => ({
   key: buildKey(Entity.USER, userID),
@@ -118,9 +118,10 @@ const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
 
 export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
   const userData = await getUserData(userID)
-  return userData?.defaultPromptConfig
-    ? (JSON.parse(userData.defaultPromptConfig) as PromptConfig)
-    : DefaultPromptConfig
+  const userConfig: Partial<PromptConfig> = userData?.defaultPromptConfig
+    ? JSON.parse(userData.defaultPromptConfig)
+    : {}
+  return { ...DefaultPromptConfig, ...userConfig }
 }
 
 export async function markUserAsOnboarded(userID: number) {
