@@ -83,7 +83,7 @@ export function PopupLabelItem({
         {label}
         {checked && <Icon className='ml-auto' icon={checkIcon} />}
       </div>
-      {description && <span className='px-3 pb-2 -mt-3 text-gray-400'>{description}</span>}
+      {description && <span className='px-3 pb-2 -mt-2 text-gray-400'>{description}</span>}
     </PopupItem>
   )
 }

@@ -18,7 +18,7 @@ export function PopupButton({
   popUpAbove?: boolean
   children: ReactNode
 }) {
-  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-9 border border-gray-300'
+  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-8 border border-gray-300'
   const disabledClass = disabled ? 'opacity-40 select-none' : 'cursor-pointer hover:bg-gray-100'
 
   return (

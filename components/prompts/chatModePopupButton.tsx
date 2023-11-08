@@ -23,7 +23,7 @@ export default function ChatModePopupButton({
   return (
     <PopupButton popUpAbove fixedWidth disabled={disabled} onSetPopup={onSetChatModePopup}>
       <span className='flex-1 pl-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {isChat ? 'Multi step' : 'Single step'}
+        {isChat ? 'Multi Step' : 'Single Step'}
       </span>
     </PopupButton>
   )
@@ -32,7 +32,7 @@ export default function ChatModePopupButton({
 type ChatModeSelectorPopupProps = { isChat: boolean; setChat: (chat: boolean) => void }
 
 const ChatModeSelectorPopup = ({ isChat, setChat, withDismiss }: ChatModeSelectorPopupProps & WithDismiss) => (
-  <PopupContent className='p-3 min-w-[370px]'>
+  <PopupContent className='p-3 min-w-[340px]'>
     <PopupLabelItem
       title='Single step'
       description='Each LLM interaction involves prompting the model once and receiving a single response.'
@@ -41,7 +41,7 @@ const ChatModeSelectorPopup = ({ isChat, setChat, withDismiss }: ChatModeSelecto
     />
     <PopupLabelItem
       title='Multi step'
-      description='An LLM interaction maintains context across multiple responses, suited for conversational applications like chatbots.'
+      description='LLM interactions maintain context across multiple responses, suited for conversational applications like chatbots.'
       onClick={withDismiss(() => setChat(true))}
       checked={isChat}
     />
