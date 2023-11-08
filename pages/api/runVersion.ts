@@ -75,7 +75,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       inputIndex: index,
       timestamp: new Date().getTime(),
       isLast: !response.failed,
-      canContinue: !!response.continuationID,
+      continuationID: response.continuationID,
     })
     await logResponse(req, res, user.id, version, multipleInputs[index], response, continuationID)
   }
