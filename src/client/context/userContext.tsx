@@ -17,3 +17,8 @@ export const useLoggedInUser = () => {
     defaultPromptConfig: context.defaultPromptConfig!,
   }
 }
+
+export function useDefaultPromptConfig() {
+  const user = useLoggedInUser()
+  return user.defaultPromptConfig
+}

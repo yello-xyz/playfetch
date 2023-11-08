@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import { useDefaultPromptConfig } from '@/src/client/context/userContext'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
@@ -30,7 +31,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
         <span className='font-medium'>{FullLabelForModel(model, availableProviders)}</span>
-        {IsModelFreeToUse(model) && <FreeLabel />}
+        <LabelForModel model={model} />
         <div className='flex justify-end flex-1'>
           <Link className='flex items-center' href={WebsiteLinkForModel(model)} target='_blank'>
             <span className='text-gray-500'>Website</span>
@@ -62,8 +63,17 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
 
 const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 
-export const FreeLabel = () => (
-  <span className='px-1 ml-1 text-[10px] leading-[17px] font-medium text-white bg-gray-400 rounded'>Free</span>
+export const LabelForModel = ({ model }: { model: LanguageModel }) => {
+  const defaultPromptConfig = useDefaultPromptConfig()
+
+  return IsModelFreeToUse(model) ? (
+    <ModelLabel label='Free' />
+  ) : model === defaultPromptConfig.model ? (
+    <ModelLabel label='Default' />
+  ) : null
+}
+const ModelLabel = ({ label }: { label: string }) => (
+  <span className='px-1 ml-1 text-[10px] leading-[17px] font-medium text-white bg-gray-400 rounded'>{label}</span>
 )
 
 const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: LanguageModel) => number }) => {
