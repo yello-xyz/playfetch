@@ -114,8 +114,10 @@ export default function ChainNodeOutput({
   const runChain = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     persistInputValuesIfNeeded()
     if (areProvidersAvailable(items)) {
-      setActiveIndex(0)
-      setRunningItemIndex(-1)
+      if (continuationID === undefined) {
+        setActiveIndex(0)
+        setRunningItemIndex(-1)
+      }
       const succeeded = await runVersion(getVersion, inputs, continuationID)
       if (succeeded) {
         setActiveIndex(nodes.length - 1)
@@ -126,7 +128,6 @@ export default function ChainNodeOutput({
 
   useEffect(() => {
     if (highestRunIndex > runningItemIndex) {
-      console.log(runningItemIndex, '->', highestRunIndex)
       setActiveIndex(highestRunIndex + 1)
       setRunningItemIndex(highestRunIndex)
     }
