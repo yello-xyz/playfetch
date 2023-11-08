@@ -1,5 +1,5 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
-import { Fragment, ReactNode, useState } from 'react'
+import { Fragment, KeyboardEvent, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
 import { PendingButton } from '../button'
@@ -42,6 +42,12 @@ export default function RunCellContinuation({
     setReplyMessage('')
   }
 
+  const onKeyDown = (runContinuation: (message: string, inputKey: string) => void) => (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      sendReply(runContinuation)()
+    }
+  }
+
   const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
   const users = activeItem?.users ?? []
 
@@ -68,7 +74,12 @@ export default function RunCellContinuation({
           <RoleHeader user={user} role='User' />
           <BorderedSection>
             <div className='flex items-center flex-1 gap-2'>
-              <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
+              <TextInput
+                placeholder='Enter a message'
+                value={replyMessage}
+                setValue={setReplyMessage}
+                onKeyDown={onKeyDown(runContinuation)}
+              />
               <PendingButton
                 title='Reply'
                 pendingTitle='Running'
