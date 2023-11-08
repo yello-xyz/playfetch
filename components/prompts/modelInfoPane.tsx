@@ -82,11 +82,11 @@ export const LabelForModel = ({ model }: { model: LanguageModel }) => {
   return IsModelFreeToUse(model) ? (
     <ModelLabel label='Free' />
   ) : model === defaultPromptConfig.model ? (
-    <ModelLabel label='Default' />
+    <ModelLabel label='Default' color='bg-pink-400' />
   ) : null
 }
-const ModelLabel = ({ label }: { label: string }) => (
-  <span className='px-1 ml-1 text-[10px] leading-[17px] font-medium text-white bg-gray-400 rounded'>{label}</span>
+const ModelLabel = ({ label, color = 'bg-gray-400' }: { label: string; color?: string }) => (
+  <span className={`${color} px-1 ml-1 text-[10px] leading-[17px] font-medium text-white rounded`}>{label}</span>
 )
 
 const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: LanguageModel) => number }) => {
