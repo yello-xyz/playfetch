@@ -20,6 +20,7 @@ import { useState } from 'react'
 import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useDefaultPromptConfig } from '@/src/client/context/promptConfigContext'
+import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 
 export default function ModelInfoPane({
   config,
@@ -109,6 +110,10 @@ const ActionMenu = ({
   const model = config.model
   const [defaultPromptConfig, updateDefaultPromptConfig] = useDefaultPromptConfig()
   const canSaveModel = model !== defaultPromptConfig.model
+  const canSaveConfig = model === defaultPromptConfig.model && !PromptConfigsAreEqual(config, defaultPromptConfig)
+  const canResetConfig = model === defaultPromptConfig.model && !PromptConfigsAreEqual(config, defaultPromptConfig)
+
+  console.log(defaultPromptConfig, config)
 
   const withDismiss = (callback: () => void) => () => {
     onDismiss()
@@ -116,12 +121,17 @@ const ActionMenu = ({
   }
 
   const saveModelAsDefault = canSaveModel ? withDismiss(() => updateDefaultPromptConfig({ model })) : undefined
-
+  const saveConfig = canSaveConfig
+    ? withDismiss(() => updateDefaultPromptConfig({ ...config, model: undefined }))
+    : undefined
+  const resetConfig = canResetConfig ? withDismiss(() => setConfig(defaultPromptConfig)) : undefined
   const viewWebsite = () => window.open(WebsiteLinkForModel(model), '_blank')
 
   return (
-    <PopupContent className='absolute w-40 right-3 top-10'>
+    <PopupContent className='absolute w-52 right-3 top-10'>
       <PopupMenuItem title='Set as default' callback={saveModelAsDefault} first />
+      <PopupMenuItem title='Save model parameters' callback={saveConfig} separated />
+      <PopupMenuItem title='Reset model parameters' callback={resetConfig} />
       <PopupMenuItem title='View website' callback={withDismiss(viewWebsite)} separated last />
     </PopupContent>
   )
