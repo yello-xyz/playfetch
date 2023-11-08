@@ -90,18 +90,21 @@ const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: Lang
 }
 
 const ActionMenu = ({ model, onDismiss }: { model: LanguageModel; onDismiss: () => void }) => {
+  const defaultPromptConfig = useDefaultPromptConfig()
+  const canSaveModel = model !== defaultPromptConfig.model
+
   const withDismiss = (callback: () => void) => () => {
     onDismiss()
     callback()
   }
 
-  const saveModelAsDefault = () => api.updateDefaultConfig({ model })
+  const saveModelAsDefault = canSaveModel ? withDismiss(() => api.updateDefaultConfig({ model })) : undefined
 
   const viewWebsite = () => window.open(WebsiteLinkForModel(model), '_blank')
 
   return (
     <PopupContent className='absolute w-40 right-3 top-10'>
-      <PopupMenuItem title='Set as default' callback={withDismiss(saveModelAsDefault)} first />
+      <PopupMenuItem title='Set as default' callback={saveModelAsDefault} first />
       <PopupMenuItem title='View website' callback={withDismiss(viewWebsite)} separated last />
     </PopupContent>
   )
