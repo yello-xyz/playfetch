@@ -23,15 +23,16 @@ import { useDefaultPromptConfig } from '@/src/client/context/promptConfigContext
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 
 export default function ModelInfoPane({
+  model,
   config,
   setConfig,
 }: {
+  model: LanguageModel
   config: PromptConfig
   setConfig: (config: PromptConfig) => void
 }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
 
-  const model = config.model
   const provider = ProviderForModel(model)
   const isModelAvailable = checkModelAvailable(model)
 
@@ -67,7 +68,7 @@ export default function ModelInfoPane({
         <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
       )}
       {showActionMenu && (
-        <ActionMenu config={config} setConfig={setConfig} onDismiss={() => setShowActionMenu(false)} />
+        <ActionMenu model={model} config={config} setConfig={setConfig} onDismiss={() => setShowActionMenu(false)} />
       )}
     </PopupContent>
   )
@@ -99,39 +100,43 @@ const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: Lang
 }
 
 const ActionMenu = ({
+  model,
   config,
   setConfig,
   onDismiss,
 }: {
+  model: LanguageModel
   config: PromptConfig
   setConfig: (config: PromptConfig) => void
   onDismiss: () => void
 }) => {
-  const model = config.model
-  const [defaultPromptConfig, updateDefaultPromptConfig] = useDefaultPromptConfig()
+  const [defaultPromptConfig, updateDefaultModel, updateDefaultParameters] = useDefaultPromptConfig()
   const canSaveModel = model !== defaultPromptConfig.model
-  const canSaveConfig = model === defaultPromptConfig.model && !PromptConfigsAreEqual(config, defaultPromptConfig)
-  const canResetConfig = model === defaultPromptConfig.model && !PromptConfigsAreEqual(config, defaultPromptConfig)
-
-  console.log(defaultPromptConfig, config)
+  const parametersAreEqual = PromptConfigsAreEqual({ ...config, model }, { ...defaultPromptConfig, model })
+  const canSaveParameters = !parametersAreEqual
+  const canResetParameters = !parametersAreEqual
 
   const withDismiss = (callback: () => void) => () => {
     onDismiss()
     callback()
   }
 
-  const saveModelAsDefault = canSaveModel ? withDismiss(() => updateDefaultPromptConfig({ model })) : undefined
-  const saveConfig = canSaveConfig
-    ? withDismiss(() => updateDefaultPromptConfig({ ...config, model: undefined }))
+  const saveModelAsDefault = canSaveModel ? withDismiss(() => updateDefaultModel(model)) : undefined
+  const saveParametersAsDefault = canSaveParameters
+    ? withDismiss(() =>
+        updateDefaultParameters({ isChat: config.isChat, maxTokens: config.maxTokens, temperature: config.temperature })
+      )
     : undefined
-  const resetConfig = canResetConfig ? withDismiss(() => setConfig(defaultPromptConfig)) : undefined
+  const resetToDefaultParameters = canResetParameters
+    ? withDismiss(() => setConfig({ ...defaultPromptConfig, model: config.model }))
+    : undefined
   const viewWebsite = () => window.open(WebsiteLinkForModel(model), '_blank')
 
   return (
     <PopupContent className='absolute w-52 right-3 top-10'>
       <PopupMenuItem title='Set as default' callback={saveModelAsDefault} first />
-      <PopupMenuItem title='Save model parameters' callback={saveConfig} separated />
-      <PopupMenuItem title='Reset model parameters' callback={resetConfig} />
+      <PopupMenuItem title='Save model parameters' callback={saveParametersAsDefault} separated />
+      <PopupMenuItem title='Reset model parameters' callback={resetToDefaultParameters} />
       <PopupMenuItem title='View website' callback={withDismiss(viewWebsite)} separated last />
     </PopupContent>
   )

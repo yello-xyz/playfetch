@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import { PromptConfig } from '@/types'
+import { LanguageModel, PromptConfig } from '@/types'
 import api from '../api'
 
 type PromptConfigContextType = {
@@ -14,10 +14,15 @@ export function useDefaultPromptConfig() {
 
   const defaultPromptConfig = context.defaultPromptConfig!
 
-  const updateDefaultPromptConfig = (newConfig: Partial<PromptConfig>) => {
-    api.updateDefaultConfig(newConfig)
-    context.setDefaultPromptConfig?.({ ...defaultPromptConfig, ...newConfig })
+  const updateDefaultModel = (model: LanguageModel) => {
+    api.updateDefaultConfig({ model })
+    context.setDefaultPromptConfig?.({ ...defaultPromptConfig, model })
   }
 
-  return [defaultPromptConfig, updateDefaultPromptConfig] as const
+  const updateDefaultParameters = (config: Omit<PromptConfig, 'model'>) => {
+    api.updateDefaultConfig(config)
+    context.setDefaultPromptConfig?.({ model: defaultPromptConfig.model, ...config })
+  }
+
+  return [defaultPromptConfig, updateDefaultModel, updateDefaultParameters] as const
 }

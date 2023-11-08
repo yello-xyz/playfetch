@@ -139,9 +139,7 @@ export function PopupMenuItem({
   const stateClass = callback ? `${destructiveClass} ${hoverClass} cursor-pointer` : 'opacity-40 select-none'
 
   return (
-    <div
-      onClick={callback}
-      className={`${baseClass} ${separatedClass} ${roundedClass} ${stateClass}`}>
+    <div onClick={callback} className={`${baseClass} ${separatedClass} ${roundedClass} ${stateClass}`}>
       {title}
     </div>
   )

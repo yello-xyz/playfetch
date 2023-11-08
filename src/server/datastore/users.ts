@@ -127,8 +127,8 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
   const userData = await getUserData(userID)
   if (userData) {
     const userConfig: Partial<PromptConfig> = userData.defaultPromptConfig
-    ? JSON.parse(userData.defaultPromptConfig)
-    : {}
+      ? JSON.parse(userData.defaultPromptConfig)
+      : {}
     await updateUser({ ...userData, defaultPromptConfig: JSON.stringify({ ...userConfig, ...config }) })
   }
 }

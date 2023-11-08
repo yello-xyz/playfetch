@@ -3,7 +3,7 @@ import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/c
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
-import ModelInfoPane, {  LabelForModel } from './modelInfoPane'
+import ModelInfoPane, { LabelForModel } from './modelInfoPane'
 import {
   PublicLanguageModels,
   FullLabelForModel,
@@ -28,11 +28,7 @@ export default function ModelSelector({
   const [availableProviders, checkModelAvailable] = useModelProviders()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(
-      ModelSelectorPopup,
-      { config, setConfig, checkModelAvailable, availableProviders },
-      location
-    )
+    setPopup(ModelSelectorPopup, { config, setConfig, checkModelAvailable, availableProviders }, location)
 
   return (
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup} disabled={disabled}>
@@ -84,7 +80,7 @@ function ModelSelectorPopup({
               checked={model === config.model}
             />
             <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block'>
-              <ModelInfoPane config={config} setConfig={setConfig} />
+              <ModelInfoPane model={model} config={config} setConfig={setConfig} />
             </div>
           </div>
         ))}
