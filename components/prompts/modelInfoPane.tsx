@@ -1,5 +1,5 @@
 import { LanguageModel } from '@/types'
-import { PopupContent } from '../popupMenu'
+import { PopupContent, PopupMenuItem } from '../popupMenu'
 import {
   DescriptionForModel,
   FullLabelForModel,
@@ -13,30 +13,31 @@ import {
   WebsiteLinkForModel,
 } from '@/src/common/providerMetadata'
 import Icon from '../icon'
-import openInIcon from '@/public/openIn.svg'
-import Link from 'next/link'
 import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 import { useDefaultPromptConfig } from '@/src/client/context/userContext'
+import { useEffect, useState } from 'react'
+import IconButton from '../iconButton'
+import dotsIcon from '@/public/dots.svg'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
 
   const provider = ProviderForModel(model)
   const isModelAvailable = checkModelAvailable(model)
+
+  const [showActionMenu, setShowActionMenu] = useState(false)
+
   return (
-    <PopupContent className='p-3 w-[480px] ml-7 flex flex-col gap-1'>
+    <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1'>
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
         <span className='font-medium'>{FullLabelForModel(model, availableProviders)}</span>
         <LabelForModel model={model} />
         <div className='flex justify-end flex-1'>
-          <Link className='flex items-center' href={WebsiteLinkForModel(model)} target='_blank'>
-            <span className='text-gray-500'>Website</span>
-            <Icon icon={openInIcon} />
-          </Link>
+          <IconButton icon={dotsIcon} onClick={() => setShowActionMenu(!showActionMenu)} />
         </div>
       </div>
       <HorizontalBorder />
@@ -57,6 +58,7 @@ export default function ModelInfoPane({ model }: { model: LanguageModel }) {
       {!isModelAvailable && (
         <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
       )}
+      {showActionMenu && <ActionMenu model={model} onDismiss={() => setShowActionMenu(false)} />}
     </PopupContent>
   )
 }
@@ -83,5 +85,20 @@ const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: Lang
     </span>
   ) : (
     <span>{FormatCost(price(model))} / 1M tokens</span>
+  )
+}
+
+const ActionMenu = ({ model, onDismiss }: { model: LanguageModel; onDismiss: () => void }) => {
+  const withDismiss = (callback: () => void) => () => {
+    onDismiss()
+    callback()
+  }
+
+  const viewWebsite = () => window.open(WebsiteLinkForModel(model), '_blank')
+
+  return (
+    <PopupContent className='absolute right-3 top-10'>
+      <PopupMenuItem title='View website' callback={withDismiss(viewWebsite)} last />
+    </PopupContent>
   )
 }
