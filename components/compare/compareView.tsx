@@ -7,12 +7,12 @@ import { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import SegmentedControl, { Segment } from '../segmentedControl'
 import DiffPane from './diffPane'
-import useDiffContent, { getPromptVersionContent } from '@/src/client/hooks/useDiffContent'
+import useDiffContent from '@/src/client/hooks/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
 
 const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVersion, rightVersion: PromptVersion) =>
-  ([activePromptTab, 'main', 'functions', 'system', 'settings'] as PromptTab[]).find(
-    tab => getPromptVersionContent(leftVersion, tab) !== getPromptVersionContent(rightVersion, tab)
+  ([activePromptTab, 'main', 'functions', 'system'] as PromptTab[]).find(
+    tab => leftVersion.prompts[tab] !== rightVersion.prompts[tab]
   ) ?? activePromptTab
 
 export default function CompareView({ project, logEntries = [] }: { project: ActiveProject; logEntries?: LogEntry[] }) {
