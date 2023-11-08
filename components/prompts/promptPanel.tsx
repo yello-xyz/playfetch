@@ -14,8 +14,6 @@ import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
   ModelProviders,
-  IconForProvider,
-  LabelForModel,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -29,7 +27,6 @@ import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
-import Icon from '../icon'
 import { useModelProviders, useCheckModelDisabled } from '@/src/client/hooks/useAvailableProviders'
 
 export type PromptTab = keyof Prompts | 'settings'
@@ -134,20 +131,8 @@ export default function PromptPanel({
               {labelForTab(tab)}
             </div>
           ))}
-          {!runPrompt && (
-            <div className='flex justify-end flex-1 overflow-hidden text-gray-600'>
-              {setModifiedVersion ? (
-                <ModelSelector model={config.model} setModel={updateModel} />
-              ) : (
-                <div className='flex items-center min-w-0 gap-1'>
-                  <Icon icon={IconForProvider(ProviderForModel(config.model))} />
-                  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
-                    {LabelForModel(config.model, availableProviders)}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+          <div className='flex-1' />
+          <ModelSelector model={config.model} setModel={updateModel} disabled={!setModifiedVersion} />
         </div>
         {isSettingsTab(activeTab) ? (
           <PromptSettingsPane config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
@@ -169,8 +154,6 @@ export default function PromptPanel({
           variables={ExtractPromptVariables(prompts, config)}
           staticVariables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}
-          languageModel={config.model}
-          setLanguageModel={updateModel}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
           onShowTestConfig={onShowTestConfig}

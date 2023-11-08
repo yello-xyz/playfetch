@@ -1,7 +1,6 @@
 import { useCallback, useEffect } from 'react'
 import { PendingButton } from '../button'
-import { InputValues, LanguageModel, PromptInputs, TestConfig } from '@/types'
-import ModelSelector from '../prompts/modelSelector'
+import { InputValues, PromptInputs, TestConfig } from '@/types'
 import TestDataSelector from './testDataSelector'
 import { SelectInputRows } from '@/src/client/inputRows'
 
@@ -28,8 +27,6 @@ export default function RunButtons({
   variables,
   staticVariables,
   inputValues,
-  languageModel,
-  setLanguageModel,
   testConfig,
   setTestConfig,
   onShowTestConfig,
@@ -40,8 +37,6 @@ export default function RunButtons({
   variables: string[]
   staticVariables: string[]
   inputValues: InputValues
-  languageModel?: LanguageModel
-  setLanguageModel?: (model: LanguageModel) => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
   onShowTestConfig?: () => void
@@ -91,9 +86,6 @@ export default function RunButtons({
 
   return (
     <div className='flex items-center self-end gap-3'>
-      {languageModel && setLanguageModel && (
-        <ModelSelector popUpAbove model={languageModel} setModel={setLanguageModel} />
-      )}
       <div className='flex items-center'>
         {showTestDataSelector && (
           <TestDataSelector

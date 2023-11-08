@@ -1,4 +1,4 @@
-import { AvailableModelProvider, LanguageModel, ModelProvider } from '@/types'
+import { AvailableModelProvider, LanguageModel } from '@/types'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
@@ -9,7 +9,6 @@ import {
   FullLabelForModel,
   GatedLanguageModels,
   IconForProvider,
-  LabelForModel,
   ProviderForModel,
   IsModelFreeToUse,
 } from '@/src/common/providerMetadata'
@@ -19,10 +18,12 @@ export default function ModelSelector({
   model,
   setModel,
   popUpAbove,
+  disabled,
 }: {
   model: LanguageModel
   setModel: (model: LanguageModel) => void
   popUpAbove?: boolean
+  disabled?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
   const [availableProviders, checkModelAvailable] = useModelProviders()
@@ -35,7 +36,7 @@ export default function ModelSelector({
     )
 
   return (
-    <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup}>
+    <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup} disabled={disabled}>
       <Icon icon={IconForProvider(ProviderForModel(model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
         {FullLabelForModel(model, availableProviders)}
