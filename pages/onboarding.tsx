@@ -238,19 +238,9 @@ const RoleOption = ({
   value: OnboardingResponse['role']
   setValue: (value: OnboardingResponse['role']) => void
   role: OnboardingResponse['role']
-}) => {
-  return (
-    <div className='flex items-center gap-3'>
-      <input
-        type='radio'
-        className='w-5 h-5 cursor-pointer'
-        id={value?.toString()}
-        checked={role === value}
-        onChange={() => setValue(role)}
-      />
-      <label className='font-medium cursor-pointer' htmlFor={value?.toString()}>
-        {title}
-      </label>
-    </div>
-  )
-}
+}) => (
+  <label className='flex items-center gap-3'>
+    <input type='radio' className='w-5 h-5 cursor-pointer' checked={role === value} onChange={() => setValue(role)} />
+    <span className='font-medium cursor-pointer'>{title}</span>
+  </label>
+)
