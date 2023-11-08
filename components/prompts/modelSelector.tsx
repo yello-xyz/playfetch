@@ -65,7 +65,7 @@ function ModelSelectorPopup({
     ...availableProviders.flatMap(provider => provider.customModels.map(model => model.id)),
   ]
   return (
-    <PopupContent className='relative p-3 w-52' autoOverflow={false}>
+    <PopupContent className='relative w-64 p-3' autoOverflow={false}>
       {allModels
         .sort((a, b) =>
           FullLabelForModel(a, availableProviders, true).localeCompare(FullLabelForModel(b, availableProviders, true))
@@ -80,7 +80,7 @@ function ModelSelectorPopup({
               disabled={!checkModelAvailable(model)}
               checked={model === selectedModel}
             />
-            <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
+            <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block'>
               <ModelInfoPane model={model} />
             </div>
           </div>

@@ -17,9 +17,10 @@ import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 import { useDefaultPromptConfig } from '@/src/client/context/userContext'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'
+import api from '@/src/client/api'
 
 export default function ModelInfoPane({ model }: { model: LanguageModel }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
@@ -94,11 +95,14 @@ const ActionMenu = ({ model, onDismiss }: { model: LanguageModel; onDismiss: () 
     callback()
   }
 
+  const saveModelAsDefault = () => api.updateDefaultConfig({ model })
+
   const viewWebsite = () => window.open(WebsiteLinkForModel(model), '_blank')
 
   return (
-    <PopupContent className='absolute right-3 top-10'>
-      <PopupMenuItem title='View website' callback={withDismiss(viewWebsite)} last />
+    <PopupContent className='absolute w-40 right-3 top-10'>
+      <PopupMenuItem title='Set as default' callback={withDismiss(saveModelAsDefault)} first />
+      <PopupMenuItem title='View website' callback={withDismiss(viewWebsite)} separated last />
     </PopupContent>
   )
 }
