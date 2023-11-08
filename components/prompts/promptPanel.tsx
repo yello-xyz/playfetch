@@ -10,7 +10,6 @@ import {
   QueryProvider,
 } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import PromptSettingsPane from './promptSettingsPane'
 import ModelSelector from './modelSelector'
 import {
   ModelProviders,
@@ -29,7 +28,7 @@ import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
-export type PromptTab = keyof Prompts | 'settings'
+export type PromptTab = keyof Prompts
 
 export default function PromptPanel({
   version,
@@ -63,9 +62,7 @@ export default function PromptPanel({
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
-  const isSettingsTab = (tab: PromptTab): tab is 'settings' => tab === 'settings'
-  const labelForTab = (tab: PromptTab) => (isSettingsTab(tab) ? 'Advanced Settings' : LabelForPromptKey(tab))
-  const tabs = [...SupportedPromptKeysForModel(config.model), 'settings'] as PromptTab[]
+  const tabs = SupportedPromptKeysForModel(config.model)
   const [activeTab, setActiveTab] = useInitialState<PromptTab>(
     initialActiveTab && tabs.includes(initialActiveTab) ? initialActiveTab : 'main'
   )
@@ -78,7 +75,7 @@ export default function PromptPanel({
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion?.({ ...version, prompts, config })
-    if (!isSettingsTab(activeTab) && !SupportedPromptKeysForModel(config.model).includes(activeTab)) {
+    if (!SupportedPromptKeysForModel(config.model).includes(activeTab)) {
       updateActiveTab('main')
     }
   }
@@ -128,23 +125,19 @@ export default function PromptPanel({
               key={tab}
               className={`px-2 py-1 rounded whitespace-nowrap ${classNameForTab(tab)}`}
               onClick={() => updateActiveTab(tab)}>
-              {labelForTab(tab)}
+              {LabelForPromptKey(tab)}
             </div>
           ))}
         </div>
-        {isSettingsTab(activeTab) ? (
-          <PromptSettingsPane config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
-        ) : (
-          <PromptInput
-            key={version.id}
-            promptKey={activeTab}
-            value={prompts[activeTab] ?? ''}
-            setValue={updatePrompt}
-            placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
-            preformatted={PromptKeyNeedsPreformatted(activeTab)}
-            disabled={!setModifiedVersion}
-          />
-        )}
+        <PromptInput
+          key={version.id}
+          promptKey={activeTab}
+          value={prompts[activeTab] ?? ''}
+          setValue={updatePrompt}
+          placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
+          preformatted={PromptKeyNeedsPreformatted(activeTab)}
+          disabled={!setModifiedVersion}
+        />
         <div className='flex flex-wrap items-center gap-2.5'>
           <ModelSelector model={config.model} setModel={updateModel} disabled={!setModifiedVersion} />
         </div>
