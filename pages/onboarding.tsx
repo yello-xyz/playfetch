@@ -30,8 +30,17 @@ export default function Onboarding() {
       {step === 'useCase' && (
         <UseCaseStep response={response} setResponse={setResponse} onNextStep={() => setStep('role')} />
       )}
-      {step === 'role' && <RoleStep response={response} setResponse={setResponse} onNextStep={() => setStep('area')} />}
-      {step === 'area' && <AreaStep response={response} setResponse={setResponse} />}
+      {step === 'role' && (
+        <RoleStep
+          response={response}
+          setResponse={setResponse}
+          onNextStep={() => setStep('area')}
+          onPreviousStep={() => setStep('useCase')}
+        />
+      )}
+      {step === 'area' && (
+        <AreaStep response={response} setResponse={setResponse} onPreviousStep={() => setStep('role')} />
+      )}
     </main>
   )
 }
@@ -41,19 +50,26 @@ const OnboardingStep = ({
   subtitle = 'Help us personalise your experience',
   isValid,
   onNextStep,
+  onPreviousStep,
   children,
 }: {
   title: string
   subtitle?: string
   isValid: boolean
   onNextStep: () => void
+  onPreviousStep?: () => void
   children: ReactNode
 }) => (
   <div className='flex flex-col w-full gap-1 p-6 bg-white shadow rounded-lg border border-gray-200 max-w-[536px]'>
     <span className='text-2xl font-bold tracking-tight'>{title}</span>
     <span className='text-xl pb-7'>{subtitle}</span>
     <div className='flex flex-col gap-4 text-base'>{children}</div>
-    <div className='self-end pt-4'>
+    <div className='flex self-end gap-4 pt-4'>
+      {onPreviousStep && (
+        <Button type='secondary' onClick={onPreviousStep}>
+          Back
+        </Button>
+      )}
       <Button disabled={!isValid} onClick={onNextStep}>
         Next
       </Button>
@@ -115,17 +131,23 @@ const RoleStep = ({
   response,
   setResponse,
   onNextStep,
+  onPreviousStep,
 }: {
   response: OnboardingResponse
   setResponse: (response: OnboardingResponse) => void
   onNextStep: () => void
+  onPreviousStep: () => void
 }) => {
   const role = response.role
   const setRole = (role: OnboardingResponse['role']) => setResponse({ ...response, role })
   const isValidRole = role !== undefined
 
   return (
-    <OnboardingStep title='What is your role?' isValid={isValidRole} onNextStep={onNextStep}>
+    <OnboardingStep
+      title='What is your role?'
+      isValid={isValidRole}
+      onNextStep={onNextStep}
+      onPreviousStep={onPreviousStep}>
       <RadioOption title='Executive' value={role} setValue={setRole} activeValue='executive' />
       <RadioOption title='Management' value={role} setValue={setRole} activeValue='manager' />
       <RadioOption title='Individual Contributor' value={role} setValue={setRole} activeValue='individual' />
@@ -137,9 +159,11 @@ const RoleStep = ({
 const AreaStep = ({
   response,
   setResponse,
+  onPreviousStep,
 }: {
   response: OnboardingResponse
   setResponse: (response: OnboardingResponse) => void
+  onPreviousStep: () => void
 }) => {
   const area = response.area
   const setArea = (area: OnboardingResponse['area']) => setResponse({ ...response, area })
@@ -164,7 +188,8 @@ const AreaStep = ({
     <OnboardingStep
       title='What kind of work do you do?'
       isValid={isValidArea && !isProcessing}
-      onNextStep={completeOnboarding}>
+      onNextStep={completeOnboarding}
+      onPreviousStep={isProcessing ? undefined : onPreviousStep}>
       <RadioOption title='Product' value={area} setValue={setArea} activeValue='product' />
       <RadioOption title='Engineering' value={area} setValue={setArea} activeValue='engineering' />
       <RadioOption title='Marketing' value={area} setValue={setArea} activeValue='marketing' />
