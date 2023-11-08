@@ -103,6 +103,7 @@ export const toUser = (data: any): User => ({
   isAdmin: data.isAdmin,
   lastLoginAt: getTimestamp(data, 'lastLoginAt') ?? null,
   didCompleteOnboarding: data.didCompleteOnboarding ?? true,
+  defaultPromptConfig: data.defaultPromptConfig ? JSON.parse(data.defaultPromptConfig) : null,
 })
 
 export const getUserForID = (userID: number) => getKeyedEntity(Entity.USER, userID).then(toUser)
