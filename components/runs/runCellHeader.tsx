@@ -2,7 +2,7 @@ import { ActiveChain, ActivePrompt, PromptInputs, Run } from '@/types'
 import { ReactNode, useState } from 'react'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { ItemLabels } from '../versions/versionCell'
 
 export default function RunCellHeader({ run, activeItem }: { run: Run; activeItem?: ActivePrompt | ActiveChain }) {
@@ -17,7 +17,6 @@ export default function RunCellHeader({ run, activeItem }: { run: Run; activeIte
         ) : (
           <RunInputs inputs={run.inputs} />
         )}
-        {activeItem && <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />}
       </BorderedRow>
       {hasLabels && hasInputs && (
         <BorderedRow>

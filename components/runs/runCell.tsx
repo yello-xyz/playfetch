@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, InputValues, PartialRun, PromptVersion, Run } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run } from '@/types'
 import RunCellHeader from './runCellHeader'
 import RunCellFooter from './runCellFooter'
 import RunCellBody from './runCellBody'
@@ -43,7 +43,7 @@ export default function RunCell({
           />
         </div>
       </div>
-      <RunCellFooter run={run} isContinuation={isContinuation} />
+      <RunCellFooter run={run} activeItem={activeItem} isContinuation={isContinuation} />
       {isContinuation && (
         <RunCellContinuation
           run={run}
