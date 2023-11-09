@@ -220,6 +220,8 @@ const OptionCheckbox = <T extends Record<string, boolean>>({
   valueKey: keyof T
 }) => <Checkbox title={title} value={value[valueKey]} setValue={val => setValue({ ...value, [valueKey]: val })} />
 
+const appearanceClass = 'appearance-none w-[17px] h-[17px] border-2 border-transparent outline outline-1 checked:border-white outline-gray-300 checked:bg-blue-500'
+
 const Checkbox = ({
   title,
   value,
@@ -233,7 +235,7 @@ const Checkbox = ({
     <div className='flex items-center gap-3'>
       <input
         type='checkbox'
-        className='w-5 h-5 cursor-pointer'
+        className={`${appearanceClass} rounded cursor-pointer`}
         id={title}
         checked={value}
         onChange={() => setValue(!value)}
@@ -259,7 +261,7 @@ const RadioOption = <T,>({
   <label className='flex items-center gap-3'>
     <input
       type='radio'
-      className='w-5 h-5 cursor-pointer'
+      className={`${appearanceClass} rounded-full cursor-pointer`}
       checked={value === activeValue}
       onChange={() => setValue(activeValue)}
     />
