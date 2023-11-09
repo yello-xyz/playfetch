@@ -21,7 +21,6 @@ import {
 } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment } from './comments'
-import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
   augmentChainDataWithNewVersion,

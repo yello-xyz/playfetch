@@ -22,7 +22,7 @@ export const QueryProviders: QueryProvider[] = ['pinecone']
 export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
 export const PublicLanguageModels: DefaultLanguageModel[] = [
   'gpt-4',
-  'gpt-4-1106-preview',
+  'gpt-4-turbo',
   'gpt-3.5-turbo',
   'gpt-3.5-turbo-16k',
   'claude-instant-1',
@@ -73,7 +73,7 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
     case 'gpt-4-32k':
     case 'text-embedding-ada-002':
     case 'claude-instant-1':
@@ -115,7 +115,7 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
     case 'gpt-4-32k':
       return true
     case 'claude-instant-1':
@@ -133,7 +133,7 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
     case 'gpt-4-32k':
       return true
     case 'claude-instant-1':
@@ -193,7 +193,7 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
     case 'gpt-3.5-turbo':
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
     case 'gpt-4-32k':
     case 'text-embedding-ada-002':
       return 'openai'
@@ -217,7 +217,7 @@ const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]
       return 'GPT-3.5 Turbo 16k'
     case 'gpt-4':
       return 'GPT-4'
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
       return 'GPT-4 Turbo'
     case 'gpt-4-32k':
       return 'GPT-4 32k'
@@ -240,7 +240,7 @@ const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvi
     case 'gpt-3.5-turbo-16k':
       return 'GPT3.5'
     case 'gpt-4':
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
     case 'gpt-4-32k':
       return 'GPT4'
     case 'claude-instant-1':
@@ -275,7 +275,7 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
     case 'gpt-3.5-turbo-16k':
       return 'https://platform.openai.com/docs/models/gpt-3-5'
     case 'gpt-4':
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
     case 'gpt-4-32k':
       return 'https://platform.openai.com/docs/models/gpt-4'
     case 'claude-instant-1':
@@ -300,7 +300,7 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
       return 'This is the updated version of GPT-3.5 Turbo with 4 times the context window and lower pricing.'
     case 'gpt-4':
       return 'GPT-4 from OpenAI has broad general knowledge and domain expertise allowing it to follow complex instructions in natural language and solve difficult problems accurately.'
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
       return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023.'
     case 'gpt-4-32k':
       return 'This model has the same capabilities as the standard gpt-4 mode but with 4 times the context.'
@@ -325,7 +325,7 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
       return 16385
     case 'gpt-4':
       return 8192
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
       return 128000
     case 'gpt-4-32k':
       return 32768
@@ -353,7 +353,7 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
       return 1
     case 'gpt-4':
       return 30
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
       return 10
     case 'gpt-4-32k':
       return 60
@@ -381,7 +381,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 2
     case 'gpt-4':
       return 60
-    case 'gpt-4-1106-preview':
+    case 'gpt-4-turbo':
       return 30
     case 'gpt-4-32k':
       return 120
