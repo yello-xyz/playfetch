@@ -22,8 +22,11 @@ export const ConsumeStream = async (
         JSON.parse(data)
       if (isLast || timestamp) {
         const lastIndex = Math.max(...Object.keys(runs[inputIndex]).map(Number))
-        runs[inputIndex][lastIndex].isLast = isLast ?? false
-        runs[inputIndex][lastIndex].timestamp = timestamp
+        const lastRun = runs[inputIndex][lastIndex]
+        lastRun.isLast = isLast ?? false
+        lastRun.timestamp = timestamp
+        lastRun.continuationID = lastRun.continuationID ?? continuationID
+        lastRun.canContinue = !!continuationID
       } else {
         const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
@@ -65,25 +68,27 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     const versionID = await getVersion()
     setRunningVersionID(versionID)
     const streamReader = await api.runVersion(versionID, inputs, continuationID)
+    let isFinished = false
     await ConsumeStream(inputs, streamReader, runs => {
-      setPartialRuns(runs)
-      setHighestRunIndex(Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
+      const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp && !run.failed).map(run => run.timestamp!))
+      const addTimestamp = clearLastPartialRunsOnCompletion && minTimestamp > 0 && minTimestamp < Infinity
+      setPartialRuns(
+        runs.map((run, index, runs) =>
+          addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
+        )
+      )
+      setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
+      isFinished = !runs.some(run => !!run.failed || run.canContinue)
     })
     await refreshActiveItem(versionID)
 
     if (clearLastPartialRunsOnCompletion) {
-      setPartialRuns(runs => {
-        const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp).map(run => run.timestamp!))
-        const addTimestamp = minTimestamp > 0 && minTimestamp < Infinity
-        return runs
-          .filter(run => !run.isLast)
-          .map((run, index, runs) =>
-            addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
-          )
-      })
+      setPartialRuns(runs => runs.filter(run => !run.isLast))
     }
 
     setRunning(false)
+
+    return isFinished
   }
 
   return [runVersion, partialRuns, isRunning, highestRunIndex] as const

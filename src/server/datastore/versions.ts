@@ -21,7 +21,6 @@ import {
 } from './prompts'
 import { augmentProjectWithNewVersion, ensureProjectLabel } from './projects'
 import { saveComment } from './comments'
-import { DefaultConfig } from '@/src/common/defaultConfig'
 import { ChainVersionsAreEqual, PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import {
   augmentChainDataWithNewVersion,
@@ -29,6 +28,7 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
+import { getDefaultPromptConfigForUser } from './users'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -37,69 +37,25 @@ export async function migrateVersions(postMerge: boolean) {
   const datastore = getDatastore()
   let remainingSaveCount = 100
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  for (const parentID of [...new Set(allVersions.map(versionData => versionData.parentID))]) {
-    const sameParentVersions = allVersions.filter(versionData => versionData.parentID === parentID)
-    for (const userID of [...new Set(sameParentVersions.map(versionData => versionData.userID))]) {
-      const userVersions = sameParentVersions.filter(versionData => versionData.userID === userID)
-      const oldPendingVersionIDs = new Set(
-        userVersions
-          .filter(versionData => !versionData.didRun)
-          .sort((a, b) => getTimestamp(b) - getTimestamp(a))
-          .slice(1)
-          .map(versionData => getID(versionData))
-      )
-      for (const versionData of userVersions) {
-        const versionID = getID(versionData)
-
-        let config: PromptConfig | null = versionData.config ? JSON.parse(versionData.config) : null
-        let items: ChainItemWithInputs[] | null = versionData.items ? JSON.parse(versionData.items) : null
-        let didRun: boolean = versionData.didRun
-
-        const needToUpdateConfig = !!config && (config.isChat === undefined || config.model === 'text-bison@001')
-        const needToUpdateItems = !!items && items.some(item => item.branch === undefined)
-        const needToUpdateDidRun = oldPendingVersionIDs.has(versionID)
-
-        if (needToUpdateConfig || needToUpdateItems || needToUpdateDidRun) {
-          if (remainingSaveCount-- <= 0) {
-            console.log('‼️  Please run this migration again to process remaining versions')
-            return
-          }
-          const description = `version ${versionID} parent ${versionData.parentID} user ${userID}`
-
-          if (!!config && needToUpdateConfig) {
-            console.log(`Migrating config in ${description}`)
-            config = {
-              ...config,
-              isChat: config.isChat === undefined ? false : config.isChat,
-              model: config.model.split('@')[0],
-            }
-          }
-          if (!!items && needToUpdateItems) {
-            console.log(`Migrating items in ${description}`)
-            items = items.map(item => ({ ...item, branch: item.branch ?? 0 }))
-          }
-          if (needToUpdateDidRun) {
-            didRun = !didRun
-            console.log(`Migrating pending ${description} to ${didRun}`)
-          }
-
-          await datastore.save(
-            toVersionData(
-              versionData.userID,
-              versionData.parentID,
-              versionData.prompts ? JSON.parse(versionData.prompts) : null,
-              config,
-              items,
-              JSON.parse(versionData.labels),
-              versionData.createdAt,
-              didRun,
-              versionData.previousVersionID,
-              versionID
-            )
-          )
-        }
-      }
+  for (const versionData of allVersions) {
+    if (remainingSaveCount-- <= 0) {
+      console.log('‼️  Please run this migration again to process remaining versions')
+      return
     }
+    await datastore.save(
+      toVersionData(
+        versionData.userID,
+        versionData.parentID,
+        versionData.prompts ? JSON.parse(versionData.prompts) : null,
+        versionData.config ? JSON.parse(versionData.config) : null,
+        versionData.items ? JSON.parse(versionData.items) : null,
+        JSON.parse(versionData.labels),
+        versionData.createdAt,
+        versionData.didRun,
+        versionData.previousVersionID,
+        getID(versionData)
+      )
+    )
   }
   console.log('✅ Processed all remaining versions')
 }
@@ -146,11 +102,12 @@ const DefaultPrompts = { main: '' }
 
 export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
   const versionID = await allocateID(Entity.VERSION)
+  const promptConfig = isChainVersion ? null : await getDefaultPromptConfigForUser(userID)
   return toVersionData(
     userID,
     parentID,
     isChainVersion ? null : DefaultPrompts,
-    isChainVersion ? null : DefaultConfig,
+    promptConfig,
     isChainVersion ? [] : null,
     [],
     new Date(),
@@ -163,8 +120,8 @@ export async function addInitialVersion(userID: number, parentID: number, isChai
 export async function savePromptVersionForUser(
   userID: number,
   promptID: number,
-  prompts: Prompts = DefaultPrompts,
-  config: PromptConfig = DefaultConfig,
+  prompts: Prompts,
+  config: PromptConfig,
   currentVersionID?: number,
   previousVersionID?: number
 ) {
@@ -175,7 +132,7 @@ export async function savePromptVersionForUser(
 export async function saveChainVersionForUser(
   userID: number,
   chainID: number,
-  items: ChainItemWithInputs[] = [],
+  items: ChainItemWithInputs[],
   currentVersionID?: number,
   previousVersionID?: number
 ) {
@@ -256,9 +213,7 @@ const updateVersionData = (versionData: any) =>
     getID(versionData)
   )
 
-async function updateVersion(versionData: any) {
-  await getDatastore().save(updateVersionData(versionData))
-}
+const updateVersion = (versionData: any) => getDatastore().save(updateVersionData(versionData))
 
 export async function processLabels(
   labels: string[],
@@ -395,9 +350,10 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   if (!anyVersionWithSameParentKey) {
     if (wasPromptVersion) {
-      await savePromptVersionForUser(userID, parentID)
+      const promptConfig = await getDefaultPromptConfigForUser(userID)
+      await savePromptVersionForUser(userID, parentID, DefaultPrompts, promptConfig)
     } else {
-      await saveChainVersionForUser(userID, parentID)
+      await saveChainVersionForUser(userID, parentID, [])
     }
   }
 

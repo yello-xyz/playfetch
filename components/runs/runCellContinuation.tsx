@@ -1,36 +1,51 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
-import { Fragment, ReactNode, useState } from 'react'
+import { Fragment, KeyboardEvent, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
 import { PendingButton } from '../button'
-import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import RunCellBody from './runCellBody'
+import { ExtractInputKey } from '@/src/common/formatting'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function RunCellContinuation({
+  run,
   continuations,
   identifierForRun,
   activeItem,
   version,
   isRunning,
   runContinuation,
+  selectInputValue,
 }: {
+  run: PartialRun | Run
   continuations: (PartialRun | Run)[]
   identifierForRun: (runID: number) => string
   activeItem?: ActivePrompt | ActiveChain
   version?: PromptVersion | ChainVersion
   isRunning?: boolean
-  runContinuation?: (message: string) => void
+  runContinuation?: (message: string, inputKey: string) => void
+  selectInputValue: (inputKey: string) => string | undefined
 }) {
-  const [replyMessage, setReplyMessage] = useState('')
+  const getInputKey = (run: PartialRun | Run) => ExtractInputKey(run)
+  const getPreviousInputKey = (index: number) => getInputKey([run, ...continuations][index])
+  const lastInputKey = getPreviousInputKey(continuations.length)
+
+  const [replyMessage, setReplyMessage] = useInitialState(selectInputValue(lastInputKey) ?? '')
   const [lastReply, setLastReply] = useState('')
 
   const user = useLoggedInUser()
-  const sendReply = (runContinuation: (message: string) => void) => () => {
-    runContinuation(replyMessage)
+  const sendReply = (runContinuation: (message: string, inputKey: string) => void) => () => {
+    runContinuation(replyMessage, lastInputKey)
     setLastReply(replyMessage)
     setReplyMessage('')
+  }
+
+  const onKeyDown = (runContinuation: (message: string, inputKey: string) => void) => (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      sendReply(runContinuation)()
+    }
   }
 
   const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
@@ -38,17 +53,11 @@ export default function RunCellContinuation({
 
   return (
     <>
-      {continuations.map(run => (
+      {continuations.map((run, index) => (
         <Fragment key={run.id}>
           <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
           <BorderedSection>
-            <div className='flex-1'>
-              {isPartialRun(run)
-                ? lastReply
-                : activeItem
-                ? run.inputs[DefaultChatContinuationInputKey]
-                : JSON.stringify(run.inputs, null, 2)}
-            </div>
+            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[getPreviousInputKey(index)]}</div>
           </BorderedSection>
           <RunCellBody
             identifierForRun={identifierForRun}
@@ -57,15 +66,20 @@ export default function RunCellContinuation({
             activeItem={activeItem}
             isContinuation
           />
-          <RunCellFooter run={run} isContinuation />
+          <RunCellFooter run={run} activeItem={activeItem} isContinuation />
         </Fragment>
       ))}
-      {runContinuation && (
+      {!!runContinuation && !![run, ...continuations].slice(-1)[0].canContinue && (
         <>
           <RoleHeader user={user} role='User' />
           <BorderedSection>
             <div className='flex items-center flex-1 gap-2'>
-              <TextInput placeholder='Enter a message' value={replyMessage} setValue={setReplyMessage} />
+              <TextInput
+                placeholder='Enter a message'
+                value={replyMessage}
+                setValue={setReplyMessage}
+                onKeyDown={onKeyDown(runContinuation)}
+              />
               <PendingButton
                 title='Reply'
                 pendingTitle='Running'
@@ -103,7 +117,7 @@ export const BorderedSection = ({
   children: ReactNode
 }) =>
   border ? (
-    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-300`}>
+    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-200`}>
       {children}
     </div>
   ) : (

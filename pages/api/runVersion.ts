@@ -30,7 +30,8 @@ const logResponse = (
         response.cost,
         response.duration,
         [],
-        continuationID ?? response.continuationID
+        continuationID ?? response.continuationID,
+        !!response.continuationID
       )
 }
 
@@ -70,7 +71,12 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   )
 
   for (const [index, response] of responses.entries()) {
-    sendData({ inputIndex: index, timestamp: new Date().getTime(), isLast: !response.failed })
+    sendData({
+      inputIndex: index,
+      timestamp: new Date().getTime(),
+      isLast: !response.failed,
+      continuationID: response.continuationID,
+    })
     await logResponse(req, res, user.id, version, multipleInputs[index], response, continuationID)
   }
 

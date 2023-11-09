@@ -1,4 +1,4 @@
-import { ActiveUser, IsRawPromptVersion, User, UserMetrics } from '@/types'
+import { ActiveUser, IsRawPromptVersion, PromptConfig, User, UserMetrics } from '@/types'
 import {
   Entity,
   buildFilter,
@@ -22,6 +22,7 @@ import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
+import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 
 export async function migrateUsers(postMerge: boolean) {
   if (postMerge) {
@@ -30,34 +31,69 @@ export async function migrateUsers(postMerge: boolean) {
   const datastore = getDatastore()
   const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
   for (const userData of allUsers) {
-    await getDatastore().save(
-      toUserData(
-        userData.email,
-        userData.fullName,
-        userData.imageURL,
-        userData.hasAccess,
-        userData.isAdmin,
-        userData.createdAt,
-        userData.lastLoginAt,
-        getID(userData)
+    let didCompleteOnboarding: boolean | undefined = userData.didCompleteOnboarding
+    if (didCompleteOnboarding === undefined) {
+      const lastLoginAt: Date | undefined = userData.lastLoginAt
+      didCompleteOnboarding = !!lastLoginAt
+      await getDatastore().save(
+        toUserData(
+          userData.email,
+          userData.fullName,
+          userData.imageURL,
+          userData.hasAccess,
+          didCompleteOnboarding,
+          userData.isAdmin,
+          userData.createdAt,
+          lastLoginAt,
+          userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
+          getID(userData)
+        )
       )
-    )
+    }
   }
 }
+
+const updateUserData = (userData: any) =>
+  toUserData(
+    userData.email,
+    userData.fullName,
+    userData.imageURL,
+    userData.hasAccess,
+    userData.didCompleteOnboarding,
+    userData.isAdmin,
+    userData.createdAt,
+    userData.lastLoginAt,
+    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
+    getID(userData)
+  )
+
+const updateUser = (userData: any) => getDatastore().save(updateUserData(userData))
 
 const toUserData = (
   email: string,
   fullName: string,
   imageURL: string,
   hasAccess: boolean,
+  didCompleteOnboarding: boolean,
   isAdmin: boolean,
   createdAt: Date,
   lastLoginAt?: Date,
+  defaultPromptConfig?: Partial<PromptConfig>,
   userID?: number
 ) => ({
   key: buildKey(Entity.USER, userID),
-  data: { email, fullName, imageURL, hasAccess, isAdmin, createdAt, lastLoginAt },
-  excludeFromIndexes: ['fullName', 'imageURL'],
+  data: {
+    email,
+    fullName,
+    imageURL,
+    hasAccess,
+    didCompleteOnboarding,
+    isAdmin,
+    createdAt,
+    lastLoginAt,
+    defaultPromptConfig: defaultPromptConfig ? JSON.stringify(defaultPromptConfig) : undefined,
+  },
+  excludeFromIndexes: ['fullName', 'imageURL', 'defaultPromptConfig'],
 })
 
 export const toUser = (data: any): User => ({
@@ -67,6 +103,7 @@ export const toUser = (data: any): User => ({
   imageURL: data.imageURL,
   isAdmin: data.isAdmin,
   lastLoginAt: getTimestamp(data, 'lastLoginAt') ?? null,
+  didCompleteOnboarding: data.didCompleteOnboarding ?? true,
 })
 
 export const getUserForID = (userID: number) => getKeyedEntity(Entity.USER, userID).then(toUser)
@@ -76,24 +113,50 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
   return userData && (includingWithoutAccess || userData.hasAccess) ? toUser(userData) : undefined
 }
 
+const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
+
+export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
+  const userData = await getUserData(userID)
+  const userConfig: Partial<PromptConfig> = userData?.defaultPromptConfig
+    ? JSON.parse(userData.defaultPromptConfig)
+    : {}
+  return { ...DefaultPromptConfig, ...userConfig }
+}
+
+export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {
+  let userConfig: Partial<PromptConfig> = {}
+
+  const userData = await getUserData(userID)
+  if (userData) {
+    const previousConfig: Partial<PromptConfig> = userData.defaultPromptConfig
+      ? JSON.parse(userData.defaultPromptConfig)
+      : {}
+    userConfig = { ...previousConfig, ...config }
+    await updateUser({ ...userData, defaultPromptConfig: JSON.stringify(userConfig) })
+  }
+
+  return { ...DefaultPromptConfig, ...userConfig }
+}
+
+export async function markUserAsOnboarded(userID: number) {
+  const userData = await getUserData(userID)
+  if (userData) {
+    await updateUser({ ...userData, didCompleteOnboarding: true })
+  }
+}
+
 export async function markUserLogin(userID: number, fullName: string, imageURL: string) {
-  const userData = await getKeyedEntity(Entity.USER, userID)
+  const userData = await getUserData(userID)
   if (userData) {
     if (imageURL.length) {
       imageURL = await uploadImageURLToStorage(userID.toString(), imageURL)
     }
-    await getDatastore().save(
-      toUserData(
-        userData.email,
-        fullName.length ? fullName : userData.fullName,
-        imageURL.length ? imageURL : userData.imageURL,
-        userData.hasAccess,
-        userData.isAdmin,
-        userData.createdAt,
-        new Date(),
-        userID
-      )
-    )
+    await updateUser({
+      ...userData,
+      fullName: fullName.length ? fullName : userData.fullName,
+      imageURL: imageURL.length ? imageURL : userData.imageURL,
+      lastLoginAt: new Date(),
+    })
   }
   return userData ? toUser(userData) : undefined
 }
@@ -105,9 +168,11 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
     (fullName.length ? fullName : email).trim(),
     previousUserData?.imageURL ?? '',
     hasAccess,
+    previousUserData?.didCompleteOnboarding ?? false,
     isAdmin,
     previousUserData?.createdAt ?? new Date(),
     previousUserData?.lastLoginAt,
+    previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined,
     previousUserData ? getID(previousUserData) : undefined
   )
   await getDatastore().save(userData)
@@ -118,6 +183,8 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
   }
   return !previousUserData
 }
+
+// Admin functionality below
 
 export async function getUsersWithoutAccess() {
   const usersData = await getOrderedEntities(Entity.USER, 'hasAccess', false)

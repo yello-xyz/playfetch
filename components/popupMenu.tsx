@@ -58,24 +58,32 @@ export function PopupContent({
 }
 
 export function PopupLabelItem({
-  label,
+  title,
+  description,
   icon,
+  label,
   onClick,
   checked,
   disabled,
 }: {
-  label: string
+  title: string
+  description?: string
   icon?: StaticImageData
+  label?: ReactNode
   onClick: () => void
   disabled?: boolean
   checked?: boolean
 }) {
   const disabledClass = disabled ? 'opacity-50' : ''
   return (
-    <PopupItem className={`flex items-center gap-1 p-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
-      {icon && <Icon icon={icon} />}
-      {label}
-      {checked && <Icon className='ml-auto' icon={checkIcon} />}
+    <PopupItem className={`flex flex-col gap-1 ${disabledClass}`} onClick={disabled ? undefined : onClick}>
+      <div className={`flex items-center gap-1 ${description ? 'py-2 px-3' : 'p-1'}`}>
+        {icon && <Icon icon={icon} />}
+        {title}
+        {label}
+        {checked && <Icon className='ml-auto' icon={checkIcon} />}
+      </div>
+      {description && <span className='px-3 pb-2 -mt-2 text-gray-400'>{description}</span>}
     </PopupItem>
   )
 }
@@ -116,22 +124,22 @@ export function PopupMenuItem({
   last,
 }: {
   title: string
-  callback: () => void
+  callback?: () => void
   destructive?: boolean
   separated?: boolean
   first?: boolean
   last?: boolean
 }) {
   const baseClass = 'px-4 py-2 text-sm font-normal text-gray-700'
-  const destructiveClass = destructive ? 'text-red-500' : ''
   const separatedClass = separated ? 'border-t border-gray-200' : ''
-  const hoverClass = destructive ? 'hover:bg-red-400 hover:text-white' : 'hover:bg-blue-400 hover:text-white'
   const roundedClass = first && last ? 'rounded-lg' : first ? 'rounded-t-lg' : last ? 'rounded-b-lg' : ''
 
+  const destructiveClass = destructive ? 'text-red-500' : ''
+  const hoverClass = destructive ? 'hover:bg-red-400 hover:text-white' : 'hover:bg-blue-400 hover:text-white'
+  const stateClass = callback ? `${destructiveClass} ${hoverClass} cursor-pointer` : 'opacity-40 select-none'
+
   return (
-    <div
-      onClick={callback}
-      className={`${baseClass} ${destructiveClass} ${separatedClass} ${hoverClass} ${roundedClass}`}>
+    <div onClick={callback} className={`${baseClass} ${separatedClass} ${roundedClass} ${stateClass}`}>
       {title}
     </div>
   )

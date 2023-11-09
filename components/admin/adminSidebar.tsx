@@ -1,4 +1,3 @@
-import { AdminRoute } from '@/src/common/clientRoute'
 import { SidebarButton, SidebarSection } from '../sidebar'
 import linkIcon from '@/public/chain.svg'
 import userIcon from '@/public/user.svg'
@@ -8,10 +7,14 @@ export default function AdminSidebar({
   onSelectWaitlist,
   onSelectActiveUsers,
   onSelectRecentProjects,
+  analyticsLinks,
+  debugLinks,
 }: {
   onSelectWaitlist: () => void
   onSelectActiveUsers: () => void
   onSelectRecentProjects: () => void
+  analyticsLinks: [string, string]
+  debugLinks: [string, string]
 }) {
   return (
     <>
@@ -23,39 +26,21 @@ export default function AdminSidebar({
           <SidebarButton title='Active Users' icon={userIcon} onClick={onSelectActiveUsers} />
           <SidebarButton title='Active Projects' icon={fileIcon} onClick={onSelectRecentProjects} />
         </SidebarSection>
-        <SidebarSection title='Google Analytics'>
-          <SidebarButton
-            title='Dashboards'
-            icon={linkIcon}
-            link={AdminRoute.AnalyticsDashboard}
-            target='_blank'
-            prefetch={false}
-          />
-          <SidebarButton
-            title='Reports'
-            icon={linkIcon}
-            link={AdminRoute.AnalyticsReports}
-            target='_blank'
-            prefetch={false}
-          />
-          <SidebarButton
-            title='Search Console'
-            icon={linkIcon}
-            link={AdminRoute.SearchConsole}
-            target='_blank'
-            prefetch={false}
-          />
+        <SidebarSection title='Analytics'>
+          {analyticsLinks.map(([title, link], index) => (
+            <LinkButton key={index} title={title} link={link} />
+          ))}
         </SidebarSection>
         <SidebarSection title='Debug'>
-          <SidebarButton
-            title='Server Logs'
-            icon={linkIcon}
-            link={AdminRoute.ServerLogs}
-            target='_blank'
-            prefetch={false}
-          />
+          {debugLinks.map(([title, link], index) => (
+            <LinkButton key={index} title={title} link={link} />
+          ))}
         </SidebarSection>
       </div>
     </>
   )
 }
+
+const LinkButton = ({ title, link }: { title: string; link: string }) => (
+  <SidebarButton title={title} icon={linkIcon} link={link} target='_blank' prefetch={false} />
+)

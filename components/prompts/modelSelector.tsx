@@ -1,60 +1,57 @@
-import { AvailableModelProvider, LanguageModel, ModelProvider } from '@/types'
+import { AvailableModelProvider, LanguageModel, PromptConfig } from '@/types'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
-import ModelInfoPane from './modelInfoPane'
+import ModelInfoPane, { LabelForModel } from './modelInfoPane'
 import {
   PublicLanguageModels,
   FullLabelForModel,
   GatedLanguageModels,
   IconForProvider,
-  LabelForModel,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
 import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
 
 export default function ModelSelector({
-  model,
-  setModel,
+  config,
+  setConfig,
   popUpAbove,
+  disabled,
 }: {
-  model: LanguageModel
-  setModel: (model: LanguageModel) => void
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
   popUpAbove?: boolean
+  disabled?: boolean
 }) {
   const setPopup = useGlobalPopup<ModelSelectorPopupProps>()
   const [availableProviders, checkModelAvailable] = useModelProviders()
 
   const onSetPopup = (location: GlobalPopupLocation) =>
-    setPopup(
-      ModelSelectorPopup,
-      { selectedModel: model, onSelectModel: setModel, checkModelAvailable, availableProviders },
-      location
-    )
+    setPopup(ModelSelectorPopup, { config, setConfig, checkModelAvailable, availableProviders }, location)
 
   return (
-    <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup}>
-      <Icon icon={IconForProvider(ProviderForModel(model))} />
+    <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup} disabled={disabled}>
+      <Icon icon={IconForProvider(ProviderForModel(config.model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {LabelForModel(model, availableProviders)}
+        {FullLabelForModel(config.model, availableProviders)}
       </span>
     </PopupButton>
   )
 }
 
 type ModelSelectorPopupProps = {
-  selectedModel: LanguageModel
-  onSelectModel: (model: LanguageModel) => void
   checkModelAvailable: (model: LanguageModel) => boolean
   availableProviders: AvailableModelProvider[]
+  config: PromptConfig
+  setConfig: (config: PromptConfig) => void
 }
 
 function ModelSelectorPopup({
-  selectedModel,
-  onSelectModel,
   checkModelAvailable,
   availableProviders,
+  config,
+  setConfig,
   withDismiss,
 }: ModelSelectorPopupProps & WithDismiss) {
   const gatedModels = availableProviders.flatMap(provider => provider.gatedModels)
@@ -63,8 +60,11 @@ function ModelSelectorPopup({
     ...GatedLanguageModels.filter(model => gatedModels.includes(model)),
     ...availableProviders.flatMap(provider => provider.customModels.map(model => model.id)),
   ]
+
+  const onSelectModel = (model: LanguageModel) => setConfig({ ...config, model })
+
   return (
-    <PopupContent className='relative p-3 w-52' autoOverflow={false}>
+    <PopupContent className='relative w-64 p-3' autoOverflow={false}>
       {allModels
         .sort((a, b) =>
           FullLabelForModel(a, availableProviders, true).localeCompare(FullLabelForModel(b, availableProviders, true))
@@ -72,14 +72,15 @@ function ModelSelectorPopup({
         .map((model, index) => (
           <div key={index} className='group'>
             <PopupLabelItem
-              label={FullLabelForModel(model, availableProviders, false)}
+              title={FullLabelForModel(model, availableProviders)}
               icon={IconForProvider(ProviderForModel(model))}
+              label={<LabelForModel model={model} />}
               onClick={withDismiss(() => onSelectModel(model))}
               disabled={!checkModelAvailable(model)}
-              checked={model === selectedModel}
+              checked={model === config.model}
             />
-            <div className='absolute top-0 bottom-0 hidden left-[184px] group-hover:block hover:block'>
-              <ModelInfoPane model={model} />
+            <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block'>
+              <ModelInfoPane model={model} config={config} setConfig={setConfig} />
             </div>
           </div>
         ))}

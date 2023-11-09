@@ -8,6 +8,7 @@ import { getAvailableProvidersForUser } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
 import { ParseActiveItemQuery, ParseNumberQuery, ParseQuery } from '../common/clientRoute'
 import { getAnalyticsForProject } from './datastore/analytics'
+import { getDefaultPromptConfigForUser } from './datastore/users'
 
 export default async function loadActiveItem(user: User, query: ParsedUrlQuery) {
   const { projectID } = ParseNumberQuery(query)
@@ -29,6 +30,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     : null
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
+  const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)
 
   let initialAnalytics: Analytics | null =
     initialActiveItem === EndpointsItem || initialActiveItem === CompareItem
@@ -43,6 +45,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialActiveItem,
     initialAnalytics,
     availableProviders,
+    initialPromptConfig,
   }
 }
 

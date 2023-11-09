@@ -2,7 +2,6 @@ import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, Prom
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
-import { DefaultChatContinuationInputKey } from '@/src/common/defaultConfig'
 
 const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
   items.sort((a, b) => a.timestamp - b.timestamp)
@@ -20,6 +19,7 @@ export default function RunTimeline({
   activeItem,
   activeRunID,
   runVersion,
+  selectInputValue = () => undefined,
   isRunning,
   skipHeader,
 }: {
@@ -27,7 +27,8 @@ export default function RunTimeline({
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   activeRunID?: number
-  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<void>
+  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
+  selectInputValue?: (inputKey: string) => string | undefined
   isRunning?: boolean
   skipHeader?: boolean
 }) {
@@ -70,12 +71,8 @@ export default function RunTimeline({
 
   const runContinuation =
     version && runVersion
-      ? async (continuationID: number, message: string) =>
-          runVersion(
-            () => Promise.resolve(version.id),
-            [{ [DefaultChatContinuationInputKey]: message }],
-            continuationID
-          )
+      ? async (continuationID: number, message: string, inputKey: string) =>
+          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], continuationID)
       : undefined
 
   return (
@@ -96,6 +93,7 @@ export default function RunTimeline({
               activeItem={activeItem}
               isRunning={isRunning}
               runContinuation={runContinuation}
+              selectInputValue={selectInputValue}
             />
           ))}
         </div>

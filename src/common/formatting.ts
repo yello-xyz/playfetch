@@ -102,9 +102,17 @@ const TryParseJSON = (text: string) => {
   }
 }
 
+export const DefaultChatContinuationInputKey = 'message'
+
+export const ExtractInputKey = (run: { output: string }) => {
+  const json = TryParseJSON(run.output)
+  return (json?.function?.name ?? json?.output?.function?.name ?? DefaultChatContinuationInputKey) as string
+}
+
 const ExtractFunctionNames = (text: string) => {
   const json = TryParseJSON(text)
-  return Array.isArray(json) ? json.map(item => item?.name as string).filter(name => name) : []
+  const array = json && Array.isArray(json) ? json : json ? [json] : undefined
+  return array ? array.map(item => item?.name as string).filter(name => name) : []
 }
 
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic = true) => [

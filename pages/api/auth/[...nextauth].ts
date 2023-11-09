@@ -4,10 +4,10 @@ import logUserRequest, { LoginEvent, SignupEvent, logUnknownUserRequest } from '
 import NextAuthAdapter from '@/src/server/datastore/nextAuthAdapter'
 import { getUserForEmail, markUserLogin } from '@/src/server/datastore/users'
 import { GetEmailServerConfig, GetNoReplyFromAddress } from '@/src/server/email'
-import signUpNewUser from '@/src/server/waitlist'
+import signUpNewUser from '@/src/server/notion'
 import { ServerResponse } from 'http'
 import { NextApiRequest, NextApiResponse } from 'next'
-import NextAuth, { Session, SessionStrategy, User } from 'next-auth'
+import NextAuth, { NextAuthOptions, Session, SessionStrategy, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
 import EmailProvider from 'next-auth/providers/email'
 import GithubProvider from 'next-auth/providers/github'
@@ -16,7 +16,7 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 
 const getRegisteredUser = async (email?: string | null) => (email ? getUserForEmail(email) : undefined)
 
-export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse) => ({
+export const authOptions = (req: { cookies: NextApiRequestCookies }, res: ServerResponse): NextAuthOptions => ({
   adapter: NextAuthAdapter(),
   session: {
     strategy: 'jwt' as SessionStrategy,
@@ -61,15 +61,17 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         return false
       }
     },
-    async jwt({ token, user }: { user: User; token: JWT }) {
-      if (user) {
-        const registeredUser = await getRegisteredUser(user.email)
+    async jwt({ token, user, trigger }: { user: User; token: JWT; trigger?: 'signIn' | 'signUp' | 'update' }) {
+      const email = user ? user.email : trigger === 'update' ? token.email : undefined
+      if (email) {
+        const registeredUser = await getRegisteredUser(email)
         if (registeredUser) {
           token.id = registeredUser.id
           token.fullName = registeredUser.fullName
           token.imageURL = registeredUser.imageURL
           token.isAdmin = registeredUser.isAdmin
           token.lastLoginAt = registeredUser.lastLoginAt
+          token.didCompleteOnboarding = registeredUser.didCompleteOnboarding
         }
       }
       return token
@@ -82,6 +84,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
         imageURL: token.imageURL as string,
         isAdmin: token.isAdmin as boolean,
         lastLoginAt: token.lastLoginAt as number | null,
+        didCompleteOnboarding: token.didCompleteOnboarding as boolean,
       }
       return session
     },

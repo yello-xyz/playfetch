@@ -31,14 +31,14 @@ export function useCheckProviders() {
   return [checkProviderAvailable, checkModelAvailable] as const
 }
 
+export function useCheckModelProviders() {
+  const [_, checkModelAvailable, checkModelProviderAvailable] = useModelProviders()
+  return [checkModelProviderAvailable, checkModelAvailable] as const
+}
+
 export function useCheckProviderAvailable() {
   const [checkProviderAvailable] = useCheckProviders()
   return checkProviderAvailable
-}
-
-export function useCheckModelProviderAvailable() {
-  const [availableModelProviders] = useModelProviders()
-  return (provider: ModelProvider) => IsProviderAvailable(provider, availableModelProviders)
 }
 
 export function useCheckModelDisabled() {

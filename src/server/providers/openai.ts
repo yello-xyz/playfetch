@@ -66,6 +66,9 @@ async function tryCompleteChat(
   if (functionsPrompt) {
     try {
       functions = JSON.parse(functionsPrompt)
+      if (!Array.isArray(functions)) {
+        functions = [functions]
+      }
     } catch (error: any) {
       return { error: `Failed to parse functions as JSON array.\n${error?.message ?? ''}` }
     }
@@ -78,7 +81,11 @@ async function tryCompleteChat(
     const previousFunctions = useContext ? context?.functions ?? [] : []
     const response = await api.chat.completions.create(
       {
-        model,
+        model: model
+          // TODO remove this after Dec 11th (when the former points to the latter)
+          .replaceAll('gpt-3.5-turbo-16k', 'gpt-3.5-turbo-1106')
+          // TODO remove this once the model is generally available
+          .replaceAll('gpt-4-turbo', 'gpt-4-1106-preview'),
         messages: [...previousMessages, ...promptMessages],
         temperature,
         max_tokens: maxTokens,
@@ -149,7 +156,7 @@ export async function loadExtraModels(
     .filter(model => model.id.startsWith(`ft:${supportedRootModel}`))
     .map(model => model.id)
 
-  const supportedGatedModels: OpenAILanguageModel[] = ['gpt-4-32k']
+  const supportedGatedModels: OpenAILanguageModel[] = [] // used to contain 'gpt-4-32k'
   const gatedModels = response.data
     .filter(model => (supportedGatedModels as string[]).includes(model.id))
     .map(model => model.id) as DefaultLanguageModel[]

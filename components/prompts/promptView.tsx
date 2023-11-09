@@ -12,6 +12,7 @@ import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testDataPane'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import { SelectAnyInputValue } from '@/src/client/inputRows'
 
 export const LoadPendingVersion = (
   versions: PromptVersion[],
@@ -47,10 +48,11 @@ export default function PromptView({
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
-  const runPrompt = (inputs: PromptInputs[]) => {
+  const runPrompt = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     persistInputValuesIfNeeded()
-    return runVersion(savePrompt, inputs)
+    await runVersion(getVersion, inputs, continuationID)
   }
+  const saveAndRun = async (inputs: PromptInputs[]) => runPrompt(savePrompt, inputs)
 
   const selectTab = (tab: ActiveTab) => {
     setActiveTab(tab)
@@ -118,7 +120,7 @@ export default function PromptView({
               <PromptPanel
                 version={activeVersion}
                 setModifiedVersion={updateVersion}
-                runPrompt={runPrompt}
+                runPrompt={saveAndRun}
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
@@ -139,7 +141,8 @@ export default function PromptView({
             activeItem={prompt}
             version={activeVersion}
             activeRunID={activeRunID}
-            runVersion={runVersion}
+            runVersion={runPrompt}
+            selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
             isRunning={isRunning}
           />
         </div>

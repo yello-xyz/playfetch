@@ -6,7 +6,7 @@ import Icon from '../icon'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import api from '@/src/client/api'
 import Link from 'next/link'
-import ClientRoute, { AdminRoute } from '@/src/common/clientRoute'
+import ClientRoute from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import UserAvatar from './userAvatar'
 import UserBadge from './userBadge'
@@ -44,7 +44,7 @@ export default function UserSidebarItem() {
                 </span>
                 {user.isAdmin && (
                   <Link
-                    href={AdminRoute.Home}
+                    href={ClientRoute.Admin}
                     className='w-full px-2 py-1 leading-6 rounded select-none hover:bg-gray-50'>
                     <span className='font-medium text-gray-700 cursor-pointer'>Admin</span>
                   </Link>

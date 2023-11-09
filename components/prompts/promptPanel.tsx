@@ -10,12 +10,8 @@ import {
   QueryProvider,
 } from '@/types'
 import { ExtractPromptVariables } from '@/src/common/formatting'
-import PromptSettingsPane from './promptSettingsPane'
-import ModelSelector from './modelSelector'
 import {
   ModelProviders,
-  IconForProvider,
-  LabelForModel,
   LabelForPromptKey,
   PlaceholderForPromptKey,
   PromptKeyNeedsPreformatted,
@@ -29,10 +25,10 @@ import RunButtons from '../runs/runButtons'
 import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
-import Icon from '../icon'
-import { useModelProviders, useCheckModelDisabled } from '@/src/client/hooks/useAvailableProviders'
+import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import PromptConfigSettings from './promptConfigSettings'
 
-export type PromptTab = keyof Prompts | 'settings'
+export type PromptTab = keyof Prompts
 
 export default function PromptPanel({
   version,
@@ -66,9 +62,7 @@ export default function PromptPanel({
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
-  const isSettingsTab = (tab: PromptTab): tab is 'settings' => tab === 'settings'
-  const labelForTab = (tab: PromptTab) => (isSettingsTab(tab) ? 'Advanced Settings' : LabelForPromptKey(tab))
-  const tabs = [...SupportedPromptKeysForModel(config.model), 'settings'] as PromptTab[]
+  const tabs = SupportedPromptKeysForModel(config.model)
   const [activeTab, setActiveTab] = useInitialState<PromptTab>(
     initialActiveTab && tabs.includes(initialActiveTab) ? initialActiveTab : 'main'
   )
@@ -81,16 +75,15 @@ export default function PromptPanel({
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion?.({ ...version, prompts, config })
-    if (!isSettingsTab(activeTab) && !SupportedPromptKeysForModel(config.model).includes(activeTab)) {
+    if (!SupportedPromptKeysForModel(config.model).includes(activeTab)) {
       updateActiveTab('main')
     }
   }
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
-  const updateModel = (model: LanguageModel) => updateConfig({ ...config, model })
 
-  const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
+  const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
@@ -98,7 +91,7 @@ export default function PromptPanel({
   const padding = 12 // gap-3
   const modelSelectorHeight = 37
   const tabHeight = 27
-  const contentHeight = 148
+  const contentHeight = 154 // keep ComparePane in sync when updating this
   const preferredHeight =
     tabHeight +
     padding +
@@ -131,37 +124,20 @@ export default function PromptPanel({
               key={tab}
               className={`px-2 py-1 rounded whitespace-nowrap ${classNameForTab(tab)}`}
               onClick={() => updateActiveTab(tab)}>
-              {labelForTab(tab)}
+              {LabelForPromptKey(tab)}
             </div>
           ))}
-          {!runPrompt && (
-            <div className='flex justify-end flex-1 overflow-hidden text-gray-600'>
-              {setModifiedVersion ? (
-                <ModelSelector model={config.model} setModel={updateModel} />
-              ) : (
-                <div className='flex items-center min-w-0 gap-1'>
-                  <Icon icon={IconForProvider(ProviderForModel(config.model))} />
-                  <span className='overflow-hidden whitespace-nowrap text-ellipsis'>
-                    {LabelForModel(config.model, availableProviders)}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
         </div>
-        {isSettingsTab(activeTab) ? (
-          <PromptSettingsPane config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
-        ) : (
-          <PromptInput
-            key={version.id}
-            promptKey={activeTab}
-            value={prompts[activeTab] ?? ''}
-            setValue={updatePrompt}
-            placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
-            preformatted={PromptKeyNeedsPreformatted(activeTab)}
-            disabled={!setModifiedVersion}
-          />
-        )}
+        <PromptInput
+          key={version.id}
+          promptKey={activeTab}
+          value={prompts[activeTab] ?? ''}
+          setValue={updatePrompt}
+          placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
+          preformatted={PromptKeyNeedsPreformatted(activeTab)}
+          disabled={!setModifiedVersion}
+        />
+        <PromptConfigSettings config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
@@ -169,8 +145,6 @@ export default function PromptPanel({
           variables={ExtractPromptVariables(prompts, config)}
           staticVariables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}
-          languageModel={config.model}
-          setLanguageModel={updateModel}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
           onShowTestConfig={onShowTestConfig}

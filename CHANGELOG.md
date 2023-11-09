@@ -1,5 +1,11 @@
 ## PlayFetch Changelog
 
+### v0.15 - 2023-11-09
+- Test function interrupts dynamically in the UI
+- Support for GPT-4 Turbo (preview) and new GPT-3.5 Turbo
+- Save default model and parameters
+- Onboarding questionnaire
+
 ### v0.14 - 2023-11-03
 - Support for branching in chains
 - Test chat conversations in the UI

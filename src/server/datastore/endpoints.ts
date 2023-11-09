@@ -149,7 +149,7 @@ export async function updateEndpointForUser(
   await getDatastore().save(
     toEndpointData(
       enabled,
-      endpointData.userID,
+      userID,
       endpointData.projectID,
       parentID,
       versionID,

@@ -75,26 +75,7 @@ const getVersionContent = (
   version: ChainVersion | PromptVersion,
   activePromptTab: PromptTab,
   itemCache: ActiveItemCache
-) =>
-  IsPromptVersion(version)
-    ? getPromptVersionContent(version, activePromptTab)
-    : getChainVersionContent(version, itemCache)
-
-export const getPromptVersionContent = (version: PromptVersion, activePromptTab: PromptTab) => {
-  switch (activePromptTab) {
-    case 'main':
-    case 'functions':
-    case 'system':
-      return version.prompts[activePromptTab]
-    case 'settings':
-      return version.config
-        ? `Model: ${version.config.model}
-Chat: ${version.config.isChat}
-Maximum Tokens: ${version.config.maxTokens}
-Temperature: ${version.config.temperature}`
-        : undefined
-  }
-}
+) => (IsPromptVersion(version) ? version.prompts[activePromptTab] : getChainVersionContent(version, itemCache))
 
 const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCache) =>
   version.items.map(item => getChainItemContent(item, itemCache)).join('\n')
@@ -134,7 +115,7 @@ const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache)
     if (prompt) {
       const promptVersion = prompt.versions.find(version => version.id === item.versionID)
       if (promptVersion) {
-        return getPromptVersionContent(promptVersion, 'main')
+        return promptVersion.prompts['main']
       }
     }
     return '…'

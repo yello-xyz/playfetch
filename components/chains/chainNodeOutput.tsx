@@ -21,6 +21,7 @@ import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
 import { ProviderForModel } from '@/src/common/providerMetadata'
+import { SelectAnyInputValue } from '@/src/client/inputRows'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
@@ -110,15 +111,20 @@ export default function ChainNodeOutput({
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion(activeVersion.id)
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
-  const runChain = async (inputs: PromptInputs[]) => {
+  const runChain = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     persistInputValuesIfNeeded()
     if (areProvidersAvailable(items)) {
-      setActiveIndex(0)
-      setRunningItemIndex(-1)
-      await runVersion(() => saveItems(items), inputs)
-      setActiveIndex(nodes.length - 1)
+      if (continuationID === undefined) {
+        setActiveIndex(0)
+        setRunningItemIndex(-1)
+      }
+      const isFinished = await runVersion(getVersion, inputs, continuationID)
+      if (isFinished) {
+        setActiveIndex(nodes.length - 1)
+      }
     }
   }
+  const saveAndRun = async (inputs: PromptInputs[]) => runChain(() => saveItems(items), inputs)
 
   useEffect(() => {
     if (highestRunIndex > runningItemIndex) {
@@ -160,7 +166,8 @@ export default function ChainNodeOutput({
               activeItem={chain}
               activeRunID={activeRunID}
               version={activeVersion}
-              runVersion={runVersion}
+              runVersion={runChain}
+              selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
             />
           </div>
@@ -175,7 +182,7 @@ export default function ChainNodeOutput({
               setTestConfig={setTestConfig}
               onShowTestConfig={activeIndex !== 0 ? () => setActiveIndex(0) : undefined}
               disabled={!items.length || !areProvidersAvailable(items) || isRunning}
-              callback={runChain}
+              callback={saveAndRun}
             />
           </div>
         )}

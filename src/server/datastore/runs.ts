@@ -2,6 +2,7 @@ import { PromptInputs, Run } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
+import { PropertyFilter } from '@google-cloud/datastore'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -9,10 +10,11 @@ export async function migrateRuns(postMerge: boolean) {
   }
   const datastore = getDatastore()
   let remainingSaveCount = 100
-  const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
-  for (const runData of allRuns) {
-    const continuationID = runData.continuationID
-    if (continuationID === undefined) {
+  const [continuationRuns] = await datastore.runQuery(
+    datastore.createQuery(Entity.RUN).filter(new PropertyFilter('continuationID', '!=', null))
+  )
+  for (const runData of continuationRuns) {
+    if (runData.canContinue === undefined) {
       if (remainingSaveCount-- <= 0) {
         console.log('‼️  Please run this migration again to process remaining runs')
         return
@@ -28,7 +30,8 @@ export async function migrateRuns(postMerge: boolean) {
           runData.cost,
           runData.duration,
           JSON.parse(runData.labels),
-          runData.continuationID, // will save as null rather than undefined
+          runData.continuationID,
+          true,
           getID(runData)
         )
       )
@@ -46,7 +49,8 @@ export async function saveRun(
   cost: number,
   duration: number,
   labels: string[],
-  continuationID?: number
+  continuationID: number | undefined,
+  canContinue: boolean
 ) {
   await ensurePromptOrChainAccess(userID, parentID)
   const runData = toRunData(
@@ -59,7 +63,8 @@ export async function saveRun(
     cost,
     duration,
     labels,
-    continuationID
+    continuationID,
+    canContinue ?? undefined
   )
   await getDatastore().save(runData)
 }
@@ -112,6 +117,7 @@ async function updateRun(runData: any) {
       runData.duration,
       JSON.parse(runData.labels),
       runData.continuationID,
+      runData.canContinue,
       getID(runData)
     )
   )
@@ -128,6 +134,7 @@ const toRunData = (
   duration: number,
   labels: string[],
   continuationID: number | undefined,
+  canContinue: boolean | undefined,
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
@@ -142,6 +149,7 @@ const toRunData = (
     duration,
     labels: JSON.stringify(labels),
     continuationID: continuationID ?? null,
+    canContinue,
   },
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })
@@ -156,6 +164,7 @@ export const toRun = (data: any): Run => ({
   duration: data.duration,
   labels: JSON.parse(data.labels),
   continuationID: data.continuationID ?? null,
+  canContinue: data.canContinue ?? false,
 })
 
 export async function getRecentRuns(

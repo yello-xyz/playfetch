@@ -8,16 +8,10 @@ enum ClientRoute {
   SharedProjects = `${ClientRoute.Home}?w=${SharedProjectsWorkspaceID}`,
   Settings = '/settings',
   Login = '/login',
+  Onboarding = '/onboarding',
   Waitlist = `${ClientRoute.Login}?w=1`,
   Privacy = '/privacy',
-}
-
-export enum AdminRoute {
-  Home = '/admin',
-  AnalyticsDashboard = '/api/admin/loadURL?type=analyticsDashboard',
-  AnalyticsReports = '/api/admin/loadURL?type=analyticsReports',
-  SearchConsole = '/api/admin/loadURL?type=searchConsole',
-  ServerLogs = '/api/admin/loadURL?type=serverLogs',
+  Admin = '/admin',
 }
 
 export const WorkspaceRoute = (workspaceID: number, userID: number) =>

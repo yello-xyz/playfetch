@@ -22,7 +22,7 @@ export default function RangeInput({
   return (
     <>
       <input
-        className={`accent-gray-700 min-w-0 ${borderClass} ${className}`}
+        className={`accent-gray-700 min-w-0 h-1.5 ${borderClass} ${className}`}
         type='range'
         min={min}
         max={max}

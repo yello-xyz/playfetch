@@ -16,6 +16,7 @@ import {
   QueryProvider,
   PendingWorkspace,
   PendingProject,
+  OnboardingResponse,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -244,6 +245,9 @@ const api = {
   deleteVersion: function (versionID: number) {
     return post(this.deleteVersion, { versionID })
   },
+  updateDefaultConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
+    return post(this.updateDefaultConfig, { defaultPromptConfig })
+  },
   getAvailableProviders: function (): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders)
   },
@@ -261,6 +265,9 @@ const api = {
   },
   logOut: function () {
     return post(this.logOut)
+  },
+  completeOnboarding: function (response: OnboardingResponse) {
+    return post(this.completeOnboarding, { response })
   },
 }
 

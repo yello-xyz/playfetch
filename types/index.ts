@@ -5,6 +5,7 @@ export type User = {
   imageURL: string
   isAdmin: boolean
   lastLoginAt: number | null
+  didCompleteOnboarding: boolean
 }
 
 type PendingAttributes = {
@@ -89,7 +90,7 @@ export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere'
 export type OpenAIEmbeddingModel = 'text-embedding-ada-002'
 export type EmbeddingModel = OpenAIEmbeddingModel
 
-export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-32k'
+export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-turbo'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
 export type GoogleLanguageModel = 'text-bison'
 export type CohereLanguageModel = 'command'
@@ -179,6 +180,7 @@ type CommonRun = {
   duration?: number
   failed?: boolean
   continuationID?: number
+  canContinue?: boolean
   continuations?: (PartialRun | Run)[]
 }
 
@@ -317,7 +319,7 @@ export type LogEntry = {
   error?: string
   attempts: number
   cacheHit: boolean
-  continuationID: number
+  continuationID?: number
 }
 
 export type Analytics = {
@@ -367,4 +369,19 @@ export type WorkspaceMetrics = ActiveWorkspace & {
   projects: RecentProject[]
   users: ActiveUser[]
   pendingUsers: ActiveUser[]
+}
+
+export type OnboardingResponse = {
+  useCase: {
+    iteration: boolean
+    testing: boolean
+    collaboration: boolean
+    monitoring: boolean
+    deployment: boolean
+    feedback: boolean
+  }
+  otherUseCase?: string
+  role?: 'executive' | 'manager' | 'individual' | 'contractor'
+  area?: 'product' | 'engineering' | 'marketing' | 'content' | 'design' | 'sales'
+  otherArea?: string
 }
