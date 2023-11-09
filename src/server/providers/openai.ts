@@ -156,7 +156,7 @@ export async function loadExtraModels(
     .filter(model => model.id.startsWith(`ft:${supportedRootModel}`))
     .map(model => model.id)
 
-  const supportedGatedModels: OpenAILanguageModel[] = ['gpt-4-32k']
+  const supportedGatedModels: OpenAILanguageModel[] = [] // used to contain 'gpt-4-32k'
   const gatedModels = response.data
     .filter(model => (supportedGatedModels as string[]).includes(model.id))
     .map(model => model.id) as DefaultLanguageModel[]
