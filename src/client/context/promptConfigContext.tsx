@@ -14,15 +14,11 @@ export function useDefaultPromptConfig() {
 
   const defaultPromptConfig = context.defaultPromptConfig!
 
-  const updateDefaultModel = (model: LanguageModel) => {
-    api.updateDefaultConfig({ model })
-    context.setDefaultPromptConfig?.({ ...defaultPromptConfig, model })
-  }
+  const updateConfig = (config: Partial<PromptConfig>) =>
+    api.updateDefaultConfig(config).then(context.setDefaultPromptConfig)
 
-  const updateDefaultParameters = (config: Omit<PromptConfig, 'model'>) => {
-    api.updateDefaultConfig(config)
-    context.setDefaultPromptConfig?.({ model: defaultPromptConfig.model, ...config })
-  }
+  const updateDefaultModel = (model: LanguageModel) => updateConfig({ model })
+  const updateDefaultParameters = (config: Omit<PromptConfig, 'model'>) => updateConfig(config)
 
   return [defaultPromptConfig, updateDefaultModel, updateDefaultParameters] as const
 }
