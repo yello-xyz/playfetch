@@ -135,12 +135,12 @@ export default function ChainNodeOutput({
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
-  const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
+  const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
-        {activeNode === InputNode && variables.length > 0 ? (
+        {activeNode === InputNode && canShowTestData ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />
             <TestDataPane
