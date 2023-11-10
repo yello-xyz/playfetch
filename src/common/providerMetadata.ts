@@ -28,6 +28,7 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
   'claude-instant-1',
   'claude-2',
   'text-bison',
+  'chat-bison',
   'command',
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
@@ -78,6 +79,7 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
+    case 'chat-bison':
     case 'command':
       return false
     default:
@@ -115,6 +117,7 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'gpt-3.5-turbo-16k':
     case 'gpt-4':
     case 'gpt-4-turbo':
+    case 'chat-bison':
       return true
     case 'claude-instant-1':
     case 'claude-2':
@@ -136,6 +139,7 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
+    case 'chat-bison':
     case 'command':
       return false
     default:
@@ -197,6 +201,7 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
     case 'claude-2':
       return 'anthropic'
     case 'text-bison':
+    case 'chat-bison':
       return 'google'
     case 'command':
       return 'cohere'
@@ -220,7 +225,9 @@ const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]
     case 'claude-2':
       return 'Claude v2'
     case 'text-bison':
-      return 'PaLM v2'
+      return 'PaLM 2 for Text'
+    case 'chat-bison':
+      return 'PaLM 2 for Chat'
     case 'command':
       return 'Command'
     default:
@@ -240,7 +247,8 @@ const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvi
     case 'claude-2':
       return 'Claude'
     case 'text-bison':
-      return 'PaLM'
+    case 'chat-bison':
+      return 'PaLM 2'
     case 'command':
       return 'Command'
     default:
@@ -276,6 +284,8 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
       return 'https://docs.anthropic.com/claude/reference/selecting-a-model'
     case 'text-bison':
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text'
+    case 'chat-bison':
+      return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text-chat'
     case 'command':
       return 'https://docs.cohere.com/docs/models'
     default:
@@ -299,7 +309,9 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'claude-2':
       return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction. It is good for complex reasoning, creativity, thoughtful dialogue, coding,and detailed content creation.'
     case 'text-bison':
-      return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation.'
+      return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation. Fine-tuned for tasks that can be completed with one response, without the need for continuous conversation.'
+    case 'chat-bison':
+      return 'Google’s foundation model optimized for language understanding, language generation, and conversations. Fine-tuned to conduct natural multi-turn conversations, and for text tasks about code that require back-and-forth interactions.'
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
     default:
@@ -322,6 +334,7 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
     case 'claude-2':
       return 100000
     case 'text-bison':
+    case 'chat-bison':
       // TODO should we separate max input tokens vs max output tokens? (8192 vs 1024)
       return 8192
     case 'command':
@@ -350,6 +363,7 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
     case 'command':
       return 15
     case 'text-bison':
+    case 'chat-bison':
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
@@ -376,6 +390,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
     case 'command':
       return 15
     case 'text-bison':
+    case 'chat-bison':
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
