@@ -22,7 +22,7 @@ import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/hooks/useAvailableProviders'
@@ -66,22 +66,25 @@ export default function PromptPanel({
   const [activeTab, setActiveTab] = useInitialState<PromptTab>(
     initialActiveTab && tabs.includes(initialActiveTab) ? initialActiveTab : 'main'
   )
-  const updateActiveTab = (tab: PromptTab) => {
-    setActiveTab(tab)
-    onActiveTabChange?.(tab)
-  }
-
-  const update = (prompts: Prompts, config: PromptConfig) => {
-    setPrompts(prompts)
-    setConfig(config)
-    setModifiedVersion?.({ ...version, prompts, config })
-  }
+  const updateActiveTab = useCallback(
+    (tab: PromptTab) => {
+      setActiveTab(tab)
+      onActiveTabChange?.(tab)
+    },
+    [setActiveTab, onActiveTabChange]
+  )
 
   useEffect(() => {
     if (!SupportedPromptKeysForModel(config.model).includes(activeTab)) {
       updateActiveTab('main')
     }
   }, [config, activeTab, updateActiveTab])
+
+  const update = (prompts: Prompts, config: PromptConfig) => {
+    setPrompts(prompts)
+    setConfig(config)
+    setModifiedVersion?.({ ...version, prompts, config })
+  }
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
