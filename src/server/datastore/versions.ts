@@ -47,6 +47,7 @@ export async function migrateVersions(postMerge: boolean) {
         versionData.userID,
         versionData.parentID,
         versionData.prompts ? JSON.parse(versionData.prompts) : null,
+        // Remember to migrate the defaultPromptConfig in the users entity as well
         versionData.config ? JSON.parse(versionData.config) : null,
         versionData.items ? JSON.parse(versionData.items) : null,
         JSON.parse(versionData.labels),

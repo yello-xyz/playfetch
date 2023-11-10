@@ -142,8 +142,7 @@ export default function PromptPanel({
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
           runTitle={version.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
-          variables={ExtractPromptVariables(prompts, config)}
-          staticVariables={ExtractPromptVariables(prompts, config, false)}
+          variables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
