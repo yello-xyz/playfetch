@@ -115,7 +115,7 @@ const ExtractFunctionNames = (text: string) => {
   return array ? array.map(item => item?.name as string).filter(name => name) : []
 }
 
-export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic = true) => [
+export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic: boolean) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
   ...(SupportsFunctionsPrompt(config.model) && prompts.functions
