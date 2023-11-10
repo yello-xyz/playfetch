@@ -143,17 +143,15 @@ export default function ChainNodeOutput({
         {activeNode === InputNode && variables.length > 0 ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />
-            {showTestData && (
-              <TestDataPane
-                variables={variables}
-                staticVariables={staticVariables}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                testConfig={testConfig}
-                setTestConfig={setTestConfig}
-              />
-            )}
+            <TestDataPane
+              variables={variables}
+              staticVariables={staticVariables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
+            />
           </div>
         ) : (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
