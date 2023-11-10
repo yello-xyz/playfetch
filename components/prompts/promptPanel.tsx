@@ -75,10 +75,13 @@ export default function PromptPanel({
     setPrompts(prompts)
     setConfig(config)
     setModifiedVersion?.({ ...version, prompts, config })
+  }
+
+  useEffect(() => {
     if (!SupportedPromptKeysForModel(config.model).includes(activeTab)) {
       updateActiveTab('main')
     }
-  }
+  }, [config, activeTab, updateActiveTab])
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
