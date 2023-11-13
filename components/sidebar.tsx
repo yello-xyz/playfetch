@@ -2,6 +2,7 @@ import { HTMLAttributeAnchorTarget, ReactNode } from 'react'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import Link from 'next/link'
+import documentationIcon from '@/public/help.svg'
 import feedbackIcon from '@/public/feedback.svg'
 
 export default function Sidebar({ children }: { children: ReactNode }) {
@@ -16,6 +17,7 @@ export default function Sidebar({ children }: { children: ReactNode }) {
 export function FeedbackSection() {
   return (
     <SidebarSection>
+      <SidebarButton title='Documentation' icon={documentationIcon} link={process.env.NEXT_PUBLIC_DOCS_URL} />
       <SidebarButton title='Support' icon={feedbackIcon} link='mailto:hello@playfetch.ai?subject=PlayFetch Feedback' />
     </SidebarSection>
   )
