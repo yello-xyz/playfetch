@@ -30,6 +30,7 @@ import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import WorkspaceInvite from '@/components/workspaces/workspaceInvite'
+import { useDocumentationCookie } from '@/components/cookieBanner'
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (
@@ -90,6 +91,7 @@ export default function Home({
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
   availableProviders: AvailableProvider[]
 }) {
+  useDocumentationCookie('set')
   const router = useRouter()
 
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()

@@ -36,6 +36,7 @@ import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 
 import dynamic from 'next/dynamic'
 import { PromptConfigContext } from '@/src/client/context/promptConfigContext'
+import { useDocumentationCookie } from '@/components/cookieBanner'
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
@@ -59,6 +60,7 @@ export default function Home({
   availableProviders: AvailableProvider[]
   initialPromptConfig: PromptConfig
 }) {
+  useDocumentationCookie('set')
   const [
     activeProject,
     refreshProject,
