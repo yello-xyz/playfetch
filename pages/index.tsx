@@ -1,7 +1,7 @@
 import { withLoggedInSession } from '@/src/server/session'
 import { useRouter } from 'next/router'
 import api from '@/src/client/api'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import {
   User,
   AvailableProvider,
@@ -24,13 +24,15 @@ import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
-import WorkspaceGridView from '@/components/workspaces/workspaceGridView'
-import WorkspaceSidebar from '@/components/workspaces/workspaceSidebar'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
-import WorkspaceInvite from '@/components/workspaces/workspaceInvite'
 import { useDocumentationCookie } from '@/components/cookieBanner'
+
+import dynamic from 'next/dynamic'
+const WorkspaceSidebar = dynamic(() => import('@/components/workspaces/workspaceSidebar'))
+const WorkspaceInvite = dynamic(() => import('@/components/workspaces/workspaceInvite'))
+const WorkspaceGridView = dynamic(() => import('@/components/workspaces/workspaceGridView'))
 
 const IsSharedProjects = (workspace: ActiveWorkspace) => workspace.id === SharedProjectsWorkspaceID
 export const SharedProjectsWorkspace = (
@@ -174,35 +176,41 @@ export default function Home({
         <ModalDialogContext.Provider value={{ setDialogPrompt }}>
           <GlobalPopupContext.Provider value={globalPopupProviderProps}>
             <main className='flex items-stretch h-screen text-sm'>
-              <WorkspaceSidebar
-                workspaces={workspaces}
-                pendingWorkspaces={pendingWorkspaces}
-                activeWorkspaceID={activeWorkspace.id}
-                sharedProjects={sharedProjects}
-                onSelectWorkspace={selectWorkspace}
-                onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
-                onRefreshWorkspaces={refreshWorkspaces}
-              />
+              <Suspense>
+                <WorkspaceSidebar
+                  workspaces={workspaces}
+                  pendingWorkspaces={pendingWorkspaces}
+                  activeWorkspaceID={activeWorkspace.id}
+                  sharedProjects={sharedProjects}
+                  onSelectWorkspace={selectWorkspace}
+                  onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
+                  onRefreshWorkspaces={refreshWorkspaces}
+                />
+              </Suspense>
               <div className='flex flex-col flex-1'>
                 <div className='flex-1 overflow-hidden'>
                   {IsPendingWorkspace(activeWorkspace) ? (
-                    <WorkspaceInvite
-                      workspace={activeWorkspace}
-                      onRespond={accept => respondToWorkspaceInvite(activeWorkspace.id, accept)}
-                    />
+                    <Suspense>
+                      <WorkspaceInvite
+                        workspace={activeWorkspace}
+                        onRespond={accept => respondToWorkspaceInvite(activeWorkspace.id, accept)}
+                      />
+                    </Suspense>
                   ) : (
-                    <WorkspaceGridView
-                      workspaces={workspaces}
-                      activeWorkspace={activeWorkspace}
-                      isUserWorkspace={activeWorkspace.id === user.id}
-                      isSharedProjects={IsSharedProjects(activeWorkspace)}
-                      onRespondToProjectInvite={respondToProjectInvite}
-                      onAddProject={addProject}
-                      onSelectProject={navigateToProject}
-                      onSelectUserWorkspace={() => selectWorkspace(user.id)}
-                      onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                      onRefreshWorkspaces={refreshWorkspaces}
-                    />
+                    <Suspense>
+                      <WorkspaceGridView
+                        workspaces={workspaces}
+                        activeWorkspace={activeWorkspace}
+                        isUserWorkspace={activeWorkspace.id === user.id}
+                        isSharedProjects={IsSharedProjects(activeWorkspace)}
+                        onRespondToProjectInvite={respondToProjectInvite}
+                        onAddProject={addProject}
+                        onSelectProject={navigateToProject}
+                        onSelectUserWorkspace={() => selectWorkspace(user.id)}
+                        onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                        onRefreshWorkspaces={refreshWorkspaces}
+                      />
+                    </Suspense>
                   )}
                 </div>
               </div>

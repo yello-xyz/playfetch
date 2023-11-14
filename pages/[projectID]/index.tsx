@@ -23,8 +23,6 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { RefreshContext } from '@/src/client/context/refreshContext'
 import { UserContext } from '@/src/client/context/userContext'
-import ProjectSidebar from '@/components/projects/projectSidebar'
-import ProjectTopBar from '@/components/projects/projectTopBar'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
 import usePrompt from '@/src/client/hooks/usePrompt'
@@ -33,11 +31,13 @@ import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-
-import dynamic from 'next/dynamic'
 import { PromptConfigContext } from '@/src/client/context/promptConfigContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
+
+import dynamic from 'next/dynamic'
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
+const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
+const ProjectTopBar = dynamic(() => import('@/components/projects/projectTopBar'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user, query }) => ({
   props: await loadActiveItem(user, query),
@@ -208,27 +208,32 @@ export default function Home({
             <ModalDialogContext.Provider value={{ setDialogPrompt }}>
               <GlobalPopupContext.Provider value={globalPopupProviderProps}>
                 <main className='flex flex-col h-screen text-sm'>
-                  <ProjectTopBar
-                    workspaces={workspaces}
-                    activeProject={activeProject}
-                    onRefreshProject={refreshProject}
-                    onNavigateBack={navigateBack}
-                    showComments={showComments}
-                    setShowComments={setShowComments}
-                  />
-                  <div className='flex items-stretch flex-1 overflow-hidden'>
-                    <ProjectSidebar
-                      activeProject={activeProject}
-                      activeItem={activeItem}
+                  <Suspense>
+                    <ProjectTopBar
                       workspaces={workspaces}
-                      onAddPrompt={addPrompt}
-                      onAddChain={addChain}
-                      onDeleteItem={onDeleteItem}
-                      onSelectPrompt={selectPrompt}
-                      onSelectChain={selectChain}
-                      onSelectCompare={selectCompare}
-                      onSelectEndpoints={selectEndpoints}
+                      activeProject={activeProject}
+                      onRefreshProject={refreshProject}
+                      onNavigateBack={navigateBack}
+                      showComments={showComments}
+                      setShowComments={setShowComments}
                     />
+                  </Suspense>
+
+                  <div className='flex items-stretch flex-1 overflow-hidden'>
+                    <Suspense>
+                      <ProjectSidebar
+                        activeProject={activeProject}
+                        activeItem={activeItem}
+                        workspaces={workspaces}
+                        onAddPrompt={addPrompt}
+                        onAddChain={addChain}
+                        onDeleteItem={onDeleteItem}
+                        onSelectPrompt={selectPrompt}
+                        onSelectChain={selectChain}
+                        onSelectCompare={selectCompare}
+                        onSelectEndpoints={selectEndpoints}
+                      />
+                    </Suspense>
                     <div className='flex-1'>
                       <Suspense>
                         <MainProjectPane
