@@ -4,8 +4,9 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
   const { render, location, onDismissGlobalPopup, parentRef, parentRect, childRect, childRef, ...other } = props
 
   const position: GlobalPopupLocation = { ...location }
-  const isFullySpecified = Object.keys(position).length === 4
-  const isUnspecified = Object.keys(position).length === 0
+  const definedKeyLength = Object.entries(position).filter(([, value]) => value !== undefined).length
+  const isFullySpecified = definedKeyLength === 4
+  const isUnspecified = definedKeyLength === 0
   if (!isFullySpecified) {
     if (parentRect && childRect) {
       if (position.right !== undefined) {

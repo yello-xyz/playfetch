@@ -24,8 +24,8 @@ export default async function loadAdminItem(query: ParsedUrlQuery) {
   const initialAdminItem: AdminItem = waitlist
     ? WaitlistItem
     : projects
-      ? RecentProjectsItem
-      : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
+    ? RecentProjectsItem
+    : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
 
   return {
     initialAdminItem,
@@ -39,10 +39,10 @@ export default async function loadAdminItem(query: ParsedUrlQuery) {
       ['Dashboards', process.env.GOOGLE_ANALYTICS_DASHBOARD_URL ?? ''],
       ['Reports', process.env.GOOGLE_ANALYTICS_REPORTS_URL ?? ''],
       ['Search Console', process.env.GOOGLE_SEARCH_CONSOLE_URL ?? ''],
-    ].filter(([_, url]) => url),
+    ].filter(([, url]) => url),
     debugLinks: [
       ['Integration Test', process.env.INTEGRATION_TEST_URL ?? ''],
       ['Server Logs', process.env.SERVER_LOGS_URL ?? ''],
-    ].filter(([_, url]) => url),
+    ].filter(([, url]) => url),
   }
 }

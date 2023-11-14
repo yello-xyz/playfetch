@@ -76,7 +76,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
     const commentBlocks = [] as CommentBlock[]
     for (const [parentIDKey, comments] of Object.entries(commentsForTarget).sort(
-      ([_, [a]], [__, [b]]) => a.timestamp - b.timestamp
+      ([, [a]], [, [b]]) => a.timestamp - b.timestamp
     )) {
       const parentID = Number(parentIDKey)
       const chain = chainsData.find(data => getID(data) === parentID)
