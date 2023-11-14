@@ -29,7 +29,7 @@ export default function CookieBanner({ children }: any) {
   const cookieStatus: CookieStatus = cookies[cookieName] ?? 'unknown'
   const updateCookieStatus = useCallback(
     (status: 'accepted' | 'denied') => setCookie(cookieName, status, topLevelCookieProperties()),
-    [setCookie, consentCookieName]
+    [setCookie, cookieName]
   )
 
   useEffect(() => {
