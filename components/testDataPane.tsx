@@ -1,12 +1,13 @@
-import { Fragment, KeyboardEvent, useRef, useState } from 'react'
+import { Fragment, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from './icon'
 import { InputValues, TestConfig } from '@/types'
 import RichTextInput from './richTextInput'
-import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from './popupMenu'
 import Button from './button'
+import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
 
 export default function TestDataPane({
   variables,
@@ -104,6 +105,22 @@ export default function TestDataPane({
   const isRowActive = (row: number) => activeCell?.[0] === row
   const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
 
+  const setPopup = useGlobalPopup<TestDataPopupProps>()
+
+  const expandCell = (row: number, variable: string) => {
+    setPopup(TestDataPopup, {
+      variable,
+      variables,
+      staticVariables,
+      row,
+      value: inputValues[variable]?.[row] ?? '',
+      setValue: value => {
+        updateInputValue(variable, value, row)
+        persistInputValuesIfNeeded()
+      },
+    })
+  }
+
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
@@ -117,7 +134,11 @@ export default function TestDataPane({
           const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
-              <RowNumberCell row={row} toggleRow={toggleRow} color={color} />
+              <div
+                className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
+                onClick={() => toggleRow(row)}>
+                #{row + 1}
+              </div>
               {allVariables.map((variable, col) => (
                 <div className='relative group' key={`${rowCount}-${col}`}>
                   <RichTextInput
@@ -129,10 +150,11 @@ export default function TestDataPane({
                     onKeyDown={event => checkDeleteRow(event, row)}
                   />
                   <Icon
-                    className={`absolute top-px right-px bg-white rounded cursor-pointer opacity-0 ${
+                    className={`absolute top-0.5 right-0.5 bg-white rounded cursor-pointer opacity-0 ${
                       isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
                     }`}
                     icon={expandIcon}
+                    onClick={() => expandCell(row, variable)}
                   />
                 </div>
               ))}
@@ -169,23 +191,26 @@ export function TestDataPopup({
   withDismiss,
 }: TestDataPopupProps & WithDismiss) {
   const [currentValue, setCurrentValue] = useState(value)
+  const innerRef = useFocusEndRef()
 
   return (
     <PopupContent>
-      <div className='flex flex-col h-full'>
-        <div className='flex items-stretch w-full border-b border-gray-200'>
-          <div className='w-10 border-r border-gray-200 bg-gray-25 grow' />
-          <HeaderCell variable={variable} variables={variables} staticVariables={staticVariables} />
+      <div className='h-full flex flex-col w-[640px] h-[480px]'>
+        <div className='flex items-stretch w-full'>
+          <div className='w-10 border-b border-gray-200 bg-gray-25' />
+          <HeaderCell grow variable={variable} variables={variables} staticVariables={staticVariables} />
         </div>
-        <div className='flex items-stretch w-full grow'>
-          <RowNumberCell row={row} color='bg-white border-r border-gray-200' />
+        <div className='flex items-stretch flex-1 w-full min-h-0'>
+          <div className='min-w-[40px] py-1 text-center text-gray-400'>#{row + 1}</div>
+          <div className='border-l border-gray-200' />
           <RichTextInput
             className='w-full h-full px-3 py-1 overflow-y-auto text-sm outline-none'
             value={currentValue}
             setValue={setCurrentValue}
+            innerRef={innerRef}
           />
         </div>
-        <div className='flex justify-end p-2 bg-gray-25'>
+        <div className='flex justify-end p-2 bg-gray-50'>
           <Button onClick={withDismiss(() => setValue(currentValue))}>Done</Button>
         </div>
       </div>
@@ -193,38 +218,26 @@ export function TestDataPopup({
   )
 }
 
-const RowNumberCell = ({
-  row,
-  toggleRow,
-  color,
-}: {
-  row: number
-  toggleRow?: (row: number) => void
-  color: string
-}) => (
-  <div
-    className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
-    onClick={toggleRow ? () => toggleRow(row) : undefined}>
-    #{row + 1}
-  </div>
-)
-
 const HeaderCell = ({
   variable,
   variables,
   staticVariables,
+  grow,
 }: {
   variable: string
   variables: string[]
   staticVariables: string[]
+  grow?: boolean
 }) => {
   const bgColor = (variable: string) =>
     staticVariables.includes(variable) ? 'bg-pink-25' : variables.includes(variable) ? 'bg-purple-25' : ''
   const textColor = (variable: string) =>
     staticVariables.includes(variable) ? 'text-pink-400' : variables.includes(variable) ? 'text-purple-400' : ''
 
+  const containerClass = 'flex items-center px-3 py-1 border-b border-l border-gray-200'
+
   return (
-    <div className={`flex items-center px-3 py-1 border-b border-l border-gray-200 ${bgColor(variable)}`}>
+    <div className={`${containerClass} ${grow ? 'grow' : ''}  ${bgColor(variable)}`}>
       <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
         {staticVariables.includes(variable) ? `{{${variable}}}` : variable}
       </span>
