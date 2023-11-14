@@ -1,4 +1,4 @@
-import { KeyboardEvent, useState } from 'react'
+import { KeyboardEvent, RefObject, useState } from 'react'
 import ContentEditable from './contentEditable'
 
 const escapeSpecialCharacters = (text: string) =>
@@ -53,6 +53,7 @@ export default function RichTextInput({
   onFocus,
   onBlur,
   onKeyDown,
+  innerRef,
 }: {
   className?: string
   value: string
@@ -60,6 +61,7 @@ export default function RichTextInput({
   onFocus?: () => void
   onBlur?: () => void
   onKeyDown?: (event: KeyboardEvent) => void
+  innerRef?: RefObject<HTMLElement>
 }) {
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== RichTextFromHTML(htmlValue)) {
@@ -79,6 +81,7 @@ export default function RichTextInput({
       onBlur={onBlur}
       onFocus={onFocus}
       onKeyDown={onKeyDown}
+      innerRef={innerRef}
     />
   )
 }
