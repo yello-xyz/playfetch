@@ -4,9 +4,8 @@ import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
 import { InputValues, TestConfig } from '@/types'
 import RichTextInput from '../richTextInput'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import TestDataHeader from './testDataHeader'
-import TestDataPopup, { TestDataPopupProps } from './testDataPopup'
+import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 
 export default function TestDataPane({
   variables,
@@ -34,13 +33,15 @@ export default function TestDataPane({
     ...(inputValues[variable] ?? []),
     ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
   ]
-  const updateInputValue = (variable: string, value: string, row: number) =>
+
+  const getInputValue = (row: number, variable: string) => inputValues[variable]?.[row] ?? ''
+  const setInputValue = (row: number, variable: string, value: string) =>
     setInputValues({
       ...inputValues,
       [variable]: [...paddedColumn(variable, row).slice(0, row), value, ...paddedColumn(variable, row).slice(row + 1)],
     })
 
-  const isRowEmpty = (row: number) => allVariables.every(variable => (inputValues[variable]?.[row] ?? '').length === 0)
+  const isRowEmpty = (row: number) => allVariables.every(variable => (getInputValue(row, variable)).length === 0)
 
   const addInput = () => {
     if (!isRowEmpty(rowCount - 1)) {
@@ -83,11 +84,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-            ? 'last'
-            : 'custom'
-        : rowIndices.length === rowCount
-          ? 'all'
+          ? 'last'
           : 'custom'
+        : rowIndices.length === rowCount
+        ? 'all'
+        : 'custom'
     setTestConfig({ mode, rowIndices })
   }
 
@@ -104,25 +105,15 @@ export default function TestDataPane({
   const isRowActive = (row: number) => activeCell?.[0] === row
   const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
 
-  const setPopup = useGlobalPopup<TestDataPopupProps>()
-
-  const expandCell = (row: number, variable: string) => {
-    setPopup(
-      TestDataPopup,
-      {
-        variable,
-        variables,
-        staticVariables,
-        row,
-        value: inputValues[variable]?.[row] ?? '',
-        setValue: value => {
-          updateInputValue(variable, value, row)
-          persistInputValuesIfNeeded()
-        },
-      },
-      { top: 150, left: 200, right: 200, bottom: 150 }
-    )
-  }
+  const expandCell = useTestDataPopup(
+    variables,
+    staticVariables,
+    getInputValue,
+    (row, variable, value) => {
+      setInputValue(row, variable, value)
+      persistInputValuesIfNeeded()
+    }
+  )
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
@@ -146,8 +137,8 @@ export default function TestDataPane({
                 <div className='relative group' key={`${rowCount}-${col}`}>
                   <RichTextInput
                     className={`w-full h-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
-                    value={inputValues[variable]?.[row] ?? ''}
-                    setValue={value => updateInputValue(variable, value, row)}
+                    value={getInputValue(row, variable)}
+                    setValue={value => setInputValue(row, variable, value)}
                     onBlur={() => persistInputValuesIfNeeded()}
                     onFocus={() => setActiveCell([row, col])}
                     onKeyDown={event => checkDeleteRow(event, row)}

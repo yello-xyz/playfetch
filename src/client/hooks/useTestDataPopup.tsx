@@ -1,12 +1,38 @@
-import { useState } from 'react'
-import RichTextInput from '../richTextInput'
-import { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { PopupContent } from '../popupMenu'
-import Button from '../button'
+import { KeyboardEvent, useState } from 'react'
+import RichTextInput from '../../../components/richTextInput'
+import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { PopupContent } from '../../../components/popupMenu'
+import Button from '../../../components/button'
 import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
-import TestDataHeader from './testDataHeader'
+import TestDataHeader from '../../../components/testData/testDataHeader'
 
-export type TestDataPopupProps = {
+export default function useTestDataPopup(
+  variables: string[],
+  staticVariables: string[],
+  getInputValue: (row: number, variable: string) => string,
+  setInputValue: (row: number, variable: string, value: string) => void
+) {
+  const setPopup = useGlobalPopup<TestDataPopupProps>()
+
+  const expandCell = (row: number, variable: string) => {
+    setPopup(
+      TestDataPopup,
+      {
+        variable,
+        variables,
+        staticVariables,
+        row,
+        value: getInputValue(row, variable),
+        setValue: value => setInputValue(row, variable, value),
+      },
+      { top: 150, left: 200, right: 200, bottom: 150 }
+    )
+  }
+
+  return expandCell
+}
+
+type TestDataPopupProps = {
   variable: string
   variables: string[]
   staticVariables: string[]
@@ -15,7 +41,7 @@ export type TestDataPopupProps = {
   setValue: (value: string) => void
 }
 
-export default function TestDataPopup({
+const TestDataPopup = ({
   variable,
   variables,
   staticVariables,
@@ -23,8 +49,15 @@ export default function TestDataPopup({
   value,
   setValue,
   withDismiss,
-}: TestDataPopupProps & WithDismiss) {
+}: TestDataPopupProps & WithDismiss) => {
   const [currentValue, setCurrentValue] = useState(value)
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      withDismiss(() => {})()
+    }
+  }
+
   const innerRef = useFocusEndRef()
 
   return (
@@ -41,6 +74,7 @@ export default function TestDataPopup({
             className='w-full h-full px-3 py-1 overflow-y-auto text-sm outline-none'
             value={currentValue}
             setValue={setCurrentValue}
+            onKeyDown={onKeyDown}
             innerRef={innerRef}
           />
         </div>
