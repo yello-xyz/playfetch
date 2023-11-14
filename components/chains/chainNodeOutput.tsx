@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
-import TestDataPane from '../testDataPane'
+import TestDataPane from '../testData/testDataPane'
 import RunButtons from '../runs/runButtons'
 import {
   ChainNode,

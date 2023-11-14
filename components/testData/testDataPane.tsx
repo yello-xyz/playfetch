@@ -1,13 +1,14 @@
-import { Fragment, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, KeyboardEvent, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
-import Icon from './icon'
+import Icon from '../icon'
 import { InputValues, TestConfig } from '@/types'
-import RichTextInput from './richTextInput'
+import RichTextInput from '../richTextInput'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
-import { PopupContent } from './popupMenu'
-import Button from './button'
+import { PopupContent } from '../popupMenu'
+import Button from '../button'
 import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
+import TestDataHeader from './testDataHeader'
 
 export default function TestDataPane({
   variables,
@@ -131,7 +132,7 @@ export default function TestDataPane({
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
         <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={toggleAll} />
         {allVariables.map((variable, index) => (
-          <HeaderCell key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
+          <TestDataHeader key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
@@ -202,7 +203,7 @@ export function TestDataPopup({
       <div className='flex flex-col w-full h-full'>
         <div className='flex items-stretch w-full'>
           <div className='w-10 border-b border-gray-200 bg-gray-25' />
-          <HeaderCell grow variable={variable} variables={variables} staticVariables={staticVariables} />
+          <TestDataHeader grow variable={variable} variables={variables} staticVariables={staticVariables} />
         </div>
         <div className='flex items-stretch flex-1 w-full min-h-0'>
           <div className='min-w-[40px] py-1 text-center text-gray-400'>#{row + 1}</div>
@@ -219,32 +220,5 @@ export function TestDataPopup({
         </div>
       </div>
     </PopupContent>
-  )
-}
-
-const HeaderCell = ({
-  variable,
-  variables,
-  staticVariables,
-  grow,
-}: {
-  variable: string
-  variables: string[]
-  staticVariables: string[]
-  grow?: boolean
-}) => {
-  const bgColor = (variable: string) =>
-    staticVariables.includes(variable) ? 'bg-pink-25' : variables.includes(variable) ? 'bg-purple-25' : ''
-  const textColor = (variable: string) =>
-    staticVariables.includes(variable) ? 'text-pink-400' : variables.includes(variable) ? 'text-purple-400' : ''
-
-  const containerClass = 'flex items-center px-3 py-1 border-b border-l border-gray-200'
-
-  return (
-    <div className={`${containerClass} ${grow ? 'grow' : ''}  ${bgColor(variable)}`}>
-      <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
-        {staticVariables.includes(variable) ? `{{${variable}}}` : variable}
-      </span>
-    </div>
   )
 }
