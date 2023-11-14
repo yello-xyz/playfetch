@@ -1,5 +1,6 @@
 import { KeyboardEvent, RefObject, useState } from 'react'
 import ContentEditable from './contentEditable'
+import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
 
 const escapeSpecialCharacters = (text: string) =>
   text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -53,7 +54,7 @@ export default function RichTextInput({
   onFocus,
   onBlur,
   onKeyDown,
-  innerRef,
+  focusOnLoad,
 }: {
   className?: string
   value: string
@@ -61,7 +62,7 @@ export default function RichTextInput({
   onFocus?: () => void
   onBlur?: () => void
   onKeyDown?: (event: KeyboardEvent) => void
-  innerRef?: RefObject<HTMLElement>
+  focusOnLoad?: boolean
 }) {
   const [htmlValue, setHTMLValue] = useState('')
   if (value !== RichTextFromHTML(htmlValue)) {
@@ -71,6 +72,8 @@ export default function RichTextInput({
     setHTMLValue(html)
     setValue(RichTextFromHTML(html))
   }
+
+  const innerRef = useFocusEndRef(!!focusOnLoad)
 
   return (
     <ContentEditable

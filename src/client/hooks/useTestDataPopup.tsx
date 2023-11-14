@@ -3,7 +3,6 @@ import RichTextInput from '../../../components/richTextInput'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../../../components/popupMenu'
 import Button from '../../../components/button'
-import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
 import TestDataHeader from '../../../components/testData/testDataHeader'
 
 export default function useTestDataPopup(
@@ -58,8 +57,6 @@ const TestDataPopup = ({
     }
   }
 
-  const innerRef = useFocusEndRef()
-
   return (
     <PopupContent className='h-full'>
       <div className='flex flex-col w-full h-full'>
@@ -75,7 +72,7 @@ const TestDataPopup = ({
             value={currentValue}
             setValue={setCurrentValue}
             onKeyDown={onKeyDown}
-            innerRef={innerRef}
+            focusOnLoad
           />
         </div>
         <div className='flex justify-end p-2 bg-gray-50'>

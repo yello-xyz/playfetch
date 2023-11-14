@@ -23,11 +23,11 @@ const moveCursorToEndOfNode = (node: ChildNode) => {
   }
 }
 
-export default function useFocusEndRef() {
+export default function useFocusEndRef(focusOnLoad = true) {
   const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    if (ref.current) {
+    if (focusOnLoad && ref.current) {
       ref.current.focus()
       moveCursorToEndOfNode(ref.current)
     }
