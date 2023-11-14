@@ -108,17 +108,21 @@ export default function TestDataPane({
   const setPopup = useGlobalPopup<TestDataPopupProps>()
 
   const expandCell = (row: number, variable: string) => {
-    setPopup(TestDataPopup, {
-      variable,
-      variables,
-      staticVariables,
-      row,
-      value: inputValues[variable]?.[row] ?? '',
-      setValue: value => {
-        updateInputValue(variable, value, row)
-        persistInputValuesIfNeeded()
+    setPopup(
+      TestDataPopup,
+      {
+        variable,
+        variables,
+        staticVariables,
+        row,
+        value: inputValues[variable]?.[row] ?? '',
+        setValue: value => {
+          updateInputValue(variable, value, row)
+          persistInputValuesIfNeeded()
+        },
       },
-    })
+      { top: 150, left: 200, right: 200, bottom: 150 }
+    )
   }
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
@@ -194,8 +198,8 @@ export function TestDataPopup({
   const innerRef = useFocusEndRef()
 
   return (
-    <PopupContent>
-      <div className='h-full flex flex-col w-[640px] h-[480px]'>
+    <PopupContent className='h-full'>
+      <div className='flex flex-col w-full h-full'>
         <div className='flex items-stretch w-full'>
           <div className='w-10 border-b border-gray-200 bg-gray-25' />
           <HeaderCell grow variable={variable} variables={variables} staticVariables={staticVariables} />
