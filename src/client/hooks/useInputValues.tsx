@@ -17,7 +17,7 @@ export default function useInputValues(
           api.updateInputValues(parent.id, variable, inputs)
         }
       }
-      setOriginalInputValues(inputValues)  
+      setOriginalInputValues(inputValues)
       return inputValues
     })
   }

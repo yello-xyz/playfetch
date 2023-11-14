@@ -40,8 +40,8 @@ export default function AnalyticsDashboards({
     return usage.duration === 0
       ? acc
       : acc === 0
-      ? usage.duration / (usage.requests || 1)
-      : Math.min(acc, usage.duration / (usage.requests || 1))
+        ? usage.duration / (usage.requests || 1)
+        : Math.min(acc, usage.duration / (usage.requests || 1))
   }, 0)
   const maxAverageDuration = recentUsage.reduce(
     (acc, usage) => Math.max(acc, usage.duration / (usage.requests || 1)),
