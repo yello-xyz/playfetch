@@ -4,6 +4,9 @@ import expandIcon from '@/public/expand.svg'
 import Icon from './icon'
 import { InputValues, TestConfig } from '@/types'
 import RichTextInput from './richTextInput'
+import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { PopupContent } from './popupMenu'
+import Button from './button'
 
 export default function TestDataPane({
   variables,
@@ -147,10 +150,53 @@ export default function TestDataPane({
   )
 }
 
+type TestDataPopupProps = {
+  variable: string
+  variables: string[]
+  staticVariables: string[]
+  row: number
+  value: string
+  setValue: (value: string) => void
+}
+
+export function TestDataPopup({
+  variable,
+  variables,
+  staticVariables,
+  row,
+  value,
+  setValue,
+  withDismiss,
+}: TestDataPopupProps & WithDismiss) {
+  const [currentValue, setCurrentValue] = useState(value)
+
+  return (
+    <PopupContent>
+      <div className='flex flex-col h-full'>
+        <div className='flex items-stretch w-full border-b border-gray-200'>
+          <div className='w-10 border-r border-gray-200 bg-gray-25 grow' />
+          <HeaderCell variable={variable} variables={variables} staticVariables={staticVariables} />
+        </div>
+        <div className='flex items-stretch w-full grow'>
+          <RowNumberCell row={row} color='bg-white border-r border-gray-200' />
+          <RichTextInput
+            className='w-full h-full px-3 py-1 overflow-y-auto text-sm outline-none'
+            value={currentValue}
+            setValue={setCurrentValue}
+          />
+        </div>
+        <div className='flex justify-end p-2 bg-gray-25'>
+          <Button onClick={withDismiss(() => setValue(currentValue))}>Done</Button>
+        </div>
+      </div>
+    </PopupContent>
+  )
+}
+
 const RowNumberCell = ({
   row,
   toggleRow,
-  color = 'bg-white',
+  color,
 }: {
   row: number
   toggleRow?: (row: number) => void
