@@ -1,5 +1,6 @@
 import { Fragment, KeyboardEvent, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
+import expandIcon from '@/public/expand.svg'
 import Icon from './icon'
 import { InputValues, TestConfig } from '@/types'
 import RichTextInput from './richTextInput'
@@ -96,7 +97,9 @@ export default function TestDataPane({
     }
   }
 
-  const [activeRow, setActiveRow] = useState<number>()
+  const [activeCell, setActiveCell] = useState<[number, number]>()
+  const isRowActive = (row: number) => activeCell?.[0] === row
+  const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   const bgColor = (variable: string) =>
@@ -118,7 +121,7 @@ export default function TestDataPane({
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
-          const truncate = row === activeRow ? '' : 'max-h-[46px] line-clamp-2'
+          const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
               <div
@@ -127,15 +130,22 @@ export default function TestDataPane({
                 #{row + 1}
               </div>
               {allVariables.map((variable, col) => (
-                <RichTextInput
-                  key={`${rowCount}-${col}`}
-                  className={`w-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
-                  value={inputValues[variable]?.[row] ?? ''}
-                  setValue={value => updateInputValue(variable, value, row)}
-                  onBlur={() => persistInputValuesIfNeeded()}
-                  onFocus={() => setActiveRow(row)}
-                  onKeyDown={event => checkDeleteRow(event, row)}
-                />
+                <div className='relative group' key={`${rowCount}-${col}`}>
+                  <RichTextInput
+                    className={`w-full h-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
+                    value={inputValues[variable]?.[row] ?? ''}
+                    setValue={value => updateInputValue(variable, value, row)}
+                    onBlur={() => persistInputValuesIfNeeded()}
+                    onFocus={() => setActiveCell([row, col])}
+                    onKeyDown={event => checkDeleteRow(event, row)}
+                  />
+                  <Icon
+                    className={`absolute top-px right-px bg-white rounded cursor-pointer opacity-0 ${
+                      isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
+                    }`}
+                    icon={expandIcon}
+                  />
+                </div>
               ))}
             </Fragment>
           )
