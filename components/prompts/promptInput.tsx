@@ -4,6 +4,7 @@ import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CodeBlock from '../codeBlock'
 import ContentEditable from '../contentEditable'
+import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
@@ -46,29 +47,6 @@ const extractSelection = (contentEditableRef: RefObject<HTMLElement>) => {
     }
   }
   return undefined
-}
-
-const endRangeForNode = (node: ChildNode): Range => {
-  if (node.nodeType === Node.TEXT_NODE || node.childNodes.length === 0) {
-    const range = document.createRange()
-    range.selectNode(node)
-    range.setStart(node, 0)
-    range.setEnd(node, node.textContent?.length ?? 0)
-    return range
-  } else {
-    const childCount = node.childNodes.length
-    return endRangeForNode(node.childNodes[childCount - 1])
-  }
-}
-
-const moveCursorToEndOfNode = (node: ChildNode) => {
-  const selection = node.ownerDocument?.getSelection()
-  if (selection) {
-    const range = endRangeForNode(node)
-    range.collapse(false)
-    selection.removeAllRanges()
-    selection.addRange(range)
-  }
 }
 
 export default function PromptInput({
@@ -116,7 +94,7 @@ export default function PromptInput({
     [setPopup, toggleInput, lastSelection]
   )
 
-  const contentEditableRef = useRef<HTMLDivElement>(null)
+  const contentEditableRef = useFocusEndRef()
   const [lastKey, setLastKey] = useState(promptKey)
   if (promptKey !== lastKey) {
     setLastKey(promptKey)
@@ -130,13 +108,6 @@ export default function PromptInput({
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
   }, [contentEditableRef, updateSelection])
-
-  useEffect(() => {
-    if (contentEditableRef.current) {
-      contentEditableRef.current.focus()
-      moveCursorToEndOfNode(contentEditableRef.current)
-    }
-  }, [contentEditableRef])
 
   const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
   const contentEditableClassName = preformatted
