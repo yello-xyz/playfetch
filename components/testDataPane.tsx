@@ -102,22 +102,12 @@ export default function TestDataPane({
   const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
-  const bgColor = (variable: string) =>
-    staticVariables.includes(variable) ? 'bg-pink-25' : variables.includes(variable) ? 'bg-purple-25' : ''
-  const textColor = (variable: string) =>
-    staticVariables.includes(variable) ? 'text-pink-400' : variables.includes(variable) ? 'text-purple-400' : ''
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
         <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={toggleAll} />
         {allVariables.map((variable, index) => (
-          <div
-            key={index}
-            className={`flex items-center px-3 py-1 border-b border-l border-gray-200 ${bgColor(variable)}`}>
-            <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
-              {staticVariables.includes(variable) ? `{{${variable}}}` : variable}
-            </span>
-          </div>
+          <TestDataHeaderCell key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
@@ -157,6 +147,29 @@ export default function TestDataPane({
         <Icon icon={addIcon} />
         Add
       </div>
+    </div>
+  )
+}
+
+const TestDataHeaderCell = ({
+  variable,
+  variables,
+  staticVariables,
+}: {
+  variable: string
+  variables: string[]
+  staticVariables: string[]
+}) => {
+  const bgColor = (variable: string) =>
+    staticVariables.includes(variable) ? 'bg-pink-25' : variables.includes(variable) ? 'bg-purple-25' : ''
+  const textColor = (variable: string) =>
+    staticVariables.includes(variable) ? 'text-pink-400' : variables.includes(variable) ? 'text-purple-400' : ''
+
+  return (
+    <div className={`flex items-center px-3 py-1 border-b border-l border-gray-200 ${bgColor(variable)}`}>
+      <span className={`flex-1 mr-6 font-medium whitespace-nowrap text-ellipsis ${textColor(variable)}`}>
+        {staticVariables.includes(variable) ? `{{${variable}}}` : variable}
+      </span>
     </div>
   )
 }
