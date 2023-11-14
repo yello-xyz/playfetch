@@ -107,18 +107,14 @@ export default function TestDataPane({
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
         <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={toggleAll} />
         {allVariables.map((variable, index) => (
-          <TestDataHeaderCell key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
+          <HeaderCell key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
           const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
-              <div
-                className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
-                onClick={() => toggleRow(row)}>
-                #{row + 1}
-              </div>
+              <RowNumberCell row={row} toggleRow={toggleRow} color={color} />
               {allVariables.map((variable, col) => (
                 <div className='relative group' key={`${rowCount}-${col}`}>
                   <RichTextInput
@@ -151,7 +147,23 @@ export default function TestDataPane({
   )
 }
 
-const TestDataHeaderCell = ({
+const RowNumberCell = ({
+  row,
+  toggleRow,
+  color = 'bg-white',
+}: {
+  row: number
+  toggleRow?: (row: number) => void
+  color: string
+}) => (
+  <div
+    className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
+    onClick={toggleRow ? () => toggleRow(row) : undefined}>
+    #{row + 1}
+  </div>
+)
+
+const HeaderCell = ({
   variable,
   variables,
   staticVariables,
