@@ -103,8 +103,9 @@ export default function ChainView({
     return { promptID, versionID }
   }
 
-  const isInputOutputIndex = (index: number | undefined) => index === 0 || index === nodes.length - 1
-  const isInputOutputNode = isInputOutputIndex(activeNodeIndex)
+  const isInputOutputIndex = (index: number | undefined, nodes: ChainNode[]) =>
+    index === 0 || index === nodes.length - 1
+  const isInputOutputNode = isInputOutputIndex(activeNodeIndex, nodes)
   const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
 
   const [isNodeDirty, setNodeDirty] = useState(false)
@@ -112,9 +113,12 @@ export default function ChainView({
     setActiveNodeIndex(index)
     setShowVersions(false)
     setNodeDirty(false)
-    if (isInputOutputIndex(index)) {
-      setTestMode(true)
-    }
+    setNodes(nodes => {
+      if (isInputOutputIndex(index, nodes)) {
+        setTestMode(true)
+      }
+      return nodes
+    })
   }
 
   const updateItems = (items: ChainItem[]) => {
