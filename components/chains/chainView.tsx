@@ -152,7 +152,7 @@ export default function ChainView({
   return (
     <Allotment>
       {showVersions && (
-        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
+        <Allotment.Pane minSize={minWidth} preferredSize={480}>
           <div className='h-full'>
             <VersionTimeline
               activeItem={chain}
