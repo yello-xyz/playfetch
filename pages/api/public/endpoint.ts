@@ -23,7 +23,15 @@ const logResponse = (
   cacheHit: boolean,
   continuationID: number | undefined
 ) => {
-  updateUsage(endpoint.id, response.cost, response.duration, cacheHit, response.attempts, response.failed)
+  updateUsage(
+    endpoint.id,
+    response.cost,
+    response.duration,
+    cacheHit,
+    continuationID !== undefined,
+    response.attempts,
+    response.failed
+  )
   updateAnalytics(endpoint.projectID, response.cost, response.duration, cacheHit, response.attempts, response.failed)
   saveLogEntry(
     endpoint.projectID,

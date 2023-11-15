@@ -21,6 +21,7 @@ export async function migrateUsage() {
         usageData.cost,
         usageData.duration,
         usageData.cacheHits,
+        usageData.continuations,
         usageData.attempts,
         usageData.failures,
         usageData.createdAt,
@@ -31,7 +32,7 @@ export async function migrateUsage() {
 }
 
 export async function saveUsage(endpointID: number, projectID: number, parentID: number) {
-  await getDatastore().save(toUsageData(endpointID, projectID, parentID, 0, 0, 0, 0, 0, 0, new Date()))
+  await getDatastore().save(toUsageData(endpointID, projectID, parentID, 0, 0, 0, 0, 0, 0, 0, new Date()))
 }
 
 export async function updateUsage(
@@ -39,6 +40,7 @@ export async function updateUsage(
   incrementalCost: number,
   incrementalDuration: number,
   cacheHit: boolean,
+  isContinuation: boolean,
   attempts: number,
   failed: boolean
 ) {
@@ -53,6 +55,7 @@ export async function updateUsage(
         usageData.cost + incrementalCost,
         usageData.duration + incrementalDuration,
         usageData.cacheHits + (cacheHit ? 1 : 0),
+        usageData.continuations + (isContinuation ? 1 : 0),
         usageData.attempts + attempts,
         usageData.failures + (failed ? 1 : 0),
         usageData.createdAt,
@@ -70,13 +73,26 @@ const toUsageData = (
   cost: number,
   duration: number,
   cacheHits: number,
+  continuations: number,
   attempts: number,
   failures: number,
   createdAt: Date,
   lastRunAt?: Date
 ) => ({
   key: buildKey(Entity.USAGE, endpointID),
-  data: { projectID, parentID, requests, cost, duration, cacheHits, attempts, failures, createdAt, lastRunAt },
+  data: {
+    projectID,
+    parentID,
+    requests,
+    cost,
+    duration,
+    cacheHits,
+    continuations,
+    attempts,
+    failures,
+    createdAt,
+    lastRunAt,
+  },
   excludeFromIndexes: [],
 })
 
