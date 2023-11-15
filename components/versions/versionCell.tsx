@@ -5,7 +5,6 @@ import VersionComparison from './versionComparison'
 import LabelPopupMenu from '../labelPopupMenu'
 import UserAvatar from '@/components/users/userAvatar'
 import CommentPopupMenu from '../commentPopupMenu'
-import { LabelForModel } from '@/src/common/providerMetadata'
 import chainIcon from '@/public/chainSmall.svg'
 import endpointIcon from '@/public/endpointSmall.svg'
 import Icon from '../icon'
@@ -52,7 +51,6 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
 
   const user = activeItem.users.find(user => user.id === version.userID)
   const formattedDate = useFormattedDate(version.timestamp, FormatRelativeDate)
-  const availableProviders = useAvailableProviders()
 
   return (
     <VerticalBarWrapper
@@ -67,7 +65,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-700'>
-            {IsPromptVersion(version) ? LabelForModel(version.config.model, availableProviders) : formattedDate}
+            {formattedDate}
             {version.runs.length > 0 && (
               <>
                 {' '}
