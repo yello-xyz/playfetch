@@ -11,6 +11,7 @@ import endpointIcon from '@/public/endpointSmall.svg'
 import Icon from '../icon'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import { FormatRelativeDate } from '@/src/common/formatting'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -50,7 +51,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   }, [identifier])
 
   const user = activeItem.users.find(user => user.id === version.userID)
-  const formattedDate = useFormattedDate(version.timestamp)
+  const formattedDate = useFormattedDate(version.timestamp, FormatRelativeDate)
   const availableProviders = useAvailableProviders()
 
   return (
@@ -66,14 +67,12 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
           <div className='flex items-center flex-1 gap-2 text-xs text-gray-700'>
-            <span className='font-medium'>
-              {IsPromptVersion(version) ? LabelForModel(version.config.model, availableProviders) : formattedDate}
-            </span>
+            {IsPromptVersion(version) ? LabelForModel(version.config.model, availableProviders) : formattedDate}
             {version.runs.length > 0 && (
-              <span>
+              <>
                 {' '}
-                | {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
-              </span>
+                • {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
+              </>
             )}
           </div>
           <div className='flex items-center gap-1'>
