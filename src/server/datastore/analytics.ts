@@ -68,7 +68,15 @@ export async function getAnalyticsForProject(
       .filter(usage => usage.createdAt >= recentDays[0])
       .map(usage => [usage.createdAt.getTime(), toUsage(usage)])
   )
-  const emptyUsage = { requests: 0, cost: 0, duration: 0, cacheHits: 0, attempts: 0, failures: 0 }
+  const emptyUsage: Usage = {
+    requests: 0,
+    cost: 0,
+    duration: 0,
+    cacheHits: 0,
+    continuations: 0,
+    attempts: 0,
+    failures: 0,
+  }
   const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
 
   const cutoff = daysAgo(today, 2 * dayRange - 1)
@@ -79,6 +87,7 @@ export async function getAnalyticsForProject(
       cost: acc.cost + usage.cost,
       duration: acc.duration + usage.duration,
       cacheHits: acc.cacheHits + usage.cacheHits,
+      continuations: acc.continuations + usage.continuations,
       attempts: acc.attempts + usage.attempts,
       failures: acc.failures + usage.failures,
     }),

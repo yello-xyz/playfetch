@@ -284,6 +284,7 @@ export type Usage = {
   cost: number
   duration: number
   cacheHits: number
+  continuations: number
   attempts: number
   failures: number
 }

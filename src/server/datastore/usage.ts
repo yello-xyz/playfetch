@@ -104,6 +104,7 @@ export const toUsage = (data: any): Usage => ({
   cost: data.cost,
   duration: data.duration,
   cacheHits: data.cacheHits,
+  continuations: data.continuations,
   attempts: data.attempts,
   failures: data.failures,
 })
