@@ -28,8 +28,9 @@ export default function RunCellContinuation({
   runContinuation?: (message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
 }) {
+  const runWithContinuations = [run, ...continuations]
   const getInputKey = (run: PartialRun | Run) => ExtractInputKey(run)
-  const getPreviousInputKey = (index: number) => getInputKey([run, ...continuations][index])
+  const getPreviousInputKey = (index: number) => getInputKey(runWithContinuations[index])
   const lastInputKey = getPreviousInputKey(continuations.length)
 
   const [replyMessage, setReplyMessage] = useInitialState(selectInputValue(lastInputKey) ?? '')
@@ -51,6 +52,9 @@ export default function RunCellContinuation({
   const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
   const users = activeItem?.users ?? []
 
+  // TODO render this somewhere
+  // const totalCost = runWithContinuations.reduce((totalCost, run) => totalCost + (run.cost ?? 0), 0)
+
   return (
     <>
       {continuations.map((run, index) => (
@@ -69,7 +73,7 @@ export default function RunCellContinuation({
           <RunCellFooter run={run} activeItem={activeItem} isContinuation />
         </Fragment>
       ))}
-      {!!runContinuation && !![run, ...continuations].slice(-1)[0].canContinue && (
+      {!!runContinuation && !!runWithContinuations.slice(-1)[0].canContinue && (
         <>
           <RoleHeader user={user} role='User' />
           <BorderedSection>
