@@ -43,9 +43,12 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
           activeItem={activeItem}
         />
         {IsPromptVersion(version) && (
-          <div className={isActiveVersion ? '' : 'line-clamp-2'}>
-            <VersionComparison version={version} compareVersion={compareVersion} />
-          </div>
+          <>
+            <div className='border-b border-gray-200 border-b-1' />
+            <div className={isActiveVersion ? '' : 'line-clamp-2'}>
+              <VersionComparison version={version} compareVersion={compareVersion} />
+            </div>
+          </>
         )}
       </div>
     </VerticalBarWrapper>
