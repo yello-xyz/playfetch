@@ -42,7 +42,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
 
   return (
     <>
-      <div className='flex items-center justify-between gap-2 -mb-1'>
+      <div className='flex items-center justify-between gap-2'>
         <div className='flex items-center gap-1 text-xs text-gray-700 whitespace-nowrap'>
           {user && (
             <>

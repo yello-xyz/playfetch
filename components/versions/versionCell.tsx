@@ -31,7 +31,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
-        className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2.5 mb-2.5 mt-1 ${
+        className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
           isActiveVersion ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200 hover:bg-gray-50'
         }`}
         onClick={() => onSelect(version)}>

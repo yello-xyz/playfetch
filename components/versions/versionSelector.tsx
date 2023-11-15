@@ -1,5 +1,5 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PromptVersion } from '@/types'
-import { VersionLabels } from './versionCell'
+import { VersionLabels } from './versionLabels'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent, PopupItem } from '../popupMenu'
 import { PopupButton } from '../popupButton'
