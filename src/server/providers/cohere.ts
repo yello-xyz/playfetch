@@ -21,9 +21,10 @@ async function complete(
   try {
     cohere.init(apiKey)
     const runningContext = usePreviousContext ? context.running ?? '' : ''
+    const inputPrompt = `${runningContext}${prompt}`
     const response = await cohere.generate({
       model,
-      prompt: `${runningContext}${prompt}`,
+      prompt: inputPrompt,
       temperature,
       max_tokens: maxTokens,
     })
@@ -33,8 +34,8 @@ async function complete(
       streamChunks(output)
     }
 
-    const cost = CostForModel(model, prompt, output)
-    context.running = `${runningContext}${prompt}\n${output}\n`
+    const cost = CostForModel(model, inputPrompt, output)
+    context.running = `${inputPrompt}\n${output}\n`
 
     return { output, cost }
   } catch (error: any) {

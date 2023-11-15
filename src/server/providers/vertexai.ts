@@ -45,7 +45,8 @@ async function complete(
         },
       },
     }
-    const promptMessages = [...previousMessages, promptAsMessage]
+    const inputPrompt = `${runningContext}${prompt}`
+    const inputMessages = [...previousMessages, promptAsMessage]
     const request = {
       endpoint: `projects/${projectID}/locations/${location}/publishers/google/models/${model}`,
       instances: [
@@ -54,8 +55,8 @@ async function complete(
             fields: {
               ...(system ? { context: { stringValue: system } } : {}),
               ...(isChatModel(model)
-                ? { messages: { listValue: { values: promptMessages } } }
-                : { content: { stringValue: `${runningContext}${prompt}` } }),
+                ? { messages: { listValue: { values: inputMessages } } }
+                : { content: { stringValue: inputPrompt } }),
             },
           },
         },
@@ -72,17 +73,17 @@ async function complete(
 
     const [response] = await client.predict(request)
     const responseMessage = response.predictions?.[0]?.structValue?.fields?.candidates?.listValue?.values?.[0]
-    const output =
-      responseMessage?.structValue?.fields?.content?.stringValue ??
-      response.predictions?.[0]?.structValue?.fields?.content?.stringValue ??
-      ''
+    const getContent = (obj: any | undefined) => obj?.structValue?.fields?.content?.stringValue
+    const output = getContent(responseMessage) ?? getContent(response.predictions?.[0]) ?? ''
     if (output && streamChunks) {
       streamChunks(output)
     }
 
-    const cost = CostForModel(model, prompt, output)
-    context.running = `${runningContext}${prompt}\n${output}\n`
-    context.messages = [...promptMessages, ...(responseMessage ? [responseMessage] : [])]
+    const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
+    const input = isChatModel(model) ? [system ?? '', ...inputMessages.map(extractContent)].join('\n') : inputPrompt
+    const cost = CostForModel(model, input, output)
+    context.running = `${inputPrompt}\n${output}\n`
+    context.messages = [...inputMessages, ...(responseMessage ? [responseMessage] : [])]
 
     return { output, cost }
   } catch (error: any) {

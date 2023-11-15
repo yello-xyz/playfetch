@@ -78,8 +78,9 @@ async function tryCompleteChat(
     const api = new OpenAI({ apiKey })
     const previousMessages = useContext ? context?.messages ?? [] : []
     const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
-    const previousFunctions = useContext ? context?.functions ?? [] : []
-    const serializedPreviousFunctions = new Set(previousFunctions.map(JSON.stringify))
+    const inputMessages = [...previousMessages, ...promptMessages]
+    const previousFunctions: any[] = useContext ? context?.functions ?? [] : []
+    const serializedPreviousFunctions = new Set(previousFunctions.map(f => JSON.stringify(f)))
     const newFunctions = functions.filter(f => !serializedPreviousFunctions.has(JSON.stringify(f)))
     const inputFunctions = [...previousFunctions, ...newFunctions]
     const response = await api.chat.completions.create(
@@ -89,7 +90,7 @@ async function tryCompleteChat(
           .replaceAll('gpt-3.5-turbo-16k', 'gpt-3.5-turbo-1106')
           // TODO remove this once the model is generally available
           .replaceAll('gpt-4-turbo', 'gpt-4-1106-preview'),
-        messages: [...previousMessages, ...promptMessages],
+        messages: inputMessages,
         temperature,
         max_tokens: maxTokens,
         user: userID.toString(),
@@ -134,12 +135,9 @@ async function tryCompleteChat(
       }
     }
 
-    const cost = CostForModel(model, system ? `${system} ${prompt}` : prompt, output)
-    context.messages = [
-      ...previousMessages,
-      ...promptMessages,
-      functionMessage ?? { role: 'assistant', content: output },
-    ]
+    const extractContent = (obj: any) => (typeof obj.content === 'string' ? obj.content : JSON.stringify(obj))
+    const cost = CostForModel(model, [...inputMessages, ...inputFunctions].map(extractContent).join('\n'), output)
+    context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
     context.functions = inputFunctions
 
     return { output, cost, functionInterrupt: functionMessage?.function_call?.name }
