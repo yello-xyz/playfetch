@@ -30,7 +30,7 @@ export async function migrateAnalytics(postMerge: boolean) {
         analyticsData.cost,
         analyticsData.duration,
         analyticsData.cacheHits,
-        analyticsData.continuations,
+        analyticsData.continuations ?? 0,
         analyticsData.attempts,
         analyticsData.failures,
         getID(analyticsData)
