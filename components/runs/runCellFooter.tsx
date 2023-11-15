@@ -8,7 +8,7 @@ import dateIcon from '@/public/date.svg'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
 import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import { ItemLabels } from '../versions/versionCell'
+import { ItemLabels } from '../versions/versionLabels'
 
 export default function RunCellFooter({
   run,

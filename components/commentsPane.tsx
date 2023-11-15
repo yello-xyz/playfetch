@@ -7,12 +7,10 @@ import {
   ActiveProject,
   ActivePrompt,
   ActiveChain,
-  Prompt,
-  Chain,
 } from '@/types'
 import { ReactNode } from 'react'
 import { Capitalize, FormatRelativeDate } from '@/src/common/formatting'
-import { ItemLabel } from './versions/versionCell'
+import { ItemLabel } from './versions/versionLabels'
 import UserAvatar from '@/components/users/userAvatar'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
