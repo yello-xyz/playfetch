@@ -69,7 +69,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
             <span className='font-medium'>
               {IsPromptVersion(version) ? LabelForModel(version.config.model, availableProviders) : formattedDate}
             </span>
-            {IsPromptVersion(version) && version.runs.length > 0 && (
+            {version.runs.length > 0 && (
               <span>
                 {' '}
                 | {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
