@@ -59,12 +59,18 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
       bulletStyle={isActiveVersion ? 'filled' : 'stroked'}
       strokeStyle={isLast ? 'none' : 'stroked'}>
       <div
-        className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-2.5 mt-1 ${
+        className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2.5 mb-2.5 mt-1 ${
           isActiveVersion ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200 hover:bg-gray-50'
         }`}
         onClick={() => onSelect(version)}>
         <div className='flex items-center justify-between gap-2 -mb-1'>
-          <div className='flex items-center flex-1 gap-2 text-xs text-gray-700'>
+          <div className='flex items-center gap-1 text-xs text-gray-700 whitespace-nowrap'>
+            {user && (
+              <>
+                <UserAvatar user={user} size='sm' />
+                <span className='overflow-hidden font-medium text-ellipsis'>{user.fullName} |</span>
+              </>
+            )}
             {formattedDate}
             {version.runs.length > 0 && (
               <>
@@ -85,7 +91,6 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
             <VersionPopupMenu version={version} selectedCell={isActiveVersion} />
           </div>
         </div>
-        {user && activeItem.projectID !== user.id && <UserDetails user={user} />}
         <VersionLabels version={version} colors={labelColors} />
         {IsPromptVersion(version) && (
           <div className={isActiveVersion ? '' : 'line-clamp-2'}>
@@ -166,15 +171,6 @@ export function ItemLabel({
       {icon ? <Icon icon={icon} className='-my-0.5' /> : null}
       {label}
     </span>
-  )
-}
-
-function UserDetails({ user }: { user: User }) {
-  return (
-    <div className='flex items-center gap-1 text-xs'>
-      <UserAvatar user={user} size='sm' />
-      <span className='font-normal'>{user.fullName}</span>
-    </div>
   )
 }
 
