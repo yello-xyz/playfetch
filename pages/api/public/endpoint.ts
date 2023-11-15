@@ -117,7 +117,9 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
         const continuationID = continuationKey ? Number(salt(BigInt(continuationKey))) : undefined
         const versionID = endpoint.versionID
         const inputs =
-          typeof req.body === 'string' ? { [DefaultChatContinuationInputKey]: req.body } : (req.body as PromptInputs)
+          typeof req.body === 'string' && req.body.length > 0
+            ? { [DefaultChatContinuationInputKey]: req.body }
+            : (req.body as PromptInputs)
 
         const cachedResponse = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
         if (cachedResponse && useStreaming) {
