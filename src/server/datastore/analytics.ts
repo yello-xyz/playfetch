@@ -30,6 +30,7 @@ export async function migrateAnalytics(postMerge: boolean) {
         analyticsData.cost,
         analyticsData.duration,
         analyticsData.cacheHits,
+        analyticsData.continuations,
         analyticsData.attempts,
         analyticsData.failures,
         getID(analyticsData)
@@ -92,6 +93,7 @@ export async function updateAnalytics(
   incrementalCost: number,
   incrementalDuration: number,
   cacheHit: boolean,
+  isContinuation: boolean,
   attempts: number,
   failed: boolean,
   timestamp = new Date(),
@@ -111,6 +113,7 @@ export async function updateAnalytics(
         (previousData?.cost ?? 0) + incrementalCost,
         (previousData?.duration ?? 0) + incrementalDuration,
         (previousData?.cacheHits ?? 0) + (cacheHit ? 1 : 0),
+        (previousData?.continuations ?? 0) + (isContinuation ? 1 : 0),
         (previousData?.attempts ?? 0) + attempts,
         (previousData?.failures ?? 0) + (failed ? 1 : 0),
         previousData ? getID(previousData) : undefined
@@ -127,11 +130,12 @@ const toAnalyticsData = (
   cost: number,
   duration: number,
   cacheHits: number,
+  continuations: number,
   attempts: number,
   failures: number,
   analyticsID?: number
 ) => ({
   key: buildKey(Entity.ANALYTICS, analyticsID),
-  data: { projectID, range, createdAt, requests, cost, duration, cacheHits, attempts, failures },
+  data: { projectID, range, createdAt, requests, cost, duration, cacheHits, continuations, attempts, failures },
   excludeFromIndexes: [],
 })
