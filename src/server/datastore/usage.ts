@@ -8,7 +8,10 @@ import {
   getKeyedEntity,
 } from './datastore'
 
-export async function migrateUsage() {
+export async function migrateUsage(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allUsage] = await datastore.runQuery(datastore.createQuery(Entity.USAGE))
   for (const usageData of allUsage) {
@@ -21,7 +24,7 @@ export async function migrateUsage() {
         usageData.cost,
         usageData.duration,
         usageData.cacheHits,
-        usageData.continuations,
+        usageData.continuations ?? 0,
         usageData.attempts,
         usageData.failures,
         usageData.createdAt,
