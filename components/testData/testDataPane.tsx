@@ -41,7 +41,7 @@ export default function TestDataPane({
       [variable]: [...paddedColumn(variable, row).slice(0, row), value, ...paddedColumn(variable, row).slice(row + 1)],
     })
 
-  const isRowEmpty = (row: number) => allVariables.every(variable => (getInputValue(row, variable)).length === 0)
+  const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
 
   const addInput = () => {
     if (!isRowEmpty(rowCount - 1)) {
@@ -84,11 +84,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-          ? 'last'
-          : 'custom'
+            ? 'last'
+            : 'custom'
         : rowIndices.length === rowCount
-        ? 'all'
-        : 'custom'
+          ? 'all'
+          : 'custom'
     setTestConfig({ mode, rowIndices })
   }
 
@@ -105,15 +105,10 @@ export default function TestDataPane({
   const isRowActive = (row: number) => activeCell?.[0] === row
   const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
 
-  const expandCell = useTestDataPopup(
-    variables,
-    staticVariables,
-    getInputValue,
-    (row, variable, value) => {
-      setInputValue(row, variable, value)
-      persistInputValuesIfNeeded()
-    }
-  )
+  const expandCell = useTestDataPopup(variables, staticVariables, getInputValue, (row, variable, value) => {
+    setInputValue(row, variable, value)
+    persistInputValuesIfNeeded()
+  })
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (

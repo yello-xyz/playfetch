@@ -31,7 +31,7 @@ export default function useFocusEndRef(focusOnLoad = true) {
       ref.current.focus()
       moveCursorToEndOfNode(ref.current)
     }
-  }, [ref])
+  }, [focusOnLoad, ref])
 
   return ref
 }
