@@ -79,6 +79,9 @@ async function tryCompleteChat(
     const previousMessages = useContext ? context?.messages ?? [] : []
     const promptMessages = buildPromptMessages(previousMessages, prompt, system, continuationInputs)
     const previousFunctions = useContext ? context?.functions ?? [] : []
+    const serializedPreviousFunctions = new Set(previousFunctions.map(JSON.stringify))
+    const newFunctions = functions.filter(f => !serializedPreviousFunctions.has(JSON.stringify(f)))
+    const inputFunctions = [...previousFunctions, ...newFunctions]
     const response = await api.chat.completions.create(
       {
         model: model
@@ -91,7 +94,7 @@ async function tryCompleteChat(
         max_tokens: maxTokens,
         user: userID.toString(),
         stream: true,
-        functions: previousFunctions.length || functions.length ? [...previousFunctions, ...functions] : undefined,
+        functions: inputFunctions.length > 0 ? inputFunctions : undefined,
       },
       { timeout: 30 * 1000 }
     )
@@ -137,7 +140,7 @@ async function tryCompleteChat(
       ...promptMessages,
       functionMessage ?? { role: 'assistant', content: output },
     ]
-    context.functions = [...previousFunctions, ...functions]
+    context.functions = inputFunctions
 
     return { output, cost, functionInterrupt: functionMessage?.function_call?.name }
   } catch (error: any) {
