@@ -61,7 +61,7 @@ export async function migrateVersions(postMerge: boolean) {
   console.log('✅ Processed all remaining versions')
 }
 
-const IsPromptVersion = (version: { items: ChainItemWithInputs[] | null }) => !version.items
+const IsPromptVersion = (version: { items: ChainItemWithInputs[] | string | null }) => !version.items
 
 const isVersionDataCompatible = (
   versionData: any,

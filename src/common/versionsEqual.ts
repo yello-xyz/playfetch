@@ -2,7 +2,13 @@ import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/prov
 import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
 
 const normalizeItems = (items: ChainItemWithInputs[]) =>
-  JSON.stringify(items.map(item => Object.entries(item).sort(([a], [b]) => a.localeCompare(b))))
+  JSON.stringify(
+    items.map(item =>
+      Object.entries(item)
+        .filter(([, b]) => b !== undefined)
+        .sort(([a], [b]) => a.localeCompare(b))
+    )
+  )
 
 export const ChainVersionsAreEqual = (a: { items: ChainItemWithInputs[] }, b: { items: ChainItemWithInputs[] }) =>
   normalizeItems(a.items) === normalizeItems(b.items)
