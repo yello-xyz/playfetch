@@ -1,24 +1,10 @@
 import { ReactNode, useState } from 'react'
-import { PromptVersion, ChainVersion, IsPromptVersion } from '@/types'
-import VersionComparison from './versionComparison'
+import { PromptVersion } from '@/types'
+import VersionComparison from '../versions/versionComparison'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
 
-export default function VersionCellBody<Version extends PromptVersion | ChainVersion>({
-  version,
-  isActiveVersion,
-  compareVersion,
-}: {
-  version: Version
-  isActiveVersion: boolean
-  compareVersion?: PromptVersion
-}) {
-  return IsPromptVersion(version) ? (
-    <PromptVersionCellBody version={version} compareVersion={compareVersion} isActiveVersion={isActiveVersion} />
-  ) : null
-}
-
-function PromptVersionCellBody({
+export default function PromptVersionCellBody({
   version,
   isActiveVersion,
   compareVersion,

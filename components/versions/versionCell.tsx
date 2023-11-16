@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
-import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain } from '@/types'
+import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain, IsPromptVersion } from '@/types'
 import VersionCellHeader from './versionCellHeader'
-import VersionCellBody from './versionCellBody'
+import PromptVersionCellBody from '../prompts/promptVersionCellBody'
 
 export default function VersionCell<Version extends PromptVersion | ChainVersion>({
   identifier,
@@ -42,7 +42,9 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
           isActiveVersion={isActiveVersion}
           activeItem={activeItem}
         />
-        <VersionCellBody version={version} compareVersion={compareVersion} isActiveVersion={isActiveVersion} />
+        {IsPromptVersion(version) && (
+          <PromptVersionCellBody version={version} compareVersion={compareVersion} isActiveVersion={isActiveVersion} />
+        )}
       </div>
     </VerticalBarWrapper>
   )
