@@ -3,7 +3,7 @@ import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import { FullLabelForModel } from '@/src/common/providerMetadata'
+import { FullLabelForModel, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 import { labelForChatMode } from './chatModePopupButton'
 
@@ -25,7 +25,7 @@ export default function PromptVersionCellBody({
         title='System'
         version={version}
         compareVersion={compareVersion}
-        getContent={version => version.prompts.system}
+        getContent={version => SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined}
       />
       <CollapsibleSection title='Prompt' expanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
