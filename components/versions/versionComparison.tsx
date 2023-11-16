@@ -202,3 +202,25 @@ export function TaggedContent({
     />
   )
 }
+
+export function ContentComparison({
+  content,
+  compareContent,
+  shouldTruncate = false,
+  stripSentinels = false,
+}: {
+  content: string
+  compareContent?: string
+  shouldTruncate?: boolean
+  stripSentinels?: boolean
+}) {
+  return (
+    <Comparison
+      currentContent={content}
+      compareContent={compareContent}
+      shouldTruncate={shouldTruncate}
+      stripSentinels={stripSentinels}
+      taggedClassName=''
+    />
+  )
+}

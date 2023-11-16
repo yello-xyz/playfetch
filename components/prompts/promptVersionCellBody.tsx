@@ -1,8 +1,11 @@
 import { ReactNode, useState } from 'react'
-import { PromptVersion } from '@/types'
-import VersionComparison from '../versions/versionComparison'
+import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
+import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
+import { FullLabelForModel } from '@/src/common/providerMetadata'
+import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import { labelForChatMode } from './chatModePopupButton'
 
 export default function PromptVersionCellBody({
   version,
@@ -13,6 +16,9 @@ export default function PromptVersionCellBody({
   isActiveVersion: boolean
   compareVersion?: PromptVersion
 }) {
+  const availableProviders = useAvailableProviders()
+  const getConfigContent = (version: PromptVersion) => formatConfig(version.config, availableProviders)
+
   return (
     <>
       <div className='border-b border-gray-200 border-b-1' />
@@ -21,9 +27,21 @@ export default function PromptVersionCellBody({
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </CollapsibleSection>
+      <CollapsibleSection title='Parameters'>
+        <ContentComparison
+          content={getConfigContent(version)}
+          compareContent={compareVersion ? getConfigContent(compareVersion) : undefined}
+        />
+      </CollapsibleSection>
     </>
   )
 }
+
+const formatConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) => 
+`Model: ${FullLabelForModel(config.model, availableProviders)}
+Mode: ${labelForChatMode(config.isChat)}
+Max Tokens: ${config.maxTokens}
+Temperature: ${config.temperature}`
 
 function CollapsibleSection({
   title,
