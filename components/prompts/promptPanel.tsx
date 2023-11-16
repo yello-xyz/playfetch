@@ -87,7 +87,15 @@ export default function PromptPanel({
   }
 
   const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
-  const updateConfig = (config: PromptConfig) => update(prompts, { ...config })
+  const updateConfig = (config: PromptConfig) =>
+    update(
+      Object.fromEntries(
+        Object.entries(prompts).filter(([key]) =>
+          SupportedPromptKeysForModel(config.model).includes(key as keyof Prompts)
+        )
+      ) as Prompts,
+      { ...config }
+    )
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
