@@ -109,7 +109,7 @@ export const ExtractInputKey = (run: { output: string }) => {
   return (json?.function?.name ?? json?.output?.function?.name ?? DefaultChatContinuationInputKey) as string
 }
 
-const ExtractFunctionNames = (text: string) => {
+export const ExtractFunctionNames = (text: string) => {
   const json = TryParseJSON(text)
   const array = json && Array.isArray(json) ? json : json ? [json] : undefined
   return array ? array.map(item => item?.name as string).filter(name => name) : []

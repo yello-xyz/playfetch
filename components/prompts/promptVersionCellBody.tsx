@@ -3,9 +3,10 @@ import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import { FullLabelForModel, SupportsSystemPrompt } from '@/src/common/providerMetadata'
+import { FullLabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 import { labelForChatMode } from './chatModePopupButton'
+import { ExtractFunctionNames } from '@/src/common/formatting'
 
 export default function PromptVersionCellBody({
   version,
@@ -17,27 +18,23 @@ export default function PromptVersionCellBody({
   compareVersion?: PromptVersion
 }) {
   const availableProviders = useAvailableProviders()
+  const getConfig = (version: PromptVersion) => formatConfig(version.config, availableProviders)
+  const getSystem = (version: PromptVersion) =>
+    SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined
+  const getFunctions = (version: PromptVersion) =>
+    SupportsFunctionsPrompt(version.config.model) ? formatFunctions(version.prompts.functions) : undefined
 
   return (
     <>
       <div className='border-b border-gray-200 border-b-1' />
-      <ContentSection
-        title='System'
-        version={version}
-        compareVersion={compareVersion}
-        getContent={version => SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined}
-      />
+      <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
       <CollapsibleSection title='Prompt' expanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </CollapsibleSection>
-      <ContentSection
-        title='Parameters'
-        version={version}
-        compareVersion={compareVersion}
-        getContent={version => formatConfig(version.config, availableProviders)}
-      />
+      <ContentSection title='Parameters' version={version} compareVersion={compareVersion} getContent={getConfig} />
+      <ContentSection title='Functions' version={version} compareVersion={compareVersion} getContent={getFunctions} />
     </>
   )
 }
@@ -47,6 +44,8 @@ const formatConfig = (config: PromptConfig, availableProviders: AvailableModelPr
 Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
 Temperature: ${config.temperature}`
+
+const formatFunctions = (functions?: string) => ExtractFunctionNames(functions ?? '').join('\n')
 
 function ContentSection({
   title,
