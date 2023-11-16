@@ -21,6 +21,12 @@ export default function PromptVersionCellBody({
   return (
     <>
       <div className='border-b border-gray-200 border-b-1' />
+      <ContentSection
+        title='System'
+        version={version}
+        compareVersion={compareVersion}
+        getContent={version => version.prompts.system}
+      />
       <CollapsibleSection title='Prompt' expanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
@@ -51,14 +57,14 @@ function ContentSection({
   title: string
   version: PromptVersion
   compareVersion?: PromptVersion
-  getContent: (version: PromptVersion) => string
+  getContent: (version: PromptVersion) => string | undefined
 }) {
   const content = getContent(version)
   const compareContent = compareVersion ? getContent(compareVersion) : undefined
 
-  return content.length > 0 || (compareContent && compareContent.length > 0) ? (
+  return (content && content.length > 0) || (compareContent && compareContent.length > 0) ? (
     <CollapsibleSection title={title}>
-      <ContentComparison content={getContent(version)} compareContent={compareContent} />
+      <ContentComparison content={content ?? ''} compareContent={compareContent} />
     </CollapsibleSection>
   ) : null
 }
