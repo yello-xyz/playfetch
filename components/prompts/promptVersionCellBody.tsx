@@ -17,7 +17,6 @@ export default function PromptVersionCellBody({
   compareVersion?: PromptVersion
 }) {
   const availableProviders = useAvailableProviders()
-  const getConfigContent = (version: PromptVersion) => formatConfig(version.config, availableProviders)
 
   return (
     <>
@@ -27,21 +26,42 @@ export default function PromptVersionCellBody({
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </CollapsibleSection>
-      <CollapsibleSection title='Parameters'>
-        <ContentComparison
-          content={getConfigContent(version)}
-          compareContent={compareVersion ? getConfigContent(compareVersion) : undefined}
-        />
-      </CollapsibleSection>
+      <ContentSection
+        title='Parameters'
+        version={version}
+        compareVersion={compareVersion}
+        getContent={version => formatConfig(version.config, availableProviders)}
+      />
     </>
   )
 }
 
-const formatConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) => 
-`Model: ${FullLabelForModel(config.model, availableProviders)}
+const formatConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) =>
+  `Model: ${FullLabelForModel(config.model, availableProviders)}
 Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
 Temperature: ${config.temperature}`
+
+function ContentSection({
+  title,
+  version,
+  compareVersion,
+  getContent,
+}: {
+  title: string
+  version: PromptVersion
+  compareVersion?: PromptVersion
+  getContent: (version: PromptVersion) => string
+}) {
+  const content = getContent(version)
+  const compareContent = compareVersion ? getContent(compareVersion) : undefined
+
+  return content.length > 0 || (compareContent && compareContent.length > 0) ? (
+    <CollapsibleSection title={title}>
+      <ContentComparison content={getContent(version)} compareContent={compareContent} />
+    </CollapsibleSection>
+  ) : null
+}
 
 function CollapsibleSection({
   title,
