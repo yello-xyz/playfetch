@@ -3,7 +3,6 @@ import {
   ChainNode,
   InputNode,
   IsBranchChainItem,
-  IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
@@ -20,7 +19,6 @@ import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { ReactNode, useState } from 'react'
-import { SubtreeForNode } from '@/src/common/branching'
 
 export default function ChainNodeBoxHeader({
   nodes,

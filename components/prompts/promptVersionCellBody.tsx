@@ -6,7 +6,7 @@ import chevronIcon from '@/public/chevron.svg'
 import { FullLabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
 import { labelForChatMode } from './chatModePopupButton'
-import { ExtractFunctionNames } from '@/src/common/formatting'
+import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
 
 export default function PromptVersionCellBody({
   version,
@@ -22,7 +22,9 @@ export default function PromptVersionCellBody({
   const getSystem = (version: PromptVersion) =>
     SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined
   const getFunctions = (version: PromptVersion) =>
-    SupportsFunctionsPrompt(version.config.model) ? formatFunctions(version.prompts.functions) : undefined
+    SupportsFunctionsPrompt(version.config.model)
+      ? formatFunctions(version.prompts.functions, compareVersion?.prompts?.functions)
+      : undefined
 
   return (
     <>
@@ -45,7 +47,16 @@ Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
 Temperature: ${config.temperature}`
 
-const formatFunctions = (functions?: string) => ExtractFunctionNames(functions ?? '').join('\n')
+const formatFunctions = (functions?: string, compareFunctions?: string) => {
+  const functionNames = ExtractFunctionNames(functions ?? '')
+  const compareFunctionNames = ExtractFunctionNames(compareFunctions ?? '')
+  const suffixForFunctionName = (name: string) =>
+    compareFunctionNames.includes(name) &&
+    JSON.stringify(ExtractFunction(functions!, name)) !== JSON.stringify(ExtractFunction(compareFunctions!, name))
+      ? ' (modified)'
+      : ''
+  return functionNames.map(name => `${name}${suffixForFunctionName(name)}`).join('\n')
+}
 
 function ContentSection({
   title,
