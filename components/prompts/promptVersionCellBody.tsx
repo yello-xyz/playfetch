@@ -30,7 +30,7 @@ export default function PromptVersionCellBody({
     <>
       <div className='border-b border-gray-200 border-b-1' />
       <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
-      <CollapsibleSection title='Prompt' expanded>
+      <CollapsibleSection title='Prompt' initiallyExpanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
@@ -81,11 +81,11 @@ function ContentSection({
 
 function CollapsibleSection({
   title,
-  expanded: initiallyExpanded = false,
+  initiallyExpanded = false,
   children,
 }: {
   title: string
-  expanded?: boolean
+  initiallyExpanded?: boolean
   children: ReactNode
 }) {
   const [isExpanded, setExpanded] = useState(initiallyExpanded)
