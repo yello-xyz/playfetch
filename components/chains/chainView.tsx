@@ -153,12 +153,7 @@ export default function ChainView({
     }
   }
 
-  const recentVersionItemsPromptIDs = new Set(
-    chain.versions.slice(-10).flatMap(version =>
-      (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
-    )
-  )
-  const versionItemsCache = useActiveItemCache(project, [...recentVersionItemsPromptIDs])
+  const versionPromptItemsCache = useActiveItemCache(project, [])
 
   const minWidth = 300
   return (
@@ -176,7 +171,7 @@ export default function ChainView({
                   <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
                 </SingleTabHeader>
               )}
-              chainItemCache={versionItemsCache}
+              chainItemCache={versionPromptItemsCache}
             />
           </div>
         </Allotment.Pane>
