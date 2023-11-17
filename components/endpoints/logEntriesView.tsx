@@ -6,6 +6,7 @@ import Icon from '../icon'
 import TableCell, { TableHeader } from '../tableCell'
 import { FormatDate } from '@/src/common/formatting'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import LogStatus from './logStatus'
 
 const sameSequence = (a: LogEntry) => (b: LogEntry) => !!a.continuationID && a.continuationID === b.continuationID
 
@@ -70,7 +71,6 @@ function LogEntryRow({
   sequenceNumber: number
 }) {
   const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
-  const statusColor = logEntry.error ? 'bg-red-300' : 'bg-green-300'
   const props = { active: isActive, semiActive: isSameSequenceAsActive, callback: setActive }
 
   return endpoint ? (
@@ -85,9 +85,7 @@ function LogEntryRow({
       <TableCell {...props}>{endpoint.flavor}</TableCell>
       <TableCell {...props}>{formattedDate}</TableCell>
       <TableCell last {...props}>
-        <div className={`rounded px-1.5 py-0.5 flex items-center text-white ${statusColor}`}>
-          {logEntry.error ? 'Error' : 'Success'}
-        </div>
+        <LogStatus isError={!!logEntry.error} />
       </TableCell>
     </div>
   ) : null
