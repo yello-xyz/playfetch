@@ -69,7 +69,7 @@ export default function LogEntryDetailsPane({
         </div>
         {Object.keys(logEntry.inputs).length > 0 && (
           <>
-            <Label className='-mb-4'>Input</Label>
+            <Label className='-mb-4'>Request</Label>
             <CodeBlock>{JSON.stringify(logEntry.inputs, null, 2)}</CodeBlock>
           </>
         )}
@@ -80,7 +80,7 @@ export default function LogEntryDetailsPane({
           </>
         ) : (
           <>
-            <Label className='-mb-4'>Output</Label>
+            <Label className='-mb-4'>Response</Label>
             <CodeBlock>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
           </>
         )}

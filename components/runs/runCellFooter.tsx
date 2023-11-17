@@ -21,18 +21,15 @@ export default function RunCellFooter({
   isContinuation: boolean
 }) {
   const isProperRun = ((item): item is Run => 'labels' in item)(run)
-  const formattedDate = useFormattedDate(run.timestamp)
 
-  return run.duration || run.cost || formattedDate ? (
+  return run.duration || run.cost || run.timestamp ? (
     <BorderedSection border={isContinuation} bridgingGap>
       <div className='flex flex-col w-full gap-2 pt-2 border-t border-gray-200'>
         {isProperRun && run.labels.length > 0 && activeItem && (
           <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
         )}
         <div className='flex items-center gap-3'>
-          {!!run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
-          {!!run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
-          {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
+          <RunAttributes run={run} />
           <div className='flex-1' />
           {isProperRun && activeItem && (
             <>
@@ -45,6 +42,18 @@ export default function RunCellFooter({
       </div>
     </BorderedSection>
   ) : null
+}
+
+const RunAttributes = ({ run }: { run: { timestamp?: number; duration?: number; cost?: number } }) => {
+  const formattedDate = useFormattedDate(run.timestamp)
+
+  return (
+    <>
+      {!!run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
+      {!!run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
+      {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
+    </>
+  )
 }
 
 const Attribute = ({ icon, value }: { icon: StaticImageData; value: string }) => (
