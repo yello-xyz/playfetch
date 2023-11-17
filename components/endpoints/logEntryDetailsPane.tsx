@@ -31,7 +31,7 @@ export default function LogEntryDetailsPane({
 
   const failedAttempts = logEntries.reduce((sum, entry) => sum + (entry.attempts - 1), 0)
   const cost = logEntries.reduce((sum, entry) => sum + entry.cost, 0)
-  const duration = logEntries.reduce((sum, entry) => sum + entry.duration, 0)
+  const duration = logEntries.reduce((sum, entry) => sum + entry.duration, 0) / logEntries.length
   const multipleLogEntries = logEntries.length > 1
 
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
@@ -70,7 +70,7 @@ export default function LogEntryDetailsPane({
               <span className='flex justify-end'>{FormatCost(cost)}</span>
             </>
           )}
-          <span>{multipleLogEntries ? 'Total Duration' : 'Duration'}</span>
+          <span>{multipleLogEntries ? 'Average Duration' : 'Duration'}</span>
           <span className='flex justify-end'>{FormatDuration(duration)}</span>
           {!multipleLogEntries && (
             <>
