@@ -6,6 +6,7 @@ import thumbsUpFilledIcon from '@/public/thumbsUpFilled.svg'
 import thumbsDownFilledIcon from '@/public/thumbsDownFilled.svg'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
 import IconButton from '../iconButton'
+import { useState } from 'react'
 
 export default function RunRatingButtons({ run, activeItem }: { run: Run; activeItem: ActivePrompt | ActiveChain }) {
   const refreshProject = useRefreshProject()
@@ -16,24 +17,32 @@ export default function RunRatingButtons({ run, activeItem }: { run: Run; active
     .flatMap(version => version.comments)
     .filter(comment => comment.runID === run.id)
 
+  const [pendingRating, setPendingRating] = useState<RunRating>()
+
   const toggleRating = (rating: RunRating) => {
-    if (rating !== run.rating) {
+    if (rating !== run.rating && rating !== pendingRating) {
+      setPendingRating(rating)
       const replyTo = runComments.findLast(
         comment => comment.action === (rating === 'positive' ? 'thumbsDown' : 'thumbsUp')
       )?.id
-      api.toggleRunRating(run.id, activeItem.projectID, rating, replyTo).then(refresh)  
+      api
+        .toggleRunRating(run.id, activeItem.projectID, rating, replyTo)
+        .then(refresh)
+        .then(() => setPendingRating(undefined))
     }
   }
+
+  const rating = pendingRating ?? run.rating
 
   return (
     <div className='flex items-center gap-2'>
       <IconButton
-        icon={run.rating === 'positive' ? thumbsUpFilledIcon : thumbsUpIcon}
+        icon={rating === 'positive' ? thumbsUpFilledIcon : thumbsUpIcon}
         onClick={() => toggleRating('positive')}
         hoverType={{ background: 'hover:bg-blue-50' }}
       />
       <IconButton
-        icon={run.rating === 'negative' ? thumbsDownFilledIcon : thumbsDownIcon}
+        icon={rating === 'negative' ? thumbsDownFilledIcon : thumbsDownIcon}
         onClick={() => toggleRating('negative')}
         hoverType={{ background: 'hover:bg-blue-50' }}
       />
