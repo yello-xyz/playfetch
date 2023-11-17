@@ -21,12 +21,12 @@ async function complete(
   try {
     const anthropic = new Anthropic({ apiKey })
     const runningContext = usePreviousContext ? context.running ?? '' : ''
-    const formattedPrompt = `${Anthropic.HUMAN_PROMPT} ${prompt} ${Anthropic.AI_PROMPT}`
+    const inputPrompt = `${runningContext}${Anthropic.HUMAN_PROMPT} ${prompt} ${Anthropic.AI_PROMPT}`
     const stream = await anthropic.completions.create({
       model,
       temperature,
       max_tokens_to_sample: maxTokens,
-      prompt: `${runningContext}${formattedPrompt}`,
+      prompt: inputPrompt,
       stop_sequences: [Anthropic.HUMAN_PROMPT],
       stream: true,
     })
@@ -38,8 +38,8 @@ async function complete(
       streamChunks?.(text)
     }
 
-    const cost = CostForModel(model, formattedPrompt, output)
-    context.running = `${runningContext}${formattedPrompt}${output}`
+    const cost = CostForModel(model, inputPrompt, output)
+    context.running = `${inputPrompt}${output}`
 
     return { output, cost }
   } catch (error: any) {

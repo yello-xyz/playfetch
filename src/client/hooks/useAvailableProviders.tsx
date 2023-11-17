@@ -27,12 +27,12 @@ export default function useAvailableProviders() {
 }
 
 export function useCheckProviders() {
-  const [_, checkModelAvailable, checkProviderAvailable] = useProviders()
+  const [, checkModelAvailable, checkProviderAvailable] = useProviders()
   return [checkProviderAvailable, checkModelAvailable] as const
 }
 
 export function useCheckModelProviders() {
-  const [_, checkModelAvailable, checkModelProviderAvailable] = useModelProviders()
+  const [, checkModelAvailable, checkModelProviderAvailable] = useModelProviders()
   return [checkModelProviderAvailable, checkModelAvailable] as const
 }
 

@@ -1,6 +1,6 @@
 __INVITER_NAME__ shared a __ENTITY_NAME__ on PlayFetch
 
-__INVITER_NAME__ (__INVITER_EMAIL__) has invited you to the __ENTITY_NAME__ “__PROJECT_NAME__”.
+__INVITER_NAME____INVITER_SUFFIX__ has invited you to the __ENTITY_NAME__ “__PROJECT_NAME__”.
 
 Open the following link to accept or decline the invitation: __INVITATION_LINK__
 

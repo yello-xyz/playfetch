@@ -9,6 +9,7 @@ import { CheckValidEmail } from '@/src/common/formatting'
 import { useRouter } from 'next/router'
 import logo from '@/public/logo.svg'
 import Image from 'next/image'
+import { useDocumentationCookie } from '@/components/cookieBanner'
 
 export const getServerSideProps = withLoggedOutSession(async context => {
   const tokenCSRF = (await getCsrfToken(context)) ?? null
@@ -16,6 +17,7 @@ export const getServerSideProps = withLoggedOutSession(async context => {
 })
 
 export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
+  useDocumentationCookie('remove')
   const router = useRouter()
   const { w: joinedWaitList } = ParseNumberQuery(router.query)
 

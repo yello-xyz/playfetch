@@ -1,37 +1,21 @@
-import { PartialRun, PromptInputs, Run } from '@/types'
+import { PartialRun, Run } from '@/types'
 import { ReactNode, useState } from 'react'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
 
 export default function RunCellHeader({ run }: { run: Run | PartialRun }) {
-  return 'inputs' in run && Object.keys(run.inputs).length > 0 ? (
-    <BorderedRow>
-      <RunInputs inputs={run.inputs} />
-    </BorderedRow>
+  return 'inputs' in run && Object.entries(run.inputs).length > 0 ? (
+    <div className='border-b border-b-1 border-gray-200 pb-2.5'>
+      <CollapsibleInputsHeader>
+        {Object.entries(run.inputs).map(([variable, value]) => (
+          <ExpandableInputRow key={variable}>
+            <span className='text-sm font-medium text-gray-700'>{variable}: </span>
+            <span className='text-gray-500'>{value}</span>
+          </ExpandableInputRow>
+        ))}
+      </CollapsibleInputsHeader>
+    </div>
   ) : null
-}
-
-const BorderedRow = ({ children, addBorder = true }: { children: ReactNode; addBorder?: boolean }) => (
-  <div className={`${addBorder ? 'border-b border-b-1 border-gray-200 pb-2.5' : ''}`}>{children}</div>
-)
-
-function RunInputs({ inputs }: { inputs: PromptInputs }) {
-  return Object.entries(inputs).length > 0 ? (
-    <CollapsibleInputsHeader>
-      {Object.entries(inputs).map(([variable, value]) => (
-        <RunInput key={variable} variable={variable} value={value} />
-      ))}
-    </CollapsibleInputsHeader>
-  ) : null
-}
-
-function RunInput({ variable, value }: { variable: string; value: string }) {
-  return (
-    <ExpandableInputRow>
-      <span className='text-sm font-medium text-gray-700'>{variable}: </span>
-      <span className='text-gray-500'>{value}</span>
-    </ExpandableInputRow>
-  )
 }
 
 function CollapsibleInputsHeader({ children }: { children: ReactNode }) {

@@ -11,12 +11,15 @@ export default function useInputValues(
   const [inputValues, setInputValues] = useInitialState(originalInputValues)
 
   const persistInputValuesIfNeeded = () => {
-    for (const [variable, inputs] of Object.entries(inputValues)) {
-      if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-        api.updateInputValues(parent.id, variable, inputs)
+    setInputValues(inputValues => {
+      for (const [variable, inputs] of Object.entries(inputValues)) {
+        if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
+          api.updateInputValues(parent.id, variable, inputs)
+        }
       }
-    }
-    setOriginalInputValues(inputValues)
+      setOriginalInputValues(inputValues)
+      return inputValues
+    })
   }
 
   const [previouslyActiveTab, setPreviouslyActiveTab] = useState(activeTab)

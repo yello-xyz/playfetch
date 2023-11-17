@@ -22,12 +22,12 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
   const initialActiveItem: ActiveItem | null = compare
     ? CompareItem
     : endpoints
-    ? EndpointsItem
-    : promptID
-    ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
-    : chainID
-    ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
-    : null
+      ? EndpointsItem
+      : promptID
+        ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
+        : chainID
+          ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
+          : null
 
   const availableProviders = await getAvailableProvidersForUser(user.id)
   const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)

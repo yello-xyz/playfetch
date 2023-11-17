@@ -18,7 +18,7 @@ export default function AdminSidebar({
 }) {
   return (
     <>
-      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 border-r border-gray-200 bg-gray-25'>
+      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 overflow-y-auto border-r border-gray-200 bg-gray-25'>
         <SidebarSection title='Manage Access'>
           <SidebarButton title='Waitlist' icon={userIcon} onClick={onSelectWaitlist} />
         </SidebarSection>

@@ -92,7 +92,7 @@ export type EmbeddingModel = OpenAIEmbeddingModel
 
 export type OpenAILanguageModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-turbo'
 export type AnthropicLanguageModel = 'claude-instant-1' | 'claude-2'
-export type GoogleLanguageModel = 'text-bison'
+export type GoogleLanguageModel = 'text-bison' | 'chat-bison'
 export type CohereLanguageModel = 'command'
 
 export type DefaultLanguageModel =
@@ -195,6 +195,7 @@ export type Run = CommonRun & {
   duration: number
   inputs: PromptInputs
   labels: string[]
+  rating?: RunRating
   userID: number
 }
 
@@ -284,11 +285,13 @@ export type Usage = {
   cost: number
   duration: number
   cacheHits: number
+  continuations: number
   attempts: number
   failures: number
 }
 
-export type CommentAction = 'addLabel' | 'removeLabel'
+export type RunRating = 'positive' | 'negative'
+export type CommentAction = 'addLabel' | 'removeLabel' | 'thumbsUp' | 'thumbsDown'
 
 export type Comment = {
   id: number

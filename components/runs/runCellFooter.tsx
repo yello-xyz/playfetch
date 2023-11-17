@@ -8,7 +8,8 @@ import dateIcon from '@/public/date.svg'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
 import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import { ItemLabels } from '../versions/versionCell'
+import { ItemLabels } from '../versions/versionLabels'
+import RunRatingButtons from './runRatingButtons'
 
 export default function RunCellFooter({
   run,
@@ -33,7 +34,13 @@ export default function RunCellFooter({
           {!!run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
           {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
           <div className='flex-1' />
-          {isProperRun && activeItem && <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />}
+          {isProperRun && activeItem && (
+            <>
+              <RunRatingButtons run={run} activeItem={activeItem} />
+              <div className='self-stretch border-r border-gray-200' />
+              <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
+            </>
+          )}
         </div>
       </div>
     </BorderedSection>

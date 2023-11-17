@@ -40,7 +40,7 @@ export function CodeWithMarkup({ children, markup }: { children: ReactNode; mark
             {(line.match(/^\s+|([^\s"]+|"[^"]*")+/g) ?? []).map((span, index, spans) => (
               <span
                 key={index}
-                className={markup.filter(([text]) => span.startsWith(text)).map(([_, color]) => color)[0] ?? {}}>
+                className={markup.filter(([text]) => span.startsWith(text)).map(([, color]) => color)[0] ?? {}}>
                 {span}
                 {index < spans.length - 1 && !span.endsWith(' ') ? ' ' : ''}
               </span>

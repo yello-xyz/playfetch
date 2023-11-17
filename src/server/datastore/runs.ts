@@ -1,8 +1,8 @@
-import { PromptInputs, Run } from '@/types'
+import { PromptInputs, Run, RunRating } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
-import { PropertyFilter } from '@google-cloud/datastore'
+import { saveComment } from './comments'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -10,37 +10,34 @@ export async function migrateRuns(postMerge: boolean) {
   }
   const datastore = getDatastore()
   let remainingSaveCount = 100
-  const [continuationRuns] = await datastore.runQuery(
-    datastore.createQuery(Entity.RUN).filter(new PropertyFilter('continuationID', '!=', null))
-  )
-  for (const runData of continuationRuns) {
-    if (runData.canContinue === undefined) {
-      if (remainingSaveCount-- <= 0) {
-        console.log('‼️  Please run this migration again to process remaining runs')
-        return
-      }
-      await datastore.save(
-        toRunData(
-          runData.userID,
-          runData.parentID,
-          runData.versionID,
-          JSON.parse(runData.inputs),
-          runData.output,
-          runData.createdAt,
-          runData.cost,
-          runData.duration,
-          JSON.parse(runData.labels),
-          runData.continuationID,
-          true,
-          getID(runData)
-        )
-      )
+  const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
+  for (const runData of allRuns) {
+    if (remainingSaveCount-- <= 0) {
+      console.log('‼️  Please run this migration again to process remaining runs')
+      return
     }
+    await datastore.save(
+      toRunData(
+        runData.userID,
+        runData.parentID,
+        runData.versionID,
+        JSON.parse(runData.inputs),
+        runData.output,
+        runData.createdAt,
+        runData.cost,
+        runData.duration,
+        JSON.parse(runData.labels),
+        runData.rating,
+        runData.continuationID,
+        runData.canContinue,
+        getID(runData)
+      )
+    )
   }
   console.log('✅ Processed all remaining runs')
 }
 
-export async function saveRun(
+export async function saveNewRun(
   userID: number,
   parentID: number,
   versionID: number,
@@ -48,7 +45,6 @@ export async function saveRun(
   output: string,
   cost: number,
   duration: number,
-  labels: string[],
   continuationID: number | undefined,
   canContinue: boolean
 ) {
@@ -62,7 +58,8 @@ export async function saveRun(
     new Date(),
     cost,
     duration,
-    labels,
+    [],
+    undefined,
     continuationID,
     canContinue ?? undefined
   )
@@ -104,6 +101,29 @@ export async function updateRunLabel(
   }
 }
 
+export async function updateRunRating(
+  userID: number,
+  runID: number,
+  projectID: number,
+  rating: RunRating,
+  replyTo?: number
+) {
+  const runData = await getVerifiedUserRunData(userID, runID)
+  await saveComment(
+    userID,
+    projectID,
+    runData.parentID,
+    runData.versionID,
+    '', // TODO store the justification here (maybe)
+    replyTo,
+    rating === 'positive' ? 'thumbsUp' : 'thumbsDown',
+    runID
+  )
+  if (rating !== runData.rating) {
+    await updateRun({ ...runData, rating })
+  }
+}
+
 async function updateRun(runData: any) {
   await getDatastore().save(
     toRunData(
@@ -116,6 +136,7 @@ async function updateRun(runData: any) {
       runData.cost,
       runData.duration,
       JSON.parse(runData.labels),
+      runData.rating,
       runData.continuationID,
       runData.canContinue,
       getID(runData)
@@ -133,6 +154,7 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
+  rating: RunRating | undefined,
   continuationID: number | undefined,
   canContinue: boolean | undefined,
   runID?: number
@@ -148,6 +170,7 @@ const toRunData = (
     cost,
     duration,
     labels: JSON.stringify(labels),
+    rating,
     continuationID: continuationID ?? null,
     canContinue,
   },
@@ -163,6 +186,7 @@ export const toRun = (data: any): Run => ({
   cost: data.cost,
   duration: data.duration,
   labels: JSON.parse(data.labels),
+  rating: data.rating ?? null,
   continuationID: data.continuationID ?? null,
   canContinue: data.canContinue ?? false,
 })

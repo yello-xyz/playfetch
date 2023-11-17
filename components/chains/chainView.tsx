@@ -21,6 +21,7 @@ import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -103,11 +104,22 @@ export default function ChainView({
     return { promptID, versionID }
   }
 
+  const isInputOutputIndex = (index: number | undefined, nodes: ChainNode[]) =>
+    index === 0 || index === nodes.length - 1
+  const isInputOutputNode = isInputOutputIndex(activeNodeIndex, nodes)
+  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
+
   const [isNodeDirty, setNodeDirty] = useState(false)
   const updateActiveNodeIndex = (index: number | undefined) => {
     setActiveNodeIndex(index)
     setShowVersions(false)
     setNodeDirty(false)
+    setNodes(nodes => {
+      if (isInputOutputIndex(index, nodes)) {
+        setTestMode(true)
+      }
+      return nodes
+    })
   }
 
   const updateItems = (items: ChainItem[]) => {
@@ -121,9 +133,6 @@ export default function ChainView({
   if (showVersions && !canShowVersions) {
     setShowVersions(false)
   }
-
-  const isInputOutputNode = activeNodeIndex === 0 || activeNodeIndex === nodes.length - 1
-  const isUnloadedPromptNode = (node: ChainNode) => IsPromptChainItem(node) && !promptCache.promptForItem(node)
 
   const [isTestMode, setTestMode] = useState(false)
   const updateTestMode = (testMode: boolean) => {
@@ -144,11 +153,18 @@ export default function ChainView({
     }
   }
 
+  const versionItemsCache = useActiveItemCache(
+    project,
+    chain.versions.flatMap(version =>
+      (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
+    )
+  )
+
   const minWidth = 300
   return (
     <Allotment>
       {showVersions && (
-        <Allotment.Pane minSize={minWidth} preferredSize={minWidth}>
+        <Allotment.Pane minSize={minWidth} preferredSize={480}>
           <div className='h-full'>
             <VersionTimeline
               activeItem={chain}
@@ -160,6 +176,7 @@ export default function ChainView({
                   <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
                 </SingleTabHeader>
               )}
+              chainItemCache={versionItemsCache}
             />
           </div>
         </Allotment.Pane>

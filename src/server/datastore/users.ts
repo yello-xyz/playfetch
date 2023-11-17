@@ -31,25 +31,20 @@ export async function migrateUsers(postMerge: boolean) {
   const datastore = getDatastore()
   const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
   for (const userData of allUsers) {
-    let didCompleteOnboarding: boolean | undefined = userData.didCompleteOnboarding
-    if (didCompleteOnboarding === undefined) {
-      const lastLoginAt: Date | undefined = userData.lastLoginAt
-      didCompleteOnboarding = !!lastLoginAt
-      await getDatastore().save(
-        toUserData(
-          userData.email,
-          userData.fullName,
-          userData.imageURL,
-          userData.hasAccess,
-          didCompleteOnboarding,
-          userData.isAdmin,
-          userData.createdAt,
-          lastLoginAt,
-          userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-          getID(userData)
-        )
+    await getDatastore().save(
+      toUserData(
+        userData.email,
+        userData.fullName,
+        userData.imageURL,
+        userData.hasAccess,
+        userData.didCompleteOnboarding,
+        userData.isAdmin,
+        userData.createdAt,
+        userData.lastLoginAt,
+        userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
+        getID(userData)
       )
-    }
+    )
   }
 }
 

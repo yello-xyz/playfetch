@@ -5,6 +5,14 @@ import TagManager from 'react-gtm-module'
 import ClientRoute from '@/src/common/clientRoute'
 import Checkbox from './checkbox'
 import { useCookies } from 'react-cookie'
+import { CookieSetOptions } from 'universal-cookie'
+
+const consentCookieName = () => process.env.NEXT_PUBLIC_COOKIE_NAME ?? 'dev-consent'
+const topLevelCookieProperties: () => CookieSetOptions = () => ({
+  path: '/',
+  sameSite: 'lax',
+  domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN,
+})
 
 export const updateCookieConsent = (accept: boolean) => {
   TagManager.dataLayer({ dataLayer: { event: 'update-consent', consent: accept ? 'granted' : 'denied' } })
@@ -16,12 +24,11 @@ export default function CookieBanner({ children }: any) {
   const [toggledOn, setToggledOn] = useState(false)
 
   type CookieStatus = 'accepted' | 'denied' | 'unknown'
-  const cookieName = process.env.NEXT_PUBLIC_COOKIE_NAME ?? 'dev-consent'
+  const cookieName = consentCookieName()
   const [cookies, setCookie] = useCookies([cookieName])
   const cookieStatus: CookieStatus = cookies[cookieName] ?? 'unknown'
   const updateCookieStatus = useCallback(
-    (status: 'accepted' | 'denied') =>
-      setCookie(cookieName, status, { path: '/', sameSite: 'lax', domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN }),
+    (status: 'accepted' | 'denied') => setCookie(cookieName, status, topLevelCookieProperties()),
     [setCookie, cookieName]
   )
 
@@ -80,4 +87,14 @@ export default function CookieBanner({ children }: any) {
       )}
     </div>
   )
+}
+
+export const useDocumentationCookie = (action: 'set' | 'remove') => {
+  const cookieName = consentCookieName().startsWith('dev-') ? 'dev-pfda' : 'pfda'
+  const [cookies, setCookie, removeCookie] = useCookies([cookieName])
+  if (action === 'set' && !cookies[cookieName]) {
+    setCookie(cookieName, 'lax', topLevelCookieProperties())
+  } else if (action === 'remove' && cookies[cookieName]) {
+    removeCookie(cookieName, topLevelCookieProperties())
+  }
 }

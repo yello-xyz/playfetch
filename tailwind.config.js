@@ -66,7 +66,8 @@ module.exports = {
       'pink-25': '#FDF2FC',
       'pink-100': '#F4B8EE',
       'pink-400': '#E14BD2',
-      'purple-25': '#F7F2FD', // TODO replace Copilot prediction with proper color code
+      'purple-25': '#F8F6FC',
+      'purple-50': '#F3EEFC',
       'purple-200': '#BEA4F6',
       'purple-300': '#9F78F3',
       'purple-400': '#7D48EF',

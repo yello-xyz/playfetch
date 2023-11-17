@@ -9,7 +9,7 @@ import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
-import TestDataPane from '../testDataPane'
+import TestDataPane from '../testData/testDataPane'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
@@ -60,7 +60,7 @@ export default function PromptView({
   }
 
   const [currentVersion, updateVersion, isDirty] = useModifiedVersion(activeVersion, setModifiedVersion)
-  const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config)
+  const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const tabSelector = (children?: ReactNode) => (

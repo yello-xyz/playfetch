@@ -30,6 +30,7 @@ export async function migrateAnalytics(postMerge: boolean) {
         analyticsData.cost,
         analyticsData.duration,
         analyticsData.cacheHits,
+        analyticsData.continuations ?? 0,
         analyticsData.attempts,
         analyticsData.failures,
         getID(analyticsData)
@@ -67,7 +68,15 @@ export async function getAnalyticsForProject(
       .filter(usage => usage.createdAt >= recentDays[0])
       .map(usage => [usage.createdAt.getTime(), toUsage(usage)])
   )
-  const emptyUsage = { requests: 0, cost: 0, duration: 0, cacheHits: 0, attempts: 0, failures: 0 }
+  const emptyUsage: Usage = {
+    requests: 0,
+    cost: 0,
+    duration: 0,
+    cacheHits: 0,
+    continuations: 0,
+    attempts: 0,
+    failures: 0,
+  }
   const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
 
   const cutoff = daysAgo(today, 2 * dayRange - 1)
@@ -78,6 +87,7 @@ export async function getAnalyticsForProject(
       cost: acc.cost + usage.cost,
       duration: acc.duration + usage.duration,
       cacheHits: acc.cacheHits + usage.cacheHits,
+      continuations: acc.continuations + usage.continuations,
       attempts: acc.attempts + usage.attempts,
       failures: acc.failures + usage.failures,
     }),
@@ -92,6 +102,7 @@ export async function updateAnalytics(
   incrementalCost: number,
   incrementalDuration: number,
   cacheHit: boolean,
+  isContinuation: boolean,
   attempts: number,
   failed: boolean,
   timestamp = new Date(),
@@ -111,6 +122,7 @@ export async function updateAnalytics(
         (previousData?.cost ?? 0) + incrementalCost,
         (previousData?.duration ?? 0) + incrementalDuration,
         (previousData?.cacheHits ?? 0) + (cacheHit ? 1 : 0),
+        (previousData?.continuations ?? 0) + (isContinuation ? 1 : 0),
         (previousData?.attempts ?? 0) + attempts,
         (previousData?.failures ?? 0) + (failed ? 1 : 0),
         previousData ? getID(previousData) : undefined
@@ -127,11 +139,12 @@ const toAnalyticsData = (
   cost: number,
   duration: number,
   cacheHits: number,
+  continuations: number,
   attempts: number,
   failures: number,
   analyticsID?: number
 ) => ({
   key: buildKey(Entity.ANALYTICS, analyticsID),
-  data: { projectID, range, createdAt, requests, cost, duration, cacheHits, attempts, failures },
+  data: { projectID, range, createdAt, requests, cost, duration, cacheHits, continuations, attempts, failures },
   excludeFromIndexes: [],
 })

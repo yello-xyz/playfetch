@@ -16,6 +16,6 @@ import { migrateVersions } from './versions'
 import { migrateWorkspaces } from './workspaces'
 
 export async function runDataMigrations(postMerge: boolean) {
-  await migrateUsers(postMerge)
-  await migrateRuns(postMerge)
+  await migrateUsage(postMerge)
+  await migrateAnalytics(postMerge)
 }

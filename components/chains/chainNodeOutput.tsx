@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
-import TestDataPane from '../testDataPane'
+import TestDataPane from '../testData/testDataPane'
 import RunButtons from '../runs/runButtons'
 import {
   ChainNode,
@@ -135,25 +135,23 @@ export default function ChainNodeOutput({
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
-  const showTestData = variables.length > 0 || Object.keys(inputValues).length > 0
+  const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
   return (
     <>
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
-        {activeNode === InputNode && variables.length > 0 ? (
+        {activeNode === InputNode && canShowTestData ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <SingleTabHeader label='Test data' />
-            {showTestData && (
-              <TestDataPane
-                variables={variables}
-                staticVariables={staticVariables}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                testConfig={testConfig}
-                setTestConfig={setTestConfig}
-              />
-            )}
+            <TestDataPane
+              variables={variables}
+              staticVariables={staticVariables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
+            />
           </div>
         ) : (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
@@ -175,8 +173,7 @@ export default function ChainNodeOutput({
         {showRunButtons && (
           <div className='flex items-center justify-end w-full gap-4 px-4'>
             <RunButtons
-              variables={variables}
-              staticVariables={staticVariables}
+              variables={staticVariables}
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}

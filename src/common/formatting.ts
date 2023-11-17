@@ -31,8 +31,8 @@ export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIn
   return !alwaysIncludeDate && dateString === todayString
     ? timeString
     : alwaysIncludeTime
-    ? `${dateString} ${timeString}`
-    : dateString
+      ? `${dateString} ${timeString}`
+      : dateString
 }
 
 export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
@@ -109,13 +109,19 @@ export const ExtractInputKey = (run: { output: string }) => {
   return (json?.function?.name ?? json?.output?.function?.name ?? DefaultChatContinuationInputKey) as string
 }
 
-const ExtractFunctionNames = (text: string) => {
+const ExtractFunctions = (text: string) => {
   const json = TryParseJSON(text)
-  const array = json && Array.isArray(json) ? json : json ? [json] : undefined
-  return array ? array.map(item => item?.name as string).filter(name => name) : []
+  return json && Array.isArray(json) ? json : json ? [json] : []
 }
 
-export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic = true) => [
+export const ExtractFunction = (text: string, name: string) => ExtractFunctions(text).find(fun => fun?.name === name)
+
+export const ExtractFunctionNames = (text: string) =>
+  ExtractFunctions(text)
+    .map(fun => fun?.name as string)
+    .filter(name => name)
+
+export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic: boolean) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
   ...(SupportsFunctionsPrompt(config.model) && prompts.functions

@@ -43,14 +43,7 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
   const leftVersion = loadVersion(leftItem, leftVersionID)
   const rightVersion = loadVersion(rightItem, rightVersionID)
 
-  const [leftContent, rightContent] = useDiffContent(
-    project,
-    activePromptTab,
-    leftItem,
-    rightItem,
-    leftVersion,
-    rightVersion
-  )
+  const [leftContent, rightContent] = useDiffContent(project, leftItem, rightItem, leftVersion, rightVersion)
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
