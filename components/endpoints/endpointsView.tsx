@@ -228,7 +228,7 @@ export default function EndpointsView({
       {activeLogEntryIndex !== undefined && (
         <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <LogEntryDetailsPane
-            logEntry={logEntries[activeLogEntryIndex]}
+            logEntries={[logEntries[activeLogEntryIndex]]}
             parent={parent}
             versions={versions}
             onCollapse={() => setActiveLogEntryIndex(undefined)}

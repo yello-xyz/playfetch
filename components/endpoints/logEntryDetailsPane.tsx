@@ -14,16 +14,17 @@ import { ReactNode, useState } from 'react'
 import chevronIcon from '@/public/chevron.svg'
 
 export default function LogEntryDetailsPane({
-  logEntry,
+  logEntries,
   parent,
   versions,
   onCollapse,
 }: {
-  logEntry: LogEntry
+  logEntries: LogEntry[]
   parent?: Prompt | Chain
   versions: PromptVersion[] | ChainVersion[]
   onCollapse: () => void
 }) {
+  const logEntry = logEntries[0]
   const formattedDate = useFormattedDate(logEntry.timestamp, timestamp => FormatDate(timestamp, true, true))
 
   const versionIndex = versions.findIndex(version => version.id === logEntry.versionID)
