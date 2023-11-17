@@ -49,6 +49,7 @@ export async function sendInviteEmail(
   const variables = {
     __ENTITY_NAME__: kind,
     __INVITER_NAME__: inviter.fullName,
+    __INVITER_SUFFIX__: inviter.fullName !== inviter.email ? ` (${inviter.email})` : '',
     __INVITER_EMAIL__: inviter.email,
     __PROJECT_NAME__: objectName,
     __INVITATION_LINK__: `${process.env.NEXTAUTH_URL}${inviteRoute}`,
@@ -92,7 +93,7 @@ export async function sendCommentsEmail(
               .map(({ commenter, timestamp, text }) =>
                 resolveContent('comment', type, {
                   __COMMENTER_NAME__: commenter.fullName,
-                  __COMMENTER_EMAIL__: commenter.email,
+                  __COMMENTER_SUFFIX__: commenter.fullName !== commenter.email ? ` (${commenter.email})` : '',
                   __COMMENT_DATE__: FormatDate(timestamp),
                   __COMMENT_TEXT__: text,
                 })
