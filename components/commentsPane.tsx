@@ -7,6 +7,7 @@ import {
   ActiveProject,
   ActivePrompt,
   ActiveChain,
+  CommentAction,
 } from '@/types'
 import { ReactNode } from 'react'
 import { Capitalize, FormatRelativeDate } from '@/src/common/formatting'
@@ -96,12 +97,16 @@ export function CommentCell({
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
           {user && <UserAvatar user={user} size='sm' />}
           <span className='font-medium'>{userName}</span>
-          {comment.action === 'addLabel' ? ' added label ' : ' removed label '}
+          {actionPrefix(comment.action)}
           <ItemLabel label={comment.text} colors={labelColors} />
-          {(version || parentName) &&
-            `${comment.action === 'addLabel' ? ' to' : ' from'} ${comment.runID ? 'response in ' : ''}${
-              version ? `version ${versionIndex}` : parentName
-            } · `}
+          {(version || parentName) && (
+            <>
+              {actionSuffix(comment.action)}
+              {comment.runID ? 'response in ' : ''}
+              {version ? `version ${versionIndex}` : parentName}
+              {' · '}
+            </>
+          )}
           <span className='text-gray-400'>{formattedDate}</span>
         </div>
       ) : (
@@ -135,6 +140,31 @@ export function CommentCell({
       )}
     </div>
   )
+}
+
+const actionPrefix = (action: CommentAction) => {
+  switch (action) {
+    case 'addLabel':
+      return ' added label '
+    case 'removeLabel':
+      return ' removed label '
+    case 'thumbsUp':
+      return ' thumbed up'
+    case 'thumbsDown':
+      return ' thumbed down'
+  }
+}
+
+const actionSuffix = (action: CommentAction) => {
+  switch (action) {
+    case 'addLabel':
+      return ' to '
+    case 'removeLabel':
+      return ' from '
+    case 'thumbsUp':
+    case 'thumbsDown':
+      return ' '
+  }
 }
 
 export function CommentQuote({ children, className = '' }: { children: ReactNode; className?: string }) {

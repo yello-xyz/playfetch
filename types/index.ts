@@ -289,7 +289,8 @@ export type Usage = {
   failures: number
 }
 
-export type CommentAction = 'addLabel' | 'removeLabel'
+export type RunRating = 'positive' | 'negative'
+export type CommentAction = 'addLabel' | 'removeLabel' | 'thumbsUp' | 'thumbsDown'
 
 export type Comment = {
   id: number
