@@ -4,6 +4,7 @@ import {
   ActiveChain,
   ActiveProject,
   ActivePrompt,
+  AvailableModelProvider,
   ChainItem,
   ChainItemWithInputs,
   ChainVersion,
@@ -15,13 +16,14 @@ import {
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
 import { PromptTab } from '@/components/prompts/promptPanel'
 import { LabelForProvider } from '@/src/common/providerMetadata'
+import useAvailableProviders from './useAvailableProviders'
+import { FormatPromptConfig } from '@/components/prompts/promptVersionCellBody'
 
 type ItemType = ActivePrompt | ActiveChain | Endpoint
 type VersionType = PromptVersion | ChainVersion
 
 export default function useDiffContent(
   project: ActiveProject,
-  activePromptTab: PromptTab,
   leftItem?: ItemType,
   rightItem?: ItemType,
   leftVersion?: VersionType,
@@ -31,23 +33,25 @@ export default function useDiffContent(
     IsEndpoint(item)
       ? [item.parentID]
       : version && !IsPromptVersion(version)
-        ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
-        : []
+      ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
+      : []
 
   const itemCache = useActiveItemCache(project, [
     ...getCacheItemIDs(leftItem, leftVersion),
     ...getCacheItemIDs(rightItem, rightVersion),
   ])
 
-  const getContent = (activePromptTab: PromptTab, item?: ItemType, version?: VersionType) =>
+  const availableProviders = useAvailableProviders()
+
+  const getContent = (item?: ItemType, version?: VersionType) =>
     IsEndpoint(item)
       ? getEndpointContent(item, itemCache)
       : version
-        ? getVersionContent(version, activePromptTab, itemCache)
-        : undefined
+      ? getVersionContent(version, availableProviders, itemCache)
+      : undefined
 
-  const leftContent = getContent(activePromptTab, leftItem, leftVersion)
-  const rightContent = getContent(activePromptTab, rightItem, rightVersion)
+  const leftContent = getContent(leftItem, leftVersion)
+  const rightContent = getContent(rightItem, rightVersion)
 
   return [leftContent, rightContent] as const
 }
@@ -73,9 +77,18 @@ Stream Responses: ${endpoint.useStreaming ? 'Yes' : 'No'}
 
 const getVersionContent = (
   version: ChainVersion | PromptVersion,
-  activePromptTab: PromptTab,
+  availableProviders: AvailableModelProvider[],
   itemCache: ActiveItemCache
-) => (IsPromptVersion(version) ? version.prompts[activePromptTab] : getChainVersionContent(version, itemCache))
+) =>
+  IsPromptVersion(version)
+    ? getPromptVersionContent(version, availableProviders)
+    : getChainVersionContent(version, itemCache)
+
+const getPromptVersionContent = (version: PromptVersion, availableProviders: AvailableModelProvider[]) =>
+  `${FormatPromptConfig(version.config, availableProviders)}\n\n` +
+  `${version.prompts.system ? `System:\n${version.prompts.system}\n\n` : ''}` +
+  `Prompt:\n${version.prompts.main}\n\n` +
+  `${version.prompts.functions ? `Functions:\n${version.prompts.functions}\n\n` : ''}`
 
 const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCache) =>
   version.items.map(item => getChainItemContent(item, itemCache)).join('\n')

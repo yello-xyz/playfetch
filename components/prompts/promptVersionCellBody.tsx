@@ -18,7 +18,7 @@ export default function PromptVersionCellBody({
   compareVersion?: PromptVersion
 }) {
   const availableProviders = useAvailableProviders()
-  const getConfig = (version: PromptVersion) => formatConfig(version.config, availableProviders)
+  const getConfig = (version: PromptVersion) => FormatPromptConfig(version.config, availableProviders)
   const getSystem = (version: PromptVersion) =>
     SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined
   const getFunctions = (version: PromptVersion) =>
@@ -41,7 +41,7 @@ export default function PromptVersionCellBody({
   )
 }
 
-const formatConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) =>
+export const FormatPromptConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) =>
   `Model: ${FullLabelForModel(config.model, availableProviders)}
 Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}

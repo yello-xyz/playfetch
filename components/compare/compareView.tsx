@@ -45,7 +45,6 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
 
   const [leftContent, rightContent] = useDiffContent(
     project,
-    activePromptTab,
     leftItem,
     rightItem,
     leftVersion,
