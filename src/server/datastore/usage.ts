@@ -24,7 +24,7 @@ export async function migrateUsage(postMerge: boolean) {
         usageData.cost,
         usageData.duration,
         usageData.cacheHits,
-        usageData.continuations ?? 0,
+        usageData.continuations,
         usageData.attempts,
         usageData.failures,
         usageData.createdAt,
