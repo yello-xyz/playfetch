@@ -38,12 +38,14 @@ export default function useActiveItemCache(
     [project, findItemForID, onRefreshItem]
   )
 
+  const [loadingItemIDs, setLoadingItemIDs] = useState<Set<number>>(new Set())
   useEffect(() => {
-    const unloadedItemID = itemIDs.find(itemID => !activeItemCache[itemID])
+    const unloadedItemID = itemIDs.find(itemID => !activeItemCache[itemID] && !loadingItemIDs.has(itemID))
     if (unloadedItemID) {
+      setLoadingItemIDs(loadingItemIDs => loadingItemIDs.add(unloadedItemID))
       refreshItem(unloadedItemID)
     }
-  }, [project, itemIDs, activeItemCache, refreshItem])
+  }, [project, itemIDs, activeItemCache, refreshItem, loadingItemIDs])
 
   const nameForID = (itemID: number) => findItemForID(itemID)!.name
 
