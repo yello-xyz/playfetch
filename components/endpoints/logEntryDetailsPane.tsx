@@ -55,8 +55,12 @@ export default function LogEntryDetailsPane({
           <span className='flex justify-end'>{FormatDuration(logEntry.duration)}</span>
           <span>Cache Hit</span>
           <span className='flex justify-end'>{logEntry.cacheHit ? 'Yes' : 'No'}</span>
-          <span>Attempts</span>
-          <span className='flex justify-end'>{logEntry.attempts}</span>
+          {logEntry.attempts > 1 && (
+            <>
+              <span>Failed Attempts</span>
+              <span className='flex justify-end'>{logEntry.attempts - 1}</span>
+            </>
+          )}
         </div>
         {Object.keys(logEntry.inputs).length > 0 && (
           <>
