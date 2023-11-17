@@ -21,6 +21,7 @@ import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -152,6 +153,13 @@ export default function ChainView({
     }
   }
 
+  const versionItemsCache = useActiveItemCache(
+    project,
+    chain.versions.flatMap(version =>
+      (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
+    )
+  )
+
   const minWidth = 300
   return (
     <Allotment>
@@ -168,6 +176,7 @@ export default function ChainView({
                   <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
                 </SingleTabHeader>
               )}
+              chainItemCache={versionItemsCache}
             />
           </div>
         </Allotment.Pane>

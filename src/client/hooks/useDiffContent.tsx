@@ -14,10 +14,9 @@ import {
   PromptVersion,
 } from '@/types'
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
-import { PromptTab } from '@/components/prompts/promptPanel'
-import { LabelForProvider } from '@/src/common/providerMetadata'
 import useAvailableProviders from './useAvailableProviders'
 import { FormatPromptConfig } from '@/components/prompts/promptVersionCellBody'
+import { GetChainItemTitle } from '@/components/chains/chainVersionCellBody'
 
 type ItemType = ActivePrompt | ActiveChain | Endpoint
 type VersionType = PromptVersion | ChainVersion
@@ -33,8 +32,8 @@ export default function useDiffContent(
     IsEndpoint(item)
       ? [item.parentID]
       : version && !IsPromptVersion(version)
-      ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
-      : []
+        ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
+        : []
 
   const itemCache = useActiveItemCache(project, [
     ...getCacheItemIDs(leftItem, leftVersion),
@@ -47,8 +46,8 @@ export default function useDiffContent(
     IsEndpoint(item)
       ? getEndpointContent(item, itemCache)
       : version
-      ? getVersionContent(version, availableProviders, itemCache)
-      : undefined
+        ? getVersionContent(version, availableProviders, itemCache)
+        : undefined
 
   const leftContent = getContent(leftItem, leftVersion)
   const rightContent = getContent(rightItem, rightVersion)
@@ -94,28 +93,8 @@ const getChainVersionContent = (version: ChainVersion, itemCache: ActiveItemCach
   version.items.map(item => getChainItemContent(item, itemCache)).join('\n')
 
 const getChainItemContent = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
-  const outputSuffix = item.output ? `→ ${item.output}` : ''
-  return `${getChainItemTitle(item, itemCache)}\n${getChainItemBody(item, itemCache)}\n${outputSuffix}\n`
-}
-
-const getChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
-  if (IsCodeChainItem(item)) {
-    return `• Code block: ${item.name ?? ''}`
-  } else if (IsBranchChainItem(item)) {
-    return `• Branch: ${item.branches.join(' | ')}`
-  } else if (IsQueryChainItem(item)) {
-    return `• Query: ${LabelForProvider(item.provider)} “${item.indexName}” (${item.topK} Top-K)`
-  } else {
-    let versionSuffix = ''
-    const prompt = itemCache.itemForID(item.promptID) as ActivePrompt | undefined
-    if (prompt) {
-      const versionIndex = prompt.versions.findIndex(version => version.id === item.versionID)
-      if (versionIndex >= 0) {
-        versionSuffix = ` (Version ${versionIndex + 1})`
-      }
-    }
-    return `• Prompt: ${itemCache.nameForID(item.promptID)}${versionSuffix}`
-  }
+  const outputSuffix = item.output ? `\n→ ${item.output}` : ''
+  return `${GetChainItemTitle(item, itemCache)}\n${getChainItemBody(item, itemCache)}${outputSuffix}\n`
 }
 
 const getChainItemBody = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {

@@ -1,8 +1,9 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
+import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -10,12 +11,14 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   activeVersion,
   setActiveVersion,
   tabSelector,
+  chainItemCache,
 }: {
   activeItem: ActivePrompt | ActiveChain
   versions: Version[]
   activeVersion: Version
   setActiveVersion: (version: Version) => void
   tabSelector: (children?: ReactNode) => ReactNode
+  chainItemCache?: ActiveItemCache
 }) {
   const [filters, setFilters] = useState<VersionFilter[]>([])
 
@@ -35,10 +38,6 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   }
 
   const filteredVersions = versions.filter(BuildVersionFilter(filters))
-  const previousPromptVersion = (version: Version) => {
-    const previousVersion = versions.find(v => v.id === version.previousID)
-    return previousVersion && IsPromptVersion(previousVersion) ? previousVersion : undefined
-  }
 
   return (
     <div className='relative flex h-full'>
@@ -62,9 +61,10 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 version={version}
                 index={versions.findIndex(v => v.id === version.id)}
                 isActiveVersion={version.id === activeVersion.id}
-                compareVersion={previousPromptVersion(version)}
+                compareVersion={versions.find(v => v.id === version.previousID)}
                 activeItem={activeItem}
                 onSelect={selectVersion}
+                chainItemCache={chainItemCache}
               />
             ))}
           </div>

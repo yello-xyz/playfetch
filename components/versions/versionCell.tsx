@@ -2,6 +2,8 @@ import { ReactNode } from 'react'
 import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain, IsPromptVersion } from '@/types'
 import VersionCellHeader from './versionCellHeader'
 import PromptVersionCellBody from '../prompts/promptVersionCellBody'
+import ChainVersionCellBody from '../chains/chainVersionCellBody'
+import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 
 export default function VersionCell<Version extends PromptVersion | ChainVersion>({
   identifier,
@@ -13,6 +15,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   compareVersion,
   activeItem,
   onSelect,
+  chainItemCache,
 }: {
   identifier: string
   labelColors: Record<string, string>
@@ -20,9 +23,10 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   index: number
   isLast: boolean
   isActiveVersion: boolean
-  compareVersion?: PromptVersion
+  compareVersion?: Version
   activeItem: ActivePrompt | ActiveChain
   onSelect: (version: Version) => void
+  chainItemCache?: ActiveItemCache
 }) {
   return (
     <VerticalBarWrapper
@@ -42,9 +46,21 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
           isActiveVersion={isActiveVersion}
           activeItem={activeItem}
         />
-        {IsPromptVersion(version) && (
-          <PromptVersionCellBody version={version} compareVersion={compareVersion} isActiveVersion={isActiveVersion} />
-        )}
+        <div className='border-b border-gray-200 border-b-1' />
+        {IsPromptVersion(version) ? (
+          <PromptVersionCellBody
+            version={version}
+            compareVersion={compareVersion as PromptVersion | undefined}
+            isActiveVersion={isActiveVersion}
+          />
+        ) : chainItemCache ? (
+          <ChainVersionCellBody
+            version={version}
+            compareVersion={compareVersion as ChainVersion | undefined}
+            isActiveVersion={isActiveVersion}
+            itemCache={chainItemCache}
+          />
+        ) : null}
       </div>
     </VerticalBarWrapper>
   )
