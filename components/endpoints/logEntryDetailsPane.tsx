@@ -50,18 +50,22 @@ export default function LogEntryDetailsPane({
           <div className='flex justify-end'>
             <LogStatus padding='px-1.5 py-[3px]' isError={!!logEntry.error} />
           </div>
-          <span>Cost</span>
-          <span className='flex justify-end'>{FormatCost(logEntry.cost)}</span>
-          <span>Duration</span>
-          <span className='flex justify-end'>{FormatDuration(logEntry.duration)}</span>
-          <span>Cache Hit</span>
-          <span className='flex justify-end'>{logEntry.cacheHit ? 'Yes' : 'No'}</span>
           {logEntry.attempts > 1 && (
             <>
               <span>Failed Attempts</span>
               <span className='flex justify-end'>{logEntry.attempts - 1}</span>
             </>
           )}
+          {logEntry.cost > 0 && (
+            <>
+              <span>Cost</span>
+              <span className='flex justify-end'>{FormatCost(logEntry.cost)}</span>
+            </>
+          )}
+          <span>Duration</span>
+          <span className='flex justify-end'>{FormatDuration(logEntry.duration)}</span>
+          <span>Cache Hit</span>
+          <span className='flex justify-end'>{logEntry.cacheHit ? 'Yes' : 'No'}</span>
         </div>
         {Object.keys(logEntry.inputs).length > 0 && (
           <>
