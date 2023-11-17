@@ -101,9 +101,10 @@ export function CommentCell({
           <ItemLabel label={comment.text} colors={labelColors} />
           {(version || parentName) && (
             <>
-              {actionSuffix(comment.action)}
-              {comment.runID ? 'response in ' : ''}
+              {actionInfix(comment.action)}
+              {comment.runID ? `response${actionSuffix(comment.action)} in ` : ''}
               {version ? `version ${versionIndex}` : parentName}
+              {!comment.runID && actionSuffix(comment.action)}
               {' · '}
             </>
           )}
@@ -149,13 +150,12 @@ const actionPrefix = (action: CommentAction) => {
     case 'removeLabel':
       return ' removed label '
     case 'thumbsUp':
-      return ' thumbed up'
     case 'thumbsDown':
-      return ' thumbed down'
+      return ' rated'
   }
 }
 
-const actionSuffix = (action: CommentAction) => {
+const actionInfix = (action: CommentAction) => {
   switch (action) {
     case 'addLabel':
       return ' to '
@@ -164,6 +164,18 @@ const actionSuffix = (action: CommentAction) => {
     case 'thumbsUp':
     case 'thumbsDown':
       return ' '
+  }
+}
+
+const actionSuffix = (action: CommentAction) => {
+  switch (action) {
+    case 'addLabel':
+    case 'removeLabel':
+      return ''
+    case 'thumbsUp':
+      return ' 👍'
+    case 'thumbsDown':
+      return ' 👎'
   }
 }
 
