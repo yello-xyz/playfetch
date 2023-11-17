@@ -1,7 +1,8 @@
-import { PromptInputs, Run } from '@/types'
+import { PromptInputs, Run, RunRating } from '@/types'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
+import { saveComment } from './comments'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -100,6 +101,29 @@ export async function updateRunLabel(
   }
 }
 
+export async function updateRunRating(
+  userID: number,
+  runID: number,
+  projectID: number,
+  rating: RunRating,
+  replyTo?: number
+) {
+  const runData = await getVerifiedUserRunData(userID, runID)
+  await saveComment(
+    userID,
+    projectID,
+    runData.parentID,
+    runData.versionID,
+    '', // TODO store the justification here (maybe)
+    replyTo,
+    rating === 'positive' ? 'thumbsUp' : 'thumbsDown',
+    runID
+  )
+  if (rating !== runData.rating) {
+    await updateRun({ ...runData, rating })
+  }
+}
+
 async function updateRun(runData: any) {
   await getDatastore().save(
     toRunData(
@@ -130,7 +154,7 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
-  rating: 'positive' | 'negative' | undefined,
+  rating: RunRating | undefined,
   continuationID: number | undefined,
   canContinue: boolean | undefined,
   runID?: number
