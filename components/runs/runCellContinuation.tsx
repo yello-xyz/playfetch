@@ -6,7 +6,7 @@ import { PendingButton } from '../button'
 import UserAvatar from '../users/userAvatar'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import RunCellBody from './runCellBody'
-import { ExtractInputKey } from '@/src/common/formatting'
+import { ExtractInputKey, FormatCost } from '@/src/common/formatting'
 import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function RunCellContinuation({
@@ -52,8 +52,7 @@ export default function RunCellContinuation({
   const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
   const users = activeItem?.users ?? []
 
-  // TODO render this somewhere
-  // const totalCost = runWithContinuations.reduce((totalCost, run) => totalCost + (run.cost ?? 0), 0)
+  const totalCost = runWithContinuations.reduce((totalCost, run) => totalCost + (run.cost ?? 0), 0)
 
   return (
     <>
@@ -76,7 +75,7 @@ export default function RunCellContinuation({
       {!!runContinuation && !!runWithContinuations.slice(-1)[0].canContinue && (
         <>
           <RoleHeader user={user} role='User' />
-          <BorderedSection>
+          <BorderedSection borderColor='border-transparent'>
             <div className='flex items-center flex-1 gap-2'>
               <TextInput
                 placeholder='Enter a message'
@@ -93,6 +92,11 @@ export default function RunCellContinuation({
             </div>
           </BorderedSection>
         </>
+      )}
+      {totalCost > (run.cost ?? 0) && (
+        <span className='w-full pt-2 mt-2 text-right text-gray-500 border-t border-gray-200'>
+          Total Cost: {FormatCost(totalCost)}
+        </span>
       )}
     </>
   )
@@ -113,15 +117,17 @@ export const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
 
 export const BorderedSection = ({
   border = true,
+  borderColor = 'border-gray-200',
   bridgingGap,
   children,
 }: {
   border?: boolean
+  borderColor?: string
   bridgingGap?: boolean
   children: ReactNode
 }) =>
   border ? (
-    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ml-2.5 flex items-stretch pl-4 border-l border-gray-200`}>
+    <div className={`${bridgingGap ? '-mt-2.5 pt-2.5' : ''} ${borderColor} ml-2.5 flex items-stretch pl-4 border-l`}>
       {children}
     </div>
   ) : (
