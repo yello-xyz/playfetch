@@ -195,6 +195,7 @@ export type Run = CommonRun & {
   duration: number
   inputs: PromptInputs
   labels: string[]
+  rating?: RunRating
   userID: number
 }
 

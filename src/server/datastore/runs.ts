@@ -186,6 +186,7 @@ export const toRun = (data: any): Run => ({
   cost: data.cost,
   duration: data.duration,
   labels: JSON.parse(data.labels),
+  rating: data.rating ?? null,
   continuationID: data.continuationID ?? null,
   canContinue: data.canContinue ?? false,
 })
