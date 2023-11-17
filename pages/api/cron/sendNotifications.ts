@@ -98,9 +98,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             case 'removeLabel':
               return `Removed “${comment.text}”`
             case 'thumbsUp':
-              return 'Thumbed up'
+              return 'Thumbs up'
             case 'thumbsDown':
-              return 'Thumbed down'
+              return 'Thumbs down'
             default:
               return comment.text
           }
