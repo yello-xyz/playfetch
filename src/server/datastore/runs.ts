@@ -26,6 +26,7 @@ export async function migrateRuns(postMerge: boolean) {
         runData.cost,
         runData.duration,
         JSON.parse(runData.labels),
+        runData.rating,
         runData.continuationID,
         runData.canContinue,
         getID(runData)
@@ -35,7 +36,7 @@ export async function migrateRuns(postMerge: boolean) {
   console.log('✅ Processed all remaining runs')
 }
 
-export async function saveRun(
+export async function saveNewRun(
   userID: number,
   parentID: number,
   versionID: number,
@@ -43,7 +44,6 @@ export async function saveRun(
   output: string,
   cost: number,
   duration: number,
-  labels: string[],
   continuationID: number | undefined,
   canContinue: boolean
 ) {
@@ -57,7 +57,8 @@ export async function saveRun(
     new Date(),
     cost,
     duration,
-    labels,
+    [],
+    undefined,
     continuationID,
     canContinue ?? undefined
   )
@@ -111,6 +112,7 @@ async function updateRun(runData: any) {
       runData.cost,
       runData.duration,
       JSON.parse(runData.labels),
+      runData.rating,
       runData.continuationID,
       runData.canContinue,
       getID(runData)
@@ -128,6 +130,7 @@ const toRunData = (
   cost: number,
   duration: number,
   labels: string[],
+  rating: 'positive' | 'negative' | undefined,
   continuationID: number | undefined,
   canContinue: boolean | undefined,
   runID?: number
@@ -143,6 +146,7 @@ const toRunData = (
     cost,
     duration,
     labels: JSON.stringify(labels),
+    rating,
     continuationID: continuationID ?? null,
     canContinue,
   },

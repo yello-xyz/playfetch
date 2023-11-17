@@ -1,6 +1,6 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { saveRun } from '@/src/server/datastore/runs'
+import { saveNewRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
@@ -21,7 +21,7 @@ const logResponse = (
   logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
   return response.failed
     ? Promise.resolve()
-    : saveRun(
+    : saveNewRun(
         userID,
         version.parentID,
         version.id,
@@ -29,7 +29,6 @@ const logResponse = (
         response.output,
         response.cost,
         response.duration,
-        [],
         continuationID ?? response.continuationID,
         !!response.continuationID
       )
