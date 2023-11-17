@@ -29,6 +29,11 @@ export default function LogEntryDetailsPane({
 
   const versionIndex = versions.findIndex(version => version.id === logEntry.versionID)
 
+  const failedAttempts = logEntries.reduce((sum, entry) => sum + (entry.attempts - 1), 0)
+  const cost = logEntries.reduce((sum, entry) => sum + entry.cost, 0)
+  const duration = logEntries.reduce((sum, entry) => sum + entry.duration, 0)
+  const multipleLogEntries = logEntries.length > 1
+
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
     <div className='flex flex-col w-full h-full bg-gray-25'>
@@ -53,31 +58,35 @@ export default function LogEntryDetailsPane({
           <div className='flex justify-end'>
             <LogStatus padding='px-1.5 py-[3px]' isError={!!logEntry.error} />
           </div>
-          {logEntry.attempts > 1 && (
+          {failedAttempts > 0 && (
             <>
               <span>Failed Attempts</span>
-              <span className='flex justify-end'>{logEntry.attempts - 1}</span>
+              <span className='flex justify-end'>{failedAttempts}</span>
             </>
           )}
-          {logEntry.cost > 0 && (
+          {cost > 0 && (
             <>
-              <span>Cost</span>
-              <span className='flex justify-end'>{FormatCost(logEntry.cost)}</span>
+              <span>{multipleLogEntries ? 'Total Cost' : 'Cost'}</span>
+              <span className='flex justify-end'>{FormatCost(cost)}</span>
             </>
           )}
-          <span>Duration</span>
-          <span className='flex justify-end'>{FormatDuration(logEntry.duration)}</span>
-          <span>Cache Hit</span>
-          <span className='flex justify-end'>{logEntry.cacheHit ? 'Yes' : 'No'}</span>
+          <span>{multipleLogEntries ? 'Total Duration' : 'Duration'}</span>
+          <span className='flex justify-end'>{FormatDuration(duration)}</span>
+          {!multipleLogEntries && (
+            <>
+              <span>Cache Hit</span>
+              <span className='flex justify-end'>{logEntry.cacheHit ? 'Yes' : 'No'}</span>
+            </>
+          )}
         </div>
         {logEntries
           .slice()
           .reverse()
-          .map((logEntry, index, entries) => (
+          .map((logEntry, index) => (
             <CollapsibleContent
               key={index}
               timestamp={logEntry.timestamp}
-              collapsible={entries.length > 1}
+              collapsible={multipleLogEntries}
               initiallyExpanded={index === 0}>
               {Object.keys(logEntry.inputs).length > 0 && (
                 <>
