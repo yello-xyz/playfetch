@@ -29,11 +29,12 @@ export default function LogEntriesView({
   activeIndex?: number
   setActiveIndex: (index: number) => void
 }) {
+  const gridConfig = 'grid grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'
   return (
     <div className='flex flex-col h-full'>
       {tabSelector()}
       <div className='overflow-y-auto'>
-        <div className='grid p-4 w-full grid-cols-[minmax(80px,2fr)_minmax(120px,1fr)_minmax(120px,1fr)_minmax(100px,1fr)]'>
+        <div className={`${gridConfig} p-4 w-full`}>
           <TableHeader first>Endpoint</TableHeader>
           <TableHeader>Environment</TableHeader>
           <TableHeader>Time</TableHeader>
