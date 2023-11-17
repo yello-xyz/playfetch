@@ -1,5 +1,12 @@
 ## PlayFetch Changelog
 
+### v0.16 - 2023-11-17
+- Documentation
+- Rate run responses
+- Support for PaLM 2 for Chat
+- Improved version history
+- Improved test data entry
+
 ### v0.15 - 2023-11-09
 - Test function interrupts dynamically in the UI
 - Support for GPT-4 Turbo (preview) and new GPT-3.5 Turbo
