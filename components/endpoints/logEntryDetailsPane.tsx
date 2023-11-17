@@ -70,50 +70,60 @@ export default function LogEntryDetailsPane({
           <span>Cache Hit</span>
           <span className='flex justify-end'>{logEntry.cacheHit ? 'Yes' : 'No'}</span>
         </div>
-        <CollapsibleContent title='' collapsible={false}>
-          {Object.keys(logEntry.inputs).length > 0 && (
-            <>
-              <Label className='-mb-4'>Request</Label>
-              <CodeBlock>{JSON.stringify(logEntry.inputs, null, 2)}</CodeBlock>
-            </>
-          )}
-          {logEntry.error ? (
-            <>
-              <Label className='-mb-4'>Error</Label>
-              <CodeBlock error>{logEntry.error}</CodeBlock>
-            </>
-          ) : (
-            <>
-              <Label className='-mb-4'>Response</Label>
-              <CodeBlock>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
-            </>
-          )}
-        </CollapsibleContent>
+        {logEntries
+          .slice()
+          .reverse()
+          .map((logEntry, index, entries) => (
+            <CollapsibleContent
+              key={index}
+              timestamp={logEntry.timestamp}
+              collapsible={entries.length > 1}
+              initiallyExpanded={index === 0}>
+              {Object.keys(logEntry.inputs).length > 0 && (
+                <>
+                  <Label className='-mb-4'>Request</Label>
+                  <CodeBlock>{JSON.stringify(logEntry.inputs, null, 2)}</CodeBlock>
+                </>
+              )}
+              {logEntry.error ? (
+                <>
+                  <Label className='-mb-4'>Error</Label>
+                  <CodeBlock error>{logEntry.error}</CodeBlock>
+                </>
+              ) : (
+                <>
+                  <Label className='-mb-4'>Response</Label>
+                  <CodeBlock>{JSON.stringify(logEntry.output, null, 2)}</CodeBlock>
+                </>
+              )}
+            </CollapsibleContent>
+          ))}
       </div>
     </div>
   )
 }
 
 function CollapsibleContent({
-  title,
+  timestamp,
   collapsible = true,
   initiallyExpanded = false,
   children,
 }: {
-  title: string
+  timestamp: number
   collapsible?: boolean
   initiallyExpanded?: boolean
   children: ReactNode
 }) {
   const [isExpanded, setExpanded] = useState(initiallyExpanded)
+  const formattedDate = useFormattedDate(timestamp, timestamp => FormatDate(timestamp, true, true))
 
   return collapsible ? (
     <div>
       <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
         <Icon className={`${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
-        <span className='font-medium text-gray-700'>{title}</span>
+        <span className='font-medium text-gray-700'>{formattedDate}</span>
       </div>
-      {isExpanded && <div className='ml-6'>{children}</div>}
+      {isExpanded && <div className='flex flex-col gap-6 pt-2 ml-6'>{children}</div>}
     </div>
   ) : (
     <>{children}</>
