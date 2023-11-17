@@ -13,8 +13,8 @@ import {
 import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
-import queryIcon from '@/public/query.svg' // TODO update svg so it is different from prompt icon
-import branchIcon from '@/public/branch.svg' // TODO update svg so it is different from code icon
+import queryIcon from '@/public/query.svg'
+import branchIcon from '@/public/branch.svg'
 import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'

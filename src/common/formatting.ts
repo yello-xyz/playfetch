@@ -31,8 +31,8 @@ export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIn
   return !alwaysIncludeDate && dateString === todayString
     ? timeString
     : alwaysIncludeTime
-    ? `${dateString} ${timeString}`
-    : dateString
+      ? `${dateString} ${timeString}`
+      : dateString
 }
 
 export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
