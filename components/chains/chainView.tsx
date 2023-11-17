@@ -153,12 +153,12 @@ export default function ChainView({
     }
   }
 
-  const versionItemsCache = useActiveItemCache(
-    project,
-    chain.versions.flatMap(version =>
+  const recentVersionItemsPromptIDs = new Set(
+    chain.versions.slice(-10).flatMap(version =>
       (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
     )
   )
+  const versionItemsCache = useActiveItemCache(project, [...recentVersionItemsPromptIDs])
 
   const minWidth = 300
   return (
