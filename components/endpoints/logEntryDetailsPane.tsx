@@ -9,6 +9,7 @@ import Label from '../label'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { SingleTabHeader } from '../tabSelector'
 import CodeBlock from '../codeBlock'
+import LogStatus from './logStatus'
 
 export default function LogEntryDetailsPane({
   logEntry,
@@ -46,9 +47,9 @@ export default function LogEntryDetailsPane({
           <span>Environment</span>
           <span className='flex justify-end'>{logEntry.flavor}</span>
           <span>Status</span>
-          <span className={`flex justify-end ${logEntry.error ? 'text-red-300' : 'text-green-300'}`}>
-            {logEntry.error ? 'Error' : 'Success'}
-          </span>
+          <div className='flex justify-end'>
+            <LogStatus padding='px-1.5 py-[3px]' isError={!!logEntry.error} />
+          </div>
           <span>Cost</span>
           <span className='flex justify-end'>{FormatCost(logEntry.cost)}</span>
           <span>Duration</span>
