@@ -1,6 +1,6 @@
 import { EmbeddingModel, QueryProvider } from '@/types'
 import { getProviderCredentials, incrementProviderCostForScope } from '../datastore/providers'
-import { APIKeyForProvider, CreateEmbedding } from '../providers/integration'
+import { CredentialsForProvider, CreateEmbedding } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
 
@@ -24,7 +24,7 @@ export const runQuery = async (
     }
 
     const embeddingProvider = ProviderForModel(model)
-    const embeddingAPIKey = await APIKeyForProvider(userID, embeddingProvider)
+    const { apiKey: embeddingAPIKey } = await CredentialsForProvider(userID, embeddingProvider)
     if (!embeddingAPIKey) {
       throw new Error('Missing API key')
     }

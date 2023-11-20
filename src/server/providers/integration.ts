@@ -22,15 +22,15 @@ const costForTokens = (content: string, pricePerMillionTokens: number) =>
 export const CostForModel = (model: LanguageModel, input: string, output = '') =>
   costForTokens(input, InputPriceForModel(model)) + costForTokens(output, OutputPriceForModel(model))
 
-export const APIKeyForProvider = async (userID: number, provider: ModelProvider, modelToCheck?: string) => {
+export const CredentialsForProvider = async (userID: number, provider: ModelProvider, modelToCheck?: string) => {
   switch (provider) {
     case 'google':
-      return Promise.resolve(null)
+      return Promise.resolve({ providerID: null, apiKey: null})
     case 'openai':
     case 'anthropic':
     case 'cohere':
-      const { apiKey } = await getProviderCredentials([userID], provider, modelToCheck)
-      return apiKey
+      const { providerID, apiKey } = await getProviderCredentials([userID], provider, modelToCheck)
+      return { providerID, apiKey }
   }
 }
 
