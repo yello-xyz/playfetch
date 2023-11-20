@@ -1,5 +1,5 @@
 import { PromptConfig, Prompts, PromptInputs } from '@/types'
-import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
+import { incrementProviderCostForScope } from '@/src/server/datastore/providers'
 import { APIKeyForProvider, GetPredictor } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
@@ -86,7 +86,7 @@ export default async function runPromptWithConfig(
   }
 
   if (!isErrorPredictionResponse(result) && result.cost > 0) {
-    incrementProviderCostForUser(userID, provider, result.cost)
+    incrementProviderCostForScope(userID, provider, result.cost)
   }
 
   return {

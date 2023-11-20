@@ -22,7 +22,7 @@ import ClientRoute, {
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
-import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
+import { getAvailableProvidersForScopes } from '@/src/server/datastore/providers'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
@@ -64,7 +64,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
         (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
-  const availableProviders = await getAvailableProvidersForUser(user.id)
+  const availableProviders = await getAvailableProvidersForScopes([user.id])
 
   return {
     props: {

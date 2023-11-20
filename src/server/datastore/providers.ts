@@ -1,10 +1,11 @@
-import { and } from '@google-cloud/datastore'
+import { PropertyFilter, and } from '@google-cloud/datastore'
 import {
   Entity,
   buildFilter,
   buildKey,
   getDatastore,
   getEntities,
+  getFilteredEntities,
   getFilteredEntity,
   getID,
   runTransactionWithExponentialBackoff,
@@ -21,10 +22,10 @@ import {
 import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
 
-const buildProviderFilter = (scopeID: number, provider: ModelProvider | QueryProvider) =>
-  and([buildFilter('scopeID', scopeID), buildFilter('provider', provider)])
-const getProviderData = (scopeID: number, provider: ModelProvider | QueryProvider) =>
-  getFilteredEntity(Entity.PROVIDER, buildProviderFilter(scopeID, provider))
+const buildProviderFilter = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
+  and([new PropertyFilter('scopeID', 'IN', scopeIDs), buildFilter('provider', provider)])
+const getProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
+  getFilteredEntity(Entity.PROVIDER, buildProviderFilter(scopeIDs, provider))
 
 type ProviderMetadata = {
   customModels?: CustomModel[]
@@ -53,11 +54,11 @@ export async function migrateProviders(postMerge: boolean) {
 }
 
 export async function getProviderCredentials(
-  scopeID: number,
+  scopeIDs: number[],
   provider: ModelProvider | QueryProvider,
   modelToCheck?: string
 ): Promise<string[]> {
-  const providerData = await getProviderData(scopeID, provider)
+  const providerData = await getProviderData(scopeIDs, provider)
   const metadata = providerData ? (JSON.parse(providerData.metadata) as ProviderMetadata) : {}
   const customModels = metadata.customModels ?? []
   const gatedModels = metadata.gatedModels ?? []
@@ -75,11 +76,11 @@ export async function getProviderCredentials(
 }
 
 export async function getProviderKey(
-  scopeID: number,
+  scopeIDs: number[],
   provider: ModelProvider | QueryProvider,
   modelToCheck?: string
 ): Promise<string | null> {
-  const [apiKey] = await getProviderCredentials(scopeID, provider, modelToCheck)
+  const [apiKey] = await getProviderCredentials(scopeIDs, provider, modelToCheck)
   return apiKey ?? null
 }
 
@@ -113,13 +114,13 @@ const toAvailableProvider = (data: any): AvailableProvider => {
   }
 }
 
-export async function incrementProviderCostForUser(
+export async function incrementProviderCostForScope(
   scopeID: number,
   provider: ModelProvider | QueryProvider,
   cost: number
 ) {
   await runTransactionWithExponentialBackoff(async transaction => {
-    const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(scopeID, provider), transaction)
+    const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter([scopeID], provider), transaction)
     if (providerData) {
       transaction.save(
         toProviderData(
@@ -141,7 +142,7 @@ export async function saveProviderKey(
   apiKey: string | null,
   environment: string | undefined
 ) {
-  const providerData = await getProviderData(scopeID, provider)
+  const providerData = await getProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, 0, providerID))
 }
@@ -154,7 +155,7 @@ export async function saveProviderModel(
   description: string,
   enabled: boolean
 ) {
-  const providerData = await getProviderData(scopeID, provider)
+  const providerData = await getProviderData([scopeID], provider)
   if (providerData) {
     const metadata = JSON.parse(providerData.metadata) as ProviderMetadata
     metadata.customModels = [
@@ -167,11 +168,11 @@ export async function saveProviderModel(
   }
 }
 
-export async function getAvailableProvidersForUser(
-  scopeID: number,
+export async function getAvailableProvidersForScopes(
+  scopeIDs: number[],
   reloadCustomModels = false
 ): Promise<AvailableProvider[]> {
-  const providerData = await getEntities(Entity.PROVIDER, 'scopeID', scopeID)
+  const providerData = await getFilteredEntities(Entity.PROVIDER, new PropertyFilter('scopeID', 'IN', scopeIDs))
 
   const availableProviders = [] as AvailableProvider[]
   const providerDataToSave = [] as any[]
