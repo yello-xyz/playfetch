@@ -8,13 +8,14 @@ import {
   ChainItemWithInputs,
 } from '@/types'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
-import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { Allotment } from 'allotment'
 import PromptView from '../prompts/promptView'
 import ChainView from '../chains/chainView'
 import CompareView from '../compare/compareView'
 import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../commentsPane'
+import ProviderSettingsView from '../settings/providerSettingsView'
 
 export default function MainProjectPane({
   activeProject,
@@ -93,6 +94,7 @@ export default function MainProjectPane({
             onRefresh={refreshProject}
           />
         )}
+        {activeItem === SettingsItem && <ProviderSettingsView scopeID={activeProject.id} />}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>

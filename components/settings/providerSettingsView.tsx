@@ -7,14 +7,14 @@ import ProviderSettingsPane from './providerSettingsPane'
 import CustomModelSettingsPane from './customModelSettingsPane'
 import { IsModelProvider } from '@/types'
 
-export default function ProviderSettingsView() {
+export default function ProviderSettingsView({ scopeID }: { scopeID: number }) {
   const initialProviders = useScopedProviders()
 
   const [availableProviders, setAvailableProviders] = useState(initialProviders)
   const availableModelProviders = availableProviders.filter(IsModelProvider)
   const availableQueryProviders = availableProviders.filter(provider => !IsModelProvider(provider))
 
-  const refresh = () => api.getAvailableProviders().then(setAvailableProviders)
+  const refresh = () => api.getScopedProviders(scopeID).then(setAvailableProviders)
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)

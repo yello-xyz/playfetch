@@ -3,9 +3,9 @@ import { withLoggedInUserRoute } from '@/src/server/session'
 import { AvailableProvider, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-async function getAvailableProviders(_: NextApiRequest, res: NextApiResponse<AvailableProvider[]>, user: User) {
-  const availableProviders = await loadScopedProviders(user.id)
+async function getScopedProviders(req: NextApiRequest, res: NextApiResponse<AvailableProvider[]>, user: User) {
+  const availableProviders = await loadScopedProviders(req.body.scopeID)
   res.json(availableProviders)
 }
 
-export default withLoggedInUserRoute(getAvailableProviders)
+export default withLoggedInUserRoute(getScopedProviders)

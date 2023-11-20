@@ -252,8 +252,8 @@ const api = {
   updateDefaultConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
     return post(this.updateDefaultConfig, { defaultPromptConfig })
   },
-  getAvailableProviders: function (): Promise<AvailableProvider[]> {
-    return post(this.getAvailableProviders)
+  getScopedProviders: function (scopeID: number): Promise<AvailableProvider[]> {
+    return post(this.getScopedProviders, { scopeID })
   },
   updateProviderKey: function (provider: ModelProvider | QueryProvider, apiKey: string | null, environment?: string) {
     return post(this.updateProviderKey, { provider, apiKey, environment })

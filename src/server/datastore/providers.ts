@@ -160,10 +160,10 @@ export async function saveProviderModel(
   }
 }
 
-export const loadScopedProviders = (scopeID: number) => getAvailableProvidersForScopes([scopeID], true)
-export const loadAvailableProviders = (scopeIDs: number[]) => getAvailableProvidersForScopes(scopeIDs, false)
+export const loadScopedProviders = (scopeID: number) => getProvidersForScopes([scopeID], true)
+export const loadAvailableProviders = (scopeIDs: number[]) => getProvidersForScopes(scopeIDs, false)
 
-async function getAvailableProvidersForScopes(
+async function getProvidersForScopes(
   scopeIDs: number[],
   reloadCustomModels = false
 ): Promise<AvailableProvider[]> {
