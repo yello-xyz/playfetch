@@ -134,7 +134,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const stream = (index: number, _: number, message: string) =>
             useStreaming && isLastStep(index) ? res.write(message) : undefined
 
-          response = await runChain(endpoint.userID, version, configs, inputs, true, stream, continuationID)
+          response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
 
           if (endpoint.useCache && !response.failed && !continuationID && !response.continuationID) {
             cacheResponse(versionID, inputs, response, endpoint.parentID)

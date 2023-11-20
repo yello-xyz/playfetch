@@ -48,6 +48,7 @@ const emptyResponse: ResponseType = {
 
 export default async function runChain(
   userID: number,
+  projectID: number,
   version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,

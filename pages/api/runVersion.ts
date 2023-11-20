@@ -5,6 +5,7 @@ import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVe
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
+import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
@@ -40,6 +41,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const continuationID = req.body.continuationID
 
   const version = await getTrustedVersion(versionID, true)
+  const parentData = await getVerifiedUserPromptOrChainData(user.id, version.parentID)
   const configs = loadConfigsFromVersion(version)
 
   res.setHeader('X-Accel-Buffering', 'no')
@@ -49,6 +51,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     multipleInputs.map(async (inputs, inputIndex) => {
       return runChain(
         user.id,
+        parentData.projectID,
         version,
         configs,
         inputs,
