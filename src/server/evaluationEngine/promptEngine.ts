@@ -1,5 +1,5 @@
 import { PromptConfig, Prompts, PromptInputs } from '@/types'
-import { incrementProviderCostForScope } from '@/src/server/datastore/providers'
+import { incrementProviderCost } from '@/src/server/datastore/providers'
 import { CredentialsForProvider, GetPredictor } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
@@ -52,7 +52,7 @@ export default async function runPromptWithConfig(
 ): Promise<RunResponse> {
   const provider = ProviderForModel(config.model)
   const modelToCheck = (PublicLanguageModels as string[]).includes(config.model) ? undefined : config.model
-  const { apiKey } = await CredentialsForProvider(userID, provider, modelToCheck)
+  const { providerID, apiKey } = await CredentialsForProvider(userID, provider, modelToCheck)
   if (provider !== DefaultProvider && !apiKey) {
     const { apiKey: defaultModelsAPIKey } = modelToCheck ? await CredentialsForProvider(userID, provider) : { apiKey }
     return {
@@ -85,8 +85,8 @@ export default async function runPromptWithConfig(
     }
   }
 
-  if (!isErrorPredictionResponse(result) && result.cost > 0) {
-    incrementProviderCostForScope(userID, provider, result.cost)
+  if (!isErrorPredictionResponse(result) && result.cost > 0 && providerID) {
+    incrementProviderCost(providerID, result.cost)
   }
 
   return {

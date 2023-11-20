@@ -5,8 +5,8 @@ import {
   buildKey,
   getDatastore,
   getFilteredEntities,
-  getFilteredEntity,
   getID,
+  getKeyedEntity,
   runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
@@ -110,26 +110,18 @@ const toAvailableProvider = (data: any): AvailableProvider => {
   }
 }
 
-export async function incrementProviderCostForScope(
-  scopeID: number,
-  provider: ModelProvider | QueryProvider,
-  cost: number
-) {
+export async function incrementProviderCost(providerID: number, cost: number) {
   await runTransactionWithExponentialBackoff(async transaction => {
-    const providerData = await getFilteredEntity(
-      Entity.PROVIDER,
-      buildSingleProviderFilter([scopeID], provider),
-      transaction
-    )
+    const providerData = await getKeyedEntity(Entity.PROVIDER, providerID, transaction)
     if (providerData) {
       transaction.save(
         toProviderData(
-          scopeID,
-          provider,
+          providerData.scopeID,
+          providerData.provider,
           providerData.apiKey,
           JSON.parse(providerData.metadata),
           providerData.cost + cost,
-          getID(providerData)
+          providerID
         )
       )
     }
