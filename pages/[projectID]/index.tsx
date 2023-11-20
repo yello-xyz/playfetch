@@ -17,6 +17,7 @@ import ClientRoute, {
   EndpointsRoute,
   ParseActiveItemQuery,
   ProjectRoute,
+  SettingsRoute,
   WorkspaceRoute,
 } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
@@ -27,7 +28,7 @@ import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context
 import GlobalPopup from '@/components/globalPopup'
 import usePrompt from '@/src/client/hooks/usePrompt'
 import useChain from '@/src/client/hooks/useChain'
-import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
@@ -124,7 +125,7 @@ export default function Home({
   }
 
   const router = useRouter()
-  const { promptID, chainID, compare, endpoints } = ParseActiveItemQuery(router.query, activeProject)
+  const { promptID, chainID, compare, endpoints, settings } = ParseActiveItemQuery(router.query, activeProject)
 
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
@@ -160,13 +161,30 @@ export default function Home({
     }
   }
 
-  const currentQueryState = compare ? CompareItem : endpoints ? EndpointsItem : promptID ?? chainID
+  const selectSettings = () => {
+    savePrompt(refreshProject)
+    setActiveItem(SettingsItem)
+    updateVersion(undefined)
+    if (!settings) {
+      router.push(SettingsRoute(activeProject.id), undefined, { shallow: true })
+    }
+  }
+
+  const currentQueryState = compare
+    ? CompareItem
+    : endpoints
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
       selectCompare()
     } else if (endpoints) {
       selectEndpoints()
+    } else if (settings) {
+      selectSettings()
     } else if (promptID) {
       selectPrompt(promptID)
     } else if (chainID) {
@@ -234,6 +252,7 @@ export default function Home({
                           onSelectChain={selectChain}
                           onSelectCompare={selectCompare}
                           onSelectEndpoints={selectEndpoints}
+                          onSelectSettings={selectSettings}
                         />
                       </Suspense>
                       <div className='flex-1'>

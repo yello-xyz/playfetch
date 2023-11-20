@@ -1,7 +1,14 @@
 import { Analytics, ResolvedEndpoint, User } from '@/types'
 import { getWorkspacesForUser } from './datastore/workspaces'
 import { getActiveProject } from './datastore/projects'
-import { ActiveItem, BuildActiveChain, BuildActivePrompt, CompareItem, EndpointsItem } from '../common/activeItem'
+import {
+  ActiveItem,
+  BuildActiveChain,
+  BuildActivePrompt,
+  CompareItem,
+  EndpointsItem,
+  SettingsItem,
+} from '../common/activeItem'
 import { getPromptForUser } from './datastore/prompts'
 import { getChainForUser } from './datastore/chains'
 import { loadAvailableProviders } from './datastore/providers'
@@ -17,17 +24,19 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
 
   const initialActiveProject = await getActiveProject(user.id, projectID!)
 
-  const { promptID, chainID, compare, endpoints } = ParseActiveItemQuery(query, initialActiveProject)
+  const { promptID, chainID, compare, endpoints, settings } = ParseActiveItemQuery(query, initialActiveProject)
 
   const initialActiveItem: ActiveItem | null = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : promptID
-        ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
-        : chainID
-          ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
-          : null
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID
+    ? await getPromptForUser(user.id, promptID).then(BuildActivePrompt(initialActiveProject))
+    : chainID
+    ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
+    : null
 
   const availableProviders = await loadAvailableProviders([projectID!, user.id])
   const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)
