@@ -64,7 +64,7 @@ export async function getProviderCredentials(
   scopeIDs: number[],
   provider: ModelProvider | QueryProvider,
   modelToCheck?: string
-): Promise<string[]> {
+): Promise<{ apiKey: string | null; environment: string | null }> {
   const providerData = await getSingleProviderData(scopeIDs, provider)
   const metadata = providerData ? (JSON.parse(providerData.metadata) as ProviderMetadata) : {}
   const customModels = metadata.customModels ?? []
@@ -74,21 +74,9 @@ export async function getProviderCredentials(
     !(gatedModels as string[]).includes(modelToCheck) &&
     !customModels.find(model => model.id === modelToCheck && model.enabled)
   ) {
-    return []
+    return { apiKey: null, environment: null }
   }
-  return [
-    ...(providerData?.apiKey ? [providerData.apiKey] : []),
-    ...(metadata.environment ? [metadata.environment] : []),
-  ]
-}
-
-export async function getProviderKey(
-  scopeIDs: number[],
-  provider: ModelProvider | QueryProvider,
-  modelToCheck?: string
-): Promise<string | null> {
-  const [apiKey] = await getProviderCredentials(scopeIDs, provider, modelToCheck)
-  return apiKey ?? null
+  return { apiKey: providerData?.apiKey ?? null, environment: metadata.environment ?? null }
 }
 
 const toProviderData = (

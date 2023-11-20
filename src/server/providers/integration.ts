@@ -10,7 +10,7 @@ import {
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderKey } from '../datastore/providers'
+import { getProviderCredentials } from '../datastore/providers'
 import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
@@ -22,14 +22,15 @@ const costForTokens = (content: string, pricePerMillionTokens: number) =>
 export const CostForModel = (model: LanguageModel, input: string, output = '') =>
   costForTokens(input, InputPriceForModel(model)) + costForTokens(output, OutputPriceForModel(model))
 
-export const APIKeyForProvider = (userID: number, provider: ModelProvider, modelToCheck?: string) => {
+export const APIKeyForProvider = async (userID: number, provider: ModelProvider, modelToCheck?: string) => {
   switch (provider) {
     case 'google':
       return Promise.resolve(null)
     case 'openai':
     case 'anthropic':
     case 'cohere':
-      return getProviderKey([userID], provider, modelToCheck)
+      const { apiKey } = await getProviderCredentials([userID], provider, modelToCheck)
+      return apiKey
   }
 }
 

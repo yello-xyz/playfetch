@@ -18,21 +18,21 @@ export const runQuery = async (
   topK: number
 ): Promise<QueryResponse> => {
   try {
-    const [queryAPIKey, queryEnvironment] = await getProviderCredentials([userID], provider)
-    if (!queryAPIKey || !queryEnvironment) {
+    const { apiKey, environment } = await getProviderCredentials([userID], provider)
+    if (!apiKey || !environment) {
       throw new Error('Missing vector store credentials')
     }
 
     const embeddingProvider = ProviderForModel(model)
-    const embeddingApiKey = await APIKeyForProvider(userID, embeddingProvider)
-    if (!embeddingApiKey) {
+    const embeddingAPIKey = await APIKeyForProvider(userID, embeddingProvider)
+    if (!embeddingAPIKey) {
       throw new Error('Missing API key')
     }
 
-    const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingApiKey, userID, query)
+    const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
     incrementProviderCostForScope(userID, embeddingProvider, cost)
 
-    const result = await runVectorQuery(queryAPIKey, queryEnvironment, indexName, embedding, topK)
+    const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 
     return { result, output: result.join('\n'), error: undefined, failed: false, cost, attempts: 1 }
   } catch (error: any) {
