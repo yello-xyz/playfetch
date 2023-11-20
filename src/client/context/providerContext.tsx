@@ -4,24 +4,31 @@ import { createContext, useContext } from 'react'
 
 type ProviderContextType = {
   availableProviders?: AvailableProvider[]
+  scopedProviders?: AvailableProvider[]
 }
 
 export const ProviderContext = createContext<ProviderContextType>({})
 
-function useProviders() {
+function useAvailableProviders() {
   const context = useContext(ProviderContext)
   const availableProviders = context.availableProviders ?? []
+  return availableProviders ?? []
+}
+
+export function useScopedProviders() {
+  const context = useContext(ProviderContext)
+  const scopedProviders = context.scopedProviders ?? []
+  return scopedProviders ?? []
+}
+
+function useProviders() {
+  const availableProviders = useAvailableProviders()
   const availableModelProviders = availableProviders.filter(IsModelProvider)
   const checkModelAvailable = (model: LanguageModel | EmbeddingModel) =>
     IsModelAvailable(model, availableModelProviders)
   const checkProviderAvailable = (provider: ModelProvider | QueryProvider) =>
     IsProviderAvailable(provider, availableProviders)
   return [availableProviders, checkModelAvailable, checkProviderAvailable] as const
-}
-
-export function useAvailableProviders() {
-  const [availableProviders] = useProviders()
-  return availableProviders
 }
 
 export function useModelProviders() {

@@ -52,6 +52,7 @@ export default function Home({
   initialActiveItem,
   initialAnalytics,
   availableProviders,
+  scopedProviders,
   initialPromptConfig,
 }: {
   user: User
@@ -60,6 +61,7 @@ export default function Home({
   initialActiveItem: ActiveItem | null
   initialAnalytics: Analytics | null
   availableProviders: AvailableProvider[]
+  scopedProviders: AvailableProvider[]
   initialPromptConfig: PromptConfig
 }) {
   useDocumentationCookie('set')
@@ -222,7 +224,7 @@ export default function Home({
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user }}>
-        <ProviderContext.Provider value={{ availableProviders }}>
+        <ProviderContext.Provider value={{ availableProviders, scopedProviders }}>
           <PromptConfigContext.Provider value={{ defaultPromptConfig, setDefaultPromptConfig }}>
             <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
               <ModalDialogContext.Provider value={{ setDialogPrompt }}>
@@ -238,7 +240,6 @@ export default function Home({
                         setShowComments={setShowComments}
                       />
                     </Suspense>
-
                     <div className='flex items-stretch flex-1 overflow-hidden'>
                       <Suspense>
                         <ProjectSidebar

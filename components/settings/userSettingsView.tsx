@@ -1,4 +1,4 @@
-import { useAvailableProviders } from '@/src/client/context/providerContext'
+import { useScopedProviders } from '@/src/client/context/providerContext'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import { useState } from 'react'
@@ -8,7 +8,7 @@ import CustomModelSettingsPane from './customModelSettingsPane'
 import { IsModelProvider } from '@/types'
 
 export default function UserSettingsView() {
-  const initialProviders = useAvailableProviders()
+  const initialProviders = useScopedProviders()
 
   const [availableProviders, setAvailableProviders] = useState(initialProviders)
   const availableModelProviders = availableProviders.filter(IsModelProvider)

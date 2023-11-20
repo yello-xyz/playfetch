@@ -4,30 +4,24 @@ import { User, AvailableProvider } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
-import { reloadAvailableProviders } from '@/src/server/datastore/providers'
+import { loadScopedProviders } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/settings/userSettingsView'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import { ProviderContext } from '@/src/client/context/providerContext'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
-  const availableProviders = await reloadAvailableProviders(user.id)
+  const scopedProviders = await loadScopedProviders(user.id)
 
-  return { props: { user, availableProviders } }
+  return { props: { user, scopedProviders } }
 })
 
-export default function Settings({
-  user,
-  availableProviders,
-}: {
-  user: User
-  availableProviders: AvailableProvider[]
-}) {
+export default function Settings({ user, scopedProviders }: { user: User; scopedProviders: AvailableProvider[] }) {
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user }}>
-        <ProviderContext.Provider value={{ availableProviders }}>
+        <ProviderContext.Provider value={{ scopedProviders }}>
           <ModalDialogContext.Provider value={{ setDialogPrompt }}>
             <main className='flex flex-col h-screen overflow-hidden text-sm'>
               <TopBar>

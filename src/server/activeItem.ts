@@ -11,7 +11,7 @@ import {
 } from '../common/activeItem'
 import { getPromptForUser } from './datastore/prompts'
 import { getChainForUser } from './datastore/chains'
-import { loadAvailableProviders } from './datastore/providers'
+import { loadAvailableProviders, loadScopedProviders } from './datastore/providers'
 import { ParsedUrlQuery } from 'querystring'
 import { ParseActiveItemQuery, ParseNumberQuery, ParseQuery } from '../common/clientRoute'
 import { getAnalyticsForProject } from './datastore/analytics'
@@ -39,6 +39,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     : null
 
   const availableProviders = await loadAvailableProviders([projectID!, user.id])
+  const scopedProviders = await loadScopedProviders(projectID!)
   const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)
 
   let initialAnalytics: Analytics | null =
@@ -54,6 +55,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
     initialActiveItem,
     initialAnalytics,
     availableProviders,
+    scopedProviders,
     initialPromptConfig,
   }
 }
