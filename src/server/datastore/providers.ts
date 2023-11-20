@@ -21,10 +21,10 @@ import {
 import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
 
-const buildProviderFilter = (userID: number, provider: ModelProvider | QueryProvider) =>
-  and([buildFilter('userID', userID), buildFilter('provider', provider)])
-const getProviderData = (userID: number, provider: ModelProvider | QueryProvider) =>
-  getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider))
+const buildProviderFilter = (scopeID: number, provider: ModelProvider | QueryProvider) =>
+  and([buildFilter('scopeID', scopeID), buildFilter('provider', provider)])
+const getProviderData = (scopeID: number, provider: ModelProvider | QueryProvider) =>
+  getFilteredEntity(Entity.PROVIDER, buildProviderFilter(scopeID, provider))
 
 type ProviderMetadata = {
   customModels?: CustomModel[]
@@ -41,7 +41,7 @@ export async function migrateProviders(postMerge: boolean) {
   for (const providerData of allProviders) {
     await getDatastore().save(
       toProviderData(
-        providerData.userID,
+        providerData.scopeID ?? providerData.userID,
         providerData.provider,
         providerData.apiKey,
         JSON.parse(providerData.metadata),
@@ -53,11 +53,11 @@ export async function migrateProviders(postMerge: boolean) {
 }
 
 export async function getProviderCredentials(
-  userID: number,
+  scopeID: number,
   provider: ModelProvider | QueryProvider,
   modelToCheck?: string
 ): Promise<string[]> {
-  const providerData = await getProviderData(userID, provider)
+  const providerData = await getProviderData(scopeID, provider)
   const metadata = providerData ? (JSON.parse(providerData.metadata) as ProviderMetadata) : {}
   const customModels = metadata.customModels ?? []
   const gatedModels = metadata.gatedModels ?? []
@@ -75,16 +75,16 @@ export async function getProviderCredentials(
 }
 
 export async function getProviderKey(
-  userID: number,
+  scopeID: number,
   provider: ModelProvider | QueryProvider,
   modelToCheck?: string
 ): Promise<string | null> {
-  const [apiKey] = await getProviderCredentials(userID, provider, modelToCheck)
+  const [apiKey] = await getProviderCredentials(scopeID, provider, modelToCheck)
   return apiKey ?? null
 }
 
 const toProviderData = (
-  userID: number,
+  scopeID: number,
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   metadata: ProviderMetadata,
@@ -93,7 +93,7 @@ const toProviderData = (
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
-    userID,
+    scopeID,
     provider,
     apiKey,
     metadata: JSON.stringify(metadata),
@@ -114,16 +114,16 @@ const toAvailableProvider = (data: any): AvailableProvider => {
 }
 
 export async function incrementProviderCostForUser(
-  userID: number,
+  scopeID: number,
   provider: ModelProvider | QueryProvider,
   cost: number
 ) {
   await runTransactionWithExponentialBackoff(async transaction => {
-    const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(userID, provider), transaction)
+    const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter(scopeID, provider), transaction)
     if (providerData) {
       transaction.save(
         toProviderData(
-          userID,
+          scopeID,
           provider,
           providerData.apiKey,
           JSON.parse(providerData.metadata),
@@ -136,25 +136,25 @@ export async function incrementProviderCostForUser(
 }
 
 export async function saveProviderKey(
-  userID: number,
+  scopeID: number,
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   environment: string | undefined
 ) {
-  const providerData = await getProviderData(userID, provider)
+  const providerData = await getProviderData(scopeID, provider)
   const providerID = providerData ? getID(providerData) : undefined
-  await getDatastore().save(toProviderData(userID, provider, apiKey, { environment }, 0, providerID))
+  await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, 0, providerID))
 }
 
 export async function saveProviderModel(
-  userID: number,
+  scopeID: number,
   provider: ModelProvider,
   modelID: string,
   name: string,
   description: string,
   enabled: boolean
 ) {
-  const providerData = await getProviderData(userID, provider)
+  const providerData = await getProviderData(scopeID, provider)
   if (providerData) {
     const metadata = JSON.parse(providerData.metadata) as ProviderMetadata
     metadata.customModels = [
@@ -162,16 +162,16 @@ export async function saveProviderModel(
       { id: modelID, name, description, enabled },
     ]
     await getDatastore().save(
-      toProviderData(userID, provider, providerData.apiKey, metadata, providerData.cost, getID(providerData))
+      toProviderData(scopeID, provider, providerData.apiKey, metadata, providerData.cost, getID(providerData))
     )
   }
 }
 
 export async function getAvailableProvidersForUser(
-  userID: number,
+  scopeID: number,
   reloadCustomModels = false
 ): Promise<AvailableProvider[]> {
-  const providerData = await getEntities(Entity.PROVIDER, 'userID', userID)
+  const providerData = await getEntities(Entity.PROVIDER, 'scopeID', scopeID)
 
   const availableProviders = [] as AvailableProvider[]
   const providerDataToSave = [] as any[]
@@ -208,7 +208,7 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
   if (filteredCustomModels.length < previousCustomModels.length || differentGatedModels) {
     providerDataToSave.push(
       toProviderData(
-        availableProviderData.userID,
+        availableProviderData.scopeID,
         availableProviderData.provider,
         availableProviderData.apiKey,
         { ...previousMetadata, customModels: filteredCustomModels, gatedModels: currentGatedModels },
