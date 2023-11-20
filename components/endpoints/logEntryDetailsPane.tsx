@@ -83,11 +83,7 @@ export default function LogEntryDetailsPane({
           .slice()
           .reverse()
           .map((logEntry, index) => (
-            <CollapsibleContent
-              key={index}
-              timestamp={logEntry.timestamp}
-              collapsible={multipleLogEntries}
-              initiallyExpanded={index === 0}>
+            <CollapsibleContent key={index} timestamp={logEntry.timestamp} collapsible={multipleLogEntries}>
               {Object.keys(logEntry.inputs).length > 0 && (
                 <>
                   <Label className='-mb-4'>Request</Label>
@@ -115,15 +111,13 @@ export default function LogEntryDetailsPane({
 function CollapsibleContent({
   timestamp,
   collapsible = true,
-  initiallyExpanded = false,
   children,
 }: {
   timestamp: number
   collapsible?: boolean
-  initiallyExpanded?: boolean
   children: ReactNode
 }) {
-  const [isExpanded, setExpanded] = useState(initiallyExpanded)
+  const [isExpanded, setExpanded] = useState(true)
   const formattedDate = useFormattedDate(timestamp, timestamp => FormatDate(timestamp, true, true))
 
   return collapsible ? (
