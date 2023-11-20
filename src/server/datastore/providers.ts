@@ -21,20 +21,10 @@ import {
 import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
-
-const sortAndFilterProviderData =
-  (scopeIDs: number[]) =>
-  (providerData: any[]): any[] =>
-    providerData
-      .sort((a, b) => scopeIDs.indexOf(a.scopeID) - scopeIDs.indexOf(b.scopeID))
-      .reduce(
-        (filtered, providerData) =>
-          filtered.some((p: any) => p.provider === providerData.provider) ? filtered : [...filtered, providerData],
-        []
-      )
+import { SortAndFilterProviderData } from '../providers/cascade'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
-  getFilteredEntities(Entity.PROVIDER, filter).then(sortAndFilterProviderData(scopeIDs))
+  getFilteredEntities(Entity.PROVIDER, filter).then(SortAndFilterProviderData(scopeIDs))
 
 const buildScopeFilter = (scopeIDs: number[]) => new PropertyFilter('scopeID', 'IN', scopeIDs)
 const getMultipleProviderData = (scopeIDs: number[]) => getFilteredProviderData(buildScopeFilter(scopeIDs), scopeIDs)
