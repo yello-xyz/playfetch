@@ -29,7 +29,7 @@ export default async function loadActiveItem(user: User, query: ParsedUrlQuery) 
           ? await getChainForUser(user.id, chainID).then(BuildActiveChain(initialActiveProject))
           : null
 
-  const availableProviders = await loadAvailableProviders([user.id])
+  const availableProviders = await loadAvailableProviders([projectID!, user.id])
   const initialPromptConfig = await getDefaultPromptConfigForUser(user.id)
 
   let initialAnalytics: Analytics | null =

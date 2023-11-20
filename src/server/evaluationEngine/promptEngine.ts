@@ -43,6 +43,7 @@ export const TryParseOutput = (output: string | undefined) => {
 
 export default async function runPromptWithConfig(
   userID: number,
+  projectID: number,
   prompts: Prompts,
   config: PromptConfig,
   context: PromptContext,
@@ -50,11 +51,12 @@ export default async function runPromptWithConfig(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
+  const scopeIDs = [projectID, userID]
   const provider = ProviderForModel(config.model)
   const modelToCheck = (PublicLanguageModels as string[]).includes(config.model) ? undefined : config.model
-  const { providerID, apiKey } = await CredentialsForProvider(userID, provider, modelToCheck)
+  const { providerID, apiKey } = await CredentialsForProvider(scopeIDs, provider, modelToCheck)
   if (provider !== DefaultProvider && !apiKey) {
-    const { apiKey: defaultModelsAPIKey } = modelToCheck ? await CredentialsForProvider(userID, provider) : { apiKey }
+    const { apiKey: defaultModelsAPIKey } = modelToCheck ? await CredentialsForProvider(scopeIDs, provider) : { apiKey }
     return {
       error: defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key',
       result: undefined,

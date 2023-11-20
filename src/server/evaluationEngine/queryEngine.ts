@@ -11,6 +11,7 @@ type QueryResponse = (
 
 export const runQuery = async (
   userID: number,
+  projectID: number,
   provider: QueryProvider,
   model: EmbeddingModel,
   indexName: string,
@@ -18,13 +19,14 @@ export const runQuery = async (
   topK: number
 ): Promise<QueryResponse> => {
   try {
-    const { apiKey, environment } = await getProviderCredentials([userID], provider)
+    const scopeIDs = [projectID, userID]
+    const { apiKey, environment } = await getProviderCredentials(scopeIDs, provider)
     if (!apiKey || !environment) {
       throw new Error('Missing vector store credentials')
     }
 
     const embeddingProvider = ProviderForModel(model)
-    const { providerID, apiKey: embeddingAPIKey } = await CredentialsForProvider(userID, embeddingProvider)
+    const { providerID, apiKey: embeddingAPIKey } = await CredentialsForProvider(scopeIDs, embeddingProvider)
     if (!embeddingAPIKey) {
       throw new Error('Missing API key')
     }
