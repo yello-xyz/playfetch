@@ -15,7 +15,7 @@ import {
 import { getUniqueNameWithFormat, getVerifiedProjectScopedData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
-import { getTrustedUserPromptOrChainData, getVerifiedUserPromptOrChainData } from './chains'
+import { getTrustedUserPromptOrChainData } from './chains'
 import { ensureProjectAccess } from './projects'
 import { getTrustedVersion } from './versions'
 
@@ -53,7 +53,7 @@ async function ensureValidEndpointData(projectID: number, parentID: number, vers
       `Item with ID ${parentID} does not belong to project with ID ${projectID}`
     )
   }
-  const versionData = await getTrustedVersion(versionID)
+  const versionData = await getTrustedVersion(versionID, true)
   if (versionData.parentID !== parentID) {
     throw new Error(
       `Version with ID ${versionID} does not belong to item with ID ${parentID}`
