@@ -28,7 +28,6 @@ export default function PromptVersionCellBody({
 
   return (
     <>
-      <div className='border-b border-gray-200 border-b-1' />
       <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
       <CollapsibleSection title='Prompt' expanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
