@@ -179,7 +179,10 @@ export async function saveProviderModel(
   }
 }
 
-export async function getAvailableProvidersForScopes(
+export const reloadAvailableProviders = (scopeID: number) => getAvailableProvidersForScopes([scopeID], true)
+export const loadAvailableProviders = (scopeIDs: number[]) => getAvailableProvidersForScopes(scopeIDs, false)
+
+async function getAvailableProvidersForScopes(
   scopeIDs: number[],
   reloadCustomModels = false
 ): Promise<AvailableProvider[]> {

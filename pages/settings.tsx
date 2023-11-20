@@ -4,13 +4,13 @@ import { User, AvailableProvider } from '@/types'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
-import { getAvailableProvidersForScopes } from '@/src/server/datastore/providers'
+import { reloadAvailableProviders } from '@/src/server/datastore/providers'
 import UserSettingsView from '@/components/settings/userSettingsView'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import { ProviderContext } from '@/src/client/context/providerContext'
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
-  const availableProviders = await getAvailableProvidersForScopes([user.id], true)
+  const availableProviders = await reloadAvailableProviders(user.id)
 
   return { props: { user, availableProviders } }
 })

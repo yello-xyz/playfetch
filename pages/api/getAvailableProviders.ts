@@ -1,10 +1,10 @@
-import { getAvailableProvidersForScopes } from '@/src/server/datastore/providers'
+import { reloadAvailableProviders } from '@/src/server/datastore/providers'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { AvailableProvider, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getAvailableProviders(_: NextApiRequest, res: NextApiResponse<AvailableProvider[]>, user: User) {
-  const availableProviders = await getAvailableProvidersForScopes([user.id], true)
+  const availableProviders = await reloadAvailableProviders(user.id)
   res.json(availableProviders)
 }
 
