@@ -18,7 +18,7 @@ export const runQuery = async (
   topK: number
 ): Promise<QueryResponse> => {
   try {
-    const [queryAPIKey, queryEnvironment] = await getProviderCredentials(userID, provider)
+    const [queryAPIKey, queryEnvironment] = await getProviderCredentials([userID], provider)
     if (!queryAPIKey || !queryEnvironment) {
       throw new Error('Missing vector store credentials')
     }

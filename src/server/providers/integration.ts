@@ -29,7 +29,7 @@ export const APIKeyForProvider = (userID: number, provider: ModelProvider, model
     case 'openai':
     case 'anthropic':
     case 'cohere':
-      return getProviderKey(userID, provider, modelToCheck)
+      return getProviderKey([userID], provider, modelToCheck)
   }
 }
 

@@ -4,7 +4,6 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
-  getEntities,
   getFilteredEntities,
   getFilteredEntity,
   getID,
@@ -21,11 +20,29 @@ import {
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
+import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 
-const buildProviderFilter = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
-  and([new PropertyFilter('scopeID', 'IN', scopeIDs), buildFilter('provider', provider)])
-const getProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
-  getFilteredEntity(Entity.PROVIDER, buildProviderFilter(scopeIDs, provider))
+const sortAndFilterProviderData =
+  (scopeIDs: number[]) =>
+  (providerData: any[]): any[] =>
+    providerData
+      .sort((a, b) => scopeIDs.indexOf(a.scopeID) - scopeIDs.indexOf(b.scopeID))
+      .reduce(
+        (filtered, providerData) =>
+          filtered.some((p: any) => p.provider === providerData.provider) ? filtered : [...filtered, providerData],
+        []
+      )
+
+const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
+  getFilteredEntities(Entity.PROVIDER, filter).then(sortAndFilterProviderData(scopeIDs))
+
+const buildScopeFilter = (scopeIDs: number[]) => new PropertyFilter('scopeID', 'IN', scopeIDs)
+const getMultipleProviderData = (scopeIDs: number[]) => getFilteredProviderData(buildScopeFilter(scopeIDs), scopeIDs)
+
+const buildSingleProviderFilter = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
+  and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)])
+const getSingleProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
+  getFilteredProviderData(buildSingleProviderFilter(scopeIDs, provider), scopeIDs).then(([entity]) => entity)
 
 type ProviderMetadata = {
   customModels?: CustomModel[]
@@ -58,7 +75,7 @@ export async function getProviderCredentials(
   provider: ModelProvider | QueryProvider,
   modelToCheck?: string
 ): Promise<string[]> {
-  const providerData = await getProviderData(scopeIDs, provider)
+  const providerData = await getSingleProviderData(scopeIDs, provider)
   const metadata = providerData ? (JSON.parse(providerData.metadata) as ProviderMetadata) : {}
   const customModels = metadata.customModels ?? []
   const gatedModels = metadata.gatedModels ?? []
@@ -120,7 +137,11 @@ export async function incrementProviderCostForScope(
   cost: number
 ) {
   await runTransactionWithExponentialBackoff(async transaction => {
-    const providerData = await getFilteredEntity(Entity.PROVIDER, buildProviderFilter([scopeID], provider), transaction)
+    const providerData = await getFilteredEntity(
+      Entity.PROVIDER,
+      buildSingleProviderFilter([scopeID], provider),
+      transaction
+    )
     if (providerData) {
       transaction.save(
         toProviderData(
@@ -142,7 +163,7 @@ export async function saveProviderKey(
   apiKey: string | null,
   environment: string | undefined
 ) {
-  const providerData = await getProviderData([scopeID], provider)
+  const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, 0, providerID))
 }
@@ -155,7 +176,7 @@ export async function saveProviderModel(
   description: string,
   enabled: boolean
 ) {
-  const providerData = await getProviderData([scopeID], provider)
+  const providerData = await getSingleProviderData([scopeID], provider)
   if (providerData) {
     const metadata = JSON.parse(providerData.metadata) as ProviderMetadata
     metadata.customModels = [
@@ -172,7 +193,7 @@ export async function getAvailableProvidersForScopes(
   scopeIDs: number[],
   reloadCustomModels = false
 ): Promise<AvailableProvider[]> {
-  const providerData = await getFilteredEntities(Entity.PROVIDER, new PropertyFilter('scopeID', 'IN', scopeIDs))
+  const providerData = await getMultipleProviderData(scopeIDs)
 
   const availableProviders = [] as AvailableProvider[]
   const providerDataToSave = [] as any[]
