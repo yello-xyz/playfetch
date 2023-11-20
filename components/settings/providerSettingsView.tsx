@@ -7,7 +7,7 @@ import ProviderSettingsPane from './providerSettingsPane'
 import CustomModelSettingsPane from './customModelSettingsPane'
 import { IsModelProvider } from '@/types'
 
-export default function UserSettingsView() {
+export default function ProviderSettingsView() {
   const initialProviders = useScopedProviders()
 
   const [availableProviders, setAvailableProviders] = useState(initialProviders)
