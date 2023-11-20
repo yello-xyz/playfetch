@@ -15,8 +15,9 @@ import {
 import { getUniqueNameWithFormat, getVerifiedProjectScopedData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
-import { getVerifiedUserPromptOrChainData } from './chains'
+import { getTrustedUserPromptOrChainData, getVerifiedUserPromptOrChainData } from './chains'
 import { ensureProjectAccess } from './projects'
+import { getTrustedVersion } from './versions'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -45,18 +46,17 @@ const getVerifiedUserEndpointData = async (userID: number, endpointID: number) =
 
 const ensureEndpointAccess = (userID: number, endpointID: number) => getVerifiedUserEndpointData(userID, endpointID)
 
-async function ensureValidEndpointData(
-  userID: number,
-  endpointData: {
-    projectID: number
-    parentID: number
-    versionID: number
-  }
-) {
-  const data = await getVerifiedUserPromptOrChainData(userID, endpointData.parentID)
-  if (data.projectID !== endpointData.projectID) {
+async function ensureValidEndpointData(projectID: number, parentID: number, versionID: number) {
+  const parentData = await getTrustedUserPromptOrChainData(parentID)
+  if (parentData.projectID !== projectID) {
     throw new Error(
-      `Item with ID ${endpointData.parentID} does not belong to project with ID ${endpointData.projectID}`
+      `Item with ID ${parentID} does not belong to project with ID ${projectID}`
+    )
+  }
+  const versionData = await getTrustedVersion(versionID)
+  if (versionData.parentID !== parentID) {
+    throw new Error(
+      `Version with ID ${versionID} does not belong to item with ID ${parentID}`
     )
   }
 }
@@ -103,7 +103,7 @@ export async function saveEndpoint(
   useStreaming: boolean
 ) {
   await ensureProjectAccess(userID, projectID)
-  await ensureValidEndpointData(userID, { projectID, parentID, versionID })
+  await ensureValidEndpointData(projectID, parentID, versionID)
   const urlPath = await getValidURLPath(projectID, parentID, name, flavor)
   const endpointData = toEndpointData(
     isEnabled,
@@ -148,7 +148,7 @@ export async function updateEndpointForUser(
   useStreaming: boolean
 ) {
   const endpointData = await getVerifiedUserEndpointData(userID, endpointID)
-  await ensureValidEndpointData(userID, { projectID: endpointData.projectID, parentID, versionID })
+  await ensureValidEndpointData(endpointData.projectID, parentID, versionID)
   if (urlPath !== endpointData.urlPath) {
     urlPath = await getValidURLPath(endpointData.projectID, parentID, urlPath, flavor, endpointID)
   }

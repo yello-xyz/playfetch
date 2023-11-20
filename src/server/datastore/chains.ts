@@ -13,7 +13,7 @@ import {
 } from './datastore'
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
-import { getUniqueName, getVerifiedProjectScopedData } from './prompts'
+import { getTrustedProjectScopedData, getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 
@@ -133,6 +133,9 @@ export const getVerifiedUserChainData = async (userID: number, chainID: number) 
 
 export const getVerifiedUserPromptOrChainData = async (userID: number, parentID: number) =>
   getVerifiedProjectScopedData(userID, [Entity.PROMPT, Entity.CHAIN], parentID)
+
+export const getTrustedUserPromptOrChainData = async (parentID: number) =>
+  getTrustedProjectScopedData([Entity.PROMPT, Entity.CHAIN], parentID)
 
 export const ensureChainAccess = (userID: number, chainID: number) => getVerifiedUserChainData(userID, chainID)
 
