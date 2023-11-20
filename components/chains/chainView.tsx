@@ -153,8 +153,6 @@ export default function ChainView({
     }
   }
 
-  const versionPromptItemsCache = useActiveItemCache(project, [])
-
   const minWidth = 300
   return (
     <Allotment>
@@ -171,7 +169,7 @@ export default function ChainView({
                   <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
                 </SingleTabHeader>
               )}
-              chainItemCache={versionPromptItemsCache}
+              chainItemCache={promptCache}
             />
           </div>
         </Allotment.Pane>
