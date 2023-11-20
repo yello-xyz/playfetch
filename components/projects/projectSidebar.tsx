@@ -1,4 +1,4 @@
-import { ActiveProject, Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -9,14 +9,10 @@ import dotsIcon from '@/public/dots.svg'
 import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
 import { Suspense, useState } from 'react'
 import IconButton from '../iconButton'
+import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 
 import dynamic from 'next/dynamic'
 const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
-
-const Compare = 'compare'
-const Endpoints = 'endpoints'
-const Settings = 'settings'
-type ActiveItem = Prompt | Chain | typeof Compare | typeof Endpoints | typeof Settings
 
 export default function ProjectSidebar({
   activeProject,
@@ -59,24 +55,31 @@ export default function ProjectSidebar({
 
   const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
   const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
-  const isPromptOrChain = (item: ActiveItem | undefined): item is Prompt | Chain | undefined =>
-    item !== Compare && item !== Endpoints && item !== Settings
-  const isActiveItem = (item: Prompt | Chain) => isPromptOrChain(activeItem) && activeItem?.id === item.id
+  const isActiveItem = (item: Prompt | Chain) =>
+    activeItem !== CompareItem &&
+    activeItem !== EndpointsItem &&
+    activeItem !== SettingsItem &&
+    activeItem?.id === item.id
 
   return (
     <Sidebar>
       <SidebarSection>
-        <SidebarButton title='Compare' icon={compareIcon} active={activeItem === Compare} onClick={onSelectCompare} />
+        <SidebarButton
+          title='Compare'
+          icon={compareIcon}
+          active={activeItem === CompareItem}
+          onClick={onSelectCompare}
+        />
         <SidebarButton
           title='Endpoints'
           icon={endpointIcon}
-          active={activeItem === Endpoints}
+          active={activeItem === EndpointsItem}
           onClick={onSelectEndpoints}
         />
         <SidebarButton
           title='Settings'
           icon={settingsIcon}
-          active={activeItem === Settings}
+          active={activeItem === SettingsItem}
           onClick={onSelectSettings}
         />
       </SidebarSection>
