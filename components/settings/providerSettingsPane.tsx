@@ -11,6 +11,7 @@ import TextInput from '../textInput'
 import SettingsPane from './settingsPane'
 
 export default function ProviderSettingsPane({
+  scopeID,
   title,
   description,
   providers,
@@ -18,6 +19,7 @@ export default function ProviderSettingsPane({
   includeEnvironment,
   onRefresh,
 }: {
+  scopeID: number
   title: string
   description: string
   providers: ModelProvider[] | QueryProvider[]
@@ -30,6 +32,7 @@ export default function ProviderSettingsPane({
       {providers.map((provider, index) => (
         <ProviderRow
           key={index}
+          scopeID={scopeID}
           provider={provider}
           availableProvider={availableProviders.find(p => p.provider === provider)}
           includeEnvironment={includeEnvironment}
@@ -41,11 +44,13 @@ export default function ProviderSettingsPane({
 }
 
 function ProviderRow({
+  scopeID,
   provider,
   availableProvider,
   includeEnvironment,
   onRefresh,
 }: {
+  scopeID: number
   provider: ModelProvider | QueryProvider
   availableProvider?: AvailableProvider
   includeEnvironment?: boolean
@@ -68,7 +73,7 @@ function ProviderRow({
 
   const updateKey = async (apiKey: string | null) => {
     setProcessing(true)
-    await api.updateProviderKey(provider, apiKey, environment).then(onRefresh)
+    await api.updateProviderKey(scopeID, provider, apiKey, environment).then(onRefresh)
     setProcessing(false)
     toggleUpdate(false)
   }

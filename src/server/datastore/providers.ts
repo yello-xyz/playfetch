@@ -22,6 +22,7 @@ import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
+import { ensureProjectAccess } from './projects'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
   getFilteredEntities(Entity.PROVIDER, filter).then(SortAndFilterProviderData(scopeIDs))
@@ -128,18 +129,24 @@ export async function incrementProviderCost(providerID: number, cost: number) {
   })
 }
 
+const ensureScopeAccess = async (userID: number, scopeID: number) =>
+  scopeID !== userID ? Promise.resolve() : ensureProjectAccess(userID, scopeID)
+
 export async function saveProviderKey(
+  userID: number,
   scopeID: number,
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   environment: string | undefined
 ) {
+  await ensureScopeAccess(userID, scopeID)
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, 0, providerID))
 }
 
 export async function saveProviderModel(
+  userID: number,
   scopeID: number,
   provider: ModelProvider,
   modelID: string,
@@ -147,6 +154,7 @@ export async function saveProviderModel(
   description: string,
   enabled: boolean
 ) {
+  await ensureScopeAccess(userID, scopeID)
   const providerData = await getSingleProviderData([scopeID], provider)
   if (providerData) {
     const metadata = JSON.parse(providerData.metadata) as ProviderMetadata
@@ -163,10 +171,7 @@ export async function saveProviderModel(
 export const loadScopedProviders = (scopeID: number) => getProvidersForScopes([scopeID], true)
 export const loadAvailableProviders = (scopeIDs: number[]) => getProvidersForScopes(scopeIDs, false)
 
-async function getProvidersForScopes(
-  scopeIDs: number[],
-  reloadCustomModels = false
-): Promise<AvailableProvider[]> {
+async function getProvidersForScopes(scopeIDs: number[], reloadCustomModels = false): Promise<AvailableProvider[]> {
   const providerData = await getMultipleProviderData(scopeIDs)
 
   const availableProviders = [] as AvailableProvider[]

@@ -11,9 +11,11 @@ import useInitialState from '@/src/client/hooks/useInitialState'
 import { useState } from 'react'
 
 export default function CustomModelSettingsPane({
+  scopeID,
   availableProviders,
   onRefresh,
 }: {
+  scopeID: number
   availableProviders: AvailableModelProvider[]
   onRefresh: () => void
 }) {
@@ -33,6 +35,7 @@ export default function CustomModelSettingsPane({
         .map((model, index) => (
           <ModelRow
             key={index}
+            scopeID={scopeID}
             provider={providerMap[model.id]}
             model={model}
             otherNames={otherNames(model)}
@@ -44,11 +47,13 @@ export default function CustomModelSettingsPane({
 }
 
 function ModelRow({
+  scopeID,
   provider,
   model,
   otherNames,
   onRefresh,
 }: {
+  scopeID: number
   provider: ModelProvider
   model: CustomModel
   otherNames: string[]
@@ -65,7 +70,7 @@ function ModelRow({
 
   const updateModel = async (enabled: boolean) => {
     setProcessing(true)
-    await api.updateProviderModel(provider, model.id, name, description, enabled).then(onRefresh)
+    await api.updateProviderModel(scopeID, provider, model.id, name, description, enabled).then(onRefresh)
     setProcessing(false)
   }
 

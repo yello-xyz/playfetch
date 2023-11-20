@@ -255,17 +255,23 @@ const api = {
   getScopedProviders: function (scopeID: number): Promise<AvailableProvider[]> {
     return post(this.getScopedProviders, { scopeID })
   },
-  updateProviderKey: function (provider: ModelProvider | QueryProvider, apiKey: string | null, environment?: string) {
-    return post(this.updateProviderKey, { provider, apiKey, environment })
+  updateProviderKey: function (
+    scopeID: number,
+    provider: ModelProvider | QueryProvider,
+    apiKey: string | null,
+    environment?: string
+  ) {
+    return post(this.updateProviderKey, { scopeID, provider, apiKey, environment })
   },
   updateProviderModel: function (
+    scopeID: number,
     provider: ModelProvider,
     modelID: string,
     name: string,
     description: string,
     enabled: boolean
   ) {
-    return post(this.updateProviderModel, { provider, modelID, name, description, enabled })
+    return post(this.updateProviderModel, { scopeID, provider, modelID, name, description, enabled })
   },
   logOut: function () {
     return post(this.logOut)
