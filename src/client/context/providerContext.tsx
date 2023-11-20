@@ -1,10 +1,16 @@
-import { AvailableProvider, EmbeddingModel, IsModelProvider, LanguageModel, ModelProvider, QueryProvider } from '@/types'
+import {
+  AvailableProvider,
+  EmbeddingModel,
+  IsModelProvider,
+  LanguageModel,
+  ModelProvider,
+  QueryProvider,
+} from '@/types'
 import { IsModelAvailable, IsModelDisabled, IsProviderAvailable } from '@/src/common/providerMetadata'
 import { createContext, useContext } from 'react'
 
 type ProviderContextType = {
   availableProviders?: AvailableProvider[]
-  scopedProviders?: AvailableProvider[]
 }
 
 export const ProviderContext = createContext<ProviderContextType>({})
@@ -13,12 +19,6 @@ function useAvailableProviders() {
   const context = useContext(ProviderContext)
   const availableProviders = context.availableProviders ?? []
   return availableProviders ?? []
-}
-
-export function useScopedProviders() {
-  const context = useContext(ProviderContext)
-  const scopedProviders = context.scopedProviders ?? []
-  return scopedProviders ?? []
 }
 
 function useProviders() {

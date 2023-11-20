@@ -252,8 +252,11 @@ const api = {
   updateDefaultConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
     return post(this.updateDefaultConfig, { defaultPromptConfig })
   },
-  getScopedProviders: function (scopeID: number): Promise<AvailableProvider[]> {
-    return post(this.getScopedProviders, { scopeID })
+  getAvailableProviders: function (projectID: number): Promise<AvailableProvider[]> {
+    return post(this.getAvailableProviders, { projectID })
+  },
+  getScopedProviders: function (projectID?: number): Promise<AvailableProvider[]> {
+    return post(this.getScopedProviders, { projectID })
   },
   updateProviderKey: function (
     scopeID: number,

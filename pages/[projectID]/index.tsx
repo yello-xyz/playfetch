@@ -51,8 +51,8 @@ export default function Home({
   initialActiveProject,
   initialActiveItem,
   initialAnalytics,
-  availableProviders,
-  scopedProviders,
+  initialAvailableProviders,
+  initialScopedProviders,
   initialPromptConfig,
 }: {
   user: User
@@ -60,8 +60,8 @@ export default function Home({
   initialActiveProject: ActiveProject
   initialActiveItem: ActiveItem | null
   initialAnalytics: Analytics | null
-  availableProviders: AvailableProvider[]
-  scopedProviders: AvailableProvider[]
+  initialAvailableProviders: AvailableProvider[]
+  initialScopedProviders: AvailableProvider[]
   initialPromptConfig: PromptConfig
 }) {
   useDocumentationCookie('set')
@@ -138,6 +138,13 @@ export default function Home({
 
   const [analytics, setAnalytics] = useState(initialAnalytics ?? undefined)
   const refreshAnalytics = (dayRange?: number) => api.getAnalytics(activeProject.id, dayRange).then(setAnalytics)
+
+  const [availableProviders, setAvailableProviders] = useState(initialAvailableProviders)
+  const [scopedProviders, setScopedProviders] = useState(initialScopedProviders)
+  const refreshProviders = () => {
+    api.getScopedProviders(activeProject.id).then(setScopedProviders)
+    api.getAvailableProviders(activeProject.id).then(setAvailableProviders)
+  }
 
   const selectCompare = () => {
     savePrompt(refreshProject)
@@ -224,7 +231,7 @@ export default function Home({
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user }}>
-        <ProviderContext.Provider value={{ availableProviders, scopedProviders }}>
+        <ProviderContext.Provider value={{ availableProviders }}>
           <PromptConfigContext.Provider value={{ defaultPromptConfig, setDefaultPromptConfig }}>
             <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
               <ModalDialogContext.Provider value={{ setDialogPrompt }}>
@@ -275,6 +282,8 @@ export default function Home({
                             activeRunID={activeRunID}
                             analytics={analytics}
                             refreshAnalytics={refreshAnalytics}
+                            scopedProviders={scopedProviders}
+                            refreshProviders={refreshProviders}
                             showComments={showComments}
                             setShowComments={setShowComments}
                             selectComment={selectComment}

@@ -6,6 +6,7 @@ import {
   ActivePrompt,
   ActiveChain,
   ChainItemWithInputs,
+  AvailableProvider,
 } from '@/types'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
@@ -34,6 +35,8 @@ export default function MainProjectPane({
   activeRunID,
   analytics,
   refreshAnalytics,
+  scopedProviders,
+  refreshProviders,
   showComments,
   setShowComments,
   selectComment,
@@ -57,6 +60,8 @@ export default function MainProjectPane({
   activeRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number) => Promise<void>
+  scopedProviders: AvailableProvider[]
+  refreshProviders: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
   selectComment: (parentID: number, versionID: number, runID?: number) => void
@@ -94,7 +99,9 @@ export default function MainProjectPane({
             onRefresh={refreshProject}
           />
         )}
-        {activeItem === SettingsItem && <ProviderSettingsView scopeID={activeProject.id} />}
+        {activeItem === SettingsItem && (
+          <ProviderSettingsView scopeID={activeProject.id} providers={scopedProviders} refresh={refreshProviders} />
+        )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>

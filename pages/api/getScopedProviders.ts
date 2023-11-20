@@ -4,8 +4,8 @@ import { AvailableProvider, User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getScopedProviders(req: NextApiRequest, res: NextApiResponse<AvailableProvider[]>, user: User) {
-  const availableProviders = await loadScopedProviders(req.body.scopeID)
-  res.json(availableProviders)
+  const scopedProviders = await loadScopedProviders(req.body.projectID ?? user.id)
+  res.json(scopedProviders)
 }
 
 export default withLoggedInUserRoute(getScopedProviders)

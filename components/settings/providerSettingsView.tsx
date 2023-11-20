@@ -1,20 +1,20 @@
-import { useScopedProviders } from '@/src/client/context/providerContext'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
-import { useState } from 'react'
-import api from '@/src/client/api'
 import ProviderSettingsPane from './providerSettingsPane'
 import CustomModelSettingsPane from './customModelSettingsPane'
-import { IsModelProvider } from '@/types'
+import { AvailableProvider, IsModelProvider } from '@/types'
 
-export default function ProviderSettingsView({ scopeID }: { scopeID: number }) {
-  const initialProviders = useScopedProviders()
-
-  const [availableProviders, setAvailableProviders] = useState(initialProviders)
-  const availableModelProviders = availableProviders.filter(IsModelProvider)
-  const availableQueryProviders = availableProviders.filter(provider => !IsModelProvider(provider))
-
-  const refresh = () => api.getScopedProviders(scopeID).then(setAvailableProviders)
+export default function ProviderSettingsView({
+  scopeID,
+  providers,
+  refresh,
+}: {
+  scopeID: number
+  providers: AvailableProvider[]
+  refresh: () => void
+}) {
+  const availableModelProviders = providers.filter(IsModelProvider)
+  const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)
