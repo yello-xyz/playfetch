@@ -11,7 +11,7 @@ import {
   IconForProvider,
   ProviderForModel,
 } from '@/src/common/providerMetadata'
-import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import { useModelProviders } from '@/src/client/context/providerContext'
 
 export default function ModelSelector({
   config,

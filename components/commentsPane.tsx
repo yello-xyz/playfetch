@@ -20,7 +20,7 @@ import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
-import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import useAvailableModelProviders from '@/src/client/context/providerContext'
 
 export default function CommentsPane({
   project,
@@ -88,7 +88,7 @@ export function CommentCell({
     versions.filter(v => v.parentID === version?.parentID).findIndex(v => v.id === comment.versionID) + 1
 
   const selectComment = onSelect ? () => onSelect(comment.parentID, comment.versionID, comment.runID) : undefined
-  const availableProviders = useAvailableProviders()
+  const availableProviders = useAvailableModelProviders()
   const userName = user ? user.fullName : 'Unknown user'
 
   return (

@@ -25,7 +25,7 @@ import RunButtons from '../runs/runButtons'
 import { ReactNode, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ClientRoute from '@/src/common/clientRoute'
-import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 
 export type PromptTab = keyof Prompts

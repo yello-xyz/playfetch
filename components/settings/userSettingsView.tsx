@@ -1,4 +1,4 @@
-import { useLoggedInUser } from '@/src/client/context/userContext'
+import { useAvailableProviders } from '@/src/client/context/providerContext'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import { useState } from 'react'
@@ -8,9 +8,9 @@ import CustomModelSettingsPane from './customModelSettingsPane'
 import { IsModelProvider } from '@/types'
 
 export default function UserSettingsView() {
-  const user = useLoggedInUser()
+  const initialProviders = useAvailableProviders()
 
-  const [availableProviders, setAvailableProviders] = useState(user.availableProviders)
+  const [availableProviders, setAvailableProviders] = useState(initialProviders)
   const availableModelProviders = availableProviders.filter(IsModelProvider)
   const availableQueryProviders = availableProviders.filter(provider => !IsModelProvider(provider))
 

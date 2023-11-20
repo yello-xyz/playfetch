@@ -14,7 +14,7 @@ import {
   PromptVersion,
 } from '@/types'
 import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
-import useAvailableProviders from './useAvailableProviders'
+import useAvailableModelProviders from '../context/providerContext'
 import { FormatPromptConfig } from '@/components/prompts/promptVersionCellBody'
 import { GetChainItemTitle } from '@/components/chains/chainVersionCellBody'
 
@@ -40,7 +40,7 @@ export default function useDiffContent(
     ...getCacheItemIDs(rightItem, rightVersion),
   ])
 
-  const availableProviders = useAvailableProviders()
+  const availableProviders = useAvailableModelProviders()
 
   const getContent = (item?: ItemType, version?: VersionType) =>
     IsEndpoint(item)

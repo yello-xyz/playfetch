@@ -4,7 +4,7 @@ import VersionComparison, { ContentComparison } from '../versions/versionCompari
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
 import { FullLabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
-import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { labelForChatMode } from './chatModePopupButton'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
 
@@ -17,7 +17,7 @@ export default function PromptVersionCellBody({
   isActiveVersion: boolean
   compareVersion?: PromptVersion
 }) {
-  const availableProviders = useAvailableProviders()
+  const availableProviders = useAvailableModelProviders()
   const getConfig = (version: PromptVersion) => FormatPromptConfig(version.config, availableProviders)
   const getSystem = (version: PromptVersion) =>
     SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined

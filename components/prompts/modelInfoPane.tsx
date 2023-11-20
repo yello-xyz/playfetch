@@ -15,7 +15,7 @@ import {
 import Icon from '../icon'
 import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
-import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import { useModelProviders } from '@/src/client/context/providerContext'
 import { useState } from 'react'
 import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'

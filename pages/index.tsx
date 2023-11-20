@@ -30,6 +30,7 @@ import GlobalPopup from '@/components/globalPopup'
 import { useDocumentationCookie } from '@/components/cookieBanner'
 
 import dynamic from 'next/dynamic'
+import { ProviderContext } from '@/src/client/context/providerContext'
 const WorkspaceSidebar = dynamic(() => import('@/components/workspaces/workspaceSidebar'))
 const WorkspaceInvite = dynamic(() => import('@/components/workspaces/workspaceInvite'))
 const WorkspaceGridView = dynamic(() => import('@/components/workspaces/workspaceGridView'))
@@ -172,53 +173,55 @@ export default function Home({
 
   return (
     <>
-      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
-        <ModalDialogContext.Provider value={{ setDialogPrompt }}>
-          <GlobalPopupContext.Provider value={globalPopupProviderProps}>
-            <main className='flex items-stretch h-screen text-sm'>
-              <Suspense>
-                <WorkspaceSidebar
-                  workspaces={workspaces}
-                  pendingWorkspaces={pendingWorkspaces}
-                  activeWorkspaceID={activeWorkspace.id}
-                  sharedProjects={sharedProjects}
-                  onSelectWorkspace={selectWorkspace}
-                  onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
-                  onRefreshWorkspaces={refreshWorkspaces}
-                />
-              </Suspense>
-              <div className='flex flex-col flex-1'>
-                <div className='flex-1 overflow-hidden'>
-                  {IsPendingWorkspace(activeWorkspace) ? (
-                    <Suspense>
-                      <WorkspaceInvite
-                        workspace={activeWorkspace}
-                        onRespond={accept => respondToWorkspaceInvite(activeWorkspace.id, accept)}
-                      />
-                    </Suspense>
-                  ) : (
-                    <Suspense>
-                      <WorkspaceGridView
-                        workspaces={workspaces}
-                        activeWorkspace={activeWorkspace}
-                        isUserWorkspace={activeWorkspace.id === user.id}
-                        isSharedProjects={IsSharedProjects(activeWorkspace)}
-                        onRespondToProjectInvite={respondToProjectInvite}
-                        onAddProject={addProject}
-                        onSelectProject={navigateToProject}
-                        onSelectUserWorkspace={() => selectWorkspace(user.id)}
-                        onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
-                        onRefreshWorkspaces={refreshWorkspaces}
-                      />
-                    </Suspense>
-                  )}
+      <UserContext.Provider value={{ loggedInUser: user }}>
+        <ProviderContext.Provider value={{ availableProviders }}>
+          <ModalDialogContext.Provider value={{ setDialogPrompt }}>
+            <GlobalPopupContext.Provider value={globalPopupProviderProps}>
+              <main className='flex items-stretch h-screen text-sm'>
+                <Suspense>
+                  <WorkspaceSidebar
+                    workspaces={workspaces}
+                    pendingWorkspaces={pendingWorkspaces}
+                    activeWorkspaceID={activeWorkspace.id}
+                    sharedProjects={sharedProjects}
+                    onSelectWorkspace={selectWorkspace}
+                    onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
+                    onRefreshWorkspaces={refreshWorkspaces}
+                  />
+                </Suspense>
+                <div className='flex flex-col flex-1'>
+                  <div className='flex-1 overflow-hidden'>
+                    {IsPendingWorkspace(activeWorkspace) ? (
+                      <Suspense>
+                        <WorkspaceInvite
+                          workspace={activeWorkspace}
+                          onRespond={accept => respondToWorkspaceInvite(activeWorkspace.id, accept)}
+                        />
+                      </Suspense>
+                    ) : (
+                      <Suspense>
+                        <WorkspaceGridView
+                          workspaces={workspaces}
+                          activeWorkspace={activeWorkspace}
+                          isUserWorkspace={activeWorkspace.id === user.id}
+                          isSharedProjects={IsSharedProjects(activeWorkspace)}
+                          onRespondToProjectInvite={respondToProjectInvite}
+                          onAddProject={addProject}
+                          onSelectProject={navigateToProject}
+                          onSelectUserWorkspace={() => selectWorkspace(user.id)}
+                          onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
+                          onRefreshWorkspaces={refreshWorkspaces}
+                        />
+                      </Suspense>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </main>
-          </GlobalPopupContext.Provider>
-        </ModalDialogContext.Provider>
-        <GlobalPopup {...globalPopupProps} {...popupProps} />
-        <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+              </main>
+            </GlobalPopupContext.Provider>
+          </ModalDialogContext.Provider>
+          <GlobalPopup {...globalPopupProps} {...popupProps} />
+          <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
+        </ProviderContext.Provider>
       </UserContext.Provider>
     </>
   )
