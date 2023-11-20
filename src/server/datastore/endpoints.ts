@@ -1,5 +1,5 @@
 import { Endpoint } from '@/types'
-import { PropertyFilter, and } from '@google-cloud/datastore'
+import { and } from '@google-cloud/datastore'
 import {
   Entity,
   buildFilter,
@@ -9,14 +9,14 @@ import {
   getFilteredEntities,
   getFilteredEntity,
   getID,
-  getKeyedEntity,
   getRecentEntities,
   getTimestamp,
 } from './datastore'
-import { getUniqueNameWithFormat } from './prompts'
+import { getUniqueNameWithFormat, getVerifiedProjectScopedData } from './prompts'
 import { saveUsage } from './usage'
 import { CheckValidURLPath } from '@/src/common/formatting'
 import { getVerifiedUserPromptOrChainData } from './chains'
+import { ensureProjectAccess } from './projects'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -40,7 +40,12 @@ export async function migrateEndpoints() {
   }
 }
 
-async function ensureEndpointAccess(
+const getVerifiedUserEndpointData = async (userID: number, endpointID: number) =>
+  getVerifiedProjectScopedData(userID, [Entity.ENDPOINT], endpointID)
+
+const ensureEndpointAccess = (userID: number, endpointID: number) => getVerifiedUserEndpointData(userID, endpointID)
+
+async function ensureValidEndpointData(
   userID: number,
   endpointData: {
     projectID: number
@@ -97,7 +102,8 @@ export async function saveEndpoint(
   useCache: boolean,
   useStreaming: boolean
 ) {
-  await ensureEndpointAccess(userID, { projectID, parentID, versionID })
+  await ensureProjectAccess(userID, projectID)
+  await ensureValidEndpointData(userID, { projectID, parentID, versionID })
   const urlPath = await getValidURLPath(projectID, parentID, name, flavor)
   const endpointData = toEndpointData(
     isEnabled,
@@ -141,8 +147,8 @@ export async function updateEndpointForUser(
   useCache: boolean,
   useStreaming: boolean
 ) {
-  const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
-  await ensureEndpointAccess(userID, endpointData)
+  const endpointData = await getVerifiedUserEndpointData(userID, endpointID)
+  await ensureValidEndpointData(userID, { projectID: endpointData.projectID, parentID, versionID })
   if (urlPath !== endpointData.urlPath) {
     urlPath = await getValidURLPath(endpointData.projectID, parentID, urlPath, flavor, endpointID)
   }
@@ -164,8 +170,7 @@ export async function updateEndpointForUser(
 }
 
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
-  const endpointData = await getKeyedEntity(Entity.ENDPOINT, endpointID)
-  await ensureEndpointAccess(userID, endpointData)
+  await ensureEndpointAccess(userID, endpointID)
   const logEntryKeys = await getEntityKeys(Entity.LOG, 'endpointID', endpointID)
   const keysToDelete = [...logEntryKeys, buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
   await getDatastore().delete(keysToDelete)
