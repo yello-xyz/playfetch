@@ -5,7 +5,7 @@ import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { loadScopedProviders } from '@/src/server/datastore/providers'
-import ProviderSettingsView from '@/components/settings/providerSettingsView'
+import SettingsView from '@/components/settings/settingsView'
 import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar'
 import api from '@/src/client/api'
 
@@ -31,7 +31,7 @@ export default function Settings({ user, initialProviders }: { user: User; initi
               <span className='text-base font-medium'>Settings</span>
               <TopBarAccessoryItem />
             </TopBar>
-            <ProviderSettingsView scopeID={user.id} providers={scopedProviders} refresh={refresh} />
+            <SettingsView scopeID={user.id} providers={scopedProviders} refresh={refresh} />
           </main>
         </ModalDialogContext.Provider>
         <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />

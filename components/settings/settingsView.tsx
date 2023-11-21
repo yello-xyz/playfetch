@@ -4,7 +4,7 @@ import ProviderSettingsPane from './providerSettingsPane'
 import CustomModelSettingsPane from './customModelSettingsPane'
 import { AvailableProvider, IsModelProvider } from '@/types'
 
-export default function ProviderSettingsView({
+export default function SettingsView({
   scopeID,
   providers,
   description,

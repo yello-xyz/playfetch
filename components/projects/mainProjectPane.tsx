@@ -16,7 +16,7 @@ import ChainView from '../chains/chainView'
 import CompareView from '../compare/compareView'
 import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../commentsPane'
-import ProviderSettingsView from '../settings/providerSettingsView'
+import SettingsView from '../settings/settingsView'
 
 export default function MainProjectPane({
   activeProject,
@@ -100,7 +100,7 @@ export default function MainProjectPane({
           />
         )}
         {activeItem === SettingsItem && (
-          <ProviderSettingsView
+          <SettingsView
             scopeID={activeProject.id}
             providers={scopedProviders}
             description='Any API keys configured here will be available to anyone with project access to be used within the context of this project. You can update or delete these keys at any time, maintaining collective access and control.'
