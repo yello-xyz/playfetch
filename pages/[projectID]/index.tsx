@@ -34,9 +34,9 @@ import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
 import { PromptConfigContext } from '@/src/client/context/promptConfigContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
+import { ProviderContext } from '@/src/client/context/providerContext'
 
 import dynamic from 'next/dynamic'
-import { ProviderContext } from '@/src/client/context/providerContext'
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
 const ProjectTopBar = dynamic(() => import('@/components/projects/projectTopBar'))
