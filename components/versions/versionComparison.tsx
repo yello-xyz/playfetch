@@ -1,6 +1,8 @@
 import { PromptVersion } from '@/types'
 import simplediff from 'simplediff'
 import { InputVariableClass } from '../prompts/promptInput'
+import MemoryCache from '@/src/client/cache'
+import HashValue from '@/src/common/hashing'
 
 type Span = { state: ComparisonState; content: string; tagged: boolean }
 const trimmedWords = (span: Span) => span.content.trim().split(' ')
@@ -87,15 +89,25 @@ const tokenize = (prompt: string) => {
 
 type State = '=' | '-' | '+'
 
+const cache = new MemoryCache(200)
+
 export const TokenizeContent = (
   currentContent: string,
   compareContent: string | undefined,
   maxLength: number,
   stripSentinels: boolean
 ) => {
-  const parts: [State, string[]][] = compareContent
-    ? simplediff.diff(tokenize(compareContent), tokenize(currentContent))
-    : [['=', [currentContent]]]
+  let parts: [State, string[]][] = [['=', [currentContent]]]
+  if (compareContent) {
+    const cacheKey = HashValue(`${currentContent}<-|->${compareContent}`)
+    const cacheValue = cache.get(cacheKey)
+    if (cacheValue) {
+      parts = cacheValue as [State, string[]][]
+    } else {
+      parts = simplediff.diff(tokenize(compareContent), tokenize(currentContent))
+      cache.set(cacheKey, parts)
+    }
+  }
 
   const result = []
   let tagged = false

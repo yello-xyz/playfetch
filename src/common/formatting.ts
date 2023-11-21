@@ -12,10 +12,9 @@ export const DaysAgo = (date: Date, days: number) => {
   result.setUTCHours(0, 0, 0, 0)
   return result
 }
-    
+
 const isValidTimestamp = (timestamp: number) =>
   timestamp > 0 && timestamp < Number.MAX_VALUE && !Number.isNaN(timestamp)
-
 
 export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIncludeDate = false) => {
   if (!isValidTimestamp(timestamp)) {

@@ -11,11 +11,11 @@ export default class MemoryCache {
     if (!this.cache.has(key)) {
       return undefined
     }
-  
+
     const value = this.cache.get(key)
     this.cache.delete(key)
     this.cache.set(key, value)
-  
+
     return value
   }
 
@@ -23,11 +23,11 @@ export default class MemoryCache {
     if (this.cache.has(key)) {
       this.cache.delete(key)
     }
-  
+
     this.cache.set(key, value)
-  
+
     if (this.cache.size > this.capacity) {
-      const firstKey = this.cache.keys().next().value  
+      const firstKey = this.cache.keys().next().value
       this.cache.delete(firstKey)
     }
   }
