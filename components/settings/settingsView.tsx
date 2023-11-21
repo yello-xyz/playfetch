@@ -41,6 +41,17 @@ const descriptionForPane = (pane: ActivePane) => {
   }
 }
 
+const shouldIncludeScopeDescriptionForPane = (pane: ActivePane) => {
+  switch (pane) {
+    case ProvidersPane:
+    case CustomModelsPane:
+    case ConnectorsPane:
+      return true
+    case UsagePane:
+      return false
+  }
+}
+
 export default function SettingsView({
   scopeID,
   providers,
@@ -72,16 +83,12 @@ export default function SettingsView({
 
   return (
     <div className='flex h-full gap-10 px-10 pt-10 bg-gray-25'>
-      <InnerSidebar
-        activePane={activePane}
-        setActivePane={setActivePane}
-        haveCustomModels={haveCustomModels}
-      />
+      <InnerSidebar activePane={activePane} setActivePane={setActivePane} haveCustomModels={haveCustomModels} />
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
         <SettingsPane
           title={titleForPane(activePane)}
           description={descriptionForPane(activePane)}
-          scopeDescription={scopeDescription}>
+          scopeDescription={shouldIncludeScopeDescriptionForPane(activePane) ? scopeDescription : undefined}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}
