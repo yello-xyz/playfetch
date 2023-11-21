@@ -25,12 +25,12 @@ export const CostForModel = (model: LanguageModel, input: string, output = '') =
 export const CredentialsForProvider = async (scopeIDs: number[], provider: ModelProvider, modelToCheck?: string) => {
   switch (provider) {
     case 'google':
-      return Promise.resolve({ providerID: null, apiKey: null })
+      return Promise.resolve({ scopeID: null, providerID: null, apiKey: null })
     case 'openai':
     case 'anthropic':
     case 'cohere':
-      const { providerID, apiKey } = await getProviderCredentials(scopeIDs, provider, modelToCheck)
-      return { providerID, apiKey }
+      const { scopeID, providerID, apiKey } = await getProviderCredentials(scopeIDs, provider, modelToCheck)
+      return { scopeID, providerID, apiKey }
   }
 }
 

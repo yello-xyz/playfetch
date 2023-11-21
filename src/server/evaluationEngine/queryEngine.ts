@@ -3,6 +3,7 @@ import { getProviderCredentials, incrementProviderCost } from '../datastore/prov
 import { CredentialsForProvider, CreateEmbedding } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
+import { updateScopedModelCost } from '../datastore/cost'
 
 type QueryResponse = (
   | { result: string[]; output: string; error: undefined; failed: false }
@@ -26,14 +27,15 @@ export const runQuery = async (
     }
 
     const embeddingProvider = ProviderForModel(model)
-    const { providerID, apiKey: embeddingAPIKey } = await CredentialsForProvider(scopeIDs, embeddingProvider)
+    const { scopeID, providerID, apiKey: embeddingAPIKey } = await CredentialsForProvider(scopeIDs, embeddingProvider)
     if (!embeddingAPIKey) {
       throw new Error('Missing API key')
     }
 
     const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
-    if (providerID && cost > 0) {
+    if (providerID && scopeID && cost > 0) {
       incrementProviderCost(providerID, cost)
+      updateScopedModelCost(scopeID, model, cost)
     }
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)

@@ -67,7 +67,7 @@ export async function getCostAnalyticsForScope(userID: number, scopeID: number):
   return costs.sort((a, b) => totalCost(b) - totalCost(a))
 }
 
-export async function updateCost(
+export async function updateScopedModelCost(
   scopeID: number,
   model: string,
   incrementalCost: number,
