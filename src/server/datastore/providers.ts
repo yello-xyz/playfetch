@@ -129,7 +129,7 @@ export async function incrementProviderCost(providerID: number, cost: number) {
   })
 }
 
-const ensureScopeAccess = async (userID: number, scopeID: number) =>
+export const ensureScopeAccess = async (userID: number, scopeID: number) =>
   scopeID === userID ? Promise.resolve() : ensureProjectAccess(userID, scopeID)
 
 export async function saveProviderKey(

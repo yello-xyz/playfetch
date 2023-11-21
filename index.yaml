@@ -83,6 +83,13 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: cost
+  properties:
+  - name: scopeID
+  - name: model
+  - name: createdAt
+    direction: desc
+
 - kind: version
   properties:
   - name: userID
