@@ -24,7 +24,7 @@ export default function ProviderSettingsView({
   return (
     <div className='flex flex-col items-center h-full overflow-y-auto bg-gray-25'>
       <div className='flex flex-col items-start flex-1 gap-3 p-6 text-gray-500 max-w-[680px]'>
-      {description && <span>{description}</span>}
+        {description && <span>{description}</span>}
         <ProviderSettingsPane
           scopeID={scopeID}
           title='Manage API keys'

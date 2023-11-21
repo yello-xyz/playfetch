@@ -49,15 +49,11 @@ const ensureEndpointAccess = (userID: number, endpointID: number) => getVerified
 async function ensureValidEndpointData(projectID: number, parentID: number, versionID: number) {
   const parentData = await getTrustedUserPromptOrChainData(parentID)
   if (parentData.projectID !== projectID) {
-    throw new Error(
-      `Item with ID ${parentID} does not belong to project with ID ${projectID}`
-    )
+    throw new Error(`Item with ID ${parentID} does not belong to project with ID ${projectID}`)
   }
   const versionData = await getTrustedVersion(versionID, true)
   if (versionData.parentID !== parentID) {
-    throw new Error(
-      `Version with ID ${versionID} does not belong to item with ID ${parentID}`
-    )
+    throw new Error(`Version with ID ${versionID} does not belong to item with ID ${parentID}`)
   }
 }
 
