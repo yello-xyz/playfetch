@@ -72,7 +72,7 @@ export default function SettingsView({
       setModelCosts([])
       api.getModelCosts(scopeID).then(setModelCosts)
     }
-  }, [modelCosts])
+  }, [scopeID, modelCosts])
 
   const availableModelProviders = providers.filter(IsModelProvider)
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
