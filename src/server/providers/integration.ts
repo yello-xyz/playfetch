@@ -10,11 +10,12 @@ import {
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderCredentials } from '../datastore/providers'
+import { getProviderCredentials, incrementProviderCost } from '../datastore/providers'
 import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
+import { updateScopedModelCost } from '../datastore/cost'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) =>
   (encode(content).length * pricePerMillionTokens) / 1000000
@@ -31,6 +32,18 @@ export const CredentialsForProvider = async (scopeIDs: number[], provider: Model
     case 'cohere':
       const { scopeID, providerID, apiKey } = await getProviderCredentials(scopeIDs, provider, modelToCheck)
       return { scopeID, providerID, apiKey }
+  }
+}
+
+export const IncrementProviderCost = (
+  scopeID: number | null,
+  providerID: number | null,
+  model: string,
+  cost: number
+) => {
+  if (scopeID && providerID && cost > 0) {
+    incrementProviderCost(providerID, cost)
+    updateScopedModelCost(scopeID, model, cost)
   }
 }
 

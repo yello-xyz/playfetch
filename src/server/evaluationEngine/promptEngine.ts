@@ -1,9 +1,7 @@
 import { PromptConfig, Prompts, PromptInputs } from '@/types'
-import { incrementProviderCost } from '@/src/server/datastore/providers'
-import { CredentialsForProvider, GetPredictor } from '../providers/integration'
+import { CredentialsForProvider, GetPredictor, IncrementProviderCost } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
-import { updateScopedModelCost } from '../datastore/cost'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -88,9 +86,8 @@ export default async function runPromptWithConfig(
     }
   }
 
-  if (!isErrorPredictionResponse(result) && result.cost > 0 && providerID && scopeID) {
-    incrementProviderCost(providerID, result.cost)
-    updateScopedModelCost(scopeID, config.model, result.cost)
+  if (!isErrorPredictionResponse(result)) {
+    IncrementProviderCost(scopeID, providerID, config.model, result.cost)
   }
 
   return {

@@ -1,9 +1,8 @@
 import { EmbeddingModel, QueryProvider } from '@/types'
-import { getProviderCredentials, incrementProviderCost } from '../datastore/providers'
-import { CredentialsForProvider, CreateEmbedding } from '../providers/integration'
+import { getProviderCredentials } from '../datastore/providers'
+import { CredentialsForProvider, CreateEmbedding, IncrementProviderCost } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
-import { updateScopedModelCost } from '../datastore/cost'
 
 type QueryResponse = (
   | { result: string[]; output: string; error: undefined; failed: false }
@@ -33,10 +32,7 @@ export const runQuery = async (
     }
 
     const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
-    if (providerID && scopeID && cost > 0) {
-      incrementProviderCost(providerID, cost)
-      updateScopedModelCost(scopeID, model, cost)
-    }
+    IncrementProviderCost(scopeID, providerID, model, cost)
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 
