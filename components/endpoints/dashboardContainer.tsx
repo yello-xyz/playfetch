@@ -7,6 +7,7 @@ export default function DashboardContainer({
   percentIncrement,
   lowerIsBetter = false,
   range,
+  customRange,
   callback,
   addBottomPadding = false,
   children,
@@ -16,6 +17,7 @@ export default function DashboardContainer({
   percentIncrement?: number
   lowerIsBetter?: boolean
   range: number
+  customRange?: string
   callback?: () => void
   addBottomPadding?: boolean
   children: ReactElement<any>
@@ -26,7 +28,7 @@ export default function DashboardContainer({
         <div className='flex flex-wrap items-baseline justify-between overflow-hidden max-h-[19px]'>
           <span className='font-medium text-gray-400'>{title}</span>
           <span className={`text-xs font-medium text-gray-300 ${callback ? 'cursor-pointer' : ''}`} onClick={callback}>
-            last {range} days
+            {customRange ?? `last ${range} days`}
           </span>
         </div>
         <div className='flex items-center gap-2'>

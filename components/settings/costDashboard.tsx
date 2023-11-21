@@ -25,7 +25,11 @@ export default function CostDashboard({
 
   return (
     <div className='flex gap-4'>
-      <DashboardContainer title='Average Daily Cost' value={FormatCost(averageCost)} range={days}>
+      <DashboardContainer
+        title='Average Daily Cost'
+        value={FormatCost(averageCost)}
+        range={days}
+        customRange='Current month'>
         <BarChart id='cost' data={data} margin={{ left: 20, right: 20, top: 10, bottom: 0 }}>
           <XAxis dataKey='name' hide />
           <Tooltip cursor={false} content={<CustomTooltip availableProviders={availableProviders} />} />
