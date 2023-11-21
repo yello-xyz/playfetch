@@ -15,13 +15,12 @@ export default function CostDashboard({
 }) {
   const days = modelCosts.length || 1
   const averageCost = modelCosts.flatMap(Object.values).reduce((sum, next) => sum + next, 0) / days
-  const models = [...new Set(modelCosts.flatMap(Object.keys))]
+  const costForModel = (model: string) => modelCosts.map(cost => cost[model] ?? 0).reduce((sum, next) => sum + next, 0)
+  const models = [...new Set(modelCosts.flatMap(Object.keys))].sort((a, b) => costForModel(b) - costForModel(a))
   const data = modelCosts.map((cost, index, costs) => ({
     ...cost,
     name: FormatDate(DaysAgo(new Date(), costs.length - 1 - index).getTime(), false, true),
   }))
-
-  console.log(data)
 
   return (
     <div className='flex gap-4'>
