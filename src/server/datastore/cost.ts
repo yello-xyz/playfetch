@@ -11,6 +11,7 @@ import {
   afterDateFilter,
 } from './datastore'
 import { ensureScopeAccess } from './providers'
+import { ModelCosts } from '@/types'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
@@ -20,14 +21,7 @@ export async function migrateAnalytics(postMerge: boolean) {
   const [allCost] = await datastore.runQuery(datastore.createQuery(Entity.COST))
   for (const costData of allCost) {
     await getDatastore().save(
-      toCostData(
-        costData.scopeID,
-        costData.model,
-        costData.range,
-        costData.createdAt,
-        costData.cost,
-        getID(costData)
-      )
+      toCostData(costData.scopeID, costData.model, costData.range, costData.createdAt, costData.cost, getID(costData))
     )
   }
 }
@@ -39,32 +33,27 @@ const daysAgo = (date: Date, days: number) => {
   return result
 }
 
-type ModelCost = { model: string; cost: number[] }
-
-export async function getCostAnalyticsForScope(userID: number, scopeID: number): Promise<ModelCost[]> {
+export async function getModelCostsForScope(userID: number, scopeID: number): Promise<ModelCosts[]> {
   await ensureScopeAccess(userID, scopeID)
 
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
 
   const dayInMonth = today.getUTCDate()
-  const costData = await getFilteredEntities(
+  const costsData = await getFilteredEntities(
     Entity.COST,
     and([buildFilter('scopeID', scopeID), afterDateFilter(daysAgo(today, dayInMonth))])
   )
 
-  const costs: ModelCost[] = []
-  const daysOfMonth = Array.from({ length: dayInMonth }, (_, index) => daysAgo(today, index)).reverse()
-  for (const model of new Set(costData.map(cost => cost.model as string))) {
-    const costMap: { [timestamp: number]: number } = Object.fromEntries(
-      costData.filter(cost => cost.model === model).map(cost => [cost.createdAt.getTime(), cost.cost])
-    )
-    costs.push({ model, cost: daysOfMonth.map(day => costMap[day.getTime()] ?? 0) })
+  const costMap: { [timestamp: number]: { [model: string]: number } } = {}
+  for (const costData of costsData) {
+    const timestamp = costData.createdAt.getTime()
+    costMap[timestamp] = { ...(costMap[timestamp] ?? {}), [costData.model]: costData.cost }
   }
 
-  const totalCost = (cost: ModelCost) => cost.cost.reduce((sum, cost) => sum + cost, 0)
+  const daysOfMonth = Array.from({ length: dayInMonth }, (_, index) => daysAgo(today, index)).reverse()
 
-  return costs.sort((a, b) => totalCost(b) - totalCost(a))
+  return daysOfMonth.map(day => costMap[day.getTime()] ?? {})
 }
 
 export async function updateScopedModelCost(
@@ -96,14 +85,7 @@ export async function updateScopedModelCost(
   })
 }
 
-const toCostData = (
-  scopeID: number,
-  model: string,
-  range: 'day',
-  createdAt: Date,
-  cost: number,
-  costID?: number
-) => ({
+const toCostData = (scopeID: number, model: string, range: 'day', createdAt: Date, cost: number, costID?: number) => ({
   key: buildKey(Entity.COST, costID),
   data: { scopeID, model, range, createdAt, cost },
   excludeFromIndexes: [],
