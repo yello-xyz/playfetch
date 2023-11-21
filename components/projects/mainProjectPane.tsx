@@ -100,7 +100,12 @@ export default function MainProjectPane({
           />
         )}
         {activeItem === SettingsItem && (
-          <ProviderSettingsView scopeID={activeProject.id} providers={scopedProviders} refresh={refreshProviders} />
+          <ProviderSettingsView
+            scopeID={activeProject.id}
+            providers={scopedProviders}
+            description='Any API keys configured here will be available to anyone with project access to be used within the context of this project. You can update or delete these keys at any time, maintaining collective access and control.'
+            refresh={refreshProviders}
+          />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
