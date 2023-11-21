@@ -40,10 +40,11 @@ export default function WorkspaceSidebar({
 
   return (
     <>
-      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 overflow-y-auto border-r border-gray-200 bg-gray-25'>
+      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 border-r border-gray-200 bg-gray-25'>
         <SidebarSection>
           <UserSidebarItem />
         </SidebarSection>
+        <div className='flex flex-col gap-4 pr-2 -mr-2 overflow-y-auto'>
         <SidebarSection>
           {userWorkspace && (
             <SidebarButton
@@ -75,6 +76,7 @@ export default function WorkspaceSidebar({
           <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
         </SidebarSection>
         <FeedbackSection />
+        </div>
       </div>
       {showPickNamePrompt && (
         <PickNameDialog
