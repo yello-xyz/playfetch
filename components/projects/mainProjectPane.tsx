@@ -103,7 +103,7 @@ export default function MainProjectPane({
           <SettingsView
             scopeID={activeProject.id}
             providers={scopedProviders}
-            description='Any API keys configured here will be available to anyone with project access to be used within the context of this project. You can update or delete these keys at any time, maintaining collective access and control.'
+            scopeDescription='Anything configured here will be available to anyone with project access to be used within the context of this project only.'
             refresh={refreshProviders}
           />
         )}

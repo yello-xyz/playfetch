@@ -14,6 +14,7 @@ export default function ProviderSettingsPane({
   scopeID,
   title,
   description,
+  scopeDescription,
   providers,
   availableProviders,
   includeEnvironment,
@@ -22,13 +23,14 @@ export default function ProviderSettingsPane({
   scopeID: number
   title: string
   description: string
+  scopeDescription?: string
   providers: ModelProvider[] | QueryProvider[]
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
   onRefresh: () => void
 }) {
   return (
-    <SettingsPane title={title} description={description}>
+    <SettingsPane title={title} description={description} scopeDescription={scopeDescription}>
       {providers.map((provider, index) => (
         <ProviderRow
           key={index}

@@ -14,12 +14,12 @@ type ActivePane = typeof ProvidersPane | typeof CustomModelsPane | typeof Connec
 export default function SettingsView({
   scopeID,
   providers,
-  description,
+  scopeDescription,
   refresh,
 }: {
   scopeID: number
   providers: AvailableProvider[]
-  description?: string
+  scopeDescription?: string
   refresh: () => void
 }) {
   const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
@@ -39,19 +39,26 @@ export default function SettingsView({
             scopeID={scopeID}
             title='Manage API keys'
             description='Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'
+            scopeDescription={scopeDescription}
             providers={allModelProviders}
             availableProviders={availableModelProviders}
             onRefresh={refresh}
           />
         )}
         {activePane === CustomModelsPane && (
-          <CustomModelSettingsPane scopeID={scopeID} availableProviders={availableModelProviders} onRefresh={refresh} />
+          <CustomModelSettingsPane
+            scopeID={scopeID}
+            scopeDescription={scopeDescription}
+            availableProviders={availableModelProviders}
+            onRefresh={refresh}
+          />
         )}
         {activePane === ConnectorsPane && (
           <ProviderSettingsPane
             scopeID={scopeID}
             title='Manage Vector Store Credentials'
             description='Provide your API credentials here to enable integration with vector stores.'
+            scopeDescription={scopeDescription}
             providers={QueryProviders}
             availableProviders={availableQueryProviders}
             includeEnvironment

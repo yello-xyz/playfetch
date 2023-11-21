@@ -12,10 +12,12 @@ import { useState } from 'react'
 
 export default function CustomModelSettingsPane({
   scopeID,
+  scopeDescription,
   availableProviders,
   onRefresh,
 }: {
   scopeID: number
+  scopeDescription?: string
   availableProviders: AvailableModelProvider[]
   onRefresh: () => void
 }) {
@@ -29,7 +31,8 @@ export default function CustomModelSettingsPane({
   return (
     <SettingsPane
       title='Manage Custom Models'
-      description='Give each model you want to use a short unique name and optional description to enable it within the app.'>
+      description='Give each model you want to use a short unique name and optional description to enable it within the app.'
+      scopeDescription={scopeDescription}>
       {availableProviders
         .flatMap(provider => provider.customModels)
         .map((model, index) => (
