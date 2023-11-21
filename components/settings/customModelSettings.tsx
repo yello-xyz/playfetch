@@ -6,18 +6,15 @@ import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
-import SettingsPane from './settingsPane'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import { useState } from 'react'
 
-export default function CustomModelSettingsPane({
+export default function CustomModelSettings({
   scopeID,
-  scopeDescription,
   availableProviders,
   onRefresh,
 }: {
   scopeID: number
-  scopeDescription?: string
   availableProviders: AvailableModelProvider[]
   onRefresh: () => void
 }) {
@@ -29,10 +26,7 @@ export default function CustomModelSettingsPane({
   const otherNames = (model: CustomModel) => customModels.filter(m => m.id !== model.id).map(m => m.name)
 
   return (
-    <SettingsPane
-      title='Manage Custom Models'
-      description='Give each model you want to use a short unique name and optional description to enable it within the app.'
-      scopeDescription={scopeDescription}>
+    <>
       {availableProviders
         .flatMap(provider => provider.customModels)
         .map((model, index) => (
@@ -45,7 +39,7 @@ export default function CustomModelSettingsPane({
             onRefresh={onRefresh}
           />
         ))}
-    </SettingsPane>
+    </>
   )
 }
 

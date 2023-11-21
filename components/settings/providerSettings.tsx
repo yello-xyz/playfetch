@@ -8,29 +8,22 @@ import { FormatCost } from '@/src/common/formatting'
 import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
-import SettingsPane from './settingsPane'
 
-export default function ProviderSettingsPane({
+export default function ProviderSettings({
   scopeID,
-  title,
-  description,
-  scopeDescription,
   providers,
   availableProviders,
   includeEnvironment,
   onRefresh,
 }: {
   scopeID: number
-  title: string
-  description: string
-  scopeDescription?: string
   providers: ModelProvider[] | QueryProvider[]
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
   onRefresh: () => void
 }) {
   return (
-    <SettingsPane title={title} description={description} scopeDescription={scopeDescription}>
+    <>
       {providers.map((provider, index) => (
         <ProviderRow
           key={index}
@@ -41,7 +34,7 @@ export default function ProviderSettingsPane({
           onRefresh={onRefresh}
         />
       ))}
-    </SettingsPane>
+    </>
   )
 }
 
