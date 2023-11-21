@@ -12,6 +12,7 @@ import {
 } from './datastore'
 import { ensureScopeAccess } from './providers'
 import { ModelCosts } from '@/types'
+import { DaysAgo } from '@/src/common/formatting'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
@@ -26,13 +27,6 @@ export async function migrateAnalytics(postMerge: boolean) {
   }
 }
 
-const daysAgo = (date: Date, days: number) => {
-  const result = new Date(date)
-  result.setDate(result.getDate() - days)
-  result.setUTCHours(0, 0, 0, 0)
-  return result
-}
-
 export async function getModelCostsForScope(userID: number, scopeID: number): Promise<ModelCosts[]> {
   await ensureScopeAccess(userID, scopeID)
 
@@ -42,7 +36,7 @@ export async function getModelCostsForScope(userID: number, scopeID: number): Pr
   const dayInMonth = today.getUTCDate()
   const costsData = await getFilteredEntities(
     Entity.COST,
-    and([buildFilter('scopeID', scopeID), afterDateFilter(daysAgo(today, dayInMonth))])
+    and([buildFilter('scopeID', scopeID), afterDateFilter(DaysAgo(today, dayInMonth))])
   )
 
   const costMap: { [timestamp: number]: { [model: string]: number } } = {}
@@ -51,7 +45,7 @@ export async function getModelCostsForScope(userID: number, scopeID: number): Pr
     costMap[timestamp] = { ...(costMap[timestamp] ?? {}), [costData.model]: costData.cost }
   }
 
-  const daysOfMonth = Array.from({ length: dayInMonth }, (_, index) => daysAgo(today, index)).reverse()
+  const daysOfMonth = Array.from({ length: dayInMonth }, (_, index) => DaysAgo(today, index)).reverse()
 
   return daysOfMonth.map(day => costMap[day.getTime()] ?? {})
 }

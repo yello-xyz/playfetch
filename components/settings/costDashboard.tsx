@@ -1,16 +1,10 @@
-import { FormatCost, FormatDate } from '@/src/common/formatting'
+import { DaysAgo, FormatCost, FormatDate } from '@/src/common/formatting'
 import { AvailableModelProvider, ModelCosts } from '@/types'
 import { Bar, BarChart, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from '../endpoints/dashboardContainer'
 import { FullLabelForModel } from '@/src/common/providerMetadata'
 
 const colors = ['#9ACEB2', '#FAE3A8', '#8BBBF3', '#F9D093', '#BEA4F6', '#EC9987']
-
-const daysAgo = (date: Date, days: number) => {
-  const result = new Date(date)
-  result.setDate(result.getDate() - days)
-  return result
-}
 
 export default function CostDashboard({
   modelCosts,
@@ -24,7 +18,7 @@ export default function CostDashboard({
   const models = [...new Set(modelCosts.flatMap(Object.keys))]
   const data = modelCosts.map((cost, index, costs) => ({
     ...cost,
-    name: FormatDate(daysAgo(new Date(), costs.length - 1 - index).getTime(), false, true),
+    name: FormatDate(DaysAgo(new Date(), costs.length - 1 - index).getTime(), false, true),
   }))
 
   console.log(data)

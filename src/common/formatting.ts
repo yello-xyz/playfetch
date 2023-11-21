@@ -6,8 +6,16 @@ const validEmailRegExp =
 
 export const CheckValidEmail = (email: string) => !!email.trim().toLowerCase().match(validEmailRegExp)
 
+export const DaysAgo = (date: Date, days: number) => {
+  const result = new Date(date)
+  result.setDate(result.getDate() - days)
+  result.setUTCHours(0, 0, 0, 0)
+  return result
+}
+    
 const isValidTimestamp = (timestamp: number) =>
   timestamp > 0 && timestamp < Number.MAX_VALUE && !Number.isNaN(timestamp)
+
 
 export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIncludeDate = false) => {
   if (!isValidTimestamp(timestamp)) {

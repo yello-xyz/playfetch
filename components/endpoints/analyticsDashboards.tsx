@@ -1,20 +1,14 @@
-import { FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
+import { DaysAgo, FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { Analytics, Usage } from '@/types'
 import { Area, AreaChart, Bar, BarChart, Pie, PieChart, Sector, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from './dashboardContainer'
-
-const daysAgo = (date: Date, days: number) => {
-  const result = new Date(date)
-  result.setDate(result.getDate() - days)
-  return result
-}
 
 const prepareData = (analytics: Usage[]) =>
   analytics
     .reduce((acc, usage) => [...acc, { ...usage, cost: (acc[acc.length - 1]?.cost ?? 0) + usage.cost }], [] as Usage[])
     .map((usage, index, usages) => ({
       ...usage,
-      name: FormatDate(daysAgo(new Date(), usages.length - 1 - index).getTime(), false, true),
+      name: FormatDate(DaysAgo(new Date(), usages.length - 1 - index).getTime(), false, true),
       duration: usage.duration / (usage.requests || 1),
       success: usage.requests - usage.failures,
     }))
