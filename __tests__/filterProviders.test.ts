@@ -23,10 +23,16 @@ testFilterProviders(
   [provider('openai', 1)]
 )
 testFilterProviders(
-  'Retains non-null providers',
+  'Filters null providers',
   [1, 2],
   [provider('openai', 1, false), provider('openai', 2)],
-  [provider('openai', 1, false), provider('openai', 2)]
+  [provider('openai', 2)]
+)
+testFilterProviders(
+  'Retains null providers if no alternative',
+  [1, 2],
+  [provider('anthropic', 1, false), provider('openai', 2)],
+  [provider('anthropic', 1, false), provider('openai', 2)]
 )
 testFilterProviders(
   'Sorts overlapping providers',
@@ -41,8 +47,14 @@ testFilterProviders(
   [provider('anthropic', 2), provider('openai', 2)]
 )
 testFilterProviders(
-  'Sorts and filters multiple overlapping providers while retaining non-null providers',
+  'Sorts and filters multiple overlapping providers while filtering null providers unless no alternative',
   [2, 1],
-  [provider('openai', 1), provider('anthropic', 2, false), provider('anthropic', 1), provider('openai', 2)],
-  [provider('anthropic', 2, false), provider('openai', 2), provider('anthropic', 1)]
+  [
+    provider('openai', 1),
+    provider('anthropic', 2, false),
+    provider('google', 1, false),
+    provider('anthropic', 1),
+    provider('openai', 2),
+  ],
+  [provider('openai', 2), provider('google', 1, false), provider('anthropic', 1)]
 )
