@@ -44,11 +44,18 @@ export async function hasUserAccess(userID: number, objectID: number) {
   return !!accessData && (accessData.state === 'default' || accessData.state === 'owner')
 }
 
-export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind, state: State) {
+export async function grantUserAccess(
+  grantedBy: number,
+  userID: number,
+  objectID: number,
+  kind: Kind,
+  state: State,
+  createdAt = new Date()
+) {
   const accessData = await getAccessData(userID, objectID)
   if (!accessData || accessData.state !== state) {
     await getDatastore().save(
-      toAccessData(userID, objectID, kind, state, grantedBy, new Date(), accessData ? getID(accessData) : undefined)
+      toAccessData(userID, objectID, kind, state, grantedBy, createdAt, accessData ? getID(accessData) : undefined)
     )
   }
 }

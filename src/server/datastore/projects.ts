@@ -35,7 +35,21 @@ export async function migrateProjects(postMerge: boolean) {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData }, false)
+    const projectID = getID(projectData)
+    const accessKeys = await getEntities(Entity.ACCESS, 'objectID', projectID)
+    let userID: number
+    let foundInvite = false
+    if (accessKeys.length > 0) {
+      userID = accessKeys.sort((a, b) => a.createdAt - b.createdAt)[0].grantedBy
+      foundInvite = true
+    } else {
+      const workspaceData = await getKeyedEntity(Entity.WORKSPACE, projectData.workspaceID)
+      userID = workspaceData.userID
+    }
+    const userData = await getKeyedEntity(Entity.USER, userID)
+    console.log(`${foundInvite ? '✅' : '❓'} “${projectData.name}” → ${userData.fullName}`)
+    await updateProject({ ...projectData, userID: projectData?.userID ?? userID }, false)
+    await grantUserAccess(userID, userID, projectID, 'project', 'owner', projectData.createdAt)
   }
 }
 
