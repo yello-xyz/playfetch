@@ -115,19 +115,19 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 }
 
 export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
-  getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace)
+  getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace).then(([u, p]) => [u, p])
 
 export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
-  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser).then(([u, p]) => [u, p])
 
 export async function getPendingAccessObjects<T>(
   sourceID: number,
   kind: 'project' | 'workspace',
   entityType: string,
   toObject: (data: any) => T
-): Promise<[T[], (T & { invitedBy: User; timestamp: number })[]]> {
+): Promise<[T[], (T & { invitedBy: User; timestamp: number })[], T[]]> {
   const sourceIsUser = entityType !== Entity.USER
-  const [objectIDs, pendingObjects] = sourceIsUser
+  const [ownedObjectIDs, accessibleObjectIDs, pendingObjects] = sourceIsUser
     ? await getAccessibleObjectIDs(sourceID, kind)
     : await getAccessingUserIDs(sourceID, kind)
 
@@ -135,7 +135,11 @@ export async function getPendingAccessObjects<T>(
   const pendingObjectIDs = pendingObjects.map(getAccessID)
   const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
 
-  const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
+  const objectsData = await getKeyedEntities(entityType, [
+    ...ownedObjectIDs,
+    ...accessibleObjectIDs,
+    ...pendingObjectIDs,
+  ])
   const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
   const invitingUsers = invitingUsersData.map(toUser)
 
@@ -160,6 +164,7 @@ export async function getPendingAccessObjects<T>(
       .map(objectData =>
         toPendingObject(toObject(objectData), pendingObjects.find(access => getAccessID(access) === getID(objectData))!)
       ),
+    objectsData.filter(objectData => ownedObjectIDs.includes(getID(objectData))).map(toObject),
   ]
 }
 

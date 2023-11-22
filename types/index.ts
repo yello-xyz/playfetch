@@ -52,8 +52,9 @@ export type ActiveProject = Project & {
   chains: Chain[]
   users: User[]
   pendingUsers: PendingUser[]
-  projectUsers: User[]
-  pendingProjectUsers: PendingUser[]
+  projectOwners: User[]
+  projectMembers: User[]
+  pendingProjectMembers: PendingUser[]
   availableLabels: string[]
   comments: Comment[]
 }

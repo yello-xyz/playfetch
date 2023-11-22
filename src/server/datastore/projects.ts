@@ -98,10 +98,12 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const chains = chainData.map(toChain)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
-  const [users, pendingUsers, projectUsers, pendingProjectUsers] = await getProjectAndWorkspaceUsers(
+  const [users, pendingUsers, projectOwners, projectMembers, pendingProjectMembers] = await getProjectAndWorkspaceUsers(
     projectID,
     projectData.workspaceID
   )
+
+  const isOwner = projectOwners.some(user => user.id === userID)
 
   return {
     ...toProject(projectData, userID),
@@ -111,9 +113,9 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     chains,
     users,
     pendingUsers,
-    // TODO only need to expose these for project owners?
-    projectUsers,
-    pendingProjectUsers,
+    projectOwners: isOwner ? projectOwners : [],
+    projectMembers: isOwner ? projectMembers : [],
+    pendingProjectMembers: isOwner ? pendingProjectMembers : [],
     availableLabels: JSON.parse(projectData.labels),
     comments,
   }
@@ -275,16 +277,18 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 }
 
 export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
-  getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
+  getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID)).then(
+    ([u, p]) => [u, p]
+  )
 
-const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[]]> =>
+const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
 
 async function getProjectAndWorkspaceUsers(
   projectID: number,
   workspaceID: number
-): Promise<[User[], PendingUser[], User[], PendingUser[]]> {
-  const [projectUsers, pendingProjectUsers] = await getSharedProjectUsers(projectID)
+): Promise<[User[], PendingUser[], User[], User[], PendingUser[]]> {
+  const [projectUsers, pendingProjectUsers, projectOwners] = await getSharedProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
 
   const filterUsers = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
@@ -296,7 +300,8 @@ async function getProjectAndWorkspaceUsers(
       ...filterUsers(pendingProjectUsers, workspaceUsers),
       ...filterUsers(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),
     ],
-    projectUsers,
+    projectOwners,
+    filterUsers(projectUsers, projectOwners),
     pendingProjectUsers,
   ]
 }

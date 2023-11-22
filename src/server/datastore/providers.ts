@@ -1,12 +1,5 @@
 import { PropertyFilter, and } from '@google-cloud/datastore'
-import {
-  Entity,
-  buildFilter,
-  buildKey,
-  getDatastore,
-  getFilteredEntities,
-  getID,
-} from './datastore'
+import { Entity, buildFilter, buildKey, getDatastore, getFilteredEntities, getID } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import {
   AvailableModelProvider,
@@ -142,9 +135,7 @@ export async function saveProviderModel(
       ...(metadata.customModels ?? []).filter(model => model.id !== modelID),
       { id: modelID, name, description, enabled },
     ]
-    await getDatastore().save(
-      toProviderData(scopeID, provider, providerData.apiKey, metadata, getID(providerData))
-    )
+    await getDatastore().save(toProviderData(scopeID, provider, providerData.apiKey, metadata, getID(providerData)))
   }
 }
 

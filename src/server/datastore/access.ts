@@ -81,25 +81,32 @@ export async function updateAccessForUser(userID: number, objectID: number, acce
   }
 }
 
-export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
+export async function getAccessibleObjectIDs(
+  userID: number,
+  kind: Kind
+): Promise<[number[], number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
   return [
-    entities.filter(entity => entity.state === 'default' || entity.state === 'owner').map(entity => entity.objectID),
+    entities.filter(entity => entity.state === 'owner').map(entity => entity.objectID),
+    entities.filter(entity => entity.state === 'default').map(entity => entity.objectID),
     entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
   ]
 }
 
-export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
+export async function getAccessingUserIDs(
+  objectID: number,
+  kind: Kind
+): Promise<[number[], number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
-  // TODO allow distinguish between owners and regular members
   return [
-    entities.filter(entity => entity.state === 'default' || entity.state === 'owner').map(entity => entity.userID),
+    entities.filter(entity => entity.state === 'owner').map(entity => entity.userID),
+    entities.filter(entity => entity.state === 'default').map(entity => entity.userID),
     entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
   ]
 }
