@@ -8,6 +8,7 @@ import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
 import CostDashboard from './costDashboard'
+import { useEffectOnce } from '@/src/client/hooks/useEffectOnce'
 
 const ProvidersPane = 'providers'
 const CustomModelsPane = 'customModels'
@@ -67,12 +68,7 @@ export default function SettingsView({
 
   const [modelCosts, setModelCosts] = useState<ModelCosts[]>()
 
-  useEffect(() => {
-    if (!modelCosts) {
-      setModelCosts([])
-      api.getModelCosts(scopeID).then(setModelCosts)
-    }
-  }, [scopeID, modelCosts])
+  useEffectOnce(() => api.getModelCosts(scopeID).then(setModelCosts), [scopeID])
 
   const availableModelProviders = providers.filter(IsModelProvider)
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
