@@ -43,10 +43,10 @@ export default function RecentProjects({
                 <Label>Project</Label>
               </TableCell>
               <TableCell>
-                <Label>Workspace</Label>
+                <Label>Creator</Label>
               </TableCell>
               <TableCell>
-                <Label>Workspace Creator</Label>
+                <Label>Workspace</Label>
               </TableCell>
               {recentProjects.map(project => (
                 <ProjectRow
@@ -89,13 +89,13 @@ function ProjectRow({
         <Icon icon={fileIcon} />
         <TruncatedSpan>{project.name}</TruncatedSpan>
       </TableCell>
-      <TableCell onClick={selectWorkspace}>
-        <Icon icon={folderIcon} />
-        <TruncatedSpan>{project.workspaceName}</TruncatedSpan>
-      </TableCell>
       <TableCell>
         <Icon icon={userIcon} />
-        <TruncatedSpan>{project.workspaceCreator}</TruncatedSpan>
+        <TruncatedSpan>{project.creator}</TruncatedSpan>
+      </TableCell>
+      <TableCell onClick={selectWorkspace}>
+        <Icon icon={folderIcon} />
+        <TruncatedSpan>{project.workspace}</TruncatedSpan>
       </TableCell>
     </TableRow>
   )

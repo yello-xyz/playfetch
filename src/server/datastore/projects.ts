@@ -90,6 +90,7 @@ export const toProject = (data: any, userID: number): Project => ({
   workspaceID: data.workspaceID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
   favorited: JSON.parse(data.favorited).includes(userID),
+  createdBy: data.userID,
 })
 
 async function loadEndpoints(projectID: number, apiKeyDev: string) {
@@ -392,12 +393,9 @@ export async function getRecentProjects(projects?: Project[], limit = 100): Prom
 
 const toRecentProject = (project: Project, workspacesData: any[], usersData: any[]): RecentProject => {
   const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
-  const workspaceName = workspaceData.name
+  const userData = usersData.find(user => getID(user) === project.createdBy)
 
-  const userData = usersData.find(user => getID(user) === workspaceData.userID)
-  const workspaceCreator = userData.fullName
-
-  return { ...project, workspaceName, workspaceCreator }
+  return { ...project, workspace: workspaceData.name, creator: userData.fullName }
 }
 
 export async function getMetricsForProject(

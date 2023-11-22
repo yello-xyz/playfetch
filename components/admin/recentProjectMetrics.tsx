@@ -42,11 +42,11 @@ export default function RecentProjectMetrics({
         <div className='flex flex-col gap-4 p-4 bg-white border border-gray-200 rounded-lg'>
           <div className='flex items-center'>
             <Icon icon={fileIcon} />
-            <Label>{project.name} • </Label>
-            <Icon icon={folderIcon} />
             <Label>
-              {project.workspaceName} ({project.workspaceCreator})
+              {project.name} ({project.creator}) •{' '}
             </Label>
+            <Icon icon={folderIcon} />
+            <Label>{project.workspace}</Label>
           </div>
           <Label>Last Modified: {lastModified}</Label>
           <div className='flex flex-col gap-1'>

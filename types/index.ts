@@ -37,6 +37,7 @@ export type Project = {
   workspaceID: number
   timestamp: number
   favorited: boolean
+  createdBy: number
 }
 
 export type PendingProject = Project & PendingAttributes
@@ -362,8 +363,8 @@ export type UserMetrics = {
 }
 
 export type RecentProject = Project & {
-  workspaceName: string
-  workspaceCreator: string
+  workspace: string
+  creator: string
 }
 
 export type ProjectMetrics = {

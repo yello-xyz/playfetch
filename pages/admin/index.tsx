@@ -101,7 +101,7 @@ export default function Admin({
     const knownWorkspaces: Workspace[] = [
       ...(userMetrics?.workspaces ?? []),
       ...(userMetrics?.pendingWorkspaces ?? []),
-      ...recentProjects.map(project => ({ id: project.workspaceID, name: project.workspaceName })),
+      ...recentProjects.map(project => ({ id: project.workspaceID, name: project.workspace })),
     ]
 
     const activeUser = !isWorkspace ? knownUsers.find(user => user.id === itemID) : undefined
