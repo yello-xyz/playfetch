@@ -194,8 +194,11 @@ export async function inviteMembersToProject(userID: number, projectID: number, 
   await grantUsersAccess(userID, emails, projectID, 'project')
 }
 
-export async function revokeMemberAccessForProject(userID: number, projectID: number) {
-  await revokeUserAccess(userID, projectID)
+export async function revokeMemberAccessForProject(userID: number, memberID: number, projectID: number) {
+  if (userID !== memberID) {
+    await ensureProjectAccess(userID, projectID)
+  }
+  await revokeUserAccess(memberID, projectID)
 }
 
 export async function checkProject(projectID: number, apiKey?: string): Promise<number | undefined> {

@@ -114,8 +114,8 @@ const api = {
   inviteToProject: function (projectID: number, emails: string[]) {
     return post(this.inviteToProject, { projectID, emails })
   },
-  leaveProject: function (projectID: number) {
-    return post(this.leaveProject, { projectID })
+  revokeProjectAccess: function (projectID: number, memberID?: number) {
+    return post(this.revokeProjectAccess, { projectID, memberID })
   },
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
