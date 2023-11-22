@@ -10,7 +10,11 @@ export default function TeamSettings({ activeProject }: { activeProject: ActiveP
 
   return (
     <div className='flex flex-col gap-3 p-3 bg-white border border-gray-200 rounded-lg'>
-      <MembersPane users={activeProject.users} pendingUsers={activeProject.pendingUsers} onInvite={inviteMembers} />
+      <MembersPane
+        users={activeProject.projectUsers}
+        pendingUsers={activeProject.pendingProjectUsers}
+        onInvite={inviteMembers}
+      />
     </div>
   )
 }
