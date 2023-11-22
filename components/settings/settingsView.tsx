@@ -9,12 +9,19 @@ import api from '@/src/client/api'
 import UsageSettings from './usageSettings'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import SettingsSidebar from './settingsSidebar'
+import TeamSettings from './teamSettings'
 
 const ProvidersPane = 'providers'
 const CustomModelsPane = 'customModels'
 const UsagePane = 'usage'
+const TeamPane = 'team'
 const ConnectorsPane = 'connectors'
-type ActivePane = typeof ProvidersPane | typeof CustomModelsPane | typeof UsagePane | typeof ConnectorsPane
+type ActivePane =
+  | typeof ProvidersPane
+  | typeof CustomModelsPane
+  | typeof UsagePane
+  | typeof TeamPane
+  | typeof ConnectorsPane
 
 const titleForPane = (pane: ActivePane) => {
   switch (pane) {
@@ -24,6 +31,8 @@ const titleForPane = (pane: ActivePane) => {
       return 'Custom models'
     case UsagePane:
       return 'Usage limits'
+    case TeamPane:
+      return 'Team'
     case ConnectorsPane:
       return 'Connectors'
   }
@@ -37,6 +46,8 @@ const descriptionForPane = (pane: ActivePane) => {
       return 'Give each model you want to use a short unique name and optional description to enable it in the model selector.'
     case UsagePane:
       return 'Limit your API expenditure by setting a monthly spending limit. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
+    case TeamPane:
+      return 'Manage who has access to this project.'//, change role assignment and remove members.'
     case ConnectorsPane:
       return 'Provide your API credentials here to enable integration with vector stores.'
   }
@@ -49,6 +60,7 @@ const projectScopeDescriptionForPane = (pane: ActivePane) => {
     case ConnectorsPane:
       return 'Configurations made here will be available to anyone with project access to be used within the context of this project only.'
     case UsagePane:
+    case TeamPane:
       return undefined
   }
 }
@@ -83,12 +95,18 @@ export default function SettingsView({
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)
-  const panes = [ProvidersPane, ...(haveCustomModels ? [CustomModelsPane] : []), UsagePane, ConnectorsPane]
+  const availablePanes = [
+    ProvidersPane,
+    ...(haveCustomModels ? [CustomModelsPane] : []),
+    UsagePane,
+    ...(activeProject ? [TeamPane] : []),
+    ConnectorsPane,
+  ]
 
   return (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
       <SettingsSidebar
-        panes={panes as ActivePane[]}
+        panes={availablePanes as ActivePane[]}
         activePane={activePane}
         setActivePane={setActivePane}
         titleForPane={titleForPane}
@@ -117,6 +135,7 @@ export default function SettingsView({
               onRefresh={refreshUsage}
             />
           )}
+          {activePane === TeamPane && !!activeProject && <TeamSettings activeProject={activeProject} />}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}
