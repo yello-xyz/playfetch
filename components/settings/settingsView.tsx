@@ -3,7 +3,7 @@ import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import CustomModelSettings from './customModelSettings'
 import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
@@ -35,7 +35,7 @@ const descriptionForPane = (pane: ActivePane) => {
     case CustomModelsPane:
       return 'Give each model you want to use a short unique name and optional description to enable it within the app.'
     case UsagePane:
-      return 'Limit your API expenditure by setting monthly spending limits.'
+      return 'Limit your API expenditure by setting a monthly spending limit. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
     case ConnectorsPane:
       return 'Provide your API credentials here to enable integration with vector stores.'
   }
@@ -67,13 +67,15 @@ export default function SettingsView({
 
   const [costUsage, setCostUsage] = useState<CostUsage>()
 
+  const refreshUsage = useCallback(() => api.getCostUsage(scopeID).then(setCostUsage), [scopeID])
+
   const didFetchCostUsage = useRef(false)
   useEffect(() => {
     if (!didFetchCostUsage.current) {
       didFetchCostUsage.current = true
-      api.getCostUsage(scopeID).then(setCostUsage)
+      refreshUsage()
     }
-  }, [scopeID])
+  }, [refreshUsage])
 
   const availableModelProviders = providers.filter(IsModelProvider)
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
@@ -101,7 +103,12 @@ export default function SettingsView({
             <CustomModelSettings scopeID={scopeID} availableProviders={availableModelProviders} onRefresh={refresh} />
           )}
           {activePane === UsagePane && !!costUsage && (
-            <UsageSettings scopeID={scopeID} costUsage={costUsage} availableProviders={availableModelProviders} />
+            <UsageSettings
+              scopeID={scopeID}
+              costUsage={costUsage}
+              availableProviders={availableModelProviders}
+              onRefresh={refreshUsage}
+            />
           )}
           {activePane === ConnectorsPane && (
             <ProviderSettings

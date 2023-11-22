@@ -5,7 +5,15 @@ import { FormatCost } from '@/src/common/formatting'
 import { useRef, useState } from 'react'
 import api from '@/src/client/api'
 
-export default function BudgetPane({ scopeID, costUsage }: { scopeID: number; costUsage: CostUsage }) {
+export default function BudgetPane({
+  scopeID,
+  costUsage,
+  onRefresh,
+}: {
+  scopeID: number
+  costUsage: CostUsage
+  onRefresh: () => Promise<any>
+}) {
   const [limit, setLimit] = useState<number>()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -17,7 +25,10 @@ export default function BudgetPane({ scopeID, costUsage }: { scopeID: number; co
   }
 
   const updateLimit = () =>
-    api.updateBudget(scopeID, editingLimit && limit > 0 ? limit : undefined).then(() => setLimit(undefined))
+    api
+      .updateBudget(scopeID, editingLimit && !isNaN(limit) && limit > 0 ? limit : undefined)
+      .then(onRefresh)
+      .then(() => setLimit(undefined))
 
   const buttonClass = editingLimit ? 'bg-blue-300 hover:bg-blue-500 text-white' : 'hover:bg-gray-50'
 
