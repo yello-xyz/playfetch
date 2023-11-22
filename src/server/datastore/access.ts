@@ -13,7 +13,7 @@ import { getUserForEmail } from './users'
 import { sendInviteEmail } from '../email'
 
 type Kind = 'project' | 'workspace'
-type State = 'default' | 'pending'
+type State = 'owner' | 'default' | 'pending'
 
 export async function migrateAccess(postMerge: boolean) {
   if (postMerge) {
@@ -41,13 +41,13 @@ const getAccessData = (userID: number, objectID: number) =>
 
 export async function hasUserAccess(userID: number, objectID: number) {
   const accessData = await getAccessData(userID, objectID)
-  return !!accessData && accessData.state === 'default'
+  return !!accessData && (accessData.state === 'default' || accessData.state === 'owner')
 }
 
 export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
   const hasAccess = await hasUserAccess(userID, objectID)
   if (!hasAccess) {
-    const state = userID === grantedBy ? 'default' : 'pending'
+    const state = userID === grantedBy ? 'owner' : 'pending'
     await getDatastore().save(toAccessData(userID, objectID, kind, state, grantedBy, new Date()))
   }
 }
@@ -86,7 +86,7 @@ export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promis
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
   return [
-    entities.filter(entity => entity.state === 'default').map(entity => entity.objectID),
+    entities.filter(entity => entity.state === 'default' || entity.state === 'owner').map(entity => entity.objectID),
     entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
   ]
 }
@@ -96,8 +96,9 @@ export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
+  // TODO allow distinguish between owners and regular members
   return [
-    entities.filter(entity => entity.state === 'default').map(entity => entity.userID),
+    entities.filter(entity => entity.state === 'default' || entity.state === 'owner').map(entity => entity.userID),
     entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
   ]
 }
