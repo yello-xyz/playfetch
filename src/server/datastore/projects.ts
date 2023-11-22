@@ -98,7 +98,10 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const chains = chainData.map(toChain)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
-  const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
+  const [users, pendingUsers, projectUsers, pendingProjectUsers] = await getProjectAndWorkspaceUsers(
+    projectID,
+    projectData.workspaceID
+  )
 
   return {
     ...toProject(projectData, userID),
@@ -108,6 +111,9 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     chains,
     users,
     pendingUsers,
+    // TODO only need to expose these for project owners?
+    projectUsers,
+    pendingProjectUsers,
     availableLabels: JSON.parse(projectData.labels),
     comments,
   }
@@ -274,7 +280,10 @@ export const getSharedProjectsForUser = (userID: number): Promise<[Project[], Pe
 const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
 
-async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<[User[], PendingUser[]]> {
+async function getProjectAndWorkspaceUsers(
+  projectID: number,
+  workspaceID: number
+): Promise<[User[], PendingUser[], User[], PendingUser[]]> {
   const [projectUsers, pendingProjectUsers] = await getSharedProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
 
@@ -287,6 +296,8 @@ async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: numbe
       ...filterUsers(pendingProjectUsers, workspaceUsers),
       ...filterUsers(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),
     ],
+    projectUsers,
+    pendingProjectUsers,
   ]
 }
 
