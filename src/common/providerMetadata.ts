@@ -256,10 +256,8 @@ const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvi
   }
 }
 
-export const LabelForModel = (model: LanguageModel, providers: AvailableModelProvider[], includeProvider = true) =>
-  includeProvider
-    ? `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model, providers)}`
-    : shortLabelForModel(model, providers)
+export const ShortLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]) =>
+  `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model, providers)}`
 
 export const FullLabelForModel = (
   model: LanguageModel,
