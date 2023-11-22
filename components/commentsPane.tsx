@@ -88,7 +88,6 @@ export function CommentCell({
     versions.filter(v => v.parentID === version?.parentID).findIndex(v => v.id === comment.versionID) + 1
 
   const selectComment = onSelect ? () => onSelect(comment.parentID, comment.versionID, comment.runID) : undefined
-  const availableProviders = useAvailableModelProviders()
   const userName = user ? user.fullName : 'Unknown user'
 
   return (
@@ -119,13 +118,7 @@ export function CommentCell({
           </div>
           {(version || parentName || comment.quote) && (
             <CommentQuote>
-              {version && (
-                <span className='font-medium'>
-                  {IsPromptVersion(version)
-                    ? `${versionIndex} › ${LabelForModel(version.config.model, availableProviders)}`
-                    : `Version ${versionIndex}`}
-                </span>
-              )}
+              {version && <VersionDescription index={versionIndex} version={version} />}
               {!version && parentName && <span className='font-medium'>{Capitalize(parentName)}</span>}
               <div className='line-clamp-2'>
                 {comment.quote ? (
@@ -140,6 +133,18 @@ export function CommentCell({
         </div>
       )}
     </div>
+  )
+}
+
+export const VersionDescription = ({ index, version }: { index: number; version: PromptVersion | ChainVersion }) => {
+  const availableProviders = useAvailableModelProviders()
+
+  return (
+    <span className='font-medium'>
+      {IsPromptVersion(version)
+        ? `${index} › ${LabelForModel(version.config.model, availableProviders)}`
+        : `Version ${index}`}
+    </span>
   )
 }
 
