@@ -66,19 +66,17 @@ export async function checkBudgetForScope(scopeID: number): Promise<boolean> {
 export async function incrementCostForScope(scopeID: number, cost: number) {
   await runTransactionWithExponentialBackoff(async transaction => {
     const budgetData = await getKeyedEntity(Entity.BUDGET, scopeID, transaction)
-    if (budgetData) {
-      transaction.save(
-        toBudgetData(
-          scopeID,
-          budgetData?.userID ?? scopeID,
-          budgetData?.createdAt ?? new Date(),
-          budgetData?.limit ?? null,
-          budgetData?.resetsAt ?? startOfNextMonth(),
-          budgetData?.threshold ?? null,
-          (budgetData?.cost ?? 0) + cost
-        )
+    transaction.save(
+      toBudgetData(
+        scopeID,
+        budgetData?.userID ?? scopeID,
+        budgetData?.createdAt ?? new Date(),
+        budgetData?.limit ?? null,
+        budgetData?.resetsAt ?? startOfNextMonth(),
+        budgetData?.threshold ?? null,
+        (budgetData?.cost ?? 0) + cost
       )
-    }
+    )
   })
 }
 
@@ -92,6 +90,6 @@ const toBudgetData = (
   cost: number
 ) => ({
   key: buildKey(Entity.BUDGET, scopeID),
-  data: { scopeID, limit, resetsAt, threshold, cost, userID, createdAt },
+  data: { limit, resetsAt, threshold, cost, userID, createdAt },
   excludeFromIndexes: [],
 })
