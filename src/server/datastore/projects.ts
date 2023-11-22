@@ -277,11 +277,15 @@ const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[
 async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<[User[], PendingUser[]]> {
   const [projectUsers, pendingProjectUsers] = await getSharedProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
+
+  const filterUsers = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
+    source.filter(user => !filter.some(u => u.id === user.id))
+
   return [
-    [...projectUsers, ...workspaceUsers.filter(user => !projectUsers.some(u => u.id === user.id))],
+    [...projectUsers, ...filterUsers(workspaceUsers, projectUsers)],
     [
-      ...pendingProjectUsers.filter(user => !workspaceUsers.some(u => u.id === user.id)),
-      ...pendingWorkspaceUsers.filter(user => ![...projectUsers, ...pendingProjectUsers].some(u => u.id === user.id)),
+      ...filterUsers(pendingProjectUsers, workspaceUsers),
+      ...filterUsers(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),
     ],
   ]
 }
