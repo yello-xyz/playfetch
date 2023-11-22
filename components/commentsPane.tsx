@@ -140,10 +140,9 @@ export const VersionDescription = ({ index, version }: { index: number; version:
   const availableProviders = useAvailableModelProviders()
 
   return (
-    <span className='font-medium'>
-      {IsPromptVersion(version)
-        ? `${index} › ${LabelForModel(version.config.model, availableProviders)}`
-        : `Version ${index}`}
+    <span className='text-xs font-medium text-gray-500'>
+      Version {index}
+      {IsPromptVersion(version) ? ` • ${LabelForModel(version.config.model, availableProviders)}` : ''}
     </span>
   )
 }
