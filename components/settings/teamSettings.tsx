@@ -7,13 +7,16 @@ export default function TeamSettings({ activeProject }: { activeProject: ActiveP
   const refreshProject = useRefreshProject()
 
   const inviteMembers = (emails: string[]) => api.inviteToProject(activeProject.id, emails).then(refreshProject)
+  const revokeMemberAccess = (userID: number) => api.revokeProjectAccess(activeProject.id, userID).then(refreshProject)
 
   return (
     <div className='flex flex-col gap-3 p-3 bg-white border border-gray-200 rounded-lg'>
       <MembersPane
-        users={[...activeProject.projectOwners, ...activeProject.projectMembers]}
-        pendingUsers={activeProject.pendingProjectMembers}
+        owners={activeProject.projectOwners}
+        members={activeProject.projectMembers}
+        pendingMembers={activeProject.pendingProjectMembers}
         onInvite={inviteMembers}
+        onRevoke={revokeMemberAccess}
       />
     </div>
   )

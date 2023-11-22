@@ -7,13 +7,17 @@ import UserBadge from './userBadge'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 
 export default function MembersPane({
-  users,
-  pendingUsers,
+  owners = [],
+  members,
+  pendingMembers,
   onInvite,
+  onRevoke,
 }: {
-  users: User[]
-  pendingUsers: PendingUser[]
+  owners?: User[]
+  members: User[]
+  pendingMembers: PendingUser[]
   onInvite: (emails: string[]) => void
+  onRevoke?: (userID: number) => void
 }) {
   const [email, setEmail] = useState('')
 
@@ -22,7 +26,7 @@ export default function MembersPane({
     .map(email => email.trim())
     .filter(email => email.length > 0)
 
-  const previousEmails = new Set([...users, ...pendingUsers].map(user => user.email))
+  const previousEmails = new Set([...owners, ...members, ...pendingMembers].map(user => user.email))
   const emailsAreValid =
     emails.length > 0 && emails.every(email => CheckValidEmail(email) && !previousEmails.has(email))
 
@@ -37,14 +41,17 @@ export default function MembersPane({
         </Button>
       </div>
       <SectionHeader>People with access</SectionHeader>
-      {users.map((user, index) => (
+      {owners.map((user, index) => (
         <UserBadge key={index} user={user} padding='' />
       ))}
-      {pendingUsers.length > 0 && (
+      {members.map((user, index) => (
+        <UserBadge key={index} user={user} padding='' />
+      ))}
+      {pendingMembers.length > 0 && (
         <>
           <SectionHeader>Pending invitations</SectionHeader>
-          {pendingUsers.map((user, index) => (
-            <PendingUserBadge key={index} user={user} />
+          {pendingMembers.map((user, index) => (
+            <PendingUserBadge key={index} user={user} onRevoke={onRevoke} />
           ))}
         </>
       )}
@@ -56,7 +63,7 @@ const SectionHeader = ({ children }: { children: string }) => (
   <span className='text-xs font-medium text-gray-400'>{children}</span>
 )
 
-function PendingUserBadge({ user }: { user: PendingUser }) {
+function PendingUserBadge({ user, onRevoke }: { user: PendingUser; onRevoke?: (userID: number) => void }) {
   const formattedDate = useFormattedDate(user.timestamp, FormatRelativeDate)
 
   return (
@@ -64,12 +71,18 @@ function PendingUserBadge({ user }: { user: PendingUser }) {
       <div className='flex-1 min-w-0'>
         <UserBadge user={user} padding='' />
       </div>
-      <div className='flex flex-col items-end text-xs'>
-        <span className='text-gray-700'>
-          invited by <span className='font-medium'>{user.invitedBy.fullName}</span>
-        </span>
-        <span className='text-gray-400'>{formattedDate}</span>
-      </div>
+      {onRevoke ? (
+        <Button type='destructive' onClick={() => onRevoke(user.id)}>
+          Revoke
+        </Button>
+      ) : (
+        <div className='flex flex-col items-end text-xs'>
+          <span className='text-gray-700'>
+            invited by <span className='font-medium'>{user.invitedBy.fullName}</span>
+          </span>
+          <span className='text-gray-400'>{formattedDate}</span>
+        </div>
+      )}
     </div>
   )
 }

@@ -37,8 +37,8 @@ function InvitePopup({ users, pendingUsers, onInvite, withDismiss }: InvitePopup
   return (
     <PopupContent className='flex flex-col gap-3.5 p-3 w-[485px]'>
       <MembersPane
-        users={users}
-        pendingUsers={pendingUsers}
+        members={users}
+        pendingMembers={pendingUsers}
         onInvite={emails => withDismiss(() => onInvite(emails))()}
       />
     </PopupContent>
