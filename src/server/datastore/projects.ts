@@ -16,7 +16,7 @@ import {
 } from './datastore'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
-import { grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
+import { grantUserAccess, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
@@ -151,6 +151,7 @@ export async function addProjectForUser(
   )
   const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
   await getDatastore().save([projectData, promptData, versionData])
+  await grantUserAccess(userID, userID, projectID, 'project', 'owner')
   return projectID
 }
 
