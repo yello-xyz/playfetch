@@ -2,12 +2,13 @@ import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import CustomModelSettings from './customModelSettings'
-import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
+import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
 import UsageSettings from './usageSettings'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 
 const ProvidersPane = 'providers'
 const CustomModelsPane = 'customModels'
@@ -33,7 +34,7 @@ const descriptionForPane = (pane: ActivePane) => {
     case ProvidersPane:
       return 'Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'
     case CustomModelsPane:
-      return 'Give each model you want to use a short unique name and optional description to enable it within the app.'
+      return 'Give each model you want to use a short unique name and optional description to enable it in the model selector.'
     case UsagePane:
       return 'Limit your API expenditure by setting a monthly spending limit. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
     case ConnectorsPane:
@@ -53,16 +54,16 @@ const projectScopeDescriptionForPane = (pane: ActivePane) => {
 }
 
 export default function SettingsView({
-  scopeID,
+  activeProject,
   providers,
-  showProjectScopeDescription,
   refresh,
 }: {
-  scopeID: number
+  activeProject?: ActiveProject
   providers: AvailableProvider[]
-  showProjectScopeDescription?: boolean
   refresh: () => void
 }) {
+  const user = useLoggedInUser()
+  const scopeID = activeProject?.id ?? user.id
   const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
 
   const [costUsage, setCostUsage] = useState<CostUsage>()
@@ -90,7 +91,7 @@ export default function SettingsView({
         <SettingsPane
           title={titleForPane(activePane)}
           description={descriptionForPane(activePane)}
-          scopeDescription={showProjectScopeDescription ? projectScopeDescriptionForPane(activePane) : undefined}>
+          scopeDescription={activeProject ? projectScopeDescriptionForPane(activePane) : undefined}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}

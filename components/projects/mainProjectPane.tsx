@@ -100,12 +100,7 @@ export default function MainProjectPane({
           />
         )}
         {activeItem === SettingsItem && (
-          <SettingsView
-            scopeID={activeProject.id}
-            providers={scopedProviders}
-            showProjectScopeDescription
-            refresh={refreshProviders}
-          />
+          <SettingsView activeProject={activeProject} providers={scopedProviders} refresh={refreshProviders} />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
