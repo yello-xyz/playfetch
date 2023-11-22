@@ -58,7 +58,7 @@ const CustomTooltip = ({
         .reverse()
         .map((entry, index) => (
           <div key={index} className='flex items-center gap-2'>
-            <div style={{ backgroundColor: entry.fill }} className='w-2.5 h-2.5 rounded-sm' />
+            <div style={{ backgroundColor: entry.fill }} className='w-3 h-3 rounded-sm' />
             <span className='flex-1'>{LabelForModel(entry.name, availableProviders)}</span>
             <span className='font-medium'>{FormatCost(entry.value)}</span>
           </div>

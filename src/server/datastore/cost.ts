@@ -14,13 +14,13 @@ import { ensureScopeAccess } from './providers'
 import { ModelCosts } from '@/types'
 import { DaysAgo } from '@/src/common/formatting'
 
-export async function migrateAnalytics(postMerge: boolean) {
+export async function migrateCosts(postMerge: boolean) {
   if (postMerge) {
     return
   }
   const datastore = getDatastore()
-  const [allCost] = await datastore.runQuery(datastore.createQuery(Entity.COST))
-  for (const costData of allCost) {
+  const [allCosts] = await datastore.runQuery(datastore.createQuery(Entity.COST))
+  for (const costData of allCosts) {
     await getDatastore().save(
       toCostData(costData.scopeID, costData.model, costData.range, costData.createdAt, costData.cost, getID(costData))
     )
