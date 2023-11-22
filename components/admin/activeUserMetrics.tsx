@@ -71,9 +71,7 @@ export default function ActiveUserMetrics({
           <Label>Registered Providers:</Label>
           <div className='flex flex-col gap-1'>
             {metrics.providers.map((provider, index) => (
-              <Label key={index}>
-                • {LabelForProvider(provider.provider)} ({FormatCost(provider.cost)})
-              </Label>
+              <Label key={index}>• {LabelForProvider(provider)}</Label>
             ))}
           </div>
         </div>

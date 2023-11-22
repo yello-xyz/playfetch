@@ -315,7 +315,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   endpointTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].endpoints++)
 
   const providersData = await getEntities(Entity.PROVIDER, 'scopeID', userID)
-  const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
+  const providers = providersData.map(providerData => providerData.provider)
 
   return {
     createdWorkspaceCount,

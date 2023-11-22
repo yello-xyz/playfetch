@@ -4,7 +4,6 @@ import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider } from
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
-import { FormatCost } from '@/src/common/formatting'
 import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
@@ -82,6 +81,7 @@ function ProviderRow({
     })
   }
 
+  const isProviderAvailable = availableProvider && !isUpdating
   const flexLayout = availableProvider || isUpdating ? 'flex-col' : 'justify-between'
 
   return (
@@ -89,12 +89,9 @@ function ProviderRow({
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <Label className='w-40'>{label}</Label>
-        {availableProvider && availableProvider.cost > 0 && (
-          <div className='flex justify-end text-xs grow'>{FormatCost(availableProvider.cost)}</div>
-        )}
       </div>
       <div className='flex items-center gap-2.5'>
-        {availableProvider && !isUpdating && (
+        {isProviderAvailable && (
           <>
             <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />
             {includeEnvironment && previousEnvironment && <TextInput disabled value={previousEnvironment} />}
@@ -125,7 +122,7 @@ function ProviderRow({
           <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>
             {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
           </Button>
-          {availableProvider && !isUpdating && (
+          {isProviderAvailable && (
             <Button type='destructive' disabled={isProcessing} onClick={removeKey}>
               Remove
             </Button>
