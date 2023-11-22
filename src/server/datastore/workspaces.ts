@@ -59,15 +59,16 @@ async function loadActiveWorkspace(userID: number, workspace: Workspace): Promis
 }
 
 export async function addWorkspaceForUser(userID: number, workspaceName?: string) {
+  const createdAt = new Date()
   const workspaceData = toWorkspaceData(
     userID,
     workspaceName ?? 'Drafts',
-    new Date(),
+    createdAt,
     workspaceName ? undefined : userID
   )
   await getDatastore().save(workspaceData)
   const workspaceID = getID(workspaceData)
-  await grantUserAccess(userID, userID, workspaceID, 'workspace', 'owner')
+  await grantUserAccess(userID, userID, workspaceID, 'workspace', 'owner', createdAt)
   return workspaceID
 }
 

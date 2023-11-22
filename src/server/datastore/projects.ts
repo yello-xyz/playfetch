@@ -169,7 +169,7 @@ export async function addProjectForUser(
   )
   const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
   await getDatastore().save([projectData, promptData, versionData])
-  await grantUserAccess(userID, userID, projectID, 'project', 'owner')
+  await grantUserAccess(userID, userID, projectID, 'project', 'owner', createdAt)
   return projectID
 }
 
