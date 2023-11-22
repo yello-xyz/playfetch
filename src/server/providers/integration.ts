@@ -10,7 +10,7 @@ import {
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderCredentials, incrementProviderCost } from '../datastore/providers'
+import { getProviderCredentials } from '../datastore/providers'
 import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
@@ -54,7 +54,6 @@ export const IncrementProviderCost = (
   cost: number
 ) => {
   if (scopeID && providerID && cost > 0) {
-    incrementProviderCost(providerID, cost)
     updateScopedModelCost(scopeID, model, cost)
     incrementCostForScope(scopeID, cost)
   }

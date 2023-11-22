@@ -121,13 +121,11 @@ export type CustomModel = {
 
 export type AvailableModelProvider = {
   provider: ModelProvider
-  cost: number
   customModels: CustomModel[]
   gatedModels: DefaultLanguageModel[]
 }
 export type AvailableQueryProvider = {
   provider: QueryProvider
-  cost: number
   environment: string
 }
 export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider

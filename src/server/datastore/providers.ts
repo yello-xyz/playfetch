@@ -6,8 +6,6 @@ import {
   getDatastore,
   getFilteredEntities,
   getID,
-  getKeyedEntity,
-  runTransactionWithExponentialBackoff,
 } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import {
@@ -54,7 +52,6 @@ export async function migrateProviders(postMerge: boolean) {
         providerData.provider,
         providerData.apiKey,
         JSON.parse(providerData.metadata),
-        providerData.cost,
         getID(providerData)
       )
     )
@@ -90,7 +87,6 @@ const toProviderData = (
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   metadata: ProviderMetadata,
-  cost: number,
   providerID?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
@@ -99,7 +95,6 @@ const toProviderData = (
     provider,
     apiKey,
     metadata: JSON.stringify(metadata),
-    cost,
   },
   excludeFromIndexes: ['apiKey', 'metadata'],
 })
@@ -108,29 +103,10 @@ const toAvailableProvider = (data: any): AvailableProvider => {
   const metadata = JSON.parse(data.metadata) as ProviderMetadata
   return {
     provider: data.provider,
-    cost: data.cost,
     ...(ModelProviders.includes(data.provider)
       ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
       : { environment: metadata.environment ?? '' }),
   }
-}
-
-export async function incrementProviderCost(providerID: number, cost: number) {
-  await runTransactionWithExponentialBackoff(async transaction => {
-    const providerData = await getKeyedEntity(Entity.PROVIDER, providerID, transaction)
-    if (providerData) {
-      transaction.save(
-        toProviderData(
-          providerData.scopeID,
-          providerData.provider,
-          providerData.apiKey,
-          JSON.parse(providerData.metadata),
-          providerData.cost + cost,
-          providerID
-        )
-      )
-    }
-  })
 }
 
 export const ensureScopeAccess = async (userID: number, scopeID: number) =>
@@ -146,7 +122,7 @@ export async function saveProviderKey(
   await ensureScopeAccess(userID, scopeID)
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
-  await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, 0, providerID))
+  await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, providerID))
 }
 
 export async function saveProviderModel(
@@ -167,7 +143,7 @@ export async function saveProviderModel(
       { id: modelID, name, description, enabled },
     ]
     await getDatastore().save(
-      toProviderData(scopeID, provider, providerData.apiKey, metadata, providerData.cost, getID(providerData))
+      toProviderData(scopeID, provider, providerData.apiKey, metadata, getID(providerData))
     )
   }
 }
@@ -192,7 +168,7 @@ async function getProvidersForScopes(scopeIDs: number[], reloadCustomModels = fa
   }
 
   if (!availableProviders.find(key => key.provider === DefaultProvider)) {
-    availableProviders.push({ provider: DefaultProvider, cost: 0, customModels: [], gatedModels: [] })
+    availableProviders.push({ provider: DefaultProvider, customModels: [], gatedModels: [] })
   }
 
   return availableProviders
@@ -217,7 +193,6 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
         availableProviderData.provider,
         availableProviderData.apiKey,
         { ...previousMetadata, customModels: filteredCustomModels, gatedModels: currentGatedModels },
-        availableProviderData.cost,
         getID(availableProviderData)
       )
     )
