@@ -44,11 +44,12 @@ export async function hasUserAccess(userID: number, objectID: number) {
   return !!accessData && (accessData.state === 'default' || accessData.state === 'owner')
 }
 
-export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
-  const hasAccess = await hasUserAccess(userID, objectID)
-  if (!hasAccess) {
-    const state = userID === grantedBy ? 'owner' : 'pending'
-    await getDatastore().save(toAccessData(userID, objectID, kind, state, grantedBy, new Date()))
+export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind, state: State) {
+  const accessData = await getAccessData(userID, objectID)
+  if (!accessData || accessData.state !== state) {
+    await getDatastore().save(
+      toAccessData(userID, objectID, kind, state, grantedBy, new Date(), accessData ? getID(accessData) : undefined)
+    )
   }
 }
 
@@ -112,7 +113,7 @@ export async function grantUsersAccess(
   for (const email of emails) {
     const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
-      await grantUserAccess(userID, user.id, objectID, kind)
+      await grantUserAccess(userID, user.id, objectID, kind, 'pending')
       hasUserAccess(user.id, user.id).then(hasAccess =>
         hasAccess ? sendInviteEmail(userID, email, objectID, kind) : {}
       )

@@ -67,7 +67,7 @@ export async function addWorkspaceForUser(userID: number, workspaceName?: string
   )
   await getDatastore().save(workspaceData)
   const workspaceID = getID(workspaceData)
-  await grantUserAccess(userID, userID, workspaceID, 'workspace')
+  await grantUserAccess(userID, userID, workspaceID, 'workspace', 'owner')
   return workspaceID
 }
 
