@@ -1,7 +1,8 @@
 import { DaysAgo, FormatCost, FormatDate, FormatDuration } from '@/src/common/formatting'
 import { Analytics, Usage } from '@/types'
-import { Area, AreaChart, Bar, BarChart, Pie, PieChart, Sector, Tooltip, XAxis } from 'recharts'
+import { Area, AreaChart, Bar, BarChart, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from './dashboardContainer'
+import PercentagePieChart from './percentagePieChart'
 
 const prepareData = (analytics: Usage[]) =>
   analytics
@@ -110,20 +111,7 @@ export default function AnalyticsDashboards({
           range={recentUsage.length}
           callback={toggleDayRange}
           addBottomPadding>
-          <PieChart>
-            <Pie
-              data={[{ value: 1 - cacheHits }, { name: `${(100 * cacheHits).toFixed(0)}%`, value: cacheHits }]}
-              activeIndex={1}
-              activeShape={renderPieSegment}
-              startAngle={90 - cacheHits * 360}
-              endAngle={-270 - cacheHits * 360}
-              cx='50%'
-              cy='50%'
-              innerRadius={60}
-              outerRadius={80}
-              dataKey='value'
-            />
-          </PieChart>
+          <PercentagePieChart percentage={cacheHits} />
         </DashboardContainer>
       )}
     </div>
@@ -148,54 +136,3 @@ const CustomTooltip = ({
       <span>{`${label}: ${formatter(payload)}`}</span>
     </div>
   ) : null
-
-const renderPieSegment = ({
-  cx,
-  cy,
-  innerRadius,
-  outerRadius,
-  startAngle,
-  endAngle,
-  name,
-}: {
-  cx?: number
-  cy?: number
-  innerRadius?: number
-  outerRadius?: number
-  startAngle?: number
-  endAngle?: number
-  name?: string
-}) => (
-  <g>
-    <defs>
-      <linearGradient id='gradient' x1='1' y1='1' x2='0' y2='0'>
-        <stop offset='0%' stopColor='#E14BD2' stopOpacity={1} />
-        <stop offset='100%' stopColor='#E14BD2' stopOpacity={0.3} />
-      </linearGradient>
-    </defs>
-    <text x={cx} y={cy} dy={8} textAnchor='middle' fill='#333A46' fontSize={30} fontWeight={600}>
-      {name}
-    </text>
-    <Sector
-      cx={cx}
-      cy={cy}
-      innerRadius={innerRadius}
-      outerRadius={outerRadius}
-      startAngle={0}
-      endAngle={360}
-      fill='#FDF2FC'
-    />
-    <Sector
-      cx={cx}
-      cy={cy}
-      innerRadius={innerRadius}
-      outerRadius={outerRadius}
-      startAngle={startAngle}
-      endAngle={endAngle}
-      cornerRadius={10}
-      forceCornerRadius
-      cornerIsExternal
-      fill='url(#gradient)'
-    />
-  </g>
-)
