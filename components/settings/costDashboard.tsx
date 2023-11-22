@@ -7,13 +7,12 @@ import { LabelForModel } from '@/src/common/providerMetadata'
 const colors = ['#9ACEB2', '#FAE3A8', '#8BBBF3', '#F9D093', '#BEA4F6', '#EC9987']
 
 export default function CostDashboard({
-  costUsage,
+  modelCosts,
   availableProviders,
 }: {
-  costUsage: CostUsage
+  modelCosts: CostUsage['modelCosts']
   availableProviders: AvailableModelProvider[]
 }) {
-  const modelCosts = costUsage.modelCosts
   const days = modelCosts.length || 1
   const averageCost = modelCosts.flatMap(Object.values).reduce((sum, next) => sum + next, 0) / days
   const costForModel = (model: string) => modelCosts.map(cost => cost[model] ?? 0).reduce((sum, next) => sum + next, 0)
@@ -24,21 +23,19 @@ export default function CostDashboard({
   }))
 
   return (
-    <div className='flex gap-4'>
-      <DashboardContainer
-        title='Average Daily Cost'
-        value={FormatCost(averageCost)}
-        range={days}
-        customRange='Current month'>
-        <BarChart id='cost' data={data} margin={{ left: 20, right: 20, top: 10, bottom: 0 }}>
-          <XAxis dataKey='name' hide />
-          <Tooltip cursor={false} content={<CustomTooltip availableProviders={availableProviders} />} />
-          {models.map((model, index) => (
-            <Bar key={index} dataKey={model} stackId={0} fill={colors[index % colors.length]} />
-          ))}
-        </BarChart>
-      </DashboardContainer>
-    </div>
+    <DashboardContainer
+      title='Average Daily Cost'
+      value={FormatCost(averageCost)}
+      range={days}
+      customRange='Current month'>
+      <BarChart id='cost' data={data} margin={{ left: 20, right: 20, top: 10, bottom: 0 }}>
+        <XAxis dataKey='name' hide />
+        <Tooltip cursor={false} content={<CustomTooltip availableProviders={availableProviders} />} />
+        {models.map((model, index) => (
+          <Bar key={index} dataKey={model} stackId={0} fill={colors[index % colors.length]} />
+        ))}
+      </BarChart>
+    </DashboardContainer>
   )
 }
 

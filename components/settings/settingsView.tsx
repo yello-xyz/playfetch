@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
-import CostDashboard from './costDashboard'
+import UsageSettings from './usageSettings'
 
 const ProvidersPane = 'providers'
 const CustomModelsPane = 'customModels'
@@ -101,7 +101,7 @@ export default function SettingsView({
             <CustomModelSettings scopeID={scopeID} availableProviders={availableModelProviders} onRefresh={refresh} />
           )}
           {activePane === UsagePane && !!costUsage && (
-            <CostDashboard costUsage={costUsage} availableProviders={availableModelProviders} />
+            <UsageSettings costUsage={costUsage} availableProviders={availableModelProviders} />
           )}
           {activePane === ConnectorsPane && (
             <ProviderSettings
