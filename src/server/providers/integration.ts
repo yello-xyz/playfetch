@@ -16,6 +16,7 @@ import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
 import { updateScopedModelCost } from '../datastore/cost'
+import { checkBudgetForScope, incrementCostForScope } from '../datastore/budget'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) =>
   (encode(content).length * pricePerMillionTokens) / 1000000
@@ -35,6 +36,17 @@ export const CredentialsForProvider = async (scopeIDs: number[], provider: Model
   }
 }
 
+export const CheckBudgetForProvider = async (scopeID: number | null, provider: ModelProvider) => {
+  switch (provider) {
+    case 'google':
+      return Promise.resolve(true)
+    case 'openai':
+    case 'anthropic':
+    case 'cohere':
+      return !!scopeID && checkBudgetForScope(scopeID)
+  }
+}
+
 export const IncrementProviderCost = (
   scopeID: number | null,
   providerID: number | null,
@@ -44,6 +56,7 @@ export const IncrementProviderCost = (
   if (scopeID && providerID && cost > 0) {
     incrementProviderCost(providerID, cost)
     updateScopedModelCost(scopeID, model, cost)
+    incrementCostForScope(scopeID, cost)
   }
 }
 

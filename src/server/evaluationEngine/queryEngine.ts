@@ -1,8 +1,14 @@
 import { EmbeddingModel, QueryProvider } from '@/types'
 import { getProviderCredentials } from '../datastore/providers'
-import { CredentialsForProvider, CreateEmbedding, IncrementProviderCost } from '../providers/integration'
+import {
+  CredentialsForProvider,
+  CreateEmbedding,
+  IncrementProviderCost,
+  CheckBudgetForProvider,
+} from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
+import { ErrorRunResponse } from './promptEngine'
 
 type QueryResponse = (
   | { result: string[]; output: string; error: undefined; failed: false }
@@ -30,6 +36,9 @@ export const runQuery = async (
     if (!embeddingAPIKey) {
       throw new Error('Missing API key')
     }
+    if (!(await CheckBudgetForProvider(scopeID, embeddingProvider))) {
+      throw new Error('Monthly usage limit exceeded')
+    }
 
     const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
     IncrementProviderCost(scopeID, providerID, model, cost)
@@ -38,6 +47,6 @@ export const runQuery = async (
 
     return { result, output: result.join('\n'), error: undefined, failed: false, cost, attempts: 1 }
   } catch (error: any) {
-    return { result: undefined, output: undefined, error: error.message, failed: true, cost: 0, attempts: 1 }
+    return ErrorRunResponse(error.message)
   }
 }
