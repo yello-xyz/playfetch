@@ -101,7 +101,7 @@ export default function SettingsView({
             <CustomModelSettings scopeID={scopeID} availableProviders={availableModelProviders} onRefresh={refresh} />
           )}
           {activePane === UsagePane && !!costUsage && (
-            <UsageSettings costUsage={costUsage} availableProviders={availableModelProviders} />
+            <UsageSettings scopeID={scopeID} costUsage={costUsage} availableProviders={availableModelProviders} />
           )}
           {activePane === ConnectorsPane && (
             <ProviderSettings
