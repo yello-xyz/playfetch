@@ -12,6 +12,7 @@ import IconButton from '../iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 
 import dynamic from 'next/dynamic'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
 
 export default function ProjectSidebar({
@@ -61,6 +62,9 @@ export default function ProjectSidebar({
     activeItem !== SettingsItem &&
     activeItem?.id === item.id
 
+  const user = useLoggedInUser()
+  const isProjectOwner = activeProject.projectOwners.some(owner => owner.id === user.id)
+
   return (
     <Sidebar>
       <SidebarSection>
@@ -76,12 +80,14 @@ export default function ProjectSidebar({
           active={activeItem === EndpointsItem}
           onClick={onSelectEndpoints}
         />
-        <SidebarButton
-          title='Settings'
-          icon={settingsIcon}
-          active={activeItem === SettingsItem}
-          onClick={onSelectSettings}
-        />
+        {isProjectOwner && (
+          <SidebarButton
+            title='Settings'
+            icon={settingsIcon}
+            active={activeItem === SettingsItem}
+            onClick={onSelectSettings}
+          />
+        )}
       </SidebarSection>
       <SidebarSection title='Prompts' actionComponent={addPromptButton}>
         {activeProject.prompts.map((prompt, promptIndex) => (
