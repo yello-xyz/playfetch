@@ -44,7 +44,7 @@ export default function WorkspaceSidebar({
         <SidebarSection>
           <UserSidebarItem />
         </SidebarSection>
-        <div className='flex flex-col gap-4 pr-2 -mr-2 overflow-y-auto'>
+        <div className='flex flex-col flex-1 gap-4 pr-2 -mr-2 overflow-y-auto'>
           <SidebarSection>
             {userWorkspace && (
               <SidebarButton
