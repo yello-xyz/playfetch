@@ -4,11 +4,11 @@ import ProviderSettings from './providerSettings'
 import CustomModelSettings from './customModelSettings'
 import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
 import UsageSettings from './usageSettings'
 import { useLoggedInUser } from '@/src/client/context/userContext'
+import SettingsSidebar from './settingsSidebar'
 
 const ProvidersPane = 'providers'
 const CustomModelsPane = 'customModels'
@@ -83,10 +83,16 @@ export default function SettingsView({
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)
+  const panes = [ProvidersPane, ...(haveCustomModels ? [CustomModelsPane] : []), UsagePane, ConnectorsPane]
 
   return (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
-      <InnerSidebar activePane={activePane} setActivePane={setActivePane} haveCustomModels={haveCustomModels} />
+      <SettingsSidebar
+        panes={panes as ActivePane[]}
+        activePane={activePane}
+        setActivePane={setActivePane}
+        titleForPane={titleForPane}
+      />
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
         <SettingsPane
           title={titleForPane(activePane)}
@@ -125,32 +131,3 @@ export default function SettingsView({
     </div>
   )
 }
-
-const InnerSidebar = ({
-  activePane,
-  setActivePane,
-  haveCustomModels,
-}: {
-  activePane: ActivePane
-  setActivePane: (pane: ActivePane) => void
-  haveCustomModels: boolean
-}) => (
-  <div className='flex flex-col min-w-[220px] overflow-y-auto'>
-    <InnerSidebarItem pane={ProvidersPane} activePane={activePane} setActivePane={setActivePane} />
-    {haveCustomModels && (
-      <InnerSidebarItem pane={CustomModelsPane} activePane={activePane} setActivePane={setActivePane} />
-    )}
-    <InnerSidebarItem pane={UsagePane} activePane={activePane} setActivePane={setActivePane} />
-    <InnerSidebarItem pane={ConnectorsPane} activePane={activePane} setActivePane={setActivePane} />
-  </div>
-)
-
-const InnerSidebarItem = ({
-  pane,
-  activePane,
-  setActivePane,
-}: {
-  pane: ActivePane
-  activePane: ActivePane
-  setActivePane: (pane: ActivePane) => void
-}) => <SidebarButton title={titleForPane(pane)} active={pane === activePane} onClick={() => setActivePane(pane)} />
