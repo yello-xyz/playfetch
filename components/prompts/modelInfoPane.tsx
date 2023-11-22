@@ -2,7 +2,7 @@ import { LanguageModel, PromptConfig } from '@/types'
 import { PopupContent, PopupMenuItem } from '../popupMenu'
 import {
   DescriptionForModel,
-  FullLabelForModel,
+  LabelForModel,
   IconForProvider,
   InputPriceForModel,
   IsModelFreeToUse,
@@ -43,8 +43,8 @@ export default function ModelInfoPane({
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
-        <span className='font-medium'>{FullLabelForModel(model, availableProviders)}</span>
-        <LabelForModel model={model} />
+        <span className='font-medium'>{LabelForModel(model, availableProviders)}</span>
+        <ModelLabel model={model} />
         <div className='flex justify-end flex-1'>
           <IconButton icon={dotsIcon} onClick={() => setShowActionMenu(!showActionMenu)} />
         </div>
@@ -76,16 +76,17 @@ export default function ModelInfoPane({
 
 const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 
-export const LabelForModel = ({ model }: { model: LanguageModel }) => {
+export const ModelLabel = ({ model }: { model: LanguageModel }) => {
   const [defaultPromptConfig] = useDefaultPromptConfig()
 
   return IsModelFreeToUse(model) ? (
-    <ModelLabel label='Free' />
+    <ModelSuffix label='Free' />
   ) : model === defaultPromptConfig.model ? (
-    <ModelLabel label='Default' color='bg-pink-400' />
+    <ModelSuffix label='Default' color='bg-pink-400' />
   ) : null
 }
-const ModelLabel = ({ label, color = 'bg-gray-400' }: { label: string; color?: string }) => (
+
+const ModelSuffix = ({ label, color = 'bg-gray-400' }: { label: string; color?: string }) => (
   <span className={`${color} px-1 ml-1 text-[10px] leading-[17px] font-medium text-white rounded`}>{label}</span>
 )
 

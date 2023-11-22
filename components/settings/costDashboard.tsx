@@ -2,7 +2,7 @@ import { DaysAgo, FormatCost, FormatDate } from '@/src/common/formatting'
 import { AvailableModelProvider, ModelCosts } from '@/types'
 import { Bar, BarChart, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from '../endpoints/dashboardContainer'
-import { FullLabelForModel } from '@/src/common/providerMetadata'
+import { LabelForModel } from '@/src/common/providerMetadata'
 
 const colors = ['#9ACEB2', '#FAE3A8', '#8BBBF3', '#F9D093', '#BEA4F6', '#EC9987']
 
@@ -59,7 +59,7 @@ const CustomTooltip = ({
         .map((entry, index) => (
           <div key={index} className='flex items-center gap-2'>
             <div style={{ backgroundColor: entry.fill }} className='w-2.5 h-2.5 rounded-sm' />
-            <span className='flex-1'>{FullLabelForModel(entry.name, availableProviders)}</span>
+            <span className='flex-1'>{LabelForModel(entry.name, availableProviders)}</span>
             <span className='font-medium'>{FormatCost(entry.value)}</span>
           </div>
         ))}

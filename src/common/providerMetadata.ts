@@ -210,7 +210,7 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
   }
 }
 
-const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
+export const LabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
   switch (model) {
     case 'gpt-3.5-turbo':
       return 'GPT-3.5 Turbo'
@@ -235,38 +235,8 @@ const labelForModel = (model: LanguageModel, providers: AvailableModelProvider[]
   }
 }
 
-const shortLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]): string => {
-  switch (model) {
-    case 'gpt-3.5-turbo':
-    case 'gpt-3.5-turbo-16k':
-      return 'GPT3.5'
-    case 'gpt-4':
-    case 'gpt-4-turbo':
-      return 'GPT4'
-    case 'claude-instant-1':
-    case 'claude-2':
-      return 'Claude'
-    case 'text-bison':
-    case 'chat-bison':
-      return 'PaLM 2'
-    case 'command':
-      return 'Command'
-    default:
-      return labelForModel(model, providers)
-  }
-}
-
-export const ShortLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]) =>
-  `${LabelForProvider(ProviderForModel(model))} ${shortLabelForModel(model, providers)}`
-
-export const FullLabelForModel = (
-  model: LanguageModel,
-  providers: AvailableModelProvider[],
-  includeProvider = false
-) =>
-  includeProvider
-    ? `${LabelForProvider(ProviderForModel(model))} - ${labelForModel(model, providers)}`
-    : labelForModel(model, providers)
+export const FullLabelForModel = (model: LanguageModel, providers: AvailableModelProvider[]) =>
+  `${LabelForProvider(ProviderForModel(model))} - ${LabelForModel(model, providers)}`
 
 export const WebsiteLinkForModel = (model: LanguageModel): string => {
   switch (model) {

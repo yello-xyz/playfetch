@@ -1,7 +1,7 @@
 import { ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { ShortLabelForModel } from '@/src/common/providerMetadata'
+import { LabelForModel } from '@/src/common/providerMetadata'
 import { VersionLabels } from '../versions/versionLabels'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { TaggedContent } from '../versions/versionComparison'
@@ -50,7 +50,7 @@ function PromptNodeBody({
     <div className='flex flex-col'>
       <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2.5 ml-0.5'>
         <span className='text-xs font-medium text-gray-500'>
-          {ShortLabelForModel(version.config.model, availableProviders)} | Prompt version {index + 1}
+          {LabelForModel(version.config.model, availableProviders)} | Prompt version {index + 1}
         </span>
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>

@@ -16,7 +16,7 @@ import UserAvatar from '@/components/users/userAvatar'
 import collapseIcon from '@/public/collapse.svg'
 import IconButton from './iconButton'
 import VersionComparison from './versions/versionComparison'
-import { ShortLabelForModel } from '@/src/common/providerMetadata'
+import { LabelForModel } from '@/src/common/providerMetadata'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
@@ -122,7 +122,7 @@ export function CommentCell({
               {version && (
                 <span className='font-medium'>
                   {IsPromptVersion(version)
-                    ? `${versionIndex} › ${ShortLabelForModel(version.config.model, availableProviders)}`
+                    ? `${versionIndex} › ${LabelForModel(version.config.model, availableProviders)}`
                     : `Version ${versionIndex}`}
                 </span>
               )}

@@ -3,7 +3,7 @@ import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import { FullLabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
+import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { labelForChatMode } from './chatModePopupButton'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
@@ -41,7 +41,7 @@ export default function PromptVersionCellBody({
 }
 
 export const FormatPromptConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) =>
-  `Model: ${FullLabelForModel(config.model, availableProviders)}
+  `Model: ${LabelForModel(config.model, availableProviders)}
 Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
 Temperature: ${config.temperature}`

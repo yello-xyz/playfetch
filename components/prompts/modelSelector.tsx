@@ -3,10 +3,11 @@ import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/c
 import Icon from '../icon'
 import { PopupButton } from '../popupButton'
 import { PopupContent, PopupLabelItem } from '../popupMenu'
-import ModelInfoPane, { LabelForModel } from './modelInfoPane'
+import ModelInfoPane, { ModelLabel } from './modelInfoPane'
 import {
   PublicLanguageModels,
   FullLabelForModel,
+  LabelForModel,
   GatedLanguageModels,
   IconForProvider,
   ProviderForModel,
@@ -34,7 +35,7 @@ export default function ModelSelector({
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup} disabled={disabled}>
       <Icon icon={IconForProvider(ProviderForModel(config.model))} />
       <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
-        {FullLabelForModel(config.model, availableProviders)}
+        {LabelForModel(config.model, availableProviders)}
       </span>
     </PopupButton>
   )
@@ -67,14 +68,14 @@ function ModelSelectorPopup({
     <PopupContent className='relative w-64 p-3' autoOverflow={false}>
       {allModels
         .sort((a, b) =>
-          FullLabelForModel(a, availableProviders, true).localeCompare(FullLabelForModel(b, availableProviders, true))
+          FullLabelForModel(a, availableProviders).localeCompare(FullLabelForModel(b, availableProviders))
         )
         .map((model, index) => (
           <div key={index} className='group'>
             <PopupLabelItem
-              title={FullLabelForModel(model, availableProviders)}
+              title={LabelForModel(model, availableProviders)}
               icon={IconForProvider(ProviderForModel(model))}
-              label={<LabelForModel model={model} />}
+              label={<ModelLabel model={model} />}
               onClick={withDismiss(() => onSelectModel(model))}
               disabled={!checkModelAvailable(model)}
               checked={model === config.model}
