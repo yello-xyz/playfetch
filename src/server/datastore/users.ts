@@ -314,7 +314,7 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   commentTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].comments++)
   endpointTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].endpoints++)
 
-  const providersData = await getEntities(Entity.PROVIDER, 'userID', userID)
+  const providersData = await getEntities(Entity.PROVIDER, 'scopeID', userID)
   const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
 
   return {
