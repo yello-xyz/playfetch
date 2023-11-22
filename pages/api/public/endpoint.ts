@@ -121,7 +121,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             ? { [DefaultChatContinuationInputKey]: req.body }
             : (req.body as PromptInputs)
 
-        const cachedResponse = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
+        const cachedResponse = endpoint.useCache && !continuationID ? await getCachedResponse(versionID, inputs) : null
         if (cachedResponse && useStreaming) {
           res.write(cachedResponse.output)
         }
