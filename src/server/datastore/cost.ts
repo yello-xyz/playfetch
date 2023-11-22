@@ -11,8 +11,9 @@ import {
   afterDateFilter,
 } from './datastore'
 import { ensureScopeAccess } from './providers'
-import { ModelCosts } from '@/types'
+import { CostUsage } from '@/types'
 import { DaysAgo } from '@/src/common/formatting'
+import { getTrustedBudgetForScope } from './budget'
 
 export async function migrateCosts(postMerge: boolean) {
   if (postMerge) {
@@ -27,7 +28,7 @@ export async function migrateCosts(postMerge: boolean) {
   }
 }
 
-export async function getModelCostsForScope(userID: number, scopeID: number): Promise<ModelCosts[]> {
+export async function getCostUsageForScope(userID: number, scopeID: number): Promise<CostUsage> {
   await ensureScopeAccess(userID, scopeID)
 
   const today = new Date()
@@ -47,7 +48,13 @@ export async function getModelCostsForScope(userID: number, scopeID: number): Pr
 
   const daysOfMonth = Array.from({ length: dayInMonth }, (_, index) => DaysAgo(today, index)).reverse()
 
-  return daysOfMonth.map(day => costMap[day.getTime()] ?? {})
+  const budget = await getTrustedBudgetForScope(scopeID)
+
+  return {
+    limit: budget?.limit,
+    cost: budget.cost,
+    modelCosts: daysOfMonth.map(day => costMap[day.getTime()] ?? {})
+  }
 }
 
 export async function updateScopedModelCost(

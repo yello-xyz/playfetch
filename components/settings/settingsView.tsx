@@ -2,7 +2,7 @@ import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import CustomModelSettings from './customModelSettings'
-import { AvailableProvider, IsModelProvider, ModelCosts } from '@/types'
+import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useEffect, useState } from 'react'
 import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
@@ -66,16 +66,15 @@ export default function SettingsView({
 }) {
   const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
 
-  const [modelCosts, setModelCosts] = useState<ModelCosts[]>()
+  const [costUsage, setCostUsage] = useState<CostUsage>()
 
-  useEffectOnce(() => api.getModelCosts(scopeID).then(setModelCosts), [scopeID])
+  useEffectOnce(() => api.getCostUsage(scopeID).then(setCostUsage), [scopeID])
 
   const availableModelProviders = providers.filter(IsModelProvider)
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)
-  const haveModelCosts = !!modelCosts && modelCosts.length > 0
 
   return (
     <div className='flex h-full gap-10 px-10 pt-10 bg-gray-25'>
@@ -96,8 +95,8 @@ export default function SettingsView({
           {activePane === CustomModelsPane && (
             <CustomModelSettings scopeID={scopeID} availableProviders={availableModelProviders} onRefresh={refresh} />
           )}
-          {activePane === UsagePane && haveModelCosts && (
-            <CostDashboard modelCosts={modelCosts!} availableProviders={availableModelProviders} />
+          {activePane === UsagePane && !!costUsage && (
+            <CostDashboard costUsage={costUsage} availableProviders={availableModelProviders} />
           )}
           {activePane === ConnectorsPane && (
             <ProviderSettings

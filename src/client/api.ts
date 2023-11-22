@@ -18,7 +18,7 @@ import {
   PendingProject,
   OnboardingResponse,
   RunRating,
-  ModelCosts,
+  CostUsage,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -218,8 +218,8 @@ const api = {
   getAnalytics: function (projectID: number, dayRange = 30): Promise<Analytics> {
     return post(this.getAnalytics, { projectID, dayRange })
   },
-  getModelCosts: function (scopeID: number): Promise<ModelCosts[]> {
-    return post(this.getModelCosts, { scopeID })
+  getCostUsage: function (scopeID: number): Promise<CostUsage> {
+    return post(this.getCostUsage, { scopeID })
   },
   addComment: function (
     versionID: number,

@@ -325,7 +325,11 @@ export type LogEntry = {
   continuationID?: number
 }
 
-export type ModelCosts = { [model: string]: number }
+export type CostUsage = {
+  cost: number
+  limit: number | null
+  modelCosts: { [model: string]: number }[]
+}
 
 export type Analytics = {
   recentLogEntries: LogEntry[]

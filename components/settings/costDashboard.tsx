@@ -1,5 +1,5 @@
 import { DaysAgo, FormatCost, FormatDate } from '@/src/common/formatting'
-import { AvailableModelProvider, ModelCosts } from '@/types'
+import { AvailableModelProvider, CostUsage } from '@/types'
 import { Bar, BarChart, Tooltip, XAxis } from 'recharts'
 import DashboardContainer from '../endpoints/dashboardContainer'
 import { LabelForModel } from '@/src/common/providerMetadata'
@@ -7,12 +7,13 @@ import { LabelForModel } from '@/src/common/providerMetadata'
 const colors = ['#9ACEB2', '#FAE3A8', '#8BBBF3', '#F9D093', '#BEA4F6', '#EC9987']
 
 export default function CostDashboard({
-  modelCosts,
+  costUsage,
   availableProviders,
 }: {
-  modelCosts: ModelCosts[]
+  costUsage: CostUsage
   availableProviders: AvailableModelProvider[]
 }) {
+  const modelCosts = costUsage.modelCosts
   const days = modelCosts.length || 1
   const averageCost = modelCosts.flatMap(Object.values).reduce((sum, next) => sum + next, 0) / days
   const costForModel = (model: string) => modelCosts.map(cost => cost[model] ?? 0).reduce((sum, next) => sum + next, 0)
