@@ -1,14 +1,13 @@
 import { ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
 import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { LabelForModel } from '@/src/common/providerMetadata'
 import { VersionLabels } from '../versions/versionLabels'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
-import useAvailableModelProviders from '@/src/client/context/providerContext'
+import { VersionDescription } from '../commentsPane'
 
 export default function ChainNodeBoxBody({
   items,
@@ -45,13 +44,10 @@ function PromptNodeBody({
   const prompt = promptCache.promptForItem(item)
   const version = promptCache.versionForItem(item)
   const index = prompt?.versions?.findIndex(v => v.id === version?.id) ?? 0
-  const availableProviders = useAvailableModelProviders()
   return prompt && version ? (
     <div className='flex flex-col'>
       <div className='flex flex-col gap-1 pb-3 pl-8 -mt-2.5 ml-0.5'>
-        <span className='text-xs font-medium text-gray-500'>
-          {LabelForModel(version.config.model, availableProviders)} | Prompt version {index + 1}
-        </span>
+        <VersionDescription index={index + 1} version={version} />
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
       <CommonBody isSelected={isSelected}>
