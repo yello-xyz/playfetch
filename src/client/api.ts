@@ -221,6 +221,9 @@ const api = {
   getCostUsage: function (scopeID: number): Promise<CostUsage> {
     return post(this.getCostUsage, { scopeID })
   },
+  updateBudget: function (scopeID: number, limit?: number, threshold?: number) {
+    return post(this.updateBudget, { scopeID, limit, threshold })
+  },
   addComment: function (
     versionID: number,
     text: string,
