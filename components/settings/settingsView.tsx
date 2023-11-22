@@ -3,12 +3,11 @@ import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import CustomModelSettings from './customModelSettings'
 import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SidebarButton } from '../sidebar'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
 import CostDashboard from './costDashboard'
-import { useEffectOnce } from '@/src/client/hooks/useEffectOnce'
 
 const ProvidersPane = 'providers'
 const CustomModelsPane = 'customModels'
@@ -68,7 +67,13 @@ export default function SettingsView({
 
   const [costUsage, setCostUsage] = useState<CostUsage>()
 
-  useEffectOnce(() => api.getCostUsage(scopeID).then(setCostUsage), [scopeID])
+  const didFetchCostUsage = useRef(false)
+  useEffect(() => {
+    if (!didFetchCostUsage.current) {
+      didFetchCostUsage.current = true
+      api.getCostUsage(scopeID).then(setCostUsage)
+    }
+  }, [scopeID])
 
   const availableModelProviders = providers.filter(IsModelProvider)
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
