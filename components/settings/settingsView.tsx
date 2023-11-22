@@ -41,26 +41,26 @@ const descriptionForPane = (pane: ActivePane) => {
   }
 }
 
-const shouldIncludeScopeDescriptionForPane = (pane: ActivePane) => {
+const projectScopeDescriptionForPane = (pane: ActivePane) => {
   switch (pane) {
     case ProvidersPane:
     case CustomModelsPane:
     case ConnectorsPane:
-      return true
+      return 'Configurations made here will be available to anyone with project access to be used within the context of this project only.'
     case UsagePane:
-      return false
+      return undefined
   }
 }
 
 export default function SettingsView({
   scopeID,
   providers,
-  scopeDescription,
+  showProjectScopeDescription,
   refresh,
 }: {
   scopeID: number
   providers: AvailableProvider[]
-  scopeDescription?: string
+  showProjectScopeDescription?: boolean
   refresh: () => void
 }) {
   const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
@@ -88,7 +88,7 @@ export default function SettingsView({
         <SettingsPane
           title={titleForPane(activePane)}
           description={descriptionForPane(activePane)}
-          scopeDescription={shouldIncludeScopeDescriptionForPane(activePane) ? scopeDescription : undefined}>
+          scopeDescription={showProjectScopeDescription ? projectScopeDescriptionForPane(activePane) : undefined}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}

@@ -103,7 +103,7 @@ export default function MainProjectPane({
           <SettingsView
             scopeID={activeProject.id}
             providers={scopedProviders}
-            scopeDescription='Configurations made here will be available to anyone with project access to be used within the context of this project only.'
+            showProjectScopeDescription
             refresh={refreshProviders}
           />
         )}
