@@ -72,7 +72,7 @@ export async function sendBudgetNotificationEmail(
       : `Subsequent request will not be processed until the end of the month unless you increase your limit.`,
     `You can increase your ${limitName} in the ${projectName ? 'Project' : 'User'} Settings.`,
   ]
-  const configurator = projectName ?  'a project owner' : 'you'
+  const configurator = projectName ? 'a project owner' : 'you'
 
   const variables = {
     __TITLE__: title,

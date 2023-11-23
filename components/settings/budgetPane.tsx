@@ -14,43 +14,14 @@ export default function BudgetPane({
   costUsage: CostUsage
   onRefresh: () => Promise<any>
 }) {
-  const [limit, setLimit] = useState<number>()
-  const limitInputRef = useRef<HTMLInputElement>(null)
-  const editingLimit = limit !== undefined
-
-  const editLimit = () => {
-    setLimit(costUsage.limit ?? 0)
-    setTimeout(() => limitInputRef.current?.focus())
-  }
-
-  const updateLimit = () =>
-    api
-      .updateBudget(
-        scopeID,
-        editingLimit && !isNaN(limit) && limit > 0 ? limit : undefined,
-        costUsage.threshold ?? undefined
-      )
-      .then(onRefresh)
-      .then(() => setLimit(undefined))
-
-  const [threshold, setThreshold] = useState<number>()
-  const thresholdInputRef = useRef<HTMLInputElement>(null)
-  const editingThreshold = threshold !== undefined
-
-  const editThreshold = () => {
-    setThreshold(costUsage.threshold ?? 0)
-    setTimeout(() => thresholdInputRef.current?.focus())
-  }
-
-  const updateThreshold = () =>
-    api
-      .updateBudget(
-        scopeID,
-        costUsage.limit ?? undefined,
-        editingThreshold && !isNaN(threshold) && threshold > 0 ? threshold : undefined
-      )
-      .then(onRefresh)
-      .then(() => setThreshold(undefined))
+  const [limit, setLimit, limitInputRef, editingLimit, editLimit, updateLimit] = useBudgetEditor(
+    scopeID,
+    costUsage,
+    'limit',
+    onRefresh
+  )
+  const [threshold, setThreshold, thresholdInputRef, editingThreshold, editThreshold, updateThreshold] =
+    useBudgetEditor(scopeID, costUsage, 'threshold', onRefresh)
 
   return (
     <>
@@ -70,13 +41,14 @@ export default function BudgetPane({
           <div className='flex items-center gap-1 text-xl '>
             <span className='font-bold text-gray-700'>{FormatCost(costUsage.cost)}</span>/
             <BudgetInput
-              value={editingLimit ? limit : costUsage.limit}
+              value={editingLimit ? limit! : costUsage.limit}
               setValue={editingLimit ? setLimit : undefined}
               inputRef={limitInputRef}
             />
           </div>
           <span className='pr-4 text-gray-400'>
-            If the budget is exceeded in a given calendar month, project owners will be sent an email notification and subsequent requests will fail until the start of the next month.
+            If the budget is exceeded in a given calendar month, project owners will be sent an email notification and
+            subsequent requests will fail until the start of the next month.
           </span>
         </div>
       </RoundedSection>
@@ -90,7 +62,7 @@ export default function BudgetPane({
       <RoundedSection>
         <div className='flex items-center gap-8 p-5 text-xl'>
           <BudgetInput
-            value={editingThreshold ? threshold : costUsage.threshold}
+            value={editingThreshold ? threshold! : costUsage.threshold}
             setValue={editingThreshold ? setThreshold : undefined}
             inputRef={thresholdInputRef}
           />
@@ -102,6 +74,36 @@ export default function BudgetPane({
       </RoundedSection>
     </>
   )
+}
+
+const useBudgetEditor = (
+  scopeID: number,
+  costUsage: CostUsage,
+  fieldToEdit: 'limit' | 'threshold',
+  onRefresh: () => Promise<any>
+) => {
+  const [value, setValue] = useState<number>()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const isEditing = value !== undefined
+
+  const isThreshold = fieldToEdit === 'threshold'
+  const edit = () => {
+    setValue((isThreshold ? costUsage.threshold : costUsage.limit) ?? 0)
+    setTimeout(() => inputRef.current?.focus())
+  }
+
+  const updateValue = isEditing && !isNaN(value) && value > 0 ? value : undefined
+  const update = () =>
+    api
+      .updateBudget(
+        scopeID,
+        isThreshold ? costUsage.limit ?? undefined : updateValue,
+        isThreshold ? updateValue : costUsage.threshold ?? undefined
+      )
+      .then(onRefresh)
+      .then(() => setValue(undefined))
+
+  return [value, setValue, inputRef, isEditing, edit, update] as const
 }
 
 const BudgetInput = ({
