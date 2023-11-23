@@ -6,6 +6,7 @@ import TextInput from '../textInput'
 import UserBadge from './userBadge'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { useLoggedInUser } from '@/src/client/context/userContext'
+import RolePopupButton from './rolePopupButton'
 
 export default function MembersPane({
   owners = [],
@@ -45,10 +46,16 @@ export default function MembersPane({
       </div>
       <SectionHeader>People with access</SectionHeader>
       {owners.map((user, index) => (
-        <UserBadge key={index} user={user} suffix={user.id === currentUser.id ? ' (you)' : ''} padding='' />
+        <UserBadge key={index} user={user} suffix={user.id === currentUser.id ? ' (you)' : ''} padding=''>
+          {onRevoke && (
+            <RolePopupButton isOwner onRevoke={() => onRevoke(user.id)} disabled={user.id === currentUser.id} />
+          )}
+        </UserBadge>
       ))}
       {members.map((user, index) => (
-        <UserBadge key={index} user={user} padding='' />
+        <UserBadge key={index} user={user} padding=''>
+          {onRevoke && <RolePopupButton isOwner={false} onRevoke={() => onRevoke(user.id)} />}
+        </UserBadge>
       ))}
       {pendingMembers.length > 0 && (
         <>
