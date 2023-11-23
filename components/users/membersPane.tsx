@@ -70,10 +70,7 @@ function PendingUserBadge({ user, onRevoke }: { user: PendingUser; onRevoke?: (u
   const formattedDate = useFormattedDate(user.timestamp, FormatRelativeDate)
 
   return (
-    <div className='flex items-center justify-between gap-2'>
-      <div className='flex-1 min-w-0'>
-        <UserBadge user={user} padding='' />
-      </div>
+    <UserBadge user={user} padding=''>
       {onRevoke ? (
         <Button type='destructive' onClick={() => onRevoke(user.id)}>
           Revoke
@@ -86,6 +83,6 @@ function PendingUserBadge({ user, onRevoke }: { user: PendingUser; onRevoke?: (u
           <span className='text-gray-400'>{formattedDate}</span>
         </div>
       )}
-    </div>
+    </UserBadge>
   )
 }
