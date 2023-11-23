@@ -47,15 +47,26 @@ export async function migrateProjects(postMerge: boolean) {
       const accessKeys = await getEntities(Entity.ACCESS, 'objectID', projectID)
       let userID: number
       let foundInvite = false
+      let userMatch = false
       if (accessKeys.length > 0) {
         userID = accessKeys.sort((a, b) => a.createdAt - b.createdAt)[0].grantedBy
         foundInvite = true
       } else {
         const workspaceData = await getKeyedEntity(Entity.WORKSPACE, projectData.workspaceID)
         userID = workspaceData.userID
+        const prompts = await getEntities(Entity.PROMPT, 'projectID', projectID)
+        const oldestPrompt = prompts.sort((a, b) => a.createdAt - b.createdAt)[0]
+        if (oldestPrompt) {
+          const versions = await getEntities(Entity.VERSION, 'parentID', getID(oldestPrompt))
+          const oldestVersion = versions.sort((a, b) => a.createdAt - b.createdAt)[0]
+          if (oldestVersion) {
+            userMatch = userID === oldestVersion.userID
+            userID = oldestVersion.userID
+          }
+        }
       }
       const userData = await getKeyedEntity(Entity.USER, userID)
-      console.log(`${foundInvite ? '✅' : '❓'} “${projectData.name}” → ${userData.fullName}`)
+      console.log(`${foundInvite ? '✅' : userMatch ? '🟩' : '❓'} “${projectData.name}” → ${userData.fullName}`)
       await updateProject({ ...projectData, userID }, false)
       await grantUserAccess(userID, userID, projectID, 'project', 'owner', projectData.createdAt)
     }
