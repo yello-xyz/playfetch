@@ -1,0 +1,9 @@
+__TITLE__
+
+__FIRST_PARAGRAPH__
+
+__SECOND_PARAGRAPH__
+
+__THIRD_PARAGRAPH__: __SETTINGS_LINK__
+
+You have received this email because __CONFIGURATOR__ configured budget notifications in PlayFetch.
