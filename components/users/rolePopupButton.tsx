@@ -1,4 +1,4 @@
-import { PopupContent, PopupLabelItem } from '../popupMenu'
+import { PopupContent, PopupItem, PopupLabelItem } from '../popupMenu'
 import { PopupButton } from '../popupButton'
 import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/context/globalPopupContext'
 
@@ -43,6 +43,9 @@ const RolePopup = ({ isOwner, setOwner, onRevoke, withDismiss }: RolePopupProps 
       onClick={withDismiss(() => setOwner(false))}
       checked={!isOwner}
     />
-    <PopupLabelItem title='Remove Team Member' onClick={withDismiss(onRevoke)} />
+    <div className='my-2 border-t border-gray-200' />
+    <PopupItem onClick={withDismiss(onRevoke)}>
+      <div className='px-3 py-2 text-red-500 rounded hover:text-white hover:bg-red-400'>Remove Team Member</div>
+    </PopupItem>
   </PopupContent>
 )
