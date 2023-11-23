@@ -103,7 +103,7 @@ export default function SettingsView({
     ConnectorsPane,
   ]
 
-  return (!activeProject || activeProject.isOwner) ? (
+  return !activeProject || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActivePane[]}

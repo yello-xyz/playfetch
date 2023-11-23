@@ -341,14 +341,14 @@ export async function getSharedProjectsForUser(
   return [projects.filter(project => !workspaceIDs.includes(project.workspaceID)), pendingProjects]
 }
 
-const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
+const getProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
 
 async function getProjectAndWorkspaceUsers(
   projectID: number,
   workspaceID: number
 ): Promise<[User[], PendingUser[], User[], User[], PendingUser[]]> {
-  const [projectUsers, pendingProjectUsers, projectOwners] = await getSharedProjectUsers(projectID)
+  const [projectUsers, pendingProjectUsers, projectOwners] = await getProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
 
   return [
@@ -366,10 +366,6 @@ async function getProjectAndWorkspaceUsers(
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectOwnership(userID, projectID)
-  const [users] = await getSharedProjectUsers(projectID)
-  if (users.some(user => user.id === userID)) {
-    throw new Error('Cannot delete project that was shared with user who is trying to delete it')
-  }
 
   const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
