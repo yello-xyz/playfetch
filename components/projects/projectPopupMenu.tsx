@@ -73,12 +73,19 @@ export default function ProjectPopupMenu({
   return (
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename Project…' callback={renameProject} first />
-        {!isSharedProject && <PopupMenuItem title='Move to Workspace…' callback={moveProject} />}
-        {isSharedProject ? (
-          <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} last />
+        <PopupMenuItem
+          title='Rename Project…'
+          callback={renameProject}
+          first
+          last={!project.isOwner && !isSharedProject}
+        />
+        {project.isOwner ? (
+          <>
+            <PopupMenuItem title='Move to Workspace…' callback={moveProject} />
+            <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} last />
+          </>
         ) : (
-          <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} last />
+          isSharedProject && <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} last />
         )}
       </PopupMenu>
       {showPickNamePrompt && (

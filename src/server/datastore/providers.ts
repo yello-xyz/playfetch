@@ -13,7 +13,7 @@ import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
-import { ensureProjectAccess, ensureProjectOwnership } from './projects'
+import { ensureProjectOwnership } from './projects'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
   getFilteredEntities(Entity.PROVIDER, filter).then(SortAndFilterProviderData(scopeIDs))

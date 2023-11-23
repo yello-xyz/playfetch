@@ -4,7 +4,6 @@ import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
 import {
   User,
-  AvailableProvider,
   Workspace,
   ActiveWorkspace,
   Project,

@@ -313,8 +313,9 @@ export async function toggleFavoriteProject(userID: number, projectID: number, f
 }
 
 export async function updateProjectWorkspace(userID: number, projectID: number, workspaceID: number) {
-  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  await ensureProjectOwnership(userID, projectID)
   await ensureWorkspaceAccess(userID, workspaceID)
+  const projectData = await getTrustedProjectData(projectID)
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
@@ -364,7 +365,7 @@ async function getProjectAndWorkspaceUsers(
 
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
-  await ensureProjectAccess(userID, projectID)
+  await ensureProjectOwnership(userID, projectID)
   const [users] = await getSharedProjectUsers(projectID)
   if (users.some(user => user.id === userID)) {
     throw new Error('Cannot delete project that was shared with user who is trying to delete it')
