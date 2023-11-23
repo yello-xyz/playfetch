@@ -1,5 +1,5 @@
 import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getKeyedEntity } from './datastore'
-import { ensureScopeAccess } from './providers'
+import { ensureScopeOwnership } from './providers'
 
 export async function migrateBudgets(postMerge: boolean) {
   if (postMerge) {
@@ -43,7 +43,7 @@ export async function updateBudgetForScope(
   limit: number | null,
   threshold: number | null
 ) {
-  await ensureScopeAccess(userID, scopeID)
+  await ensureScopeOwnership(userID, scopeID)
   const budgetData = await getBudgetData(scopeID)
   const resetsAt = budgetData?.resetsAt ?? startOfNextMonth()
   const cost = budgetData?.cost ?? 0

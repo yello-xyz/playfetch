@@ -16,7 +16,7 @@ import {
 } from './datastore'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
-import { grantUserAccess, grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
+import { grantUserAccess, grantUsersAccess, hasUserAccess, checkUserOwnership, revokeUserAccess } from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
@@ -192,20 +192,20 @@ export async function augmentProjectWithNewVersion(
 }
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
-  await getVerifiedUserProjectData(userID, projectID)
+  await ensureProjectAccess(userID, projectID)
   await grantUsersAccess(userID, emails, projectID, 'project')
 }
 
 export async function revokeMemberAccessForProject(userID: number, memberID: number, projectID: number) {
   if (userID !== memberID) {
-    await ensureProjectAccess(userID, projectID) // TODO check project ownership
+    await ensureProjectOwnership(userID, projectID)
   }
   await revokeUserAccess(memberID, projectID)
 }
 
 export async function toggleOwnershipForProject(userID: number, memberID: number, projectID: number, isOwner: boolean) {
   if (userID !== memberID) {
-    await ensureProjectAccess(userID, projectID) // TODO check project ownership
+    await ensureProjectOwnership(userID, projectID)
     await grantUserAccess(userID, memberID, projectID, 'project', isOwner ? 'owner' : 'default')
   }
 }
@@ -234,6 +234,8 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
 }
 
 export const ensureProjectAccess = (userID: number, projectID: number) => getVerifiedUserProjectData(userID, projectID)
+
+export const ensureProjectOwnership = (userID: number, projectID: number) => checkUserOwnership(userID, projectID)
 
 const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
 

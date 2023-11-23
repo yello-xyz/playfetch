@@ -39,10 +39,15 @@ export async function migrateAccess(postMerge: boolean) {
 const getAccessData = (userID: number, objectID: number) =>
   getFilteredEntity(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
 
-export async function hasUserAccess(userID: number, objectID: number) {
+async function checkUserAccess(userID: number, objectID: number, states: State[]) {
   const accessData = await getAccessData(userID, objectID)
-  return !!accessData && (accessData.state === 'default' || accessData.state === 'owner')
+  return !!accessData && states.includes(accessData.state)
 }
+
+export const hasUserAccess = (userID: number, objectID: number) =>
+  checkUserAccess(userID, objectID, ['owner', 'default'])
+
+export const checkUserOwnership = (userID: number, objectID: number) => checkUserAccess(userID, objectID, ['owner'])
 
 export async function grantUserAccess(
   grantedBy: number,

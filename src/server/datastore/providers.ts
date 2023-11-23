@@ -13,7 +13,7 @@ import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
-import { ensureProjectAccess } from './projects'
+import { ensureProjectAccess, ensureProjectOwnership } from './projects'
 
 const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
   getFilteredEntities(Entity.PROVIDER, filter).then(SortAndFilterProviderData(scopeIDs))
@@ -49,7 +49,7 @@ export async function migrateProviders(postMerge: boolean) {
           JSON.parse(providerData.metadata),
           getID(providerData)
         )
-      )  
+      )
     }
   }
 }
@@ -105,8 +105,8 @@ const toAvailableProvider = (data: any): AvailableProvider => {
   }
 }
 
-export const ensureScopeAccess = async (userID: number, scopeID: number) =>
-  scopeID === userID ? Promise.resolve() : ensureProjectAccess(userID, scopeID)
+export const ensureScopeOwnership = async (userID: number, scopeID: number) =>
+  scopeID === userID ? Promise.resolve() : ensureProjectOwnership(userID, scopeID)
 
 export async function saveProviderKey(
   userID: number,
@@ -115,7 +115,7 @@ export async function saveProviderKey(
   apiKey: string | null,
   environment: string | undefined
 ) {
-  await ensureScopeAccess(userID, scopeID)
+  await ensureScopeOwnership(userID, scopeID)
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, providerID))
@@ -130,7 +130,7 @@ export async function saveProviderModel(
   description: string,
   enabled: boolean
 ) {
-  await ensureScopeAccess(userID, scopeID)
+  await ensureScopeOwnership(userID, scopeID)
   const providerData = await getSingleProviderData([scopeID], provider)
   if (providerData) {
     const metadata = JSON.parse(providerData.metadata) as ProviderMetadata

@@ -10,7 +10,7 @@ import {
   getFilteredEntities,
   afterDateFilter,
 } from './datastore'
-import { ensureScopeAccess } from './providers'
+import { ensureScopeOwnership } from './providers'
 import { CostUsage } from '@/types'
 import { DaysAgo } from '@/src/common/formatting'
 import { getTrustedBudgetForScope } from './budget'
@@ -29,7 +29,7 @@ export async function migrateCosts(postMerge: boolean) {
 }
 
 export async function getCostUsageForScope(userID: number, scopeID: number): Promise<CostUsage> {
-  await ensureScopeAccess(userID, scopeID)
+  await ensureScopeOwnership(userID, scopeID)
 
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
