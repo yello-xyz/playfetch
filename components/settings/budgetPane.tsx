@@ -2,7 +2,7 @@ import { CostUsage } from '@/types'
 import Label from '../label'
 import PercentagePieChart from '../endpoints/percentagePieChart'
 import { FormatCost } from '@/src/common/formatting'
-import { RefObject, useRef, useState } from 'react'
+import { ReactNode, RefObject, useRef, useState } from 'react'
 import api from '@/src/client/api'
 
 export default function BudgetPane({
@@ -15,20 +15,42 @@ export default function BudgetPane({
   onRefresh: () => Promise<any>
 }) {
   const [limit, setLimit] = useState<number>()
-  const inputRef = useRef<HTMLInputElement>(null)
-
+  const limitInputRef = useRef<HTMLInputElement>(null)
   const editingLimit = limit !== undefined
 
   const editLimit = () => {
     setLimit(costUsage.limit ?? 0)
-    setTimeout(() => inputRef.current?.focus())
+    setTimeout(() => limitInputRef.current?.focus())
   }
 
   const updateLimit = () =>
     api
-      .updateBudget(scopeID, editingLimit && !isNaN(limit) && limit > 0 ? limit : undefined)
+      .updateBudget(
+        scopeID,
+        editingLimit && !isNaN(limit) && limit > 0 ? limit : undefined,
+        costUsage.threshold ?? undefined
+      )
       .then(onRefresh)
       .then(() => setLimit(undefined))
+
+  const [threshold, setThreshold] = useState<number>()
+  const thresholdInputRef = useRef<HTMLInputElement>(null)
+  const editingThreshold = threshold !== undefined
+
+  const editThreshold = () => {
+    setThreshold(costUsage.threshold ?? 0)
+    setTimeout(() => thresholdInputRef.current?.focus())
+  }
+
+  const updateThreshold = () =>
+    api
+      .updateBudget(
+        scopeID,
+        costUsage.limit ?? undefined,
+        editingThreshold && !isNaN(threshold) && threshold > 0 ? threshold : undefined
+      )
+      .then(onRefresh)
+      .then(() => setThreshold(undefined))
 
   return (
     <>
@@ -39,25 +61,45 @@ export default function BudgetPane({
         onConfigure={editLimit}
         onConfirm={updateLimit}
       />
-      <div className='flex bg-white border border-gray-200 rounded-md'>
+      <RoundedSection>
         <div className='w-40 h-40 -m-2 scale-[.625]'>
           <PercentagePieChart percentage={costUsage.limit ? costUsage.cost / costUsage.limit : 0} />
         </div>
-        <div className='flex flex-col flex-1 gap-2 py-5'>
+        <div className='flex flex-col flex-1 gap-2 py-4'>
           <CurrentMonthDescription />
           <div className='flex items-center gap-1 text-xl '>
             <span className='font-bold text-gray-700'>{FormatCost(costUsage.cost)}</span>/
             <BudgetInput
               value={editingLimit ? limit : costUsage.limit}
               setValue={editingLimit ? setLimit : undefined}
-              inputRef={inputRef}
+              inputRef={limitInputRef}
             />
           </div>
-          <span className='text-gray-400'>
-            If the budget is exceeded in a given calendar month, subsequent requests will fail.
+          <span className='pr-4 text-gray-400'>
+            If the budget is exceeded in a given calendar month, project owners will be sent an email notification and subsequent requests will fail until the start of the next month.
           </span>
         </div>
-      </div>
+      </RoundedSection>
+      <SectionHeader
+        title='Email threshold'
+        isConfiguring={editingThreshold}
+        confirmTitle='Save Threshold'
+        onConfigure={editThreshold}
+        onConfirm={updateThreshold}
+      />
+      <RoundedSection>
+        <div className='flex items-center gap-8 p-5 text-xl'>
+          <BudgetInput
+            value={editingThreshold ? threshold : costUsage.threshold}
+            setValue={editingThreshold ? setThreshold : undefined}
+            inputRef={thresholdInputRef}
+          />
+          <span className='text-sm text-gray-400'>
+            Project owners will receive an email notification when the threshold is reached within a given calendar
+            month.
+          </span>
+        </div>
+      </RoundedSection>
     </>
   )
 }
@@ -83,7 +125,9 @@ const BudgetInput = ({
       />
     </>
   ) : (
-    <span className='px-2 py-1 border border-gray-100 rounded-md bg-gray-25'>{value ? FormatCost(value) : '$ ——'}</span>
+    <span className='px-2 py-1 border border-gray-100 rounded-md bg-gray-25 whitespace-nowrap'>
+      {value ? FormatCost(value) : '$ ——'}
+    </span>
   )
 }
 
@@ -113,6 +157,10 @@ const SectionHeader = ({
     </div>
   )
 }
+
+const RoundedSection = ({ children }: { children: ReactNode }) => (
+  <div className='flex bg-white border border-gray-200 rounded-md'>{children}</div>
+)
 
 const CurrentMonthDescription = () => {
   const today = new Date()

@@ -52,6 +52,7 @@ export async function getCostUsageForScope(userID: number, scopeID: number): Pro
 
   return {
     limit: budget?.limit,
+    threshold: budget?.threshold,
     cost: budget.cost,
     modelCosts: daysOfMonth.map(day => costMap[day.getTime()] ?? {}),
   }

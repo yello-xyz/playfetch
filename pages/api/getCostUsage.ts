@@ -4,8 +4,8 @@ import { User, CostUsage } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getCostUsage(req: NextApiRequest, res: NextApiResponse<CostUsage>, user: User) {
-  const analytics = await getCostUsageForScope(user.id, req.body.scopeID)
-  res.json(analytics)
+  const costUsage = await getCostUsageForScope(user.id, req.body.scopeID)
+  res.json(costUsage)
 }
 
 export default withLoggedInUserRoute(getCostUsage)

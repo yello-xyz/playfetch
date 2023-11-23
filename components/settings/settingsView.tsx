@@ -45,7 +45,7 @@ const descriptionForPane = (pane: ActivePane) => {
     case CustomModelsPane:
       return 'Give each model you want to use a short unique name and optional description to enable it in the model selector.'
     case UsagePane:
-      return 'Limit your API expenditure by setting a monthly spending limit. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
+      return 'Limit your API expenditure by setting a monthly spending limit. Notification emails will be dispatched to project members with the “Owner” role. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
     case TeamPane:
       return 'Manage who has access to this project, change role assignment and remove members.'
     case ConnectorsPane:

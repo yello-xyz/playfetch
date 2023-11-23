@@ -331,6 +331,7 @@ export type LogEntry = {
 export type CostUsage = {
   cost: number
   limit: number | null
+  threshold: number | null
   modelCosts: { [model: string]: number }[]
 }
 
