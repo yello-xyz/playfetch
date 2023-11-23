@@ -5,6 +5,7 @@ import { PendingUser, User } from '@/types'
 import TextInput from '../textInput'
 import UserBadge from './userBadge'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 
 export default function MembersPane({
   owners = [],
@@ -20,6 +21,8 @@ export default function MembersPane({
   onRevoke?: (userID: number) => void
 }) {
   const [email, setEmail] = useState('')
+
+  const currentUser = useLoggedInUser()
 
   const emails = email
     .split(/[\s,]+/)
@@ -42,7 +45,7 @@ export default function MembersPane({
       </div>
       <SectionHeader>People with access</SectionHeader>
       {owners.map((user, index) => (
-        <UserBadge key={index} user={user} padding='' />
+        <UserBadge key={index} user={user} suffix={user.id === currentUser.id ? ' (you)' : ''} padding='' />
       ))}
       {members.map((user, index) => (
         <UserBadge key={index} user={user} padding='' />
