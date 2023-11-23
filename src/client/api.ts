@@ -117,6 +117,9 @@ const api = {
   revokeProjectAccess: function (projectID: number, memberID?: number) {
     return post(this.revokeProjectAccess, { projectID, memberID })
   },
+  toggleProjectOwnership: function (projectID: number, memberID: number, isOwner: boolean) {
+    return post(this.toggleProjectOwnership, { projectID, memberID, isOwner })
+  },
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
   },

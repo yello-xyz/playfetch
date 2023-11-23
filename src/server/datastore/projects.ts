@@ -198,9 +198,16 @@ export async function inviteMembersToProject(userID: number, projectID: number, 
 
 export async function revokeMemberAccessForProject(userID: number, memberID: number, projectID: number) {
   if (userID !== memberID) {
-    await ensureProjectAccess(userID, projectID)
+    await ensureProjectAccess(userID, projectID) // TODO check project ownership
   }
   await revokeUserAccess(memberID, projectID)
+}
+
+export async function toggleOwnershipForProject(userID: number, memberID: number, projectID: number, isOwner: boolean) {
+  if (userID !== memberID) {
+    await ensureProjectAccess(userID, projectID) // TODO check project ownership
+    await grantUserAccess(userID, memberID, projectID, 'project', isOwner ? 'owner' : 'default')
+  }
 }
 
 export async function checkProject(projectID: number, apiKey?: string): Promise<number | undefined> {
