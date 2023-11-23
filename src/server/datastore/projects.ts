@@ -16,12 +16,19 @@ import {
 } from './datastore'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
-import { grantUserAccess, grantUsersAccess, hasUserAccess, checkUserOwnership, revokeUserAccess } from './access'
+import {
+  grantUserAccess,
+  grantUsersAccess,
+  hasUserAccess,
+  checkUserOwnership,
+  revokeUserAccess,
+  getAccessibleObjectIDs,
+} from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
-import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
+import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers, getWorkspacesForUser } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
@@ -132,7 +139,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     chains,
     users,
     pendingUsers,
-    projectOwners: projectOwner ? [projectOwner, ...filterUsers(projectOwners, [projectOwner])] : [],
+    projectOwners: projectOwner ? [projectOwner, ...filterObjects(projectOwners, [projectOwner])] : [],
     projectMembers: projectOwner ? projectMembers : [],
     pendingProjectMembers: projectOwner ? pendingProjectMembers : [],
     availableLabels: JSON.parse(projectData.labels),
@@ -310,16 +317,21 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
-export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
-  getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID)).then(
-    ([u, p]) => [u, p]
+const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
+  source.filter(user => !filter.some(u => u.id === user.id))
+
+export async function getSharedProjectsForUser(userID: number): Promise<[Project[], PendingProject[]]> {
+  const [projects, pendingProjects] = await getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData =>
+    toProject(projectData, userID)
   )
+  const [ownedWorkspaceIDs, accessibleWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
+  const hasWorkspaceAccess = (project: Project) =>
+    [...ownedWorkspaceIDs, ...accessibleWorkspaceIDs].includes(project.workspaceID)
+  return [projects.filter(project => !hasWorkspaceAccess(project)), pendingProjects]
+}
 
 const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
-
-const filterUsers = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
-  source.filter(user => !filter.some(u => u.id === user.id))
 
 async function getProjectAndWorkspaceUsers(
   projectID: number,
@@ -329,13 +341,13 @@ async function getProjectAndWorkspaceUsers(
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
 
   return [
-    [...projectUsers, ...filterUsers(workspaceUsers, projectUsers)],
+    [...projectUsers, ...filterObjects(workspaceUsers, projectUsers)],
     [
-      ...filterUsers(pendingProjectUsers, workspaceUsers),
-      ...filterUsers(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),
+      ...filterObjects(pendingProjectUsers, workspaceUsers),
+      ...filterObjects(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),
     ],
     projectOwners,
-    filterUsers(projectUsers, projectOwners),
+    filterObjects(projectUsers, projectOwners),
     pendingProjectUsers,
   ]
 }
