@@ -1,7 +1,6 @@
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
-import CustomModelSettings from './customModelSettings'
 import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SettingsPane from './settingsPane'
@@ -12,23 +11,15 @@ import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
 
 const ProvidersPane = 'providers'
-const CustomModelsPane = 'customModels'
 const UsagePane = 'usage'
 const TeamPane = 'team'
 const ConnectorsPane = 'connectors'
-type ActivePane =
-  | typeof ProvidersPane
-  | typeof CustomModelsPane
-  | typeof UsagePane
-  | typeof TeamPane
-  | typeof ConnectorsPane
+type ActivePane = typeof ProvidersPane | typeof UsagePane | typeof TeamPane | typeof ConnectorsPane
 
 const titleForPane = (pane: ActivePane) => {
   switch (pane) {
     case ProvidersPane:
       return 'LLM providers'
-    case CustomModelsPane:
-      return 'Custom models'
     case UsagePane:
       return 'Usage limits'
     case TeamPane:
@@ -42,8 +33,6 @@ const descriptionForPane = (pane: ActivePane) => {
   switch (pane) {
     case ProvidersPane:
       return 'Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'
-    case CustomModelsPane:
-      return 'Give each model you want to use a short unique name and optional description to enable it in the model selector.'
     case UsagePane:
       return 'Limit your API expenditure by setting a monthly spending limit. Notification emails will be dispatched to project members with the “Owner” role. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
     case TeamPane:
@@ -56,7 +45,6 @@ const descriptionForPane = (pane: ActivePane) => {
 const projectScopeDescriptionForPane = (pane: ActivePane) => {
   switch (pane) {
     case ProvidersPane:
-    case CustomModelsPane:
     case ConnectorsPane:
       return 'Configurations made here will be available to anyone with project access to be used within the context of this project only.'
     case UsagePane:
@@ -94,14 +82,7 @@ export default function SettingsView({
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
-  const haveCustomModels = availableModelProviders.some(provider => provider.customModels.length > 0)
-  const availablePanes = [
-    ProvidersPane,
-    ...(haveCustomModels ? [CustomModelsPane] : []),
-    UsagePane,
-    ...(activeProject ? [TeamPane] : []),
-    ConnectorsPane,
-  ]
+  const availablePanes = [ProvidersPane, UsagePane, ...(activeProject ? [TeamPane] : []), ConnectorsPane]
 
   return !activeProject || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
@@ -123,9 +104,6 @@ export default function SettingsView({
               availableProviders={availableModelProviders}
               onRefresh={refresh}
             />
-          )}
-          {activePane === CustomModelsPane && (
-            <CustomModelSettings scopeID={scopeID} availableProviders={availableModelProviders} onRefresh={refresh} />
           )}
           {activePane === UsagePane && !!costUsage && (
             <UsageSettings
