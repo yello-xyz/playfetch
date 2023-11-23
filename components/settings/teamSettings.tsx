@@ -22,11 +22,17 @@ export default function TeamSettings({ activeProject }: { activeProject: ActiveP
   const toggleProjectOwnership = (userID: number, isOwner: boolean) =>
     api.toggleProjectOwnership(activeProject.id, userID, isOwner).then(refreshProject)
 
+  const explicitProjectMemberIDs = new Set(
+    [...activeProject.projectOwners, ...activeProject.projectMembers].map(user => user.id)
+  )
+  const implicitMembers = activeProject.users.filter(user => !explicitProjectMemberIDs.has(user.id))
+
   return (
     <div className='flex flex-col gap-3 p-3 bg-white border border-gray-200 rounded-lg'>
       <MembersPane
         owners={activeProject.projectOwners}
         members={activeProject.projectMembers}
+        implicitMembers={implicitMembers}
         pendingMembers={activeProject.pendingProjectMembers}
         onInvite={inviteMembers}
         onRevoke={revokeMemberAccess}

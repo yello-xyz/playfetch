@@ -9,7 +9,7 @@ export default function RolePopupButton({
   disabled,
 }: {
   isOwner: boolean
-  revokeAccess: () => void
+  revokeAccess?: () => void
   toggleOwnership: (isOwner: boolean) => void
   disabled?: boolean
 }) {
@@ -27,25 +27,33 @@ export default function RolePopupButton({
   )
 }
 
-type RolePopupProps = { isOwner: boolean; toggleOwnership: (owner: boolean) => void; revokeAccess: () => void }
+type RolePopupProps = { isOwner: boolean; toggleOwnership: (owner: boolean) => void; revokeAccess?: () => void }
 
-const RolePopup = ({ isOwner, toggleOwnership, revokeAccess, withDismiss }: RolePopupProps & WithDismiss) => (
-  <PopupContent className='p-3 min-w-[280px]'>
-    <PopupLabelItem
-      title='Owner'
-      description='Can modify API keys, usage limits, and team administration.'
-      onClick={withDismiss(() => toggleOwnership(true))}
-      checked={isOwner}
-    />
-    <PopupLabelItem
-      title='Member'
-      description='Can create, test prompts and chains and deploy endpoints.'
-      onClick={withDismiss(() => toggleOwnership(false))}
-      checked={!isOwner}
-    />
-    <div className='my-2 border-t border-gray-200' />
-    <PopupItem onClick={withDismiss(revokeAccess)}>
-      <div className='px-3 py-2 text-red-500 rounded hover:text-white hover:bg-red-400'>Remove Team Member</div>
-    </PopupItem>
-  </PopupContent>
-)
+const RolePopup = ({ isOwner, toggleOwnership, revokeAccess, withDismiss }: RolePopupProps & WithDismiss) => {
+  const toggleOwner = (owner: boolean) => withDismiss(() => owner !== isOwner && toggleOwnership(owner))
+
+  return (
+    <PopupContent className='p-3 min-w-[280px]'>
+      <PopupLabelItem
+        title='Owner'
+        description='Can modify API keys, usage limits, and team administration.'
+        onClick={toggleOwner(true)}
+        checked={isOwner}
+      />
+      <PopupLabelItem
+        title='Member'
+        description='Can create, test prompts and chains and deploy endpoints.'
+        onClick={toggleOwner(false)}
+        checked={!isOwner}
+      />
+      {revokeAccess && (
+        <>
+          <div className='my-2 border-t border-gray-200' />
+          <PopupItem onClick={withDismiss(revokeAccess)}>
+            <div className='px-3 py-2 text-red-500 rounded hover:text-white hover:bg-red-400'>Remove Team Member</div>
+          </PopupItem>
+        </>
+      )}
+    </PopupContent>
+  )
+}

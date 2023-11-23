@@ -370,7 +370,7 @@ async function getProjectAndWorkspaceUsers(
     ],
     projectOwners,
     filterObjects(projectUsers, projectOwners),
-    pendingProjectUsers,
+    filterObjects(pendingProjectUsers, workspaceUsers),
   ]
 }
 

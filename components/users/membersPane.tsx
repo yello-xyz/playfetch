@@ -11,6 +11,7 @@ import RolePopupButton from './rolePopupButton'
 export default function MembersPane({
   owners = [],
   members,
+  implicitMembers = [],
   pendingMembers,
   onInvite,
   onRevoke,
@@ -18,6 +19,7 @@ export default function MembersPane({
 }: {
   owners?: User[]
   members: User[]
+  implicitMembers?: User[]
   pendingMembers: PendingUser[]
   onInvite: (emails: string[]) => void
   onRevoke?: (userID: number) => void
@@ -33,7 +35,7 @@ export default function MembersPane({
     .map(email => email.trim())
     .filter(email => email.length > 0)
 
-  const previousEmails = new Set([...owners, ...members, ...pendingMembers].map(user => user.email))
+  const previousEmails = new Set([...owners, ...members, ...implicitMembers, ...pendingMembers].map(user => user.email))
   const emailsAreValid =
     emails.length > 0 && emails.every(email => CheckValidEmail(email) && !previousEmails.has(email))
 
@@ -68,6 +70,13 @@ export default function MembersPane({
               revokeAccess={() => onRevoke(user.id)}
               toggleOwnership={isOwner => onToggleOwnership(user.id, isOwner)}
             />
+          )}
+        </UserBadge>
+      ))}
+      {implicitMembers.map((user, index) => (
+        <UserBadge key={index} user={user} padding=''>
+          {isOwner && (
+            <RolePopupButton isOwner={false} toggleOwnership={isOwner => onToggleOwnership(user.id, isOwner)} />
           )}
         </UserBadge>
       ))}
