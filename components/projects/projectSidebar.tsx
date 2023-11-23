@@ -63,7 +63,6 @@ export default function ProjectSidebar({
     activeItem?.id === item.id
 
   const user = useLoggedInUser()
-  const isProjectOwner = activeProject.projectOwners.some(owner => owner.id === user.id)
 
   return (
     <Sidebar>
@@ -80,7 +79,7 @@ export default function ProjectSidebar({
           active={activeItem === EndpointsItem}
           onClick={onSelectEndpoints}
         />
-        {isProjectOwner && (
+        {activeProject.isOwner && (
           <SidebarButton
             title='Settings'
             icon={settingsIcon}

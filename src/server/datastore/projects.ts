@@ -93,12 +93,13 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
-export const toProject = (data: any, userID: number): Project => ({
+export const toProject = (data: any, userID: number, isOwner: boolean): Project => ({
   id: getID(data),
   name: data.name,
   workspaceID: data.workspaceID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
   favorited: JSON.parse(data.favorited).includes(userID),
+  isOwner,
   createdBy: data.userID,
 })
 
@@ -132,7 +133,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const projectOwner = projectOwners.find(user => user.id === userID)
 
   return {
-    ...toProject(projectData, userID),
+    ...toProject(projectData, userID, !!projectOwner),
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? ''),
     prompts,
@@ -324,9 +325,13 @@ export async function getSharedProjectsForUser(
   userID: number,
   workspaces: { id: number }[] = []
 ): Promise<[Project[], PendingProject[]]> {
-  const [projects, pendingProjects] = await getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData =>
-    toProject(projectData, userID)
+  const [projects, pendingProjects, ownedProjects] = await getPendingAccessObjects(
+    userID,
+    'project',
+    Entity.PROJECT,
+    projectData => toProject(projectData, userID, false)
   )
+  projects.forEach(project => (project.isOwner = ownedProjects.some(ownedProject => ownedProject.id === project.id)))
   let workspaceIDs = workspaces.map(workspace => workspace.id)
   if (workspaceIDs.length === 0) {
     const [ownedWorkspaceIDs, accessibleWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
@@ -406,7 +411,7 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
 export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {
   if (!projects) {
     const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, undefined, 'lastEditedAt')
-    projects = recentProjectsData.map(projectData => toProject(projectData, 0))
+    projects = recentProjectsData.map(projectData => toProject(projectData, 0, false))
   }
 
   const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [

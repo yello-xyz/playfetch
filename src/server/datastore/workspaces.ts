@@ -59,7 +59,8 @@ export async function getActiveWorkspace(userID: number, workspaceID: number): P
 
 async function loadActiveWorkspace(userID: number, workspace: Workspace): Promise<ActiveWorkspace> {
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspace.id, ['lastEditedAt'])
-  const projects = projectData.map(project => toProject(project, userID))
+  const [ownedProjectIDs] = await getAccessibleObjectIDs(userID, 'project')
+  const projects = projectData.map(project => toProject(project, userID, ownedProjectIDs.includes(getID(project))))
   const [users, pendingUsers] = await getWorkspaceUsers(workspace.id)
 
   return {

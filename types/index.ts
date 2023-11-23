@@ -37,6 +37,7 @@ export type Project = {
   workspaceID: number
   timestamp: number
   favorited: boolean
+  isOwner: boolean
   createdBy: number
 }
 
