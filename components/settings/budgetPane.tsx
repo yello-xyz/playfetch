@@ -30,18 +30,15 @@ export default function BudgetPane({
       .then(onRefresh)
       .then(() => setLimit(undefined))
 
-  const buttonClass = editingLimit ? 'bg-blue-300 hover:bg-blue-500 text-white' : 'hover:bg-gray-50'
-
   return (
     <>
-      <div className='flex items-center justify-between'>
-        <Label>Monthly budget</Label>
-        <div
-          className={`${buttonClass} px-2 py-0.5 rounded-md cursor-pointer`}
-          onClick={editingLimit ? updateLimit : editLimit}>
-          {editingLimit ? 'Save Limit' : 'Configure'}
-        </div>
-      </div>
+      <SectionHeader
+        title='Monthly budget'
+        isConfiguring={editingLimit}
+        confirmTitle='Save Limit'
+        onConfigure={editLimit}
+        onConfirm={updateLimit}
+      />
       <div className='flex bg-white border border-gray-200 rounded-md'>
         <div className='w-40 h-40 -m-2 scale-[.625]'>
           <PercentagePieChart percentage={costUsage.limit ? costUsage.cost / costUsage.limit : 0} />
@@ -73,6 +70,33 @@ export default function BudgetPane({
         </div>
       </div>
     </>
+  )
+}
+
+const SectionHeader = ({
+  title,
+  isConfiguring,
+  confirmTitle,
+  onConfigure,
+  onConfirm,
+}: {
+  title: string
+  isConfiguring: boolean
+  confirmTitle: string
+  onConfigure: () => void
+  onConfirm: () => void
+}) => {
+  const buttonClass = isConfiguring ? 'bg-blue-300 hover:bg-blue-500 text-white' : 'hover:bg-gray-50'
+
+  return (
+    <div className='flex items-center justify-between'>
+      <Label>{title}</Label>
+      <div
+        className={`${buttonClass} px-2 py-0.5 rounded-md cursor-pointer`}
+        onClick={isConfiguring ? onConfirm : onConfigure}>
+        {isConfiguring ? confirmTitle : 'Configure'}
+      </div>
+    </div>
   )
 }
 
