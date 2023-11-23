@@ -2,7 +2,7 @@ import { CostUsage } from '@/types'
 import Label from '../label'
 import PercentagePieChart from '../endpoints/percentagePieChart'
 import { FormatCost } from '@/src/common/formatting'
-import { useRef, useState } from 'react'
+import { RefObject, useRef, useState } from 'react'
 import api from '@/src/client/api'
 
 export default function BudgetPane({
@@ -47,22 +47,11 @@ export default function BudgetPane({
           <CurrentMonthDescription />
           <div className='flex items-center gap-1 text-xl '>
             <span className='font-bold text-gray-700'>{FormatCost(costUsage.cost)}</span>/
-            {editingLimit ? (
-              <>
-                {' $'}
-                <input
-                  className='px-2 py-1 w-[100px] rounded border focus:border-blue-400 border-gray-200 focus:ring-0 focus:outline-none'
-                  type='text'
-                  ref={inputRef}
-                  value={limit}
-                  onChange={event => setLimit(Number(event.target.value))}
-                />
-              </>
-            ) : (
-              <span className='px-2 py-1 border border-gray-100 rounded-md bg-gray-25'>
-                {costUsage.limit ? FormatCost(costUsage.limit) : '$ ——'}
-              </span>
-            )}
+            <BudgetInput
+              value={editingLimit ? limit : costUsage.limit}
+              setValue={editingLimit ? setLimit : undefined}
+              inputRef={inputRef}
+            />
           </div>
           <span className='text-gray-400'>
             If the budget is exceeded in a given calendar month, subsequent requests will fail.
@@ -70,6 +59,31 @@ export default function BudgetPane({
         </div>
       </div>
     </>
+  )
+}
+
+const BudgetInput = ({
+  value,
+  setValue,
+  inputRef,
+}: {
+  value: number | null
+  setValue?: (value: number) => void
+  inputRef: RefObject<HTMLInputElement>
+}) => {
+  return value !== null && setValue ? (
+    <>
+      {' $'}
+      <input
+        className='px-2 py-1 w-[100px] rounded border focus:border-blue-400 border-gray-200 focus:ring-0 focus:outline-none'
+        type='text'
+        ref={inputRef}
+        value={value}
+        onChange={event => setValue(Number(event.target.value))}
+      />
+    </>
+  ) : (
+    <span className='px-2 py-1 border border-gray-100 rounded-md bg-gray-25'>{value ? FormatCost(value) : '$ ——'}</span>
   )
 }
 
