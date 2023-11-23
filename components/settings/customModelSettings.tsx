@@ -1,6 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableModelProvider, CustomModel, ModelProvider } from '@/types'
+import { AvailableProvider, CustomModel, IsModelProvider, ModelProvider, QueryProvider } from '@/types'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Icon from '../icon'
@@ -8,39 +8,55 @@ import Button from '../button'
 import TextInput from '../textInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import { useState } from 'react'
+import chevronIcon from '@/public/chevron.svg'
 
 export default function CustomModelSettings({
   scopeID,
+  provider,
   availableProviders,
   onRefresh,
 }: {
   scopeID: number
-  availableProviders: AvailableModelProvider[]
+  provider: ModelProvider | QueryProvider
+  availableProviders: AvailableProvider[]
   onRefresh: () => void
 }) {
   const providerMap = {} as { [id: string]: ModelProvider }
-  availableProviders.forEach(provider =>
+  const availableModelProviders = availableProviders.filter(IsModelProvider)
+  availableModelProviders.forEach(provider =>
     provider.customModels.forEach(model => (providerMap[model.id] = provider.provider))
   )
-  const customModels = availableProviders.flatMap(provider => provider.customModels)
-  const otherNames = (model: CustomModel) => customModels.filter(m => m.id !== model.id).map(m => m.name)
+  const allCustomModels = availableModelProviders.flatMap(provider => provider.customModels)
+  const otherNames = (model: CustomModel) => allCustomModels.filter(m => m.id !== model.id).map(m => m.name)
 
-  return (
-    <>
-      {availableProviders
-        .flatMap(provider => provider.customModels)
-        .map((model, index) => (
-          <ModelRow
-            key={index}
-            scopeID={scopeID}
-            provider={providerMap[model.id]}
-            model={model}
-            otherNames={otherNames(model)}
-            onRefresh={onRefresh}
-          />
-        ))}
-    </>
-  )
+  const availableProvider = availableProviders.find(p => p.provider === provider)
+  const customModels = availableProvider && IsModelProvider(availableProvider) ? availableProvider.customModels : []
+  const [areCustomModelsExpanded, setCustomModelsExpanded] = useState(false)
+
+  return customModels.length > 0 ? (
+    <div>
+      <div
+        className='flex items-center cursor-pointer'
+        onClick={() => setCustomModelsExpanded(!areCustomModelsExpanded)}>
+        <Icon className={`${areCustomModelsExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
+        <span className='font-medium text-gray-700'>Custom Models</span>
+      </div>
+      {areCustomModelsExpanded && (
+        <div className='ml-6'>
+          {customModels.map((model, index) => (
+            <ModelRow
+              key={index}
+              scopeID={scopeID}
+              provider={providerMap[model.id]}
+              model={model}
+              otherNames={otherNames(model)}
+              onRefresh={onRefresh}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  ) : null
 }
 
 function ModelRow({

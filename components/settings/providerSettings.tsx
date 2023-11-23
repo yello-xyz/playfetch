@@ -7,6 +7,7 @@ import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
+import CustomModelSettings from './customModelSettings'
 
 export default function ProviderSettings({
   scopeID,
@@ -29,6 +30,7 @@ export default function ProviderSettings({
           scopeID={scopeID}
           provider={provider}
           availableProvider={availableProviders.find(p => p.provider === provider)}
+          availableProviders={availableProviders}
           includeEnvironment={includeEnvironment}
           onRefresh={onRefresh}
         />
@@ -41,12 +43,14 @@ function ProviderRow({
   scopeID,
   provider,
   availableProvider,
+  availableProviders,
   includeEnvironment,
   onRefresh,
 }: {
   scopeID: number
   provider: ModelProvider | QueryProvider
   availableProvider?: AvailableProvider
+  availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
   onRefresh: () => void
 }) {
@@ -129,6 +133,12 @@ function ProviderRow({
           )}
         </div>
       </div>
+      <CustomModelSettings
+        scopeID={scopeID}
+        provider={provider}
+        availableProviders={availableProviders}
+        onRefresh={onRefresh}
+      />
     </div>
   )
 }
