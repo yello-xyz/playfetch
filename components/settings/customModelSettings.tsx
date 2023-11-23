@@ -42,8 +42,8 @@ export default function CustomModelSettings({
         <span className='font-medium text-gray-700'>Custom Models</span>
       </div>
       {areCustomModelsExpanded && (
-        <div className='ml-6'>
-          {customModels.map((model, index) => (
+        <div className='flex flex-col gap-2 ml-6'>
+          {[...customModels, ...customModels].map((model, index) => (
             <ModelRow
               key={index}
               scopeID={scopeID}
@@ -74,17 +74,18 @@ function ModelRow({
 }) {
   const [name, setName] = useInitialState(model.name)
   const [description, setDescription] = useInitialState(model.description)
+  const [isEditing, setEditing] = useState(false)
   const [isProcessing, setProcessing] = useState(false)
 
   const setDialogPrompt = useModalDialogPrompt()
 
-  const label = LabelForProvider(provider)
   const canUpdate = !isProcessing && name.length && !otherNames.includes(name)
 
   const updateModel = async (enabled: boolean) => {
     setProcessing(true)
     await api.updateProviderModel(scopeID, provider, model.id, name, description, enabled).then(onRefresh)
     setProcessing(false)
+    setEditing(false)
   }
 
   const disableModel = () => {
@@ -96,27 +97,41 @@ function ModelRow({
   }
 
   return (
-    <div className={`flex flex-col gap-2 p-3 bg-white border border-gray-200 rounded-lg`}>
-      <div className='flex items-center gap-1'>
-        <Icon icon={IconForProvider(provider)} />
-        <Label className='w-40'>{label}</Label>
-        <div className='flex justify-end font-medium grow whitespace-nowrap'>{model.id}</div>
+    <div className='flex flex-col gap-2 text-gray-700'>
+      <div className='flex items-center gap-2.5'>
+        <span className='flex-1'>{model.id}</span>
+        {isEditing && (
+          <Button type='outline' onClick={() => setEditing(false)} disabled={isProcessing}>
+            Cancel
+          </Button>
+        )}
+        <Button
+          type={isEditing ? 'primary' : 'outline'}
+          onClick={isEditing ? () => updateModel(true) : () => setEditing(true)}
+          disabled={isEditing && !canUpdate}>
+          {model.enabled ? (isEditing ? 'Update' : 'Edit') : 'Enable'}
+        </Button>
+        {model.enabled && !isEditing && (
+          <Button type='destructive' onClick={disableModel} disabled={isProcessing}>
+            Disable
+          </Button>
+        )}
       </div>
       <div className='flex items-center gap-2.5'>
-        <div className='w-40'>
-          <TextInput placeholder='Short Name' value={name} setValue={setName} />
-        </div>
-        <TextInput placeholder='Description' value={description} setValue={setDescription} />
-        <div className='flex gap-2.5 justify-end grow cursor-pointer'>
-          <Button type={model.enabled ? 'outline' : 'primary'} onClick={() => updateModel(true)} disabled={!canUpdate}>
-            {model.enabled ? 'Update' : 'Enable'}
-          </Button>
-          {model.enabled && (
-            <Button type='destructive' onClick={disableModel} disabled={isProcessing}>
-              Disable
-            </Button>
-          )}
-        </div>
+        {isEditing ? (
+          <div className='w-80'>
+            <TextInput placeholder='Short name for the model' value={name} setValue={setName} />
+          </div>
+        ) : (
+          model.enabled && name && <Label className='-mt-2'>{name}</Label>
+        )}
+        {isEditing ? (
+          <div className='w-full'>
+            <TextInput placeholder='Short description of the model' value={description} setValue={setDescription} />
+          </div>
+        ) : (
+          model.enabled && description && <Label className='-mt-2'>{description}</Label>
+        )}
       </div>
     </div>
   )
