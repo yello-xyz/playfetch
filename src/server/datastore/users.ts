@@ -277,11 +277,11 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     and([buildFilter('userID', userID), buildFilter('kind', 'project')])
   )
 
-  const [sharedProjects, pendingSharedProjects] = await getSharedProjectsForUser(userID)
+  const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
+
+  const [sharedProjects, pendingSharedProjects] = await getSharedProjectsForUser(userID, workspaces)
   const sharedProjectsAsRecent = await getRecentProjects(sharedProjects)
   const pendingSharedProjectsAsRecent = await getRecentProjects(pendingSharedProjects)
-
-  const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
 
   const getTimestamps = (type: string, userID: number) =>
     getDatastore().runQuery(getDatastore().createQuery(type).filter(buildFilter('userID', userID)).select('createdAt'))

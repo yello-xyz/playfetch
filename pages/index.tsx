@@ -54,7 +54,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
-  const [projects, pendingProjects] = await getSharedProjectsForUser(user.id)
+  const [projects, pendingProjects] = await getSharedProjectsForUser(user.id, initialWorkspaces)
   const initialSharedProjects =
     projects.length > 0 || pendingProjects.length > 0 ? SharedProjectsWorkspace(projects, pendingProjects) : null
   const initialActiveWorkspace =

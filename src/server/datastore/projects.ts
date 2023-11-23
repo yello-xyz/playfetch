@@ -320,14 +320,19 @@ export async function updateProjectWorkspace(userID: number, projectID: number, 
 const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
   source.filter(user => !filter.some(u => u.id === user.id))
 
-export async function getSharedProjectsForUser(userID: number): Promise<[Project[], PendingProject[]]> {
+export async function getSharedProjectsForUser(
+  userID: number,
+  workspaces: { id: number }[] = []
+): Promise<[Project[], PendingProject[]]> {
   const [projects, pendingProjects] = await getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData =>
     toProject(projectData, userID)
   )
-  const [ownedWorkspaceIDs, accessibleWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
-  const hasWorkspaceAccess = (project: Project) =>
-    [...ownedWorkspaceIDs, ...accessibleWorkspaceIDs].includes(project.workspaceID)
-  return [projects.filter(project => !hasWorkspaceAccess(project)), pendingProjects]
+  let workspaceIDs = workspaces.map(workspace => workspace.id)
+  if (workspaceIDs.length === 0) {
+    const [ownedWorkspaceIDs, accessibleWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
+    workspaceIDs = [...ownedWorkspaceIDs, ...accessibleWorkspaceIDs]
+  }
+  return [projects.filter(project => !workspaceIDs.includes(project.workspaceID)), pendingProjects]
 }
 
 const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
