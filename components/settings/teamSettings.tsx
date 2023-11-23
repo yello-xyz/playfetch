@@ -19,6 +19,9 @@ export default function TeamSettings({ activeProject }: { activeProject: ActiveP
       callback: () => api.revokeProjectAccess(activeProject.id, userID).then(refreshProject),
     })
 
+  const toggleProjectOwnership = (userID: number, isOwner: boolean) =>
+    api.toggleProjectOwnership(activeProject.id, userID, isOwner).then(refreshProject)
+
   return (
     <div className='flex flex-col gap-3 p-3 bg-white border border-gray-200 rounded-lg'>
       <MembersPane
@@ -27,6 +30,7 @@ export default function TeamSettings({ activeProject }: { activeProject: ActiveP
         pendingMembers={activeProject.pendingProjectMembers}
         onInvite={inviteMembers}
         onRevoke={revokeMemberAccess}
+        onToggleOwnership={toggleProjectOwnership}
       />
       <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
     </div>

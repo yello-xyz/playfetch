@@ -14,16 +14,19 @@ export default function MembersPane({
   pendingMembers,
   onInvite,
   onRevoke,
+  onToggleOwnership,
 }: {
   owners?: User[]
   members: User[]
   pendingMembers: PendingUser[]
   onInvite: (emails: string[]) => void
   onRevoke?: (userID: number) => void
+  onToggleOwnership?: (userID: number, isOwner: boolean) => void
 }) {
   const [email, setEmail] = useState('')
 
   const currentUser = useLoggedInUser()
+  const isOwner = onRevoke && onToggleOwnership && owners.some(user => user.id === currentUser.id)
 
   const emails = email
     .split(/[\s,]+/)
@@ -47,14 +50,25 @@ export default function MembersPane({
       <SectionHeader>People with access</SectionHeader>
       {owners.map((user, index) => (
         <UserBadge key={index} user={user} suffix={user.id === currentUser.id ? ' (you)' : ''} padding=''>
-          {onRevoke && (
-            <RolePopupButton isOwner onRevoke={() => onRevoke(user.id)} disabled={user.id === currentUser.id} />
+          {isOwner && (
+            <RolePopupButton
+              isOwner
+              revokeAccess={() => onRevoke(user.id)}
+              toggleOwnership={isOwner => onToggleOwnership(user.id, isOwner)}
+              disabled={user.id === currentUser.id}
+            />
           )}
         </UserBadge>
       ))}
       {members.map((user, index) => (
         <UserBadge key={index} user={user} padding=''>
-          {onRevoke && <RolePopupButton isOwner={false} onRevoke={() => onRevoke(user.id)} />}
+          {isOwner && (
+            <RolePopupButton
+              isOwner={false}
+              revokeAccess={() => onRevoke(user.id)}
+              toggleOwnership={isOwner => onToggleOwnership(user.id, isOwner)}
+            />
+          )}
         </UserBadge>
       ))}
       {pendingMembers.length > 0 && (

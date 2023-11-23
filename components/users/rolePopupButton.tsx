@@ -4,19 +4,19 @@ import useGlobalPopup, { GlobalPopupLocation, WithDismiss } from '@/src/client/c
 
 export default function RolePopupButton({
   isOwner,
-  onRevoke,
+  revokeAccess,
+  toggleOwnership,
   disabled,
 }: {
   isOwner: boolean
-  onRevoke: () => void
+  revokeAccess: () => void
+  toggleOwnership: (isOwner: boolean) => void
   disabled?: boolean
 }) {
-  const setOwner = (owner: boolean) => {} // TODO
-
   const setRolePopup = useGlobalPopup<RolePopupProps>()
 
   const onSetRolePopup = (location: GlobalPopupLocation) =>
-    setRolePopup(RolePopup, { isOwner, setOwner, onRevoke }, location)
+    setRolePopup(RolePopup, { isOwner, toggleOwnership, revokeAccess }, location)
 
   return (
     <PopupButton fixedWidth disabled={disabled} onSetPopup={onSetRolePopup}>
@@ -27,24 +27,24 @@ export default function RolePopupButton({
   )
 }
 
-type RolePopupProps = { isOwner: boolean; setOwner: (owner: boolean) => void; onRevoke: () => void }
+type RolePopupProps = { isOwner: boolean; toggleOwnership: (owner: boolean) => void; revokeAccess: () => void }
 
-const RolePopup = ({ isOwner, setOwner, onRevoke, withDismiss }: RolePopupProps & WithDismiss) => (
+const RolePopup = ({ isOwner, toggleOwnership, revokeAccess, withDismiss }: RolePopupProps & WithDismiss) => (
   <PopupContent className='p-3 min-w-[280px]'>
     <PopupLabelItem
       title='Owner'
       description='Can modify API keys, usage limits, and team administration.'
-      onClick={withDismiss(() => setOwner(true))}
+      onClick={withDismiss(() => toggleOwnership(true))}
       checked={isOwner}
     />
     <PopupLabelItem
       title='Member'
       description='Can create, test prompts and chains and deploy endpoints.'
-      onClick={withDismiss(() => setOwner(false))}
+      onClick={withDismiss(() => toggleOwnership(false))}
       checked={!isOwner}
     />
     <div className='my-2 border-t border-gray-200' />
-    <PopupItem onClick={withDismiss(onRevoke)}>
+    <PopupItem onClick={withDismiss(revokeAccess)}>
       <div className='px-3 py-2 text-red-500 rounded hover:text-white hover:bg-red-400'>Remove Team Member</div>
     </PopupItem>
   </PopupContent>
