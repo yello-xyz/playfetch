@@ -122,7 +122,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     projectData.workspaceID
   )
 
-  const isOwner = projectOwners.some(user => user.id === userID)
+  const projectOwner = projectOwners.find(user => user.id === userID)
 
   return {
     ...toProject(projectData, userID),
@@ -132,9 +132,9 @@ export async function getActiveProject(userID: number, projectID: number): Promi
     chains,
     users,
     pendingUsers,
-    projectOwners: isOwner ? projectOwners : [],
-    projectMembers: isOwner ? projectMembers : [],
-    pendingProjectMembers: isOwner ? pendingProjectMembers : [],
+    projectOwners: projectOwner ? [projectOwner, ...filterUsers(projectOwners, [projectOwner])] : [],
+    projectMembers: projectOwner ? projectMembers : [],
+    pendingProjectMembers: projectOwner ? pendingProjectMembers : [],
     availableLabels: JSON.parse(projectData.labels),
     comments,
   }
@@ -309,15 +309,15 @@ export const getSharedProjectsForUser = (userID: number): Promise<[Project[], Pe
 const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
 
+const filterUsers = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
+  source.filter(user => !filter.some(u => u.id === user.id))
+
 async function getProjectAndWorkspaceUsers(
   projectID: number,
   workspaceID: number
 ): Promise<[User[], PendingUser[], User[], User[], PendingUser[]]> {
   const [projectUsers, pendingProjectUsers, projectOwners] = await getSharedProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
-
-  const filterUsers = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
-    source.filter(user => !filter.some(u => u.id === user.id))
 
   return [
     [...projectUsers, ...filterUsers(workspaceUsers, projectUsers)],
