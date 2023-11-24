@@ -103,10 +103,7 @@ export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelP
   return !!customModel && !customModel.enabled
 }
 
-export const IsModelAvailable = (
-  model: LanguageModel | EmbeddingModel,
-  providers: AvailableModelProvider[]
-): boolean =>
+export const IsModelAvailable = (model: LanguageModel | EmbeddingModel, providers: AvailableModelProvider[]): boolean =>
   isCustomModel(model)
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)

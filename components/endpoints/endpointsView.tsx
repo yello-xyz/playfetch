@@ -152,8 +152,8 @@ export default function EndpointsView({
         ? ExtractUnboundChainInputs(activeVersion.items, false)
         : []
       : activeVersion?.prompts && activeVersion?.config
-        ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
-        : []
+      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
+      : []
     : []
 
   const minWidth = 460
