@@ -1,9 +1,10 @@
 import { CostUsage } from '@/types'
 import Label from '../label'
 import PercentagePieChart from '../endpoints/percentagePieChart'
-import { FormatCost } from '@/src/common/formatting'
+import { Capitalize, FormatCost } from '@/src/common/formatting'
 import { ReactNode, RefObject, useRef, useState } from 'react'
 import api from '@/src/client/api'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 
 export default function BudgetPane({
   scopeID,
@@ -14,6 +15,9 @@ export default function BudgetPane({
   costUsage: CostUsage
   onRefresh: () => Promise<any>
 }) {
+  const user = useLoggedInUser()
+  const recipient = scopeID === user.id ? 'you' : 'project owners'
+
   const [limit, setLimit, limitInputRef, editingLimit, editLimit, updateLimit] = useBudgetEditor(
     scopeID,
     costUsage,
@@ -47,8 +51,8 @@ export default function BudgetPane({
             />
           </div>
           <span className='pr-4 text-gray-400'>
-            If the budget is exceeded in a given calendar month, project owners will be sent an email notification and
-            subsequent requests will fail until the start of the next month.
+            {`If the budget is exceeded in a given calendar month, ${recipient} will be sent an email notification and
+            subsequent requests will fail until the start of the next month.`}
           </span>
         </div>
       </RoundedSection>
@@ -67,8 +71,9 @@ export default function BudgetPane({
             inputRef={thresholdInputRef}
           />
           <span className='text-sm text-gray-400'>
-            Project owners will receive an email notification when the threshold is reached within a given calendar
-            month.
+            {`${Capitalize(
+              recipient
+            )} will receive an email notification when the threshold is reached within a given calendar month.`}
           </span>
         </div>
       </RoundedSection>

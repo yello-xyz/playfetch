@@ -29,12 +29,16 @@ const titleForPane = (pane: ActivePane) => {
   }
 }
 
-const descriptionForPane = (pane: ActivePane) => {
+const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
   switch (pane) {
     case ProvidersPane:
       return 'Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'
     case UsagePane:
-      return 'Limit your API expenditure by setting a monthly spending limit. Notification emails will be dispatched to project members with the “Owner” role. Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing these limits.'
+      return (
+        'Limit your API expenditure by setting a monthly spending limit. ' +
+        (isProjectScope ? 'Notification emails will be dispatched to project members with the “Owner” role. ' : '') +
+        'Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing the limits.'
+      )
     case TeamPane:
       return 'Manage who has access to this project, change role assignment and remove members.'
     case ConnectorsPane:
@@ -42,11 +46,13 @@ const descriptionForPane = (pane: ActivePane) => {
   }
 }
 
-const projectScopeDescriptionForPane = (pane: ActivePane) => {
+const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
   switch (pane) {
     case ProvidersPane:
     case ConnectorsPane:
-      return 'Configurations made here will be available to anyone with project access to be used within the context of this project only.'
+      return isProjectScope
+        ? 'Configurations made here will be available to anyone with project access to be used within the context of this project only.'
+        : undefined
     case UsagePane:
     case TeamPane:
       return undefined
@@ -63,7 +69,8 @@ export default function SettingsView({
   refresh: () => void
 }) {
   const user = useLoggedInUser()
-  const scopeID = activeProject?.id ?? user.id
+  const isProjectScope = !!activeProject
+  const scopeID = isProjectScope ? activeProject.id : user.id
   const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
 
   const [costUsage, setCostUsage] = useState<CostUsage>()
@@ -82,9 +89,9 @@ export default function SettingsView({
   const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
-  const availablePanes = [ProvidersPane, UsagePane, ...(activeProject ? [TeamPane] : []), ConnectorsPane]
+  const availablePanes = [ProvidersPane, UsagePane, ...(isProjectScope ? [TeamPane] : []), ConnectorsPane]
 
-  return !activeProject || activeProject.isOwner ? (
+  return !isProjectScope || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActivePane[]}
@@ -95,8 +102,8 @@ export default function SettingsView({
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
         <SettingsPane
           title={titleForPane(activePane)}
-          description={descriptionForPane(activePane)}
-          scopeDescription={activeProject ? projectScopeDescriptionForPane(activePane) : undefined}>
+          description={descriptionForPane(activePane, isProjectScope)}
+          scopeDescription={scopeDescriptionForPane(activePane, isProjectScope)}>
           {activePane === ProvidersPane && (
             <ProviderSettings
               scopeID={scopeID}
@@ -113,7 +120,7 @@ export default function SettingsView({
               onRefresh={refreshUsage}
             />
           )}
-          {activePane === TeamPane && !!activeProject && <TeamSettings activeProject={activeProject} />}
+          {activePane === TeamPane && isProjectScope && <TeamSettings activeProject={activeProject} />}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}
