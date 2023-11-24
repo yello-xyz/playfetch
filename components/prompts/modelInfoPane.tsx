@@ -26,10 +26,12 @@ export default function ModelInfoPane({
   model,
   config,
   setConfig,
+  onDismiss,
 }: {
   model: LanguageModel
   config: PromptConfig
   setConfig: (config: PromptConfig) => void
+  onDismiss: () => void
 }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
 
@@ -65,7 +67,12 @@ export default function ModelInfoPane({
         {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (
-        <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
+        <ModelUnavailableWarning
+          model={model}
+          includeTitle={false}
+          checkProviderAvailable={checkProviderAvailable}
+          onDismiss={onDismiss}
+        />
       )}
       {showActionMenu && (
         <ActionMenu model={model} config={config} setConfig={setConfig} onDismiss={() => setShowActionMenu(false)} />

@@ -81,7 +81,7 @@ function ModelSelectorPopup({
               checked={model === config.model}
             />
             <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block'>
-              <ModelInfoPane model={model} config={config} setConfig={setConfig} />
+              <ModelInfoPane model={model} config={config} setConfig={setConfig} onDismiss={withDismiss(() => {})} />
             </div>
           </div>
         ))}

@@ -178,31 +178,44 @@ export function ModelUnavailableWarning({
   model,
   includeTitle = true,
   checkProviderAvailable,
+  onDismiss,
 }: {
   model: LanguageModel
   includeTitle?: boolean
   checkProviderAvailable: (provider: ModelProvider) => boolean
+  onDismiss?: () => void
 }) {
   const provider = ProviderForModel(model)
 
   return checkProviderAvailable(provider) ? (
-    <ModelWarning model={model} includeTitle={includeTitle} />
+    <ModelWarning model={model} includeTitle={includeTitle} onDismiss={onDismiss} />
   ) : (
-    <ProviderWarning provider={provider} includeTitle={includeTitle} />
+    <ProviderWarning provider={provider} includeTitle={includeTitle} onDismiss={onDismiss} />
   )
 }
 
-const useNavigateToSettings = () => {
+const useNavigateToSettings = (onDismiss?: () => void) => {
   const router = useRouter()
   const project = useActiveProject()
-  return () => router.push(project.isOwner ? SettingsRoute(project.id) : ClientRoute.Settings)
+  return () => {
+    onDismiss?.()
+    router.push(project.isOwner ? SettingsRoute(project.id) : ClientRoute.Settings)
+  }
 }
 
-function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; includeTitle?: boolean }) {
+function ModelWarning({
+  model,
+  includeTitle = true,
+  onDismiss,
+}: {
+  model: LanguageModel
+  includeTitle?: boolean
+  onDismiss?: () => void
+}) {
   const checkModelDisabled = useCheckModelDisabled()
   const isModelDisabled = checkModelDisabled(model)
 
-  const navigateToSettings = useNavigateToSettings()
+  const navigateToSettings = useNavigateToSettings(onDismiss)
 
   const buttonTitle = isModelDisabled ? 'Enable Model' : 'View Settings'
   const title = includeTitle ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : undefined
@@ -211,11 +224,7 @@ function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; in
     : 'Custom models need to be configured before use.'
 
   return (
-    <ButtonBanner
-      type='warning'
-      title={title}
-      buttonTitle={buttonTitle}
-      onClick={navigateToSettings}>
+    <ButtonBanner type='warning' title={title} buttonTitle={buttonTitle} onClick={navigateToSettings}>
       <span>{description}</span>
     </ButtonBanner>
   )
@@ -224,11 +233,13 @@ function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; in
 export function ProviderWarning({
   provider,
   includeTitle = true,
+  onDismiss,
 }: {
   provider: ModelProvider | QueryProvider
   includeTitle?: boolean
+  onDismiss?: () => void
 }) {
-  const navigateToSettings = useNavigateToSettings()
+  const navigateToSettings = useNavigateToSettings(onDismiss)
 
   return (
     <ButtonBanner
