@@ -1,11 +1,14 @@
+import { ActiveProject } from '@/types'
 import { createContext, useContext } from 'react'
 
 type ProjectContextType = {
-  refreshActiveItem?: (focusVersionID?: number) => Promise<void>
+  activeProject?: ActiveProject
   refreshProject?: () => Promise<void>
+  refreshActiveItem?: (focusVersionID?: number) => Promise<void>
 }
 
 export const ProjectContext = createContext<ProjectContextType>({})
 
-export const useRefreshActiveItem = () => useContext(ProjectContext).refreshActiveItem!
+export const useActiveProject = () => useContext(ProjectContext).activeProject!
 export const useRefreshProject = () => useContext(ProjectContext).refreshProject!
+export const useRefreshActiveItem = () => useContext(ProjectContext).refreshActiveItem!
