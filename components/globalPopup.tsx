@@ -35,19 +35,17 @@ export const SanitizePopupLocation = (
 
   if (!isFullySpecified) {
     if (parentRect && childRect) {
-      const clampHorizontal = (value: number) => Math.max(0, Math.min(parentRect.width - childRect.width, value))
-      const clampVertical = (value: number) => Math.max(0, Math.min(parentRect.height - childRect.height, value))
       if (position.right !== undefined) {
-        position.right = parentRect.width - clampHorizontal(position.right)
+        position.right = parentRect.width - Math.max(childRect.width, Math.min(parentRect.width, position.right))
       }
       if (position.left !== undefined) {
-        position.left = clampHorizontal(position.left)
+        position.left = Math.max(0, Math.min(parentRect.width - childRect.width, position.left))
       }
       if (position.bottom !== undefined) {
-        position.bottom = parentRect.height - clampVertical(position.bottom)
+        position.bottom = parentRect.height - Math.max(childRect.height, Math.min(parentRect.height, position.bottom))
       }
       if (position.top !== undefined) {
-        position.top = clampVertical(position.top)
+        position.top = Math.max(0, Math.min(parentRect.height - childRect.height, position.top))
       } else if (isUnspecified) {
         position.left = (parentRect.width - childRect.width) / 2
         position.top = (parentRect.height - childRect.height) / 2
