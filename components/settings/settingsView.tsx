@@ -9,6 +9,7 @@ import UsageSettings from './usageSettings'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
+import { Capitalize } from '@/src/common/formatting'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
@@ -32,27 +33,41 @@ const titleForPane = (pane: ActivePane) => {
 const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
   switch (pane) {
     case ProvidersPane:
-      return 'Provide your API credentials here to enable integration with LLM providers. To get started, you’ll need to sign up for an account and get an API key from them.'
+      return (
+        'Provide your API credentials here to enable integration with LLM providers' +
+        (isProjectScope ? ' within this project. ' : '. ') +
+        'To get started, you’ll need to sign up for an account and get an API key from them.'
+      )
     case UsagePane:
       return (
-        'Limit your API expenditure by setting a monthly spending limit. ' +
+        'Limit your API expenditure by setting a monthly spending limit' +
+        (isProjectScope
+          ? ' for providers configured in this project. '
+          : ' for providers that are not configured within the scope of a project. ') +
         (isProjectScope ? 'Notification emails will be dispatched to project members with the “Owner” role. ' : '') +
         'Please be aware that you remain accountable for any exceeding costs in case of delays in enforcing the limits.'
       )
     case TeamPane:
-      return 'Manage who has access to this project, change role assignment and remove members.'
+      return 'Manage who has access to this project, change role assignments or remove members.'
     case ConnectorsPane:
-      return 'Provide your API credentials here to enable integration with vector stores.'
+      return (
+        'Provide your API credentials here to enable integration with vector stores' +
+        (isProjectScope ? ' within this project.' : '.')
+      )
   }
 }
+
+const projectScopeDescription = (targetType: 'providers' | 'connectors') =>
+  `${Capitalize(
+    targetType
+  )} configured here will be available to anyone with project access to be used within the context of this project only. Project members can still use their own API keys within this project for ${targetType} that are not configured here.`
 
 const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
   switch (pane) {
     case ProvidersPane:
+      return isProjectScope ? projectScopeDescription('providers') : undefined
     case ConnectorsPane:
-      return isProjectScope
-        ? 'Configurations made here will be available to anyone with project access to be used within the context of this project only.'
-        : undefined
+      return isProjectScope ? projectScopeDescription('connectors') : undefined
     case UsagePane:
     case TeamPane:
       return undefined
