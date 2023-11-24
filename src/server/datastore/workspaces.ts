@@ -28,16 +28,7 @@ export async function migrateWorkspaces(postMerge: boolean) {
   const datastore = getDatastore()
   const [allWorkspaces] = await datastore.runQuery(datastore.createQuery(Entity.WORKSPACE))
   for (const workspaceData of allWorkspaces) {
-    console.log(`Migrating workspace ${workspaceData.name} for user ${workspaceData.userID}`)
-    await grantUserAccess(
-      workspaceData.userID,
-      workspaceData.userID,
-      getID(workspaceData),
-      'workspace',
-      'owner',
-      workspaceData.createdAt
-    )
-    // await updateWorkspace({ ...workspaceData })
+    await updateWorkspace({ ...workspaceData })
   }
 }
 
