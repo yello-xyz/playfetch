@@ -4,10 +4,14 @@ import Icon from './icon'
 
 export default function Collapsible({
   title,
+  className = '',
+  titleClassName = '',
   initiallyExpanded = false,
   children,
 }: {
-  title: string
+  title?: string
+  className?: string
+  titleClassName?: string
   initiallyExpanded?: boolean
   children: ReactNode
 }) {
@@ -15,11 +19,11 @@ export default function Collapsible({
 
   return (
     <div>
-      <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
-        <Icon className={`${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
+      <div className={`${titleClassName} flex items-center cursor-pointer`} onClick={() => setExpanded(!isExpanded)}>
+        <Icon className={isExpanded ? '' : '-rotate-90'} icon={chevronIcon} />
         <span className='font-medium text-gray-700'>{title}</span>
       </div>
-      {isExpanded && <div className='ml-6'>{children}</div>}
+      {isExpanded && <div className={`${className} ml-6`}>{children}</div>}
     </div>
   )
 }
