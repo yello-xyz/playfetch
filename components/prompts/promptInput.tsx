@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import { RefObject, useCallback, useEffect, useState } from 'react'
 
 import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
@@ -16,15 +16,16 @@ const printVariables = (text: string) =>
 const parseVariables = (html: string) =>
   html
     .replace(/(<\/b>)&nbsp;(<br \/>)?(<\/div>)?( )?$/, '$1$2$3$4')
+    .replace(/<b[^>]*>\n<\/b>/g, '\n')
     .replace(/<b[^>]*>([^>{}]*?)<\/b>/g, '{{$1}}')
     .replace(/<b[^>]*>([^>]*?)<\/b>/g, '$1')
     .replaceAll('{{}}', '')
     .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
     .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
 
-const PromptToHTML = (text: string) => RichTextToHTML(text, printVariables)
+export const PromptToHTML = (text: string) => RichTextToHTML(text, printVariables)
 
-const PromptFromHTML = (html: string) => RichTextFromHTML(html, parseVariables)
+export const PromptFromHTML = (html: string) => RichTextFromHTML(html, parseVariables)
 
 type Selection = { text: string; range: Range; popupPoint: { x: number; y: number }; isInput: boolean }
 
