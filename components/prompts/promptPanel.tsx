@@ -24,9 +24,10 @@ import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
 import { ReactNode, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import ClientRoute from '@/src/common/clientRoute'
+import ClientRoute, { SettingsRoute } from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
+import { useActiveProject } from '@/src/client/context/projectContext'
 
 export type PromptTab = keyof Prompts
 
@@ -191,11 +192,17 @@ export function ModelUnavailableWarning({
   )
 }
 
+const useNavigateToSettings = () => {
+  const router = useRouter()
+  const project = useActiveProject()
+  return () => router.push(project.isOwner ? SettingsRoute(project.id) : ClientRoute.Settings)
+}
+
 function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; includeTitle?: boolean }) {
   const checkModelDisabled = useCheckModelDisabled()
   const isModelDisabled = checkModelDisabled(model)
 
-  const router = useRouter()
+  const navigateToSettings = useNavigateToSettings()
 
   const buttonTitle = isModelDisabled ? 'Enable Model' : 'View Settings'
   const title = includeTitle ? (isModelDisabled ? 'Model Disabled' : 'Model Unavailable') : undefined
@@ -208,7 +215,7 @@ function ModelWarning({ model, includeTitle = true }: { model: LanguageModel; in
       type='warning'
       title={title}
       buttonTitle={buttonTitle}
-      onClick={() => router.push(ClientRoute.Settings)}>
+      onClick={navigateToSettings}>
       <span>{description}</span>
     </ButtonBanner>
   )
@@ -221,14 +228,14 @@ export function ProviderWarning({
   provider: ModelProvider | QueryProvider
   includeTitle?: boolean
 }) {
-  const router = useRouter()
+  const navigateToSettings = useNavigateToSettings()
 
   return (
     <ButtonBanner
       type='warning'
       title={includeTitle ? 'Missing API Key' : undefined}
       buttonTitle='Add API Key'
-      onClick={() => router.push(ClientRoute.Settings)}>
+      onClick={navigateToSettings}>
       <span>
         An API key is required to use this {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
