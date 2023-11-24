@@ -1,11 +1,11 @@
-import { ActiveProject } from '@/types'
 import MembersPane from '../users/membersPane'
-import { useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import ModalDialog, { DialogPrompt } from '../modalDialog'
 
-export default function TeamSettings({ activeProject }: { activeProject: ActiveProject }) {
+export default function TeamSettings() {
+  const activeProject = useActiveProject()
   const refreshProject = useRefreshProject()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 

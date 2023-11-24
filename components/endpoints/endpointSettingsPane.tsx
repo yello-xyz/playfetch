@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActiveChain, ActiveProject, ActivePrompt } from '@/types'
+import { ActiveChain, ActivePrompt } from '@/types'
 import api from '@/src/client/api'
 import Label from '../label'
 import { CheckValidURLPath, ToCamelCase } from '@/src/common/formatting'
@@ -12,6 +12,7 @@ import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import TextInput from '../textInput'
 import Button, { PendingButton } from '../button'
 import ProjectItemSelector from '../projects/projectItemSelector'
+import { useActiveProject } from '@/src/client/context/projectContext'
 
 export type EndpointSettings = {
   id: number | undefined
@@ -26,7 +27,6 @@ export type EndpointSettings = {
 
 export default function EndpointSettingsPane({
   endpoint,
-  project,
   activeParent,
   onSelectParentID,
   onSelectVersionIndex,
@@ -35,7 +35,6 @@ export default function EndpointSettingsPane({
   onRefresh,
 }: {
   endpoint: EndpointSettings
-  project: ActiveProject
   activeParent?: ActivePrompt | ActiveChain
   onSelectParentID: (parentID?: number) => void
   onSelectVersionIndex: (versionIndex: number) => void
@@ -90,8 +89,10 @@ export default function EndpointSettingsPane({
     }
   }
 
+  const activeProject = useActiveProject()
+
   const addFlavor = async (flavor: string) => {
-    await api.addFlavor(project.id, flavor)
+    await api.addFlavor(activeProject.id, flavor)
     await onRefresh()
     updateFlavor(flavor)
   }
@@ -105,7 +106,7 @@ export default function EndpointSettingsPane({
     setSaving(true)
     const newEndpointID = await api.publishEndpoint(
       isEnabled,
-      project.id,
+      activeProject.id,
       parentID!,
       versionID!,
       urlPath,
@@ -170,7 +171,7 @@ export default function EndpointSettingsPane({
         <ProjectItemSelector
           fixedWidth
           disabled={disabled}
-          project={project}
+          project={activeProject}
           selectedItemID={parentID}
           onSelectItemID={updateParentID}
         />
@@ -195,7 +196,7 @@ export default function EndpointSettingsPane({
         <Label disabled={disabled}>Environment</Label>
         <DropdownMenu disabled={disabled} value={flavor ?? 0} onChange={updateFlavor}>
           {!flavor && <option value={0}>Select environment</option>}
-          {project.availableFlavors.map((flavor, index) => (
+          {activeProject.availableFlavors.map((flavor, index) => (
             <option key={index} value={flavor}>
               {flavor}
             </option>
@@ -249,7 +250,7 @@ export default function EndpointSettingsPane({
           title='Add Project Environment'
           confirmTitle='Add'
           label='Name'
-          initialName={project.availableFlavors.includes('production') ? '' : 'production'}
+          initialName={activeProject.availableFlavors.includes('production') ? '' : 'production'}
           onConfirm={addFlavor}
           onDismiss={() => setShowPickNamePrompt(false)}
         />

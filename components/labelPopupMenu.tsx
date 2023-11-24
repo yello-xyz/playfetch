@@ -19,9 +19,9 @@ const projectLabelColors = [
   'bg-yellow-300 text-white',
 ]
 
-export const AvailableLabelColorsForItem = (prompt: ActivePrompt | ActiveChain | ActiveProject) =>
+export const AvailableLabelColorsForItem = (item: ActivePrompt | ActiveChain | ActiveProject) =>
   Object.fromEntries(
-    prompt.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
+    item.availableLabels.map((label, index) => [label, projectLabelColors[index % projectLabelColors.length]])
   )
 
 export default function LabelPopupMenu({

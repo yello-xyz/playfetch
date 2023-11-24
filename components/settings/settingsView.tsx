@@ -1,7 +1,7 @@
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
-import { ActiveProject, AvailableProvider, CostUsage, IsModelProvider } from '@/types'
+import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SettingsPane from './settingsPane'
 import api from '@/src/client/api'
@@ -10,6 +10,7 @@ import { useLoggedInUser } from '@/src/client/context/userContext'
 import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
 import { Capitalize } from '@/src/common/formatting'
+import { useActiveProject } from '@/src/client/context/projectContext'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
@@ -75,16 +76,17 @@ const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
 }
 
 export default function SettingsView({
-  activeProject,
+  scope,
   providers,
   refresh,
 }: {
-  activeProject?: ActiveProject
+  scope: 'user' | 'project'
   providers: AvailableProvider[]
   refresh: () => void
 }) {
   const user = useLoggedInUser()
-  const isProjectScope = !!activeProject
+  const activeProject = useActiveProject()
+  const isProjectScope = scope === 'project'
   const scopeID = isProjectScope ? activeProject.id : user.id
   const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
 
@@ -135,7 +137,7 @@ export default function SettingsView({
               onRefresh={refreshUsage}
             />
           )}
-          {activePane === TeamPane && isProjectScope && <TeamSettings activeProject={activeProject} />}
+          {activePane === TeamPane && isProjectScope && <TeamSettings />}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}

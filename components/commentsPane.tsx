@@ -21,22 +21,22 @@ import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { AvailableLabelColorsForItem } from './labelPopupMenu'
 import { SingleTabHeader } from './tabSelector'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
+import { useActiveProject } from '@/src/client/context/projectContext'
 
 export default function CommentsPane({
-  project,
   activeItem,
   showComments,
   setShowComments,
   onSelectComment,
 }: {
-  project: ActiveProject
   activeItem?: ActivePrompt | ActiveChain
   showComments: boolean
   setShowComments: (show: boolean) => void
   onSelectComment: (parentID: number, versionID: number, runID?: number) => void
 }) {
-  const users = project.users
-  const labelColors = AvailableLabelColorsForItem(project)
+  const activeProject = useActiveProject()
+  const users = activeProject.users
+  const labelColors = AvailableLabelColorsForItem(activeProject)
   const versions = activeItem?.versions
 
   return showComments ? (
@@ -45,13 +45,13 @@ export default function CommentsPane({
         <IconButton icon={collapseIcon} onClick={() => setShowComments(false)} />
       </SingleTabHeader>
       <div className='flex flex-col gap-2 p-3 overflow-y-auto'>
-        {project.comments.map((comment, index) => (
+        {activeProject.comments.map((comment, index) => (
           <CommentCell
             key={index}
             comment={comment}
             user={users.find(user => user.id === comment.userID)!}
             labelColors={labelColors}
-            project={project}
+            project={activeProject}
             versions={versions}
             onSelect={onSelectComment}
           />

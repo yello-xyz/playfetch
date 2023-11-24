@@ -240,8 +240,6 @@ export default function Home({
                     <Suspense>
                       <ProjectTopBar
                         workspaces={workspaces}
-                        activeProject={activeProject}
-                        onRefreshProject={refreshProject}
                         onNavigateBack={navigateBack}
                         showComments={showComments}
                         setShowComments={setShowComments}
@@ -250,7 +248,6 @@ export default function Home({
                     <div className='flex items-stretch flex-1 overflow-hidden'>
                       <Suspense>
                         <ProjectSidebar
-                          activeProject={activeProject}
                           activeItem={activeItem}
                           workspaces={workspaces}
                           onAddPrompt={addPrompt}
@@ -266,8 +263,6 @@ export default function Home({
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane
-                            activeProject={activeProject}
-                            refreshProject={refreshProject}
                             activeItem={activeItem}
                             activePrompt={activePrompt}
                             activeChain={activeChain}

@@ -1,4 +1,4 @@
-import { ActiveProject, Workspace } from '@/types'
+import { Workspace } from '@/types'
 import commentIcon from '@/public/commentBadge.svg'
 import chevronIcon from '@/public/chevron.svg'
 import { Suspense, useState } from 'react'
@@ -10,28 +10,27 @@ import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '../topBar'
 
 import dynamic from 'next/dynamic'
 import InviteButton from '../users/inviteButton'
+import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
 const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 
 export default function ProjectTopBar({
   workspaces,
-  activeProject,
-  onRefreshProject,
   onNavigateBack,
   showComments,
   setShowComments,
 }: {
   workspaces: Workspace[]
-  activeProject: ActiveProject
-  onRefreshProject: () => void
   onNavigateBack: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
 }) {
+  const activeProject = useActiveProject()
+  const refreshProject = useRefreshProject()
   const [isMenuExpanded, setMenuExpanded] = useState(false)
 
   const inviteMembers = async (emails: string[]) => {
     await api.inviteToProject(activeProject.id, emails)
-    onRefreshProject()
+    refreshProject()
   }
 
   const workspace = workspaces.find(workspace => workspace.id === activeProject.workspaceID)
@@ -58,7 +57,7 @@ export default function ProjectTopBar({
                   setMenuExpanded={setMenuExpanded}
                   workspaces={workspaces}
                   isSharedProject={!workspace}
-                  onRefresh={onRefreshProject}
+                  onRefresh={refreshProject}
                   onDeleted={onNavigateBack}
                 />
               </Suspense>
