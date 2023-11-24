@@ -33,24 +33,21 @@ type ProviderMetadata = {
 }
 
 export async function migrateProviders(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
   for (const providerData of allProviders) {
-    if (providerData.userID && !providerData.scopeID) {
-      console.log(`Migrating provider ${providerData.provider} for user ${providerData.userID}`)
-      await getDatastore().save(
-        toProviderData(
-          providerData.scopeID ?? providerData.userID,
-          providerData.provider,
-          providerData.apiKey,
-          JSON.parse(providerData.metadata),
-          getID(providerData)
-        )
+    console.log(`Migrating provider ${providerData.provider} for user ${providerData.userID}`)
+    await getDatastore().save(
+      toProviderData(
+        providerData.scopeID ?? providerData.userID,
+        providerData.provider,
+        providerData.apiKey,
+        JSON.parse(providerData.metadata),
+        getID(providerData),
+        postMerge ? undefined : providerData.userID ?? providerData.scopeID,
+        postMerge ? undefined : providerData.cost ?? 0
       )
-    }
+    )
   }
 }
 
@@ -83,7 +80,9 @@ const toProviderData = (
   provider: ModelProvider | QueryProvider,
   apiKey: string | null,
   metadata: ProviderMetadata,
-  providerID?: number
+  providerID?: number,
+  userID?: number,
+  cost?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
@@ -91,6 +90,8 @@ const toProviderData = (
     provider,
     apiKey,
     metadata: JSON.stringify(metadata),
+    userID,
+    cost,
   },
   excludeFromIndexes: ['apiKey', 'metadata'],
 })
