@@ -20,7 +20,7 @@ export default function CodeBlock({
       <div className='relative overflow-hidden'>
         <pre className='break-all whitespace-pre-wrap pl-9'>{children}</pre>
         <div className='absolute top-0 left-0'>
-          <pre className='w-4 text-right text-gray-300'>
+          <pre className='w-4 text-right text-gray-400'>
             {[...Array(99).keys()].map(i => (i + 1).toString()).join('\n')}
           </pre>
         </div>
