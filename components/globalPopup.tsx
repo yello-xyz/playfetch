@@ -35,35 +35,19 @@ export const SanitizePopupLocation = (
 
   if (!isFullySpecified) {
     if (parentRect && childRect) {
+      const clampHorizontal = (value: number) => Math.max(0, Math.min(parentRect.width - childRect.width, value))
+      const clampVertical = (value: number) => Math.max(0, Math.min(parentRect.height - childRect.height, value))
       if (position.right !== undefined) {
-        if (position.right < 0) {
-          position.right = 0
-        } else if (position.right + childRect.width > parentRect.width) {
-          position.right = parentRect.width - childRect.width
-        }
-        position.right = parentRect.width - position.right
+        position.right = parentRect.width - clampHorizontal(position.right)
       }
       if (position.left !== undefined) {
-        if (position.left < 0) {
-          position.left = 0
-        } else if (position.left + childRect.width > parentRect.width) {
-          position.left = parentRect.width - childRect.width
-        }
+        position.left = clampHorizontal(position.left)
       }
       if (position.bottom !== undefined) {
-        if (position.bottom < 0) {
-          position.bottom = 0
-        } else if (position.bottom + childRect.height > parentRect.height) {
-          position.bottom = parentRect.height - childRect.height
-        }
-        position.bottom = parentRect.height - position.bottom
+        position.bottom = parentRect.height - clampVertical(position.bottom)
       }
       if (position.top !== undefined) {
-        if (position.top < 0) {
-          position.top = 0
-        } else if (position.top + childRect.height > parentRect.height) {
-          position.top = parentRect.height - childRect.height
-        }
+        position.top = clampVertical(position.top)
       } else if (isUnspecified) {
         position.left = (parentRect.width - childRect.width) / 2
         position.top = (parentRect.height - childRect.height) / 2
