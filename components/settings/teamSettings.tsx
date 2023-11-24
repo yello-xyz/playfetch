@@ -1,6 +1,6 @@
 import { ActiveProject } from '@/types'
 import MembersPane from '../users/membersPane'
-import { useRefreshProject } from '@/src/client/context/refreshContext'
+import { useRefreshProject } from '@/src/client/context/projectContext'
 import api from '@/src/client/api'
 import { useState } from 'react'
 import ModalDialog, { DialogPrompt } from '../modalDialog'

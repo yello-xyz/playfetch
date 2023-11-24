@@ -7,7 +7,7 @@ import PickNameDialog from '../pickNameDialog'
 import MovePromptDialog from '../prompts/movePromptDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 
 export default function ProjectItemPopupMenu({
   item,

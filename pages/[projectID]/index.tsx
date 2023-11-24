@@ -22,7 +22,7 @@ import ClientRoute, {
 } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
-import { RefreshContext } from '@/src/client/context/refreshContext'
+import { ProjectContext } from '@/src/client/context/projectContext'
 import { UserContext } from '@/src/client/context/userContext'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
 import GlobalPopup from '@/components/globalPopup'
@@ -233,7 +233,7 @@ export default function Home({
       <UserContext.Provider value={{ loggedInUser: user }}>
         <ProviderContext.Provider value={{ availableProviders }}>
           <PromptConfigContext.Provider value={{ defaultPromptConfig, setDefaultPromptConfig }}>
-            <RefreshContext.Provider value={{ refreshActiveItem, refreshProject }}>
+            <ProjectContext.Provider value={{ activeProject, refreshActiveItem, refreshProject }}>
               <ModalDialogContext.Provider value={{ setDialogPrompt }}>
                 <GlobalPopupContext.Provider value={globalPopupProviderProps}>
                   <main className='flex flex-col h-screen text-sm'>
@@ -296,7 +296,7 @@ export default function Home({
               </ModalDialogContext.Provider>
               <GlobalPopup {...globalPopupProps} {...popupProps} />
               <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
-            </RefreshContext.Provider>
+            </ProjectContext.Provider>
           </PromptConfigContext.Provider>
         </ProviderContext.Provider>
       </UserContext.Provider>

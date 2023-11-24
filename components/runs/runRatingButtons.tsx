@@ -4,7 +4,7 @@ import thumbsUpIcon from '@/public/thumbsUp.svg'
 import thumbsDownIcon from '@/public/thumbsDown.svg'
 import thumbsUpFilledIcon from '@/public/thumbsUpFilled.svg'
 import thumbsDownFilledIcon from '@/public/thumbsDownFilled.svg'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/refreshContext'
+import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import IconButton from '../iconButton'
 import { useState } from 'react'
 
