@@ -6,15 +6,17 @@ import {
   ActivePrompt,
   ActiveChain,
   ChainItemWithInputs,
+  AvailableProvider,
 } from '@/types'
 import { EmptyProjectView } from '@/components/projects/emptyProjectView'
-import { ActiveItem, CompareItem, EndpointsItem } from '@/src/common/activeItem'
+import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 import { Allotment } from 'allotment'
 import PromptView from '../prompts/promptView'
 import ChainView from '../chains/chainView'
 import CompareView from '../compare/compareView'
 import EndpointsView from '../endpoints/endpointsView'
 import CommentsPane from '../commentsPane'
+import SettingsView from '../settings/settingsView'
 
 export default function MainProjectPane({
   activeProject,
@@ -33,6 +35,8 @@ export default function MainProjectPane({
   activeRunID,
   analytics,
   refreshAnalytics,
+  scopedProviders,
+  refreshProviders,
   showComments,
   setShowComments,
   selectComment,
@@ -56,6 +60,8 @@ export default function MainProjectPane({
   activeRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number) => Promise<void>
+  scopedProviders: AvailableProvider[]
+  refreshProviders: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
   selectComment: (parentID: number, versionID: number, runID?: number) => void
@@ -92,6 +98,9 @@ export default function MainProjectPane({
             refreshAnalytics={refreshAnalytics}
             onRefresh={refreshProject}
           />
+        )}
+        {activeItem === SettingsItem && (
+          <SettingsView activeProject={activeProject} providers={scopedProviders} refresh={refreshProviders} />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>

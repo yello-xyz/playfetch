@@ -160,7 +160,7 @@ export async function updatePromptOnDeletedVersion(promptID: number) {
   await updatePrompt({ ...promptData }, true)
 }
 
-export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {
+export const getTrustedProjectScopedData = async (entities: Entity[], id: number) => {
   let data
   for (const entity of entities) {
     data = await getKeyedEntity(entity, id)
@@ -171,6 +171,11 @@ export const getVerifiedProjectScopedData = async (userID: number, entities: Ent
   if (!data) {
     throw new Error(`Entity with ID ${id} does not exist or user has no access`)
   }
+  return data
+}
+
+export const getVerifiedProjectScopedData = async (userID: number, entities: Entity[], id: number) => {
+  const data = await getTrustedProjectScopedData(entities, id)
   await ensureProjectAccess(userID, data.projectID)
   return data
 }

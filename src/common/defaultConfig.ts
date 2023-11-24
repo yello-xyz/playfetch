@@ -8,5 +8,5 @@ export const DefaultPromptConfig: PromptConfig = {
   model: DefaultModel,
   isChat: false,
   temperature: 0.5,
-  maxTokens: 250,
+  maxTokens: 1000,
 }

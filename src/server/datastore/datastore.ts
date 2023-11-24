@@ -28,6 +28,8 @@ export enum Entity {
   LOG = 'log',
   USAGE = 'usage',
   ANALYTICS = 'analytics',
+  COST = 'cost',
+  BUDGET = 'budget',
 }
 
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key

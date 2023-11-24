@@ -1,5 +1,12 @@
 ## PlayFetch Changelog
 
+### v0.17 - 2023-11-24
+- Project specific API keys
+- Daily cost tracking per model
+- Specify usage limits with notifications
+- Project roles (owner vs member)
+- Improved logs for multi-step requests
+
 ### v0.16 - 2023-11-17
 - Documentation
 - Rate run responses

@@ -1,10 +1,28 @@
-import { EmbeddingModel, IsModelProvider, LanguageModel, ModelProvider, QueryProvider } from '@/types'
-import { useLoggedInUser } from '../context/userContext'
+import {
+  AvailableProvider,
+  EmbeddingModel,
+  IsModelProvider,
+  LanguageModel,
+  ModelProvider,
+  QueryProvider,
+} from '@/types'
 import { IsModelAvailable, IsModelDisabled, IsProviderAvailable } from '@/src/common/providerMetadata'
+import { createContext, useContext } from 'react'
+
+type ProviderContextType = {
+  availableProviders?: AvailableProvider[]
+}
+
+export const ProviderContext = createContext<ProviderContextType>({})
+
+function useAvailableProviders() {
+  const context = useContext(ProviderContext)
+  const availableProviders = context.availableProviders ?? []
+  return availableProviders ?? []
+}
 
 function useProviders() {
-  const user = useLoggedInUser()
-  const availableProviders = user.availableProviders
+  const availableProviders = useAvailableProviders()
   const availableModelProviders = availableProviders.filter(IsModelProvider)
   const checkModelAvailable = (model: LanguageModel | EmbeddingModel) =>
     IsModelAvailable(model, availableModelProviders)
@@ -21,7 +39,7 @@ export function useModelProviders() {
   return [availableModelProviders, checkModelAvailable, checkModelProviderAvailable] as const
 }
 
-export default function useAvailableProviders() {
+export default function useAvailableModelProviders() {
   const [availableModelProviders] = useModelProviders()
   return availableModelProviders
 }

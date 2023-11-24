@@ -121,7 +121,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
             ? { [DefaultChatContinuationInputKey]: req.body }
             : (req.body as PromptInputs)
 
-        const cachedResponse = endpoint.useCache ? await getCachedResponse(versionID, inputs) : null
+        const cachedResponse = endpoint.useCache && !continuationID ? await getCachedResponse(versionID, inputs) : null
         if (cachedResponse && useStreaming) {
           res.write(cachedResponse.output)
         }
@@ -134,7 +134,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const stream = (index: number, _: number, message: string) =>
             useStreaming && isLastStep(index) ? res.write(message) : undefined
 
-          response = await runChain(endpoint.userID, version, configs, inputs, true, stream, continuationID)
+          response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
 
           if (endpoint.useCache && !response.failed && !continuationID && !response.continuationID) {
             cacheResponse(versionID, inputs, response, endpoint.parentID)

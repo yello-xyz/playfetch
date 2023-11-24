@@ -16,7 +16,8 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
         } else if (parentRect.width - position.right - childRect.width < 0) {
           position.right = parentRect.width - childRect.width
         }
-      } else if (position.left !== undefined) {
+      }
+      if (position.left !== undefined) {
         if (position.left < 0) {
           position.left = 0
         } else if (position.left + childRect.width > parentRect.width) {
@@ -30,7 +31,8 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
         } else if (parentRect.height - position.bottom - childRect.height < 0) {
           position.bottom = parentRect.height - childRect.height
         }
-      } else if (position.top !== undefined) {
+      }
+      if (position.top !== undefined) {
         if (position.top < 0) {
           position.top = 0
         } else if (position.top + childRect.height > parentRect.height) {

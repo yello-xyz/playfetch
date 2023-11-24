@@ -1,8 +1,14 @@
 import { EmbeddingModel, QueryProvider } from '@/types'
-import { getProviderCredentials, incrementProviderCostForUser } from '../datastore/providers'
-import { APIKeyForProvider, CreateEmbedding } from '../providers/integration'
+import { getProviderCredentials } from '../datastore/providers'
+import {
+  CredentialsForProvider,
+  CreateEmbedding,
+  IncrementProviderCost,
+  CheckBudgetForProvider,
+} from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
+import { ErrorRunResponse } from './promptEngine'
 
 type QueryResponse = (
   | { result: string[]; output: string; error: undefined; failed: false }
@@ -11,6 +17,7 @@ type QueryResponse = (
 
 export const runQuery = async (
   userID: number,
+  projectID: number,
   provider: QueryProvider,
   model: EmbeddingModel,
   indexName: string,
@@ -18,24 +25,28 @@ export const runQuery = async (
   topK: number
 ): Promise<QueryResponse> => {
   try {
-    const [queryAPIKey, queryEnvironment] = await getProviderCredentials(userID, provider)
-    if (!queryAPIKey || !queryEnvironment) {
+    const scopeIDs = [projectID, userID]
+    const { apiKey, environment } = await getProviderCredentials(scopeIDs, provider)
+    if (!apiKey || !environment) {
       throw new Error('Missing vector store credentials')
     }
 
     const embeddingProvider = ProviderForModel(model)
-    const embeddingApiKey = await APIKeyForProvider(userID, embeddingProvider)
-    if (!embeddingApiKey) {
+    const { scopeID, providerID, apiKey: embeddingAPIKey } = await CredentialsForProvider(scopeIDs, embeddingProvider)
+    if (!embeddingAPIKey) {
       throw new Error('Missing API key')
     }
+    if (!(await CheckBudgetForProvider(scopeID, embeddingProvider))) {
+      throw new Error('Monthly usage limit exceeded')
+    }
 
-    const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingApiKey, userID, query)
-    incrementProviderCostForUser(userID, embeddingProvider, cost)
+    const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
+    IncrementProviderCost(scopeID, providerID, model, cost)
 
-    const result = await runVectorQuery(queryAPIKey, queryEnvironment, indexName, embedding, topK)
+    const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 
     return { result, output: result.join('\n'), error: undefined, failed: false, cost, attempts: 1 }
   } catch (error: any) {
-    return { result: undefined, output: undefined, error: error.message, failed: true, cost: 0, attempts: 1 }
+    return ErrorRunResponse(error.message)
   }
 }

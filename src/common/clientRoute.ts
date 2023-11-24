@@ -29,6 +29,8 @@ export const CompareRoute = (projectID: number, itemID?: number, versionID?: num
 
 export const EndpointsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1`
 
+export const SettingsRoute = (projectID: number) => `${ProjectRoute(projectID)}?s=1`
+
 export const NewEndpointRoute = (projectID: number, parentID: number, versionID: number) =>
   `${EndpointsRoute(projectID)}&p=${parentID}&v=${versionID}`
 
@@ -53,15 +55,15 @@ export const ParseNumberQuery = (query: NodeJS.Dict<string | string[]>): NodeJS.
   mapDictionary(ParseQuery(query), value => Number(value))
 
 export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
-  let { p: promptID, c: chainID, m: compare, e: endpoints } = ParseNumberQuery(query)
-  if (!compare && !endpoints && !promptID && !chainID) {
+  let { p: promptID, c: chainID, m: compare, e: endpoints, s: settings } = ParseNumberQuery(query)
+  if (!compare && !endpoints && !settings && !promptID && !chainID) {
     if (project.prompts.length > 0) {
       promptID = project.prompts[0].id
     } else {
       chainID = project.chains[0]?.id
     }
   }
-  return { promptID, chainID, compare, endpoints }
+  return { promptID, chainID, compare, endpoints, settings }
 }
 
 export default ClientRoute

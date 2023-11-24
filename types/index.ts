@@ -37,6 +37,8 @@ export type Project = {
   workspaceID: number
   timestamp: number
   favorited: boolean
+  isOwner: boolean
+  createdBy: number
 }
 
 export type PendingProject = Project & PendingAttributes
@@ -52,6 +54,9 @@ export type ActiveProject = Project & {
   chains: Chain[]
   users: User[]
   pendingUsers: PendingUser[]
+  projectOwners: User[]
+  projectMembers: User[]
+  pendingProjectMembers: PendingUser[]
   availableLabels: string[]
   comments: Comment[]
 }
@@ -121,13 +126,11 @@ export type CustomModel = {
 
 export type AvailableModelProvider = {
   provider: ModelProvider
-  cost: number
   customModels: CustomModel[]
   gatedModels: DefaultLanguageModel[]
 }
 export type AvailableQueryProvider = {
   provider: QueryProvider
-  cost: number
   environment: string
 }
 export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
@@ -325,6 +328,13 @@ export type LogEntry = {
   continuationID?: number
 }
 
+export type CostUsage = {
+  cost: number
+  limit: number | null
+  threshold: number | null
+  modelCosts: { [model: string]: number }[]
+}
+
 export type Analytics = {
   recentLogEntries: LogEntry[]
   recentUsage: Usage[]
@@ -347,7 +357,7 @@ export type UserMetrics = {
   workspaceAccessCount: number
   projectAccessCount: number
   activity: { timestamp: number; versions: number; runs: number; comments: number; endpoints: number }[]
-  providers: { provider: ModelProvider | QueryProvider; cost: number }[]
+  providers: (ModelProvider | QueryProvider)[]
   sharedProjects: RecentProject[]
   pendingSharedProjects: RecentProject[]
   workspaces: Workspace[]
@@ -355,8 +365,8 @@ export type UserMetrics = {
 }
 
 export type RecentProject = Project & {
-  workspaceName: string
-  workspaceCreator: string
+  workspace: string
+  creator: string
 }
 
 export type ProjectMetrics = {

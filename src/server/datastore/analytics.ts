@@ -13,6 +13,7 @@ import { Analytics, Usage } from '@/types'
 import { ensureProjectAccess } from './projects'
 import { toUsage } from './usage'
 import { getLogEntriesForProject } from './logs'
+import { DaysAgo } from '@/src/common/formatting'
 
 export async function migrateAnalytics(postMerge: boolean) {
   if (postMerge) {
@@ -30,20 +31,13 @@ export async function migrateAnalytics(postMerge: boolean) {
         analyticsData.cost,
         analyticsData.duration,
         analyticsData.cacheHits,
-        analyticsData.continuations ?? 0,
+        analyticsData.continuations,
         analyticsData.attempts,
         analyticsData.failures,
         getID(analyticsData)
       )
     )
   }
-}
-
-const daysAgo = (date: Date, days: number) => {
-  const result = new Date(date)
-  result.setDate(result.getDate() - days)
-  result.setUTCHours(0, 0, 0, 0)
-  return result
 }
 
 export async function getAnalyticsForProject(
@@ -62,7 +56,7 @@ export async function getAnalyticsForProject(
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
 
-  const recentDays = Array.from({ length: dayRange }, (_, index) => daysAgo(today, index)).reverse()
+  const recentDays = Array.from({ length: dayRange }, (_, index) => DaysAgo(today, index)).reverse()
   const usageMap: { [timestamp: number]: Usage } = Object.fromEntries(
     analyticsData
       .filter(usage => usage.createdAt >= recentDays[0])
@@ -79,7 +73,7 @@ export async function getAnalyticsForProject(
   }
   const recentUsage = recentDays.map(day => usageMap[day.getTime()] ?? emptyUsage)
 
-  const cutoff = daysAgo(today, 2 * dayRange - 1)
+  const cutoff = DaysAgo(today, 2 * dayRange - 1)
   const previous30Days = analyticsData.filter(usage => usage.createdAt >= cutoff && usage.createdAt < recentDays[0])
   const aggregatePreviousUsage = previous30Days.reduce(
     (acc, usage) => ({

@@ -40,41 +40,43 @@ export default function WorkspaceSidebar({
 
   return (
     <>
-      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 overflow-y-auto border-r border-gray-200 bg-gray-25'>
+      <div className='flex flex-col gap-4 px-2 pt-3 pb-4 border-r border-gray-200 bg-gray-25'>
         <SidebarSection>
           <UserSidebarItem />
         </SidebarSection>
-        <SidebarSection>
-          {userWorkspace && (
-            <SidebarButton
-              title={userWorkspace.name}
-              icon={fileIcon}
-              active={activeWorkspaceID === userWorkspace.id}
-              onClick={() => onSelectWorkspace(userWorkspace.id)}
-            />
-          )}
-          {sharedProjects && onSelectSharedProjects && (
-            <SidebarButton
-              title={sharedProjects.name}
-              icon={folderIcon}
-              active={activeWorkspaceID === sharedProjects.id}
-              onClick={onSelectSharedProjects}
-            />
-          )}
-        </SidebarSection>
-        <SidebarSection title='Workspaces' className='flex-1'>
-          {[...pendingWorkspaces, ...properWorkspaces].map((workspace, workspaceIndex) => (
-            <SidebarButton
-              key={workspaceIndex}
-              title={workspace.name}
-              icon={folderIcon}
-              active={activeWorkspaceID === workspace.id}
-              onClick={() => onSelectWorkspace(workspace.id)}
-            />
-          ))}
-          <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
-        </SidebarSection>
-        <FeedbackSection />
+        <div className='flex flex-col flex-1 gap-4 pr-2 -mr-2 overflow-y-auto'>
+          <SidebarSection>
+            {userWorkspace && (
+              <SidebarButton
+                title={userWorkspace.name}
+                icon={fileIcon}
+                active={activeWorkspaceID === userWorkspace.id}
+                onClick={() => onSelectWorkspace(userWorkspace.id)}
+              />
+            )}
+            {sharedProjects && onSelectSharedProjects && (
+              <SidebarButton
+                title={sharedProjects.name}
+                icon={folderIcon}
+                active={activeWorkspaceID === sharedProjects.id}
+                onClick={onSelectSharedProjects}
+              />
+            )}
+          </SidebarSection>
+          <SidebarSection title='Workspaces' className='flex-1'>
+            {[...pendingWorkspaces, ...properWorkspaces].map((workspace, workspaceIndex) => (
+              <SidebarButton
+                key={workspaceIndex}
+                title={workspace.name}
+                icon={folderIcon}
+                active={activeWorkspaceID === workspace.id}
+                onClick={() => onSelectWorkspace(workspace.id)}
+              />
+            ))}
+            <SidebarButton title='New Workspace…' icon={addIcon} onClick={() => setShowPickNamePrompt(true)} />
+          </SidebarSection>
+          <FeedbackSection />
+        </div>
       </div>
       {showPickNamePrompt && (
         <PickNameDialog

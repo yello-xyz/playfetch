@@ -1,20 +1,19 @@
-import { ActiveProject, Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
 import compareIcon from '@/public/compare.svg'
 import endpointIcon from '@/public/endpoint.svg'
+import settingsIcon from '@/public/settings.svg'
 import dotsIcon from '@/public/dots.svg'
 import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
 import { Suspense, useState } from 'react'
 import IconButton from '../iconButton'
+import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
 
 import dynamic from 'next/dynamic'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
-
-const Compare = 'compare'
-const Endpoints = 'endpoints'
-type ActiveItem = Prompt | Chain | typeof Compare | typeof Endpoints
 
 export default function ProjectSidebar({
   activeProject,
@@ -27,6 +26,7 @@ export default function ProjectSidebar({
   onSelectChain,
   onSelectCompare,
   onSelectEndpoints,
+  onSelectSettings,
 }: {
   activeProject: ActiveProject
   activeItem?: ActiveItem
@@ -38,6 +38,7 @@ export default function ProjectSidebar({
   onSelectChain: (chainID: number) => void
   onSelectCompare: () => void
   onSelectEndpoints: () => void
+  onSelectSettings: () => void
 }) {
   const reference = (item: Prompt | Chain) =>
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
@@ -56,18 +57,36 @@ export default function ProjectSidebar({
   const addPromptButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddPrompt} />
   const addChainButton = <IconButton className='opacity-50 hover:opacity-100' icon={addIcon} onClick={onAddChain} />
   const isActiveItem = (item: Prompt | Chain) =>
-    activeItem !== Compare && activeItem !== Endpoints && activeItem?.id === item.id
+    activeItem !== CompareItem &&
+    activeItem !== EndpointsItem &&
+    activeItem !== SettingsItem &&
+    activeItem?.id === item.id
+
+  const user = useLoggedInUser()
 
   return (
     <Sidebar>
       <SidebarSection>
-        <SidebarButton title='Compare' icon={compareIcon} active={activeItem === Compare} onClick={onSelectCompare} />
+        <SidebarButton
+          title='Compare'
+          icon={compareIcon}
+          active={activeItem === CompareItem}
+          onClick={onSelectCompare}
+        />
         <SidebarButton
           title='Endpoints'
           icon={endpointIcon}
-          active={activeItem === Endpoints}
+          active={activeItem === EndpointsItem}
           onClick={onSelectEndpoints}
         />
+        {activeProject.isOwner && (
+          <SidebarButton
+            title='Settings'
+            icon={settingsIcon}
+            active={activeItem === SettingsItem}
+            onClick={onSelectSettings}
+          />
+        )}
       </SidebarSection>
       <SidebarSection title='Prompts' actionComponent={addPromptButton}>
         {activeProject.prompts.map((prompt, promptIndex) => (

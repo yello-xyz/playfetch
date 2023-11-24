@@ -4,7 +4,6 @@ import api from '@/src/client/api'
 import { Suspense, useState } from 'react'
 import {
   User,
-  AvailableProvider,
   Workspace,
   ActiveWorkspace,
   Project,
@@ -22,7 +21,6 @@ import ClientRoute, {
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
 import { ModalDialogContext } from '@/src/client/context/modalDialogContext'
 import { UserContext } from '@/src/client/context/userContext'
-import { getAvailableProvidersForUser } from '@/src/server/datastore/providers'
 import { getActiveWorkspace, getWorkspacesForUser } from '@/src/server/datastore/workspaces'
 import { getSharedProjectsForUser } from '@/src/server/datastore/projects'
 import { GlobalPopupContext, useGlobalPopupProvider } from '@/src/client/context/globalPopupContext'
@@ -55,7 +53,7 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
 
   const [initialWorkspaces, initialPendingWorkspaces] = await getWorkspacesForUser(user.id)
 
-  const [projects, pendingProjects] = await getSharedProjectsForUser(user.id)
+  const [projects, pendingProjects] = await getSharedProjectsForUser(user.id, initialWorkspaces)
   const initialSharedProjects =
     projects.length > 0 || pendingProjects.length > 0 ? SharedProjectsWorkspace(projects, pendingProjects) : null
   const initialActiveWorkspace =
@@ -64,8 +62,6 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       : initialPendingWorkspaces.find(workspace => workspace.id === workspaceID) ??
         (await getActiveWorkspace(user.id, workspaceID ?? user.id))
 
-  const availableProviders = await getAvailableProvidersForUser(user.id)
-
   return {
     props: {
       user,
@@ -73,7 +69,6 @@ export const getServerSideProps = withLoggedInSession(async ({ query, user }) =>
       initialWorkspaces,
       initialPendingWorkspaces,
       initialActiveWorkspace,
-      availableProviders,
     },
   }
 })
@@ -84,14 +79,12 @@ export default function Home({
   initialWorkspaces,
   initialPendingWorkspaces,
   initialActiveWorkspace,
-  availableProviders,
 }: {
   user: User
   initialSharedProjects?: ActiveWorkspace
   initialWorkspaces: Workspace[]
   initialPendingWorkspaces: PendingWorkspace[]
   initialActiveWorkspace: ActiveWorkspace | PendingWorkspace
-  availableProviders: AvailableProvider[]
 }) {
   useDocumentationCookie('set')
   const router = useRouter()
@@ -172,7 +165,7 @@ export default function Home({
 
   return (
     <>
-      <UserContext.Provider value={{ loggedInUser: user, availableProviders }}>
+      <UserContext.Provider value={{ loggedInUser: user }}>
         <ModalDialogContext.Provider value={{ setDialogPrompt }}>
           <GlobalPopupContext.Provider value={globalPopupProviderProps}>
             <main className='flex items-stretch h-screen text-sm'>

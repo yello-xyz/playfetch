@@ -6,6 +6,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 async function updateProviderModel(req: NextApiRequest, res: NextApiResponse, user: User) {
   await saveProviderModel(
     user.id,
+    req.body.scopeID,
     req.body.provider,
     req.body.modelID,
     req.body.name,

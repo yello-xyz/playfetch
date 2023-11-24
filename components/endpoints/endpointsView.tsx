@@ -11,6 +11,7 @@ import {
   PromptVersion,
   ChainVersion,
   Analytics,
+  LogEntry,
 } from '@/types'
 import UsagePane from './usagePane'
 import ExamplePane from './examplePane'
@@ -228,7 +229,7 @@ export default function EndpointsView({
       {activeLogEntryIndex !== undefined && (
         <Allotment.Pane minSize={minWidth} maxSize={maxWidth} preferredSize={minWidth}>
           <LogEntryDetailsPane
-            logEntry={logEntries[activeLogEntryIndex]}
+            logEntries={sameContinuationEntries(logEntries[activeLogEntryIndex], logEntries)}
             parent={parent}
             versions={versions}
             onCollapse={() => setActiveLogEntryIndex(undefined)}
@@ -238,6 +239,9 @@ export default function EndpointsView({
     </Allotment>
   )
 }
+
+const sameContinuationEntries = (entry: LogEntry, entries: LogEntry[]) =>
+  entry.continuationID ? entries.filter(logEntry => logEntry.continuationID === entry.continuationID) : [entry]
 
 function SettingsPaneHeader({
   label,

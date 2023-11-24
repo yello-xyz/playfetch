@@ -25,6 +25,7 @@ export default function GlobalPopupMenu<T>({
   return (
     <div ref={iconRef}>
       <IconButton
+        className='min-w-[24px]'
         icon={icon}
         onClick={togglePopup}
         hoverType={{ background: selectedCell ? 'hover:bg-blue-50' : 'hover:bg-gray-100' }}

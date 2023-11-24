@@ -2,7 +2,7 @@ import { LanguageModel, PromptConfig } from '@/types'
 import { PopupContent, PopupMenuItem } from '../popupMenu'
 import {
   DescriptionForModel,
-  FullLabelForModel,
+  LabelForModel,
   IconForProvider,
   InputPriceForModel,
   IsModelFreeToUse,
@@ -15,7 +15,7 @@ import {
 import Icon from '../icon'
 import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
-import { useModelProviders } from '@/src/client/hooks/useAvailableProviders'
+import { useModelProviders } from '@/src/client/context/providerContext'
 import { useState } from 'react'
 import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'
@@ -26,10 +26,12 @@ export default function ModelInfoPane({
   model,
   config,
   setConfig,
+  onDismiss,
 }: {
   model: LanguageModel
   config: PromptConfig
   setConfig: (config: PromptConfig) => void
+  onDismiss: () => void
 }) {
   const [availableProviders, checkModelAvailable, checkProviderAvailable] = useModelProviders()
 
@@ -43,8 +45,8 @@ export default function ModelInfoPane({
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
-        <span className='font-medium'>{FullLabelForModel(model, availableProviders)}</span>
-        <LabelForModel model={model} />
+        <span className='font-medium'>{LabelForModel(model, availableProviders)}</span>
+        <ModelLabel model={model} />
         <div className='flex justify-end flex-1'>
           <IconButton icon={dotsIcon} onClick={() => setShowActionMenu(!showActionMenu)} />
         </div>
@@ -65,7 +67,12 @@ export default function ModelInfoPane({
         {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (
-        <ModelUnavailableWarning model={model} includeTitle={false} checkProviderAvailable={checkProviderAvailable} />
+        <ModelUnavailableWarning
+          model={model}
+          includeTitle={false}
+          checkProviderAvailable={checkProviderAvailable}
+          onDismiss={onDismiss}
+        />
       )}
       {showActionMenu && (
         <ActionMenu model={model} config={config} setConfig={setConfig} onDismiss={() => setShowActionMenu(false)} />
@@ -76,16 +83,17 @@ export default function ModelInfoPane({
 
 const HorizontalBorder = () => <div className='h-1 border-b border-gray-200' />
 
-export const LabelForModel = ({ model }: { model: LanguageModel }) => {
+export const ModelLabel = ({ model }: { model: LanguageModel }) => {
   const [defaultPromptConfig] = useDefaultPromptConfig()
 
   return IsModelFreeToUse(model) ? (
-    <ModelLabel label='Free' />
+    <ModelSuffix label='Free' />
   ) : model === defaultPromptConfig.model ? (
-    <ModelLabel label='Default' color='bg-pink-400' />
+    <ModelSuffix label='Default' color='bg-pink-400' />
   ) : null
 }
-const ModelLabel = ({ label, color = 'bg-gray-400' }: { label: string; color?: string }) => (
+
+const ModelSuffix = ({ label, color = 'bg-gray-400' }: { label: string; color?: string }) => (
   <span className={`${color} px-1 ml-1 text-[10px] leading-[17px] font-medium text-white rounded`}>{label}</span>
 )
 

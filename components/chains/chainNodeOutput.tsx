@@ -19,7 +19,7 @@ import {
 import { SingleTabHeader } from '../tabSelector'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
-import { useCheckProviders } from '@/src/client/hooks/useAvailableProviders'
+import { useCheckProviders } from '@/src/client/context/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 

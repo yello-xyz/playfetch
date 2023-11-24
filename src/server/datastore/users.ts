@@ -277,11 +277,11 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
     and([buildFilter('userID', userID), buildFilter('kind', 'project')])
   )
 
-  const [sharedProjects, pendingSharedProjects] = await getSharedProjectsForUser(userID)
+  const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
+
+  const [sharedProjects, pendingSharedProjects] = await getSharedProjectsForUser(userID, workspaces)
   const sharedProjectsAsRecent = await getRecentProjects(sharedProjects)
   const pendingSharedProjectsAsRecent = await getRecentProjects(pendingSharedProjects)
-
-  const [workspaces, pendingWorkspaces] = await getWorkspacesForUser(userID)
 
   const getTimestamps = (type: string, userID: number) =>
     getDatastore().runQuery(getDatastore().createQuery(type).filter(buildFilter('userID', userID)).select('createdAt'))
@@ -314,8 +314,8 @@ export async function getMetricsForUser(userID: number): Promise<UserMetrics> {
   commentTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].comments++)
   endpointTimestamps.forEach(daysAgo => activity[maxDaysAgo - daysAgo].endpoints++)
 
-  const providersData = await getEntities(Entity.PROVIDER, 'userID', userID)
-  const providers = providersData.map(providerData => ({ provider: providerData.provider, cost: providerData.cost }))
+  const providersData = await getEntities(Entity.PROVIDER, 'scopeID', userID)
+  const providers = providersData.map(providerData => providerData.provider)
 
   return {
     createdWorkspaceCount,

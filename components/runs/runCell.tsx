@@ -25,7 +25,8 @@ export default function RunCell({
   const isContinuation = !!continuationID
 
   const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
-  const colorClass = run.failed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
+  const anyRunFailed = [run, ...(run.continuations ?? [])].some(run => run.failed)
+  const colorClass = anyRunFailed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
 
   return (
     <div className={`${baseClass} ${colorClass}`}>

@@ -3,10 +3,11 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { getUserForID } from './datastore/users'
 import { getProjectNameForID } from './datastore/projects'
-import ClientRoute, { WorkspaceRoute } from '../common/clientRoute'
+import ClientRoute, { SettingsRoute, WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
 import { User } from '@/types'
-import { Capitalize, FormatDate } from '../common/formatting'
+import { Capitalize, FormatCost, FormatDate } from '../common/formatting'
+import { getAccessingUserIDs } from './datastore/access'
 
 export const GetEmailServerConfig = () => ({
   host: 'smtp.gmail.com',
@@ -34,6 +35,60 @@ function resolveContent(fileName: string, fileType: 'txt' | 'html', variables: {
     content = content.replace(new RegExp(key, 'g'), value)
   })
   return content
+}
+
+export async function sendBudgetNotificationEmails(scopeID: number, limit: number, hardLimit: number | null = null) {
+  const [ownerIDs] = await getAccessingUserIDs(scopeID, 'project')
+  if (ownerIDs.length > 0) {
+    const projectName = await getProjectNameForID(scopeID)
+    const settingsRoute = SettingsRoute(scopeID)
+    for (const ownerID of ownerIDs) {
+      await sendBudgetNotificationEmail(ownerID, settingsRoute, projectName, limit, hardLimit)
+    }
+  } else {
+    await sendBudgetNotificationEmail(scopeID, ClientRoute.Settings, null, limit, hardLimit)
+  }
+}
+
+export async function sendBudgetNotificationEmail(
+  userID: number,
+  settingsRoute: string,
+  projectName: string | null,
+  limit: number,
+  hardLimit: number | null = null
+) {
+  const user = await getUserForID(userID)
+
+  const limitName = hardLimit ? 'usage threshold' : 'usage limit'
+  const projectSuffix = projectName ? ` for project “${projectName}”` : ''
+  const plainProjectSuffix = projectSuffix.replaceAll('“', '"').replaceAll('”', '"')
+  const subject = `Monthly ${limitName} reached${plainProjectSuffix}`
+
+  const title = `You have reached a ${limitName} on PlayFetch`
+  const paragraphs = [
+    `The monthly ${limitName} of ${FormatCost(limit)} has now been reached ${projectSuffix}.`,
+    hardLimit
+      ? `Requests will continue to be processed unless you reach the usage limit of ${FormatCost(hardLimit)}.`
+      : `Subsequent request will not be processed until the end of the month unless you increase your limit.`,
+    `You can increase your ${limitName} in the ${projectName ? 'Project' : 'User'} Settings.`,
+  ]
+  const configurator = projectName ? 'a project owner' : 'you'
+
+  const variables = {
+    __TITLE__: title,
+    __FIRST_PARAGRAPH__: paragraphs[0],
+    __SECOND_PARAGRAPH__: paragraphs[1],
+    __THIRD_PARAGRAPH__: paragraphs[2],
+    __SETTINGS_LINK__: `${process.env.NEXTAUTH_URL}${settingsRoute}`,
+    __CONFIGURATOR__: configurator,
+  }
+
+  await sendMail(
+    user.email,
+    subject,
+    resolveContent('budget', 'txt', variables),
+    resolveContent('budget', 'html', variables)
+  )
 }
 
 export async function sendInviteEmail(

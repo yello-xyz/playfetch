@@ -10,11 +10,13 @@ import {
   OpenAILanguageModel,
 } from '@/types'
 import { encode } from 'gpt-3-encoder'
-import { getProviderKey } from '../datastore/providers'
+import { getProviderCredentials } from '../datastore/providers'
 import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
+import { updateScopedModelCost } from '../datastore/cost'
+import { checkBudgetForScope, incrementCostForScope } from '../datastore/budget'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) =>
   (encode(content).length * pricePerMillionTokens) / 1000000
@@ -22,14 +24,38 @@ const costForTokens = (content: string, pricePerMillionTokens: number) =>
 export const CostForModel = (model: LanguageModel, input: string, output = '') =>
   costForTokens(input, InputPriceForModel(model)) + costForTokens(output, OutputPriceForModel(model))
 
-export const APIKeyForProvider = (userID: number, provider: ModelProvider, modelToCheck?: string) => {
+export const CredentialsForProvider = async (scopeIDs: number[], provider: ModelProvider, modelToCheck?: string) => {
   switch (provider) {
     case 'google':
-      return Promise.resolve(null)
+      return Promise.resolve({ scopeID: null, providerID: null, apiKey: null })
     case 'openai':
     case 'anthropic':
     case 'cohere':
-      return getProviderKey(userID, provider, modelToCheck)
+      const { scopeID, providerID, apiKey } = await getProviderCredentials(scopeIDs, provider, modelToCheck)
+      return { scopeID, providerID, apiKey }
+  }
+}
+
+export const CheckBudgetForProvider = async (scopeID: number | null, provider: ModelProvider) => {
+  switch (provider) {
+    case 'google':
+      return Promise.resolve(true)
+    case 'openai':
+    case 'anthropic':
+    case 'cohere':
+      return !!scopeID && checkBudgetForScope(scopeID)
+  }
+}
+
+export const IncrementProviderCost = (
+  scopeID: number | null,
+  providerID: number | null,
+  model: string,
+  cost: number
+) => {
+  if (scopeID && providerID && cost > 0) {
+    updateScopedModelCost(scopeID, model, cost)
+    incrementCostForScope(scopeID, cost)
   }
 }
 

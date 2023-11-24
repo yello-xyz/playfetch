@@ -13,7 +13,7 @@ import { getUserForEmail } from './users'
 import { sendInviteEmail } from '../email'
 
 type Kind = 'project' | 'workspace'
-type State = 'default' | 'pending'
+type State = 'owner' | 'default' | 'pending'
 
 export async function migrateAccess(postMerge: boolean) {
   if (postMerge) {
@@ -39,16 +39,29 @@ export async function migrateAccess(postMerge: boolean) {
 const getAccessData = (userID: number, objectID: number) =>
   getFilteredEntity(Entity.ACCESS, and([buildFilter('userID', userID), buildFilter('objectID', objectID)]))
 
-export async function hasUserAccess(userID: number, objectID: number) {
+async function checkUserAccess(userID: number, objectID: number, states: State[]) {
   const accessData = await getAccessData(userID, objectID)
-  return !!accessData && accessData.state === 'default'
+  return !!accessData && states.includes(accessData.state)
 }
 
-export async function grantUserAccess(grantedBy: number, userID: number, objectID: number, kind: Kind) {
-  const hasAccess = await hasUserAccess(userID, objectID)
-  if (!hasAccess) {
-    const state = userID === grantedBy ? 'default' : 'pending'
-    await getDatastore().save(toAccessData(userID, objectID, kind, state, grantedBy, new Date()))
+export const hasUserAccess = (userID: number, objectID: number) =>
+  checkUserAccess(userID, objectID, ['owner', 'default'])
+
+export const checkUserOwnership = (userID: number, objectID: number) => checkUserAccess(userID, objectID, ['owner'])
+
+export async function grantUserAccess(
+  grantedBy: number,
+  userID: number,
+  objectID: number,
+  kind: Kind,
+  state: State,
+  createdAt = new Date()
+) {
+  const accessData = await getAccessData(userID, objectID)
+  if (!accessData || accessData.state !== state) {
+    await getDatastore().save(
+      toAccessData(userID, objectID, kind, state, grantedBy, createdAt, accessData ? getID(accessData) : undefined)
+    )
   }
 }
 
@@ -80,23 +93,31 @@ export async function updateAccessForUser(userID: number, objectID: number, acce
   }
 }
 
-export async function getAccessibleObjectIDs(userID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
+export async function getAccessibleObjectIDs(
+  userID: number,
+  kind: Kind
+): Promise<[number[], number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('userID', userID), buildFilter('kind', kind)])
   )
   return [
+    entities.filter(entity => entity.state === 'owner').map(entity => entity.objectID),
     entities.filter(entity => entity.state === 'default').map(entity => entity.objectID),
     entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
   ]
 }
 
-export async function getAccessingUserIDs(objectID: number, kind: Kind): Promise<[number[], PendingAccess[]]> {
+export async function getAccessingUserIDs(
+  objectID: number,
+  kind: Kind
+): Promise<[number[], number[], PendingAccess[]]> {
   const entities = await getFilteredEntities(
     Entity.ACCESS,
     and([buildFilter('objectID', objectID), buildFilter('kind', kind)])
   )
   return [
+    entities.filter(entity => entity.state === 'owner').map(entity => entity.userID),
     entities.filter(entity => entity.state === 'default').map(entity => entity.userID),
     entities.filter(entity => entity.state === 'pending').map(toPendingAccess),
   ]
@@ -111,7 +132,7 @@ export async function grantUsersAccess(
   for (const email of emails) {
     const user = await getUserForEmail(email.toLowerCase(), true)
     if (user) {
-      await grantUserAccess(userID, user.id, objectID, kind)
+      await grantUserAccess(userID, user.id, objectID, kind, 'pending')
       hasUserAccess(user.id, user.id).then(hasAccess =>
         hasAccess ? sendInviteEmail(userID, email, objectID, kind) : {}
       )

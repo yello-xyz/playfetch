@@ -4,50 +4,53 @@ import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider } from
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
-import { FormatCost } from '@/src/common/formatting'
 import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
-import SettingsPane from './settingsPane'
+import CustomModelSettings from './customModelSettings'
 
-export default function ProviderSettingsPane({
-  title,
-  description,
+export default function ProviderSettings({
+  scopeID,
   providers,
   availableProviders,
   includeEnvironment,
   onRefresh,
 }: {
-  title: string
-  description: string
+  scopeID: number
   providers: ModelProvider[] | QueryProvider[]
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
   onRefresh: () => void
 }) {
   return (
-    <SettingsPane title={title} description={description}>
+    <>
       {providers.map((provider, index) => (
         <ProviderRow
           key={index}
+          scopeID={scopeID}
           provider={provider}
           availableProvider={availableProviders.find(p => p.provider === provider)}
+          availableProviders={availableProviders}
           includeEnvironment={includeEnvironment}
           onRefresh={onRefresh}
         />
       ))}
-    </SettingsPane>
+    </>
   )
 }
 
 function ProviderRow({
+  scopeID,
   provider,
   availableProvider,
+  availableProviders,
   includeEnvironment,
   onRefresh,
 }: {
+  scopeID: number
   provider: ModelProvider | QueryProvider
   availableProvider?: AvailableProvider
+  availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
   onRefresh: () => void
 }) {
@@ -68,7 +71,7 @@ function ProviderRow({
 
   const updateKey = async (apiKey: string | null) => {
     setProcessing(true)
-    await api.updateProviderKey(provider, apiKey, environment).then(onRefresh)
+    await api.updateProviderKey(scopeID, provider, apiKey, environment).then(onRefresh)
     setProcessing(false)
     toggleUpdate(false)
   }
@@ -82,6 +85,7 @@ function ProviderRow({
     })
   }
 
+  const isProviderAvailable = availableProvider && !isUpdating
   const flexLayout = availableProvider || isUpdating ? 'flex-col' : 'justify-between'
 
   return (
@@ -89,12 +93,9 @@ function ProviderRow({
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <Label className='w-40'>{label}</Label>
-        {availableProvider && availableProvider.cost > 0 && (
-          <div className='flex justify-end text-xs grow'>{FormatCost(availableProvider.cost)}</div>
-        )}
       </div>
       <div className='flex items-center gap-2.5'>
-        {availableProvider && !isUpdating && (
+        {isProviderAvailable && (
           <>
             <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />
             {includeEnvironment && previousEnvironment && <TextInput disabled value={previousEnvironment} />}
@@ -125,13 +126,19 @@ function ProviderRow({
           <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>
             {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
           </Button>
-          {availableProvider && !isUpdating && (
+          {isProviderAvailable && (
             <Button type='destructive' disabled={isProcessing} onClick={removeKey}>
               Remove
             </Button>
           )}
         </div>
       </div>
+      <CustomModelSettings
+        scopeID={scopeID}
+        provider={provider}
+        availableProviders={availableProviders}
+        onRefresh={onRefresh}
+      />
     </div>
   )
 }

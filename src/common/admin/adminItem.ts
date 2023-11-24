@@ -12,4 +12,4 @@ export type AdminItem =
   | Workspace
 export const AdminItemIsUser = (item: AdminItem): item is ActiveUser => typeof item === 'object' && 'fullName' in item
 export const AdminItemIsProject = (item: AdminItem): item is RecentProject =>
-  typeof item === 'object' && 'workspaceName' in item
+  typeof item === 'object' && 'workspace' in item

@@ -35,7 +35,7 @@ export default function ProjectPopupMenu({
       title: `Are you sure you want to leave “${project.name}”?`,
       content: 'If you leave this project, you will no longer have access to any of its prompts or chains.',
       confirmTitle: 'Leave Shared Project',
-      callback: () => api.leaveProject(project.id).then(onDeleted),
+      callback: () => api.revokeProjectAccess(project.id).then(onDeleted),
       destructive: true,
     })
   }
@@ -73,12 +73,19 @@ export default function ProjectPopupMenu({
   return (
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename Project…' callback={renameProject} first />
-        {!isSharedProject && <PopupMenuItem title='Move to Workspace…' callback={moveProject} />}
-        {isSharedProject ? (
-          <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} last />
+        <PopupMenuItem
+          title='Rename Project…'
+          callback={renameProject}
+          first
+          last={!project.isOwner && !isSharedProject}
+        />
+        {project.isOwner ? (
+          <>
+            <PopupMenuItem title='Move to Workspace…' callback={moveProject} />
+            <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} last />
+          </>
         ) : (
-          <PopupMenuItem separated destructive title='Delete Project' callback={deleteProject} last />
+          isSharedProject && <PopupMenuItem separated destructive title='Leave Project' callback={leaveProject} last />
         )}
       </PopupMenu>
       {showPickNamePrompt && (

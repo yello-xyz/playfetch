@@ -16,12 +16,19 @@ import {
 } from './datastore'
 import { ActiveProject, PendingProject, PendingUser, Project, ProjectMetrics, RecentProject, User } from '@/types'
 import ShortUniqueId from 'short-unique-id'
-import { grantUsersAccess, hasUserAccess, revokeUserAccess } from './access'
+import {
+  grantUserAccess,
+  grantUsersAccess,
+  hasUserAccess,
+  checkUserOwnership,
+  revokeUserAccess,
+  getAccessibleObjectIDs,
+} from './access'
 import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
-import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
+import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers, getWorkspacesForUser } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
@@ -35,7 +42,34 @@ export async function migrateProjects(postMerge: boolean) {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData }, false)
+    if (!projectData.userID) {
+      const projectID = getID(projectData)
+      const accessKeys = await getEntities(Entity.ACCESS, 'objectID', projectID)
+      let userID: number
+      let foundInvite = false
+      let userMatch = false
+      if (accessKeys.length > 0) {
+        userID = accessKeys.sort((a, b) => a.createdAt - b.createdAt)[0].grantedBy
+        foundInvite = true
+      } else {
+        const workspaceData = await getKeyedEntity(Entity.WORKSPACE, projectData.workspaceID)
+        userID = workspaceData.userID
+        const prompts = await getEntities(Entity.PROMPT, 'projectID', projectID)
+        const oldestPrompt = prompts.sort((a, b) => a.createdAt - b.createdAt)[0]
+        if (oldestPrompt) {
+          const versions = await getEntities(Entity.VERSION, 'parentID', getID(oldestPrompt))
+          const oldestVersion = versions.sort((a, b) => a.createdAt - b.createdAt)[0]
+          if (oldestVersion) {
+            userMatch = userID === oldestVersion.userID
+            userID = oldestVersion.userID
+          }
+        }
+      }
+      const userData = await getKeyedEntity(Entity.USER, userID)
+      console.log(`${foundInvite ? '✅' : userMatch ? '🟩' : '❓'} “${projectData.name}” → ${userData.fullName}`)
+      await updateProject({ ...projectData, userID }, false)
+      await grantUserAccess(userID, userID, projectID, 'project', 'owner', projectData.createdAt)
+    }
   }
 }
 
@@ -46,6 +80,7 @@ const toProjectData = (
   name: string,
   labels: string[],
   flavors: string[],
+  userID: number,
   createdAt: Date,
   lastEditedAt: Date,
   favorited: number[],
@@ -57,6 +92,7 @@ const toProjectData = (
   data: {
     workspaceID,
     name,
+    userID,
     createdAt,
     lastEditedAt,
     labels: JSON.stringify(labels),
@@ -68,12 +104,14 @@ const toProjectData = (
   excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
-export const toProject = (data: any, userID: number): Project => ({
+export const toProject = (data: any, userID: number, isOwner: boolean): Project => ({
   id: getID(data),
   name: data.name,
   workspaceID: data.workspaceID,
   timestamp: getTimestamp(data, 'lastEditedAt'),
   favorited: JSON.parse(data.favorited).includes(userID),
+  isOwner,
+  createdBy: data.userID,
 })
 
 async function loadEndpoints(projectID: number, apiKeyDev: string) {
@@ -98,16 +136,24 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   const chains = chainData.map(toChain)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
-  const [users, pendingUsers] = await getProjectAndWorkspaceUsers(projectID, projectData.workspaceID)
+  const [users, pendingUsers, projectOwners, projectMembers, pendingProjectMembers] = await getProjectAndWorkspaceUsers(
+    projectID,
+    projectData.workspaceID
+  )
+
+  const projectOwner = projectOwners.find(user => user.id === userID)
 
   return {
-    ...toProject(projectData, userID),
+    ...toProject(projectData, userID, !!projectOwner),
     availableFlavors: JSON.parse(projectData.flavors),
     endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? ''),
     prompts,
     chains,
     users,
     pendingUsers,
+    projectOwners: projectOwner ? [projectOwner, ...filterObjects(projectOwners, [projectOwner])] : [],
+    projectMembers: projectOwner ? projectMembers : [],
+    pendingProjectMembers: projectOwner ? pendingProjectMembers : [],
     availableLabels: JSON.parse(projectData.labels),
     comments,
   }
@@ -134,6 +180,7 @@ export async function addProjectForUser(
     uniqueName,
     DefaultLabels,
     [DefaultEndpointFlavor],
+    userID,
     createdAt,
     createdAt,
     [],
@@ -143,6 +190,7 @@ export async function addProjectForUser(
   )
   const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
   await getDatastore().save([projectData, promptData, versionData])
+  await grantUserAccess(userID, userID, projectID, 'project', 'owner', createdAt)
   return projectID
 }
 
@@ -163,12 +211,22 @@ export async function augmentProjectWithNewVersion(
 }
 
 export async function inviteMembersToProject(userID: number, projectID: number, emails: string[]) {
-  await getVerifiedUserProjectData(userID, projectID)
+  await ensureProjectAccess(userID, projectID)
   await grantUsersAccess(userID, emails, projectID, 'project')
 }
 
-export async function revokeMemberAccessForProject(userID: number, projectID: number) {
-  await revokeUserAccess(userID, projectID)
+export async function revokeMemberAccessForProject(userID: number, memberID: number, projectID: number) {
+  if (userID !== memberID) {
+    await ensureProjectOwnership(userID, projectID)
+  }
+  await revokeUserAccess(memberID, projectID)
+}
+
+export async function toggleOwnershipForProject(userID: number, memberID: number, projectID: number, isOwner: boolean) {
+  if (userID !== memberID) {
+    await ensureProjectOwnership(userID, projectID)
+    await grantUserAccess(userID, memberID, projectID, 'project', isOwner ? 'owner' : 'default')
+  }
 }
 
 export async function checkProject(projectID: number, apiKey?: string): Promise<number | undefined> {
@@ -183,6 +241,7 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
       projectData.name,
       JSON.parse(projectData.labels),
       JSON.parse(projectData.flavors),
+      projectData.userID,
       projectData.createdAt,
       updateLastEditedTimestamp ? new Date() : projectData.lastEditedAt,
       JSON.parse(projectData.favorited),
@@ -194,6 +253,8 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
 }
 
 export const ensureProjectAccess = (userID: number, projectID: number) => getVerifiedUserProjectData(userID, projectID)
+
+export const ensureProjectOwnership = (userID: number, projectID: number) => checkUserOwnership(userID, projectID)
 
 const getTrustedProjectData = (projectID: number) => getKeyedEntity(Entity.PROJECT, projectID)
 
@@ -263,36 +324,59 @@ export async function toggleFavoriteProject(userID: number, projectID: number, f
 }
 
 export async function updateProjectWorkspace(userID: number, projectID: number, workspaceID: number) {
-  const projectData = await getVerifiedUserProjectData(userID, projectID)
+  await ensureProjectOwnership(userID, projectID)
   await ensureWorkspaceAccess(userID, workspaceID)
+  const projectData = await getTrustedProjectData(projectID)
   await updateProject({ ...projectData, workspaceID }, true)
 }
 
-export const getSharedProjectsForUser = (userID: number): Promise<[Project[], PendingProject[]]> =>
-  getPendingAccessObjects(userID, 'project', Entity.PROJECT, projectData => toProject(projectData, userID))
+const filterObjects = <T extends { id: number }, U extends { id: number }>(source: T[], filter: U[]) =>
+  source.filter(user => !filter.some(u => u.id === user.id))
 
-const getSharedProjectUsers = (projectID: number): Promise<[User[], PendingUser[]]> =>
+export async function getSharedProjectsForUser(
+  userID: number,
+  workspaces: { id: number }[] = []
+): Promise<[Project[], PendingProject[]]> {
+  const [projects, pendingProjects, ownedProjects] = await getPendingAccessObjects(
+    userID,
+    'project',
+    Entity.PROJECT,
+    projectData => toProject(projectData, userID, false)
+  )
+  projects.forEach(project => (project.isOwner = ownedProjects.some(ownedProject => ownedProject.id === project.id)))
+  let workspaceIDs = workspaces.map(workspace => workspace.id)
+  if (workspaceIDs.length === 0) {
+    const [ownedWorkspaceIDs, accessibleWorkspaceIDs] = await getAccessibleObjectIDs(userID, 'workspace')
+    workspaceIDs = [...ownedWorkspaceIDs, ...accessibleWorkspaceIDs]
+  }
+  return [projects.filter(project => !workspaceIDs.includes(project.workspaceID)), pendingProjects]
+}
+
+const getProjectUsers = (projectID: number): Promise<[User[], PendingUser[], User[]]> =>
   getPendingAccessObjects(projectID, 'project', Entity.USER, toUser)
 
-async function getProjectAndWorkspaceUsers(projectID: number, workspaceID: number): Promise<[User[], PendingUser[]]> {
-  const [projectUsers, pendingProjectUsers] = await getSharedProjectUsers(projectID)
+async function getProjectAndWorkspaceUsers(
+  projectID: number,
+  workspaceID: number
+): Promise<[User[], PendingUser[], User[], User[], PendingUser[]]> {
+  const [projectUsers, pendingProjectUsers, projectOwners] = await getProjectUsers(projectID)
   const [workspaceUsers, pendingWorkspaceUsers] = await getWorkspaceUsers(workspaceID)
+
   return [
-    [...projectUsers, ...workspaceUsers.filter(user => !projectUsers.some(u => u.id === user.id))],
+    [...projectUsers, ...filterObjects(workspaceUsers, projectUsers)],
     [
-      ...pendingProjectUsers.filter(user => !workspaceUsers.some(u => u.id === user.id)),
-      ...pendingWorkspaceUsers.filter(user => ![...projectUsers, ...pendingProjectUsers].some(u => u.id === user.id)),
+      ...filterObjects(pendingProjectUsers, workspaceUsers),
+      ...filterObjects(pendingWorkspaceUsers, [...projectUsers, ...pendingProjectUsers]),
     ],
+    projectOwners,
+    filterObjects(projectUsers, projectOwners),
+    filterObjects(pendingProjectUsers, workspaceUsers),
   ]
 }
 
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
-  await ensureProjectAccess(userID, projectID)
-  const [users] = await getSharedProjectUsers(projectID)
-  if (users.some(user => user.id === userID)) {
-    throw new Error('Cannot delete project that was shared with user who is trying to delete it')
-  }
+  await ensureProjectOwnership(userID, projectID)
 
   const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
@@ -335,7 +419,7 @@ export async function deleteProjectForUser(userID: number, projectID: number) {
 export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {
   if (!projects) {
     const recentProjectsData = await getRecentEntities(Entity.PROJECT, limit, undefined, undefined, 'lastEditedAt')
-    projects = recentProjectsData.map(projectData => toProject(projectData, 0))
+    projects = recentProjectsData.map(projectData => toProject(projectData, 0, false))
   }
 
   const workspacesData = await getKeyedEntities(Entity.WORKSPACE, [
@@ -353,12 +437,9 @@ export async function getRecentProjects(projects?: Project[], limit = 100): Prom
 
 const toRecentProject = (project: Project, workspacesData: any[], usersData: any[]): RecentProject => {
   const workspaceData = workspacesData.find(workspace => getID(workspace) === project.workspaceID)
-  const workspaceName = workspaceData.name
+  const userData = usersData.find(user => getID(user) === project.createdBy)
 
-  const userData = usersData.find(user => getID(user) === workspaceData.userID)
-  const workspaceCreator = userData.fullName
-
-  return { ...project, workspaceName, workspaceCreator }
+  return { ...project, workspace: workspaceData.name, creator: userData.fullName }
 }
 
 export async function getMetricsForProject(

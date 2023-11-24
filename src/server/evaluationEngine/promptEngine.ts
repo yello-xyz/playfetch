@@ -1,6 +1,10 @@
 import { PromptConfig, Prompts, PromptInputs } from '@/types'
-import { incrementProviderCostForUser } from '@/src/server/datastore/providers'
-import { APIKeyForProvider, GetPredictor } from '../providers/integration'
+import {
+  CheckBudgetForProvider,
+  CredentialsForProvider,
+  GetPredictor,
+  IncrementProviderCost,
+} from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
 
@@ -41,8 +45,18 @@ export const TryParseOutput = (output: string | undefined) => {
   }
 }
 
+export const ErrorRunResponse = (error: string): RunResponse => ({
+  error,
+  result: undefined,
+  output: undefined,
+  cost: 0,
+  attempts: 1,
+  failed: true,
+})
+
 export default async function runPromptWithConfig(
   userID: number,
+  projectID: number,
   prompts: Prompts,
   config: PromptConfig,
   context: PromptContext,
@@ -50,19 +64,16 @@ export default async function runPromptWithConfig(
   streamChunks?: (chunk: string) => void,
   continuationInputs?: PromptInputs
 ): Promise<RunResponse> {
+  const scopeIDs = [projectID, userID]
   const provider = ProviderForModel(config.model)
   const modelToCheck = (PublicLanguageModels as string[]).includes(config.model) ? undefined : config.model
-  const apiKey = await APIKeyForProvider(userID, provider, modelToCheck)
+  const { scopeID, providerID, apiKey } = await CredentialsForProvider(scopeIDs, provider, modelToCheck)
   if (provider !== DefaultProvider && !apiKey) {
-    const defaultModelsAPIKey = modelToCheck ? await APIKeyForProvider(userID, provider) : apiKey
-    return {
-      error: defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key',
-      result: undefined,
-      output: undefined,
-      cost: 0,
-      attempts: 1,
-      failed: true,
-    }
+    const { apiKey: defaultModelsAPIKey } = modelToCheck ? await CredentialsForProvider(scopeIDs, provider) : { apiKey }
+    return ErrorRunResponse(defaultModelsAPIKey ? 'Unsupported model' : 'Missing API key')
+  }
+  if (!(await CheckBudgetForProvider(scopeID, provider))) {
+    return ErrorRunResponse('Monthly usage limit exceeded')
   }
 
   const predictor = GetPredictor(provider, apiKey ?? '', userID, config.model)
@@ -85,8 +96,8 @@ export default async function runPromptWithConfig(
     }
   }
 
-  if (!isErrorPredictionResponse(result) && result.cost > 0) {
-    incrementProviderCostForUser(userID, provider, result.cost)
+  if (!isErrorPredictionResponse(result)) {
+    IncrementProviderCost(scopeID, providerID, config.model, result.cost)
   }
 
   return {

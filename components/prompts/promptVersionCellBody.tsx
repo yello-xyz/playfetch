@@ -3,8 +3,8 @@ import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import { FullLabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
-import useAvailableProviders from '@/src/client/hooks/useAvailableProviders'
+import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
+import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { labelForChatMode } from './chatModePopupButton'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
 
@@ -17,7 +17,7 @@ export default function PromptVersionCellBody({
   isActiveVersion: boolean
   compareVersion?: PromptVersion
 }) {
-  const availableProviders = useAvailableProviders()
+  const availableProviders = useAvailableModelProviders()
   const getConfig = (version: PromptVersion) => FormatPromptConfig(version.config, availableProviders)
   const getSystem = (version: PromptVersion) =>
     SupportsSystemPrompt(version.config.model) ? version.prompts.system : undefined
@@ -29,7 +29,7 @@ export default function PromptVersionCellBody({
   return (
     <>
       <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
-      <CollapsibleSection title='Prompt' expanded>
+      <CollapsibleSection title='Prompt' initiallyExpanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
@@ -41,7 +41,7 @@ export default function PromptVersionCellBody({
 }
 
 export const FormatPromptConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) =>
-  `Model: ${FullLabelForModel(config.model, availableProviders)}
+  `Model: ${LabelForModel(config.model, availableProviders)}
 Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
 Temperature: ${config.temperature}`
@@ -80,11 +80,11 @@ function ContentSection({
 
 function CollapsibleSection({
   title,
-  expanded: initiallyExpanded = false,
+  initiallyExpanded = false,
   children,
 }: {
   title: string
-  expanded?: boolean
+  initiallyExpanded?: boolean
   children: ReactNode
 }) {
   const [isExpanded, setExpanded] = useState(initiallyExpanded)

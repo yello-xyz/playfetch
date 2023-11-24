@@ -50,13 +50,15 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
               <span className='overflow-hidden font-medium text-ellipsis'>{user.fullName} |</span>
             </>
           )}
-          {formattedDate}
-          {version.runs.length > 0 && (
-            <>
-              {' '}
-              • {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
-            </>
-          )}
+          <div className='overflow-hidden text-ellipsis'>
+            {formattedDate}
+            {version.runs.length > 0 && (
+              <>
+                {' '}
+                • {version.runs.length} {version.runs.length > 1 ? 'responses' : 'response'}
+              </>
+            )}
+          </div>
         </div>
         <div className='flex items-center gap-1'>
           <CommentPopupMenu

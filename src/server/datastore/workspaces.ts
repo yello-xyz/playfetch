@@ -21,11 +21,23 @@ import {
 } from './access'
 import { getActiveUsers, toUser } from './users'
 
-export async function migrateWorkspaces() {
+export async function migrateWorkspaces(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allWorkspaces] = await datastore.runQuery(datastore.createQuery(Entity.WORKSPACE))
   for (const workspaceData of allWorkspaces) {
-    await updateWorkspace({ ...workspaceData })
+    console.log(`Migrating workspace ${workspaceData.name} for user ${workspaceData.userID}`)
+    await grantUserAccess(
+      workspaceData.userID,
+      workspaceData.userID,
+      getID(workspaceData),
+      'workspace',
+      'owner',
+      workspaceData.createdAt
+    )
+    // await updateWorkspace({ ...workspaceData })
   }
 }
 
@@ -47,7 +59,8 @@ export async function getActiveWorkspace(userID: number, workspaceID: number): P
 
 async function loadActiveWorkspace(userID: number, workspace: Workspace): Promise<ActiveWorkspace> {
   const projectData = await getOrderedEntities(Entity.PROJECT, 'workspaceID', workspace.id, ['lastEditedAt'])
-  const projects = projectData.map(project => toProject(project, userID))
+  const [ownedProjectIDs] = await getAccessibleObjectIDs(userID, 'project')
+  const projects = projectData.map(project => toProject(project, userID, ownedProjectIDs.includes(getID(project))))
   const [users, pendingUsers] = await getWorkspaceUsers(workspace.id)
 
   return {
@@ -59,15 +72,16 @@ async function loadActiveWorkspace(userID: number, workspace: Workspace): Promis
 }
 
 export async function addWorkspaceForUser(userID: number, workspaceName?: string) {
+  const createdAt = new Date()
   const workspaceData = toWorkspaceData(
     userID,
     workspaceName ?? 'Drafts',
-    new Date(),
+    createdAt,
     workspaceName ? undefined : userID
   )
   await getDatastore().save(workspaceData)
   const workspaceID = getID(workspaceData)
-  await grantUserAccess(userID, userID, workspaceID, 'workspace')
+  await grantUserAccess(userID, userID, workspaceID, 'workspace', 'owner', createdAt)
   return workspaceID
 }
 
@@ -115,19 +129,19 @@ export async function updateWorkspaceName(userID: number, workspaceID: number, n
 }
 
 export const getWorkspacesForUser = (userID: number): Promise<[Workspace[], PendingWorkspace[]]> =>
-  getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace)
+  getPendingAccessObjects(userID, 'workspace', Entity.WORKSPACE, toWorkspace).then(([u, p]) => [u, p])
 
 export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], PendingUser[]]> =>
-  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser)
+  getPendingAccessObjects(workspaceID, 'workspace', Entity.USER, toUser).then(([u, p]) => [u, p])
 
 export async function getPendingAccessObjects<T>(
   sourceID: number,
   kind: 'project' | 'workspace',
   entityType: string,
   toObject: (data: any) => T
-): Promise<[T[], (T & { invitedBy: User; timestamp: number })[]]> {
+): Promise<[T[], (T & { invitedBy: User; timestamp: number })[], T[]]> {
   const sourceIsUser = entityType !== Entity.USER
-  const [objectIDs, pendingObjects] = sourceIsUser
+  const [ownedObjectIDs, accessibleObjectIDs, pendingObjects] = sourceIsUser
     ? await getAccessibleObjectIDs(sourceID, kind)
     : await getAccessingUserIDs(sourceID, kind)
 
@@ -135,7 +149,11 @@ export async function getPendingAccessObjects<T>(
   const pendingObjectIDs = pendingObjects.map(getAccessID)
   const invitingUserIDs = pendingObjects.map(access => access.invitedBy)
 
-  const objectsData = await getKeyedEntities(entityType, [...objectIDs, ...pendingObjectIDs])
+  const objectsData = await getKeyedEntities(entityType, [
+    ...ownedObjectIDs,
+    ...accessibleObjectIDs,
+    ...pendingObjectIDs,
+  ])
   const invitingUsersData = await getKeyedEntities(Entity.USER, invitingUserIDs)
   const invitingUsers = invitingUsersData.map(toUser)
 
@@ -160,6 +178,7 @@ export async function getPendingAccessObjects<T>(
       .map(objectData =>
         toPendingObject(toObject(objectData), pendingObjects.find(access => getAccessID(access) === getID(objectData))!)
       ),
+    objectsData.filter(objectData => ownedObjectIDs.includes(getID(objectData))).map(toObject),
   ]
 }
 

@@ -18,6 +18,7 @@ import {
   PendingProject,
   OnboardingResponse,
   RunRating,
+  CostUsage,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -113,8 +114,11 @@ const api = {
   inviteToProject: function (projectID: number, emails: string[]) {
     return post(this.inviteToProject, { projectID, emails })
   },
-  leaveProject: function (projectID: number) {
-    return post(this.leaveProject, { projectID })
+  revokeProjectAccess: function (projectID: number, memberID?: number) {
+    return post(this.revokeProjectAccess, { projectID, memberID })
+  },
+  toggleProjectOwnership: function (projectID: number, memberID: number, isOwner: boolean) {
+    return post(this.toggleProjectOwnership, { projectID, memberID, isOwner })
   },
   deleteProject: function (projectID: number) {
     return post(this.deleteProject, { projectID })
@@ -217,6 +221,12 @@ const api = {
   getAnalytics: function (projectID: number, dayRange = 30): Promise<Analytics> {
     return post(this.getAnalytics, { projectID, dayRange })
   },
+  getCostUsage: function (scopeID: number): Promise<CostUsage> {
+    return post(this.getCostUsage, { scopeID })
+  },
+  updateBudget: function (scopeID: number, limit?: number, threshold?: number) {
+    return post(this.updateBudget, { scopeID, limit, threshold })
+  },
   addComment: function (
     versionID: number,
     text: string,
@@ -252,20 +262,29 @@ const api = {
   updateDefaultConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
     return post(this.updateDefaultConfig, { defaultPromptConfig })
   },
-  getAvailableProviders: function (): Promise<AvailableProvider[]> {
-    return post(this.getAvailableProviders)
+  getAvailableProviders: function (projectID: number): Promise<AvailableProvider[]> {
+    return post(this.getAvailableProviders, { projectID })
   },
-  updateProviderKey: function (provider: ModelProvider | QueryProvider, apiKey: string | null, environment?: string) {
-    return post(this.updateProviderKey, { provider, apiKey, environment })
+  getScopedProviders: function (projectID?: number): Promise<AvailableProvider[]> {
+    return post(this.getScopedProviders, { projectID })
+  },
+  updateProviderKey: function (
+    scopeID: number,
+    provider: ModelProvider | QueryProvider,
+    apiKey: string | null,
+    environment?: string
+  ) {
+    return post(this.updateProviderKey, { scopeID, provider, apiKey, environment })
   },
   updateProviderModel: function (
+    scopeID: number,
     provider: ModelProvider,
     modelID: string,
     name: string,
     description: string,
     enabled: boolean
   ) {
-    return post(this.updateProviderModel, { provider, modelID, name, description, enabled })
+    return post(this.updateProviderModel, { scopeID, provider, modelID, name, description, enabled })
   },
   logOut: function () {
     return post(this.logOut)

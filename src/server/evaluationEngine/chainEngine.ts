@@ -48,6 +48,7 @@ const emptyResponse: ResponseType = {
 
 export default async function runChain(
   userID: number,
+  projectID: number,
   version: RawPromptVersion | RawChainVersion,
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
@@ -109,6 +110,7 @@ export default async function runChain(
       lastResponse = await runChainStep(
         runPromptWithConfig(
           userID,
+          projectID,
           prompts,
           promptVersion.config,
           promptContext,
@@ -130,7 +132,7 @@ export default async function runChain(
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
       lastResponse = await runChainStep(
-        runQuery(userID, config.provider, config.model, config.indexName, query, config.topK)
+        runQuery(userID, projectID, config.provider, config.model, config.indexName, query, config.topK)
       )
       streamResponse(lastResponse)
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
