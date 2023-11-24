@@ -34,6 +34,9 @@ testHTML('<div><br /></div><div>A<br /></div>')
 testHTML('A<div>B<br /></div>')
 testHTML('A<div>B<br /></div><div>C<br /></div>')
 
+testHTML('<div><br /></div>', '')
+testHTML('<br />', '<div><br /></div><div><br /></div>')
+
 testHTML('A<br />B', 'A<div>B<br /></div>')
 testHTML('<div>A<br />B</div>', 'A<div>B<br /></div>')
 testHTML('<div>A<br /><div>B<br />C</div></div>', 'A<div>B<br /></div><div>C<br /></div>')
