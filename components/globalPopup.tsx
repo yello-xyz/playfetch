@@ -3,10 +3,36 @@ import { GlobalPopupLocation, GlobalPopupProps } from '@/src/client/context/glob
 export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
   const { render, location, onDismissGlobalPopup, parentRef, parentRect, childRect, childRef, ...other } = props
 
+  const [position, isModalDialog] = SanitizePopupLocation(location, parentRect, childRect)
+
+  const withDismiss = (callback: () => void) => () => {
+    onDismissGlobalPopup()
+    callback()
+  }
+
+  return render ? (
+    <div
+      ref={parentRef}
+      onClick={onDismissGlobalPopup}
+      className={`fixed inset-0 z-40 w-full h-full text-sm ${isModalDialog ? 'bg-gray-600 bg-opacity-50' : ''}`}>
+      <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute shadow-sm' style={position}>
+        {render({ ...other, withDismiss })}
+      </div>
+    </div>
+  ) : null
+}
+
+export const SanitizePopupLocation = (
+  location: GlobalPopupLocation,
+  parentRect?: { width: number; height: number },
+  childRect?: { width: number; height: number }
+) => {
   const position: GlobalPopupLocation = { ...location }
+
   const definedKeyLength = Object.entries(position).filter(([, value]) => value !== undefined).length
   const isFullySpecified = definedKeyLength === 4
   const isUnspecified = definedKeyLength === 0
+
   if (!isFullySpecified) {
     if (parentRect && childRect) {
       if (position.right !== undefined) {
@@ -52,21 +78,5 @@ export default function GlobalPopup<T>(props: GlobalPopupProps & T) {
     }
   }
 
-  const withDismiss = (callback: () => void) => () => {
-    onDismissGlobalPopup()
-    callback()
-  }
-
-  const isModalDialog = isUnspecified || isFullySpecified
-
-  return render ? (
-    <div
-      ref={parentRef}
-      onClick={onDismissGlobalPopup}
-      className={`fixed inset-0 z-40 w-full h-full text-sm ${isModalDialog ? 'bg-gray-600 bg-opacity-50' : ''}`}>
-      <div ref={childRef} onClick={event => event.stopPropagation()} className='absolute shadow-sm' style={position}>
-        {render({ ...other, withDismiss })}
-      </div>
-    </div>
-  ) : null
+  return [position, isUnspecified || isFullySpecified] as const
 }
