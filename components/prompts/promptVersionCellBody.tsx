@@ -1,12 +1,10 @@
-import { ReactNode, useState } from 'react'
 import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
-import Icon from '../icon'
-import chevronIcon from '@/public/chevron.svg'
 import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { labelForChatMode } from './chatModePopupButton'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
+import Collapsible from '../collapsible'
 
 export default function PromptVersionCellBody({
   version,
@@ -29,11 +27,11 @@ export default function PromptVersionCellBody({
   return (
     <>
       <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
-      <CollapsibleSection title='Prompt' initiallyExpanded>
+      <Collapsible title='Prompt' initiallyExpanded>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
-      </CollapsibleSection>
+      </Collapsible>
       <ContentSection title='Parameters' version={version} compareVersion={compareVersion} getContent={getConfig} />
       <ContentSection title='Functions' version={version} compareVersion={compareVersion} getContent={getFunctions} />
     </>
@@ -72,30 +70,8 @@ function ContentSection({
   const compareContent = compareVersion ? getContent(compareVersion) : undefined
 
   return (content && content.length > 0) || (compareContent && compareContent.length > 0) ? (
-    <CollapsibleSection title={title}>
+    <Collapsible title={title}>
       <ContentComparison content={content ?? ''} compareContent={compareContent} />
-    </CollapsibleSection>
+    </Collapsible>
   ) : null
-}
-
-function CollapsibleSection({
-  title,
-  initiallyExpanded = false,
-  children,
-}: {
-  title: string
-  initiallyExpanded?: boolean
-  children: ReactNode
-}) {
-  const [isExpanded, setExpanded] = useState(initiallyExpanded)
-
-  return (
-    <div>
-      <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
-        <Icon className={`${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
-        <span className='font-medium text-gray-700'>{title}</span>
-      </div>
-      {isExpanded && <div className='ml-6'>{children}</div>}
-    </div>
-  )
 }

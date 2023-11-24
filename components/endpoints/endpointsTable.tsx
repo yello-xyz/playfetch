@@ -6,10 +6,9 @@ import {
   FindItemInProject,
   Prompt,
   ResolvedEndpoint,
-  Usage,
   Analytics,
 } from '@/types'
-import { Fragment, ReactNode } from 'react'
+import { ReactNode } from 'react'
 import Checkbox from '../checkbox'
 import addIcon from '@/public/add.svg'
 import promptIcon from '@/public/prompt.svg'
@@ -18,11 +17,11 @@ import Icon from '../icon'
 import TableCell, { TableHeader } from '../tableCell'
 
 import dynamic from 'next/dynamic'
+import { useActiveProject } from '@/src/client/context/projectContext'
 const AnalyticsDashboards = dynamic(() => import('./analyticsDashboards'), { ssr: false })
 
 export default function EndpointsTable({
   tabSelector,
-  project,
   activeEndpoint,
   setActiveEndpoint,
   onAddEndpoint,
@@ -30,15 +29,15 @@ export default function EndpointsTable({
   refreshAnalytics,
 }: {
   tabSelector: (children?: ReactNode) => ReactNode
-  project: ActiveProject
   activeEndpoint?: ResolvedEndpoint
   setActiveEndpoint: (endpoint: ResolvedEndpoint) => void
   onAddEndpoint?: () => void
   analytics?: Analytics
   refreshAnalytics: (dayRange: number) => void
 }) {
-  const groups = ItemsInProject(project)
-    .map(parent => project.endpoints.filter(endpoint => endpoint.parentID === parent.id))
+  const activeProject = useActiveProject()
+  const groups = ItemsInProject(activeProject)
+    .map(parent => activeProject.endpoints.filter(endpoint => endpoint.parentID === parent.id))
     .filter(group => group.length > 0)
   return (
     <div className='flex flex-col h-full bg-gray-25'>
@@ -58,7 +57,7 @@ export default function EndpointsTable({
           groups.map((group, index) => (
             <EndpointsGroup
               key={index}
-              parent={FindItemInProject(group[0].parentID, project)}
+              parent={FindItemInProject(group[0].parentID, activeProject)}
               endpoints={group}
               activeEndpoint={activeEndpoint}
               setActiveEndpoint={setActiveEndpoint}

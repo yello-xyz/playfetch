@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ChainItem, ChainItemWithInputs, ChainVersion } from '@/types'
+import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
@@ -14,14 +14,13 @@ import {
   OutputNode,
 } from './chainNode'
 import { Allotment } from 'allotment'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import VersionTimeline from '../versions/versionTimeline'
 import { SingleTabHeader } from '../tabSelector'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
-import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -55,14 +54,12 @@ export default function ChainView({
   chain,
   activeVersion,
   setActiveVersion,
-  project,
   saveChain,
   activeRunID,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   setActiveVersion: (version: ChainVersion) => void
-  project: ActiveProject
   saveChain: (
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
@@ -71,7 +68,8 @@ export default function ChainView({
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
 
-  const promptCache = useChainPromptCache(project, nodes, setNodes)
+  const activeProject = useActiveProject()
+  const promptCache = useChainPromptCache(activeProject, nodes, setNodes)
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)
@@ -99,7 +97,7 @@ export default function ChainView({
   const refreshProject = useRefreshProject()
 
   const addPrompt = async () => {
-    const { promptID, versionID } = await api.addPrompt(project.id)
+    const { promptID, versionID } = await api.addPrompt(activeProject.id)
     refreshProject()
     return { promptID, versionID }
   }
@@ -183,7 +181,7 @@ export default function ChainView({
           saveItems={updateItems}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
-          prompts={project.prompts}
+          prompts={activeProject.prompts}
           addPrompt={addPrompt}
           showVersions={showVersions}
           setShowVersions={canShowVersions ? setShowVersions : undefined}

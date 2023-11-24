@@ -76,10 +76,9 @@ export default function ChainNodeEditor({
 
   const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
     if (isPromptChainItemActive) {
-      return savePrompt(async versionID => {
-        onSavePrompt?.(versionID)
-        promptCache.refreshPrompt(activeItem.promptID)
-      })
+      return savePrompt(() => promptCache.refreshPrompt(activeItem.promptID)).then(
+        versionID => versionID && onSavePrompt?.(versionID)
+      )
     }
   }
 
