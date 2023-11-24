@@ -83,10 +83,10 @@ const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = 
   since && before
     ? and([afterDateFilter(since, key, !pagingBackwards), beforeDateFilter(before, key, pagingBackwards)])
     : since
-      ? afterDateFilter(since, key, !pagingBackwards)
-      : before
-        ? beforeDateFilter(before, key, pagingBackwards)
-        : undefined
+    ? afterDateFilter(since, key, !pagingBackwards)
+    : before
+    ? beforeDateFilter(before, key, pagingBackwards)
+    : undefined
 
 export const getRecentEntities = (
   type: string,

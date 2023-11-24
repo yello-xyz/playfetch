@@ -24,8 +24,8 @@ export default async function loadAdminItem(query: ParsedUrlQuery) {
   const initialAdminItem: AdminItem = waitlist
     ? WaitlistItem
     : projects
-      ? RecentProjectsItem
-      : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
+    ? RecentProjectsItem
+    : initialWorkspaceMetrics ?? activeUser ?? recentProject ?? ActiveUsersItem
 
   return {
     initialAdminItem,
