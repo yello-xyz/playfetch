@@ -36,12 +36,12 @@ export const SanitizePopupLocation = (
   if (!isFullySpecified) {
     if (parentRect && childRect) {
       if (position.right !== undefined) {
-        position.right = parentRect.width - position.right
         if (position.right < 0) {
           position.right = 0
-        } else if (position.right - childRect.width < 0) {
+        } else if (position.right + childRect.width > parentRect.width) {
           position.right = parentRect.width - childRect.width
         }
+        position.right = parentRect.width - position.right
       }
       if (position.left !== undefined) {
         if (position.left < 0) {
@@ -51,12 +51,12 @@ export const SanitizePopupLocation = (
         }
       }
       if (position.bottom !== undefined) {
-        position.bottom = parentRect.height - position.bottom
         if (position.bottom < 0) {
           position.bottom = 0
-        } else if (position.bottom - childRect.height < 0) {
+        } else if (position.bottom + childRect.height > parentRect.height) {
           position.bottom = parentRect.height - childRect.height
         }
+        position.bottom = parentRect.height - position.bottom
       }
       if (position.top !== undefined) {
         if (position.top < 0) {
