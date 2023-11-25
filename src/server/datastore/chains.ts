@@ -9,7 +9,6 @@ import {
   getID,
   getKeyedEntity,
   getOrderedEntities,
-  getTimestamp,
 } from './datastore'
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'

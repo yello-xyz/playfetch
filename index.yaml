@@ -21,13 +21,13 @@ indexes:
 - kind: prompt
   properties:
   - name: projectID
-  - name: lastEditedAt
+  - name: createdAt
     direction: desc
 
 - kind: chain
   properties:
   - name: projectID
-  - name: lastEditedAt
+  - name: createdAt
     direction: desc
 
 - kind: version

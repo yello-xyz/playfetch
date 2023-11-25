@@ -9,7 +9,6 @@ import {
   getID,
   getKeyedEntity,
   getOrderedEntities,
-  getTimestamp,
 } from './datastore'
 import { addInitialVersion, savePromptVersionForUser, toUserVersions } from './versions'
 import { InputValues, Prompt, RawPromptVersion } from '@/types'

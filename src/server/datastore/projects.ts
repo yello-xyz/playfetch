@@ -103,9 +103,9 @@ async function loadEndpoints(projectID: number, apiKeyDev: string) {
 
 export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
+  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID)
   const prompts = promptData.map(toPrompt)
-  const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
+  const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID)
   const chains = chainData.map(toChain)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
