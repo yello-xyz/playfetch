@@ -63,7 +63,6 @@ export const toChain = (data: any): Chain => ({
   name: data.name,
   referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
-  timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
 export async function getChainForUser(

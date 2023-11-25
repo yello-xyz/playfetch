@@ -38,7 +38,6 @@ export const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   projectID: data.projectID,
-  timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
 export async function getPromptForUser(

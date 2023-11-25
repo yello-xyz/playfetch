@@ -65,7 +65,6 @@ export type Prompt = {
   id: number
   name: string
   projectID: number
-  timestamp: number
 }
 
 export type ActivePrompt = Prompt & {
@@ -80,7 +79,6 @@ export type Chain = {
   name: string
   referencedItemIDs: number[]
   projectID: number
-  timestamp: number
 }
 
 export type ActiveChain = Chain & {
