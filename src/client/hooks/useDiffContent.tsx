@@ -32,8 +32,8 @@ export default function useDiffContent(
     IsEndpoint(item)
       ? [item.parentID]
       : version && !IsPromptVersion(version)
-      ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
-      : []
+        ? (version.items as ChainItem[]).filter(IsPromptChainItem).map(item => item.promptID)
+        : []
 
   const itemCache = useActiveItemCache(project, [
     ...getCacheItemIDs(leftItem, leftVersion),
@@ -46,8 +46,8 @@ export default function useDiffContent(
     IsEndpoint(item)
       ? getEndpointContent(item, itemCache)
       : version
-      ? getVersionContent(version, availableProviders, itemCache)
-      : undefined
+        ? getVersionContent(version, availableProviders, itemCache)
+        : undefined
 
   const leftContent = getContent(leftItem, leftVersion)
   const rightContent = getContent(rightItem, rightVersion)

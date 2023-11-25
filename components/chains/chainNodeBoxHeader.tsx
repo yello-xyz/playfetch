@@ -47,12 +47,12 @@ export default function ChainNodeBoxHeader({
   const icon = IsPromptChainItem(chainNode)
     ? promptIcon
     : IsQueryChainItem(chainNode)
-    ? queryIcon
-    : IsCodeChainItem(chainNode)
-    ? codeIcon
-    : IsBranchChainItem(chainNode)
-    ? branchIcon
-    : undefined
+      ? queryIcon
+      : IsCodeChainItem(chainNode)
+        ? codeIcon
+        : IsBranchChainItem(chainNode)
+          ? branchIcon
+          : undefined
 
   const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
   const [label, setLabel] = useState<string>()
