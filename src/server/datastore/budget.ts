@@ -49,7 +49,7 @@ export async function updateBudgetForScope(
   const budgetData = await getBudgetData(scopeID)
   const resetsAt = budgetData?.resetsAt ?? startOfNextMonth()
   const cost = budgetData?.cost ?? 0
-  if (threshold !== null && limit !== null && threshold >= limit) {
+  if (threshold !== null && (limit === null || threshold >= limit)) {
     threshold = null
   }
   await getDatastore().save(toBudgetData(scopeID, userID, new Date(), limit, resetsAt, threshold, cost))
