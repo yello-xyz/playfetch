@@ -18,7 +18,7 @@ export function getClientID(req: Request, res: Response): string {
 }
 
 type Event = { name: string; params: { [key: string]: string | number } }
-type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'endpoint'
+type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'rating' | 'endpoint'
 
 const pageFromURL = (url: string) => {
   const page = url.split('/').slice(-1)[0].split('?')[0]
