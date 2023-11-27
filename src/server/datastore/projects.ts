@@ -427,7 +427,7 @@ export async function getRecentProjects(projects?: Project[], limit = 100): Prom
   ])
 
   const usersData = await getKeyedEntities(Entity.USER, [
-    ...new Set([...workspacesData.map(workspaceData => workspaceData.userID)]),
+    ...new Set([...projects.map(project => project.createdBy)]),
   ])
 
   return projects
