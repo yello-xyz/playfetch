@@ -31,19 +31,30 @@ const isBranchConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryCon
 const isCodeConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is CodeConfig =>
   'code' in config && !isBranchConfig(config)
 
-type PromptResponse = Awaited<ReturnType<typeof runPromptWithConfig>>
-type CodeResponse = Awaited<ReturnType<typeof runCodeInContext>>
-type ChainStepResponse = PromptResponse | CodeResponse
-type ResponseType = Awaited<ReturnType<typeof runWithTimer<ChainStepResponse>>>
+export type RunResponse = (
+  | { result: any; output: string; error: undefined; failed: false; isFunctionCall?: boolean }
+  | { result: undefined; output: undefined; error: string; failed: true }
+) & { cost: number; attempts: number }
+
+export const ErrorRunResponse = (error: string): RunResponse => ({
+  error,
+  result: undefined,
+  output: undefined,
+  cost: 0,
+  attempts: 1,
+  failed: true,
+})
+
+type ResponseType = Awaited<ReturnType<typeof runWithTimer<RunResponse>>>
 
 const emptyResponse: ResponseType = {
   output: '',
   result: '',
   error: undefined,
   cost: 0,
-  duration: 0,
   attempts: 1,
   failed: false,
+  duration: 0,
 }
 
 export default async function runChain(
@@ -68,7 +79,7 @@ export default async function runChain(
   let cost = 0
   let duration = 0
   let extraAttempts = 0
-  const runChainStep = async (operation: Promise<ChainStepResponse>) => {
+  const runChainStep = async (operation: Promise<RunResponse>) => {
     const response = await runWithTimer(operation)
     cost += response.cost
     duration += response.duration

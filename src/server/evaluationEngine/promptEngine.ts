@@ -7,6 +7,7 @@ import {
 } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
+import { ErrorRunResponse, RunResponse } from './chainEngine'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
@@ -32,11 +33,6 @@ const isValidOrEmptyPredictionResponse = (response: PredictionResponse): respons
 const isValidPredictionResponse = (response: PredictionResponse) =>
   isValidOrEmptyPredictionResponse(response) && response.output.length > 0
 
-type RunResponse = (
-  | { result: any; output: string; error: undefined; failed: false; isFunctionCall?: boolean }
-  | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number }
-
 export const TryParseOutput = (output: string | undefined) => {
   try {
     return output ? JSON.parse(output) : output
@@ -44,15 +40,6 @@ export const TryParseOutput = (output: string | undefined) => {
     return output
   }
 }
-
-export const ErrorRunResponse = (error: string): RunResponse => ({
-  error,
-  result: undefined,
-  output: undefined,
-  cost: 0,
-  attempts: 1,
-  failed: true,
-})
 
 export default async function runPromptWithConfig(
   userID: number,

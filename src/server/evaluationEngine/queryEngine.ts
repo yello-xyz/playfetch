@@ -8,12 +8,7 @@ import {
 } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
-import { ErrorRunResponse } from './promptEngine'
-
-type QueryResponse = (
-  | { result: string[]; output: string; error: undefined; failed: false }
-  | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number }
+import { ErrorRunResponse, RunResponse } from './chainEngine'
 
 export const runQuery = async (
   userID: number,
@@ -23,7 +18,7 @@ export const runQuery = async (
   indexName: string,
   query: string,
   topK: number
-): Promise<QueryResponse> => {
+): Promise<RunResponse> => {
   try {
     const scopeIDs = [projectID, userID]
     const { apiKey, environment } = await getProviderCredentials(scopeIDs, provider)
