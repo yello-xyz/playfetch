@@ -2,6 +2,7 @@ import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, Prom
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
   items.sort((a, b) => a.timestamp - b.timestamp)
@@ -17,7 +18,7 @@ export default function RunTimeline({
   runs = [],
   version,
   activeItem,
-  activeRunID,
+  focusRunID,
   runVersion,
   selectInputValue = () => undefined,
   isRunning,
@@ -26,7 +27,7 @@ export default function RunTimeline({
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
-  activeRunID?: number
+  focusRunID?: number
   runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
   selectInputValue?: (inputKey: string) => string | undefined
   isRunning?: boolean
@@ -45,7 +46,8 @@ export default function RunTimeline({
     }
   }
 
-  const [previousActiveRunID, setPreviousActiveRunID] = useState(activeRunID)
+  const [activeRunID, setActiveRunID] = useInitialState(focusRunID)
+  const [previousActiveRunID, setPreviousActiveRunID] = useState(focusRunID)
   if (activeRunID !== previousActiveRunID) {
     focusRun(activeRunID)
     setPreviousActiveRunID(activeRunID)

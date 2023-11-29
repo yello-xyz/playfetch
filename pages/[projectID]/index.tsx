@@ -212,7 +212,7 @@ export default function Home({
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, async (parentID, versionID) => {
+  const [focusRunID, selectComment] = useCommentSelection(activeVersion, async (parentID, versionID) => {
     const prompt = activeProject.prompts.find(prompt => prompt.id === parentID)
     const chain = activeProject.chains.find(chain => chain.id === parentID)
     if (prompt && prompt.id === activePrompt?.id) {
@@ -274,7 +274,7 @@ export default function Home({
                             savePrompt={savePrompt}
                             saveChain={saveChain}
                             refreshOnSavePrompt={refreshOnSavePrompt}
-                            activeRunID={activeRunID}
+                            focusRunID={focusRunID}
                             analytics={analytics}
                             refreshAnalytics={refreshAnalytics}
                             scopedProviders={scopedProviders}

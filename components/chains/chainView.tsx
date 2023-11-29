@@ -55,7 +55,7 @@ export default function ChainView({
   activeVersion,
   setActiveVersion,
   saveChain,
-  activeRunID,
+  focusRunID,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
@@ -64,7 +64,7 @@ export default function ChainView({
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
-  activeRunID?: number
+  focusRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
 
@@ -142,9 +142,9 @@ export default function ChainView({
     }
   }
 
-  const [lastActiveRunID, setLastActiveRunID] = useState<number>()
-  if (activeRunID !== lastActiveRunID) {
-    setLastActiveRunID(activeRunID)
+  const [lastFocusRunID, setLastFocusRunID] = useState<number>()
+  if (focusRunID !== lastFocusRunID) {
+    setLastFocusRunID(focusRunID)
     if (!isNodeDirty) {
       updateTestMode(true)
       setActiveNodeIndex(nodes.indexOf(OutputNode))
@@ -205,7 +205,7 @@ export default function ChainView({
                 setActiveIndex={updateActiveNodeIndex}
                 promptCache={promptCache}
                 saveItems={items => saveItems(items).then(versionID => versionID!)}
-                activeRunID={activeRunID}
+                focusRunID={focusRunID}
                 showRunButtons={isTestMode}
               />
             ) : (

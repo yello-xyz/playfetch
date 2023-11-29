@@ -30,7 +30,7 @@ export default function MainProjectPane({
   savePrompt,
   saveChain,
   refreshOnSavePrompt,
-  activeRunID,
+  focusRunID,
   analytics,
   refreshAnalytics,
   scopedProviders,
@@ -53,7 +53,7 @@ export default function MainProjectPane({
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
   refreshOnSavePrompt: (promptID: number) => (versionID?: number) => void
-  activeRunID: number | undefined
+  focusRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number) => Promise<void>
   scopedProviders: AvailableProvider[]
@@ -72,7 +72,7 @@ export default function MainProjectPane({
             setActiveVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
             savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
-            activeRunID={activeRunID}
+            focusRunID={focusRunID}
           />
         )}
         {activeChain && activeChainVersion && (
@@ -82,7 +82,7 @@ export default function MainProjectPane({
             activeVersion={activeChainVersion}
             setActiveVersion={selectVersion}
             saveChain={saveChain}
-            activeRunID={activeRunID}
+            focusRunID={focusRunID}
           />
         )}
         {activeItem === CompareItem && <CompareView logEntries={analytics?.recentLogEntries} />}

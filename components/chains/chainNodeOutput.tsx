@@ -13,7 +13,6 @@ import {
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
-  OutputNode,
   SubtreeForChainNode,
 } from './chainNode'
 import { SingleTabHeader } from '../tabSelector'
@@ -76,7 +75,7 @@ const excludeBoundChainVariables = (chain: Omit<ChainItemWithInputs, 'dynamicInp
 export default function ChainNodeOutput({
   chain,
   activeVersion,
-  activeRunID,
+  focusRunID,
   nodes,
   activeIndex,
   setActiveIndex,
@@ -86,7 +85,7 @@ export default function ChainNodeOutput({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  activeRunID?: number
+  focusRunID?: number
   nodes: ChainNode[]
   activeIndex: number
   setActiveIndex: (index: number) => void
@@ -158,7 +157,7 @@ export default function ChainNodeOutput({
             <RunTimeline
               runs={[...activeVersion.runs, ...partialRuns]}
               activeItem={chain}
-              activeRunID={activeRunID}
+              focusRunID={focusRunID}
               version={activeVersion}
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
