@@ -6,7 +6,6 @@ import PercentagePieChart from './percentagePieChart'
 
 const prepareData = (analytics: Usage[]) =>
   analytics
-    .reduce((acc, usage) => [...acc, { ...usage, cost: (acc[acc.length - 1]?.cost ?? 0) + usage.cost }], [] as Usage[])
     .map((usage, index, usages) => ({
       ...usage,
       name: FormatDate(DaysAgo(new Date(), usages.length - 1 - index).getTime(), false, true),
