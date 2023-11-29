@@ -48,7 +48,6 @@ export async function saveNewRun(
   continuationID: number | undefined,
   canContinue: boolean
 ) {
-  await ensurePromptOrChainAccess(userID, parentID)
   const runData = toRunData(
     userID,
     parentID,
