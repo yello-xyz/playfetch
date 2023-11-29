@@ -7,11 +7,11 @@ import {
 } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
-import { ErrorRunResponse, RunResponse } from './chainEngine'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './chainEngine'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number; isFunctionCall?: boolean }
 type ErrorPredictionResponse = { error: string }
-type PredictionResponse = (ValidOrEmptyPredictionResponse | ErrorPredictionResponse)
+type PredictionResponse = ValidOrEmptyPredictionResponse | ErrorPredictionResponse
 
 export type PromptContext = any
 export type Predictor = (
@@ -63,7 +63,7 @@ export default async function runPromptWithConfig(
 
   const predictor = GetPredictor(provider, apiKey ?? '', userID, config.model)
 
-  let result: PredictionResponse = { output: '', cost: 0 }
+  let result: PredictionResponse = EmptyRunResponse()
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {

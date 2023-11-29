@@ -36,6 +36,15 @@ export type RunResponse = (
   | { result: undefined; output: undefined; error: string; failed: true }
 ) & { cost: number; attempts: number }
 
+export const EmptyRunResponse = (): RunResponse & { failed: false } => ({
+  output: '',
+  result: '',
+  error: undefined,
+  cost: 0,
+  attempts: 1,
+  failed: false,
+})
+
 export const ErrorRunResponse = (error: string): RunResponse => ({
   error,
   result: undefined,
@@ -46,16 +55,6 @@ export const ErrorRunResponse = (error: string): RunResponse => ({
 })
 
 type ResponseType = Awaited<ReturnType<typeof runWithTimer<RunResponse>>>
-
-const emptyResponse: ResponseType = {
-  output: '',
-  result: '',
-  error: undefined,
-  cost: 0,
-  attempts: 1,
-  failed: false,
-  duration: 0,
-}
 
 export default async function runChain(
   userID: number,
@@ -93,7 +92,7 @@ export default async function runChain(
   const promptContext = continuation[2]
   inputs = continuation[3]
 
-  let lastResponse = emptyResponse
+  let lastResponse: ResponseType = { ...EmptyRunResponse(), duration: 0 }
   let continuationCount = 0
   let branch = 0
 

@@ -8,7 +8,7 @@ import {
 } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
-import { ErrorRunResponse, RunResponse } from './chainEngine'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './chainEngine'
 
 export const runQuery = async (
   userID: number,
@@ -40,7 +40,7 @@ export const runQuery = async (
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 
-    return { result, output: result.join('\n'), error: undefined, failed: false, cost, attempts: 1 }
+    return { ...EmptyRunResponse(), result, output: result.join('\n'), cost }
   } catch (error: any) {
     return ErrorRunResponse(error.message)
   }
