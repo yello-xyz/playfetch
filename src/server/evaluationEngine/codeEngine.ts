@@ -24,7 +24,7 @@ export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   return context
 }
 
-const codeResponseAttributes = { cost: 0, attempts: 1, functionInterrupt: undefined }
+const codeResponseAttributes = { cost: 0, attempts: 1, isFunctionCall: undefined }
 type CodeResponse = typeof codeResponseAttributes &
   (
     | { result: any; output: string; error: undefined; failed: false }

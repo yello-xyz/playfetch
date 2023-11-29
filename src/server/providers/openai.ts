@@ -140,7 +140,7 @@ async function tryCompleteChat(
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
     context.functions = inputFunctions
 
-    return { output, cost, functionInterrupt: functionMessage?.function_call?.name }
+    return { output, cost, isFunctionCall }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

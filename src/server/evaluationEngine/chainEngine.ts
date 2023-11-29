@@ -120,10 +120,9 @@ export default async function runChain(
         )
       )
       streamResponse(lastResponse, true)
-      const functionInterrupt = lastResponse.failed ? undefined : lastResponse.functionInterrupt
       if (lastResponse.failed) {
         continuationIndex = undefined
-      } else if (promptVersion.config.isChat || functionInterrupt) {
+      } else if (promptVersion.config.isChat || lastResponse.isFunctionCall) {
         continuationIndex = index
         break
       } else {

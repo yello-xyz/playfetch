@@ -11,7 +11,7 @@ import { PublicLanguageModels, ProviderForModel } from '../../common/providerMet
 type ValidOrEmptyPredictionResponse = { output: string; cost: number }
 type ErrorPredictionResponse = { error: string }
 type PredictionResponse = (ValidOrEmptyPredictionResponse | ErrorPredictionResponse) & {
-  functionInterrupt?: string
+  isFunctionCall?: boolean
 }
 
 export type PromptContext = any
@@ -33,7 +33,7 @@ const isValidPredictionResponse = (response: PredictionResponse) =>
   isValidOrEmptyPredictionResponse(response) && response.output.length > 0
 
 type RunResponse = (
-  | { result: any; output: string; error: undefined; failed: false; functionInterrupt?: string }
+  | { result: any; output: string; error: undefined; failed: false; isFunctionCall?: boolean }
   | { result: undefined; output: undefined; error: string; failed: true }
 ) & { cost: number; attempts: number }
 
