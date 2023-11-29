@@ -47,12 +47,12 @@ export default function ChainNodeBoxHeader({
   const icon = IsPromptChainItem(chainNode)
     ? promptIcon
     : IsQueryChainItem(chainNode)
-      ? queryIcon
-      : IsCodeChainItem(chainNode)
-        ? codeIcon
-        : IsBranchChainItem(chainNode)
-          ? branchIcon
-          : undefined
+    ? queryIcon
+    : IsCodeChainItem(chainNode)
+    ? codeIcon
+    : IsBranchChainItem(chainNode)
+    ? branchIcon
+    : undefined
 
   const onRename = IsCodeChainItem(chainNode) ? () => setLabel(NameForCodeChainItem(chainNode)) : undefined
   const [label, setLabel] = useState<string>()
@@ -82,7 +82,7 @@ export default function ChainNodeBoxHeader({
           />
         </IncludeContextHeader>
       )}
-      <div className={`flex items-center justify-between px-2 rounded-t-lg`}>
+      <div className={`flex items-center px-2 rounded-t-lg`}>
         {label !== undefined ? (
           <EditableHeaderItem
             value={label}
@@ -91,14 +91,16 @@ export default function ChainNodeBoxHeader({
             onCancel={() => setLabel(undefined)}
           />
         ) : (
-          <HeaderItem>
+          <HeaderItem className='flex-1 min-w-0'>
             {icon && <Icon className='mr-0.5 -ml-2' icon={icon} />}
-            {chainNode === InputNode && 'Inputs'}
-            {chainNode === OutputNode && 'Output'}
-            {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
-            {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
-            {IsBranchChainItem(chainNode) && 'Branch'}
-            {IsQueryChainItem(chainNode) && 'Query'}
+            <span className='overflow-hidden text-ellipsis'>
+              {chainNode === InputNode && 'Inputs'}
+              {chainNode === OutputNode && 'Output'}
+              {IsPromptChainItem(chainNode) && prompts.find(prompt => prompt.id === chainNode.promptID)?.name}
+              {IsCodeChainItem(chainNode) && NameForCodeChainItem(chainNode)}
+              {IsBranchChainItem(chainNode) && 'Branch'}
+              {IsQueryChainItem(chainNode) && 'Query'}
+            </span>
           </HeaderItem>
         )}
         {!canIncludeContext && (
