@@ -9,7 +9,13 @@ import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
 import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './runResponse'
 
-type ValidOrEmptyPredictionResponse = { output: string; cost: number; isInterrupt: boolean }
+type ValidOrEmptyPredictionResponse = {
+  output: string
+  cost: number
+  inputTokens: number
+  outputTokens: number
+  isInterrupt: boolean
+}
 type ErrorPredictionResponse = { error: string }
 type PredictionResponse = ValidOrEmptyPredictionResponse | ErrorPredictionResponse
 
@@ -79,7 +85,7 @@ export default async function runPromptWithConfig(
 
   return {
     ...(isErrorPredictionResponse(result)
-      ? { error: result.error, result: undefined, output: undefined, cost: 0, failed: true }
+      ? ErrorRunResponse(result.error)
       : isValidPredictionResponse(result)
       ? {
           ...result,
