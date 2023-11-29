@@ -45,11 +45,15 @@ export default async function runChain(
   const continuationInputs = inputs
   const useCamelCase = isEndpointEvaluation
   let cost = 0
+  let inputTokens = 0
+  let outputTokens = 0
   let duration = 0
   let extraAttempts = 0
   const runChainStep = async (operation: Promise<RunResponse>) => {
     const response = await RunWithTimer(operation)
     cost += response.cost
+    inputTokens += response.inputTokens
+    outputTokens += response.outputTokens
     duration += response.duration
     extraAttempts += response.attempts - 1
     return response
@@ -152,7 +156,16 @@ export default async function runChain(
     isEndpointEvaluation
   )
 
-  return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID, extraSteps: continuationCount }
+  return {
+    ...lastResponse,
+    cost,
+    inputTokens,
+    outputTokens,
+    duration,
+    attempts: 1 + extraAttempts,
+    continuationID,
+    extraSteps: continuationCount,
+  }
 }
 
 export const ChainResponseFromValue = (value: any): Awaited<ReturnType<typeof runChain>> | null =>

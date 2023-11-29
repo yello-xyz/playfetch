@@ -29,6 +29,8 @@ const logResponse = (
         inputs,
         response.output,
         response.cost,
+        response.inputTokens,
+        response.outputTokens,
         response.duration,
         continuationID ?? response.continuationID,
         !!response.continuationID
