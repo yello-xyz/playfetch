@@ -99,14 +99,6 @@ export default async function runChain(
         )
       )
       streamResponse(lastResponse, true)
-      if (lastResponse.failed) {
-        continuationIndex = undefined
-      } else if (promptVersion.config.isChat || lastResponse.isInterrupt) {
-        continuationIndex = index
-        break
-      } else {
-        continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
-      }
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
       lastResponse = await runChainStep(
@@ -139,8 +131,13 @@ export default async function runChain(
       throw new Error('Unsupported config type in chain evaluation')
     }
     if (lastResponse.failed) {
+      continuationIndex = undefined
+      break
+    } else if (lastResponse.isInterrupt) {
+      continuationIndex = index
       break
     } else {
+      continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
       inputs = AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
     }
   }
