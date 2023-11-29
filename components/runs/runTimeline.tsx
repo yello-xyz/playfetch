@@ -23,6 +23,7 @@ export default function RunTimeline({
   selectInputValue = () => undefined,
   isRunning,
   skipHeader,
+  canSelectRuns,
 }: {
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
@@ -32,6 +33,7 @@ export default function RunTimeline({
   selectInputValue?: (inputKey: string) => string | undefined
   isRunning?: boolean
   skipHeader?: boolean
+  canSelectRuns?: boolean
 }) {
   const identifierForRun = (runID: number) => `r${runID}`
 
@@ -47,14 +49,17 @@ export default function RunTimeline({
   }
 
   const [activeRunID, setActiveRunID] = useInitialState(focusRunID)
-  const [previousActiveRunID, setPreviousActiveRunID] = useState(focusRunID)
+  const [previousActiveRunID, setPreviousActiveRunID] = useState<number>()
   if (activeRunID !== previousActiveRunID) {
     focusRun(activeRunID)
     setPreviousActiveRunID(activeRunID)
   }
   const isRunSelected = (run: PartialRun | Run) =>
-    run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
-  const unselectRuns = runs.length > 1 && activeRunID !== undefined ? () => setActiveRunID(undefined) : undefined
+    activeRunID === undefined || run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
+  const selectRun = (run: PartialRun | Run) =>
+    runs.length > 1 && (canSelectRuns ? activeRunID !== run.id : activeRunID !== undefined)
+      ? () => setActiveRunID(canSelectRuns ? run.id : undefined)
+      : undefined
 
   const sortedRuns = sortRuns(runs).reduce(
     (sortedRuns, run) =>
@@ -98,7 +103,7 @@ export default function RunTimeline({
               activeItem={activeItem}
               isRunning={isRunning}
               isSelected={isRunSelected(run)}
-              onSelect={unselectRuns}
+              onSelect={selectRun(run)}
               runContinuation={runContinuation}
               selectInputValue={selectInputValue}
             />

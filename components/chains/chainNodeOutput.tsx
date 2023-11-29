@@ -157,11 +157,12 @@ export default function ChainNodeOutput({
             <RunTimeline
               runs={[...activeVersion.runs, ...partialRuns]}
               activeItem={chain}
-              focusRunID={focusRunID}
+              focusRunID={focusRunID ?? activeVersion.runs.slice(-1)[0]?.id}
               version={activeVersion}
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
+              canSelectRuns
             />
           </div>
         )}
