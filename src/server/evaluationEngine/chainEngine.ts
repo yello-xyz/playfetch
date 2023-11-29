@@ -68,7 +68,7 @@ export default async function runChain(
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
     const streamPartialResponse = (chunk: string) => stream?.(index, continuationCount, chunk)
-    const streamResponse = (response: TimedRunResponse, skipOutput = false) =>
+    const streamStepResponse = (response: TimedRunResponse, skipOutput = false) =>
       stream?.(
         index,
         continuationCount,
@@ -98,13 +98,13 @@ export default async function runChain(
           index === continuationIndex ? continuationInputs : undefined
         )
       )
-      streamResponse(lastResponse, true)
+      streamStepResponse(lastResponse, true)
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runQuery(userID, projectID, config.provider, config.model, config.indexName, query, config.topK)
       )
-      streamResponse(lastResponse)
+      streamStepResponse(lastResponse)
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
@@ -126,7 +126,7 @@ export default async function runChain(
           }
         }
       }
-      streamResponse(lastResponse)
+      streamStepResponse(lastResponse)
     } else {
       throw new Error('Unsupported config type in chain evaluation')
     }

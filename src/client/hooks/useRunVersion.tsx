@@ -46,7 +46,7 @@ export const ConsumeStream = async (
   }
 }
 
-export default function useRunVersion(activeVersionID: number, clearLastPartialRunsOnCompletion = false) {
+export default function useRunVersion(activeVersionID: number) {
   const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
@@ -71,7 +71,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     let isFinished = false
     await ConsumeStream(inputs, streamReader, runs => {
       const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp && !run.failed).map(run => run.timestamp!))
-      const addTimestamp = clearLastPartialRunsOnCompletion && minTimestamp > 0 && minTimestamp < Infinity
+      const addTimestamp = minTimestamp > 0 && minTimestamp < Infinity
       setPartialRuns(
         runs.map((run, index, runs) =>
           addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
@@ -82,10 +82,7 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     })
     await refreshActiveItem(versionID)
 
-    if (clearLastPartialRunsOnCompletion) {
-      setPartialRuns(runs => runs.filter(run => !run.isLast))
-    }
-
+    setPartialRuns(runs => runs.filter(run => !run.isLast))
     setRunning(false)
 
     return isFinished
