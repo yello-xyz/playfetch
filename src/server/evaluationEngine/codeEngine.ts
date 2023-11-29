@@ -1,7 +1,7 @@
 import { PromptInputs } from '@/types'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import Isolated from 'isolated-vm'
-import { RunResponse } from './chainEngine'
+import { ErrorRunResponse, RunResponse } from './chainEngine'
 
 const codeToCamelCase = (code: string) =>
   ExtractVariables(code).reduce(
@@ -25,15 +25,13 @@ export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   return context
 }
 
-const codeResponseAttributes = { cost: 0, attempts: 1, isFunctionCall: undefined }
-
 export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<RunResponse> => {
   try {
     const functionCode = `(() => { ${codeToCamelCase(code)} })()`
     const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
-    return { result, output, error: undefined, failed: false, ...codeResponseAttributes }
+    return { result, output, error: undefined, failed: false, cost: 0, attempts: 1 }
   } catch (error: any) {
-    return { result: undefined, output: undefined, error: error.message, failed: true, ...codeResponseAttributes }
+    return ErrorRunResponse(error.message)
   }
 }
