@@ -53,6 +53,7 @@ export default function RunCellContinuation({
   const users = activeItem?.users ?? []
 
   const totalCost = runWithContinuations.reduce((totalCost, run) => totalCost + (run.cost ?? 0), 0)
+  const totalTokens = runWithContinuations.reduce((tokens, run) => tokens + (isPartialRun(run) ? 0 : run.tokens), 0)
 
   return (
     <>
@@ -99,7 +100,7 @@ export default function RunCellContinuation({
       )}
       {totalCost > (run.cost ?? 0) && (
         <span className='w-full pt-2 mt-2 text-right text-gray-500 border-t border-gray-200'>
-          Total Cost: {FormatCost(totalCost)}
+          Total Cost: {FormatCost(totalCost)}{totalTokens > 0 && ` • Total Tokens: ${totalTokens}`}
         </span>
       )}
     </>

@@ -194,6 +194,7 @@ export type Run = CommonRun & {
   timestamp: number
   cost: number
   duration: number
+  tokens: number
   inputs: PromptInputs
   labels: string[]
   rating?: RunRating
