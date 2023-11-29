@@ -7,6 +7,12 @@ export default function useCommentSelection(
 ) {
   const [focusRunID, setFocusRunID] = useState<number>()
 
+  const [previousVersionID, setPreviousVersionID] = useState(activeVersion?.id)
+  if (activeVersion?.id !== previousVersionID) {
+    setPreviousVersionID(activeVersion?.id)
+    setFocusRunID(undefined)
+  }
+
   const selectComment = (parentID: number, versionID: number, runID?: number) => {
     if (versionID !== activeVersion?.id) {
       setFocusRunID(undefined)
