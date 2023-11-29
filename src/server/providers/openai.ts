@@ -136,11 +136,15 @@ async function tryCompleteChat(
     }
 
     const extractContent = (obj: any) => (typeof obj.content === 'string' ? obj.content : JSON.stringify(obj))
-    const cost = CostForModel(model, [...inputMessages, ...inputFunctions].map(extractContent).join('\n'), output)
+    const [cost, inputTokens, outputTokens] = CostForModel(
+      model,
+      [...inputMessages, ...inputFunctions].map(extractContent).join('\n'),
+      output
+    )
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
     context.functions = inputFunctions
 
-    return { output, cost, isInterrupt: isFunctionCall }
+    return { output, cost, inputTokens, outputTokens, isInterrupt: isFunctionCall }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }
@@ -170,13 +174,13 @@ export async function createEmbedding(
   userID: number,
   model: 'text-embedding-ada-002',
   input: string
-): Promise<{ embedding: number[]; cost: number }> {
+): Promise<{ embedding: number[]; cost: number; inputTokens: number }> {
   const api = new OpenAI({ apiKey })
 
   const response = await api.embeddings.create({ input, model, user: userID.toString() })
 
   const embedding = response.data[0].embedding
-  const cost = CostForModel(model, input)
+  const [cost, inputTokens] = CostForModel(model, input)
 
-  return { embedding, cost }
+  return { embedding, cost, inputTokens }
 }

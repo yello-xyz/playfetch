@@ -34,10 +34,10 @@ async function complete(
       streamChunks(output)
     }
 
-    const cost = CostForModel(model, inputPrompt, output)
+    const [cost, inputTokens, outputTokens] = CostForModel(model, inputPrompt, output)
     context.running = `${inputPrompt}\n${output}\n`
 
-    return { output, cost, isInterrupt: false }
+    return { output, cost, inputTokens, outputTokens, isInterrupt: false }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }

@@ -81,11 +81,11 @@ async function complete(
 
     const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
     const input = isChatModel(model) ? [system ?? '', ...inputMessages.map(extractContent)].join('\n') : inputPrompt
-    const cost = CostForModel(model, input, output)
+    const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
     context.running = `${inputPrompt}\n${output}\n`
     context.messages = [...inputMessages, ...(responseMessage ? [responseMessage] : [])]
 
-    return { output, cost, isInterrupt: false }
+    return { output, cost, inputTokens, outputTokens, isInterrupt: false }
   } catch (error: any) {
     return { error: error?.details ?? 'Unknown error' }
   }

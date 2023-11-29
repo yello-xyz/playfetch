@@ -18,11 +18,17 @@ import cohere from './cohere'
 import { updateScopedModelCost } from '../datastore/cost'
 import { checkBudgetForScope, incrementCostForScope } from '../datastore/budget'
 
-const costForTokens = (content: string, pricePerMillionTokens: number) =>
-  (encode(content).length * pricePerMillionTokens) / 1000000
+const costForTokens = (content: string, pricePerMillionTokens: number) => {
+  const tokens = encode(content).length
+  const cost = (tokens * pricePerMillionTokens) / 1000000
+  return [cost, tokens]
+}
 
-export const CostForModel = (model: LanguageModel, input: string, output = '') =>
-  costForTokens(input, InputPriceForModel(model)) + costForTokens(output, OutputPriceForModel(model))
+export const CostForModel = (model: LanguageModel, input: string, output = '') => {
+  const [inputCost, inputTokens] = costForTokens(input, InputPriceForModel(model))
+  const [outputCost, outputTokens] = costForTokens(output, OutputPriceForModel(model))
+  return [inputCost + outputCost, inputTokens, outputTokens]
+}
 
 export const CredentialsForProvider = async (scopeIDs: number[], provider: ModelProvider, modelToCheck?: string) => {
   switch (provider) {
