@@ -52,6 +52,10 @@ export default function RunTimeline({
     focusRun(activeRunID)
     setPreviousActiveRunID(activeRunID)
   }
+  const isRunSelected = (run: PartialRun | Run) =>
+    run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
+  const selectRun = (run: PartialRun | Run) =>
+    runs.length > 1 && activeRunID !== undefined ? () => setActiveRunID(run.id) : undefined
 
   const sortedRuns = sortRuns(runs).reduce(
     (sortedRuns, run) =>
@@ -94,6 +98,8 @@ export default function RunTimeline({
               version={version}
               activeItem={activeItem}
               isRunning={isRunning}
+              isSelected={isRunSelected(run)}
+              onSelect={selectRun(run)}
               runContinuation={runContinuation}
               selectInputValue={selectInputValue}
             />

@@ -10,6 +10,8 @@ export default function RunCell({
   version,
   activeItem,
   isRunning,
+  isSelected,
+  onSelect,
   runContinuation,
   selectInputValue,
 }: {
@@ -18,6 +20,8 @@ export default function RunCell({
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   isRunning?: boolean
+  isSelected?: boolean
+  onSelect?: () => void
   runContinuation?: (continuationID: number, message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
 }) {
@@ -26,10 +30,14 @@ export default function RunCell({
 
   const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const anyRunFailed = [run, ...(run.continuations ?? [])].some(run => run.failed)
-  const colorClass = anyRunFailed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
+  const colorClass = anyRunFailed
+    ? 'bg-red-25 border-red-50'
+    : isSelected || !onSelect
+    ? 'bg-blue-25 border-blue-100'
+    : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
 
   return (
-    <div className={`${baseClass} ${colorClass}`}>
+    <div className={`${baseClass} ${colorClass}`} onClick={onSelect}>
       <div className='flex flex-col gap-2.5'>
         <RunCellHeader run={run} />
         <RunCellBody
