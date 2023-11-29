@@ -58,10 +58,14 @@ export default function RunCellContinuation({
     <>
       {continuations.map((run, index) => (
         <Fragment key={run.id}>
-          <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
-          <BorderedSection>
-            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[getPreviousInputKey(index)]}</div>
-          </BorderedSection>
+          {!!runWithContinuations[index].canContinue && (
+            <>
+              <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
+              <BorderedSection>
+                <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[getPreviousInputKey(index)]}</div>
+              </BorderedSection>
+            </>
+          )}
           <RunCellBody
             identifierForRun={identifierForRun}
             run={run}
