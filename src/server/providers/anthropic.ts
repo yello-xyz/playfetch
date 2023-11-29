@@ -41,7 +41,7 @@ async function complete(
     const cost = CostForModel(model, inputPrompt, output)
     context.running = `${inputPrompt}${output}`
 
-    return { output, cost, isFunctionCall: false }
+    return { output, cost, isInterrupt: false }
   } catch (error: any) {
     return { error: error?.error?.error?.message ?? 'Unknown error' }
   }

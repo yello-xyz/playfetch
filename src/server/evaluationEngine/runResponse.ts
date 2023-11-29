@@ -1,5 +1,5 @@
 export type RunResponse = (
-  | { result: any; output: string; error: undefined; failed: false; isFunctionCall: boolean }
+  | { result: any; output: string; error: undefined; failed: false; isInterrupt: boolean }
   | { result: undefined; output: undefined; error: string; failed: true }
 ) & { cost: number; attempts: number }
 
@@ -10,7 +10,7 @@ export const EmptyRunResponse = (): RunResponse & { failed: false } => ({
   cost: 0,
   attempts: 1,
   failed: false,
-  isFunctionCall: false,
+  isInterrupt: false,
 })
 
 export const ErrorRunResponse = (error: string): RunResponse => ({

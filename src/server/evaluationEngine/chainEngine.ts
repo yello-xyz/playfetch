@@ -101,7 +101,7 @@ export default async function runChain(
       streamResponse(lastResponse, true)
       if (lastResponse.failed) {
         continuationIndex = undefined
-      } else if (promptVersion.config.isChat || lastResponse.isFunctionCall) {
+      } else if (promptVersion.config.isChat || lastResponse.isInterrupt) {
         continuationIndex = index
         break
       } else {

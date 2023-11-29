@@ -9,7 +9,7 @@ import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
 import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './runResponse'
 
-type ValidOrEmptyPredictionResponse = { output: string; cost: number; isFunctionCall: boolean }
+type ValidOrEmptyPredictionResponse = { output: string; cost: number; isInterrupt: boolean }
 type ErrorPredictionResponse = { error: string }
 type PredictionResponse = ValidOrEmptyPredictionResponse | ErrorPredictionResponse
 
