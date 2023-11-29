@@ -55,7 +55,27 @@ export const ErrorRunResponse = (error: string): RunResponse => ({
   failed: true,
 })
 
+export const TryParseOutput = (output: string | undefined) => {
+  try {
+    return output ? JSON.parse(output) : output
+  } catch {
+    return output
+  }
+}
+
 type ResponseType = Awaited<ReturnType<typeof runWithTimer<RunResponse>>>
+
+export const ChainResponseFromValue = (value: any): Awaited<ReturnType<typeof runChain>> | null =>
+  value
+    ? {
+        ...EmptyRunResponse(),
+        result: TryParseOutput(value),
+        output: value,
+        duration: 0,
+        continuationID: undefined,
+        extraSteps: 0,
+      }
+    : null
 
 export default async function runChain(
   userID: number,
