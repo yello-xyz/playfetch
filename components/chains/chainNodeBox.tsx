@@ -108,7 +108,7 @@ export function ChainNodeBox({
         />
         {chainNode !== OutputNode && <SmallDot position='bottom' />}
       </div>
-      <DownStroke height='-mb-[6px]' spacer grow />
+      {index < nodes.length - 1 && <DownStroke height='-mb-[6px]' spacer grow />}
     </div>
   )
 }
