@@ -9,11 +9,9 @@ import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
 import { ErrorRunResponse, RunResponse } from './chainEngine'
 
-type ValidOrEmptyPredictionResponse = { output: string; cost: number }
+type ValidOrEmptyPredictionResponse = { output: string; cost: number; isFunctionCall?: boolean }
 type ErrorPredictionResponse = { error: string }
-type PredictionResponse = (ValidOrEmptyPredictionResponse | ErrorPredictionResponse) & {
-  isFunctionCall?: boolean
-}
+type PredictionResponse = (ValidOrEmptyPredictionResponse | ErrorPredictionResponse)
 
 export type PromptContext = any
 export type Predictor = (
