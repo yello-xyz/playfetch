@@ -108,7 +108,7 @@ export default async function runChain(
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
-      if (!lastResponse.failed && isBranchConfig(config)) {
+      if (!lastResponse.failed && !lastResponse.isInterrupt && isBranchConfig(config)) {
         const branchIndex = config.branches.indexOf(lastResponse.output)
         if (branchIndex >= 0) {
           branch = FirstBranchForBranchOfNode(
