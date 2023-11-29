@@ -1,7 +1,7 @@
 import { PromptInputs } from '@/types'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import Isolated from 'isolated-vm'
-import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './chainEngine'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
 const codeToCamelCase = (code: string) =>
   ExtractVariables(code).reduce(

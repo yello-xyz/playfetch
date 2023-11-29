@@ -8,7 +8,7 @@ import {
 } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
-import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './chainEngine'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
 export const runQuery = async (
   userID: number,

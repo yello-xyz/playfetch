@@ -14,13 +14,7 @@ import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode } from '../../common/branching'
 import { loadContinuation, saveContinuation } from './continuationCache'
 import { AugmentInputs, resolvePrompt, resolvePrompts } from './resolveEngine'
-
-const runWithTimer = async <T>(operation: Promise<T>) => {
-  const startTime = process.hrtime.bigint()
-  const result = await operation
-  const duration = Number(process.hrtime.bigint() - startTime) / 1_000_000_000
-  return { ...result, duration }
-}
+import { RunResponse, EmptyRunResponse, TryParseOutput, RunWithTimer, TimedRunResponse } from './runResponse'
 
 const isRunConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is RunConfig =>
   'versionID' in config
@@ -30,52 +24,6 @@ const isBranchConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryCon
   'branches' in config
 const isCodeConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is CodeConfig =>
   'code' in config && !isBranchConfig(config)
-
-export type RunResponse = (
-  | { result: any; output: string; error: undefined; failed: false; isFunctionCall: boolean }
-  | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number }
-
-export const EmptyRunResponse = (): RunResponse & { failed: false } => ({
-  output: '',
-  result: '',
-  error: undefined,
-  cost: 0,
-  attempts: 1,
-  failed: false,
-  isFunctionCall: false,
-})
-
-export const ErrorRunResponse = (error: string): RunResponse => ({
-  error,
-  result: undefined,
-  output: undefined,
-  cost: 0,
-  attempts: 1,
-  failed: true,
-})
-
-export const TryParseOutput = (output: string | undefined) => {
-  try {
-    return output ? JSON.parse(output) : output
-  } catch {
-    return output
-  }
-}
-
-type ResponseType = Awaited<ReturnType<typeof runWithTimer<RunResponse>>>
-
-export const ChainResponseFromValue = (value: any): Awaited<ReturnType<typeof runChain>> | null =>
-  value
-    ? {
-        ...EmptyRunResponse(),
-        result: TryParseOutput(value),
-        output: value,
-        duration: 0,
-        continuationID: undefined,
-        extraSteps: 0,
-      }
-    : null
 
 export default async function runChain(
   userID: number,
@@ -100,7 +48,7 @@ export default async function runChain(
   let duration = 0
   let extraAttempts = 0
   const runChainStep = async (operation: Promise<RunResponse>) => {
-    const response = await runWithTimer(operation)
+    const response = await RunWithTimer(operation)
     cost += response.cost
     duration += response.duration
     extraAttempts += response.attempts - 1
@@ -113,14 +61,14 @@ export default async function runChain(
   const promptContext = continuation[2]
   inputs = continuation[3]
 
-  let lastResponse: ResponseType = { ...EmptyRunResponse(), duration: 0 }
+  let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
   let continuationCount = 0
   let branch = 0
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
     const streamPartialResponse = (chunk: string) => stream?.(index, continuationCount, chunk)
-    const streamResponse = (response: ResponseType, skipOutput = false) =>
+    const streamResponse = (response: TimedRunResponse, skipOutput = false) =>
       stream?.(
         index,
         continuationCount,
@@ -209,3 +157,15 @@ export default async function runChain(
 
   return { ...lastResponse, cost, duration, attempts: 1 + extraAttempts, continuationID, extraSteps: continuationCount }
 }
+
+export const ChainResponseFromValue = (value: any): Awaited<ReturnType<typeof runChain>> | null =>
+  value
+    ? {
+        ...EmptyRunResponse(),
+        result: TryParseOutput(value),
+        output: value,
+        duration: 0,
+        continuationID: undefined,
+        extraSteps: 0,
+      }
+    : null

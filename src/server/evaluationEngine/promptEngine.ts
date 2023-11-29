@@ -7,7 +7,7 @@ import {
 } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
-import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './chainEngine'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './runResponse'
 
 type ValidOrEmptyPredictionResponse = { output: string; cost: number; isFunctionCall: boolean }
 type ErrorPredictionResponse = { error: string }
