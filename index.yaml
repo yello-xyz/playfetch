@@ -39,19 +39,19 @@ indexes:
 - kind: run
   properties:
   - name: parentID
-  - name: itemIndex
+  - name: parentRunID
   - name: createdAt
     direction: desc
 
 - kind: run
   properties:
   - name: parentRunID
-  - name: itemIndex
+  - name: parentRunID
 
 - kind: run
   properties:
   - name: continuationID
-  - name: itemIndex
+  - name: parentRunID
 
 - kind: endpoint
   properties:

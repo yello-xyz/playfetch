@@ -13,8 +13,8 @@ export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersi
 const saveRun = (
   userID: number,
   version: RawPromptVersion | RawChainVersion,
-  parentRunID: number,
-  itemIndex: number | null,
+  parentRunID: number | null,
+  itemIndex: number,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>> & { failed: false },
   continuationID: number | undefined,
@@ -50,6 +50,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
   const runIDs = await allocateRunIDs(multipleInputs.length)
+  const lastIndices = multipleInputs.map(_ => 0)
 
   const responses = await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
@@ -70,6 +71,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             failed: response?.failed,
             continuationID,
           })
+          lastIndices[inputIndex] = index
           if (response && !response.failed && !response.isInterrupt && index < configs.length - 1) {
             saveRun(user.id, version, runIDs[inputIndex], index, {}, response, continuationID)
           }
@@ -88,8 +90,16 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     })
     logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
     if (!response.failed) {
-      const runID = runIDs[index]
-      await saveRun(user.id, version, runID, null, multipleInputs[index], response, continuationID, runID)
+      await saveRun(
+        user.id,
+        version,
+        null,
+        lastIndices[index],
+        multipleInputs[index],
+        response,
+        continuationID,
+        runIDs[index]
+      )
     }
   }
 

@@ -25,7 +25,7 @@ export async function migrateRuns(postMerge: boolean) {
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    if (runData.parentRunID !== undefined) {
+    if (runData.inputTokens !== undefined) {
       continue
     }
     if (remainingSaveCount-- <= 0) {
@@ -37,7 +37,7 @@ export async function migrateRuns(postMerge: boolean) {
         runData.userID,
         runData.parentID,
         runData.versionID,
-        runData.parentRunID ?? getID(runData),
+        runData.parentRunID ?? null,
         runData.itemIndex ?? null,
         JSON.parse(runData.inputs),
         runData.output,
@@ -63,8 +63,8 @@ export async function saveNewRun(
   userID: number,
   parentID: number,
   versionID: number,
-  parentRunID: number,
-  itemIndex: number | null,
+  parentRunID: number | null,
+  itemIndex: number,
   inputs: PromptInputs,
   output: string,
   cost: number,
@@ -100,12 +100,12 @@ export async function saveNewRun(
 export async function getIntermediateRunsForParentRun(userID: number, parentRunID: number, continuationID?: number) {
   const runData = await getFilteredEntities(
     Entity.RUN,
-    and([
-      continuationID
-        ? or([buildFilter('parentRunID', parentRunID), buildFilter('continuationID', continuationID)])
-        : buildFilter('parentRunID', parentRunID),
-      new PropertyFilter('itemIndex', '!=', null),
-    ])
+    continuationID
+      ? or([
+          buildFilter('parentRunID', parentRunID),
+          and([buildFilter('continuationID', continuationID), new PropertyFilter('parentRunID', '!=', null)]),
+        ])
+      : buildFilter('parentRunID', parentRunID)
   )
   if (runData.length > 0) {
     await ensurePromptOrChainAccess(userID, runData[0].parentID)
@@ -114,7 +114,7 @@ export async function getIntermediateRunsForParentRun(userID: number, parentRunI
 }
 
 export const getOrderedRunsForParentID = (parentID: number) =>
-  getFilteredOrderedEntities(Entity.RUN, and([buildFilter('parentID', parentID), buildFilter('itemIndex', null)]))
+  getFilteredOrderedEntities(Entity.RUN, and([buildFilter('parentID', parentID), buildFilter('parentRunID', null)]))
 
 const getVerifiedUserRunData = async (userID: number, runID: number) => {
   const runData = await getKeyedEntity(Entity.RUN, runID)
@@ -202,8 +202,8 @@ const toRunData = (
   userID: number,
   parentID: number,
   versionID: number,
-  parentRunID: number,
-  itemIndex: number | null,
+  parentRunID: number | null,
+  itemIndex: number,
   inputs: PromptInputs,
   output: string,
   createdAt: Date,
