@@ -1,4 +1,13 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
+import {
+  ActiveChain,
+  ActivePrompt,
+  ChainVersion,
+  IsPartialRun,
+  PartialRun,
+  PromptInputs,
+  PromptVersion,
+  Run,
+} from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
@@ -80,7 +89,10 @@ export default function RunTimeline({
   }
 
   const isRunSelected = (run: PartialRun | Run) =>
-    activeRunID === undefined || run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
+    activeRunID === undefined ||
+    IsPartialRun(run) ||
+    run.id === activeRunID ||
+    (run.continuations ?? []).some(run => run.id === activeRunID)
   const selectRun = (run: PartialRun | Run) =>
     sortedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
       ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))

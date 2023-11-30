@@ -1,5 +1,5 @@
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
-import { ActiveChain, ActivePrompt, PartialRun, Run } from '@/types'
+import { ActiveChain, ActivePrompt, IsPartialRun, PartialRun, Run } from '@/types'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { BorderedSection } from './runCellContinuation'
 import durationIcon from '@/public/duration.svg'
@@ -20,18 +20,16 @@ export default function RunCellFooter({
   activeItem?: ActivePrompt | ActiveChain
   isContinuation: boolean
 }) {
-  const isProperRun = ((item): item is Run => 'labels' in item)(run)
-
   return run.duration || run.cost || run.timestamp ? (
     <BorderedSection border={isContinuation} bridgingGap>
       <div className='flex flex-col w-full gap-2 pt-2 border-t border-gray-200'>
-        {isProperRun && run.labels.length > 0 && activeItem && (
+        {!IsPartialRun(run) && run.labels.length > 0 && activeItem && (
           <ItemLabels labels={run.labels} colors={AvailableLabelColorsForItem(activeItem)} />
         )}
         <div className='flex items-center gap-3'>
           <RunAttributes run={run} />
           <div className='flex-1' />
-          {isProperRun && activeItem && (
+          {!IsPartialRun(run) && activeItem && (
             <>
               <RunRatingButtons run={run} activeItem={activeItem} />
               <div className='self-stretch border-r border-gray-200' />

@@ -239,22 +239,24 @@ const toRunData = (
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })
 
-export const toRun = (maxItemIndex: number) => (data: any): Run => ({
-  id: getID(data),
-  index: data.itemIndex !== null ? data.itemIndex : maxItemIndex,
-  parentRunID: data.parentRunID,
-  userID: data.userID,
-  timestamp: getTimestamp(data),
-  inputs: JSON.parse(data.inputs),
-  output: data.output,
-  cost: data.cost,
-  tokens: data.inputTokens + data.outputTokens,
-  duration: data.duration,
-  labels: JSON.parse(data.labels),
-  rating: data.rating,
-  continuationID: data.continuationID,
-  canContinue: data.canContinue,
-})
+export const toRun =
+  (maxItemIndex: number) =>
+  (data: any): Run => ({
+    id: getID(data),
+    index: data.itemIndex !== null ? data.itemIndex : maxItemIndex,
+    parentRunID: data.parentRunID,
+    userID: data.userID,
+    timestamp: getTimestamp(data),
+    inputs: JSON.parse(data.inputs),
+    output: data.output,
+    cost: data.cost,
+    tokens: data.inputTokens + data.outputTokens,
+    duration: data.duration,
+    labels: JSON.parse(data.labels),
+    rating: data.rating,
+    continuationID: data.continuationID,
+    canContinue: data.canContinue,
+  })
 
 export async function getRecentRuns(
   since: Date,

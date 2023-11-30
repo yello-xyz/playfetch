@@ -1,5 +1,5 @@
 import { BorderedSection, RoleHeader } from './runCellContinuation'
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, IsPartialRun, PartialRun, PromptVersion, Run } from '@/types'
 import { MouseEvent, useCallback } from 'react'
 import { CommentsPopup, CommentsPopupProps } from '../commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
@@ -95,8 +95,7 @@ export default function RunCellBody({
     [version, setPopup, updateSelectionForComment]
   )
 
-  const isProperRun = ((item): item is Run => 'labels' in item)(run)
-  useExtractCommentSelection(isProperRun ? identifierForRun(run.id) : null, onUpdateSelection)
+  useExtractCommentSelection(IsPartialRun(run) ? null : identifierForRun(run.id), onUpdateSelection)
 
   const spans = []
 

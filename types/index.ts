@@ -204,6 +204,8 @@ export type Run = CommonRun & {
   userID: number
 }
 
+export const IsPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
+
 type CommonConfigAttributes = {
   output?: string
   branch: number

@@ -186,8 +186,8 @@ export default function ChainNodeOutput({
                 isRunning
                   ? [...activeVersion.runs, ...partialRuns]
                   : activeNode === OutputNode
-                  ? [...activeVersion.runs, ...intermediateRuns]
-                  : relevantRuns.filter(run => run.index === activeIndex - 1)
+                    ? [...activeVersion.runs, ...intermediateRuns]
+                    : relevantRuns.filter(run => run.index === activeIndex - 1)
               }
               activeItem={chain}
               focusRunID={activeRunID}
