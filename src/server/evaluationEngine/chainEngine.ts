@@ -32,15 +32,9 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
-  stream?: (
-    index: number,
-    chunk: string,
-    cost?: number,
-    duration?: number,
-    failed?: boolean
-  ) => void,
+  stream?: (index: number, chunk: string, stepResponse?: TimedRunResponse) => void,
   continuationID?: number
-) {
+): Promise<TimedRunResponse & { continuationID?: number }> {
   const continuationInputs = inputs
   const useCamelCase = isEndpointEvaluation
   let cost = 0
@@ -122,9 +116,7 @@ export default async function runChain(
     stream?.(
       index,
       lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
-      lastResponse.cost,
-      lastResponse.duration,
-      lastResponse.failed
+      lastResponse
     )
     if (lastResponse.failed) {
       continuationIndex = undefined
@@ -155,7 +147,7 @@ export default async function runChain(
     outputTokens,
     duration,
     attempts: 1 + extraAttempts,
-    continuationID
+    continuationID,
   }
 }
 
@@ -166,6 +158,6 @@ export const ChainResponseFromValue = (value: any): Awaited<ReturnType<typeof ru
         result: TryParseOutput(value),
         output: value,
         duration: 0,
-        continuationID: undefined
+        continuationID: undefined,
       }
     : null

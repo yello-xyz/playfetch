@@ -58,14 +58,14 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         configs,
         inputs,
         false,
-        (index, message, cost, duration, failed) =>
+        (index, message, response) =>
           sendData({
             inputIndex,
             index,
             message,
-            cost,
-            duration,
-            failed,
+            cost: response?.cost,
+            duration: response?.duration,
+            failed: response?.failed,
             continuationID,
           }),
         continuationID
