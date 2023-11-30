@@ -26,15 +26,15 @@ export default function RunCell({
   selectInputValue: (inputKey: string) => string | undefined
 }) {
   const continuationID = run.continuationID
-  const isContinuation = !!continuationID
+  const isContinuation = !!continuationID || (run.continuations ?? []).length > 0
 
   const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const anyRunFailed = [run, ...(run.continuations ?? [])].some(run => run.failed)
   const colorClass = anyRunFailed
     ? 'bg-red-25 border-red-50'
     : isSelected || !onSelect
-      ? 'bg-blue-25 border-blue-100'
-      : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
+    ? 'bg-blue-25 border-blue-100'
+    : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
 
   return (
     <div className={`${baseClass} ${colorClass}`} onClick={isSelected ? undefined : onSelect}>
@@ -58,7 +58,9 @@ export default function RunCell({
           version={version}
           isRunning={isRunning}
           runContinuation={
-            runContinuation ? (message, inputKey) => runContinuation(continuationID, message, inputKey) : undefined
+            runContinuation && continuationID
+              ? (message, inputKey) => runContinuation(continuationID, message, inputKey)
+              : undefined
           }
           selectInputValue={selectInputValue}
         />
