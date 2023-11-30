@@ -119,6 +119,7 @@ export default function ChainNodeOutput({
       if (continuationID === undefined) {
         setActiveIndex(0)
         setRunningItemIndex(-1)
+        setActiveRunID(undefined)
       }
       const isFinished = await runVersion(getVersion, inputs, continuationID)
       if (isFinished) {
@@ -135,7 +136,9 @@ export default function ChainNodeOutput({
     }
   }, [setActiveIndex, highestRunIndex, runningItemIndex])
 
-  const [activeRunID, setActiveRunID] = useInitialState(focusRunID ?? activeVersion.runs.slice(-1)[0]?.id)
+  const [activeRunID, setActiveRunID] = useInitialState<number | undefined>(
+    focusRunID ?? activeVersion.runs.slice(-1)[0]?.id
+  )
   const activeRun = activeVersion.runs.find(run => run.id === activeRunID)
   const parentRun = activeVersion.runs.find(
     run => run.id === activeRunID || (activeRun?.continuationID && run.continuationID === activeRun.continuationID)
