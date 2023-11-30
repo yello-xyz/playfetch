@@ -62,17 +62,22 @@ export default function RunTimeline({
       ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
       : undefined
 
-  const sortedRuns = sortRuns(runs).reduce(
-    (sortedRuns, run) =>
-      run.continuationID && run.continuationID === sortedRuns.slice(-1)[0]?.continuationID
-        ? [
-            ...sortedRuns.slice(0, -1),
-            { ...sortedRuns.slice(-1)[0], continuations: [...(sortedRuns.slice(-1)[0].continuations ?? []), run] },
-          ]
-        : [...sortedRuns, run],
-
-    [] as PartialRun[]
-  )
+  const sortedRuns = sortRuns(runs).reduce((sortedRuns, run) => {
+    const previousRun = sortedRuns.slice(-1)[0]
+    const isParentRun = previousRun?.parentRunID === run.id
+    const sameParentRun = !!run.parentRunID && run.parentRunID === previousRun?.parentRunID
+    const sameContinuation = !!run.continuationID && run.continuationID === previousRun?.continuationID
+    return isParentRun || sameParentRun || sameContinuation
+      ? [
+          ...sortedRuns.slice(0, -1),
+          {
+            ...previousRun,
+            continuations: [...(previousRun.continuations ?? []), run],
+            continuationID: previousRun?.continuationID ?? run.continuationID,
+          },
+        ]
+      : [...sortedRuns, run]
+  }, [] as PartialRun[])
   const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
