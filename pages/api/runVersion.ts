@@ -73,7 +73,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           })
           lastIndices[inputIndex] = index
           if (response && !response.failed && !response.isInterrupt && index < configs.length - 1) {
-            saveRun(user.id, version, runIDs[inputIndex], index, {}, response, continuationID)
+            saveRun(user.id, version, runIDs[inputIndex], index, multipleInputs[inputIndex], response, continuationID)
           }
         },
         continuationID
