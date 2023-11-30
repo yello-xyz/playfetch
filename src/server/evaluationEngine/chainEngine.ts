@@ -71,16 +71,6 @@ export default async function runChain(
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
-    const streamPartialResponse = (chunk: string) => stream?.(index, continuationCount, chunk)
-    const streamStepResponse = (response: TimedRunResponse, skipOutput = false) =>
-      stream?.(
-        index,
-        continuationCount,
-        response.failed ? response.error : skipOutput ? '' : response.output,
-        response.cost,
-        response.duration,
-        response.failed
-      )
     if (config.branch !== branch) {
       continue
     }
@@ -98,17 +88,15 @@ export default async function runChain(
           promptVersion.config,
           promptContext,
           index === continuationIndex || (config.includeContext ?? false),
-          streamPartialResponse,
+          (chunk: string) => stream?.(index, continuationCount, chunk),
           index === continuationIndex ? continuationInputs : undefined
         )
       )
-      streamStepResponse(lastResponse, true)
     } else if (isQueryConfig(config)) {
       const query = resolvePrompt(config.query, inputs, useCamelCase)
       lastResponse = await runChainStep(
         runQuery(userID, projectID, config.provider, config.model, config.indexName, query, config.topK)
       )
-      streamStepResponse(lastResponse)
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
       const codeContext = CreateCodeContextWithInputs(inputs)
       lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
@@ -130,10 +118,17 @@ export default async function runChain(
           }
         }
       }
-      streamStepResponse(lastResponse)
     } else {
       throw new Error('Unsupported config type in chain evaluation')
     }
+    stream?.(
+      index,
+      continuationCount,
+      lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
+      lastResponse.cost,
+      lastResponse.duration,
+      lastResponse.failed
+    )
     if (lastResponse.failed) {
       continuationIndex = undefined
       break

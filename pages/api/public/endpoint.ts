@@ -109,6 +109,7 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const version = await getTrustedVersion(versionID, true)
 
           const configs = loadConfigsFromVersion(version)
+          // TODO this means we don't output on interrupt when streaming if there are more nodes following.
           const isLastStep = (index: number) => index === configs.length - 1
           const stream = (index: number, _: number, message: string) =>
             useStreaming && isLastStep(index) ? res.write(message) : undefined
