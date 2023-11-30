@@ -110,12 +110,14 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           const version = await getTrustedVersion(versionID, true)
 
           const configs = loadConfigsFromVersion(version)
-          const stream = useStreaming ? (index: number, message: string) => {
-            didReachLastStep = index === configs.length - 1
-            if (didReachLastStep) {
-              res.write(message)
-            }
-          } : undefined
+          const stream = useStreaming
+            ? (index: number, message: string) => {
+                didReachLastStep = index === configs.length - 1
+                if (didReachLastStep) {
+                  res.write(message)
+                }
+              }
+            : undefined
 
           response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
 

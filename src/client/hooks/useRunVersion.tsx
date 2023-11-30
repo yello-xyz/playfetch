@@ -18,8 +18,7 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, index, message, cost, duration, timestamp, failed, continuationID, isLast } =
-        JSON.parse(data)
+      const { inputIndex, index, message, cost, duration, timestamp, failed, continuationID, isLast } = JSON.parse(data)
       if (isLast || timestamp) {
         const lastIndex = Math.max(...Object.keys(runs[inputIndex]).map(Number))
         const lastRun = runs[inputIndex][lastIndex]

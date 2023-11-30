@@ -100,7 +100,8 @@ export default function RunCellContinuation({
       )}
       {totalCost > (run.cost ?? 0) && (
         <span className='w-full pt-2 mt-2 text-right text-gray-500 border-t border-gray-200'>
-          Total Cost: {FormatCost(totalCost)}{totalTokens > 0 && ` • Total Tokens: ${totalTokens}`}
+          Total Cost: {FormatCost(totalCost)}
+          {totalTokens > 0 && ` • Total Tokens: ${totalTokens}`}
         </span>
       )}
     </>

@@ -61,6 +61,7 @@ export default function ComparePane({
       ? { [extractInputKey(log, logs)]: JSON.stringify(log.inputs, null, 2) }
       : log.inputs,
     cost: log.cost,
+    tokens: 0,
     duration: log.duration,
     failed: !!log.error,
     labels: [],

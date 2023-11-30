@@ -97,11 +97,7 @@ export async function saveNewRun(
   await getDatastore().save(runData)
 }
 
-export async function getIntermediateRunsForParentRun(
-  userID: number,
-  parentRunID: number,
-  continuationID?: number
-) {
+export async function getIntermediateRunsForParentRun(userID: number, parentRunID: number, continuationID?: number) {
   const runData = await getFilteredEntities(
     Entity.RUN,
     and([
