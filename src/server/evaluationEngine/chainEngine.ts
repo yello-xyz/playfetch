@@ -34,7 +34,6 @@ export default async function runChain(
   isEndpointEvaluation: boolean,
   stream?: (
     index: number,
-    extraSteps: number,
     chunk: string,
     cost?: number,
     duration?: number,
@@ -66,7 +65,6 @@ export default async function runChain(
   inputs = continuation[3]
 
   let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
-  let continuationCount = 0
   let branch = 0
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
@@ -88,7 +86,7 @@ export default async function runChain(
           promptVersion.config,
           promptContext,
           index === continuationIndex || (config.includeContext ?? false),
-          (chunk: string) => stream?.(index, continuationCount, chunk),
+          (chunk: string) => stream?.(index, chunk),
           index === continuationIndex ? continuationInputs : undefined
         )
       )
@@ -123,7 +121,6 @@ export default async function runChain(
     }
     stream?.(
       index,
-      continuationCount,
       lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
       lastResponse.cost,
       lastResponse.duration,
@@ -158,8 +155,7 @@ export default async function runChain(
     outputTokens,
     duration,
     attempts: 1 + extraAttempts,
-    continuationID,
-    extraSteps: continuationCount,
+    continuationID
   }
 }
 
@@ -170,7 +166,6 @@ export const ChainResponseFromValue = (value: any): Awaited<ReturnType<typeof ru
         result: TryParseOutput(value),
         output: value,
         duration: 0,
-        continuationID: undefined,
-        extraSteps: 0,
+        continuationID: undefined
       }
     : null

@@ -58,11 +58,10 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         configs,
         inputs,
         false,
-        (index, extraSteps, message, cost, duration, failed) =>
+        (index, message, cost, duration, failed) =>
           sendData({
             inputIndex,
-            configIndex: index,
-            index: index + extraSteps,
+            index,
             message,
             cost,
             duration,
