@@ -242,6 +242,7 @@ const toRunData = (
 export const toRun = (maxItemIndex: number) => (data: any): Run => ({
   id: getID(data),
   index: data.itemIndex !== null ? data.itemIndex : maxItemIndex,
+  parentRunID: data.parentRunID,
   userID: data.userID,
   timestamp: getTimestamp(data),
   inputs: JSON.parse(data.inputs),

@@ -66,6 +66,7 @@ export default function ComparePane({
     labels: [],
     continuationID: log.continuationID,
     index: 0,
+    parentRunID: null,
     tokens: 0,
     userID: 0,
   }))
