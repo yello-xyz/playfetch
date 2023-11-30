@@ -184,7 +184,7 @@ type CommonRun = {
   canContinue?: boolean
   continuations?: (PartialRun | Run)[]
   index?: number
-  parentRunID?: number
+  parentRunID?: number | null
 }
 
 export type PartialRun = CommonRun & {
@@ -194,7 +194,7 @@ export type PartialRun = CommonRun & {
 export type Run = CommonRun & {
   timestamp: number
   index: number
-  parentRunID: number
+  parentRunID: number | null
   cost: number
   duration: number
   tokens: number

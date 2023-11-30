@@ -37,7 +37,7 @@ export default function RunCell({
       : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
 
   return (
-    <div className={`${baseClass} ${colorClass}`} onClick={onSelect}>
+    <div className={`${baseClass} ${colorClass}`} onClick={isSelected ? undefined : onSelect}>
       <div className='flex flex-col gap-2.5'>
         <RunCellHeader run={run} />
         <RunCellBody
