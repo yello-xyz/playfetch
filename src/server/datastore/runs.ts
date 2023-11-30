@@ -12,7 +12,7 @@ export async function migrateRuns(postMerge: boolean) {
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    if (runData.inputTokens !== undefined) {
+    if (runData.parentRunID !== undefined) {
       continue
     }
     if (remainingSaveCount-- <= 0) {
@@ -24,6 +24,8 @@ export async function migrateRuns(postMerge: boolean) {
         runData.userID,
         runData.parentID,
         runData.versionID,
+        runData.parentRunID ?? getID(runData),
+        runData.itemIndex ?? null,
         JSON.parse(runData.inputs),
         runData.output,
         runData.createdAt,
@@ -48,6 +50,8 @@ export async function saveNewRun(
   userID: number,
   parentID: number,
   versionID: number,
+  parentRunID: number,
+  itemIndex: number | null,
   inputs: PromptInputs,
   output: string,
   cost: number,
@@ -62,6 +66,8 @@ export async function saveNewRun(
     userID,
     parentID,
     versionID,
+    parentRunID,
+    itemIndex,
     inputs,
     output,
     new Date(),
@@ -142,6 +148,8 @@ async function updateRun(runData: any) {
       runData.userID,
       runData.parentID,
       runData.versionID,
+      runData.parentRunID,
+      runData.itemIndex,
       JSON.parse(runData.inputs),
       runData.output,
       runData.createdAt,
@@ -162,6 +170,8 @@ const toRunData = (
   userID: number,
   parentID: number,
   versionID: number,
+  parentRunID: number,
+  itemIndex: number | null,
   inputs: PromptInputs,
   output: string,
   createdAt: Date,
@@ -180,6 +190,8 @@ const toRunData = (
     userID,
     parentID,
     versionID,
+    parentRunID,
+    itemIndex,
     inputs: JSON.stringify(inputs),
     output,
     createdAt,

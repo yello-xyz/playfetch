@@ -13,6 +13,8 @@ export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersi
 const saveRun = (
   userID: number,
   version: RawPromptVersion | RawChainVersion,
+  parentRunID: number,
+  itemIndex: number | null,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>> & { failed: false },
   continuationID: number | undefined,
@@ -22,6 +24,8 @@ const saveRun = (
     userID,
     version.parentID,
     version.id,
+    parentRunID,
+    itemIndex,
     inputs,
     response.output,
     response.cost,
@@ -80,7 +84,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     })
     logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
     if (!response.failed) {
-      await saveRun(user.id, version, multipleInputs[index], response, continuationID, runIDs[index])
+      const runID = runIDs[index]
+      await saveRun(user.id, version, runID, null, multipleInputs[index], response, continuationID, runID)
     }
   }
 
