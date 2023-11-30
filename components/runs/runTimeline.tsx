@@ -55,13 +55,6 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const isRunSelected = (run: PartialRun | Run) =>
-    activeRunID === undefined || run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
-  const selectRun = (run: PartialRun | Run) =>
-    runs.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
-      ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
-      : undefined
-
   const sortedRuns = sortRuns(runs).reduce((sortedRuns, run) => {
     const previousRun = sortedRuns.slice(-1)[0]
     const isParentRun = previousRun?.parentRunID === run.id
@@ -72,6 +65,7 @@ export default function RunTimeline({
           ...sortedRuns.slice(0, -1),
           {
             ...previousRun,
+            id: !previousRun || isParentRun ? run.id : previousRun?.id,
             continuations: [...(previousRun.continuations ?? []), run],
             continuationID: previousRun?.continuationID ?? run.continuationID,
           },
@@ -84,6 +78,13 @@ export default function RunTimeline({
     focusRun(lastPartialRunID)
     setPreviousLastRunID(lastPartialRunID)
   }
+
+  const isRunSelected = (run: PartialRun | Run) =>
+    activeRunID === undefined || run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
+  const selectRun = (run: PartialRun | Run) =>
+    sortedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
+      ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
+      : undefined
 
   const runContinuation =
     version && runVersion
