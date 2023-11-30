@@ -1,5 +1,5 @@
-import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, TestConfig } from '@/types'
-import { useEffect, useState } from 'react'
+import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
+import { useEffect, useRef, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
@@ -22,6 +22,7 @@ import { useCheckProviders } from '@/src/client/context/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 import useInitialState from '@/src/client/hooks/useInitialState'
+import api from '@/src/client/api'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
@@ -134,6 +135,19 @@ export default function ChainNodeOutput({
   }, [setActiveIndex, highestRunIndex, runningItemIndex])
 
   const [activeRunID, setActiveRunID] = useInitialState(focusRunID ?? activeVersion.runs.slice(-1)[0]?.id)
+  const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
+  const fetchedRunID = useRef<number>()
+  if (activeRunID && activeRunID !== fetchedRunID.current) {
+    setIntermediateRuns([])
+    fetchedRunID.current = activeRunID
+    const activeRun = activeVersion.runs.find(run => run.id === activeRunID)
+    const parentRun = activeVersion.runs.find(
+      run => run.id === activeRunID || (activeRun?.continuationID && run.continuationID === activeRun.continuationID)
+    )
+    if (parentRun) {
+      api.getIntermediateRuns(parentRun.id, parentRun.continuationID).then(setIntermediateRuns)
+    }
+  }
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
