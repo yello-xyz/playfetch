@@ -78,7 +78,7 @@ export default function useRunVersion(activeVersionID: number) {
         )
       )
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
-      isFinished = !runs.some(run => !!run.failed || run.canContinue)
+      isFinished = !runs.some(run => !!run.failed)
     })
     await refreshActiveItem(versionID)
 
