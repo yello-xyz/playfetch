@@ -136,23 +136,30 @@ export default function ChainNodeOutput({
   }, [setActiveIndex, highestRunIndex, runningItemIndex])
 
   const [activeRunID, setActiveRunID] = useInitialState(focusRunID ?? activeVersion.runs.slice(-1)[0]?.id)
-  const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
+  const activeRun = activeVersion.runs.find(run => run.id === activeRunID)
+  const parentRun = activeVersion.runs.find(
+    run => run.id === activeRunID || (activeRun?.continuationID && run.continuationID === activeRun.continuationID)
+  )
+const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
   const fetchedRunID = useRef<number>()
   if (activeRunID && activeRunID !== fetchedRunID.current) {
     setIntermediateRuns([])
     fetchedRunID.current = activeRunID
-    const activeRun = activeVersion.runs.find(run => run.id === activeRunID)
-    const parentRun = activeVersion.runs.find(
-      run => run.id === activeRunID || (activeRun?.continuationID && run.continuationID === activeRun.continuationID)
-    )
-    if (parentRun) {
-      api.getIntermediateRuns(parentRun.id, parentRun.continuationID).then(setIntermediateRuns)
+    if (activeRun && parentRun) {
+      api.getIntermediateRuns(parentRun.id, activeRun.continuationID).then(setIntermediateRuns)
     }
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
+
+  const relevantRuns = [...activeVersion.runs, ...intermediateRuns].filter(
+    run =>
+      run.id === activeRunID ||
+      (!!run.continuationID && run.continuationID === activeRun?.continuationID) ||
+      (!!run.parentRunID && run.parentRunID === parentRun?.id)
+  )
 
   return (
     <>
@@ -176,9 +183,9 @@ export default function ChainNodeOutput({
               runs={
                 isRunning
                   ? [...activeVersion.runs, ...partialRuns]
-                  : [...activeVersion.runs, ...intermediateRuns].filter(
-                      run => activeNode === OutputNode || run.index === activeIndex - 1
-                    )
+                  : activeNode === OutputNode
+                  ? [...activeVersion.runs, ...intermediateRuns]
+                  : relevantRuns.filter(run => run.index === activeIndex - 1)
               }
               activeItem={chain}
               focusRunID={activeRunID}
