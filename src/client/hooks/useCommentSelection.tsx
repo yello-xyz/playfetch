@@ -16,7 +16,7 @@ export default function useCommentSelection(
   const selectComment = (parentID: number, versionID: number, runID?: number | null) => {
     if (versionID !== activeVersion?.id) {
       setFocusRunID(undefined)
-      selectVersion(parentID, versionID).then(() => setTimeout(() => setFocusRunID(runID ?? undefined), 1000))
+      selectVersion(parentID, versionID).then(() => setTimeout(() => setFocusRunID(runID ?? undefined)))
     } else {
       setFocusRunID(runID ?? undefined)
     }
