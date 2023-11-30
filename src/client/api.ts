@@ -19,6 +19,7 @@ import {
   OnboardingResponse,
   RunRating,
   CostUsage,
+  Run,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -149,6 +150,9 @@ const api = {
   },
   runVersion: function (versionID: number, inputs: PromptInputs[], continuationID?: number): Promise<StreamReader> {
     return post(this.runVersion, { versionID, inputs, continuationID }, 'stream')
+  },
+  getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
+    return post(this.getIntermediateRuns, { parentRunID, continuationID })
   },
   getChain: function (chainID: number, activeProject: ActiveProject): Promise<ActiveChain> {
     return post(this.getChain, { chainID }).then(BuildActiveChain(activeProject))

@@ -5,6 +5,7 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
+  getFilteredEntities,
   getFilteredOrderedEntities,
   getID,
   getKeyedEntity,
@@ -14,7 +15,7 @@ import {
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 import { saveComment } from './comments'
-import { and } from '@google-cloud/datastore'
+import { PropertyFilter, and, or } from '@google-cloud/datastore'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -94,6 +95,26 @@ export async function saveNewRun(
     runID
   )
   await getDatastore().save(runData)
+}
+
+export async function getIntermediateRunsForParentRun(
+  userID: number,
+  parentRunID: number,
+  continuationID?: number
+) {
+  const runData = await getFilteredEntities(
+    Entity.RUN,
+    and([
+      continuationID
+        ? or([buildFilter('parentRunID', parentRunID), buildFilter('continuationID', continuationID)])
+        : buildFilter('parentRunID', parentRunID),
+      new PropertyFilter('itemIndex', '!=', null),
+    ])
+  )
+  if (runData.length > 0) {
+    await ensurePromptOrChainAccess(userID, runData[0].parentID)
+  }
+  return runData.map(toRun)
 }
 
 export const getOrderedRunsForParentID = (parentID: number) =>

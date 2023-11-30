@@ -43,6 +43,16 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: run
+  properties:
+  - name: parentRunID
+  - name: itemIndex
+
+- kind: run
+  properties:
+  - name: continuationID
+  - name: itemIndex
+
 - kind: endpoint
   properties:
   - name: projectID
