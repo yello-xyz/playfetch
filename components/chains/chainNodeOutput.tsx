@@ -140,14 +140,16 @@ export default function ChainNodeOutput({
   const parentRun = activeVersion.runs.find(
     run => run.id === activeRunID || (activeRun?.continuationID && run.continuationID === activeRun.continuationID)
   )
-const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
+  const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
   const fetchedRunID = useRef<number>()
-  if (activeRunID && activeRunID !== fetchedRunID.current) {
+  if (activeRun && parentRun && activeRunID !== fetchedRunID.current) {
     setIntermediateRuns([])
     fetchedRunID.current = activeRunID
-    if (activeRun && parentRun) {
-      api.getIntermediateRuns(parentRun.id, activeRun.continuationID).then(setIntermediateRuns)
-    }
+    api.getIntermediateRuns(parentRun.id, activeRun.continuationID).then(runs => {
+      if (activeRunID === fetchedRunID.current) {
+        setIntermediateRuns(runs)
+      }
+    })
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
