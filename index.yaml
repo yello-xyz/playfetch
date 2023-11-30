@@ -39,6 +39,7 @@ indexes:
 - kind: run
   properties:
   - name: parentID
+  - name: itemIndex
   - name: createdAt
     direction: desc
 

@@ -1,8 +1,20 @@
 import { PromptInputs, Run, RunRating } from '@/types'
-import { Entity, allocateIDs, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
+import {
+  Entity,
+  allocateIDs,
+  buildFilter,
+  buildKey,
+  getDatastore,
+  getFilteredOrderedEntities,
+  getID,
+  getKeyedEntity,
+  getRecentEntities,
+  getTimestamp,
+} from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 import { saveComment } from './comments'
+import { and } from '@google-cloud/datastore'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -83,6 +95,9 @@ export async function saveNewRun(
   )
   await getDatastore().save(runData)
 }
+
+export const getOrderedRunsForParentID = (parentID: number) =>
+  getFilteredOrderedEntities(Entity.RUN, and([buildFilter('parentID', parentID), buildFilter('itemIndex', null)]))
 
 const getVerifiedUserRunData = async (userID: number, runID: number) => {
   const runData = await getKeyedEntity(Entity.RUN, runID)

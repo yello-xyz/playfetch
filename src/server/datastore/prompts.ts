@@ -15,6 +15,7 @@ import { InputValues, Prompt, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
+import { getOrderedRunsForParentID } from './runs'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -46,7 +47,7 @@ export async function getPromptForUser(
   const promptData = await getVerifiedUserPromptData(userID, promptID)
 
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
-  const runs = await getOrderedEntities(Entity.RUN, 'parentID', promptID)
+  const runs = await getOrderedRunsForParentID(promptID)
 
   const inputValues = await getTrustedParentInputValues(promptID)
 

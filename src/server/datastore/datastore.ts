@@ -40,7 +40,7 @@ export const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as 
 
 export const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
-export const buildFilter = (key: string, value: {}) => new PropertyFilter(key, '=', value)
+export const buildFilter = (key: string, value: {} | null) => new PropertyFilter(key, '=', value)
 
 const filterQuery = (query: Query, filter: EntityFilter | undefined) =>
   filter !== undefined ? query.filter(filter) : query
@@ -115,8 +115,15 @@ const getInternalEntities = (
 export const getEntities = (type: string, key: string, value: {}, transaction?: Transaction) =>
   getInternalEntities(type, key, value, undefined, [], transaction)
 
+export const getFilteredOrderedEntities = (
+  type: string,
+  filter: EntityFilter,
+  sortKeys = ['createdAt'],
+  limit?: number
+) => getInternalFilteredEntities(type, filter, limit, sortKeys, [])
+
 export const getOrderedEntities = (type: string, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
-  getInternalEntities(type, key, value, limit, sortKeys)
+  getFilteredOrderedEntities(type, buildFilter(key, value), sortKeys, limit)
 
 export const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
   getInternalEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
