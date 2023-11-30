@@ -105,14 +105,17 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.write(cachedResponse.output)
         }
         let response = cachedResponse
+        let didReachLastStep = false
         if (!response) {
           const version = await getTrustedVersion(versionID, true)
 
           const configs = loadConfigsFromVersion(version)
-          // TODO this means we don't output on interrupt when streaming if there are more nodes following.
-          const isLastStep = (index: number) => index === configs.length - 1
-          const stream = (index: number, message: string) =>
-            useStreaming && isLastStep(index) ? res.write(message) : undefined
+          const stream = useStreaming ? (index: number, message: string) => {
+            didReachLastStep = index === configs.length - 1
+            if (didReachLastStep) {
+              res.write(message)
+            }
+          } : undefined
 
           response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
 
@@ -125,6 +128,9 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         const newContinuationKey = response.continuationID ? salt(response.continuationID).toString() : undefined
         if (useStreaming) {
+          if (!didReachLastStep) {
+            res.write(response.output)
+          }
           if (newContinuationKey && newContinuationKey !== continuationKey) {
             res.write(`\n${continuationHeaderKey}: ${newContinuationKey}`)
           }
