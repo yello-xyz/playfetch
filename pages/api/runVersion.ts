@@ -10,32 +10,26 @@ import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
 
-const logResponse = (
-  req: NextApiRequest,
-  res: NextApiResponse,
+const saveRun = (
   userID: number,
   version: RawPromptVersion | RawChainVersion,
   inputs: PromptInputs,
-  response: Awaited<ReturnType<typeof runChain>>,
+  response: Awaited<ReturnType<typeof runChain>> & { failed: false },
   continuationID: number | undefined
-) => {
-  logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
-  return response.failed
-    ? Promise.resolve()
-    : saveNewRun(
-        userID,
-        version.parentID,
-        version.id,
-        inputs,
-        response.output,
-        response.cost,
-        response.inputTokens,
-        response.outputTokens,
-        response.duration,
-        continuationID ?? response.continuationID ?? null,
-        !!response.continuationID
-      )
-}
+) =>
+  saveNewRun(
+    userID,
+    version.parentID,
+    version.id,
+    inputs,
+    response.output,
+    response.cost,
+    response.inputTokens,
+    response.outputTokens,
+    response.duration,
+    continuationID ?? response.continuationID ?? null,
+    !!response.continuationID
+  )
 
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
@@ -80,7 +74,10 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       isLast: !response.failed,
       continuationID: response.continuationID,
     })
-    await logResponse(req, res, user.id, version, multipleInputs[index], response, continuationID)
+    logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+    if (!response.failed) {
+      await saveRun(user.id, version, multipleInputs[index], response, continuationID)
+    }
   }
 
   res.end()
