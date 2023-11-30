@@ -19,21 +19,21 @@ export default function RunTimeline({
   version,
   activeItem,
   focusRunID,
+  setFocusRunID,
   runVersion,
   selectInputValue = () => undefined,
   isRunning,
   skipHeader,
-  canSelectRuns,
 }: {
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   focusRunID?: number
+  setFocusRunID?: (runID: number) => void
   runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
   selectInputValue?: (inputKey: string) => string | undefined
   isRunning?: boolean
   skipHeader?: boolean
-  canSelectRuns?: boolean
 }) {
   const identifierForRun = (runID: number) => `r${runID}`
 
@@ -54,11 +54,12 @@ export default function RunTimeline({
     focusRun(activeRunID)
     setPreviousActiveRunID(activeRunID)
   }
+
   const isRunSelected = (run: PartialRun | Run) =>
     activeRunID === undefined || run.id === activeRunID || (run.continuations ?? []).some(run => run.id === activeRunID)
   const selectRun = (run: PartialRun | Run) =>
-    runs.length > 1 && (canSelectRuns ? activeRunID !== run.id : activeRunID !== undefined)
-      ? () => setActiveRunID(canSelectRuns ? run.id : undefined)
+    runs.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
+      ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
       : undefined
 
   const sortedRuns = sortRuns(runs).reduce(

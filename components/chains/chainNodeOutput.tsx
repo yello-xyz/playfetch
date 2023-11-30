@@ -21,6 +21,7 @@ import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/context/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
@@ -132,6 +133,8 @@ export default function ChainNodeOutput({
     }
   }, [setActiveIndex, highestRunIndex, runningItemIndex])
 
+  const [activeRunID, setActiveRunID] = useInitialState(focusRunID ?? activeVersion.runs.slice(-1)[0]?.id)
+
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
@@ -157,12 +160,12 @@ export default function ChainNodeOutput({
             <RunTimeline
               runs={[...activeVersion.runs, ...partialRuns]}
               activeItem={chain}
-              focusRunID={focusRunID ?? activeVersion.runs.slice(-1)[0]?.id}
+              focusRunID={activeRunID}
+              setFocusRunID={setActiveRunID}
               version={activeVersion}
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
-              canSelectRuns
             />
           </div>
         )}
