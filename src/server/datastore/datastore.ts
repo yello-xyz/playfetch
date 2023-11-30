@@ -83,10 +83,10 @@ const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = 
   since && before
     ? and([afterDateFilter(since, key, !pagingBackwards), beforeDateFilter(before, key, pagingBackwards)])
     : since
-      ? afterDateFilter(since, key, !pagingBackwards)
-      : before
-        ? beforeDateFilter(before, key, pagingBackwards)
-        : undefined
+    ? afterDateFilter(since, key, !pagingBackwards)
+    : before
+    ? beforeDateFilter(before, key, pagingBackwards)
+    : undefined
 
 export const getRecentEntities = (
   type: string,
@@ -163,10 +163,11 @@ export const getFilteredEntityCount = async (type: string, filter: EntityFilter)
 export const getEntityCount = async (type: string, key: string, value: {}) =>
   getFilteredEntityCount(type, buildFilter(key, value))
 
-export const allocateID = async (type: string, transaction?: Transaction) => {
-  const [[key]] = await (transaction ?? getDatastore()).allocateIds(buildKey(type), 1)
-  return getID({ key })
-}
+export const allocateIDs = (type: string, count: number, transaction?: Transaction) =>
+  (transaction ?? getDatastore()).allocateIds(buildKey(type), count).then(([keys]) => keys.map(key => getID({ key })))
+
+export const allocateID = (type: string, transaction?: Transaction) =>
+  allocateIDs(type, 1, transaction).then(([id]) => id)
 
 export const runTransactionWithExponentialBackoff = async <T>(
   operation: (transaction: Transaction) => Promise<T>,

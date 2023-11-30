@@ -1,5 +1,5 @@
 import { PromptInputs, Run, RunRating } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
+import { Entity, allocateIDs, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 import { saveComment } from './comments'
@@ -42,6 +42,8 @@ export async function migrateRuns(postMerge: boolean) {
   console.log('✅ Processed all remaining runs')
 }
 
+export const allocateRunIDs = (count: number) => allocateIDs(Entity.RUN, count)
+
 export async function saveNewRun(
   userID: number,
   parentID: number,
@@ -53,7 +55,8 @@ export async function saveNewRun(
   outputTokens: number,
   duration: number,
   continuationID: number | null,
-  canContinue: boolean
+  canContinue: boolean,
+  runID?: number
 ) {
   const runData = toRunData(
     userID,
@@ -69,7 +72,8 @@ export async function saveNewRun(
     [],
     null,
     continuationID,
-    canContinue
+    canContinue,
+    runID
   )
   await getDatastore().save(runData)
 }

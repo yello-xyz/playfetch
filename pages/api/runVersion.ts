@@ -1,6 +1,6 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { saveNewRun } from '@/src/server/datastore/runs'
+import { allocateRunIDs, saveNewRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
@@ -15,7 +15,8 @@ const saveRun = (
   version: RawPromptVersion | RawChainVersion,
   inputs: PromptInputs,
   response: Awaited<ReturnType<typeof runChain>> & { failed: false },
-  continuationID: number | undefined
+  continuationID: number | undefined,
+  runID?: number
 ) =>
   saveNewRun(
     userID,
@@ -28,7 +29,8 @@ const saveRun = (
     response.outputTokens,
     response.duration,
     continuationID ?? response.continuationID ?? null,
-    !!response.continuationID
+    !!response.continuationID,
+    runID
   )
 
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
@@ -42,6 +44,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
+
+  const runIDs = await allocateRunIDs(multipleInputs.length)
 
   const responses = await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
@@ -76,7 +80,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     })
     logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
     if (!response.failed) {
-      await saveRun(user.id, version, multipleInputs[index], response, continuationID)
+      await saveRun(user.id, version, multipleInputs[index], response, continuationID, runIDs[index])
     }
   }
 
