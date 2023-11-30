@@ -60,7 +60,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         configs,
         inputs,
         false,
-        (index, message, response) =>
+        (index, message, response) => {
           sendData({
             inputIndex,
             index,
@@ -69,7 +69,11 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             duration: response?.duration,
             failed: response?.failed,
             continuationID,
-          }),
+          })
+          if (response && !response.failed && !response.isInterrupt && index < configs.length - 1) {
+            saveRun(user.id, version, runIDs[inputIndex], index, {}, response, continuationID)
+          }
+        },
         continuationID
       )
     })
