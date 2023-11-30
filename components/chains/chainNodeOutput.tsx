@@ -13,6 +13,7 @@ import {
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
+  OutputNode,
   SubtreeForChainNode,
 } from './chainNode'
 import { SingleTabHeader } from '../tabSelector'
@@ -172,7 +173,13 @@ export default function ChainNodeOutput({
         ) : (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
-              runs={[...activeVersion.runs, ...partialRuns]}
+              runs={
+                isRunning
+                  ? [...activeVersion.runs, ...partialRuns]
+                  : [...activeVersion.runs, ...intermediateRuns].filter(
+                      run => activeNode === OutputNode || run.index === activeIndex - 1
+                    )
+              }
               activeItem={chain}
               focusRunID={activeRunID}
               setFocusRunID={setActiveRunID}
