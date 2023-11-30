@@ -121,8 +121,12 @@ export default function ChainView({
   }
 
   const updateItems = (items: ChainItem[]) => {
-    setNodes([InputNode, ...items, OutputNode])
+    const nodes = [InputNode, ...items, OutputNode] as ChainNode[]
+    setNodes(nodes)
     saveItems(items)
+    if (activeNodeIndex !== undefined && activeNodeIndex > nodes.length - 1) {
+      setActiveNodeIndex(nodes.length - 1)
+    }
   }
 
   const [showVersions, setShowVersions] = useState(false)
