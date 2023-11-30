@@ -12,8 +12,11 @@ export async function migrateRuns(postMerge: boolean) {
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
+    if (runData.inputTokens !== undefined) {
+      continue
+    }
     if (remainingSaveCount-- <= 0) {
-      console.log('‼️  Please run this migration again to process remaining runs')
+      console.log(`‼️  Please run this migration again to process remaining runs (total count ${allRuns.length})`)
       return
     }
     await datastore.save(
@@ -29,9 +32,9 @@ export async function migrateRuns(postMerge: boolean) {
         runData.outputTokens ?? 0,
         runData.duration,
         JSON.parse(runData.labels),
-        runData.rating,
-        runData.continuationID,
-        runData.canContinue,
+        runData.rating ?? null,
+        runData.continuationID ?? null,
+        runData.canContinue ?? false,
         getID(runData)
       )
     )
@@ -49,7 +52,7 @@ export async function saveNewRun(
   inputTokens: number,
   outputTokens: number,
   duration: number,
-  continuationID: number | undefined,
+  continuationID: number | null,
   canContinue: boolean
 ) {
   const runData = toRunData(
@@ -64,9 +67,9 @@ export async function saveNewRun(
     outputTokens,
     duration,
     [],
-    undefined,
+    null,
     continuationID,
-    canContinue ?? undefined
+    canContinue
   )
   await getDatastore().save(runData)
 }
@@ -139,8 +142,8 @@ async function updateRun(runData: any) {
       runData.output,
       runData.createdAt,
       runData.cost,
-      runData.inputTokens ?? 0,
-      runData.outputTokens ?? 0,
+      runData.inputTokens,
+      runData.outputTokens,
       runData.duration,
       JSON.parse(runData.labels),
       runData.rating,
@@ -163,9 +166,9 @@ const toRunData = (
   outputTokens: number,
   duration: number,
   labels: string[],
-  rating: RunRating | undefined,
-  continuationID: number | undefined,
-  canContinue: boolean | undefined,
+  rating: RunRating | null,
+  continuationID: number | null,
+  canContinue: boolean,
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
@@ -182,7 +185,7 @@ const toRunData = (
     duration,
     labels: JSON.stringify(labels),
     rating,
-    continuationID: continuationID ?? null,
+    continuationID,
     canContinue,
   },
   excludeFromIndexes: ['output', 'inputs', 'labels'],
@@ -195,12 +198,12 @@ export const toRun = (data: any): Run => ({
   inputs: JSON.parse(data.inputs),
   output: data.output,
   cost: data.cost,
-  tokens: (data.inputTokens ?? 0) + (data.outputTokens ?? 0),
+  tokens: data.inputTokens + data.outputTokens,
   duration: data.duration,
   labels: JSON.parse(data.labels),
-  rating: data.rating ?? null,
-  continuationID: data.continuationID ?? null,
-  canContinue: data.canContinue ?? false,
+  rating: data.rating,
+  continuationID: data.continuationID,
+  canContinue: data.canContinue,
 })
 
 export async function getRecentRuns(

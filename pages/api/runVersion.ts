@@ -32,7 +32,7 @@ const logResponse = (
         response.inputTokens,
         response.outputTokens,
         response.duration,
-        continuationID ?? response.continuationID,
+        continuationID ?? response.continuationID ?? null,
         !!response.continuationID
       )
 }
