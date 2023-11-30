@@ -315,22 +315,25 @@ export const toUserVersions = (userID: number, versions: any[], runs: any[]) => 
   return [...userVersion, ...versionsWithRuns, ...initialVersion].map(version => toVersion(version, runs)).reverse()
 }
 
-const toVersion = (data: any, runs: any[]): RawPromptVersion | RawChainVersion => ({
-  id: getID(data),
-  parentID: data.parentID,
-  userID: data.userID,
-  previousID: data.previousVersionID ?? null,
-  timestamp: getTimestamp(data),
-  prompts: data.prompts ? JSON.parse(data.prompts) : null,
-  config: data.config ? JSON.parse(data.config) : null,
-  items: data.items ? JSON.parse(data.items) : null,
-  labels: JSON.parse(data.labels),
-  didRun: data.didRun,
-  runs: runs
-    .filter(run => run.versionID === getID(data))
-    .map(toRun)
-    .reverse(),
-})
+const toVersion = (data: any, runs: any[]): RawPromptVersion | RawChainVersion => {
+  const items = data.items ? JSON.parse(data.items) : null
+  return {
+    id: getID(data),
+    parentID: data.parentID,
+    userID: data.userID,
+    previousID: data.previousVersionID ?? null,
+    timestamp: getTimestamp(data),
+    prompts: data.prompts ? JSON.parse(data.prompts) : null,
+    config: data.config ? JSON.parse(data.config) : null,
+    items,
+    labels: JSON.parse(data.labels),
+    didRun: data.didRun,
+    runs: runs
+      .filter(run => run.versionID === getID(data))
+      .map(toRun(items ? items.length - 1 : 0))
+      .reverse(),
+  }
+}
 
 export async function deleteVersionForUser(userID: number, versionID: number) {
   const versionData = await getVerifiedUserVersionData(userID, versionID)

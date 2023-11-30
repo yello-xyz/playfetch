@@ -192,6 +192,7 @@ export type PartialRun = CommonRun & {
 
 export type Run = CommonRun & {
   timestamp: number
+  index: number
   cost: number
   duration: number
   tokens: number

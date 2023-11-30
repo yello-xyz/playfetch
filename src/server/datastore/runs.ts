@@ -110,7 +110,7 @@ export async function getIntermediateRunsForParentRun(userID: number, parentRunI
   if (runData.length > 0) {
     await ensurePromptOrChainAccess(userID, runData[0].parentID)
   }
-  return runData.map(toRun)
+  return runData.map(toRun(0))
 }
 
 export const getOrderedRunsForParentID = (parentID: number) =>
@@ -239,8 +239,9 @@ const toRunData = (
   excludeFromIndexes: ['output', 'inputs', 'labels'],
 })
 
-export const toRun = (data: any): Run => ({
+export const toRun = (maxItemIndex: number) => (data: any): Run => ({
   id: getID(data),
+  index: data.itemIndex !== null ? data.itemIndex : maxItemIndex,
   userID: data.userID,
   timestamp: getTimestamp(data),
   inputs: JSON.parse(data.inputs),
@@ -261,5 +262,5 @@ export async function getRecentRuns(
   pagingBackwards = false
 ): Promise<(Run & { userID: number })[]> {
   const recentRunsData = await getRecentEntities(Entity.RUN, limit, since, before, 'createdAt', pagingBackwards)
-  return recentRunsData.map(runData => ({ ...toRun(runData), userID: runData.userID }))
+  return recentRunsData.map(runData => ({ ...toRun(0)(runData), userID: runData.userID }))
 }
