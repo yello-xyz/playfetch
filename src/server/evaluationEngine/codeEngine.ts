@@ -33,7 +33,7 @@ export const runCodeInContext = async (code: string, context: Isolated.Context):
     const functionCode = `(() => { ${codeToCamelCase(code)} })()`
     const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
-    return { ...EmptyRunResponse(), result, output, isInterrupt: !!result?.function?.name }
+    return { ...EmptyRunResponse(), result, output, functionCall: result?.function?.name ?? null }
   } catch (error: any) {
     return ErrorRunResponse(error.message)
   }

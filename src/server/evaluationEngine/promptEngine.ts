@@ -8,13 +8,14 @@ import {
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
 import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './runResponse'
+import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
 
 type ValidOrEmptyPredictionResponse = {
   output: string
   cost: number
   inputTokens: number
   outputTokens: number
-  isInterrupt: boolean
+  functionCall: string | null
 }
 type ErrorPredictionResponse = { error: string }
 type PredictionResponse = ValidOrEmptyPredictionResponse | ErrorPredictionResponse
@@ -92,7 +93,7 @@ export default async function runPromptWithConfig(
             result: TryParseOutput(result.output),
             error: undefined,
             failed: false,
-            isInterrupt: result.isInterrupt || config.isChat,
+            functionCall: result.functionCall ?? (config.isChat ? DefaultChatContinuationInputKey : null),
           }
         : {
             ...result,

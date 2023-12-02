@@ -85,7 +85,7 @@ async function complete(
     context.running = `${inputPrompt}\n${output}\n`
     context.messages = [...inputMessages, ...(responseMessage ? [responseMessage] : [])]
 
-    return { output, cost, inputTokens, outputTokens, isInterrupt: false }
+    return { output, cost, inputTokens, outputTokens, functionCall: null }
   } catch (error: any) {
     return { error: error?.details ?? 'Unknown error' }
   }
