@@ -82,12 +82,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   )
 
   for (const [index, response] of responses.entries()) {
-    sendData({
-      inputIndex: index,
-      timestamp: new Date().getTime(),
-      isLast: !response.failed,
-      continuationID: response.continuationID,
-    })
+    sendData({ inputIndex: index, timestamp: new Date().getTime(), continuationID: response.continuationID })
     logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
     if (!response.failed) {
       await saveRun(

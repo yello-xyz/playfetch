@@ -173,7 +173,7 @@ export const IsPromptVersion = (version: PromptVersion | ChainVersion): version 
 
 export type PromptInputs = { [name: string]: string }
 
-type CommonRun = {
+export type PartialRun = {
   id: number
   output: string
   timestamp?: number
@@ -187,11 +187,7 @@ type CommonRun = {
   parentRunID?: number | null
 }
 
-export type PartialRun = CommonRun & {
-  isLast?: boolean
-}
-
-export type Run = CommonRun & {
+export type Run = PartialRun & {
   timestamp: number
   index: number
   parentRunID: number | null
