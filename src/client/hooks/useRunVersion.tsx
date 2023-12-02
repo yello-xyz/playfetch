@@ -23,8 +23,6 @@ export const ConsumeStream = async (
         const lastIndex = Math.max(...Object.keys(runs[inputIndex]).map(Number))
         const lastRun = runs[inputIndex][lastIndex]
         lastRun.timestamp = timestamp
-        lastRun.continuationID = lastRun.continuationID ?? continuationID
-        lastRun.canContinue = !!continuationID
       } else {
         const previousOutput = runs[inputIndex][index]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
