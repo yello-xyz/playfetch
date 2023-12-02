@@ -2,7 +2,7 @@ import {
   ActiveChain,
   ActivePrompt,
   ChainVersion,
-  IsPartialRun,
+  IsProperRun,
   PartialRun,
   PromptInputs,
   PromptVersion,
@@ -67,7 +67,7 @@ export default function RunTimeline({
   const sortedRuns = sortRuns(runs).reduce(
     (sortedRuns, run) => {
       const previousRun = sortedRuns.slice(-1)[0]
-      const wasPartialRun = previousRun && IsPartialRun(previousRun)
+      const wasPartialRun = previousRun && !IsProperRun(previousRun)
       const isParentRun = previousRun?.parentRunID === run.id
       const sameParentRun = !!run.parentRunID && run.parentRunID === previousRun?.parentRunID
       const sameContinuation = !!run.continuationID && run.continuationID === previousRun?.continuationID
@@ -95,7 +95,7 @@ export default function RunTimeline({
 
   const isRunSelected = (run: PartialRun | Run) =>
     activeRunID === undefined ||
-    IsPartialRun(run) ||
+    !IsProperRun(run) ||
     run.id === activeRunID ||
     (run.continuations ?? []).some(run => run.id === activeRunID)
   const selectRun = (run: PartialRun | Run) =>

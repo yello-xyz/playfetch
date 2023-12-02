@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, IsPartialRun, PartialRun, PromptVersion, Run, User } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, PromptVersion, Run, User } from '@/types'
 import { Fragment, KeyboardEvent, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
@@ -52,7 +52,7 @@ export default function RunCellContinuation({
   const users = activeItem?.users ?? []
 
   const totalCost = runWithContinuations.reduce((totalCost, run) => totalCost + (run.cost ?? 0), 0)
-  const totalTokens = runWithContinuations.reduce((tokens, run) => tokens + (IsPartialRun(run) ? 0 : run.tokens), 0)
+  const totalTokens = runWithContinuations.reduce((tokens, run) => tokens + (IsProperRun(run) ? run.tokens : 0), 0)
 
   return (
     <>
@@ -60,9 +60,9 @@ export default function RunCellContinuation({
         <Fragment key={run.id}>
           {!!runWithContinuations[index].canContinue && (
             <>
-              <RoleHeader user={IsPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
+              <RoleHeader user={IsProperRun(run) ? users.find(user => user.id === run.userID) : user} role='User' />
               <BorderedSection>
-                <div className='flex-1'>{IsPartialRun(run) ? lastReply : run.inputs[getPreviousInputKey(index)]}</div>
+                <div className='flex-1'>{IsProperRun(run) ? run.inputs[getPreviousInputKey(index)] : lastReply}</div>
               </BorderedSection>
             </>
           )}
