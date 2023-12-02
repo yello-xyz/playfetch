@@ -79,8 +79,9 @@ export default function ChainView({
   const refreshActiveItem = useRefreshActiveItem()
 
   const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
-    setSavedItemsKey(GetChainItemsSaveKey(items))
-    return saveChain(GetItemsToSave(items, promptCache), refreshActiveItem)
+    const loadedItems = items.filter(item => !IsPromptChainItem(item) || !!item.versionID)
+    setSavedItemsKey(GetChainItemsSaveKey(loadedItems))
+    return saveChain(GetItemsToSave(loadedItems, promptCache), refreshActiveItem)
   }
 
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
