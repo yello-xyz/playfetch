@@ -66,7 +66,6 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             inputIndex,
             index,
             message,
-            timestamp: response ? new Date().getTime() : undefined,
             cost: response?.cost,
             duration: response?.duration,
             failed: response?.failed,

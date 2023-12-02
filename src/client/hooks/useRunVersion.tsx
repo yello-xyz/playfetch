@@ -18,10 +18,10 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, index, message, cost, duration, timestamp, failed, continuationID } = JSON.parse(data)
+      const { inputIndex, index, message, cost, duration, failed, continuationID } = JSON.parse(data)
       const previousOutput = runs[inputIndex][index]?.output ?? ''
       const output = message ? `${previousOutput}${message}` : previousOutput
-      runs[inputIndex][index] = { id: index, index, timestamp, output, cost, duration, failed, continuationID }
+      runs[inputIndex][index] = { id: index, index, output, cost, duration, failed, continuationID }
     }
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
     const sortedRuns = Object.entries(runs)
@@ -59,16 +59,6 @@ export default function useRunVersion(activeVersionID: number) {
     setRunningVersionID(versionID)
     const streamReader = await api.runVersion(versionID, inputs, continuationID)
     await ConsumeStream(inputs, streamReader, runs => {
-      if (runs.some(run => !!run.timestamp)) {
-        let virtualTimestamp = Math.min(...runs.filter(run => !!run.timestamp).map(run => run.timestamp!)) - runs.length
-        for (const run of runs) {
-          if (run.timestamp) {
-            virtualTimestamp = run.timestamp + 1
-          } else {
-            run.timestamp = virtualTimestamp++
-          }
-        }
-      }
       setPartialRuns(runs)
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index)))
     })
