@@ -159,11 +159,12 @@ export default function ChainNodeOutput({
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
-  const relevantRuns = [...activeVersion.runs, ...intermediateRuns].filter(
+  const relevantRuns = [...activeVersion.runs, ...intermediateRuns, ...partialRuns].filter(
     run =>
       run.id === activeRunID ||
       (!!run.continuationID && run.continuationID === activeRun?.continuationID) ||
-      (!!run.parentRunID && run.parentRunID === parentRun?.id)
+      (!!run.parentRunID && run.parentRunID === parentRun?.id) ||
+      run.failed
   )
 
   return (
@@ -189,8 +190,8 @@ export default function ChainNodeOutput({
                 isRunning
                   ? [...activeVersion.runs, ...partialRuns]
                   : activeNode === OutputNode
-                    ? [...activeVersion.runs, ...intermediateRuns]
-                    : relevantRuns.filter(run => run.index === activeIndex - 1)
+                  ? [...activeVersion.runs, ...intermediateRuns]
+                  : relevantRuns.filter(run => run.index === activeIndex - 1)
               }
               activeItem={chain}
               focusRunID={activeRunID}
