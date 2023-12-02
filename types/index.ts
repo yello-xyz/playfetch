@@ -183,13 +183,12 @@ export type PartialRun = {
   failed?: boolean
   continuationID?: number
   canContinue?: boolean
-  continuations?: (PartialRun | Run)[]
   parentRunID?: number | null
+  continuations?: (PartialRun | Run)[]
 }
 
 export type Run = PartialRun & {
   timestamp: number
-  index: number
   parentRunID: number | null
   cost: number
   duration: number
