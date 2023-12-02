@@ -128,8 +128,15 @@ export default async function runChain(
       functionCall = lastResponse.functionCall
       break
     } else {
-      continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
       inputs = AugmentInputs(inputs, config.output, lastResponse.output, useCamelCase)
+      if (index === continuationIndex) {
+        if (functionCall) {
+          inputs = Object.fromEntries(Object.entries(inputs).filter(([key]) => key !== functionCall))
+        }
+        if (!requestContinuation) {
+          continuationIndex = undefined
+        }
+      }
     }
   }
 

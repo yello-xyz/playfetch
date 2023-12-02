@@ -19,11 +19,12 @@ const AugmentCodeContext = (context: Isolated.Context, variable: string | undefi
   variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
+  console.log(inputs)
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
   const context = isolated.createContextSync()
-  context.eval(
-    'globalThis.PlayFetch = { InterruptOnce: (name, args) => this[name] ?? { function: { name, arguments: args } } }'
-  )
+  context.eval(`globalThis.PlayFetch = { 
+  InterruptOnce: (name, args = {}) => this[name] ?? { function: { name, arguments: args } } 
+}`)
   Object.entries(inputs).forEach(([variable, value]) => AugmentCodeContext(context, variable, value))
   return context
 }
