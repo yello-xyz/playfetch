@@ -187,10 +187,8 @@ export default function ChainNodeOutput({
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
               runs={
-                isRunning
+                isRunning || activeNode === OutputNode
                   ? [...activeVersion.runs, ...partialRuns]
-                  : activeNode === OutputNode
-                  ? [...activeVersion.runs, ...intermediateRuns]
                   : relevantRuns.filter(run => run.index === activeIndex - 1)
               }
               activeItem={chain}
