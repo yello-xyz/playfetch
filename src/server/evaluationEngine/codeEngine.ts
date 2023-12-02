@@ -19,7 +19,6 @@ const AugmentCodeContext = (context: Isolated.Context, variable: string | undefi
   variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
 
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
-  console.log(inputs)
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
   const context = isolated.createContextSync()
   context.eval(`globalThis.PlayFetch = { 

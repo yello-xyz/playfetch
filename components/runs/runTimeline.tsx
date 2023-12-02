@@ -66,8 +66,11 @@ export default function RunTimeline({
 
   const sortedRuns = sortRuns(runs).reduce(
     (sortedRuns, run) => {
-      const previousRun = sortedRuns.slice(-1)[0]
-      const wasPartialRun = previousRun && !IsProperRun(previousRun)
+      let previousRun = sortedRuns.slice(-1)[0]
+      if (previousRun?.continuations) {
+        previousRun = previousRun.continuations.slice(-1)[0]
+      }
+      const wasPartialRun = previousRun && !IsProperRun(previousRun) && previousRun.index < run.index
       const isParentRun = previousRun?.parentRunID === run.id
       const sameParentRun = !!run.parentRunID && run.parentRunID === previousRun?.parentRunID
       const sameContinuation = !!run.continuationID && run.continuationID === previousRun?.continuationID
