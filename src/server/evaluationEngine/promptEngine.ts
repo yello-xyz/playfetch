@@ -27,8 +27,8 @@ export type Predictor = (
   maxTokens: number,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks?: (text: string) => void,
-  continuationInputs?: PromptInputs
+  streamChunks: (text: string) => void | undefined,
+  continuationInputs: PromptInputs
 ) => Promise<PredictionResponse>
 
 const isErrorPredictionResponse = (response: PredictionResponse): response is ErrorPredictionResponse =>
@@ -45,8 +45,8 @@ export default async function runPromptWithConfig(
   config: PromptConfig,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks?: (chunk: string) => void,
-  continuationInputs?: PromptInputs
+  streamChunks: (chunk: string) => void | undefined,
+  continuationInputs: PromptInputs
 ): Promise<RunResponse> {
   const scopeIDs = [projectID, userID]
   const provider = ProviderForModel(config.model)

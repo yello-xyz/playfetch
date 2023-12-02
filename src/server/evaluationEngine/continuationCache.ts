@@ -9,22 +9,23 @@ export const loadContinuation = async (
   continuationID: number | undefined,
   inputs: PromptInputs,
   isEndpointEvaluation: boolean
-): Promise<readonly [number | undefined, boolean, PromptContext, PromptInputs]> => {
+): Promise<readonly [number | undefined, string | null | undefined, boolean, PromptContext, PromptInputs]> => {
   if (continuationID) {
     const cachedValue = await getCachedContinuation(continuationID, isEndpointEvaluation)
     if (cachedValue) {
       const continuation = JSON.parse(cachedValue)
       return [
         continuation.continuationIndex,
+        continuation.functionCall,
         continuation.requestContinuation ?? false,
         continuation.promptContext,
         { ...continuation.inputs, ...inputs },
       ] as const
     } else {
-      return [0, true, {}, inputs] as const
+      return [0, null, true, {}, inputs] as const
     }
   } else {
-    return [undefined, false, {}, inputs] as const
+    return [undefined, null, false, {}, inputs] as const
   }
 }
 
@@ -41,6 +42,7 @@ const cacheContinuation = (
 export const saveContinuation = async (
   continuationID: number | undefined,
   continuationIndex: number | undefined,
+  functionCall: string | null,
   requestContinuation: boolean,
   promptContext: PromptContext,
   inputs: PromptInputs,
@@ -49,7 +51,7 @@ export const saveContinuation = async (
 ): Promise<number | undefined> =>
   continuationIndex !== undefined
     ? await cacheContinuation(
-        JSON.stringify({ continuationIndex, inputs, promptContext, requestContinuation }),
+        JSON.stringify({ continuationIndex, inputs, promptContext, functionCall, requestContinuation }),
         continuationID,
         version,
         isEndpointEvaluation

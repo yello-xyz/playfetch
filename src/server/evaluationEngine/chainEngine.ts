@@ -35,7 +35,6 @@ export default async function runChain(
   stream?: (index: number, chunk: string, stepResponse?: TimedRunResponse) => void,
   continuationID?: number
 ): Promise<TimedRunResponse & { continuationID?: number }> {
-  const continuationInputs = inputs
   const useCamelCase = isEndpointEvaluation
   let cost = 0
   let inputTokens = 0
@@ -54,9 +53,12 @@ export default async function runChain(
 
   const continuation = await loadContinuation(continuationID, inputs, isEndpointEvaluation)
   let continuationIndex = continuation[0]
-  const requestContinuation = continuation[1]
-  const promptContext = continuation[2]
-  inputs = continuation[3]
+  let functionCall = continuation[1]
+  const requestContinuation = continuation[2]
+  const promptContext = continuation[3]
+  inputs = continuation[4]
+  const continuationInputs =
+    functionCall === undefined ? inputs : functionCall === null ? {} : { functionCall: inputs[functionCall] }
 
   let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
   let branch = 0
@@ -81,7 +83,7 @@ export default async function runChain(
           promptContext,
           index === continuationIndex || (config.includeContext ?? false),
           (chunk: string) => stream?.(index, chunk),
-          index === continuationIndex ? continuationInputs : undefined
+          index === continuationIndex ? continuationInputs : {}
         )
       )
     } else if (isQueryConfig(config)) {
@@ -123,6 +125,7 @@ export default async function runChain(
       break
     } else if (lastResponse.functionCall) {
       continuationIndex = index
+      functionCall = lastResponse.functionCall
       break
     } else {
       continuationIndex = index === continuationIndex && !requestContinuation ? undefined : continuationIndex
@@ -133,6 +136,7 @@ export default async function runChain(
   continuationID = await saveContinuation(
     continuationID,
     continuationIndex,
+    functionCall ?? null,
     requestContinuation,
     promptContext,
     inputs,
