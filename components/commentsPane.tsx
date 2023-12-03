@@ -89,21 +89,23 @@ export function CommentCell({
 
   const selectComment = onSelect ? () => onSelect(comment.parentID, comment.versionID, comment.runID) : undefined
   const userName = user ? user.fullName : 'Unknown user'
+  const isLabelOrRatingComment = comment.action !== undefined
+  const isLabelComment = comment.action === 'addLabel' || comment.action === 'removeLabel'
 
   return (
     <div className={selectComment ? 'cursor-pointer' : ''} onClick={selectComment}>
-      {comment.action ? (
+      {isLabelOrRatingComment ? (
         <div className='flex flex-wrap items-center gap-1 p-3 text-xs text-gray-600 bg-gray-100 rounded-lg'>
           {user && <UserAvatar user={user} size='sm' />}
           <span className='font-medium'>{userName}</span>
-          {actionPrefix(comment.action)}
-          <ItemLabel label={comment.text} colors={labelColors} />
+          {actionPrefix(comment)}
+          {isLabelComment && <ItemLabel label={comment.text} colors={labelColors} />}
           {(version || parentName) && (
             <>
-              {actionInfix(comment.action)}
-              {comment.runID ? `response${actionSuffix(comment.action)} in ` : ''}
+              {actionInfix(comment)}
+              {comment.runID ? `response${actionSuffix(comment)} in ` : ''}
               {version ? `version ${versionIndex}` : parentName}
-              {!comment.runID && actionSuffix(comment.action)}
+              {!comment.runID && actionSuffix(comment)}
               {' · '}
             </>
           )}
@@ -147,8 +149,8 @@ export const VersionDescription = ({ index, version }: { index: number; version:
   )
 }
 
-const actionPrefix = (action: CommentAction) => {
-  switch (action) {
+const actionPrefix = (comment: Comment) => {
+  switch (comment.action) {
     case 'addLabel':
       return ' added label '
     case 'removeLabel':
@@ -159,8 +161,8 @@ const actionPrefix = (action: CommentAction) => {
   }
 }
 
-const actionInfix = (action: CommentAction) => {
-  switch (action) {
+const actionInfix = (comment: Comment) => {
+  switch (comment.action) {
     case 'addLabel':
       return ' to '
     case 'removeLabel':
@@ -171,15 +173,16 @@ const actionInfix = (action: CommentAction) => {
   }
 }
 
-const actionSuffix = (action: CommentAction) => {
-  switch (action) {
+const actionSuffix = (comment: Comment) => {
+  const textSuffix = comment.text ? ` (${comment.text})` : ''
+  switch (comment.action) {
     case 'addLabel':
     case 'removeLabel':
       return ''
     case 'thumbsUp':
-      return ' 👍'
+      return ` 👍${textSuffix}`
     case 'thumbsDown':
-      return ' 👎'
+      return ` 👎${textSuffix}`
   }
 }
 
