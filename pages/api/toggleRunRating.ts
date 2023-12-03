@@ -6,7 +6,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function toggleRunRating(req: NextApiRequest, res: NextApiResponse, user: User) {
   logUserRequest(req, res, user.id, CreateEvent('rating', req.body.projectID))
-  await updateRunRating(user.id, req.body.runID, req.body.projectID, req.body.rating, req.body.replyTo)
+  await updateRunRating(user.id, req.body.runID, req.body.projectID, req.body.rating, req.body.reason, req.body.replyTo)
   res.json({})
 }
 

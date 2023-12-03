@@ -254,8 +254,8 @@ const api = {
   toggleRunLabel: function (runID: number, projectID: number, label: string, checked: boolean, replyTo?: number) {
     return post(this.toggleRunLabel, { runID, projectID, label, checked, replyTo })
   },
-  toggleRunRating: function (runID: number, projectID: number, rating: RunRating, replyTo?: number) {
-    return post(this.toggleRunRating, { runID, projectID, rating, replyTo })
+  toggleRunRating: function (runID: number, projectID: number, rating: RunRating, reason?: string, replyTo?: number) {
+    return post(this.toggleRunRating, { runID, projectID, rating, reason, replyTo })
   },
   updateInputValues: function (parentID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { parentID, name, values })

@@ -18,6 +18,7 @@ export default function RunRatingButtons({ run, activeItem }: { run: Run; active
     .filter(comment => comment.runID === run.id)
 
   const [pendingRating, setPendingRating] = useState<RunRating>()
+  const [reason, setReason] = useState<string>()
 
   const toggleRating = (rating: RunRating) => {
     if (rating !== run.rating && rating !== pendingRating) {
@@ -26,7 +27,7 @@ export default function RunRatingButtons({ run, activeItem }: { run: Run; active
         comment => comment.action === (rating === 'positive' ? 'thumbsDown' : 'thumbsUp')
       )?.id
       api
-        .toggleRunRating(run.id, activeItem.projectID, rating, replyTo)
+        .toggleRunRating(run.id, activeItem.projectID, rating, reason, replyTo)
         .then(refresh)
         .then(() => setPendingRating(undefined))
     }

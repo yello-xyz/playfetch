@@ -25,7 +25,7 @@ export async function migrateRuns(postMerge: boolean) {
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    if (runData.inputTokens !== undefined) {
+    if (runData.reason !== undefined) {
       continue
     }
     if (remainingSaveCount-- <= 0) {
@@ -48,6 +48,7 @@ export async function migrateRuns(postMerge: boolean) {
         runData.duration,
         JSON.parse(runData.labels),
         runData.rating ?? null,
+        runData.reason ?? null,
         runData.continuationID ?? null,
         runData.canContinue ?? false,
         getID(runData)
@@ -89,6 +90,7 @@ export async function saveNewRun(
     outputTokens,
     duration,
     [],
+    null,
     null,
     continuationID,
     canContinue,
@@ -156,6 +158,7 @@ export async function updateRunRating(
   runID: number,
   projectID: number,
   rating: RunRating,
+  reason?: string,
   replyTo?: number
 ) {
   const runData = await getVerifiedUserRunData(userID, runID)
@@ -164,13 +167,13 @@ export async function updateRunRating(
     projectID,
     runData.parentID,
     runData.versionID,
-    '', // TODO store the justification here (maybe)
+    reason ?? '',
     replyTo,
     rating === 'positive' ? 'thumbsUp' : 'thumbsDown',
     runID
   )
-  if (rating !== runData.rating) {
-    await updateRun({ ...runData, rating })
+  if (rating !== runData.rating || !!reason) {
+    await updateRun({ ...runData, rating, reason: reason ?? null })
   }
 }
 
@@ -191,6 +194,7 @@ async function updateRun(runData: any) {
       runData.duration,
       JSON.parse(runData.labels),
       runData.rating,
+      runData.reason,
       runData.continuationID,
       runData.canContinue,
       getID(runData)
@@ -213,6 +217,7 @@ const toRunData = (
   duration: number,
   labels: string[],
   rating: RunRating | null,
+  reason: string | null,
   continuationID: number | null,
   canContinue: boolean,
   runID?: number
@@ -233,10 +238,11 @@ const toRunData = (
     duration,
     labels: JSON.stringify(labels),
     rating,
+    reason,
     continuationID,
     canContinue,
   },
-  excludeFromIndexes: ['output', 'inputs', 'labels'],
+  excludeFromIndexes: ['output', 'inputs', 'labels', 'reason'],
 })
 
 export const toRun =
