@@ -195,7 +195,8 @@ export type Run = PartialRun & {
   tokens: number
   inputs: PromptInputs
   labels: string[]
-  rating?: RunRating
+  rating: RunRating | null
+  reason: string | null
   userID: number
 }
 

@@ -69,6 +69,8 @@ export default function ComparePane({
     parentRunID: null,
     tokens: 0,
     userID: 0,
+    rating: null,
+    reason: null,
   }))
 
   return (
