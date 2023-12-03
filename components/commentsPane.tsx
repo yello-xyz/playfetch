@@ -174,7 +174,7 @@ const actionInfix = (comment: Comment) => {
 }
 
 const actionSuffix = (comment: Comment) => {
-  const textSuffix = comment.text ? ` (${comment.text})` : ''
+  const textSuffix = comment.text ? ` “${comment.text}”` : ''
   switch (comment.action) {
     case 'addLabel':
     case 'removeLabel':

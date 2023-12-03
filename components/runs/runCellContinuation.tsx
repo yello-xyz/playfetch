@@ -16,6 +16,7 @@ export default function RunCellContinuation({
   activeItem,
   version,
   isRunning,
+  isSelected,
   runContinuation,
   selectInputValue,
 }: {
@@ -25,6 +26,7 @@ export default function RunCellContinuation({
   activeItem?: ActivePrompt | ActiveChain
   version?: PromptVersion | ChainVersion
   isRunning?: boolean
+  isSelected: boolean
   runContinuation?: (message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
 }) {
@@ -73,7 +75,7 @@ export default function RunCellContinuation({
             activeItem={activeItem}
             isContinuation
           />
-          <RunCellFooter run={run} activeItem={activeItem} isContinuation />
+          <RunCellFooter run={run} activeItem={activeItem} isContinuation isSelected={isSelected} />
         </Fragment>
       ))}
       {!!runContinuation && !!runWithContinuations.slice(-1)[0].canContinue && (

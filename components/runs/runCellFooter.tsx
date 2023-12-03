@@ -15,10 +15,12 @@ export default function RunCellFooter({
   run,
   activeItem,
   isContinuation,
+  isSelected,
 }: {
   run: PartialRun | Run
   activeItem?: ActivePrompt | ActiveChain
   isContinuation: boolean
+  isSelected: boolean
 }) {
   return run.duration || run.cost || run.timestamp ? (
     <BorderedSection border={isContinuation} bridgingGap>
@@ -31,7 +33,7 @@ export default function RunCellFooter({
           <div className='flex-1' />
           {IsProperRun(run) && activeItem && (
             <>
-              <RunRatingButtons run={run} activeItem={activeItem} />
+              <RunRatingButtons run={run} activeItem={activeItem} isSelected={isSelected} />
               <div className='self-stretch border-r border-gray-200' />
               <LabelPopupMenu activeItem={activeItem} item={run} selectedCell />
             </>
