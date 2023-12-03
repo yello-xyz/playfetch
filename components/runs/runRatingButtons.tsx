@@ -5,7 +5,6 @@ import thumbsDownIcon from '@/public/thumbsDown.svg'
 import thumbsUpFilledIcon from '@/public/thumbsUpFilled.svg'
 import thumbsDownFilledIcon from '@/public/thumbsDownFilled.svg'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
-import IconButton from '../iconButton'
 import { KeyboardEvent, useCallback, useState } from 'react'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../popupMenu'
@@ -44,35 +43,74 @@ export default function RunRatingButtons({
     }
   }
 
-  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] =>
-    [ReasonPopup, { rating, callback: reason => toggleRating(rating, reason) }]
-
-  const rating = pendingRating ?? run.rating
+  const ratingButtonProps = { run, pendingRating, setRating: toggleRating, isSelected }
 
   return (
     <div className='flex items-center gap-2'>
-      <GlobalPopupMenu
-        icon={rating === 'positive' ? thumbsUpFilledIcon : thumbsUpIcon}
-        loadPopup={showReasonPopup('positive')}
-        selectedCell={isSelected}
-        popUpAbove
-      />
-      <GlobalPopupMenu
-        icon={rating === 'negative' ? thumbsDownFilledIcon : thumbsDownIcon}
-        loadPopup={showReasonPopup('negative')}
-        selectedCell={isSelected}
-        popUpAbove
-      />
+      <RatingButton rating='positive' {...ratingButtonProps} />
+      <RatingButton rating='negative' {...ratingButtonProps} />
     </div>
   )
 }
 
-export type ReasonPopupProps = {
+function RatingButton({
+  run,
+  rating,
+  pendingRating,
+  setRating,
+  isSelected,
+}: {
+  run: Run
+  rating: RunRating
+  pendingRating: RunRating | undefined
+  setRating: (rating: RunRating, reason?: string) => void
+  isSelected: boolean
+}) {
+  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] => [
+    ReasonPopup,
+    { rating, callback: reason => setRating(rating, reason) },
+  ]
+
+  const isActiveRating = (pendingRating ?? run.rating) === rating
+
+  const iconForRating = () => {
+    switch (rating) {
+      case 'positive':
+        return isActiveRating ? thumbsUpFilledIcon : thumbsUpIcon
+      case 'negative':
+        return isActiveRating ? thumbsDownFilledIcon : thumbsDownIcon
+    }
+  }
+
+  return (
+    <div className='relative overflow-visible group'>
+      <GlobalPopupMenu
+        icon={iconForRating()}
+        loadPopup={showReasonPopup(rating)}
+        selectedCell={isSelected}
+        popUpAbove
+      />
+      {run.reason && isActiveRating && !pendingRating && (
+        <div className='absolute hidden overflow-visible group-hover:block left-3 bottom-8 max-w-0'>
+          <div className='flex justify-center'>
+            <div className='min-w-[160px] flex justify-center'>
+              <span className='py-1 px-2 text-xs text-center bg-white border border-gray-200 rounded-md max-w-[160px]'>
+                {run.reason}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+type ReasonPopupProps = {
   rating: RunRating
   callback: (reason?: string) => void
 }
 
-export function ReasonPopup({ rating, callback, withDismiss }: ReasonPopupProps & WithDismiss) {
+function ReasonPopup({ rating, callback, withDismiss }: ReasonPopupProps & WithDismiss) {
   const [reason, setReason] = useState('')
 
   const confirm = withDismiss(() => callback(reason ?? undefined))
