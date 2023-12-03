@@ -7,10 +7,12 @@ export default function GlobalPopupMenu<T>({
   icon,
   loadPopup,
   selectedCell = false,
+  popUpAbove = false,
 }: {
   icon: StaticImageData
   loadPopup: () => [GlobalPopupRender<T>, T]
   selectedCell?: boolean
+  popUpAbove?: boolean
 }) {
   const iconRef = useRef<HTMLDivElement>(null)
 
@@ -19,7 +21,11 @@ export default function GlobalPopupMenu<T>({
   const togglePopup = () => {
     const iconRect = iconRef.current?.getBoundingClientRect()
     const [Popup, props] = loadPopup()
-    setPopup(Popup, props, { right: iconRect?.right, top: iconRect?.bottom })
+    setPopup(Popup, props, {
+      right: iconRect?.right,
+      top: iconRect && !popUpAbove ? iconRect.bottom : undefined,
+      bottom: iconRect && popUpAbove ? iconRect.top - 8 : undefined,
+    })
   }
 
   return (

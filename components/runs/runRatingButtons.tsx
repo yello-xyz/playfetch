@@ -55,11 +55,13 @@ export default function RunRatingButtons({
         icon={rating === 'positive' ? thumbsUpFilledIcon : thumbsUpIcon}
         loadPopup={showReasonPopup('positive')}
         selectedCell={isSelected}
+        popUpAbove
       />
       <GlobalPopupMenu
         icon={rating === 'negative' ? thumbsDownFilledIcon : thumbsDownIcon}
         loadPopup={showReasonPopup('negative')}
         selectedCell={isSelected}
+        popUpAbove
       />
     </div>
   )
@@ -87,12 +89,12 @@ export function ReasonPopup({ rating, callback, withDismiss }: ReasonPopupProps 
 
   return (
     <PopupContent>
-      <div className='flex flex-col gap-2 w-80 p3'>
-        <div className='flex flex-col items-stretch gap-1'>
-          <span className='font-bold text-gray-800'>
-            What do you {rating === 'positive' ? 'like' : 'dislike'} about this response?
-          </span>
-          <TextInput onLoad={onLoad} onKeyDown={onKeyDown} value={reason} setValue={setReason} />
+      <div className='flex flex-col gap-2 p-3 w-80'>
+        <span className='font-bold text-gray-800'>
+          What do you {rating === 'positive' ? 'like' : 'dislike'} about this response?
+        </span>
+        <TextInput onLoad={onLoad} onKeyDown={onKeyDown} value={reason} setValue={setReason} />
+        <div className='self-end'>
           <Button type='primary' onClick={confirm}>
             Done
           </Button>
