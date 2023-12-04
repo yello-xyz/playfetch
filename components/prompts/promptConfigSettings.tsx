@@ -1,8 +1,8 @@
 import { PromptConfig } from '@/types'
 import ModelSelector from './modelSelector'
 import ChatModePopupButton from './chatModePopupButton'
-import MaxTokensInput from './maxTokensInput'
 import TemperatureInput from './temperatureInput'
+import NumberParameterInput from './numberParameterInput'
 
 export default function PromptConfigSettings({
   config,
@@ -17,7 +17,13 @@ export default function PromptConfigSettings({
     <div className='flex flex-wrap items-center gap-2.5'>
       <ModelSelector popUpAbove config={config} setConfig={setConfig} disabled={disabled} />
       <ChatModePopupButton config={config} setConfig={setConfig} disabled={disabled} />
-      <MaxTokensInput config={config} setConfig={setConfig} disabled={disabled} />
+      <NumberParameterInput
+        parameter='maxTokens'
+        title='Max Tokens'
+        config={config}
+        setConfig={setConfig}
+        disabled={disabled}
+      />
       <TemperatureInput config={config} setConfig={setConfig} disabled={disabled} />
     </div>
   )
