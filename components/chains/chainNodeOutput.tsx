@@ -159,7 +159,7 @@ export default function ChainNodeOutput({
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
-  const relevantRuns = [...activeVersion.runs, ...intermediateRuns, ...partialRuns].filter(
+  const relevantRuns = [...activeVersion.runs.slice(0, -1), ...intermediateRuns, ...partialRuns].filter(
     run =>
       run.id === activeRunID ||
       (!!run.continuationID && run.continuationID === activeRun?.continuationID) ||

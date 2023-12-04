@@ -72,7 +72,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             continuationID,
           })
           lastIndices[inputIndex] = index
-          if (response && stepInputs && !response.failed && !response.functionCall && index < configs.length - 1) {
+          if (response && stepInputs && !response.failed && !response.functionCall) {
             saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
           }
         },
