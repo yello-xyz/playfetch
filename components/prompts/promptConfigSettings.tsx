@@ -47,7 +47,7 @@ export default function PromptConfigSettings({
   )
 }
 
-export const LabelForChatMode = (isChat: boolean) => (isChat ? 'Simple Chat' : 'Automatic')
+export const LabelForChatMode = (isChat: boolean) => (isChat ? 'Simple Chat' : 'Single Step')
 
 const descriptionForChatMode = (isChat: boolean) =>
   isChat
