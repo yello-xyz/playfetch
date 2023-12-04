@@ -3,13 +3,14 @@ import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
+import { SupportsJsonMode } from '@/src/common/providerMetadata'
 
 export default function predict(
   apiKey: string,
   userID: number,
   model: OpenAILanguageModel | CustomLanguageModel
 ): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks, seed, continuationInputs) =>
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks, seed, jsonMode, continuationInputs) =>
     tryCompleteChat(
       apiKey,
       userID,
@@ -20,6 +21,7 @@ export default function predict(
       temperature,
       maxTokens,
       seed,
+      jsonMode,
       context,
       useContext,
       streamChunks,
@@ -59,6 +61,7 @@ async function tryCompleteChat(
   temperature: number,
   maxTokens: number,
   seed: number | undefined,
+  jsonMode: boolean | undefined,
   context: PromptContext,
   useContext: boolean,
   streamChunks?: (chunk: string) => void,
@@ -98,7 +101,8 @@ async function tryCompleteChat(
         user: userID.toString(),
         stream: true,
         functions: inputFunctions.length > 0 ? inputFunctions : undefined,
-        seed,
+        seed,        
+        ...(SupportsJsonMode(model) && !!jsonMode ? { response_format: { type: 'json_object' } } : {})
       },
       { timeout: 30 * 1000 }
     )

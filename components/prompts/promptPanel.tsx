@@ -100,7 +100,7 @@ export default function PromptPanel({
       {
         ...config,
         seed: SupportsSeed(config.model) ? config.seed : undefined,
-        jsonMode: SupportsJsonMode(config.model) ? config.jsonMode : undefined,
+        jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
       }
     )
 

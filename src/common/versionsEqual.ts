@@ -18,7 +18,8 @@ export const PromptConfigsAreEqual = (a: PromptConfig, b: PromptConfig) =>
   a.isChat === b.isChat &&
   a.temperature === b.temperature &&
   a.maxTokens === b.maxTokens &&
-  a.seed === b.seed
+  a.seed === b.seed && 
+  a.jsonMode === b.jsonMode
 
 export const PromptVersionsAreEqual = (
   a: { prompts: Prompts; config: PromptConfig },

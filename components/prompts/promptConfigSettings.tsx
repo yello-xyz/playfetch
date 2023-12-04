@@ -64,9 +64,9 @@ const descriptionForChatMode = (isChat: boolean) =>
     ? 'In this mode, a conversation involves multiple LLM interactions. There is always an option to provide further user input.'
     : 'LLM interactions prompt the model once and receive a single response. Function callbacks can be used to request further user input.'
 
-export const LabelForJsonMode = (jsonMode: boolean) => (jsonMode ? 'JSON Mode' : 'Automatic')
+export const LabelForJsonMode = (jsonMode: boolean) => (jsonMode ? 'JSON' : 'Automatic')
 
 const descriptionForJsonMode = (jsonMode: boolean) =>
   jsonMode
-    ? 'Constrain the model to only generate strings that parse into valid JSON.'
-    : 'Rely solely on the prompt to determine the output format.'
+    ? 'Constrain the model to generate valid JSON. This requires an explicit instruction in the (system) prompt.'
+    : 'Rely solely on the (system) prompt or provided functions to determine the output format.'

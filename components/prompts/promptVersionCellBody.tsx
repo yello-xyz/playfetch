@@ -4,7 +4,7 @@ import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/
 import useAvailableModelProviders from '@/src/client/context/providerContext'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
 import Collapsible from '../collapsible'
-import { LabelForChatMode } from './promptConfigSettings'
+import { LabelForChatMode, LabelForJsonMode } from './promptConfigSettings'
 
 export default function PromptVersionCellBody({
   version,
@@ -42,7 +42,9 @@ export const FormatPromptConfig = (config: PromptConfig, availableProviders: Ava
   `Model: ${LabelForModel(config.model, availableProviders)}
 Mode: ${LabelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
-Temperature: ${config.temperature}${config.seed !== undefined ? `\nSeed: ${config.seed}` : ''}`
+Temperature: ${config.temperature}` +
+  (config.seed !== undefined ? `\nSeed: ${config.seed}` : '') +
+  (config.jsonMode !== undefined ? `\nOutput: ${LabelForJsonMode(config.jsonMode)}` : '')
 
 const formatFunctions = (functions?: string, compareFunctions?: string) => {
   const functionNames = ExtractFunctionNames(functions ?? '')

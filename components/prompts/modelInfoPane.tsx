@@ -137,6 +137,7 @@ const ActionMenu = ({
           maxTokens: config.maxTokens,
           temperature: config.temperature,
           seed: config.seed,
+          jsonMode: config.jsonMode,
         })
       )
     : undefined
