@@ -58,7 +58,7 @@ export default async function runChain(
   const promptContext = continuation[3]
   inputs = continuation[4]
   const continuationInputs =
-    functionCall === undefined ? inputs : functionCall === null ? {} : { functionCall: inputs[functionCall] }
+    functionCall === undefined ? inputs : functionCall === null ? {} : { [functionCall]: inputs[functionCall] }
 
   let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
   let branch = 0
