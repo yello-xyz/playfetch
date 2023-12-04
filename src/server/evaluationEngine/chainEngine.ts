@@ -32,7 +32,7 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
-  stream?: (index: number, chunk: string, stepResponse?: TimedRunResponse) => void,
+  stream?: (index: number, chunk: string, stepResponse?: TimedRunResponse, inputs?: PromptInputs) => void,
   continuationID?: number
 ): Promise<TimedRunResponse & { continuationID?: number }> {
   const useCamelCase = isEndpointEvaluation
@@ -118,7 +118,8 @@ export default async function runChain(
     stream?.(
       index,
       lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
-      lastResponse
+      lastResponse,
+      inputs
     )
     if (lastResponse.failed) {
       continuationIndex = undefined

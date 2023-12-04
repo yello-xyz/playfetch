@@ -61,7 +61,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         configs,
         inputs,
         false,
-        (index, message, response) => {
+        (index, message, response, stepInputs) => {
           sendData({
             inputIndex,
             index,
@@ -72,8 +72,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             continuationID,
           })
           lastIndices[inputIndex] = index
-          if (response && !response.failed && !response.functionCall && index < configs.length - 1) {
-            saveRun(user.id, version, runIDs[inputIndex], index, multipleInputs[inputIndex], response, continuationID)
+          if (response && stepInputs && !response.failed && !response.functionCall && index < configs.length - 1) {
+            saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
           }
         },
         continuationID
