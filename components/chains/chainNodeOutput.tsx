@@ -1,4 +1,12 @@
-import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
+import {
+  ActiveChain,
+  ChainItem,
+  ChainItemWithInputs,
+  ChainVersion,
+  PromptInputs,
+  Run,
+  TestConfig,
+} from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
@@ -159,13 +167,23 @@ export default function ChainNodeOutput({
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
 
-  const relevantRuns = [...activeVersion.runs.slice(0, -1), ...intermediateRuns, ...partialRuns].filter(
-    run =>
-      run.id === activeRunID ||
-      (!!run.continuationID && run.continuationID === activeRun?.continuationID) ||
-      (!!run.parentRunID && run.parentRunID === parentRun?.id) ||
-      run.failed
-  )
+  const findParentRun = (run: Run) => activeVersion.runs.find(r => !!run.parentRunID && r.id === run.parentRunID)
+  const lastSameParentRun = (run: Run) => intermediateRuns.findLast(r => r.parentRunID === run.parentRunID)
+  const relevantRuns = [
+    ...intermediateRuns
+      .filter(
+        run =>
+          run.id === activeRunID ||
+          (!!run.continuationID && run.continuationID === activeRun?.continuationID) ||
+          (!!run.parentRunID && run.parentRunID === parentRun?.id)
+      )
+      .map(run => ({
+        ...run,
+        continuationID: run.continuationID ?? findParentRun(run)?.continuationID,
+        canContinue: !!run.canContinue || (findParentRun(run)?.canContinue && lastSameParentRun(run)?.id === run.id),
+      })),
+    ...partialRuns,
+  ]
 
   return (
     <>
