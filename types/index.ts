@@ -114,6 +114,7 @@ export type PromptConfig = {
   temperature: number
   maxTokens: number
   seed?: number
+  jsonMode?: boolean
 }
 
 export type CustomModel = {

@@ -3,7 +3,7 @@ import ModelSelector from './modelSelector'
 import BooleanParameterPopupButton from './booleanParameterPopupButton'
 import TemperatureInput from './temperatureInput'
 import NumberParameterInput from './numberParameterInput'
-import { SupportsSeed } from '@/src/common/providerMetadata'
+import { SupportsJsonMode, SupportsSeed } from '@/src/common/providerMetadata'
 
 export default function PromptConfigSettings({
   config,
@@ -43,6 +43,16 @@ export default function PromptConfigSettings({
           supportsUndefined
         />
       )}
+      {SupportsJsonMode(config.model) && (
+        <BooleanParameterPopupButton
+          parameter='jsonMode'
+          label={LabelForJsonMode}
+          description={descriptionForJsonMode}
+          config={config}
+          setConfig={setConfig}
+          disabled={disabled}
+        />
+      )}
     </div>
   )
 }
@@ -53,3 +63,10 @@ const descriptionForChatMode = (isChat: boolean) =>
   isChat
     ? 'In this mode, a conversation involves multiple LLM interactions. There is always an option to provide further user input.'
     : 'LLM interactions prompt the model once and receive a single response. Function callbacks can be used to request further user input.'
+
+export const LabelForJsonMode = (jsonMode: boolean) => (jsonMode ? 'JSON Mode' : 'Automatic')
+
+const descriptionForJsonMode = (jsonMode: boolean) =>
+  jsonMode
+    ? 'Constrain the model to only generate strings that parse into valid JSON.'
+    : 'Rely solely on the prompt to determine the output format.'
