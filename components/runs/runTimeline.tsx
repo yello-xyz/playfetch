@@ -66,22 +66,22 @@ export default function RunTimeline({
 
   const sortedRuns = sortRuns(runs).reduce(
     (sortedRuns, run) => {
-      let previousRun = sortedRuns.slice(-1)[0]
-      if (previousRun?.continuations) {
-        previousRun = previousRun.continuations.slice(-1)[0]
-      }
-      const wasPartialRun = previousRun && !IsProperRun(previousRun) && previousRun.index < run.index
-      const isParentRun = previousRun?.parentRunID === run.id
-      const sameParentRun = !!run.parentRunID && run.parentRunID === previousRun?.parentRunID
-      const sameContinuation = !!run.continuationID && run.continuationID === previousRun?.continuationID
+      const previousRun = sortedRuns.slice(-1)[0]
+      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+
+      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
+      const isParentRun = compareRun && compareRun.parentRunID === run.id
+      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
+      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+
       return wasPartialRun || isParentRun || sameParentRun || sameContinuation
         ? [
             ...sortedRuns.slice(0, -1),
             {
               ...previousRun,
-              id: !previousRun || wasPartialRun || isParentRun ? run.id : previousRun?.id,
+              id: wasPartialRun || isParentRun ? run.id : compareRun.id,
               continuations: [...(previousRun.continuations ?? []), run],
-              continuationID: previousRun?.continuationID ?? run.continuationID,
+              continuationID: compareRun.continuationID ?? run.continuationID,
             },
           ]
         : [...sortedRuns, run]
