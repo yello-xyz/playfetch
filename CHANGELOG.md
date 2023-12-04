@@ -1,5 +1,10 @@
 ## PlayFetch Changelog
 
+### v0.18 - 2023-12-04
+- Trigger manual interrupt from code block
+- Specify a reason for response ratings
+- Improved visualisation of chain runs
+
 ### v0.17 - 2023-11-24
 - Project specific API keys
 - Daily cost tracking per model
