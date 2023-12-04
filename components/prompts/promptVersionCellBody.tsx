@@ -2,9 +2,9 @@ import { AvailableModelProvider, PromptConfig, PromptVersion } from '@/types'
 import VersionComparison, { ContentComparison } from '../versions/versionComparison'
 import { LabelForModel, SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
 import useAvailableModelProviders from '@/src/client/context/providerContext'
-import { labelForChatMode } from './chatModePopupButton'
 import { ExtractFunction, ExtractFunctionNames } from '@/src/common/formatting'
 import Collapsible from '../collapsible'
+import { LabelForChatMode } from './promptConfigSettings'
 
 export default function PromptVersionCellBody({
   version,
@@ -40,7 +40,7 @@ export default function PromptVersionCellBody({
 
 export const FormatPromptConfig = (config: PromptConfig, availableProviders: AvailableModelProvider[]) =>
   `Model: ${LabelForModel(config.model, availableProviders)}
-Mode: ${labelForChatMode(config.isChat)}
+Mode: ${LabelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
 Temperature: ${config.temperature}${config.seed !== undefined ? `\nSeed: ${config.seed}` : ''}`
 

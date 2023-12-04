@@ -1,6 +1,6 @@
 import { PromptConfig } from '@/types'
 import ModelSelector from './modelSelector'
-import ChatModePopupButton from './chatModePopupButton'
+import BooleanParameterPopupButton from './booleanParameterPopupButton'
 import TemperatureInput from './temperatureInput'
 import NumberParameterInput from './numberParameterInput'
 import { SupportsSeed } from '@/src/common/providerMetadata'
@@ -17,7 +17,14 @@ export default function PromptConfigSettings({
   return (
     <div className='flex flex-wrap items-center gap-2.5'>
       <ModelSelector popUpAbove config={config} setConfig={setConfig} disabled={disabled} />
-      <ChatModePopupButton config={config} setConfig={setConfig} disabled={disabled} />
+      <BooleanParameterPopupButton
+        parameter='isChat'
+        label={LabelForChatMode}
+        description={descriptionForChatMode}
+        config={config}
+        setConfig={setConfig}
+        disabled={disabled}
+      />
       <NumberParameterInput
         parameter='maxTokens'
         title='Max Tokens'
@@ -39,3 +46,10 @@ export default function PromptConfigSettings({
     </div>
   )
 }
+
+export const LabelForChatMode = (isChat: boolean) => (isChat ? 'Simple Chat' : 'Automatic')
+
+const descriptionForChatMode = (isChat: boolean) =>
+  isChat
+    ? 'In this mode, a conversation involves multiple LLM interactions. There is always an option to provide further user input.'
+    : 'LLM interactions prompt the model once and receive a single response. Function callbacks can be used to request further user input.'
