@@ -22,7 +22,7 @@ export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
   const context = isolated.createContextSync()
   context.eval(`globalThis.PlayFetch = { 
-  InterruptOnce: (name, args = {}) => this[name] ?? { function: { name, arguments: args } } 
+  InterruptOnce: (name, args) => this[name] ?? { function: { name, arguments: args } } 
 }`)
   Object.entries(inputs).forEach(([variable, value]) => AugmentCodeContext(context, variable, value))
   return context
