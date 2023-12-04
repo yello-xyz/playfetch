@@ -6,16 +6,20 @@ export default function NumberParameterInput({
   parameter,
   config,
   setConfig,
-  disabled,
+  disabled = false,
+  supportsUndefined = false,
 }: {
   title: string
   parameter: keyof PromptConfig
   config: PromptConfig
   setConfig: (config: PromptConfig) => void
   disabled?: boolean
+  supportsUndefined?: boolean
 }) {
-  const value = config[parameter] as number
-  const updateValue = (value: number) => !isNaN(value) && setConfig({ ...config, [parameter]: value })
+  const value = config[parameter] as number | undefined
+  const updateValue = (value: number | undefined) =>
+    (supportsUndefined || (value !== undefined && !isNaN(value))) &&
+    setConfig({ ...config, [parameter]: value === undefined || isNaN(value) ? undefined : value })
 
   const span = useRef<HTMLSpanElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -42,8 +46,8 @@ export default function NumberParameterInput({
         style={{ width }}
         type='text'
         ref={inputRef}
-        value={value}
-        onChange={event => updateValue(Number(event.target.value))}
+        value={value === undefined ? '' : value}
+        onChange={event => updateValue(event.target.value === '' ? undefined : Number(event.target.value))}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         disabled={disabled}
