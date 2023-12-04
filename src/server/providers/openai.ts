@@ -9,7 +9,7 @@ export default function predict(
   userID: number,
   model: OpenAILanguageModel | CustomLanguageModel
 ): Predictor {
-  return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks, seed, continuationInputs) =>
     tryCompleteChat(
       apiKey,
       userID,
@@ -18,7 +18,8 @@ export default function predict(
       prompts.system,
       prompts.functions,
       temperature,
-      maxOutputTokens,
+      maxTokens,
+      seed,
       context,
       useContext,
       streamChunks,
@@ -57,6 +58,7 @@ async function tryCompleteChat(
   functionsPrompt: string | undefined,
   temperature: number,
   maxTokens: number,
+  seed: number | undefined,
   context: PromptContext,
   useContext: boolean,
   streamChunks?: (chunk: string) => void,
@@ -96,6 +98,7 @@ async function tryCompleteChat(
         user: userID.toString(),
         stream: true,
         functions: inputFunctions.length > 0 ? inputFunctions : undefined,
+        seed,
       },
       { timeout: 30 * 1000 }
     )

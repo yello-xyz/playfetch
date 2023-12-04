@@ -132,7 +132,12 @@ const ActionMenu = ({
   const saveModelAsDefault = canSaveModel ? withDismiss(() => updateDefaultModel(model)) : undefined
   const saveParametersAsDefault = canSaveParameters
     ? withDismiss(() =>
-        updateDefaultParameters({ isChat: config.isChat, maxTokens: config.maxTokens, temperature: config.temperature })
+        updateDefaultParameters({
+          isChat: config.isChat,
+          maxTokens: config.maxTokens,
+          temperature: config.temperature,
+          seed: config.seed,
+        })
       )
     : undefined
   const resetToDefaultParameters = canResetParameters

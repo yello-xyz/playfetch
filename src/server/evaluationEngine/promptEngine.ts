@@ -28,6 +28,7 @@ export type Predictor = (
   context: PromptContext,
   usePreviousContext: boolean,
   streamChunks: (text: string) => void | undefined,
+  seed: number | undefined,
   continuationInputs: PromptInputs
 ) => Promise<PredictionResponse>
 
@@ -73,6 +74,7 @@ export default async function runPromptWithConfig(
       context,
       usePreviousContext,
       streamChunks,
+      config.seed,
       continuationInputs
     )
     if (isValidPredictionResponse(result)) {

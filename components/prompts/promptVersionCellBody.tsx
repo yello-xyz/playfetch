@@ -42,7 +42,7 @@ export const FormatPromptConfig = (config: PromptConfig, availableProviders: Ava
   `Model: ${LabelForModel(config.model, availableProviders)}
 Mode: ${labelForChatMode(config.isChat)}
 Max Tokens: ${config.maxTokens}
-Temperature: ${config.temperature}`
+Temperature: ${config.temperature}${config.seed !== undefined ? `\nSeed: ${config.seed}` : ''}`
 
 const formatFunctions = (functions?: string, compareFunctions?: string) => {
   const functionNames = ExtractFunctionNames(functions ?? '')
