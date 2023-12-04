@@ -79,7 +79,7 @@ export default function RunTimeline({
             ...sortedRuns.slice(0, -1),
             {
               ...previousRun,
-              id: wasPartialRun || isParentRun ? run.id : compareRun.id,
+              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
               continuations: [...(previousRun.continuations ?? []), run],
               continuationID: compareRun.continuationID ?? run.continuationID,
             },
