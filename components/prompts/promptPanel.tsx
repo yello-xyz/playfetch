@@ -17,6 +17,7 @@ import {
   PromptKeyNeedsPreformatted,
   ProviderForModel,
   SupportedPromptKeysForModel,
+  SupportsSeed,
 } from '@/src/common/providerMetadata'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
@@ -95,7 +96,7 @@ export default function PromptPanel({
           SupportedPromptKeysForModel(config.model).includes(key as keyof Prompts)
         )
       ) as Prompts,
-      { ...config }
+      { ...config, seed: SupportsSeed(config.model) ? config.seed : undefined }
     )
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()

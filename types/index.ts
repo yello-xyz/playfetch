@@ -113,6 +113,7 @@ export type PromptConfig = {
   isChat: boolean
   temperature: number
   maxTokens: number
+  seed?: number
 }
 
 export type CustomModel = {

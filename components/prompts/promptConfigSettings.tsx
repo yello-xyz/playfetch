@@ -3,6 +3,7 @@ import ModelSelector from './modelSelector'
 import ChatModePopupButton from './chatModePopupButton'
 import TemperatureInput from './temperatureInput'
 import NumberParameterInput from './numberParameterInput'
+import { SupportsSeed } from '@/src/common/providerMetadata'
 
 export default function PromptConfigSettings({
   config,
@@ -25,6 +26,16 @@ export default function PromptConfigSettings({
         disabled={disabled}
       />
       <TemperatureInput config={config} setConfig={setConfig} disabled={disabled} />
+      {SupportsSeed(config.model) && (
+        <NumberParameterInput
+          parameter='seed'
+          title='Seed'
+          config={config}
+          setConfig={setConfig}
+          disabled={disabled}
+          supportsUndefined
+        />
+      )}
     </div>
   )
 }
