@@ -68,5 +68,5 @@ export const LabelForJsonMode = (jsonMode: boolean) => (jsonMode ? 'JSON' : 'Aut
 
 const descriptionForJsonMode = (jsonMode: boolean) =>
   jsonMode
-    ? 'Constrain the model to generate valid JSON. This requires an explicit instruction in the (system) prompt.'
+    ? 'Constrain the model to generate valid JSON. This also requires an explicit instruction in the (system) prompt.'
     : 'Rely solely on the (system) prompt or provided functions to determine the output format.'
