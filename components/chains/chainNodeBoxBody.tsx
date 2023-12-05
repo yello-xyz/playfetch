@@ -8,6 +8,7 @@ import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
 import { VersionDescription } from '../commentsPane'
+import { Highlight, themes } from 'prism-react-renderer'
 
 export default function ChainNodeBoxBody({
   items,
@@ -58,7 +59,25 @@ function PromptNodeBody({
 }
 
 function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: boolean }) {
-  return item.description ? <CommonBody isSelected={isSelected}>{item.description}</CommonBody> : null
+  return item.description || item.code ? (
+    <CommonBody isSelected={isSelected}>
+      {item.description || (
+        <Highlight theme={themes.github} code={item.code.trim()} language='javascript'>
+          {({ tokens, getLineProps, getTokenProps }) => (
+            <>
+              {tokens.map((line, lineIndex) => (
+                <div key={lineIndex} {...getLineProps({ line })}>
+                  {line.map((token, tokenIndex) => (
+                    <span key={tokenIndex} {...getTokenProps({ token })} />
+                  ))}
+                </div>
+              ))}
+            </>
+          )}
+        </Highlight>
+      )}
+    </CommonBody>
+  ) : null
 }
 
 function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected: boolean }) {
