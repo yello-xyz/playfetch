@@ -1,6 +1,6 @@
 ## PlayFetch Changelog
 
-### v0.18 - 2023-12-04
+### v0.18 - 2023-12-05
 - Trigger manual interrupt from code block
 - Specify a reason for response ratings
 - Support for seed and JSON mode in OpenAI models
