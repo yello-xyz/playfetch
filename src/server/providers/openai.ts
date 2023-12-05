@@ -101,8 +101,8 @@ async function tryCompleteChat(
         user: userID.toString(),
         stream: true,
         functions: inputFunctions.length > 0 ? inputFunctions : undefined,
-        seed,        
-        ...(SupportsJsonMode(model) && !!jsonMode ? { response_format: { type: 'json_object' } } : {})
+        seed,
+        ...(SupportsJsonMode(model) && !!jsonMode ? { response_format: { type: 'json_object' } } : {}),
       },
       { timeout: 30 * 1000 }
     )

@@ -31,6 +31,7 @@ export default function RunTimeline({
   setFocusRunID,
   runVersion,
   selectInputValue = () => undefined,
+  onRatingUpdate,
   isRunning,
   skipHeader,
 }: {
@@ -41,6 +42,7 @@ export default function RunTimeline({
   setFocusRunID?: (runID: number) => void
   runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
   selectInputValue?: (inputKey: string) => string | undefined
+  onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
   skipHeader?: boolean
 }) {
@@ -133,6 +135,7 @@ export default function RunTimeline({
               onSelect={selectRun(run)}
               runContinuation={runContinuation}
               selectInputValue={selectInputValue}
+              onRatingUpdate={onRatingUpdate}
             />
           ))}
         </div>

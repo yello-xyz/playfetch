@@ -14,6 +14,7 @@ export default function RunCell({
   onSelect,
   runContinuation,
   selectInputValue,
+  onRatingUpdate,
 }: {
   identifierForRun: (runID: number) => string
   run: PartialRun | Run
@@ -24,6 +25,7 @@ export default function RunCell({
   onSelect?: () => void
   runContinuation?: (continuationID: number, message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
+  onRatingUpdate?: (run: Run) => Promise<void>
 }) {
   const continuationID = run.continuationID
   const isContinuation = !!continuationID || (run.continuations ?? []).length > 0
@@ -49,7 +51,13 @@ export default function RunCell({
           isContinuation={isContinuation}
         />
       </div>
-      <RunCellFooter run={run} activeItem={activeItem} isContinuation={isContinuation} isSelected={selected} />
+      <RunCellFooter
+        run={run}
+        activeItem={activeItem}
+        isContinuation={isContinuation}
+        isSelected={selected}
+        onRatingUpdate={onRatingUpdate}
+      />
       {isContinuation && (
         <RunCellContinuation
           run={run}
@@ -65,6 +73,7 @@ export default function RunCell({
               : undefined
           }
           selectInputValue={selectInputValue}
+          onRatingUpdate={onRatingUpdate}
         />
       )}
     </div>

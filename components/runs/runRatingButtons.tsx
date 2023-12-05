@@ -16,14 +16,22 @@ export default function RunRatingButtons({
   run,
   activeItem,
   isSelected,
+  onUpdate,
 }: {
   run: Run
   activeItem: ActivePrompt | ActiveChain
   isSelected: boolean
+  onUpdate?: (run: Run) => Promise<void>
 }) {
   const refreshProject = useRefreshProject()
   const refreshActiveItem = useRefreshActiveItem()
-  const refresh = () => refreshActiveItem().then(refreshProject)
+  const refresh = async () => {
+    await refreshActiveItem()
+    if (onUpdate) {
+      await onUpdate(run)
+    }
+    refreshProject()
+  }
 
   const runComments = activeItem.versions
     .flatMap(version => version.comments)

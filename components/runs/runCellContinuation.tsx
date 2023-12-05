@@ -19,6 +19,7 @@ export default function RunCellContinuation({
   isSelected,
   runContinuation,
   selectInputValue,
+  onRatingUpdate,
 }: {
   run: PartialRun | Run
   continuations: (PartialRun | Run)[]
@@ -29,6 +30,7 @@ export default function RunCellContinuation({
   isSelected: boolean
   runContinuation?: (message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
+  onRatingUpdate?: (run: Run) => Promise<void>
 }) {
   const runWithContinuations = [run, ...continuations]
   const getInputKey = (run: PartialRun | Run) => ExtractInputKey(run)
@@ -75,7 +77,13 @@ export default function RunCellContinuation({
             activeItem={activeItem}
             isContinuation
           />
-          <RunCellFooter run={run} activeItem={activeItem} isContinuation isSelected={isSelected} />
+          <RunCellFooter
+            run={run}
+            activeItem={activeItem}
+            isContinuation
+            isSelected={isSelected}
+            onRatingUpdate={onRatingUpdate}
+          />
         </Fragment>
       ))}
       {!!runContinuation && !!runWithContinuations.slice(-1)[0].canContinue && (
