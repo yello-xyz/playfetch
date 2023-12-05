@@ -1,12 +1,4 @@
-import {
-  ActiveChain,
-  ChainItem,
-  ChainItemWithInputs,
-  ChainVersion,
-  PromptInputs,
-  Run,
-  TestConfig,
-} from '@/types'
+import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
 import { useEffect, useRef, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
@@ -153,14 +145,18 @@ export default function ChainNodeOutput({
   )
   const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
   const fetchedRunID = useRef<number>()
-  if (activeRun && parentRun && activeRunID !== fetchedRunID.current) {
+  const refreshIntermediateRuns = () =>
+    activeRun && parentRun
+      ? api.getIntermediateRuns(parentRun.id, activeRun.continuationID).then(runs => {
+          if (activeRunID === fetchedRunID.current) {
+            setIntermediateRuns(runs)
+          }
+        })
+      : Promise.resolve()
+  if (activeRun && activeRunID !== fetchedRunID.current) {
     setIntermediateRuns([])
     fetchedRunID.current = activeRunID
-    api.getIntermediateRuns(parentRun.id, activeRun.continuationID).then(runs => {
-      if (activeRunID === fetchedRunID.current) {
-        setIntermediateRuns(runs)
-      }
-    })
+    refreshIntermediateRuns()
   }
 
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
@@ -216,6 +212,7 @@ export default function ChainNodeOutput({
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
+              onRatingUpdate={run => run.parentRunID ? refreshIntermediateRuns() : Promise.resolve()}
             />
           </div>
         )}
