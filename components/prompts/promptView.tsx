@@ -32,14 +32,14 @@ export default function PromptView({
   setActiveVersion,
   setModifiedVersion,
   savePrompt,
-  activeRunID,
+  focusRunID,
 }: {
   prompt: ActivePrompt
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
   savePrompt: () => Promise<number>
-  activeRunID?: number
+  focusRunID?: number
 }) {
   type ActiveTab = 'Prompt versions' | 'Test data'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
@@ -47,7 +47,7 @@ export default function PromptView({
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
-  const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id, true)
+  const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id)
   const runPrompt = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     persistInputValuesIfNeeded()
     await runVersion(getVersion, inputs, continuationID)
@@ -140,7 +140,7 @@ export default function PromptView({
             runs={[...activeVersion.runs, ...partialRuns]}
             activeItem={prompt}
             version={activeVersion}
-            activeRunID={activeRunID}
+            focusRunID={focusRunID}
             runVersion={runPrompt}
             selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
             isRunning={isRunning}

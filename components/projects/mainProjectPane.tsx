@@ -19,8 +19,6 @@ import CommentsPane from '../commentsPane'
 import SettingsView from '../settings/settingsView'
 
 export default function MainProjectPane({
-  activeProject,
-  refreshProject,
   activeItem,
   activePrompt,
   activeChain,
@@ -32,7 +30,7 @@ export default function MainProjectPane({
   savePrompt,
   saveChain,
   refreshOnSavePrompt,
-  activeRunID,
+  focusRunID,
   analytics,
   refreshAnalytics,
   scopedProviders,
@@ -41,8 +39,6 @@ export default function MainProjectPane({
   setShowComments,
   selectComment,
 }: {
-  activeProject: ActiveProject
-  refreshProject: () => Promise<void>
   activeItem: ActiveItem | undefined
   activePrompt: ActivePrompt | undefined
   activeChain: ActiveChain | undefined
@@ -57,7 +53,7 @@ export default function MainProjectPane({
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
   refreshOnSavePrompt: (promptID: number) => (versionID?: number) => void
-  activeRunID: number | undefined
+  focusRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number) => Promise<void>
   scopedProviders: AvailableProvider[]
@@ -76,7 +72,7 @@ export default function MainProjectPane({
             setActiveVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
             savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
-            activeRunID={activeRunID}
+            focusRunID={focusRunID}
           />
         )}
         {activeChain && activeChainVersion && (
@@ -85,28 +81,19 @@ export default function MainProjectPane({
             chain={activeChain}
             activeVersion={activeChainVersion}
             setActiveVersion={selectVersion}
-            project={activeProject}
             saveChain={saveChain}
-            activeRunID={activeRunID}
+            focusRunID={focusRunID}
           />
         )}
-        {activeItem === CompareItem && <CompareView project={activeProject} logEntries={analytics?.recentLogEntries} />}
-        {activeItem === EndpointsItem && (
-          <EndpointsView
-            project={activeProject}
-            analytics={analytics}
-            refreshAnalytics={refreshAnalytics}
-            onRefresh={refreshProject}
-          />
-        )}
+        {activeItem === CompareItem && <CompareView logEntries={analytics?.recentLogEntries} />}
+        {activeItem === EndpointsItem && <EndpointsView analytics={analytics} refreshAnalytics={refreshAnalytics} />}
         {activeItem === SettingsItem && (
-          <SettingsView activeProject={activeProject} providers={scopedProviders} refresh={refreshProviders} />
+          <SettingsView scope='project' providers={scopedProviders} refresh={refreshProviders} />
         )}
         {!activeItem && <EmptyProjectView onAddPrompt={addPrompt} />}
       </Allotment.Pane>
       <Allotment.Pane minSize={showComments ? 300 : 0} preferredSize={300} visible={showComments}>
         <CommentsPane
-          project={activeProject}
           activeItem={activePrompt ?? activeChain}
           onSelectComment={selectComment}
           showComments={showComments}

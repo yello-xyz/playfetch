@@ -1,6 +1,7 @@
 import { PromptInputs } from '@/types'
 import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import Isolated from 'isolated-vm'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
 const codeToCamelCase = (code: string) =>
   ExtractVariables(code).reduce(
@@ -20,24 +21,20 @@ const AugmentCodeContext = (context: Isolated.Context, variable: string | undefi
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
   const context = isolated.createContextSync()
+  context.eval(`globalThis.PlayFetch = { 
+  InterruptOnce: (name, args) => this[name] ?? { function: { name, arguments: args } } 
+}`)
   Object.entries(inputs).forEach(([variable, value]) => AugmentCodeContext(context, variable, value))
   return context
 }
 
-const codeResponseAttributes = { cost: 0, attempts: 1, functionInterrupt: undefined }
-type CodeResponse = typeof codeResponseAttributes &
-  (
-    | { result: any; output: string; error: undefined; failed: false }
-    | { result: undefined; output: undefined; error: string; failed: true }
-  )
-
-export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<CodeResponse> => {
+export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<RunResponse> => {
   try {
     const functionCode = `(() => { ${codeToCamelCase(code)} })()`
     const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
-    return { result, output, error: undefined, failed: false, ...codeResponseAttributes }
+    return { ...EmptyRunResponse(), result, output, functionCall: result?.function?.name ?? null }
   } catch (error: any) {
-    return { result: undefined, output: undefined, error: error.message, failed: true, ...codeResponseAttributes }
+    return ErrorRunResponse(error.message)
   }
 }

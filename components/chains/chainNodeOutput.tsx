@@ -1,5 +1,5 @@
-import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, TestConfig } from '@/types'
-import { useEffect, useState } from 'react'
+import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
+import { useEffect, useRef, useState } from 'react'
 import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
@@ -22,6 +22,8 @@ import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/context/providerContext'
 import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
+import useInitialState from '@/src/client/hooks/useInitialState'
+import api from '@/src/client/api'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
@@ -76,7 +78,7 @@ const excludeBoundChainVariables = (chain: Omit<ChainItemWithInputs, 'dynamicInp
 export default function ChainNodeOutput({
   chain,
   activeVersion,
-  activeRunID,
+  focusRunID,
   nodes,
   activeIndex,
   setActiveIndex,
@@ -86,7 +88,7 @@ export default function ChainNodeOutput({
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
-  activeRunID?: number
+  focusRunID?: number
   nodes: ChainNode[]
   activeIndex: number
   setActiveIndex: (index: number) => void
@@ -117,6 +119,7 @@ export default function ChainNodeOutput({
       if (continuationID === undefined) {
         setActiveIndex(0)
         setRunningItemIndex(-1)
+        setActiveRunID(undefined)
       }
       const isFinished = await runVersion(getVersion, inputs, continuationID)
       if (isFinished) {
@@ -133,9 +136,50 @@ export default function ChainNodeOutput({
     }
   }, [setActiveIndex, highestRunIndex, runningItemIndex])
 
+  const [activeRunID, setActiveRunID] = useInitialState<number | undefined>(
+    focusRunID ?? activeVersion.runs.slice(-1)[0]?.id
+  )
+  const activeRun = activeVersion.runs.find(run => run.id === activeRunID)
+  const parentRun = activeVersion.runs.find(
+    run => run.id === activeRunID || (activeRun?.continuationID && run.continuationID === activeRun.continuationID)
+  )
+  const [intermediateRuns, setIntermediateRuns] = useState<Run[]>([])
+  const fetchedRunID = useRef<number>()
+  const refreshIntermediateRuns = () =>
+    activeRun && parentRun
+      ? api.getIntermediateRuns(parentRun.id, activeRun.continuationID).then(runs => {
+          if (activeRunID === fetchedRunID.current) {
+            setIntermediateRuns(runs)
+          }
+        })
+      : Promise.resolve()
+  if (activeRun && activeRunID !== fetchedRunID.current) {
+    setIntermediateRuns([])
+    fetchedRunID.current = activeRunID
+    refreshIntermediateRuns()
+  }
+
   const variables = ExtractUnboundChainVariables(items, promptCache, true)
   const staticVariables = ExtractUnboundChainVariables(items, promptCache, false)
   const canShowTestData = variables.length > 0 || Object.keys(inputValues).length > 0
+
+  const findParentRun = (run: Run) => activeVersion.runs.find(r => !!run.parentRunID && r.id === run.parentRunID)
+  const lastSameParentRun = (run: Run) => intermediateRuns.findLast(r => r.parentRunID === run.parentRunID)
+  const relevantRuns = [
+    ...intermediateRuns
+      .filter(
+        run =>
+          run.id === activeRunID ||
+          (!!run.continuationID && run.continuationID === activeRun?.continuationID) ||
+          (!!run.parentRunID && run.parentRunID === parentRun?.id)
+      )
+      .map(run => ({
+        ...run,
+        continuationID: run.continuationID ?? findParentRun(run)?.continuationID,
+        canContinue: !!run.canContinue || (findParentRun(run)?.canContinue && lastSameParentRun(run)?.id === run.id),
+      })),
+    ...partialRuns,
+  ]
 
   return (
     <>
@@ -157,16 +201,18 @@ export default function ChainNodeOutput({
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
             <RunTimeline
               runs={
-                activeNode === OutputNode
-                  ? activeVersion.runs
-                  : partialRuns.filter(run => run.index === activeIndex - 1)
+                isRunning || activeNode === OutputNode
+                  ? [...activeVersion.runs, ...partialRuns]
+                  : relevantRuns.filter(run => run.index === activeIndex - 1)
               }
               activeItem={chain}
-              activeRunID={activeRunID}
+              focusRunID={activeRunID}
+              setFocusRunID={setActiveRunID}
               version={activeVersion}
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
+              onRatingUpdate={run => run.parentRunID ? refreshIntermediateRuns() : Promise.resolve()}
             />
           </div>
         )}

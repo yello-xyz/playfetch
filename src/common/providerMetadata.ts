@@ -111,6 +111,42 @@ export const IsModelAvailable = (
     ? customModelFromProviders(model, providers)?.enabled ?? false
     : IsProviderAvailable(ProviderForModel(model), providers)
 
+export const SupportsSeed = (model: LanguageModel): boolean => {
+  switch (model) {
+    case 'gpt-3.5-turbo':
+    case 'gpt-3.5-turbo-16k':
+    case 'gpt-4':
+    case 'gpt-4-turbo':
+      return true
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison':
+    case 'chat-bison':
+    case 'command':
+      return false
+    default:
+      return SupportsSystemPrompt(baseModelForModel(model))
+  }
+}
+
+export const SupportsJsonMode = (model: LanguageModel): boolean => {
+  switch (model) {
+    case 'gpt-3.5-turbo-16k':
+    case 'gpt-4-turbo':
+      return true
+    case 'gpt-3.5-turbo':
+    case 'gpt-4':
+    case 'claude-instant-1':
+    case 'claude-2':
+    case 'text-bison':
+    case 'chat-bison':
+    case 'command':
+      return false
+    default:
+      return SupportsSystemPrompt(baseModelForModel(model))
+  }
+}
+
 export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
   switch (model) {
     case 'gpt-3.5-turbo':

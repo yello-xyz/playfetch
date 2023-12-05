@@ -1,7 +1,17 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
+import {
+  ActiveChain,
+  ActivePrompt,
+  ChainVersion,
+  IsProperRun,
+  PartialRun,
+  PromptInputs,
+  PromptVersion,
+  Run,
+} from '@/types'
 import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
   items.sort((a, b) => a.timestamp - b.timestamp)
@@ -17,18 +27,22 @@ export default function RunTimeline({
   runs = [],
   version,
   activeItem,
-  activeRunID,
+  focusRunID,
+  setFocusRunID,
   runVersion,
   selectInputValue = () => undefined,
+  onRatingUpdate,
   isRunning,
   skipHeader,
 }: {
   runs: (PartialRun | Run)[]
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
-  activeRunID?: number
+  focusRunID?: number
+  setFocusRunID?: (runID: number) => void
   runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
   selectInputValue?: (inputKey: string) => string | undefined
+  onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
   skipHeader?: boolean
 }) {
@@ -45,29 +59,54 @@ export default function RunTimeline({
     }
   }
 
-  const [previousActiveRunID, setPreviousActiveRunID] = useState(activeRunID)
+  const [activeRunID, setActiveRunID] = useInitialState(focusRunID)
+  const [previousActiveRunID, setPreviousActiveRunID] = useState<number>()
   if (activeRunID !== previousActiveRunID) {
     focusRun(activeRunID)
     setPreviousActiveRunID(activeRunID)
   }
 
   const sortedRuns = sortRuns(runs).reduce(
-    (sortedRuns, run) =>
-      run.continuationID && run.continuationID === sortedRuns.slice(-1)[0]?.continuationID
+    (sortedRuns, run) => {
+      const previousRun = sortedRuns.slice(-1)[0]
+      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+
+      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
+      const isParentRun = compareRun && compareRun.parentRunID === run.id
+      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
+      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+
+      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
         ? [
             ...sortedRuns.slice(0, -1),
-            { ...sortedRuns.slice(-1)[0], continuations: [...(sortedRuns.slice(-1)[0].continuations ?? []), run] },
+            {
+              ...previousRun,
+              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
+              continuations: [...(previousRun.continuations ?? []), run],
+              continuationID: compareRun.continuationID ?? run.continuationID,
+            },
           ]
-        : [...sortedRuns, run],
-
-    [] as PartialRun[]
+        : [...sortedRuns, run]
+    },
+    [] as (PartialRun | Run)[]
   )
+
   const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
     focusRun(lastPartialRunID)
     setPreviousLastRunID(lastPartialRunID)
   }
+
+  const isRunSelected = (run: PartialRun | Run) =>
+    activeRunID === undefined ||
+    !IsProperRun(run) ||
+    run.id === activeRunID ||
+    (run.continuations ?? []).some(run => run.id === activeRunID)
+  const selectRun = (run: PartialRun | Run) =>
+    sortedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
+      ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
+      : undefined
 
   const runContinuation =
     version && runVersion
@@ -92,8 +131,11 @@ export default function RunTimeline({
               version={version}
               activeItem={activeItem}
               isRunning={isRunning}
+              isSelected={isRunSelected(run)}
+              onSelect={selectRun(run)}
               runContinuation={runContinuation}
               selectInputValue={selectInputValue}
+              onRatingUpdate={onRatingUpdate}
             />
           ))}
         </div>

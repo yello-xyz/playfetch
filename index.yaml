@@ -21,13 +21,13 @@ indexes:
 - kind: prompt
   properties:
   - name: projectID
-  - name: lastEditedAt
+  - name: createdAt
     direction: desc
 
 - kind: chain
   properties:
   - name: projectID
-  - name: lastEditedAt
+  - name: createdAt
     direction: desc
 
 - kind: version
@@ -39,8 +39,19 @@ indexes:
 - kind: run
   properties:
   - name: parentID
+  - name: parentRunID
   - name: createdAt
     direction: desc
+
+- kind: run
+  properties:
+  - name: parentRunID
+  - name: parentRunID
+
+- kind: run
+  properties:
+  - name: continuationID
+  - name: parentRunID
 
 - kind: endpoint
   properties:

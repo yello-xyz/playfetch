@@ -95,7 +95,7 @@ const ConnectorCell = ({
     <ChainNodeBoxConnector
       prompts={prompts}
       isDisabled={isDisabled || (isActive && hasSpotOnNextRow)}
-      isActive={isActive}
+      isActive={isActive && !isDisabled}
       setActive={active => setActiveMenuIndex(active ? [index, branch] : undefined)}
       canDismiss={nodes.length > 2}
       hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}

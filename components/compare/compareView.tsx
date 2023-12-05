@@ -1,4 +1,4 @@
-import { ActiveProject, Endpoint, IsPromptVersion, ItemsInProject, LogEntry, PromptVersion } from '@/types'
+import { Endpoint, IsPromptVersion, ItemsInProject, LogEntry, PromptVersion } from '@/types'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
@@ -9,13 +9,14 @@ import SegmentedControl, { Segment } from '../segmentedControl'
 import DiffPane from './diffPane'
 import useDiffContent from '@/src/client/hooks/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
+import { useActiveProject } from '@/src/client/context/projectContext'
 
 const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVersion, rightVersion: PromptVersion) =>
   ([activePromptTab, 'main', 'functions', 'system'] as PromptTab[]).find(
     tab => leftVersion.prompts[tab] !== rightVersion.prompts[tab]
   ) ?? activePromptTab
 
-export default function CompareView({ project, logEntries = [] }: { project: ActiveProject; logEntries?: LogEntry[] }) {
+export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry[] }) {
   const router = useRouter()
   const { i: itemID, v: versionID, p: previousVersionID } = ParseNumberQuery(router.query)
 
@@ -26,9 +27,10 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
   const [leftVersionID, setLeftVersionID] = useState(previousVersionID)
   const [activePromptTab, setActivePromptTab] = useState('main' as PromptTab)
 
-  const endpointForID = (endpointID: number) => project.endpoints.find(endpoint => endpoint.id === endpointID)
+  const activeProject = useActiveProject()
+  const endpointForID = (endpointID: number) => activeProject.endpoints.find(endpoint => endpoint.id === endpointID)
 
-  const itemCache = useActiveItemCache(project, [
+  const itemCache = useActiveItemCache(activeProject, [
     ...(leftItemID && !endpointForID(leftItemID) ? [leftItemID] : []),
     ...(rightItemID && !endpointForID(rightItemID) ? [rightItemID] : []),
   ])
@@ -43,16 +45,16 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
   const leftVersion = loadVersion(leftItem, leftVersionID)
   const rightVersion = loadVersion(rightItem, rightVersionID)
 
-  const [leftContent, rightContent] = useDiffContent(project, leftItem, rightItem, leftVersion, rightVersion)
+  const [leftContent, rightContent] = useDiffContent(activeProject, leftItem, rightItem, leftVersion, rightVersion)
 
   const updateRightItemID = (itemID: number) => {
     if (itemID !== rightItemID) {
       if (endpointForID(itemID)) {
         const endpoint = loadItem(itemID) as Endpoint
         const compareEndpoint =
-          project.endpoints.find(e => e.urlPath === endpoint.urlPath && e.flavor !== endpoint.flavor) ??
-          project.endpoints.find(e => e.id !== itemID && e.id === leftItemID) ??
-          project.endpoints.find(e => e.urlPath !== endpoint.urlPath) ??
+          activeProject.endpoints.find(e => e.urlPath === endpoint.urlPath && e.flavor !== endpoint.flavor) ??
+          activeProject.endpoints.find(e => e.id !== itemID && e.id === leftItemID) ??
+          activeProject.endpoints.find(e => e.urlPath !== endpoint.urlPath) ??
           endpoint
         setLeftItemID(compareEndpoint.id)
       } else {
@@ -98,12 +100,12 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
     }
   }, [leftItem, leftVersion, rightItem, rightVersion, updateRightVersionID])
 
-  return ItemsInProject(project).length > 0 ? (
+  return ItemsInProject(activeProject).length > 0 ? (
     <>
       <div className='flex flex-col h-full'>
         <div className={isDiffMode ? 'flex' : 'flex h-full'}>
           <ComparePane
-            project={project}
+            project={activeProject}
             logEntries={logEntries}
             activeItem={leftItem}
             activeVersion={leftVersion}
@@ -116,7 +118,7 @@ export default function CompareView({ project, logEntries = [] }: { project: Act
           />
           <div className='h-full border-l border-gray-200' />
           <ComparePane
-            project={project}
+            project={activeProject}
             logEntries={logEntries}
             activeItem={rightItem}
             activeVersion={rightVersion}

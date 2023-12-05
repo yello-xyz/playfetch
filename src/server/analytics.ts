@@ -18,7 +18,7 @@ export function getClientID(req: Request, res: Response): string {
 }
 
 type Event = { name: string; params: { [key: string]: string | number } }
-type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'endpoint'
+type EntityType = 'workspace' | 'project' | 'prompt' | 'chain' | 'version' | 'comment' | 'rating' | 'endpoint'
 
 const pageFromURL = (url: string) => {
   const page = url.split('/').slice(-1)[0].split('?')[0]
@@ -54,6 +54,11 @@ export const RunEvent = (
 
 export const EndpointEvent = (parentID: number, failed: boolean, cost: number, duration: number) =>
   RunEvent(parentID, failed, cost, duration, 'api')
+
+export const BudgetEvent = (scope: 'user' | 'project', scopeID: number, cost: number): Event => ({
+  name: 'budget',
+  params: { content_type: scope, item_id: scopeID.toString(), cost },
+})
 
 export default function logUserRequest(req: Request, res: Response, userID: number, event: Event) {
   const clientID = getClientID(req, res)

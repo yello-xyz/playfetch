@@ -10,26 +10,37 @@ export default function RunCell({
   version,
   activeItem,
   isRunning,
+  isSelected,
+  onSelect,
   runContinuation,
   selectInputValue,
+  onRatingUpdate,
 }: {
   identifierForRun: (runID: number) => string
   run: PartialRun | Run
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   isRunning?: boolean
+  isSelected?: boolean
+  onSelect?: () => void
   runContinuation?: (continuationID: number, message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
+  onRatingUpdate?: (run: Run) => Promise<void>
 }) {
   const continuationID = run.continuationID
-  const isContinuation = !!continuationID
+  const isContinuation = !!continuationID || (run.continuations ?? []).length > 0
 
   const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
   const anyRunFailed = [run, ...(run.continuations ?? [])].some(run => run.failed)
-  const colorClass = anyRunFailed ? 'bg-red-25 border-red-50' : 'bg-blue-25 border-blue-100'
+  const selected = isSelected || !onSelect
+  const colorClass = anyRunFailed
+    ? 'bg-red-25 border-red-50'
+    : selected
+      ? 'bg-blue-25 border-blue-100'
+      : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
 
   return (
-    <div className={`${baseClass} ${colorClass}`}>
+    <div className={`${baseClass} ${colorClass}`} onClick={isSelected ? undefined : onSelect}>
       <div className='flex flex-col gap-2.5'>
         <RunCellHeader run={run} />
         <RunCellBody
@@ -40,7 +51,13 @@ export default function RunCell({
           isContinuation={isContinuation}
         />
       </div>
-      <RunCellFooter run={run} activeItem={activeItem} isContinuation={isContinuation} />
+      <RunCellFooter
+        run={run}
+        activeItem={activeItem}
+        isContinuation={isContinuation}
+        isSelected={selected}
+        onRatingUpdate={onRatingUpdate}
+      />
       {isContinuation && (
         <RunCellContinuation
           run={run}
@@ -49,10 +66,14 @@ export default function RunCell({
           activeItem={activeItem}
           version={version}
           isRunning={isRunning}
+          isSelected={selected}
           runContinuation={
-            runContinuation ? (message, inputKey) => runContinuation(continuationID, message, inputKey) : undefined
+            runContinuation && continuationID
+              ? (message, inputKey) => runContinuation(continuationID, message, inputKey)
+              : undefined
           }
           selectInputValue={selectInputValue}
+          onRatingUpdate={onRatingUpdate}
         />
       )}
     </div>

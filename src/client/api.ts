@@ -19,6 +19,7 @@ import {
   OnboardingResponse,
   RunRating,
   CostUsage,
+  Run,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -150,6 +151,9 @@ const api = {
   runVersion: function (versionID: number, inputs: PromptInputs[], continuationID?: number): Promise<StreamReader> {
     return post(this.runVersion, { versionID, inputs, continuationID }, 'stream')
   },
+  getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
+    return post(this.getIntermediateRuns, { parentRunID, continuationID })
+  },
   getChain: function (chainID: number, activeProject: ActiveProject): Promise<ActiveChain> {
     return post(this.getChain, { chainID }).then(BuildActiveChain(activeProject))
   },
@@ -250,8 +254,8 @@ const api = {
   toggleRunLabel: function (runID: number, projectID: number, label: string, checked: boolean, replyTo?: number) {
     return post(this.toggleRunLabel, { runID, projectID, label, checked, replyTo })
   },
-  toggleRunRating: function (runID: number, projectID: number, rating: RunRating, replyTo?: number) {
-    return post(this.toggleRunRating, { runID, projectID, rating, replyTo })
+  toggleRunRating: function (runID: number, projectID: number, rating: RunRating, reason?: string, replyTo?: number) {
+    return post(this.toggleRunRating, { runID, projectID, rating, reason, replyTo })
   },
   updateInputValues: function (parentID: number, name: string, values: string[]) {
     return post(this.updateInputValues, { parentID, name, values })

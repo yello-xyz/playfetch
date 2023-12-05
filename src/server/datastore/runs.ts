@@ -1,8 +1,21 @@
 import { PromptInputs, Run, RunRating } from '@/types'
-import { Entity, buildKey, getDatastore, getID, getKeyedEntity, getRecentEntities, getTimestamp } from './datastore'
+import {
+  Entity,
+  allocateIDs,
+  buildFilter,
+  buildKey,
+  getDatastore,
+  getFilteredEntities,
+  getFilteredOrderedEntities,
+  getID,
+  getKeyedEntity,
+  getRecentEntities,
+  getTimestamp,
+} from './datastore'
 import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 import { saveComment } from './comments'
+import { PropertyFilter, and, or } from '@google-cloud/datastore'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -12,8 +25,11 @@ export async function migrateRuns(postMerge: boolean) {
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
+    if (runData.reason !== undefined) {
+      continue
+    }
     if (remainingSaveCount-- <= 0) {
-      console.log('‼️  Please run this migration again to process remaining runs')
+      console.log(`‼️  Please run this migration again to process remaining runs (total count ${allRuns.length})`)
       return
     }
     await datastore.save(
@@ -21,15 +37,20 @@ export async function migrateRuns(postMerge: boolean) {
         runData.userID,
         runData.parentID,
         runData.versionID,
+        runData.parentRunID ?? null,
+        runData.itemIndex ?? null,
         JSON.parse(runData.inputs),
         runData.output,
         runData.createdAt,
         runData.cost,
+        runData.inputTokens ?? 0,
+        runData.outputTokens ?? 0,
         runData.duration,
         JSON.parse(runData.labels),
-        runData.rating,
-        runData.continuationID,
-        runData.canContinue,
+        runData.rating ?? null,
+        runData.reason ?? null,
+        runData.continuationID ?? null,
+        runData.canContinue ?? false,
         getID(runData)
       )
     )
@@ -37,34 +58,65 @@ export async function migrateRuns(postMerge: boolean) {
   console.log('✅ Processed all remaining runs')
 }
 
+export const allocateRunIDs = (count: number) => allocateIDs(Entity.RUN, count)
+
 export async function saveNewRun(
   userID: number,
   parentID: number,
   versionID: number,
+  parentRunID: number | null,
+  itemIndex: number,
   inputs: PromptInputs,
   output: string,
   cost: number,
+  inputTokens: number,
+  outputTokens: number,
   duration: number,
-  continuationID: number | undefined,
-  canContinue: boolean
+  continuationID: number | null,
+  canContinue: boolean,
+  runID?: number
 ) {
-  await ensurePromptOrChainAccess(userID, parentID)
   const runData = toRunData(
     userID,
     parentID,
     versionID,
+    parentRunID,
+    itemIndex,
     inputs,
     output,
     new Date(),
     cost,
+    inputTokens,
+    outputTokens,
     duration,
     [],
-    undefined,
+    null,
+    null,
     continuationID,
-    canContinue ?? undefined
+    canContinue,
+    runID
   )
   await getDatastore().save(runData)
 }
+
+export async function getIntermediateRunsForParentRun(userID: number, parentRunID: number, continuationID?: number) {
+  const runData = await getFilteredEntities(
+    Entity.RUN,
+    continuationID
+      ? or([
+          buildFilter('parentRunID', parentRunID),
+          and([buildFilter('continuationID', continuationID), new PropertyFilter('parentRunID', '!=', null)]),
+        ])
+      : buildFilter('parentRunID', parentRunID)
+  )
+  if (runData.length > 0) {
+    await ensurePromptOrChainAccess(userID, runData[0].parentID)
+  }
+  return runData.map(toRun(0))
+}
+
+export const getOrderedRunsForParentID = (parentID: number) =>
+  getFilteredOrderedEntities(Entity.RUN, and([buildFilter('parentID', parentID), buildFilter('parentRunID', null)]))
 
 const getVerifiedUserRunData = async (userID: number, runID: number) => {
   const runData = await getKeyedEntity(Entity.RUN, runID)
@@ -106,6 +158,7 @@ export async function updateRunRating(
   runID: number,
   projectID: number,
   rating: RunRating,
+  reason?: string,
   replyTo?: number
 ) {
   const runData = await getVerifiedUserRunData(userID, runID)
@@ -114,13 +167,13 @@ export async function updateRunRating(
     projectID,
     runData.parentID,
     runData.versionID,
-    '', // TODO store the justification here (maybe)
+    reason ?? '',
     replyTo,
     rating === 'positive' ? 'thumbsUp' : 'thumbsDown',
     runID
   )
-  if (rating !== runData.rating) {
-    await updateRun({ ...runData, rating })
+  if (rating !== runData.rating || !!reason) {
+    await updateRun({ ...runData, rating, reason: reason ?? null })
   }
 }
 
@@ -130,13 +183,18 @@ async function updateRun(runData: any) {
       runData.userID,
       runData.parentID,
       runData.versionID,
+      runData.parentRunID,
+      runData.itemIndex,
       JSON.parse(runData.inputs),
       runData.output,
       runData.createdAt,
       runData.cost,
+      runData.inputTokens,
+      runData.outputTokens,
       runData.duration,
       JSON.parse(runData.labels),
       runData.rating,
+      runData.reason,
       runData.continuationID,
       runData.canContinue,
       getID(runData)
@@ -148,15 +206,20 @@ const toRunData = (
   userID: number,
   parentID: number,
   versionID: number,
+  parentRunID: number | null,
+  itemIndex: number,
   inputs: PromptInputs,
   output: string,
   createdAt: Date,
   cost: number,
+  inputTokens: number,
+  outputTokens: number,
   duration: number,
   labels: string[],
-  rating: RunRating | undefined,
-  continuationID: number | undefined,
-  canContinue: boolean | undefined,
+  rating: RunRating | null,
+  reason: string | null,
+  continuationID: number | null,
+  canContinue: boolean,
   runID?: number
 ) => ({
   key: buildKey(Entity.RUN, runID),
@@ -164,32 +227,43 @@ const toRunData = (
     userID,
     parentID,
     versionID,
+    parentRunID,
+    itemIndex,
     inputs: JSON.stringify(inputs),
     output,
     createdAt,
     cost,
+    inputTokens,
+    outputTokens,
     duration,
     labels: JSON.stringify(labels),
     rating,
-    continuationID: continuationID ?? null,
+    reason,
+    continuationID,
     canContinue,
   },
-  excludeFromIndexes: ['output', 'inputs', 'labels'],
+  excludeFromIndexes: ['output', 'inputs', 'labels', 'reason'],
 })
 
-export const toRun = (data: any): Run => ({
-  id: getID(data),
-  userID: data.userID,
-  timestamp: getTimestamp(data),
-  inputs: JSON.parse(data.inputs),
-  output: data.output,
-  cost: data.cost,
-  duration: data.duration,
-  labels: JSON.parse(data.labels),
-  rating: data.rating ?? null,
-  continuationID: data.continuationID ?? null,
-  canContinue: data.canContinue ?? false,
-})
+export const toRun =
+  (maxItemIndex: number) =>
+  (data: any): Run => ({
+    id: getID(data),
+    index: data.itemIndex !== null ? data.itemIndex : maxItemIndex,
+    parentRunID: data.parentRunID,
+    userID: data.userID,
+    timestamp: getTimestamp(data),
+    inputs: JSON.parse(data.inputs),
+    output: data.output,
+    cost: data.cost,
+    tokens: data.inputTokens + data.outputTokens,
+    duration: data.duration,
+    labels: JSON.parse(data.labels),
+    rating: data.rating,
+    reason: data.reason,
+    continuationID: data.continuationID,
+    canContinue: data.canContinue,
+  })
 
 export async function getRecentRuns(
   since: Date,
@@ -198,5 +272,5 @@ export async function getRecentRuns(
   pagingBackwards = false
 ): Promise<(Run & { userID: number })[]> {
   const recentRunsData = await getRecentEntities(Entity.RUN, limit, since, before, 'createdAt', pagingBackwards)
-  return recentRunsData.map(runData => ({ ...toRun(runData), userID: runData.userID }))
+  return recentRunsData.map(runData => ({ ...toRun(0)(runData), userID: runData.userID }))
 }

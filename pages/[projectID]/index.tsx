@@ -132,6 +132,7 @@ export default function Home({
   const onDeleteItem = async (itemID: number) => {
     refreshProject()
     if (itemID === activePrompt?.id || itemID === activeChain?.id) {
+      setModifiedVersion(undefined)
       router.push(ProjectRoute(activeProject.id))
     }
   }
@@ -212,7 +213,7 @@ export default function Home({
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
-  const [activeRunID, selectComment] = useCommentSelection(activeVersion, async (parentID, versionID) => {
+  const [focusRunID, selectComment] = useCommentSelection(activeVersion, async (parentID, versionID) => {
     const prompt = activeProject.prompts.find(prompt => prompt.id === parentID)
     const chain = activeProject.chains.find(chain => chain.id === parentID)
     if (prompt && prompt.id === activePrompt?.id) {
@@ -240,8 +241,6 @@ export default function Home({
                     <Suspense>
                       <ProjectTopBar
                         workspaces={workspaces}
-                        activeProject={activeProject}
-                        onRefreshProject={refreshProject}
                         onNavigateBack={navigateBack}
                         showComments={showComments}
                         setShowComments={setShowComments}
@@ -250,7 +249,6 @@ export default function Home({
                     <div className='flex items-stretch flex-1 overflow-hidden'>
                       <Suspense>
                         <ProjectSidebar
-                          activeProject={activeProject}
                           activeItem={activeItem}
                           workspaces={workspaces}
                           onAddPrompt={addPrompt}
@@ -266,8 +264,6 @@ export default function Home({
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane
-                            activeProject={activeProject}
-                            refreshProject={refreshProject}
                             activeItem={activeItem}
                             activePrompt={activePrompt}
                             activeChain={activeChain}
@@ -279,7 +275,7 @@ export default function Home({
                             savePrompt={savePrompt}
                             saveChain={saveChain}
                             refreshOnSavePrompt={refreshOnSavePrompt}
-                            activeRunID={activeRunID}
+                            focusRunID={focusRunID}
                             analytics={analytics}
                             refreshAnalytics={refreshAnalytics}
                             scopedProviders={scopedProviders}

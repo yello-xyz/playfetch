@@ -1,6 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react'
 import {
-  ActiveProject,
   ActivePrompt,
   Endpoint,
   FindItemInProject,
@@ -30,6 +29,7 @@ import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
 import { ExtractUnboundChainInputs } from '../chains/chainNodeOutput'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
+import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,
@@ -43,15 +43,11 @@ const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSet
 })
 
 export default function EndpointsView({
-  project,
   analytics,
   refreshAnalytics,
-  onRefresh,
 }: {
-  project: ActiveProject
   analytics?: Analytics
   refreshAnalytics: (dayRange: number) => void
-  onRefresh: () => Promise<void>
 }) {
   const router = useRouter()
   const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
@@ -62,15 +58,19 @@ export default function EndpointsView({
   const logEntries = analytics?.recentLogEntries ?? []
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
+  const activeProject = useActiveProject()
+
   const updateActiveLogEntryIndex = (index: number) => {
     setActiveLogEntryIndex(index)
-    const endpoint = project.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
+    const endpoint = activeProject.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
     setActiveEndpointID(endpoint?.id)
     setActiveParentID(logEntries[index].parentID)
   }
 
   const selectTab = (tab: ActiveTab) => {
-    router.push(tab === 'Logs' ? LogsRoute(project.id) : EndpointsRoute(project.id), undefined, { shallow: true })
+    router.push(tab === 'Logs' ? LogsRoute(activeProject.id) : EndpointsRoute(activeProject.id), undefined, {
+      shallow: true,
+    })
     setActiveTab(tab)
     setActiveLogEntryIndex(undefined)
   }
@@ -84,7 +84,7 @@ export default function EndpointsView({
     </TabSelector>
   )
 
-  const endpoints = project.endpoints
+  const endpoints = activeProject.endpoints
 
   const startsEditing = newParentID !== undefined && newVersionID !== undefined
   const [isEditing, setEditing] = useState(startsEditing)
@@ -93,7 +93,7 @@ export default function EndpointsView({
   )
 
   const addEndpoint =
-    ItemsInProject(project).length > 0
+    ItemsInProject(activeProject).length > 0
       ? () => {
           setNewEndpoint(NewEndpointSettings())
           setActiveParentID(undefined)
@@ -102,8 +102,10 @@ export default function EndpointsView({
         }
       : undefined
 
+  const refreshProject = useRefreshProject()
+
   const refresh = async (newEndpointID?: number) => {
-    await onRefresh()
+    await refreshProject()
     if (newEndpointID) {
       setActiveEndpointID(newEndpointID)
     }
@@ -111,7 +113,7 @@ export default function EndpointsView({
 
   if (newEndpoint && !isEditing) {
     setNewEndpoint(undefined)
-    router.push(EndpointsRoute(project.id), undefined, { shallow: true })
+    router.push(EndpointsRoute(activeProject.id), undefined, { shallow: true })
   }
 
   const [activeEndpointID, setActiveEndpointID] = useState<number>()
@@ -136,9 +138,9 @@ export default function EndpointsView({
     }
   }
 
-  const parent = activeParentID ? FindItemInProject(activeParentID, project) : undefined
+  const parent = activeParentID ? FindItemInProject(activeParentID, activeProject) : undefined
   const [activeParent, setActiveParent] = useState<ActivePrompt | ActiveChain>()
-  const parentCache = useActiveItemCache(project, parent ? [parent.id] : [], setActiveParent)
+  const parentCache = useActiveItemCache(activeProject, parent ? [parent.id] : [], setActiveParent)
   useEffect(() => setActiveParent(parent ? parentCache.itemForID(parent.id) : undefined), [parent, parentCache])
 
   const [versionIndex, setVersionIndex] = useState(-1)
@@ -166,7 +168,6 @@ export default function EndpointsView({
         <Allotment.Pane minSize={minWidth}>
           <EndpointsTable
             tabSelector={tabSelector}
-            project={project}
             activeEndpoint={activeEndpoint}
             setActiveEndpoint={updateActiveEndpoint}
             onAddEndpoint={addEndpoint}
@@ -192,7 +193,6 @@ export default function EndpointsView({
             <div className='flex flex-col gap-6 p-4 overflow-y-auto max-w-[680px]'>
               <EndpointSettingsPane
                 endpoint={activeEndpoint}
-                project={project}
                 activeParent={activeParent}
                 onSelectParentID={setActiveParentID}
                 onSelectVersionIndex={setVersionIndex}
@@ -205,7 +205,7 @@ export default function EndpointsView({
                   endpoint={activeEndpoint}
                   variables={variables}
                   inputValues={activeParent.inputValues}
-                  defaultFlavor={project.availableFlavors[0]}
+                  defaultFlavor={activeProject.availableFlavors[0]}
                 />
               )}
               {!isEditing && IsSavedEndpoint(activeEndpoint) && <UsagePane endpoint={activeEndpoint} />}
@@ -219,7 +219,7 @@ export default function EndpointsView({
             <LogEntriesView
               tabSelector={tabSelector}
               logEntries={logEntries}
-              endpoints={project.endpoints}
+              endpoints={activeProject.endpoints}
               activeIndex={activeLogEntryIndex}
               setActiveIndex={updateActiveLogEntryIndex}
             />

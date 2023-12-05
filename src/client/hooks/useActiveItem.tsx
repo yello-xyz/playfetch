@@ -9,6 +9,7 @@ import {
   SettingsItem,
 } from '@/src/common/activeItem'
 import useInitialState from './useInitialState'
+import { useState } from 'react'
 
 const ActiveItemIsPromptOrChain = (item: ActiveItem | undefined): item is ActivePrompt | ActiveChain | undefined =>
   item !== CompareItem && item !== EndpointsItem && item !== SettingsItem
@@ -18,8 +19,6 @@ const ActiveItemIsPrompt = (item: ActiveItem): item is ActivePrompt =>
   ActiveItemIsPromptOrChain(item) && !ActiveItemIsChain(item)
 
 const sameIDs = (a: { id: number } | undefined, b: { id: number } | undefined) => a?.id === b?.id
-const sameParentIDs = (a: { parentID: number } | undefined, b: { parentID: number } | undefined) =>
-  a?.parentID === b?.parentID
 const sameItems = (a: ActiveItem | undefined, b: ActiveItem | undefined) =>
   (a === CompareItem && b === CompareItem) ||
   (a === EndpointsItem && b === EndpointsItem) ||
@@ -59,16 +58,25 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
   const activePrompt = activeItem && ActiveItemIsPrompt(activeItem) ? activeItem : undefined
   const activeChain = activeItem && ActiveItemIsChain(activeItem) ? activeItem : undefined
 
-  const initialActiveVersion = ActiveItemIsPromptOrChain(activeItem) ? activeItem?.versions?.slice(-1)?.[0] : undefined
-  const [activeVersion, setActiveVersion] = useInitialState(initialActiveVersion, sameParentIDs)
+  const defaultVersionForItem = (item: ActiveItem | undefined) =>
+    item && ActiveItemIsPromptOrChain(item) ? item.versions.slice(-1)[0] : undefined
+
+  const [activeVersion, setActiveVersion] = useState(defaultVersionForItem(activeItem))
   const activePromptVersion = activeVersion && IsPromptVersion(activeVersion) ? activeVersion : undefined
   const activeChainVersion = activeVersion && !IsPromptVersion(activeVersion) ? activeVersion : undefined
+
+  const updateActiveItem = (item: ActiveItem | undefined) => {
+    setActiveItem(item)
+    if (!sameItems(item, activeItem)) {
+      setActiveVersion(defaultVersionForItem(item))
+    }
+  }
 
   return [
     activeProject,
     refreshProject,
     activeItem,
-    setActiveItem,
+    updateActiveItem,
     activePrompt,
     activeChain,
     activeVersion,

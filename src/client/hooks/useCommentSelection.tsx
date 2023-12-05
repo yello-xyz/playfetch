@@ -5,16 +5,22 @@ export default function useCommentSelection(
   activeVersion: PromptVersion | ChainVersion | undefined,
   selectVersion: (parentID: number, versionID: number) => Promise<void>
 ) {
-  const [activeRunID, setActiveRunID] = useState<number>()
+  const [focusRunID, setFocusRunID] = useState<number>()
 
-  const selectComment = (parentID: number, versionID: number, runID?: number) => {
+  const [previousVersionID, setPreviousVersionID] = useState(activeVersion?.id)
+  if (activeVersion?.id !== previousVersionID) {
+    setPreviousVersionID(activeVersion?.id)
+    setFocusRunID(undefined)
+  }
+
+  const selectComment = (parentID: number, versionID: number, runID?: number | null) => {
     if (versionID !== activeVersion?.id) {
-      setActiveRunID(undefined)
-      selectVersion(parentID, versionID).then(() => setTimeout(() => setActiveRunID(runID), 1000))
+      setFocusRunID(undefined)
+      selectVersion(parentID, versionID).then(() => setTimeout(() => setFocusRunID(runID ?? undefined)))
     } else {
-      setActiveRunID(runID)
+      setFocusRunID(runID ?? undefined)
     }
   }
 
-  return [activeRunID, selectComment] as const
+  return [focusRunID, selectComment] as const
 }

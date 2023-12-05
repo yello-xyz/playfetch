@@ -1,4 +1,4 @@
-import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptVersion, Run, User } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, IsProperRun, PartialRun, PromptVersion, Run, User } from '@/types'
 import { Fragment, KeyboardEvent, ReactNode, useState } from 'react'
 import RunCellFooter from './runCellFooter'
 import TextInput from '../textInput'
@@ -16,8 +16,10 @@ export default function RunCellContinuation({
   activeItem,
   version,
   isRunning,
+  isSelected,
   runContinuation,
   selectInputValue,
+  onRatingUpdate,
 }: {
   run: PartialRun | Run
   continuations: (PartialRun | Run)[]
@@ -25,8 +27,10 @@ export default function RunCellContinuation({
   activeItem?: ActivePrompt | ActiveChain
   version?: PromptVersion | ChainVersion
   isRunning?: boolean
+  isSelected: boolean
   runContinuation?: (message: string, inputKey: string) => void
   selectInputValue: (inputKey: string) => string | undefined
+  onRatingUpdate?: (run: Run) => Promise<void>
 }) {
   const runWithContinuations = [run, ...continuations]
   const getInputKey = (run: PartialRun | Run) => ExtractInputKey(run)
@@ -49,19 +53,23 @@ export default function RunCellContinuation({
     }
   }
 
-  const isPartialRun = (item: PartialRun | Run): item is PartialRun => !('labels' in item)
   const users = activeItem?.users ?? []
 
   const totalCost = runWithContinuations.reduce((totalCost, run) => totalCost + (run.cost ?? 0), 0)
+  const totalTokens = runWithContinuations.reduce((tokens, run) => tokens + (IsProperRun(run) ? run.tokens : 0), 0)
 
   return (
     <>
       {continuations.map((run, index) => (
         <Fragment key={run.id}>
-          <RoleHeader user={isPartialRun(run) ? user : users.find(user => user.id === run.userID)} role='User' />
-          <BorderedSection>
-            <div className='flex-1'>{isPartialRun(run) ? lastReply : run.inputs[getPreviousInputKey(index)]}</div>
-          </BorderedSection>
+          {!!runWithContinuations[index].canContinue && (
+            <>
+              <RoleHeader user={IsProperRun(run) ? users.find(user => user.id === run.userID) : user} role='User' />
+              <BorderedSection>
+                <div className='flex-1'>{IsProperRun(run) ? run.inputs[getPreviousInputKey(index)] : lastReply}</div>
+              </BorderedSection>
+            </>
+          )}
           <RunCellBody
             identifierForRun={identifierForRun}
             run={run}
@@ -69,7 +77,13 @@ export default function RunCellContinuation({
             activeItem={activeItem}
             isContinuation
           />
-          <RunCellFooter run={run} activeItem={activeItem} isContinuation />
+          <RunCellFooter
+            run={run}
+            activeItem={activeItem}
+            isContinuation
+            isSelected={isSelected}
+            onRatingUpdate={onRatingUpdate}
+          />
         </Fragment>
       ))}
       {!!runContinuation && !!runWithContinuations.slice(-1)[0].canContinue && (
@@ -96,6 +110,7 @@ export default function RunCellContinuation({
       {totalCost > (run.cost ?? 0) && (
         <span className='w-full pt-2 mt-2 text-right text-gray-500 border-t border-gray-200'>
           Total Cost: {FormatCost(totalCost)}
+          {totalTokens > 0 && ` • Total Tokens: ${totalTokens}`}
         </span>
       )}
     </>

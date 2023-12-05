@@ -9,13 +9,13 @@ import {
   getID,
   getKeyedEntity,
   getOrderedEntities,
-  getTimestamp,
 } from './datastore'
 import { Chain, ChainItemWithInputs, InputValues, RawChainVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { getTrustedProjectScopedData, getUniqueName, getVerifiedProjectScopedData } from './prompts'
 import { getTrustedParentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
+import { getOrderedRunsForParentID } from './runs'
 
 export async function migrateChains(postMerge: boolean) {
   if (postMerge) {
@@ -63,7 +63,6 @@ export const toChain = (data: any): Chain => ({
   name: data.name,
   referencedItemIDs: [...new Set(Object.values(JSON.parse(data.references) as References).flat())],
   projectID: data.projectID,
-  timestamp: getTimestamp(data, 'lastEditedAt'),
 })
 
 export async function getChainForUser(
@@ -73,7 +72,7 @@ export async function getChainForUser(
   const chainData = await getVerifiedUserChainData(userID, chainID)
 
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', chainID)
-  const runs = await getOrderedEntities(Entity.RUN, 'parentID', chainID)
+  const runs = await getOrderedRunsForParentID(chainID)
 
   const inputValues = await getTrustedParentInputValues(chainID)
 

@@ -18,20 +18,10 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, configIndex, index, message, cost, duration, timestamp, failed, continuationID, isLast } =
-        JSON.parse(data)
-      if (isLast || timestamp) {
-        const lastIndex = Math.max(...Object.keys(runs[inputIndex]).map(Number))
-        const lastRun = runs[inputIndex][lastIndex]
-        lastRun.isLast = isLast ?? false
-        lastRun.timestamp = timestamp
-        lastRun.continuationID = lastRun.continuationID ?? continuationID
-        lastRun.canContinue = !!continuationID
-      } else {
-        const previousOutput = runs[inputIndex][index]?.output ?? ''
-        const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[inputIndex][index] = { id: index, index: configIndex, output, cost, duration, failed, continuationID }
-      }
+      const { inputIndex, index, message, cost, duration, failed, continuationID } = JSON.parse(data)
+      const previousOutput = runs[inputIndex][index]?.output ?? ''
+      const output = message ? `${previousOutput}${message}` : previousOutput
+      runs[inputIndex][index] = { id: index, index, output, cost, duration, failed, continuationID }
     }
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
     const sortedRuns = Object.entries(runs)
@@ -46,7 +36,7 @@ export const ConsumeStream = async (
   }
 }
 
-export default function useRunVersion(activeVersionID: number, clearLastPartialRunsOnCompletion = false) {
+export default function useRunVersion(activeVersionID: number) {
   const refreshActiveItem = useRefreshActiveItem()
   const [isRunning, setRunning] = useState(false)
   const [partialRuns, setPartialRuns] = useState<PartialRun[]>([])
@@ -68,27 +58,18 @@ export default function useRunVersion(activeVersionID: number, clearLastPartialR
     const versionID = await getVersion()
     setRunningVersionID(versionID)
     const streamReader = await api.runVersion(versionID, inputs, continuationID)
-    let isFinished = false
+    let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
-      const minTimestamp = Math.min(...runs.filter(run => !!run.timestamp && !run.failed).map(run => run.timestamp!))
-      const addTimestamp = clearLastPartialRunsOnCompletion && minTimestamp > 0 && minTimestamp < Infinity
-      setPartialRuns(
-        runs.map((run, index, runs) =>
-          addTimestamp && !run.timestamp ? { ...run, timestamp: minTimestamp - runs.length + index } : run
-        )
-      )
-      setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index ?? 0)))
-      isFinished = !runs.some(run => !!run.failed || run.canContinue)
+      anyRunFailed = runs.some(run => run.failed)
+      setPartialRuns(runs)
+      setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index)))
     })
     await refreshActiveItem(versionID)
 
-    if (clearLastPartialRunsOnCompletion) {
-      setPartialRuns(runs => runs.filter(run => !run.isLast))
-    }
-
+    setPartialRuns(runs => runs.filter(run => run.failed))
     setRunning(false)
 
-    return isFinished
+    return !anyRunFailed
   }
 
   return [runVersion, partialRuns, isRunning, highestRunIndex] as const

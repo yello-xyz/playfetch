@@ -31,10 +31,12 @@ const startOfNextMonth = () => {
 
 const getBudgetData = (scopeID: number) => getKeyedEntity(Entity.BUDGET, scopeID)
 
+const budgetDataNeedsCostReset = (data: any | undefined) => data?.resetsAt && new Date() > data.resetsAt
+
 const toBudget = (data: any | undefined): { limit: number | null; threshold: number | null; cost: number } => ({
   limit: data?.limit ?? null,
   threshold: data?.threshold ?? null,
-  cost: data?.cost ?? 0,
+  cost: budgetDataNeedsCostReset(data) ? 0 : data?.cost ?? 0,
 })
 
 export const getTrustedBudgetForScope = (scopeID: number) => getBudgetData(scopeID).then(toBudget)
@@ -49,7 +51,7 @@ export async function updateBudgetForScope(
   const budgetData = await getBudgetData(scopeID)
   const resetsAt = budgetData?.resetsAt ?? startOfNextMonth()
   const cost = budgetData?.cost ?? 0
-  if (threshold !== null && limit !== null && threshold >= limit) {
+  if (threshold !== null && (limit === null || threshold >= limit)) {
     threshold = null
   }
   await getDatastore().save(toBudgetData(scopeID, userID, new Date(), limit, resetsAt, threshold, cost))
@@ -60,7 +62,7 @@ export async function checkBudgetForScope(scopeID: number): Promise<boolean> {
   if (!budgetData) {
     return true
   }
-  if (new Date() > budgetData.resetsAt) {
+  if (budgetDataNeedsCostReset(budgetData)) {
     await getDatastore().save(
       toBudgetData(
         scopeID,

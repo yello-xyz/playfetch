@@ -7,12 +7,18 @@ import {
 } from '../providers/integration'
 import { DefaultProvider } from '../../common/defaultConfig'
 import { PublicLanguageModels, ProviderForModel } from '../../common/providerMetadata'
+import { EmptyRunResponse, ErrorRunResponse, RunResponse, TryParseOutput } from './runResponse'
+import { DefaultChatContinuationInputKey } from '@/src/common/formatting'
 
-type ValidOrEmptyPredictionResponse = { output: string; cost: number }
-type ErrorPredictionResponse = { error: string }
-type PredictionResponse = (ValidOrEmptyPredictionResponse | ErrorPredictionResponse) & {
-  functionInterrupt?: string
+type ValidOrEmptyPredictionResponse = {
+  output: string
+  cost: number
+  inputTokens: number
+  outputTokens: number
+  functionCall: string | null
 }
+type ErrorPredictionResponse = { error: string }
+type PredictionResponse = ValidOrEmptyPredictionResponse | ErrorPredictionResponse
 
 export type PromptContext = any
 export type Predictor = (
@@ -21,8 +27,10 @@ export type Predictor = (
   maxTokens: number,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks?: (text: string) => void,
-  continuationInputs?: PromptInputs
+  streamChunks: (text: string) => void | undefined,
+  seed: number | undefined,
+  jsonMode: boolean | undefined,
+  continuationInputs: PromptInputs
 ) => Promise<PredictionResponse>
 
 const isErrorPredictionResponse = (response: PredictionResponse): response is ErrorPredictionResponse =>
@@ -32,28 +40,6 @@ const isValidOrEmptyPredictionResponse = (response: PredictionResponse): respons
 const isValidPredictionResponse = (response: PredictionResponse) =>
   isValidOrEmptyPredictionResponse(response) && response.output.length > 0
 
-type RunResponse = (
-  | { result: any; output: string; error: undefined; failed: false; functionInterrupt?: string }
-  | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number }
-
-export const TryParseOutput = (output: string | undefined) => {
-  try {
-    return output ? JSON.parse(output) : output
-  } catch {
-    return output
-  }
-}
-
-export const ErrorRunResponse = (error: string): RunResponse => ({
-  error,
-  result: undefined,
-  output: undefined,
-  cost: 0,
-  attempts: 1,
-  failed: true,
-})
-
 export default async function runPromptWithConfig(
   userID: number,
   projectID: number,
@@ -61,8 +47,8 @@ export default async function runPromptWithConfig(
   config: PromptConfig,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks?: (chunk: string) => void,
-  continuationInputs?: PromptInputs
+  streamChunks: (chunk: string) => void | undefined,
+  continuationInputs: PromptInputs
 ): Promise<RunResponse> {
   const scopeIDs = [projectID, userID]
   const provider = ProviderForModel(config.model)
@@ -78,7 +64,7 @@ export default async function runPromptWithConfig(
 
   const predictor = GetPredictor(provider, apiKey ?? '', userID, config.model)
 
-  let result: PredictionResponse = { output: '', cost: 0 }
+  let result: PredictionResponse = EmptyRunResponse()
   let attempts = 0
   const maxAttempts = 3
   while (++attempts <= maxAttempts) {
@@ -89,6 +75,8 @@ export default async function runPromptWithConfig(
       context,
       usePreviousContext,
       streamChunks,
+      config.seed,
+      config.jsonMode,
       continuationInputs
     )
     if (isValidPredictionResponse(result)) {
@@ -102,9 +90,15 @@ export default async function runPromptWithConfig(
 
   return {
     ...(isErrorPredictionResponse(result)
-      ? { error: result.error, result: undefined, output: undefined, cost: 0, failed: true }
+      ? ErrorRunResponse(result.error)
       : isValidPredictionResponse(result)
-        ? { ...result, result: TryParseOutput(result.output), error: undefined, failed: false }
+        ? {
+            ...result,
+            result: TryParseOutput(result.output),
+            error: undefined,
+            failed: false,
+            functionCall: result.functionCall ?? (config.isChat ? DefaultChatContinuationInputKey : null),
+          }
         : {
             ...result,
             result: undefined,

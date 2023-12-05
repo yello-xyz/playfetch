@@ -42,34 +42,7 @@ export async function migrateProjects(postMerge: boolean) {
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    if (!projectData.userID) {
-      const projectID = getID(projectData)
-      const accessKeys = await getEntities(Entity.ACCESS, 'objectID', projectID)
-      let userID: number
-      let foundInvite = false
-      let userMatch = false
-      if (accessKeys.length > 0) {
-        userID = accessKeys.sort((a, b) => a.createdAt - b.createdAt)[0].grantedBy
-        foundInvite = true
-      } else {
-        const workspaceData = await getKeyedEntity(Entity.WORKSPACE, projectData.workspaceID)
-        userID = workspaceData.userID
-        const prompts = await getEntities(Entity.PROMPT, 'projectID', projectID)
-        const oldestPrompt = prompts.sort((a, b) => a.createdAt - b.createdAt)[0]
-        if (oldestPrompt) {
-          const versions = await getEntities(Entity.VERSION, 'parentID', getID(oldestPrompt))
-          const oldestVersion = versions.sort((a, b) => a.createdAt - b.createdAt)[0]
-          if (oldestVersion) {
-            userMatch = userID === oldestVersion.userID
-            userID = oldestVersion.userID
-          }
-        }
-      }
-      const userData = await getKeyedEntity(Entity.USER, userID)
-      console.log(`${foundInvite ? '✅' : userMatch ? '🟩' : '❓'} “${projectData.name}” → ${userData.fullName}`)
-      await updateProject({ ...projectData, userID }, false)
-      await grantUserAccess(userID, userID, projectID, 'project', 'owner', projectData.createdAt)
-    }
+    await updateProject({ ...projectData }, false)
   }
 }
 
@@ -130,9 +103,9 @@ async function loadEndpoints(projectID: number, apiKeyDev: string) {
 
 export async function getActiveProject(userID: number, projectID: number): Promise<ActiveProject> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID, ['lastEditedAt'])
+  const promptData = await getOrderedEntities(Entity.PROMPT, 'projectID', projectID)
   const prompts = promptData.map(toPrompt)
-  const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID, ['lastEditedAt'])
+  const chainData = await getOrderedEntities(Entity.CHAIN, 'projectID', projectID)
   const chains = chainData.map(toChain)
   const commentsData = await getOrderedEntities(Entity.COMMENT, 'projectID', projectID)
   const comments = commentsData.map(toComment).reverse()
@@ -426,9 +399,7 @@ export async function getRecentProjects(projects?: Project[], limit = 100): Prom
     ...new Set([...projects.map(project => project.workspaceID)]),
   ])
 
-  const usersData = await getKeyedEntities(Entity.USER, [
-    ...new Set([...projects.map(project => project.createdBy)]),
-  ])
+  const usersData = await getKeyedEntities(Entity.USER, [...new Set([...projects.map(project => project.createdBy)])])
 
   return projects
     .map(project => toRecentProject(project, workspacesData, usersData))

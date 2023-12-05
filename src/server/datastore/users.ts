@@ -126,7 +126,7 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
     const previousConfig: Partial<PromptConfig> = userData.defaultPromptConfig
       ? JSON.parse(userData.defaultPromptConfig)
       : {}
-    userConfig = { ...previousConfig, ...config }
+    userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
     await updateUser({ ...userData, defaultPromptConfig: JSON.stringify(userConfig) })
   }
 

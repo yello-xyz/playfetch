@@ -3,13 +3,14 @@ import OpenAI from 'openai'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { ChatCompletionCreateParams } from 'openai/resources/chat'
+import { SupportsJsonMode } from '@/src/common/providerMetadata'
 
 export default function predict(
   apiKey: string,
   userID: number,
   model: OpenAILanguageModel | CustomLanguageModel
 ): Predictor {
-  return (prompts, temperature, maxOutputTokens, context, useContext, streamChunks, continuationInputs) =>
+  return (prompts, temperature, maxTokens, context, useContext, streamChunks, seed, jsonMode, continuationInputs) =>
     tryCompleteChat(
       apiKey,
       userID,
@@ -18,7 +19,9 @@ export default function predict(
       prompts.system,
       prompts.functions,
       temperature,
-      maxOutputTokens,
+      maxTokens,
+      seed,
+      jsonMode,
       context,
       useContext,
       streamChunks,
@@ -57,6 +60,8 @@ async function tryCompleteChat(
   functionsPrompt: string | undefined,
   temperature: number,
   maxTokens: number,
+  seed: number | undefined,
+  jsonMode: boolean | undefined,
   context: PromptContext,
   useContext: boolean,
   streamChunks?: (chunk: string) => void,
@@ -96,6 +101,8 @@ async function tryCompleteChat(
         user: userID.toString(),
         stream: true,
         functions: inputFunctions.length > 0 ? inputFunctions : undefined,
+        seed,
+        ...(SupportsJsonMode(model) && !!jsonMode ? { response_format: { type: 'json_object' } } : {}),
       },
       { timeout: 30 * 1000 }
     )
@@ -136,11 +143,15 @@ async function tryCompleteChat(
     }
 
     const extractContent = (obj: any) => (typeof obj.content === 'string' ? obj.content : JSON.stringify(obj))
-    const cost = CostForModel(model, [...inputMessages, ...inputFunctions].map(extractContent).join('\n'), output)
+    const [cost, inputTokens, outputTokens] = CostForModel(
+      model,
+      [...inputMessages, ...inputFunctions].map(extractContent).join('\n'),
+      output
+    )
     context.messages = [...inputMessages, functionMessage ?? { role: 'assistant', content: output }]
     context.functions = inputFunctions
 
-    return { output, cost, functionInterrupt: functionMessage?.function_call?.name }
+    return { output, cost, inputTokens, outputTokens, functionCall: functionMessage?.function_call?.name ?? null }
   } catch (error: any) {
     return { error: error?.message ?? 'Unknown error' }
   }
@@ -170,13 +181,13 @@ export async function createEmbedding(
   userID: number,
   model: 'text-embedding-ada-002',
   input: string
-): Promise<{ embedding: number[]; cost: number }> {
+): Promise<{ embedding: number[]; cost: number; inputTokens: number }> {
   const api = new OpenAI({ apiKey })
 
   const response = await api.embeddings.create({ input, model, user: userID.toString() })
 
   const embedding = response.data[0].embedding
-  const cost = CostForModel(model, input)
+  const [cost, inputTokens] = CostForModel(model, input)
 
-  return { embedding, cost }
+  return { embedding, cost, inputTokens }
 }

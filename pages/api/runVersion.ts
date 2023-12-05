@@ -1,6 +1,6 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { saveNewRun } from '@/src/server/datastore/runs'
+import { allocateRunIDs, saveNewRun } from '@/src/server/datastore/runs'
 import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
@@ -10,30 +10,32 @@ import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
 
-const logResponse = (
-  req: NextApiRequest,
-  res: NextApiResponse,
+const saveRun = (
   userID: number,
   version: RawPromptVersion | RawChainVersion,
+  parentRunID: number | null,
+  itemIndex: number,
   inputs: PromptInputs,
-  response: Awaited<ReturnType<typeof runChain>>,
-  continuationID: number | undefined
-) => {
-  logUserRequest(req, res, userID, RunEvent(version.parentID, response.failed, response.cost, response.duration))
-  return response.failed
-    ? Promise.resolve()
-    : saveNewRun(
-        userID,
-        version.parentID,
-        version.id,
-        inputs,
-        response.output,
-        response.cost,
-        response.duration,
-        continuationID ?? response.continuationID,
-        !!response.continuationID
-      )
-}
+  response: Awaited<ReturnType<typeof runChain>> & { failed: false },
+  continuationID: number | undefined,
+  runID?: number
+) =>
+  saveNewRun(
+    userID,
+    version.parentID,
+    version.id,
+    parentRunID,
+    itemIndex,
+    inputs,
+    response.output,
+    response.cost,
+    response.inputTokens,
+    response.outputTokens,
+    response.duration,
+    continuationID ?? response.continuationID ?? null,
+    !!response.continuationID,
+    runID
+  )
 
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
@@ -47,6 +49,9 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
+  const runIDs = await allocateRunIDs(multipleInputs.length)
+  const lastIndices = multipleInputs.map(_ => 0)
+
   const responses = await Promise.all(
     multipleInputs.map(async (inputs, inputIndex) => {
       return runChain(
@@ -56,30 +61,40 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         configs,
         inputs,
         false,
-        (index, extraSteps, message, cost, duration, failed) =>
+        (index, message, response, stepInputs) => {
           sendData({
             inputIndex,
-            configIndex: index,
-            index: index + extraSteps,
+            index,
             message,
-            cost,
-            duration,
-            failed,
+            cost: response?.cost,
+            duration: response?.duration,
+            failed: response?.failed,
             continuationID,
-          }),
+          })
+          lastIndices[inputIndex] = index
+          if (response && stepInputs && !response.failed) {
+            saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
+          }
+        },
         continuationID
       )
     })
   )
 
   for (const [index, response] of responses.entries()) {
-    sendData({
-      inputIndex: index,
-      timestamp: new Date().getTime(),
-      isLast: !response.failed,
-      continuationID: response.continuationID,
-    })
-    await logResponse(req, res, user.id, version, multipleInputs[index], response, continuationID)
+    logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+    if (!response.failed) {
+      await saveRun(
+        user.id,
+        version,
+        null,
+        lastIndices[index],
+        multipleInputs[index],
+        response,
+        continuationID,
+        runIDs[index]
+      )
+    }
   }
 
   res.end()

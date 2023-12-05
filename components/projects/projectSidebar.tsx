@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ActivePrompt, Chain, Endpoint, Prompt, Workspace } from '@/types'
+import { Chain, Endpoint, Prompt, Workspace } from '@/types'
 import promptIcon from '@/public/prompt.svg'
 import addIcon from '@/public/add.svg'
 import chainIcon from '@/public/chain.svg'
@@ -10,13 +10,12 @@ import Sidebar, { SidebarButton, SidebarSection } from '../sidebar'
 import { Suspense, useState } from 'react'
 import IconButton from '../iconButton'
 import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/common/activeItem'
+import { useActiveProject } from '@/src/client/context/projectContext'
 
 import dynamic from 'next/dynamic'
-import { useLoggedInUser } from '@/src/client/context/userContext'
 const ProjectItemPopupMenu = dynamic(() => import('./projectItemPopupMenu'))
 
 export default function ProjectSidebar({
-  activeProject,
   activeItem,
   workspaces,
   onAddPrompt,
@@ -28,7 +27,6 @@ export default function ProjectSidebar({
   onSelectEndpoints,
   onSelectSettings,
 }: {
-  activeProject: ActiveProject
   activeItem?: ActiveItem
   workspaces: Workspace[]
   onAddPrompt: () => void
@@ -40,6 +38,7 @@ export default function ProjectSidebar({
   onSelectEndpoints: () => void
   onSelectSettings: () => void
 }) {
+  const activeProject = useActiveProject()
   const reference = (item: Prompt | Chain) =>
     activeProject.endpoints.find(endpoint => endpoint.enabled && endpoint.parentID === item.id) ??
     activeProject.chains.find(chain => chain.referencedItemIDs.includes(item.id))
@@ -61,8 +60,6 @@ export default function ProjectSidebar({
     activeItem !== EndpointsItem &&
     activeItem !== SettingsItem &&
     activeItem?.id === item.id
-
-  const user = useLoggedInUser()
 
   return (
     <Sidebar>

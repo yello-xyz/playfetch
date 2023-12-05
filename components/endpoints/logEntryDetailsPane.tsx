@@ -10,8 +10,8 @@ import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { SingleTabHeader } from '../tabSelector'
 import CodeBlock from '../codeBlock'
 import LogStatus from './logStatus'
-import { ReactNode, useState } from 'react'
-import chevronIcon from '@/public/chevron.svg'
+import { ReactNode } from 'react'
+import Collapsible from '../collapsible'
 
 export default function LogEntryDetailsPane({
   logEntries,
@@ -117,17 +117,12 @@ function CollapsibleContent({
   collapsible?: boolean
   children: ReactNode
 }) {
-  const [isExpanded, setExpanded] = useState(true)
   const formattedDate = useFormattedDate(timestamp, timestamp => FormatDate(timestamp, true, true))
 
   return collapsible ? (
-    <div>
-      <div className='flex items-center cursor-pointer' onClick={() => setExpanded(!isExpanded)}>
-        <Icon className={`${isExpanded ? '' : '-rotate-90'}`} icon={chevronIcon} />
-        <span className='font-medium text-gray-700'>{formattedDate}</span>
-      </div>
-      {isExpanded && <div className='flex flex-col gap-6 pt-2 ml-6'>{children}</div>}
-    </div>
+    <Collapsible initiallyExpanded title={formattedDate} className='flex flex-col gap-6 pt-2'>
+      {children}
+    </Collapsible>
   ) : (
     <>{children}</>
   )

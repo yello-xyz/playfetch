@@ -65,7 +65,6 @@ export type Prompt = {
   id: number
   name: string
   projectID: number
-  timestamp: number
 }
 
 export type ActivePrompt = Prompt & {
@@ -80,7 +79,6 @@ export type Chain = {
   name: string
   referencedItemIDs: number[]
   projectID: number
-  timestamp: number
 }
 
 export type ActiveChain = Chain & {
@@ -115,6 +113,8 @@ export type PromptConfig = {
   isChat: boolean
   temperature: number
   maxTokens: number
+  seed?: number
+  jsonMode?: boolean
 }
 
 export type CustomModel = {
@@ -175,8 +175,9 @@ export const IsPromptVersion = (version: PromptVersion | ChainVersion): version 
 
 export type PromptInputs = { [name: string]: string }
 
-type CommonRun = {
+export type PartialRun = {
   id: number
+  index: number
   output: string
   timestamp?: number
   cost?: number
@@ -184,23 +185,24 @@ type CommonRun = {
   failed?: boolean
   continuationID?: number
   canContinue?: boolean
+  parentRunID?: number | null
   continuations?: (PartialRun | Run)[]
 }
 
-export type PartialRun = CommonRun & {
-  index?: number
-  isLast?: boolean
-}
-
-export type Run = CommonRun & {
+export type Run = PartialRun & {
   timestamp: number
+  parentRunID: number | null
   cost: number
   duration: number
+  tokens: number
   inputs: PromptInputs
   labels: string[]
-  rating?: RunRating
+  rating: RunRating | null
+  reason: string | null
   userID: number
 }
+
+export const IsProperRun = (item: PartialRun | Run): item is Run => 'labels' in item
 
 type CommonConfigAttributes = {
   output?: string

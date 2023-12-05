@@ -7,9 +7,8 @@ import { Endpoint, PromptInputs } from '@/types'
 import { loadConfigsFromVersion } from '../runVersion'
 import { saveLogEntry } from '@/src/server/datastore/logs'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import runChain from '@/src/server/evaluationEngine/chainEngine'
+import runChain, { ChainResponseFromValue } from '@/src/server/evaluationEngine/chainEngine'
 import { cacheValueForKey, getCachedValueForKey } from '@/src/server/datastore/cache'
-import { TryParseOutput } from '@/src/server/evaluationEngine/promptEngine'
 import { withErrorRoute } from '@/src/server/session'
 import { EndpointEvent, getClientID, logUnknownUserEvent } from '@/src/server/analytics'
 import { updateAnalytics } from '@/src/server/datastore/analytics'
@@ -61,34 +60,14 @@ const logResponse = (
   logUnknownUserEvent(clientID, EndpointEvent(endpoint.parentID, response.failed, response.cost, response.duration))
 }
 
-type ResponseType = Awaited<ReturnType<typeof runChain>>
-
 const getCacheKey = (versionID: number, inputs: PromptInputs) =>
   `${versionID}:${JSON.stringify(Object.entries(inputs).sort(([a], [b]) => a.localeCompare(b)))}`
 
-const cacheResponse = (
-  versionID: number,
-  inputs: PromptInputs,
-  response: ResponseType & { failed: false },
-  parentID: number
-) => cacheValueForKey(getCacheKey(versionID, inputs), response.output, { versionID, parentID })
+const cacheResponse = (versionID: number, inputs: PromptInputs, output: string, parentID: number) =>
+  cacheValueForKey(getCacheKey(versionID, inputs), output, { versionID, parentID })
 
-const getCachedResponse = async (versionID: number, inputs: PromptInputs): Promise<ResponseType | null> => {
-  const cachedValue = await getCachedValueForKey(getCacheKey(versionID, inputs))
-  return cachedValue
-    ? {
-        result: TryParseOutput(cachedValue),
-        output: cachedValue,
-        error: undefined,
-        duration: 0,
-        cost: 0,
-        failed: false,
-        attempts: 1,
-        continuationID: undefined,
-        extraSteps: 0,
-      }
-    : null
-}
+const getCachedResponse = (versionID: number, inputs: PromptInputs) =>
+  getCachedValueForKey(getCacheKey(versionID, inputs)).then(ChainResponseFromValue)
 
 const stringify = (result: object) => JSON.stringify(result, null, 2)
 
@@ -126,18 +105,24 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
           res.write(cachedResponse.output)
         }
         let response = cachedResponse
+        let didReachLastStep = false
         if (!response) {
           const version = await getTrustedVersion(versionID, true)
 
           const configs = loadConfigsFromVersion(version)
-          const isLastStep = (index: number) => index === configs.length - 1
-          const stream = (index: number, _: number, message: string) =>
-            useStreaming && isLastStep(index) ? res.write(message) : undefined
+          const stream = useStreaming
+            ? (index: number, message: string) => {
+                didReachLastStep = index === configs.length - 1
+                if (didReachLastStep) {
+                  res.write(message)
+                }
+              }
+            : undefined
 
           response = await runChain(endpoint.userID, projectID, version, configs, inputs, true, stream, continuationID)
 
           if (endpoint.useCache && !response.failed && !continuationID && !response.continuationID) {
-            cacheResponse(versionID, inputs, response, endpoint.parentID)
+            cacheResponse(versionID, inputs, response.output, endpoint.parentID)
           }
         }
 
@@ -145,6 +130,9 @@ async function endpoint(req: NextApiRequest, res: NextApiResponse) {
 
         const newContinuationKey = response.continuationID ? salt(response.continuationID).toString() : undefined
         if (useStreaming) {
+          if (!didReachLastStep) {
+            res.write(response.output)
+          }
           if (newContinuationKey && newContinuationKey !== continuationKey) {
             res.write(`\n${continuationHeaderKey}: ${newContinuationKey}`)
           }

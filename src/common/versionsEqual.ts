@@ -14,7 +14,12 @@ export const ChainVersionsAreEqual = (a: { items: ChainItemWithInputs[] }, b: { 
   normalizeItems(a.items) === normalizeItems(b.items)
 
 export const PromptConfigsAreEqual = (a: PromptConfig, b: PromptConfig) =>
-  a.model === b.model && a.isChat === b.isChat && a.temperature === b.temperature && a.maxTokens === b.maxTokens
+  a.model === b.model &&
+  a.isChat === b.isChat &&
+  a.temperature === b.temperature &&
+  a.maxTokens === b.maxTokens &&
+  a.seed === b.seed &&
+  a.jsonMode === b.jsonMode
 
 export const PromptVersionsAreEqual = (
   a: { prompts: Prompts; config: PromptConfig },

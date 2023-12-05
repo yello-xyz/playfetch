@@ -8,12 +8,7 @@ import {
 } from '../providers/integration'
 import runVectorQuery from '../providers/pinecone'
 import { ProviderForModel } from '../../common/providerMetadata'
-import { ErrorRunResponse } from './promptEngine'
-
-type QueryResponse = (
-  | { result: string[]; output: string; error: undefined; failed: false }
-  | { result: undefined; output: undefined; error: string; failed: true }
-) & { cost: number; attempts: number }
+import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
 export const runQuery = async (
   userID: number,
@@ -23,7 +18,7 @@ export const runQuery = async (
   indexName: string,
   query: string,
   topK: number
-): Promise<QueryResponse> => {
+): Promise<RunResponse> => {
   try {
     const scopeIDs = [projectID, userID]
     const { apiKey, environment } = await getProviderCredentials(scopeIDs, provider)
@@ -40,12 +35,12 @@ export const runQuery = async (
       throw new Error('Monthly usage limit exceeded')
     }
 
-    const { embedding, cost } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
+    const { embedding, cost, inputTokens } = await CreateEmbedding(embeddingProvider, embeddingAPIKey, userID, query)
     IncrementProviderCost(scopeID, providerID, model, cost)
 
     const result = await runVectorQuery(apiKey, environment, indexName, embedding, topK)
 
-    return { result, output: result.join('\n'), error: undefined, failed: false, cost, attempts: 1 }
+    return { ...EmptyRunResponse(), result, output: result.join('\n'), cost, inputTokens }
   } catch (error: any) {
     return ErrorRunResponse(error.message)
   }

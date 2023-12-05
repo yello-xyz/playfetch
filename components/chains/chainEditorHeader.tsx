@@ -21,8 +21,6 @@ export default function ChainEditorHeader({
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
 }) {
-  const versionIndex = chain.versions.findIndex(version => version.id === activeVersion.id)
-
   const refreshActiveItem = useRefreshActiveItem()
   const refreshProject = useRefreshProject()
   const renameChain = (name: string) =>
@@ -37,7 +35,9 @@ export default function ChainEditorHeader({
       <HeaderTitle
         chainName={chain.name}
         onRename={renameChain}
-        versionIndex={!isVersionSaved || !setShowVersions ? undefined : versionIndex}
+        versionIndex={chain.versions.findIndex(version => version.id === activeVersion.id)}
+        versionIsSaved={isVersionSaved && !!setShowVersions}
+        versionIsPublished={activeVersion.didRun}
       />
       <HiddenHeaderButton />
     </CustomHeader>
@@ -47,10 +47,14 @@ export default function ChainEditorHeader({
 function HeaderTitle({
   chainName,
   versionIndex,
+  versionIsSaved,
+  versionIsPublished,
   onRename,
 }: {
   chainName: string
-  versionIndex?: number
+  versionIndex: number
+  versionIsSaved: boolean
+  versionIsPublished: boolean
   onRename: (name: string) => Promise<void>
 }) {
   const [label, setLabel] = useState<string>()
@@ -74,10 +78,12 @@ function HeaderTitle({
         )}
       </div>
       {label === undefined &&
-        (versionIndex === undefined ? (
-          <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>Unsaved</span>
-        ) : (
+        (versionIsSaved && versionIsPublished ? (
           <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
+        ) : (
+          <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>
+            {versionIsSaved ? 'Unpublished' : 'Unsaved'}
+          </span>
         ))}
     </div>
   )

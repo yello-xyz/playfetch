@@ -1,4 +1,4 @@
-import { ActiveChain, ActiveProject, ChainItem, ChainItemWithInputs, ChainVersion } from '@/types'
+import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
@@ -14,14 +14,13 @@ import {
   OutputNode,
 } from './chainNode'
 import { Allotment } from 'allotment'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import VersionTimeline from '../versions/versionTimeline'
 import { SingleTabHeader } from '../tabSelector'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'
 import useChainPromptCache, { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
-import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 
 const StripItemsToSave = (items: ChainItem[]): ChainItem[] =>
   items.map(item => {
@@ -55,23 +54,22 @@ export default function ChainView({
   chain,
   activeVersion,
   setActiveVersion,
-  project,
   saveChain,
-  activeRunID,
+  focusRunID,
 }: {
   chain: ActiveChain
   activeVersion: ChainVersion
   setActiveVersion: (version: ChainVersion) => void
-  project: ActiveProject
   saveChain: (
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
-  activeRunID?: number
+  focusRunID?: number
 }) {
   const [nodes, setNodes] = useState([InputNode, ...activeVersion.items, OutputNode] as ChainNode[])
 
-  const promptCache = useChainPromptCache(project, nodes, setNodes)
+  const activeProject = useActiveProject()
+  const promptCache = useChainPromptCache(activeProject, nodes, setNodes)
   const [activeNodeIndex, setActiveNodeIndex] = useState<number>()
 
   const items = nodes.filter(IsChainItem)
@@ -81,8 +79,9 @@ export default function ChainView({
   const refreshActiveItem = useRefreshActiveItem()
 
   const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
-    setSavedItemsKey(GetChainItemsSaveKey(items))
-    return saveChain(GetItemsToSave(items, promptCache), refreshActiveItem)
+    const loadedItems = items.filter(item => !IsPromptChainItem(item) || !!item.versionID)
+    setSavedItemsKey(GetChainItemsSaveKey(loadedItems))
+    return saveChain(GetItemsToSave(loadedItems, promptCache), refreshActiveItem)
   }
 
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
@@ -99,7 +98,7 @@ export default function ChainView({
   const refreshProject = useRefreshProject()
 
   const addPrompt = async () => {
-    const { promptID, versionID } = await api.addPrompt(project.id)
+    const { promptID, versionID } = await api.addPrompt(activeProject.id)
     refreshProject()
     return { promptID, versionID }
   }
@@ -123,8 +122,12 @@ export default function ChainView({
   }
 
   const updateItems = (items: ChainItem[]) => {
-    setNodes([InputNode, ...items, OutputNode])
+    const nodes = [InputNode, ...items, OutputNode] as ChainNode[]
+    setNodes(nodes)
     saveItems(items)
+    if (activeNodeIndex !== undefined && activeNodeIndex > nodes.length - 1) {
+      setActiveNodeIndex(nodes.length - 1)
+    }
   }
 
   const [showVersions, setShowVersions] = useState(false)
@@ -144,9 +147,9 @@ export default function ChainView({
     }
   }
 
-  const [lastActiveRunID, setLastActiveRunID] = useState<number>()
-  if (activeRunID !== lastActiveRunID) {
-    setLastActiveRunID(activeRunID)
+  const [lastFocusRunID, setLastFocusRunID] = useState<number>()
+  if (focusRunID !== lastFocusRunID) {
+    setLastFocusRunID(focusRunID)
     if (!isNodeDirty) {
       updateTestMode(true)
       setActiveNodeIndex(nodes.indexOf(OutputNode))
@@ -183,7 +186,7 @@ export default function ChainView({
           saveItems={updateItems}
           activeIndex={activeNodeIndex}
           setActiveIndex={updateActiveNodeIndex}
-          prompts={project.prompts}
+          prompts={activeProject.prompts}
           addPrompt={addPrompt}
           showVersions={showVersions}
           setShowVersions={canShowVersions ? setShowVersions : undefined}
@@ -207,7 +210,7 @@ export default function ChainView({
                 setActiveIndex={updateActiveNodeIndex}
                 promptCache={promptCache}
                 saveItems={items => saveItems(items).then(versionID => versionID!)}
-                activeRunID={activeRunID}
+                focusRunID={focusRunID}
                 showRunButtons={isTestMode}
               />
             ) : (
