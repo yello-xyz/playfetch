@@ -128,7 +128,10 @@ const BudgetInput = ({
         type='text'
         ref={inputRef}
         value={value}
-        onChange={event => setValue(Number(event.target.value))}
+        onChange={event => {
+          const numberValue = Number(event.target.value)
+          setValue(isNaN(numberValue) ? 0 : numberValue)
+        }}
       />
     </>
   ) : (
