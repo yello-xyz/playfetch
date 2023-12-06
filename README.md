@@ -45,6 +45,8 @@ In order to run the app locally, you will need to add some additional variables 
 
 `API_URL=http://localhost:3000`
 
+`ENCRYPTION_KEY=` *[see "PlayFetch DEV Encryption Key" in the 1Password Engineering vault]*
+
 `GCLOUD_STORAGE_BUCKET=playfetch-dev.appspot.com`
 
 `NEXTAUTH_URL=http://localhost:3000`
