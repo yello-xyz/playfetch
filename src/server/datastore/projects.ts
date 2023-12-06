@@ -202,9 +202,9 @@ export async function toggleOwnershipForProject(userID: number, memberID: number
   }
 }
 
-export async function checkProject(projectID: number, apiKey?: string): Promise<number | undefined> {
+export async function checkProject(projectID: number, apiKey: string): Promise<number | undefined> {
   const projectData = await getTrustedProjectData(projectID)
-  return projectData && (!apiKey || projectData.apiKeyHash === hashAPIKey(apiKey))
+  return projectData && projectData.apiKeyHash === hashAPIKey(apiKey)
 }
 
 async function updateProject(projectData: any, updateLastEditedTimestamp: boolean) {
