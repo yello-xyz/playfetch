@@ -43,7 +43,7 @@ export default function CustomModelSettings({
       </div>
       {areCustomModelsExpanded && (
         <div className='flex flex-col gap-2 ml-6'>
-          {[...customModels, ...customModels].map((model, index) => (
+          {customModels.map((model, index) => (
             <ModelRow
               key={index}
               scopeID={scopeID}
