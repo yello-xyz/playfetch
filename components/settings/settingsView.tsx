@@ -37,7 +37,8 @@ const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
       return (
         'Provide your API credentials here to enable integration with LLM providers' +
         (isProjectScope ? ' within this project. ' : '. ') +
-        'To get started, you’ll need to sign up for an account and get an API key from them.'
+        'To get started, you’ll need to sign up for an account and get an API key from them. ' +
+        'All API keys are encrypted and stored securely.'
       )
     case UsagePane:
       return (
@@ -53,7 +54,8 @@ const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
     case ConnectorsPane:
       return (
         'Provide your API credentials here to enable integration with vector stores' +
-        (isProjectScope ? ' within this project.' : '.')
+        (isProjectScope ? ' within this project. ' : '. ') + 
+        'All API keys are encrypted and stored securely.'
       )
   }
 }
