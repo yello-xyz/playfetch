@@ -270,16 +270,17 @@ export async function ensureProjectLabel(userID: number, projectID: number, labe
   }
 }
 
-export async function ensureProjectAPIKey(userID: number, projectID: number): Promise<string> {
+export async function ensureProjectAPIKey(userID: number, projectID: number): Promise<void> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  return projectData.apiKeyDev ?? rotateProjectAPIKey(projectData)
+  if (!projectData.apiKeyDev) {
+    await rotateProjectAPIKey(projectData)
+  }
 }
 
-async function rotateProjectAPIKey(projectData: any): Promise<string> {
+async function rotateProjectAPIKey(projectData: any): Promise<void> {
   const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
   const apiKeyHash = hashAPIKey(apiKey)
   await updateProject({ ...projectData, apiKeyHash, apiKeyDev: apiKey }, true)
-  return apiKey
 }
 
 export async function toggleFavoriteProject(userID: number, projectID: number, favorited: boolean) {
