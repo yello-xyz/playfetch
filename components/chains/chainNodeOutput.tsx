@@ -212,7 +212,7 @@ export default function ChainNodeOutput({
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
-              onRatingUpdate={run => run.parentRunID ? refreshIntermediateRuns() : Promise.resolve()}
+              onRatingUpdate={run => (run.parentRunID ? refreshIntermediateRuns() : Promise.resolve())}
             />
           </div>
         )}

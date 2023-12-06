@@ -3,6 +3,8 @@ import {
   Entity,
   allocateID,
   buildKey,
+  decrypt,
+  encrypt,
   getDatastore,
   getEntities,
   getEntityCount,
@@ -28,7 +30,7 @@ import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } fr
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
-import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers, getWorkspacesForUser } from './workspaces'
+import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
@@ -36,13 +38,23 @@ import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 
 export async function migrateProjects(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    await updateProject({ ...projectData }, false)
+    if (projectData.apiKeyHash) {
+      await updateProject(
+        {
+          ...projectData,
+          encryptedAPIKey: postMerge
+            ? projectData.encryptedAPIKey
+            : projectData.apiKeyDev
+              ? encrypt(projectData.apiKeyDev)
+              : projectData.apiKeyDev,
+          apiKeyDev: postMerge ? undefined : projectData.apiKeyDev,
+        },
+        false
+      )
+    }
   }
 }
 
@@ -58,8 +70,9 @@ const toProjectData = (
   lastEditedAt: Date,
   favorited: number[],
   apiKeyHash: string | undefined,
-  apiKeyDev: string | undefined,
-  projectID: number
+  encryptedAPIKey: string | undefined,
+  projectID: number,
+  apiKeyDev?: string // TODO delete after next merge to prod (also in exludedFromIndexes)
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
   data: {
@@ -72,9 +85,10 @@ const toProjectData = (
     flavors: JSON.stringify(flavors),
     favorited: JSON.stringify(favorited),
     apiKeyHash,
+    encryptedAPIKey,
     apiKeyDev, // TODO do NOT store api key in datastore but show it once to user on creation
   },
-  excludeFromIndexes: ['name', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
+  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
 })
 
 export const toProject = (data: any, userID: number, isOwner: boolean): Project => ({
@@ -119,7 +133,7 @@ export async function getActiveProject(userID: number, projectID: number): Promi
   return {
     ...toProject(projectData, userID, !!projectOwner),
     availableFlavors: JSON.parse(projectData.flavors),
-    endpoints: await loadEndpoints(projectID, projectData.apiKeyDev ?? ''),
+    endpoints: await loadEndpoints(projectID, projectData.encryptedAPIKey ? decrypt(projectData.encryptedAPIKey) : ''),
     prompts,
     chains,
     users,
@@ -219,8 +233,9 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
       updateLastEditedTimestamp ? new Date() : projectData.lastEditedAt,
       JSON.parse(projectData.favorited),
       projectData.apiKeyHash,
-      projectData.apiKeyDev,
-      getID(projectData)
+      projectData.encryptedAPIKey,
+      getID(projectData),
+      projectData.apiKeyDev
     )
   )
 }
@@ -272,10 +287,11 @@ export async function ensureProjectLabel(userID: number, projectID: number, labe
 
 export async function ensureProjectAPIKey(userID: number, projectID: number): Promise<void> {
   const projectData = await getVerifiedUserProjectData(userID, projectID)
-  if (!projectData.apiKeyDev) {
+  if (!projectData.encryptedAPIKey) {
     const apiKey = `sk-${new ShortUniqueId({ length: 48, dictionary: 'alphanum' })()}`
+    const encryptedAPIKey = encrypt(apiKey)
     const apiKeyHash = hashAPIKey(apiKey)
-    await updateProject({ ...projectData, apiKeyHash, apiKeyDev: apiKey }, true)
+    await updateProject({ ...projectData, encryptedAPIKey, apiKeyHash }, true)
   }
 }
 
