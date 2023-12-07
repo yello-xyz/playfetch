@@ -134,8 +134,10 @@ export async function getIntermediateRunsForParentRun(userID: number, parentRunI
 export const getOrderedRunsForParentID = (parentID: number) =>
   getFilteredOrderedEntities(Entity.RUN, and([buildFilter('parentID', parentID), buildFilter('parentRunID', null)]))
 
+const getTrustedRunData = (runID: number) => getKeyedEntity(Entity.RUN, runID)
+
 const getVerifiedUserRunData = async (userID: number, runID: number) => {
-  const runData = await getKeyedEntity(Entity.RUN, runID)
+  const runData = await getTrustedRunData(runID)
   if (!runData) {
     throw new Error(`Run with ID ${runID} does not exist or user has no access`)
   }
@@ -196,6 +198,15 @@ export async function updateRunRating(
   }
 }
 
+const predictedRatingPrefix = 'predicted-'
+
+export async function savePredictedRunRating(runID: number, rating: RunRating, reason: string) {
+  const runData = await getTrustedRunData(runID)
+  if (runData.rating === null) {
+    await updateRun({ ...runData, rating: `${predictedRatingPrefix}${rating}`, reason })
+  }
+}
+
 async function updateRun(runData: any) {
   await getDatastore().save(
     toRunData(
@@ -235,7 +246,7 @@ const toRunData = (
   outputTokens: number,
   duration: number,
   labels: string[],
-  rating: RunRating | null,
+  rating: RunRating | 'predicted-positive' | 'predicted-negative' | null,
   reason: string | null,
   continuationID: number | null,
   canContinue: boolean,
@@ -278,8 +289,8 @@ export const toRun =
     tokens: data.inputTokens + data.outputTokens,
     duration: data.duration,
     labels: JSON.parse(data.labels),
-    rating: data.rating,
-    isPredictedRating: false,
+    rating: data.rating !== null ? data.rating.replace(predictedRatingPrefix, '') : null,
+    isPredictedRating: data.rating !== null && data.rating.startsWith(predictedRatingPrefix),
     reason: data.reason,
     continuationID: data.continuationID,
     canContinue: data.canContinue,
