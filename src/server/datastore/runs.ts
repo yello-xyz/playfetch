@@ -17,6 +17,7 @@ import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 import { saveComment } from './comments'
 import { PropertyFilter, and, or } from '@google-cloud/datastore'
+import { saveRunRatingForParent } from './ratings'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
@@ -189,6 +190,9 @@ export async function updateRunRating(
   )
   if (rating !== runData.rating || !!reason) {
     await updateRun({ ...runData, rating, reason: reason ?? null })
+  }
+  if (!!reason) {
+    saveRunRatingForParent(runData.parentID, JSON.parse(runData.inputs), runData.output, rating, reason)
   }
 }
 
