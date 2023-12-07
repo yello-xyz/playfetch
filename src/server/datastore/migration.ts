@@ -11,6 +11,7 @@ import { migrateLogs } from './logs'
 import { migrateProjects } from './projects'
 import { migratePrompts } from './prompts'
 import { migrateProviders } from './providers'
+import { migrateRatings } from './ratings'
 import { migrateRuns } from './runs'
 import { migrateUsage } from './usage'
 import { migrateUsers } from './users'
@@ -21,4 +22,5 @@ export async function runDataMigrations(postMerge: boolean) {
   await migrateProviders(postMerge)
   await migrateProjects(postMerge)
   await migrateRuns(postMerge)
+  await migrateRatings(postMerge)
 }
