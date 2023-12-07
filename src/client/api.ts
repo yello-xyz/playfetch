@@ -148,6 +148,9 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
+  suggestPrompt: function (promptID: number, versionID: number) {
+    return post(this.suggestPrompt, { promptID, versionID })
+  },
   runVersion: function (versionID: number, inputs: PromptInputs[], continuationID?: number): Promise<StreamReader> {
     return post(this.runVersion, { versionID, inputs, continuationID }, 'stream')
   },

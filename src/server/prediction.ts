@@ -1,12 +1,14 @@
-import { PromptInputs } from '@/types'
+import { PromptInputs, Prompts, RawPromptVersion } from '@/types'
 import { getRecentRatingsForParent } from './datastore/ratings'
-import ModelProvider from './providers/vertexai'
+import getPredictorForDefaultProviderModel from './providers/vertexai'
 import { savePredictedRunRating } from './datastore/runs'
+import { ensurePromptAccess } from './datastore/prompts'
+import { getTrustedVersion, savePromptVersionForUser } from './datastore/versions'
 
 type Rating = Awaited<ReturnType<typeof getRecentRatingsForParent>>[0]
 
 const buildRatingPredictionPrompts = (recentRatings: Rating[], inputs: PromptInputs, output: string) => ({
-  system: 'You are a critical QA tester who is concise and predictable.',
+  system: 'You are a critical QA tester who is concise and predictable',
   main: `Given the following ratings for outputs based on inputs, predict the rating for the next output based on its input. Limit yourself to the same ratings and reasons as the ones provided in the examples:
 
 ${recentRatings
@@ -26,11 +28,30 @@ Output: ${output}
 Rating: `,
 })
 
-export async function predictRatingForRun(runID: number, parentID: number, inputs: PromptInputs, output: string) {
-  const recentRatings = await getRecentRatingsForParent(parentID)
+const buildPromptImprovementPrompts = (recentRatings: Rating[], prompts: Prompts) => ({
+  system: 'You are a linguist expert',
+  main: `Given the following prompt and ratings for outputs based on inputs, suggest a better prompt that would produce better outputs:
 
-  const response = await ModelProvider('chat-bison')(
-    buildRatingPredictionPrompts(recentRatings, inputs, output),
+Prompt: ${prompts.main}
+
+${recentRatings
+  .map(
+    rating =>
+      `Input: ${rating.inputs}
+Output: ${rating.output}
+Rating: ${rating.rating}
+Reason: ${rating.reason}
+
+`
+  )
+  .join('')})}
+
+Suggested prompt: `,
+})
+
+const runPrompt = (prompts: Prompts) =>
+  getPredictorForDefaultProviderModel('chat-bison')(
+    prompts,
     0,
     500,
     {},
@@ -39,10 +60,15 @@ export async function predictRatingForRun(runID: number, parentID: number, input
     undefined,
     undefined,
     {}
-  )
+  ).then(response => ('output' in response && !!response.output ? response.output : null))
 
-  if ('output' in response && !!output) {
-    const lines = response.output
+export async function predictRatingForRun(runID: number, parentID: number, inputs: PromptInputs, output: string) {
+  const recentRatings = await getRecentRatingsForParent(parentID)
+
+  const response = await runPrompt(buildRatingPredictionPrompts(recentRatings, inputs, output))
+
+  if (response) {
+    const lines = response
       .split('\n')
       .map(line =>
         line
@@ -57,5 +83,25 @@ export async function predictRatingForRun(runID: number, parentID: number, input
         await savePredictedRunRating(runID, rating, reason)
       }
     }
+  }
+}
+
+export async function suggestImprovementForPrompt(userID: number, promptID: number, versionID: number) {
+  await ensurePromptAccess(userID, promptID)
+  const recentRatings = await getRecentRatingsForParent(promptID)
+  const promptVersion = (await getTrustedVersion(versionID)) as RawPromptVersion
+  const prompts = promptVersion.prompts
+
+  const response = await runPrompt(buildPromptImprovementPrompts(recentRatings, promptVersion.prompts))
+
+  if (response) {
+    await savePromptVersionForUser(
+      userID,
+      promptID,
+      { ...prompts, main: response },
+      promptVersion.config,
+      versionID,
+      versionID
+    )
   }
 }
