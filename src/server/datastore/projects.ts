@@ -49,7 +49,7 @@ export async function migrateProjects(postMerge: boolean) {
             ? projectData.encryptedAPIKey
             : projectData.apiKeyDev
               ? encrypt(projectData.apiKeyDev)
-              : projectData.apiKeyDev,
+              : projectData.encryptedAPIKey,
           apiKeyDev: postMerge ? undefined : projectData.apiKeyDev,
         },
         false

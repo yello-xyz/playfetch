@@ -40,7 +40,11 @@ export async function migrateProviders(postMerge: boolean) {
       toProviderData(
         providerData.scopeID,
         providerData.provider,
-        postMerge ? providerData.encryptedAPIKey : providerData.apiKey ? encrypt(providerData.apiKey) : null,
+        postMerge
+          ? providerData.encryptedAPIKey
+          : providerData.apiKey
+          ? encrypt(providerData.apiKey)
+          : providerData.encryptedAPIKey,
         JSON.parse(providerData.metadata),
         providerData.createdAt,
         getID(providerData),
