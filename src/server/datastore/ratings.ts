@@ -42,12 +42,19 @@ export async function migrateRatings(postMerge: boolean) {
 }
 
 const RecentRatingCutoffLength = 10
+const MinimumRecentRatingLength = 10
 
 type Rating = {
   inputs: PromptInputs
   output: string
   rating: RunRating
   reason: string
+}
+
+export const getRecentRatingsForParent = async (parentID: number) => {
+  const ratingData = await getKeyedEntity(Entity.RATING, parentID)
+  const recentRatings = ratingData ? (JSON.parse(ratingData.recentRatings) as Rating[]) : []
+  return recentRatings.length < MinimumRecentRatingLength ? [] : recentRatings
 }
 
 export const saveRunRatingForParent = async (

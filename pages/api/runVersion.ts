@@ -14,6 +14,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
 import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
+import { predictRatingForRun } from '@/src/server/prediction'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
@@ -103,6 +104,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         continuationID,
         runIDs[index]
       )
+      predictRatingForRun(runIDs[index], version.parentID, multipleInputs[index], response.output)
     }
   }
 

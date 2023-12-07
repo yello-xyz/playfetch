@@ -193,7 +193,7 @@ export async function updateRunRating(
   if (rating !== runData.rating || !!reason) {
     await updateRun({ ...runData, rating, reason: reason ?? null })
   }
-  if (!!reason) {
+  if (!!reason && reason !== runData.reason) {
     saveRunRatingForParent(runData.parentID, JSON.parse(runData.inputs), runData.output, rating, reason)
   }
 }
