@@ -1,5 +1,5 @@
 import { sendBudgetNotificationEmails } from '../email'
-import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getKeyedEntity } from './datastore'
+import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getKeyedEntity, getID } from './datastore'
 import { ensureScopeOwnership } from './providers'
 
 export async function migrateBudgets(postMerge: boolean) {
@@ -11,7 +11,7 @@ export async function migrateBudgets(postMerge: boolean) {
   for (const budgetData of allBudgets) {
     await getDatastore().save(
       toBudgetData(
-        budgetData.scopeID,
+        getID(budgetData),
         budgetData.userID,
         budgetData.createdAt,
         budgetData.limit,
