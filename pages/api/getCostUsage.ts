@@ -1,4 +1,4 @@
-import { getCostUsageForScope } from '@/src/server/datastore/cost'
+import { getCostUsageForScope } from '@/src/server/datastore/costs'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User, CostUsage } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

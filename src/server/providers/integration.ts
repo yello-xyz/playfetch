@@ -15,8 +15,8 @@ import openai, { createEmbedding, loadExtraModels } from './openai'
 import anthropic from './anthropic'
 import vertexai from './vertexai'
 import cohere from './cohere'
-import { updateScopedModelCost } from '../datastore/cost'
-import { checkBudgetForScope, incrementCostForScope } from '../datastore/budget'
+import { updateScopedModelCost } from '../datastore/costs'
+import { checkBudgetForScope, incrementCostForScope } from '../datastore/budgets'
 
 const costForTokens = (content: string, pricePerMillionTokens: number) => {
   const tokens = encode(content).length

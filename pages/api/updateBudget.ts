@@ -1,5 +1,5 @@
 import logUserRequest, { BudgetEvent } from '@/src/server/analytics'
-import { updateBudgetForScope } from '@/src/server/datastore/budget'
+import { updateBudgetForScope } from '@/src/server/datastore/budgets'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
