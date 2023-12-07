@@ -1,5 +1,12 @@
 import { sendBudgetNotificationEmails } from '../email'
-import { Entity, runTransactionWithExponentialBackoff, buildKey, getDatastore, getKeyedEntity, getID } from './datastore'
+import {
+  Entity,
+  runTransactionWithExponentialBackoff,
+  buildKey,
+  getDatastore,
+  getKeyedEntity,
+  getID,
+} from './datastore'
 import { ensureScopeOwnership } from './providers'
 
 export async function migrateBudgets(postMerge: boolean) {
