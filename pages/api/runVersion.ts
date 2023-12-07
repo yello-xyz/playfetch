@@ -1,7 +1,15 @@
 import { withLoggedInUserRoute } from '@/src/server/session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { allocateRunIDs, saveNewRun } from '@/src/server/datastore/runs'
-import { PromptInputs, User, RunConfig, CodeConfig, RawPromptVersion, RawChainVersion } from '@/types'
+import {
+  PromptInputs,
+  User,
+  RunConfig,
+  CodeConfig,
+  RawPromptVersion,
+  RawChainVersion,
+  IsRawPromptVersion,
+} from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
@@ -43,6 +51,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const continuationID = req.body.continuationID
 
   const version = await getTrustedVersion(versionID, true)
+  const saveIntermediateRuns = !IsRawPromptVersion(version)
   const parentData = await getVerifiedUserPromptOrChainData(user.id, version.parentID)
   const configs = loadConfigsFromVersion(version)
 
@@ -72,7 +81,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
             continuationID,
           })
           lastIndices[inputIndex] = index
-          if (response && stepInputs && !response.failed) {
+          if (saveIntermediateRuns && response && stepInputs && !response.failed) {
             saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
           }
         },
