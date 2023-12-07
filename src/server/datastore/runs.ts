@@ -279,6 +279,7 @@ export const toRun =
     duration: data.duration,
     labels: JSON.parse(data.labels),
     rating: data.rating,
+    isPredictedRating: false,
     reason: data.reason,
     continuationID: data.continuationID,
     canContinue: data.canContinue,

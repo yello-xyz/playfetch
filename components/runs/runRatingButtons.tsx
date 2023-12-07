@@ -4,6 +4,8 @@ import thumbsUpIcon from '@/public/thumbsUp.svg'
 import thumbsDownIcon from '@/public/thumbsDown.svg'
 import thumbsUpFilledIcon from '@/public/thumbsUpFilled.svg'
 import thumbsDownFilledIcon from '@/public/thumbsDownFilled.svg'
+import thumbsUpSemiFilledIcon from '@/public/thumbsUpSemiFilled.svg'
+import thumbsDownSemiFilledIcon from '@/public/thumbsDownSemiFilled.svg'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import { KeyboardEvent, useCallback, useState } from 'react'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
@@ -40,7 +42,7 @@ export default function RunRatingButtons({
   const [pendingRating, setPendingRating] = useState<RunRating>()
 
   const toggleRating = (rating: RunRating, reason?: string) => {
-    if ((!!reason || rating !== run.rating) && rating !== pendingRating) {
+    if ((!!reason || rating !== run.rating || run.isPredictedRating) && rating !== pendingRating) {
       setPendingRating(rating)
       const replyToActions = reason ? ['thumbsDown', 'thumbsUp'] : rating === 'positive' ? ['thumbsDown'] : ['thumbsUp']
       const replyTo = runComments.findLast(comment => !!comment.action && replyToActions.includes(comment.action))?.id
@@ -74,19 +76,32 @@ function RatingButton({
   setRating: (rating: RunRating, reason?: string) => void
   isSelected: boolean
 }) {
-  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] => [
-    ReasonPopup,
-    { rating, callback: reason => setRating(rating, reason) },
-  ]
+  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] =>
+    [
+      ReasonPopup,
+      {
+        rating,
+        callback: reason => setRating(rating, reason),
+        predictedReason: run.isPredictedRating && !!run.reason ? run.reason : undefined,
+      },
+    ]
 
   const isActiveRating = (pendingRating ?? run.rating) === rating
 
   const iconForRating = () => {
     switch (rating) {
       case 'positive':
-        return isActiveRating ? thumbsUpFilledIcon : thumbsUpIcon
+        return isActiveRating
+          ? run.isPredictedRating && !pendingRating
+            ? thumbsUpSemiFilledIcon
+            : thumbsUpFilledIcon
+          : thumbsUpIcon
       case 'negative':
-        return isActiveRating ? thumbsDownFilledIcon : thumbsDownIcon
+        return isActiveRating
+          ? run.isPredictedRating && !pendingRating
+            ? thumbsDownSemiFilledIcon
+            : thumbsDownFilledIcon
+          : thumbsDownIcon
     }
   }
 
@@ -101,7 +116,7 @@ function RatingButton({
       {run.reason && isActiveRating && !pendingRating && (
         <div className='absolute hidden overflow-visible group-hover:block left-3 bottom-8 max-w-0'>
           <div className='flex justify-center'>
-            <div className='min-w-[160px] flex justify-center'>
+            <div className={`min-w-[160px] flex justify-center ${run.isPredictedRating ? 'italic' : ''}`}>
               <span className='py-1 px-2 text-xs text-center bg-white border border-gray-200 rounded-md max-w-[160px]'>
                 {run.reason}
               </span>
@@ -116,10 +131,11 @@ function RatingButton({
 type ReasonPopupProps = {
   rating: RunRating
   callback: (reason?: string) => void
+  predictedReason?: string
 }
 
-function ReasonPopup({ rating, callback, withDismiss }: ReasonPopupProps & WithDismiss) {
-  const [reason, setReason] = useState('')
+function ReasonPopup({ rating, callback, predictedReason, withDismiss }: ReasonPopupProps & WithDismiss) {
+  const [reason, setReason] = useState(predictedReason ?? '')
 
   const confirm = withDismiss(() => callback(reason ?? undefined))
 

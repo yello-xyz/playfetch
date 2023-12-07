@@ -198,6 +198,7 @@ export type Run = PartialRun & {
   inputs: PromptInputs
   labels: string[]
   rating: RunRating | null
+  isPredictedRating: boolean
   reason: string | null
   userID: number
 }
