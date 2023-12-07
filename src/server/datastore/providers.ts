@@ -42,6 +42,7 @@ export async function migrateProviders(postMerge: boolean) {
         providerData.provider,
         postMerge ? providerData.encryptedAPIKey : providerData.apiKey ? encrypt(providerData.apiKey) : null,
         JSON.parse(providerData.metadata),
+        providerData.createdAt,
         getID(providerData),
         postMerge ? undefined : providerData.apiKey
       )
@@ -78,11 +79,13 @@ const toProviderData = (
   provider: ModelProvider | QueryProvider,
   encryptedAPIKey: string | null,
   metadata: ProviderMetadata,
+  createdAt = new Date(),
   providerID?: number,
   apiKey?: string | null // TODO delete after next merge to prod (also in exludedFromIndexes)
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
+    createdAt,
     scopeID,
     provider,
     encryptedAPIKey,
@@ -116,7 +119,9 @@ export async function saveProviderKey(
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   const encryptedAPIKey = apiKey ? encrypt(apiKey) : null
-  await getDatastore().save(toProviderData(scopeID, provider, encryptedAPIKey, { environment }, providerID))
+  await getDatastore().save(
+    toProviderData(scopeID, provider, encryptedAPIKey, { environment }, providerData?.createdAt, providerID)
+  )
 }
 
 export async function saveProviderModel(
@@ -137,7 +142,14 @@ export async function saveProviderModel(
       { id: modelID, name, description, enabled },
     ]
     await getDatastore().save(
-      toProviderData(scopeID, provider, providerData.encryptedAPIKey, metadata, getID(providerData))
+      toProviderData(
+        scopeID,
+        provider,
+        providerData.encryptedAPIKey,
+        metadata,
+        providerData.createdAt,
+        getID(providerData)
+      )
     )
   }
 }
@@ -187,6 +199,7 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
         availableProviderData.provider,
         availableProviderData.encryptedAPIKey,
         { ...previousMetadata, customModels: filteredCustomModels, gatedModels: currentGatedModels },
+        availableProviderData.createdAt,
         getID(availableProviderData)
       )
     )
