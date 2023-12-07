@@ -72,6 +72,7 @@ export type ActivePrompt = Prompt & {
   inputValues: InputValues
   users: User[]
   availableLabels: string[]
+  canSuggestImprovements: boolean
 }
 
 export type Chain = {

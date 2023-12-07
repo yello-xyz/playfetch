@@ -69,7 +69,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
             selectedCell={isActiveVersion}
           />
           <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
-          <VersionPopupMenu version={version} selectedCell={isActiveVersion} />
+          <VersionPopupMenu activeItem={activeItem} version={version} selectedCell={isActiveVersion} />
         </div>
       </div>
       <VersionLabels version={version} colors={labelColors} />

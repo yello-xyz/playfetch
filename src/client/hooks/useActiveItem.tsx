@@ -37,6 +37,7 @@ export default function useActiveItem(initialActiveProject: ActiveProject, initi
             prompt: activeItem,
             versions: activeItem.versions,
             inputValues: activeItem.inputValues,
+            canSuggestImprovements: activeItem.canSuggestImprovements,
           })
           setActiveVersion(version => updatedPrompt.versions.find(v => v.id === version?.id) ?? version)
           return updatedPrompt

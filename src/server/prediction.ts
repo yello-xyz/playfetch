@@ -30,7 +30,7 @@ Rating: `,
 
 const buildPromptImprovementPrompts = (recentRatings: Rating[], prompts: Prompts) => ({
   system: 'You are a linguist expert',
-  main: `Given the following prompt and ratings for outputs based on inputs, suggest a better prompt that would produce better outputs:
+  main: `Given the following prompt and ratings for outputs based on inputs, suggest a better prompt that would produce better outputs. Make sure to retain any input variables enclosed in double curly braces:
 
 Prompt: ${prompts.main}
 

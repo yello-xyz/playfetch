@@ -5,7 +5,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 async function getPrompt(
   req: NextApiRequest,
-  res: NextApiResponse<{ prompt: Prompt; versions: RawPromptVersion[]; inputValues: InputValues }>,
+  res: NextApiResponse<{
+    prompt: Prompt
+    versions: RawPromptVersion[]
+    inputValues: InputValues
+    canSuggestImprovements: boolean
+  }>,
   user: User
 ) {
   const prompt = await getPromptForUser(user.id, req.body.promptID)

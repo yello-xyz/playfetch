@@ -24,10 +24,12 @@ export const BuildActivePrompt =
     prompt,
     versions,
     inputValues,
+    canSuggestImprovements,
   }: {
     prompt: Prompt
     versions: RawPromptVersion[]
     inputValues: InputValues
+    canSuggestImprovements: boolean
   }): ActivePrompt => {
     const chainReferencedItemIDs = {} as { [id: number]: string }
     project.chains.forEach(chain =>
@@ -49,6 +51,7 @@ export const BuildActivePrompt =
         usedAsEndpoint: versionIDsUsedAsEndpoints.includes(version.id),
       })),
       inputValues,
+      canSuggestImprovements,
       users: project.users,
       availableLabels: project.availableLabels,
     }

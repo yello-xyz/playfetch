@@ -51,6 +51,9 @@ type Rating = {
   reason: string
 }
 
+export const canSuggestImprovedPrompt = (promptID: number) =>
+  getRecentRatingsForParent(promptID).then(ratings => ratings.length >= MinimumRecentRatingLength)
+
 export const getRecentRatingsForParent = async (parentID: number) => {
   const ratingData = await getKeyedEntity(Entity.RATING, parentID)
   const recentRatings = ratingData ? (JSON.parse(ratingData.recentRatings) as Rating[]) : []
