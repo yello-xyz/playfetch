@@ -49,7 +49,7 @@ const saveRun = (
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
-  const dynamicInputs: PromptInputs[] = req.body.dynamicInputs
+  const multipleDynamicInputs: PromptInputs[] = req.body.dynamicInputs
   const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
   const autoRespond = req.body.autoRespond
   const autoRepeatCount = autoRespond !== undefined ? Math.min(25, req.body.maxResponses ?? 0) : 0
@@ -62,7 +62,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
-  for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount; autoRunIndex++) {
+  for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount && multipleInputs.length > 0; autoRunIndex++) {
     const runIDs = await allocateRunIDs(multipleInputs.length)
     const lastIndices = multipleInputs.map(_ => 0)
 
@@ -112,17 +112,19 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       }
     }
 
-    if (responses.some(response => response.failed)) {
-      break
-    } else {
-      for (const [index, response] of responses.entries()) {
-        continuationIDs[index] = response.continuationID
-        if (!response.failed && response.functionCall) {
-          multipleInputs[index] = {
-            ...multipleInputs[index],
-            [response.functionCall]: dynamicInputs[index][response.functionCall],
-          }
-        }
+    for (let index = responses.length - 1; index >= 0; index--) {
+      const response = responses[index]
+      const continuationID = response.continuationID
+      const functionCall = response.failed ? undefined : response.functionCall
+      const inputs = multipleInputs[index]
+      const dynamicInputs = multipleDynamicInputs[index]
+      if (!response.failed && continuationID && functionCall && dynamicInputs[functionCall]) {
+        continuationIDs[index] = continuationID
+        multipleInputs[index] = { ...inputs, [functionCall]: dynamicInputs[functionCall] }
+      } else {
+        multipleInputs.splice(index, 1)
+        multipleDynamicInputs.splice(index, 1)
+        continuationIDs.splice(index, 1)
       }
     }
   }
