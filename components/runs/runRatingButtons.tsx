@@ -4,8 +4,6 @@ import thumbsUpIcon from '@/public/thumbsUp.svg'
 import thumbsDownIcon from '@/public/thumbsDown.svg'
 import thumbsUpFilledIcon from '@/public/thumbsUpFilled.svg'
 import thumbsDownFilledIcon from '@/public/thumbsDownFilled.svg'
-import thumbsUpSemiFilledIcon from '@/public/thumbsUpSemiFilled.svg'
-import thumbsDownSemiFilledIcon from '@/public/thumbsDownSemiFilled.svg'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import { KeyboardEvent, useCallback, useState } from 'react'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
@@ -76,42 +74,37 @@ function RatingButton({
   setRating: (rating: RunRating, reason?: string) => void
   isSelected: boolean
 }) {
-  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] => [
-    ReasonPopup,
-    {
-      rating,
-      callback: reason => setRating(rating, reason),
-      predictedReason: run.isPredictedRating && !!run.reason ? run.reason : undefined,
-    },
-  ]
+  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] =>
+    [
+      ReasonPopup,
+      {
+        rating,
+        callback: reason => setRating(rating, reason),
+        predictedReason: run.isPredictedRating && !!run.reason ? run.reason : undefined,
+      },
+    ]
 
   const isActiveRating = (pendingRating ?? run.rating) === rating
 
   const iconForRating = () => {
     switch (rating) {
       case 'positive':
-        return isActiveRating
-          ? run.isPredictedRating && !pendingRating
-            ? thumbsUpSemiFilledIcon
-            : thumbsUpFilledIcon
-          : thumbsUpIcon
+        return isActiveRating ? thumbsUpFilledIcon : thumbsUpIcon
       case 'negative':
-        return isActiveRating
-          ? run.isPredictedRating && !pendingRating
-            ? thumbsDownSemiFilledIcon
-            : thumbsDownFilledIcon
-          : thumbsDownIcon
+        return isActiveRating ? thumbsDownFilledIcon : thumbsDownIcon
     }
   }
 
   return (
     <div className='relative overflow-visible group'>
-      <GlobalPopupMenu
-        icon={iconForRating()}
-        loadPopup={showReasonPopup(rating)}
-        selectedCell={isSelected}
-        popUpAbove
-      />
+      <div className={isActiveRating && run.isPredictedRating && !pendingRating ? 'opacity-50' : ''}>
+        <GlobalPopupMenu
+          icon={iconForRating()}
+          loadPopup={showReasonPopup(rating)}
+          selectedCell={isSelected}
+          popUpAbove
+        />
+      </div>
       {run.reason && isActiveRating && !pendingRating && (
         <div className='absolute hidden overflow-visible group-hover:block left-3 bottom-8 max-w-0'>
           <div className='flex justify-center'>
