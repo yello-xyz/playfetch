@@ -80,7 +80,7 @@ function RatingButton({
       {
         rating,
         callback: reason => setRating(rating, reason),
-        predictedReason: run.isPredictedRating && !!run.reason ? run.reason : undefined,
+        predictedReason: run.isPredictedRating && run.rating === rating && !!run.reason ? run.reason : undefined,
       },
     ]
 
