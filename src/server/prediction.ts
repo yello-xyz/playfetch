@@ -65,22 +65,23 @@ const runPrompt = (prompts: Prompts) =>
 export async function predictRatingForRun(runID: number, parentID: number, inputs: PromptInputs, output: string) {
   const recentRatings = await getRecentRatingsForParent(parentID)
 
-  const response = await runPrompt(buildRatingPredictionPrompts(recentRatings, inputs, output))
-
-  if (response) {
-    const lines = response
-      .split('\n')
-      .map(line =>
-        line
-          .replace(/Rating:/gi, '')
-          .replace(/Reason:/gi, '')
-          .trim()
-      )
-      .filter(line => line.length > 0)
-    if (lines.length === 2) {
-      const [rating, reason] = lines
-      if (rating === 'positive' || rating === 'negative') {
-        await savePredictedRunRating(runID, rating, reason)
+  if (recentRatings.length > 0) {
+    const response = await runPrompt(buildRatingPredictionPrompts(recentRatings, inputs, output))
+    if (response) {
+      const lines = response
+        .split('\n')
+        .map(line =>
+          line
+            .replace(/Rating:/gi, '')
+            .replace(/Reason:/gi, '')
+            .trim()
+        )
+        .filter(line => line.length > 0)
+      if (lines.length === 2) {
+        const [rating, reason] = lines
+        if (rating === 'positive' || rating === 'negative') {
+          await savePredictedRunRating(runID, rating, reason)
+        }
       }
     }
   }
