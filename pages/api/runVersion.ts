@@ -49,7 +49,7 @@ const saveRun = (
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
-  const continuationID = req.body.continuationID
+  const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID) 
   const autoRespond = req.body.autoRespond
   const autoRepeatCount = autoRespond !== undefined ? Math.min(0, req.body.maxResponses ?? 0) : 0
 
@@ -66,8 +66,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     const lastIndices = multipleInputs.map(_ => 0)
 
     const responses = await Promise.all(
-      multipleInputs.map(async (inputs, inputIndex) => {
-        return runChain(
+      multipleInputs.map(async (inputs, inputIndex) =>
+        runChain(
           user.id,
           parentData.projectID,
           version,
@@ -82,16 +82,16 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
               cost: response?.cost,
               duration: response?.duration,
               failed: response?.failed,
-              continuationID,
+              continuationID: continuationIDs[inputIndex],
             })
             lastIndices[inputIndex] = index
             if (saveIntermediateRuns && response && stepInputs && !response.failed) {
-              saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
+              saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationIDs[inputIndex])
             }
           },
-          continuationID
+          continuationIDs[inputIndex]
         )
-      })
+      )
     )
 
     for (const [index, response] of responses.entries()) {
@@ -104,10 +104,18 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           lastIndices[index],
           multipleInputs[index],
           response,
-          continuationID,
+          continuationIDs[index],
           runIDs[index]
         )
         predictRatingForRun(runIDs[index], version.parentID, multipleInputs[index], response.output)
+      }
+    }
+
+    if (responses.some(response => response.failed)) {
+      break
+    } else {
+      for (const [index, response] of responses.entries()) {
+        continuationIDs[index] = response.continuationID
       }
     }
   }
