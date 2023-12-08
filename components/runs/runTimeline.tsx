@@ -40,7 +40,12 @@ export default function RunTimeline({
   activeItem?: ActivePrompt | ActiveChain
   focusRunID?: number
   setFocusRunID?: (runID: number) => void
-  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
+  runVersion?: (
+    getVersion: () => Promise<number>,
+    inputs: PromptInputs[],
+    dynamicInputs: PromptInputs[],
+    continuationID?: number
+  ) => Promise<any>
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
@@ -66,30 +71,27 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const sortedRuns = sortRuns(runs).reduce(
-    (sortedRuns, run) => {
-      const previousRun = sortedRuns.slice(-1)[0]
-      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+  const sortedRuns = sortRuns(runs).reduce((sortedRuns, run) => {
+    const previousRun = sortedRuns.slice(-1)[0]
+    const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
 
-      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
-      const isParentRun = compareRun && compareRun.parentRunID === run.id
-      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
-      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+    const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
+    const isParentRun = compareRun && compareRun.parentRunID === run.id
+    const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
+    const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
 
-      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
-        ? [
-            ...sortedRuns.slice(0, -1),
-            {
-              ...previousRun,
-              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
-              continuations: [...(previousRun.continuations ?? []), run],
-              continuationID: compareRun.continuationID ?? run.continuationID,
-            },
-          ]
-        : [...sortedRuns, run]
-    },
-    [] as (PartialRun | Run)[]
-  )
+    return wasPartialRun || isParentRun || sameParentRun || sameContinuation
+      ? [
+          ...sortedRuns.slice(0, -1),
+          {
+            ...previousRun,
+            id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
+            continuations: [...(previousRun.continuations ?? []), run],
+            continuationID: compareRun.continuationID ?? run.continuationID,
+          },
+        ]
+      : [...sortedRuns, run]
+  }, [] as (PartialRun | Run)[])
 
   const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
@@ -111,7 +113,7 @@ export default function RunTimeline({
   const runContinuation =
     version && runVersion
       ? async (continuationID: number, message: string, inputKey: string) =>
-          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], continuationID)
+          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [], continuationID)
       : undefined
 
   return (

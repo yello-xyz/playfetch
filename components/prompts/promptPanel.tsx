@@ -50,7 +50,7 @@ export default function PromptPanel({
 }: {
   version: PromptVersion
   setModifiedVersion?: (version: PromptVersion) => void
-  runPrompt?: (inputs: PromptInputs[]) => Promise<void>
+  runPrompt?: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void

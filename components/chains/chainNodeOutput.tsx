@@ -113,7 +113,12 @@ export default function ChainNodeOutput({
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion(activeVersion.id)
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
-  const runChain = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
+  const runChain = async (
+    getVersion: () => Promise<number>,
+    inputs: PromptInputs[],
+    dynamicInputs: PromptInputs[],
+    continuationID?: number
+  ) => {
     persistInputValuesIfNeeded()
     if (areProvidersAvailable(items)) {
       if (continuationID === undefined) {
@@ -124,6 +129,7 @@ export default function ChainNodeOutput({
       const isFinished = await runVersion(
         getVersion,
         inputs,
+        dynamicInputs,
         continuationID,
         testConfig.autoRespond,
         testConfig.maxResponses
@@ -133,7 +139,8 @@ export default function ChainNodeOutput({
       }
     }
   }
-  const saveAndRun = async (inputs: PromptInputs[]) => runChain(() => saveItems(items), inputs)
+  const saveAndRun = async (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) =>
+    runChain(() => saveItems(items), inputs, dynamicInputs)
 
   useEffect(() => {
     if (highestRunIndex > runningItemIndex) {

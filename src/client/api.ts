@@ -154,11 +154,16 @@ const api = {
   runVersion: function (
     versionID: number,
     inputs: PromptInputs[],
+    dynamicInputs: PromptInputs[],
     continuationID?: number,
     autoRespond?: boolean,
     maxResponses?: number
   ): Promise<StreamReader> {
-    return post(this.runVersion, { versionID, inputs, continuationID, autoRespond, maxResponses }, 'stream')
+    return post(
+      this.runVersion,
+      { versionID, inputs, dynamicInputs, continuationID, autoRespond, maxResponses },
+      'stream'
+    )
   },
   getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
     return post(this.getIntermediateRuns, { parentRunID, continuationID })

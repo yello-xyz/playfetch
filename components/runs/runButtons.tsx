@@ -41,7 +41,7 @@ export default function RunButtons({
   setTestConfig: (testConfig: TestConfig) => void
   onShowTestConfig?: () => void
   disabled?: boolean
-  callback: (inputs: PromptInputs[]) => Promise<void>
+  callback: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
 }) {
   const selectInputs = useCallback(
     (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
@@ -80,7 +80,10 @@ export default function RunButtons({
   const testPrompt = () => {
     const [inputs, indices] = selectInputs(testConfig)
     setTestConfig({ ...testConfig, rowIndices: indices })
-    return callback(inputs)
+    const filterInputs = (inputs: PromptInputs[], variables: string[]) =>
+      inputs.map(row => Object.fromEntries(Object.entries(row).filter(([key]) => variables.includes(key))))
+    const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
+    return callback(filterInputs(inputs, staticVariables), filterInputs(inputs, dynamicVariables))
   }
 
   const showTestDataSelector = getIndicesForMode('all').length > 1
