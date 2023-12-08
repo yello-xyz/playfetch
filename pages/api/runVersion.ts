@@ -51,6 +51,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const multipleInputs: PromptInputs[] = req.body.inputs
   const multipleDynamicInputs: PromptInputs[] = req.body.dynamicInputs
   const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
+  const repeatOffsets = Array.from({ length: multipleInputs.length }, _ => 0)
   const autoRespond = req.body.autoRespond
   const autoRepeatCount = autoRespond !== undefined ? Math.min(25, req.body.maxResponses ?? 0) : 0
 
@@ -77,8 +78,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           false,
           (index, message, response, stepInputs) => {
             sendData({
-              inputIndex,
-              index,
+              inputIndex, // TODO consider spliced inputs here
+              index: index + repeatOffsets[inputIndex],
               message,
               cost: response?.cost,
               duration: response?.duration,
@@ -121,14 +122,18 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       const dynamicInput = functionCall ? dynamicInputs[functionCall] : undefined
       if (!response.failed && continuationID && functionCall && dynamicInput) {
         continuationIDs[index] = continuationID
-        const reply = autoRespond
+        const message = autoRespond
           ? (await generateAutoResponse(dynamicInput, response.output)) ?? dynamicInput
           : dynamicInput
-        multipleInputs[index] = { ...inputs, [functionCall]: reply }
+        multipleInputs[index] = { ...inputs, [functionCall]: message }
+        repeatOffsets[index] += lastIndices[index] + 2
+        // TODO consider spliced inputs in inputIndex
+        sendData({ inputIndex: index, index: repeatOffsets[index] - 1, message, continuationID })
       } else {
         multipleInputs.splice(index, 1)
         multipleDynamicInputs.splice(index, 1)
         continuationIDs.splice(index, 1)
+        repeatOffsets.splice(index, 1)
       }
     }
   }
