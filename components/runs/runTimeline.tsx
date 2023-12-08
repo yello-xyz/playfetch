@@ -13,8 +13,13 @@ import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
 
+const lastContinuationTimestamp = <T extends { timestamp: number; continuationID?: number }>(run: T, runs: T[]) =>
+  run.continuationID
+    ? Math.max(...runs.filter(r => r.continuationID === run.continuationID).map(r => r.timestamp))
+    : run.timestamp
+
 const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
-  items.sort((a, b) => a.timestamp - b.timestamp)
+  items.sort((a, b) => lastContinuationTimestamp(a, items) - lastContinuationTimestamp(b, items))
 
 const hasTimestamp = <T extends { timestamp?: number }>(run: T): run is T & { timestamp: number } => !!run.timestamp
 
