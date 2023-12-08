@@ -5,6 +5,7 @@ import { CommentsPopup, CommentsPopupProps } from '../commentPopupMenu'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 
 export default function RunCellBody({
   identifierForRun,
@@ -121,9 +122,11 @@ export default function RunCellBody({
     spans.push(<span key={index}>{run.output.substring(index)}</span>)
   }
 
+  const user = useLoggedInUser()
+
   return (
     <>
-      {isContinuation && <RoleHeader />}
+      {isContinuation && (IsProperRun(run) || !run.userID ? <RoleHeader /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
         <div className='flex-1' id={identifierForRun(run.id)}>
           {spans}

@@ -128,7 +128,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         multipleInputs[index] = { ...inputs, [functionCall]: message }
         repeatOffsets[index] += lastIndices[index] + 2
         // TODO consider spliced inputs in inputIndex
-        sendData({ inputIndex: index, index: repeatOffsets[index] - 1, message, continuationID })
+        sendData({ inputIndex: index, index: repeatOffsets[index] - 1, message, continuationID, userID: user.id })
       } else {
         multipleInputs.splice(index, 1)
         multipleDynamicInputs.splice(index, 1)

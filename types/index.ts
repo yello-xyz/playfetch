@@ -188,6 +188,7 @@ export type PartialRun = {
   canContinue?: boolean
   parentRunID?: number | null
   continuations?: (PartialRun | Run)[]
+  userID?: number
 }
 
 export type Run = PartialRun & {
