@@ -51,13 +51,19 @@ export default function useRunVersion(activeVersionID: number) {
     setHighestRunIndex(-1)
   }
 
-  const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
+  const runVersion = async (
+    getVersion: () => Promise<number>,
+    inputs: PromptInputs[],
+    continuationID?: number,
+    autoRespond?: boolean,
+    maxResponses?: number
+  ) => {
     setRunning(true)
     setPartialRuns([])
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     setRunningVersionID(versionID)
-    const streamReader = await api.runVersion(versionID, inputs, continuationID)
+    const streamReader = await api.runVersion(versionID, inputs, continuationID, autoRespond, maxResponses)
     let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
       anyRunFailed = runs.some(run => run.failed)

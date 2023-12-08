@@ -121,7 +121,13 @@ export default function ChainNodeOutput({
         setRunningItemIndex(-1)
         setActiveRunID(undefined)
       }
-      const isFinished = await runVersion(getVersion, inputs, continuationID)
+      const isFinished = await runVersion(
+        getVersion,
+        inputs,
+        continuationID,
+        testConfig.autoRespond,
+        testConfig.maxResponses
+      )
       if (isFinished) {
         setActiveIndex(nodes.length - 1)
       }

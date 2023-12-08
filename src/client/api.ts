@@ -151,8 +151,14 @@ const api = {
   suggestPrompt: function (promptID: number, versionID: number) {
     return post(this.suggestPrompt, { promptID, versionID })
   },
-  runVersion: function (versionID: number, inputs: PromptInputs[], continuationID?: number): Promise<StreamReader> {
-    return post(this.runVersion, { versionID, inputs, continuationID }, 'stream')
+  runVersion: function (
+    versionID: number,
+    inputs: PromptInputs[],
+    continuationID?: number,
+    autoRespond?: boolean,
+    maxResponses?: number
+  ): Promise<StreamReader> {
+    return post(this.runVersion, { versionID, inputs, continuationID, autoRespond, maxResponses }, 'stream')
   },
   getIntermediateRuns: function (parentRunID: number, continuationID?: number): Promise<Run[]> {
     return post(this.getIntermediateRuns, { parentRunID, continuationID })

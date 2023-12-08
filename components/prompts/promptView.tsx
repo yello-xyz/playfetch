@@ -50,7 +50,7 @@ export default function PromptView({
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id)
   const runPrompt = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
     persistInputValuesIfNeeded()
-    await runVersion(getVersion, inputs, continuationID)
+    await runVersion(getVersion, inputs, continuationID, testConfig.autoRespond, testConfig.maxResponses)
   }
   const saveAndRun = async (inputs: PromptInputs[]) => runPrompt(savePrompt, inputs)
 

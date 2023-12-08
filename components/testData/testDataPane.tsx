@@ -201,7 +201,7 @@ export default function TestDataPane({
 }
 
 type DynamicMode = 'manual' | 'static' | 'dynamic'
-const DefaultMaxResponses = 3
+const DefaultMaxResponses = 1
 
 const autoRespondModeFromTestConfig = (testConfig: TestConfig): DynamicMode => {
   if (testConfig.autoRespond === true) {

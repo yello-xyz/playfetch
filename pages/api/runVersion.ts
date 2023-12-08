@@ -50,6 +50,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
   const continuationID = req.body.continuationID
+  const autoRespond = req.body.autoRespond
+  const autoRepeatCount = autoRespond !== undefined ? Math.min(0, req.body.maxResponses ?? 0) : 0
 
   const version = await getTrustedVersion(versionID, true)
   const saveIntermediateRuns = !IsRawPromptVersion(version)
@@ -59,52 +61,54 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   res.setHeader('X-Accel-Buffering', 'no')
   const sendData = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`)
 
-  const runIDs = await allocateRunIDs(multipleInputs.length)
-  const lastIndices = multipleInputs.map(_ => 0)
+  for (let autoRunIndex = 0; autoRunIndex < 1 + autoRepeatCount; autoRunIndex++) {
+    const runIDs = await allocateRunIDs(multipleInputs.length)
+    const lastIndices = multipleInputs.map(_ => 0)
 
-  const responses = await Promise.all(
-    multipleInputs.map(async (inputs, inputIndex) => {
-      return runChain(
-        user.id,
-        parentData.projectID,
-        version,
-        configs,
-        inputs,
-        false,
-        (index, message, response, stepInputs) => {
-          sendData({
-            inputIndex,
-            index,
-            message,
-            cost: response?.cost,
-            duration: response?.duration,
-            failed: response?.failed,
-            continuationID,
-          })
-          lastIndices[inputIndex] = index
-          if (saveIntermediateRuns && response && stepInputs && !response.failed) {
-            saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
-          }
-        },
-        continuationID
-      )
-    })
-  )
+    const responses = await Promise.all(
+      multipleInputs.map(async (inputs, inputIndex) => {
+        return runChain(
+          user.id,
+          parentData.projectID,
+          version,
+          configs,
+          inputs,
+          false,
+          (index, message, response, stepInputs) => {
+            sendData({
+              inputIndex,
+              index,
+              message,
+              cost: response?.cost,
+              duration: response?.duration,
+              failed: response?.failed,
+              continuationID,
+            })
+            lastIndices[inputIndex] = index
+            if (saveIntermediateRuns && response && stepInputs && !response.failed) {
+              saveRun(user.id, version, runIDs[inputIndex], index, stepInputs, response, continuationID)
+            }
+          },
+          continuationID
+        )
+      })
+    )
 
-  for (const [index, response] of responses.entries()) {
-    logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
-    if (!response.failed) {
-      await saveRun(
-        user.id,
-        version,
-        null,
-        lastIndices[index],
-        multipleInputs[index],
-        response,
-        continuationID,
-        runIDs[index]
-      )
-      predictRatingForRun(runIDs[index], version.parentID, multipleInputs[index], response.output)
+    for (const [index, response] of responses.entries()) {
+      logUserRequest(req, res, user.id, RunEvent(version.parentID, response.failed, response.cost, response.duration))
+      if (!response.failed) {
+        await saveRun(
+          user.id,
+          version,
+          null,
+          lastIndices[index],
+          multipleInputs[index],
+          response,
+          continuationID,
+          runIDs[index]
+        )
+        predictRatingForRun(runIDs[index], version.parentID, multipleInputs[index], response.output)
+      }
     }
   }
 
