@@ -14,7 +14,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
 import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
-import { predictRatingForRun } from '@/src/server/prediction'
+import { generateAutoResponse, predictRatingForRun } from '@/src/server/prediction'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
@@ -118,9 +118,13 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       const functionCall = response.failed ? undefined : response.functionCall
       const inputs = multipleInputs[index]
       const dynamicInputs = multipleDynamicInputs[index]
-      if (!response.failed && continuationID && functionCall && dynamicInputs[functionCall]) {
+      const dynamicInput = functionCall ? dynamicInputs[functionCall] : undefined
+      if (!response.failed && continuationID && functionCall && dynamicInput) {
         continuationIDs[index] = continuationID
-        multipleInputs[index] = { ...inputs, [functionCall]: dynamicInputs[functionCall] }
+        const reply = autoRespond
+          ? (await generateAutoResponse(dynamicInput, response.output)) ?? dynamicInput
+          : dynamicInput
+        multipleInputs[index] = { ...inputs, [functionCall]: reply }
       } else {
         multipleInputs.splice(index, 1)
         multipleDynamicInputs.splice(index, 1)

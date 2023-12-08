@@ -49,10 +49,10 @@ Reason: ${rating.reason}
 Suggested prompt: `,
 })
 
-const runPrompt = (prompts: Prompts) =>
+const runPrompt = (prompts: Prompts, temperature = 0) =>
   getPredictorForDefaultProviderModel('chat-bison')(
     prompts,
-    0,
+    temperature,
     500,
     {},
     false,
@@ -61,6 +61,10 @@ const runPrompt = (prompts: Prompts) =>
     undefined,
     {}
   ).then(response => ('output' in response && !!response.output ? response.output : null))
+
+export async function generateAutoResponse(system: string, output: string) {
+  return runPrompt({ system, main: output }, 0.5)
+}
 
 export async function predictRatingForRun(runID: number, parentID: number, inputs: PromptInputs, output: string) {
   const recentRatings = await getRecentRatingsForParent(parentID)
