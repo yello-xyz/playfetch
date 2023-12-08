@@ -46,28 +46,55 @@ testExtractCodeInterrupts(
   `return PlayFetch.InterruptOnce(Math.random() < 0.5 ? 'ask_question' : give_up)`
 )
 
-const configWithFunctionsSupport: PromptConfig = { ...DefaultPromptConfig, model: 'gpt-4' }
+const buildConfig = (supportsFunctions = true, simpleChat = false) => ({
+  ...DefaultPromptConfig,
+  model: supportsFunctions ? 'gpt-4' : 'text-bison',
+  isChat: simpleChat,
+})
 
 const buildPrompt = (main: string, system?: string, functions?: string): Prompts => ({ main, system, functions })
+const buildFunctionsPrompt = (functionName: string): Prompts => buildPrompt('', '', `[{"name": "${functionName}"}]`)
 
 const testExtractPromptVariables = (
   testDescription: string,
   expectedVariables: string[],
   prompts: Prompts,
-  includingDynamic = true
+  includingDynamic = true,
+  config = buildConfig()
 ) =>
   test(`Test ${testDescription}`, () => {
-    expect(ExtractPromptVariables(prompts, configWithFunctionsSupport, includingDynamic)).toStrictEqual(
-      expectedVariables
-    )
+    expect(ExtractPromptVariables(prompts, config, includingDynamic)).toStrictEqual(expectedVariables)
   })
 
 testExtractPromptVariables('empty prompts', [], buildPrompt(''))
 testExtractPromptVariables('main prompt', ['hello'], buildPrompt('{{hello}}'))
 testExtractPromptVariables('system prompt', ['hello', 'world'], buildPrompt('{{hello}}', '{{world}}'))
 testExtractPromptVariables('functions prompt', ['hello', 'world'], buildPrompt('{{hello}}', '', '{{world}}'))
-testExtractPromptVariables('include dynamic', ['hello_world'], buildPrompt('', '', '[{ "name": "hello_world" }]'))
-testExtractPromptVariables('exclude dynamic', [], buildPrompt('', '', '[{ "name": "hello_world" }]'), false)
+testExtractPromptVariables('include dynamic', ['hello_world'], buildFunctionsPrompt('hello_world'))
+testExtractPromptVariables('exclude dynamic', [], buildFunctionsPrompt('hello_world'), false)
+testExtractPromptVariables(
+  'dynamic no functions support',
+  [],
+  buildPrompt('', '', '[{ "name": "hello_world" }]'),
+  true,
+  buildConfig(false)
+)
+testExtractPromptVariables('include simple chat', ['message'], buildPrompt(''), true, buildConfig(false, true))
+testExtractPromptVariables('exclude simple chat', [], buildPrompt(''), false, buildConfig(false, true))
+testExtractPromptVariables(
+  'exclude simple chat if functions supported',
+  ['hello_world'],
+  buildFunctionsPrompt('hello_world'),
+  true,
+  buildConfig(true, true)
+)
+testExtractPromptVariables(
+  'include simple chat if functions unsupported',
+  ['message'],
+  buildFunctionsPrompt('hello_world'),
+  true,
+  buildConfig(false, true)
+)
 
 const buildChain = (
   inputs: string[],

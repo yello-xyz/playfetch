@@ -139,13 +139,17 @@ export const ExtractFunctionNames = (text: string) =>
     .map(fun => fun?.name as string)
     .filter(name => name)
 
+export const ExtractDynamicPromptInputs = (prompts: Prompts, config: PromptConfig) => {
+  const functionNames =
+    SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractFunctionNames(prompts.functions) : []
+  return functionNames.length === 0 && config.isChat ? [DefaultChatContinuationInputKey] : functionNames
+}
+
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic: boolean) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
   ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
-  ...(includingDynamic && SupportsFunctionsPrompt(config.model) && prompts.functions
-    ? ExtractFunctionNames(prompts.functions)
-    : []),
+  ...(includingDynamic ? ExtractDynamicPromptInputs(prompts, config) : []),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {
