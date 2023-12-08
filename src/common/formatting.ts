@@ -38,8 +38,8 @@ export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIn
   return !alwaysIncludeDate && dateString === todayString
     ? timeString
     : alwaysIncludeTime
-      ? `${dateString} ${timeString}`
-      : dateString
+    ? `${dateString} ${timeString}`
+    : dateString
 }
 
 export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
@@ -99,6 +99,17 @@ export const StripVariableSentinels = (text: string) => text.replaceAll('{{', ''
 
 export const ExtractVariables = (text: string) => [
   ...new Set([...text.matchAll(/{{([^{}]+)}}/g)].map(match => match[1])),
+]
+
+export const CodeModuleName = 'PlayFetch'
+export const InterruptOnceFunctionName = 'InterruptOnce'
+
+export const ExtractCodeInterrupts = (text: string) => [
+  ...new Set(
+    [...text.matchAll(new RegExp(`${CodeModuleName}\.${InterruptOnceFunctionName}\\(["']([^"']+)["']`, 'g'))].map(
+      match => match[1]
+    )
+  ),
 ]
 
 const TryParseJSON = (text: string) => {

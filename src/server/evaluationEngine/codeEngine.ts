@@ -1,5 +1,5 @@
 import { PromptInputs } from '@/types'
-import { ExtractVariables, ToCamelCase } from '@/src/common/formatting'
+import { CodeModuleName, InterruptOnceFunctionName, ExtractVariables, ToCamelCase } from '@/src/common/formatting'
 import Isolated from 'isolated-vm'
 import { EmptyRunResponse, ErrorRunResponse, RunResponse } from './runResponse'
 
@@ -21,8 +21,8 @@ const AugmentCodeContext = (context: Isolated.Context, variable: string | undefi
 export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
   const context = isolated.createContextSync()
-  context.eval(`globalThis.PlayFetch = { 
-  InterruptOnce: (name, args) => this[name] ?? { function: { name, arguments: args } } 
+  context.eval(`globalThis.${CodeModuleName} = { 
+  ${InterruptOnceFunctionName}: (name, args) => this[name] ?? { function: { name, arguments: args } } 
 }`)
   Object.entries(inputs).forEach(([variable, value]) => AugmentCodeContext(context, variable, value))
   return context

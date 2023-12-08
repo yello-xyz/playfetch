@@ -1,4 +1,4 @@
-import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
+import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
 import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 import { ExtractUnboundChainInputs } from '@/components/chains/chainNodeOutput'
@@ -14,6 +14,37 @@ testExtractVariables('non variable', [], '}}hello{{')
 testExtractVariables('single variable', ['hello'], '{{hello}}')
 testExtractVariables('single variable start', ['hello'], '{{hello}} world')
 testExtractVariables('single variable end', ['world'], 'hello {{world}}')
+
+const testExtractCodeInterrupts = (testDescription: string, expectedVariables: string[], code: string) =>
+  test(`Test ${testDescription}`, () => {
+    expect(ExtractCodeInterrupts(code)).toStrictEqual(expectedVariables)
+  })
+
+testExtractCodeInterrupts('no code interrupts', [], `return 'Hello World'`)
+testExtractCodeInterrupts(
+  'single quoted code interrupt',
+  ['ask_question'],
+  `return PlayFetch.InterruptOnce('ask_question')`
+)
+testExtractCodeInterrupts(
+  'double quoted code interrupt',
+  ['ask_question'],
+  `return PlayFetch.InterruptOnce("ask_question")`
+)
+testExtractCodeInterrupts(
+  'multiple code interrupts with parameters and variables',
+  ['ask_question', 'give_up'],
+  `return 
+  Math.random() < 0.5 
+    ? PlayFetch.InterruptOnce('ask_question', { question: {{question}} }) 
+    : PlayFetch.InterruptOnce('give_up', { reason: {{reason}} })`
+)
+
+testExtractCodeInterrupts(
+  'fail to detect more dynamic code interrupts',
+  [],
+  `return PlayFetch.InterruptOnce(Math.random() < 0.5 ? 'ask_question' : give_up)`
+)
 
 const configWithFunctionsSupport: PromptConfig = { ...DefaultPromptConfig, model: 'gpt-4' }
 

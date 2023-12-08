@@ -1,6 +1,6 @@
 import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
+import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testData/testDataPane'
@@ -27,7 +27,7 @@ import api from '@/src/client/api'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
-    return ExtractVariables(item.code)
+    return [...ExtractVariables(item.code), ...(includingDynamic ? ExtractCodeInterrupts(item.code) : [])]
   }
   if (IsQueryChainItem(item)) {
     return ExtractVariables(item.query)
