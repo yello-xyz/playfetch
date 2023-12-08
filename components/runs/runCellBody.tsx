@@ -123,7 +123,7 @@ export default function RunCellBody({
 
   return (
     <>
-      {isContinuation && <RoleHeader role='Assistant' />}
+      {isContinuation && <RoleHeader />}
       <BorderedSection border={isContinuation}>
         <div className='flex-1' id={identifierForRun(run.id)}>
           {spans}

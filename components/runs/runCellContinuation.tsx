@@ -64,7 +64,7 @@ export default function RunCellContinuation({
         <Fragment key={run.id}>
           {!!runWithContinuations[index].canContinue && (
             <>
-              <RoleHeader user={IsProperRun(run) ? users.find(user => user.id === run.userID) : user} role='User' />
+              <RoleHeader user={IsProperRun(run) ? users.find(user => user.id === run.userID) : user} />
               <BorderedSection>
                 <div className='flex-1'>{IsProperRun(run) ? run.inputs[getPreviousInputKey(index)] : lastReply}</div>
               </BorderedSection>
@@ -88,7 +88,7 @@ export default function RunCellContinuation({
       ))}
       {!!runContinuation && !!runWithContinuations.slice(-1)[0].canContinue && (
         <>
-          <RoleHeader user={user} role='User' />
+          <RoleHeader user={user} />
           <BorderedSection borderColor='border-transparent'>
             <div className='flex items-center flex-1 gap-2'>
               <TextInput
@@ -117,18 +117,21 @@ export default function RunCellContinuation({
   )
 }
 
-export const RoleHeader = ({ user, role }: { user?: User; role: string }) => (
-  <div className='flex items-center gap-2'>
-    {user ? (
-      <UserAvatar user={user} size='md' />
-    ) : (
-      <span className='flex items-center justify-center w-[22px] h-[22px] pt-px text-xs font-medium text-white rounded-full bg-dark-gray-700'>
-        {role.slice(0, 1)}
-      </span>
-    )}
-    <span className='font-medium text-gray-700'>{user?.fullName ?? role}</span>
-  </div>
-)
+export const RoleHeader = ({ user }: { user?: User }) => {
+  const role = user?.fullName ?? 'Assistant'
+  return (
+    <div className='flex items-center gap-2'>
+      {user ? (
+        <UserAvatar user={user} size='md' />
+      ) : (
+        <span className='flex items-center justify-center w-[22px] h-[22px] pt-px text-xs font-medium text-white rounded-full bg-dark-gray-700'>
+          {role.slice(0, 1)}
+        </span>
+      )}
+      <span className='font-medium text-gray-700'>{role}</span>
+    </div>
+  )
+}
 
 export const BorderedSection = ({
   border = true,
