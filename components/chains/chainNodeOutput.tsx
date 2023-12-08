@@ -225,7 +225,8 @@ export default function ChainNodeOutput({
         {showRunButtons && (
           <div className='flex items-center justify-end w-full gap-4 px-4'>
             <RunButtons
-              variables={staticVariables}
+              variables={variables}
+              staticVariables={staticVariables}
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}

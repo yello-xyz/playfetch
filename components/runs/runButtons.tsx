@@ -25,6 +25,7 @@ const selectValidRowIndices = (
 export default function RunButtons({
   runTitle,
   variables,
+  staticVariables,
   inputValues,
   testConfig,
   setTestConfig,
@@ -34,6 +35,7 @@ export default function RunButtons({
 }: {
   runTitle?: string
   variables: string[]
+  staticVariables: string[]
   inputValues: InputValues
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
@@ -45,7 +47,9 @@ export default function RunButtons({
     (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
       SelectInputRows(
         inputValues,
-        variables,
+        'rowIndices' in config && config.autoRespond !== undefined && (config.maxResponses ?? 0) > 0
+          ? variables
+          : staticVariables,
         {
           mode: config.mode,
           rowIndices: 'rowIndices' in config ? config.rowIndices : [],
@@ -53,7 +57,7 @@ export default function RunButtons({
         'rowIndices' in config ? config.rowIndices.length : config.count,
         'rowIndices' in config ? config.rowIndices[0] : config.start
       ),
-    [inputValues, variables]
+    [inputValues, variables, staticVariables]
   )
   const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]
 
@@ -80,7 +84,7 @@ export default function RunButtons({
   }
 
   const showTestDataSelector = getIndicesForMode('all').length > 1
-  const isMissingTestData = rowIndices.length === 0 && variables.length > 0
+  const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
 
   return (
     <div className='flex items-center self-end gap-3'>
