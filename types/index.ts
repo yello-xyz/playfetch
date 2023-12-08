@@ -259,7 +259,8 @@ export type ChainItemWithInputs = (
 export type TestConfig = {
   mode: 'custom' | 'first' | 'last' | 'range' | 'random' | 'all'
   rowIndices: number[]
-  interrupt: 'manual' | 'static' | 'dynamic'
+  autoRespond?: boolean
+  maxResponses?: number
 }
 
 export type Endpoint = {

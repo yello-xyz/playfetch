@@ -45,7 +45,7 @@ export default function PromptView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
-  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0], interrupt: 'manual' })
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id)
   const runPrompt = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {

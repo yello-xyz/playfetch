@@ -99,7 +99,7 @@ export default function ChainNodeOutput({
   const activeNode = nodes[activeIndex]
   const items = nodes.filter(IsChainItem)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
-  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0], interrupt: 'manual' })
+  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
   const areProvidersAvailable = (items: ChainItem[]) =>

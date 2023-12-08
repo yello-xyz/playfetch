@@ -1,7 +1,7 @@
 import { InputValues, TestConfig } from '@/types'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
-  SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [], interrupt: 'manual' })[0][0] ??
+  SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
   Object.fromEntries(variables.map(variable => [variable, '']))
 
 export const SelectAnyInputValue =
