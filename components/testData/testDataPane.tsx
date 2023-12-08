@@ -6,6 +6,8 @@ import { InputValues, TestConfig } from '@/types'
 import RichTextInput from '../richTextInput'
 import TestDataHeader from './testDataHeader'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
+import { SelectInputRows } from '@/src/client/inputRows'
+import DropdownMenu from '../dropdownMenu'
 
 export default function TestDataPane({
   variables,
@@ -84,11 +86,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-            ? 'last'
-            : 'custom'
-        : rowIndices.length === rowCount
-          ? 'all'
+          ? 'last'
           : 'custom'
+        : rowIndices.length === rowCount
+        ? 'all'
+        : 'custom'
     setTestConfig({ mode, rowIndices, interrupt: testConfig.interrupt })
   }
 
@@ -109,6 +111,9 @@ export default function TestDataPane({
     setInputValue(row, variable, value)
     persistInputValuesIfNeeded()
   })
+
+  const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
+  const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
@@ -157,6 +162,18 @@ export default function TestDataPane({
         <Icon icon={addIcon} />
         Add
       </div>
+      {dynamicInputRows.length > 0 && (
+        <div className='flex items-center gap-2 p-4'>
+          Use values for <span className='-m-1 font-medium text-purple-400'>dynamic inputs</span> as
+          <DropdownMenu
+            value={testConfig.interrupt}
+            onChange={interrupt => setTestConfig({ ...testConfig, interrupt: interrupt as TestConfig['interrupt'] })}>
+            <option value='manual'>suggested manual responses</option>
+            <option value='static'>fixed mocked responses</option>
+            <option value='dynamic'>prompts for automated responses</option>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   )
 }
