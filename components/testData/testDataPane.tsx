@@ -89,11 +89,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-          ? 'last'
-          : 'custom'
+            ? 'last'
+            : 'custom'
         : rowIndices.length === rowCount
-        ? 'all'
-        : 'custom'
+          ? 'all'
+          : 'custom'
     setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
@@ -181,16 +181,16 @@ export default function TestDataPane({
             <>
               <Label>Maximum number of responses</Label>
               <div className='flex items-center gap-2'>
-              <RangeInput
-                className='flex-1'
-                value={testConfig.maxResponses ?? DefaultMaxResponses}
-                setValue={value =>
-                  setTestConfig({ ...testConfig, maxResponses: isNaN(Number(value)) ? 0 : Number(value) })
-                }
-                min={1}
-                max={25}
-                step={1}
-              />
+                <RangeInput
+                  className='flex-1'
+                  value={testConfig.maxResponses ?? DefaultMaxResponses}
+                  setValue={value =>
+                    setTestConfig({ ...testConfig, maxResponses: isNaN(Number(value)) ? 0 : Number(value) })
+                  }
+                  min={1}
+                  max={25}
+                  step={1}
+                />
               </div>
             </>
           )}
