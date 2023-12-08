@@ -49,9 +49,10 @@ const saveRun = (
 async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User) {
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
-  const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID) 
+  const dynamicInputs: PromptInputs[] = req.body.dynamicInputs
+  const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
   const autoRespond = req.body.autoRespond
-  const autoRepeatCount = autoRespond !== undefined ? Math.min(0, req.body.maxResponses ?? 0) : 0
+  const autoRepeatCount = autoRespond !== undefined ? Math.min(25, req.body.maxResponses ?? 0) : 0
 
   const version = await getTrustedVersion(versionID, true)
   const saveIntermediateRuns = !IsRawPromptVersion(version)
@@ -116,6 +117,12 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     } else {
       for (const [index, response] of responses.entries()) {
         continuationIDs[index] = response.continuationID
+        if (!response.failed && response.functionCall) {
+          multipleInputs[index] = {
+            ...multipleInputs[index],
+            [response.functionCall]: dynamicInputs[index][response.functionCall],
+          }
+        }
       }
     }
   }
