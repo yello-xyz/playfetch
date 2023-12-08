@@ -49,6 +49,7 @@ export default function RunButtons({
         {
           mode: config.mode,
           rowIndices: 'rowIndices' in config ? config.rowIndices : [],
+          interrupt: 'interrupt' in config ? config.interrupt : 'manual',
         },
         'rowIndices' in config ? config.rowIndices.length : config.count,
         'rowIndices' in config ? config.rowIndices[0] : config.start
@@ -67,9 +68,9 @@ export default function RunButtons({
       testConfig.rowIndices.length !== rowIndices.length ||
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
     ) {
-      setTestConfig({ mode: testConfig.mode, rowIndices })
+      setTestConfig({ mode: testConfig.mode, rowIndices, interrupt: testConfig.interrupt })
     } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      setTestConfig({ mode: 'first', rowIndices: fallbackIndices })
+      setTestConfig({ mode: 'first', rowIndices: fallbackIndices, interrupt: testConfig.interrupt })
     }
   }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
 

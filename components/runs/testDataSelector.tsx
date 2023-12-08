@@ -54,7 +54,9 @@ function TestDataSelectorPopup({
   const [mode, setMode] = useState(testConfig.mode)
   const [count, setCount] = useState(testConfig.rowIndices.length)
   const [start, setStart] = useState(testConfig.rowIndices[0] ?? validRows[0])
-  const confirm = withDismiss(() => setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count, start) }))
+  const confirm = withDismiss(() =>
+    setTestConfig({ mode, rowIndices: getIndicesForMode(mode, count, start), interrupt: testConfig.interrupt })
+  )
 
   const updateCount = (count: number) => {
     setCount(count)

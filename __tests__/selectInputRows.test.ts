@@ -1,7 +1,11 @@
 import { SelectInputRows } from '@/src/client/inputRows'
 import { InputValues, TestConfig } from '@/types'
 
-const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({ mode, rowIndices })
+const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({
+  mode,
+  rowIndices,
+  interrupt: 'manual',
+})
 
 test('No inputs yields single empty prompt input', () =>
   expect(SelectInputRows({}, [], config('first'))[0]).toStrictEqual([{}]))
