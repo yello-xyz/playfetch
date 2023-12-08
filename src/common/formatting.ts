@@ -142,8 +142,9 @@ export const ExtractFunctionNames = (text: string) =>
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic: boolean) => [
   ...ExtractVariables(prompts.main),
   ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
-  ...(SupportsFunctionsPrompt(config.model) && prompts.functions
-    ? [...ExtractVariables(prompts.functions), ...(includingDynamic ? ExtractFunctionNames(prompts.functions) : [])]
+  ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
+  ...(includingDynamic && SupportsFunctionsPrompt(config.model) && prompts.functions
+    ? ExtractFunctionNames(prompts.functions)
     : []),
 ]
 
