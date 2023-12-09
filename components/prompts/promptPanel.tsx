@@ -20,7 +20,7 @@ import {
   SupportsSeed,
   SupportsJsonMode,
 } from '@/src/common/providerMetadata'
-import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
+import { PromptConfigsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
@@ -169,7 +169,7 @@ export default function PromptPanel({
           testConfig={testConfig}
           setTestConfig={setTestConfig}
           onShowTestConfig={onShowTestConfig}
-          disabled={!isModelAvailable || prompts.main.trim().length === 0 || isRunning}
+          disabled={!isModelAvailable || !VersionHasNonEmptyPrompts({ prompts, config }) || isRunning}
           callback={runPrompt}
         />
       )}
