@@ -38,8 +38,8 @@ export const FormatDate = (timestamp: number, alwaysIncludeTime = true, alwaysIn
   return !alwaysIncludeDate && dateString === todayString
     ? timeString
     : alwaysIncludeTime
-      ? `${dateString} ${timeString}`
-      : dateString
+    ? `${dateString} ${timeString}`
+    : dateString
 }
 
 export const FormatRelativeDate = (timestamp: number, thresholdDays = 0) => {
@@ -146,10 +146,12 @@ export const ExtractDynamicPromptInputs = (prompts: Prompts, config: PromptConfi
 }
 
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic: boolean) => [
-  ...ExtractVariables(prompts.main),
-  ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
-  ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
-  ...(includingDynamic ? ExtractDynamicPromptInputs(prompts, config) : []),
+  ...new Set([
+    ...ExtractVariables(prompts.main),
+    ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
+    ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
+    ...(includingDynamic ? ExtractDynamicPromptInputs(prompts, config) : []),
+  ]),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {

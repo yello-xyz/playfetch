@@ -9,7 +9,6 @@ import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
-import TextInput from '../textInput'
 import RangeInput from '../rangeInput'
 
 export default function TestDataPane({

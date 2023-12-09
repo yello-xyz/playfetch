@@ -95,6 +95,13 @@ testExtractPromptVariables(
   true,
   buildConfig(false, true)
 )
+testExtractPromptVariables(
+  'deduplicate variables',
+  ['message'],
+  buildPrompt('{{message}}'),
+  true,
+  buildConfig(false, true)
+)
 
 const buildChain = (
   inputs: string[],
