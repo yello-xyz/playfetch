@@ -50,6 +50,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const versionID = req.body.versionID
   const multipleInputs: PromptInputs[] = req.body.inputs
   const multipleDynamicInputs: PromptInputs[] = req.body.dynamicInputs
+  const inputIndices = Array.from({ length: multipleInputs.length }, (_, index) => index)
   const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
   const repeatOffsets = Array.from({ length: multipleInputs.length }, _ => 0)
   const autoRespond = req.body.autoRespond
@@ -78,7 +79,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           false,
           (index, message, response, stepInputs) => {
             sendData({
-              inputIndex, // TODO consider spliced inputs here
+              inputIndex: inputIndices[inputIndex],
               index: index + repeatOffsets[inputIndex],
               message,
               cost: response?.cost,
@@ -127,13 +128,19 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           : dynamicInput
         multipleInputs[index] = { ...inputs, [functionCall]: message }
         repeatOffsets[index] += lastIndices[index] + 2
-        // TODO consider spliced inputs in inputIndex
-        sendData({ inputIndex: index, index: repeatOffsets[index] - 1, message, continuationID, userID: user.id })
+        sendData({
+          inputIndex: inputIndices[index],
+          index: repeatOffsets[index] - 1,
+          message,
+          continuationID,
+          userID: user.id,
+        })
       } else {
         multipleInputs.splice(index, 1)
         multipleDynamicInputs.splice(index, 1)
         continuationIDs.splice(index, 1)
         repeatOffsets.splice(index, 1)
+        inputIndices.splice(index, 1)
       }
     }
   }
