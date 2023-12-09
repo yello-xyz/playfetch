@@ -28,29 +28,9 @@ Output: ${output}
 Rating: `,
 })
 
-const buildPromptImprovementPrompts = (recentRatings: Rating[], prompts: Prompts) => ({
-  system: 'You are a linguist expert',
-  main: `Given the following prompt and ratings for outputs based on inputs, suggest a better prompt that would produce better outputs. Make sure to retain any input variables enclosed in double curly braces:
-
-Prompt: ${prompts.main}
-
-${recentRatings
-  .map(
-    rating =>
-      `Input: ${rating.inputs}
-Output: ${rating.output}
-Rating: ${rating.rating}
-Reason: ${rating.reason}
-
-`
-  )
-  .join('')})}
-
-Suggested prompt: `,
-})
-
 enum Endpoint {
   Respond = '/respond',
+  Suggest = '/suggest',
 }
 
 const continuationKey = 'x-continuation-key'
@@ -117,15 +97,17 @@ export async function suggestImprovementForPrompt(userID: number, promptID: numb
   await ensurePromptAccess(userID, promptID)
   const recentRatings = await getRecentRatingsForParent(promptID)
   const promptVersion = (await getTrustedVersion(versionID)) as RawPromptVersion
-  const prompts = promptVersion.prompts
 
-  const response = await runPrompt(buildPromptImprovementPrompts(recentRatings, promptVersion.prompts))
+  const [response] = await postRequest(Endpoint.Suggest, {
+    recentRatings: JSON.stringify(recentRatings),
+    prompt: promptVersion.prompts.main,
+  })
 
   if (response) {
     await savePromptVersionForUser(
       userID,
       promptID,
-      { ...prompts, main: response },
+      { ...promptVersion.prompts, main: response },
       promptVersion.config,
       versionID,
       versionID
