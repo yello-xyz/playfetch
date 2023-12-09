@@ -47,9 +47,11 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   const compareVersion = version.previousID
     ? () => router.push(CompareRoute(projectID!, version.parentID, version.id, version.previousID))
     : undefined
+  const currentVersion =
+    (activeItem.versions as { didRun: boolean; id: number }[]).findLast(version => !version.didRun) ?? version
   const suggestImprovement =
     IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
-      ? () => api.suggestPrompt(activeItem.id, version.id).then(refreshActiveItem)
+      ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
       : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [

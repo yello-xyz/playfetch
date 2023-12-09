@@ -46,7 +46,12 @@ export async function predictRatingForRun(runID: number, parentID: number, input
   }
 }
 
-export async function suggestImprovementForPrompt(userID: number, promptID: number, versionID: number) {
+export async function suggestImprovementForPrompt(
+  userID: number,
+  promptID: number,
+  versionID: number,
+  currentVersionID: number
+) {
   await ensurePromptAccess(userID, promptID)
   const recentRatings = await getRecentRatingsForParent(promptID)
   const promptVersion = (await getTrustedVersion(versionID)) as RawPromptVersion
@@ -62,7 +67,7 @@ export async function suggestImprovementForPrompt(userID: number, promptID: numb
       promptID,
       { ...promptVersion.prompts, main: response },
       promptVersion.config,
-      versionID,
+      currentVersionID,
       versionID
     )
   }

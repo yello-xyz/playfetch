@@ -305,7 +305,10 @@ const toVersionData = (
 export const toUserVersions = (userID: number, versions: any[], runs: any[]) => {
   const pendingUserVersions = versions.filter(version => version.userID === userID && !version.didRun)
   if (pendingUserVersions.length > 1) {
-    console.error(`‼️ found multiple pending versions ${pendingUserVersions.map(v => getID(v))} (${userID})`)
+    console.error(
+      `‼️ found multiple pending versions (${userID})`,
+      pendingUserVersions.map(v => getID(v))
+    )
   }
 
   const userVersion = pendingUserVersions.slice(0, 1)

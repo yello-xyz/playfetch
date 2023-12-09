@@ -148,8 +148,8 @@ const api = {
   deletePrompt: function (promptID: number) {
     return post(this.deletePrompt, { promptID })
   },
-  suggestPrompt: function (promptID: number, versionID: number) {
-    return post(this.suggestPrompt, { promptID, versionID })
+  suggestPrompt: function (promptID: number, versionID: number, currentVersionID: number) {
+    return post(this.suggestPrompt, { promptID, versionID, currentVersionID })
   },
   runVersion: function (
     versionID: number,
