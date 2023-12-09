@@ -175,7 +175,7 @@ export default function TestDataPane({
             onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
             <option value='manual'>suggested manual responses</option>
             <option value='static'>fixed mocked responses</option>
-            <option value='dynamic'>prompts for automated responses</option>
+            <option value='dynamic'>personas for automated responses</option>
           </DropdownMenu>
           {testConfig.autoRespond !== undefined && (
             <>
@@ -188,7 +188,7 @@ export default function TestDataPane({
                     setTestConfig({ ...testConfig, maxResponses: isNaN(Number(value)) ? 0 : Number(value) })
                   }
                   min={1}
-                  max={25}
+                  max={10}
                   step={1}
                 />
               </div>

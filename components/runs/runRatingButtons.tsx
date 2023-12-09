@@ -96,7 +96,7 @@ function RatingButton({
 
   return (
     <div className='relative overflow-visible group'>
-      <div className={isActiveRating && run.isPredictedRating && !pendingRating ? 'opacity-50' : ''}>
+      <div className={isActiveRating && run.isPredictedRating && !pendingRating ? 'opacity-30' : ''}>
         <GlobalPopupMenu
           icon={iconForRating()}
           loadPopup={showReasonPopup(rating)}

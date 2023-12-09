@@ -53,7 +53,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
   const repeatOffsets = Array.from({ length: multipleInputs.length }, _ => 0)
   const autoRespond = req.body.autoRespond
-  const autoRepeatCount = autoRespond !== undefined ? Math.min(25, req.body.maxResponses ?? 0) : 0
+  const autoRepeatCount = autoRespond !== undefined ? Math.min(10, req.body.maxResponses ?? 0) : 0
 
   const version = await getTrustedVersion(versionID, true)
   const saveIntermediateRuns = !IsRawPromptVersion(version)
