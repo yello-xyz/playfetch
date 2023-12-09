@@ -43,13 +43,13 @@ export default function RunButtons({
   disabled?: boolean
   callback: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
 }) {
+  const inputVariables =
+    testConfig.autoRespond !== undefined && (testConfig.maxResponses ?? 0) > 0 ? variables : staticVariables
   const selectInputs = useCallback(
     (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
       SelectInputRows(
         inputValues,
-        'rowIndices' in config && config.autoRespond !== undefined && (config.maxResponses ?? 0) > 0
-          ? variables
-          : staticVariables,
+        inputVariables,
         {
           mode: config.mode,
           rowIndices: 'rowIndices' in config ? config.rowIndices : [],
@@ -57,7 +57,7 @@ export default function RunButtons({
         'rowIndices' in config ? config.rowIndices.length : config.count,
         'rowIndices' in config ? config.rowIndices[0] : config.start
       ),
-    [inputValues, variables, staticVariables]
+    [inputValues, inputVariables]
   )
   const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]
 
