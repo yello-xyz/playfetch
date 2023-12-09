@@ -1,4 +1,4 @@
-import { suggestImprovementForPrompt } from '@/src/server/prediction'
+import { suggestImprovementForPrompt } from '@/src/server/providers/playfetch'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'

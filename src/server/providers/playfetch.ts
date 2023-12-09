@@ -1,9 +1,9 @@
 import { PromptInputs, Prompts, RawPromptVersion } from '@/types'
-import { getRecentRatingsForParent } from './datastore/ratings'
-import getPredictorForDefaultProviderModel from './providers/vertexai'
-import { savePredictedRunRating } from './datastore/runs'
-import { ensurePromptAccess } from './datastore/prompts'
-import { getTrustedVersion, savePromptVersionForUser } from './datastore/versions'
+import { getRecentRatingsForParent } from '../datastore/ratings'
+import getPredictorForDefaultProviderModel from './vertexai'
+import { savePredictedRunRating } from '../datastore/runs'
+import { ensurePromptAccess } from '../datastore/prompts'
+import { getTrustedVersion, savePromptVersionForUser } from '../datastore/versions'
 
 type Rating = Awaited<ReturnType<typeof getRecentRatingsForParent>>[0]
 

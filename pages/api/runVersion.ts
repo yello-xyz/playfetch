@@ -14,7 +14,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
 import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
-import { generateAutoResponse, predictRatingForRun } from '@/src/server/prediction'
+import { generateAutoResponse, predictRatingForRun } from '@/src/server/providers/playfetch'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
