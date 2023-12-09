@@ -256,13 +256,14 @@ function SettingsPaneHeader({
   onNavigateBack: () => void
   onCollapse: () => void
 }) {
+  const labelSuffix = secondaryLabel ? ` (${secondaryLabel})` : ''
   return isEditing ? (
     <div className='flex mt-1 -mb-2'>
       <HeaderItem active={false} className='cursor-pointer' onClick={onNavigateBack}>
         <Icon className='rotate-90 -mr-0.5' icon={chevronIcon} />
         Endpoints /
       </HeaderItem>
-      <HeaderItem className='-mx-2.5'>{label + ' (' + secondaryLabel + ')'}</HeaderItem>
+      <HeaderItem className='-mx-2.5'>{`${label}${labelSuffix}`}</HeaderItem>
     </div>
   ) : (
     <SingleTabHeader label={label} secondaryLabel={secondaryLabel}>
