@@ -49,6 +49,29 @@ Reason: ${rating.reason}
 Suggested prompt: `,
 })
 
+enum Endpoint {
+  Respond = '/respond',
+}
+
+const continuationKey = 'x-continuation-key'
+
+const postRequest = async (endpoint: Endpoint, inputs: PromptInputs, continuationID?: number) => {
+  const response = await fetch(`${process.env.PLAYFETCH_ENDPOINT_URL}${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': process.env.PLAYFETCH_API_KEY ?? '',
+      ...(continuationID ? { [continuationKey]: continuationID.toString() } : {}),
+    },
+    body: JSON.stringify(inputs),
+  }).then(response => response.json())
+
+  const output = response?.output ?? ''
+  continuationID = response?.[continuationKey] ? Number(response[continuationKey]) : undefined
+
+  return [output, continuationID] as const
+}
+
 const runPrompt = (prompts: Prompts, temperature = 0) =>
   getPredictorForDefaultProviderModel('chat-bison')(
     prompts,
@@ -62,9 +85,8 @@ const runPrompt = (prompts: Prompts, temperature = 0) =>
     {}
   ).then(response => ('output' in response && !!response.output ? response.output : null))
 
-export async function generateAutoResponse(system: string, output: string) {
-  return runPrompt({ system, main: output }, 0.5)
-}
+export const generateAutoResponse = (system: string, message: string, continuationID?: number) =>
+  postRequest(Endpoint.Respond, { system, message }, continuationID)
 
 export async function predictRatingForRun(runID: number, parentID: number, inputs: PromptInputs, output: string) {
   const recentRatings = await getRecentRatingsForParent(parentID)

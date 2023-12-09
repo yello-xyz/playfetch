@@ -52,6 +52,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const multipleDynamicInputs: PromptInputs[] = req.body.dynamicInputs
   const inputIndices = Array.from({ length: multipleInputs.length }, (_, index) => index)
   const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
+  const responseContinuationIDs = Array.from({ length: multipleInputs.length }, _ => undefined as number | undefined)
   const repeatOffsets = Array.from({ length: multipleInputs.length }, _ => 0)
   const autoRespond = req.body.autoRespond
   const autoRepeatCount = autoRespond !== undefined ? Math.min(10, req.body.maxResponses ?? 0) : 0
@@ -123,9 +124,12 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       const dynamicInput = functionCall ? dynamicInputs[functionCall] : undefined
       if (!response.failed && continuationID && functionCall && dynamicInput) {
         continuationIDs[index] = continuationID
-        const message = autoRespond
-          ? (await generateAutoResponse(dynamicInput, response.output)) ?? dynamicInput
-          : dynamicInput
+        let message = dynamicInput
+        if (autoRespond) {
+          const autoResponse = await generateAutoResponse(dynamicInput, response.output, responseContinuationIDs[index])
+          message = autoResponse[0]
+          responseContinuationIDs[index] = autoResponse[1]
+        }
         multipleInputs[index] = { ...inputs, [functionCall]: message }
         repeatOffsets[index] += lastIndices[index] + 2
         sendData({
@@ -141,6 +145,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
         continuationIDs.splice(index, 1)
         repeatOffsets.splice(index, 1)
         inputIndices.splice(index, 1)
+        responseContinuationIDs.splice(index, 1)
       }
     }
   }
