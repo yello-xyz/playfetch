@@ -32,8 +32,9 @@ const chunk = (
   duration?: number,
   failed?: boolean,
   continuationID?: number,
-  userID?: number
-) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed, continuationID, userID })
+  userID?: number,
+  offset = 0
+) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed, continuationID, userID, offset })
 
 const run = (
   output: string,

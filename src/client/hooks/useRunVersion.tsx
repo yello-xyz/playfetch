@@ -24,7 +24,6 @@ export const ConsumeStream = async (
       const output = message ? `${previousOutput}${message}` : previousOutput
       runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }
     }
-    console.log(runs)
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
     const sortedRuns = Object.entries(runs)
       .flatMap(([inputIndex, inputRuns]) =>
