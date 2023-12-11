@@ -70,7 +70,7 @@ export default async function runChain(
     functionCall === undefined ? inputs : functionCall === null ? {} : { [functionCall]: inputs[functionCall] }
 
   let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
-  let branch = 0
+  let branch = configs[continuationIndex ?? 0].branch
   const configsAsChainItems = configs.map(item => ({ ...item, code: '' }))
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
