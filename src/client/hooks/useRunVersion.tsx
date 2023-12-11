@@ -8,7 +8,7 @@ export const ConsumeStream = async (
   streamReader: StreamReader,
   callback: (runs: PartialRun[]) => void
 ) => {
-  const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [index: number]: PartialRun }]))
+  const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [id: number]: PartialRun }]))
   while (streamReader) {
     const { done, value } = await streamReader.read()
     if (done) {
@@ -19,16 +19,18 @@ export const ConsumeStream = async (
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
       const { inputIndex, index, offset, message, cost, duration, failed, continuationID, userID } = JSON.parse(data)
-      const previousOutput = runs[inputIndex][index]?.output ?? ''
+      const id = index + offset
+      const previousOutput = runs[inputIndex][id]?.output ?? ''
       const output = message ? `${previousOutput}${message}` : previousOutput
-      runs[inputIndex][index] = { id: index + offset, index, output, cost, duration, failed, continuationID, userID }
+      runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }
     }
+    console.log(runs)
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
     const sortedRuns = Object.entries(runs)
       .flatMap(([inputIndex, inputRuns]) =>
-        Object.entries(inputRuns).map(([index, run]) => ({
+        Object.entries(inputRuns).map(([id, run]) => ({
           ...run,
-          id: Number(inputIndex) * maxSteps + Number(index),
+          id: Number(inputIndex) * maxSteps + Number(id),
         }))
       )
       .sort((a, b) => a.id - b.id)

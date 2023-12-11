@@ -34,7 +34,13 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
-  stream?: (index: number, chunk: string, stepResponse?: TimedRunResponse, inputs?: PromptInputs) => void,
+  stream?: (
+    index: number,
+    chunk: string,
+    stepResponse?: TimedRunResponse,
+    inputs?: PromptInputs,
+    canLoop?: boolean
+  ) => void,
   continuationID?: number
 ): Promise<TimedRunResponse & { continuationID?: number }> {
   const useCamelCase = isEndpointEvaluation
@@ -115,11 +121,14 @@ export default async function runChain(
     } else {
       throw new Error('Unsupported config type in chain evaluation')
     }
+    const loopIndex = LoopCompletionIndexForNode(configsAsChainItems, index, branch)
+    const canLoop = loopIndex >= 0 && --remainingLoopIterations > 0
     stream?.(
       index,
       lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
       lastResponse,
-      inputs
+      inputs,
+      canLoop
     )
     if (lastResponse.failed) {
       continuationIndex = undefined
@@ -138,10 +147,9 @@ export default async function runChain(
           continuationIndex = undefined
         }
       }
-      const loopIndex = LoopCompletionIndexForNode(configsAsChainItems, index, branch)
-      if (loopIndex >= 0 && --remainingLoopIterations > 0) {
-        index = loopIndex - 1
+      if (canLoop) {
         branch = configs[loopIndex].branch
+        index = loopIndex - 1
       }
     }
   }
