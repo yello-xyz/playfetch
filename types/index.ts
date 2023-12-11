@@ -228,6 +228,7 @@ export type CodeConfig = CommonConfigAttributes & {
 export type BranchConfig = CommonConfigAttributes & {
   code: string
   branches: string[]
+  loops?: number[]
 }
 
 export type QueryConfig = CommonConfigAttributes & {
