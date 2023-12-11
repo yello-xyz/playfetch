@@ -53,7 +53,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
   const inputIndices = Array.from({ length: multipleInputs.length }, (_, index) => index)
   const continuationIDs = Array.from({ length: multipleInputs.length }, _ => req.body.continuationID)
   const responseContinuationIDs = Array.from({ length: multipleInputs.length }, _ => undefined as number | undefined)
-  const repeatOffsets = Array.from({ length: multipleInputs.length }, _ => 0)
+  const indexOffsets = Array.from({ length: multipleInputs.length }, _ => 0)
   const autoRespond = req.body.autoRespond
   const autoRepeatCount = autoRespond !== undefined ? Math.min(10, req.body.maxResponses ?? 0) : 0
 
@@ -81,7 +81,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           (index, message, response, stepInputs) => {
             sendData({
               inputIndex: inputIndices[inputIndex],
-              index: index + repeatOffsets[inputIndex],
+              index,
+              offset: indexOffsets[inputIndex],
               message,
               cost: response?.cost,
               duration: response?.duration,
@@ -131,19 +132,20 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           responseContinuationIDs[index] = autoResponse[1]
         }
         multipleInputs[index] = { ...inputs, [functionCall]: message }
-        repeatOffsets[index] += lastIndices[index] + 2
         sendData({
           inputIndex: inputIndices[index],
-          index: repeatOffsets[index] - 1,
+          index: lastIndices[index],
+          offset: indexOffsets[index] + 1,
           message,
           continuationID,
           userID: user.id,
         })
+        indexOffsets[index] += lastIndices[index] + 2
       } else {
         multipleInputs.splice(index, 1)
         multipleDynamicInputs.splice(index, 1)
         continuationIDs.splice(index, 1)
-        repeatOffsets.splice(index, 1)
+        indexOffsets.splice(index, 1)
         inputIndices.splice(index, 1)
         responseContinuationIDs.splice(index, 1)
       }
