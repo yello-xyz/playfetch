@@ -11,7 +11,7 @@ import { getTrustedVersion } from '@/src/server/datastore/versions'
 import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/evaluationEngine/codeEngine'
 import runPromptWithConfig from '@/src/server/evaluationEngine/promptEngine'
 import { runQuery } from './queryEngine'
-import { FirstBranchForBranchOfNode } from '../../common/branching'
+import { FirstBranchForBranchOfNode, LoopCompletionIndexForNode } from '../../common/branching'
 import { loadContinuation, saveContinuation } from './continuationCache'
 import { AugmentInputs, resolvePrompt, resolvePrompts } from './resolveEngine'
 import { RunResponse, EmptyRunResponse, TryParseOutput, RunWithTimer, TimedRunResponse } from './runResponse'
@@ -24,6 +24,8 @@ const isBranchConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryCon
   'branches' in config
 const isCodeConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is CodeConfig =>
   'code' in config && !isBranchConfig(config)
+
+const MaxLoopIterations = 10 // TODO make this configurable (on individual branch chain items?)
 
 export default async function runChain(
   userID: number,
@@ -41,6 +43,7 @@ export default async function runChain(
   let outputTokens = 0
   let duration = 0
   let extraAttempts = 0
+  let remainingLoopIterations = MaxLoopIterations
   const runChainStep = async (operation: Promise<RunResponse>) => {
     const response = await RunWithTimer(operation)
     cost += response.cost
@@ -62,6 +65,7 @@ export default async function runChain(
 
   let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
   let branch = 0
+  const configsAsChainItems = configs.map(item => ({ ...item, code: '' }))
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
@@ -97,11 +101,7 @@ export default async function runChain(
       if (!lastResponse.failed && !lastResponse.functionCall && isBranchConfig(config)) {
         const branchIndex = config.branches.indexOf(lastResponse.output)
         if (branchIndex >= 0) {
-          branch = FirstBranchForBranchOfNode(
-            configs.map(item => ({ ...item, code: '' })),
-            index,
-            branchIndex
-          )
+          branch = FirstBranchForBranchOfNode(configsAsChainItems, index, branchIndex)
         } else {
           lastResponse = {
             ...lastResponse,
@@ -137,6 +137,11 @@ export default async function runChain(
         if (!requestContinuation) {
           continuationIndex = undefined
         }
+      }
+      const loopIndex = LoopCompletionIndexForNode(configsAsChainItems, index, branch)
+      if (loopIndex >= 0 && --remainingLoopIterations > 0) {
+        index = loopIndex - 1
+        branch = configs[loopIndex].branch
       }
     }
   }
