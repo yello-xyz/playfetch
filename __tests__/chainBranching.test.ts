@@ -1,4 +1,5 @@
 import {
+  BranchParentForNode,
   FirstBranchForBranchOfNode,
   IsSiblingNode,
   MaxBranch,
@@ -54,6 +55,22 @@ testSibling(5, false)
 testSibling(6, true)
 testSibling(7, true)
 testSibling(8, false)
+
+const testBranchParent = (index: number, expectedIndex: number | undefined) =>
+  test(`Branch parent for node at position ${index} is node at position ${expectedIndex}`, () =>
+    expect(BranchParentForNode(chain1, index)).toStrictEqual(
+      expectedIndex !== undefined ? chain1[expectedIndex] : undefined
+    ))
+
+testBranchParent(0, undefined)
+testBranchParent(1, undefined)
+testBranchParent(2, 1)
+testBranchParent(3, 1)
+testBranchParent(4, 1)
+testBranchParent(5, 1)
+testBranchParent(6, 3)
+testBranchParent(7, 3)
+testBranchParent(8, undefined)
 
 const testSubtree = (index: number, expected: number[]) =>
   test(`Subtree at position ${index} is [${expected}]`, () => expectItemsToBe(SubtreeForNode(chain1, index), expected))
