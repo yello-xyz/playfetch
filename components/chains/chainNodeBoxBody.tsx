@@ -1,5 +1,12 @@
-import { ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
+import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
+import {
+  ChainNode,
+  InputNode,
+  IsBranchChainItem,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+} from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { VersionLabels } from '../versions/versionLabels'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
@@ -26,7 +33,9 @@ export default function ChainNodeBoxBody({
       {IsPromptChainItem(chainNode) && (
         <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
       )}
-      {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
+      {(IsCodeChainItem(chainNode) || IsBranchChainItem(chainNode)) && (
+        <CodeNodeBody item={chainNode} isSelected={isSelected} />
+      )}
       {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
       {chainNode === InputNode && <InputNodeBody items={items} isSelected={isSelected} promptCache={promptCache} />}
     </>
@@ -58,10 +67,11 @@ function PromptNodeBody({
   ) : null
 }
 
-function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: boolean }) {
-  return item.description || item.code ? (
+function CodeNodeBody({ item, isSelected }: { item: CodeChainItem | BranchChainItem; isSelected: boolean }) {
+  const description = IsCodeChainItem(item) ? item.description : undefined
+  return description || item.code ? (
     <CommonBody isSelected={isSelected}>
-      {item.description || (
+      {description || (
         <Highlight theme={themes.github} code={item.code.trim()} language='javascript'>
           {({ tokens, getLineProps, getTokenProps }) => (
             <>
