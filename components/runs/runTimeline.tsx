@@ -121,7 +121,7 @@ export default function RunTimeline({
   const runContinuation =
     version && runVersion
       ? async (continuationID: number, message: string, inputKey: string) =>
-          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [], continuationID)
+          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [{}], continuationID)
       : undefined
 
   return (
