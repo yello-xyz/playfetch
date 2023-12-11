@@ -15,7 +15,7 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { Fragment, useState } from 'react'
 import { useCheckProviders } from '@/src/client/context/providerContext'
 import { EmbeddingModels, QueryProviders } from '@/src/common/providerMetadata'
-import { MaxBranch, ShiftDown, ShiftRight, SplitNodes } from '@/src/common/branching'
+import { MaxBranch, ShiftDown, ShiftRight, ShouldBranchLoopOnCompletion, SplitNodes } from '@/src/common/branching'
 import { ConnectorRow, EndBranchConnector, EndRow, NodesRow, StartBranchConnector, StartRow } from './chainEditorRow'
 
 export default function ChainEditor({
@@ -106,6 +106,9 @@ export default function ChainEditor({
 
   const nodeRows = [[nodes[0]], ...SplitNodes(items), [nodes.slice(-1)[0]]]
   const maxBranch = Math.min(MaxBranch(items), gridConfigs.length)
+  const maxNonLoopingBranch = Array.from({ length: maxBranch + 1 }).findLastIndex(
+    (_, branch) => !ShouldBranchLoopOnCompletion(items, branch)
+  )
 
   return (
     <div className='relative flex flex-col items-stretch h-full bg-gray-25'>
@@ -121,7 +124,13 @@ export default function ChainEditor({
           <StartRow maxBranch={maxBranch} colSpans={colSpans} />
           {nodeRows.map((row, rowIndex, rows) => (
             <Fragment key={rowIndex}>
-              {rowIndex === rows.length - 1 && <EndBranchConnector maxBranch={maxBranch} colSpans={colSpans} />}
+              {rowIndex === rows.length - 1 && (
+                <EndBranchConnector
+                  maxBranch={maxBranch}
+                  maxNonLoopingBranch={maxNonLoopingBranch}
+                  colSpans={colSpans}
+                />
+              )}
               <NodesRow
                 chain={chain}
                 nodes={nodes}

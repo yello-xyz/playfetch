@@ -19,20 +19,29 @@ export const BranchParentIndexForNode = (nodes: ChainItem[], index: number): num
   )
 }
 
+export const ShouldBranchLoopOnCompletion = (nodes: ChainItem[], branch: number): boolean => {
+  if (branch === 0) {
+    return false
+  }
+  for (let index = nodes.length - 1; index >= 0; --index) {
+    const node = nodes[index]
+    if (IsBranchChainItem(node)) {
+      for (let branchIndex = 0; branchIndex < node.branches.length; ++branchIndex) {
+        if (FirstBranchForBranchOfNode(nodes, index, branchIndex) === branch) {
+          return (node.loops ?? []).includes(branchIndex)
+        }
+      }
+    }
+  }
+  return false
+}
+
 export const ShouldLoopOnCompletion = (nodes: ChainItem[], index: number): boolean => {
   if (index < 0 || index > nodes.length - 1) {
     return false
   }
   const node = nodes[index]
-  if (node.branch === 0 || nodes.slice(index + 1).some(n => n.branch === node.branch)) {
-    return false
-  }
-  const branchParentIndex = BranchParentIndexForNode(nodes, index)
-  const branchParent = nodes[branchParentIndex] as BranchChainItem
-  const branchIndex = branchParent.branches.findIndex((_, i) =>
-    SubtreeForBranchOfNode(nodes, branchParentIndex, i).includes(node)
-  )
-  return (branchParent.loops ?? []).includes(branchIndex)
+  return nodes.slice(index + 1).every(n => n.branch !== node.branch) && ShouldBranchLoopOnCompletion(nodes, node.branch)
 }
 
 export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot = true): ChainItem[] => {
