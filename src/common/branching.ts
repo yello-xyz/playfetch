@@ -1,4 +1,4 @@
-import { ChainItem } from '@/types'
+import { BranchChainItem, ChainItem } from '@/types'
 import { IsBranchChainItem } from '@/components/chains/chainNode'
 
 export const IsSiblingNode = (nodes: ChainItem[], index: number): boolean => {
@@ -10,11 +10,29 @@ export const IsSiblingNode = (nodes: ChainItem[], index: number): boolean => {
   return node.branch > previousNode.branch + (IsBranchChainItem(previousNode) ? previousNode.branches.length - 1 : 0)
 }
 
-export const BranchParentForNode = (nodes: ChainItem[], index: number): ChainItem | undefined => {
+export const BranchParentIndexForNode = (nodes: ChainItem[], index: number): number => {
   if (index < 0 || index > nodes.length - 1) {
-    return undefined
+    return -1
   }
-  return nodes.findLast((node, i) => IsBranchChainItem(node) && SubtreeForNode(nodes, i, false).includes(nodes[index]))
+  return nodes.findLastIndex(
+    (node, i) => IsBranchChainItem(node) && SubtreeForNode(nodes, i, false).includes(nodes[index])
+  )
+}
+
+export const ShouldLoopOnCompletion = (nodes: ChainItem[], index: number): boolean => {
+  if (index < 0 || index > nodes.length - 1) {
+    return false
+  }
+  const node = nodes[index]
+  if (node.branch === 0 || nodes.slice(index + 1).some(n => n.branch === node.branch)) {
+    return false
+  }
+  const branchParentIndex = BranchParentIndexForNode(nodes, index)
+  const branchParent = nodes[branchParentIndex] as BranchChainItem
+  const branchIndex = branchParent.branches.findIndex((_, i) =>
+    SubtreeForBranchOfNode(nodes, branchParentIndex, i).includes(node)
+  )
+  return (branchParent.loops ?? []).includes(branchIndex)
 }
 
 export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot = true): ChainItem[] => {
