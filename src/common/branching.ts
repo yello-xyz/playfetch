@@ -1,4 +1,4 @@
-import { BranchChainItem, ChainItem } from '@/types'
+import { ChainItem } from '@/types'
 import { IsBranchChainItem } from '@/components/chains/chainNode'
 
 export const IsSiblingNode = (nodes: ChainItem[], index: number): boolean => {
@@ -10,38 +10,29 @@ export const IsSiblingNode = (nodes: ChainItem[], index: number): boolean => {
   return node.branch > previousNode.branch + (IsBranchChainItem(previousNode) ? previousNode.branches.length - 1 : 0)
 }
 
-export const BranchParentIndexForNode = (nodes: ChainItem[], index: number): number => {
+const IsLoopRootForBranch = (nodes: ChainItem[], index: number, branch: number): boolean => {
   if (index < 0 || index > nodes.length - 1) {
-    return -1
-  }
-  return nodes.findLastIndex(
-    (node, i) => IsBranchChainItem(node) && SubtreeForNode(nodes, i, false).includes(nodes[index])
-  )
-}
-
-export const ShouldBranchLoopOnCompletion = (nodes: ChainItem[], branch: number): boolean => {
-  if (branch === 0) {
     return false
   }
-  for (let index = nodes.length - 1; index >= 0; --index) {
-    const node = nodes[index]
-    if (IsBranchChainItem(node)) {
-      for (let branchIndex = 0; branchIndex < node.branches.length; ++branchIndex) {
-        if (FirstBranchForBranchOfNode(nodes, index, branchIndex) === branch) {
-          return (node.loops ?? []).includes(branchIndex)
-        }
+  const node = nodes[index]
+  if (IsBranchChainItem(node)) {
+    for (let branchIndex = 0; branchIndex < node.branches.length; ++branchIndex) {
+      if (FirstBranchForBranchOfNode(nodes, index, branchIndex) === branch) {
+        return (node.loops ?? []).includes(branchIndex)
       }
     }
   }
   return false
 }
 
-export const ShouldLoopOnCompletion = (nodes: ChainItem[], index: number): boolean => {
-  if (index < 0 || index > nodes.length - 1) {
-    return false
+export const ShouldBranchLoopOnCompletion = (nodes: ChainItem[], branch: number): boolean =>
+  nodes.some((_, index) => IsLoopRootForBranch(nodes, index, branch))
+
+export const LoopCompletionIndexForNode = (nodes: ChainItem[], index: number, branch: number): number => {
+  if (index < 0 || index > nodes.length - 1 || nodes.slice(index + 1).some(n => n.branch === branch)) {
+    return -1
   }
-  const node = nodes[index]
-  return nodes.slice(index + 1).every(n => n.branch !== node.branch) && ShouldBranchLoopOnCompletion(nodes, node.branch)
+  return nodes.findLastIndex((_, i) => IsLoopRootForBranch(nodes, i, branch))
 }
 
 export const SubtreeForNode = (nodes: ChainItem[], index: number, includingRoot = true): ChainItem[] => {

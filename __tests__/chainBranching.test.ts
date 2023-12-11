@@ -1,13 +1,13 @@
 import {
-  BranchParentIndexForNode,
   FirstBranchForBranchOfNode,
   IsSiblingNode,
+  LoopCompletionIndexForNode,
   MaxBranch,
   PruneBranchAndShiftLeft,
   PruneNodeAndShiftUp,
   ShiftDown,
   ShiftRight,
-  ShouldLoopOnCompletion,
+  ShouldBranchLoopOnCompletion,
   SplitNodes,
   SubtreeForBranchOfNode,
   SubtreeForNode,
@@ -16,9 +16,9 @@ import { ChainItem } from '@/types'
 
 const chain1: ChainItem[] = [
   { branch: 0, code: '0 [A0]' },
-  { branch: 0, code: '1 [B0]', branches: ['0', '1', '4'], loops: [2] },
+  { branch: 0, code: '1 [B0]', branches: ['0', '1', '4'], loops: [1, 2] },
   { branch: 0, code: '2 [C0]' },
-  { branch: 1, code: '3 [C1]', branches: ['1', '2', '3'], loops: [0] },
+  { branch: 1, code: '3 [C1]', branches: ['1', '2', '3'], loops: [1] },
   { branch: 4, code: '4 [C4]' },
   { branch: 0, code: '5 [D0]' },
   { branch: 1, code: '6 [D1]' },
@@ -57,33 +57,34 @@ testSibling(6, true)
 testSibling(7, true)
 testSibling(8, false)
 
-const testBranchParent = (index: number, expectedIndex: number) =>
-  test(`Branch parent for node at position ${index} is node at position ${expectedIndex}`, () =>
-    expect(BranchParentIndexForNode(chain1, index)).toBe(expectedIndex))
+const testLoopBranchOnCompletion = (branch: number, shouldLoop: boolean) =>
+  test(`Branch ${branch} should ${shouldLoop ? '' : 'not'} loop on completion`, () =>
+    expect(ShouldBranchLoopOnCompletion(chain1, branch)).toBe(shouldLoop))
 
-testBranchParent(0, -1)
-testBranchParent(1, -1)
-testBranchParent(2, 1)
-testBranchParent(3, 1)
-testBranchParent(4, 1)
-testBranchParent(5, 1)
-testBranchParent(6, 3)
-testBranchParent(7, 3)
-testBranchParent(8, -1)
+testLoopBranchOnCompletion(0, false)
+testLoopBranchOnCompletion(1, true)
+testLoopBranchOnCompletion(2, true)
+testLoopBranchOnCompletion(3, false)
+testLoopBranchOnCompletion(4, true)
+testLoopBranchOnCompletion(5, false)
 
-const testLoopOnCompletion = (index: number, shouldLoop: boolean) =>
-  test(`Node at position ${index} should ${shouldLoop ? '' : 'not'} loop on completion`, () =>
-    expect(ShouldLoopOnCompletion(chain1, index)).toBe(shouldLoop))
+const testLoopIndex = (index: number, branch: number, expectedIndex: number) =>
+  test(`Loop completion index for node at position ${index} on branch ${branch} is node at position ${expectedIndex}`, () =>
+    expect(LoopCompletionIndexForNode(chain1, index, branch)).toBe(expectedIndex))
 
-testLoopOnCompletion(0, false)
-testLoopOnCompletion(1, false)
-testLoopOnCompletion(2, false)
-testLoopOnCompletion(3, false)
-testLoopOnCompletion(4, true)
-testLoopOnCompletion(5, false)
-testLoopOnCompletion(6, true)
-testLoopOnCompletion(7, false)
-testLoopOnCompletion(8, false)
+testLoopIndex(0, 0, -1)
+testLoopIndex(1, 0, -1)
+testLoopIndex(1, 1, -1)
+testLoopIndex(1, 4, -1)
+testLoopIndex(2, 0, -1)
+testLoopIndex(3, 1, -1)
+testLoopIndex(3, 2, 3)
+testLoopIndex(3, 3, -1)
+testLoopIndex(4, 4, 1)
+testLoopIndex(5, 0, -1)
+testLoopIndex(6, 1, 1)
+testLoopIndex(7, 3, -1)
+testLoopIndex(8, 0, -1)
 
 const testSubtree = (index: number, expected: number[]) =>
   test(`Subtree at position ${index} is [${expected}]`, () => expectItemsToBe(SubtreeForNode(chain1, index), expected))
