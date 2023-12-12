@@ -35,14 +35,16 @@ export const generateAutoResponse = (system: string, message: string, continuati
 export async function predictRatingForRun(runID: number, parentID: number, inputs: PromptInputs, output: string) {
   const recentRatings = await getRecentRatingsForParent(parentID)
 
-  const [response] = await postRequest(Endpoint.Rate, {
-    recentRatings: JSON.stringify(recentRatings),
-    inputs: JSON.stringify(inputs),
-    output,
-  })
-
-  if (response?.rating && response?.reason) {
-    await savePredictedRunRating(runID, response.rating, response.reason)
+  if (recentRatings.length > 0) {
+    const [response] = await postRequest(Endpoint.Rate, {
+      recentRatings: JSON.stringify(recentRatings),
+      inputs: JSON.stringify(inputs),
+      output,
+    })
+  
+    if (response?.rating && response?.reason) {
+      await savePredictedRunRating(runID, response.rating, response.reason)
+    }  
   }
 }
 
