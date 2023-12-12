@@ -31,6 +31,6 @@ export const SubtreeForChainNode = (
         return SubtreeForChainNode(items[loopIndex], nodes, true, false)
       }
     }
-    return SubtreeForNode(items, items.indexOf(node), includeRoot)  
+    return SubtreeForNode(items, items.indexOf(node), includeRoot)
   }
 }

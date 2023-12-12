@@ -3,6 +3,7 @@ import {
   ChainNode,
   InputNode,
   IsBranchChainItem,
+  IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
@@ -19,6 +20,7 @@ import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { ReactNode, useState } from 'react'
+import { ShouldBranchLoopOnCompletion } from '@/src/common/branching'
 
 export default function ChainNodeBoxHeader({
   nodes,
@@ -63,7 +65,13 @@ export default function ChainNodeBoxHeader({
 
   const canIncludeContext =
     IsPromptChainItem(chainNode) &&
-    nodes.slice(0, index).some(node => IsPromptChainItem(node) && SubtreeForChainNode(node, nodes).includes(chainNode))
+    nodes.some(
+      node =>
+        IsPromptChainItem(node) &&
+        (SubtreeForChainNode(node, nodes, false).includes(chainNode) ||
+          (ShouldBranchLoopOnCompletion(nodes.filter(IsChainItem), node.branch) &&
+            SubtreeForChainNode(node, nodes, false, true).includes(chainNode)))
+    )
 
   return (
     <>
