@@ -7,8 +7,10 @@ export const SelectAnyInputRow = (inputValues: InputValues, variables: string[])
 export const SelectAnyInputValue =
   (inputValues: InputValues, config: TestConfig) =>
   (variable: string): string | undefined =>
-    SelectInputRows(inputValues, [variable], config)[0][0]?.[variable] ??
-    SelectAnyInputRow(inputValues, [variable])[variable]
+    config.autoRespond !== undefined && !!config.maxResponses
+      ? undefined
+      : SelectInputRows(inputValues, [variable], config)[0][0]?.[variable] ??
+        SelectAnyInputRow(inputValues, [variable])[variable]
 
 const shuffleArray = <T>(source: T[]): T[] => {
   const array = [...source]
