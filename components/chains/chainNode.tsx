@@ -1,4 +1,4 @@
-import { SubtreeForNode } from '@/src/common/branching'
+import { LoopCompletionIndexForNode, SubtreeForNode } from '@/src/common/branching'
 import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
 
 export const InputNode = 'input'
@@ -13,13 +13,24 @@ export const IsCodeChainItem = (item: ChainNode): item is CodeChainItem =>
 export const IsQueryChainItem = (item: ChainNode): item is QueryChainItem => IsChainItem(item) && 'query' in item
 export const NameForCodeChainItem = (item: CodeChainItem) => item.name || 'Code block'
 
-export const SubtreeForChainNode = (node: ChainNode, nodes: ChainNode[], includeRoot = true): ChainItem[] => {
+export const SubtreeForChainNode = (
+  node: ChainNode,
+  nodes: ChainNode[],
+  includeRoot = true,
+  considerLoops = false
+): ChainItem[] => {
   const items = nodes.filter(IsChainItem)
   if (node === InputNode) {
     return items
   } else if (node === OutputNode) {
     return []
   } else {
-    return SubtreeForNode(items, items.indexOf(node), includeRoot)
+    if (considerLoops) {
+      const loopIndex = LoopCompletionIndexForNode(items, items.indexOf(node), node.branch)
+      if (loopIndex >= 0) {
+        return SubtreeForChainNode(items[loopIndex], nodes, true, false)
+      }
+    }
+    return SubtreeForNode(items, items.indexOf(node), includeRoot)  
   }
 }

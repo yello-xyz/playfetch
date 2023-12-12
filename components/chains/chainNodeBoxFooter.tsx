@@ -4,18 +4,6 @@ import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
 import { ExtractChainItemVariables } from './chainNodeOutput'
-import { LoopCompletionIndexForNode } from '@/src/common/branching'
-
-export const SubtreeForChainNodeConsideringLoops = (node: ChainNode, nodes: ChainNode[]) => {
-  if (IsChainItem(node)) {
-    const items = nodes.filter(IsChainItem)
-    const loopIndex = LoopCompletionIndexForNode(items, items.indexOf(node), node.branch)
-    if (loopIndex >= 0) {
-      return SubtreeForChainNode(items[loopIndex], nodes, true)
-    }
-  }
-  return SubtreeForChainNode(node, nodes, false)
-}
 
 export default function ChainNodeBoxFooter({
   nodes,
@@ -33,7 +21,7 @@ export default function ChainNodeBoxFooter({
   const chainNode = nodes[index]
   const inputs = [
     ...new Set(
-      SubtreeForChainNodeConsideringLoops(chainNode, nodes).flatMap(item =>
+      SubtreeForChainNode(chainNode, nodes, false, true).flatMap(item =>
         ExtractChainItemVariables(item, promptCache, false)
       )
     ),
