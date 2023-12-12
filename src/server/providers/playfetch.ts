@@ -41,10 +41,10 @@ export async function predictRatingForRun(runID: number, parentID: number, input
       inputs: JSON.stringify(inputs),
       output,
     })
-  
+
     if (response?.rating && response?.reason) {
       await savePredictedRunRating(runID, response.rating, response.reason)
-    }  
+    }
   }
 }
 
