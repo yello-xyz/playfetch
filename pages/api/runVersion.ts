@@ -72,7 +72,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
 
     const sendDataForInput = (
       inputIndex: number,
-      message: string,
+      message: string | undefined,
       response: TimedRunResponse | undefined,
       userID?: number
     ) =>
@@ -137,7 +137,10 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       const dynamicInputs = multipleDynamicInputs[index]
       const dynamicInput = functionCall ? dynamicInputs[functionCall] : undefined
       if (!response.failed && continuationID && functionCall && dynamicInput) {
-        continuationIDs[index] = continuationID
+        if (!continuationIDs[index]) {
+          continuationIDs[index] = continuationID
+          sendDataForInput(index, undefined, response)
+        }
         let message = dynamicInput
         if (autoRespond) {
           const autoResponse = await generateAutoResponse(dynamicInput, response.output, responseContinuationIDs[index])
