@@ -15,6 +15,7 @@ import runChain from '@/src/server/evaluationEngine/chainEngine'
 import logUserRequest, { RunEvent } from '@/src/server/analytics'
 import { getVerifiedUserPromptOrChainData } from '@/src/server/datastore/chains'
 import { generateAutoResponse, predictRatingForRun } from '@/src/server/providers/playfetch'
+import { TimedRunResponse } from '@/src/server/evaluationEngine/runResponse'
 
 export const loadConfigsFromVersion = (version: RawPromptVersion | RawChainVersion): (RunConfig | CodeConfig)[] =>
   (version.items as (RunConfig | CodeConfig)[] | undefined) ?? [{ versionID: version.id, branch: 0 }]
@@ -69,6 +70,24 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
     const runIDs = await allocateRunIDs(multipleInputs.length)
     const lastIndices = multipleInputs.map(_ => 0)
 
+    const sendDataForInput = (
+      inputIndex: number,
+      message: string,
+      response: TimedRunResponse | undefined,
+      userID?: number
+    ) =>
+      sendData({
+        inputIndex: inputIndices[inputIndex],
+        index: lastIndices[inputIndex],
+        offset: indexOffsets[inputIndex],
+        message,
+        cost: response?.cost,
+        duration: response?.duration,
+        failed: response?.failed,
+        continuationID: continuationIDs[inputIndex],
+        userID,
+      })
+
     const responses = await Promise.all(
       multipleInputs.map(async (inputs, inputIndex) =>
         runChain(
@@ -79,17 +98,8 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           inputs,
           false,
           (index, message, response, stepInputs, canLoop) => {
-            sendData({
-              inputIndex: inputIndices[inputIndex],
-              index,
-              offset: indexOffsets[inputIndex],
-              message,
-              cost: response?.cost,
-              duration: response?.duration,
-              failed: response?.failed,
-              continuationID: continuationIDs[inputIndex],
-            })
             lastIndices[inputIndex] = index
+            sendDataForInput(inputIndex, message, response)
             if (canLoop && response && !response.failed && !response.functionCall) {
               indexOffsets[inputIndex] += lastIndices[inputIndex] + 1
             }
@@ -135,15 +145,9 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
           responseContinuationIDs[index] = autoResponse[1]
         }
         multipleInputs[index] = { ...inputs, [functionCall]: message }
-        sendData({
-          inputIndex: inputIndices[index],
-          index: lastIndices[index],
-          offset: indexOffsets[index] + 1,
-          message,
-          continuationID,
-          userID: user.id,
-        })
-        indexOffsets[index] += lastIndices[index] + 2
+        indexOffsets[index] += 1
+        sendDataForInput(index, message, undefined, user.id)
+        indexOffsets[index] += lastIndices[index] + 1
       } else {
         multipleInputs.splice(index, 1)
         multipleDynamicInputs.splice(index, 1)
