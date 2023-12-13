@@ -18,8 +18,12 @@ const lastContinuationTimestamp = <T extends { timestamp: number; continuationID
     ? Math.max(...runs.filter(r => r.continuationID === run.continuationID).map(r => r.timestamp))
     : run.timestamp
 
-const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
-  items.sort((a, b) => lastContinuationTimestamp(a, items) - lastContinuationTimestamp(b, items))
+const sortByTimestamp = <T extends { timestamp: number; continuationID?: number }>(items: T[]): T[] =>
+  items.sort((a, b) =>
+    a.continuationID === b.continuationID
+      ? a.timestamp - b.timestamp
+      : lastContinuationTimestamp(a, items) - lastContinuationTimestamp(b, items)
+  )
 
 const hasTimestamp = <T extends { timestamp?: number }>(run: T): run is T & { timestamp: number } => !!run.timestamp
 
