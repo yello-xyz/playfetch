@@ -104,12 +104,16 @@ export const ExtractVariables = (text: string) => [
 export const CodeModuleName = 'PlayFetch'
 export const InterruptOnceFunctionName = 'InterruptOnce'
 
+const interruptPrefix = `${CodeModuleName}\.${InterruptOnceFunctionName}\\(`
+const matchAll = (text: string, expression: string) =>
+  [...text.matchAll(new RegExp(expression, 'g'))].map(match => match[1])
+
 export const ExtractCodeInterrupts = (text: string) => [
-  ...new Set(
-    [...text.matchAll(new RegExp(`${CodeModuleName}\.${InterruptOnceFunctionName}\\(["']([^"']+)["']`, 'g'))].map(
-      match => match[1]
-    )
-  ),
+  ...new Set([
+    ...matchAll(text, `${interruptPrefix}["']([^"']+)["'],`),
+    ...matchAll(text, `${interruptPrefix}["'][^"']+["']\\)`).map(_ => DefaultChatContinuationInputKey),
+    ...matchAll(text, `${interruptPrefix}{{[^,]+}}\\)`).map(_ => DefaultChatContinuationInputKey),
+  ]),
 ]
 
 const TryParseJSON = (text: string) => {

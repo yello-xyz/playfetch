@@ -22,28 +22,54 @@ const testExtractCodeInterrupts = (testDescription: string, expectedVariables: s
 
 testExtractCodeInterrupts('no code interrupts', [], `return 'Hello World'`)
 testExtractCodeInterrupts(
-  'single quoted code interrupt',
-  ['ask_question'],
-  `return PlayFetch.InterruptOnce('ask_question')`
+  'single quoted message interrupt',
+  ['message'],
+  `return PlayFetch.InterruptOnce('How are you?')`
 )
 testExtractCodeInterrupts(
-  'double quoted code interrupt',
-  ['ask_question'],
-  `return PlayFetch.InterruptOnce("ask_question")`
+  'double quoted message interrupt',
+  ['message'],
+  `return PlayFetch.InterruptOnce("Who are you?")`
 )
 testExtractCodeInterrupts(
-  'multiple code interrupts with parameters and variables',
-  ['ask_question', 'give_up'],
+  'deduplicate message interrupts',
+  ['message'],
+  `Math.random() < 0.5 ? PlayFetch.InterruptOnce('How are you?') : PlayFetch.InterruptOnce("Who are you?")`
+)
+testExtractCodeInterrupts(
+  'single quoted function interrupt',
+  ['ask_question'],
+  `return PlayFetch.InterruptOnce('ask_question', { question: 'How are you?' })`
+)
+testExtractCodeInterrupts(
+  'double quoted function interrupt',
+  ['ask_question'],
+  `return PlayFetch.InterruptOnce("ask_question", { question: "Who are you?" })`
+)
+testExtractCodeInterrupts(
+  'deduplicate function interrupts',
+  ['ask_question'],
+  `Math.random() < 0.5 
+    ? PlayFetch.InterruptOnce('ask_question', { question: 'How are you?' })
+    : PlayFetch.InterruptOnce("ask_question", { question: "Who are you?" })`
+)
+testExtractCodeInterrupts(
+  'multiple code interrupts with variables',
+  ['ask_question', 'message'],
   `return 
   Math.random() < 0.5 
     ? PlayFetch.InterruptOnce('ask_question', { question: {{question}} }) 
-    : PlayFetch.InterruptOnce('give_up', { reason: {{reason}} })`
+    : PlayFetch.InterruptOnce({{reason}})`
 )
-
+testExtractCodeInterrupts(
+  'fail to detect variable function interrupt',
+  [],
+  `return PlayFetch.InterruptOnce({{functionName}}, {})`
+)
 testExtractCodeInterrupts(
   'fail to detect more dynamic code interrupts',
   [],
-  `return PlayFetch.InterruptOnce(Math.random() < 0.5 ? 'ask_question' : give_up)`
+  `return PlayFetch.InterruptOnce(Math.random() < 0.5 ? 'How are you?' : 'Who are you?')`
 )
 
 const buildConfig = (supportsFunctions = true, simpleChat = false) => ({
