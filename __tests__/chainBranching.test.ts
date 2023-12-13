@@ -1,3 +1,4 @@
+import { SubtreeForChainNode } from '@/components/chains/chainNode'
 import {
   FirstBranchForBranchOfNode,
   IsSiblingNode,
@@ -86,8 +87,9 @@ testLoopIndex(6, 1, 1)
 testLoopIndex(7, 3, -1)
 testLoopIndex(8, 0, -1)
 
-const testSubtree = (index: number, expected: number[]) =>
-  test(`Subtree at position ${index} is [${expected}]`, () => expectItemsToBe(SubtreeForNode(chain1, index), expected))
+const testSubtree = (index: number, expected: number[], includingRoot = true) =>
+  test(`Subtree at position ${index}${includingRoot ? ' including root' : ''} is [${expected}]`, () =>
+    expectItemsToBe(SubtreeForNode(chain1, index, includingRoot), expected))
 
 testSubtree(0, [0, 1, 2, 3, 4, 5, 6, 7])
 testSubtree(1, [1, 2, 3, 4, 5, 6, 7])
@@ -98,6 +100,45 @@ testSubtree(5, [5])
 testSubtree(6, [6])
 testSubtree(7, [7])
 testSubtree(8, [])
+
+const testSubtreeExcludingRoot = (index: number, expected: number[]) => testSubtree(index, expected, false)
+
+testSubtreeExcludingRoot(0, [1, 2, 3, 4, 5, 6, 7])
+testSubtreeExcludingRoot(1, [2, 3, 4, 5, 6, 7])
+testSubtreeExcludingRoot(2, [5])
+testSubtreeExcludingRoot(3, [6, 7])
+testSubtreeExcludingRoot(4, [])
+testSubtreeExcludingRoot(5, [])
+testSubtreeExcludingRoot(6, [])
+testSubtreeExcludingRoot(7, [])
+testSubtreeExcludingRoot(8, [])
+
+const testLoopedChainSubtree = (index: number, expected: number[], includingRoot = true) =>
+  test(`Looped chain subtree at position ${index}${includingRoot ? ' including root' : ''} is [${expected}]`, () =>
+    expectItemsToBe(SubtreeForChainNode(chain1[index], chain1, includingRoot, true), expected))
+
+testLoopedChainSubtree(0, [0, 1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtree(1, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtree(2, [2, 5])
+testLoopedChainSubtree(3, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtree(4, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtree(5, [5])
+testLoopedChainSubtree(6, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtree(7, [7])
+testLoopedChainSubtree(8, [])
+
+const testLoopedChainSubtreeExcludingRoot = (index: number, expected: number[]) =>
+  testLoopedChainSubtree(index, expected, false)
+
+testLoopedChainSubtreeExcludingRoot(0, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtreeExcludingRoot(1, [2, 3, 4, 5, 6, 7])
+testLoopedChainSubtreeExcludingRoot(2, [5])
+testLoopedChainSubtreeExcludingRoot(3, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtreeExcludingRoot(4, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtreeExcludingRoot(5, [])
+testLoopedChainSubtreeExcludingRoot(6, [1, 2, 3, 4, 5, 6, 7])
+testLoopedChainSubtreeExcludingRoot(7, [])
+testLoopedChainSubtreeExcludingRoot(8, [])
 
 const testMaxBranch = (index: number, expected: number, chain = chain1) =>
   test(`Max branch for subtree at position ${index} is ${expected}`, () =>
