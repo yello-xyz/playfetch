@@ -26,7 +26,11 @@ export const SubtreeForChainNode = (
     return []
   } else {
     if (considerLoops) {
-      const loopIndex = LoopCompletionIndexForNode(items, items.indexOf(node), node.branch)
+      const loopIndex = LoopCompletionIndexForNode(
+        items,
+        items.findLastIndex(n => n.branch === node.branch),
+        node.branch
+      )
       if (loopIndex >= 0) {
         return SubtreeForChainNode(items[loopIndex], nodes, true, false)
       }
