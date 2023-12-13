@@ -61,7 +61,7 @@ function PromptNodeBody({
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
       <CommonBody isSelected={isSelected}>
-        <TaggedContent content={version.prompts.main} />
+        <TaggedContent content={version.prompts.main || (version.prompts.system ?? '')} />
       </CommonBody>
     </div>
   ) : null
