@@ -1,4 +1,4 @@
-import { SubtreeForChainNode } from '@/components/chains/chainNode'
+import { CanChainNodeIncludeContext, SubtreeForChainNode } from '@/components/chains/chainNode'
 import {
   FirstBranchForBranchOfNode,
   IsSiblingNode,
@@ -16,11 +16,11 @@ import {
 import { ChainItem } from '@/types'
 
 const chain1: ChainItem[] = [
-  { branch: 0, code: '0 [A0]' },
+  { branch: 0, code: '0 [A0]', promptID: 1 },
   { branch: 0, code: '1 [B0]', branches: ['0', '1', '4'], loops: [1, 2] },
-  { branch: 0, code: '2 [C0]' },
+  { branch: 0, code: '2 [C0]', promptID: 2 },
   { branch: 1, code: '3 [C1]', branches: ['1', '2', '3'], loops: [1] },
-  { branch: 4, code: '4 [C4]' },
+  { branch: 4, code: '4 [C4]', promptID: 3 },
   { branch: 0, code: '5 [D0]' },
   { branch: 1, code: '6 [D1]' },
   { branch: 3, code: '7 [D3]' },
@@ -28,9 +28,9 @@ const chain1: ChainItem[] = [
 
 const chain2: ChainItem[] = [
   { branch: 0, code: '0 [A0]', branches: ['0', '2'] },
-  { branch: 0, code: '1 [B0]', branches: ['0', '1'] },
+  { branch: 0, code: '1 [B0]', branches: ['0', '1'], promptID: 1 },
   { branch: 2, code: '2 [B2]' },
-  { branch: 0, code: '3 [C0]' },
+  { branch: 0, code: '3 [C0]', promptID: 2 },
 ]
 
 const chain3: ChainItem[] = [{ branch: 0, code: '0 [A0]', branches: ['0', '1', '2'] }]
@@ -125,7 +125,6 @@ testLoopedChainSubtree(4, [1, 2, 3, 4, 5, 6, 7])
 testLoopedChainSubtree(5, [5])
 testLoopedChainSubtree(6, [1, 2, 3, 4, 5, 6, 7])
 testLoopedChainSubtree(7, [7])
-testLoopedChainSubtree(8, [])
 
 const testLoopedChainSubtreeExcludingRoot = (index: number, expected: number[]) =>
   testLoopedChainSubtree(index, expected, false)
@@ -138,7 +137,24 @@ testLoopedChainSubtreeExcludingRoot(4, [1, 2, 3, 4, 5, 6, 7])
 testLoopedChainSubtreeExcludingRoot(5, [])
 testLoopedChainSubtreeExcludingRoot(6, [1, 2, 3, 4, 5, 6, 7])
 testLoopedChainSubtreeExcludingRoot(7, [])
-testLoopedChainSubtreeExcludingRoot(8, [])
+
+const testIncludeContext = (index: number, expected: boolean, chain = chain1) =>
+  test(`Item at position ${index} ${expected ? 'can' : 'cannot'} include previous prompt context`, () =>
+    expect(CanChainNodeIncludeContext(chain[index], chain)).toBe(expected))
+
+testIncludeContext(0, false)
+testIncludeContext(1, false)
+testIncludeContext(2, true)
+testIncludeContext(3, false)
+testIncludeContext(4, true)
+testIncludeContext(5, false)
+testIncludeContext(6, false)
+testIncludeContext(7, false)
+
+testIncludeContext(0, false, chain2)
+testIncludeContext(1, false, chain2)
+testIncludeContext(2, false, chain2)
+testIncludeContext(3, true, chain2)
 
 const testMaxBranch = (index: number, expected: number, chain = chain1) =>
   test(`Max branch for subtree at position ${index} is ${expected}`, () =>

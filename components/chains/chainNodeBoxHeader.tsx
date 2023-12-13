@@ -1,5 +1,6 @@
 import { ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User } from '@/types'
 import {
+  CanChainNodeIncludeContext,
   ChainNode,
   InputNode,
   IsBranchChainItem,
@@ -63,15 +64,7 @@ export default function ChainNodeBoxHeader({
     setLabel(undefined)
   }
 
-  const canIncludeContext =
-    IsPromptChainItem(chainNode) &&
-    nodes.some(
-      node =>
-        IsPromptChainItem(node) &&
-        (SubtreeForChainNode(node, nodes, false).includes(chainNode) ||
-          (ShouldBranchLoopOnCompletion(nodes.filter(IsChainItem), node.branch) &&
-            SubtreeForChainNode(node, nodes, false, true).includes(chainNode)))
-    )
+  const canIncludeContext = CanChainNodeIncludeContext(chainNode, nodes)
 
   return (
     <>

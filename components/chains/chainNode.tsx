@@ -1,4 +1,4 @@
-import { LoopCompletionIndexForNode, SubtreeForNode } from '@/src/common/branching'
+import { LoopCompletionIndexForNode, ShouldBranchLoopOnCompletion, SubtreeForNode } from '@/src/common/branching'
 import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
 
 export const InputNode = 'input'
@@ -14,27 +14,37 @@ export const IsQueryChainItem = (item: ChainNode): item is QueryChainItem => IsC
 export const NameForCodeChainItem = (item: CodeChainItem) => item.name || 'Code block'
 
 export const SubtreeForChainNode = (
-  node: ChainNode,
+  chainNode: ChainNode,
   nodes: ChainNode[],
   includeRoot = true,
   considerLoops = false
 ): ChainItem[] => {
   const items = nodes.filter(IsChainItem)
-  if (node === InputNode) {
+  if (chainNode === InputNode) {
     return items
-  } else if (node === OutputNode) {
+  } else if (chainNode === OutputNode) {
     return []
   } else {
     if (considerLoops) {
       const loopIndex = LoopCompletionIndexForNode(
         items,
-        items.findLastIndex(n => n.branch === node?.branch),
-        node?.branch
+        items.findLastIndex(node => node.branch === chainNode.branch),
+        chainNode.branch
       )
       if (loopIndex >= 0) {
         return SubtreeForChainNode(items[loopIndex], nodes, true, false)
       }
     }
-    return SubtreeForNode(items, items.indexOf(node), includeRoot)
+    return SubtreeForNode(items, items.indexOf(chainNode), includeRoot)
   }
 }
+
+export const CanChainNodeIncludeContext = (chainNode: ChainNode, nodes: ChainNode[]): chainNode is PromptChainItem =>
+  IsPromptChainItem(chainNode) &&
+  nodes.some(
+    node =>
+      IsPromptChainItem(node) &&
+      (SubtreeForChainNode(node, nodes, false).includes(chainNode) ||
+        (ShouldBranchLoopOnCompletion(nodes.filter(IsChainItem), node.branch) &&
+          SubtreeForChainNode(node, nodes, false, true).includes(chainNode)))
+  )
