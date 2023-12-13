@@ -8,7 +8,7 @@ import {
   BranchConfig,
 } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/evaluationEngine/codeEngine'
+import { runCodeWithInputs } from '@/src/server/evaluationEngine/codeEngine'
 import runPromptWithConfig from '@/src/server/evaluationEngine/promptEngine'
 import { runQuery } from './queryEngine'
 import { FirstBranchForBranchOfNode, LoopCompletionIndexForNode } from '../../common/branching'
@@ -102,8 +102,7 @@ export default async function runChain(
         runQuery(userID, projectID, config.provider, config.model, config.indexName, query, config.topK)
       )
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
-      const codeContext = CreateCodeContextWithInputs(inputs)
-      lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
+      lastResponse = await runChainStep(runCodeWithInputs(config.code, inputs))
       if (!lastResponse.failed && !lastResponse.functionCall && isBranchConfig(config)) {
         const branchIndex = config.branches.indexOf(lastResponse.output)
         if (branchIndex >= 0) {

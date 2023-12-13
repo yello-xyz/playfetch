@@ -15,21 +15,21 @@ const codeToCamelCase = (code: string) =>
 
 const stringify = (result: any) => (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result))
 
-const AugmentCodeContext = (context: Isolated.Context, variable: string | undefined, value: any) =>
-  variable ? context.global.setSync(ToCamelCase(variable), value, { copy: true }) : undefined
-
-export const CreateCodeContextWithInputs = (inputs: PromptInputs) => {
+const createCodeContextWithInputs = (inputs: PromptInputs) => {
   const isolated = new Isolated.Isolate({ memoryLimit: 8 })
   const context = isolated.createContextSync()
   context.eval(`globalThis.${CodeModuleName} = { 
-  ${InterruptOnceFunctionName}: (name, args) => this[name] ?? { function: { name, arguments: args } } 
-}`)
-  Object.entries(inputs).forEach(([variable, value]) => AugmentCodeContext(context, variable, value))
+    ${InterruptOnceFunctionName}: (name, args) => this[name] ?? { function: { name, arguments: args } } 
+  }`)
+  Object.entries(inputs).forEach(([variable, value]) =>
+    context.global.setSync(ToCamelCase(variable), value, { copy: true })
+  )
   return context
 }
 
-export const runCodeInContext = async (code: string, context: Isolated.Context): Promise<RunResponse> => {
+export const runCodeWithInputs = async (code: string, inputs: PromptInputs): Promise<RunResponse> => {
   try {
+    const context = createCodeContextWithInputs(inputs)
     const functionCode = `(() => { ${codeToCamelCase(code)} })()`
     const result = await context.eval(functionCode, { timeout: 1000, copy: true })
     const output = stringify(result)
