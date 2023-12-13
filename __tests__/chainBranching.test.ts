@@ -1,4 +1,8 @@
-import { CanChainNodeIncludeContext, SubtreeForChainNode } from '@/components/chains/chainNode'
+import {
+  CanChainNodeIncludeContext,
+  MappableTargetInputsForChainNode,
+  SubtreeForChainNode,
+} from '@/components/chains/chainNode'
 import {
   FirstBranchForBranchOfNode,
   IsSiblingNode,
@@ -18,7 +22,7 @@ import { ChainItem } from '@/types'
 const chain1: ChainItem[] = [
   { branch: 0, code: '0 [A0]', promptID: 1 },
   { branch: 0, code: '1 [B0]', branches: ['0', '1', '4'], loops: [1, 2] },
-  { branch: 0, code: '2 [C0]', promptID: 2 },
+  { branch: 0, code: '2 [C0] {{input}}', promptID: 2 },
   { branch: 1, code: '3 [C1]', branches: ['1', '2', '3'], loops: [1] },
   { branch: 4, code: '4 [C4]', promptID: 3 },
   { branch: 0, code: '5 [D0]' },
@@ -155,6 +159,19 @@ testIncludeContext(0, false, chain2)
 testIncludeContext(1, false, chain2)
 testIncludeContext(2, false, chain2)
 testIncludeContext(3, true, chain2)
+
+const testTargetInputs = (index: number, expected: string[], chain = chain1) =>
+  test(`Item at position ${index} can map output to [${expected}]`, () =>
+    expect(MappableTargetInputsForChainNode(chain[index], chain, {} as any)).toStrictEqual(expected))
+
+testTargetInputs(0, ['input'])
+testTargetInputs(1, ['input'])
+testTargetInputs(2, [])
+testTargetInputs(3, ['input'])
+testTargetInputs(4, ['input'])
+testTargetInputs(5, [])
+testTargetInputs(6, ['input'])
+testTargetInputs(7, [])
 
 const testMaxBranch = (index: number, expected: number, chain = chain1) =>
   test(`Max branch for subtree at position ${index} is ${expected}`, () =>

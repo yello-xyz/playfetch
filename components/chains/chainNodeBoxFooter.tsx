@@ -1,9 +1,8 @@
 import { ChainItem } from '@/types'
-import { ChainNode, IsChainItem, SubtreeForChainNode } from './chainNode'
+import { ChainNode, IsChainItem, MappableTargetInputsForChainNode } from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
-import { ExtractChainItemVariables } from './chainNodeOutput'
 
 export default function ChainNodeBoxFooter({
   nodes,
@@ -19,13 +18,7 @@ export default function ChainNodeBoxFooter({
   promptCache: ChainPromptCache
 }) {
   const chainNode = nodes[index]
-  const inputs = [
-    ...new Set(
-      SubtreeForChainNode(chainNode, nodes, false, true).flatMap(item =>
-        ExtractChainItemVariables(item, promptCache, false)
-      )
-    ),
-  ]
+  const inputs = MappableTargetInputsForChainNode(chainNode, nodes, promptCache)
   const mapOutput = (output?: string) => onUpdate({ ...(chainNode as ChainItem), output })
 
   return IsChainItem(chainNode) && inputs.length > 0 ? (
