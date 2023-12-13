@@ -128,7 +128,7 @@ export async function getIntermediateRunsForParentRun(userID: number, parentRunI
   if (runData.length > 0) {
     await ensurePromptOrChainAccess(userID, runData[0].parentID)
   }
-  return runData.map(toRun(0))
+  return runData.map(toRun(0)).sort((a, b) => a.timestamp - b.timestamp)
 }
 
 export const getOrderedRunsForParentID = (parentID: number) =>
