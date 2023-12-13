@@ -29,6 +29,7 @@ import {
   updateChainOnDeletedVersion,
 } from './chains'
 import { getDefaultPromptConfigForUser } from './users'
+import { DefaultPrompts } from '@/src/common/defaultConfig'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -98,8 +99,6 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   }
   return toVersion(versionData, [])
 }
-
-const DefaultPrompts = { main: '' }
 
 export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
   const versionID = await allocateID(Entity.VERSION)
