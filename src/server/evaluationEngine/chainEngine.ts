@@ -121,7 +121,7 @@ export default async function runChain(
       throw new Error('Unsupported config type in chain evaluation')
     }
     const loopIndex = LoopCompletionIndexForNode(configsAsChainItems, index, branch)
-    const canLoop = loopIndex >= 0 && --remainingLoopIterations > 0
+    const canLoop = loopIndex >= 0 && remainingLoopIterations > 1
     stream?.(
       index,
       lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
@@ -149,6 +149,7 @@ export default async function runChain(
       if (canLoop) {
         branch = configs[loopIndex].branch
         index = loopIndex - 1
+        --remainingLoopIterations
       }
     }
   }
