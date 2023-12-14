@@ -138,7 +138,7 @@ export type AvailableSourceControlProvider = {
   provider: SourceControlProvider
   environment: string
 }
-export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
+export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider | AvailableSourceControlProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
   'customModels' in provider
 

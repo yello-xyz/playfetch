@@ -1,6 +1,6 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider } from '@/types'
+import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SourceControlProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -17,7 +17,7 @@ export default function ProviderSettings({
   onRefresh,
 }: {
   scopeID: number
-  providers: ModelProvider[] | QueryProvider[]
+  providers: ModelProvider[] | QueryProvider[] | SourceControlProvider[]
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
   onRefresh: () => void
@@ -48,7 +48,7 @@ function ProviderRow({
   onRefresh,
 }: {
   scopeID: number
-  provider: ModelProvider | QueryProvider
+  provider: ModelProvider | QueryProvider | SourceControlProvider
   availableProvider?: AvailableProvider
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean

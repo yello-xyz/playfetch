@@ -1,6 +1,12 @@
 import Label from '../label'
-import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, CustomModel, IsModelProvider, ModelProvider, QueryProvider } from '@/types'
+import {
+  AvailableProvider,
+  CustomModel,
+  IsModelProvider,
+  ModelProvider,
+  QueryProvider,
+  SourceControlProvider,
+} from '@/types'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Icon from '../icon'
@@ -17,7 +23,7 @@ export default function CustomModelSettings({
   onRefresh,
 }: {
   scopeID: number
-  provider: ModelProvider | QueryProvider
+  provider: ModelProvider | QueryProvider | SourceControlProvider
   availableProviders: AvailableProvider[]
   onRefresh: () => void
 }) {

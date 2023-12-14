@@ -20,6 +20,7 @@ import {
   RunRating,
   CostUsage,
   Run,
+  SourceControlProvider,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -288,7 +289,7 @@ const api = {
   },
   updateProviderKey: function (
     scopeID: number,
-    provider: ModelProvider | QueryProvider,
+    provider: ModelProvider | QueryProvider | SourceControlProvider,
     apiKey: string | null,
     environment?: string
   ) {

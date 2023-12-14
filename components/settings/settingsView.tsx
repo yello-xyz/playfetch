@@ -1,5 +1,5 @@
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
+import { ModelProviders, QueryProviders, SourceControlProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -16,7 +16,13 @@ const ProvidersPane = 'providers'
 const UsagePane = 'usage'
 const TeamPane = 'team'
 const ConnectorsPane = 'connectors'
-type ActivePane = typeof ProvidersPane | typeof UsagePane | typeof TeamPane | typeof ConnectorsPane
+const SourceControlPane = 'sourceControl'
+type ActivePane =
+  | typeof ProvidersPane
+  | typeof UsagePane
+  | typeof TeamPane
+  | typeof ConnectorsPane
+  | typeof SourceControlPane
 
 const titleForPane = (pane: ActivePane) => {
   switch (pane) {
@@ -28,6 +34,8 @@ const titleForPane = (pane: ActivePane) => {
       return 'Team'
     case ConnectorsPane:
       return 'Connectors'
+    case SourceControlPane:
+      return 'Source control'
   }
 }
 
@@ -57,6 +65,8 @@ const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
         (isProjectScope ? ' within this project. ' : '. ') +
         'All API keys are encrypted and stored securely.'
       )
+    case SourceControlPane:
+      return 'Synchronise prompt files between your PlayFetch project and your source control system.'
   }
 }
 
@@ -73,6 +83,7 @@ const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
       return isProjectScope ? projectScopeDescription('connectors') : undefined
     case UsagePane:
     case TeamPane:
+    case SourceControlPane:
       return undefined
   }
 }
@@ -105,10 +116,19 @@ export default function SettingsView({
   }, [refreshUsage])
 
   const availableModelProviders = providers.filter(IsModelProvider)
-  const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
+  const availableQueryProviders = providers.filter(
+    provider => !IsModelProvider(provider) && (QueryProviders as string[]).includes(provider.provider)
+  )
+  const availableSourceControlProviders = providers.filter(
+    provider => !IsModelProvider(provider) && (SourceControlProviders as string[]).includes(provider.provider)
+  )
 
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
-  const availablePanes = [ProvidersPane, UsagePane, ...(isProjectScope ? [TeamPane] : []), ConnectorsPane]
+  const availablePanes = [
+    ProvidersPane,
+    UsagePane,
+    ...(isProjectScope ? [TeamPane, ConnectorsPane, SourceControlPane] : [ConnectorsPane]),
+  ]
 
   return !isProjectScope || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
@@ -139,12 +159,21 @@ export default function SettingsView({
               onRefresh={refreshUsage}
             />
           )}
-          {activePane === TeamPane && isProjectScope && <TeamSettings />}
+          {activePane === TeamPane && <TeamSettings />}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}
               providers={QueryProviders}
               availableProviders={availableQueryProviders}
+              includeEnvironment
+              onRefresh={refresh}
+            />
+          )}
+          {activePane === SourceControlPane && (
+            <ProviderSettings
+              scopeID={scopeID}
+              providers={SourceControlProviders}
+              availableProviders={availableSourceControlProviders}
               includeEnvironment
               onRefresh={refresh}
             />
