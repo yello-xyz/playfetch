@@ -2,12 +2,16 @@ import { DefaultPromptConfig, DefaultPrompts } from '@/src/common/defaultConfig'
 import { deserializePromptVersion, serializePromptVersion } from '@/src/server/serialize'
 import { PromptConfig, Prompts } from '@/types'
 
-const testSerialize = (testDescription: string, promptVersion: { prompts: Prompts; config: PromptConfig }) =>
+const testSerialize = (
+  testDescription: string,
+  promptVersion: { id?: number; prompts: Prompts; config: PromptConfig }
+) =>
   test(testDescription, async () =>
     expect(deserializePromptVersion(serializePromptVersion(promptVersion))).toStrictEqual(promptVersion)
   )
 
 testSerialize('Default prompt', { prompts: DefaultPrompts, config: DefaultPromptConfig })
+testSerialize('Default prompt with id', { id: 1234, prompts: DefaultPrompts, config: DefaultPromptConfig })
 testSerialize('Prompt with variables', {
   prompts: { main: 'Please tell me a {{contentType}} in {{wordCount}} words' },
   config: DefaultPromptConfig,
