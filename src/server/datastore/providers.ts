@@ -8,6 +8,7 @@ import {
   DefaultLanguageModel,
   ModelProvider,
   QueryProvider,
+  SourceControlProvider,
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
 import { ModelProviders } from '@/src/common/providerMetadata'
@@ -21,10 +22,10 @@ const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
 const buildScopeFilter = (scopeIDs: number[]) => new PropertyFilter('scopeID', 'IN', scopeIDs)
 const getMultipleProviderData = (scopeIDs: number[]) => getFilteredProviderData(buildScopeFilter(scopeIDs), scopeIDs)
 
-const buildSingleProviderFilter = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
-  and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)])
-const getSingleProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
-  getFilteredProviderData(buildSingleProviderFilter(scopeIDs, provider), scopeIDs).then(([entity]) => entity)
+const getSingleProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider | SourceControlProvider) =>
+  getFilteredProviderData(and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)]), scopeIDs).then(
+    ([entity]) => entity
+  )
 
 type ProviderMetadata = {
   customModels?: CustomModel[]
@@ -54,7 +55,7 @@ export async function migrateProviders(postMerge: boolean) {
 
 export async function getProviderCredentials(
   scopeIDs: number[],
-  provider: ModelProvider | QueryProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
   modelToCheck?: string
 ): Promise<{ scopeID: number | null; providerID: number | null; apiKey: string | null; environment: string | null }> {
   const providerData = await getSingleProviderData(scopeIDs, provider)
@@ -78,7 +79,7 @@ export async function getProviderCredentials(
 
 const toProviderData = (
   scopeID: number,
-  provider: ModelProvider | QueryProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
   encryptedAPIKey: string | null,
   metadata: ProviderMetadata,
   createdAt = new Date(),
@@ -111,7 +112,7 @@ export const ensureScopeOwnership = async (userID: number, scopeID: number) =>
 export async function saveProviderKey(
   userID: number,
   scopeID: number,
-  provider: ModelProvider | QueryProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
   apiKey: string | null,
   environment: string | undefined
 ) {

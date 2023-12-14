@@ -134,11 +134,16 @@ export type AvailableQueryProvider = {
   provider: QueryProvider
   environment: string
 }
+export type AvailableSourceControlProvider = {
+  provider: SourceControlProvider
+  environment: string
+}
 export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
   'customModels' in provider
 
 export type QueryProvider = 'pinecone'
+export type SourceControlProvider = 'github'
 
 type Version = {
   id: number
