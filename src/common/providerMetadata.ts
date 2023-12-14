@@ -125,7 +125,7 @@ export const SupportsSeed = (model: LanguageModel): boolean => {
     case 'command':
       return false
     default:
-      return SupportsSystemPrompt(baseModelForModel(model))
+      return SupportsSeed(baseModelForModel(model))
   }
 }
 
@@ -143,7 +143,7 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'command':
       return false
     default:
-      return SupportsSystemPrompt(baseModelForModel(model))
+      return SupportsJsonMode(baseModelForModel(model))
   }
 }
 
