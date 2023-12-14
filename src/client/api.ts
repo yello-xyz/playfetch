@@ -39,7 +39,7 @@ async function parseResponse(response: Response, responseType: ResponseType) {
         return response.body?.getReader()
     }
   } else if (response.status === 401) {
-    window.location.href = ClientRoute.Home
+    window.open(ClientRoute.Home, '_self')
   }
   return Promise.resolve(null)
 }
@@ -294,6 +294,9 @@ const api = {
     environment?: string
   ) {
     return post(this.updateProviderKey, { scopeID, provider, apiKey, environment })
+  },
+  getGithubAppInstallLink: function (projectID: number) {
+    return post(this.getGithubAppInstallLink, { projectID })
   },
   updateProviderModel: function (
     scopeID: number,

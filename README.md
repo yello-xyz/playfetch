@@ -51,6 +51,8 @@ In order to run the app locally, you will need to add some additional variables 
 
 `PLAYFETCH_ENDPOINT_URL=` *[see "PlayFetch API Key" in the 1Password Engineering vault]*
 
+`GITHUB_APP_INSTALL_LINK=https://github.com/apps/playfetch-local/installations/new`
+
 `GCLOUD_STORAGE_BUCKET=playfetch-dev.appspot.com`
 
 `NEXTAUTH_URL=http://localhost:3000`
@@ -62,8 +64,6 @@ In order to run the app locally, you will need to add some additional variables 
 `GOOGLE_ANALYTICS_MEASUREMENT_ID=G-7EW4BEVHT1`
 
 `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
-
-`NEXT_PUBLIC_GITHUB_APP_LINK=https://github.com/apps/playfetch-local/installations/new`
 
 - **To use Email authentication:**
 

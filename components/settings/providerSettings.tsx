@@ -1,5 +1,5 @@
 import Label from '../label'
-import { IconForProvider, LabelForProvider, SourceControlProviders } from '@/src/common/providerMetadata'
+import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
 import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SourceControlProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
@@ -8,7 +8,6 @@ import Icon from '../icon'
 import Button from '../button'
 import TextInput from '../textInput'
 import CustomModelSettings from './customModelSettings'
-import Link from 'next/link'
 
 export default function ProviderSettings({
   scopeID,
@@ -75,6 +74,8 @@ function ProviderRow({
     setEnvironment(previousEnvironment)
   }
 
+  const installGithubApp = () => api.getGithubAppInstallLink(scopeID).then(link => window.open(link, '_self'))
+
   const updateKey = async (apiKey: string | null) => {
     setProcessing(true)
     await api.updateProviderKey(scopeID, provider, apiKey, environment).then(onRefresh)
@@ -130,11 +131,9 @@ function ProviderRow({
             </Button>
           )}
           {excludeApiKey ? (
-            <Link href={process.env.NEXT_PUBLIC_GITHUB_APP_LINK ?? ''}>
-              <div className='px-4 py-2 font-medium border border-gray-200 rounded-lg hover:bg-gray-100'>
-                {availableProvider ? 'Reinstall' : 'Install'}
-              </div>
-            </Link>
+            <Button type='outline' onClick={installGithubApp}>
+              {availableProvider ? 'Reinstall' : 'Install'}
+            </Button>
           ) : (
             <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>
               {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
