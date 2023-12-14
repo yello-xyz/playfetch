@@ -48,7 +48,7 @@ export async function migrateProviders(postMerge: boolean) {
         JSON.parse(providerData.metadata),
         providerData.createdAt,
         getID(providerData),
-        postMerge ? undefined : providerData.apiKey
+        postMerge && providerData.encryptedAPIKey ? undefined : providerData.apiKey
       )
     )
   }
