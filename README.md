@@ -53,6 +53,10 @@ In order to run the app locally, you will need to add some additional variables 
 
 `GITHUB_APP_INSTALL_LINK=https://github.com/apps/playfetch-local/installations/new`
 
+`GITHUB_APP_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+
+`GITHUB_APP_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+
 `GCLOUD_STORAGE_BUCKET=playfetch-dev.appspot.com`
 
 `NEXTAUTH_URL=http://localhost:3000`
@@ -73,9 +77,9 @@ In order to run the app locally, you will need to add some additional variables 
 
 - **To use GitHub authentication:**
 
-`GITHUB_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+`GITHUB_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/applications - PlayFetch (local)]*
 
-`GITHUB_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+`GITHUB_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/applications - PlayFetch (local)]*
 
 - **To use Google authentication:**
 
