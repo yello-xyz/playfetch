@@ -76,7 +76,7 @@ const toProjectData = (
     apiKeyHash,
     encryptedAPIKey,
   },
-  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'labels', 'flavors'],
+  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'labels', 'flavors', 'favorited'],
 })
 
 export const toProject = (data: any, userID: number, isOwner: boolean): Project => ({
