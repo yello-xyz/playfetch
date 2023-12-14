@@ -1,5 +1,11 @@
 ## PlayFetch Changelog
 
+### v0.19 - 2023-12-14
+- Rating prediction
+- Generate prompt improvement suggestions
+- Specify persona to automate testing
+- Ability to loop a branch in a chain
+
 ### v0.18 - 2023-12-05
 - Trigger manual interrupt from code block
 - Specify a reason for response ratings
