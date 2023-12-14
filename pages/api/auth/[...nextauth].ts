@@ -10,7 +10,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import NextAuth, { NextAuthOptions, Session, SessionStrategy, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt/types'
 import EmailProvider from 'next-auth/providers/email'
-import GithubProvider from 'next-auth/providers/github'
+import GitHubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import { NextApiRequestCookies } from 'next/dist/server/api-utils'
 
@@ -30,7 +30,7 @@ export const authOptions = (req: { cookies: NextApiRequestCookies }, res: Server
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     }),
-    GithubProvider({
+    GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID ?? '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
     }),

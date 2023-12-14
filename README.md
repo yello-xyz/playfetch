@@ -69,7 +69,7 @@ In order to run the app locally, you will need to add some additional variables 
 
 `NOREPLY_EMAIL_PASSWORD=` *[see "Gmail Service Account" in the 1Password Engineering vault]*
 
-- **To use Github authentication:**
+- **To use GitHub authentication:**
 
 `GITHUB_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
 

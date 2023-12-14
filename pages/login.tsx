@@ -70,7 +70,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
           <div className='flex-1 h-px bg-gray-200' />
         </div>
         <SignInButton name='Google' icon={googleIcon} provider='google' />
-        <SignInButton name='Github' icon={githubIcon} provider='github' />
+        <SignInButton name='GitHub' icon={githubIcon} provider='github' />
       </div>
     </main>
   )
