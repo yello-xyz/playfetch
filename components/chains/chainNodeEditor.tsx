@@ -28,7 +28,10 @@ export default function ChainNodeEditor({
   promptCache: ChainPromptCache
   dismiss: () => void
 }) {
-  const [updatedItems, setUpdatedItems] = useInitialState(items, (a, b) => a.length === b.length)
+  const [updatedItems, setUpdatedItems] = useInitialState(
+    items,
+    (a, b) => GetChainItemsSaveKey(a) === GetChainItemsSaveKey(b)
+  )
 
   const itemsWithUpdate = (item: ChainItem) => [
     ...updatedItems.slice(0, activeIndex),
