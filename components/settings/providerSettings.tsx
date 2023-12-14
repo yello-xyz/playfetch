@@ -133,6 +133,7 @@ function ProviderRow({
           )}
         </div>
       </div>
+      {isUpdating && <span>Your key will be encrypted using AES 256 and stored securely.</span>}
       <CustomModelSettings
         scopeID={scopeID}
         provider={provider}

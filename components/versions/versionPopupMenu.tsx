@@ -1,4 +1,4 @@
-import { ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import api from '@/src/client/api'
 import { PopupContent, PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -11,9 +11,11 @@ import { WithDismiss } from '@/src/client/context/globalPopupContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
+  activeItem,
   selectedCell = false,
 }: {
   version: Version
+  activeItem: ActivePrompt | ActiveChain
   selectedCell?: boolean
 }) {
   const refreshActiveItem = useRefreshActiveItem()
@@ -45,22 +47,40 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   const compareVersion = version.previousID
     ? () => router.push(CompareRoute(projectID!, version.parentID, version.id, version.previousID))
     : undefined
+  const currentVersion =
+    (activeItem.versions as { didRun: boolean; id: number }[]).findLast(version => !version.didRun) ?? version
+  const suggestImprovement =
+    IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
+      ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
+      : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [
     VersionPopup,
-    { deleteVersion, createEndpoint, compareVersion },
+    { deleteVersion, createEndpoint, compareVersion, suggestImprovement },
   ]
 
   return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
 }
 
-type VersionPopupProps = { deleteVersion: () => void; createEndpoint: () => void; compareVersion?: () => void }
+type VersionPopupProps = {
+  deleteVersion: () => void
+  createEndpoint: () => void
+  compareVersion?: () => void
+  suggestImprovement?: () => void
+}
 
-function VersionPopup({ deleteVersion, createEndpoint, compareVersion, withDismiss }: VersionPopupProps & WithDismiss) {
+function VersionPopup({
+  deleteVersion,
+  createEndpoint,
+  compareVersion,
+  suggestImprovement,
+  withDismiss,
+}: VersionPopupProps & WithDismiss) {
   return (
-    <PopupContent className='w-40'>
+    <PopupContent className='w-44'>
       {compareVersion && <PopupMenuItem title='Compare' callback={withDismiss(compareVersion)} first />}
       <PopupMenuItem title='Create Endpoint' callback={withDismiss(createEndpoint)} first={!compareVersion} />
+      {suggestImprovement && <PopupMenuItem title='Suggest Improvement' callback={withDismiss(suggestImprovement)} />}
       <PopupMenuItem destructive title='Delete' callback={withDismiss(deleteVersion)} last />
     </PopupContent>
   )

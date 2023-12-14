@@ -1,4 +1,4 @@
-import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
+import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import { ChainItemWithInputs, PromptConfig, Prompts } from '@/types'
 import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 import { ExtractUnboundChainInputs } from '@/components/chains/chainNodeOutput'
@@ -15,28 +15,119 @@ testExtractVariables('single variable', ['hello'], '{{hello}}')
 testExtractVariables('single variable start', ['hello'], '{{hello}} world')
 testExtractVariables('single variable end', ['world'], 'hello {{world}}')
 
-const configWithFunctionsSupport: PromptConfig = { ...DefaultPromptConfig, model: 'gpt-4' }
+const testExtractCodeInterrupts = (testDescription: string, expectedVariables: string[], code: string) =>
+  test(`Test ${testDescription}`, () => {
+    expect(ExtractCodeInterrupts(code)).toStrictEqual(expectedVariables)
+  })
+
+testExtractCodeInterrupts('no code interrupts', [], `return 'Hello World'`)
+testExtractCodeInterrupts(
+  'single quoted message interrupt',
+  ['message'],
+  `return PlayFetch.InterruptOnce('How are you?')`
+)
+testExtractCodeInterrupts(
+  'double quoted message interrupt',
+  ['message'],
+  `return PlayFetch.InterruptOnce("Who are you?")`
+)
+testExtractCodeInterrupts(
+  'deduplicate message interrupts',
+  ['message'],
+  `Math.random() < 0.5 ? PlayFetch.InterruptOnce('How are you?') : PlayFetch.InterruptOnce("Who are you?")`
+)
+testExtractCodeInterrupts(
+  'single quoted function interrupt',
+  ['ask_question'],
+  `return PlayFetch.InterruptOnce('ask_question', { question: 'How are you?' })`
+)
+testExtractCodeInterrupts(
+  'double quoted function interrupt',
+  ['ask_question'],
+  `return PlayFetch.InterruptOnce("ask_question", { question: "Who are you?" })`
+)
+testExtractCodeInterrupts(
+  'deduplicate function interrupts',
+  ['ask_question'],
+  `Math.random() < 0.5 
+    ? PlayFetch.InterruptOnce('ask_question', { question: 'How are you?' })
+    : PlayFetch.InterruptOnce("ask_question", { question: "Who are you?" })`
+)
+testExtractCodeInterrupts(
+  'multiple code interrupts with variables',
+  ['ask_question', 'message'],
+  `return 
+  Math.random() < 0.5 
+    ? PlayFetch.InterruptOnce('ask_question', { question: {{question}} }) 
+    : PlayFetch.InterruptOnce({{reason}})`
+)
+testExtractCodeInterrupts(
+  'fail to detect variable function interrupt',
+  [],
+  `return PlayFetch.InterruptOnce({{functionName}}, {})`
+)
+testExtractCodeInterrupts(
+  'fail to detect more dynamic code interrupts',
+  [],
+  `return PlayFetch.InterruptOnce(Math.random() < 0.5 ? 'How are you?' : 'Who are you?')`
+)
+
+const buildConfig = (supportsFunctions = true, simpleChat = false) => ({
+  ...DefaultPromptConfig,
+  model: supportsFunctions ? 'gpt-4' : 'text-bison',
+  isChat: simpleChat,
+})
 
 const buildPrompt = (main: string, system?: string, functions?: string): Prompts => ({ main, system, functions })
+const buildFunctionsPrompt = (functionName: string): Prompts => buildPrompt('', '', `[{"name": "${functionName}"}]`)
 
 const testExtractPromptVariables = (
   testDescription: string,
   expectedVariables: string[],
   prompts: Prompts,
-  includingDynamic = true
+  includingDynamic = true,
+  config = buildConfig()
 ) =>
   test(`Test ${testDescription}`, () => {
-    expect(ExtractPromptVariables(prompts, configWithFunctionsSupport, includingDynamic)).toStrictEqual(
-      expectedVariables
-    )
+    expect(ExtractPromptVariables(prompts, config, includingDynamic)).toStrictEqual(expectedVariables)
   })
 
 testExtractPromptVariables('empty prompts', [], buildPrompt(''))
 testExtractPromptVariables('main prompt', ['hello'], buildPrompt('{{hello}}'))
 testExtractPromptVariables('system prompt', ['hello', 'world'], buildPrompt('{{hello}}', '{{world}}'))
 testExtractPromptVariables('functions prompt', ['hello', 'world'], buildPrompt('{{hello}}', '', '{{world}}'))
-testExtractPromptVariables('include dynamic', ['hello_world'], buildPrompt('', '', '[{ "name": "hello_world" }]'))
-testExtractPromptVariables('exclude dynamic', [], buildPrompt('', '', '[{ "name": "hello_world" }]'), false)
+testExtractPromptVariables('include dynamic', ['hello_world'], buildFunctionsPrompt('hello_world'))
+testExtractPromptVariables('exclude dynamic', [], buildFunctionsPrompt('hello_world'), false)
+testExtractPromptVariables(
+  'dynamic no functions support',
+  [],
+  buildPrompt('', '', '[{ "name": "hello_world" }]'),
+  true,
+  buildConfig(false)
+)
+testExtractPromptVariables('include simple chat', ['message'], buildPrompt(''), true, buildConfig(false, true))
+testExtractPromptVariables('exclude simple chat', [], buildPrompt(''), false, buildConfig(false, true))
+testExtractPromptVariables(
+  'exclude simple chat if functions supported',
+  ['hello_world'],
+  buildFunctionsPrompt('hello_world'),
+  true,
+  buildConfig(true, true)
+)
+testExtractPromptVariables(
+  'include simple chat if functions unsupported',
+  ['message'],
+  buildFunctionsPrompt('hello_world'),
+  true,
+  buildConfig(false, true)
+)
+testExtractPromptVariables(
+  'deduplicate variables',
+  ['message'],
+  buildPrompt('{{message}}'),
+  true,
+  buildConfig(false, true)
+)
 
 const buildChain = (
   inputs: string[],

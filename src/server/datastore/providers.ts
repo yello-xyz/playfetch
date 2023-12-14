@@ -1,5 +1,5 @@
 import { PropertyFilter, and } from '@google-cloud/datastore'
-import { Entity, buildFilter, buildKey, getDatastore, getFilteredEntities, getID } from './datastore'
+import { Entity, buildFilter, buildKey, decrypt, encrypt, getDatastore, getFilteredEntities, getID } from './datastore'
 import { DefaultProvider } from '@/src/common/defaultConfig'
 import {
   AvailableModelProvider,
@@ -33,9 +33,6 @@ type ProviderMetadata = {
 }
 
 export async function migrateProviders(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
   for (const providerData of allProviders) {
@@ -43,9 +40,15 @@ export async function migrateProviders(postMerge: boolean) {
       toProviderData(
         providerData.scopeID,
         providerData.provider,
-        providerData.apiKey,
+        postMerge
+          ? providerData.encryptedAPIKey
+          : providerData.apiKey
+            ? encrypt(providerData.apiKey)
+            : providerData.encryptedAPIKey,
         JSON.parse(providerData.metadata),
-        getID(providerData)
+        providerData.createdAt,
+        getID(providerData),
+        postMerge && providerData.encryptedAPIKey ? undefined : providerData.apiKey
       )
     )
   }
@@ -70,7 +73,7 @@ export async function getProviderCredentials(
   return {
     scopeID: providerData?.scopeID ?? null,
     providerID: providerData ? getID(providerData) : null,
-    apiKey: providerData?.apiKey ?? null,
+    apiKey: providerData?.encryptedAPIKey ? decrypt(providerData.encryptedAPIKey) : null,
     environment: metadata.environment ?? null,
   }
 }
@@ -78,18 +81,22 @@ export async function getProviderCredentials(
 const toProviderData = (
   scopeID: number,
   provider: ModelProvider | QueryProvider,
-  apiKey: string | null,
+  encryptedAPIKey: string | null,
   metadata: ProviderMetadata,
-  providerID?: number
+  createdAt = new Date(),
+  providerID?: number,
+  apiKey?: string | null // TODO delete after next merge to prod (also in exludedFromIndexes)
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
+    createdAt,
     scopeID,
     provider,
-    apiKey,
+    encryptedAPIKey,
     metadata: JSON.stringify(metadata),
+    apiKey,
   },
-  excludeFromIndexes: ['apiKey', 'metadata'],
+  excludeFromIndexes: ['encryptedAPIKey', 'metadata', 'apiKey'],
 })
 
 const toAvailableProvider = (data: any): AvailableProvider => {
@@ -115,7 +122,10 @@ export async function saveProviderKey(
   await ensureScopeOwnership(userID, scopeID)
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
-  await getDatastore().save(toProviderData(scopeID, provider, apiKey, { environment }, providerID))
+  const encryptedAPIKey = apiKey ? encrypt(apiKey) : null
+  await getDatastore().save(
+    toProviderData(scopeID, provider, encryptedAPIKey, { environment }, providerData?.createdAt, providerID)
+  )
 }
 
 export async function saveProviderModel(
@@ -135,7 +145,16 @@ export async function saveProviderModel(
       ...(metadata.customModels ?? []).filter(model => model.id !== modelID),
       { id: modelID, name, description, enabled },
     ]
-    await getDatastore().save(toProviderData(scopeID, provider, providerData.apiKey, metadata, getID(providerData)))
+    await getDatastore().save(
+      toProviderData(
+        scopeID,
+        provider,
+        providerData.encryptedAPIKey,
+        metadata,
+        providerData.createdAt,
+        getID(providerData)
+      )
+    )
   }
 }
 
@@ -147,7 +166,7 @@ async function getProvidersForScopes(scopeIDs: number[], reloadCustomModels = fa
 
   const availableProviders = [] as AvailableProvider[]
   const providerDataToSave = [] as any[]
-  for (const availableProviderData of providerData.filter(data => !!data.apiKey?.length)) {
+  for (const availableProviderData of providerData.filter(data => !!data.encryptedAPIKey?.length)) {
     const availableProvider =
       reloadCustomModels && ModelProviders.includes(availableProviderData.provider)
         ? await loadProviderWithCustomModels(availableProviderData, providerDataToSave)
@@ -171,7 +190,7 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
   const previousGatedModels = previousMetadata.gatedModels ?? []
   const { customModels: currentCustomModels, gatedModels: currentGatedModels } = await ExtraModelsForProvider(
     availableProviderData.provider as ModelProvider,
-    availableProviderData.apiKey
+    decrypt(availableProviderData.encryptedAPIKey)
   )
   const filteredCustomModels = previousCustomModels.filter(model => currentCustomModels.includes(model.id))
   const differentGatedModels =
@@ -182,8 +201,9 @@ async function loadProviderWithCustomModels(availableProviderData: any, provider
       toProviderData(
         availableProviderData.scopeID,
         availableProviderData.provider,
-        availableProviderData.apiKey,
+        availableProviderData.encryptedAPIKey,
         { ...previousMetadata, customModels: filteredCustomModels, gatedModels: currentGatedModels },
+        availableProviderData.createdAt,
         getID(availableProviderData)
       )
     )

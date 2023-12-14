@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { GetCursorPosition, SetCursorPosition } from '@/components/contentEditable'
 
 const testCursorPosition = (testDescription: string, innerHTML: string, position: number, expected: number) =>

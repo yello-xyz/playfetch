@@ -27,7 +27,7 @@ export type Predictor = (
   maxTokens: number,
   context: PromptContext,
   usePreviousContext: boolean,
-  streamChunks: (text: string) => void | undefined,
+  streamChunks: ((text: string) => void) | undefined,
   seed: number | undefined,
   jsonMode: boolean | undefined,
   continuationInputs: PromptInputs

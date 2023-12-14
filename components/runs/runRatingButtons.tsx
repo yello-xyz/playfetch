@@ -40,7 +40,7 @@ export default function RunRatingButtons({
   const [pendingRating, setPendingRating] = useState<RunRating>()
 
   const toggleRating = (rating: RunRating, reason?: string) => {
-    if ((!!reason || rating !== run.rating) && rating !== pendingRating) {
+    if ((!!reason || rating !== run.rating || run.isPredictedRating) && rating !== pendingRating) {
       setPendingRating(rating)
       const replyToActions = reason ? ['thumbsDown', 'thumbsUp'] : rating === 'positive' ? ['thumbsDown'] : ['thumbsUp']
       const replyTo = runComments.findLast(comment => !!comment.action && replyToActions.includes(comment.action))?.id
@@ -76,7 +76,11 @@ function RatingButton({
 }) {
   const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] => [
     ReasonPopup,
-    { rating, callback: reason => setRating(rating, reason) },
+    {
+      rating,
+      callback: reason => setRating(rating, reason),
+      predictedReason: run.isPredictedRating && run.rating === rating && !!run.reason ? run.reason : undefined,
+    },
   ]
 
   const isActiveRating = (pendingRating ?? run.rating) === rating
@@ -92,16 +96,18 @@ function RatingButton({
 
   return (
     <div className='relative overflow-visible group'>
-      <GlobalPopupMenu
-        icon={iconForRating()}
-        loadPopup={showReasonPopup(rating)}
-        selectedCell={isSelected}
-        popUpAbove
-      />
+      <div className={isActiveRating && run.isPredictedRating && !pendingRating ? 'opacity-30' : ''}>
+        <GlobalPopupMenu
+          icon={iconForRating()}
+          loadPopup={showReasonPopup(rating)}
+          selectedCell={isSelected}
+          popUpAbove
+        />
+      </div>
       {run.reason && isActiveRating && !pendingRating && (
         <div className='absolute hidden overflow-visible group-hover:block left-3 bottom-8 max-w-0'>
           <div className='flex justify-center'>
-            <div className='min-w-[160px] flex justify-center'>
+            <div className={`min-w-[160px] flex justify-center ${run.isPredictedRating ? 'italic' : ''}`}>
               <span className='py-1 px-2 text-xs text-center bg-white border border-gray-200 rounded-md max-w-[160px]'>
                 {run.reason}
               </span>
@@ -116,10 +122,11 @@ function RatingButton({
 type ReasonPopupProps = {
   rating: RunRating
   callback: (reason?: string) => void
+  predictedReason?: string
 }
 
-function ReasonPopup({ rating, callback, withDismiss }: ReasonPopupProps & WithDismiss) {
-  const [reason, setReason] = useState('')
+function ReasonPopup({ rating, callback, predictedReason, withDismiss }: ReasonPopupProps & WithDismiss) {
+  const [reason, setReason] = useState(predictedReason ?? '')
 
   const confirm = withDismiss(() => callback(reason ?? undefined))
 

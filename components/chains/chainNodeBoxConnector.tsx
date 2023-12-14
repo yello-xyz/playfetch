@@ -4,6 +4,7 @@ import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import branchIcon from '@/public/branch.svg'
 import queryIcon from '@/public/query.svg'
+import loopIcon from '@/public/loop.svg'
 import closeIcon from '@/public/closeWhite.svg'
 import Icon from '../icon'
 import addIcon from '@/public/addSmall.svg'
@@ -20,6 +21,7 @@ export default function ChainNodeBoxConnector({
   canDismiss,
   hasPrevious,
   hasNext,
+  hasCompleted,
   onInsertPrompt,
   onInsertNewPrompt,
   onInsertQuery,
@@ -34,6 +36,7 @@ export default function ChainNodeBoxConnector({
   canDismiss: boolean
   hasPrevious: boolean
   hasNext: boolean
+  hasCompleted: boolean
   onInsertPrompt: (promptID: number) => void
   onInsertNewPrompt: () => void
   onInsertQuery?: () => void
@@ -46,29 +49,40 @@ export default function ChainNodeBoxConnector({
     <div className='flex flex-col items-center'>
       {!skipConnector && <DownStroke height='min-h-[12px]' spacer={hasPrevious} />}
       {isDisabled ? (
-        <DownStroke height='min-h-[22px]' />
+        hasCompleted ? (
+          <LoopIcon />
+        ) : (
+          <DownStroke height='min-h-[22px]' />
+        )
       ) : (
-        <AddButton
-          prompts={prompts}
-          isActive={isActive}
-          setActive={setActive}
-          canDismiss={canDismiss}
-          onInsertPrompt={onInsertPrompt}
-          onInsertNewPrompt={onInsertNewPrompt}
-          onInsertQuery={onInsertQuery}
-          onInsertCodeBlock={onInsertCodeBlock}
-          onInsertBranch={onInsertBranch}
-          hasConnector={!skipConnector}
-        />
+        <>
+          <AddButton
+            prompts={prompts}
+            isActive={isActive}
+            setActive={setActive}
+            canDismiss={canDismiss}
+            onInsertPrompt={onInsertPrompt}
+            onInsertNewPrompt={onInsertNewPrompt}
+            onInsertQuery={onInsertQuery}
+            onInsertCodeBlock={onInsertCodeBlock}
+            onInsertBranch={onInsertBranch}
+            hasConnector={!skipConnector}
+          />
+          {hasCompleted && <LoopIcon />}
+        </>
       )}
       {hasNext || (isDisabled && isActive) ? (
         <DownConnector height='min-h-[18px]' grow />
+      ) : hasCompleted ? (
+        <div className={skipConnector ? '' : 'min-h-[18px]'} />
       ) : (
         <DownStroke height={skipConnector ? '' : 'min-h-[18px]'} grow />
       )}
     </div>
   )
 }
+
+const LoopIcon = () => <Icon className='my-0.5 rounded-full border border-gray-400' icon={loopIcon} />
 
 const AddButton = ({
   prompts,

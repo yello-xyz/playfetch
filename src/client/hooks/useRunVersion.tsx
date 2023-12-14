@@ -8,7 +8,7 @@ export const ConsumeStream = async (
   streamReader: StreamReader,
   callback: (runs: PartialRun[]) => void
 ) => {
-  const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [index: number]: PartialRun }]))
+  const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [id: number]: PartialRun }]))
   while (streamReader) {
     const { done, value } = await streamReader.read()
     if (done) {
@@ -18,17 +18,18 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, index, message, cost, duration, failed, continuationID } = JSON.parse(data)
-      const previousOutput = runs[inputIndex][index]?.output ?? ''
+      const { inputIndex, index, offset, message, cost, duration, failed, continuationID, userID } = JSON.parse(data)
+      const id = index + offset
+      const previousOutput = runs[inputIndex][id]?.output ?? ''
       const output = message ? `${previousOutput}${message}` : previousOutput
-      runs[inputIndex][index] = { id: index, index, output, cost, duration, failed, continuationID }
+      runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }
     }
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
     const sortedRuns = Object.entries(runs)
       .flatMap(([inputIndex, inputRuns]) =>
-        Object.entries(inputRuns).map(([index, run]) => ({
+        Object.entries(inputRuns).map(([id, run]) => ({
           ...run,
-          id: Number(inputIndex) * maxSteps + Number(index),
+          id: Number(inputIndex) * maxSteps + Number(id),
         }))
       )
       .sort((a, b) => a.id - b.id)
@@ -51,13 +52,27 @@ export default function useRunVersion(activeVersionID: number) {
     setHighestRunIndex(-1)
   }
 
-  const runVersion = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
+  const runVersion = async (
+    getVersion: () => Promise<number>,
+    inputs: PromptInputs[],
+    dynamicInputs: PromptInputs[],
+    continuationID?: number,
+    autoRespond?: boolean,
+    maxResponses?: number
+  ) => {
     setRunning(true)
     setPartialRuns([])
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     setRunningVersionID(versionID)
-    const streamReader = await api.runVersion(versionID, inputs, continuationID)
+    const streamReader = await api.runVersion(
+      versionID,
+      inputs,
+      dynamicInputs,
+      continuationID,
+      autoRespond,
+      maxResponses
+    )
     let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
       anyRunFailed = runs.some(run => run.failed)

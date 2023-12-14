@@ -29,6 +29,7 @@ import {
   updateChainOnDeletedVersion,
 } from './chains'
 import { getDefaultPromptConfigForUser } from './users'
+import { DefaultPrompts } from '@/src/common/defaultConfig'
 
 export async function migrateVersions(postMerge: boolean) {
   if (postMerge) {
@@ -98,8 +99,6 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
   }
   return toVersion(versionData, [])
 }
-
-const DefaultPrompts = { main: '' }
 
 export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
   const versionID = await allocateID(Entity.VERSION)
@@ -305,7 +304,10 @@ const toVersionData = (
 export const toUserVersions = (userID: number, versions: any[], runs: any[]) => {
   const pendingUserVersions = versions.filter(version => version.userID === userID && !version.didRun)
   if (pendingUserVersions.length > 1) {
-    console.error(`‼️ found multiple pending versions ${pendingUserVersions.map(v => getID(v))} (${userID})`)
+    console.error(
+      `‼️ found multiple pending versions (${userID})`,
+      pendingUserVersions.map(v => getID(v))
+    )
   }
 
   const userVersion = pendingUserVersions.slice(0, 1)

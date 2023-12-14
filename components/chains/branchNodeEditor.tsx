@@ -37,6 +37,12 @@ export default function BranchNodeEditor({
   const updateBranchName = (branchIndex: number, name: string) =>
     updateItem(updateBranches([...item.branches.slice(0, branchIndex), name, ...item.branches.slice(branchIndex + 1)]))
 
+  const toggleLoop = (branchIndex: number, loop: boolean) => {
+    const loops = item.loops ?? []
+    const updatedLoops = loop ? [...loops, branchIndex].sort((a, b) => a - b) : loops.filter(i => i !== branchIndex)
+    updateItem({ ...item, loops: updatedLoops.length > 0 ? updatedLoops : undefined })
+  }
+
   const addBranch = () => updateItem(updateBranches([...item.branches, '']), ShiftRight(items, index))
 
   const deleteBranch = (branchIndex: number) => {
@@ -48,8 +54,8 @@ export default function BranchNodeEditor({
 
   const showDeleteButtons = item.branches.length > 2
   const gridConfig = showDeleteButtons
-    ? 'grid grid-cols-[120px_minmax(0,1fr)_74px]'
-    : 'grid grid-cols-[120px_minmax(0,1fr)]'
+    ? 'grid grid-cols-[120px_minmax(0,1fr)_74px_32px]'
+    : 'grid grid-cols-[120px_minmax(0,1fr)_32px]'
 
   return (
     <>
@@ -72,6 +78,23 @@ export default function BranchNodeEditor({
                     Delete
                   </Button>
                 )}
+                <div key={index} className='relative flex justify-center group'>
+                  {branchIndex > 0 && (
+                    <>
+                      <input
+                        type='checkbox'
+                        className='cursor-pointer'
+                        checked={(item.loops ?? []).includes(branchIndex)}
+                        onChange={event => toggleLoop(branchIndex, event.target.checked)}
+                      />
+                      <div className='absolute z-10 justify-center hidden overflow-visible group-hover:flex -top-8 max-w-0'>
+                        <span className='px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md whitespace-nowrap'>
+                          Loop branch
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </Fragment>
             ))}
             <Button type='outline' onClick={addBranch}>

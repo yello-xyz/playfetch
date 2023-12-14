@@ -101,6 +101,21 @@ export const ExtractVariables = (text: string) => [
   ...new Set([...text.matchAll(/{{([^{}]+)}}/g)].map(match => match[1])),
 ]
 
+export const CodeModuleName = 'PlayFetch'
+export const InterruptOnceFunctionName = 'InterruptOnce'
+
+const interruptPrefix = `${CodeModuleName}\.${InterruptOnceFunctionName}\\(`
+const matchAll = (text: string, expression: string) =>
+  [...text.matchAll(new RegExp(expression, 'g'))].map(match => match[1])
+
+export const ExtractCodeInterrupts = (text: string) => [
+  ...new Set([
+    ...matchAll(text, `${interruptPrefix}["']([^"']+)["'],`),
+    ...matchAll(text, `${interruptPrefix}["'][^"']+["']\\)`).map(_ => DefaultChatContinuationInputKey),
+    ...matchAll(text, `${interruptPrefix}{{[^,]+}}\\)`).map(_ => DefaultChatContinuationInputKey),
+  ]),
+]
+
 const TryParseJSON = (text: string) => {
   try {
     return JSON.parse(text)
@@ -128,12 +143,19 @@ export const ExtractFunctionNames = (text: string) =>
     .map(fun => fun?.name as string)
     .filter(name => name)
 
+export const ExtractDynamicPromptInputs = (prompts: Prompts, config: PromptConfig) => {
+  const functionNames =
+    SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractFunctionNames(prompts.functions) : []
+  return functionNames.length === 0 && config.isChat ? [DefaultChatContinuationInputKey] : functionNames
+}
+
 export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, includingDynamic: boolean) => [
-  ...ExtractVariables(prompts.main),
-  ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
-  ...(SupportsFunctionsPrompt(config.model) && prompts.functions
-    ? [...ExtractVariables(prompts.functions), ...(includingDynamic ? ExtractFunctionNames(prompts.functions) : [])]
-    : []),
+  ...new Set([
+    ...ExtractVariables(prompts.main),
+    ...(SupportsSystemPrompt(config.model) && prompts.system ? ExtractVariables(prompts.system) : []),
+    ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
+    ...(includingDynamic ? ExtractDynamicPromptInputs(prompts, config) : []),
+  ]),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {

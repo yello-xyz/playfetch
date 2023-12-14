@@ -8,10 +8,10 @@ import {
   BranchConfig,
 } from '@/types'
 import { getTrustedVersion } from '@/src/server/datastore/versions'
-import { CreateCodeContextWithInputs, runCodeInContext } from '@/src/server/evaluationEngine/codeEngine'
+import { runCodeWithInputs } from '@/src/server/evaluationEngine/codeEngine'
 import runPromptWithConfig from '@/src/server/evaluationEngine/promptEngine'
 import { runQuery } from './queryEngine'
-import { FirstBranchForBranchOfNode } from '../../common/branching'
+import { FirstBranchForBranchOfNode, LoopCompletionIndexForNode } from '../../common/branching'
 import { loadContinuation, saveContinuation } from './continuationCache'
 import { AugmentInputs, resolvePrompt, resolvePrompts } from './resolveEngine'
 import { RunResponse, EmptyRunResponse, TryParseOutput, RunWithTimer, TimedRunResponse } from './runResponse'
@@ -25,6 +25,8 @@ const isBranchConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryCon
 const isCodeConfig = (config: RunConfig | CodeConfig | BranchConfig | QueryConfig): config is CodeConfig =>
   'code' in config && !isBranchConfig(config)
 
+const MaxLoopIterations = 10 // TODO make this configurable (on individual branch chain items?)
+
 export default async function runChain(
   userID: number,
   projectID: number,
@@ -32,7 +34,13 @@ export default async function runChain(
   configs: (RunConfig | CodeConfig)[],
   inputs: PromptInputs,
   isEndpointEvaluation: boolean,
-  stream?: (index: number, chunk: string, stepResponse?: TimedRunResponse, inputs?: PromptInputs) => void,
+  stream?: (
+    index: number,
+    chunk: string,
+    stepResponse?: TimedRunResponse,
+    inputs?: PromptInputs,
+    canLoop?: boolean
+  ) => void,
   continuationID?: number
 ): Promise<TimedRunResponse & { continuationID?: number }> {
   const useCamelCase = isEndpointEvaluation
@@ -41,6 +49,7 @@ export default async function runChain(
   let outputTokens = 0
   let duration = 0
   let extraAttempts = 0
+  let remainingLoopIterations = MaxLoopIterations
   const runChainStep = async (operation: Promise<RunResponse>) => {
     const response = await RunWithTimer(operation)
     cost += response.cost
@@ -61,7 +70,8 @@ export default async function runChain(
     functionCall === undefined ? inputs : functionCall === null ? {} : { [functionCall]: inputs[functionCall] }
 
   let lastResponse: TimedRunResponse = { ...EmptyRunResponse(), duration: 0 }
-  let branch = 0
+  let branch = configs[continuationIndex ?? 0].branch
+  const configsAsChainItems = configs.map(item => ({ ...item, code: '' }))
 
   for (let index = continuationIndex ?? 0; index < configs.length; ++index) {
     const config = configs[index]
@@ -92,16 +102,11 @@ export default async function runChain(
         runQuery(userID, projectID, config.provider, config.model, config.indexName, query, config.topK)
       )
     } else if (isCodeConfig(config) || isBranchConfig(config)) {
-      const codeContext = CreateCodeContextWithInputs(inputs)
-      lastResponse = await runChainStep(runCodeInContext(config.code, codeContext))
+      lastResponse = await runChainStep(runCodeWithInputs(config.code, inputs))
       if (!lastResponse.failed && !lastResponse.functionCall && isBranchConfig(config)) {
         const branchIndex = config.branches.indexOf(lastResponse.output)
         if (branchIndex >= 0) {
-          branch = FirstBranchForBranchOfNode(
-            configs.map(item => ({ ...item, code: '' })),
-            index,
-            branchIndex
-          )
+          branch = FirstBranchForBranchOfNode(configsAsChainItems, index, branchIndex)
         } else {
           lastResponse = {
             ...lastResponse,
@@ -115,11 +120,14 @@ export default async function runChain(
     } else {
       throw new Error('Unsupported config type in chain evaluation')
     }
+    const loopIndex = LoopCompletionIndexForNode(configsAsChainItems, index, branch)
+    const canLoop = loopIndex >= 0 && remainingLoopIterations > 1
     stream?.(
       index,
       lastResponse.failed ? lastResponse.error : isRunConfig(config) ? '' : lastResponse.output,
       lastResponse,
-      inputs
+      inputs,
+      canLoop
     )
     if (lastResponse.failed) {
       continuationIndex = undefined
@@ -137,6 +145,11 @@ export default async function runChain(
         if (!requestContinuation) {
           continuationIndex = undefined
         }
+      }
+      if (canLoop) {
+        branch = configs[loopIndex].branch
+        index = loopIndex - 1
+        --remainingLoopIterations
       }
     }
   }

@@ -13,8 +13,17 @@ import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
 
-const sortByTimestamp = <T extends { timestamp: number }>(items: T[]): T[] =>
-  items.sort((a, b) => a.timestamp - b.timestamp)
+const lastContinuationTimestamp = <T extends { timestamp: number; continuationID?: number }>(run: T, runs: T[]) =>
+  run.continuationID
+    ? Math.max(...runs.filter(r => r.continuationID === run.continuationID).map(r => r.timestamp))
+    : run.timestamp
+
+const sortByTimestamp = <T extends { timestamp: number; continuationID?: number }>(items: T[]): T[] =>
+  items.sort((a, b) =>
+    a.continuationID === b.continuationID
+      ? a.timestamp - b.timestamp
+      : lastContinuationTimestamp(a, items) - lastContinuationTimestamp(b, items)
+  )
 
 const hasTimestamp = <T extends { timestamp?: number }>(run: T): run is T & { timestamp: number } => !!run.timestamp
 
@@ -40,7 +49,12 @@ export default function RunTimeline({
   activeItem?: ActivePrompt | ActiveChain
   focusRunID?: number
   setFocusRunID?: (runID: number) => void
-  runVersion?: (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => Promise<any>
+  runVersion?: (
+    getVersion: () => Promise<number>,
+    inputs: PromptInputs[],
+    dynamicInputs: PromptInputs[],
+    continuationID?: number
+  ) => Promise<any>
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
@@ -111,7 +125,7 @@ export default function RunTimeline({
   const runContinuation =
     version && runVersion
       ? async (continuationID: number, message: string, inputKey: string) =>
-          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], continuationID)
+          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [{}], continuationID)
       : undefined
 
   return (

@@ -6,6 +6,10 @@ import { InputValues, TestConfig } from '@/types'
 import RichTextInput from '../richTextInput'
 import TestDataHeader from './testDataHeader'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
+import { SelectInputRows } from '@/src/client/inputRows'
+import DropdownMenu from '../dropdownMenu'
+import Label from '../label'
+import RangeInput from '../rangeInput'
 
 export default function TestDataPane({
   variables,
@@ -89,15 +93,15 @@ export default function TestDataPane({
         : rowIndices.length === rowCount
           ? 'all'
           : 'custom'
-    setTestConfig({ mode, rowIndices })
+    setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
   const toggleAll = () => {
     const nonEmptyRowIndices = Array.from({ length: rowCount }, (_, index) => index).filter(row => !isRowEmpty(row))
     if (testConfig.rowIndices.length < nonEmptyRowIndices.length) {
-      setTestConfig({ mode: 'all', rowIndices: nonEmptyRowIndices })
+      setTestConfig({ ...testConfig, mode: 'all', rowIndices: nonEmptyRowIndices })
     } else if (nonEmptyRowIndices.length > 1) {
-      setTestConfig({ mode: 'first', rowIndices: nonEmptyRowIndices.slice(0, 1) })
+      setTestConfig({ ...testConfig, mode: 'first', rowIndices: nonEmptyRowIndices.slice(0, 1) })
     }
   }
 
@@ -109,6 +113,9 @@ export default function TestDataPane({
     setInputValue(row, variable, value)
     persistInputValuesIfNeeded()
   })
+
+  const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
+  const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
 
   const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
@@ -157,6 +164,56 @@ export default function TestDataPane({
         <Icon icon={addIcon} />
         Add
       </div>
+      {dynamicInputRows.length > 0 && (
+        <div className='grid items-center gap-2 p-4 grid-cols-[200px_250px]'>
+          <Label>
+            Use values for <span className='font-medium text-purple-400'>dynamic inputs</span> as
+          </Label>
+          <DropdownMenu
+            value={autoRespondModeFromTestConfig(testConfig)}
+            onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
+            <option value='manual'>suggested manual responses</option>
+            <option value='static'>fixed mocked responses</option>
+            <option value='dynamic'>personas for automated responses</option>
+          </DropdownMenu>
+          {testConfig.autoRespond !== undefined && (
+            <>
+              <Label>Maximum number of responses</Label>
+              <div className='flex items-center gap-2'>
+                <RangeInput
+                  className='flex-1'
+                  value={testConfig.maxResponses ?? DefaultMaxResponses}
+                  setValue={value =>
+                    setTestConfig({ ...testConfig, maxResponses: isNaN(Number(value)) ? 0 : Number(value) })
+                  }
+                  min={1}
+                  max={10}
+                  step={1}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
+
+type DynamicMode = 'manual' | 'static' | 'dynamic'
+const DefaultMaxResponses = 1
+
+const autoRespondModeFromTestConfig = (testConfig: TestConfig): DynamicMode => {
+  if (testConfig.autoRespond === true) {
+    return 'dynamic'
+  } else if (testConfig.autoRespond === false) {
+    return 'static'
+  } else {
+    return 'manual'
+  }
+}
+
+const testConfigWithAutoRespondMode = (testConfig: TestConfig, mode: DynamicMode): TestConfig => ({
+  ...testConfig,
+  autoRespond: mode === 'dynamic' ? true : mode === 'static' ? false : undefined,
+  maxResponses: mode === 'manual' ? undefined : testConfig.maxResponses ?? DefaultMaxResponses,
+})

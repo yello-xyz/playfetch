@@ -8,6 +8,7 @@ import {
   getFilteredEntities,
   getFilteredOrderedEntities,
   getID,
+  getKeyedEntities,
   getKeyedEntity,
   getRecentEntities,
   getTimestamp,
@@ -16,18 +17,33 @@ import { processLabels } from './versions'
 import { ensurePromptOrChainAccess } from './chains'
 import { saveComment } from './comments'
 import { PropertyFilter, and, or } from '@google-cloud/datastore'
+import { saveRunRatingForParent } from './ratings'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
-    return
+    const datastore = getDatastore()
+    const [intermediateRuns] = await datastore.runQuery(
+      datastore.createQuery(Entity.RUN).filter(new PropertyFilter('parentRunID', '!=', null))
+    )
+    const versionIDs = [...new Set(intermediateRuns.map(runData => runData.versionID))]
+    const versionsData = await getKeyedEntities(Entity.VERSION, versionIDs)
+    const promptVersionIDs = new Set(
+      versionsData.filter(versionData => versionData.items === null).map(versionData => getID(versionData))
+    )
+    const intermediatePromptRuns = intermediateRuns.filter(runData => promptVersionIDs.has(runData.versionID))
+    await datastore.delete(intermediatePromptRuns.map(runData => buildKey(Entity.RUN, getID(runData))))
+    console.log(
+      `Deleted ${intermediatePromptRuns.length} intermediate prompt runs`,
+      intermediatePromptRuns.map(runData => getID(runData))
+    )
   }
+
+  return
+
   const datastore = getDatastore()
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   for (const runData of allRuns) {
-    if (runData.reason !== undefined) {
-      continue
-    }
     if (remainingSaveCount-- <= 0) {
       console.log(`‼️  Please run this migration again to process remaining runs (total count ${allRuns.length})`)
       return
@@ -37,20 +53,20 @@ export async function migrateRuns(postMerge: boolean) {
         runData.userID,
         runData.parentID,
         runData.versionID,
-        runData.parentRunID ?? null,
-        runData.itemIndex ?? null,
+        runData.parentRunID,
+        runData.itemIndex,
         JSON.parse(runData.inputs),
         runData.output,
         runData.createdAt,
         runData.cost,
-        runData.inputTokens ?? 0,
-        runData.outputTokens ?? 0,
+        runData.inputTokens,
+        runData.outputTokens,
         runData.duration,
         JSON.parse(runData.labels),
-        runData.rating ?? null,
-        runData.reason ?? null,
-        runData.continuationID ?? null,
-        runData.canContinue ?? false,
+        runData.rating,
+        runData.reason,
+        runData.continuationID,
+        runData.canContinue,
         getID(runData)
       )
     )
@@ -112,14 +128,16 @@ export async function getIntermediateRunsForParentRun(userID: number, parentRunI
   if (runData.length > 0) {
     await ensurePromptOrChainAccess(userID, runData[0].parentID)
   }
-  return runData.map(toRun(0))
+  return runData.map(toRun(0)).sort((a, b) => a.timestamp - b.timestamp)
 }
 
 export const getOrderedRunsForParentID = (parentID: number) =>
   getFilteredOrderedEntities(Entity.RUN, and([buildFilter('parentID', parentID), buildFilter('parentRunID', null)]))
 
+const getTrustedRunData = (runID: number) => getKeyedEntity(Entity.RUN, runID)
+
 const getVerifiedUserRunData = async (userID: number, runID: number) => {
-  const runData = await getKeyedEntity(Entity.RUN, runID)
+  const runData = await getTrustedRunData(runID)
   if (!runData) {
     throw new Error(`Run with ID ${runID} does not exist or user has no access`)
   }
@@ -175,6 +193,18 @@ export async function updateRunRating(
   if (rating !== runData.rating || !!reason) {
     await updateRun({ ...runData, rating, reason: reason ?? null })
   }
+  if (!!reason && reason !== runData.reason) {
+    saveRunRatingForParent(runData.parentID, JSON.parse(runData.inputs), runData.output, rating, reason)
+  }
+}
+
+const predictedRatingPrefix = 'predicted-'
+
+export async function savePredictedRunRating(runID: number, rating: RunRating, reason: string) {
+  const runData = await getTrustedRunData(runID)
+  if (runData.rating === null) {
+    await updateRun({ ...runData, rating: `${predictedRatingPrefix}${rating}`, reason })
+  }
 }
 
 async function updateRun(runData: any) {
@@ -216,7 +246,7 @@ const toRunData = (
   outputTokens: number,
   duration: number,
   labels: string[],
-  rating: RunRating | null,
+  rating: RunRating | 'predicted-positive' | 'predicted-negative' | null,
   reason: string | null,
   continuationID: number | null,
   canContinue: boolean,
@@ -259,7 +289,8 @@ export const toRun =
     tokens: data.inputTokens + data.outputTokens,
     duration: data.duration,
     labels: JSON.parse(data.labels),
-    rating: data.rating,
+    rating: data.rating !== null ? data.rating.replace(predictedRatingPrefix, '') : null,
+    isPredictedRating: data.rating !== null && data.rating.startsWith(predictedRatingPrefix),
     reason: data.reason,
     continuationID: data.continuationID,
     canContinue: data.canContinue,

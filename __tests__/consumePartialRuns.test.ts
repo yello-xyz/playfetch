@@ -31,8 +31,10 @@ const chunk = (
   cost?: number,
   duration?: number,
   failed?: boolean,
-  continuationID?: number
-) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed, continuationID })
+  continuationID?: number,
+  userID?: number,
+  offset = 0
+) => ({ inputIndex, configIndex, index: configIndex, message, cost, duration, failed, continuationID, userID, offset })
 
 const run = (
   output: string,
@@ -41,7 +43,8 @@ const run = (
   cost?: number,
   duration?: number,
   failed?: boolean,
-  continuationID?: number
+  continuationID?: number,
+  userID?: number
 ) => ({
   id,
   index,
@@ -50,6 +53,7 @@ const run = (
   duration,
   failed,
   continuationID,
+  userID,
 })
 
 testConsumeStream('no chunks', [], [])

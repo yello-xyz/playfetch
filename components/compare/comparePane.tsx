@@ -70,6 +70,7 @@ export default function ComparePane({
     tokens: 0,
     userID: 0,
     rating: null,
+    isPredictedRating: false,
     reason: null,
   }))
 

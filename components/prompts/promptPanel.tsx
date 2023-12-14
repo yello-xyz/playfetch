@@ -20,7 +20,7 @@ import {
   SupportsSeed,
   SupportsJsonMode,
 } from '@/src/common/providerMetadata'
-import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
+import { PromptConfigsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
@@ -50,7 +50,7 @@ export default function PromptPanel({
 }: {
   version: PromptVersion
   setModifiedVersion?: (version: PromptVersion) => void
-  runPrompt?: (inputs: PromptInputs[]) => Promise<void>
+  runPrompt?: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
@@ -163,12 +163,13 @@ export default function PromptPanel({
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons
           runTitle={version.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
-          variables={ExtractPromptVariables(prompts, config, false)}
+          variables={ExtractPromptVariables(prompts, config, true)}
+          staticVariables={ExtractPromptVariables(prompts, config, false)}
           inputValues={inputValues}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
           onShowTestConfig={onShowTestConfig}
-          disabled={!isModelAvailable || prompts.main.trim().length === 0 || isRunning}
+          disabled={!isModelAvailable || !VersionHasNonEmptyPrompts({ prompts, config }) || isRunning}
           callback={runPrompt}
         />
       )}

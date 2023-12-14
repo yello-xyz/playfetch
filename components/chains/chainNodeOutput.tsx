@@ -1,6 +1,6 @@
 import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import { ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
+import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testData/testDataPane'
@@ -27,7 +27,7 @@ import api from '@/src/client/api'
 
 export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
   if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
-    return ExtractVariables(item.code)
+    return [...ExtractVariables(item.code), ...(includingDynamic ? ExtractCodeInterrupts(item.code) : [])]
   }
   if (IsQueryChainItem(item)) {
     return ExtractVariables(item.query)
@@ -113,7 +113,12 @@ export default function ChainNodeOutput({
 
   const [runVersion, partialRuns, isRunning, highestRunIndex] = useRunVersion(activeVersion.id)
   const [runningItemIndex, setRunningItemIndex] = useState<number>(-1)
-  const runChain = async (getVersion: () => Promise<number>, inputs: PromptInputs[], continuationID?: number) => {
+  const runChain = async (
+    getVersion: () => Promise<number>,
+    inputs: PromptInputs[],
+    dynamicInputs: PromptInputs[],
+    continuationID?: number
+  ) => {
     persistInputValuesIfNeeded()
     if (areProvidersAvailable(items)) {
       if (continuationID === undefined) {
@@ -121,13 +126,21 @@ export default function ChainNodeOutput({
         setRunningItemIndex(-1)
         setActiveRunID(undefined)
       }
-      const isFinished = await runVersion(getVersion, inputs, continuationID)
+      const isFinished = await runVersion(
+        getVersion,
+        inputs,
+        dynamicInputs,
+        continuationID,
+        testConfig.autoRespond,
+        testConfig.maxResponses
+      )
       if (isFinished) {
         setActiveIndex(nodes.length - 1)
       }
     }
   }
-  const saveAndRun = async (inputs: PromptInputs[]) => runChain(() => saveItems(items), inputs)
+  const saveAndRun = async (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) =>
+    runChain(() => saveItems(items), inputs, dynamicInputs)
 
   useEffect(() => {
     if (highestRunIndex > runningItemIndex) {
@@ -212,14 +225,15 @@ export default function ChainNodeOutput({
               runVersion={runChain}
               selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
               isRunning={isRunning}
-              onRatingUpdate={run => run.parentRunID ? refreshIntermediateRuns() : Promise.resolve()}
+              onRatingUpdate={run => (run.parentRunID ? refreshIntermediateRuns() : Promise.resolve())}
             />
           </div>
         )}
         {showRunButtons && (
           <div className='flex items-center justify-end w-full gap-4 px-4'>
             <RunButtons
-              variables={staticVariables}
+              variables={variables}
+              staticVariables={staticVariables}
               inputValues={inputValues}
               testConfig={testConfig}
               setTestConfig={setTestConfig}

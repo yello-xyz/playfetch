@@ -72,6 +72,7 @@ export type ActivePrompt = Prompt & {
   inputValues: InputValues
   users: User[]
   availableLabels: string[]
+  canSuggestImprovements: boolean
 }
 
 export type Chain = {
@@ -187,6 +188,7 @@ export type PartialRun = {
   canContinue?: boolean
   parentRunID?: number | null
   continuations?: (PartialRun | Run)[]
+  userID?: number
 }
 
 export type Run = PartialRun & {
@@ -198,6 +200,7 @@ export type Run = PartialRun & {
   inputs: PromptInputs
   labels: string[]
   rating: RunRating | null
+  isPredictedRating: boolean
   reason: string | null
   userID: number
 }
@@ -225,6 +228,7 @@ export type CodeConfig = CommonConfigAttributes & {
 export type BranchConfig = CommonConfigAttributes & {
   code: string
   branches: string[]
+  loops?: number[]
 }
 
 export type QueryConfig = CommonConfigAttributes & {
@@ -257,6 +261,8 @@ export type ChainItemWithInputs = (
 export type TestConfig = {
   mode: 'custom' | 'first' | 'last' | 'range' | 'random' | 'all'
   rowIndices: number[]
+  autoRespond?: boolean
+  maxResponses?: number
 }
 
 export type Endpoint = {

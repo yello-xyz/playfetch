@@ -2,7 +2,7 @@ import { ActiveChain, ChainItem, ChainVersion, Prompt } from '@/types'
 import { ChainNode, IsBranchChainItem, IsChainItem } from './chainNode'
 import { ChainNodeBox } from './chainNodeBox'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
-import { FirstBranchForBranchOfNode } from '@/src/common/branching'
+import { FirstBranchForBranchOfNode, ShouldBranchLoopOnCompletion } from '@/src/common/branching'
 import ChainNodeBoxConnector, { DownConnector, DownStroke } from './chainNodeBoxConnector'
 
 export type InsertActions = {
@@ -36,9 +36,11 @@ const startsBranch = (nodes: ChainNode[], branch: number) => (node: ChainNode) =
     )
   )
 }
-
 const didStartBranchInColumn = (nodes: ChainNode[], previousIndex: number, branch: number) =>
   nodes.slice(0, previousIndex).some(startsBranch(nodes, branch))
+
+const shouldBranchLoopOnCompletion = (nodes: ChainNode[], branch: number) =>
+  ShouldBranchLoopOnCompletion(nodes.filter(IsChainItem), branch)
 
 export const ConnectorRow = (props: {
   nodes: ChainNode[]
@@ -91,6 +93,7 @@ const ConnectorCell = ({
   }
   const isActive = index === activeMenuIndex?.[0] && branch === activeMenuIndex?.[1]
   const hasSpotOnNextRow = !nextNode && nodes.indexOf(nextRow[0]) !== nodes.length - 1
+  const hasCompletedBranch = !nextNode && shouldBranchLoopOnCompletion(nodes, branch)
   return (precedingNode || isStartOfBranch) && index >= 0 ? (
     <ChainNodeBoxConnector
       prompts={prompts}
@@ -100,9 +103,10 @@ const ConnectorCell = ({
       canDismiss={nodes.length > 2}
       hasPrevious={!!precedingNode && !IsBranchChainItem(precedingNode)}
       hasNext={!!nextNode && IsChainItem(nextNode)}
+      hasCompleted={hasCompletedBranch}
       {...bindInsertActions(insertActions, index, branch)}
     />
-  ) : didStartBranchInColumn(nodes, previousNodeIndex, branch) ? (
+  ) : didStartBranchInColumn(nodes, previousNodeIndex, branch) && !hasCompletedBranch ? (
     <DownStroke />
   ) : (
     <div />
@@ -184,6 +188,8 @@ const NodeCell = ({
     }
   }
 
+  const hasCompletedBranch = !node && shouldBranchLoopOnCompletion(nodes, branch)
+
   return index >= 0 ? (
     node === undefined ? (
       <ChainNodeBoxConnector
@@ -194,6 +200,7 @@ const NodeCell = ({
         canDismiss={true}
         hasPrevious={false}
         hasNext={false}
+        hasCompleted={hasCompletedBranch}
         skipConnector
         {...bindInsertActions(insertActions, index, branch)}
       />
@@ -212,7 +219,7 @@ const NodeCell = ({
         promptCache={promptCache}
       />
     )
-  ) : !isLastRow && didStartBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (
+  ) : !isLastRow && !hasCompletedBranch && didStartBranchInColumn(nodes, firstNodeOfRowIndex, branch) ? (
     <DownStroke />
   ) : (
     <div />
@@ -269,9 +276,20 @@ export const StartBranchConnector = ({
   )
 }
 
-export const EndBranchConnector = ({ maxBranch, colSpans }: { maxBranch: number; colSpans: string[] }) => (
+export const EndBranchConnector = ({
+  maxBranch,
+  maxNonLoopingBranch,
+  colSpans,
+}: {
+  maxBranch: number
+  maxNonLoopingBranch: number
+  colSpans: string[]
+}) => (
   <>
-    <div className={`${colSpans[maxBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`} />
+    <div
+      className={`${colSpans[maxNonLoopingBranch]} border-t -mt-px mx-48 h-px border-gray-400 justify-self-stretch`}
+    />
+    <RowFiller start={maxNonLoopingBranch + 1} end={maxBranch} colSpans={colSpans} />
     <div className='flex flex-col items-center'>
       <DownConnector height='min-h-[18px]' />
     </div>
@@ -296,4 +314,4 @@ export const EndRow = ({ maxBranch, colSpans }: { maxBranch: number; colSpans: s
 )
 
 export const RowFiller = ({ start, end, colSpans }: { start: number; end: number; colSpans: string[] }) =>
-  end + 1 > start ? <div className={colSpans[end + 1 - start]} /> : null
+  end + 1 > start ? <div className={colSpans[end - start]} /> : null

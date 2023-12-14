@@ -1,8 +1,10 @@
 import { ChainItem, ChainVersion, CodeChainItem, Prompt, PromptChainItem, User } from '@/types'
 import {
+  CanChainNodeIncludeContext,
   ChainNode,
   InputNode,
   IsBranchChainItem,
+  IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
@@ -19,6 +21,7 @@ import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { ReactNode, useState } from 'react'
+import { ShouldBranchLoopOnCompletion } from '@/src/common/branching'
 
 export default function ChainNodeBoxHeader({
   nodes,
@@ -61,9 +64,7 @@ export default function ChainNodeBoxHeader({
     setLabel(undefined)
   }
 
-  const canIncludeContext =
-    IsPromptChainItem(chainNode) &&
-    nodes.slice(0, index).some(node => IsPromptChainItem(node) && SubtreeForChainNode(node, nodes).includes(chainNode))
+  const canIncludeContext = CanChainNodeIncludeContext(chainNode, nodes)
 
   return (
     <>

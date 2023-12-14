@@ -1,5 +1,12 @@
-import { ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
-import { ChainNode, InputNode, IsCodeChainItem, IsPromptChainItem, IsQueryChainItem } from './chainNode'
+import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
+import {
+  ChainNode,
+  InputNode,
+  IsBranchChainItem,
+  IsCodeChainItem,
+  IsPromptChainItem,
+  IsQueryChainItem,
+} from './chainNode'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 import { VersionLabels } from '../versions/versionLabels'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
@@ -8,6 +15,7 @@ import { ReactNode } from 'react'
 import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
 import { VersionDescription } from '../commentsPane'
+import { Highlight, themes } from 'prism-react-renderer'
 
 export default function ChainNodeBoxBody({
   items,
@@ -25,7 +33,9 @@ export default function ChainNodeBoxBody({
       {IsPromptChainItem(chainNode) && (
         <PromptNodeBody item={chainNode} isSelected={isSelected} promptCache={promptCache} />
       )}
-      {IsCodeChainItem(chainNode) && <CodeNodeBody item={chainNode} isSelected={isSelected} />}
+      {(IsCodeChainItem(chainNode) || IsBranchChainItem(chainNode)) && (
+        <CodeNodeBody item={chainNode} isSelected={isSelected} />
+      )}
       {IsQueryChainItem(chainNode) && <QueryNodeBody item={chainNode} isSelected={isSelected} />}
       {chainNode === InputNode && <InputNodeBody items={items} isSelected={isSelected} promptCache={promptCache} />}
     </>
@@ -51,14 +61,33 @@ function PromptNodeBody({
         <VersionLabels version={version} colors={AvailableLabelColorsForItem(prompt)} hideChainReferences />
       </div>
       <CommonBody isSelected={isSelected}>
-        <TaggedContent content={version.prompts.main} />
+        <TaggedContent content={version.prompts.main || (version.prompts.system ?? '')} />
       </CommonBody>
     </div>
   ) : null
 }
 
-function CodeNodeBody({ item, isSelected }: { item: CodeChainItem; isSelected: boolean }) {
-  return item.description ? <CommonBody isSelected={isSelected}>{item.description}</CommonBody> : null
+function CodeNodeBody({ item, isSelected }: { item: CodeChainItem | BranchChainItem; isSelected: boolean }) {
+  const description = IsCodeChainItem(item) ? item.description : undefined
+  return description || item.code ? (
+    <CommonBody isSelected={isSelected}>
+      {description || (
+        <Highlight theme={themes.github} code={item.code.trim()} language='javascript'>
+          {({ tokens, getLineProps, getTokenProps }) => (
+            <>
+              {tokens.map((line, lineIndex) => (
+                <div key={lineIndex} {...getLineProps({ line })}>
+                  {line.map((token, tokenIndex) => (
+                    <span key={tokenIndex} {...getTokenProps({ token })} />
+                  ))}
+                </div>
+              ))}
+            </>
+          )}
+        </Highlight>
+      )}
+    </CommonBody>
+  ) : null
 }
 
 function QueryNodeBody({ item, isSelected }: { item: QueryChainItem; isSelected: boolean }) {

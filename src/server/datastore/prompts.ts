@@ -16,6 +16,7 @@ import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
+import { canSuggestImprovedPrompt } from './ratings'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -43,18 +44,25 @@ export const toPrompt = (data: any): Prompt => ({
 export async function getPromptForUser(
   userID: number,
   promptID: number
-): Promise<{ prompt: Prompt; versions: RawPromptVersion[]; inputValues: InputValues }> {
+): Promise<{
+  prompt: Prompt
+  versions: RawPromptVersion[]
+  inputValues: InputValues
+  canSuggestImprovements: boolean
+}> {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
 
   const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
   const runs = await getOrderedRunsForParentID(promptID)
 
   const inputValues = await getTrustedParentInputValues(promptID)
+  const canSuggestImprovements = await canSuggestImprovedPrompt(promptID)
 
   return {
     prompt: toPrompt(promptData),
     versions: toUserVersions(userID, versions, runs) as RawPromptVersion[],
     inputValues,
+    canSuggestImprovements,
   }
 }
 

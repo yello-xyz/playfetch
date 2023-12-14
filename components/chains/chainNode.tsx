@@ -1,5 +1,7 @@
-import { SubtreeForNode } from '@/src/common/branching'
+import { LoopCompletionIndexForNode, ShouldBranchLoopOnCompletion, SubtreeForNode } from '@/src/common/branching'
 import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
+import { ExtractChainItemVariables } from './chainNodeOutput'
+import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'
@@ -13,13 +15,50 @@ export const IsCodeChainItem = (item: ChainNode): item is CodeChainItem =>
 export const IsQueryChainItem = (item: ChainNode): item is QueryChainItem => IsChainItem(item) && 'query' in item
 export const NameForCodeChainItem = (item: CodeChainItem) => item.name || 'Code block'
 
-export const SubtreeForChainNode = (node: ChainNode, nodes: ChainNode[], includeRoot = true): ChainItem[] => {
+export const SubtreeForChainNode = (
+  chainNode: ChainNode,
+  nodes: ChainNode[],
+  includeRoot = true,
+  considerLoops = false
+): ChainItem[] => {
   const items = nodes.filter(IsChainItem)
-  if (node === InputNode) {
+  if (chainNode === InputNode) {
     return items
-  } else if (node === OutputNode) {
+  } else if (chainNode === OutputNode) {
     return []
   } else {
-    return SubtreeForNode(items, items.indexOf(node), includeRoot)
+    if (considerLoops) {
+      const loopIndex = LoopCompletionIndexForNode(
+        items,
+        items.findLastIndex(node => node.branch === chainNode.branch),
+        chainNode.branch
+      )
+      if (loopIndex >= 0) {
+        return SubtreeForChainNode(items[loopIndex], nodes, true, false)
+      }
+    }
+    return SubtreeForNode(items, items.indexOf(chainNode), includeRoot)
   }
 }
+
+export const CanChainNodeIncludeContext = (chainNode: ChainNode, nodes: ChainNode[]): chainNode is PromptChainItem =>
+  IsPromptChainItem(chainNode) &&
+  nodes.some(
+    node =>
+      IsPromptChainItem(node) &&
+      (SubtreeForChainNode(node, nodes, false).includes(chainNode) ||
+        (ShouldBranchLoopOnCompletion(nodes.filter(IsChainItem), node.branch) &&
+          SubtreeForChainNode(node, nodes, false, true).includes(chainNode)))
+  )
+
+export const MappableTargetInputsForChainNode = (
+  chainNode: ChainNode,
+  nodes: ChainNode[],
+  promptCache: ChainPromptCache
+): string[] => [
+  ...new Set(
+    SubtreeForChainNode(chainNode, nodes, false, true).flatMap(item =>
+      ExtractChainItemVariables(item, promptCache, false)
+    )
+  ),
+]

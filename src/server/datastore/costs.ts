@@ -13,7 +13,7 @@ import {
 import { ensureScopeOwnership } from './providers'
 import { CostUsage } from '@/types'
 import { DaysAgo } from '@/src/common/formatting'
-import { getTrustedBudgetForScope } from './budget'
+import { getTrustedBudgetForScope } from './budgets'
 
 export async function migrateCosts(postMerge: boolean) {
   if (postMerge) {

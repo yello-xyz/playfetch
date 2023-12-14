@@ -165,7 +165,7 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
     hasAccess,
     previousUserData?.didCompleteOnboarding ?? false,
     isAdmin,
-    previousUserData?.createdAt ?? new Date(),
+    hasAccess ? previousUserData?.createdAt ?? new Date() : new Date(),
     previousUserData?.lastLoginAt,
     previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined,
     previousUserData ? getID(previousUserData) : undefined
