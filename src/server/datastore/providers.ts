@@ -33,6 +33,9 @@ type ProviderMetadata = {
 }
 
 export async function migrateProviders(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
   for (const providerData of allProviders) {
@@ -40,15 +43,10 @@ export async function migrateProviders(postMerge: boolean) {
       toProviderData(
         providerData.scopeID,
         providerData.provider,
-        postMerge
-          ? providerData.encryptedAPIKey
-          : providerData.apiKey
-            ? encrypt(providerData.apiKey)
-            : providerData.encryptedAPIKey,
+        providerData.encryptedAPIKey,
         JSON.parse(providerData.metadata),
         providerData.createdAt,
-        getID(providerData),
-        postMerge && providerData.encryptedAPIKey ? undefined : providerData.apiKey
+        getID(providerData)
       )
     )
   }
@@ -84,8 +82,7 @@ const toProviderData = (
   encryptedAPIKey: string | null,
   metadata: ProviderMetadata,
   createdAt = new Date(),
-  providerID?: number,
-  apiKey?: string | null // TODO delete after next merge to prod (also in exludedFromIndexes)
+  providerID?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
@@ -94,9 +91,8 @@ const toProviderData = (
     provider,
     encryptedAPIKey,
     metadata: JSON.stringify(metadata),
-    apiKey,
   },
-  excludeFromIndexes: ['encryptedAPIKey', 'metadata', 'apiKey'],
+  excludeFromIndexes: ['encryptedAPIKey', 'metadata'],
 })
 
 const toAvailableProvider = (data: any): AvailableProvider => {

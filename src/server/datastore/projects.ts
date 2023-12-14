@@ -38,23 +38,13 @@ import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
 
 export async function migrateProjects(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    if (projectData.apiKeyHash) {
-      await updateProject(
-        {
-          ...projectData,
-          encryptedAPIKey: postMerge
-            ? projectData.encryptedAPIKey
-            : projectData.apiKeyDev
-              ? encrypt(projectData.apiKeyDev)
-              : projectData.encryptedAPIKey,
-          apiKeyDev: postMerge && projectData.encryptedAPIKey ? undefined : projectData.apiKeyDev,
-        },
-        false
-      )
-    }
+    await updateProject({ ...projectData }, false)
   }
 }
 
@@ -71,8 +61,7 @@ const toProjectData = (
   favorited: number[],
   apiKeyHash: string | undefined,
   encryptedAPIKey: string | undefined,
-  projectID: number,
-  apiKeyDev?: string // TODO delete after next merge to prod (also in exludedFromIndexes)
+  projectID: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
   data: {
@@ -86,9 +75,8 @@ const toProjectData = (
     favorited: JSON.stringify(favorited),
     apiKeyHash,
     encryptedAPIKey,
-    apiKeyDev, // TODO do NOT store api key in datastore but show it once to user on creation
   },
-  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
+  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'labels', 'flavors'],
 })
 
 export const toProject = (data: any, userID: number, isOwner: boolean): Project => ({
@@ -234,8 +222,7 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
       JSON.parse(projectData.favorited),
       projectData.apiKeyHash,
       projectData.encryptedAPIKey,
-      getID(projectData),
-      projectData.apiKeyDev
+      getID(projectData)
     )
   )
 }

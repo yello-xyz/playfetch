@@ -7,33 +7,13 @@ import {
   getKeyedEntity,
   runTransactionWithExponentialBackoff,
 } from './datastore'
-import { PropertyFilter } from '@google-cloud/datastore'
 
 export async function migrateRatings(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allRatings] = await datastore.runQuery(datastore.createQuery(Entity.RATING))
-
-  if (postMerge && allRatings.length === 0) {
-    const [ratedRuns] = await datastore.runQuery(
-      datastore.createQuery(Entity.RUN).filter(new PropertyFilter('rating', '!=', null))
-    )
-    const filteredRuns = ratedRuns
-      .filter(runData => !!runData.reason && runData.parentRunID === null)
-      .sort((a, b) => a.createdAt - b.createdAt)
-    console.log(`Migrating ${filteredRuns.length} out of ${ratedRuns.length} runs to ratings`)
-    for (const runData of filteredRuns) {
-      await saveRunRatingForParent(
-        runData.parentID,
-        JSON.parse(runData.inputs),
-        runData.output,
-        runData.rating,
-        runData.reason
-      )
-    }
-  }
-
-  return
-
   for (const ratingData of allRatings) {
     await getDatastore().save(
       toRatingData(getID(ratingData), ratingData.createdAt, JSON.parse(ratingData.recentRatings))

@@ -8,7 +8,6 @@ import {
   getFilteredEntities,
   getFilteredOrderedEntities,
   getID,
-  getKeyedEntities,
   getKeyedEntity,
   getRecentEntities,
   getTimestamp,
@@ -21,25 +20,8 @@ import { saveRunRatingForParent } from './ratings'
 
 export async function migrateRuns(postMerge: boolean) {
   if (postMerge) {
-    const datastore = getDatastore()
-    const [intermediateRuns] = await datastore.runQuery(
-      datastore.createQuery(Entity.RUN).filter(new PropertyFilter('parentRunID', '!=', null))
-    )
-    const versionIDs = [...new Set(intermediateRuns.map(runData => runData.versionID))]
-    const versionsData = await getKeyedEntities(Entity.VERSION, versionIDs)
-    const promptVersionIDs = new Set(
-      versionsData.filter(versionData => versionData.items === null).map(versionData => getID(versionData))
-    )
-    const intermediatePromptRuns = intermediateRuns.filter(runData => promptVersionIDs.has(runData.versionID))
-    await datastore.delete(intermediatePromptRuns.map(runData => buildKey(Entity.RUN, getID(runData))))
-    console.log(
-      `Deleted ${intermediatePromptRuns.length} intermediate prompt runs`,
-      intermediatePromptRuns.map(runData => getID(runData))
-    )
+    return
   }
-
-  return
-
   const datastore = getDatastore()
   let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
