@@ -11,12 +11,15 @@ import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
 import { Capitalize } from '@/src/common/formatting'
 import { useActiveProject } from '@/src/client/context/projectContext'
+import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
+import { useRouter } from 'next/router'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
 const TeamPane = 'team'
 const ConnectorsPane = 'connectors'
 const SourceControlPane = 'sourceControl'
+
 type ActivePane =
   | typeof ProvidersPane
   | typeof UsagePane
@@ -101,7 +104,18 @@ export default function SettingsView({
   const activeProject = useActiveProject()
   const isProjectScope = scope === 'project'
   const scopeID = isProjectScope ? activeProject.id : user.id
-  const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
+
+  const router = useRouter()
+  const activePaneFromQuery = ParseActiveSettingsTabQuery(router.query)
+  const [activePane, setActivePane] = useState<ActivePane>(activePaneFromQuery)
+  const updateActivePane = (pane: ActivePane) => {
+    if (pane !== activePane) {
+      router.push(isProjectScope ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
+        shallow: true,
+      })
+      setActivePane(pane)
+    }
+  }
 
   const [costUsage, setCostUsage] = useState<CostUsage>()
 
@@ -135,7 +149,7 @@ export default function SettingsView({
       <SettingsSidebar
         panes={availablePanes as ActivePane[]}
         activePane={activePane}
-        setActivePane={setActivePane}
+        setActivePane={updateActivePane}
         titleForPane={titleForPane}
       />
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>

@@ -3,7 +3,7 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { getUserForID } from './datastore/users'
 import { getProjectNameForID } from './datastore/projects'
-import ClientRoute, { SettingsRoute, WorkspaceRoute } from '../common/clientRoute'
+import ClientRoute, { ProjectSettingsRoute, UserSettingsRoute, WorkspaceRoute } from '../common/clientRoute'
 import { getWorkspaceNameForID } from './datastore/workspaces'
 import { User } from '@/types'
 import { Capitalize, FormatCost, FormatDate } from '../common/formatting'
@@ -41,12 +41,12 @@ export async function sendBudgetNotificationEmails(scopeID: number, limit: numbe
   const [ownerIDs] = await getAccessingUserIDs(scopeID, 'project')
   if (ownerIDs.length > 0) {
     const projectName = await getProjectNameForID(scopeID)
-    const settingsRoute = SettingsRoute(scopeID)
+    const settingsRoute = ProjectSettingsRoute(scopeID, 'usage')
     for (const ownerID of ownerIDs) {
       await sendBudgetNotificationEmail(ownerID, settingsRoute, projectName, limit, hardLimit)
     }
   } else {
-    await sendBudgetNotificationEmail(scopeID, ClientRoute.Settings, null, limit, hardLimit)
+    await sendBudgetNotificationEmail(scopeID, UserSettingsRoute('usage'), null, limit, hardLimit)
   }
 }
 
