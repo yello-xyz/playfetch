@@ -189,6 +189,7 @@ export default function SettingsView({
               providers={SourceControlProviders}
               availableProviders={availableSourceControlProviders}
               includeEnvironment
+              excludeApiKey
               onRefresh={refresh}
             />
           )}

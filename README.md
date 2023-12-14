@@ -63,6 +63,8 @@ In order to run the app locally, you will need to add some additional variables 
 
 `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
 
+`NEXT_PUBLIC_GITHUB_APP_LINK=https://github.com/apps/playfetch-local/installations/new`
+
 - **To use Email authentication:**
 
 `NOREPLY_EMAIL_USER=no-reply@yello.xyz`
