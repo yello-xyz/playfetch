@@ -1,99 +1,119 @@
-import { LabelForProvider } from '@/src/common/providerMetadata'
-import { AvailableProvider, IsModelProvider } from '@/types'
+import { AvailableProvider, AvailableSourceControlProvider } from '@/types'
 import { useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Button from '../button'
 import TextInput from '../textInput'
 import { ProviderRow } from './providerSettings'
+import { useSourceControlProvider } from '@/src/client/context/providerContext'
+import Link from 'next/link'
+import { UserSettingsRoute } from '@/src/common/clientRoute'
+import DropdownMenu from '../dropdownMenu'
+import { TryParseJSON } from '@/src/common/formatting'
 
 export default function GitHubProviderRow({
   scope,
   scopeID,
-  availableProvider,
+  provider,
   onRefresh,
 }: {
   scope: 'user' | 'project'
   scopeID: number
-  availableProvider?: AvailableProvider
+  provider?: AvailableProvider
   onRefresh: () => void
 }) {
-  const previousEnvironment =
-    availableProvider && !IsModelProvider(availableProvider) ? availableProvider.environment : undefined
+  const scopedProvider = provider as AvailableSourceControlProvider | undefined
+  const availableProvider = useSourceControlProvider()
 
-  const [apiKey, setAPIKey] = useState('')
-  const [environment, setEnvironment] = useState(previousEnvironment)
+  const repositories: string[] = TryParseJSON(availableProvider?.environment ?? '') ?? []
+  const scopedPath = scopedProvider?.environment ?? ''
+  const scopedRepository = scopedPath.split('/').slice(0, 2).join('/')
+  const scopedRootDirectory = scopedPath.split('/').slice(2).join('/')
+
+  const [repository, setRepository] = useState(scopedRepository || repositories[0])
+  const [rootDirectory, setRootDirectory] = useState(scopedRootDirectory)
+
   const [isUpdating, setUpdating] = useState(false)
   const [isProcessing, setProcessing] = useState(false)
 
-  const toggleUpdate = (updating: boolean) => {
-    setUpdating(updating)
-    setAPIKey('')
-    setEnvironment(previousEnvironment)
-  }
-
-  const installGithubApp = () => api.installGithubApp().then(link => window.open(link, '_self'))
-
-  const updateKey = async (apiKey: string | null) => {
+  const updateEnvironment = async (environment?: string) => {
     setProcessing(true)
-    await api.updateProviderKey(scopeID, 'github', apiKey, environment).then(onRefresh)
+    await api.updateProviderKey(scopeID, 'github', null, environment).then(onRefresh)
     setProcessing(false)
-    toggleUpdate(false)
+    setUpdating(false)
   }
 
   const setDialogPrompt = useModalDialogPrompt()
-  const removeKey = () => {
+  const resetEnvironment = () => {
     setDialogPrompt({
-      title: `Are you sure you want to unlink your ${LabelForProvider(
-        'github'
-      )} API key? This may affect published endpoints.`,
-      callback: () => updateKey(null),
+      title: `Are you sure you want to reset your GitHub integration?`,
+      callback: () => updateEnvironment(),
       destructive: true,
     })
   }
 
-  const isProviderAvailable = availableProvider && !isUpdating
+  const installGithubApp = () => api.installGithubApp().then(link => window.open(link, '_self'))
+
+  const isProviderAvailable = scopedProvider && !isUpdating
   const isProjectScope = scope === 'project'
 
-  return (
+  return !isProjectScope || availableProvider ? (
     <ProviderRow
       provider='github'
-      flexLayout={(availableProvider && isProjectScope) || isUpdating ? 'flex-col' : 'justify-between'}>
+      flexLayout={(scopedProvider && isProjectScope) || isUpdating ? 'flex-col' : 'justify-between'}>
       {isProjectScope ? (
         <div className='flex items-center gap-2.5'>
-          {isProviderAvailable && <>{previousEnvironment && <TextInput disabled value={previousEnvironment} />}</>}
+          {isProviderAvailable && <TextInput disabled value={scopedPath} />}
           {isUpdating && (
-            <TextInput
-              disabled={isProcessing}
-              value={environment ?? ''}
-              setValue={setEnvironment}
-              placeholder='Environment'
-            />
+            <>
+              <DropdownMenu value={repository} onChange={setRepository}>
+                {repositories.map((repo, index) => (
+                  <option key={index} value={repo}>
+                    {repo}
+                  </option>
+                ))}
+              </DropdownMenu>
+              {'/'}
+              <TextInput
+                disabled={isProcessing}
+                value={rootDirectory}
+                setValue={setRootDirectory}
+                placeholder='root directory'
+              />
+            </>
           )}
           <div className='flex gap-2.5 justify-end grow cursor-pointer'>
-            {isUpdating && (
+            {isUpdating ? (
               <Button
                 type='primary'
-                disabled={!apiKey.length || !environment?.length || isProcessing}
-                onClick={() => updateKey(apiKey)}>
-                {availableProvider ? 'Update' : 'Add'}
+                disabled={isProcessing}
+                onClick={() => updateEnvironment(`${repository}/${rootDirectory}`)}>
+                Confirm
               </Button>
-            )}
-            <Button type='outline' onClick={() => toggleUpdate(!isUpdating)}>
-              {availableProvider ? 'Configure' : 'Update'}
-            </Button>
-            {isProviderAvailable && (
-              <Button type='destructive' disabled={isProcessing} onClick={removeKey}>
-                Remove
+            ) : scopedProvider ? (
+              <Button type='destructive' disabled={isProcessing} onClick={resetEnvironment}>
+                Reset
+              </Button>
+            ) : (
+              <Button type='outline' onClick={() => setUpdating(!isUpdating)}>
+                Configure
               </Button>
             )}
           </div>
         </div>
       ) : (
         <Button type='outline' onClick={installGithubApp}>
-          {availableProvider ? 'Refresh' : 'Install'}
+          {scopedProvider ? 'Refresh' : 'Install'}
         </Button>
       )}
     </ProviderRow>
+  ) : (
+    <div>
+      Start by installing the GitHub App in your{' '}
+      <Link href={UserSettingsRoute('sourceControl')} className='underline'>
+        Account Settings
+      </Link>
+      .
+    </div>
   )
 }

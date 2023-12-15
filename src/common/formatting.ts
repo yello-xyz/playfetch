@@ -116,7 +116,7 @@ export const ExtractCodeInterrupts = (text: string) => [
   ]),
 ]
 
-const TryParseJSON = (text: string) => {
+export const TryParseJSON = (text: string) => {
   try {
     return JSON.parse(text)
   } catch {

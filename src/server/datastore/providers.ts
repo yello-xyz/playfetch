@@ -117,6 +117,9 @@ export async function saveProviderKey(
   environment: string | undefined
 ) {
   await ensureScopeOwnership(userID, scopeID)
+  if (provider === 'github' && scopeID !== userID && apiKey === null && environment !== undefined) {
+    apiKey = (await getProviderCredentials([userID], provider)).apiKey
+  }
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   const encryptedAPIKey = apiKey ? encrypt(apiKey) : null

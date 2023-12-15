@@ -1,5 +1,5 @@
 import { DefaultProvider } from '@/src/common/defaultConfig'
-import { ModelProviders, QueryProviders, SourceControlProviders } from '@/src/common/providerMetadata'
+import { ModelProviders, QueryProviders } from '@/src/common/providerMetadata'
 import ProviderSettings from './providerSettings'
 import { AvailableProvider, CostUsage, IsModelProvider } from '@/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -186,7 +186,7 @@ export default function SettingsView({
             <GitHubProviderRow
               scope={scope}
               scopeID={scopeID}
-              availableProvider={providers.find(provider => (provider.provider === 'github'))}
+              provider={providers.find(provider => (provider.provider === 'github'))}
               onRefresh={refresh}
             />
           )}
