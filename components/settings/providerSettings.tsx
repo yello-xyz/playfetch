@@ -14,14 +14,12 @@ export default function ProviderSettings({
   providers,
   availableProviders,
   includeEnvironment,
-  excludeApiKey,
   onRefresh,
 }: {
   scopeID: number
-  providers: ModelProvider[] | QueryProvider[] | SourceControlProvider[]
+  providers: ModelProvider[] | QueryProvider[]
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
-  excludeApiKey?: boolean
   onRefresh: () => void
 }) {
   return (
@@ -34,7 +32,6 @@ export default function ProviderSettings({
           availableProvider={availableProviders.find(p => p.provider === provider)}
           availableProviders={availableProviders}
           includeEnvironment={includeEnvironment}
-          excludeApiKey={excludeApiKey}
           onRefresh={onRefresh}
         />
       ))}
@@ -48,15 +45,13 @@ function DefaultProviderRow({
   availableProvider,
   availableProviders,
   includeEnvironment,
-  excludeApiKey,
   onRefresh,
 }: {
   scopeID: number
-  provider: ModelProvider | QueryProvider | SourceControlProvider
+  provider: ModelProvider | QueryProvider
   availableProvider?: AvailableProvider
   availableProviders: AvailableProvider[]
   includeEnvironment?: boolean
-  excludeApiKey?: boolean
   onRefresh: () => void
 }) {
   const label = LabelForProvider(provider)
@@ -73,8 +68,6 @@ function DefaultProviderRow({
     setAPIKey('')
     setEnvironment(previousEnvironment)
   }
-
-  const installGithubApp = () => api.getGithubAppInstallLink(scopeID).then(link => window.open(link, '_self'))
 
   const updateKey = async (apiKey: string | null) => {
     setProcessing(true)
@@ -99,11 +92,11 @@ function DefaultProviderRow({
       <div className='flex items-center gap-2.5'>
         {isProviderAvailable && (
           <>
-            {!excludeApiKey && <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />}
+            <TextInput disabled value={Array.from({ length: 48 }, _ => '•').join('')} />
             {includeEnvironment && previousEnvironment && <TextInput disabled value={previousEnvironment} />}
           </>
         )}
-        {isUpdating && !excludeApiKey && (
+        {isUpdating && (
           <>
             <TextInput disabled={isProcessing} value={apiKey} setValue={setAPIKey} placeholder={`${label} API Key`} />
             {includeEnvironment && (
@@ -125,15 +118,9 @@ function DefaultProviderRow({
               {availableProvider ? 'Update' : 'Add'}
             </Button>
           )}
-          {excludeApiKey ? (
-            <Button type='outline' onClick={installGithubApp}>
-              {availableProvider ? 'Reinstall' : 'Install'}
-            </Button>
-          ) : (
-            <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>
-              {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
-            </Button>
-          )}
+          <Button type='outline' disabled={isProcessing} onClick={() => toggleUpdate(!isUpdating)}>
+            {isUpdating ? 'Cancel' : availableProvider ? 'Update' : 'Configure'}
+          </Button>
           {isProviderAvailable && (
             <Button type='destructive' disabled={isProcessing} onClick={removeKey}>
               Remove
@@ -141,7 +128,7 @@ function DefaultProviderRow({
           )}
         </div>
       </div>
-      {isUpdating && !excludeApiKey && <span>Your key will be encrypted using AES 256 and stored securely.</span>}
+      {isUpdating && <span>Your key will be encrypted using AES 256 and stored securely.</span>}
       <CustomModelSettings
         scopeID={scopeID}
         provider={provider}

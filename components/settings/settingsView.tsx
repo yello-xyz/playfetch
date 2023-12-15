@@ -13,6 +13,7 @@ import { Capitalize } from '@/src/common/formatting'
 import { useActiveProject } from '@/src/client/context/projectContext'
 import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
+import GitHubProviderRow from './githubProviderRow'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
@@ -133,10 +134,6 @@ export default function SettingsView({
   const availableQueryProviders = providers.filter(
     provider => !IsModelProvider(provider) && (QueryProviders as string[]).includes(provider.provider)
   )
-  const availableSourceControlProviders = providers.filter(
-    provider => !IsModelProvider(provider) && (SourceControlProviders as string[]).includes(provider.provider)
-  )
-
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
   const availablePanes = [
     ProvidersPane,
@@ -145,7 +142,7 @@ export default function SettingsView({
     ConnectorsPane,
     SourceControlPane,
   ]
-
+  
   return !isProjectScope || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
       <SettingsSidebar
@@ -186,12 +183,10 @@ export default function SettingsView({
             />
           )}
           {activePane === SourceControlPane && (
-            <ProviderSettings
+            <GitHubProviderRow
+              scope={scope}
               scopeID={scopeID}
-              providers={SourceControlProviders}
-              availableProviders={availableSourceControlProviders}
-              includeEnvironment
-              excludeApiKey
+              availableProvider={providers.find(provider => (provider.provider === 'github'))}
               onRefresh={refresh}
             />
           )}
