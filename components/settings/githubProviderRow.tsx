@@ -32,7 +32,7 @@ export default function GitHubProviderRow({
     setEnvironment(previousEnvironment)
   }
 
-  const installGithubApp = () => api.getGithubAppInstallLink(scopeID).then(link => window.open(link, '_self'))
+  const installGithubApp = () => api.installGithubApp().then(link => window.open(link, '_self'))
 
   const updateKey = async (apiKey: string | null) => {
     setProcessing(true)
@@ -79,8 +79,8 @@ export default function GitHubProviderRow({
                 {availableProvider ? 'Update' : 'Add'}
               </Button>
             )}
-            <Button type='outline' onClick={installGithubApp}>
-              {availableProvider ? 'Reinstall' : 'Install'}
+            <Button type='outline' onClick={() => toggleUpdate(!isUpdating)}>
+              {availableProvider ? 'Configure' : 'Update'}
             </Button>
             {isProviderAvailable && (
               <Button type='destructive' disabled={isProcessing} onClick={removeKey}>
@@ -91,7 +91,7 @@ export default function GitHubProviderRow({
         </div>
       ) : (
         <Button type='outline' onClick={installGithubApp}>
-          {availableProvider ? 'Reinstall' : 'Install'}
+          {availableProvider ? 'Refresh' : 'Install'}
         </Button>
       )}
     </ProviderRow>

@@ -1,5 +1,5 @@
-import { ProjectSettingsRoute } from '@/src/common/clientRoute'
-import { getProviderCredentials, saveProviderKey } from '@/src/server/datastore/providers'
+import { UserSettingsRoute } from '@/src/common/clientRoute'
+import { saveProviderKey } from '@/src/server/datastore/providers'
 import { withLoggedInUserRoute } from '@/src/server/session'
 import { User } from '@/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -20,22 +20,18 @@ async function github(req: NextApiRequest, res: NextApiResponse, user: User) {
 
   const installationID = Number(installation_id)
 
-  const { environment } = await getProviderCredentials([user.id], 'github')
-  const projectID = Number(environment)
-
   const octokit = new Octokit({ auth: response.access_token })
   const userInstallations = await octokit.request('GET /user/installations')
 
-  if (projectID && userInstallations.data.installations.some(installation => installation.id === installationID)) {
+  if (userInstallations.data.installations.some(installation => installation.id === installationID)) {
     const installationRepos = await octokit.request('GET /user/installations/{installation_id}/repositories', {
       installation_id: installationID,
     })
     const repositories = installationRepos.data.repositories.map(repository => repository.full_name)
-    await saveProviderKey(user.id, projectID, 'github', installationID.toString(), JSON.stringify(repositories))
-    res.redirect(ProjectSettingsRoute(projectID, 'sourceControl'))
-  } else {
-    res.redirect('/')
+    await saveProviderKey(user.id, user.id, 'github', installationID.toString(), JSON.stringify(repositories))
   }
+
+  res.redirect(UserSettingsRoute('sourceControl'))
 }
 
 export default withLoggedInUserRoute(github)

@@ -295,8 +295,8 @@ const api = {
   ) {
     return post(this.updateProviderKey, { scopeID, provider, apiKey, environment })
   },
-  getGithubAppInstallLink: function (projectID: number) {
-    return post(this.getGithubAppInstallLink, { projectID })
+  installGithubApp: function () {
+    return post(this.installGithubApp)
   },
   updateProviderModel: function (
     scopeID: number,
