@@ -141,7 +141,9 @@ export default function SettingsView({
   const availablePanes = [
     ProvidersPane,
     UsagePane,
-    ...(isProjectScope ? [TeamPane, ConnectorsPane, SourceControlPane] : [ConnectorsPane]),
+    ...(isProjectScope ? [TeamPane] : []),
+    ConnectorsPane,
+    SourceControlPane,
   ]
 
   return !isProjectScope || activeProject.isOwner ? (
