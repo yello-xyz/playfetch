@@ -1,7 +1,7 @@
 import Label from '../label'
 import { IconForProvider, LabelForProvider } from '@/src/common/providerMetadata'
 import { AvailableProvider, IsModelProvider, ModelProvider, QueryProvider, SourceControlProvider } from '@/types'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import api from '@/src/client/api'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import Icon from '../icon'
@@ -27,7 +27,7 @@ export default function ProviderSettings({
   return (
     <>
       {providers.map((provider, index) => (
-        <ProviderRow
+        <DefaultProviderRow
           key={index}
           scopeID={scopeID}
           provider={provider}
@@ -42,7 +42,7 @@ export default function ProviderSettings({
   )
 }
 
-function ProviderRow({
+function DefaultProviderRow({
   scopeID,
   provider,
   availableProvider,
@@ -93,14 +93,9 @@ function ProviderRow({
   }
 
   const isProviderAvailable = availableProvider && !isUpdating
-  const flexLayout = availableProvider || isUpdating ? 'flex-col' : 'justify-between'
 
   return (
-    <div className={`flex ${flexLayout} gap-2 p-3 bg-white border border-gray-200 rounded-lg`}>
-      <div className='flex items-center gap-1'>
-        <Icon icon={IconForProvider(provider)} />
-        <Label className='w-40'>{label}</Label>
-      </div>
+    <ProviderRow provider={provider} flexLayout={availableProvider || isUpdating ? 'flex-col' : 'justify-between'}>
       <div className='flex items-center gap-2.5'>
         {isProviderAvailable && (
           <>
@@ -153,6 +148,28 @@ function ProviderRow({
         availableProviders={availableProviders}
         onRefresh={onRefresh}
       />
+    </ProviderRow>
+  )
+}
+
+export function ProviderRow({
+  provider,
+  flexLayout = 'justify-between',
+  children,
+}: {
+  provider: ModelProvider | QueryProvider | SourceControlProvider
+  flexLayout?: string
+  children?: ReactNode
+}) {
+  const label = LabelForProvider(provider)
+
+  return (
+    <div className={`flex ${flexLayout} gap-2 p-3 bg-white border border-gray-200 rounded-lg`}>
+      <div className='flex items-center gap-1'>
+        <Icon icon={IconForProvider(provider)} />
+        <Label className='w-40'>{label}</Label>
+      </div>
+      {children}
     </div>
   )
 }
