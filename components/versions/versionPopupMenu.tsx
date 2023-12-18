@@ -69,7 +69,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
       confirmTitle='Export'
       label='Name'
       initialName={(activeItem as ActivePrompt).sourcePath ?? `${activeItem.name}.yaml`}
-      onConfirm={fileName => api.exportPrompt(projectID!, version.id, fileName)}
+      onConfirm={fileName => api.exportPrompt(projectID!, version.id, fileName).then(_ => refreshActiveItem())}
       onDismiss={() => setShowPickNamePrompt(false)}
     />
   ) : (

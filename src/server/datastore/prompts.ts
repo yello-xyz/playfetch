@@ -215,6 +215,11 @@ export async function getExportablePromptsFromProject(projectID: number) {
   return exportablePrompts
 }
 
+export async function updatePromptSourcePath(promptID: number, sourcePath: string) {
+  const promptData = await getPromptData(promptID)
+  await updatePrompt({ ...promptData, sourcePath }, false)
+}
+
 async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(

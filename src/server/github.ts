@@ -1,7 +1,7 @@
 import { App } from 'octokit'
 import { deserializePromptVersion, serializePromptVersion } from './serialize'
 import { getProviderCredentials } from './datastore/providers'
-import { getExportablePromptsFromProject, importPromptToProject } from './datastore/prompts'
+import { getExportablePromptsFromProject, importPromptToProject, updatePromptSourcePath } from './datastore/prompts'
 import { ensureProjectAccess } from './datastore/projects'
 import { PromptVersionsAreEqual } from '../common/versionsEqual'
 import { getTrustedVersion } from './datastore/versions'
@@ -63,6 +63,7 @@ export async function exportPromptsFromProject(
   if (versionID && fileName) {
     const version = (await getTrustedVersion(versionID)) as RawPromptVersion
     exportablePrompts = [{ prompts: version.prompts, config: version.config, sourcePath: fileName }]
+    await updatePromptSourcePath(version.parentID, fileName)
   } else {
     exportablePrompts = await getExportablePromptsFromProject(projectID)
   }
