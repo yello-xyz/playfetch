@@ -11,6 +11,7 @@ import {
   getFilteredEntity,
   getID,
   getKeyedEntity,
+  getLastEntity,
   getOrderedEntities,
 } from './datastore'
 import {
@@ -190,11 +191,28 @@ export async function importPromptToProject(
 }
 
 export async function getExportablePromptsFromProject(projectID: number) {
+  const exportablePrompts: { sourcePath: string; prompts: Prompts; config: PromptConfig }[] = []
+
   const sourcePathPrompts = await getFilteredEntities(
     Entity.PROMPT,
     and([buildFilter('projectID', projectID), new PropertyFilter('sourcePath', '!=', null)])
   )
-  return sourcePathPrompts.map(promptData => promptData.sourcePath)
+  for (const promptData of sourcePathPrompts) {
+    const lastRunVersion = await getLastEntity(
+      Entity.VERSION,
+      and([buildFilter('parentID', getID(promptData)), buildFilter('didRun', true)])
+    )
+    if (lastRunVersion) {
+      const promptVersion = toUserVersions(0, [lastRunVersion], [])[0] as RawPromptVersion
+      exportablePrompts.push({
+        sourcePath: promptData.sourcePath,
+        prompts: promptVersion.prompts,
+        config: promptVersion.config,
+      })
+    }
+  }
+
+  return exportablePrompts
 }
 
 async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {

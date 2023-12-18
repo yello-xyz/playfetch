@@ -85,10 +85,10 @@ const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = 
   since && before
     ? and([afterDateFilter(since, key, !pagingBackwards), beforeDateFilter(before, key, pagingBackwards)])
     : since
-      ? afterDateFilter(since, key, !pagingBackwards)
-      : before
-        ? beforeDateFilter(before, key, pagingBackwards)
-        : undefined
+    ? afterDateFilter(since, key, !pagingBackwards)
+    : before
+    ? beforeDateFilter(before, key, pagingBackwards)
+    : undefined
 
 export const getRecentEntities = (
   type: string,
@@ -127,8 +127,11 @@ export const getFilteredOrderedEntities = (
 export const getOrderedEntities = (type: string, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
   getFilteredOrderedEntities(type, buildFilter(key, value), sortKeys, limit)
 
-export const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
-  getInternalEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
+export const getLastEntity = (type: string, filter: EntityFilter) =>
+  getFilteredOrderedEntities(type, filter, ['createdAt'], 1).then(([entity]) => entity)
+
+export const getEntity = async (type: string, key: string, value: {}) =>
+  getInternalEntities(type, key, value, 1, []).then(([entity]) => entity)
 
 const getFilteredEntityKeys = (type: string, filter: EntityFilter, limit?: number, transaction?: Transaction) =>
   getInternalFilteredEntities(type, filter, limit, [], ['__key__'], transaction).then(entities => entities.map(getKey))

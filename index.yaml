@@ -41,6 +41,13 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: version
+  properties:
+  - name: parentID
+  - name: didRun
+  - name: createdAt
+    direction: desc
+
 - kind: run
   properties:
   - name: parentID
