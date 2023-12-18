@@ -95,6 +95,8 @@ const getVerifiedUserVersionData = async (userID: number, versionID: number) => 
   return versionData
 }
 
+export const markVersionAsRun = (versionID: number) => getTrustedVersion(versionID, true)
+
 export async function getTrustedVersion(versionID: number, markAsRun = false) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
   if (markAsRun && !versionData.didRun) {

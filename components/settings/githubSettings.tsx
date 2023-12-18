@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { UserSettingsRoute } from '@/src/common/clientRoute'
 import DropdownMenu from '../dropdownMenu'
 import { TryParseJSON } from '@/src/common/formatting'
-import { useRefreshProject } from '@/src/client/context/projectContext'
+import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
 
 export default function GitHubSettings({
   scope,
@@ -61,6 +61,12 @@ export default function GitHubSettings({
   const importPrompts = async () => {
     setProcessing(true)
     await api.importPrompts(scopeID).then(refreshProject)
+    setProcessing(false)
+  }
+
+  const exportPrompts = async () => {
+    setProcessing(true)
+    await api.exportPrompts(scopeID)
     setProcessing(false)
   }
 
@@ -128,9 +134,14 @@ export default function GitHubSettings({
         </div>
       )}
       {isProjectScope && scopedProvider && (
-        <Button type='outline' disabled={isProcessing} onClick={importPrompts}>
-          Import Prompts
-        </Button>
+        <div className='flex items-center gap-2'>
+          <Button type='outline' disabled={isProcessing} onClick={importPrompts}>
+            Import Prompts
+          </Button>
+          <Button type='outline' disabled={isProcessing} onClick={exportPrompts}>
+            Export Prompts
+          </Button>
+        </div>
       )}
     </>
   )

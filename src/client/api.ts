@@ -298,6 +298,9 @@ const api = {
   importPrompts: function (projectID: number) {
     return post(this.importPrompts, { projectID })
   },
+  exportPrompts: function (projectID: number) {
+    return post(this.exportPrompts, { projectID })
+  },
   updateProviderModel: function (
     scopeID: number,
     provider: ModelProvider,

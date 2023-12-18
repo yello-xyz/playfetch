@@ -7,6 +7,7 @@ import {
   getEntities,
   getEntityKey,
   getEntityKeys,
+  getFilteredEntities,
   getFilteredEntity,
   getID,
   getKeyedEntity,
@@ -14,8 +15,8 @@ import {
 } from './datastore'
 import {
   addInitialVersion,
-  getTrustedVersion,
   isPromptVersionDataCompatible,
+  markVersionAsRun,
   savePromptVersionForUser,
   toUserVersions,
 } from './versions'
@@ -25,7 +26,7 @@ import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
-import { and } from '@google-cloud/datastore'
+import { PropertyFilter, and } from '@google-cloud/datastore'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -184,7 +185,15 @@ export async function importPromptToProject(
     const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptName, sourcePath)
     newVersionID = await savePromptVersionForUser(userID, newPromptID, prompts, config, versionID)
   }
-  await getTrustedVersion(newVersionID, true)
+  await markVersionAsRun(newVersionID)
+}
+
+export async function getExportablePromptsFromProject(projectID: number) {
+  const sourcePathPrompts = await getFilteredEntities(
+    Entity.PROMPT,
+    and([buildFilter('projectID', projectID), new PropertyFilter('sourcePath', '!=', null)])
+  )
+  return sourcePathPrompts.map(promptData => promptData.sourcePath)
 }
 
 async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
