@@ -8,6 +8,8 @@ import GlobalPopupMenu from '../globalPopupMenu'
 import { useRouter } from 'next/router'
 import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/common/clientRoute'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { useState } from 'react'
+import PickNameDialog from '../pickNameDialog'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
@@ -21,6 +23,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   const refreshActiveItem = useRefreshActiveItem()
 
   const setDialogPrompt = useModalDialogPrompt()
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const chainReference = IsPromptVersion(version) ? version.usedInChain : null
 
@@ -53,17 +56,25 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
       ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
       : undefined
-  // TODO allow to specify file name (starting from existing source path if defined)
-  const exportVersion = IsPromptVersion(version)
-    ? () => api.exportPrompt(projectID!, version.id, 'test.yaml')
-    : undefined
+  const exportVersion = IsPromptVersion(version) ? () => setShowPickNamePrompt(true) : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [
     VersionPopup,
     { deleteVersion, createEndpoint, compareVersion, exportVersion, suggestImprovement },
   ]
 
-  return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
+  return showPickNamePrompt ? (
+    <PickNameDialog
+      title='Pick File Name'
+      confirmTitle='Export'
+      label='Name'
+      initialName={(activeItem as ActivePrompt).sourcePath ?? `${activeItem.name}.yaml`}
+      onConfirm={fileName => api.exportPrompt(projectID!, version.id, fileName)}
+      onDismiss={() => setShowPickNamePrompt(false)}
+    />
+  ) : (
+    <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
+  )
 }
 
 type VersionPopupProps = {
