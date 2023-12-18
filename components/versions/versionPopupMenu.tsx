@@ -53,10 +53,14 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
       ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
       : undefined
+  // TODO allow to specify file name (starting from existing source path if defined)
+  const exportVersion = IsPromptVersion(version)
+    ? () => api.exportPrompt(projectID!, version.id, 'test.yaml')
+    : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [
     VersionPopup,
-    { deleteVersion, createEndpoint, compareVersion, suggestImprovement },
+    { deleteVersion, createEndpoint, compareVersion, exportVersion, suggestImprovement },
   ]
 
   return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
@@ -66,6 +70,7 @@ type VersionPopupProps = {
   deleteVersion: () => void
   createEndpoint: () => void
   compareVersion?: () => void
+  exportVersion?: () => void
   suggestImprovement?: () => void
 }
 
@@ -73,6 +78,7 @@ function VersionPopup({
   deleteVersion,
   createEndpoint,
   compareVersion,
+  exportVersion,
   suggestImprovement,
   withDismiss,
 }: VersionPopupProps & WithDismiss) {
@@ -80,6 +86,7 @@ function VersionPopup({
     <PopupContent className='w-44'>
       {compareVersion && <PopupMenuItem title='Compare' callback={withDismiss(compareVersion)} first />}
       <PopupMenuItem title='Create Endpoint' callback={withDismiss(createEndpoint)} first={!compareVersion} />
+      {exportVersion && <PopupMenuItem title='Export' callback={withDismiss(exportVersion)} />}
       {suggestImprovement && <PopupMenuItem title='Suggest Improvement' callback={withDismiss(suggestImprovement)} />}
       <PopupMenuItem destructive title='Delete' callback={withDismiss(deleteVersion)} last />
     </PopupContent>

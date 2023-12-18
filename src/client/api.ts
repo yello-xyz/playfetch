@@ -301,6 +301,9 @@ const api = {
   exportPrompts: function (projectID: number) {
     return post(this.exportPrompts, { projectID })
   },
+  exportPrompt: function (projectID: number, versionID: number, fileName: string) {
+    return post(this.exportPrompts, { projectID, versionID, fileName })
+  },
   updateProviderModel: function (
     scopeID: number,
     provider: ModelProvider,
