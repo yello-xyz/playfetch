@@ -1,8 +1,9 @@
 import { App } from 'octokit'
-import { deserializePromptVersion } from './serialize'
+import { deserializePromptVersion, serializePromptVersion } from './serialize'
 import { getProviderCredentials } from './datastore/providers'
 import { getExportablePromptsFromProject, importPromptToProject } from './datastore/prompts'
 import { ensureProjectAccess } from './datastore/projects'
+import { PromptVersionsAreEqual } from '../common/versionsEqual'
 
 const isYamlFile = (file: any) => file.type === 'file' && (file.name.endsWith('.yaml') || file.name.endsWith('.yml'))
 
@@ -43,8 +44,31 @@ export default async function importPromptsToProject(userID: number, projectID: 
 }
 
 export async function exportPromptsFromProject(userID: number, projectID: number) {
-  const { app, owner, repo, path } = await loadGitHubConfigForProject(userID, projectID)
+  const { app, owner, repo } = await loadGitHubConfigForProject(userID, projectID)
 
-  const versions = await getExportablePromptsFromProject(projectID)
-  console.log(versions)
+  const exportablePrompts = await getExportablePromptsFromProject(projectID)
+
+  for (const exportablePrompt of exportablePrompts) {
+    const contents = await app.request('GET /repos/{owner}/{repo}/contents/{path}', {
+      owner,
+      repo,
+      path: exportablePrompt.sourcePath,
+    })
+    if (!Array.isArray(contents.data) && contents.data.type === 'file') {
+      const promptContents = Buffer.from(contents.data.content, 'base64').toString('utf8')
+      const promptVersion = deserializePromptVersion(promptContents)
+      if (!PromptVersionsAreEqual(promptVersion, exportablePrompt)) {
+        const content = Buffer.from(serializePromptVersion(exportablePrompt)).toString('base64')
+        await app.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+          owner,
+          repo,
+          path: exportablePrompt.sourcePath,
+          sha: contents.data.sha,
+          message: 'Export prompts',
+          committer: { name: 'PlayFetch', email: 'github@playfetch.ai' },
+          content,
+        })
+      }
+    }
+  }
 }
