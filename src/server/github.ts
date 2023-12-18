@@ -1,8 +1,9 @@
 import { App } from 'octokit'
 import { deserializePromptVersion } from './serialize'
 import { getProviderCredentials } from './datastore/providers'
-import { addPromptForUser } from './datastore/prompts'
+import { addPromptForUser, importPromptToTrustedProject } from './datastore/prompts'
 import { savePromptVersionForUser } from './datastore/versions'
+import { ensureProjectAccess } from './datastore/projects'
 
 const isYamlFile = (file: any) => file.type === 'file' && (file.name.endsWith('.yaml') || file.name.endsWith('.yml'))
 
@@ -13,6 +14,8 @@ const getAppInstallation = (installationID: string | null) =>
   }).getInstallationOctokit(Number(installationID))
 
 export default async function importPromptsToProject(userID: number, projectID: number) {
+  await ensureProjectAccess(userID, projectID)
+
   const { apiKey: installationID, environment } = await getProviderCredentials([projectID], 'github')
 
   const pathSegments = (environment ?? '').split('/')
@@ -33,9 +36,7 @@ export default async function importPromptsToProject(userID: number, projectID: 
     if (!Array.isArray(contents.data) && contents.data.type === 'file') {
       const promptContents = Buffer.from(contents.data.content, 'base64').toString('utf8')
       const promptVersion = deserializePromptVersion(promptContents)
-
-      const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, file.name.split('.')[0])
-      await savePromptVersionForUser(userID, newPromptID, promptVersion.prompts, promptVersion.config, versionID)
+      await importPromptToTrustedProject(userID, projectID, file.path, promptVersion.prompts, promptVersion.config)
     }
   }
 }

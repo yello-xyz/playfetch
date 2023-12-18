@@ -26,7 +26,7 @@ import {
   revokeUserAccess,
   getAccessibleObjectIDs,
 } from './access'
-import { addPromptToProject, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addPromptToTrustedProject, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
@@ -163,7 +163,7 @@ export async function addProjectForUser(
     undefined,
     projectID
   )
-  const [promptData, versionData] = await addPromptToProject(userID, projectID)
+  const [promptData, versionData] = await addPromptToTrustedProject(userID, projectID)
   await getDatastore().save([projectData, promptData, versionData])
   await grantUserAccess(userID, userID, projectID, 'project', 'owner', createdAt)
   return projectID

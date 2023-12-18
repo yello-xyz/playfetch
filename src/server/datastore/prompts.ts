@@ -11,7 +11,7 @@ import {
   getOrderedEntities,
 } from './datastore'
 import { addInitialVersion, savePromptVersionForUser, toUserVersions } from './versions'
-import { InputValues, Prompt, RawPromptVersion } from '@/types'
+import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
@@ -35,7 +35,7 @@ const toPromptData = (
   createdAt: Date,
   lastEditedAt: Date,
   sourcePath: string | undefined,
-  promptID: number,
+  promptID: number
 ) => ({
   key: buildKey(Entity.PROMPT, promptID),
   data: { projectID, name, createdAt, lastEditedAt, sourcePath },
@@ -105,13 +105,13 @@ export async function addPromptForUser(userID: number, projectID: number, name =
     name,
     promptNames.map(prompt => prompt.name)
   )
-  const [promptData, versionData] = await addPromptToProject(userID, projectID, uniqueName)
+  const [promptData, versionData] = await addPromptToTrustedProject(userID, projectID, uniqueName)
   await getDatastore().save([promptData, versionData])
   updateProjectLastEditedAt(projectID)
   return { promptID: getID(promptData), versionID: getID(versionData) }
 }
 
-export async function addPromptToProject(userID: number, projectID: number, name = DefaultPromptName) {
+export async function addPromptToTrustedProject(userID: number, projectID: number, name = DefaultPromptName) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addInitialVersion(userID, promptID, false)
@@ -134,6 +134,19 @@ export async function duplicatePromptForUser(
   const lastUserVersion = toUserVersions(userID, versions, []).slice(-1)[0] as RawPromptVersion
   await savePromptVersionForUser(userID, newPromptID, lastUserVersion.prompts, lastUserVersion.config, versionID)
   return newPromptID
+}
+
+export async function importPromptToTrustedProject(
+  userID: number,
+  projectID: number,
+  sourcePath: string,
+  prompts: Prompts,
+  config: PromptConfig
+) {
+  const fileName = sourcePath.split('/').slice(-1)[0]
+  const promptName = fileName.split('.')[0]
+  const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptName)
+  await savePromptVersionForUser(userID, newPromptID, prompts, config, versionID)
 }
 
 async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
