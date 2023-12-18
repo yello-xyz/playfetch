@@ -53,8 +53,6 @@ export default function GitHubSettings({
     })
   }
 
-  const installApp = () => api.installGithubApp().then(link => window.open(link, '_self'))
-
   const isProviderAvailable = scopedProvider && !isUpdating
   const isProjectScope = scope === 'project'
 
@@ -113,9 +111,11 @@ export default function GitHubSettings({
               </div>
             </div>
           ) : (
-            <Button type='outline' onClick={installApp}>
-              {scopedProvider ? 'Refresh' : 'Install'}
-            </Button>
+            <Link href={process.env.NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK ?? ''}>
+              <div className='px-4 py-2 font-medium border border-gray-200 rounded-lg hover:bg-gray-100'>
+                {scopedProvider ? 'Update' : 'Install'}
+              </div>
+            </Link>
           )}
         </ProviderRow>
       ) : (

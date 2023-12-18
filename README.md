@@ -51,7 +51,7 @@ In order to run the app locally, you will need to add some additional variables 
 
 `PLAYFETCH_ENDPOINT_URL=` *[see "PlayFetch API Key" in the 1Password Engineering vault]*
 
-`GITHUB_APP_INSTALL_LINK=https://github.com/apps/playfetch-local/installations/new`
+`NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK=https://github.com/apps/playfetch-local/installations/new`
 
 `GITHUB_APP_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
 

@@ -13,7 +13,7 @@ import { Capitalize } from '@/src/common/formatting'
 import { useActiveProject } from '@/src/client/context/projectContext'
 import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
-import GitHubSettings from './githubProviderRow'
+import GitHubSettings from './githubSettings'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
@@ -142,7 +142,7 @@ export default function SettingsView({
     ConnectorsPane,
     ...(user.isAdmin ? [SourceControlPane] : []),
   ]
-  
+
   return !isProjectScope || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
       <SettingsSidebar
@@ -186,7 +186,7 @@ export default function SettingsView({
             <GitHubSettings
               scope={scope}
               scopeID={scopeID}
-              provider={providers.find(provider => (provider.provider === 'github'))}
+              provider={providers.find(provider => provider.provider === 'github')}
               onRefresh={refresh}
             />
           )}

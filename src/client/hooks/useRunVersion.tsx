@@ -23,7 +23,7 @@ export const ConsumeStream = async (
         const id = index + offset
         const previousOutput = runs[inputIndex][id]?.output ?? ''
         const output = message ? `${previousOutput}${message}` : previousOutput
-        runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }  
+        runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }
       } catch (error) {
         console.error(error, data)
       }
