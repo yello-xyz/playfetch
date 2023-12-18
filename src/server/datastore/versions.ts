@@ -64,6 +64,9 @@ export async function migrateVersions(postMerge: boolean) {
 
 const IsPromptVersion = (version: { items: ChainItemWithInputs[] | string | null }) => !version.items
 
+export const isPromptVersionDataCompatible = (versionData: any, prompts: Prompts, config: PromptConfig) =>
+  isVersionDataCompatible(versionData, prompts, config, null)
+
 const isVersionDataCompatible = (
   versionData: any,
   prompts: Prompts | null,
@@ -74,7 +77,7 @@ const isVersionDataCompatible = (
     ? prompts &&
       config &&
       PromptVersionsAreEqual(
-        { prompts: versionData.prompts, config: JSON.parse(versionData.config) },
+        { prompts: JSON.parse(versionData.prompts), config: JSON.parse(versionData.config) },
         { prompts, config }
       )
     : items && ChainVersionsAreEqual({ items: JSON.parse(versionData.items) }, { items })
