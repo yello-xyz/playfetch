@@ -12,7 +12,7 @@ import DropdownMenu from '../dropdownMenu'
 import { TryParseJSON } from '@/src/common/formatting'
 import { useRefreshProject } from '@/src/client/context/projectContext'
 
-export default function GitHubProviderRow({
+export default function GitHubSettings({
   scope,
   scopeID,
   provider,

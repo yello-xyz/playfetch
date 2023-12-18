@@ -13,7 +13,7 @@ import { Capitalize } from '@/src/common/formatting'
 import { useActiveProject } from '@/src/client/context/projectContext'
 import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
-import GitHubProviderRow from './githubProviderRow'
+import GitHubSettings from './githubProviderRow'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
@@ -183,7 +183,7 @@ export default function SettingsView({
             />
           )}
           {activePane === SourceControlPane && (
-            <GitHubProviderRow
+            <GitHubSettings
               scope={scope}
               scopeID={scopeID}
               provider={providers.find(provider => (provider.provider === 'github'))}
