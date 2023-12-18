@@ -29,9 +29,16 @@ export async function migratePrompts(postMerge: boolean) {
   }
 }
 
-const toPromptData = (projectID: number, name: string, createdAt: Date, lastEditedAt: Date, promptID: number) => ({
+const toPromptData = (
+  projectID: number,
+  name: string,
+  createdAt: Date,
+  lastEditedAt: Date,
+  sourcePath: string | undefined,
+  promptID: number,
+) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, name, createdAt, lastEditedAt },
+  data: { projectID, name, createdAt, lastEditedAt, sourcePath },
   excludeFromIndexes: ['name'],
 })
 
@@ -98,17 +105,17 @@ export async function addPromptForUser(userID: number, projectID: number, name =
     name,
     promptNames.map(prompt => prompt.name)
   )
-  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID, uniqueName)
+  const [promptData, versionData] = await addPromptToProject(userID, projectID, uniqueName)
   await getDatastore().save([promptData, versionData])
   updateProjectLastEditedAt(projectID)
   return { promptID: getID(promptData), versionID: getID(versionData) }
 }
 
-export async function addFirstProjectPrompt(userID: number, projectID: number, name = DefaultPromptName) {
+export async function addPromptToProject(userID: number, projectID: number, name = DefaultPromptName) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addInitialVersion(userID, promptID, false)
-  const promptData = toPromptData(projectID, name, createdAt, createdAt, promptID)
+  const promptData = toPromptData(projectID, name, createdAt, createdAt, undefined, promptID)
   return [promptData, versionData]
 }
 
@@ -136,6 +143,7 @@ async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean)
       promptData.name,
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
+      promptData.sourcePath,
       getID(promptData)
     )
   )
