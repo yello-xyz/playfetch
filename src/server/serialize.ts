@@ -1,7 +1,6 @@
 import { PromptConfig, Prompts } from '@/types'
 import { DefaultPromptConfig, DefaultPrompts } from '@/src/common/defaultConfig'
 import { parse, stringify } from 'yaml'
-import { DefaultConfig } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch'
 
 export const serializePromptVersion = ({
   id,
