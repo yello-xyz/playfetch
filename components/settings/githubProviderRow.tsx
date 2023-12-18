@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { UserSettingsRoute } from '@/src/common/clientRoute'
 import DropdownMenu from '../dropdownMenu'
 import { TryParseJSON } from '@/src/common/formatting'
+import { useRefreshProject } from '@/src/client/context/projectContext'
 
 export default function GitHubProviderRow({
   scope,
@@ -57,9 +58,11 @@ export default function GitHubProviderRow({
   const isProviderAvailable = scopedProvider && !isUpdating
   const isProjectScope = scope === 'project'
 
+  const refreshProject = useRefreshProject()
+
   const importPrompts = async () => {
     setProcessing(true)
-    await api.importPrompts(scopeID).then(onRefresh)
+    await api.importPrompts(scopeID).then(refreshProject)
     setProcessing(false)
   }
 
