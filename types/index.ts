@@ -65,6 +65,7 @@ export type Prompt = {
   id: number
   name: string
   projectID: number
+  sourcePath: string | null
 }
 
 export type ActivePrompt = Prompt & {

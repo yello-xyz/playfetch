@@ -57,6 +57,7 @@ export default function GitHubSettings({
   const isProjectScope = scope === 'project'
 
   const refreshProject = useRefreshProject()
+  const activeProject = useActiveProject()
 
   const importPrompts = async () => {
     setProcessing(true)
@@ -138,7 +139,10 @@ export default function GitHubSettings({
           <Button type='outline' disabled={isProcessing} onClick={importPrompts}>
             Import Prompts
           </Button>
-          <Button type='outline' disabled={isProcessing} onClick={exportPrompts}>
+          <Button
+            type='outline'
+            disabled={isProcessing || !activeProject.prompts.some(prompt => prompt.sourcePath !== null)}
+            onClick={exportPrompts}>
             Export Prompts
           </Button>
         </div>

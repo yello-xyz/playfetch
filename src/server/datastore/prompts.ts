@@ -56,6 +56,7 @@ export const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   projectID: data.projectID,
+  sourcePath: data.sourcePath ?? null,
 })
 
 export async function getPromptForUser(
