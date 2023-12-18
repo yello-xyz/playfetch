@@ -298,6 +298,9 @@ const api = {
   installGithubApp: function () {
     return post(this.installGithubApp)
   },
+  importPrompts: function (projectID: number) {
+    return post(this.importPrompts, { projectID})
+  },
   updateProviderModel: function (
     scopeID: number,
     provider: ModelProvider,
