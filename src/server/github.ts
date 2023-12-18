@@ -38,21 +38,22 @@ export default async function importPromptsToProject(userID: number, projectID: 
     if (!Array.isArray(contents.data) && contents.data.type === 'file') {
       const promptContents = Buffer.from(contents.data.content, 'base64').toString('utf8')
       const promptVersion = deserializePromptVersion(promptContents)
-      await importPromptToProject(userID, projectID, file.path, promptVersion.prompts, promptVersion.config)
+      await importPromptToProject(userID, projectID, file.name, promptVersion.prompts, promptVersion.config)
     }
   }
 }
 
 export async function exportPromptsFromProject(userID: number, projectID: number) {
-  const { app, owner, repo } = await loadGitHubConfigForProject(userID, projectID)
+  const { app, owner, repo, path } = await loadGitHubConfigForProject(userID, projectID)
 
   const exportablePrompts = await getExportablePromptsFromProject(projectID)
 
   for (const exportablePrompt of exportablePrompts) {
+    const filePath = `${path}/${exportablePrompt.sourcePath}`
     const contents = await app.request('GET /repos/{owner}/{repo}/contents/{path}', {
       owner,
       repo,
-      path: exportablePrompt.sourcePath,
+      path: filePath,
     })
     if (!Array.isArray(contents.data) && contents.data.type === 'file') {
       const promptContents = Buffer.from(contents.data.content, 'base64').toString('utf8')
@@ -62,7 +63,7 @@ export async function exportPromptsFromProject(userID: number, projectID: number
         await app.request('PUT /repos/{owner}/{repo}/contents/{path}', {
           owner,
           repo,
-          path: exportablePrompt.sourcePath,
+          path: filePath,
           sha: contents.data.sha,
           message: 'Export prompts',
           committer: { name: 'PlayFetch', email: 'github@playfetch.ai' },
