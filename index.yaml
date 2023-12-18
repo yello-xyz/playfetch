@@ -24,6 +24,11 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: prompt
+  properties:
+  - name: projectID
+  - name: sourcePath
+
 - kind: chain
   properties:
   - name: projectID

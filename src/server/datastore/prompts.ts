@@ -1,22 +1,31 @@
 import {
   Entity,
   allocateID,
+  buildFilter,
   buildKey,
   getDatastore,
   getEntities,
   getEntityKey,
   getEntityKeys,
+  getFilteredEntity,
   getID,
   getKeyedEntity,
   getOrderedEntities,
 } from './datastore'
-import { addInitialVersion, savePromptVersionForUser, toUserVersions } from './versions'
+import {
+  addInitialVersion,
+  getTrustedVersion,
+  isPromptVersionDataCompatible,
+  savePromptVersionForUser,
+  toUserVersions,
+} from './versions'
 import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
+import { and } from '@google-cloud/datastore'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -98,24 +107,34 @@ export const matchesDefaultName = (name: string, defaultName: string) =>
 
 const DefaultPromptName = 'New Prompt'
 
-export async function addPromptForUser(userID: number, projectID: number, name = DefaultPromptName) {
+export async function addPromptForUser(
+  userID: number,
+  projectID: number,
+  name = DefaultPromptName,
+  sourcePath?: string
+) {
   await ensureProjectAccess(userID, projectID)
   const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
   const uniqueName = await getUniqueName(
     name,
     promptNames.map(prompt => prompt.name)
   )
-  const [promptData, versionData] = await addPromptToTrustedProject(userID, projectID, uniqueName)
+  const [promptData, versionData] = await addPromptToProject(userID, projectID, uniqueName, sourcePath)
   await getDatastore().save([promptData, versionData])
   updateProjectLastEditedAt(projectID)
   return { promptID: getID(promptData), versionID: getID(versionData) }
 }
 
-export async function addPromptToTrustedProject(userID: number, projectID: number, name = DefaultPromptName) {
+export async function addPromptToProject(
+  userID: number,
+  projectID: number,
+  name = DefaultPromptName,
+  sourcePath?: string
+) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addInitialVersion(userID, promptID, false)
-  const promptData = toPromptData(projectID, name, createdAt, createdAt, undefined, promptID)
+  const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, promptID)
   return [promptData, versionData]
 }
 
@@ -136,7 +155,7 @@ export async function duplicatePromptForUser(
   return newPromptID
 }
 
-export async function importPromptToTrustedProject(
+export async function importPromptToProject(
   userID: number,
   projectID: number,
   sourcePath: string,
@@ -145,8 +164,27 @@ export async function importPromptToTrustedProject(
 ) {
   const fileName = sourcePath.split('/').slice(-1)[0]
   const promptName = fileName.split('.')[0]
-  const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptName)
-  await savePromptVersionForUser(userID, newPromptID, prompts, config, versionID)
+  const previousPromptData = await getFilteredEntity(
+    Entity.PROMPT,
+    and([buildFilter('projectID', projectID), buildFilter('sourcePath', sourcePath)])
+  )
+  let newVersionID: number
+  if (previousPromptData) {
+    const promptID = getID(previousPromptData)
+    const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
+    const previousVersion = versions.find(versionData => isPromptVersionDataCompatible(versionData, prompts, config))
+    if (previousVersion) {
+      newVersionID = getID(previousVersion)
+    } else {
+      const lastUserVersion = toUserVersions(userID, versions, []).slice(-1)[0] as RawPromptVersion
+      const versionID = lastUserVersion.id
+      newVersionID = await savePromptVersionForUser(userID, promptID, prompts, config, versionID, versionID)
+    }
+  } else {
+    const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptName, sourcePath)
+    newVersionID = await savePromptVersionForUser(userID, newPromptID, prompts, config, versionID)
+  }
+  await getTrustedVersion(newVersionID, true)
 }
 
 async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
