@@ -140,7 +140,7 @@ export default function SettingsView({
     UsagePane,
     ...(isProjectScope ? [TeamPane] : []),
     ConnectorsPane,
-    ...(user.isAdmin ? [SourceControlPane] : []),
+    SourceControlPane,
   ]
 
   return !isProjectScope || activeProject.isOwner ? (
