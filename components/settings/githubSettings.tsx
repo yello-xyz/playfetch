@@ -47,7 +47,7 @@ export default function GitHubSettings({
   const setDialogPrompt = useModalDialogPrompt()
   const resetEnvironment = () => {
     setDialogPrompt({
-      title: `Are you sure you want to reset your GitHub integration?`,
+      title: 'Are you sure you want to reset your GitHub integration?',
       callback: () => updateEnvironment(),
       destructive: true,
     })
@@ -60,15 +60,29 @@ export default function GitHubSettings({
   const activeProject = useActiveProject()
 
   const importPrompts = async () => {
-    setProcessing(true)
-    await api.importPrompts(scopeID).then(refreshProject)
-    setProcessing(false)
+    setDialogPrompt({
+      title: 'Import prompts to project?',
+      content:
+        'This will look for compatible YAML files in the GitHub repository and import them in the project, either as new prompts, or as new versions of previously imported & exported prompts if changes are detected.',
+      callback: async () => {
+        setProcessing(true)
+        await api.importPrompts(scopeID).then(refreshProject)
+        setProcessing(false)
+      },
+    })
   }
 
   const exportPrompts = async () => {
-    setProcessing(true)
-    await api.exportPrompts(scopeID)
-    setProcessing(false)
+    setDialogPrompt({
+      title: 'Export prompts to repository?',
+      content:
+        'This will export the most recent version of any prompts that were previously imported or manually exported through the version menu and modified since.',
+      callback: async () => {
+        setProcessing(true)
+        await api.exportPrompts(scopeID)
+        setProcessing(false)
+      },
+    })
   }
 
   return (
@@ -94,7 +108,7 @@ export default function GitHubSettings({
                     disabled={isProcessing}
                     value={rootDirectory}
                     setValue={setRootDirectory}
-                    placeholder='root directory'
+                    placeholder='path to prompts directory'
                   />
                 </>
               )}
