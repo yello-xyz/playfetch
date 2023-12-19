@@ -10,6 +10,7 @@ import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/common/c
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
+import { useSourceControlProvider } from '@/src/client/context/providerContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
@@ -56,7 +57,9 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
       ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
       : undefined
-  const exportVersion = IsPromptVersion(version) ? () => setShowPickNamePrompt(true) : undefined
+  const availableProvider = useSourceControlProvider()
+  const exportVersion =
+    IsPromptVersion(version) && availableProvider?.scopeID === projectID ? () => setShowPickNamePrompt(true) : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [
     VersionPopup,
