@@ -83,7 +83,7 @@ export async function exportPromptsFromProject(
         path: filePath,
         branch,
         sha: fileHash,
-        message: 'Export prompts',
+        message: `Update ${exportablePrompt.sourcePath}`,
         content,
       })
     }
