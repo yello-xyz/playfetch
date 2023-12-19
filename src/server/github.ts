@@ -73,7 +73,7 @@ export async function exportPromptsFromProject(
   const files = await app.request('GET /repos/{owner}/{repo}/contents/{path}', { owner, repo, path })
 
   for (const exportablePrompt of exportablePrompts) {
-    const filePath = `${path}/${exportablePrompt.sourcePath}`
+    const filePath = path.length > 0 ? `${path}/${exportablePrompt.sourcePath}` : exportablePrompt.sourcePath
     const [promptVersion, fileHash] = await loadPromptVersionForPath(app, owner, repo, filePath, files)
     if (!promptVersion || !PromptVersionsAreEqual(promptVersion, exportablePrompt)) {
       const content = Buffer.from(serializePromptVersion(exportablePrompt)).toString('base64')
