@@ -89,7 +89,7 @@ export default function GitHubSettings({
 
   return (
     <>
-      {!isProjectScope || userProvider ? (
+      {!isProjectScope || availableProvider ? (
         <ProviderRow
           provider='github'
           flexLayout={(scopedProvider && isProjectScope) || isUpdating ? 'flex-col' : 'justify-between'}>
