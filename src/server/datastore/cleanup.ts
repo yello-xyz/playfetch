@@ -20,7 +20,7 @@ const toCleanupData = (entityID: number, entity: Entity, createdAt: Date) => ({
 
 export const deleteEntity = (type: Entity, id: number) => deleteEntities([buildKey(type, id)])
 
-const deleteEntities = async (entityKeys: Key[]) => {
+export const deleteEntities = async (entityKeys: Key[]) => {
   const datastore = getDatastore()
   datastore.save(entityKeys.map(key => toCleanupData(getID({ key }), key.kind as Entity, new Date())))
   await datastore.delete(entityKeys)
@@ -63,6 +63,10 @@ export default async function cleanUpEntities() {
         await cleanUpBatchedEntities(Entity.PROMPT, 'projectID', entityID)
         await cleanUpBatchedEntities(Entity.CHAIN, 'projectID', entityID)
         break
+      case Entity.WORKSPACE:
+        await deleteBatchedEntities(Entity.ACCESS, 'objectID', entityID)
+        await cleanUpBatchedEntities(Entity.PROJECT, 'workspaceID', entityID)
+        break      
     }
   }
 

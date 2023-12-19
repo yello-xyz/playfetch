@@ -2,7 +2,6 @@ import {
   Entity,
   buildKey,
   getDatastore,
-  getEntityIDs,
   getEntityKeys,
   getID,
   getKeyedEntities,
@@ -10,7 +9,7 @@ import {
   getOrderedEntities,
 } from './datastore'
 import { ActiveUser, ActiveWorkspace, PendingUser, PendingWorkspace, User, Workspace, WorkspaceMetrics } from '@/types'
-import { deleteProjectForUser, getRecentProjects, toProject } from './projects'
+import { getRecentProjects, toProject } from './projects'
 import {
   getAccessibleObjectIDs,
   getAccessingUserIDs,
@@ -20,6 +19,7 @@ import {
   revokeUserAccess,
 } from './access'
 import { getActiveUsers, toUser } from './users'
+import { deleteEntities } from './cleanup'
 
 export async function migrateWorkspaces(postMerge: boolean) {
   if (postMerge) {
@@ -182,12 +182,8 @@ export async function deleteWorkspaceForUser(userID: number, workspaceID: number
   if (users.some(user => user.id !== userID)) {
     throw new Error('Cannot delete multi-user workspace')
   }
-  const projectIDs = await getEntityIDs(Entity.PROJECT, 'workspaceID', workspaceID)
-  for (const projectID of projectIDs) {
-    await deleteProjectForUser(userID, projectID)
-  }
-  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', workspaceID)
-  await getDatastore().delete([...accessKeys, buildKey(Entity.WORKSPACE, workspaceID)])
+  const projectKeys = await getEntityKeys(Entity.PROJECT, 'workspaceID', workspaceID, 1000)
+  await deleteEntities([...projectKeys, buildKey(Entity.WORKSPACE, workspaceID)])
 }
 
 export async function getMetricsForWorkspace(workspaceID: number, before?: Date): Promise<WorkspaceMetrics> {

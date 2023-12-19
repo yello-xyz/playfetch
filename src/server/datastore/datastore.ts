@@ -160,12 +160,6 @@ const getFilteredEntityIDs = (type: EntityType, filter: EntityFilter, limit?: nu
 export const getFilteredEntityID = (type: EntityType, filter: EntityFilter) =>
   getFilteredEntityIDs(type, filter, 1).then(([id]) => id)
 
-export const getEntityIDs = (type: EntityType, key: string, value: {}, limit?: number) =>
-  getFilteredEntityIDs(type, buildFilter(key, value), limit)
-
-export const getEntityID = (type: EntityType, key: string, value: {}) =>
-  getEntityIDs(type, key, value, 1).then(([id]) => id)
-
 export const getKeyedEntities = async (type: EntityType, ids: number[], transaction?: Transaction): Promise<any[]> =>
   ids.length
     ? (transaction ?? getDatastore()).get(ids.map(id => buildKey(type, id))).then(([entities]) => entities)
