@@ -30,7 +30,7 @@ export async function migrateAnalytics(postMerge: boolean) {
   for (const analyticsData of allAnalytics) {
     if (!allProjectIDs.has(analyticsData.projectID)) {
       console.log(`Deleting analytics entry ${getID(analyticsData)} for missing project ${analyticsData.projectID}`)
-      // await datastore.delete(buildKey(Entity.ANALYTICS, getID(analyticsData)))
+      await datastore.delete(buildKey(Entity.ANALYTICS, getID(analyticsData)))
     }
     // await getDatastore().save(
     //   toAnalyticsData(

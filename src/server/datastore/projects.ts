@@ -8,7 +8,6 @@ import {
   getDatastore,
   getEntities,
   getEntityCount,
-  getEntityKeys,
   getID,
   getKeyedEntities,
   getKeyedEntity,
@@ -33,10 +32,9 @@ import { toChain } from './chains'
 import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
-import { Key } from '@google-cloud/datastore'
 import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
-import { deleteEntities, deleteEntity } from './cleanup'
+import { deleteEntity } from './cleanup'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
