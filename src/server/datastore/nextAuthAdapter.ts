@@ -1,5 +1,6 @@
 import { Adapter } from 'next-auth/adapters'
 import {
+  NextAuthEntity as Entity,
   buildFilter,
   buildKey,
   getDatastore,
@@ -10,12 +11,6 @@ import {
   getKeyedEntity,
 } from './datastore'
 import { and } from '@google-cloud/datastore'
-
-enum Entity {
-  USER = '_nextauth_user',
-  ACCOUNT = '_nextauth_account',
-  TOKEN = '_nextauth_token',
-}
 
 export default function NextAuthAdapter(): Adapter {
   const getAccount = async (providerAccountId: string, provider: string) => {

@@ -128,7 +128,7 @@ export const getWorkspaceUsers = (workspaceID: number): Promise<[User[], Pending
 export async function getPendingAccessObjects<T>(
   sourceID: number,
   kind: 'project' | 'workspace',
-  entityType: string,
+  entityType: Entity,
   toObject: (data: any) => T
 ): Promise<[T[], (T & { invitedBy: User; timestamp: number })[], T[]]> {
   const sourceIsUser = entityType !== Entity.USER
