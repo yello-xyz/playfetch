@@ -9,13 +9,23 @@ export async function migrateComments(postMerge: boolean) {
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   const usedParentIDs = new Set(allComments.map(commentData => commentData.parentID))
+  const usedVersionIDs = new Set(allComments.map(commentData => commentData.versionID))
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
-  console.log(`Found ${allComments.length} comments (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
+  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
+  const allVersionIDs = new Set(allVersions.map(version => getID(version)))
+  console.log(
+    `Found ${allComments.length} comments ` +
+      `(for ${usedParentIDs.size} parents out of ${allParentIDs.size}) ` +
+      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size})`
+  )
   for (const commentData of allComments) {
     if (!allParentIDs.has(commentData.parentID)) {
       console.log(`Deleting comment ${getID(commentData)} for missing parent ${commentData.parentID}`)
+      await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
+    } else if (!allVersionIDs.has(commentData.versionID)) {
+      console.log(`Deleting comment ${getID(commentData)} for missing version ${commentData.versionID}`)
       await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
     }
   }

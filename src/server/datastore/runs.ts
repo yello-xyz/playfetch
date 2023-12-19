@@ -25,13 +25,23 @@ export async function migrateRuns(postMerge: boolean) {
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   const usedParentIDs = new Set(allRuns.map(runData => runData.parentID))
+  const usedVersionIDs = new Set(allRuns.map(runData => runData.versionID))
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
   const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
-  console.log(`Found ${allRuns.length} runs (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
+  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
+  const allVersionIDs = new Set(allVersions.map(version => getID(version)))
+  console.log(
+    `Found ${allRuns.length} runs ` +
+      `(for ${usedParentIDs.size} parents out of ${allParentIDs.size}) ` +
+      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size})`
+  )
   for (const runData of allRuns) {
     if (!allParentIDs.has(runData.parentID)) {
       console.log(`Deleting run ${getID(runData)} for missing parent ${runData.parentID}`)
+      await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+    } else if (!allVersionIDs.has(runData.versionID)) {
+      console.log(`Deleting run ${getID(runData)} for missing version ${runData.versionID}`)
       await datastore.delete(buildKey(Entity.RUN, getID(runData)))
     }
   }

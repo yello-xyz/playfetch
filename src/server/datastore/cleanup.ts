@@ -39,6 +39,11 @@ export default async function cleanUpEntities() {
         await deleteSingleEntity(Entity.USAGE, entityID)
         await deleteBatchedEntities(Entity.LOG, 'endpointID', entityID)
         break
+      case Entity.VERSION:
+        await deleteBatchedEntities(Entity.CACHE, 'versionID', entityID)
+        await deleteBatchedEntities(Entity.COMMENT, 'versionID', entityID)
+        await deleteBatchedEntities(Entity.RUN, 'versionID', entityID)
+        break      
       case Entity.PROMPT:
       case Entity.CHAIN:
         await deleteSingleEntity(Entity.RATING, entityID)

@@ -30,6 +30,7 @@ import {
 } from './chains'
 import { getDefaultPromptConfigForUser } from './users'
 import { DefaultPrompts } from '@/src/common/defaultConfig'
+import { deleteEntity } from './cleanup'
 
 export async function migrateVersions(postMerge: boolean) {
   if (!postMerge) {
@@ -364,10 +365,7 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const parentID = versionData.parentID
   const wasPromptVersion = IsPromptVersion(versionData)
 
-  const runKeys = await getEntityKeys(Entity.RUN, 'versionID', versionID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'versionID', versionID)
-  const cacheKeys = await getEntityKeys(Entity.CACHE, 'versionID', versionID)
-  await getDatastore().delete([...cacheKeys, ...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
+  await deleteEntity(Entity.VERSION, versionID)
 
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   if (!anyVersionWithSameParentKey) {
