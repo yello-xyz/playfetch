@@ -5,7 +5,6 @@ import {
   buildFilter,
   buildKey,
   getDatastore,
-  getEntityKeys,
   getFilteredEntities,
   getFilteredEntity,
   getID,

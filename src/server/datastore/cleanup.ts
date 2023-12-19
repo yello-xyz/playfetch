@@ -39,9 +39,17 @@ export default async function cleanUpEntities() {
         await datastore.delete(buildKey(Entity.USAGE, entityID))
         await deleteBatchedEntities(Entity.LOG, 'endpointID', entityID)
         break
+      case Entity.PROMPT:
+      case Entity.CHAIN:
+        await deleteBatchedEntities(Entity.CACHE, 'parentID', entityID)
+        await deleteBatchedEntities(Entity.INPUT, 'parentID', entityID)
+        await deleteBatchedEntities(Entity.COMMENT, 'parentID', entityID)
+        await deleteBatchedEntities(Entity.RUN, 'parentID', entityID)
+        await deleteBatchedEntities(Entity.VERSION, 'parentID', entityID)
+        break
     }
   }
-  
+
   await datastore.delete(allCleanupData.map(cleanupData => cleanupData[datastore.KEY]))
 }
 

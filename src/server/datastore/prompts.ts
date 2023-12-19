@@ -6,7 +6,6 @@ import {
   getDatastore,
   getEntities,
   getEntityKey,
-  getEntityKeys,
   getFilteredEntities,
   getFilteredEntity,
   getID,
@@ -28,6 +27,7 @@ import { getTrustedParentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
 import { PropertyFilter, and } from '@google-cloud/datastore'
+import { deleteEntity } from './cleanup'
 
 export async function migratePrompts(postMerge: boolean) {
   if (postMerge) {
@@ -291,23 +291,9 @@ export async function updatePromptName(userID: number, promptID: number, name: s
 
 export async function deletePromptForUser(userID: number, promptID: number) {
   await ensurePromptAccess(userID, promptID)
-
   const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'parentID', promptID)
   if (anyEndpointKey) {
     throw new Error('Cannot delete prompt with published endpoints')
   }
-
-  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', promptID)
-  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', promptID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', promptID)
-  const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', promptID)
-  const cacheKeys = await getEntityKeys(Entity.CACHE, 'parentID', promptID)
-  await getDatastore().delete([
-    ...cacheKeys,
-    ...inputKeys,
-    ...commentKeys,
-    ...runKeys,
-    ...versionKeys,
-    buildKey(Entity.PROMPT, promptID),
-  ])
+  await deleteEntity(Entity.PROMPT, promptID)
 }

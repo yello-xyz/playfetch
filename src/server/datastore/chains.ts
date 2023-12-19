@@ -5,7 +5,6 @@ import {
   getDatastore,
   getEntities,
   getEntityKey,
-  getEntityKeys,
   getID,
   getKeyedEntity,
   getOrderedEntities,
@@ -16,6 +15,7 @@ import { getTrustedProjectScopedData, getUniqueName, getVerifiedProjectScopedDat
 import { getTrustedParentInputValues } from './inputs'
 import { addInitialVersion, saveChainVersionForUser, toUserVersions } from './versions'
 import { getOrderedRunsForParentID } from './runs'
+import { deleteEntity } from './cleanup'
 
 export async function migrateChains(postMerge: boolean) {
   if (postMerge) {
@@ -169,23 +169,9 @@ export async function updateChainOnDeletedVersion(chainID: number, deletedVersio
 
 export async function deleteChainForUser(userID: number, chainID: number) {
   await ensureChainAccess(userID, chainID)
-
   const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'parentID', chainID)
   if (anyEndpointKey) {
     throw new Error('Cannot delete chain with published endpoints')
   }
-
-  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', chainID)
-  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', chainID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', chainID)
-  const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', chainID)
-  const cacheKeys = await getEntityKeys(Entity.CACHE, 'parentID', chainID)
-  await getDatastore().delete([
-    ...cacheKeys,
-    ...inputKeys,
-    ...commentKeys,
-    ...runKeys,
-    ...versionKeys,
-    buildKey(Entity.CHAIN, chainID),
-  ])
+  await deleteEntity(Entity.CHAIN, chainID)
 }
