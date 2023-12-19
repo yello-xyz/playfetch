@@ -84,7 +84,6 @@ export async function exportPromptsFromProject(
         branch,
         sha: fileHash,
         message: 'Export prompts',
-        committer: { name: 'PlayFetch', email: 'github@playfetch.ai' },
         content,
       })
     }
