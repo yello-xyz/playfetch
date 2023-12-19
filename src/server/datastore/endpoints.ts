@@ -18,6 +18,7 @@ import { CheckValidURLPath } from '@/src/common/formatting'
 import { getTrustedUserPromptOrChainData } from './chains'
 import { ensureProjectAccess } from './projects'
 import { getTrustedVersion } from './versions'
+import { deleteEntity } from './cleanup'
 
 export async function migrateEndpoints() {
   const datastore = getDatastore()
@@ -167,9 +168,7 @@ export async function updateEndpointForUser(
 
 export async function deleteEndpointForUser(userID: number, endpointID: number) {
   await ensureEndpointAccess(userID, endpointID)
-  const logEntryKeys = await getEntityKeys(Entity.LOG, 'endpointID', endpointID)
-  const keysToDelete = [...logEntryKeys, buildKey(Entity.ENDPOINT, endpointID), buildKey(Entity.USAGE, endpointID)]
-  await getDatastore().delete(keysToDelete)
+  await deleteEntity(Entity.ENDPOINT, endpointID)
 }
 
 const toEndpointData = (

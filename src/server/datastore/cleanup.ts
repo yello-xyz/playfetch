@@ -1,5 +1,5 @@
 import { Key } from '@google-cloud/datastore'
-import { Entity, buildKey, getDatastore, getID } from './datastore'
+import { Entity, buildKey, getDatastore, getEntityKeys, getID } from './datastore'
 
 export async function migrateCleanup(postMerge: boolean) {
   if (postMerge) {
@@ -33,7 +33,25 @@ export default async function cleanUpEntities() {
   )
 
   for (const cleanupData of allCleanupData) {
+    const entityID = getID(cleanupData)
+    switch (cleanupData.entity) {
+      case Entity.ENDPOINT:
+        await datastore.delete(buildKey(Entity.USAGE, entityID))
+        await deleteBatchedEntities(Entity.LOG, 'endpointID', entityID)
+        break
+    }
   }
   
-  await datastore.delete(allCleanupData)
+  await datastore.delete(allCleanupData.map(cleanupData => cleanupData[datastore.KEY]))
+}
+
+const deleteBatchedEntities = async (type: Entity, parentKey: string, parentID: number) => {
+  while (true) {
+    const entityKeys = await getEntityKeys(type, parentKey, parentID)
+    if (entityKeys.length > 0) {
+      await getDatastore().delete(entityKeys)
+    } else {
+      return
+    }
+  }
 }
