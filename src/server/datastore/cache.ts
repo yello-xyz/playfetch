@@ -2,25 +2,36 @@ import HashValue from '@/src/common/hashing'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
 
 export async function migrateCache(postMerge: boolean) {
-  if (postMerge) {
+  if (!postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allCacheData] = await datastore.runQuery(datastore.createQuery(Entity.CACHE))
+  const usedParentIDs = new Set(allCacheData.map(cacheData => cacheData.parentID))
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
+  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
+  console.log(`Found ${allCacheData.length} cache keys (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const cacheData of allCacheData) {
-    await datastore.save(
-      toCacheData(
-        cacheData.key,
-        cacheData.value,
-        Object.fromEntries(
-          Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt', 'expiresAt'].includes(key))
-        ),
-        cacheData.createdAt,
-        cacheData.expiresAt,
-        getID(cacheData)
-      )
-    )
+    if (!!cacheData.parentID && !allParentIDs.has(cacheData.parentID)) {
+      console.log(`Deleting cache key ${getID(cacheData)} for missing parent ${cacheData.parentID}`)
+      await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+    }
   }
+  // for (const cacheData of allCacheData) {
+  //   await datastore.save(
+  //     toCacheData(
+  //       cacheData.key,
+  //       cacheData.value,
+  //       Object.fromEntries(
+  //         Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt', 'expiresAt'].includes(key))
+  //       ),
+  //       cacheData.createdAt,
+  //       cacheData.expiresAt,
+  //       getID(cacheData)
+  //     )
+  //   )
+  // }
 }
 
 const toCacheData = (
