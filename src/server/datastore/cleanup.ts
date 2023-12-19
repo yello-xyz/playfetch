@@ -26,7 +26,7 @@ export const deleteEntities = async (entityKeys: Key[]) => {
   await datastore.delete(entityKeys)
 }
 
-export default async function cleanupEntities() {
+export default async function cleanUpEntities() {
   const datastore = getDatastore()
   const [allCleanupData] = await datastore.runQuery(
     datastore.createQuery(Entity.CLEANUP).order('createdAt', { descending: false })

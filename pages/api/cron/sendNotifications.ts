@@ -21,7 +21,7 @@ type CommentBlock = {
   comments: CommentData[]
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function sendNotifications(req: NextApiRequest, res: NextApiResponse) {
   const now = new Date()
   const lastProcessedCommentDate = await getLastProcessedCommentDate()
   if (!lastProcessedCommentDate) {
@@ -124,4 +124,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.status(200).json({})
 }
 
-export default withCronRoute(handler)
+export default withCronRoute(sendNotifications)

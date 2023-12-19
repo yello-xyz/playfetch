@@ -1,3 +1,5 @@
 cron:
 - url: /api/cron/sendNotifications?limit=100&buffer=300
   schedule: every 10 minutes
+- url: /api/cron/cleanUp
+  schedule: every 10 minutes
