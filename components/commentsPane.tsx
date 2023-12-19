@@ -89,7 +89,7 @@ export function CommentCell({
 
   const selectComment = onSelect ? () => onSelect(comment.parentID, comment.versionID, comment.runID) : undefined
   const userName = user ? user.fullName : 'Unknown user'
-  const isLabelOrRatingComment = comment.action !== undefined
+  const isLabelOrRatingComment = comment.action !== null
   const isLabelComment = comment.action === 'addLabel' || comment.action === 'removeLabel'
 
   return (
