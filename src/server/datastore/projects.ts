@@ -351,9 +351,7 @@ async function getProjectAndWorkspaceUsers(
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectOwnership(userID, projectID)
-  const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
-  const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
-  await deleteEntities([...promptKeys, ...chainKeys, buildKey(Entity.PROJECT, projectID)])
+  await deleteEntity(Entity.PROJECT, projectID)
 }
 
 export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {

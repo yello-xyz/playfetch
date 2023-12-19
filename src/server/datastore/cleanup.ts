@@ -20,7 +20,7 @@ const toCleanupData = (entityID: number, entity: Entity, createdAt: Date) => ({
 
 export const deleteEntity = (type: Entity, id: number) => deleteEntities([buildKey(type, id)])
 
-export const deleteEntities = async (entityKeys: Key[]) => {
+const deleteEntities = async (entityKeys: Key[]) => {
   const datastore = getDatastore()
   datastore.save(entityKeys.map(key => toCleanupData(getID({ key }), key.kind as Entity, new Date())))
   await datastore.delete(entityKeys)
@@ -60,6 +60,8 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.LOG, 'projectID', entityID)
         await deleteBatchedEntities(Entity.ANALYTICS, 'projectID', entityID)
         await deleteBatchedEntities(Entity.COMMENT, 'projectID', entityID)
+        await cleanUpBatchedEntities(Entity.PROMPT, 'projectID', entityID)
+        await cleanUpBatchedEntities(Entity.CHAIN, 'projectID', entityID)
         break
     }
   }
@@ -70,7 +72,7 @@ export default async function cleanUpEntities() {
 const deleteSingleEntity = async (type: Entity, entityID: number) => {
   const entity = await getKeyedEntity(type, entityID)
   if (entity) {
-    console.log(`Cleaning up ${type} entity with ID ${entityID}…`)
+    console.log(`Deleting ${type} entity with ID ${entityID}…`)
     await getDatastore().delete(buildKey(type, entityID))
   }
 }
@@ -79,8 +81,20 @@ const deleteBatchedEntities = async (type: Entity, parentKey: string, parentID: 
   while (true) {
     const entityKeys = await getEntityKeys(type, parentKey, parentID)
     if (entityKeys.length > 0) {
-      console.log(`Cleaning up ${entityKeys.length} ${type} entities for ${parentKey} ${parentID}…`)
+      console.log(`Deleting ${entityKeys.length} ${type} entities for ${parentKey} ${parentID}…`)
       await getDatastore().delete(entityKeys)
+    } else {
+      return
+    }
+  }
+}
+
+const cleanUpBatchedEntities = async (type: Entity, parentKey: string, parentID: number) => {
+  while (true) {
+    const entityKeys = await getEntityKeys(type, parentKey, parentID)
+    if (entityKeys.length > 0) {
+      console.log(`Cleaning up ${entityKeys.length} ${type} entities for ${parentKey} ${parentID}…`)
+      await deleteEntities(entityKeys)
     } else {
       return
     }
