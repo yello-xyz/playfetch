@@ -21,7 +21,7 @@ export const serializePromptVersion = ({
     maxTokens: config.maxTokens,
     seed: config.seed,
     jsonMode: config.jsonMode,
-    isChat: config.isChat || undefined,
+    chatMode: config.isChat || undefined,
   })
 
 export const deserializePromptVersion = (
@@ -41,7 +41,7 @@ export const deserializePromptVersion = (
       maxTokens: parsed.maxTokens ?? DefaultPromptConfig.maxTokens,
       ...(parsed.seed !== undefined ? { seed: parsed.seed } : {}),
       ...(parsed.jsonMode !== undefined ? { jsonMode: parsed.jsonMode } : {}),
-      isChat: parsed.isChat ?? DefaultPromptConfig.isChat,
+      isChat: parsed.chatMode ?? DefaultPromptConfig.isChat,
     },
   }
 }
