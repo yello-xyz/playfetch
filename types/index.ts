@@ -138,6 +138,7 @@ export type AvailableQueryProvider = {
 export type AvailableSourceControlProvider = {
   provider: SourceControlProvider
   environment: string
+  scopeID: number
 }
 export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider | AvailableSourceControlProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>

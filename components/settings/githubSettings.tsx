@@ -9,8 +9,8 @@ import { useSourceControlProvider } from '@/src/client/context/providerContext'
 import Link from 'next/link'
 import { UserSettingsRoute } from '@/src/common/clientRoute'
 import DropdownMenu from '../dropdownMenu'
-import { TryParseJSON } from '@/src/common/formatting'
 import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { useLoggedInUser } from '@/src/client/context/userContext'
 
 export default function GitHubSettings({
   scope,
@@ -23,10 +23,12 @@ export default function GitHubSettings({
   provider?: AvailableProvider
   onRefresh: () => void
 }) {
-  const scopedProvider = provider as AvailableSourceControlProvider | undefined
+  const user = useLoggedInUser()
   const availableProvider = useSourceControlProvider()
+  const userProvider = availableProvider?.scopeID === user.id ? availableProvider : undefined
+  const scopedProvider = provider as AvailableSourceControlProvider | undefined
 
-  const repositories: string[] = TryParseJSON(availableProvider?.environment ?? '') ?? []
+  const repositories: string[] = userProvider ? JSON.parse(userProvider.environment) : []
   const scopedPath = scopedProvider?.environment ?? ''
   const scopedRepository = scopedPath.split('/').slice(0, 2).join('/')
   const scopedRootDirectory = scopedPath.split('/').slice(2).join('/')
@@ -87,7 +89,7 @@ export default function GitHubSettings({
 
   return (
     <>
-      {!isProjectScope || availableProvider ? (
+      {!isProjectScope || userProvider ? (
         <ProviderRow
           provider='github'
           flexLayout={(scopedProvider && isProjectScope) || isUpdating ? 'flex-col' : 'justify-between'}>

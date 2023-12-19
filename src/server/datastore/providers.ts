@@ -11,7 +11,7 @@ import {
   SourceControlProvider,
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
-import { ModelProviders } from '@/src/common/providerMetadata'
+import { ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
 import { ensureProjectOwnership } from './projects'
@@ -103,6 +103,7 @@ const toAvailableProvider = (data: any): AvailableProvider => {
     ...(ModelProviders.includes(data.provider)
       ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
       : { environment: metadata.environment ?? '' }),
+    ...(SourceControlProviders.includes(data.provider) ? { scopeID: data.scopeID } : {}),
   }
 }
 
