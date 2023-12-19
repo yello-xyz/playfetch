@@ -3,32 +3,40 @@ import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp
 import { ensureProjectAccess } from './projects'
 
 export async function migrateLogs(postMerge: boolean) {
-  if (postMerge) {
+  if (!postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
+  const usedEndpointIDs = new Set(allLogs.map(logData => logData.endpointID))
+  const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
+  const allEndpointIDs = new Set(allEndpoints.map(endpoint => getID(endpoint)))
+  console.log(`Found ${allLogs.length} logs (for ${usedEndpointIDs.size} endpoints out of ${allEndpoints.length})`)
   for (const logData of allLogs) {
-    await getDatastore().save(
-      toLogData(
-        logData.projectID,
-        logData.endpointID,
-        logData.urlPath,
-        logData.flavor,
-        logData.parentID,
-        logData.versionID,
-        JSON.parse(logData.inputs),
-        JSON.parse(logData.output),
-        logData.error,
-        logData.createdAt,
-        logData.cost,
-        logData.duration,
-        logData.attempts,
-        logData.cacheHit,
-        logData.continuationID,
-        getID(logData)
-      )
-    )
+    if (!allEndpointIDs.has(logData.endpointID)) {
+      console.log(`Deleting log ${getID(logData)} for missing endpoint ${logData.endpointID}`)
+      await datastore.delete(buildKey(Entity.LOG, getID(logData)))
+    }
+    // await datastore.save(
+    //   toLogData(
+    //     logData.projectID,
+    //     logData.endpointID,
+    //     logData.urlPath,
+    //     logData.flavor,
+    //     logData.parentID,
+    //     logData.versionID,
+    //     JSON.parse(logData.inputs),
+    //     JSON.parse(logData.output),
+    //     logData.error,
+    //     logData.createdAt,
+    //     logData.cost,
+    //     logData.duration,
+    //     logData.attempts,
+    //     logData.cacheHit,
+    //     logData.continuationID,
+    //     getID(logData)
+    //   )
+    // )
   }
 }
 
