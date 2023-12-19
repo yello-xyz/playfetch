@@ -36,6 +36,7 @@ import { StripVariableSentinels } from '@/src/common/formatting'
 import { Key } from '@google-cloud/datastore'
 import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
+import { deleteEntities, deleteEntity } from './cleanup'
 
 export async function migrateProjects(postMerge: boolean) {
   if (postMerge) {
@@ -350,43 +351,9 @@ async function getProjectAndWorkspaceUsers(
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectOwnership(userID, projectID)
-
-  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
   const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
   const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'projectID', projectID)
-
-  const versionKeys = [] as Key[]
-  const runKeys = [] as Key[]
-  const inputKeys = [] as Key[]
-  const cacheKeys = [] as Key[]
-  for (const parentID of [...promptKeys, ...chainKeys].map(key => getID({ key }))) {
-    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', parentID)))
-    runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', parentID)))
-    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', parentID)))
-    cacheKeys.push(...(await getEntityKeys(Entity.CACHE, 'parentID', parentID)))
-  }
-
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'projectID', projectID)
-  const logEntryKeys = await getEntityKeys(Entity.LOG, 'projectID', projectID)
-  const analyticsKeys = await getEntityKeys(Entity.ANALYTICS, 'projectID', projectID)
-
-  await getDatastore().delete([
-    ...accessKeys,
-    ...cacheKeys,
-    ...inputKeys,
-    ...analyticsKeys,
-    ...logEntryKeys,
-    ...usageKeys,
-    ...endpointKeys,
-    ...commentKeys,
-    ...runKeys,
-    ...versionKeys,
-    ...promptKeys,
-    ...chainKeys,
-    buildKey(Entity.PROJECT, projectID),
-  ])
+  await deleteEntities([...promptKeys, ...chainKeys, buildKey(Entity.PROJECT, projectID)])
 }
 
 export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {

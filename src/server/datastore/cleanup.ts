@@ -43,7 +43,7 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.CACHE, 'versionID', entityID)
         await deleteBatchedEntities(Entity.COMMENT, 'versionID', entityID)
         await deleteBatchedEntities(Entity.RUN, 'versionID', entityID)
-        break      
+        break
       case Entity.PROMPT:
       case Entity.CHAIN:
         await deleteSingleEntity(Entity.RATING, entityID)
@@ -52,6 +52,14 @@ export default async function cleanUpEntities() {
         await deleteBatchedEntities(Entity.COMMENT, 'parentID', entityID)
         await deleteBatchedEntities(Entity.RUN, 'parentID', entityID)
         await deleteBatchedEntities(Entity.VERSION, 'parentID', entityID)
+        break
+      case Entity.PROJECT:
+        await deleteBatchedEntities(Entity.ACCESS, 'objectID', entityID)
+        await deleteBatchedEntities(Entity.ENDPOINT, 'projectID', entityID)
+        await deleteBatchedEntities(Entity.USAGE, 'projectID', entityID)
+        await deleteBatchedEntities(Entity.LOG, 'projectID', entityID)
+        await deleteBatchedEntities(Entity.ANALYTICS, 'projectID', entityID)
+        await deleteBatchedEntities(Entity.COMMENT, 'projectID', entityID)
         break
     }
   }

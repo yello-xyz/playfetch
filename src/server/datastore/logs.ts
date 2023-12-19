@@ -9,12 +9,22 @@ export async function migrateLogs(postMerge: boolean) {
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   const usedEndpointIDs = new Set(allLogs.map(logData => logData.endpointID))
+  const usedProjectIDs = new Set(allLogs.map(logData => logData.projectID))
   const [allEndpoints] = await datastore.runQuery(datastore.createQuery(Entity.ENDPOINT))
   const allEndpointIDs = new Set(allEndpoints.map(endpoint => getID(endpoint)))
-  console.log(`Found ${allLogs.length} logs (for ${usedEndpointIDs.size} endpoints out of ${allEndpoints.length})`)
+  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  const allProjectIDs = new Set(allProjects.map(project => getID(project)))
+  console.log(
+    `Found ${allLogs.length} logs ` +
+      `(for ${usedEndpointIDs.size} endpoints out of ${allEndpoints.length}) ` +
+      `(for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
+  )
   for (const logData of allLogs) {
     if (!allEndpointIDs.has(logData.endpointID)) {
       console.log(`Deleting log ${getID(logData)} for missing endpoint ${logData.endpointID}`)
+      await datastore.delete(buildKey(Entity.LOG, getID(logData)))
+    } else if (!allProjectIDs.has(logData.projectID)) {
+      console.log(`Deleting log ${getID(logData)} for missing project ${logData.projectID}`)
       await datastore.delete(buildKey(Entity.LOG, getID(logData)))
     }
     // await datastore.save(
