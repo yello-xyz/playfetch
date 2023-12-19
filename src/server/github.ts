@@ -18,12 +18,14 @@ const loadGitHubConfigForProject = async (userID: number, projectID: number) => 
     privateKey: (process.env.GITHUB_APP_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
   }).getInstallationOctokit(Number(installationID))
 
-  const pathSegments = (environment ?? '').split('/')
+  const branchSegments = (environment ?? '').split(':')
+  const pathSegments = branchSegments[0].split('/')
   const owner = pathSegments[0]
   const repo = pathSegments[1]
   const path = pathSegments.slice(2).join('/')
+  const branch = branchSegments[1] as string | undefined
 
-  return { app, owner, repo, path }
+  return { app, owner, repo, path, branch }
 }
 
 const loadPromptVersionForPath = async (app: any, owner: string, repo: string, path: string, files?: any) => {
@@ -57,7 +59,7 @@ export async function exportPromptsFromProject(
   versionID?: number,
   fileName?: string
 ) {
-  const { app, owner, repo, path } = await loadGitHubConfigForProject(userID, projectID)
+  const { app, owner, repo, path, branch } = await loadGitHubConfigForProject(userID, projectID)
 
   let exportablePrompts: Awaited<ReturnType<typeof getExportablePromptsFromProject>>
   if (versionID && fileName) {
@@ -79,6 +81,7 @@ export async function exportPromptsFromProject(
         owner,
         repo,
         path: filePath,
+        branch,
         sha: fileHash,
         message: 'Export prompts',
         committer: { name: 'PlayFetch', email: 'github@playfetch.ai' },

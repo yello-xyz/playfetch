@@ -67,7 +67,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     <PickNameDialog
       title='Pick File Name'
       confirmTitle='Export'
-      label='Name'
+      label='File Name'
       initialName={(activeItem as ActivePrompt).sourcePath ?? `${activeItem.name}.yaml`}
       onConfirm={fileName => api.exportPrompt(projectID!, version.id, fileName).then(_ => refreshActiveItem())}
       onDismiss={() => setShowPickNamePrompt(false)}
