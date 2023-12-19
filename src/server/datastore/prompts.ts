@@ -38,9 +38,7 @@ export async function migratePrompts(postMerge: boolean) {
   const usedProjectIDs = new Set(allPrompts.map(promptData => promptData.projectID))
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   const allProjectIDs = new Set(allProjects.map(project => getID(project)))
-  console.log(
-    `Found ${allPrompts.length} prompts (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
-  )
+  console.log(`Found ${allPrompts.length} prompts (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`)
   for (const promptData of allPrompts) {
     if (!allProjectIDs.has(promptData.projectID)) {
       console.log(`Deleting prompt ${getID(promptData)} for missing project ${promptData.projectID}`)

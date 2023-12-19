@@ -133,8 +133,13 @@ export const getFilteredOrderedEntities = (
   limit?: number
 ) => getInternalFilteredEntities(type, filter, limit, sortKeys, [])
 
-export const getOrderedEntities = (type: EntityType, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
-  getFilteredOrderedEntities(type, buildFilter(key, value), sortKeys, limit)
+export const getOrderedEntities = (
+  type: EntityType,
+  key: string,
+  value: {},
+  sortKeys = ['createdAt'],
+  limit?: number
+) => getFilteredOrderedEntities(type, buildFilter(key, value), sortKeys, limit)
 
 export const getLastEntity = (type: EntityType, filter: EntityFilter) =>
   getFilteredOrderedEntities(type, filter, ['createdAt'], 1).then(([entity]) => entity)

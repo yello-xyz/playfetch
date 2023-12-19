@@ -66,7 +66,7 @@ export default async function cleanUpEntities() {
       case Entity.WORKSPACE:
         await deleteBatchedEntities(Entity.ACCESS, 'objectID', entityID)
         await cleanUpBatchedEntities(Entity.PROJECT, 'workspaceID', entityID)
-        break      
+        break
     }
   }
 

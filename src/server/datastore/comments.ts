@@ -21,7 +21,7 @@ export async function migrateComments(postMerge: boolean) {
   console.log(
     `Found ${allComments.length} comments ` +
       `(for ${usedParentIDs.size} parents out of ${allParentIDs.size}) ` +
-      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size}) ` + 
+      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size}) ` +
       `(for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
   )
   for (const commentData of allComments) {
@@ -36,25 +36,25 @@ export async function migrateComments(postMerge: boolean) {
       await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
     }
   }
-//   for (const commentData of allComments) {
-//     await datastore.save(
-//       toCommentData(
-//         commentData.userID,
-//         commentData.projectID,
-//         commentData.parentID,
-//         commentData.versionID,
-//         commentData.text,
-//         commentData.createdAt,
-//         commentData.replyTo,
-//         commentData.action,
-//         commentData.quote,
-//         commentData.runID,
-//         commentData.itemIndex,
-//         commentData.startIndex,
-//         getID(commentData)
-//       )
-//     )
-//   }
+  //   for (const commentData of allComments) {
+  //     await datastore.save(
+  //       toCommentData(
+  //         commentData.userID,
+  //         commentData.projectID,
+  //         commentData.parentID,
+  //         commentData.versionID,
+  //         commentData.text,
+  //         commentData.createdAt,
+  //         commentData.replyTo,
+  //         commentData.action,
+  //         commentData.quote,
+  //         commentData.runID,
+  //         commentData.itemIndex,
+  //         commentData.startIndex,
+  //         getID(commentData)
+  //       )
+  //     )
+  //   }
 }
 
 export async function saveComment(
