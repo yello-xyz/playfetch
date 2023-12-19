@@ -23,4 +23,5 @@ export async function runDataMigrations(postMerge: boolean) {
   await migrateRatings(postMerge)
   await migrateVersions(postMerge)
   await migrateRuns(postMerge)
+  await migrateComments(postMerge)
 }

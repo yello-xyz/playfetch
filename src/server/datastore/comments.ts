@@ -3,30 +3,41 @@ import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp 
 import { ensureProjectAccess } from './projects'
 
 export async function migrateComments(postMerge: boolean) {
-  if (postMerge) {
+  if (!postMerge) {
     return
   }
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
+  const usedParentIDs = new Set(allComments.map(commentData => commentData.parentID))
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
+  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
+  console.log(`Found ${allComments.length} comments (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const commentData of allComments) {
-    await datastore.save(
-      toCommentData(
-        commentData.userID,
-        commentData.projectID,
-        commentData.parentID,
-        commentData.versionID,
-        commentData.text,
-        commentData.createdAt,
-        commentData.replyTo,
-        commentData.action,
-        commentData.quote,
-        commentData.runID,
-        commentData.itemIndex,
-        commentData.startIndex,
-        getID(commentData)
-      )
-    )
+    if (!allParentIDs.has(commentData.parentID)) {
+      console.log(`Deleting comment ${getID(commentData)} for missing parent ${commentData.parentID}`)
+      await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
+    }
   }
+//   for (const commentData of allComments) {
+//     await datastore.save(
+//       toCommentData(
+//         commentData.userID,
+//         commentData.projectID,
+//         commentData.parentID,
+//         commentData.versionID,
+//         commentData.text,
+//         commentData.createdAt,
+//         commentData.replyTo,
+//         commentData.action,
+//         commentData.quote,
+//         commentData.runID,
+//         commentData.itemIndex,
+//         commentData.startIndex,
+//         getID(commentData)
+//       )
+//     )
+//   }
 }
 
 export async function saveComment(

@@ -32,7 +32,7 @@ export async function migrateRuns(postMerge: boolean) {
   for (const runData of allRuns) {
     if (!allParentIDs.has(runData.parentID)) {
       console.log(`Deleting run ${getID(runData)} for missing parent ${runData.parentID}`)
-      // await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+      await datastore.delete(buildKey(Entity.RUN, getID(runData)))
     }
   }
   // let remainingSaveCount = 100
