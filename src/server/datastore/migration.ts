@@ -32,4 +32,5 @@ export async function runDataMigrations(postMerge: boolean) {
   await migrateAccess(postMerge)
   await migrateBudgets(postMerge)
   await migrateCosts(postMerge)
+  await migrateProviders(postMerge)
 }
