@@ -3,9 +3,6 @@ import { Entity, buildKey, getDatastore, getID, getOrderedEntities, getTimestamp
 import { ensureProjectAccess } from './projects'
 
 export async function migrateLogs(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allLogs] = await datastore.runQuery(datastore.createQuery(Entity.LOG))
   const usedEndpointIDs = new Set(allLogs.map(logData => logData.endpointID))
@@ -20,12 +17,16 @@ export async function migrateLogs(postMerge: boolean) {
       `(for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
   )
   for (const logData of allLogs) {
-    if (!allEndpointIDs.has(logData.endpointID)) {
+    if (!!logData.endpointID && !allEndpointIDs.has(logData.endpointID)) {
       console.log(`Deleting log ${getID(logData)} for missing endpoint ${logData.endpointID}`)
-      await datastore.delete(buildKey(Entity.LOG, getID(logData)))
-    } else if (!allProjectIDs.has(logData.projectID)) {
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.LOG, getID(logData)))
+      }
+    } else if (!!logData.projectID && !allProjectIDs.has(logData.projectID)) {
       console.log(`Deleting log ${getID(logData)} for missing project ${logData.projectID}`)
-      await datastore.delete(buildKey(Entity.LOG, getID(logData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.LOG, getID(logData)))
+      }
     }
     // await datastore.save(
     //   toLogData(

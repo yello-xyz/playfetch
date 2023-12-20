@@ -32,9 +32,6 @@ import { DefaultPrompts } from '@/src/common/defaultConfig'
 import { deleteEntity } from './cleanup'
 
 export async function migrateVersions(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
   const usedParentIDs = new Set(allVersions.map(versionData => versionData.parentID))
@@ -43,9 +40,11 @@ export async function migrateVersions(postMerge: boolean) {
   const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
   console.log(`Found ${allVersions.length} versions (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const versionData of allVersions) {
-    if (!allParentIDs.has(versionData.parentID)) {
+    if (!!versionData.parentID && !allParentIDs.has(versionData.parentID)) {
       console.log(`Deleting version ${getID(versionData)} for missing parent ${versionData.parentID}`)
-      await datastore.delete(buildKey(Entity.VERSION, getID(versionData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.VERSION, getID(versionData)))
+      }
     }
   }
   // let remainingSaveCount = 100

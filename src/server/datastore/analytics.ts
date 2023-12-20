@@ -16,9 +16,6 @@ import { getLogEntriesForProject } from './logs'
 import { DaysAgo } from '@/src/common/formatting'
 
 export async function migrateAnalytics(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allAnalytics] = await datastore.runQuery(datastore.createQuery(Entity.ANALYTICS))
   const usedProjectIDs = new Set(allAnalytics.map(analyticsData => analyticsData.projectID))
@@ -28,9 +25,11 @@ export async function migrateAnalytics(postMerge: boolean) {
     `Found ${allAnalytics.length} analytics entries (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
   )
   for (const analyticsData of allAnalytics) {
-    if (!allProjectIDs.has(analyticsData.projectID)) {
+    if (!!analyticsData.projectID && !allProjectIDs.has(analyticsData.projectID)) {
       console.log(`Deleting analytics entry ${getID(analyticsData)} for missing project ${analyticsData.projectID}`)
-      await datastore.delete(buildKey(Entity.ANALYTICS, getID(analyticsData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.ANALYTICS, getID(analyticsData)))
+      }
     }
     // await getDatastore().save(
     //   toAnalyticsData(

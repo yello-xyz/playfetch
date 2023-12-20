@@ -19,9 +19,6 @@ import { PropertyFilter, and, or } from '@google-cloud/datastore'
 import { saveRunRatingForParent } from './ratings'
 
 export async function migrateRuns(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
   const usedParentIDs = new Set(allRuns.map(runData => runData.parentID))
@@ -37,12 +34,16 @@ export async function migrateRuns(postMerge: boolean) {
       `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size})`
   )
   for (const runData of allRuns) {
-    if (!allParentIDs.has(runData.parentID)) {
+    if (!!runData.parentID && !allParentIDs.has(runData.parentID)) {
       console.log(`Deleting run ${getID(runData)} for missing parent ${runData.parentID}`)
-      await datastore.delete(buildKey(Entity.RUN, getID(runData)))
-    } else if (!allVersionIDs.has(runData.versionID)) {
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+      }
+    } else if (!!runData.versionID && !allVersionIDs.has(runData.versionID)) {
       console.log(`Deleting run ${getID(runData)} for missing version ${runData.versionID}`)
-      await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+      }
     }
   }
   // let remainingSaveCount = 100

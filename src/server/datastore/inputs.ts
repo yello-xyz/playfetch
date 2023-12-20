@@ -13,9 +13,6 @@ import { InputValues } from '@/types'
 import { ensurePromptOrChainAccess } from './chains'
 
 export async function migrateInputs(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.INPUT))
   const usedParentIDs = new Set(allInputs.map(inputData => inputData.parentID))
@@ -24,9 +21,11 @@ export async function migrateInputs(postMerge: boolean) {
   const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
   console.log(`Found ${allInputs.length} inputs (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const inputData of allInputs) {
-    if (!allParentIDs.has(inputData.parentID)) {
+    if (!!inputData.parentID && !allParentIDs.has(inputData.parentID)) {
       console.log(`Deleting input ${getID(inputData)} for missing parent ${inputData.parentID}`)
-      await datastore.delete(buildKey(Entity.INPUT, getID(inputData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.INPUT, getID(inputData)))
+      }
     }
   }
   // for (const inputData of allInputs) {

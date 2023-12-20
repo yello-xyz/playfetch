@@ -2,9 +2,6 @@ import HashValue from '@/src/common/hashing'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
 
 export async function migrateCache(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allCacheData] = await datastore.runQuery(datastore.createQuery(Entity.CACHE))
   const usedParentIDs = new Set(allCacheData.map(cacheData => cacheData.parentID))
@@ -22,10 +19,14 @@ export async function migrateCache(postMerge: boolean) {
   for (const cacheData of allCacheData) {
     if (!!cacheData.parentID && !allParentIDs.has(cacheData.parentID)) {
       console.log(`Deleting cache key ${getID(cacheData)} for missing parent ${cacheData.parentID}`)
-      await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+      }
     } else if (!!cacheData.versionID && !allVersionIDs.has(cacheData.versionID)) {
       console.log(`Deleting cache key ${getID(cacheData)} for missing version ${cacheData.versionID}`)
-      await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
+      }
     }
   }
   // for (const cacheData of allCacheData) {

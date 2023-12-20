@@ -3,9 +3,6 @@ import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp 
 import { ensureProjectAccess } from './projects'
 
 export async function migrateComments(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
   const usedParentIDs = new Set(allComments.map(commentData => commentData.parentID))
@@ -25,15 +22,21 @@ export async function migrateComments(postMerge: boolean) {
       `(for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
   )
   for (const commentData of allComments) {
-    if (!allParentIDs.has(commentData.parentID)) {
+    if (!!commentData.parentID && !allParentIDs.has(commentData.parentID)) {
       console.log(`Deleting comment ${getID(commentData)} for missing parent ${commentData.parentID}`)
-      await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
-    } else if (!allVersionIDs.has(commentData.versionID)) {
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
+      }
+    } else if (!!commentData.versionID && !allVersionIDs.has(commentData.versionID)) {
       console.log(`Deleting comment ${getID(commentData)} for missing version ${commentData.versionID}`)
-      await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
-    } else if (!allProjectIDs.has(commentData.projectID)) {
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
+      }
+    } else if (!!commentData.projectID && !allProjectIDs.has(commentData.projectID)) {
       console.log(`Deleting comment ${getID(commentData)} for missing project ${commentData.projectID}`)
-      await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
+      }
     }
   }
   //   for (const commentData of allComments) {

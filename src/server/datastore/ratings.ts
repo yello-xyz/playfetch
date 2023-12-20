@@ -9,9 +9,6 @@ import {
 } from './datastore'
 
 export async function migrateRatings(postMerge: boolean) {
-  if (!postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allRatings] = await datastore.runQuery(datastore.createQuery(Entity.RATING))
   const usedParentIDs = new Set(allRatings.map(ratingData => getID(ratingData)))
@@ -22,7 +19,9 @@ export async function migrateRatings(postMerge: boolean) {
   for (const ratingData of allRatings) {
     if (!allParentIDs.has(getID(ratingData))) {
       console.log(`Deleting rating ${getID(ratingData)} for missing parent ${getID(ratingData)}`)
-      await datastore.delete(buildKey(Entity.RATING, getID(ratingData)))
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.RATING, getID(ratingData)))
+      }
     }
     // await datastore.save(toRatingData(getID(ratingData), ratingData.createdAt, JSON.parse(ratingData.recentRatings)))
   }

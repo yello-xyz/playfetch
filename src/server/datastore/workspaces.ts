@@ -183,7 +183,7 @@ export async function deleteWorkspaceForUser(userID: number, workspaceID: number
     throw new Error('Cannot delete multi-user workspace')
   }
   const projectKeys = await getEntityKeys(Entity.PROJECT, 'workspaceID', workspaceID, 1000)
-  await deleteEntities([...projectKeys, buildKey(Entity.WORKSPACE, workspaceID)])
+  await deleteEntities([buildKey(Entity.WORKSPACE, workspaceID), ...projectKeys])
 }
 
 export async function getMetricsForWorkspace(workspaceID: number, before?: Date): Promise<WorkspaceMetrics> {
