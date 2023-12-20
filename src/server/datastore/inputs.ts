@@ -18,11 +18,19 @@ export async function migrateInputs(postMerge: boolean) {
   }
   const datastore = getDatastore()
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.INPUT))
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
+  const createdAtMap: { [parentID: number]: Date } = {}
+  for (const parentData of [...allPrompts, ...allChains]) {
+    createdAtMap[getID(parentData)] = parentData.createdAt
+  }
   for (const inputData of allInputs) {
-    const createdAt = inputData.createdAt ?? new Date()
-    await datastore.save(
-      toInputData(inputData.parentID, inputData.name, JSON.parse(inputData.values), createdAt, getID(inputData))
-    )
+    if (!inputData.createdAt) {
+      const createdAt = inputData.createdAt ?? createdAtMap[inputData.parentID] ?? new Date()
+      await datastore.save(
+        toInputData(inputData.parentID, inputData.name, JSON.parse(inputData.values), createdAt, getID(inputData))
+      )
+    }
   }
 }
 
