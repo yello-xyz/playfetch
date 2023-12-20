@@ -10,23 +10,31 @@ import {
 import { ensureScopeOwnership } from './providers'
 
 export async function migrateBudgets(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allBudgets] = await datastore.runQuery(datastore.createQuery(Entity.BUDGET))
+  const usedScopeIDs = new Set(allBudgets.map(budgetData => getID(budgetData)))
+  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
+  const allScopeIDs = new Set([...allProjects.map(project => getID(project)), ...allUsers.map(user => getID(user))])
+  console.log(`Found ${allBudgets.length} budgets (for ${usedScopeIDs.size} scopes out of ${allScopeIDs.size})`)
   for (const budgetData of allBudgets) {
-    await getDatastore().save(
-      toBudgetData(
-        getID(budgetData),
-        budgetData.userID,
-        budgetData.createdAt,
-        budgetData.limit,
-        budgetData.resetsAt,
-        budgetData.threshold,
-        budgetData.cost
-      )
-    )
+    if (!allScopeIDs.has(getID(budgetData))) {
+      console.log(`Deleting budget ${getID(budgetData)} for missing scope ${getID(budgetData)}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.BUDGET, getID(budgetData)))
+      }
+    }
+    // await getDatastore().save(
+    //   toBudgetData(
+    //     getID(budgetData),
+    //     budgetData.userID,
+    //     budgetData.createdAt,
+    //     budgetData.limit,
+    //     budgetData.resetsAt,
+    //     budgetData.threshold,
+    //     budgetData.cost
+    //   )
+    // )
   }
 }
 
