@@ -55,6 +55,7 @@ export default async function cleanUpEntities() {
         break
       case Entity.PROJECT:
         await deleteSingleEntity(Entity.BUDGET, entityID)
+        await deleteBatchedEntities(Entity.COST, 'scopeID', entityID)
         await deleteBatchedEntities(Entity.ACCESS, 'objectID', entityID)
         await deleteBatchedEntities(Entity.ENDPOINT, 'projectID', entityID)
         await deleteBatchedEntities(Entity.USAGE, 'projectID', entityID)
