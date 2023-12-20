@@ -13,26 +13,16 @@ import { InputValues } from '@/types'
 import { ensurePromptOrChainAccess } from './chains'
 
 export async function migrateInputs(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.INPUT))
-  const usedParentIDs = new Set(allInputs.map(inputData => inputData.parentID))
-  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
-  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
-  console.log(`Found ${allInputs.length} inputs (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const inputData of allInputs) {
-    if (!!inputData.parentID && !allParentIDs.has(inputData.parentID)) {
-      console.log(`Deleting input ${getID(inputData)} for missing parent ${inputData.parentID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.INPUT, getID(inputData)))
-      }
-    }
+    await datastore.save(
+      toInputData(inputData.parentID, inputData.name, JSON.parse(inputData.values), getID(inputData))
+    )
   }
-  // for (const inputData of allInputs) {
-  //   await datastore.save(
-  //     toInputData(inputData.parentID, inputData.name, JSON.parse(inputData.values), getID(inputData))
-  //   )
-  // }
 }
 
 const toInputData = (parentID: number, name: string, values: string[], inputID?: number) => ({

@@ -3,61 +3,30 @@ import { Entity, buildKey, getDatastore, getID, getRecentEntities, getTimestamp 
 import { ensureProjectAccess } from './projects'
 
 export async function migrateComments(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allComments] = await datastore.runQuery(datastore.createQuery(Entity.COMMENT))
-  const usedParentIDs = new Set(allComments.map(commentData => commentData.parentID))
-  const usedVersionIDs = new Set(allComments.map(commentData => commentData.versionID))
-  const usedProjectIDs = new Set(allComments.map(commentData => commentData.projectID))
-  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
-  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
-  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  const allVersionIDs = new Set(allVersions.map(version => getID(version)))
-  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
-  const allProjectIDs = new Set(allProjects.map(project => getID(project)))
-  console.log(
-    `Found ${allComments.length} comments ` +
-      `(for ${usedParentIDs.size} parents out of ${allParentIDs.size}) ` +
-      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size}) ` +
-      `(for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
-  )
   for (const commentData of allComments) {
-    if (!!commentData.parentID && !allParentIDs.has(commentData.parentID)) {
-      console.log(`Deleting comment ${getID(commentData)} for missing parent ${commentData.parentID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
-      }
-    } else if (!!commentData.versionID && !allVersionIDs.has(commentData.versionID)) {
-      console.log(`Deleting comment ${getID(commentData)} for missing version ${commentData.versionID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
-      }
-    } else if (!!commentData.projectID && !allProjectIDs.has(commentData.projectID)) {
-      console.log(`Deleting comment ${getID(commentData)} for missing project ${commentData.projectID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.COMMENT, getID(commentData)))
-      }
-    }
+    await datastore.save(
+      toCommentData(
+        commentData.userID,
+        commentData.projectID,
+        commentData.parentID,
+        commentData.versionID,
+        commentData.text,
+        commentData.createdAt,
+        commentData.replyTo,
+        commentData.action,
+        commentData.quote,
+        commentData.runID,
+        commentData.itemIndex,
+        commentData.startIndex,
+        getID(commentData)
+      )
+    )
   }
-  //   for (const commentData of allComments) {
-  //     await datastore.save(
-  //       toCommentData(
-  //         commentData.userID,
-  //         commentData.projectID,
-  //         commentData.parentID,
-  //         commentData.versionID,
-  //         commentData.text,
-  //         commentData.createdAt,
-  //         commentData.replyTo,
-  //         commentData.action,
-  //         commentData.quote,
-  //         commentData.runID,
-  //         commentData.itemIndex,
-  //         commentData.startIndex,
-  //         getID(commentData)
-  //       )
-  //     )
-  //   }
 }
 
 export async function saveComment(

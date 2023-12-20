@@ -9,21 +9,13 @@ import {
 } from './datastore'
 
 export async function migrateRatings(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allRatings] = await datastore.runQuery(datastore.createQuery(Entity.RATING))
-  const usedParentIDs = new Set(allRatings.map(ratingData => getID(ratingData)))
-  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
-  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
-  console.log(`Found ${allRatings.length} ratings (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const ratingData of allRatings) {
-    if (!allParentIDs.has(getID(ratingData))) {
-      console.log(`Deleting rating ${getID(ratingData)} for missing parent ${getID(ratingData)}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.RATING, getID(ratingData)))
-      }
-    }
-    // await datastore.save(toRatingData(getID(ratingData), ratingData.createdAt, JSON.parse(ratingData.recentRatings)))
+    await datastore.save(toRatingData(getID(ratingData), ratingData.createdAt, JSON.parse(ratingData.recentRatings)))
   }
 }
 
