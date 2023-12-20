@@ -59,10 +59,11 @@ export default function EndpointsView({
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
   const activeProject = useActiveProject()
+  const endpoints = activeProject.endpoints
 
   const updateActiveLogEntryIndex = (index: number) => {
     setActiveLogEntryIndex(index)
-    const endpoint = activeProject.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
+    const endpoint = endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
     setActiveEndpointID(endpoint?.id)
     setActiveParentID(logEntries[index].parentID)
   }
@@ -77,14 +78,14 @@ export default function EndpointsView({
 
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
-      tabs={logEntries.length > 0 ? ['Endpoints', 'Logs'] : ['Endpoints']}
+      tabs={
+        logEntries.some(entry => endpoints.some(e => e.id === entry.endpointID)) ? ['Endpoints', 'Logs'] : ['Endpoints']
+      }
       activeTab={activeTab}
       setActiveTab={selectTab}>
       {children}
     </TabSelector>
   )
-
-  const endpoints = activeProject.endpoints
 
   const startsEditing = newParentID !== undefined && newVersionID !== undefined
   const [isEditing, setEditing] = useState(startsEditing)
@@ -154,8 +155,8 @@ export default function EndpointsView({
         ? ExtractUnboundChainInputs(activeVersion.items, false)
         : []
       : activeVersion?.prompts && activeVersion?.config
-        ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
-        : []
+      ? ExtractPromptVariables(activeVersion.prompts, activeVersion.config, false)
+      : []
     : []
 
   const minWidth = 460
@@ -219,7 +220,7 @@ export default function EndpointsView({
             <LogEntriesView
               tabSelector={tabSelector}
               logEntries={logEntries}
-              endpoints={activeProject.endpoints}
+              endpoints={endpoints}
               activeIndex={activeLogEntryIndex}
               setActiveIndex={updateActiveLogEntryIndex}
             />
