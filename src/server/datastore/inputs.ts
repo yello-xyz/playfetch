@@ -19,15 +19,16 @@ export async function migrateInputs(postMerge: boolean) {
   const datastore = getDatastore()
   const [allInputs] = await datastore.runQuery(datastore.createQuery(Entity.INPUT))
   for (const inputData of allInputs) {
+    const createdAt = inputData.createdAt ?? new Date()
     await datastore.save(
-      toInputData(inputData.parentID, inputData.name, JSON.parse(inputData.values), getID(inputData))
+      toInputData(inputData.parentID, inputData.name, JSON.parse(inputData.values), createdAt, getID(inputData))
     )
   }
 }
 
-const toInputData = (parentID: number, name: string, values: string[], inputID?: number) => ({
+const toInputData = (parentID: number, name: string, values: string[], createdAt: Date, inputID?: number) => ({
   key: buildKey(Entity.INPUT, inputID),
-  data: { parentID, name, values: JSON.stringify(values) },
+  data: { parentID, createdAt, name, values: JSON.stringify(values) },
   excludeFromIndexes: ['values'],
 })
 
@@ -40,7 +41,7 @@ export async function saveInputValues(userID: number, parentID: number, name: st
       transaction
     )
     const inputID = key ? getID({ key }) : undefined
-    transaction.save(toInputData(parentID, name, values, inputID))
+    transaction.save(toInputData(parentID, name, values, new Date(), inputID))
   })
 }
 
