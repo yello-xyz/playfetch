@@ -91,7 +91,7 @@ async function tryCompleteChat(
     const response = await api.chat.completions.create(
       {
         model: model
-          // TODO remove this after Dec 11th (when the former points to the latter)
+          // TODO remove this when the former points to the latter (was initially going to be Dec 11th but is not)
           .replaceAll('gpt-3.5-turbo-16k', 'gpt-3.5-turbo-1106')
           // TODO remove this once the model is generally available (also update model description)
           .replaceAll('gpt-4-turbo', 'gpt-4-1106-preview'),
