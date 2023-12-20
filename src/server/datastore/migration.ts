@@ -29,4 +29,5 @@ export async function runDataMigrations(postMerge: boolean) {
   await migrateInputs(postMerge)
   await migrateCache(postMerge)
   await migrateAnalytics(postMerge)
+  await migrateAccess(postMerge)
 }

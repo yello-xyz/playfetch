@@ -16,23 +16,34 @@ type Kind = 'project' | 'workspace'
 type State = 'owner' | 'default' | 'pending'
 
 export async function migrateAccess(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allAccess] = await datastore.runQuery(datastore.createQuery(Entity.ACCESS))
+  const usedObjectIDs = new Set(allAccess.map(accessData => accessData.objectID))
+  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  const [allWorkspaces] = await datastore.runQuery(datastore.createQuery(Entity.WORKSPACE))
+  const allObjectIDs = new Set([
+    ...allProjects.map(project => getID(project)),
+    ...allWorkspaces.map(workspace => getID(workspace)),
+  ])
+  console.log(`Found ${allAccess.length} access keys (for ${usedObjectIDs.size} objects out of ${allObjectIDs.size})`)
   for (const accessData of allAccess) {
-    datastore.save(
-      toAccessData(
-        accessData.userID,
-        accessData.objectID,
-        accessData.kind,
-        accessData.state,
-        accessData.grantedBy,
-        accessData.createdAt,
-        getID(accessData)
-      )
-    )
+    if (!!accessData.objectID && !allObjectIDs.has(accessData.objectID)) {
+      console.log(`Deleting access key ${getID(accessData)} for missing object ${accessData.objectID}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.ACCESS, getID(accessData)))
+      }
+    }
+    // datastore.save(
+    //   toAccessData(
+    //     accessData.userID,
+    //     accessData.objectID,
+    //     accessData.kind,
+    //     accessData.state,
+    //     accessData.grantedBy,
+    //     accessData.createdAt,
+    //     getID(accessData)
+    //   )
+    // )
   }
 }
 
