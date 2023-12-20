@@ -11,12 +11,22 @@ import SettingsSidebar from './settingsSidebar'
 import TeamSettings from './teamSettings'
 import { Capitalize } from '@/src/common/formatting'
 import { useActiveProject } from '@/src/client/context/projectContext'
+import { ParseActiveSettingsTabQuery, ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
+import { useRouter } from 'next/router'
+import GitHubSettings from './githubSettings'
 
 const ProvidersPane = 'providers'
 const UsagePane = 'usage'
 const TeamPane = 'team'
 const ConnectorsPane = 'connectors'
-type ActivePane = typeof ProvidersPane | typeof UsagePane | typeof TeamPane | typeof ConnectorsPane
+const SourceControlPane = 'sourceControl'
+
+type ActivePane =
+  | typeof ProvidersPane
+  | typeof UsagePane
+  | typeof TeamPane
+  | typeof ConnectorsPane
+  | typeof SourceControlPane
 
 const titleForPane = (pane: ActivePane) => {
   switch (pane) {
@@ -28,6 +38,8 @@ const titleForPane = (pane: ActivePane) => {
       return 'Team'
     case ConnectorsPane:
       return 'Connectors'
+    case SourceControlPane:
+      return 'Source control'
   }
 }
 
@@ -57,6 +69,8 @@ const descriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
         (isProjectScope ? ' within this project. ' : '. ') +
         'All API keys are encrypted and stored securely.'
       )
+    case SourceControlPane:
+      return 'Synchronise prompt files between your PlayFetch project and your source control system.'
   }
 }
 
@@ -73,6 +87,7 @@ const scopeDescriptionForPane = (pane: ActivePane, isProjectScope: boolean) => {
       return isProjectScope ? projectScopeDescription('connectors') : undefined
     case UsagePane:
     case TeamPane:
+    case SourceControlPane:
       return undefined
   }
 }
@@ -90,7 +105,18 @@ export default function SettingsView({
   const activeProject = useActiveProject()
   const isProjectScope = scope === 'project'
   const scopeID = isProjectScope ? activeProject.id : user.id
-  const [activePane, setActivePane] = useState<ActivePane>(ProvidersPane)
+
+  const router = useRouter()
+  const activePaneFromQuery = ParseActiveSettingsTabQuery(router.query)
+  const [activePane, setActivePane] = useState<ActivePane>(activePaneFromQuery)
+  const updateActivePane = (pane: ActivePane) => {
+    if (pane !== activePane) {
+      router.push(isProjectScope ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
+        shallow: true,
+      })
+      setActivePane(pane)
+    }
+  }
 
   const [costUsage, setCostUsage] = useState<CostUsage>()
 
@@ -105,17 +131,24 @@ export default function SettingsView({
   }, [refreshUsage])
 
   const availableModelProviders = providers.filter(IsModelProvider)
-  const availableQueryProviders = providers.filter(provider => !IsModelProvider(provider))
-
+  const availableQueryProviders = providers.filter(
+    provider => !IsModelProvider(provider) && (QueryProviders as string[]).includes(provider.provider)
+  )
   const allModelProviders = ModelProviders.filter(provider => provider !== DefaultProvider)
-  const availablePanes = [ProvidersPane, UsagePane, ...(isProjectScope ? [TeamPane] : []), ConnectorsPane]
+  const availablePanes = [
+    ProvidersPane,
+    UsagePane,
+    ...(isProjectScope ? [TeamPane] : []),
+    ConnectorsPane,
+    SourceControlPane,
+  ]
 
   return !isProjectScope || activeProject.isOwner ? (
     <div className='flex h-full gap-10 p-10 overflow-hidden bg-gray-25'>
       <SettingsSidebar
         panes={availablePanes as ActivePane[]}
         activePane={activePane}
-        setActivePane={setActivePane}
+        setActivePane={updateActivePane}
         titleForPane={titleForPane}
       />
       <div className='flex flex-col items-start flex-1 gap-3 text-gray-500 max-w-[680px] overflow-y-auto'>
@@ -139,13 +172,21 @@ export default function SettingsView({
               onRefresh={refreshUsage}
             />
           )}
-          {activePane === TeamPane && isProjectScope && <TeamSettings />}
+          {activePane === TeamPane && <TeamSettings />}
           {activePane === ConnectorsPane && (
             <ProviderSettings
               scopeID={scopeID}
               providers={QueryProviders}
               availableProviders={availableQueryProviders}
               includeEnvironment
+              onRefresh={refresh}
+            />
+          )}
+          {activePane === SourceControlPane && (
+            <GitHubSettings
+              scope={scope}
+              scopeID={scopeID}
+              provider={providers.find(provider => provider.provider === 'github')}
               onRefresh={refresh}
             />
           )}

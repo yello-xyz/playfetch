@@ -1,12 +1,19 @@
 import {
   AvailableProvider,
+  AvailableSourceControlProvider,
   EmbeddingModel,
   IsModelProvider,
   LanguageModel,
   ModelProvider,
   QueryProvider,
+  SourceControlProvider,
 } from '@/types'
-import { IsModelAvailable, IsModelDisabled, IsProviderAvailable } from '@/src/common/providerMetadata'
+import {
+  IsModelAvailable,
+  IsModelDisabled,
+  IsProviderAvailable,
+  SourceControlProviders,
+} from '@/src/common/providerMetadata'
 import { createContext, useContext } from 'react'
 
 type ProviderContextType = {
@@ -29,6 +36,13 @@ function useProviders() {
   const checkProviderAvailable = (provider: ModelProvider | QueryProvider) =>
     IsProviderAvailable(provider, availableProviders)
   return [availableProviders, checkModelAvailable, checkProviderAvailable] as const
+}
+
+export function useSourceControlProvider() {
+  const availableProviders = useAvailableProviders()
+  return availableProviders.find(p => (SourceControlProviders as string[]).includes(p.provider)) as
+    | AvailableSourceControlProvider
+    | undefined
 }
 
 export function useModelProviders() {

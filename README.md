@@ -45,6 +45,10 @@ In order to run the app locally, you will need to add some additional variables 
 
 `API_URL=http://localhost:3000`
 
+`NEXTAUTH_URL=http://localhost:3000`
+
+`NEXTAUTH_SECRET=` *[random string of at least 32 characters](https://1password.com/password-generator/)*
+
 `ENCRYPTION_KEY=` *[see "PlayFetch DEV Encryption Key" in the 1Password Engineering vault]*
 
 `PLAYFETCH_API_KEY=` *[see "PlayFetch API Key" in the 1Password Engineering vault]*
@@ -53,15 +57,17 @@ In order to run the app locally, you will need to add some additional variables 
 
 `GCLOUD_STORAGE_BUCKET=playfetch-dev.appspot.com`
 
-`NEXTAUTH_URL=http://localhost:3000`
+- **To use GitHub integration:**
 
-`NEXTAUTH_SECRET=` *[random string of at least 32 characters](https://1password.com/password-generator/)*
+`NEXT_PUBLIC_GITHUB_APP_INSTALL_LINK=https://github.com/apps/playfetch-local/installations/new`
 
-`GOOGLE_ANALYTICS_API_SECRET=` *[see "Google Analytics API" in in the 1Password Engineering vault]*
+`GITHUB_APP_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
 
-`GOOGLE_ANALYTICS_MEASUREMENT_ID=G-7EW4BEVHT1`
+`GITHUB_APP_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
 
-`NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
+`GITHUB_APP_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+
+`GITHUB_APP_PRIVATE_KEY=` *[Generate a new private key at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
 
 - **To use Email authentication:**
 
@@ -69,17 +75,25 @@ In order to run the app locally, you will need to add some additional variables 
 
 `NOREPLY_EMAIL_PASSWORD=` *[see "Gmail Service Account" in the 1Password Engineering vault]*
 
-- **To use Github authentication:**
+- **To use GitHub authentication:**
 
-`GITHUB_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+`GITHUB_CLIENT_ID=` *[Copy this from https://github.com/organizations/yello-xyz/settings/applications - PlayFetch (local)]*
 
-`GITHUB_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/apps/play-fetch-local]*
+`GITHUB_CLIENT_SECRET=` *[Generate a new secret at https://github.com/organizations/yello-xyz/settings/applications - PlayFetch (local)]*
 
 - **To use Google authentication:**
 
 `GOOGLE_CLIENT_ID=` *[Copy this from Google Cloud Dev project → APIs & Services → Credentials → OAuth 2.0 Client IDs]*
 
 `GOOGLE_CLIENT_SECRET=` *[Copy this from Google Cloud Dev project → APIs & Services → Credentials → OAuth 2.0 Client IDs]*
+
+- **To test Google Analytics:**
+
+`GOOGLE_ANALYTICS_API_SECRET=` *[see "Google Analytics API" in in the 1Password Engineering vault]*
+
+`GOOGLE_ANALYTICS_MEASUREMENT_ID=G-7EW4BEVHT1`
+
+`NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
 
 In order to access the Google Cloud Datastore from your local machine, you will need to install the Google Cloud CLI initialize it as explained [here](https://cloud.google.com/sdk/docs/install-sdk) (you can skip the other steps). Run the following commands to log in with your individual Google account (which should be added to the dev@yello.xyz group).
 

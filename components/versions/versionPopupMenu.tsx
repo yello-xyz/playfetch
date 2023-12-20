@@ -8,6 +8,9 @@ import GlobalPopupMenu from '../globalPopupMenu'
 import { useRouter } from 'next/router'
 import { CompareRoute, NewEndpointRoute, ParseNumberQuery } from '@/src/common/clientRoute'
 import { WithDismiss } from '@/src/client/context/globalPopupContext'
+import { useState } from 'react'
+import PickNameDialog from '../pickNameDialog'
+import { useSourceControlProvider } from '@/src/client/context/providerContext'
 
 export default function VersionPopupMenu<Version extends PromptVersion | ChainVersion>({
   version,
@@ -21,6 +24,7 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
   const refreshActiveItem = useRefreshActiveItem()
 
   const setDialogPrompt = useModalDialogPrompt()
+  const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
 
   const chainReference = IsPromptVersion(version) ? version.usedInChain : null
 
@@ -53,19 +57,34 @@ export default function VersionPopupMenu<Version extends PromptVersion | ChainVe
     IsPromptVersion(version) && (activeItem as ActivePrompt).canSuggestImprovements
       ? () => api.suggestPrompt(activeItem.id, version.id, currentVersion.id).then(refreshActiveItem)
       : undefined
+  const availableProvider = useSourceControlProvider()
+  const exportVersion =
+    IsPromptVersion(version) && availableProvider?.scopeID === projectID ? () => setShowPickNamePrompt(true) : undefined
 
   const loadPopup = (): [typeof VersionPopup, VersionPopupProps] => [
     VersionPopup,
-    { deleteVersion, createEndpoint, compareVersion, suggestImprovement },
+    { deleteVersion, createEndpoint, compareVersion, exportVersion, suggestImprovement },
   ]
 
-  return <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
+  return showPickNamePrompt ? (
+    <PickNameDialog
+      title='Pick File Name'
+      confirmTitle='Export'
+      label='File Name'
+      initialName={(activeItem as ActivePrompt).sourcePath ?? `${activeItem.name}.yaml`}
+      onConfirm={fileName => api.exportPrompt(projectID!, version.id, fileName).then(_ => refreshActiveItem())}
+      onDismiss={() => setShowPickNamePrompt(false)}
+    />
+  ) : (
+    <GlobalPopupMenu icon={dotsIcon} loadPopup={loadPopup} selectedCell={selectedCell} />
+  )
 }
 
 type VersionPopupProps = {
   deleteVersion: () => void
   createEndpoint: () => void
   compareVersion?: () => void
+  exportVersion?: () => void
   suggestImprovement?: () => void
 }
 
@@ -73,6 +92,7 @@ function VersionPopup({
   deleteVersion,
   createEndpoint,
   compareVersion,
+  exportVersion,
   suggestImprovement,
   withDismiss,
 }: VersionPopupProps & WithDismiss) {
@@ -80,6 +100,7 @@ function VersionPopup({
     <PopupContent className='w-44'>
       {compareVersion && <PopupMenuItem title='Compare' callback={withDismiss(compareVersion)} first />}
       <PopupMenuItem title='Create Endpoint' callback={withDismiss(createEndpoint)} first={!compareVersion} />
+      {exportVersion && <PopupMenuItem title='Export' callback={withDismiss(exportVersion)} />}
       {suggestImprovement && <PopupMenuItem title='Suggest Improvement' callback={withDismiss(suggestImprovement)} />}
       <PopupMenuItem destructive title='Delete' callback={withDismiss(deleteVersion)} last />
     </PopupContent>

@@ -6,7 +6,7 @@ const testFilterProviders = (testDescription: string, scopeIDs: number[], input:
 const provider = (provider: string, scopeID: number, hasKey = true) => ({
   provider,
   scopeID,
-  apiKey: hasKey ? 'sk-1234' : null,
+  encryptedAPIKey: hasKey ? 'sk-1234' : null,
 })
 
 testFilterProviders('Retains empty providers', [], [], [])

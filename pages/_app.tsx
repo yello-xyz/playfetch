@@ -18,7 +18,7 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 const escapeHome = () => {
   if (window.location.pathname !== ClientRoute.Home && process.env.NODE_ENV !== 'development') {
-    window.location.href = ClientRoute.Home
+    window.open(ClientRoute.Home, '_self')
   }
 }
 

@@ -18,11 +18,15 @@ export const ConsumeStream = async (
     const lines = text.split('\n')
     for (const line of lines.filter(line => line.trim().length > 0)) {
       const data = line.split('data:').slice(-1)[0]
-      const { inputIndex, index, offset, message, cost, duration, failed, continuationID, userID } = JSON.parse(data)
-      const id = index + offset
-      const previousOutput = runs[inputIndex][id]?.output ?? ''
-      const output = message ? `${previousOutput}${message}` : previousOutput
-      runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }
+      try {
+        const { inputIndex, index, offset, message, cost, duration, failed, continuationID, userID } = JSON.parse(data)
+        const id = index + offset
+        const previousOutput = runs[inputIndex][id]?.output ?? ''
+        const output = message ? `${previousOutput}${message}` : previousOutput
+        runs[inputIndex][id] = { id, index, output, cost, duration, failed, continuationID, userID }
+      } catch (error) {
+        console.error(error, data)
+      }
     }
     const maxSteps = Math.max(...Object.values(runs).map(runs => Object.keys(runs).length))
     const sortedRuns = Object.entries(runs)

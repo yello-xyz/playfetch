@@ -8,7 +8,6 @@ import {
   getFilteredEntities,
   getFilteredOrderedEntities,
   getID,
-  getKeyedEntities,
   getKeyedEntity,
   getRecentEntities,
   getTimestamp,
@@ -20,58 +19,63 @@ import { PropertyFilter, and, or } from '@google-cloud/datastore'
 import { saveRunRatingForParent } from './ratings'
 
 export async function migrateRuns(postMerge: boolean) {
-  if (postMerge) {
-    const datastore = getDatastore()
-    const [intermediateRuns] = await datastore.runQuery(
-      datastore.createQuery(Entity.RUN).filter(new PropertyFilter('parentRunID', '!=', null))
-    )
-    const versionIDs = [...new Set(intermediateRuns.map(runData => runData.versionID))]
-    const versionsData = await getKeyedEntities(Entity.VERSION, versionIDs)
-    const promptVersionIDs = new Set(
-      versionsData.filter(versionData => versionData.items === null).map(versionData => getID(versionData))
-    )
-    const intermediatePromptRuns = intermediateRuns.filter(runData => promptVersionIDs.has(runData.versionID))
-    await datastore.delete(intermediatePromptRuns.map(runData => buildKey(Entity.RUN, getID(runData))))
-    console.log(
-      `Deleted ${intermediatePromptRuns.length} intermediate prompt runs`,
-      intermediatePromptRuns.map(runData => getID(runData))
-    )
-  }
-
-  return
-
   const datastore = getDatastore()
-  let remainingSaveCount = 100
   const [allRuns] = await datastore.runQuery(datastore.createQuery(Entity.RUN))
+  const usedParentIDs = new Set(allRuns.map(runData => runData.parentID))
+  const usedVersionIDs = new Set(allRuns.map(runData => runData.versionID))
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
+  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
+  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
+  const allVersionIDs = new Set(allVersions.map(version => getID(version)))
+  console.log(
+    `Found ${allRuns.length} runs ` +
+      `(for ${usedParentIDs.size} parents out of ${allParentIDs.size}) ` +
+      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size})`
+  )
   for (const runData of allRuns) {
-    if (remainingSaveCount-- <= 0) {
-      console.log(`‼️  Please run this migration again to process remaining runs (total count ${allRuns.length})`)
-      return
+    if (!!runData.parentID && !allParentIDs.has(runData.parentID)) {
+      console.log(`Deleting run ${getID(runData)} for missing parent ${runData.parentID}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+      }
+    } else if (!!runData.versionID && !allVersionIDs.has(runData.versionID)) {
+      console.log(`Deleting run ${getID(runData)} for missing version ${runData.versionID}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.RUN, getID(runData)))
+      }
     }
-    await datastore.save(
-      toRunData(
-        runData.userID,
-        runData.parentID,
-        runData.versionID,
-        runData.parentRunID,
-        runData.itemIndex,
-        JSON.parse(runData.inputs),
-        runData.output,
-        runData.createdAt,
-        runData.cost,
-        runData.inputTokens,
-        runData.outputTokens,
-        runData.duration,
-        JSON.parse(runData.labels),
-        runData.rating,
-        runData.reason,
-        runData.continuationID,
-        runData.canContinue,
-        getID(runData)
-      )
-    )
   }
-  console.log('✅ Processed all remaining runs')
+  // let remainingSaveCount = 100
+  // for (const runData of allRuns) {
+  //   if (remainingSaveCount-- <= 0) {
+  //     console.log(`‼️  Please run this migration again to process remaining runs (total count ${allRuns.length})`)
+  //     return
+  //   }
+  //   await datastore.save(
+  //     toRunData(
+  //       runData.userID,
+  //       runData.parentID,
+  //       runData.versionID,
+  //       runData.parentRunID,
+  //       runData.itemIndex,
+  //       JSON.parse(runData.inputs),
+  //       runData.output,
+  //       runData.createdAt,
+  //       runData.cost,
+  //       runData.inputTokens,
+  //       runData.outputTokens,
+  //       runData.duration,
+  //       JSON.parse(runData.labels),
+  //       runData.rating,
+  //       runData.reason,
+  //       runData.continuationID,
+  //       runData.canContinue,
+  //       getID(runData)
+  //     )
+  //   )
+  // }
+  // console.log('✅ Processed all remaining runs')
 }
 
 export const allocateRunIDs = (count: number) => allocateIDs(Entity.RUN, count)

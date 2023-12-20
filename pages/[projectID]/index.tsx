@@ -17,7 +17,7 @@ import ClientRoute, {
   EndpointsRoute,
   ParseActiveItemQuery,
   ProjectRoute,
-  SettingsRoute,
+  ProjectSettingsRoute,
   WorkspaceRoute,
 } from '@/src/common/clientRoute'
 import ModalDialog, { DialogPrompt } from '@/components/modalDialog'
@@ -176,7 +176,7 @@ export default function Home({
     setActiveItem(SettingsItem)
     updateVersion(undefined)
     if (!settings) {
-      router.push(SettingsRoute(activeProject.id), undefined, { shallow: true })
+      router.push(ProjectSettingsRoute(activeProject.id), undefined, { shallow: true })
     }
   }
 

@@ -148,7 +148,7 @@ export default function Privacy() {
               </ListItem>
 
               <ListItem>
-                We collect personal information when you sign in using your Google account or Github account. This
+                We collect personal information when you sign in using your Google account or GitHub account. This
                 information consists of your email address, full name, and avatar image (if available).
                 <Table>
                   <TableCell>How we use this personal information</TableCell>

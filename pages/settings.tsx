@@ -9,6 +9,8 @@ import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '@/components/topBar
 import api from '@/src/client/api'
 
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
+import ClientRoute from '@/src/common/clientRoute'
 const SettingsView = dynamic(() => import('@/components/settings/settingsView'))
 
 export const getServerSideProps = withLoggedInSession(async ({ user }) => {
@@ -18,6 +20,7 @@ export const getServerSideProps = withLoggedInSession(async ({ user }) => {
 })
 
 export default function Settings({ user, initialProviders }: { user: User; initialProviders: AvailableProvider[] }) {
+  const router = useRouter()
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
 
   const [scopedProviders, setScopedProviders] = useState(initialProviders)
@@ -29,7 +32,7 @@ export default function Settings({ user, initialProviders }: { user: User; initi
         <ModalDialogContext.Provider value={{ setDialogPrompt }}>
           <main className='flex flex-col h-screen overflow-hidden text-sm'>
             <TopBar>
-              <TopBarBackItem />
+              <TopBarBackItem onNavigateBack={() => router.push(ClientRoute.Home)} />
               <span className='text-base font-medium'>Settings</span>
               <TopBarAccessoryItem />
             </TopBar>

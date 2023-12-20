@@ -29,8 +29,6 @@ export const CompareRoute = (projectID: number, itemID?: number, versionID?: num
 
 export const EndpointsRoute = (projectID: number) => `${ProjectRoute(projectID)}?e=1`
 
-export const SettingsRoute = (projectID: number) => `${ProjectRoute(projectID)}?s=1`
-
 export const NewEndpointRoute = (projectID: number, parentID: number, versionID: number) =>
   `${EndpointsRoute(projectID)}&p=${parentID}&v=${versionID}`
 
@@ -64,6 +62,30 @@ export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
     }
   }
   return { promptID, chainID, compare, endpoints, settings }
+}
+
+type ActiveSettingsTab = 'providers' | 'usage' | 'team' | 'connectors' | 'sourceControl'
+
+export const UserSettingsRoute = (activeTab: ActiveSettingsTab = 'providers') =>
+  `${ClientRoute.Settings}${activeTab !== 'providers' ? `?t=${activeTab[0]}` : ''}`
+
+export const ProjectSettingsRoute = (projectID: number, activeTab: ActiveSettingsTab = 'providers') =>
+  `${ProjectRoute(projectID)}?s=1${activeTab !== 'providers' ? `&t=${activeTab[0]}` : ''}`
+
+export const ParseActiveSettingsTabQuery = (query: any) => {
+  const { t: activeTab } = ParseQuery(query)
+  switch (activeTab) {
+    case 'u':
+      return 'usage'
+    case 't':
+      return 'team'
+    case 'c':
+      return 'connectors'
+    case 's':
+      return 'sourceControl'
+    default:
+      return 'providers'
+  }
 }
 
 export default ClientRoute

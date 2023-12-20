@@ -9,15 +9,18 @@ import {
   ModelProvider,
   Prompts,
   QueryProvider,
+  SourceControlProvider,
 } from '@/types'
 import openaiIcon from '@/public/openai.svg'
 import anthropicIcon from '@/public/anthropic.svg'
 import googleIcon from '@/public/google.svg'
 import cohereIcon from '@/public/cohere.svg'
 import pineconeIcon from '@/public/pinecone.svg'
+import githubIcon from '@/public/github.svg'
 
 export const ModelProviders: ModelProvider[] = ['anthropic', 'cohere', 'google', 'openai']
 export const QueryProviders: QueryProvider[] = ['pinecone']
+export const SourceControlProviders: SourceControlProvider[] = ['github']
 
 export const EmbeddingModels: EmbeddingModel[] = ['text-embedding-ada-002']
 export const PublicLanguageModels: DefaultLanguageModel[] = [
@@ -33,7 +36,7 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
 
-export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
+export const IconForProvider = (provider: ModelProvider | QueryProvider | SourceControlProvider) => {
   switch (provider) {
     case 'openai':
       return openaiIcon
@@ -45,10 +48,12 @@ export const IconForProvider = (provider: ModelProvider | QueryProvider) => {
       return cohereIcon
     case 'pinecone':
       return pineconeIcon
+    case 'github':
+      return githubIcon
   }
 }
 
-export const LabelForProvider = (provider: ModelProvider | QueryProvider) => {
+export const LabelForProvider = (provider: ModelProvider | QueryProvider | SourceControlProvider) => {
   switch (provider) {
     case 'openai':
       return 'OpenAI'
@@ -60,6 +65,8 @@ export const LabelForProvider = (provider: ModelProvider | QueryProvider) => {
       return 'Cohere'
     case 'pinecone':
       return 'Pinecone'
+    case 'github':
+      return 'GitHub'
   }
 }
 
@@ -95,8 +102,10 @@ const customModelFromProviders = (model: LanguageModel, providers: AvailableMode
   return providers.flatMap(provider => provider.customModels).find(m => m.id === model) ?? null
 }
 
-export const IsProviderAvailable = (provider: ModelProvider | QueryProvider, providers: AvailableProvider[]): boolean =>
-  !!providers.find(p => p.provider === provider)
+export const IsProviderAvailable = (
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
+  providers: AvailableProvider[]
+): boolean => !!providers.find(p => p.provider === provider)
 
 export const IsModelDisabled = (model: LanguageModel, providers: AvailableModelProvider[]): boolean => {
   const customModel = customModelFromProviders(model, providers)
@@ -125,7 +134,7 @@ export const SupportsSeed = (model: LanguageModel): boolean => {
     case 'command':
       return false
     default:
-      return SupportsSystemPrompt(baseModelForModel(model))
+      return SupportsSeed(baseModelForModel(model))
   }
 }
 
@@ -143,7 +152,7 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'command':
       return false
     default:
-      return SupportsSystemPrompt(baseModelForModel(model))
+      return SupportsJsonMode(baseModelForModel(model))
   }
 }
 

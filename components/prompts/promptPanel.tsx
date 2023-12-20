@@ -26,7 +26,7 @@ import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
 import { ReactNode, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import ClientRoute, { SettingsRoute } from '@/src/common/clientRoute'
+import { ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { useActiveProject } from '@/src/client/context/projectContext'
@@ -206,7 +206,7 @@ const useNavigateToSettings = (onDismiss?: () => void) => {
   const project = useActiveProject()
   return () => {
     onDismiss?.()
-    router.push(project.isOwner ? SettingsRoute(project.id) : ClientRoute.Settings)
+    router.push(project.isOwner ? ProjectSettingsRoute(project.id) : UserSettingsRoute())
   }
 }
 

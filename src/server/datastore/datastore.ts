@@ -12,6 +12,7 @@ export const getDatastore = () => {
 }
 
 export enum Entity {
+  CLEANUP = 'cleanup',
   ENVIRONMENT = 'environment',
   USER = 'user',
   PROJECT = 'project',
@@ -34,13 +35,21 @@ export enum Entity {
   RATING = 'rating',
 }
 
+export enum NextAuthEntity {
+  USER = '_nextauth_user',
+  ACCOUNT = '_nextauth_account',
+  TOKEN = '_nextauth_token',
+}
+
+type EntityType = Entity | NextAuthEntity
+
 const getKey = (entity: any) => entity[getDatastore().KEY] as Key
 
 export const getID = (entity: any) => Number((entity.key ?? getKey(entity)).id)
 
 export const getTimestamp = (entity: any, key = 'createdAt') => (entity[key] as Date)?.getTime()
 
-export const buildKey = (type: string, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
+export const buildKey = (type: EntityType, id?: number) => getDatastore().key([type, ...(id ? [id] : [])])
 
 export const buildFilter = (key: string, value: {} | null) => new PropertyFilter(key, '=', value)
 
@@ -53,7 +62,7 @@ const orderQuery = (query: Query, sortKeys: string[]) =>
   sortKeys.reduce((q, sortKey) => q.order(sortKey, { descending: true }), query)
 
 const buildQuery = (
-  type: string,
+  type: EntityType,
   filter: EntityFilter | undefined,
   limit: number,
   sortKeys: string[],
@@ -66,7 +75,7 @@ const buildQuery = (
   )
 
 const getInternalFilteredEntities = (
-  type: string,
+  type: EntityType,
   filter?: EntityFilter,
   limit = 100,
   sortKeys = [] as string[],
@@ -91,7 +100,7 @@ const dateFilter = (key: string, since?: Date, before?: Date, pagingBackwards = 
         : undefined
 
 export const getRecentEntities = (
-  type: string,
+  type: EntityType,
   limit?: number,
   since?: Date,
   before?: Date,
@@ -99,14 +108,14 @@ export const getRecentEntities = (
   pagingBackwards = false
 ) => getInternalFilteredEntities(type, dateFilter(sortKey, since, before, pagingBackwards), limit, [sortKey])
 
-export const getFilteredEntities = (type: string, filter: EntityFilter, limit?: number) =>
+export const getFilteredEntities = (type: EntityType, filter: EntityFilter, limit?: number) =>
   getInternalFilteredEntities(type, filter, limit)
 
-export const getFilteredEntity = (type: string, filter: EntityFilter, transaction?: Transaction) =>
+export const getFilteredEntity = (type: EntityType, filter: EntityFilter, transaction?: Transaction) =>
   getInternalFilteredEntities(type, filter, 1, [], [], transaction).then(([entity]) => entity)
 
 const getInternalEntities = (
-  type: string,
+  type: EntityType,
   key: string,
   value: {},
   limit?: number,
@@ -114,68 +123,70 @@ const getInternalEntities = (
   transaction?: Transaction
 ) => getInternalFilteredEntities(type, buildFilter(key, value), limit, sortKeys, [], transaction)
 
-export const getEntities = (type: string, key: string, value: {}, transaction?: Transaction) =>
+export const getEntities = (type: EntityType, key: string, value: {}, transaction?: Transaction) =>
   getInternalEntities(type, key, value, undefined, [], transaction)
 
 export const getFilteredOrderedEntities = (
-  type: string,
+  type: EntityType,
   filter: EntityFilter,
   sortKeys = ['createdAt'],
   limit?: number
 ) => getInternalFilteredEntities(type, filter, limit, sortKeys, [])
 
-export const getOrderedEntities = (type: string, key: string, value: {}, sortKeys = ['createdAt'], limit?: number) =>
-  getFilteredOrderedEntities(type, buildFilter(key, value), sortKeys, limit)
+export const getOrderedEntities = (
+  type: EntityType,
+  key: string,
+  value: {},
+  sortKeys = ['createdAt'],
+  limit?: number
+) => getFilteredOrderedEntities(type, buildFilter(key, value), sortKeys, limit)
 
-export const getEntity = async (type: string, key: string, value: {}, mostRecent = false) =>
-  getInternalEntities(type, key, value, 1, mostRecent ? ['createdAt'] : []).then(([entity]) => entity)
+export const getLastEntity = (type: EntityType, filter: EntityFilter) =>
+  getFilteredOrderedEntities(type, filter, ['createdAt'], 1).then(([entity]) => entity)
 
-const getFilteredEntityKeys = (type: string, filter: EntityFilter, limit?: number, transaction?: Transaction) =>
+export const getEntity = async (type: EntityType, key: string, value: {}) =>
+  getInternalEntities(type, key, value, 1, []).then(([entity]) => entity)
+
+const getFilteredEntityKeys = (type: EntityType, filter: EntityFilter, limit?: number, transaction?: Transaction) =>
   getInternalFilteredEntities(type, filter, limit, [], ['__key__'], transaction).then(entities => entities.map(getKey))
 
-export const getFilteredEntityKey = (type: string, filter: EntityFilter, transaction?: Transaction) =>
+export const getFilteredEntityKey = (type: EntityType, filter: EntityFilter, transaction?: Transaction) =>
   getFilteredEntityKeys(type, filter, 1, transaction).then(([key]) => key)
 
-export const getEntityKeys = (type: string, key: string, value: {}, limit?: number) =>
+export const getEntityKeys = (type: EntityType, key: string, value: {}, limit?: number) =>
   getFilteredEntityKeys(type, buildFilter(key, value), limit)
 
-export const getEntityKey = (type: string, key: string, value: {}) =>
+export const getEntityKey = (type: EntityType, key: string, value: {}) =>
   getEntityKeys(type, key, value, 1).then(([key]) => key)
 
-const getFilteredEntityIDs = (type: string, filter: EntityFilter, limit?: number) =>
+const getFilteredEntityIDs = (type: EntityType, filter: EntityFilter, limit?: number) =>
   getFilteredEntityKeys(type, filter, limit).then(keys => keys.map(key => getID({ key })))
 
-export const getFilteredEntityID = (type: string, filter: EntityFilter) =>
+export const getFilteredEntityID = (type: EntityType, filter: EntityFilter) =>
   getFilteredEntityIDs(type, filter, 1).then(([id]) => id)
 
-export const getEntityIDs = (type: string, key: string, value: {}, limit?: number) =>
-  getFilteredEntityIDs(type, buildFilter(key, value), limit)
-
-export const getEntityID = (type: string, key: string, value: {}) =>
-  getEntityIDs(type, key, value, 1).then(([id]) => id)
-
-export const getKeyedEntities = async (type: string, ids: number[], transaction?: Transaction): Promise<any[]> =>
+export const getKeyedEntities = async (type: EntityType, ids: number[], transaction?: Transaction): Promise<any[]> =>
   ids.length
     ? (transaction ?? getDatastore()).get(ids.map(id => buildKey(type, id))).then(([entities]) => entities)
     : Promise.resolve([])
 
-export const getKeyedEntity = async (type: string, id: number, transaction?: Transaction) =>
+export const getKeyedEntity = async (type: EntityType, id: number, transaction?: Transaction) =>
   getKeyedEntities(type, [id], transaction).then(([entity]) => entity)
 
-export const getFilteredEntityCount = async (type: string, filter: EntityFilter) => {
+export const getFilteredEntityCount = async (type: EntityType, filter: EntityFilter) => {
   const datastore = getDatastore()
   const query = datastore.createQuery(type).filter(filter)
   const [[{ count }]] = await datastore.runAggregationQuery(new AggregateQuery(query).count('count'))
   return count
 }
 
-export const getEntityCount = async (type: string, key: string, value: {}) =>
+export const getEntityCount = async (type: EntityType, key: string, value: {}) =>
   getFilteredEntityCount(type, buildFilter(key, value))
 
-export const allocateIDs = (type: string, count: number, transaction?: Transaction) =>
+export const allocateIDs = (type: EntityType, count: number, transaction?: Transaction) =>
   (transaction ?? getDatastore()).allocateIds(buildKey(type), count).then(([keys]) => keys.map(key => getID({ key })))
 
-export const allocateID = (type: string, transaction?: Transaction) =>
+export const allocateID = (type: EntityType, transaction?: Transaction) =>
   allocateIDs(type, 1, transaction).then(([id]) => id)
 
 export const runTransactionWithExponentialBackoff = async <T>(

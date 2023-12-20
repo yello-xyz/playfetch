@@ -1,5 +1,8 @@
 ## PlayFetch Changelog
 
+### v0.20 - 2023-12-20
+- GitHub integration
+
 ### v0.19 - 2023-12-14
 - Rating prediction
 - Generate prompt improvement suggestions

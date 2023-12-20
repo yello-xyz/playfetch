@@ -8,9 +8,10 @@ import {
   DefaultLanguageModel,
   ModelProvider,
   QueryProvider,
+  SourceControlProvider,
 } from '@/types'
 import { ExtraModelsForProvider } from '../providers/integration'
-import { ModelProviders } from '@/src/common/providerMetadata'
+import { ModelProviders, SourceControlProviders } from '@/src/common/providerMetadata'
 import { EntityFilter } from '@google-cloud/datastore/build/src/filter'
 import { SortAndFilterProviderData } from '../providers/cascade'
 import { ensureProjectOwnership } from './projects'
@@ -21,10 +22,10 @@ const getFilteredProviderData = (filter: EntityFilter, scopeIDs: number[]) =>
 const buildScopeFilter = (scopeIDs: number[]) => new PropertyFilter('scopeID', 'IN', scopeIDs)
 const getMultipleProviderData = (scopeIDs: number[]) => getFilteredProviderData(buildScopeFilter(scopeIDs), scopeIDs)
 
-const buildSingleProviderFilter = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
-  and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)])
-const getSingleProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider) =>
-  getFilteredProviderData(buildSingleProviderFilter(scopeIDs, provider), scopeIDs).then(([entity]) => entity)
+const getSingleProviderData = (scopeIDs: number[], provider: ModelProvider | QueryProvider | SourceControlProvider) =>
+  getFilteredProviderData(and([buildScopeFilter(scopeIDs), buildFilter('provider', provider)]), scopeIDs).then(
+    ([entity]) => entity
+  )
 
 type ProviderMetadata = {
   customModels?: CustomModel[]
@@ -35,28 +36,34 @@ type ProviderMetadata = {
 export async function migrateProviders(postMerge: boolean) {
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
+  const usedScopeIDs = new Set(allProviders.map(providerData => providerData.scopeID))
+  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
+  const allScopeIDs = new Set([...allProjects.map(project => getID(project)), ...allUsers.map(user => getID(user))])
+  console.log(`Found ${allProviders.length} providers (for ${usedScopeIDs.size} scopes out of ${allScopeIDs.size})`)
   for (const providerData of allProviders) {
-    await getDatastore().save(
-      toProviderData(
-        providerData.scopeID,
-        providerData.provider,
-        postMerge
-          ? providerData.encryptedAPIKey
-          : providerData.apiKey
-            ? encrypt(providerData.apiKey)
-            : providerData.encryptedAPIKey,
-        JSON.parse(providerData.metadata),
-        providerData.createdAt,
-        getID(providerData),
-        postMerge && providerData.encryptedAPIKey ? undefined : providerData.apiKey
-      )
-    )
+    if (!!providerData.scopeID && !allScopeIDs.has(providerData.scopeID)) {
+      console.log(`Deleting provider ${getID(providerData)} for missing scope ${providerData.scopeID}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.PROVIDER, getID(providerData)))
+      }
+    }
+    // await getDatastore().save(
+    //   toProviderData(
+    //     providerData.scopeID,
+    //     providerData.provider,
+    //     providerData.encryptedAPIKey,
+    //     JSON.parse(providerData.metadata),
+    //     providerData.createdAt,
+    //     getID(providerData)
+    //   )
+    // )
   }
 }
 
 export async function getProviderCredentials(
   scopeIDs: number[],
-  provider: ModelProvider | QueryProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
   modelToCheck?: string
 ): Promise<{ scopeID: number | null; providerID: number | null; apiKey: string | null; environment: string | null }> {
   const providerData = await getSingleProviderData(scopeIDs, provider)
@@ -80,12 +87,11 @@ export async function getProviderCredentials(
 
 const toProviderData = (
   scopeID: number,
-  provider: ModelProvider | QueryProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
   encryptedAPIKey: string | null,
   metadata: ProviderMetadata,
   createdAt = new Date(),
-  providerID?: number,
-  apiKey?: string | null // TODO delete after next merge to prod (also in exludedFromIndexes)
+  providerID?: number
 ) => ({
   key: buildKey(Entity.PROVIDER, providerID),
   data: {
@@ -94,9 +100,8 @@ const toProviderData = (
     provider,
     encryptedAPIKey,
     metadata: JSON.stringify(metadata),
-    apiKey,
   },
-  excludeFromIndexes: ['encryptedAPIKey', 'metadata', 'apiKey'],
+  excludeFromIndexes: ['encryptedAPIKey', 'metadata'],
 })
 
 const toAvailableProvider = (data: any): AvailableProvider => {
@@ -106,6 +111,7 @@ const toAvailableProvider = (data: any): AvailableProvider => {
     ...(ModelProviders.includes(data.provider)
       ? { customModels: metadata.customModels ?? [], gatedModels: metadata.gatedModels ?? [] }
       : { environment: metadata.environment ?? '' }),
+    ...(SourceControlProviders.includes(data.provider) ? { scopeID: data.scopeID } : {}),
   }
 }
 
@@ -115,11 +121,14 @@ export const ensureScopeOwnership = async (userID: number, scopeID: number) =>
 export async function saveProviderKey(
   userID: number,
   scopeID: number,
-  provider: ModelProvider | QueryProvider,
+  provider: ModelProvider | QueryProvider | SourceControlProvider,
   apiKey: string | null,
   environment: string | undefined
 ) {
   await ensureScopeOwnership(userID, scopeID)
+  if (provider === 'github' && scopeID !== userID && apiKey === null && environment !== undefined) {
+    apiKey = (await getProviderCredentials([userID], provider)).apiKey
+  }
   const providerData = await getSingleProviderData([scopeID], provider)
   const providerID = providerData ? getID(providerData) : undefined
   const encryptedAPIKey = apiKey ? encrypt(apiKey) : null

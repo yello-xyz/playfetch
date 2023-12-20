@@ -6,7 +6,7 @@ import Icon from '../icon'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import api from '@/src/client/api'
 import Link from 'next/link'
-import ClientRoute from '@/src/common/clientRoute'
+import ClientRoute, { UserSettingsRoute } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import UserAvatar from './userAvatar'
 import UserBadge from './userBadge'
@@ -19,7 +19,7 @@ export default function UserSidebarItem() {
 
   const selectSettings = () => {
     setMenuExpanded(false)
-    router.push(ClientRoute.Settings)
+    router.push(UserSettingsRoute())
   }
 
   const logOut = async () => api.logOut().then(() => signOut())

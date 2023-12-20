@@ -24,6 +24,11 @@ indexes:
   - name: createdAt
     direction: desc
 
+- kind: prompt
+  properties:
+  - name: projectID
+  - name: sourcePath
+
 - kind: chain
   properties:
   - name: projectID
@@ -33,6 +38,13 @@ indexes:
 - kind: version
   properties:
   - name: parentID
+  - name: createdAt
+    direction: desc
+
+- kind: version
+  properties:
+  - name: parentID
+  - name: didRun
   - name: createdAt
     direction: desc
 

@@ -56,7 +56,7 @@ export default function Button({
   roundedClass?: string
   showSpinner?: boolean
   disabled?: boolean
-  onClick: () => void | Promise<void>
+  onClick: () => void | Promise<any>
   onDisabledClick?: () => void
 }) {
   const colorForType = (type: ButtonType) => {

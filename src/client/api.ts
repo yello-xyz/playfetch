@@ -20,6 +20,7 @@ import {
   RunRating,
   CostUsage,
   Run,
+  SourceControlProvider,
 } from '@/types'
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
@@ -38,7 +39,7 @@ async function parseResponse(response: Response, responseType: ResponseType) {
         return response.body?.getReader()
     }
   } else if (response.status === 401) {
-    window.location.href = ClientRoute.Home
+    window.open(ClientRoute.Home, '_self')
   }
   return Promise.resolve(null)
 }
@@ -288,11 +289,20 @@ const api = {
   },
   updateProviderKey: function (
     scopeID: number,
-    provider: ModelProvider | QueryProvider,
+    provider: ModelProvider | QueryProvider | SourceControlProvider,
     apiKey: string | null,
     environment?: string
   ) {
     return post(this.updateProviderKey, { scopeID, provider, apiKey, environment })
+  },
+  importPrompts: function (projectID: number) {
+    return post(this.importPrompts, { projectID })
+  },
+  exportPrompts: function (projectID: number) {
+    return post(this.exportPrompts, { projectID })
+  },
+  exportPrompt: function (projectID: number, versionID: number, fileName: string) {
+    return post(this.exportPrompts, { projectID, versionID, fileName })
   },
   updateProviderModel: function (
     scopeID: number,

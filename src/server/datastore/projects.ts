@@ -8,7 +8,6 @@ import {
   getDatastore,
   getEntities,
   getEntityCount,
-  getEntityKeys,
   getID,
   getKeyedEntities,
   getKeyedEntity,
@@ -26,35 +25,25 @@ import {
   revokeUserAccess,
   getAccessibleObjectIDs,
 } from './access'
-import { addFirstProjectPrompt, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
+import { addPromptToProject, getUniqueName, matchesDefaultName, toPrompt } from './prompts'
 import { getActiveUsers, toUser } from './users'
 import { DefaultEndpointFlavor, toEndpoint } from './endpoints'
 import { toChain } from './chains'
 import { ensureWorkspaceAccess, getPendingAccessObjects, getWorkspaceUsers } from './workspaces'
 import { toUsage } from './usage'
 import { StripVariableSentinels } from '@/src/common/formatting'
-import { Key } from '@google-cloud/datastore'
 import { getAnalyticsForProject } from './analytics'
 import { toComment } from './comments'
+import { deleteEntity } from './cleanup'
 
 export async function migrateProjects(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
   for (const projectData of allProjects) {
-    if (projectData.apiKeyHash) {
-      await updateProject(
-        {
-          ...projectData,
-          encryptedAPIKey: postMerge
-            ? projectData.encryptedAPIKey
-            : projectData.apiKeyDev
-              ? encrypt(projectData.apiKeyDev)
-              : projectData.encryptedAPIKey,
-          apiKeyDev: postMerge && projectData.encryptedAPIKey ? undefined : projectData.apiKeyDev,
-        },
-        false
-      )
-    }
+    await updateProject({ ...projectData }, false)
   }
 }
 
@@ -71,8 +60,7 @@ const toProjectData = (
   favorited: number[],
   apiKeyHash: string | undefined,
   encryptedAPIKey: string | undefined,
-  projectID: number,
-  apiKeyDev?: string // TODO delete after next merge to prod (also in exludedFromIndexes)
+  projectID: number
 ) => ({
   key: buildKey(Entity.PROJECT, projectID),
   data: {
@@ -86,9 +74,8 @@ const toProjectData = (
     favorited: JSON.stringify(favorited),
     apiKeyHash,
     encryptedAPIKey,
-    apiKeyDev, // TODO do NOT store api key in datastore but show it once to user on creation
   },
-  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'apiKeyDev', 'labels', 'flavors'],
+  excludeFromIndexes: ['name', 'encryptedAPIKey', 'apiKeyHash', 'labels', 'flavors', 'favorited'],
 })
 
 export const toProject = (data: any, userID: number, isOwner: boolean): Project => ({
@@ -175,7 +162,7 @@ export async function addProjectForUser(
     undefined,
     projectID
   )
-  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID)
+  const [promptData, versionData] = await addPromptToProject(userID, projectID)
   await getDatastore().save([projectData, promptData, versionData])
   await grantUserAccess(userID, userID, projectID, 'project', 'owner', createdAt)
   return projectID
@@ -234,8 +221,7 @@ async function updateProject(projectData: any, updateLastEditedTimestamp: boolea
       JSON.parse(projectData.favorited),
       projectData.apiKeyHash,
       projectData.encryptedAPIKey,
-      getID(projectData),
-      projectData.apiKeyDev
+      getID(projectData)
     )
   )
 }
@@ -363,43 +349,7 @@ async function getProjectAndWorkspaceUsers(
 export async function deleteProjectForUser(userID: number, projectID: number) {
   // TODO warn or even refuse when project has published endpoints
   await ensureProjectOwnership(userID, projectID)
-
-  const accessKeys = await getEntityKeys(Entity.ACCESS, 'objectID', projectID)
-  const promptKeys = await getEntityKeys(Entity.PROMPT, 'projectID', projectID)
-  const chainKeys = await getEntityKeys(Entity.CHAIN, 'projectID', projectID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'projectID', projectID)
-
-  const versionKeys = [] as Key[]
-  const runKeys = [] as Key[]
-  const inputKeys = [] as Key[]
-  const cacheKeys = [] as Key[]
-  for (const parentID of [...promptKeys, ...chainKeys].map(key => getID({ key }))) {
-    versionKeys.push(...(await getEntityKeys(Entity.VERSION, 'parentID', parentID)))
-    runKeys.push(...(await getEntityKeys(Entity.RUN, 'parentID', parentID)))
-    inputKeys.push(...(await getEntityKeys(Entity.INPUT, 'parentID', parentID)))
-    cacheKeys.push(...(await getEntityKeys(Entity.CACHE, 'parentID', parentID)))
-  }
-
-  const endpointKeys = await getEntityKeys(Entity.ENDPOINT, 'projectID', projectID)
-  const usageKeys = await getEntityKeys(Entity.USAGE, 'projectID', projectID)
-  const logEntryKeys = await getEntityKeys(Entity.LOG, 'projectID', projectID)
-  const analyticsKeys = await getEntityKeys(Entity.ANALYTICS, 'projectID', projectID)
-
-  await getDatastore().delete([
-    ...accessKeys,
-    ...cacheKeys,
-    ...inputKeys,
-    ...analyticsKeys,
-    ...logEntryKeys,
-    ...usageKeys,
-    ...endpointKeys,
-    ...commentKeys,
-    ...runKeys,
-    ...versionKeys,
-    ...promptKeys,
-    ...chainKeys,
-    buildKey(Entity.PROJECT, projectID),
-  ])
+  await deleteEntity(Entity.PROJECT, projectID)
 }
 
 export async function getRecentProjects(projects?: Project[], limit = 100): Promise<RecentProject[]> {

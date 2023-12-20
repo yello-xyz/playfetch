@@ -129,7 +129,7 @@ async function runVersion(req: NextApiRequest, res: NextApiResponse, user: User)
       }
     }
 
-    for (let index = responses.length - 1; index >= 0; index--) {
+    for (let index = responses.length - 1; index >= 0 && autoRunIndex < autoRepeatCount; index--) {
       const response = responses[index]
       const continuationID = response.continuationID
       const functionCall = response.failed ? undefined : response.functionCall

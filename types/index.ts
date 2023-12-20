@@ -65,6 +65,7 @@ export type Prompt = {
   id: number
   name: string
   projectID: number
+  sourcePath: string | null
 }
 
 export type ActivePrompt = Prompt & {
@@ -134,11 +135,17 @@ export type AvailableQueryProvider = {
   provider: QueryProvider
   environment: string
 }
-export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider
+export type AvailableSourceControlProvider = {
+  provider: SourceControlProvider
+  environment: string
+  scopeID: number
+}
+export type AvailableProvider = AvailableModelProvider | AvailableQueryProvider | AvailableSourceControlProvider
 export const IsModelProvider = (provider: AvailableProvider): provider is AvailableModelProvider =>
   'customModels' in provider
 
 export type QueryProvider = 'pinecone'
+export type SourceControlProvider = 'github'
 
 type Version = {
   id: number

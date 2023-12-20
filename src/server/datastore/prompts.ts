@@ -1,37 +1,62 @@
 import {
   Entity,
   allocateID,
+  buildFilter,
   buildKey,
   getDatastore,
   getEntities,
   getEntityKey,
-  getEntityKeys,
+  getFilteredEntities,
+  getFilteredEntity,
   getID,
   getKeyedEntity,
+  getLastEntity,
   getOrderedEntities,
 } from './datastore'
-import { addInitialVersion, savePromptVersionForUser, toUserVersions } from './versions'
-import { InputValues, Prompt, RawPromptVersion } from '@/types'
+import {
+  addInitialVersion,
+  isPromptVersionDataCompatible,
+  markVersionAsRun,
+  savePromptVersionForUser,
+  toUserVersions,
+} from './versions'
+import { InputValues, Prompt, PromptConfig, Prompts, RawPromptVersion } from '@/types'
 import { ensureProjectAccess, updateProjectLastEditedAt } from './projects'
 import { StripVariableSentinels } from '@/src/common/formatting'
 import { getTrustedParentInputValues } from './inputs'
 import { getOrderedRunsForParentID } from './runs'
 import { canSuggestImprovedPrompt } from './ratings'
+import { PropertyFilter, and } from '@google-cloud/datastore'
+import { deleteEntity } from './cleanup'
 
 export async function migratePrompts(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  const usedProjectIDs = new Set(allPrompts.map(promptData => promptData.projectID))
+  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
+  const allProjectIDs = new Set(allProjects.map(project => getID(project)))
+  console.log(`Found ${allPrompts.length} prompts (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`)
   for (const promptData of allPrompts) {
-    await updatePrompt({ ...promptData }, false)
+    if (!!promptData.projectID && !allProjectIDs.has(promptData.projectID)) {
+      console.log(`Deleting prompt ${getID(promptData)} for missing project ${promptData.projectID}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.PROMPT, getID(promptData)))
+      }
+    }
+    // await updatePrompt({ ...promptData }, false)
   }
 }
 
-const toPromptData = (projectID: number, name: string, createdAt: Date, lastEditedAt: Date, promptID: number) => ({
+const toPromptData = (
+  projectID: number,
+  name: string,
+  createdAt: Date,
+  lastEditedAt: Date,
+  sourcePath: string | undefined,
+  promptID: number
+) => ({
   key: buildKey(Entity.PROMPT, promptID),
-  data: { projectID, name, createdAt, lastEditedAt },
+  data: { projectID, name, createdAt, lastEditedAt, sourcePath },
   excludeFromIndexes: ['name'],
 })
 
@@ -39,6 +64,7 @@ export const toPrompt = (data: any): Prompt => ({
   id: getID(data),
   name: data.name,
   projectID: data.projectID,
+  sourcePath: data.sourcePath ?? null,
 })
 
 export async function getPromptForUser(
@@ -91,24 +117,34 @@ export const matchesDefaultName = (name: string, defaultName: string) =>
 
 const DefaultPromptName = 'New Prompt'
 
-export async function addPromptForUser(userID: number, projectID: number, name = DefaultPromptName) {
+export async function addPromptForUser(
+  userID: number,
+  projectID: number,
+  name = DefaultPromptName,
+  sourcePath?: string
+) {
   await ensureProjectAccess(userID, projectID)
   const promptNames = await getEntities(Entity.PROMPT, 'projectID', projectID)
   const uniqueName = await getUniqueName(
     name,
     promptNames.map(prompt => prompt.name)
   )
-  const [promptData, versionData] = await addFirstProjectPrompt(userID, projectID, uniqueName)
+  const [promptData, versionData] = await addPromptToProject(userID, projectID, uniqueName, sourcePath)
   await getDatastore().save([promptData, versionData])
   updateProjectLastEditedAt(projectID)
   return { promptID: getID(promptData), versionID: getID(versionData) }
 }
 
-export async function addFirstProjectPrompt(userID: number, projectID: number, name = DefaultPromptName) {
+export async function addPromptToProject(
+  userID: number,
+  projectID: number,
+  name = DefaultPromptName,
+  sourcePath?: string
+) {
   const createdAt = new Date()
   const promptID = await allocateID(Entity.PROMPT)
   const versionData = await addInitialVersion(userID, promptID, false)
-  const promptData = toPromptData(projectID, name, createdAt, createdAt, promptID)
+  const promptData = toPromptData(projectID, name, createdAt, createdAt, sourcePath, promptID)
   return [promptData, versionData]
 }
 
@@ -129,6 +165,68 @@ export async function duplicatePromptForUser(
   return newPromptID
 }
 
+export async function importPromptToProject(
+  userID: number,
+  projectID: number,
+  sourcePath: string,
+  prompts: Prompts,
+  config: PromptConfig
+) {
+  const fileName = sourcePath.split('/').slice(-1)[0]
+  const promptName = fileName.split('.')[0]
+  const previousPromptData = await getFilteredEntity(
+    Entity.PROMPT,
+    and([buildFilter('projectID', projectID), buildFilter('sourcePath', sourcePath)])
+  )
+  let newVersionID: number
+  if (previousPromptData) {
+    const promptID = getID(previousPromptData)
+    const versions = await getOrderedEntities(Entity.VERSION, 'parentID', promptID)
+    const previousVersion = versions.find(versionData => isPromptVersionDataCompatible(versionData, prompts, config))
+    if (previousVersion) {
+      newVersionID = getID(previousVersion)
+    } else {
+      const lastUserVersion = toUserVersions(userID, versions, []).slice(-1)[0] as RawPromptVersion
+      const versionID = lastUserVersion.id
+      newVersionID = await savePromptVersionForUser(userID, promptID, prompts, config, versionID, versionID)
+    }
+  } else {
+    const { promptID: newPromptID, versionID } = await addPromptForUser(userID, projectID, promptName, sourcePath)
+    newVersionID = await savePromptVersionForUser(userID, newPromptID, prompts, config, versionID)
+  }
+  await markVersionAsRun(newVersionID)
+}
+
+export async function getExportablePromptsFromProject(projectID: number) {
+  const exportablePrompts: { sourcePath: string; prompts: Prompts; config: PromptConfig }[] = []
+
+  const sourcePathPrompts = await getFilteredEntities(
+    Entity.PROMPT,
+    and([buildFilter('projectID', projectID), new PropertyFilter('sourcePath', '!=', null)])
+  )
+  for (const promptData of sourcePathPrompts) {
+    const lastRunVersion = await getLastEntity(
+      Entity.VERSION,
+      and([buildFilter('parentID', getID(promptData)), buildFilter('didRun', true)])
+    )
+    if (lastRunVersion) {
+      const promptVersion = toUserVersions(0, [lastRunVersion], [])[0] as RawPromptVersion
+      exportablePrompts.push({
+        sourcePath: promptData.sourcePath,
+        prompts: promptVersion.prompts,
+        config: promptVersion.config,
+      })
+    }
+  }
+
+  return exportablePrompts
+}
+
+export async function updatePromptSourcePath(promptID: number, sourcePath: string) {
+  const promptData = await getPromptData(promptID)
+  await updatePrompt({ ...promptData, sourcePath }, false)
+}
+
 async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean) {
   await getDatastore().save(
     toPromptData(
@@ -136,6 +234,7 @@ async function updatePrompt(promptData: any, updateLastEditedTimestamp: boolean)
       promptData.name,
       promptData.createdAt,
       updateLastEditedTimestamp ? new Date() : promptData.lastEditedAt,
+      promptData.sourcePath,
       getID(promptData)
     )
   )
@@ -199,23 +298,9 @@ export async function updatePromptName(userID: number, promptID: number, name: s
 
 export async function deletePromptForUser(userID: number, promptID: number) {
   await ensurePromptAccess(userID, promptID)
-
   const anyEndpointKey = await getEntityKey(Entity.ENDPOINT, 'parentID', promptID)
   if (anyEndpointKey) {
     throw new Error('Cannot delete prompt with published endpoints')
   }
-
-  const versionKeys = await getEntityKeys(Entity.VERSION, 'parentID', promptID)
-  const runKeys = await getEntityKeys(Entity.RUN, 'parentID', promptID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'parentID', promptID)
-  const inputKeys = await getEntityKeys(Entity.INPUT, 'parentID', promptID)
-  const cacheKeys = await getEntityKeys(Entity.CACHE, 'parentID', promptID)
-  await getDatastore().delete([
-    ...cacheKeys,
-    ...inputKeys,
-    ...commentKeys,
-    ...runKeys,
-    ...versionKeys,
-    buildKey(Entity.PROMPT, promptID),
-  ])
+  await deleteEntity(Entity.PROMPT, promptID)
 }

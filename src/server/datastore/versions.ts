@@ -5,7 +5,6 @@ import {
   buildKey,
   getDatastore,
   getEntityKey,
-  getEntityKeys,
   getID,
   getKeyedEntities,
   getKeyedEntity,
@@ -30,39 +29,53 @@ import {
 } from './chains'
 import { getDefaultPromptConfigForUser } from './users'
 import { DefaultPrompts } from '@/src/common/defaultConfig'
+import { deleteEntity } from './cleanup'
 
 export async function migrateVersions(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
-  let remainingSaveCount = 100
   const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
+  const usedParentIDs = new Set(allVersions.map(versionData => versionData.parentID))
+  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
+  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
+  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
+  console.log(`Found ${allVersions.length} versions (for ${usedParentIDs.size} parents out of ${allParentIDs.size})`)
   for (const versionData of allVersions) {
-    if (remainingSaveCount-- <= 0) {
-      console.log('‼️  Please run this migration again to process remaining versions')
-      return
+    if (!!versionData.parentID && !allParentIDs.has(versionData.parentID)) {
+      console.log(`Deleting version ${getID(versionData)} for missing parent ${versionData.parentID}`)
+      if (postMerge) {
+        await datastore.delete(buildKey(Entity.VERSION, getID(versionData)))
+      }
     }
-    await datastore.save(
-      toVersionData(
-        versionData.userID,
-        versionData.parentID,
-        versionData.prompts ? JSON.parse(versionData.prompts) : null,
-        // Remember to migrate the defaultPromptConfig in the users entity as well
-        versionData.config ? JSON.parse(versionData.config) : null,
-        versionData.items ? JSON.parse(versionData.items) : null,
-        JSON.parse(versionData.labels),
-        versionData.createdAt,
-        versionData.didRun,
-        versionData.previousVersionID,
-        getID(versionData)
-      )
-    )
   }
-  console.log('✅ Processed all remaining versions')
+  // let remainingSaveCount = 100
+  // for (const versionData of allVersions) {
+  //   if (remainingSaveCount-- <= 0) {
+  //     console.log('‼️  Please run this migration again to process remaining versions')
+  //     return
+  //   }
+  //   await datastore.save(
+  //     toVersionData(
+  //       versionData.userID,
+  //       versionData.parentID,
+  //       versionData.prompts ? JSON.parse(versionData.prompts) : null,
+  //       // Remember to migrate the defaultPromptConfig in the users entity as well
+  //       versionData.config ? JSON.parse(versionData.config) : null,
+  //       versionData.items ? JSON.parse(versionData.items) : null,
+  //       JSON.parse(versionData.labels),
+  //       versionData.createdAt,
+  //       versionData.didRun,
+  //       versionData.previousVersionID,
+  //       getID(versionData)
+  //     )
+  //   )
+  // }
+  // console.log('✅ Processed all remaining versions')
 }
 
 const IsPromptVersion = (version: { items: ChainItemWithInputs[] | string | null }) => !version.items
+
+export const isPromptVersionDataCompatible = (versionData: any, prompts: Prompts, config: PromptConfig) =>
+  isVersionDataCompatible(versionData, prompts, config, null)
 
 const isVersionDataCompatible = (
   versionData: any,
@@ -74,7 +87,7 @@ const isVersionDataCompatible = (
     ? prompts &&
       config &&
       PromptVersionsAreEqual(
-        { prompts: versionData.prompts, config: JSON.parse(versionData.config) },
+        { prompts: JSON.parse(versionData.prompts), config: JSON.parse(versionData.config) },
         { prompts, config }
       )
     : items && ChainVersionsAreEqual({ items: JSON.parse(versionData.items) }, { items })
@@ -91,6 +104,8 @@ const getVerifiedUserVersionData = async (userID: number, versionID: number) => 
   }
   return versionData
 }
+
+export const markVersionAsRun = (versionID: number) => getTrustedVersion(versionID, true)
 
 export async function getTrustedVersion(versionID: number, markAsRun = false) {
   const versionData = await getKeyedEntity(Entity.VERSION, versionID)
@@ -348,10 +363,7 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const parentID = versionData.parentID
   const wasPromptVersion = IsPromptVersion(versionData)
 
-  const runKeys = await getEntityKeys(Entity.RUN, 'versionID', versionID)
-  const commentKeys = await getEntityKeys(Entity.COMMENT, 'versionID', versionID)
-  const cacheKeys = await getEntityKeys(Entity.CACHE, 'versionID', versionID)
-  await getDatastore().delete([...cacheKeys, ...commentKeys, ...runKeys, buildKey(Entity.VERSION, versionID)])
+  await deleteEntity(Entity.VERSION, versionID)
 
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   if (!anyVersionWithSameParentKey) {
