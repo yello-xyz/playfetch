@@ -24,7 +24,7 @@ import { PromptConfigsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/v
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
-import { ReactNode, useCallback, useEffect } from 'react'
+import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/context/providerContext'
@@ -122,7 +122,7 @@ export default function PromptPanel({
     (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
-  useEffect(() => setPreferredHeight?.(preferredHeight), [preferredHeight, setPreferredHeight])
+  useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
 
   const classNameForTab = (tab: PromptTab) =>
     tab === activeTab

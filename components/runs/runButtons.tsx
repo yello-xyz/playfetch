@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { startTransition, useCallback, useEffect } from 'react'
 import { PendingButton } from '../button'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
 import TestDataSelector from './testDataSelector'
@@ -71,9 +71,9 @@ export default function RunButtons({
       testConfig.rowIndices.length !== rowIndices.length ||
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
     ) {
-      setTestConfig({ ...testConfig, rowIndices })
+      startTransition(() => setTestConfig({ ...testConfig, rowIndices }))
     } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      setTestConfig({ ...testConfig, mode: 'first', rowIndices: fallbackIndices })
+      startTransition(() => setTestConfig({ ...testConfig, mode: 'first', rowIndices: fallbackIndices }))
     }
   }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
 
