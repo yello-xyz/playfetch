@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { basicSetup } from 'codemirror'
 import { EditorView, ViewUpdate } from '@codemirror/view'
+import { Inter } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 function useCodeMirror(extensions: any[] = []) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
+  let editorTheme = EditorView.theme({ '.cm-content': { fontFamily: inter.style.fontFamily } })
+
   useEffect(() => {
     const view = new EditorView({
-      extensions: [basicSetup, ...extensions],
+      extensions: [basicSetup, editorTheme, ...extensions],
       parent: ref?.current ?? undefined,
     })
 
