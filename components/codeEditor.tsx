@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { basicSetup } from 'codemirror'
 import { EditorView, ViewUpdate } from '@codemirror/view'
-import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, bracketMatching } from '@codemirror/language'
 import { Inter } from 'next/font/google'
 import { tags } from '@lezer/highlight'
 
@@ -44,6 +44,7 @@ function useCodeMirror(extensions: any[] = []) {
         editorTheme,
         StreamLanguage.define(promptLanguage),
         syntaxHighlighting(highlightStyle),
+        bracketMatching({ brackets: '()[]' }),
         ...extensions,
       ],
       parent: ref?.current ?? undefined,
