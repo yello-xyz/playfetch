@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { basicSetup } from 'codemirror'
 import { EditorView, ViewUpdate } from '@codemirror/view'
-import { StringStream, StreamLanguage } from '@codemirror/language'
+import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { Inter } from 'next/font/google'
+import { tags } from '@lezer/highlight'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
@@ -25,9 +26,26 @@ function useCodeMirror(extensions: any[] = []) {
     },
   }
 
+  const highlightStyle = HighlightStyle.define([
+    {
+      tag: tags.variableName,
+      color: 'white',
+      padding: '2px 6px',
+      backgroundColor: '#E14BD2',
+      whitespace: 'nowrap',
+      borderRadius: '4px',
+    },
+  ])
+
   useEffect(() => {
     const view = new EditorView({
-      extensions: [basicSetup, editorTheme, StreamLanguage.define(promptLanguage), ...extensions],
+      extensions: [
+        basicSetup,
+        editorTheme,
+        StreamLanguage.define(promptLanguage),
+        syntaxHighlighting(highlightStyle),
+        ...extensions,
+      ],
       parent: ref?.current ?? undefined,
     })
 
