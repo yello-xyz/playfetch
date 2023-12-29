@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { basicSetup } from 'codemirror'
 import { EditorView, ViewUpdate } from '@codemirror/view'
+import { StringStream, StreamLanguage } from '@codemirror/language'
 import { Inter } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
@@ -9,11 +10,24 @@ function useCodeMirror(extensions: any[] = []) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
-  let editorTheme = EditorView.theme({ '.cm-content': { fontFamily: inter.style.fontFamily } })
+  const editorTheme = EditorView.theme({ '.cm-content': { fontFamily: inter.style.fontFamily } })
+
+  const promptLanguage = {
+    name: 'prompt',
+    token: function (stream: StringStream) {
+      var ch = stream.next()
+      if (ch === '{' && stream.match('{')) {
+        stream.match(/^([^}])*}}/)
+        return 'variable'
+      }
+      stream.match(/^([^{])*/)
+      return 'string'
+    },
+  }
 
   useEffect(() => {
     const view = new EditorView({
-      extensions: [basicSetup, editorTheme, ...extensions],
+      extensions: [basicSetup, editorTheme, StreamLanguage.define(promptLanguage), ...extensions],
       parent: ref?.current ?? undefined,
     })
 
