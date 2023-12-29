@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { basicSetup } from 'codemirror'
 import { EditorView, ViewUpdate } from '@codemirror/view'
-import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, bracketMatching } from '@codemirror/language'
+import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { Inter } from 'next/font/google'
 import { tags } from '@lezer/highlight'
 
@@ -11,14 +10,16 @@ function useCodeMirror(extensions: any[] = []) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
-  const editorTheme = EditorView.theme({ '.cm-content': { fontFamily: inter.style.fontFamily } })
+  const editorTheme = EditorView.theme({
+    '.cm-content': { fontFamily: inter.style.fontFamily },
+    '&.cm-focused': { outline: '1px solid #3B8CEB', borderRadius: '8px' },
+  })
 
   const promptLanguage = {
     name: 'prompt',
     token: function (stream: StringStream) {
       var ch = stream.next()
-      if (ch === '{' && stream.match('{')) {
-        stream.match(/^([^}])*}}/)
+      if (ch === '{' && stream.match(/^{([^}])*}}/)) {
         return 'variable'
       }
       stream.match(/^([^{])*/)
@@ -40,11 +41,9 @@ function useCodeMirror(extensions: any[] = []) {
   useEffect(() => {
     const view = new EditorView({
       extensions: [
-        basicSetup,
         editorTheme,
         StreamLanguage.define(promptLanguage),
         syntaxHighlighting(highlightStyle),
-        bracketMatching({ brackets: '()[]' }),
         ...extensions,
       ],
       parent: ref?.current ?? undefined,
