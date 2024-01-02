@@ -43,11 +43,15 @@ export default function Editor({
   parser,
   tagStyles = [],
   setExtractSelection,
+  className = '',
   placeholder,
   disabled = false,
   preformatted = false,
   bordered = true,
+  focusOnLoad = true,
   onKeyDown,
+  onFocus,
+  onBlur,
 }: {
   value: string
   setValue: (value: string) => void
@@ -56,11 +60,15 @@ export default function Editor({
   setExtractSelection?: (
     extractSelection: () => (tokenType: string) => { text: string; from: number; to: number; isToken: boolean }
   ) => void
+  className?: string
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
   bordered?: boolean
+  focusOnLoad?: boolean
   onKeyDown?: (event: KeyboardEvent) => void
+  onFocus?: () => void
+  onBlur?: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
@@ -70,6 +78,12 @@ export default function Editor({
       EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
         if (viewUpdate.docChanged) {
           setValue(viewUpdate.state.doc.toString())
+        } else if (viewUpdate.focusChanged) {
+          if (viewUpdate.view.hasFocus) {
+            onFocus?.()
+          } else {
+            onBlur?.()
+          }
         }
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,13 +108,15 @@ export default function Editor({
     const view = new EditorView({ extensions, parent: ref?.current ?? undefined })
 
     setView(view)
-    setTimeout(() => view.focus())
+    if (focusOnLoad) {
+      setTimeout(() => view.focus())
+    }
 
     return () => {
       view.destroy()
       setView(undefined)
     }
-  }, [extensions])
+  }, [extensions, focusOnLoad])
 
   useEffect(() => {
     if (view) {
@@ -127,5 +143,5 @@ export default function Editor({
     }
   }, [view, setExtractSelection])
 
-  return <div className='flex-1 min-h-0' ref={ref} onKeyDown={onKeyDown} />
+  return <div className={`flex-1 min-h-0 ${className}`} ref={ref} onKeyDown={onKeyDown} />
 }
