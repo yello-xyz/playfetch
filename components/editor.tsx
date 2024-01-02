@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { EditorView, ViewUpdate, placeholder as placeholderText, lineNumbers } from '@codemirror/view'
 import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, syntaxTree } from '@codemirror/language'
 import { Inter, Roboto_Mono } from 'next/font/google'
@@ -57,6 +57,7 @@ export default function Editor({
   placeholder,
   disabled = false,
   preformatted = false,
+  onKeyDown
 }: {
   value: string
   setValue: (value: string) => void
@@ -66,6 +67,7 @@ export default function Editor({
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
+  onKeyDown?: (event: KeyboardEvent) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
@@ -132,5 +134,5 @@ export default function Editor({
     }
   }, [view, setExtractSelection])
 
-  return <div className='flex-1 min-h-0' ref={ref} />
+  return <div className='flex-1 min-h-0' ref={ref} onKeyDown={onKeyDown} />
 }
