@@ -1,9 +1,9 @@
 import { KeyboardEvent, useState } from 'react'
-import RichTextInput from '../../../components/richTextInput'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../../../components/popupMenu'
 import Button from '../../../components/button'
 import TestDataHeader from '../../../components/testData/testDataHeader'
+import Editor from '@/components/editor'
 
 export default function useTestDataPopup(
   variables: string[],
@@ -67,13 +67,7 @@ const TestDataPopup = ({
         <div className='flex items-stretch flex-1 w-full min-h-0'>
           <div className='min-w-[40px] py-1 text-center text-gray-400'>#{row + 1}</div>
           <div className='border-l border-gray-200' />
-          <RichTextInput
-            className='w-full h-full px-3 py-1 overflow-y-auto text-sm outline-none'
-            value={currentValue}
-            setValue={setCurrentValue}
-            onKeyDown={onKeyDown}
-            focusOnLoad
-          />
+          <Editor value={currentValue} setValue={setCurrentValue} onKeyDown={onKeyDown} bordered={false} />
         </div>
         <div className='flex justify-end p-2 bg-gray-50'>
           <Button onClick={withDismiss(() => setValue(currentValue))}>Done</Button>
