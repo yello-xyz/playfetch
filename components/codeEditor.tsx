@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { EditorView, ViewUpdate, placeholder, lineNumbers } from '@codemirror/view'
+import { EditorView, ViewUpdate, placeholder as placeholderText, lineNumbers } from '@codemirror/view'
 import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, syntaxTree } from '@codemirror/language'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import { tags } from '@lezer/highlight'
@@ -50,12 +50,23 @@ const highlightStyle = HighlightStyle.define([
   },
 ])
 
-function useCodeMirror(
-  setValue: (value: string) => void,
-  placeholderText: string,
-  disabled: boolean,
-  preformatted: boolean
-) {
+export default function CodeEditor({
+  value,
+  setValue,
+  setExtractSelection,
+  placeholder,
+  disabled = false,
+  preformatted = false,
+}: {
+  value: string
+  setValue: (value: string) => void
+  setExtractSelection?: (
+    extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
+  ) => void
+  placeholder?: string
+  disabled?: boolean
+  preformatted?: boolean
+}) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
@@ -74,7 +85,7 @@ function useCodeMirror(
     () => [
       ...(preformatted ? [lineNumbers()] : []),
       EditorView.lineWrapping,
-      placeholder(placeholderText),
+      placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
       editorTheme(preformatted),
       StreamLanguage.define(promptLanguage),
@@ -96,40 +107,12 @@ function useCodeMirror(
     }
   }, [extensions])
 
-  return { ref, view }
-}
-
-export default function CodeEditor({
-  value,
-  setValue,
-  setExtractSelection,
-  placeholder,
-  disabled,
-  preformatted,
-}: {
-  value: string
-  setValue: (value: string) => void
-  setExtractSelection?: (
-    extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
-  ) => void
-  placeholder?: string
-  disabled?: boolean
-  preformatted?: boolean
-}) {
-  const { ref, view } = useCodeMirror(setValue, placeholder ?? '', disabled ?? false, preformatted ?? false)
-
   useEffect(() => {
     if (view) {
       const editorValue = view.state.doc.toString()
 
       if (value !== editorValue) {
-        view.dispatch({
-          changes: {
-            from: 0,
-            to: editorValue.length,
-            insert: value || '',
-          },
-        })
+        view.dispatch({ changes: { from: 0, to: editorValue.length, insert: value || '' } })
       }
     }
   }, [value, view])
