@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import Editor from '../editor'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
+import { StringStream } from '@codemirror/language'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
+
+const variableParser = (stream: StringStream) => {
+  var ch = stream.next()
+  if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
+    return 'variableName'
+  }
+  stream.match(/^([^{])*/)
+  return 'string'
+}
 
 type Selection = { text: string; from: number; to: number; isVariable: boolean; popupX?: number; popupY?: number }
 
@@ -74,6 +84,7 @@ export default function PromptInput({
     <Editor
       value={value}
       setValue={setValue}
+      parser={variableParser}
       setExtractSelection={setExtractEditorSelection}
       placeholder={placeholder}
       disabled={disabled}

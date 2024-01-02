@@ -31,18 +31,6 @@ const editorTheme = (preformatted: boolean, bordered: boolean) =>
     },
   })
 
-const promptLanguage = {
-  name: 'prompt',
-  token: function (stream: StringStream) {
-    var ch = stream.next()
-    if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
-      return 'variable'
-    }
-    stream.match(/^([^{])*/)
-    return 'string'
-  },
-}
-
 const highlightStyle = HighlightStyle.define([
   {
     tag: tags.variableName,
@@ -57,6 +45,7 @@ const highlightStyle = HighlightStyle.define([
 export default function Editor({
   value,
   setValue,
+  parser,
   setExtractSelection,
   placeholder,
   disabled = false,
@@ -66,6 +55,7 @@ export default function Editor({
 }: {
   value: string
   setValue: (value: string) => void
+  parser?: (stream: StringStream) => string
   setExtractSelection?: (
     extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
   ) => void
@@ -91,12 +81,12 @@ export default function Editor({
 
   const extensions = useMemo(
     () => [
+      ...(parser ? [StreamLanguage.define({ token: parser })] : []),
       ...(preformatted ? [lineNumbers()] : []),
       EditorView.lineWrapping,
       placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
       editorTheme(preformatted, bordered),
-      StreamLanguage.define(promptLanguage),
       syntaxHighlighting(highlightStyle),
       onUpdate,
     ],
