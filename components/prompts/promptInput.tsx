@@ -1,29 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-
-import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
-import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import Editor from '../editor'
+import useGlobalPopup from '@/src/client/context/globalPopupContext'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
-
-const printVariables = (text: string) =>
-  text
-    .replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
-    .replace(/(<\/b>)(<br \/>)?(<\/div>)?( )?$/, '$1&nbsp;$2$3$4')
-
-const parseVariables = (html: string) =>
-  html
-    .replace(/(<\/b>)&nbsp;(<br \/>)?(<\/div>)?( )?$/, '$1$2$3$4')
-    .replace(/<b[^>]*>\n<\/b>/g, '\n')
-    .replace(/<b[^>]*>([^>{}]*?)<\/b>/g, '{{$1}}')
-    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '$1')
-    .replaceAll('{{}}', '')
-    .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
-    .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
-
-export const PromptToHTML = (text: string) => RichTextToHTML(text, printVariables)
-
-export const PromptFromHTML = (html: string) => RichTextFromHTML(html, parseVariables)
 
 type Selection = { text: string; from: number; to: number; isVariable: boolean; popupX?: number; popupY?: number }
 
