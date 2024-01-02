@@ -20,8 +20,14 @@ function useCodeMirror(setValue: OnChange) {
     })
 
   const editorTheme = EditorView.theme({
-    '.cm-content': { fontFamily: inter.style.fontFamily },
-    '&.cm-focused': { outline: '1px solid #3B8CEB', borderRadius: '8px' },
+    '&': { border: '1px solid #CFD3D8', borderRadius: '8px', overflowY: 'auto', height: '100%' },
+    '&.cm-focused': { outline: 'none', border: '1px solid #3B8CEB', borderRadius: '8px' },
+    '.cm-content': {
+      fontFamily: inter.style.fontFamily,
+      color: '#333A46',
+      padding: '6px 12px',
+    },
+    '.cm-line': { padding: '0px' },
   })
 
   const promptLanguage = {
@@ -89,5 +95,5 @@ export default function CodeEditor({ value, setValue }: { value: string; setValu
     }
   }, [value, view])
 
-  return <div ref={ref} />
+  return <div className='flex-1 min-h-0' ref={ref} />
 }
