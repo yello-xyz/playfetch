@@ -1,4 +1,4 @@
-import { Fragment, KeyboardEvent, useRef, useState } from 'react'
+import { Dispatch, Fragment, KeyboardEvent, SetStateAction, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
@@ -23,7 +23,7 @@ export default function TestDataPane({
   variables: string[]
   staticVariables: string[]
   inputValues: InputValues
-  setInputValues: (inputValues: InputValues) => void
+  setInputValues: Dispatch<SetStateAction<InputValues>>
   persistInputValuesIfNeeded: () => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
@@ -40,10 +40,10 @@ export default function TestDataPane({
 
   const getInputValue = (row: number, variable: string) => inputValues[variable]?.[row] ?? ''
   const setInputValue = (row: number, variable: string, value: string) =>
-    setInputValues({
+    setInputValues(inputValues => ({
       ...inputValues,
       [variable]: [...paddedColumn(variable, row).slice(0, row), value, ...paddedColumn(variable, row).slice(row + 1)],
-    })
+    }))
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
 
@@ -51,7 +51,7 @@ export default function TestDataPane({
     if (!isRowEmpty(rowCount - 1)) {
       persistInputValuesIfNeeded()
       setTimeout(() => {
-        setInputValues(
+        setInputValues(inputValues =>
           Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
         )
         setTimeout(() => {
@@ -67,7 +67,7 @@ export default function TestDataPane({
     if (isRowEmpty(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
       persistInputValuesIfNeeded()
       setTimeout(() => {
-        setInputValues(
+        setInputValues(inputValues =>
           Object.fromEntries(
             Object.entries(inputValues).map(([variable, values]) => [
               variable,
