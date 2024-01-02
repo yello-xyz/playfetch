@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { EditorView, ViewUpdate, placeholder } from '@codemirror/view'
+import { EditorView, ViewUpdate, placeholder, lineNumbers } from '@codemirror/view'
 import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, syntaxTree } from '@codemirror/language'
-import { Inter } from 'next/font/google'
+import { Inter, Roboto_Mono } from 'next/font/google'
 import { tags } from '@lezer/highlight'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
+const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 type OnChange = (value: string, viewUpdate: ViewUpdate) => void
 
-function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: boolean) {
+function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: boolean, preformatted: boolean) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
@@ -16,12 +17,19 @@ function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: bo
     '&': { border: '1px solid #CFD3D8', borderRadius: '8px', overflowY: 'auto', height: '100%' },
     '&.cm-focused': { outline: 'none', border: '1px solid #3B8CEB', borderRadius: '8px' },
     '.cm-content': {
-      fontFamily: inter.style.fontFamily,
-      color: '#333A46',
+      fontFamily: preformatted ? mono.style.fontFamily : inter.style.fontFamily,
+      color: preformatted ? '#71B892' : '#333A46',
       padding: '6px 12px',
     },
     '.cm-line': { padding: '0px' },
     '.cm-placeholder': { color: '#B5B7BF' },
+    '.cm-gutters': {
+      color: '#898D96',
+      backgroundColor: 'transparent',
+      border: 'none',
+      fontFamily: mono.style.fontFamily,
+      padding: '0px 6px',
+    },
   })
 
   const promptLanguage = {
@@ -50,6 +58,7 @@ function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: bo
   useEffect(() => {
     const view = new EditorView({
       extensions: [
+        ...(preformatted ? [lineNumbers()] : []),
         EditorView.lineWrapping,
         placeholder(placeholderText),
         editorTheme,
@@ -60,11 +69,11 @@ function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: bo
           if (viewUpdate.docChanged) {
             setValue(viewUpdate.state.doc.toString(), viewUpdate)
           }
-        })
+        }),
       ],
       parent: ref?.current ?? undefined,
     })
-    
+
     setView(view)
     setTimeout(() => view.focus())
 
@@ -83,6 +92,7 @@ export default function CodeEditor({
   setExtractSelection,
   placeholder,
   disabled,
+  preformatted,
 }: {
   value: string
   setValue: OnChange
@@ -91,8 +101,9 @@ export default function CodeEditor({
   ) => void
   placeholder?: string
   disabled?: boolean
+  preformatted?: boolean
 }) {
-  const { ref, view } = useCodeMirror(setValue, placeholder ?? '', disabled ?? false)
+  const { ref, view } = useCodeMirror(setValue, placeholder ?? '', disabled ?? false, preformatted ?? false)
 
   useEffect(() => {
     if (view) {
