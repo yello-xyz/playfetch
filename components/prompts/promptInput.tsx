@@ -1,10 +1,9 @@
-import { RefObject, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CodeBlock from '../codeBlock'
-import ContentEditable from '../contentEditable'
-import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
+import CodeEditor from '../codeEditor'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
@@ -27,24 +26,19 @@ export const PromptToHTML = (text: string) => RichTextToHTML(text, printVariable
 
 export const PromptFromHTML = (html: string) => RichTextFromHTML(html, parseVariables)
 
-type Selection = { text: string; range: Range; popupPoint: { x: number; y: number }; isInput: boolean }
+type Selection = { text: string; from: number; to: number; isVariable: boolean; popupX?: number; popupY?: number }
 
-const extractSelection = (contentEditableRef: RefObject<HTMLElement>) => {
-  const selection = document.getSelection()
-  const selectionParent = selection?.anchorNode?.parentElement
-  if (selection && selectionParent) {
-    const isPromptSelection = selectionParent.closest('[contenteditable=true]') === contentEditableRef.current
-    const isSingleNode = selection.anchorNode === selection.focusNode
-    const isInput = selectionParent.tagName === 'B'
-    const text = isInput ? selectionParent.textContent!.trim() : selection.toString().trim()
-    if (isPromptSelection && isSingleNode && text.length > 0) {
-      const range = selection.getRangeAt(0)
+const extractSelection = (editorSelection?: Selection) => {
+  const documentSelection = document.getSelection()
+  if (editorSelection && documentSelection) {
+    const isContentEditable = documentSelection.anchorNode?.parentElement?.isContentEditable
+    const isSingleNode = documentSelection.anchorNode === documentSelection.focusNode
+    if (isContentEditable && isSingleNode && editorSelection.text.length > 0) {
+      const range = documentSelection.getRangeAt(0)
       const selectionRect = range.getBoundingClientRect()
-      const popupPoint = {
-        x: selectionRect.left + selectionRect.width / 2,
-        y: selectionRect.top - 34,
-      }
-      return { text, range, popupPoint, isInput }
+      const popupX = selectionRect.left + selectionRect.width / 2
+      const popupY = selectionRect.top - 34
+      return { ...editorSelection, popupX, popupY }
     }
   }
   return undefined
@@ -67,11 +61,8 @@ export default function PromptInput({
 }) {
   const toggleInput = useCallback(
     (selection: Selection) => {
-      if (!selection.isInput) {
-        selection.range.surroundContents(document.createElement('b'))
-      } else if (!!selection.text.match(/^{{(.*)}}$/)) {
-        setValue(value.replaceAll(selection.text, selection.text.slice(2, -2)))
-      }
+      const updatedText = selection.isVariable ? selection.text.slice(2, -2) : `{{${selection.text}}}`
+      setValue(value.substring(0, selection.from) + updatedText + value.substring(selection.to))
     },
     [value, setValue]
   )
@@ -83,11 +74,7 @@ export default function PromptInput({
     (selection?: Selection) => {
       setLastSelection(selection)
       if (selection) {
-        setPopup(
-          VariablePopup,
-          { selection, toggleInput },
-          { top: selection.popupPoint.y, left: selection.popupPoint.x }
-        )
+        setPopup(VariablePopup, { selection, toggleInput }, { left: selection.popupX, top: selection.popupY })
       } else if (lastSelection) {
         setPopup(undefined, undefined, {})
       }
@@ -95,57 +82,25 @@ export default function PromptInput({
     [setPopup, toggleInput, lastSelection]
   )
 
-  const contentEditableRef = useFocusEndRef()
-  const [lastKey, setLastKey] = useState(promptKey)
-  if (promptKey !== lastKey) {
-    setLastKey(promptKey)
-    contentEditableRef?.current?.focus()
-  }
+  const [extractEditorSelection, setExtractEditorSelection] = useState<() => Selection>()
 
   useEffect(() => {
-    const selectionChangeHandler = () => updateSelection(extractSelection(contentEditableRef))
+    const selectionChangeHandler = () => updateSelection(extractSelection(extractEditorSelection?.()))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [contentEditableRef, updateSelection])
+  }, [updateSelection, extractEditorSelection])
 
-  const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
-  const contentEditableClassName = preformatted
-    ? `outline-none ${placeholderClassName}`
-    : `h-full px-3 py-1.5 overflow-y-auto text-gray-700 border border-gray-300 focus:border-blue-400 focus:ring-0 focus:outline-none rounded-lg ${placeholderClassName}`
-
-  const [htmlValue, setHTMLValue] = useState('')
-  if (value !== PromptFromHTML(htmlValue)) {
-    setHTMLValue(PromptToHTML(value))
-  } else if (printVariables(parseVariables(htmlValue)) !== htmlValue) {
-    setHTMLValue(printVariables(parseVariables(htmlValue)))
-  }
-  const updateHTMLValue = (html: string) => {
-    updateSelection(undefined)
-    setHTMLValue(html)
-    setValue(PromptFromHTML(html))
-  }
-
-  const renderContentEditable = () => (
-    <ContentEditable
+  return (
+    <CodeEditor
+      value={value}
+      setValue={setValue}
+      setExtractSelection={setExtractEditorSelection}
       placeholder={placeholder}
       disabled={disabled}
-      className={contentEditableClassName}
-      htmlValue={htmlValue}
-      onChange={updateHTMLValue}
-      allowedTags={['br', 'div', 'b']}
-      allowedAttributes={{ b: ['class'] }}
-      innerRef={contentEditableRef}
+      preformatted={preformatted}
     />
-  )
-
-  return preformatted ? (
-    <CodeBlock active={!disabled} scroll>
-      {renderContentEditable()}
-    </CodeBlock>
-  ) : (
-    renderContentEditable()
   )
 }
 
@@ -158,7 +113,7 @@ function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
         <div
           className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
-          {selection.isInput ? 'Remove Input' : 'Create Input'}
+          {selection.isVariable ? 'Remove Input' : 'Create Input'}
         </div>
       </div>
     </div>
