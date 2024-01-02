@@ -7,10 +7,14 @@ import { tags } from '@lezer/highlight'
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
-const editorTheme = (preformatted: boolean) =>
+const editorTheme = (preformatted: boolean, bordered: boolean) =>
   EditorView.theme({
-    '&': { border: '1px solid #CFD3D8', borderRadius: '8px', overflowY: 'auto', height: '100%' },
-    '&.cm-focused': { outline: 'none', border: '1px solid #3B8CEB', borderRadius: '8px' },
+    '&': {
+      ...(bordered ? { border: '1px solid #CFD3D8', borderRadius: '8px' } : {}),
+      overflowY: 'auto',
+      height: '100%',
+    },
+    '&.cm-focused': { outline: 'none', ...(bordered ? { border: '1px solid #3B8CEB', borderRadius: '8px' } : {}) },
     '.cm-content': {
       fontFamily: preformatted ? mono.style.fontFamily : inter.style.fontFamily,
       color: preformatted ? '#71B892' : '#333A46',
@@ -57,7 +61,8 @@ export default function Editor({
   placeholder,
   disabled = false,
   preformatted = false,
-  onKeyDown
+  bordered = true,
+  onKeyDown,
 }: {
   value: string
   setValue: (value: string) => void
@@ -67,6 +72,7 @@ export default function Editor({
   placeholder?: string
   disabled?: boolean
   preformatted?: boolean
+  bordered?: boolean
   onKeyDown?: (event: KeyboardEvent) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -89,7 +95,7 @@ export default function Editor({
       EditorView.lineWrapping,
       placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
-      editorTheme(preformatted),
+      editorTheme(preformatted, bordered),
       StreamLanguage.define(promptLanguage),
       syntaxHighlighting(highlightStyle),
       onUpdate,
