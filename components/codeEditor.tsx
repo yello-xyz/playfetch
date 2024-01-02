@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { EditorView, ViewUpdate, placeholder } from '@codemirror/view'
-import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, syntaxTree } from '@codemirror/language'
 import { Inter } from 'next/font/google'
 import { tags } from '@lezer/highlight'
 
@@ -35,7 +35,7 @@ function useCodeMirror(setValue: OnChange, placeholderText: string) {
     name: 'prompt',
     token: function (stream: StringStream) {
       var ch = stream.next()
-      if (ch === '{' && stream.match(/^{([^}])*}}/)) {
+      if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
         return 'variable'
       }
       stream.match(/^([^{])*/)
@@ -82,10 +82,14 @@ function useCodeMirror(setValue: OnChange, placeholderText: string) {
 export default function CodeEditor({
   value,
   setValue,
+  setExtractSelection,
   placeholder,
 }: {
   value: string
   setValue: OnChange
+  setExtractSelection?: (
+    extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
+  ) => void
   placeholder?: string
 }) {
   const { ref, view } = useCodeMirror(setValue, placeholder ?? '')
@@ -105,6 +109,21 @@ export default function CodeEditor({
       }
     }
   }, [value, view])
+
+  useEffect(() => {
+    if (view && setExtractSelection) {
+      setExtractSelection(() => () => {
+        const state = view.state
+        const selection = state.selection.main
+        const tree = syntaxTree(state)
+        const node = tree.resolve(selection.anchor, -1)
+        const isVariable = node.type.name === 'variableName'
+        const from = isVariable ? node.from : selection.from
+        const to = isVariable ? node.to : selection.to
+        return { isVariable, text: view.state.sliceDoc(from, to).toString(), from, to }
+      })
+    }
+  }, [view, setExtractSelection])
 
   return <div className='flex-1 min-h-0' ref={ref} />
 }
