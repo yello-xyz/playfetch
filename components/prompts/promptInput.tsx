@@ -2,9 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import Editor from '../editor'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import { StringStream } from '@codemirror/language'
-import { tags } from '@lezer/highlight'
+import { tags, Tag } from '@lezer/highlight'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
+
+const tokenFromTag = (tag: Tag) =>
+  Object.entries(tags)
+    .filter(([_, value]) => value === tag)
+    .map(([key]) => key)[0]
 
 const variableStyle = {
   tag: tags.variableName,
@@ -18,13 +23,13 @@ const variableStyle = {
 const variableParser = (stream: StringStream) => {
   var ch = stream.next()
   if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
-    return 'variableName'
+    return tokenFromTag(tags.variableName)
   }
   stream.match(/^([^{])*/)
-  return 'string'
+  return tokenFromTag(tags.string)
 }
 
-type Selection = { text: string; from: number; to: number; isVariable: boolean; popupX?: number; popupY?: number }
+type Selection = { text: string; from: number; to: number; isToken: boolean; popupX?: number; popupY?: number }
 
 const extractSelection = (editorSelection?: Selection) => {
   const documentSelection = document.getSelection()
@@ -57,7 +62,7 @@ export default function PromptInput({
 }) {
   const toggleInput = useCallback(
     (selection: Selection) => {
-      const updatedText = selection.isVariable ? selection.text.slice(2, -2) : `{{${selection.text}}}`
+      const updatedText = selection.isToken ? selection.text.slice(2, -2) : `{{${selection.text}}}`
       setValue(value.substring(0, selection.from) + updatedText + value.substring(selection.to))
     },
     [value, setValue]
@@ -78,10 +83,11 @@ export default function PromptInput({
     [setPopup, toggleInput, lastSelection]
   )
 
-  const [extractEditorSelection, setExtractEditorSelection] = useState<() => Selection>()
+  const [extractEditorSelection, setExtractEditorSelection] = useState<(tokenType: string) => Selection>()
 
   useEffect(() => {
-    const selectionChangeHandler = () => updateSelection(extractSelection(extractEditorSelection?.()))
+    const selectionChangeHandler = () =>
+      updateSelection(extractSelection(extractEditorSelection?.(tokenFromTag(tags.variableName))))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
@@ -111,7 +117,7 @@ function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
         <div
           className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
-          {selection.isVariable ? 'Remove Input' : 'Create Input'}
+          {selection.isToken ? 'Remove Input' : 'Create Input'}
         </div>
       </div>
     </div>

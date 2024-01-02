@@ -54,7 +54,7 @@ export default function Editor({
   parser?: (stream: StringStream) => string
   tagStyles?: TagStyle[]
   setExtractSelection?: (
-    extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
+    extractSelection: () => (tokenType: string) => { text: string; from: number; to: number; isToken: boolean }
   ) => void
   placeholder?: string
   disabled?: boolean
@@ -114,15 +114,15 @@ export default function Editor({
 
   useEffect(() => {
     if (view && setExtractSelection) {
-      setExtractSelection(() => () => {
+      setExtractSelection(() => (tokenType: string) => {
         const state = view.state
         const selection = state.selection.main
         const tree = syntaxTree(state)
         const node = tree.resolve(selection.anchor, -1)
-        const isVariable = node.type.name === 'variableName'
-        const from = isVariable ? node.from : selection.from
-        const to = isVariable ? node.to : selection.to
-        return { isVariable, text: view.state.sliceDoc(from, to).toString(), from, to }
+        const isToken = node.type.name === tokenType
+        const from = isToken ? node.from : selection.from
+        const to = isToken ? node.to : selection.to
+        return { isToken, text: view.state.sliceDoc(from, to).toString(), from, to }
       })
     }
   }, [view, setExtractSelection])
