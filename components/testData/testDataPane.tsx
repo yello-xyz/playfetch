@@ -54,11 +54,7 @@ export default function TestDataPane({
         setInputValues(inputValues =>
           Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
         )
-        setTimeout(() => {
-          const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
-          const lastChild = editables[editables.length - 1] as HTMLElement
-          lastChild?.focus()
-        })
+        // TODO focus on last cell in newly added row?
       })
     }
   }
