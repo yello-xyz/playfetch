@@ -3,13 +3,13 @@ import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
 import { InputValues, TestConfig } from '@/types'
-import RichTextInput from '../richTextInput'
 import TestDataHeader from './testDataHeader'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
 import RangeInput from '../rangeInput'
+import Editor from '../editor'
 
 export default function TestDataPane({
   variables,
@@ -88,11 +88,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-            ? 'last'
-            : 'custom'
-        : rowIndices.length === rowCount
-          ? 'all'
+          ? 'last'
           : 'custom'
+        : rowIndices.length === rowCount
+        ? 'all'
+        : 'custom'
     setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
@@ -127,6 +127,8 @@ export default function TestDataPane({
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
+          const border = (col: number) =>
+            isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
           const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
@@ -137,13 +139,15 @@ export default function TestDataPane({
               </div>
               {allVariables.map((variable, col) => (
                 <div className='relative group' key={`${rowCount}-${col}`}>
-                  <RichTextInput
-                    className={`w-full h-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
+                  <Editor
+                    className={`h-full ${border(col)} ${color} ${truncate}`}
                     value={getInputValue(row, variable)}
                     setValue={value => setInputValue(row, variable, value)}
                     onBlur={() => persistInputValuesIfNeeded()}
                     onFocus={() => setActiveCell([row, col])}
                     onKeyDown={event => checkDeleteRow(event, row)}
+                    bordered={false}
+                    focusOnLoad={false}
                   />
                   <Icon
                     className={`absolute top-0.5 right-0.5 bg-white rounded cursor-pointer opacity-0 ${
