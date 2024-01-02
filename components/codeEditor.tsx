@@ -6,9 +6,20 @@ import { tags } from '@lezer/highlight'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
-function useCodeMirror(extensions: any[] = []) {
+type OnChange = (value: string, viewUpdate: ViewUpdate) => void
+
+function useCodeMirror(onChange: OnChange) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
+
+  const onUpdate = (onChange: OnChange) =>
+    EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
+      if (viewUpdate.docChanged) {
+        const doc = viewUpdate.state.doc
+        const value = doc.toString()
+        onChange(value, viewUpdate)
+      }
+    })
 
   const editorTheme = EditorView.theme({
     '.cm-content': { fontFamily: inter.style.fontFamily },
@@ -41,10 +52,10 @@ function useCodeMirror(extensions: any[] = []) {
   useEffect(() => {
     const view = new EditorView({
       extensions: [
+        onUpdate(onChange),
         editorTheme,
         StreamLanguage.define(promptLanguage),
         syntaxHighlighting(highlightStyle),
-        ...extensions,
       ],
       parent: ref?.current ?? undefined,
     })
@@ -60,19 +71,8 @@ function useCodeMirror(extensions: any[] = []) {
   return { ref, view }
 }
 
-type OnChange = (value: string, viewUpdate: ViewUpdate) => void
-
-const onUpdate = (onChange: OnChange) =>
-  EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
-    if (viewUpdate.docChanged) {
-      const doc = viewUpdate.state.doc
-      const value = doc.toString()
-      onChange(value, viewUpdate)
-    }
-  })
-
-function useCodeEditor({ value, onChange, extensions }: { value: string; onChange: OnChange; extensions: any[] }) {
-  const { ref, view } = useCodeMirror([onUpdate(onChange), ...extensions])
+export default function CodeEditor({ value, setValue }: { value: string; setValue: OnChange }) {
+  const { ref, view } = useCodeMirror(setValue)
 
   useEffect(() => {
     if (view) {
@@ -89,20 +89,6 @@ function useCodeEditor({ value, onChange, extensions }: { value: string; onChang
       }
     }
   }, [value, view])
-
-  return ref
-}
-
-export default function CodeEditor({
-  value,
-  onChange,
-  extensions,
-}: {
-  value: string
-  onChange: OnChange
-  extensions: any[]
-}) {
-  const ref = useCodeEditor({ value, onChange, extensions })
 
   return <div ref={ref} />
 }
