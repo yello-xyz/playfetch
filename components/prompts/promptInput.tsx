@@ -98,8 +98,8 @@ export default function PromptInput({
     <Editor
       value={value}
       setValue={setValue}
-      parser={variableParser}
-      tagStyles={[variableStyle]}
+      tokenizer={variableParser}
+      tokenStyle={variableStyle}
       setExtractSelection={setExtractEditorSelection}
       placeholder={placeholder}
       disabled={disabled}

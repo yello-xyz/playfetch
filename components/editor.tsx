@@ -40,8 +40,8 @@ const editorTheme = (preformatted: boolean, bordered: boolean) =>
 export default function Editor({
   value,
   setValue,
-  parser,
-  tagStyles = [],
+  tokenizer,
+  tokenStyle,
   setExtractSelection,
   className = '',
   placeholder,
@@ -55,8 +55,8 @@ export default function Editor({
 }: {
   value: string
   setValue: (value: string) => void
-  parser?: (stream: StringStream) => string
-  tagStyles?: TagStyle[]
+  tokenizer?: (stream: StringStream) => string
+  tokenStyle?: TagStyle
   setExtractSelection?: (
     extractSelection: () => (tokenType: string) => { text: string; from: number; to: number; isToken: boolean }
   ) => void
@@ -92,16 +92,16 @@ export default function Editor({
 
   const extensions = useMemo(
     () => [
-      ...(parser ? [StreamLanguage.define({ token: parser })] : []),
+      ...(tokenizer ? [StreamLanguage.define({ token: tokenizer })] : []),
+      ...(tokenStyle ? [syntaxHighlighting(HighlightStyle.define([tokenStyle]))] : []),
       ...(preformatted ? [lineNumbers()] : []),
       EditorView.lineWrapping,
       placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
       editorTheme(preformatted, bordered),
-      syntaxHighlighting(HighlightStyle.define(tagStyles)),
       onUpdate,
     ],
-    [disabled, placeholder, preformatted, onUpdate]
+    [tokenizer, tokenStyle, disabled, placeholder, preformatted, bordered, onUpdate]
   )
 
   useEffect(() => {
