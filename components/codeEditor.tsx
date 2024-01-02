@@ -68,6 +68,7 @@ function useCodeMirror(setValue: OnChange, placeholderText: string) {
     })
 
     setView(view)
+    setTimeout(() => view.focus())
 
     return () => {
       view.destroy()
