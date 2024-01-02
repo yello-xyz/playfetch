@@ -50,6 +50,7 @@ function useCodeMirror(setValue: OnChange) {
   useEffect(() => {
     const view = new EditorView({
       extensions: [
+        EditorView.lineWrapping,
         onUpdate(setValue),
         editorTheme,
         StreamLanguage.define(promptLanguage),
