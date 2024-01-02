@@ -62,6 +62,7 @@ export default function PromptPanel({
   isRunning?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
+  // TODO should we be checking equality of the structs here? But exact prompts to check depends on config?
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
@@ -83,13 +84,15 @@ export default function PromptPanel({
     }
   }, [config, activeTab, updateActiveTab])
 
+  const onUpdate = (prompts: Prompts, config: PromptConfig) =>
+    setTimeout(() => setModifiedVersion?.({ ...version, prompts, config }))
+
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
-    setModifiedVersion?.({ ...version, prompts, config })
+    onUpdate(prompts, config)
   }
 
-  const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) =>
     update(
       Object.fromEntries(
@@ -103,6 +106,16 @@ export default function PromptPanel({
         jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
       }
     )
+
+  const updatePrompt = (prompt: string) =>
+    setConfig(config => {
+      setPrompts(prompts => {
+        prompts = { ...prompts, [activeTab]: prompt }
+        onUpdate(prompts, config)
+        return prompts
+      })
+      return config
+    })
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
@@ -129,7 +142,7 @@ export default function PromptPanel({
       ? 'bg-gray-100 text-gray-700'
       : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
 
-      return (
+  return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {!isModelAvailable && setModifiedVersion && (
