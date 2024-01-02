@@ -8,16 +8,9 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 type OnChange = (value: string, viewUpdate: ViewUpdate) => void
 
-function useCodeMirror(setValue: OnChange, placeholderText: string) {
+function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: boolean) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
-
-  const onUpdate = (onChange: OnChange) =>
-    EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
-      if (viewUpdate.docChanged) {
-        onChange(viewUpdate.state.doc.toString(), viewUpdate)
-      }
-    })
 
   const editorTheme = EditorView.theme({
     '&': { border: '1px solid #CFD3D8', borderRadius: '8px', overflowY: 'auto', height: '100%' },
@@ -59,14 +52,19 @@ function useCodeMirror(setValue: OnChange, placeholderText: string) {
       extensions: [
         EditorView.lineWrapping,
         placeholder(placeholderText),
-        onUpdate(setValue),
         editorTheme,
         StreamLanguage.define(promptLanguage),
         syntaxHighlighting(highlightStyle),
+        EditorView.editable.of(!disabled),
+        EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
+          if (viewUpdate.docChanged) {
+            setValue(viewUpdate.state.doc.toString(), viewUpdate)
+          }
+        })
       ],
       parent: ref?.current ?? undefined,
     })
-
+    
     setView(view)
     setTimeout(() => view.focus())
 
@@ -84,6 +82,7 @@ export default function CodeEditor({
   setValue,
   setExtractSelection,
   placeholder,
+  disabled,
 }: {
   value: string
   setValue: OnChange
@@ -91,8 +90,9 @@ export default function CodeEditor({
     extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
   ) => void
   placeholder?: string
+  disabled?: boolean
 }) {
-  const { ref, view } = useCodeMirror(setValue, placeholder ?? '')
+  const { ref, view } = useCodeMirror(setValue, placeholder ?? '', disabled ?? false)
 
   useEffect(() => {
     if (view) {
