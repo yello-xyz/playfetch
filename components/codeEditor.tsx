@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { EditorView, ViewUpdate } from '@codemirror/view'
+import { EditorView, ViewUpdate, placeholder } from '@codemirror/view'
 import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { Inter } from 'next/font/google'
 import { tags } from '@lezer/highlight'
@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 type OnChange = (value: string, viewUpdate: ViewUpdate) => void
 
-function useCodeMirror(setValue: OnChange) {
+function useCodeMirror(setValue: OnChange, placeholderText: string) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
@@ -28,6 +28,7 @@ function useCodeMirror(setValue: OnChange) {
       padding: '6px 12px',
     },
     '.cm-line': { padding: '0px' },
+    '.cm-placeholder': { color: '#B5B7BF' },
   })
 
   const promptLanguage = {
@@ -57,6 +58,7 @@ function useCodeMirror(setValue: OnChange) {
     const view = new EditorView({
       extensions: [
         EditorView.lineWrapping,
+        placeholder(placeholderText),
         onUpdate(setValue),
         editorTheme,
         StreamLanguage.define(promptLanguage),
@@ -76,8 +78,16 @@ function useCodeMirror(setValue: OnChange) {
   return { ref, view }
 }
 
-export default function CodeEditor({ value, setValue }: { value: string; setValue: OnChange }) {
-  const { ref, view } = useCodeMirror(setValue)
+export default function CodeEditor({
+  value,
+  setValue,
+  placeholder,
+}: {
+  value: string
+  setValue: OnChange
+  placeholder?: string
+}) {
+  const { ref, view } = useCodeMirror(setValue, placeholder ?? '')
 
   useEffect(() => {
     if (view) {
