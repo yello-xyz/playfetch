@@ -50,7 +50,7 @@ const highlightStyle = HighlightStyle.define([
   },
 ])
 
-export default function CodeEditor({
+export default function Editor({
   value,
   setValue,
   setExtractSelection,

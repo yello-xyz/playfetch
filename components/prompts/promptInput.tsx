@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
-import CodeBlock from '../codeBlock'
-import CodeEditor from '../codeEditor'
+import Editor from '../editor'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
@@ -93,7 +92,7 @@ export default function PromptInput({
   }, [updateSelection, extractEditorSelection])
 
   return (
-    <CodeEditor
+    <Editor
       value={value}
       setValue={setValue}
       setExtractSelection={setExtractEditorSelection}
