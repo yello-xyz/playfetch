@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { EditorView, ViewUpdate, placeholder, lineNumbers } from '@codemirror/view'
 import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, syntaxTree } from '@codemirror/language'
 import { Inter, Roboto_Mono } from 'next/font/google'
@@ -7,13 +7,8 @@ import { tags } from '@lezer/highlight'
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
-type OnChange = (value: string, viewUpdate: ViewUpdate) => void
-
-function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: boolean, preformatted: boolean) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [view, setView] = useState<EditorView>()
-
-  const editorTheme = EditorView.theme({
+const editorTheme = (preformatted: boolean) =>
+  EditorView.theme({
     '&': { border: '1px solid #CFD3D8', borderRadius: '8px', overflowY: 'auto', height: '100%' },
     '&.cm-focused': { outline: 'none', border: '1px solid #3B8CEB', borderRadius: '8px' },
     '.cm-content': {
@@ -32,47 +27,65 @@ function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: bo
     },
   })
 
-  const promptLanguage = {
-    name: 'prompt',
-    token: function (stream: StringStream) {
-      var ch = stream.next()
-      if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
-        return 'variable'
-      }
-      stream.match(/^([^{])*/)
-      return 'string'
-    },
-  }
+const promptLanguage = {
+  name: 'prompt',
+  token: function (stream: StringStream) {
+    var ch = stream.next()
+    if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
+      return 'variable'
+    }
+    stream.match(/^([^{])*/)
+    return 'string'
+  },
+}
 
-  const highlightStyle = HighlightStyle.define([
-    {
-      tag: tags.variableName,
-      color: 'white',
-      padding: '2px 6px',
-      backgroundColor: '#E14BD2',
-      whitespace: 'nowrap',
-      borderRadius: '4px',
-    },
-  ])
+const highlightStyle = HighlightStyle.define([
+  {
+    tag: tags.variableName,
+    color: 'white',
+    padding: '2px 6px',
+    backgroundColor: '#E14BD2',
+    whitespace: 'nowrap',
+    borderRadius: '4px',
+  },
+])
+
+function useCodeMirror(
+  setValue: (value: string) => void,
+  placeholderText: string,
+  disabled: boolean,
+  preformatted: boolean
+) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [view, setView] = useState<EditorView>()
+
+  const onUpdate = useMemo(
+    () =>
+      EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
+        if (viewUpdate.docChanged) {
+          setValue(viewUpdate.state.doc.toString())
+        }
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  const extensions = useMemo(
+    () => [
+      ...(preformatted ? [lineNumbers()] : []),
+      EditorView.lineWrapping,
+      placeholder(placeholderText),
+      EditorView.editable.of(!disabled),
+      editorTheme(preformatted),
+      StreamLanguage.define(promptLanguage),
+      syntaxHighlighting(highlightStyle),
+      onUpdate,
+    ],
+    [disabled, placeholderText, preformatted, onUpdate]
+  )
 
   useEffect(() => {
-    const view = new EditorView({
-      extensions: [
-        ...(preformatted ? [lineNumbers()] : []),
-        EditorView.lineWrapping,
-        placeholder(placeholderText),
-        editorTheme,
-        StreamLanguage.define(promptLanguage),
-        syntaxHighlighting(highlightStyle),
-        EditorView.editable.of(!disabled),
-        EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
-          if (viewUpdate.docChanged) {
-            setValue(viewUpdate.state.doc.toString(), viewUpdate)
-          }
-        }),
-      ],
-      parent: ref?.current ?? undefined,
-    })
+    const view = new EditorView({ extensions, parent: ref?.current ?? undefined })
 
     setView(view)
     setTimeout(() => view.focus())
@@ -81,7 +94,7 @@ function useCodeMirror(setValue: OnChange, placeholderText: string, disabled: bo
       view.destroy()
       setView(undefined)
     }
-  }, [])
+  }, [extensions])
 
   return { ref, view }
 }
@@ -95,7 +108,7 @@ export default function CodeEditor({
   preformatted,
 }: {
   value: string
-  setValue: OnChange
+  setValue: (value: string) => void
   setExtractSelection?: (
     extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
   ) => void
