@@ -41,11 +41,9 @@ const divsToLines = (html: string) => {
     .replaceAll('<br />', '\n')
 }
 
-export const RichTextToHTML = (text: string, print = (s: string) => s) =>
-  linesToDivs(print(escapeSpecialCharacters(text)))
+export const RichTextToHTML = (text: string) => linesToDivs(escapeSpecialCharacters(text))
 
-export const RichTextFromHTML = (html: string, parse = (s: string) => s) =>
-  unescapeSpecialCharacters(parse(divsToLines(html)))
+export const RichTextFromHTML = (html: string) => unescapeSpecialCharacters(divsToLines(html))
 
 export default function RichTextInput({
   className,

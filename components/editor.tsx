@@ -92,7 +92,7 @@ export default function Editor({
       syntaxHighlighting(highlightStyle),
       onUpdate,
     ],
-    [disabled, placeholderText, preformatted, onUpdate]
+    [disabled, placeholder, preformatted, onUpdate]
   )
 
   useEffect(() => {
