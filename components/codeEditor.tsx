@@ -8,16 +8,14 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
 type OnChange = (value: string, viewUpdate: ViewUpdate) => void
 
-function useCodeMirror(onChange: OnChange) {
+function useCodeMirror(setValue: OnChange) {
   const ref = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<EditorView>()
 
   const onUpdate = (onChange: OnChange) =>
     EditorView.updateListener.of((viewUpdate: ViewUpdate) => {
       if (viewUpdate.docChanged) {
-        const doc = viewUpdate.state.doc
-        const value = doc.toString()
-        onChange(value, viewUpdate)
+        onChange(viewUpdate.state.doc.toString(), viewUpdate)
       }
     })
 
@@ -52,7 +50,7 @@ function useCodeMirror(onChange: OnChange) {
   useEffect(() => {
     const view = new EditorView({
       extensions: [
-        onUpdate(onChange),
+        onUpdate(setValue),
         editorTheme,
         StreamLanguage.define(promptLanguage),
         syntaxHighlighting(highlightStyle),

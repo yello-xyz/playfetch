@@ -129,7 +129,7 @@ export default function PromptPanel({
       ? 'bg-gray-100 text-gray-700'
       : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
 
-  return (
+      return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {!isModelAvailable && setModifiedVersion && (
@@ -150,7 +150,7 @@ export default function PromptPanel({
           ))}
         </div>
         <PromptInput
-          key={version.id}
+          key={`${version.id}-${activeTab}`}
           promptKey={activeTab}
           value={prompts[activeTab] ?? ''}
           setValue={updatePrompt}
