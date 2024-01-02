@@ -2,8 +2,18 @@ import { useCallback, useEffect, useState } from 'react'
 import Editor from '../editor'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import { StringStream } from '@codemirror/language'
+import { tags } from '@lezer/highlight'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
+
+const variableStyle = {
+  tag: tags.variableName,
+  color: 'white',
+  padding: '2px 6px',
+  backgroundColor: '#E14BD2',
+  whitespace: 'nowrap',
+  borderRadius: '4px',
+}
 
 const variableParser = (stream: StringStream) => {
   var ch = stream.next()
@@ -33,14 +43,12 @@ const extractSelection = (editorSelection?: Selection) => {
 }
 
 export default function PromptInput({
-  promptKey = 'main',
   value,
   setValue,
   placeholder,
   disabled,
   preformatted,
 }: {
-  promptKey?: string
   value: string
   setValue: (value: string) => void
   placeholder?: string
@@ -85,6 +93,7 @@ export default function PromptInput({
       value={value}
       setValue={setValue}
       parser={variableParser}
+      tagStyles={[variableStyle]}
       setExtractSelection={setExtractEditorSelection}
       placeholder={placeholder}
       disabled={disabled}

@@ -1,8 +1,14 @@
 import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { EditorView, ViewUpdate, placeholder as placeholderText, lineNumbers } from '@codemirror/view'
-import { StringStream, StreamLanguage, HighlightStyle, syntaxHighlighting, syntaxTree } from '@codemirror/language'
+import {
+  StringStream,
+  StreamLanguage,
+  HighlightStyle,
+  syntaxHighlighting,
+  syntaxTree,
+  TagStyle,
+} from '@codemirror/language'
 import { Inter, Roboto_Mono } from 'next/font/google'
-import { tags } from '@lezer/highlight'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
@@ -31,21 +37,11 @@ const editorTheme = (preformatted: boolean, bordered: boolean) =>
     },
   })
 
-const highlightStyle = HighlightStyle.define([
-  {
-    tag: tags.variableName,
-    color: 'white',
-    padding: '2px 6px',
-    backgroundColor: '#E14BD2',
-    whitespace: 'nowrap',
-    borderRadius: '4px',
-  },
-])
-
 export default function Editor({
   value,
   setValue,
   parser,
+  tagStyles = [],
   setExtractSelection,
   placeholder,
   disabled = false,
@@ -56,6 +52,7 @@ export default function Editor({
   value: string
   setValue: (value: string) => void
   parser?: (stream: StringStream) => string
+  tagStyles?: TagStyle[]
   setExtractSelection?: (
     extractSelection: () => () => { text: string; from: number; to: number; isVariable: boolean }
   ) => void
@@ -87,7 +84,7 @@ export default function Editor({
       placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
       editorTheme(preformatted, bordered),
-      syntaxHighlighting(highlightStyle),
+      syntaxHighlighting(HighlightStyle.define(tagStyles)),
       onUpdate,
     ],
     [disabled, placeholder, preformatted, onUpdate]

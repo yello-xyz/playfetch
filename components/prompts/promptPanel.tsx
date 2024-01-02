@@ -151,7 +151,6 @@ export default function PromptPanel({
         </div>
         <PromptInput
           key={`${version.id}-${activeTab}`}
-          promptKey={activeTab}
           value={prompts[activeTab] ?? ''}
           setValue={updatePrompt}
           placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
