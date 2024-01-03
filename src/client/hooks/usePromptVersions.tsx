@@ -14,7 +14,9 @@ export default function usePromptVersions(
   }
 
   const isDirty = !PromptVersionsAreEqual(activeVersion, currentVersion)
-  const versions = prompt.versions
+  const versions = isDirty
+    ? [...prompt.versions.filter(version => version.didRun), { ...currentVersion, didRun: false }]
+    : prompt.versions
 
   return [versions, updateVersion, currentVersion, isDirty] as const
 }
