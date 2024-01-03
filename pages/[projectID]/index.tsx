@@ -210,6 +210,7 @@ export default function Home({
   }
 
   const [showComments, setShowComments] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(true)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
@@ -228,7 +229,6 @@ export default function Home({
   })
 
   const [defaultPromptConfig, setDefaultPromptConfig] = useState(initialPromptConfig)
-  const [isSidebarExpanded, setSidebarExpanded] = useState(true)
 
   return (
     <>
@@ -243,13 +243,14 @@ export default function Home({
                       <ProjectTopBar
                         workspaces={workspaces}
                         onNavigateBack={navigateBack}
-                        onToggleSidebar={() => setSidebarExpanded(!isSidebarExpanded)}
+                        showSidebar={showSidebar}
+                        setShowSidebar={setShowSidebar}
                         showComments={showComments}
                         setShowComments={setShowComments}
                       />
                     </Suspense>
                     <div className='flex items-stretch flex-1 overflow-hidden'>
-                      {isSidebarExpanded && (
+                      {showSidebar && (
                         <Suspense>
                           <ProjectSidebar
                             activeItem={activeItem}
