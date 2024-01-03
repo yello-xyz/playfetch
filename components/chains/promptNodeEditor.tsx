@@ -5,7 +5,7 @@ import { Allotment } from 'allotment'
 import { SingleTabHeader } from '../tabSelector'
 import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
-import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
 export default function PromptNodeEditor({
@@ -45,7 +45,7 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
+  const [updateVersion] = usePromptVersion(activeVersion, setModifiedVersion)
 
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)

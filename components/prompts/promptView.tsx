@@ -10,7 +10,7 @@ import useRunVersion from '@/src/client/hooks/useRunVersion'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testData/testDataPane'
-import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 
 export default function PromptView({
@@ -52,7 +52,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const [currentVersion, updateVersion, isDirty] = useModifiedVersion(activeVersion, setModifiedVersion)
+  const [updateVersion, currentVersion, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
