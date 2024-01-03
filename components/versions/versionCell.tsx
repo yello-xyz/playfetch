@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { ActivePrompt, PromptVersion, ChainVersion, ActiveChain, IsPromptVersion } from '@/types'
 import VersionCellHeader from './versionCellHeader'
 import PromptVersionCellBody from '../prompts/promptVersionCellBody'
@@ -28,6 +28,8 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   onSelect: (version: Version) => void
   chainItemCache?: ActiveItemCache
 }) {
+  const [isExpanded, setExpanded] = useState(false)
+
   return (
     <VerticalBarWrapper
       id={identifier}
@@ -40,28 +42,34 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
           isActiveVersion ? 'bg-blue-25 border-blue-100' : 'bg-gray-25 border-gray-200 hover:bg-gray-50'
         } ${version.didRun ? 'border-solid' : 'border-dashed'}`}
         onClick={() => onSelect(version)}>
-        <VersionCellHeader
-          identifier={identifier}
-          labelColors={labelColors}
-          version={version}
-          isActiveVersion={isActiveVersion}
-          activeItem={activeItem}
-        />
-        <div className='border-b border-gray-200 border-b-1' />
-        {IsPromptVersion(version) ? (
-          <PromptVersionCellBody
+          <VersionCellHeader
+            identifier={identifier}
+            labelColors={labelColors}
             version={version}
-            compareVersion={compareVersion as PromptVersion | undefined}
             isActiveVersion={isActiveVersion}
+            activeItem={activeItem}
+            isExpanded={isExpanded}
+            setExpanded={setExpanded}
           />
-        ) : chainItemCache ? (
-          <ChainVersionCellBody
-            version={version}
-            compareVersion={compareVersion as ChainVersion | undefined}
-            isActiveVersion={isActiveVersion}
-            itemCache={chainItemCache}
-          />
-        ) : null}
+        {isExpanded && (
+          <>
+            <div className='border-b border-gray-200 border-b-1' />
+            {IsPromptVersion(version) ? (
+              <PromptVersionCellBody
+                version={version}
+                compareVersion={compareVersion as PromptVersion | undefined}
+                isActiveVersion={isActiveVersion}
+              />
+            ) : chainItemCache ? (
+              <ChainVersionCellBody
+                version={version}
+                compareVersion={compareVersion as ChainVersion | undefined}
+                isActiveVersion={isActiveVersion}
+                itemCache={chainItemCache}
+              />
+            ) : null}
+          </>
+        )}
       </div>
     </VerticalBarWrapper>
   )

@@ -7,6 +7,8 @@ import CommentPopupMenu from '../commentPopupMenu'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { FormatRelativeDate } from '@/src/common/formatting'
 import { VersionLabels } from './versionLabels'
+import Icon from '../icon'
+import chevronIcon from '@/public/chevron.svg'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -21,12 +23,16 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
   version,
   isActiveVersion,
   activeItem,
+  isExpanded,
+  setExpanded,
 }: {
   identifier: string
   labelColors: Record<string, string>
   version: Version
   isActiveVersion: boolean
   activeItem: ActivePrompt | ActiveChain
+  isExpanded: boolean
+  setExpanded: (expanded: boolean) => void
 }) {
   const [selection, setSelection] = useState<string>()
   useEffect(() => {
@@ -44,6 +50,11 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
     <>
       <div className='flex items-center justify-between gap-2'>
         <div className='flex items-center gap-1 text-xs text-gray-700 whitespace-nowrap'>
+          <Icon
+            className={`cursor-pointer -ml-3 -mr-0.5 ${isExpanded ? '' : '-rotate-90'}`}
+            icon={chevronIcon}
+            onClick={() => setExpanded(!isExpanded)}
+          />
           {user && (
             <>
               <UserAvatar user={user} size='sm' />
@@ -72,7 +83,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
           <VersionPopupMenu activeItem={activeItem} version={version} selectedCell={isActiveVersion} />
         </div>
       </div>
-      <VersionLabels version={version} colors={labelColors} />
+      <VersionLabels className='ml-3.5 -mt-1' version={version} colors={labelColors} />
     </>
   )
 }

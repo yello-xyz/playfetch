@@ -9,12 +9,14 @@ export function VersionLabels<Version extends PromptVersion | ChainVersion>({
   hideChainReferences,
   hideEndpointReferences,
   noWrap,
+  className = '',
 }: {
   version: Version
   colors: Record<string, string>
   hideChainReferences?: boolean
   hideEndpointReferences?: boolean
   noWrap?: boolean
+  className?: string
 }) {
   const usedInChain = 'used in Chain'
   const usedAsEndpoint = 'used as Endpoint'
@@ -32,6 +34,7 @@ export function VersionLabels<Version extends PromptVersion | ChainVersion>({
       colors={{ ...colors, ...extraColors }}
       icons={extraIcons}
       noWrap={noWrap}
+      className={className}
     />
   )
 }
@@ -41,14 +44,16 @@ export function ItemLabels({
   colors,
   icons = {},
   noWrap,
+  className = '',
 }: {
   labels: string[]
   colors: Record<string, string>
   icons?: Record<string, any>
   noWrap?: boolean
+  className?: string
 }) {
   return labels.length > 0 ? (
-    <div className={`flex flex-wrap gap-1 ${noWrap ? 'overflow-hidden max-h-5' : ''}`}>
+    <div className={`${className} flex flex-wrap gap-1 ${noWrap ? 'overflow-hidden max-h-5' : ''}`}>
       {labels.map((label, labelIndex) => (
         <ItemLabel label={label} colors={colors} icons={icons} key={labelIndex} />
       ))}
