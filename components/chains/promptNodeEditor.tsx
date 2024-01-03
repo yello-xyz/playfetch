@@ -5,7 +5,6 @@ import { Allotment } from 'allotment'
 import { SingleTabHeader } from '../tabSelector'
 import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
-import { LoadPendingVersion } from '../prompts/promptView'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
@@ -47,7 +46,6 @@ function PromptEditor({
   setModifiedVersion: (version: PromptVersion) => void
 }) {
   const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
-  const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, selectVersion, currentVersion)
 
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -72,7 +70,6 @@ function PromptEditor({
           <PromptPanel
             version={activeVersion}
             setModifiedVersion={updateVersion}
-            loadPendingVersion={loadPendingVersion}
             setPreferredHeight={setPromptHeight}
           />
         </div>

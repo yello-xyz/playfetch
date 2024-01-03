@@ -10,21 +10,8 @@ import useRunVersion from '@/src/client/hooks/useRunVersion'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testData/testDataPane'
-import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
-
-export const LoadPendingVersion = (
-  versions: PromptVersion[],
-  activeVersion: PromptVersion,
-  setActiveVersion: (version: PromptVersion) => void,
-  modifiedVersion: PromptVersion
-) => {
-  const pendingVersion = versions.findLast(version => !version.didRun)
-  const canLoadPendingVersion =
-    !!pendingVersion && activeVersion.id !== pendingVersion.id && PromptVersionsAreEqual(activeVersion, modifiedVersion)
-  return canLoadPendingVersion ? () => setActiveVersion(pendingVersion) : undefined
-}
 
 export default function PromptView({
   prompt,
@@ -82,8 +69,6 @@ export default function PromptView({
     setActiveTab('Prompt versions')
   }
 
-  const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, setActiveVersion, currentVersion)
-
   const minWidth = 280
   const minTopPaneHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -131,7 +116,6 @@ export default function PromptView({
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
                 onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
-                loadPendingVersion={loadPendingVersion}
                 isDirty={isDirty}
                 isRunning={isRunning}
                 setPreferredHeight={setPromptHeight}

@@ -43,7 +43,6 @@ export default function PromptPanel({
   onShowTestConfig,
   initialActiveTab,
   onActiveTabChange,
-  loadPendingVersion,
   isDirty,
   isRunning,
   setPreferredHeight,
@@ -57,7 +56,6 @@ export default function PromptPanel({
   onShowTestConfig?: () => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
-  loadPendingVersion?: () => void
   isDirty?: boolean
   isRunning?: boolean
   setPreferredHeight?: (height: number) => void
@@ -132,7 +130,6 @@ export default function PromptPanel({
     contentHeight +
     (isModelAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
-    (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
   useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
@@ -151,7 +148,6 @@ export default function PromptPanel({
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
-        {loadPendingVersion && <LoadPendingVersionBanner loadPendingVersion={loadPendingVersion} />}
         <div className='flex items-center gap-1 font-medium'>
           {tabs.map(tab => (
             <div
@@ -269,14 +265,6 @@ export function ProviderWarning({
       <span>
         An API key is required to use this {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
-    </ButtonBanner>
-  )
-}
-
-function LoadPendingVersionBanner({ loadPendingVersion }: { loadPendingVersion: () => void }) {
-  return (
-    <ButtonBanner type='info' buttonTitle='Load' onClick={loadPendingVersion}>
-      You have pending changes in a prompt that has not run.
     </ButtonBanner>
   )
 }
