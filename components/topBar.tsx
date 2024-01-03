@@ -1,6 +1,7 @@
 import Icon from './icon'
 import backIcon from '@/public/back.svg'
 import { ReactNode } from 'react'
+import Button from './button'
 
 export default function TopBar({ children }: { children: ReactNode }) {
   return (
@@ -11,11 +12,11 @@ export default function TopBar({ children }: { children: ReactNode }) {
 }
 
 export const TopBarBackItem = ({ title, onNavigateBack }: { title?: string; onNavigateBack: () => void }) => (
-  <TopBarAccessoryItem className='flex items-center gap-1 py-1 cursor-pointer' onClick={onNavigateBack}>
-    <div className='hover:bg-gray-100 flex items-center gap-0.5 py-1 pl-1.5 pr-3 rounded-lg'>
+  <TopBarAccessoryItem onClick={onNavigateBack}>
+    <Button type='outline' onClick={onNavigateBack}>
       <Icon icon={backIcon} />
-      {title ?? 'Back'}
-    </div>
+      <span className='font-normal'>{title ?? 'Back'}</span>
+    </Button>
   </TopBarAccessoryItem>
 )
 
