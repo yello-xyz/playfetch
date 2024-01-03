@@ -1,8 +1,9 @@
-import { PromptVersion } from '@/types'
+import { ActivePrompt, PromptVersion } from '@/types'
 import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 
-export default function usePromptVersion(
+export default function usePromptVersions(
+  prompt: ActivePrompt,
   activeVersion: PromptVersion,
   setModifiedVersion: (version: PromptVersion) => void
 ) {
@@ -13,6 +14,7 @@ export default function usePromptVersion(
   }
 
   const isDirty = !PromptVersionsAreEqual(activeVersion, currentVersion)
+  const versions = prompt.versions
 
-  return [updateVersion, currentVersion, isDirty] as const
+  return [versions, updateVersion, currentVersion, isDirty] as const
 }
