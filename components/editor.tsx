@@ -1,5 +1,5 @@
 import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { EditorView, ViewUpdate, placeholder as placeholderText, lineNumbers } from '@codemirror/view'
+import { EditorView, ViewUpdate, placeholder as placeholderText, lineNumbers, keymap } from '@codemirror/view'
 import {
   StringStream,
   StreamLanguage,
@@ -8,6 +8,7 @@ import {
   syntaxTree,
   TagStyle,
 } from '@codemirror/language'
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { Inter, Roboto_Mono } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
@@ -100,6 +101,8 @@ export default function Editor({
       EditorView.editable.of(!disabled),
       editorTheme(preformatted, bordered),
       onUpdate,
+      history(),
+      keymap.of([...defaultKeymap, ...historyKeymap]),
     ],
     [tokenizer, tokenStyle, disabled, placeholder, preformatted, bordered, onUpdate]
   )
