@@ -34,6 +34,7 @@ export function PendingButton({
       type={type}
       disabled={disabled || isPending}
       roundedClass={roundedClass}
+      paddingClass={isPending ? 'pr-4 pl-2.5 py-1.5' : undefined}
       showSpinner={isPending}
       onClick={handleClick}
       onDisabledClick={onDisabledClick}>
@@ -46,6 +47,7 @@ export default function Button({
   type = 'primary',
   children,
   roundedClass = 'rounded-lg',
+  paddingClass = 'px-4 py-2',
   showSpinner,
   disabled,
   onClick,
@@ -54,6 +56,7 @@ export default function Button({
   type?: ButtonType
   children: ReactNode
   roundedClass?: string
+  paddingClass?: string
   showSpinner?: boolean
   disabled?: boolean
   onClick: () => void | Promise<any>
@@ -72,8 +75,6 @@ export default function Button({
         return 'bg-white text-red-500 border border-gray-200 hover:bg-red-50 hover:border-red-100 disabled:opacity-50'
     }
   }
-
-  const paddingClass = showSpinner ? 'pr-4 pl-2.5 py-1.5' : 'px-4 py-2'
 
   return (
     <div className='relative'>
