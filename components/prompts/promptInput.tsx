@@ -36,9 +36,9 @@ const extractSelection = (editorSelection?: Selection) => {
   if (editorSelection && documentSelection) {
     const isContentEditable = documentSelection.anchorNode?.parentElement?.isContentEditable
     const isSingleNode = documentSelection.anchorNode === documentSelection.focusNode
-    if (isContentEditable && isSingleNode && editorSelection.text.length > 0) {
-      const range = documentSelection.getRangeAt(0)
-      const selectionRect = range.getBoundingClientRect()
+    const range = documentSelection.getRangeAt(0)
+    const selectionRect = range.getBoundingClientRect()
+    if (isContentEditable && isSingleNode && editorSelection.text.length > 0 && !!selectionRect.width) {
       const popupX = selectionRect.left + selectionRect.width / 2
       const popupY = selectionRect.top - 34
       return { ...editorSelection, popupX, popupY }
