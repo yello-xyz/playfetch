@@ -128,10 +128,11 @@ export async function savePromptVersionForUser(
   prompts: Prompts,
   config: PromptConfig,
   currentVersionID?: number,
-  previousVersionID?: number
+  previousVersionID?: number,
+  markAsRun = false
 ) {
   const promptData = await getVerifiedUserPromptData(userID, promptID)
-  return saveVersionForUser(userID, promptData, prompts, config, null, currentVersionID, previousVersionID)
+  return saveVersionForUser(userID, promptData, prompts, config, null, currentVersionID, previousVersionID, markAsRun)
 }
 
 export async function saveChainVersionForUser(
@@ -155,7 +156,8 @@ async function saveVersionForUser(
   config: PromptConfig | null,
   items: ChainItemWithInputs[] | null,
   currentVersionID?: number,
-  previousVersionID?: number
+  previousVersionID?: number,
+  markAsRun = false
 ) {
   const datastore = getDatastore()
 
@@ -167,7 +169,7 @@ async function saveVersionForUser(
   if (canOverwrite && previousVersionID === currentVersionID) {
     previousVersionID = currentVersion.previousVersionID
   }
-  const didRun = canOverwrite ? currentVersion.didRun : false
+  const didRun = markAsRun ?? (canOverwrite ? currentVersion.didRun : false)
   const labels = canOverwrite ? JSON.parse(currentVersion.labels) : []
 
   const versionData = toVersionData(

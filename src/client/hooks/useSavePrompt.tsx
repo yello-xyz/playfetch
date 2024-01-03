@@ -10,7 +10,7 @@ export default function useSavePrompt(
 ) {
   const [modifiedVersion, setModifiedVersion] = useState<PromptVersion>()
 
-  const savePrompt = async (onSaved?: (versionID: number) => Promise<void> | void) => {
+  const savePrompt = async (onSaved?: (versionID: number) => Promise<void> | void, markAsRun?: boolean) => {
     const versionNeedsSaving =
       activePrompt &&
       activeVersion &&
@@ -33,7 +33,8 @@ export default function useSavePrompt(
       modifiedVersion.prompts,
       modifiedVersion.config,
       currentVersion.id,
-      activeVersion.id
+      activeVersion.id,
+      markAsRun
     )
     await onSaved?.(versionID)
     return versionID

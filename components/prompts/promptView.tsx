@@ -25,7 +25,7 @@ export default function PromptView({
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  savePrompt: () => Promise<number>
+  savePrompt: (markAsRun?: boolean) => Promise<number>
   focusRunID?: number
 }) {
   type ActiveTab = 'Prompt versions' | 'Test data'
