@@ -16,11 +16,13 @@ const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 export default function ProjectTopBar({
   workspaces,
   onNavigateBack,
+  onToggleSidebar,
   showComments,
   setShowComments,
 }: {
   workspaces: Workspace[]
   onNavigateBack: () => void
+  onToggleSidebar: () => void
   showComments: boolean
   setShowComments: (show: boolean) => void
 }) {
@@ -38,7 +40,7 @@ export default function ProjectTopBar({
   return (
     <>
       <TopBar>
-        <TopBarBackItem title='Back to overview' onNavigateBack={onNavigateBack} />
+        <TopBarBackItem title='Back to overview' onNavigateBack={onNavigateBack} onToggleSidebar={onToggleSidebar} />
         <div className='relative flex gap-1 text-base justify-self-start'>
           {workspace && (
             <span>

@@ -183,10 +183,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID ?? chainID
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -228,6 +228,7 @@ export default function Home({
   })
 
   const [defaultPromptConfig, setDefaultPromptConfig] = useState(initialPromptConfig)
+  const [isSidebarExpanded, setSidebarExpanded] = useState(true)
 
   return (
     <>
@@ -242,25 +243,28 @@ export default function Home({
                       <ProjectTopBar
                         workspaces={workspaces}
                         onNavigateBack={navigateBack}
+                        onToggleSidebar={() => setSidebarExpanded(!isSidebarExpanded)}
                         showComments={showComments}
                         setShowComments={setShowComments}
                       />
                     </Suspense>
                     <div className='flex items-stretch flex-1 overflow-hidden'>
-                      <Suspense>
-                        <ProjectSidebar
-                          activeItem={activeItem}
-                          workspaces={workspaces}
-                          onAddPrompt={addPrompt}
-                          onAddChain={addChain}
-                          onDeleteItem={onDeleteItem}
-                          onSelectPrompt={selectPrompt}
-                          onSelectChain={selectChain}
-                          onSelectCompare={selectCompare}
-                          onSelectEndpoints={selectEndpoints}
-                          onSelectSettings={selectSettings}
-                        />
-                      </Suspense>
+                      {isSidebarExpanded && (
+                        <Suspense>
+                          <ProjectSidebar
+                            activeItem={activeItem}
+                            workspaces={workspaces}
+                            onAddPrompt={addPrompt}
+                            onAddChain={addChain}
+                            onDeleteItem={onDeleteItem}
+                            onSelectPrompt={selectPrompt}
+                            onSelectChain={selectChain}
+                            onSelectCompare={selectCompare}
+                            onSelectEndpoints={selectEndpoints}
+                            onSelectSettings={selectSettings}
+                          />
+                        </Suspense>
+                      )}
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane

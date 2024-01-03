@@ -11,12 +11,25 @@ export default function TopBar({ children }: { children: ReactNode }) {
   )
 }
 
-export const TopBarBackItem = ({ title, onNavigateBack }: { title?: string; onNavigateBack: () => void }) => (
-  <TopBarAccessoryItem onClick={onNavigateBack}>
+export const TopBarBackItem = ({
+  title,
+  onNavigateBack,
+  onToggleSidebar,
+}: {
+  title?: string
+  onNavigateBack: () => void
+  onToggleSidebar?: () => void
+}) => (
+  <TopBarAccessoryItem className='flex gap-2'>
     <Button type='outline' onClick={onNavigateBack}>
       <Icon icon={backIcon} />
       <span className='font-normal'>{title ?? 'Back'}</span>
     </Button>
+    {onToggleSidebar && (
+      <Button type='outline' onClick={onToggleSidebar}>
+        <span className='font-normal'>Toggle sidebar</span>
+      </Button>
+    )}
   </TopBarAccessoryItem>
 )
 
