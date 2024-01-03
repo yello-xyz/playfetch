@@ -51,7 +51,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
             </>
           )}
           <div className='overflow-hidden text-ellipsis'>
-            {formattedDate}
+            {version.didRun ? formattedDate : 'Draft Version'}
             {version.runs.length > 0 && (
               <>
                 {' '}

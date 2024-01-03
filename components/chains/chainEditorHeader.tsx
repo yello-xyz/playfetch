@@ -82,7 +82,7 @@ function HeaderTitle({
           <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
         ) : (
           <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>
-            {versionIsSaved ? 'Unpublished' : 'Unsaved'}
+            {versionIsSaved ? 'Draft Version' : 'Unsaved'}
           </span>
         ))}
     </div>

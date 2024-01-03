@@ -59,7 +59,7 @@ function PromptEditor({
           <div className='flex-1 overflow-y-auto'>
             <VersionTimeline
               activeItem={prompt}
-              versions={prompt.versions.filter(version => version.didRun)}
+              versions={prompt.versions}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
               tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
