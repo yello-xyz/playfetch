@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
 import { PromptConfigsAreEqual, PromptVersionsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 
+type OnSaved = (versionID: number) => Promise<void> | void
+
 export default function useSavePrompt(
   activePrompt: ActivePrompt | undefined,
   activeVersion: PromptVersion | undefined,
@@ -10,7 +12,12 @@ export default function useSavePrompt(
 ) {
   const [modifiedVersion, setModifiedVersion] = useState<PromptVersion>()
 
-  const savePrompt = async (onSaved?: (versionID: number) => Promise<void> | void) => {
+  const saveVersion = async (
+    activePrompt: ActivePrompt | undefined,
+    activeVersion: PromptVersion | undefined,
+    modifiedVersion: PromptVersion | undefined,
+    onSaved?: OnSaved
+  ) => {
     const versionNeedsSaving =
       activePrompt &&
       activeVersion &&
@@ -38,6 +45,8 @@ export default function useSavePrompt(
     await onSaved?.(versionID)
     return versionID
   }
+
+  const savePrompt = (onSaved?: OnSaved) => saveVersion(activePrompt, activeVersion, modifiedVersion, onSaved)
 
   return [savePrompt, setModifiedVersion] as const
 }
