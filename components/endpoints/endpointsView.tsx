@@ -53,7 +53,12 @@ export default function EndpointsView({
   const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
 
   type ActiveTab = 'Endpoints' | 'Logs'
-  const [activeTab, setActiveTab] = useState<ActiveTab>(showLogs ? 'Logs' : 'Endpoints')
+  const tabFromQuery = (showLogs: number | undefined) => (showLogs ? 'Logs' : 'Endpoints')
+  const [activeTab, setActiveTab] = useState<ActiveTab>(tabFromQuery(showLogs))
+
+  if (tabFromQuery(showLogs) !== activeTab) {
+    setActiveTab(tabFromQuery(showLogs))
+  }
 
   const logEntries = analytics?.recentLogEntries ?? []
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
