@@ -8,9 +8,8 @@ export default function usePromptVersion(
 ) {
   const [currentVersion, setCurrentVersion] = useInitialState(activeVersion, (a, b) => a.id === b.id)
   const updateVersion = (version: PromptVersion) => {
-    const modifiedVersion = { ...version, didRun: false }
-    setCurrentVersion(modifiedVersion)
-    setModifiedVersion(modifiedVersion)
+    setCurrentVersion(version)
+    setModifiedVersion(version)
   }
 
   const isDirty = !PromptVersionsAreEqual(activeVersion, currentVersion)
