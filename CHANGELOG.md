@@ -1,5 +1,11 @@
 ## PlayFetch Changelog
 
+### v0.21 - 2024-01-05
+- Improved text editor performance and usability
+- Show token counts in responses
+- Collapsible sidebar
+- Improved save prompt behaviour
+
 ### v0.20 - 2023-12-20
 - GitHub integration
 
