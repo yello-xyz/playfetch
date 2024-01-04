@@ -33,17 +33,18 @@ export default function TestDataPane({
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
   const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
 
-  const paddedColumn = (variable: string, length: number) => [
-    ...(inputValues[variable] ?? []),
-    ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
-  ]
-
   const getInputValue = (row: number, variable: string) => inputValues[variable]?.[row] ?? ''
   const setInputValue = (row: number, variable: string, value: string) =>
-    setInputValues(inputValues => ({
-      ...inputValues,
-      [variable]: [...paddedColumn(variable, row).slice(0, row), value, ...paddedColumn(variable, row).slice(row + 1)],
-    }))
+    setInputValues(inputValues => {
+      const paddedColumn = [
+        ...(inputValues[variable] ?? []),
+        ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
+      ]
+      return {
+        ...inputValues,
+        [variable]: [...paddedColumn.slice(0, row), value, ...paddedColumn.slice(row + 1)],
+      }
+    })
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
 
