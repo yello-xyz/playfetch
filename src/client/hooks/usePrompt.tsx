@@ -14,15 +14,15 @@ export default function usePrompt(
 ) {
   const router = useRouter()
 
-  const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
+  const [savePrompt, setModifiedVersion, resavePrompt] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
   const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
     const newPrompt = await api.getPrompt(promptID, activeProject)
     setActivePromp(newPrompt)
-    setActiveVersion(
+    const newVersion =
       newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0]
-    )
-    setModifiedVersion(undefined)
+    setActiveVersion(newVersion)
+    resavePrompt(newPrompt, newVersion, () => refreshPrompt(promptID, focusVersionID))
   }
 
   const selectPrompt = async (promptID: number, focusVersionID?: number) => {

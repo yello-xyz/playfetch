@@ -1,5 +1,5 @@
 import api from '@/src/client/api'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
 import { PromptConfigsAreEqual, PromptVersionsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 
@@ -48,5 +48,16 @@ export default function useSavePrompt(
 
   const savePrompt = (onSaved?: OnSaved) => saveVersion(activePrompt, activeVersion, modifiedVersion, onSaved)
 
-  return [savePrompt, setModifiedVersion] as const
+  const resavePrompt = (activePrompt: ActivePrompt, activeVersion: PromptVersion, onSaved?: OnSaved) => {
+    let didResave = false
+    setModifiedVersion(modifiedVersion => {
+      if (!didResave) {
+        didResave = true
+        saveVersion(activePrompt, activeVersion, modifiedVersion, onSaved)
+      }
+      return undefined
+    })
+  }
+
+  return [savePrompt, setModifiedVersion, resavePrompt] as const
 }
