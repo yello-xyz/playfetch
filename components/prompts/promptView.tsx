@@ -25,7 +25,7 @@ export default function PromptView({
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
-  savePrompt: (markAsRun?: boolean) => Promise<number>
+  savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
   type ActiveTab = 'Prompt versions' | 'Test data'
@@ -53,7 +53,6 @@ export default function PromptView({
   }
 
   const [updateVersion, currentVersion, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
-  const forceSave = isDirty ? () => savePrompt(true) : undefined
 
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
@@ -114,7 +113,7 @@ export default function PromptView({
                 version={activeVersion}
                 setModifiedVersion={updateVersion}
                 runPrompt={saveAndRun}
-                savePrompt={forceSave}
+                savePrompt={isDirty ? savePrompt : undefined}
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}

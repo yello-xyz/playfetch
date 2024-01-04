@@ -139,10 +139,9 @@ const api = {
     prompts: Prompts,
     config: PromptConfig,
     versionID: number,
-    previousVersionID: number,
-    markAsRun?: boolean
+    previousVersionID: number
   ): Promise<number> {
-    return post(this.updatePrompt, { promptID, prompts, config, versionID, previousVersionID, markAsRun })
+    return post(this.updatePrompt, { promptID, prompts, config, versionID, previousVersionID })
   },
   renamePrompt: function (promptID: number, name: string) {
     return post(this.renamePrompt, { promptID, name })

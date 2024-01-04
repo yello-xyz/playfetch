@@ -47,10 +47,7 @@ export default function MainProjectPane({
   selectVersion: (version: PromptVersion | ChainVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
   addPrompt: () => Promise<void>
-  savePrompt: (
-    onSaved?: (versionID: number) => Promise<void> | void,
-    markAsRun?: boolean
-  ) => Promise<number | undefined>
+  savePrompt: (onSaved?: (versionID: number) => Promise<void> | void) => Promise<number | undefined>
   saveChain: (
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
@@ -74,9 +71,7 @@ export default function MainProjectPane({
             activeVersion={activePromptVersion}
             setActiveVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
-            savePrompt={(markAsRun?: boolean) =>
-              savePrompt(refreshOnSavePrompt(activePrompt.id), markAsRun).then(versionID => versionID!)
-            }
+            savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
             focusRunID={focusRunID}
           />
         )}
