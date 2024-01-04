@@ -5,7 +5,7 @@ import { Allotment } from 'allotment'
 import { SingleTabHeader } from '../tabSelector'
 import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
-import usePromptVersions from '@/src/client/hooks/usePromptVersions'
+import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
 export default function PromptNodeEditor({
@@ -45,7 +45,7 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [versions, updateVersion] = usePromptVersions(prompt, activeVersion, setModifiedVersion)
+  const [updateVersion] = usePromptVersion(activeVersion, setModifiedVersion)
 
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -57,7 +57,7 @@ function PromptEditor({
           <div className='flex-1 overflow-y-auto'>
             <VersionTimeline
               activeItem={prompt}
-              versions={versions}
+              versions={prompt.versions}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
               tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
