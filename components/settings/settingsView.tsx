@@ -109,6 +109,11 @@ export default function SettingsView({
   const router = useRouter()
   const activePaneFromQuery = ParseActiveSettingsTabQuery(router.query)
   const [activePane, setActivePane] = useState<ActivePane>(activePaneFromQuery)
+
+  if (activePaneFromQuery !== activePane) {
+    setActivePane(activePaneFromQuery)
+  }
+
   const updateActivePane = (pane: ActivePane) => {
     if (pane !== activePane) {
       router.push(isProjectScope ? ProjectSettingsRoute(scopeID, pane) : UserSettingsRoute(pane), undefined, {
