@@ -37,6 +37,7 @@ export default function PromptPanel({
   version,
   setModifiedVersion,
   runPrompt,
+  savePrompt,
   inputValues,
   testConfig,
   setTestConfig,
@@ -50,6 +51,7 @@ export default function PromptPanel({
   version: PromptVersion
   setModifiedVersion?: (version: PromptVersion) => void
   runPrompt?: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
+  savePrompt?: () => Promise<any>
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
@@ -179,6 +181,7 @@ export default function PromptPanel({
           onShowTestConfig={onShowTestConfig}
           disabled={!isModelAvailable || !VersionHasNonEmptyPrompts({ prompts, config }) || isRunning}
           callback={runPrompt}
+          onSave={savePrompt}
         />
       )}
     </div>

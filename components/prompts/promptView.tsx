@@ -53,6 +53,8 @@ export default function PromptView({
   }
 
   const [updateVersion, currentVersion, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
+  const forceSave = isDirty ? () => savePrompt(true) : undefined
+
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
@@ -112,6 +114,7 @@ export default function PromptView({
                 version={activeVersion}
                 setModifiedVersion={updateVersion}
                 runPrompt={saveAndRun}
+                savePrompt={forceSave}
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}

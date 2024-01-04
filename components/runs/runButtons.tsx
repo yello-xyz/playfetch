@@ -3,6 +3,7 @@ import { PendingButton } from '../button'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
 import TestDataSelector from './testDataSelector'
 import { SelectInputRows } from '@/src/client/inputRows'
+import SavePromptButton from './savePromptButton'
 
 type TestMode = TestConfig['mode']
 
@@ -32,6 +33,7 @@ export default function RunButtons({
   onShowTestConfig,
   disabled,
   callback,
+  onSave,
 }: {
   runTitle?: string
   variables: string[]
@@ -42,6 +44,7 @@ export default function RunButtons({
   onShowTestConfig?: () => void
   disabled?: boolean
   callback: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
+  onSave?: () => void
 }) {
   const inputVariables =
     testConfig.autoRespond !== undefined && (testConfig.maxResponses ?? 0) > 0 ? variables : staticVariables
@@ -88,6 +91,8 @@ export default function RunButtons({
 
   const showTestDataSelector = getIndicesForMode('all').length > 1
   const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
+  const roundedClass =
+    showTestDataSelector && onSave ? '' : showTestDataSelector ? 'rounded-r-lg' : onSave ? 'rounded-l-lg' : undefined
 
   return (
     <div className='flex items-center self-end gap-3'>
@@ -102,11 +107,12 @@ export default function RunButtons({
         <PendingButton
           title={runTitle ?? 'Run'}
           pendingTitle='Running'
-          roundedClass={showTestDataSelector ? 'rounded-r-lg' : undefined}
+          roundedClass={roundedClass}
           disabled={disabled || isMissingTestData}
           onClick={testPrompt}
           onDisabledClick={!disabled && isMissingTestData ? onShowTestConfig : undefined}
         />
+        {onSave && <SavePromptButton onSave={onSave} />}
       </div>
     </div>
   )
