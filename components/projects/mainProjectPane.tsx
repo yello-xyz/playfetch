@@ -29,7 +29,6 @@ export default function MainProjectPane({
   addPrompt,
   savePrompt,
   saveChain,
-  refreshOnSavePrompt,
   focusRunID,
   analytics,
   refreshAnalytics,
@@ -47,12 +46,11 @@ export default function MainProjectPane({
   selectVersion: (version: PromptVersion | ChainVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
   addPrompt: () => Promise<void>
-  savePrompt: (onSaved?: (versionID: number) => Promise<void> | void) => Promise<number | undefined>
+  savePrompt: () => Promise<number>
   saveChain: (
     items: ChainItemWithInputs[],
     onSaved?: ((versionID: number) => Promise<void>) | (() => void)
   ) => Promise<number | undefined>
-  refreshOnSavePrompt: (promptID: number) => (versionID?: number) => void
   focusRunID: number | undefined
   analytics: Analytics | undefined
   refreshAnalytics: (dayRange?: number) => Promise<void>
@@ -71,7 +69,7 @@ export default function MainProjectPane({
             activeVersion={activePromptVersion}
             setActiveVersion={selectVersion}
             setModifiedVersion={setModifiedVersion}
-            savePrompt={() => savePrompt(refreshOnSavePrompt(activePrompt.id)).then(versionID => versionID!)}
+            savePrompt={savePrompt}
             focusRunID={focusRunID}
           />
         )}

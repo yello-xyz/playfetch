@@ -121,10 +121,11 @@ export default function Home({
     }
   }
 
-  const refreshOnSavePrompt = (promptID: number) => (versionID?: number) => {
-    refreshPrompt(promptID, versionID)
-    refreshProject()
-  }
+  const savePromptCallback = () =>
+    savePrompt(versionID => {
+      refreshPrompt(activePrompt!.id, versionID)
+      refreshProject()
+    }).then(versionID => versionID!)
 
   const router = useRouter()
   const { promptID, chainID, compare, endpoints, settings } = ParseActiveItemQuery(router.query, activeProject)
@@ -277,9 +278,8 @@ export default function Home({
                             selectVersion={selectVersion}
                             setModifiedVersion={setModifiedVersion}
                             addPrompt={addPrompt}
-                            savePrompt={savePrompt}
+                            savePrompt={savePromptCallback}
                             saveChain={saveChain}
-                            refreshOnSavePrompt={refreshOnSavePrompt}
                             focusRunID={focusRunID}
                             analytics={analytics}
                             refreshAnalytics={refreshAnalytics}
