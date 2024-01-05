@@ -39,7 +39,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
       isActive={isActiveVersion}>
       <div
         className={`flex-1 border rounded-lg cursor-pointer px-4 py-3 flex flex-col gap-2 mb-1.5 mt-1 ${
-          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'bg-white border-gray-200 hover:bg-gray-50'
+          isActiveVersion ? 'bg-blue-25 border-blue-100' : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
         } ${version.didRun ? 'border-solid' : 'border-dashed'}`}
         onClick={() => onSelect(version)}>
           <VersionCellHeader
