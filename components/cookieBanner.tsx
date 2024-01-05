@@ -50,7 +50,7 @@ export default function CookieBanner({ children }: any) {
     <div>
       {children}
       {!savedCookieStatus && (
-        <div className='fixed z-30 flex flex-col gap-2 p-4 text-gray-700 bg-white rounded-lg shadow bottom-4 left-4 w-[392px]'>
+        <div className='fixed z-30 flex flex-col gap-2 p-4 text-gray-700 border border-gray-200 bg-white rounded-lg shadow-sm bottom-4 left-4 w-[392px]'>
           {showingMoreOptions ? (
             <div className='flex flex-col gap-2 pb-2 text-sm'>
               <Checkbox label='Strictly necessary' checked disabled>
