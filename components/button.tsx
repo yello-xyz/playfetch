@@ -70,7 +70,7 @@ export default function Button({
       case 'secondary':
         return 'text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50'
       case 'outline':
-        return 'bg-white border border-gray-200 hover:bg-gray-100 font-medium disabled:opacity-50'
+        return 'bg-white border border-gray-200 hover:bg-gray-100 hover:border-gray-300 font-medium disabled:opacity-50'
       case 'destructive':
         return 'bg-white text-red-500 border border-gray-200 hover:bg-red-50 hover:border-red-100 disabled:opacity-50'
     }
