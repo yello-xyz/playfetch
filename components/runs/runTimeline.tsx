@@ -80,30 +80,27 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const sortedRuns = sortRuns(runs).reduce(
-    (sortedRuns, run) => {
-      const previousRun = sortedRuns.slice(-1)[0]
-      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+  const sortedRuns = sortRuns(runs).reduce((sortedRuns, run) => {
+    const previousRun = sortedRuns.slice(-1)[0]
+    const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
 
-      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
-      const isParentRun = compareRun && compareRun.parentRunID === run.id
-      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
-      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+    const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
+    const isParentRun = compareRun && compareRun.parentRunID === run.id
+    const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
+    const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
 
-      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
-        ? [
-            ...sortedRuns.slice(0, -1),
-            {
-              ...previousRun,
-              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
-              continuations: [...(previousRun.continuations ?? []), run],
-              continuationID: compareRun.continuationID ?? run.continuationID,
-            },
-          ]
-        : [...sortedRuns, run]
-    },
-    [] as (PartialRun | Run)[]
-  )
+    return wasPartialRun || isParentRun || sameParentRun || sameContinuation
+      ? [
+          ...sortedRuns.slice(0, -1),
+          {
+            ...previousRun,
+            id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
+            continuations: [...(previousRun.continuations ?? []), run],
+            continuationID: compareRun.continuationID ?? run.continuationID,
+          },
+        ]
+      : [...sortedRuns, run]
+  }, [] as (PartialRun | Run)[])
 
   const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)

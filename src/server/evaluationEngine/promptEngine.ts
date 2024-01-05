@@ -92,20 +92,20 @@ export default async function runPromptWithConfig(
     ...(isErrorPredictionResponse(result)
       ? ErrorRunResponse(result.error)
       : isValidPredictionResponse(result)
-        ? {
-            ...result,
-            result: TryParseOutput(result.output),
-            error: undefined,
-            failed: false,
-            functionCall: result.functionCall ?? (config.isChat ? DefaultChatContinuationInputKey : null),
-          }
-        : {
-            ...result,
-            result: undefined,
-            output: undefined,
-            error: 'Received empty prediction response',
-            failed: true,
-          }),
+      ? {
+          ...result,
+          result: TryParseOutput(result.output),
+          error: undefined,
+          failed: false,
+          functionCall: result.functionCall ?? (config.isChat ? DefaultChatContinuationInputKey : null),
+        }
+      : {
+          ...result,
+          result: undefined,
+          output: undefined,
+          error: 'Received empty prediction response',
+          failed: true,
+        }),
     attempts: Math.min(attempts, maxAttempts),
   }
 }
