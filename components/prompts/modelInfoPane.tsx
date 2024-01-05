@@ -41,7 +41,7 @@ export default function ModelInfoPane({
   const [showActionMenu, setShowActionMenu] = useState(false)
 
   return (
-    <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1'>
+    <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1 shadow-sm'>
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
