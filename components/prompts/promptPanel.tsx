@@ -24,7 +24,7 @@ import { PromptConfigsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/v
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
-import { ReactNode, useCallback, useEffect } from 'react'
+import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
 import { useCheckModelDisabled, useCheckModelProviders } from '@/src/client/context/providerContext'
@@ -37,13 +37,13 @@ export default function PromptPanel({
   version,
   setModifiedVersion,
   runPrompt,
+  savePrompt,
   inputValues,
   testConfig,
   setTestConfig,
   onShowTestConfig,
   initialActiveTab,
   onActiveTabChange,
-  loadPendingVersion,
   isDirty,
   isRunning,
   setPreferredHeight,
@@ -51,17 +51,18 @@ export default function PromptPanel({
   version: PromptVersion
   setModifiedVersion?: (version: PromptVersion) => void
   runPrompt?: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
+  savePrompt?: () => Promise<any>
   inputValues?: InputValues
   testConfig?: TestConfig
   setTestConfig?: (testConfig: TestConfig) => void
   onShowTestConfig?: () => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
-  loadPendingVersion?: () => void
   isDirty?: boolean
   isRunning?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
+  // TODO should we be checking equality of the structs here? But exact prompts to check depends on config?
   const [prompts, setPrompts] = useInitialState(version.prompts)
   const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
 
@@ -83,13 +84,15 @@ export default function PromptPanel({
     }
   }, [config, activeTab, updateActiveTab])
 
+  const onUpdate = (prompts: Prompts, config: PromptConfig) =>
+    setTimeout(() => setModifiedVersion?.({ ...version, prompts, config }))
+
   const update = (prompts: Prompts, config: PromptConfig) => {
     setPrompts(prompts)
     setConfig(config)
-    setModifiedVersion?.({ ...version, prompts, config })
+    onUpdate(prompts, config)
   }
 
-  const updatePrompt = (prompt: string) => update({ ...prompts, [activeTab]: prompt }, config)
   const updateConfig = (config: PromptConfig) =>
     update(
       Object.fromEntries(
@@ -103,6 +106,16 @@ export default function PromptPanel({
         jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
       }
     )
+
+  const updatePrompt = (prompt: string) =>
+    setConfig(config => {
+      setPrompts(prompts => {
+        prompts = { ...prompts, [activeTab]: prompt }
+        onUpdate(prompts, config)
+        return prompts
+      })
+      return config
+    })
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
@@ -119,10 +132,9 @@ export default function PromptPanel({
     contentHeight +
     (isModelAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
-    (loadPendingVersion ? 49 + padding : 0) +
     ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
 
-  useEffect(() => setPreferredHeight?.(preferredHeight), [preferredHeight, setPreferredHeight])
+  useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
 
   const classNameForTab = (tab: PromptTab) =>
     tab === activeTab
@@ -138,7 +150,6 @@ export default function PromptPanel({
         {showMultipleInputsWarning && (
           <Warning>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</Warning>
         )}
-        {loadPendingVersion && <LoadPendingVersionBanner loadPendingVersion={loadPendingVersion} />}
         <div className='flex items-center gap-1 font-medium'>
           {tabs.map(tab => (
             <div
@@ -150,8 +161,7 @@ export default function PromptPanel({
           ))}
         </div>
         <PromptInput
-          key={version.id}
-          promptKey={activeTab}
+          key={`${version.id}-${activeTab}`}
           value={prompts[activeTab] ?? ''}
           setValue={updatePrompt}
           placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
@@ -171,6 +181,7 @@ export default function PromptPanel({
           onShowTestConfig={onShowTestConfig}
           disabled={!isModelAvailable || !VersionHasNonEmptyPrompts({ prompts, config }) || isRunning}
           callback={runPrompt}
+          onSave={savePrompt}
         />
       )}
     </div>
@@ -257,14 +268,6 @@ export function ProviderWarning({
       <span>
         An API key is required to use this {(ModelProviders as string[]).includes(provider) ? 'model' : 'vector store'}.
       </span>
-    </ButtonBanner>
-  )
-}
-
-function LoadPendingVersionBanner({ loadPendingVersion }: { loadPendingVersion: () => void }) {
-  return (
-    <ButtonBanner type='info' buttonTitle='Load' onClick={loadPendingVersion}>
-      You have pending changes in a prompt that has not run.
     </ButtonBanner>
   )
 }

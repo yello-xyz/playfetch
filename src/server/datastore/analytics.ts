@@ -16,36 +16,27 @@ import { getLogEntriesForProject } from './logs'
 import { DaysAgo } from '@/src/common/formatting'
 
 export async function migrateAnalytics(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allAnalytics] = await datastore.runQuery(datastore.createQuery(Entity.ANALYTICS))
-  const usedProjectIDs = new Set(allAnalytics.map(analyticsData => analyticsData.projectID))
-  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
-  const allProjectIDs = new Set(allProjects.map(project => getID(project)))
-  console.log(
-    `Found ${allAnalytics.length} analytics entries (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`
-  )
   for (const analyticsData of allAnalytics) {
-    if (!!analyticsData.projectID && !allProjectIDs.has(analyticsData.projectID)) {
-      console.log(`Deleting analytics entry ${getID(analyticsData)} for missing project ${analyticsData.projectID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.ANALYTICS, getID(analyticsData)))
-      }
-    }
-    // await getDatastore().save(
-    //   toAnalyticsData(
-    //     analyticsData.projectID,
-    //     analyticsData.range,
-    //     analyticsData.createdAt,
-    //     analyticsData.requests,
-    //     analyticsData.cost,
-    //     analyticsData.duration,
-    //     analyticsData.cacheHits,
-    //     analyticsData.continuations,
-    //     analyticsData.attempts,
-    //     analyticsData.failures,
-    //     getID(analyticsData)
-    //   )
-    // )
+    await getDatastore().save(
+      toAnalyticsData(
+        analyticsData.projectID,
+        analyticsData.range,
+        analyticsData.createdAt,
+        analyticsData.requests,
+        analyticsData.cost,
+        analyticsData.duration,
+        analyticsData.cacheHits,
+        analyticsData.continuations,
+        analyticsData.attempts,
+        analyticsData.failures,
+        getID(analyticsData)
+      )
+    )
   }
 }
 

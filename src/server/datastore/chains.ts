@@ -18,29 +18,13 @@ import { getOrderedRunsForParentID } from './runs'
 import { deleteEntity } from './cleanup'
 
 export async function migrateChains(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
-  const usedProjectIDs = new Set(allChains.map(chainData => chainData.projectID))
-  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
-  const allProjectIDs = new Set(allProjects.map(project => getID(project)))
-  console.log(`Found ${allChains.length} chains (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`)
   for (const chainData of allChains) {
-    if (!!chainData.projectID && !allProjectIDs.has(chainData.projectID)) {
-      console.log(`Deleting chain ${getID(chainData)} for missing project ${chainData.projectID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.CHAIN, getID(chainData)))
-      }
-    }
-    // await datastore.save(
-    //   toChainData(
-    //     chainData.projectID,
-    //     chainData.name,
-    //     JSON.parse(chainData.references),
-    //     chainData.createdAt,
-    //     chainData.lastEditedAt,
-    //     getID(chainData)
-    //   )
-    // )
+    await updateChain({ ...chainData }, false)
   }
 }
 

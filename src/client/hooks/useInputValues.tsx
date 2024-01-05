@@ -12,12 +12,14 @@ export default function useInputValues(
 
   const persistInputValuesIfNeeded = () => {
     setInputValues(inputValues => {
-      for (const [variable, inputs] of Object.entries(inputValues)) {
-        if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
-          api.updateInputValues(parent.id, variable, inputs)
+      setOriginalInputValues(originalInputValues => {
+        for (const [variable, inputs] of Object.entries(inputValues)) {
+          if (inputs.join(',') !== (originalInputValues[variable] ?? []).join(',')) {
+            api.updateInputValues(parent.id, variable, inputs)
+          }
         }
-      }
-      setOriginalInputValues(inputValues)
+        return inputValues
+      })
       return inputValues
     })
   }

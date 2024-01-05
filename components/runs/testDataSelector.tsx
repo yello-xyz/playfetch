@@ -25,7 +25,7 @@ export default function TestDataSelector({
     setPopup(TestDataSelectorPopup, { testConfig, setTestConfig, getIndicesForMode }, location)
 
   const layoutClass = 'flex items-center justify-between gap-1 pl-4 pr-0.5 py-1.5'
-  const styleClass = 'bg-blue-400 border-r-2 border-blue-600 rounded-l-lg cursor-pointer  hover:bg-blue-300'
+  const styleClass = 'bg-blue-400 border-r-2 border-blue-600 rounded-l-lg cursor-pointer hover:bg-blue-300'
   const textClass = 'overflow-hidden text-sm font-medium text-white whitespace-nowrap text-ellipsis'
 
   return (

@@ -1,15 +1,15 @@
-import { Fragment, KeyboardEvent, useRef, useState } from 'react'
+import { Dispatch, Fragment, KeyboardEvent, SetStateAction, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
 import { InputValues, TestConfig } from '@/types'
-import RichTextInput from '../richTextInput'
 import TestDataHeader from './testDataHeader'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
 import RangeInput from '../rangeInput'
+import Editor from '../editor'
 
 export default function TestDataPane({
   variables,
@@ -23,7 +23,7 @@ export default function TestDataPane({
   variables: string[]
   staticVariables: string[]
   inputValues: InputValues
-  setInputValues: (inputValues: InputValues) => void
+  setInputValues: Dispatch<SetStateAction<InputValues>>
   persistInputValuesIfNeeded: () => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
@@ -33,16 +33,17 @@ export default function TestDataPane({
   const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
   const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
 
-  const paddedColumn = (variable: string, length: number) => [
-    ...(inputValues[variable] ?? []),
-    ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
-  ]
-
   const getInputValue = (row: number, variable: string) => inputValues[variable]?.[row] ?? ''
   const setInputValue = (row: number, variable: string, value: string) =>
-    setInputValues({
-      ...inputValues,
-      [variable]: [...paddedColumn(variable, row).slice(0, row), value, ...paddedColumn(variable, row).slice(row + 1)],
+    setInputValues(inputValues => {
+      const paddedColumn = [
+        ...(inputValues[variable] ?? []),
+        ...Array.from({ length: Math.max(0, length - (inputValues[variable]?.length ?? 0)) }, _ => ''),
+      ]
+      return {
+        ...inputValues,
+        [variable]: [...paddedColumn.slice(0, row), value, ...paddedColumn.slice(row + 1)],
+      }
     })
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
@@ -51,14 +52,10 @@ export default function TestDataPane({
     if (!isRowEmpty(rowCount - 1)) {
       persistInputValuesIfNeeded()
       setTimeout(() => {
-        setInputValues(
+        setInputValues(inputValues =>
           Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
         )
-        setTimeout(() => {
-          const editables = containerRef.current?.querySelectorAll('[contenteditable=true]') ?? []
-          const lastChild = editables[editables.length - 1] as HTMLElement
-          lastChild?.focus()
-        })
+        // TODO focus on last cell in newly added row?
       })
     }
   }
@@ -67,7 +64,7 @@ export default function TestDataPane({
     if (isRowEmpty(row) && (event.key === 'Backspace' || event.key === 'Delete')) {
       persistInputValuesIfNeeded()
       setTimeout(() => {
-        setInputValues(
+        setInputValues(inputValues =>
           Object.fromEntries(
             Object.entries(inputValues).map(([variable, values]) => [
               variable,
@@ -88,11 +85,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-            ? 'last'
-            : 'custom'
-        : rowIndices.length === rowCount
-          ? 'all'
+          ? 'last'
           : 'custom'
+        : rowIndices.length === rowCount
+        ? 'all'
+        : 'custom'
     setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
@@ -127,6 +124,8 @@ export default function TestDataPane({
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
+          const border = (col: number) =>
+            isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
           const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
@@ -137,13 +136,15 @@ export default function TestDataPane({
               </div>
               {allVariables.map((variable, col) => (
                 <div className='relative group' key={`${rowCount}-${col}`}>
-                  <RichTextInput
-                    className={`w-full h-full px-3 py-1 text-sm border-b border-l border-gray-200 outline-none focus:border-blue-500 focus:border ${color} ${truncate}`}
+                  <Editor
+                    className={`h-full ${border(col)} ${color} ${truncate}`}
                     value={getInputValue(row, variable)}
                     setValue={value => setInputValue(row, variable, value)}
                     onBlur={() => persistInputValuesIfNeeded()}
                     onFocus={() => setActiveCell([row, col])}
                     onKeyDown={event => checkDeleteRow(event, row)}
+                    bordered={false}
+                    focusOnLoad={false}
                   />
                   <Icon
                     className={`absolute top-0.5 right-0.5 bg-white rounded cursor-pointer opacity-0 ${

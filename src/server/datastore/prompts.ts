@@ -30,20 +30,13 @@ import { PropertyFilter, and } from '@google-cloud/datastore'
 import { deleteEntity } from './cleanup'
 
 export async function migratePrompts(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  const usedProjectIDs = new Set(allPrompts.map(promptData => promptData.projectID))
-  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
-  const allProjectIDs = new Set(allProjects.map(project => getID(project)))
-  console.log(`Found ${allPrompts.length} prompts (for ${usedProjectIDs.size} projects out of ${allProjectIDs.size})`)
   for (const promptData of allPrompts) {
-    if (!!promptData.projectID && !allProjectIDs.has(promptData.projectID)) {
-      console.log(`Deleting prompt ${getID(promptData)} for missing project ${promptData.projectID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.PROMPT, getID(promptData)))
-      }
-    }
-    // await updatePrompt({ ...promptData }, false)
+    await updatePrompt({ ...promptData }, false)
   }
 }
 

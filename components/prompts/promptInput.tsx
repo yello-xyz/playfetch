@@ -1,64 +1,59 @@
-import { RefObject, useCallback, useEffect, useState } from 'react'
-
-import { RichTextFromHTML, RichTextToHTML } from '../richTextInput'
+import { useCallback, useEffect, useState } from 'react'
+import Editor from '../editor'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
-import CodeBlock from '../codeBlock'
-import ContentEditable from '../contentEditable'
-import useFocusEndRef from '@/src/client/hooks/useFocusEndRef'
+import { StringStream } from '@codemirror/language'
+import { tags, Tag } from '@lezer/highlight'
 
 export const InputVariableClass = 'text-white rounded px-1.5 py-0.5 bg-pink-400 whitespace-nowrap font-normal'
 
-const printVariables = (text: string) =>
-  text
-    .replace(/{{([^{}]*?)}}/g, `<b class="${InputVariableClass}">{{$1}}</b>`)
-    .replace(/(<\/b>)(<br \/>)?(<\/div>)?( )?$/, '$1&nbsp;$2$3$4')
+const tokenFromTag = (tag: Tag) =>
+  Object.entries(tags)
+    .filter(([_, value]) => value === tag)
+    .map(([key]) => key)[0]
 
-const parseVariables = (html: string) =>
-  html
-    .replace(/(<\/b>)&nbsp;(<br \/>)?(<\/div>)?( )?$/, '$1$2$3$4')
-    .replace(/<b[^>]*>\n<\/b>/g, '\n')
-    .replace(/<b[^>]*>([^>{}]*?)<\/b>/g, '{{$1}}')
-    .replace(/<b[^>]*>([^>]*?)<\/b>/g, '$1')
-    .replaceAll('{{}}', '')
-    .replace(/{{(.*?)([ \.]+)}}([^ ])/g, '{{$1}}$2$3')
-    .replace(/([^ ]){{([ \.]+)(.*?)}}/g, '$1$2{{$3}}')
+const variableStyle = {
+  tag: tags.variableName,
+  color: 'white',
+  padding: '2px 6px',
+  backgroundColor: '#E14BD2',
+  whitespace: 'nowrap',
+  borderRadius: '4px',
+}
 
-export const PromptToHTML = (text: string) => RichTextToHTML(text, printVariables)
+const variableParser = (stream: StringStream) => {
+  var ch = stream.next()
+  if (ch === '{' && stream.match(/^{([^{}])*}}/)) {
+    return tokenFromTag(tags.variableName)
+  }
+  stream.match(/^([^{])*/)
+  return tokenFromTag(tags.string)
+}
 
-export const PromptFromHTML = (html: string) => RichTextFromHTML(html, parseVariables)
+type Selection = { text: string; from: number; to: number; isToken: boolean; popupX?: number; popupY?: number }
 
-type Selection = { text: string; range: Range; popupPoint: { x: number; y: number }; isInput: boolean }
-
-const extractSelection = (contentEditableRef: RefObject<HTMLElement>) => {
-  const selection = document.getSelection()
-  const selectionParent = selection?.anchorNode?.parentElement
-  if (selection && selectionParent) {
-    const isPromptSelection = selectionParent.closest('[contenteditable=true]') === contentEditableRef.current
-    const isSingleNode = selection.anchorNode === selection.focusNode
-    const isInput = selectionParent.tagName === 'B'
-    const text = isInput ? selectionParent.textContent!.trim() : selection.toString().trim()
-    if (isPromptSelection && isSingleNode && text.length > 0) {
-      const range = selection.getRangeAt(0)
-      const selectionRect = range.getBoundingClientRect()
-      const popupPoint = {
-        x: selectionRect.left + selectionRect.width / 2,
-        y: selectionRect.top - 34,
-      }
-      return { text, range, popupPoint, isInput }
+const extractSelection = (editorSelection?: Selection) => {
+  const documentSelection = document.getSelection()
+  if (editorSelection && documentSelection) {
+    const isContentEditable = documentSelection.anchorNode?.parentElement?.isContentEditable
+    const isSingleNode = documentSelection.anchorNode === documentSelection.focusNode
+    const range = documentSelection.getRangeAt(0)
+    const selectionRect = range.getBoundingClientRect()
+    if (isContentEditable && isSingleNode && editorSelection.text.length > 0 && !!selectionRect.width) {
+      const popupX = selectionRect.left + selectionRect.width / 2
+      const popupY = selectionRect.top - 34
+      return { ...editorSelection, popupX, popupY }
     }
   }
   return undefined
 }
 
 export default function PromptInput({
-  promptKey = 'main',
   value,
   setValue,
   placeholder,
   disabled,
   preformatted,
 }: {
-  promptKey?: string
   value: string
   setValue: (value: string) => void
   placeholder?: string
@@ -67,11 +62,8 @@ export default function PromptInput({
 }) {
   const toggleInput = useCallback(
     (selection: Selection) => {
-      if (!selection.isInput) {
-        selection.range.surroundContents(document.createElement('b'))
-      } else if (!!selection.text.match(/^{{(.*)}}$/)) {
-        setValue(value.replaceAll(selection.text, selection.text.slice(2, -2)))
-      }
+      const updatedText = selection.isToken ? selection.text.slice(2, -2) : `{{${selection.text}}}`
+      setValue(value.substring(0, selection.from) + updatedText + value.substring(selection.to))
     },
     [value, setValue]
   )
@@ -83,11 +75,7 @@ export default function PromptInput({
     (selection?: Selection) => {
       setLastSelection(selection)
       if (selection) {
-        setPopup(
-          VariablePopup,
-          { selection, toggleInput },
-          { top: selection.popupPoint.y, left: selection.popupPoint.x }
-        )
+        setPopup(VariablePopup, { selection, toggleInput }, { left: selection.popupX, top: selection.popupY })
       } else if (lastSelection) {
         setPopup(undefined, undefined, {})
       }
@@ -95,57 +83,28 @@ export default function PromptInput({
     [setPopup, toggleInput, lastSelection]
   )
 
-  const contentEditableRef = useFocusEndRef()
-  const [lastKey, setLastKey] = useState(promptKey)
-  if (promptKey !== lastKey) {
-    setLastKey(promptKey)
-    contentEditableRef?.current?.focus()
-  }
+  const [extractEditorSelection, setExtractEditorSelection] = useState<(tokenType: string) => Selection>()
 
   useEffect(() => {
-    const selectionChangeHandler = () => updateSelection(extractSelection(contentEditableRef))
+    const selectionChangeHandler = () =>
+      updateSelection(extractSelection(extractEditorSelection?.(tokenFromTag(tags.variableName))))
     document.addEventListener('selectionchange', selectionChangeHandler)
     return () => {
       document.removeEventListener('selectionchange', selectionChangeHandler)
     }
-  }, [contentEditableRef, updateSelection])
+  }, [updateSelection, extractEditorSelection])
 
-  const placeholderClassName = 'empty:before:content-[attr(placeholder)] empty:text-gray-300'
-  const contentEditableClassName = preformatted
-    ? `outline-none ${placeholderClassName}`
-    : `h-full px-3 py-1.5 overflow-y-auto text-gray-700 border border-gray-300 focus:border-blue-400 focus:ring-0 focus:outline-none rounded-lg ${placeholderClassName}`
-
-  const [htmlValue, setHTMLValue] = useState('')
-  if (value !== PromptFromHTML(htmlValue)) {
-    setHTMLValue(PromptToHTML(value))
-  } else if (printVariables(parseVariables(htmlValue)) !== htmlValue) {
-    setHTMLValue(printVariables(parseVariables(htmlValue)))
-  }
-  const updateHTMLValue = (html: string) => {
-    updateSelection(undefined)
-    setHTMLValue(html)
-    setValue(PromptFromHTML(html))
-  }
-
-  const renderContentEditable = () => (
-    <ContentEditable
+  return (
+    <Editor
+      value={value}
+      setValue={setValue}
+      tokenizer={variableParser}
+      tokenStyle={variableStyle}
+      setExtractSelection={setExtractEditorSelection}
       placeholder={placeholder}
       disabled={disabled}
-      className={contentEditableClassName}
-      htmlValue={htmlValue}
-      onChange={updateHTMLValue}
-      allowedTags={['br', 'div', 'b']}
-      allowedAttributes={{ b: ['class'] }}
-      innerRef={contentEditableRef}
+      preformatted={preformatted}
     />
-  )
-
-  return preformatted ? (
-    <CodeBlock active={!disabled} scroll>
-      {renderContentEditable()}
-    </CodeBlock>
-  ) : (
-    renderContentEditable()
   )
 }
 
@@ -158,7 +117,7 @@ function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
         <div
           className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
-          {selection.isInput ? 'Remove Input' : 'Create Input'}
+          {selection.isToken ? 'Remove Input' : 'Create Input'}
         </div>
       </div>
     </div>

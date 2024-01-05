@@ -5,6 +5,7 @@ import { BorderedSection } from './runCellContinuation'
 import durationIcon from '@/public/duration.svg'
 import costIcon from '@/public/cost.svg'
 import dateIcon from '@/public/date.svg'
+import tokensIcon from '@/public/tokens.svg'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
 import LabelPopupMenu, { AvailableLabelColorsForItem } from '../labelPopupMenu'
@@ -46,7 +47,7 @@ export default function RunCellFooter({
   ) : null
 }
 
-const RunAttributes = ({ run }: { run: { timestamp?: number; duration?: number; cost?: number } }) => {
+const RunAttributes = ({ run }: { run: { timestamp?: number; duration?: number; cost?: number; tokens?: number } }) => {
   const formattedDate = useFormattedDate(run.timestamp)
 
   return (
@@ -54,6 +55,7 @@ const RunAttributes = ({ run }: { run: { timestamp?: number; duration?: number; 
       {!!run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
       {!!run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
       {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
+      {!!run.tokens && <Attribute icon={tokensIcon} value={`${run.tokens} tokens`} />}
     </>
   )
 }

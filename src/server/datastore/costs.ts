@@ -16,23 +16,15 @@ import { DaysAgo } from '@/src/common/formatting'
 import { getTrustedBudgetForScope } from './budgets'
 
 export async function migrateCosts(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allCosts] = await datastore.runQuery(datastore.createQuery(Entity.COST))
-  const usedScopeIDs = new Set(allCosts.map(costData => costData.scopeID))
-  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
-  const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
-  const allScopeIDs = new Set([...allProjects.map(project => getID(project)), ...allUsers.map(user => getID(user))])
-  console.log(`Found ${allCosts.length} costs (for ${usedScopeIDs.size} scopes out of ${allScopeIDs.size})`)
   for (const costData of allCosts) {
-    if (!!costData.scopeID && !allScopeIDs.has(costData.scopeID)) {
-      console.log(`Deleting cost ${getID(costData)} for missing scope ${costData.scopeID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.COST, getID(costData)))
-      }
-    }
-    // await getDatastore().save(
-    //   toCostData(costData.scopeID, costData.model, costData.range, costData.createdAt, costData.cost, getID(costData))
-    // )
+    await getDatastore().save(
+      toCostData(costData.scopeID, costData.model, costData.range, costData.createdAt, costData.cost, getID(costData))
+    )
   }
 }
 

@@ -34,30 +34,22 @@ type ProviderMetadata = {
 }
 
 export async function migrateProviders(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allProviders] = await datastore.runQuery(datastore.createQuery(Entity.PROVIDER))
-  const usedScopeIDs = new Set(allProviders.map(providerData => providerData.scopeID))
-  const [allProjects] = await datastore.runQuery(datastore.createQuery(Entity.PROJECT))
-  const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
-  const allScopeIDs = new Set([...allProjects.map(project => getID(project)), ...allUsers.map(user => getID(user))])
-  console.log(`Found ${allProviders.length} providers (for ${usedScopeIDs.size} scopes out of ${allScopeIDs.size})`)
   for (const providerData of allProviders) {
-    if (!!providerData.scopeID && !allScopeIDs.has(providerData.scopeID)) {
-      console.log(`Deleting provider ${getID(providerData)} for missing scope ${providerData.scopeID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.PROVIDER, getID(providerData)))
-      }
-    }
-    // await getDatastore().save(
-    //   toProviderData(
-    //     providerData.scopeID,
-    //     providerData.provider,
-    //     providerData.encryptedAPIKey,
-    //     JSON.parse(providerData.metadata),
-    //     providerData.createdAt,
-    //     getID(providerData)
-    //   )
-    // )
+    await getDatastore().save(
+      toProviderData(
+        providerData.scopeID,
+        providerData.provider,
+        providerData.encryptedAPIKey,
+        JSON.parse(providerData.metadata),
+        providerData.createdAt,
+        getID(providerData)
+      )
+    )
   }
 }
 

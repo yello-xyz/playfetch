@@ -53,16 +53,22 @@ export default function EndpointsView({
   const { l: showLogs, p: newParentID, v: newVersionID } = ParseNumberQuery(router.query)
 
   type ActiveTab = 'Endpoints' | 'Logs'
-  const [activeTab, setActiveTab] = useState<ActiveTab>(showLogs ? 'Logs' : 'Endpoints')
+  const tabFromQuery = (showLogs: number | undefined) => (showLogs ? 'Logs' : 'Endpoints')
+  const [activeTab, setActiveTab] = useState<ActiveTab>(tabFromQuery(showLogs))
+
+  if (tabFromQuery(showLogs) !== activeTab) {
+    setActiveTab(tabFromQuery(showLogs))
+  }
 
   const logEntries = analytics?.recentLogEntries ?? []
   const [activeLogEntryIndex, setActiveLogEntryIndex] = useState<number>()
 
   const activeProject = useActiveProject()
+  const endpoints = activeProject.endpoints
 
   const updateActiveLogEntryIndex = (index: number) => {
     setActiveLogEntryIndex(index)
-    const endpoint = activeProject.endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
+    const endpoint = endpoints.find(endpoint => endpoint.id === logEntries[index].endpointID)
     setActiveEndpointID(endpoint?.id)
     setActiveParentID(logEntries[index].parentID)
   }
@@ -77,14 +83,14 @@ export default function EndpointsView({
 
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
-      tabs={logEntries.length > 0 ? ['Endpoints', 'Logs'] : ['Endpoints']}
+      tabs={
+        logEntries.some(entry => endpoints.some(e => e.id === entry.endpointID)) ? ['Endpoints', 'Logs'] : ['Endpoints']
+      }
       activeTab={activeTab}
       setActiveTab={selectTab}>
       {children}
     </TabSelector>
   )
-
-  const endpoints = activeProject.endpoints
 
   const startsEditing = newParentID !== undefined && newVersionID !== undefined
   const [isEditing, setEditing] = useState(startsEditing)
@@ -219,7 +225,7 @@ export default function EndpointsView({
             <LogEntriesView
               tabSelector={tabSelector}
               logEntries={logEntries}
-              endpoints={activeProject.endpoints}
+              endpoints={endpoints}
               activeIndex={activeLogEntryIndex}
               setActiveIndex={updateActiveLogEntryIndex}
             />

@@ -1,8 +1,10 @@
 import { Workspace } from '@/types'
-import commentIcon from '@/public/commentBadge.svg'
-import chevronIcon from '@/public/chevron.svg'
 import { Suspense, useState } from 'react'
 import Icon from '../icon'
+import commentIcon from '@/public/commentBadge.svg'
+import chevronIcon from '@/public/chevron.svg'
+import collapseMenuIcon from '@/public/collapseMenu.svg'
+import expandMenuIcon from '@/public/expandMenu.svg'
 import api from '@/src/client/api'
 import { TopBarButton } from '../topBarButton'
 import { UserAvatars } from '@/components/users/userAvatars'
@@ -11,16 +13,21 @@ import TopBar, { TopBarAccessoryItem, TopBarBackItem } from '../topBar'
 import dynamic from 'next/dynamic'
 import InviteButton from '../users/inviteButton'
 import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import Button from '../button'
 const ProjectPopupMenu = dynamic(() => import('./projectPopupMenu'))
 
 export default function ProjectTopBar({
   workspaces,
   onNavigateBack,
+  showSidebar,
+  setShowSidebar,
   showComments,
   setShowComments,
 }: {
   workspaces: Workspace[]
   onNavigateBack: () => void
+  showSidebar: boolean
+  setShowSidebar: (show: boolean) => void
   showComments: boolean
   setShowComments: (show: boolean) => void
 }) {
@@ -38,7 +45,11 @@ export default function ProjectTopBar({
   return (
     <>
       <TopBar>
-        <TopBarBackItem title='Back to overview' onNavigateBack={onNavigateBack} />
+        <TopBarBackItem title='Back to overview' onNavigateBack={onNavigateBack}>
+          <Button type='outline' paddingClass='p-2' onClick={() => setShowSidebar(!showSidebar)}>
+            <Icon icon={showSidebar ? collapseMenuIcon : expandMenuIcon} />
+          </Button>
+        </TopBarBackItem>
         <div className='relative flex gap-1 text-base justify-self-start'>
           {workspace && (
             <span>

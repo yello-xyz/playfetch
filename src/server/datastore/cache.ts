@@ -2,47 +2,25 @@ import HashValue from '@/src/common/hashing'
 import { Entity, buildKey, getDatastore, getID, getKeyedEntity } from './datastore'
 
 export async function migrateCache(postMerge: boolean) {
+  if (postMerge) {
+    return
+  }
   const datastore = getDatastore()
   const [allCacheData] = await datastore.runQuery(datastore.createQuery(Entity.CACHE))
-  const usedParentIDs = new Set(allCacheData.map(cacheData => cacheData.parentID))
-  const usedVersionIDs = new Set(allCacheData.map(cacheData => cacheData.versionID))
-  const [allPrompts] = await datastore.runQuery(datastore.createQuery(Entity.PROMPT))
-  const [allChains] = await datastore.runQuery(datastore.createQuery(Entity.CHAIN))
-  const allParentIDs = new Set([...allPrompts.map(prompt => getID(prompt)), ...allChains.map(chain => getID(chain))])
-  const [allVersions] = await datastore.runQuery(datastore.createQuery(Entity.VERSION))
-  const allVersionIDs = new Set(allVersions.map(version => getID(version)))
-  console.log(
-    `Found ${allCacheData.length} cache keys ` +
-      `(for ${usedParentIDs.size} parents out of ${allParentIDs.size}) ` +
-      `(for ${usedVersionIDs.size} versions out of ${allVersionIDs.size})`
-  )
   for (const cacheData of allCacheData) {
-    if (!!cacheData.parentID && !allParentIDs.has(cacheData.parentID)) {
-      console.log(`Deleting cache key ${getID(cacheData)} for missing parent ${cacheData.parentID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
-      }
-    } else if (!!cacheData.versionID && !allVersionIDs.has(cacheData.versionID)) {
-      console.log(`Deleting cache key ${getID(cacheData)} for missing version ${cacheData.versionID}`)
-      if (postMerge) {
-        await datastore.delete(buildKey(Entity.CACHE, getID(cacheData)))
-      }
-    }
+    await datastore.save(
+      toCacheData(
+        cacheData.key,
+        cacheData.value,
+        Object.fromEntries(
+          Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt', 'expiresAt'].includes(key))
+        ),
+        cacheData.createdAt,
+        cacheData.expiresAt,
+        getID(cacheData)
+      )
+    )
   }
-  // for (const cacheData of allCacheData) {
-  //   await datastore.save(
-  //     toCacheData(
-  //       cacheData.key,
-  //       cacheData.value,
-  //       Object.fromEntries(
-  //         Object.entries(cacheData).filter(([key]) => !['key', 'value', 'createdAt', 'expiresAt'].includes(key))
-  //       ),
-  //       cacheData.createdAt,
-  //       cacheData.expiresAt,
-  //       getID(cacheData)
-  //     )
-  //   )
-  // }
 }
 
 const toCacheData = (

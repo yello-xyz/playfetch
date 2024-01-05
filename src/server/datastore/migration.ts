@@ -19,18 +19,5 @@ import { migrateVersions } from './versions'
 import { migrateWorkspaces } from './workspaces'
 
 export async function runDataMigrations(postMerge: boolean) {
-  await migratePrompts(postMerge)
-  await migrateChains(postMerge)
-  await migrateLogs(postMerge)
-  await migrateRatings(postMerge)
-  await migrateVersions(postMerge)
-  await migrateRuns(postMerge)
-  await migrateComments(postMerge)
   await migrateInputs(postMerge)
-  await migrateCache(postMerge)
-  await migrateAnalytics(postMerge)
-  await migrateAccess(postMerge)
-  await migrateBudgets(postMerge)
-  await migrateCosts(postMerge)
-  await migrateProviders(postMerge)
 }

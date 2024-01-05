@@ -10,21 +10,8 @@ import useRunVersion from '@/src/client/hooks/useRunVersion'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testData/testDataPane'
-import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
-import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
-
-export const LoadPendingVersion = (
-  versions: PromptVersion[],
-  activeVersion: PromptVersion,
-  setActiveVersion: (version: PromptVersion) => void,
-  modifiedVersion: PromptVersion
-) => {
-  const pendingVersion = versions.findLast(version => !version.didRun)
-  const canLoadPendingVersion =
-    !!pendingVersion && activeVersion.id !== pendingVersion.id && PromptVersionsAreEqual(activeVersion, modifiedVersion)
-  return canLoadPendingVersion ? () => setActiveVersion(pendingVersion) : undefined
-}
 
 export default function PromptView({
   prompt,
@@ -65,7 +52,8 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const [currentVersion, updateVersion, isDirty] = useModifiedVersion(activeVersion, setModifiedVersion)
+  const [updateVersion, currentVersion, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
+
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
@@ -82,8 +70,6 @@ export default function PromptView({
     setActiveTab('Prompt versions')
   }
 
-  const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, setActiveVersion, currentVersion)
-
   const minWidth = 280
   const minTopPaneHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -97,7 +83,7 @@ export default function PromptView({
               <div className='h-full'>
                 <VersionTimeline
                   activeItem={prompt}
-                  versions={prompt.versions.filter(version => version.didRun)}
+                  versions={prompt.versions}
                   activeVersion={activeVersion}
                   setActiveVersion={setActiveVersion}
                   tabSelector={tabSelector}
@@ -127,11 +113,11 @@ export default function PromptView({
                 version={activeVersion}
                 setModifiedVersion={updateVersion}
                 runPrompt={saveAndRun}
+                savePrompt={isDirty ? savePrompt : undefined}
                 inputValues={inputValues}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
                 onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
-                loadPendingVersion={loadPendingVersion}
                 isDirty={isDirty}
                 isRunning={isRunning}
                 setPreferredHeight={setPromptHeight}

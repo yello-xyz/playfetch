@@ -5,8 +5,7 @@ import { Allotment } from 'allotment'
 import { SingleTabHeader } from '../tabSelector'
 import { useState } from 'react'
 import promptIcon from '@/public/prompt.svg'
-import { LoadPendingVersion } from '../prompts/promptView'
-import useModifiedVersion from '@/src/client/hooks/useModifiedVersion'
+import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 
 export default function PromptNodeEditor({
@@ -46,8 +45,7 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [currentVersion, updateVersion] = useModifiedVersion(activeVersion, setModifiedVersion)
-  const loadPendingVersion = LoadPendingVersion(prompt.versions, activeVersion, selectVersion, currentVersion)
+  const [updateVersion] = usePromptVersion(activeVersion, setModifiedVersion)
 
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -59,7 +57,7 @@ function PromptEditor({
           <div className='flex-1 overflow-y-auto'>
             <VersionTimeline
               activeItem={prompt}
-              versions={prompt.versions.filter(version => version.didRun)}
+              versions={prompt.versions}
               activeVersion={activeVersion}
               setActiveVersion={selectVersion}
               tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
@@ -72,7 +70,6 @@ function PromptEditor({
           <PromptPanel
             version={activeVersion}
             setModifiedVersion={updateVersion}
-            loadPendingVersion={loadPendingVersion}
             setPreferredHeight={setPromptHeight}
           />
         </div>
