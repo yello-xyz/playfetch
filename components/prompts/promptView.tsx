@@ -80,7 +80,7 @@ export default function PromptView({
     switch (activeTab) {
       case 'Prompt':
         return (
-          <div className='flex-1 p-4'>
+          <div className='flex-1 p-4 bg-gray-25'>
             <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
           </div>
         )
@@ -120,7 +120,7 @@ export default function PromptView({
         <div className='flex flex-col h-full bg-white'>
           {activeTab !== 'Version History' && tabSelector()}
           {renderActiveTab()}
-          <div className='p-4'>
+          <div className='p-4 border-t border-gray-200'>
             <RunButtons
               runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
               variables={variables}

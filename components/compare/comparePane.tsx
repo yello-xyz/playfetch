@@ -96,7 +96,7 @@ export default function ComparePane({
         )}
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
-        <div className='p-4 border-b border-gray-200 min-h-[226px] h-[226px]'>
+        <div className='p-4 border-b border-gray-200 min-h-[226px] h-[226px] bg-gray-25'>
           <PromptPanel
             version={activeVersion}
             initialActiveTab={activePromptTab}

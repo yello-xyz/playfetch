@@ -69,7 +69,7 @@ export default function PromptPanel({
       : 'text-gray-400 cursor-pointer hover:bg-gray-50 hover:text-gray-500'
 
   return (
-    <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
+    <div className='flex flex-col h-full gap-4 text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />

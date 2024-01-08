@@ -110,11 +110,9 @@ export default function ChainNodeEditor({
     }
   }
 
-  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
-
   return (
     <>
-      <div className={`flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden ${colorClass}`}>
+      <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden bg-gray-25'>
         {IsPromptChainItem(activeItem) && (
           <PromptNodeEditor
             item={activeItem}

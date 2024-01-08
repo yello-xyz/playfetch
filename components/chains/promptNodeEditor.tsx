@@ -66,7 +66,7 @@ function PromptEditor({
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
-        <div className='h-full px-4 pt-4 bg-white'>
+        <div className='h-full px-4 pt-4'>
           <PromptPanel
             version={currentVersion}
             updatePrompt={updatePrompt}
