@@ -74,15 +74,14 @@ function RatingButton({
   setRating: (rating: RunRating, reason?: string) => void
   isSelected: boolean
 }) {
-  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] =>
-    [
-      ReasonPopup,
-      {
-        rating,
-        callback: reason => setRating(rating, reason),
-        predictedReason: run.isPredictedRating && run.rating === rating && !!run.reason ? run.reason : undefined,
-      },
-    ]
+  const showReasonPopup = (rating: RunRating) => (): [typeof ReasonPopup, ReasonPopupProps] => [
+    ReasonPopup,
+    {
+      rating,
+      callback: reason => setRating(rating, reason),
+      predictedReason: run.isPredictedRating && run.rating === rating && !!run.reason ? run.reason : undefined,
+    },
+  ]
 
   const isActiveRating = (pendingRating ?? run.rating) === rating
 

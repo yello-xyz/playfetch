@@ -66,10 +66,10 @@ export default function Admin({
         item === WaitlistItem
           ? '?w=1'
           : item === RecentProjectsItem
-          ? '?p=1'
-          : item !== ActiveUsersItem
-          ? `?i=${item}`
-          : ''
+            ? '?p=1'
+            : item !== ActiveUsersItem
+              ? `?i=${item}`
+              : ''
       }${isWorkspace ? '&s=1' : ''}`,
       undefined,
       {
@@ -85,10 +85,10 @@ export default function Admin({
   const currentQueryState = waitlist
     ? WaitlistItem
     : projects
-    ? RecentProjectsItem
-    : isWorkspace
-    ? `${itemID}s`
-    : itemID ?? ActiveUsersItem
+      ? RecentProjectsItem
+      : isWorkspace
+        ? `${itemID}s`
+        : itemID ?? ActiveUsersItem
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     const knownUsers = [

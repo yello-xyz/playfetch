@@ -85,11 +85,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-          ? 'last'
-          : 'custom'
+            ? 'last'
+            : 'custom'
         : rowIndices.length === rowCount
-        ? 'all'
-        : 'custom'
+          ? 'all'
+          : 'custom'
     setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
