@@ -71,7 +71,7 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
         setRightVersionID(versionID)
       }
     },
-    [isDiffMode, itemCache, leftItemID, rightItemID, rightVersionID]
+    [itemCache, leftItemID, rightItemID, rightVersionID]
   )
 
   useEffect(() => {
