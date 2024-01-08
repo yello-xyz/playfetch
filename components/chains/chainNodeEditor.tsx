@@ -60,7 +60,10 @@ export default function ChainNodeEditor({
   const isPromptChainItemActive = IsPromptChainItem(activeItem)
   const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeItem) : undefined
   const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeItem) : undefined
-  const [activePromptVersion, setActivePromptVersion] = useState(initialActivePromptVersion)
+  const [activePromptVersion, setActivePromptVersion] = useInitialState(
+    initialActivePromptVersion,
+    (a, b) => a?.id === b?.id
+  )
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
   const updateVersion = (version?: PromptVersion) => {
