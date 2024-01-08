@@ -31,8 +31,8 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  type ActiveTab = 'Prompt versions' | 'Test data'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt versions')
+  type ActiveTab = 'Prompt' | 'Version History' | 'Test Data'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
   const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
@@ -65,79 +65,76 @@ export default function PromptView({
 
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
-      tabs={canShowTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
+      tabs={['Prompt', 'Version History', ...(canShowTestData ? ['Test Data' as ActiveTab] : [])]}
       activeTab={activeTab}
       setActiveTab={selectTab}>
       {children}
     </TabSelector>
   )
 
-  if (activeTab === 'Test data' && !canShowTestData) {
-    setActiveTab('Prompt versions')
+  if (activeTab === 'Test Data' && !canShowTestData) {
+    setActiveTab('Prompt')
+  }
+
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'Prompt':
+        return (
+          <div className='flex-1 p-4'>
+            <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
+          </div>
+        )
+      case 'Version History':
+        return (
+          <div className='flex-1 min-h-0'>
+            <VersionTimeline
+              activeItem={prompt}
+              versions={prompt.versions}
+              activeVersion={activeVersion}
+              setActiveVersion={setActiveVersion}
+              tabSelector={tabSelector}
+            />
+          </div>
+        )
+      case 'Test Data':
+        return (
+          <div className='flex-1 min-h-0 pb-4 overflow-y-auto'>
+            <TestDataPane
+              variables={variables}
+              staticVariables={staticVariables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
+            />
+          </div>
+        )
+    }
   }
 
   const minWidth = 280
-  const minTopPaneHeight = 120
-  const [promptHeight, setPromptHeight] = useState(1)
-  const minHeight = promptHeight + 2 * 16
   return (
     <Allotment>
       <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
-        <Allotment vertical>
-          <Allotment.Pane minSize={minTopPaneHeight}>
-            {activeTab === 'Prompt versions' ? (
-              <div className='h-full'>
-                <VersionTimeline
-                  activeItem={prompt}
-                  versions={prompt.versions}
-                  activeVersion={activeVersion}
-                  setActiveVersion={setActiveVersion}
-                  tabSelector={tabSelector}
-                />
-              </div>
-            ) : (
-              <div className='flex flex-col h-full min-h-0 overflow-hidden grow'>
-                {tabSelector()}
-                <TestDataPane
-                  variables={variables}
-                  staticVariables={staticVariables}
-                  inputValues={inputValues}
-                  setInputValues={setInputValues}
-                  persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                  testConfig={testConfig}
-                  setTestConfig={setTestConfig}
-                />
-              </div>
-            )}
-          </Allotment.Pane>
-          <Allotment.Pane
-            minSize={minHeight}
-            preferredSize={minHeight}
-            className='z-10 drop-shadow-[0_-4px_4px_rgba(0,0,0,0.03)]'>
-            <div className='flex flex-col h-full gap-4 p-4 bg-white'>
-              <PromptPanel
-                version={currentVersion}
-                updatePrompt={updatePrompt}
-                updateConfig={updateConfig}
-                setPreferredHeight={setPromptHeight}
-              />
-              {testConfig && setTestConfig && inputValues && (
-                <RunButtons
-                  runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
-                  variables={variables}
-                  staticVariables={staticVariables}
-                  inputValues={inputValues}
-                  testConfig={testConfig}
-                  setTestConfig={setTestConfig}
-                  onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
-                  disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
-                  callback={saveAndRun}
-                  onSave={savePrompt}
-                />
-              )}
-            </div>
-          </Allotment.Pane>
-        </Allotment>
+        <div className='flex flex-col h-full bg-white'>
+          {activeTab !== 'Version History' && tabSelector()}
+          {renderActiveTab()}
+          <div className='p-4'>
+            <RunButtons
+              runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
+              variables={variables}
+              staticVariables={staticVariables}
+              inputValues={inputValues}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
+              onShowTestConfig={activeTab !== 'Test Data' ? () => setActiveTab('Test Data') : undefined}
+              disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
+              callback={saveAndRun}
+              onSave={savePrompt}
+            />
+          </div>
+        </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
         <div className='h-full border-l border-gray-200 bg-gray-25'>

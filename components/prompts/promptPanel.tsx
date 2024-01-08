@@ -59,11 +59,7 @@ export default function PromptPanel({
   const tabHeight = 27
   const contentHeight = 154 // keep ComparePane in sync when updating this
   const preferredHeight =
-    tabHeight +
-    padding +
-    contentHeight +
-    (isModelAvailable ? 0 : 56 + padding) +
-    (padding + modelSelectorHeight)
+    tabHeight + padding + contentHeight + (isModelAvailable ? 0 : 56 + padding) + (padding + modelSelectorHeight)
 
   useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
 
