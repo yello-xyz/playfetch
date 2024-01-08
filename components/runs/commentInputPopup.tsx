@@ -6,7 +6,7 @@ export type CommentSelection = { text: string; startIndex: number; popupPoint: {
 
 const extractSelection = (identifier: string): CommentSelection | undefined => {
   const selection = document.getSelection()
-  if (!selection) {
+  if (!selection || selection.rangeCount === 0) {
     return undefined
   }
 

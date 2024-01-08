@@ -33,7 +33,7 @@ type Selection = { text: string; from: number; to: number; isToken: boolean; pop
 
 const extractSelection = (editorSelection?: Selection) => {
   const documentSelection = document.getSelection()
-  if (editorSelection && documentSelection) {
+  if (editorSelection && documentSelection && documentSelection.rangeCount > 0) {
     const isContentEditable = documentSelection.anchorNode?.parentElement?.isContentEditable
     const isSingleNode = documentSelection.anchorNode === documentSelection.focusNode
     const range = documentSelection.getRangeAt(0)
