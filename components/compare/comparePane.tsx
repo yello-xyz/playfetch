@@ -75,7 +75,7 @@ export default function ComparePane({
   }))
 
   return (
-    <div className='flex flex-col flex-grow w-1/2 h-full'>
+    <div className='flex flex-col w-1/2 h-full grow'>
       <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
         <ProjectItemSelector
           className='w-full max-w-[240px]'

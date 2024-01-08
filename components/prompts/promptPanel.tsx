@@ -7,7 +7,7 @@ import {
 } from '@/src/common/providerMetadata'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { ReactNode, startTransition, useCallback, useEffect } from 'react'
+import { startTransition, useCallback, useEffect } from 'react'
 import { useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
@@ -18,7 +18,6 @@ export default function PromptPanel({
   version,
   updatePrompt,
   updateConfig,
-  testConfig,
   initialActiveTab,
   onActiveTabChange,
   setPreferredHeight,
@@ -26,7 +25,6 @@ export default function PromptPanel({
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig?: (config: PromptConfig) => void
-  testConfig?: TestConfig
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
   setPreferredHeight?: (height: number) => void
@@ -54,7 +52,6 @@ export default function PromptPanel({
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
-  const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
   const canModifyPrompt = updatePrompt && updateConfig
 
   const padding = 12 // gap-3
@@ -66,7 +63,6 @@ export default function PromptPanel({
     padding +
     contentHeight +
     (isModelAvailable ? 0 : 56 + padding) +
-    (showMultipleInputsWarning ? 37 + padding : 0) +
     (padding + modelSelectorHeight)
 
   useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
@@ -81,9 +77,6 @@ export default function PromptPanel({
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
-        )}
-        {showMultipleInputsWarning && (
-          <WarningBanner>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</WarningBanner>
         )}
         <div className='flex items-center gap-1 font-medium'>
           {tabs.map(tab => (
@@ -112,7 +105,3 @@ export default function PromptPanel({
     </div>
   )
 }
-
-const WarningBanner = ({ children }: { children: ReactNode }) => (
-  <div className='px-3 py-2 border rounded border-pink-50 bg-pink-25'>{children}</div>
-)

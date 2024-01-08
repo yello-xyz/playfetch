@@ -1,4 +1,4 @@
-import { startTransition, useCallback, useEffect } from 'react'
+import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { PendingButton } from '../button'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
 import TestDataSelector from './testDataSelector'
@@ -91,11 +91,17 @@ export default function RunButtons({
 
   const showTestDataSelector = getIndicesForMode('all').length > 1
   const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
+  const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
   const roundedClass =
     showTestDataSelector && onSave ? '' : showTestDataSelector ? 'rounded-r-lg' : onSave ? 'rounded-l-lg' : undefined
 
   return (
-    <div className='flex items-center self-end gap-3'>
+    <div className='flex items-center gap-3 grow'>
+      {showMultipleInputsWarning ? (
+        <WarningBanner>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</WarningBanner>
+      ) : (
+        <div className='grow' />
+      )}
       <div className='flex items-center'>
         {showTestDataSelector && (
           <TestDataSelector
@@ -117,3 +123,9 @@ export default function RunButtons({
     </div>
   )
 }
+
+const WarningBanner = ({ children }: { children: ReactNode }) => (
+  <div className='flex-1 px-3 py-2 overflow-hidden border rounded-lg h-9 border-pink-50 bg-pink-25 text-ellipsis whitespace-nowrap'>
+    {children}
+  </div>
+)

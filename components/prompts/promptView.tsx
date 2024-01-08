@@ -119,7 +119,6 @@ export default function PromptView({
                 version={currentVersion}
                 updatePrompt={updatePrompt}
                 updateConfig={updateConfig}
-                testConfig={testConfig}
                 setPreferredHeight={setPromptHeight}
               />
               {testConfig && setTestConfig && inputValues && (
