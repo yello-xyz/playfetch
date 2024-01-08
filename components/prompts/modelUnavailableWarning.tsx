@@ -117,5 +117,5 @@ function ButtonBanner({
 }
 
 const Banner = ({ children, className = '' }: { children: ReactNode; className: string }) => (
-  <div className={`px-3 py-2 border rounded ${className}`}>{children}</div>
+  <div className={`px-3 py-2 border rounded-lg ${className}`}>{children}</div>
 )

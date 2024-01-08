@@ -71,9 +71,6 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 px-4 pt-4 text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isModelAvailable && canModifyPrompt && (
-          <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
-        )}
         <div className='flex items-center gap-1 font-medium'>
           {tabs.map(tab => (
             <div
@@ -92,6 +89,9 @@ export default function PromptPanel({
           preformatted={PromptKeyNeedsPreformatted(activeTab)}
           disabled={!canModifyPrompt}
         />
+        {!isModelAvailable && canModifyPrompt && (
+          <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
+        )}
         <PromptConfigSettings
           config={config}
           setConfig={config => updateConfig?.(config)}
