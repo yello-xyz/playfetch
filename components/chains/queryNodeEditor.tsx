@@ -7,8 +7,8 @@ import Label from '../label'
 import DropdownMenu from '../dropdownMenu'
 import { EmbeddingModels, QueryProviders, LabelForProvider, ProviderForModel } from '@/src/common/providerMetadata'
 import { useCheckProviderAvailable } from '@/src/client/context/providerContext'
-import { ProviderWarning } from '../prompts/promptPanel'
 import RangeInput from '../rangeInput'
+import { ProviderWarning } from '../prompts/modelUnavailableWarning'
 
 export default function QueryNodeEditor({
   item,
