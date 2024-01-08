@@ -12,6 +12,9 @@ import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testData/testDataPane'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
+import RunButtons from '../runs/runButtons'
+import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
+import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 
 export default function PromptView({
   prompt,
@@ -54,9 +57,12 @@ export default function PromptView({
 
   const [currentVersion, updatePrompt, updateConfig, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
 
+  const checkModelAvailable = useCheckModelAvailable()
+  const isModelAvailable = checkModelAvailable(currentVersion.config.model)
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
+
   const tabSelector = (children?: ReactNode) => (
     <TabSelector
       tabs={canShowTestData ? ['Prompt versions', 'Test data'] : ['Prompt versions']}
@@ -108,7 +114,7 @@ export default function PromptView({
             minSize={minHeight}
             preferredSize={minHeight}
             className='z-10 drop-shadow-[0_-4px_4px_rgba(0,0,0,0.03)]'>
-            <div className='h-full p-4 bg-white'>
+            <div className='flex flex-col h-full gap-4 p-4 bg-white'>
               <PromptPanel
                 version={currentVersion}
                 updatePrompt={updatePrompt}
@@ -123,6 +129,20 @@ export default function PromptView({
                 isRunning={isRunning}
                 setPreferredHeight={setPromptHeight}
               />
+              {testConfig && setTestConfig && inputValues && (
+                <RunButtons
+                  runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
+                  variables={variables}
+                  staticVariables={staticVariables}
+                  inputValues={inputValues}
+                  testConfig={testConfig}
+                  setTestConfig={setTestConfig} 
+                  onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
+                  disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
+                  callback={saveAndRun}
+                  onSave={savePrompt}
+                />
+              )}
             </div>
           </Allotment.Pane>
         </Allotment>

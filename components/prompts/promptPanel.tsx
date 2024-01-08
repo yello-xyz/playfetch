@@ -141,20 +141,6 @@ export default function PromptPanel({
           disabled={!canModifyPrompt}
         />
       </div>
-      {runPrompt && testConfig && setTestConfig && inputValues && (
-        <RunButtons
-          runTitle={version.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
-          variables={ExtractPromptVariables(prompts, config, true)}
-          staticVariables={ExtractPromptVariables(prompts, config, false)}
-          inputValues={inputValues}
-          testConfig={testConfig}
-          setTestConfig={setTestConfig}
-          onShowTestConfig={onShowTestConfig}
-          disabled={!isModelAvailable || !VersionHasNonEmptyPrompts({ prompts, config }) || isRunning}
-          callback={runPrompt}
-          onSave={savePrompt}
-        />
-      )}
     </div>
   )
 }
