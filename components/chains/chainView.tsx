@@ -200,7 +200,7 @@ export default function ChainView({
         activeNodeIndex !== undefined &&
         (isTestMode || !isInputOutputNode) &&
         !isUnloadedPromptNode(nodes[activeNodeIndex]) && (
-          <Allotment.Pane minSize={minWidth}>
+          <Allotment.Pane className='bg-gray-25' minSize={minWidth}>
             {isTestMode ? (
               <ChainNodeOutput
                 chain={chain}
