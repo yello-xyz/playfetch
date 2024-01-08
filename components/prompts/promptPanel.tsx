@@ -7,7 +7,7 @@ import {
 } from '@/src/common/providerMetadata'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { startTransition, useCallback, useEffect } from 'react'
+import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
@@ -33,9 +33,9 @@ export default function PromptPanel({
   const prompts = version.prompts
   const config = version.config
 
-  const tabs = SupportedPromptKeysForModel(config.model)
+  const promptKeys = SupportedPromptKeysForModel(config.model)
   const [activeTab, setActiveTab] = useInitialState<PromptTab>(
-    initialActiveTab && tabs.includes(initialActiveTab) ? initialActiveTab : 'main'
+    initialActiveTab && promptKeys.includes(initialActiveTab) ? initialActiveTab : 'main'
   )
   const updateActiveTab = useCallback(
     (tab: PromptTab) => {
@@ -73,7 +73,7 @@ export default function PromptPanel({
     <div className='flex flex-col h-full gap-4 px-4 pt-4 text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         <div className='flex items-center gap-1 font-medium'>
-          {tabs.map(tab => (
+          {promptKeys.map(tab => (
             <div
               key={tab}
               className={`px-2 py-1 rounded whitespace-nowrap ${classNameForTab(tab)}`}
@@ -82,21 +82,25 @@ export default function PromptPanel({
             </div>
           ))}
         </div>
-        <PromptInput
-          key={`${version.id}-${activeTab}`}
-          value={prompts[activeTab] ?? ''}
-          setValue={prompt => updatePrompt?.(activeTab, prompt)}
-          placeholder={canModifyPrompt ? PlaceholderForPromptKey(activeTab) : undefined}
-          preformatted={PromptKeyNeedsPreformatted(activeTab)}
-          disabled={!canModifyPrompt}
-        />
-        <Collapsible title='Parameters' initiallyExpanded className='pt-1 ml-4' titleClassName='-ml-2'>
+        {promptKeys.map(promptKey => (
+          <Section key={promptKey} title={LabelForPromptKey(promptKey)} initiallyExpanded>
+            <PromptInput
+              key={`${version.id}-${promptKey}`}
+              value={prompts[promptKey] ?? ''}
+              setValue={prompt => updatePrompt?.(promptKey, prompt)}
+              placeholder={canModifyPrompt ? PlaceholderForPromptKey(promptKey) : undefined}
+              preformatted={PromptKeyNeedsPreformatted(promptKey)}
+              disabled={!canModifyPrompt}
+            />
+          </Section>
+        ))}
+        <Section title='Parameters' initiallyExpanded>
           <PromptConfigSettings
             config={config}
             setConfig={config => updateConfig?.(config)}
             disabled={!canModifyPrompt}
           />
-        </Collapsible>
+        </Section>
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
         )}
@@ -104,3 +108,17 @@ export default function PromptPanel({
     </div>
   )
 }
+
+const Section = ({
+  title,
+  initiallyExpanded,
+  children,
+}: {
+  title: string
+  initiallyExpanded?: boolean
+  children: ReactNode
+}) => (
+  <Collapsible title={title} initiallyExpanded={initiallyExpanded} className='pt-1 ml-4' titleClassName='-ml-2'>
+    {children}
+  </Collapsible>
+)
