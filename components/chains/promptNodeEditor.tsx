@@ -45,7 +45,7 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [updateVersion] = usePromptVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, updatePrompt, updateConfig] = usePromptVersion(activeVersion, setModifiedVersion)
 
   const minVersionHeight = 120
   const [promptHeight, setPromptHeight] = useState(1)
@@ -68,8 +68,9 @@ function PromptEditor({
       <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
         <div className='h-full px-4 pt-4 bg-white'>
           <PromptPanel
-            version={activeVersion}
-            setModifiedVersion={updateVersion}
+            version={currentVersion}
+            updatePrompt={updatePrompt}
+            updateConfig={updateConfig}
             setPreferredHeight={setPromptHeight}
           />
         </div>

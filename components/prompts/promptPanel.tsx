@@ -17,10 +17,8 @@ import {
   PromptKeyNeedsPreformatted,
   ProviderForModel,
   SupportedPromptKeysForModel,
-  SupportsSeed,
-  SupportsJsonMode,
 } from '@/src/common/providerMetadata'
-import { PromptConfigsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
+import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import RunButtons from '../runs/runButtons'
@@ -35,7 +33,8 @@ export type PromptTab = keyof Prompts
 
 export default function PromptPanel({
   version,
-  setModifiedVersion,
+  updatePrompt,
+  updateConfig,
   runPrompt,
   savePrompt,
   inputValues,
@@ -49,7 +48,8 @@ export default function PromptPanel({
   setPreferredHeight,
 }: {
   version: PromptVersion
-  setModifiedVersion?: (version: PromptVersion) => void
+  updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
+  updateConfig?: (config: PromptConfig) => void
   runPrompt?: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
   savePrompt?: () => Promise<any>
   inputValues?: InputValues
@@ -62,9 +62,8 @@ export default function PromptPanel({
   isRunning?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
-  // TODO should we be checking equality of the structs here? But exact prompts to check depends on config?
-  const [prompts, setPrompts] = useInitialState(version.prompts)
-  const [config, setConfig] = useInitialState(version.config, PromptConfigsAreEqual)
+  const prompts = version.prompts
+  const config = version.config
 
   const tabs = SupportedPromptKeysForModel(config.model)
   const [activeTab, setActiveTab] = useInitialState<PromptTab>(
@@ -84,42 +83,10 @@ export default function PromptPanel({
     }
   }, [config, activeTab, updateActiveTab])
 
-  const onUpdate = (prompts: Prompts, config: PromptConfig) =>
-    setTimeout(() => setModifiedVersion?.({ ...version, prompts, config }))
-
-  const update = (prompts: Prompts, config: PromptConfig) => {
-    setPrompts(prompts)
-    setConfig(config)
-    onUpdate(prompts, config)
-  }
-
-  const updateConfig = (config: PromptConfig) =>
-    update(
-      Object.fromEntries(
-        Object.entries(prompts).filter(([key]) =>
-          SupportedPromptKeysForModel(config.model).includes(key as keyof Prompts)
-        )
-      ) as Prompts,
-      {
-        ...config,
-        seed: SupportsSeed(config.model) ? config.seed : undefined,
-        jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
-      }
-    )
-
-  const updatePrompt = (prompt: string) =>
-    setConfig(config => {
-      setPrompts(prompts => {
-        prompts = { ...prompts, [activeTab]: prompt }
-        onUpdate(prompts, config)
-        return prompts
-      })
-      return config
-    })
-
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
+  const canModifyPrompt = updatePrompt && updateConfig
 
   const outerPadding = 16 // gap-4
   const padding = 12 // gap-3
@@ -144,7 +111,7 @@ export default function PromptPanel({
   return (
     <div className='flex flex-col h-full gap-4 text-gray-500 bg-white'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
-        {!isModelAvailable && setModifiedVersion && (
+        {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
         )}
         {showMultipleInputsWarning && (
@@ -163,12 +130,16 @@ export default function PromptPanel({
         <PromptInput
           key={`${version.id}-${activeTab}`}
           value={prompts[activeTab] ?? ''}
-          setValue={updatePrompt}
-          placeholder={setModifiedVersion ? PlaceholderForPromptKey(activeTab) : undefined}
+          setValue={prompt => updatePrompt?.(activeTab, prompt)}
+          placeholder={canModifyPrompt ? PlaceholderForPromptKey(activeTab) : undefined}
           preformatted={PromptKeyNeedsPreformatted(activeTab)}
-          disabled={!setModifiedVersion}
+          disabled={!canModifyPrompt}
         />
-        <PromptConfigSettings config={config} setConfig={updateConfig} disabled={!setModifiedVersion} />
+        <PromptConfigSettings
+          config={config}
+          setConfig={config => updateConfig?.(config)}
+          disabled={!canModifyPrompt}
+        />
       </div>
       {runPrompt && testConfig && setTestConfig && inputValues && (
         <RunButtons

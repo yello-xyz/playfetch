@@ -52,7 +52,7 @@ export default function PromptView({
     persistInputValuesIfNeeded()
   }
 
-  const [updateVersion, currentVersion, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, updatePrompt, updateConfig, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
 
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
@@ -110,8 +110,9 @@ export default function PromptView({
             className='z-10 drop-shadow-[0_-4px_4px_rgba(0,0,0,0.03)]'>
             <div className='h-full p-4 bg-white'>
               <PromptPanel
-                version={activeVersion}
-                setModifiedVersion={updateVersion}
+                version={currentVersion}
+                updatePrompt={updatePrompt}
+                updateConfig={updateConfig}
                 runPrompt={saveAndRun}
                 savePrompt={isDirty ? savePrompt : undefined}
                 inputValues={inputValues}
