@@ -16,7 +16,7 @@ const variableStyle = {
   color: 'white',
   padding: '2px 6px',
   backgroundColor: '#E14BD2',
-  whitespace: 'nowrap',
+  whiteSpace: 'nowrap',
   borderRadius: '4px',
 }
 
