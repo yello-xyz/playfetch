@@ -43,7 +43,7 @@ export default function PromptPanel({
   useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
 
   return (
-    <div className='flex flex-col h-full gap-4 px-4 pt-4 text-gray-500'>
+    <div className='flex flex-col flex-1 h-full gap-4 px-4 pt-4 overflow-y-auto text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {promptKeys.map(promptKey => (
           <Section key={promptKey} title={LabelForPromptKey(promptKey)} initiallyExpanded>

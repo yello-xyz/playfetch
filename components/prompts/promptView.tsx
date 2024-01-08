@@ -79,11 +79,7 @@ export default function PromptView({
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'Prompt':
-        return (
-          <div className='flex-1'>
-            <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
-          </div>
-        )
+        return <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
       case 'Version History':
         return (
           <div className='flex-1 min-h-0'>

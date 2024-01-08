@@ -53,27 +53,21 @@ function PromptEditor({
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minVersionHeight}>
-        <div className='flex flex-col h-full'>
-          <div className='flex-1 overflow-y-auto'>
-            <VersionTimeline
-              activeItem={prompt}
-              versions={prompt.versions}
-              activeVersion={activeVersion}
-              setActiveVersion={selectVersion}
-              tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
-            />
-          </div>
-        </div>
+        <VersionTimeline
+          activeItem={prompt}
+          versions={prompt.versions}
+          activeVersion={activeVersion}
+          setActiveVersion={selectVersion}
+          tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
+        />
       </Allotment.Pane>
       <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
-        <div className='h-full'>
-          <PromptPanel
-            version={currentVersion}
-            updatePrompt={updatePrompt}
-            updateConfig={updateConfig}
-            setPreferredHeight={setPromptHeight}
-          />
-        </div>
+        <PromptPanel
+          version={currentVersion}
+          updatePrompt={updatePrompt}
+          updateConfig={updateConfig}
+          setPreferredHeight={setPromptHeight}
+        />
       </Allotment.Pane>
     </Allotment>
   )
