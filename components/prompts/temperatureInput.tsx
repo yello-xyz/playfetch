@@ -24,6 +24,7 @@ export default function TemperatureInput({
   }
 
   const disabledClass = disabled ? 'opacity-40 select-none bg-gray-25' : 'cursor-pointer'
+  const inputDisabledClass = disabled ? 'bg-gray-50' : 'bg-white'
 
   return (
     <CustomPopupButton
@@ -34,7 +35,7 @@ export default function TemperatureInput({
       disabled={disabled}>
       <span className='flex items-center pl-3 pr-2 rounded-l-lg bg-gray-25'>Temperature</span>
       <div className='h-[30px] border-r border-gray-300' />
-      <span className='flex items-center pl-2 pr-3 rounded-r-lg'>{temperature}</span>
+      <span className={`flex items-center pl-2 pr-3 rounded-r-lg ${inputDisabledClass}`}>{temperature}</span>
     </CustomPopupButton>
   )
 }
