@@ -80,7 +80,7 @@ export default function PromptView({
     switch (activeTab) {
       case 'Prompt':
         return (
-          <div className='flex-1 p-4 bg-gray-25'>
+          <div className='flex-1'>
             <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
           </div>
         )
@@ -115,12 +115,12 @@ export default function PromptView({
 
   const minWidth = 280
   return (
-    <Allotment>
-      <Allotment.Pane className='bg-gray-25' minSize={minWidth} preferredSize='50%'>
-        <div className='flex flex-col h-full bg-white'>
+    <Allotment className='bg-gray-25'>
+      <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+        <div className='flex flex-col h-full'>
           {activeTab !== 'Version History' && tabSelector()}
           {renderActiveTab()}
-          <div className='p-4 border-t border-gray-200'>
+          <div className='p-4'>
             <RunButtons
               runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
               variables={variables}
@@ -137,7 +137,7 @@ export default function PromptView({
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
-        <div className='h-full border-l border-gray-200 bg-gray-25'>
+        <div className='h-full border-l border-gray-200'>
           <RunTimeline
             runs={[...activeVersion.runs, ...partialRuns]}
             activeItem={prompt}
