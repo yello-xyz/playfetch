@@ -3,7 +3,7 @@ import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import { ReactNode, useState } from 'react'
-import TabSelector from '../tabSelector'
+import TabSelector, { SingleTabHeader } from '../tabSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
@@ -31,7 +31,7 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  type ActiveTab = 'Prompt' | 'Version History' | 'Test Data'
+  type ActiveTab = 'Prompt' | 'Version History' | 'Test Data' | 'Responses'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
@@ -63,11 +63,10 @@ export default function PromptView({
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
 
+  const tabs: ActiveTab[] = ['Prompt', 'Version History', ...(canShowTestData ? ['Test Data' as ActiveTab] : [])]
+
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector
-      tabs={['Prompt', 'Version History', ...(canShowTestData ? ['Test Data' as ActiveTab] : [])]}
-      activeTab={activeTab}
-      setActiveTab={selectTab}>
+    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={selectTab}>
       {children}
     </TabSelector>
   )
@@ -76,10 +75,15 @@ export default function PromptView({
     setActiveTab('Prompt')
   }
 
-  const renderActiveTab = () => {
-    switch (activeTab) {
+  const renderTab = (tab: ActiveTab, tabSelector: (children?: ReactNode) => ReactNode) => {
+    switch (tab) {
       case 'Prompt':
-        return <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
+        return (
+          <>
+            {tabSelector()}
+            <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
+          </>
+        )
       case 'Version History':
         return (
           <div className='flex-1 min-h-0'>
@@ -94,17 +98,36 @@ export default function PromptView({
         )
       case 'Test Data':
         return (
-          <div className='flex-1 min-h-0 pb-4 overflow-y-auto'>
-            <TestDataPane
-              variables={variables}
-              staticVariables={staticVariables}
-              inputValues={inputValues}
-              setInputValues={setInputValues}
-              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-              testConfig={testConfig}
-              setTestConfig={setTestConfig}
+          <>
+            {tabSelector()}
+            <div className='flex-1 min-h-0 pb-4 overflow-y-auto'>
+              <TestDataPane
+                variables={variables}
+                staticVariables={staticVariables}
+                inputValues={inputValues}
+                setInputValues={setInputValues}
+                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+                testConfig={testConfig}
+                setTestConfig={setTestConfig}
+              />
+            </div>
+          </>
+        )
+      case 'Responses':
+        return (
+          <>
+            {tabSelector()}
+            <RunTimeline
+              runs={[...activeVersion.runs, ...partialRuns]}
+              activeItem={prompt}
+              version={activeVersion}
+              focusRunID={focusRunID}
+              runVersion={runPrompt}
+              selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
+              isRunning={isRunning}
+              skipHeader
             />
-          </div>
+          </>
         )
     }
   }
@@ -114,8 +137,7 @@ export default function PromptView({
     <Allotment className='bg-gray-25'>
       <Allotment.Pane minSize={minWidth} preferredSize='50%'>
         <div className='flex flex-col h-full'>
-          {activeTab !== 'Version History' && tabSelector()}
-          {renderActiveTab()}
+          {renderTab(activeTab, tabSelector)}
           <div className='p-4'>
             <RunButtons
               runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
@@ -133,16 +155,10 @@ export default function PromptView({
         </div>
       </Allotment.Pane>
       <Allotment.Pane minSize={minWidth}>
-        <div className='h-full border-l border-gray-200'>
-          <RunTimeline
-            runs={[...activeVersion.runs, ...partialRuns]}
-            activeItem={prompt}
-            version={activeVersion}
-            focusRunID={focusRunID}
-            runVersion={runPrompt}
-            selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
-            isRunning={isRunning}
-          />
+        <div className='flex flex-col h-full border-l border-gray-200'>
+          {renderTab('Responses', () => (
+            <SingleTabHeader label='Responses' />
+          ))}
         </div>
       </Allotment.Pane>
     </Allotment>
