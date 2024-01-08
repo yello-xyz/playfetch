@@ -120,7 +120,7 @@ function CollapsibleContent({
   const formattedDate = useFormattedDate(timestamp, timestamp => FormatDate(timestamp, true, true))
 
   return collapsible ? (
-    <Collapsible initiallyExpanded title={formattedDate} className='flex flex-col gap-6 pt-2'>
+    <Collapsible initiallyExpanded title={formattedDate} className='flex flex-col gap-6 pt-2 ml-6'>
       {children}
     </Collapsible>
   ) : (

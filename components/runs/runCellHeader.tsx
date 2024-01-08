@@ -1,7 +1,5 @@
 import { PartialRun, Run } from '@/types'
 import { ReactNode, useState } from 'react'
-import Icon from '../icon'
-import chevronIcon from '@/public/chevron.svg'
 import Collapsible from '../collapsible'
 
 export default function RunCellHeader({ run }: { run: Run | PartialRun }) {

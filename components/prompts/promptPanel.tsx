@@ -11,6 +11,7 @@ import { startTransition, useCallback, useEffect } from 'react'
 import { useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
+import Collapsible from '../collapsible'
 
 export type PromptTab = keyof Prompts
 
@@ -89,14 +90,16 @@ export default function PromptPanel({
           preformatted={PromptKeyNeedsPreformatted(activeTab)}
           disabled={!canModifyPrompt}
         />
+        <Collapsible title='Parameters' initiallyExpanded className='pt-1 ml-4' titleClassName='-ml-2'>
+          <PromptConfigSettings
+            config={config}
+            setConfig={config => updateConfig?.(config)}
+            disabled={!canModifyPrompt}
+          />
+        </Collapsible>
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
         )}
-        <PromptConfigSettings
-          config={config}
-          setConfig={config => updateConfig?.(config)}
-          disabled={!canModifyPrompt}
-        />
       </div>
     </div>
   )

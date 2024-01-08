@@ -4,7 +4,7 @@ import Icon from './icon'
 
 export default function Collapsible({
   title,
-  className = '',
+  className = 'ml-6',
   titleClassName = '',
   initiallyExpanded = false,
   children,
@@ -23,7 +23,7 @@ export default function Collapsible({
         <Icon className={isExpanded ? '' : '-rotate-90'} icon={chevronIcon} />
         <span className='font-medium text-gray-700'>{title}</span>
       </div>
-      {isExpanded && <div className={`${className} ml-6`}>{children}</div>}
+      {isExpanded && <div className={className}>{children}</div>}
     </div>
   )
 }
