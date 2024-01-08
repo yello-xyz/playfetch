@@ -46,7 +46,7 @@ export default function PromptPanel({
     <div className='flex flex-col flex-1 h-full gap-4 px-4 pt-4 overflow-y-auto text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {promptKeys.map(promptKey => (
-          <Section key={promptKey} title={LabelForPromptKey(promptKey)} initiallyExpanded>
+          <PromptSection key={promptKey} title={LabelForPromptKey(promptKey)} initiallyExpanded={promptKey === 'main'}>
             <PromptInput
               key={`${version.id}-${promptKey}`}
               value={prompts[promptKey] ?? ''}
@@ -55,15 +55,15 @@ export default function PromptPanel({
               preformatted={PromptKeyNeedsPreformatted(promptKey)}
               disabled={!canModifyPrompt}
             />
-          </Section>
+          </PromptSection>
         ))}
-        <Section title='Parameters' initiallyExpanded>
+        <PromptSection title='Parameters' initiallyExpanded>
           <PromptConfigSettings
             config={config}
             setConfig={config => updateConfig?.(config)}
             disabled={!canModifyPrompt}
           />
-        </Section>
+        </PromptSection>
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
         )}
@@ -72,7 +72,7 @@ export default function PromptPanel({
   )
 }
 
-const Section = ({
+const PromptSection = ({
   title,
   initiallyExpanded,
   children,
