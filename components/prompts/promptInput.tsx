@@ -96,6 +96,7 @@ export default function PromptInput({
 
   return (
     <Editor
+      className={disabled ? undefined : 'bg-white'}
       value={value}
       setValue={setValue}
       tokenizer={variableParser}
