@@ -1,8 +1,7 @@
-import { Endpoint, IsPromptVersion, ItemsInProject, LogEntry, PromptVersion } from '@/types'
+import { Endpoint, ItemsInProject, LogEntry } from '@/types'
 import ComparePane from './comparePane'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useCallback, useEffect, useState } from 'react'
-import { PromptTab } from '../prompts/promptPanel'
 import { ParseNumberQuery } from '@/src/common/clientRoute'
 import { useRouter } from 'next/router'
 import SegmentedControl, { Segment } from '../segmentedControl'
@@ -10,11 +9,6 @@ import DiffPane from './diffPane'
 import useDiffContent from '@/src/client/hooks/useDiffContent'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { useActiveProject } from '@/src/client/context/projectContext'
-
-const getDifferentPromptTab = (activePromptTab: PromptTab, leftVersion: PromptVersion, rightVersion: PromptVersion) =>
-  ([activePromptTab, 'main', 'functions', 'system'] as PromptTab[]).find(
-    tab => leftVersion.prompts[tab] !== rightVersion.prompts[tab]
-  ) ?? activePromptTab
 
 export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry[] }) {
   const router = useRouter()
@@ -25,7 +19,6 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
   const [rightVersionID, setRightVersionID] = useState(versionID)
   const [leftItemID, setLeftItemID] = useState(itemID)
   const [leftVersionID, setLeftVersionID] = useState(previousVersionID)
-  const [activePromptTab, setActivePromptTab] = useState('main' as PromptTab)
 
   const activeProject = useActiveProject()
   const endpointForID = (endpointID: number) => activeProject.endpoints.find(endpoint => endpoint.id === endpointID)
@@ -71,24 +64,14 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
           const rightVersions = itemCache.itemForID(rightItemID)?.versions ?? []
           const rightVersion = [...rightVersions].find(version => version.id === versionID)
           const leftVersionID = rightVersion?.previousID ?? versionID
-          const leftVersion = [...rightVersions].find(version => version.id === leftVersionID)
           setTimeout(() => {
             setLeftVersionID(leftVersionID)
-            if (
-              isDiffMode &&
-              leftVersion &&
-              IsPromptVersion(leftVersion) &&
-              rightVersion &&
-              IsPromptVersion(rightVersion)
-            ) {
-              setActivePromptTab(getDifferentPromptTab(activePromptTab, leftVersion, rightVersion))
-            }
           })
         }
         setRightVersionID(versionID)
       }
     },
-    [activePromptTab, isDiffMode, itemCache, leftItemID, rightItemID, rightVersionID]
+    [isDiffMode, itemCache, leftItemID, rightItemID, rightVersionID]
   )
 
   useEffect(() => {
@@ -111,8 +94,6 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
             activeVersion={leftVersion}
             setItemID={setLeftItemID}
             setVersionID={setLeftVersionID}
-            activePromptTab={activePromptTab}
-            setActivePromptTab={setActivePromptTab}
             disabled={!leftItemID}
             includeResponses={!isDiffMode}
           />
@@ -124,8 +105,6 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
             activeVersion={rightVersion}
             setItemID={updateRightItemID}
             setVersionID={updateRightVersionID}
-            activePromptTab={activePromptTab}
-            setActivePromptTab={setActivePromptTab}
             includeResponses={!isDiffMode}
           />
         </div>

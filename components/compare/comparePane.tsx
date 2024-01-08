@@ -12,7 +12,7 @@ import {
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import RunTimeline from '../runs/runTimeline'
-import PromptPanel, { PromptTab } from '../prompts/promptPanel'
+import PromptPanel from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
 
@@ -23,8 +23,6 @@ export default function ComparePane({
   activeVersion,
   setItemID,
   setVersionID,
-  activePromptTab,
-  setActivePromptTab,
   disabled,
   includeResponses,
 }: {
@@ -34,8 +32,6 @@ export default function ComparePane({
   activeVersion?: PromptVersion | ChainVersion
   setItemID: (itemID: number) => void
   setVersionID: (versionID: number) => void
-  activePromptTab?: PromptTab
-  setActivePromptTab: (tab: PromptTab) => void
   disabled?: boolean
   includeResponses?: boolean
 }) {
@@ -97,11 +93,7 @@ export default function ComparePane({
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
         <div className='pb-4 border-b border-gray-200 min-h-[226px] h-[226px] bg-gray-25'>
-          <PromptPanel
-            version={activeVersion}
-            initialActiveTab={activePromptTab}
-            onActiveTabChange={setActivePromptTab}
-          />
+          <PromptPanel version={activeVersion} />
         </div>
       )}
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (
