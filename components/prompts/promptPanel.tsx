@@ -1,15 +1,4 @@
-import {
-  InputValues,
-  PromptConfig,
-  PromptInputs,
-  PromptVersion,
-  LanguageModel,
-  TestConfig,
-  Prompts,
-  ModelProvider,
-  QueryProvider,
-} from '@/types'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { PromptConfig, PromptVersion, LanguageModel, TestConfig, Prompts, ModelProvider, QueryProvider } from '@/types'
 import {
   ModelProviders,
   LabelForPromptKey,
@@ -18,10 +7,8 @@ import {
   ProviderForModel,
   SupportedPromptKeysForModel,
 } from '@/src/common/providerMetadata'
-import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import PromptInput from './promptInput'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import RunButtons from '../runs/runButtons'
 import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { ProjectSettingsRoute, UserSettingsRoute } from '@/src/common/clientRoute'
@@ -35,31 +22,17 @@ export default function PromptPanel({
   version,
   updatePrompt,
   updateConfig,
-  runPrompt,
-  savePrompt,
-  inputValues,
   testConfig,
-  setTestConfig,
-  onShowTestConfig,
   initialActiveTab,
   onActiveTabChange,
-  isDirty,
-  isRunning,
   setPreferredHeight,
 }: {
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig?: (config: PromptConfig) => void
-  runPrompt?: (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) => Promise<void>
-  savePrompt?: () => Promise<any>
-  inputValues?: InputValues
   testConfig?: TestConfig
-  setTestConfig?: (testConfig: TestConfig) => void
-  onShowTestConfig?: () => void
   initialActiveTab?: PromptTab
   onActiveTabChange?: (tab: PromptTab) => void
-  isDirty?: boolean
-  isRunning?: boolean
   setPreferredHeight?: (height: number) => void
 }) {
   const prompts = version.prompts
@@ -88,7 +61,6 @@ export default function PromptPanel({
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
   const canModifyPrompt = updatePrompt && updateConfig
 
-  const outerPadding = 16 // gap-4
   const padding = 12 // gap-3
   const modelSelectorHeight = 37
   const tabHeight = 27
@@ -99,7 +71,7 @@ export default function PromptPanel({
     contentHeight +
     (isModelAvailable ? 0 : 56 + padding) +
     (showMultipleInputsWarning ? 37 + padding : 0) +
-    ((runPrompt ? outerPadding : padding) + modelSelectorHeight)
+    (padding + modelSelectorHeight)
 
   useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
 

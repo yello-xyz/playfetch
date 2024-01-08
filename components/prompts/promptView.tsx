@@ -119,14 +119,7 @@ export default function PromptView({
                 version={currentVersion}
                 updatePrompt={updatePrompt}
                 updateConfig={updateConfig}
-                runPrompt={saveAndRun}
-                savePrompt={isDirty ? savePrompt : undefined}
-                inputValues={inputValues}
                 testConfig={testConfig}
-                setTestConfig={setTestConfig}
-                onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
-                isDirty={isDirty}
-                isRunning={isRunning}
                 setPreferredHeight={setPromptHeight}
               />
               {testConfig && setTestConfig && inputValues && (
@@ -136,7 +129,7 @@ export default function PromptView({
                   staticVariables={staticVariables}
                   inputValues={inputValues}
                   testConfig={testConfig}
-                  setTestConfig={setTestConfig} 
+                  setTestConfig={setTestConfig}
                   onShowTestConfig={activeTab !== 'Test data' ? () => setActiveTab('Test data') : undefined}
                   disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
                   callback={saveAndRun}
