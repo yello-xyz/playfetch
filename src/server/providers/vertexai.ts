@@ -114,7 +114,7 @@ async function completePreview(
     const responseStream = await generativeModel.generateContentStream(request)
 
     const getContent = (response: GenerateContentResponse) => response.candidates[0].content
-    const getText = (content: Content) => content.parts[0]?.text
+    const getText = (content: Content) => content.parts?.[0]?.text
 
     let output = ''
     for await (const chunk of responseStream.stream) {
@@ -133,6 +133,6 @@ async function completePreview(
 
     return { output, cost, inputTokens, outputTokens, functionCall: null }
   } catch (error: any) {
-    return { error: error?.details ?? 'Unknown error' }
+    return { error: error?.details ?? error?.message ?? error?.cause ?? 'Unknown error' }
   }
 }
