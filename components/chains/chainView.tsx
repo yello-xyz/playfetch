@@ -84,7 +84,7 @@ export default function ChainView({
     const activeNode = activeNodeIndex !== undefined ? nodes[activeNodeIndex] : undefined
     if (activeNode && IsPromptChainItem(activeNode)) {
       await refreshProject()
-      promptCache.clearItem(activeNode.promptID)
+      promptCache.refreshItem(activeNode.promptID)
     }
   }, [nodes, activeNodeIndex, promptCache, refreshActiveItem, refreshProject])
 

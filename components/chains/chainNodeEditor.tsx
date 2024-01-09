@@ -72,7 +72,7 @@ export default function ChainNodeEditor({
   }
 
   const selectVersion = (version?: PromptVersion) => {
-    isPromptChainItemActive && savePrompt(() => promptCache.refreshPrompt(activeItem.promptID))
+    isPromptChainItemActive && savePrompt(() => promptCache.refreshItem(activeItem.promptID))
     setActivePromptVersion(version)
     updatePromptDirty(false)
     if (version) {

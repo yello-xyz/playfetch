@@ -6,7 +6,6 @@ export type ActiveItemCache = {
   nameForID: (id: number) => string
   itemForID: (id: number) => ActivePrompt | ActiveChain | undefined
   refreshItem: (itemID: number) => void
-  clearItem: (itemID: number) => void
 }
 
 export default function useActiveItemCache(
@@ -55,5 +54,5 @@ export default function useActiveItemCache(
 
   const nameForID = (itemID: number) => findItemForID(itemID)!.name
 
-  return { nameForID, itemForID: id => activeItemCache[id], refreshItem, clearItem }
+  return { nameForID, itemForID: id => activeItemCache[id], refreshItem: clearItem }
 }
