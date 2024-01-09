@@ -59,11 +59,11 @@ export default function ModelInfoPane({
         <HorizontalBorder />
         <HorizontalBorder />
         <span className='font-medium'>Input Pricing</span>
-        <ModelCost model={model} price={InputPriceForModel} />
+        <ModelCost model={model} mode='input' />
         <HorizontalBorder />
         <HorizontalBorder />
         <span className='font-medium'>Output Pricing</span>
-        <ModelCost model={model} price={OutputPriceForModel} />
+        <ModelCost model={model} mode='output' />
         {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (
@@ -97,13 +97,13 @@ const ModelSuffix = ({ label, color = 'bg-gray-400' }: { label: string; color?: 
   <span className={`${color} px-1 ml-1 text-[10px] leading-[17px] font-medium text-white rounded`}>{label}</span>
 )
 
-const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: LanguageModel) => number }) => {
+const ModelCost = ({ model, mode }: { model: LanguageModel; mode: 'input' | 'output' }) => {
   return IsModelFreeToUse(model) ? (
     <span>
-      <span className='line-through'>{FormatCost(0.5)}</span> $0 / 1M characters*
+      <span className='line-through'>{FormatCost(mode === 'input' ? 0.25 : 0.5)}</span> $0 / 1M characters*
     </span>
   ) : (
-    <span>{FormatCost(price(model))} / 1M tokens</span>
+    <span>{FormatCost(mode === 'input' ? InputPriceForModel(model) : OutputPriceForModel(model))} / 1M tokens</span>
   )
 }
 
