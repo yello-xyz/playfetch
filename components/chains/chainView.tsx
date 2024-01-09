@@ -1,5 +1,5 @@
 import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion } from '@/types'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import api from '@/src/client/api'
 import ChainNodeEditor from './chainNodeEditor'
 import ChainEditor from './chainEditor'
@@ -77,11 +77,21 @@ export default function ChainView({
   const [savedItemsKey, setSavedItemsKey] = useState(itemsKey)
 
   const refreshActiveItem = useRefreshActiveItem()
+  const refreshProject = useRefreshProject()
+
+  const refreshOnSave = useCallback(async () => {
+    await refreshActiveItem()
+    const activeNode = activeNodeIndex !== undefined ? nodes[activeNodeIndex] : undefined
+    if (activeNode && IsPromptChainItem(activeNode)) {
+      await refreshProject()
+      promptCache.clearItem(activeNode.promptID)
+    }
+  }, [nodes, activeNodeIndex, promptCache, refreshActiveItem, refreshProject])
 
   const saveItems = (items: ChainItem[]): Promise<number | undefined> => {
     const loadedItems = items.filter(item => !IsPromptChainItem(item) || !!item.versionID)
     setSavedItemsKey(GetChainItemsSaveKey(loadedItems))
-    return saveChain(GetItemsToSave(loadedItems, promptCache), refreshActiveItem)
+    return saveChain(GetItemsToSave(loadedItems, promptCache), refreshOnSave)
   }
 
   const [syncedVersionID, setSyncedVersionID] = useState(activeVersion.id)
@@ -94,8 +104,6 @@ export default function ChainView({
     }
     setSavedItemsKey(GetChainItemsSaveKey(activeVersion.items))
   }
-
-  const refreshProject = useRefreshProject()
 
   const addPrompt = async () => {
     const { promptID, versionID } = await api.addPrompt(activeProject.id)

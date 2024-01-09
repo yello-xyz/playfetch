@@ -6,6 +6,7 @@ export type ActiveItemCache = {
   nameForID: (id: number) => string
   itemForID: (id: number) => ActivePrompt | ActiveChain | undefined
   refreshItem: (itemID: number) => void
+  clearItem: (itemID: number) => void
 }
 
 export default function useActiveItemCache(
@@ -38,6 +39,11 @@ export default function useActiveItemCache(
     [project, findItemForID, onRefreshItem]
   )
 
+  const clearItem = (itemID: number) => {
+    setLoadingItemIDs(new Set([...loadingItemIDs].filter(id => id !== itemID)))
+    setActiveItemCache(cache => Object.fromEntries(Object.entries(cache).filter(([id]) => Number(id) !== itemID)))
+  }
+
   const [loadingItemIDs, setLoadingItemIDs] = useState<Set<number>>(new Set())
   useEffect(() => {
     const unloadedItemID = itemIDs.find(itemID => !activeItemCache[itemID] && !loadingItemIDs.has(itemID))
@@ -49,5 +55,5 @@ export default function useActiveItemCache(
 
   const nameForID = (itemID: number) => findItemForID(itemID)!.name
 
-  return { nameForID, itemForID: id => activeItemCache[id], refreshItem }
+  return { nameForID, itemForID: id => activeItemCache[id], refreshItem, clearItem }
 }
