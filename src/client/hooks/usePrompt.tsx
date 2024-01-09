@@ -34,7 +34,7 @@ export default function usePrompt(
   }
 
   const addPrompt = async () => {
-    const { promptID } = await api.addPrompt(activeProject.id)
+    const promptID = await api.addPrompt(activeProject.id)
     refreshProject().then(() => selectPrompt(promptID))
   }
 

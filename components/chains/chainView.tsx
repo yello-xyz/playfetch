@@ -106,9 +106,9 @@ export default function ChainView({
   }
 
   const addPrompt = async () => {
-    const { promptID, versionID } = await api.addPrompt(activeProject.id)
+    const promptID = await api.addPrompt(activeProject.id)
     refreshProject()
-    return { promptID, versionID }
+    return promptID
   }
 
   const isInputOutputIndex = (index: number | undefined, nodes: ChainNode[]) =>
