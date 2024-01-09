@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react'
 type ProjectContextType = {
   activeProject?: ActiveProject
   refreshProject?: () => Promise<void>
-  refreshActiveItem?: (focusVersionID?: number) => Promise<void>
+  refreshActiveItem?: (focusVersionID?: number, allowResave?: boolean) => Promise<void>
 }
 
 export const ProjectContext = createContext<ProjectContextType>({})

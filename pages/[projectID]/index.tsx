@@ -111,9 +111,9 @@ export default function Home({
     }
   }
 
-  const refreshActiveItem = (versionID?: number) => {
+  const refreshActiveItem = (versionID?: number, allowResave?: boolean) => {
     if (activePrompt) {
-      return refreshPrompt(activePrompt.id, versionID)
+      return refreshPrompt(activePrompt.id, versionID, allowResave)
     } else if (activeChain) {
       return refreshChain(activeChain.id, versionID)
     } else {

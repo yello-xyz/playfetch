@@ -16,13 +16,15 @@ export default function usePrompt(
 
   const [savePrompt, setModifiedVersion, resavePrompt] = useSavePrompt(activePrompt, activeVersion, setActiveVersion)
 
-  const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id) => {
+  const refreshPrompt = async (promptID: number, focusVersionID = activeVersion?.id, allowResave = false) => {
     const newPrompt = await api.getPrompt(promptID, activeProject)
     setActivePromp(newPrompt)
     const newVersion =
       newPrompt.versions.find(version => version.id === focusVersionID) ?? newPrompt.versions.slice(-1)[0]
     setActiveVersion(newVersion)
-    resavePrompt(newPrompt, newVersion, () => refreshPrompt(promptID, focusVersionID))
+    if (allowResave) {
+      resavePrompt(newPrompt, newVersion, () => refreshPrompt(promptID, focusVersionID))
+    }
   }
 
   const selectPrompt = async (promptID: number, focusVersionID?: number) => {

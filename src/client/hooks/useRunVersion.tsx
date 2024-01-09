@@ -83,7 +83,7 @@ export default function useRunVersion(activeVersionID: number) {
       setPartialRuns(runs)
       setHighestRunIndex(highestRunIndex => Math.max(highestRunIndex, ...runs.map(run => run.index)))
     })
-    await refreshActiveItem(versionID)
+    await refreshActiveItem(versionID, true)
 
     setPartialRuns(runs => runs.filter(run => run.failed))
     setRunning(false)
