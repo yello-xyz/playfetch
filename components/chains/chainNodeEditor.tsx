@@ -72,7 +72,7 @@ export default function ChainNodeEditor({
   }
 
   const selectVersion = (version?: PromptVersion) => {
-    saveAndRefreshPrompt()
+    isPromptChainItemActive && savePrompt(() => promptCache.refreshPrompt(activeItem.promptID))
     setActivePromptVersion(version)
     updatePromptDirty(false)
     if (version) {
@@ -80,19 +80,14 @@ export default function ChainNodeEditor({
     }
   }
 
-  const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
-    if (isPromptChainItemActive) {
-      return savePrompt(() => promptCache.refreshPrompt(activeItem.promptID)).then(
-        versionID => versionID && onSavePrompt?.(versionID)
-      )
-    }
-  }
-
   const setDialogPrompt = useModalDialogPrompt()
 
   const saveAndClose = async () => {
-    saveItems(updatedItems)
-    await saveAndRefreshPrompt(versionID => saveItems(itemsWithUpdate({ ...activeItem, versionID })))
+    if (isPromptChainItemActive) {
+      savePrompt().then(versionID => versionID && saveItems(itemsWithUpdate({ ...activeItem, versionID })))
+    } else {
+      saveItems(updatedItems)
+    }
     dismiss()
   }
 
