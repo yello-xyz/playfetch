@@ -1,9 +1,10 @@
-import aiplatform from '@google-cloud/aiplatform'
+import { VertexAI, Content } from '@google-cloud/vertexai'
 import { GoogleLanguageModel } from '@/types'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { getProjectID } from '../storage'
 
+import aiplatform from '@google-cloud/aiplatform'
 const { PredictionServiceClient } = aiplatform.v1
 
 const location = 'us-central1'
@@ -84,6 +85,48 @@ async function complete(
     const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
     context.running = `${inputPrompt}\n${output}\n`
     context.messages = [...inputMessages, ...(responseMessage ? [responseMessage] : [])]
+
+    return { output, cost, inputTokens, outputTokens, functionCall: null }
+  } catch (error: any) {
+    return { error: error?.details ?? 'Unknown error' }
+  }
+}
+
+async function completePreview(
+  model: GoogleLanguageModel,
+  prompt: string,
+  system: string | undefined,
+  temperature: number,
+  maxTokens: number,
+  context: PromptContext,
+  usePreviousContext: boolean,
+  streamChunks?: (text: string) => void
+) {
+  try {
+    const previousContents = usePreviousContext ? context.contents ?? [] : []
+    const promptAsContent = { role: 'user', parts: [{ text: prompt }] }
+    const inputContents = [...previousContents, promptAsContent]
+    const request = { contents: inputContents, temperature, maxTokens }
+
+    const projectID = await getProjectID()
+    const vertexAI = new VertexAI({ project: projectID, location })
+    const generativeModel = vertexAI.preview.getGenerativeModel({ model })
+    const responseStream = await generativeModel.generateContentStream(request)
+
+    // TODO implement proper streaming
+    const aggregatedResponse = await responseStream.response
+    const responseContent = aggregatedResponse.candidates[0].content
+    const getContent = (content: Content | undefined) => content?.parts?.[0]?.text
+    const output = getContent(responseContent) ?? ''
+
+    if (output && streamChunks) {
+      streamChunks(output)
+    }
+
+    const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
+    const input = [system ?? '', ...inputContents.map(extractContent)].join('\n')
+    const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
+    context.contents = [...inputContents, ...(responseContent ? [responseContent] : [])]
 
     return { output, cost, inputTokens, outputTokens, functionCall: null }
   } catch (error: any) {
