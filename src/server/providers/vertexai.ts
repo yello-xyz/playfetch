@@ -10,19 +10,19 @@ const { PredictionServiceClient } = aiplatform.v1
 const location = 'us-central1'
 const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatform.googleapis.com` })
 
-export default function predict(model: GoogleLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
-    complete(model, prompts.main, prompts.system, temperature, maxTokens, context, useContext, streamChunks)
-}
-
-const isChatModel = (model: GoogleLanguageModel) => {
-  switch (model) {
-    case 'text-bison':
-      return false
-    case 'chat-bison':
-      return true
+const predict =
+  (model: GoogleLanguageModel): Predictor =>
+  (prompts, temperature, maxTokens, context, useContext, streamChunks) => {
+    switch (model) {
+      case 'text-bison':
+      case 'chat-bison':
+        return complete(model, prompts.main, prompts.system, temperature, maxTokens, context, useContext, streamChunks)
+      case 'gemini-pro':
+        return completePreview(model, prompts.main, temperature, maxTokens, context, useContext, streamChunks)
+    }
   }
-}
+
+export default predict
 
 async function complete(
   model: GoogleLanguageModel,
@@ -35,6 +35,7 @@ async function complete(
   streamChunks?: (text: string) => void
 ) {
   try {
+    const useMessages = model === 'chat-bison'
     const projectID = await getProjectID()
     const runningContext = usePreviousContext ? context.running ?? '' : ''
     const previousMessages = usePreviousContext ? context.messages ?? [] : []
@@ -55,7 +56,7 @@ async function complete(
           structValue: {
             fields: {
               ...(system ? { context: { stringValue: system } } : {}),
-              ...(isChatModel(model)
+              ...(useMessages
                 ? { messages: { listValue: { values: inputMessages } } }
                 : { content: { stringValue: inputPrompt } }),
             },
@@ -81,7 +82,7 @@ async function complete(
     }
 
     const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
-    const input = isChatModel(model) ? [system ?? '', ...inputMessages.map(extractContent)].join('\n') : inputPrompt
+    const input = useMessages ? [system ?? '', ...inputMessages.map(extractContent)].join('\n') : inputPrompt
     const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
     context.running = `${inputPrompt}\n${output}\n`
     context.messages = [...inputMessages, ...(responseMessage ? [responseMessage] : [])]
@@ -95,7 +96,6 @@ async function complete(
 async function completePreview(
   model: GoogleLanguageModel,
   prompt: string,
-  system: string | undefined,
   temperature: number,
   maxTokens: number,
   context: PromptContext,
@@ -124,7 +124,7 @@ async function completePreview(
     }
 
     const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
-    const input = [system ?? '', ...inputContents.map(extractContent)].join('\n')
+    const input = inputContents.map(extractContent).join('\n')
     const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
     context.contents = [...inputContents, ...(responseContent ? [responseContent] : [])]
 
