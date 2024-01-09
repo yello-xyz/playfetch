@@ -77,14 +77,16 @@ const PromptInputSection = ({
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
 }) => (
   <PromptSection key={promptKey} title={LabelForPromptKey(promptKey)} initiallyExpanded={promptKey === 'main'}>
-    <PromptInput
-      key={`${version.id}-${promptKey}`}
-      value={version.prompts[promptKey] ?? ''}
-      setValue={prompt => updatePrompt?.(promptKey, prompt)}
-      placeholder={updatePrompt ? PlaceholderForPromptKey(promptKey) : undefined}
-      preformatted={PromptKeyNeedsPreformatted(promptKey)}
-      disabled={!updatePrompt}
-    />
+    <div className='flex flex-col h-full min-h-[120px]'>
+      <PromptInput
+        key={`${version.id}-${promptKey}`}
+        value={version.prompts[promptKey] ?? ''}
+        setValue={prompt => updatePrompt?.(promptKey, prompt)}
+        placeholder={updatePrompt ? PlaceholderForPromptKey(promptKey) : undefined}
+        preformatted={PromptKeyNeedsPreformatted(promptKey)}
+        disabled={!updatePrompt}
+      />
+    </div>
   </PromptSection>
 )
 

@@ -18,7 +18,7 @@ export default function Collapsible({
   const [isExpanded, setExpanded] = useState(initiallyExpanded)
 
   return (
-    <div>
+    <div className='flex flex-col'>
       <div className={`${titleClassName} flex items-center cursor-pointer`} onClick={() => setExpanded(!isExpanded)}>
         <Icon className={isExpanded ? '' : '-rotate-90'} icon={chevronIcon} />
         <span className='font-medium text-gray-700'>{title}</span>
