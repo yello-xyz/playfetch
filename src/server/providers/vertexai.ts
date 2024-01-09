@@ -1,4 +1,4 @@
-import { VertexAI, Content } from '@google-cloud/vertexai'
+import { VertexAI, Content, GenerateContentResponse } from '@google-cloud/vertexai'
 import { GoogleLanguageModel } from '@/types'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
@@ -105,7 +105,7 @@ async function completePreview(
   try {
     const previousContents = usePreviousContext ? context.contents ?? [] : []
     const promptAsContent = { role: 'user', parts: [{ text: prompt }] }
-    const inputContents = [...previousContents, promptAsContent]
+    const inputContents: Content[] = [...previousContents, promptAsContent]
     const request = { contents: inputContents, temperature, maxTokens }
 
     const projectID = await getProjectID()
@@ -113,19 +113,22 @@ async function completePreview(
     const generativeModel = vertexAI.preview.getGenerativeModel({ model })
     const responseStream = await generativeModel.generateContentStream(request)
 
-    // TODO implement proper streaming
-    const aggregatedResponse = await responseStream.response
-    const responseContent = aggregatedResponse.candidates[0].content
-    const getContent = (content: Content | undefined) => content?.parts?.[0]?.text
-    const output = getContent(responseContent) ?? ''
+    const getContent = (response: GenerateContentResponse) => response.candidates[0].content
+    const getText = (content: Content) => content.parts[0]?.text
 
-    if (output && streamChunks) {
-      streamChunks(output)
+    let output = ''
+    for await (const chunk of responseStream.stream) {
+      const text = getText(getContent(chunk)) ?? ''
+      output += text
+      streamChunks?.(text)
     }
 
-    const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
+    const extractContent = (content: Content) => getText(content) ?? JSON.stringify(content)
     const input = inputContents.map(extractContent).join('\n')
     const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
+
+    const aggregatedResponse = await responseStream.response
+    const responseContent = getContent(aggregatedResponse)
     context.contents = [...inputContents, ...(responseContent ? [responseContent] : [])]
 
     return { output, cost, inputTokens, outputTokens, functionCall: null }
