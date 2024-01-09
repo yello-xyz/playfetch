@@ -157,7 +157,7 @@ export default function PromptView({
               onShowTestConfig={activeTab !== 'Test Data' ? () => setActiveTab('Test Data') : undefined}
               disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
               callback={saveAndRun}
-              onSave={savePrompt}
+              onSave={isDirty ? savePrompt : undefined}
             />
           </div>
         </div>
