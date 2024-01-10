@@ -1,7 +1,6 @@
 import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { PendingButton } from '../button'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
-import TestDataSelector from './testDataSelector'
 import { SelectInputRows } from '@/src/client/inputRows'
 import SavePromptButton from './savePromptButton'
 
@@ -89,11 +88,9 @@ export default function RunButtons({
     return callback(filterInputs(inputs, staticVariables), filterInputs(inputs, dynamicVariables))
   }
 
-  const showTestDataSelector = getIndicesForMode('all').length > 1
   const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
-  const roundedClass =
-    showTestDataSelector && onSave ? '' : showTestDataSelector ? 'rounded-r-lg' : onSave ? 'rounded-l-lg' : undefined
+  const roundedClass = onSave ? 'rounded-l-lg' : undefined
 
   return (
     <div className='flex items-center gap-3 grow'>
@@ -103,13 +100,6 @@ export default function RunButtons({
         <div className='grow' />
       )}
       <div className='flex items-center'>
-        {showTestDataSelector && (
-          <TestDataSelector
-            testConfig={testConfig}
-            setTestConfig={setTestConfig}
-            getIndicesForMode={getIndicesForMode}
-          />
-        )}
         <PendingButton
           title={runTitle ?? 'Run'}
           pendingTitle='Running'
