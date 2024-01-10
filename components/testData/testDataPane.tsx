@@ -115,20 +115,22 @@ export default function TestDataPane({
   const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
-      <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
+      <div
+        ref={containerRef}
+        className='grid w-full overflow-x-auto bg-gray-25 shrink-0'
+        style={{ gridTemplateColumns }}>
         <div className='border-b border-gray-200 cursor-pointer bg-gray-25' onClick={toggleAll} />
         {allVariables.map((variable, index) => (
           <TestDataHeader key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
           const isRowSelected = testConfig.rowIndices.includes(row)
-          const color = isRowSelected ? 'bg-blue-25' : 'bg-white'
           const border = (col: number) =>
             isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
           const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
-              <div className={`py-1 px-2 border-b border-gray-200 ${color}`}>
+              <div className='px-2 py-1 border-b border-gray-200'>
                 <Checkbox
                   checked={isRowSelected}
                   disabled={isRowSelected ? selectedRowCount === 1 : isRelevantRowEmpty(row) || selectedRowCount === 0}
@@ -138,7 +140,7 @@ export default function TestDataPane({
               {allVariables.map((variable, col) => (
                 <div className='relative group' key={`${rowCount}-${col}`}>
                   <Editor
-                    className={`h-full ${border(col)} ${color} ${truncate}`}
+                    className={`h-full ${border(col)} ${truncate}`}
                     value={getInputValue(row, variable)}
                     setValue={value => setInputValue(row, variable, value)}
                     onBlur={() => persistInputValuesIfNeeded()}
@@ -148,7 +150,7 @@ export default function TestDataPane({
                     focusOnLoad={false}
                   />
                   <Icon
-                    className={`absolute top-0.5 right-0.5 bg-white rounded cursor-pointer opacity-0 ${
+                    className={`absolute top-0.5 right-0.5 bg-gray-25 rounded cursor-pointer opacity-0 ${
                       isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
                     }`}
                     icon={expandIcon}
@@ -161,10 +163,10 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex items-center justify-center py-1 bg-white border-b border-gray-200 cursor-pointer hover:bg-gray-50 font-regular'
+        className='flex items-center justify-center py-1 border-b border-gray-200 cursor-pointer hover:bg-gray-50 font-regular'
         onClick={addInput}>
         <Icon icon={addIcon} />
-        Add
+        Add Row
       </div>
       {dynamicInputRows.length > 0 && (
         <div className='grid items-center gap-2 p-4 grid-cols-[200px_250px]'>
