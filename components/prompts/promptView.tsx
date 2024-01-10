@@ -141,7 +141,7 @@ export default function PromptView({
             title='Test Data'
             initiallyExpanded={testDataExpanded}
             className='pb-4 border-t border-gray-200'
-            titleClassName='py-1.5 pl-2'>
+            titleClassName='py-1.5 pl-0.5'>
             <TestDataPane
               variables={variables}
               staticVariables={staticVariables}

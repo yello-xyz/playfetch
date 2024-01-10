@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, KeyboardEvent, SetStateAction, useRef, useState } from 'react'
+import { Dispatch, Fragment, KeyboardEvent, ReactNode, SetStateAction, useRef, useState } from 'react'
 import addIcon from '@/public/add.svg'
 import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
@@ -169,21 +169,24 @@ export default function TestDataPane({
         Add Row
       </div>
       {dynamicInputRows.length > 0 && (
-        <div className='grid items-center gap-2 px-4 pt-4 grid-cols-[200px_250px]'>
-          <Label>
-            Use values for <span className='font-medium text-purple-400'>dynamic inputs</span> as
-          </Label>
-          <DropdownMenu
-            value={autoRespondModeFromTestConfig(testConfig)}
-            onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
-            <option value='manual'>suggested manual responses</option>
-            <option value='static'>fixed mocked responses</option>
-            <option value='dynamic'>personas for automated responses</option>
-          </DropdownMenu>
+        <div className='flex flex-wrap items-center px-4 pt-4 gap-y-2 gap-x-8'>
+          <OptionSection
+            label={
+              <>
+                Use values for <span className='font-medium text-purple-400'>dynamic inputs</span> as
+              </>
+            }>
+            <DropdownMenu
+              value={autoRespondModeFromTestConfig(testConfig)}
+              onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
+              <option value='manual'>suggested manual responses</option>
+              <option value='static'>fixed mocked responses</option>
+              <option value='dynamic'>personas for automated responses</option>
+            </DropdownMenu>
+          </OptionSection>
           {testConfig.autoRespond !== undefined && (
-            <>
-              <Label>Maximum number of responses</Label>
-              <div className='flex items-center gap-2'>
+            <OptionSection label='Maximum number of responses'>
+              <div className='flex items-center flex-1 gap-2'>
                 <RangeInput
                   className='flex-1'
                   value={testConfig.maxResponses ?? DefaultMaxResponses}
@@ -195,13 +198,20 @@ export default function TestDataPane({
                   step={1}
                 />
               </div>
-            </>
+            </OptionSection>
           )}
         </div>
       )}
     </div>
   )
 }
+
+const OptionSection = ({ label, children }: { label: ReactNode; children: ReactNode }) => (
+  <div className='flex items-center gap-2 w-[460px]'>
+    <Label className='w-[200px]'>{label}</Label>
+    {children}
+  </div>
+)
 
 type DynamicMode = 'manual' | 'static' | 'dynamic'
 const DefaultMaxResponses = 1
