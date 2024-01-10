@@ -142,35 +142,35 @@ export default function PromptView({
 
   const minWidth = 280
   return (
-    <Allotment className='bg-gray-25'>
-      <Allotment.Pane minSize={minWidth} preferredSize='50%'>
-        <div className='flex flex-col h-full'>
-          {renderTab(activeTab, tabSelector)}
-          <div className='p-4'>
-            <RunButtons
-              runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
-              variables={variables}
-              staticVariables={staticVariables}
-              inputValues={inputValues}
-              testConfig={testConfig}
-              setTestConfig={setTestConfig}
-              onShowTestConfig={activeTab !== 'Test Data' ? () => setActiveTab('Test Data') : undefined}
-              disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
-              callback={saveAndRun}
-              onSave={isDirty ? savePrompt : undefined}
-            />
-          </div>
-        </div>
-      </Allotment.Pane>
-      {pinnedTabs.map(tab => (
-        <Allotment.Pane key={tab} minSize={minWidth}>
-          <div className='flex flex-col h-full border-l border-gray-200'>
-            {renderTab(tab, () => (
-              <SingleTabHeader label={tab} />
-            ))}
-          </div>
+    <div className='flex flex-col h-full'>
+      <Allotment className='flex-1 bg-gray-25'>
+        <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+          <div className='flex flex-col h-full'>{renderTab(activeTab, tabSelector)}</div>
         </Allotment.Pane>
-      ))}
-    </Allotment>
+        {pinnedTabs.map(tab => (
+          <Allotment.Pane key={tab} minSize={minWidth}>
+            <div className='flex flex-col h-full border-l border-gray-200'>
+              {renderTab(tab, () => (
+                <SingleTabHeader label={tab} />
+              ))}
+            </div>
+          </Allotment.Pane>
+        ))}
+      </Allotment>
+      <div className='p-4 border-t border-gray-200'>
+        <RunButtons
+          runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
+          variables={variables}
+          staticVariables={staticVariables}
+          inputValues={inputValues}
+          testConfig={testConfig}
+          setTestConfig={setTestConfig}
+          onShowTestConfig={activeTab !== 'Test Data' ? () => setActiveTab('Test Data') : undefined}
+          disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
+          callback={saveAndRun}
+          onSave={isDirty ? savePrompt : undefined}
+        />
+      </div>
+    </div>
   )
 }

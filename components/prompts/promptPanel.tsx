@@ -62,6 +62,7 @@ export default function PromptPanel({
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
         )}
+        <div className='pb-1' />
       </div>
     </div>
   )
