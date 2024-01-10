@@ -94,7 +94,7 @@ function TabButton<T extends string>({
   return (
     <HeaderItem
       active={activeTab === undefined || activeTab === tab}
-      className={activeTab === tab ? 'border-b border-black -mb-px' : cursor}
+      className={activeTab === tab ? 'border-b border-black -mb-px' : setActiveTab ? cursor : undefined}
       onClick={() => setActiveTab?.(tab)}>
       {tab}
     </HeaderItem>
