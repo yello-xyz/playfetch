@@ -54,7 +54,7 @@ export default function useActiveItemCache(
       setItemIDsToReload(new Set([...itemIDsToReload].filter(id => id !== unloadedItemID)))
       refreshItem(unloadedItemID)
     }
-  }, [project, itemIDs, activeItemCache, refreshItem, loadingItemIDs])
+  }, [project, itemIDs, activeItemCache, refreshItem, loadingItemIDs, itemIDsToReload])
 
   const nameForID = (itemID: number) => findItemForID(itemID)!.name
 
