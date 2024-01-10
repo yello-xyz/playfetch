@@ -1,7 +1,7 @@
 import { StaticImageData } from 'next/image'
 import { KeyboardEvent, ReactNode, useCallback, useState } from 'react'
 import Icon from './icon'
-import { useDraggable } from '@dnd-kit/core'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 
 export function SingleTabHeader({
   label,
@@ -9,6 +9,7 @@ export function SingleTabHeader({
   secondaryLabel,
   onUpdateLabel,
   draggableTab,
+  dropTarget,
   children,
 }: {
   label: string
@@ -16,6 +17,7 @@ export function SingleTabHeader({
   secondaryLabel?: string
   onUpdateLabel?: (label: string) => void
   draggableTab?: boolean
+  dropTarget?: string
   children?: ReactNode
 }) {
   return (
@@ -24,7 +26,8 @@ export function SingleTabHeader({
       icon={icon}
       secondaryLabel={secondaryLabel}
       onUpdateLabel={onUpdateLabel}
-      draggableTabs={draggableTab}>
+      draggableTabs={draggableTab}
+      dropTarget={dropTarget}>
       {children}
     </TabSelector>
   )
@@ -38,6 +41,7 @@ export default function TabSelector<T extends string>({
   secondaryLabel,
   onUpdateLabel,
   draggableTabs,
+  dropTarget,
   children,
 }: {
   tabs: T[]
@@ -47,6 +51,7 @@ export default function TabSelector<T extends string>({
   secondaryLabel?: string
   onUpdateLabel?: (label: string) => void
   draggableTabs?: boolean
+  dropTarget?: string
   children?: ReactNode
 }) {
   const [label, setLabel] = useState<string>()
@@ -56,7 +61,7 @@ export default function TabSelector<T extends string>({
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader dropTarget={dropTarget}>
       <div className='flex items-center gap-0.5'>
         {icon && label === undefined && <Icon className='-mr-1.5' icon={icon} />}
         {label !== undefined ? (
@@ -85,9 +90,14 @@ export default function TabSelector<T extends string>({
   )
 }
 
-export function CustomHeader({ children }: { children?: ReactNode }) {
+export function CustomHeader({ children, dropTarget }: { children?: ReactNode; dropTarget?: string }) {
+  const { isOver, setNodeRef } = useDroppable({ id: dropTarget ?? '', disabled: !dropTarget })
+  const color = isOver ? 'bg-gray-50' : 'bg-white'
+
   return (
-    <div className='flex items-center justify-between gap-2 px-2 bg-white border-b border-gray-200'>{children}</div>
+    <div ref={setNodeRef} className={`${color} flex items-center justify-between gap-2 px-2 border-b border-gray-200`}>
+      {children}
+    </div>
   )
 }
 
