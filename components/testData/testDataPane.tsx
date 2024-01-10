@@ -169,7 +169,7 @@ export default function TestDataPane({
         Add Row
       </div>
       {dynamicInputRows.length > 0 && (
-        <div className='flex flex-wrap items-center px-4 pt-4 gap-y-2 gap-x-8'>
+        <div className='flex flex-wrap items-center px-3 pt-2 gap-y-2 gap-x-4'>
           <OptionSection
             label={
               <>
@@ -177,6 +177,7 @@ export default function TestDataPane({
               </>
             }>
             <DropdownMenu
+              size='xs'
               value={autoRespondModeFromTestConfig(testConfig)}
               onChange={value => setTestConfig(testConfigWithAutoRespondMode(testConfig, value as DynamicMode))}>
               <option value='manual'>suggested manual responses</option>
@@ -188,6 +189,7 @@ export default function TestDataPane({
             <OptionSection label='Maximum number of responses'>
               <div className='flex items-center flex-1 gap-2'>
                 <RangeInput
+                  size='xs'
                   className='flex-1'
                   value={testConfig.maxResponses ?? DefaultMaxResponses}
                   setValue={value =>
@@ -207,7 +209,7 @@ export default function TestDataPane({
 }
 
 const OptionSection = ({ label, children }: { label: ReactNode; children: ReactNode }) => (
-  <div className='flex items-center gap-2 w-[460px]'>
+  <div className='flex items-center gap-2 w-[450px]'>
     <Label className='w-[200px]'>{label}</Label>
     {children}
   </div>
