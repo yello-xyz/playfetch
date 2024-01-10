@@ -45,28 +45,21 @@ export default function RunButtons({
   const inputVariables =
     testConfig.autoRespond !== undefined && (testConfig.maxResponses ?? 0) > 0 ? variables : staticVariables
   const selectInputs = useCallback(
-    (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
-      SelectInputRows(inputValues, inputVariables, {
-        mode: config.mode,
-        rowIndices: 'rowIndices' in config ? config.rowIndices : [],
-      }),
+    (config: TestConfig) => SelectInputRows(inputValues, inputVariables, config),
     [inputValues, inputVariables]
   )
-  const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]
 
   const [, rowIndices] = selectInputs(testConfig)
-  const fallbackIndices = getIndicesForMode('first')
+  const fallbackIndices = selectInputs({ mode: 'first', rowIndices: [] })[1]
   useEffect(() => {
-    const validRowIndices = selectValidRowIndices(testConfig.mode, mode =>
-      selectInputs({ mode, count: testConfig.rowIndices.length })
-    )
+    const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode, rowIndices: [] }))
     if (
       testConfig.rowIndices.length !== rowIndices.length ||
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
     ) {
       startTransition(() => setTestConfig({ ...testConfig, rowIndices }))
     } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      startTransition(() => setTestConfig({ ...testConfig, mode: 'first', rowIndices: fallbackIndices }))
+      startTransition(() => setTestConfig({ ...testConfig, mode: 'custom', rowIndices: fallbackIndices }))
     }
   }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
 
