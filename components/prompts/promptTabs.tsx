@@ -4,11 +4,20 @@ import { ReactNode, useState } from 'react'
 import TabSelector, { SingleTabHeader } from '../tabSelector'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 import { Allotment } from 'allotment'
 
 type Tab = 'New Prompt' | 'Version History'
-type Target = 'left' | 'right'
+type Target = Tab | 'left' | 'right' | 'mergedTabs'
 
 export default function PromptTabs({
   prompt,
@@ -30,7 +39,7 @@ export default function PromptTabs({
   const [activeTab, setActiveTab] = useState<Tab>('New Prompt')
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs>
+    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs dropTarget='mergedTabs'>
       {children}
     </TabSelector>
   )
@@ -76,6 +85,10 @@ export default function PromptTabs({
         setTabs([...tabs, tab])
         setTabsMerged(false)
         return
+      default:
+        setTabs([...tabs, tab])
+        setTabsMerged(true)
+        return
     }
   }
 
@@ -90,7 +103,7 @@ export default function PromptTabs({
             {tabs.map(tab => (
               <Allotment.Pane key={tab} minSize={minWidth} preferredSize='50%'>
                 {renderTab(tab, children => (
-                  <SingleTabHeader label={tab}>{children}</SingleTabHeader>
+                  <DropHeader tab={tab}>{children}</DropHeader>
                 ))}
               </Allotment.Pane>
             ))}
@@ -125,11 +138,7 @@ const DragAndDropContext = ({
   }
 
   return (
-    <DndContext
-      id='prompt-tabs'
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}>
+    <DndContext id='prompt-tabs' sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <div className='flex items-stretch h-full'>
         {draggingTab && <DropZone target='left' />}
         {children}
@@ -137,6 +146,14 @@ const DragAndDropContext = ({
       </div>
       <DraggingTab tab={draggingTab} />
     </DndContext>
+  )
+}
+
+const DropHeader = ({ tab, children }: { tab: Tab; children: ReactNode }) => {
+  return (
+    <SingleTabHeader label={tab} draggableTab dropTarget={tab}>
+      {children}
+    </SingleTabHeader>
   )
 }
 
