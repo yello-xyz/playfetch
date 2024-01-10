@@ -35,7 +35,7 @@ export default function PromptView({
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
-  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'custom', rowIndices: [0] })
+  const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id)
   const runPrompt = async (

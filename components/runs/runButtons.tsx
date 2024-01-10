@@ -4,8 +4,6 @@ import { InputValues, PromptInputs, TestConfig } from '@/types'
 import { SelectInputRows } from '@/src/client/inputRows'
 import SavePromptButton from './savePromptButton'
 
-type TestMode = TestConfig['mode']
-
 export default function RunButtons({
   runTitle,
   variables,
@@ -37,7 +35,7 @@ export default function RunButtons({
   )
 
   const [, rowIndices] = selectInputs(testConfig)
-  const fallbackIndices = selectInputs({ mode: 'custom', rowIndices: [0] })[1]
+  const fallbackIndices = selectInputs({ rowIndices: [0] })[1]
   useEffect(() => {
     const validRowIndices = selectInputs()[1]
     if (
@@ -45,8 +43,8 @@ export default function RunButtons({
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
     ) {
       startTransition(() => setTestConfig({ ...testConfig, rowIndices }))
-    } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      startTransition(() => setTestConfig({ ...testConfig, mode: 'custom', rowIndices: fallbackIndices }))
+    } else if (testConfig.rowIndices.length === 0) {
+      startTransition(() => setTestConfig({ ...testConfig, rowIndices: fallbackIndices }))
     }
   }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
 
