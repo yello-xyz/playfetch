@@ -1,10 +1,11 @@
 import { ActivePrompt, PromptVersion, Prompts } from '@/types'
 
 import { ReactNode, useState } from 'react'
-import TabSelector from '../tabSelector'
+import TabSelector, { SingleTabHeader } from '../tabSelector'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import { DndContext, DragOverlay, PointerSensor, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
+import { Allotment } from 'allotment'
 
 type Tab = 'New Prompt' | 'Version History'
 type Target = 'left' | 'right'
@@ -24,6 +25,7 @@ export default function PromptTabs({
   updatePrompt: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig: (config: PromptVersion['config']) => void
 }) {
+  const [areTabsMerged, setTabsMerged] = useState(true)
   const [tabs, setTabs] = useState<Tab[]>(['New Prompt', 'Version History'])
   const [activeTab, setActiveTab] = useState<Tab>('New Prompt')
 
@@ -44,7 +46,7 @@ export default function PromptTabs({
         )
       case 'Version History':
         return (
-          <div className='flex-1 min-h-0'>
+          <div className='flex-1 h-full min-h-0'>
             <VersionTimeline
               activeItem={prompt}
               versions={prompt.versions}
@@ -56,10 +58,24 @@ export default function PromptTabs({
         )
     }
   }
+
+  const minWidth = 280
   return (
     <div className='flex flex-col flex-1 w-full h-full min-h-0'>
-      <DragAndDropContext onDrop={(tab, target) => console.log(`dropped ${tab} on ${target}`)}>
-        {renderTab(activeTab, tabSelector)}
+      <DragAndDropContext onDrop={(tab, target) => setTabsMerged(false)}>
+        {areTabsMerged ? (
+          renderTab(activeTab, tabSelector)
+        ) : (
+          <Allotment className='flex-1 bg-gray-25'>
+            {tabs.map(tab => (
+              <Allotment.Pane key={tab} minSize={minWidth} preferredSize='50%'>
+                {renderTab(tab, children => (
+                  <SingleTabHeader label={tab}>{children}</SingleTabHeader>
+                ))}
+              </Allotment.Pane>
+            ))}
+          </Allotment>
+        )}
       </DragAndDropContext>
     </div>
   )
