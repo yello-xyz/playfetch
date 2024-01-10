@@ -32,7 +32,7 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  type ActiveTab = 'Prompt' | 'Version History' | 'Responses'
+  type ActiveTab = 'Prompt' | 'Version History'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
@@ -65,11 +65,10 @@ export default function PromptView({
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
   const [testDataExpanded, setTestDataExpanded] = useState(false)
 
-  const tabs: ActiveTab[] = ['Prompt', 'Version History', 'Responses']
-  const pinnedTabs: ActiveTab[] = ['Responses']
+  const tabs: ActiveTab[] = ['Prompt', 'Version History']
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector tabs={tabs.filter(tab => !pinnedTabs.includes(tab))} activeTab={activeTab} setActiveTab={selectTab}>
+    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={selectTab}>
       {children}
     </TabSelector>
   )
@@ -95,10 +94,19 @@ export default function PromptView({
             />
           </div>
         )
-      case 'Responses':
-        return (
-          <>
-            {tabSelector()}
+    }
+  }
+
+  const minWidth = 280
+  return (
+    <div className='flex flex-col h-full'>
+      <Allotment className='flex-1 bg-gray-25'>
+        <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+          <div className='flex flex-col h-full'>{renderTab(activeTab, tabSelector)}</div>
+        </Allotment.Pane>
+        <Allotment.Pane minSize={minWidth}>
+          <div className='flex flex-col h-full border-l border-gray-200'>
+            <SingleTabHeader label='Responses' />
             <div className='flex-1 min-h-0 overflow-y-auto'>
               <RunTimeline
                 runs={[...activeVersion.runs, ...partialRuns]}
@@ -111,27 +119,8 @@ export default function PromptView({
                 skipHeader
               />
             </div>
-          </>
-        )
-    }
-  }
-
-  const minWidth = 280
-  return (
-    <div className='flex flex-col h-full'>
-      <Allotment className='flex-1 bg-gray-25'>
-        <Allotment.Pane minSize={minWidth} preferredSize='50%'>
-          <div className='flex flex-col h-full'>{renderTab(activeTab, tabSelector)}</div>
+          </div>
         </Allotment.Pane>
-        {pinnedTabs.map(tab => (
-          <Allotment.Pane key={tab} minSize={minWidth}>
-            <div className='flex flex-col h-full border-l border-gray-200'>
-              {renderTab(tab, () => (
-                <SingleTabHeader label={tab} />
-              ))}
-            </div>
-          </Allotment.Pane>
-        ))}
       </Allotment>
       <div className='border-t border-gray-200' />
       {canShowTestData && (
