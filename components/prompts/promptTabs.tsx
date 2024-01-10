@@ -20,10 +20,10 @@ export default function PromptTabs({
   updatePrompt: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig: (config: PromptVersion['config']) => void
 }) {
-  type ActiveTab = 'Prompt' | 'Version History'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
+  type ActiveTab = 'New Prompt' | 'Version History'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('New Prompt')
 
-  const tabs: ActiveTab[] = ['Prompt', 'Version History']
+  const tabs: ActiveTab[] = ['New Prompt', 'Version History']
 
   const tabSelector = (children?: ReactNode) => (
     <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}>
@@ -33,7 +33,7 @@ export default function PromptTabs({
 
   const renderTab = (tab: ActiveTab, tabSelector: (children?: ReactNode) => ReactNode) => {
     switch (tab) {
-      case 'Prompt':
+      case 'New Prompt':
         return (
           <>
             {tabSelector()}
