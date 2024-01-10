@@ -54,5 +54,5 @@ export default function PromptTabs({
         )
     }
   }
-  return <div className='flex flex-col h-full'>{renderTab(activeTab, tabSelector)}</div>
+  return <div className='flex flex-col w-full h-full'>{renderTab(activeTab, tabSelector)}</div>
 }

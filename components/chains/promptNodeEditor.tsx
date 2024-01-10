@@ -1,12 +1,7 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
-import VersionTimeline from '../versions/versionTimeline'
-import PromptPanel from '../prompts/promptPanel'
-import { Allotment } from 'allotment'
-import { SingleTabHeader } from '../tabSelector'
-import { useState } from 'react'
-import promptIcon from '@/public/prompt.svg'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import PromptTabs from '../prompts/promptTabs'
 
 export default function PromptNodeEditor({
   item,
@@ -47,28 +42,14 @@ function PromptEditor({
 }) {
   const [currentVersion, updatePrompt, updateConfig] = usePromptVersion(activeVersion, setModifiedVersion)
 
-  const minVersionHeight = 120
-  const [promptHeight, setPromptHeight] = useState(1)
-  const minHeight = promptHeight + 16
   return (
-    <Allotment vertical>
-      <Allotment.Pane minSize={minVersionHeight}>
-        <VersionTimeline
-          activeItem={prompt}
-          versions={prompt.versions}
-          activeVersion={activeVersion}
-          setActiveVersion={selectVersion}
-          tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
-        />
-      </Allotment.Pane>
-      <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
-        <PromptPanel
-          version={currentVersion}
-          updatePrompt={updatePrompt}
-          updateConfig={updateConfig}
-          setPreferredHeight={setPromptHeight}
-        />
-      </Allotment.Pane>
-    </Allotment>
+    <PromptTabs
+      prompt={prompt}
+      activeVersion={activeVersion}
+      setActiveVersion={selectVersion}
+      currentVersion={currentVersion}
+      updatePrompt={updatePrompt}
+      updateConfig={updateConfig}
+    />
   )
 }
