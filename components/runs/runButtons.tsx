@@ -80,7 +80,7 @@ export default function RunButtons({
 }
 
 const WarningBanner = ({ children }: { children: ReactNode }) => (
-  <div className='flex-1 px-3 py-2 overflow-hidden border rounded-lg h-9 border-pink-50 bg-pink-25 text-ellipsis whitespace-nowrap'>
+  <div className='flex-1 h-8 px-3 py-2 overflow-hidden border rounded-lg border-pink-50 bg-pink-25 text-ellipsis whitespace-nowrap'>
     {children}
   </div>
 )

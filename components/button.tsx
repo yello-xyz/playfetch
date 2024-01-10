@@ -81,7 +81,7 @@ export default function Button({
       <button
         className={`${colorForType(
           type
-        )} ${paddingClass} ${roundedClass} h-9 text-sm whitespace-nowrap flex items-center`}
+        )} ${paddingClass} ${roundedClass} h-8 text-sm whitespace-nowrap flex items-center`}
         disabled={disabled}
         onClick={onClick}>
         {showSpinner && <Icon icon={spinnerIcon} className='animate-spin max-w-[24px]' />}
