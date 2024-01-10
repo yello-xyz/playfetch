@@ -14,12 +14,10 @@ const testRowSelection = (
   inputValues: InputValues,
   variables: string[],
   config: TestConfig,
-  count: number,
-  start: number,
   expectedIndices: number[]
 ) =>
   test(testDescription, () =>
-    expect(SelectInputRows(inputValues, variables, config, count, start)[1]).toStrictEqual(expectedIndices)
+    expect(SelectInputRows(inputValues, variables, config)[1]).toStrictEqual(expectedIndices)
   )
 
 const testAllDefaultModes = (
@@ -34,8 +32,6 @@ const testAllDefaultModes = (
       inputValues,
       variables,
       config(mode),
-      expectedIndices.length,
-      0,
       expectedIndices
     )
   }
@@ -61,8 +57,6 @@ const testSparseValues = (config: TestConfig, expectedIndices: number[], count =
     sparseValues,
     Object.keys(sparseValues),
     config,
-    count,
-    start,
     expectedIndices
   )
 }
@@ -78,16 +72,3 @@ testSparseValues(config('custom', [1, 2, 3]), [1, 3])
 testSparseValues(config('custom', [3, 2, 1]), [1, 3])
 testSparseValues(config('custom', [1, 3, 5]), [1, 3, 5])
 testSparseValues(config('custom', [0, 1, 2, 3, 4, 5, 6, 7, 8]), [1, 3, 5])
-
-testSparseValues(config('range'), [1])
-testSparseValues(config('range'), [1], 1, 1)
-testSparseValues(config('range'), [3], 1, 2)
-testSparseValues(config('range'), [1, 3], 2, 0)
-testSparseValues(config('range'), [3, 5], 2, 2)
-testSparseValues(config('range'), [3, 5], 2, 3)
-testSparseValues(config('range'), [1, 3, 5], 3, 0)
-testSparseValues(config('range'), [1, 3, 5], 3, 1)
-testSparseValues(config('range'), [3, 5], 3, 2)
-testSparseValues(config('range'), [5], 1, 5)
-testSparseValues(config('range'), [5], 2, 5)
-testSparseValues(config('range'), [1, 3, 5], 10, 0)

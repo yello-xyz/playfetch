@@ -266,7 +266,7 @@ export type ChainItemWithInputs = (
 }
 
 export type TestConfig = {
-  mode: 'custom' | 'first' | 'last' | 'range' | 'random' | 'all'
+  mode: 'custom' | 'first' | 'last' | 'all'
   rowIndices: number[]
   autoRespond?: boolean
   maxResponses?: number

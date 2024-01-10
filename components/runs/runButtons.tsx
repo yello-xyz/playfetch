@@ -15,8 +15,6 @@ const selectValidRowIndices = (
     case 'last':
       return selectInputs(mode)[1]
     case 'custom':
-    case 'range':
-    case 'random':
     case 'all':
       return selectInputs('all')[1]
   }
@@ -49,16 +47,10 @@ export default function RunButtons({
     testConfig.autoRespond !== undefined && (testConfig.maxResponses ?? 0) > 0 ? variables : staticVariables
   const selectInputs = useCallback(
     (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
-      SelectInputRows(
-        inputValues,
-        inputVariables,
-        {
-          mode: config.mode,
-          rowIndices: 'rowIndices' in config ? config.rowIndices : [],
-        },
-        'rowIndices' in config ? config.rowIndices.length : config.count,
-        'rowIndices' in config ? config.rowIndices[0] : config.start
-      ),
+      SelectInputRows(inputValues, inputVariables, {
+        mode: config.mode,
+        rowIndices: 'rowIndices' in config ? config.rowIndices : [],
+      }),
     [inputValues, inputVariables]
   )
   const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]

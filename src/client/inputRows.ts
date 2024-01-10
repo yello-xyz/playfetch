@@ -12,21 +12,10 @@ export const SelectAnyInputValue =
       : SelectInputRows(inputValues, [variable], config)[0][0]?.[variable] ??
         SelectAnyInputRow(inputValues, [variable])[variable]
 
-const shuffleArray = <T>(source: T[]): T[] => {
-  const array = [...source]
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
-  return array
-}
-
 export const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
-  config: TestConfig,
-  count = 1,
-  start = 0
+  config: TestConfig
 ): [{ [key: string]: string }[], number[]] => {
   const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
@@ -39,9 +28,6 @@ export const SelectInputRows = (
   const filteredRowIndices = config.rowIndices.filter(isNonEmptyRow).sort()
 
   const indexArray = (count: number) => Array.from({ length: count }, (_, index) => index)
-  const startIndex = indexArray(maxRowCount)
-    .filter(isNonEmptyRow)
-    .findIndex(index => index >= start)
 
   const filteredPaddedInputs: InputValues = {}
   for (const [key, values] of Object.entries(inputs)) {
@@ -65,10 +51,6 @@ export const SelectInputRows = (
         return [0]
       case 'last':
         return [rowCount - 1]
-      case 'range':
-        return allRowIndices.slice(startIndex, startIndex + count)
-      case 'random':
-        return shuffleArray(allRowIndices).slice(0, count)
       case 'all':
         return allRowIndices
       case 'custom':
