@@ -59,10 +59,23 @@ export default function PromptTabs({
     }
   }
 
+  const onDrop = (tab: Tab, target: Target) => {
+    switch (target) {
+      case 'left':
+        setTabs([tab, ...tabs.filter(t => t !== tab)])
+        setTabsMerged(false)
+        break
+      case 'right':
+        setTabs([...tabs.filter(t => t !== tab), tab])
+        setTabsMerged(false)
+        break
+    }
+  }
+
   const minWidth = 280
   return (
     <div className='flex flex-col flex-1 w-full h-full min-h-0'>
-      <DragAndDropContext onDrop={(tab, target) => setTabsMerged(false)}>
+      <DragAndDropContext onDrop={onDrop}>
         {areTabsMerged ? (
           renderTab(activeTab, tabSelector)
         ) : (
