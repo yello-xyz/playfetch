@@ -1,7 +1,7 @@
 import { InputValues, TestConfig } from '@/types'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
-  SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
+  SelectInputRows(inputValues, variables, { mode: 'custom', rowIndices: [0] })[0][0] ??
   Object.fromEntries(variables.map(variable => [variable, '']))
 
 export const SelectAnyInputValue =
@@ -42,17 +42,13 @@ export const SelectInputRows = (
   }
 
   const entries = Object.entries(filteredPaddedInputs)
-  const allRowIndices = indexArray(rowCount)
-  const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
   const selectedIndices = (() => {
     switch (config.mode) {
-      default:
-      case 'first':
-        return [0]
       case 'all':
-        return allRowIndices
+        return indexArray(rowCount)
       case 'custom':
-        return filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
+        const mappedRowIndices = filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
+        return mappedRowIndices.length > 0 ? mappedRowIndices : [0]
     }
   })()
 
@@ -65,5 +61,6 @@ export const SelectInputRows = (
     }
   }
 
+  const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
   return [selectedIndices.map(selectRow), originalIndices]
 }

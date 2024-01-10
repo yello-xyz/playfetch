@@ -4,10 +4,10 @@ import { InputValues, TestConfig } from '@/types'
 const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({ mode, rowIndices })
 
 test('No inputs yields single empty prompt input', () =>
-  expect(SelectInputRows({}, [], config('first'))[0]).toStrictEqual([{}]))
+  expect(SelectInputRows({}, [], config('custom'))[0]).toStrictEqual([{}]))
 
 test('Inputs without values yield single empty prompt input', () =>
-  expect(SelectInputRows({}, ['a', 'b'], config('first'))[0]).toStrictEqual([{}]))
+  expect(SelectInputRows({}, ['a', 'b'], config('custom'))[0]).toStrictEqual([{}]))
 
 const testRowSelection = (
   testDescription: string,
@@ -26,7 +26,7 @@ const testAllDefaultModes = (
   variables: string[],
   expectedIndices: number[]
 ) => {
-  for (const mode of ['first', 'all'] as TestConfig['mode'][]) {
+  for (const mode of ['custom', 'all'] as TestConfig['mode'][]) {
     testRowSelection(
       `${testDescription} (${mode})`,
       inputValues,
@@ -61,11 +61,10 @@ const testSparseValues = (config: TestConfig, expectedIndices: number[], count =
   )
 }
 
-testSparseValues(config('first'), [1])
+testSparseValues(config('custom'), [1])
 testSparseValues(config('all'), [1, 3, 5])
 
-testSparseValues(config('custom'), [])
-testSparseValues(config('custom', [0]), [])
+testSparseValues(config('custom', [0]), [1])
 testSparseValues(config('custom', [1, 2]), [1])
 testSparseValues(config('custom', [1, 2, 3]), [1, 3])
 testSparseValues(config('custom', [3, 2, 1]), [1, 3])

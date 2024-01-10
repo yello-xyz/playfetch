@@ -6,19 +6,6 @@ import SavePromptButton from './savePromptButton'
 
 type TestMode = TestConfig['mode']
 
-const selectValidRowIndices = (
-  mode: TestMode,
-  selectInputs: (mode: TestMode) => ReturnType<typeof SelectInputRows>
-) => {
-  switch (mode) {
-    case 'first':
-      return selectInputs(mode)[1]
-    case 'custom':
-    case 'all':
-      return selectInputs('all')[1]
-  }
-}
-
 export default function RunButtons({
   runTitle,
   variables,
@@ -50,9 +37,9 @@ export default function RunButtons({
   )
 
   const [, rowIndices] = selectInputs(testConfig)
-  const fallbackIndices = selectInputs({ mode: 'first', rowIndices: [] })[1]
+  const fallbackIndices = selectInputs({ mode: 'custom', rowIndices: [0] })[1]
   useEffect(() => {
-    const validRowIndices = selectValidRowIndices(testConfig.mode, mode => selectInputs({ mode, rowIndices: [] }))
+    const validRowIndices = selectInputs({ mode: 'all', rowIndices: [] })[1]
     if (
       testConfig.rowIndices.length !== rowIndices.length ||
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
