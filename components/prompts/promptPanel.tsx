@@ -6,7 +6,7 @@ import {
   SupportedPromptKeysForModel,
 } from '@/src/common/providerMetadata'
 import PromptInput from './promptInput'
-import { ReactNode, startTransition, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
@@ -18,12 +18,10 @@ export default function PromptPanel({
   version,
   updatePrompt,
   updateConfig,
-  setPreferredHeight,
 }: {
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig?: (config: PromptConfig) => void
-  setPreferredHeight?: (height: number) => void
 }) {
   const config = version.config
 
@@ -33,15 +31,6 @@ export default function PromptPanel({
   const [checkProviderAvailable, checkModelAvailable] = useCheckModelProviders()
   const isModelAvailable = checkModelAvailable(config.model)
   const canModifyPrompt = updatePrompt && updateConfig
-
-  const padding = 12 // gap-3
-  const modelSelectorHeight = 37
-  const tabHeight = 27
-  const contentHeight = 154 // keep ComparePane in sync when updating this
-  const preferredHeight =
-    tabHeight + padding + contentHeight + (isModelAvailable ? 0 : 56 + padding) + (padding + modelSelectorHeight)
-
-  useEffect(() => startTransition(() => setPreferredHeight?.(preferredHeight)), [preferredHeight, setPreferredHeight])
 
   return (
     <div className='flex flex-col flex-1 h-full gap-4 px-4 pt-4 overflow-y-auto text-gray-500'>
