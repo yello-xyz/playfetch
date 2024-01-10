@@ -32,14 +32,14 @@ export default function RunButtons({
   const inputVariables =
     testConfig.autoRespond !== undefined && (testConfig.maxResponses ?? 0) > 0 ? variables : staticVariables
   const selectInputs = useCallback(
-    (config: TestConfig) => SelectInputRows(inputValues, inputVariables, config),
+    (config?: TestConfig) => SelectInputRows(inputValues, inputVariables, config),
     [inputValues, inputVariables]
   )
 
   const [, rowIndices] = selectInputs(testConfig)
   const fallbackIndices = selectInputs({ mode: 'custom', rowIndices: [0] })[1]
   useEffect(() => {
-    const validRowIndices = selectInputs({ mode: 'all', rowIndices: [] })[1]
+    const validRowIndices = selectInputs()[1]
     if (
       testConfig.rowIndices.length !== rowIndices.length ||
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))

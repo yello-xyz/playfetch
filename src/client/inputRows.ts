@@ -15,7 +15,7 @@ export const SelectAnyInputValue =
 export const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
-  config: TestConfig
+  config?: TestConfig
 ): [{ [key: string]: string }[], number[]] => {
   const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
@@ -25,7 +25,6 @@ export const SelectInputRows = (
     columns.every(column => column[index] === undefined || column[index].length === 0)
   )
   const isNonEmptyRow = (index: number) => !emptyRowIndices.includes(index)
-  const filteredRowIndices = config.rowIndices.filter(isNonEmptyRow).sort()
 
   const indexArray = (count: number) => Array.from({ length: count }, (_, index) => index)
 
@@ -42,15 +41,14 @@ export const SelectInputRows = (
   }
 
   const entries = Object.entries(filteredPaddedInputs)
-  const selectedIndices = (() => {
-    switch (config.mode) {
-      case 'all':
-        return indexArray(rowCount)
-      case 'custom':
-        const mappedRowIndices = filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
-        return mappedRowIndices.length > 0 ? mappedRowIndices : [0]
-    }
-  })()
+  let selectedIndices
+  if (config) {
+    const filteredRowIndices = config.rowIndices.filter(isNonEmptyRow).sort()
+    const mappedRowIndices = filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
+    selectedIndices = mappedRowIndices.length > 0 ? mappedRowIndices : [0]
+  } else {
+    selectedIndices = indexArray(rowCount)
+  }
 
   const originalIndices = [] as number[]
   for (let i = 0, offset = 0; i < maxRowCount; ++i) {

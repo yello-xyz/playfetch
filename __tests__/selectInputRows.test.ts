@@ -1,7 +1,8 @@
 import { SelectInputRows } from '@/src/client/inputRows'
 import { InputValues, TestConfig } from '@/types'
 
-const config = (mode: TestConfig['mode'], rowIndices = [] as number[]): TestConfig => ({ mode, rowIndices })
+const config = (mode: 'custom' | 'all', rowIndices = [] as number[]): TestConfig | undefined =>
+  mode === 'all' ? undefined : { mode, rowIndices }
 
 test('No inputs yields single empty prompt input', () =>
   expect(SelectInputRows({}, [], config('custom'))[0]).toStrictEqual([{}]))
@@ -13,12 +14,10 @@ const testRowSelection = (
   testDescription: string,
   inputValues: InputValues,
   variables: string[],
-  config: TestConfig,
+  config: TestConfig | undefined,
   expectedIndices: number[]
 ) =>
-  test(testDescription, () =>
-    expect(SelectInputRows(inputValues, variables, config)[1]).toStrictEqual(expectedIndices)
-  )
+  test(testDescription, () => expect(SelectInputRows(inputValues, variables, config)[1]).toStrictEqual(expectedIndices))
 
 const testAllDefaultModes = (
   testDescription: string,
@@ -26,15 +25,8 @@ const testAllDefaultModes = (
   variables: string[],
   expectedIndices: number[]
 ) => {
-  for (const mode of ['custom', 'all'] as TestConfig['mode'][]) {
-    testRowSelection(
-      `${testDescription} (${mode})`,
-      inputValues,
-      variables,
-      config(mode),
-      expectedIndices
-    )
-  }
+  testRowSelection(`${testDescription} (custom)`, inputValues, variables, config('custom'), expectedIndices)
+  testRowSelection(`${testDescription} (all)`, inputValues, variables, undefined, expectedIndices)
 }
 
 testAllDefaultModes('Test empty input', {}, [], [])
@@ -51,9 +43,9 @@ const sparseValues = {
   var3: ['', '', '', '', '', 'value3', ''],
 }
 
-const testSparseValues = (config: TestConfig, expectedIndices: number[], count = 1, start = 0) => {
+const testSparseValues = (config: TestConfig | undefined, expectedIndices: number[], count = 1, start = 0) => {
   testRowSelection(
-    `Test sparse values (${config.mode} [${config.rowIndices}]) [${count}, ${start}]`,
+    `Test sparse values (${config ? 'custom' : 'all'} [${config?.rowIndices ?? []}]) [${count}, ${start}]`,
     sparseValues,
     Object.keys(sparseValues),
     config,
