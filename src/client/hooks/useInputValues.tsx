@@ -5,7 +5,7 @@ import useInitialState from './useInitialState'
 
 export default function useInputValues(
   parent: ActivePrompt | ActiveChain,
-  activeTab: string
+  context: string
 ): [InputValues, Dispatch<SetStateAction<InputValues>>, () => void] {
   const [originalInputValues, setOriginalInputValues] = useInitialState(parent.inputValues)
   const [inputValues, setInputValues] = useInitialState(originalInputValues)
@@ -24,9 +24,9 @@ export default function useInputValues(
     })
   }
 
-  const [previouslyActiveTab, setPreviouslyActiveTab] = useState(activeTab)
-  if (activeTab !== previouslyActiveTab) {
-    setPreviouslyActiveTab(activeTab)
+  const [previousContext, setPreviousContext] = useState(context)
+  if (context !== previousContext) {
+    setPreviousContext(context)
     persistInputValuesIfNeeded()
   }
 

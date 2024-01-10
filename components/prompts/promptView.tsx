@@ -35,7 +35,8 @@ export default function PromptView({
   type ActiveTab = 'Prompt' | 'Version History'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
 
-  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
+  const [testDataExpanded, setTestDataExpanded] = useState(false)
+  const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, testDataExpanded.toString())
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
 
   const [runVersion, partialRuns, isRunning] = useRunVersion(activeVersion.id)
@@ -51,11 +52,6 @@ export default function PromptView({
   const saveAndRun = async (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) =>
     runPrompt(savePrompt, inputs, dynamicInputs)
 
-  const selectTab = (tab: ActiveTab) => {
-    setActiveTab(tab)
-    persistInputValuesIfNeeded()
-  }
-
   const [currentVersion, updatePrompt, updateConfig, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
 
   const checkModelAvailable = useCheckModelAvailable()
@@ -63,12 +59,11 @@ export default function PromptView({
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
-  const [testDataExpanded, setTestDataExpanded] = useState(false)
 
   const tabs: ActiveTab[] = ['Prompt', 'Version History']
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={selectTab}>
+    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}>
       {children}
     </TabSelector>
   )
