@@ -2,13 +2,11 @@ import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
-import { ReactNode, useState } from 'react'
-import TabSelector, { SingleTabHeader } from '../tabSelector'
+import { useState } from 'react'
+import { SingleTabHeader } from '../tabSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import PromptPanel from './promptPanel'
-import VersionTimeline from '../versions/versionTimeline'
 import TestDataPane from '../testData/testDataPane'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
@@ -16,6 +14,7 @@ import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 import Collapsible from '../collapsible'
+import PromptTabs from './promptTabs'
 
 export default function PromptView({
   prompt,
@@ -32,9 +31,6 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  type ActiveTab = 'Prompt' | 'Version History'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
-
   const [testDataExpanded, setTestDataExpanded] = useState(false)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, testDataExpanded.toString())
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
@@ -60,44 +56,19 @@ export default function PromptView({
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
 
-  const tabs: ActiveTab[] = ['Prompt', 'Version History']
-
-  const tabSelector = (children?: ReactNode) => (
-    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}>
-      {children}
-    </TabSelector>
-  )
-
-  const renderTab = (tab: ActiveTab, tabSelector: (children?: ReactNode) => ReactNode) => {
-    switch (tab) {
-      case 'Prompt':
-        return (
-          <>
-            {tabSelector()}
-            <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
-          </>
-        )
-      case 'Version History':
-        return (
-          <div className='flex-1 min-h-0'>
-            <VersionTimeline
-              activeItem={prompt}
-              versions={prompt.versions}
-              activeVersion={activeVersion}
-              setActiveVersion={setActiveVersion}
-              tabSelector={tabSelector}
-            />
-          </div>
-        )
-    }
-  }
-
   const minWidth = 280
   return (
     <div className='flex flex-col h-full'>
       <Allotment className='flex-1 bg-gray-25'>
         <Allotment.Pane minSize={minWidth} preferredSize='50%'>
-          <div className='flex flex-col h-full'>{renderTab(activeTab, tabSelector)}</div>
+          <PromptTabs
+            prompt={prompt}
+            activeVersion={activeVersion}
+            setActiveVersion={setActiveVersion}
+            currentVersion={currentVersion}
+            updatePrompt={updatePrompt}
+            updateConfig={updateConfig}
+          />
         </Allotment.Pane>
         <Allotment.Pane minSize={minWidth}>
           <div className='flex flex-col h-full border-l border-gray-200'>
