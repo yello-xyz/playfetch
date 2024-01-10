@@ -163,13 +163,13 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex items-center justify-center py-1 border-b border-gray-200 cursor-pointer hover:bg-gray-50 font-regular'
+        className='flex items-center justify-center py-1 border-b border-gray-200 cursor-pointer bg-gray-25 hover:bg-gray-50 font-regular'
         onClick={addInput}>
         <Icon icon={addIcon} />
         Add Row
       </div>
       {dynamicInputRows.length > 0 && (
-        <div className='grid items-center gap-2 p-4 grid-cols-[200px_250px]'>
+        <div className='grid items-center gap-2 px-4 pt-4 grid-cols-[200px_250px]'>
           <Label>
             Use values for <span className='font-medium text-purple-400'>dynamic inputs</span> as
           </Label>

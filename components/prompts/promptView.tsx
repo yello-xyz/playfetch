@@ -15,6 +15,7 @@ import { SelectAnyInputValue } from '@/src/client/inputRows'
 import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
+import Collapsible from '../collapsible'
 
 export default function PromptView({
   prompt,
@@ -31,7 +32,7 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  type ActiveTab = 'Prompt' | 'Version History' | 'Test Data' | 'Responses'
+  type ActiveTab = 'Prompt' | 'Version History' | 'Responses'
   const [activeTab, setActiveTab] = useState<ActiveTab>('Prompt')
 
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, activeTab)
@@ -62,13 +63,9 @@ export default function PromptView({
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
+  const [testDataExpanded, setTestDataExpanded] = useState(false)
 
-  const tabs: ActiveTab[] = [
-    'Prompt',
-    'Version History',
-    ...(canShowTestData ? ['Test Data' as ActiveTab] : []),
-    'Responses',
-  ]
+  const tabs: ActiveTab[] = ['Prompt', 'Version History', 'Responses']
   const pinnedTabs: ActiveTab[] = ['Responses']
 
   const tabSelector = (children?: ReactNode) => (
@@ -76,10 +73,6 @@ export default function PromptView({
       {children}
     </TabSelector>
   )
-
-  if (activeTab === 'Test Data' && !canShowTestData) {
-    setActiveTab('Prompt')
-  }
 
   const renderTab = (tab: ActiveTab, tabSelector: (children?: ReactNode) => ReactNode) => {
     switch (tab) {
@@ -101,23 +94,6 @@ export default function PromptView({
               tabSelector={tabSelector}
             />
           </div>
-        )
-      case 'Test Data':
-        return (
-          <>
-            {tabSelector()}
-            <div className='flex-1 min-h-0 pb-4 overflow-y-auto'>
-              <TestDataPane
-                variables={variables}
-                staticVariables={staticVariables}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-                testConfig={testConfig}
-                setTestConfig={setTestConfig}
-              />
-            </div>
-          </>
         )
       case 'Responses':
         return (
@@ -157,7 +133,28 @@ export default function PromptView({
           </Allotment.Pane>
         ))}
       </Allotment>
-      <div className='p-4 border-t border-gray-200'>
+      <div className='border-t border-gray-200' />
+      {canShowTestData && (
+        <div className='max-h-[50%] overflow-y-auto'>
+          <Collapsible
+            key={testDataExpanded.toString()}
+            title='Test Data'
+            initiallyExpanded={testDataExpanded}
+            className='pb-4 border-t border-gray-200'
+            titleClassName='py-1.5 pl-2'>
+            <TestDataPane
+              variables={variables}
+              staticVariables={staticVariables}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+              persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+              testConfig={testConfig}
+              setTestConfig={setTestConfig}
+            />
+          </Collapsible>
+        </div>
+      )}
+      <div className={canShowTestData ? 'px-4 pb-4' : 'p-4'}>
         <RunButtons
           runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
           variables={variables}
@@ -165,7 +162,7 @@ export default function PromptView({
           inputValues={inputValues}
           testConfig={testConfig}
           setTestConfig={setTestConfig}
-          onShowTestConfig={activeTab !== 'Test Data' ? () => setActiveTab('Test Data') : undefined}
+          onShowTestConfig={() => setTestDataExpanded(true)}
           disabled={!isModelAvailable || !VersionHasNonEmptyPrompts(currentVersion) || isRunning}
           callback={saveAndRun}
           onSave={isDirty ? savePrompt : undefined}
