@@ -4,7 +4,7 @@ import { ReactNode, useState } from 'react'
 import TabSelector, { SingleTabHeader } from '../tabSelector'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
-import { DndContext, DragOverlay, PointerSensor, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
 import { Allotment } from 'allotment'
 
 type Tab = 'New Prompt' | 'Version History'
@@ -59,23 +59,30 @@ export default function PromptTabs({
     }
   }
 
-  const onDrop = (tab: Tab, target: Target) => {
+  const onDrag = (tab: Tab) => {
+    setTabs([...tabs.filter(t => t !== tab)])
+  }
+
+  const onDrop = (tab: Tab, target: Target | undefined) => {
     switch (target) {
+      case undefined:
+        setTabs([...tabs, tab])
+        return
       case 'left':
-        setTabs([tab, ...tabs.filter(t => t !== tab)])
+        setTabs([tab, ...tabs])
         setTabsMerged(false)
-        break
+        return
       case 'right':
-        setTabs([...tabs.filter(t => t !== tab), tab])
+        setTabs([...tabs, tab])
         setTabsMerged(false)
-        break
+        return
     }
   }
 
   const minWidth = 280
   return (
     <div className='flex flex-col flex-1 w-full h-full min-h-0'>
-      <DragAndDropContext onDrop={onDrop}>
+      <DragAndDropContext onDrag={onDrag} onDrop={onDrop}>
         {areTabsMerged ? (
           renderTab(activeTab, tabSelector)
         ) : (
@@ -96,20 +103,33 @@ export default function PromptTabs({
 
 const DragAndDropContext = ({
   children,
+  onDrag,
   onDrop,
 }: {
   children: ReactNode
-  onDrop: (tab: Tab, target: Target) => void
+  onDrag: (tab: Tab) => void
+  onDrop: (tab: Tab, target: Target | undefined) => void
 }) => {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const [draggingTab, setDraggingTab] = useState<Tab>()
+
+  const onDragStart = (event: DragStartEvent) => {
+    const tab = event.active.id as Tab
+    setDraggingTab(tab)
+    onDrag(tab)
+  }
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setDraggingTab(undefined)
+    onDrop(event.active.id as Tab, event.over?.id as Target | undefined)
+  }
 
   return (
     <DndContext
       id='prompt-tabs'
       sensors={sensors}
-      onDragStart={event => setDraggingTab(event.active.id as Tab)}
-      onDragEnd={event => event.over && onDrop(event.active.id as Tab, event.over.id as Target)}>
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}>
       <div className='flex items-stretch h-full'>
         {draggingTab && <DropZone target='left' />}
         {children}
