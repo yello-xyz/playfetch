@@ -12,7 +12,6 @@ const selectValidRowIndices = (
 ) => {
   switch (mode) {
     case 'first':
-    case 'last':
       return selectInputs(mode)[1]
     case 'custom':
     case 'all':

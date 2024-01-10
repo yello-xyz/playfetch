@@ -81,26 +81,16 @@ export default function TestDataPane({
     const rowIndices = testConfig.rowIndices.includes(row)
       ? testConfig.rowIndices.filter(index => index !== row)
       : [...testConfig.rowIndices, row]
-    const mode =
-      rowIndices.length === 1
-        ? rowIndices.includes(0)
-          ? 'first'
-          : rowIndices.includes(rowCount - 1)
-          ? 'last'
-          : 'custom'
-        : rowIndices.length === rowCount
-        ? 'all'
-        : 'custom'
-    setTestConfig({ ...testConfig, mode, rowIndices })
+    setTestConfig({ ...testConfig, mode: 'custom', rowIndices })
   }
 
   const selectedRowCount = testConfig.rowIndices.length
   const toggleAll = () => {
     const nonEmptyRowIndices = Array.from({ length: rowCount }, (_, index) => index).filter(row => !isRowEmpty(row))
     if (selectedRowCount < nonEmptyRowIndices.length) {
-      setTestConfig({ ...testConfig, mode: 'all', rowIndices: nonEmptyRowIndices })
+      setTestConfig({ ...testConfig, mode: 'custom', rowIndices: nonEmptyRowIndices })
     } else if (nonEmptyRowIndices.length > 1) {
-      setTestConfig({ ...testConfig, mode: 'first', rowIndices: nonEmptyRowIndices.slice(0, 1) })
+      setTestConfig({ ...testConfig, mode: 'custom', rowIndices: nonEmptyRowIndices.slice(0, 1) })
     }
   }
 

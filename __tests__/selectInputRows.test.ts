@@ -26,7 +26,7 @@ const testAllDefaultModes = (
   variables: string[],
   expectedIndices: number[]
 ) => {
-  for (const mode of ['first', 'last', 'random', 'all'] as TestConfig['mode'][]) {
+  for (const mode of ['first', 'all'] as TestConfig['mode'][]) {
     testRowSelection(
       `${testDescription} (${mode})`,
       inputValues,
@@ -62,7 +62,6 @@ const testSparseValues = (config: TestConfig, expectedIndices: number[], count =
 }
 
 testSparseValues(config('first'), [1])
-testSparseValues(config('last'), [5])
 testSparseValues(config('all'), [1, 3, 5])
 
 testSparseValues(config('custom'), [])

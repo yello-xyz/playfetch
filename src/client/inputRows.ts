@@ -49,8 +49,6 @@ export const SelectInputRows = (
       default:
       case 'first':
         return [0]
-      case 'last':
-        return [rowCount - 1]
       case 'all':
         return allRowIndices
       case 'custom':
