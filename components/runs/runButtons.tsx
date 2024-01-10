@@ -35,7 +35,6 @@ export default function RunButtons({
   )
 
   const [, rowIndices] = selectInputs(testConfig)
-  const fallbackIndices = selectInputs({ rowIndices: [0] })[1]
   useEffect(() => {
     const validRowIndices = selectInputs()[1]
     if (
@@ -43,10 +42,8 @@ export default function RunButtons({
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
     ) {
       startTransition(() => setTestConfig({ ...testConfig, rowIndices }))
-    } else if (testConfig.rowIndices.length === 0) {
-      startTransition(() => setTestConfig({ ...testConfig, rowIndices: fallbackIndices }))
     }
-  }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
+  }, [testConfig, setTestConfig, rowIndices, selectInputs])
 
   const testPrompt = () => {
     const [inputs, indices] = selectInputs(testConfig)
@@ -59,7 +56,6 @@ export default function RunButtons({
 
   const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
   const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
-  const roundedClass = onSave ? 'rounded-l-lg' : undefined
 
   return (
     <div className='flex items-center gap-3 grow'>
@@ -72,7 +68,7 @@ export default function RunButtons({
         <PendingButton
           title={runTitle ?? 'Run'}
           pendingTitle='Running'
-          roundedClass={roundedClass}
+          roundedClass={onSave ? 'rounded-l-lg' : undefined}
           disabled={disabled || isMissingTestData}
           onClick={testPrompt}
           onDisabledClick={!disabled && isMissingTestData ? onShowTestConfig : undefined}
