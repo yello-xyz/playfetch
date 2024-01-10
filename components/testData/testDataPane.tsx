@@ -10,6 +10,7 @@ import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
 import RangeInput from '../rangeInput'
 import Editor from '../editor'
+import Checkbox from '../checkbox'
 
 export default function TestDataPane({
   variables,
@@ -85,11 +86,11 @@ export default function TestDataPane({
         ? rowIndices.includes(0)
           ? 'first'
           : rowIndices.includes(rowCount - 1)
-            ? 'last'
-            : 'custom'
-        : rowIndices.length === rowCount
-          ? 'all'
+          ? 'last'
           : 'custom'
+        : rowIndices.length === rowCount
+        ? 'all'
+        : 'custom'
     setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
@@ -114,7 +115,7 @@ export default function TestDataPane({
   const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
 
-  const gridTemplateColumns = `42px repeat(${allVariables.length}, minmax(240px, 1fr))`
+  const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
     <div className='flex flex-col items-stretch overflow-y-auto'>
       <div ref={containerRef} className='grid w-full overflow-x-auto bg-white shrink-0' style={{ gridTemplateColumns }}>
@@ -123,16 +124,19 @@ export default function TestDataPane({
           <TestDataHeader key={index} variable={variable} variables={variables} staticVariables={staticVariables} />
         ))}
         {Array.from({ length: rowCount }, (_, row) => {
-          const color = testConfig.rowIndices.includes(row) ? 'bg-blue-25' : 'bg-white'
+          const isRowSelected = testConfig.rowIndices.includes(row)
+          const color = isRowSelected ? 'bg-blue-25' : 'bg-white'
           const border = (col: number) =>
             isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
           const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
           return (
             <Fragment key={row}>
-              <div
-                className={`py-1 text-center text-gray-400 border-b border-gray-200 ${color} cursor-pointer`}
-                onClick={() => toggleRow(row)}>
-                #{row + 1}
+              <div className={`py-1 px-2 border-b border-gray-200 ${color}`}>
+                <Checkbox
+                  checked={isRowSelected}
+                  disabled={testConfig.rowIndices.length <= (isRowSelected ? 1 : 0)}
+                  setChecked={() => toggleRow(row)}
+                />
               </div>
               {allVariables.map((variable, col) => (
                 <div className='relative group' key={`${rowCount}-${col}`}>
