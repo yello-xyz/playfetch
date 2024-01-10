@@ -48,7 +48,10 @@ export default function TestDataPane({
     })
 
   const isRowEmpty = (row: number) => allVariables.every(variable => getInputValue(row, variable).length === 0)
-  const isRelevantRowEmpty = (row: number) => variables.every(variable => getInputValue(row, variable).length === 0)
+  const isRelevantRowEmpty = (row: number) =>
+    (testConfig.autoRespond !== undefined ? variables : staticVariables).every(
+      variable => getInputValue(row, variable).length === 0
+    )
 
   const addInput = () => {
     if (!isRowEmpty(rowCount - 1)) {
