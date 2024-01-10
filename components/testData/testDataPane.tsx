@@ -94,9 +94,10 @@ export default function TestDataPane({
     setTestConfig({ ...testConfig, mode, rowIndices })
   }
 
+  const selectedRowCount = testConfig.rowIndices.length
   const toggleAll = () => {
     const nonEmptyRowIndices = Array.from({ length: rowCount }, (_, index) => index).filter(row => !isRowEmpty(row))
-    if (testConfig.rowIndices.length < nonEmptyRowIndices.length) {
+    if (selectedRowCount < nonEmptyRowIndices.length) {
       setTestConfig({ ...testConfig, mode: 'all', rowIndices: nonEmptyRowIndices })
     } else if (nonEmptyRowIndices.length > 1) {
       setTestConfig({ ...testConfig, mode: 'first', rowIndices: nonEmptyRowIndices.slice(0, 1) })
@@ -134,7 +135,7 @@ export default function TestDataPane({
               <div className={`py-1 px-2 border-b border-gray-200 ${color}`}>
                 <Checkbox
                   checked={isRowSelected}
-                  disabled={testConfig.rowIndices.length <= (isRowSelected ? 1 : 0)}
+                  disabled={isRowSelected ? (selectedRowCount === 1) : (isRowEmpty(row) || selectedRowCount === 0)}
                   setChecked={() => toggleRow(row)}
                 />
               </div>
