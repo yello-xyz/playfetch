@@ -93,6 +93,7 @@ const DragAndDropContext = ({
 
   return (
     <DndContext
+      id='prompt-tabs'
       sensors={sensors}
       onDragStart={event => setDraggingTab(event.active.id as Tab)}
       onDragEnd={event => event.over && onDrop(event.active.id as Tab, event.over.id as Target)}>
