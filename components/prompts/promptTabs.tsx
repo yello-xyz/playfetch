@@ -24,9 +24,8 @@ export default function PromptTabs({
   updatePrompt: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig: (config: PromptVersion['config']) => void
 }) {
+  const [tabs, setTabs] = useState<Tab[]>(['New Prompt', 'Version History'])
   const [activeTab, setActiveTab] = useState<Tab>('New Prompt')
-
-  const tabs: Tab[] = ['New Prompt', 'Version History']
 
   const tabSelector = (children?: ReactNode) => (
     <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs>
@@ -38,10 +37,10 @@ export default function PromptTabs({
     switch (tab) {
       case 'New Prompt':
         return (
-          <>
+          <div className='flex flex-col flex-1 h-full'>
             {tabSelector()}
             <PromptPanel version={currentVersion} updatePrompt={updatePrompt} updateConfig={updateConfig} />
-          </>
+          </div>
         )
       case 'Version History':
         return (
@@ -60,7 +59,7 @@ export default function PromptTabs({
   return (
     <div className='flex flex-col flex-1 w-full h-full min-h-0'>
       <DragAndDropContext onDrop={(tab, target) => console.log(`dropped ${tab} on ${target}`)}>
-        <div className='flex flex-col flex-1 h-full'>{renderTab(activeTab, tabSelector)}</div>
+        {renderTab(activeTab, tabSelector)}
       </DragAndDropContext>
     </div>
   )
