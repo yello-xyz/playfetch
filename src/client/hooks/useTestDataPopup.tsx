@@ -1,8 +1,11 @@
-import { Dispatch, KeyboardEvent, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../../../components/popupMenu'
 import TestDataPane from '@/components/testData/testDataPane'
 import { InputValues, TestConfig } from '@/types'
+import Label from '@/components/label'
+import IconButton from '@/components/iconButton'
+import closeIcon from '@/public/close.svg'
 
 export default function useTestDataPopup(
   variables: string[],
@@ -52,6 +55,7 @@ const TestDataPopup = ({
   persistInputValuesIfNeeded,
   testConfig,
   setTestConfig,
+  withDismiss,
 }: TestDataPopupProps & WithDismiss) => {
   const [currentInputValues, setCurrentInputValues] = useState(inputValues)
   const updateInputValues = (inputValues: SetStateAction<InputValues>) => {
@@ -66,7 +70,11 @@ const TestDataPopup = ({
   }
 
   return (
-    <PopupContent className='h-full'>
+    <PopupContent className='flex flex-col h-full'>
+      <div className='flex items-center p-1.5 border-b border-gray-200'>
+        <Label className='flex-1 text-center'>Test Data</Label>
+        <IconButton icon={closeIcon} onClick={withDismiss(() => {})} />
+      </div>
       <TestDataPane
         variables={variables}
         staticVariables={staticVariables}

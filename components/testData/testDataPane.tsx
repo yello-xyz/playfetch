@@ -116,7 +116,7 @@ export default function TestDataPane({
 
   const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
-    <div className='flex flex-col items-stretch h-full overflow-y-auto'>
+    <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
       <div
         ref={containerRef}
         className='grid w-full overflow-x-auto bg-gray-25 shrink-0'

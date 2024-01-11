@@ -199,7 +199,7 @@ export default function ChainNodeOutput({
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
         {activeNode === InputNode && canShowTestData ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <SingleTabHeader label='Test data' />
+            <SingleTabHeader label='Test Data' />
             <TestDataPane
               variables={variables}
               staticVariables={staticVariables}
