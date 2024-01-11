@@ -17,6 +17,7 @@ import Collapsible from '../collapsible'
 import PromptTabs from './promptTabs'
 import IconButton from '../iconButton'
 import expandIcon from '@/public/expand.svg'
+import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
 
 export default function PromptView({
   prompt,
@@ -57,6 +58,16 @@ export default function PromptView({
   const variables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, true)
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
+
+  const expandTestData = useTestDataPopup(
+    variables,
+    staticVariables,
+    inputValues,
+    setInputValues,
+    persistInputValuesIfNeeded,
+    testConfig,
+    setTestConfig
+  )
 
   const minWidth = 400
   return (
@@ -99,7 +110,7 @@ export default function PromptView({
             initiallyExpanded={testDataExpanded}
             className='pb-4 border-t border-gray-200'
             titleClassName='py-1.5 pl-0.5'
-            rightHandItems={<IconButton className='mr-3 rounded' icon={expandIcon} onClick={() => {}} />}>
+            rightHandItems={<IconButton className='mr-3 rounded' icon={expandIcon} onClick={expandTestData} />}>
             <TestDataPane
               variables={variables}
               staticVariables={staticVariables}
