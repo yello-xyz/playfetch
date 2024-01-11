@@ -37,6 +37,8 @@ import { useDocumentationCookie } from '@/components/cookieBanner'
 import { ProviderContext } from '@/src/client/context/providerContext'
 
 import dynamic from 'next/dynamic'
+import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
+
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
 const ProjectTopBar = dynamic(() => import('@/components/projects/projectTopBar'))
@@ -184,10 +186,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID ?? chainID
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
@@ -211,7 +213,6 @@ export default function Home({
   }
 
   const [showComments, setShowComments] = useState(false)
-  const [showSidebar, setShowSidebar] = useState(true)
   const [dialogPrompt, setDialogPrompt] = useState<DialogPrompt>()
   const [globalPopupProviderProps, globalPopupProps, popupProps] = useGlobalPopupProvider<any>()
 
@@ -240,18 +241,19 @@ export default function Home({
               <ModalDialogContext.Provider value={{ setDialogPrompt }}>
                 <GlobalPopupContext.Provider value={globalPopupProviderProps}>
                   <main className='flex flex-col h-screen text-sm'>
-                    <Suspense>
-                      <ProjectTopBar
-                        workspaces={workspaces}
-                        onNavigateBack={navigateBack}
-                        showSidebar={showSidebar}
-                        setShowSidebar={setShowSidebar}
-                        showComments={showComments}
-                        setShowComments={setShowComments}
-                      />
-                    </Suspense>
-                    <div className='flex items-stretch flex-1 overflow-hidden'>
-                      {showSidebar && (
+                    <ProjectPaneWrapper
+                      topBar={toggleSidebarButton => (
+                        <Suspense>
+                          <ProjectTopBar
+                            workspaces={workspaces}
+                            onNavigateBack={navigateBack}
+                            showComments={showComments}
+                            setShowComments={setShowComments}>
+                            {toggleSidebarButton}
+                          </ProjectTopBar>
+                        </Suspense>
+                      )}
+                      sidebar={
                         <Suspense>
                           <ProjectSidebar
                             activeItem={activeItem}
@@ -266,7 +268,7 @@ export default function Home({
                             onSelectSettings={selectSettings}
                           />
                         </Suspense>
-                      )}
+                      }>
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane
@@ -291,7 +293,7 @@ export default function Home({
                           />
                         </Suspense>
                       </div>
-                    </div>
+                    </ProjectPaneWrapper>
                   </main>
                 </GlobalPopupContext.Provider>
               </ModalDialogContext.Provider>
