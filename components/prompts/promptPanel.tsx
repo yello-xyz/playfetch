@@ -48,10 +48,7 @@ export default function PromptPanel({
             setExpanded={setExpanded}
           />
         ))}
-        <PromptSection
-          title='Parameters'
-          isExpanded={areAllSectionsExpanded ?? true}
-          setExpanded={setExpanded}>
+        <PromptSection title='Parameters' isExpanded={areAllSectionsExpanded ?? true} setExpanded={setExpanded}>
           <PromptConfigSettings
             config={config}
             setConfig={config => updateConfig?.(config)}

@@ -10,7 +10,7 @@ import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { SingleTabHeader } from '../tabSelector'
 import CodeBlock from '../codeBlock'
 import LogStatus from './logStatus'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import Collapsible from '../collapsible'
 
 export default function LogEntryDetailsPane({
@@ -33,6 +33,9 @@ export default function LogEntryDetailsPane({
   const cost = logEntries.reduce((sum, entry) => sum + entry.cost, 0)
   const duration = logEntries.reduce((sum, entry) => sum + entry.duration, 0) / logEntries.length
   const multipleLogEntries = logEntries.length > 1
+
+  const [areAllEntriesExpanded, setAllEntriesExpanded] = useState<boolean>()
+  const setExpanded = (expanded: boolean, shiftClick: boolean) => shiftClick && setAllEntriesExpanded(expanded)
 
   const gridConfig = 'grid grid-cols-[160px_minmax(0,1fr)]'
   return (
@@ -83,7 +86,12 @@ export default function LogEntryDetailsPane({
           .slice()
           .reverse()
           .map((logEntry, index) => (
-            <CollapsibleContent key={index} timestamp={logEntry.timestamp} collapsible={multipleLogEntries}>
+            <CollapsibleContent
+              key={index}
+              timestamp={logEntry.timestamp}
+              collapsible={multipleLogEntries}
+              isExpanded={areAllEntriesExpanded}
+              setExpanded={setExpanded}>
               {Object.keys(logEntry.inputs).length > 0 && (
                 <>
                   <Label className='-mb-4'>Request</Label>
@@ -111,16 +119,24 @@ export default function LogEntryDetailsPane({
 function CollapsibleContent({
   timestamp,
   collapsible = true,
+  isExpanded,
+  setExpanded,
   children,
 }: {
   timestamp: number
   collapsible?: boolean
+  isExpanded?: boolean
+  setExpanded: (expanded: boolean, shiftClick: boolean) => void
   children: ReactNode
 }) {
   const formattedDate = useFormattedDate(timestamp, timestamp => FormatDate(timestamp, true, true))
 
   return collapsible ? (
-    <Collapsible initiallyExpanded title={formattedDate} className='flex flex-col gap-6 pt-2 ml-6'>
+    <Collapsible
+      initiallyExpanded={isExpanded ?? true}
+      onSetExpanded={setExpanded}
+      title={formattedDate}
+      className='flex flex-col gap-6 pt-2 ml-6'>
       {children}
     </Collapsible>
   ) : (
