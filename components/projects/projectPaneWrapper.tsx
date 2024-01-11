@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { MouseEvent, ReactNode, useState } from 'react'
 import Button from '@/components/button'
 import Icon from '@/components/icon'
 import menuIcon from '@/public/menu.svg'
@@ -18,27 +18,31 @@ export default function ProjectPaneWrapper({
   const [showHoverSidebar, setShowHoverSidebar] = useState(false)
   const [isHidingHoverSidebar, setIsHidingHoverSidebar] = useState(false)
 
+  const [isOverLeftEdge, setOverLeftEdge] = useState(false)
   const [isOverHoverSidebar, setOverHoverSidebar] = useState(false)
   const [isOverToggleButton, setOverToggleButton] = useState(false)
 
   const scheduleHideHoverSidebar = (delay = 0) => {
-    if (isOverHoverSidebar || isOverToggleButton) {
+    if (isOverHoverSidebar || isOverToggleButton || isOverLeftEdge) {
       setTimeout(
         () =>
           setOverHoverSidebar(overHoverSidebar => {
             setOverToggleButton(overToggleButton => {
-              if (!overHoverSidebar && !overToggleButton) {
-                setIsHidingHoverSidebar(true)
-                setTimeout(() => {
-                  setIsHidingHoverSidebar(false)
-                  setOverToggleButton(overToggleButton => {
-                    if (!overToggleButton) {
-                      setShowHoverSidebar(false)
-                    }
-                    return overToggleButton
-                  })
-                }, 200)
-              }
+              setOverLeftEdge(overLeftEdge => {
+                if (!overHoverSidebar && !overToggleButton && !overLeftEdge) {
+                  setIsHidingHoverSidebar(true)
+                  setTimeout(() => {
+                    setIsHidingHoverSidebar(false)
+                    setOverToggleButton(overToggleButton => {
+                      if (!overToggleButton) {
+                        setShowHoverSidebar(false)
+                      }
+                      return overToggleButton
+                    })
+                  }, 200)
+                }
+                return overLeftEdge
+              })
               return overToggleButton
             })
             return overHoverSidebar
@@ -69,6 +73,17 @@ export default function ProjectPaneWrapper({
     setShowStickySidebar(!showStickySidebar)
   }
 
+  const detectLeftEdge = (event: MouseEvent) => {
+    const overLeftEdge = event.clientX <= 2
+    if (!isOverLeftEdge && overLeftEdge) {
+      setOverLeftEdge(true)
+      setShowHoverSidebar(true)
+    } else if (isOverLeftEdge && !overLeftEdge) {
+      setOverLeftEdge(false)
+      scheduleHideHoverSidebar(300)
+    }
+  }
+
   const hoverSidebarStyle = 'bg-white border-gray-200 rounded-lg drop-shadow'
   const animation = isHidingHoverSidebar
     ? 'animate-[slideOutLeft_200ms_ease-in]'
@@ -83,7 +98,9 @@ export default function ProjectPaneWrapper({
           </Button>
         </div>
       )}
-      <div className='relative flex items-stretch flex-1 overflow-hidden'>
+      <div
+        className='relative flex items-stretch flex-1 overflow-hidden'
+        onMouseMove={showStickySidebar ? undefined : detectLeftEdge}>
         {showStickySidebar && sidebar}
         {children}
         {showHoverSidebar && (
