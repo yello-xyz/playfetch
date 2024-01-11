@@ -68,6 +68,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
                 compareVersion={compareVersion as PromptVersion | undefined}
                 isActiveVersion={isActiveVersion}
                 isExpanded={areChildrenExpanded}
+                setExpanded={(expanded, isShiftClick) => isShiftClick && setChildrenExpanded(expanded)}
               />
             ) : chainItemCache ? (
               <ChainVersionCellBody
