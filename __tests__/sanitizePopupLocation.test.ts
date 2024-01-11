@@ -13,6 +13,11 @@ const testPopupLocation = (testDescription: string, location: GlobalPopupLocatio
 
 testPopupLocation('Unspecified', {}, { left: 200, top: 150 })
 testPopupLocation('Fully specified', { left: 100, top: 100, right: 100, bottom: 100 })
+testPopupLocation(
+  'Fully specified with zero top and bottom centered vertically',
+  { top: 0, left: 100, right: 100, bottom: 0 },
+  { top: 150, left: 100, right: 100, bottom: undefined }
+)
 testPopupLocation('Top left', { left: 100, top: 100 }, { left: 100, top: 100 })
 testPopupLocation('Bottom right', { right: 700, bottom: 500 }, { right: 100, bottom: 100 })
 testPopupLocation('Adjusts top left down', { left: 600, top: 400 }, { left: 400, top: 300 })
