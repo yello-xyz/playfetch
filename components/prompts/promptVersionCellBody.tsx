@@ -10,10 +10,12 @@ export default function PromptVersionCellBody({
   version,
   isActiveVersion,
   compareVersion,
+  isExpanded,
 }: {
   version: PromptVersion
   isActiveVersion: boolean
   compareVersion?: PromptVersion
+  isExpanded?: boolean
 }) {
   const availableProviders = useAvailableModelProviders()
   const getConfig = (version: PromptVersion) => FormatPromptConfig(version.config, availableProviders)
@@ -26,14 +28,14 @@ export default function PromptVersionCellBody({
 
   return (
     <>
-      <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
-      <Collapsible title='Prompt' initiallyExpanded>
+      <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} isExpanded={isExpanded} />
+      <Collapsible title='Prompt' initiallyExpanded={isExpanded !== false}>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </Collapsible>
-      <ContentSection title='Parameters' version={version} compareVersion={compareVersion} getContent={getConfig} />
-      <ContentSection title='Functions' version={version} compareVersion={compareVersion} getContent={getFunctions} />
+      <ContentSection title='Parameters' version={version} compareVersion={compareVersion} getContent={getConfig} isExpanded={isExpanded} />
+      <ContentSection title='Functions' version={version} compareVersion={compareVersion} getContent={getFunctions} isExpanded={isExpanded} />
     </>
   )
 }
@@ -62,17 +64,19 @@ function ContentSection({
   version,
   compareVersion,
   getContent,
+  isExpanded,
 }: {
   title: string
   version: PromptVersion
   compareVersion?: PromptVersion
   getContent: (version: PromptVersion) => string | undefined
+  isExpanded?: boolean
 }) {
   const content = getContent(version)
   const compareContent = compareVersion ? getContent(compareVersion) : undefined
 
   return (content && content.length > 0) || (compareContent && compareContent.length > 0) ? (
-    <Collapsible title={title}>
+    <Collapsible title={title} initiallyExpanded={isExpanded}>
       <ContentComparison content={content ?? ''} compareContent={compareContent} />
     </Collapsible>
   ) : null

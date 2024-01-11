@@ -29,6 +29,12 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
   chainItemCache?: ActiveItemCache
 }) {
   const [isExpanded, setExpanded] = useState(false)
+  const [areChildrenExpanded, setChildrenExpanded] = useState<boolean>()
+
+  const toggleExpanded = (expanded: boolean, isShiftClick: boolean) => {
+    setExpanded(expanded)
+    isShiftClick && setChildrenExpanded(expanded)
+  }
 
   return (
     <VerticalBarWrapper
@@ -51,7 +57,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
           isActiveVersion={isActiveVersion}
           activeItem={activeItem}
           isExpanded={isExpanded}
-          setExpanded={setExpanded}
+          setExpanded={toggleExpanded}
         />
         {isExpanded && (
           <>
@@ -61,6 +67,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
                 version={version}
                 compareVersion={compareVersion as PromptVersion | undefined}
                 isActiveVersion={isActiveVersion}
+                isExpanded={areChildrenExpanded}
               />
             ) : chainItemCache ? (
               <ChainVersionCellBody

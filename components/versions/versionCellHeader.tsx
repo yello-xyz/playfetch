@@ -32,7 +32,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
   isActiveVersion: boolean
   activeItem: ActivePrompt | ActiveChain
   isExpanded: boolean
-  setExpanded: (expanded: boolean) => void
+  setExpanded: (expanded: boolean, isShiftClick: boolean) => void
 }) {
   const [selection, setSelection] = useState<string>()
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
           <Icon
             className={`cursor-pointer -ml-3 -mr-0.5 ${isExpanded ? '' : '-rotate-90'}`}
             icon={chevronIcon}
-            onClick={() => setExpanded(!isExpanded)}
+            onClick={(event: MouseEvent) => setExpanded(!isExpanded, event.shiftKey)}
           />
           {user && (
             <>
