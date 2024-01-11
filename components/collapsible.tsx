@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { MouseEvent, ReactNode, useState } from 'react'
 import chevronIcon from '@/public/chevron.svg'
 import Icon from './icon'
 
@@ -7,6 +7,7 @@ export default function Collapsible({
   className = 'ml-6',
   titleClassName = '',
   initiallyExpanded = false,
+  onSetExpanded,
   rightHandItems,
   children,
 }: {
@@ -14,14 +15,20 @@ export default function Collapsible({
   className?: string
   titleClassName?: string
   initiallyExpanded?: boolean
+  onSetExpanded?: (expanded: boolean, shiftClick: boolean) => void
   rightHandItems?: ReactNode
   children: ReactNode
 }) {
   const [isExpanded, setExpanded] = useState(initiallyExpanded)
 
+  const toggleExpanded = (event: MouseEvent) => {
+    setExpanded(!isExpanded)
+    onSetExpanded?.(!isExpanded, event.shiftKey)
+  }
+
   return (
     <div className='flex flex-col'>
-      <div className={`${titleClassName} flex items-center cursor-pointer`} onClick={() => setExpanded(!isExpanded)}>
+      <div className={`${titleClassName} flex items-center cursor-pointer`} onClick={toggleExpanded}>
         <Icon className={isExpanded ? '' : '-rotate-90'} icon={chevronIcon} />
         <span className='flex-1 font-medium text-gray-700'>{title}</span>
         {rightHandItems && <div className='self-end'>{rightHandItems}</div>}
