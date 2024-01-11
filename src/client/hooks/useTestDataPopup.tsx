@@ -1,4 +1,4 @@
-import { Dispatch, KeyboardEvent, SetStateAction } from 'react'
+import { Dispatch, KeyboardEvent, SetStateAction, useState } from 'react'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../../../components/popupMenu'
 import TestDataPane from '@/components/testData/testDataPane'
@@ -52,17 +52,31 @@ const TestDataPopup = ({
   persistInputValuesIfNeeded,
   testConfig,
   setTestConfig,
-}: TestDataPopupProps & WithDismiss) => (
-  <PopupContent className='h-full'>
-    <TestDataPane
-      variables={variables}
-      staticVariables={staticVariables}
-      inputValues={inputValues}
-      setInputValues={setInputValues}
-      persistInputValuesIfNeeded={persistInputValuesIfNeeded}
-      testConfig={testConfig}
-      setTestConfig={setTestConfig}
-      asModalPopup
-    />
-  </PopupContent>
-)
+}: TestDataPopupProps & WithDismiss) => {
+  const [currentInputValues, setCurrentInputValues] = useState(inputValues)
+  const updateInputValues = (inputValues: SetStateAction<InputValues>) => {
+    setCurrentInputValues(inputValues)
+    setInputValues(inputValues)
+  }
+
+  const [currentTestConfig, setCurrentTestConfig] = useState(testConfig)
+  const updateTestConfig = (testConfig: TestConfig) => {
+    setCurrentTestConfig(testConfig)
+    setTestConfig(testConfig)
+  }
+
+  return (
+    <PopupContent className='h-full'>
+      <TestDataPane
+        variables={variables}
+        staticVariables={staticVariables}
+        inputValues={currentInputValues}
+        setInputValues={updateInputValues}
+        persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+        testConfig={currentTestConfig}
+        setTestConfig={updateTestConfig}
+        asModalPopup
+      />
+    </PopupContent>
+  )
+}
