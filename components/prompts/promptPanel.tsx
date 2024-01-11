@@ -6,7 +6,7 @@ import {
   SupportedPromptKeysForModel,
 } from '@/src/common/providerMetadata'
 import PromptInput from './promptInput'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { useCheckModelProviders } from '@/src/client/context/providerContext'
 import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
@@ -32,13 +32,26 @@ export default function PromptPanel({
   const isModelAvailable = checkModelAvailable(config.model)
   const canModifyPrompt = updatePrompt && updateConfig
 
+  const [areAllSectionsExpanded, setAllSectionsExpanded] = useState<boolean>()
+  const setExpanded = (expanded: boolean, shiftClick: boolean) => shiftClick && setAllSectionsExpanded(expanded)
+
   return (
     <div className='flex flex-col flex-1 h-full gap-4 px-4 pt-4 overflow-y-auto text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {primaryPromptKeys.map(promptKey => (
-          <PromptInputSection key={promptKey} promptKey={promptKey} version={version} updatePrompt={updatePrompt} />
+          <PromptInputSection
+            key={promptKey}
+            promptKey={promptKey}
+            version={version}
+            updatePrompt={updatePrompt}
+            isExpanded={areAllSectionsExpanded}
+            setExpanded={setExpanded}
+          />
         ))}
-        <PromptSection title='Parameters' initiallyExpanded>
+        <PromptSection
+          title='Parameters'
+          isExpanded={areAllSectionsExpanded ?? true}
+          setExpanded={setExpanded}>
           <PromptConfigSettings
             config={config}
             setConfig={config => updateConfig?.(config)}
@@ -46,7 +59,14 @@ export default function PromptPanel({
           />
         </PromptSection>
         {secondaryPromptKeys.map(promptKey => (
-          <PromptInputSection key={promptKey} promptKey={promptKey} version={version} updatePrompt={updatePrompt} />
+          <PromptInputSection
+            key={promptKey}
+            promptKey={promptKey}
+            version={version}
+            updatePrompt={updatePrompt}
+            isExpanded={areAllSectionsExpanded}
+            setExpanded={setExpanded}
+          />
         ))}
         {!isModelAvailable && canModifyPrompt && (
           <ModelUnavailableWarning model={config.model} checkProviderAvailable={checkProviderAvailable} />
@@ -61,12 +81,20 @@ const PromptInputSection = ({
   promptKey,
   version,
   updatePrompt,
+  isExpanded,
+  setExpanded,
 }: {
   promptKey: keyof Prompts
   version: PromptVersion
   updatePrompt?: (promptKey: keyof Prompts, prompt: string) => void
+  isExpanded?: boolean
+  setExpanded: (expanded: boolean, shiftClick: boolean) => void
 }) => (
-  <PromptSection key={promptKey} title={LabelForPromptKey(promptKey)} initiallyExpanded={promptKey === 'main'}>
+  <PromptSection
+    key={promptKey}
+    title={LabelForPromptKey(promptKey)}
+    isExpanded={isExpanded ?? promptKey === 'main'}
+    setExpanded={setExpanded}>
     <div className='flex flex-col h-full min-h-[120px]'>
       <PromptInput
         key={`${version.id}-${promptKey}`}
@@ -82,14 +110,21 @@ const PromptInputSection = ({
 
 const PromptSection = ({
   title,
-  initiallyExpanded,
+  isExpanded,
+  setExpanded,
   children,
 }: {
   title: string
-  initiallyExpanded?: boolean
+  isExpanded: boolean
+  setExpanded: (expanded: boolean, shiftClick: boolean) => void
   children: ReactNode
 }) => (
-  <Collapsible title={title} initiallyExpanded={initiallyExpanded} className='pt-1 ml-4' titleClassName='-ml-2'>
+  <Collapsible
+    title={title}
+    initiallyExpanded={isExpanded}
+    className='pt-1 ml-4'
+    titleClassName='-ml-2'
+    onSetExpanded={setExpanded}>
     {children}
   </Collapsible>
 )
