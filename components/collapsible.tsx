@@ -1,6 +1,7 @@
-import { MouseEvent, ReactNode, useState } from 'react'
+import { MouseEvent, ReactNode } from 'react'
 import chevronIcon from '@/public/chevron.svg'
 import Icon from './icon'
+import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function Collapsible({
   title,
@@ -19,7 +20,7 @@ export default function Collapsible({
   rightHandItems?: ReactNode
   children: ReactNode
 }) {
-  const [isExpanded, setExpanded] = useState(initiallyExpanded)
+  const [isExpanded, setExpanded] = useInitialState(initiallyExpanded)
 
   const toggleExpanded = (event: MouseEvent) => {
     setExpanded(!isExpanded)
