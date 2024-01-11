@@ -92,7 +92,7 @@ export default function PromptTabs({
     }
   }
 
-  const minWidth = 280
+  const minWidth = 200
   return (
     <div className='flex flex-col flex-1 w-full h-full min-h-0'>
       <DragAndDropContext onDrag={onDrag} onDrop={onDrop}>

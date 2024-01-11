@@ -56,7 +56,7 @@ export default function PromptView({
   const staticVariables = ExtractPromptVariables(currentVersion.prompts, currentVersion.config, false)
   const canShowTestData = variables.length > 0 || Object.keys(prompt.inputValues).length > 0
 
-  const minWidth = 280
+  const minWidth = 400
   return (
     <div className='flex flex-col h-full'>
       <Allotment className='flex-1 bg-gray-25'>
