@@ -15,6 +15,8 @@ import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 import Collapsible from '../collapsible'
 import PromptTabs from './promptTabs'
+import IconButton from '../iconButton'
+import expandIcon from '@/public/expand.svg'
 
 export default function PromptView({
   prompt,
@@ -96,7 +98,8 @@ export default function PromptView({
             title='Test Data'
             initiallyExpanded={testDataExpanded}
             className='pb-4 border-t border-gray-200'
-            titleClassName='py-1.5 pl-0.5'>
+            titleClassName='py-1.5 pl-0.5'
+            rightHandItems={<IconButton className='mr-3 rounded' icon={expandIcon} onClick={() => {}} />}>
             <TestDataPane
               variables={variables}
               staticVariables={staticVariables}
