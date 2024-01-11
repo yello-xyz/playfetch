@@ -9,7 +9,7 @@ export default function SavePromptButton({ onSave }: { onSave: () => void }) {
 
   const onSetPopup = (location: GlobalPopupLocation) => setPopup(SaveButtonPopup, { onSave }, location)
 
-  const layoutClass = 'flex items-center justify-between gap-1 pl-0.5 pr-1 py-1.5'
+  const layoutClass = 'flex items-center justify-between gap-1 pl-0.5 pr-1 py-1'
   const styleClass = 'bg-blue-400 border-l-2 border-blue-600 rounded-r-lg cursor-pointer hover:bg-blue-300'
 
   return (
