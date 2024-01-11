@@ -16,24 +16,34 @@ export default function ProjectPaneWrapper({
 }) {
   const [showStickySidebar, setShowStickySidebar] = useState(true)
   const [showHoverSidebar, setShowHoverSidebar] = useState(false)
+  const [isHidingHoverSidebar, setIsHidingHoverSidebar] = useState(false)
 
   const [isOverHoverSidebar, setOverHoverSidebar] = useState(false)
   const [isOverToggleButton, setOverToggleButton] = useState(false)
 
-  const scheduleHideHoverSidebar = () => {
+  const scheduleHideHoverSidebar = (delay = 0) => {
     if (isOverHoverSidebar || isOverToggleButton) {
       setTimeout(
         () =>
           setOverHoverSidebar(overHoverSidebar => {
             setOverToggleButton(overToggleButton => {
               if (!overHoverSidebar && !overToggleButton) {
-                setShowHoverSidebar(false)
+                setIsHidingHoverSidebar(true)
+                setTimeout(() => {
+                  setIsHidingHoverSidebar(false)
+                  setOverToggleButton(overToggleButton => {
+                    if (!overToggleButton) {
+                      setShowHoverSidebar(false)
+                    }
+                    return overToggleButton
+                  })
+                }, 200)
               }
               return overToggleButton
             })
             return overHoverSidebar
           }),
-        500
+        delay
       )
     }
   }
@@ -45,7 +55,7 @@ export default function ProjectPaneWrapper({
 
   const onLeaveButton = () => {
     setOverToggleButton(false)
-    scheduleHideHoverSidebar()
+    scheduleHideHoverSidebar(300)
   }
 
   const onEnterButton = () => {
@@ -58,6 +68,11 @@ export default function ProjectPaneWrapper({
     setShowHoverSidebar(showStickySidebar)
     setShowStickySidebar(!showStickySidebar)
   }
+
+  const hoverSidebarStyle = 'bg-white border-gray-200 rounded-lg drop-shadow'
+  const animation = isHidingHoverSidebar
+    ? 'animate-[slideOutLeft_200ms_ease-in]'
+    : 'animate-[slideInLeft_200ms_ease-out]'
 
   return (
     <>
@@ -73,7 +88,7 @@ export default function ProjectPaneWrapper({
         {children}
         {showHoverSidebar && (
           <div
-            className='absolute overflow-y-auto bg-white border-gray-200 rounded-lg top-4 left-4 bottom-4 drop-shadow'
+            className={`absolute overflow-y-auto top-4 left-4 bottom-4 ${hoverSidebarStyle} ${animation}`}
             onMouseEnter={() => setOverHoverSidebar(true)}
             onMouseLeave={onLeaveSidebar}>
             {sidebar}
