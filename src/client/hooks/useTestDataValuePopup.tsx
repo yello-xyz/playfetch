@@ -5,17 +5,17 @@ import Button from '../../../components/button'
 import TestDataHeader from '../../../components/testData/testDataHeader'
 import Editor from '@/components/editor'
 
-export default function useTestDataPopup(
+export default function useTestDataValuePopup(
   variables: string[],
   staticVariables: string[],
   getInputValue: (row: number, variable: string) => string,
   setInputValue: (row: number, variable: string, value: string) => void
 ) {
-  const setPopup = useGlobalPopup<TestDataPopupProps>()
+  const setPopup = useGlobalPopup<TestDataValuePopupProps>()
 
   const expandCell = (row: number, variable: string) => {
     setPopup(
-      TestDataPopup,
+      TestDataValuePopup,
       {
         variable,
         variables,
@@ -31,7 +31,7 @@ export default function useTestDataPopup(
   return expandCell
 }
 
-type TestDataPopupProps = {
+type TestDataValuePopupProps = {
   variable: string
   variables: string[]
   staticVariables: string[]
@@ -40,7 +40,7 @@ type TestDataPopupProps = {
   setValue: (value: string) => void
 }
 
-const TestDataPopup = ({
+const TestDataValuePopup = ({
   variable,
   variables,
   staticVariables,
@@ -48,7 +48,7 @@ const TestDataPopup = ({
   value,
   setValue,
   withDismiss,
-}: TestDataPopupProps & WithDismiss) => {
+}: TestDataValuePopupProps & WithDismiss) => {
   const [currentValue, setCurrentValue] = useState(value)
 
   const onKeyDown = (event: KeyboardEvent) => {

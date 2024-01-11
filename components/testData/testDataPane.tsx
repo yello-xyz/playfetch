@@ -4,7 +4,7 @@ import expandIcon from '@/public/expand.svg'
 import Icon from '../icon'
 import { InputValues, TestConfig } from '@/types'
 import TestDataHeader from './testDataHeader'
-import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
+import useTestDataValuePopup from '@/src/client/hooks/useTestDataValuePopup'
 import { SelectInputRows } from '@/src/client/inputRows'
 import DropdownMenu from '../dropdownMenu'
 import Label from '../label'
@@ -104,7 +104,7 @@ export default function TestDataPane({
   const isRowActive = (row: number) => activeCell?.[0] === row
   const isCellActive = (row: number, col: number) => isRowActive(row) && activeCell?.[1] === col
 
-  const expandCell = useTestDataPopup(variables, staticVariables, getInputValue, (row, variable, value) => {
+  const expandCell = useTestDataValuePopup(variables, staticVariables, getInputValue, (row, variable, value) => {
     setInputValue(row, variable, value)
     persistInputValuesIfNeeded()
   })
