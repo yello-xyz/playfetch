@@ -27,7 +27,7 @@ export default function useTestDataPopup(
         testConfig,
         setTestConfig,
       },
-      { top: 150, left: 200, right: 200, bottom: 150 }
+      { top: 0, left: 100, right: 100, bottom: 0 }
     )
   }
 
@@ -62,6 +62,7 @@ const TestDataPopup = ({
       persistInputValuesIfNeeded={persistInputValuesIfNeeded}
       testConfig={testConfig}
       setTestConfig={setTestConfig}
+      asModalPopup
     />
   </PopupContent>
 )

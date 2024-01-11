@@ -20,6 +20,7 @@ export default function TestDataPane({
   persistInputValuesIfNeeded,
   testConfig,
   setTestConfig,
+  asModalPopup = false,
 }: {
   variables: string[]
   staticVariables: string[]
@@ -28,6 +29,7 @@ export default function TestDataPane({
   persistInputValuesIfNeeded: () => void
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
+  asModalPopup?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -114,7 +116,7 @@ export default function TestDataPane({
 
   const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
   return (
-    <div className='flex flex-col items-stretch overflow-y-auto'>
+    <div className='flex flex-col items-stretch h-full overflow-y-auto'>
       <div
         ref={containerRef}
         className='grid w-full overflow-x-auto bg-gray-25 shrink-0'
@@ -149,13 +151,15 @@ export default function TestDataPane({
                     bordered={false}
                     focusOnLoad={false}
                   />
-                  <Icon
-                    className={`absolute top-0.5 right-0.5 bg-gray-25 rounded cursor-pointer opacity-0 ${
-                      isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
-                    }`}
-                    icon={expandIcon}
-                    onClick={() => expandCell(row, variable)}
-                  />
+                  {!asModalPopup && (
+                    <Icon
+                      className={`absolute top-0.5 right-0.5 bg-gray-25 rounded cursor-pointer opacity-0 ${
+                        isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
+                      }`}
+                      icon={expandIcon}
+                      onClick={() => expandCell(row, variable)}
+                    />
+                  )}
                 </div>
               ))}
             </Fragment>
@@ -168,7 +172,7 @@ export default function TestDataPane({
         <Icon icon={addIcon} />
         Add Row
       </div>
-      {dynamicInputRows.length > 0 && (
+      {!asModalPopup && dynamicInputRows.length > 0 && (
         <div className='flex flex-wrap items-center px-3 pt-2 gap-y-2 gap-x-4'>
           <OptionSection
             label={
