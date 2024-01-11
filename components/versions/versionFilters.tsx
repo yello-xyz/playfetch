@@ -61,7 +61,7 @@ export default function VersionFilters<Version extends PromptVersion | ChainVers
 
   return (
     <div className='flex flex-col'>
-      <div className='z-10 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
+      <div className='z-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
         {tabSelector(
           <FilterButton
             users={users}

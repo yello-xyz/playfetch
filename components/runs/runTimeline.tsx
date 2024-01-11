@@ -131,7 +131,7 @@ export default function RunTimeline({
   return (
     <div className='relative flex flex-col h-full'>
       {!skipHeader && (
-        <div className='z-10 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
+        <div className='z-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
           <SingleTabHeader label='Responses' />
         </div>
       )}
