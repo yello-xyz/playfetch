@@ -1,4 +1,4 @@
-import { MouseEvent, ReactNode, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import Button from '@/components/button'
 import Icon from '@/components/icon'
 import menuIcon from '@/public/menu.svg'
@@ -17,29 +17,8 @@ export default function ProjectPaneWrapper({
   const [showStickySidebar, setShowStickySidebar] = useState(true)
   const [showHoverSidebar, setShowHoverSidebar] = useState(false)
 
-  const [isOverLeftEdge, setOverLeftEdge] = useState(false)
   const [isOverHoverSidebar, setOverHoverSidebar] = useState(false)
   const [isOverToggleButton, setOverToggleButton] = useState(false)
-
-  const [pendingTimeout, setPendingTimeout] = useState<NodeJS.Timeout>()
-
-  const detectLeftEdge = (event: MouseEvent) => {
-    const overLeftEdge = event.clientX <= 20
-    setOverLeftEdge(overLeftEdge)
-    if (!isOverLeftEdge && overLeftEdge) {
-      setPendingTimeout(
-        setTimeout(() => {
-          setPendingTimeout(undefined)
-          setOverLeftEdge(overLeftEdge => {
-            if (overLeftEdge) {
-              setShowHoverSidebar(true)
-            }
-            return overLeftEdge
-          })
-        }, 500)
-      )
-    }
-  }
 
   const scheduleHideHoverSidebar = () => {
     if (isOverHoverSidebar || isOverToggleButton) {
@@ -89,10 +68,7 @@ export default function ProjectPaneWrapper({
           </Button>
         </div>
       )}
-      <div
-        className='relative flex items-stretch flex-1 overflow-hidden'
-        onMouseMove={showStickySidebar ? undefined : detectLeftEdge}
-        onClick={() => pendingTimeout && clearTimeout(pendingTimeout)}>
+      <div className='relative flex items-stretch flex-1 overflow-hidden'>
         {showStickySidebar && sidebar}
         {children}
         {showHoverSidebar && (
