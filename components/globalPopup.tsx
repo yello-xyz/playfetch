@@ -65,6 +65,12 @@ export const SanitizePopupLocation = (
         position.top = gap
       }
       position.bottom = undefined
+    } else if (position.left === 0 && position.right === 0) {
+      if (parentRect && childRect) {
+        const gap = Math.max(0, (parentRect.width - childRect.width) / 2)
+        position.left = gap
+      }
+      position.right = undefined
     }
   }
 
