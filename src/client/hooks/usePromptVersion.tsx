@@ -43,7 +43,16 @@ export default function usePromptVersion(
   const versions = isDirty
     ? [
         ...prompt.versions.filter(version => version.didRun),
-        ...(draftVersion ? [{ ...draftVersion, prompts: currentVersion.prompts, config: currentVersion.config }] : []),
+        ...(draftVersion
+          ? [
+              {
+                ...draftVersion,
+                previousID: currentVersion.id,
+                prompts: currentVersion.prompts,
+                config: currentVersion.config,
+              },
+            ]
+          : []),
       ]
     : prompt.versions
 
