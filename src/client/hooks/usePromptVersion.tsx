@@ -2,6 +2,7 @@ import { ActivePrompt, ChainVersion, PromptConfig, PromptVersion, Prompts } from
 import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { SupportedPromptKeysForModel, SupportsJsonMode, SupportsSeed } from '@/src/common/providerMetadata'
+import { useEffect, useState } from 'react'
 
 export default function usePromptVersion(
   prompt: ActivePrompt,
@@ -46,6 +47,17 @@ export default function usePromptVersion(
         AugmentVersion(draftVersion ?? DummyVersion, currentVersion),
       ]
     : prompt.versions
+
+  const lastVersion = versions.slice(-1)[0]
+  const [previousLastVersion, setPreviousLastVersion] = useState(lastVersion)
+  useEffect(() => {
+    if (lastVersion.id !== previousLastVersion.id) {
+      if (IsDummyVersion(previousLastVersion) && !IsDummyVersion(lastVersion)) {
+        setCurrentVersion(activeVersion)
+      }
+      setPreviousLastVersion(lastVersion)
+    }
+  }, [previousLastVersion, lastVersion, activeVersion])
 
   return [currentVersion, versions, updatePrompt, updateConfig, isDirty] as const
 }
