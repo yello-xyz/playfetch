@@ -165,7 +165,7 @@ const DropZone = ({ target }: { target: Target }) => {
 }
 
 const DraggingTab = ({ tab }: { tab?: Tab }) => (
-  <DragOverlay>
+  <DragOverlay dropAnimation={null}>
     {tab ? (
       <div className='px-4 py-2 bg-white border border-gray-200 cursor-pointer min-w-fit whitespace-nowrap'>{tab}</div>
     ) : null}

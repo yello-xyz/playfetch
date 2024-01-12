@@ -7,7 +7,7 @@ import { SingleTabHeader } from '../tabSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
-import TestDataPane from '../testData/testDataPane'
+import TestDataPane, { GetTestDataRowCount } from '../testData/testDataPane'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 import RunButtons from '../runs/runButtons'
@@ -71,7 +71,8 @@ export default function PromptView({
 
   const minWidth = 400
   const minTopPaneHeight = 120
-  const minBottomPaneHeight = canShowTestData ? testDataExpanded ? 195 : 94 : 64
+  const rowCount = GetTestDataRowCount(variables, inputValues)
+  const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 162 + rowCount * 33) : 94) : 64
   const maxBottomPaneHeight = canShowTestData && testDataExpanded ? Infinity : minBottomPaneHeight
   return (
     <Allotment vertical>
