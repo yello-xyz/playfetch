@@ -12,6 +12,18 @@ import RangeInput from '../rangeInput'
 import Editor from '../editor'
 import Checkbox from '../checkbox'
 
+const getAllVariablesAndRowCount = (variables: string[], inputValues: InputValues) => {
+  const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
+  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
+
+  return [allVariables, rowCount] as const
+}
+
+export const GetTestDataRowCount = (variables: string[], inputValues: InputValues) => {
+  const [_, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
+  return rowCount
+}
+
 export default function TestDataPane({
   variables,
   staticVariables,
@@ -33,8 +45,7 @@ export default function TestDataPane({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const allVariables = [...variables, ...Object.keys(inputValues).filter(input => !variables.includes(input))]
-  const rowCount = Math.max(1, ...allVariables.map(variable => inputValues[variable]?.length ?? 0))
+  const [allVariables, rowCount] = getAllVariablesAndRowCount(variables, inputValues)
 
   const getInputValue = (row: number, variable: string) => inputValues[variable]?.[row] ?? ''
   const setInputValue = (row: number, variable: string, value: string) =>

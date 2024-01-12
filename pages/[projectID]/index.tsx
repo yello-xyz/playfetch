@@ -253,7 +253,7 @@ export default function Home({
                           </ProjectTopBar>
                         </Suspense>
                       )}
-                      sidebar={rightBorder => 
+                      sidebar={rightBorder => (
                         <Suspense>
                           <ProjectSidebar
                             activeItem={activeItem}
@@ -269,7 +269,7 @@ export default function Home({
                             rightBorder={rightBorder}
                           />
                         </Suspense>
-                      }>
+                      )}>
                       <div className='flex-1'>
                         <Suspense>
                           <MainProjectPane
