@@ -36,7 +36,7 @@ export default function PromptPanel({
   const setExpanded = (expanded: boolean, shiftClick: boolean) => shiftClick && setAllSectionsExpanded(expanded)
 
   return (
-    <div className='flex flex-col flex-1 h-full gap-4 px-4 pt-4 overflow-y-auto text-gray-500'>
+    <div className='flex flex-col flex-1 h-full gap-4 pl-4 pr-3 pt-2 overflow-y-auto text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {primaryPromptKeys.map(promptKey => (
           <PromptInputSection
