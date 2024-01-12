@@ -26,16 +26,22 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
 
   const identifierForVersion = useCallback((version: Version) => `v${version.id}`, [])
 
-  useEffect(() => {
-    const element = document.getElementById(identifierForVersion(activeVersion))
-    if (element) {
-      setTimeout(() => element.scrollIntoView({ behavior: 'auto', block: 'start' }), 100)
-    }
-  }, [activeVersion, identifierForVersion])
+  const [focusedVersion, setFocusedVersion] = useState(versions[0])
 
   const selectVersion = (version: Version) => {
+    setFocusedVersion(version)
     setActiveVersion(version)
   }
+
+  useEffect(() => {
+    if (activeVersion.id !== focusedVersion.id) {
+      setFocusedVersion(activeVersion)
+      const element = document.getElementById(identifierForVersion(activeVersion))
+      if (element) {
+        setTimeout(() => element.scrollIntoView({ behavior: 'auto', block: 'start' }), 100)
+      }
+    }
+  }, [focusedVersion, activeVersion, identifierForVersion])
 
   const filteredVersions = versions.filter(BuildVersionFilter(filters))
 
