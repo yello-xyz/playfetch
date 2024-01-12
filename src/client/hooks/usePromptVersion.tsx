@@ -38,7 +38,14 @@ export default function usePromptVersion(
       return { ...currentVersion, prompts }
     })
 
-  const versions = prompt.versions
+  const draftVersion = prompt.versions.find(version => !version.didRun)
+
+  const versions = isDirty
+    ? [
+        ...prompt.versions.filter(version => version.didRun),
+        ...(draftVersion ? [{ ...draftVersion, prompts: currentVersion.prompts, config: currentVersion.config }] : []),
+      ]
+    : prompt.versions
 
   return [currentVersion, versions, updatePrompt, updateConfig, isDirty] as const
 }
