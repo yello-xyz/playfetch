@@ -63,6 +63,6 @@ const RunAttributes = ({ run }: { run: { timestamp?: number; duration?: number; 
 const Attribute = ({ icon, value }: { icon: StaticImageData; value: string }) => (
   <div className='flex items-center'>
     <Icon icon={icon} />
-    <div className='pt-0.5 text-xs text-gray-500'>{value}</div>
+    <div className='pt-0.5 text-xs text-gray-500 text-ellipsis whitespace-nowrap overflow-hidden'>{value}</div>
   </div>
 )
