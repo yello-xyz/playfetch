@@ -131,6 +131,10 @@ export default function TestDataPane({
           const border = (col: number) =>
             isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
           const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
+          const iconPosition = (col: number) => (col === allVariables.length - 1 ? 'right-3' : 'right-0.5')
+          const iconOpacity = (col: number) =>
+            isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
+          const iconStyle = 'bg-gray-25 rounded cursor-pointer opacity-0'
           return (
             <Fragment key={row}>
               <div className='px-2 py-1 border-b border-gray-200'>
@@ -154,9 +158,7 @@ export default function TestDataPane({
                   />
                   {!asModalPopup && (
                     <Icon
-                      className={`absolute top-0.5 right-0.5 bg-gray-25 rounded cursor-pointer opacity-0 ${
-                        isCellActive(row, col) ? 'hover:opacity-100' : 'group-hover:opacity-100'
-                      }`}
+                      className={`absolute top-0.5 ${iconPosition(col)} ${iconOpacity(col)} ${iconStyle}`}
                       icon={expandIcon}
                       onClick={() => expandCell(row, variable)}
                     />
