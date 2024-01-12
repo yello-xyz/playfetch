@@ -68,6 +68,11 @@ export function useCheckModelProviders() {
   return [checkModelProviderAvailable, checkModelAvailable] as const
 }
 
+export function useCheckModelAvailable() {
+  const [, checkModelAvailable] = useModelProviders()
+  return checkModelAvailable
+}
+
 export function useCheckProviderAvailable() {
   const [checkProviderAvailable] = useCheckProviders()
   return checkProviderAvailable

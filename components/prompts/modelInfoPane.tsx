@@ -13,7 +13,6 @@ import {
   WebsiteLinkForModel,
 } from '@/src/common/providerMetadata'
 import Icon from '../icon'
-import { ModelUnavailableWarning } from './promptPanel'
 import { FormatCost, FormatLargeInteger } from '@/src/common/formatting'
 import { useModelProviders } from '@/src/client/context/providerContext'
 import { useState } from 'react'
@@ -21,6 +20,7 @@ import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'
 import { useDefaultPromptConfig } from '@/src/client/context/promptConfigContext'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
+import { ModelUnavailableWarning } from './modelUnavailableWarning'
 
 export default function ModelInfoPane({
   model,
@@ -41,7 +41,7 @@ export default function ModelInfoPane({
   const [showActionMenu, setShowActionMenu] = useState(false)
 
   return (
-    <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1'>
+    <PopupContent className='relative p-3 w-[480px] ml-7 flex flex-col gap-1 shadow-sm'>
       <div className='flex items-center gap-1'>
         <Icon icon={IconForProvider(provider)} />
         <span>{LabelForProvider(provider)} - </span>
@@ -59,11 +59,11 @@ export default function ModelInfoPane({
         <HorizontalBorder />
         <HorizontalBorder />
         <span className='font-medium'>Input Pricing</span>
-        <ModelCost model={model} price={InputPriceForModel} />
+        <ModelCost model={model} mode='input' />
         <HorizontalBorder />
         <HorizontalBorder />
         <span className='font-medium'>Output Pricing</span>
-        <ModelCost model={model} price={OutputPriceForModel} />
+        <ModelCost model={model} mode='output' />
         {IsModelFreeToUse(model) && <span className='mt-2'>*Fair use applies</span>}
       </div>
       {!isModelAvailable && (
@@ -97,13 +97,13 @@ const ModelSuffix = ({ label, color = 'bg-gray-400' }: { label: string; color?: 
   <span className={`${color} px-1 ml-1 text-[10px] leading-[17px] font-medium text-white rounded`}>{label}</span>
 )
 
-const ModelCost = ({ model, price }: { model: LanguageModel; price: (model: LanguageModel) => number }) => {
+const ModelCost = ({ model, mode }: { model: LanguageModel; mode: 'input' | 'output' }) => {
   return IsModelFreeToUse(model) ? (
     <span>
-      <span className='line-through'>{FormatCost(0.5)}</span> $0 / 1M characters*
+      <span className='line-through'>{FormatCost(mode === 'input' ? 0.25 : 0.5)}</span> $0 / 1M characters*
     </span>
   ) : (
-    <span>{FormatCost(price(model))} / 1M tokens</span>
+    <span>{FormatCost(mode === 'input' ? InputPriceForModel(model) : OutputPriceForModel(model))} / 1M tokens</span>
   )
 }
 

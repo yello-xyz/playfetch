@@ -26,16 +26,22 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
 
   const identifierForVersion = useCallback((version: Version) => `v${version.id}`, [])
 
-  useEffect(() => {
-    const element = document.getElementById(identifierForVersion(activeVersion))
-    if (element) {
-      setTimeout(() => element.scrollIntoView({ behavior: 'auto', block: 'start' }), 100)
-    }
-  }, [activeVersion, identifierForVersion])
+  const [focusedVersion, setFocusedVersion] = useState(versions[0])
 
   const selectVersion = (version: Version) => {
+    setFocusedVersion(version)
     setActiveVersion(version)
   }
+
+  useEffect(() => {
+    if (activeVersion.id !== focusedVersion.id) {
+      setFocusedVersion(activeVersion)
+      const element = document.getElementById(identifierForVersion(activeVersion))
+      if (element) {
+        setTimeout(() => element.scrollIntoView({ behavior: 'auto', block: 'start' }), 100)
+      }
+    }
+  }, [focusedVersion, activeVersion, identifierForVersion])
 
   const filteredVersions = versions.filter(BuildVersionFilter(filters))
 
@@ -72,7 +78,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
       ) : (
         <div className='flex flex-col w-full gap-4'>
           {tabSelector()}
-          <div className='flex flex-col gap-4 px-4'>
+          <div className='flex flex-col gap-4 px-4 overflow-y-hidden'>
             {Array.from({ length: 3 }, (_, index) => (
               <div key={index} className='min-h-[160px] bg-gray-50 rounded-lg ml-12'></div>
             ))}

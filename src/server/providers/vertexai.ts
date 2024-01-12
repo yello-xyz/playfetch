@@ -1,27 +1,28 @@
-import aiplatform from '@google-cloud/aiplatform'
+import { VertexAI, Content, GenerateContentResponse, GenerateContentRequest } from '@google-cloud/vertexai'
 import { GoogleLanguageModel } from '@/types'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
 import { getProjectID } from '../storage'
 
+import aiplatform from '@google-cloud/aiplatform'
 const { PredictionServiceClient } = aiplatform.v1
 
 const location = 'us-central1'
 const client = new PredictionServiceClient({ apiEndpoint: `${location}-aiplatform.googleapis.com` })
 
-export default function predict(model: GoogleLanguageModel): Predictor {
-  return (prompts, temperature, maxTokens, context, useContext, streamChunks) =>
-    complete(model, prompts.main, prompts.system, temperature, maxTokens, context, useContext, streamChunks)
-}
-
-const isChatModel = (model: GoogleLanguageModel) => {
-  switch (model) {
-    case 'text-bison':
-      return false
-    case 'chat-bison':
-      return true
+const predict =
+  (model: GoogleLanguageModel): Predictor =>
+  (prompts, temperature, maxTokens, context, useContext, streamChunks) => {
+    switch (model) {
+      case 'text-bison':
+      case 'chat-bison':
+        return complete(model, prompts.main, prompts.system, temperature, maxTokens, context, useContext, streamChunks)
+      case 'gemini-pro':
+        return completePreview(model, prompts.main, temperature, maxTokens, context, useContext, streamChunks)
+    }
   }
-}
+
+export default predict
 
 async function complete(
   model: GoogleLanguageModel,
@@ -34,6 +35,7 @@ async function complete(
   streamChunks?: (text: string) => void
 ) {
   try {
+    const useMessages = model === 'chat-bison'
     const projectID = await getProjectID()
     const runningContext = usePreviousContext ? context.running ?? '' : ''
     const previousMessages = usePreviousContext ? context.messages ?? [] : []
@@ -54,7 +56,7 @@ async function complete(
           structValue: {
             fields: {
               ...(system ? { context: { stringValue: system } } : {}),
-              ...(isChatModel(model)
+              ...(useMessages
                 ? { messages: { listValue: { values: inputMessages } } }
                 : { content: { stringValue: inputPrompt } }),
             },
@@ -80,7 +82,7 @@ async function complete(
     }
 
     const extractContent = (obj: any) => (typeof getContent(obj) === 'string' ? getContent(obj) : JSON.stringify(obj))
-    const input = isChatModel(model) ? [system ?? '', ...inputMessages.map(extractContent)].join('\n') : inputPrompt
+    const input = useMessages ? [system ?? '', ...inputMessages.map(extractContent)].join('\n') : inputPrompt
     const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
     context.running = `${inputPrompt}\n${output}\n`
     context.messages = [...inputMessages, ...(responseMessage ? [responseMessage] : [])]
@@ -88,5 +90,52 @@ async function complete(
     return { output, cost, inputTokens, outputTokens, functionCall: null }
   } catch (error: any) {
     return { error: error?.details ?? 'Unknown error' }
+  }
+}
+
+async function completePreview(
+  model: GoogleLanguageModel,
+  prompt: string,
+  temperature: number,
+  maxTokens: number,
+  context: PromptContext,
+  usePreviousContext: boolean,
+  streamChunks?: (text: string) => void
+) {
+  try {
+    const previousContents = usePreviousContext ? context.contents ?? [] : []
+    const promptAsContent = { role: 'user', parts: [{ text: prompt }] }
+    const inputContents: Content[] = [...previousContents, promptAsContent]
+    const request: GenerateContentRequest = {
+      contents: inputContents,
+      generation_config: { temperature, max_output_tokens: maxTokens },
+    }
+
+    const projectID = await getProjectID()
+    const vertexAI = new VertexAI({ project: projectID, location })
+    const generativeModel = vertexAI.preview.getGenerativeModel({ model })
+    const responseStream = await generativeModel.generateContentStream(request)
+
+    const getContent = (response: GenerateContentResponse) => response.candidates[0].content
+    const getText = (content: Content) => content.parts?.[0]?.text
+
+    let output = ''
+    for await (const chunk of responseStream.stream) {
+      const text = getText(getContent(chunk)) ?? ''
+      output += text
+      streamChunks?.(text)
+    }
+
+    const extractContent = (content: Content) => getText(content) ?? JSON.stringify(content)
+    const input = inputContents.map(extractContent).join('\n')
+    const [cost, inputTokens, outputTokens] = CostForModel(model, input, output)
+
+    const aggregatedResponse = await responseStream.response
+    const responseContent = getContent(aggregatedResponse)
+    context.contents = [...inputContents, ...(responseContent ? [responseContent] : [])]
+
+    return { output, cost, inputTokens, outputTokens, functionCall: null }
+  } catch (error: any) {
+    return { error: error?.details ?? error?.message ?? error?.cause ?? 'Unknown error' }
   }
 }

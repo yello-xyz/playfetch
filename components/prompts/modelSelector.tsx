@@ -34,7 +34,7 @@ export default function ModelSelector({
   return (
     <PopupButton popUpAbove={popUpAbove} onSetPopup={onSetPopup} disabled={disabled}>
       <Icon icon={IconForProvider(ProviderForModel(config.model))} />
-      <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis'>
+      <span className='flex-1 overflow-hidden text-gray-600 whitespace-nowrap text-ellipsis '>
         {LabelForModel(config.model, availableProviders)}
       </span>
     </PopupButton>
@@ -65,7 +65,7 @@ function ModelSelectorPopup({
   const onSelectModel = (model: LanguageModel) => setConfig({ ...config, model })
 
   return (
-    <PopupContent className='relative w-64 p-3' autoOverflow={false}>
+    <PopupContent className='relative w-64 p-3 shadow-sm' autoOverflow={false}>
       {allModels
         .sort((a, b) =>
           FullLabelForModel(a, availableProviders).localeCompare(FullLabelForModel(b, availableProviders))
@@ -80,7 +80,7 @@ function ModelSelectorPopup({
               disabled={!checkModelAvailable(model)}
               checked={model === config.model}
             />
-            <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block'>
+            <div className='absolute top-0 bottom-0 hidden left-[232px] group-hover:block hover:block '>
               <ModelInfoPane model={model} config={config} setConfig={setConfig} onDismiss={withDismiss(() => {})} />
             </div>
           </div>

@@ -9,10 +9,12 @@ enum ClientRoute {
   Settings = '/settings',
   Login = '/login',
   Onboarding = '/onboarding',
-  Waitlist = `${ClientRoute.Login}?w=1`,
   Privacy = '/privacy',
   Admin = '/admin',
 }
+
+export const WaitlistRoute = (email: string, provider: string | undefined) =>
+  `${ClientRoute.Login}?w=1&e=${encodeURIComponent(email)}&p=${encodeURIComponent(provider ?? '')}`
 
 export const WorkspaceRoute = (workspaceID: number, userID: number) =>
   workspaceID !== userID ? `${ClientRoute.Home}?w=${workspaceID}` : ClientRoute.Home
@@ -51,6 +53,9 @@ const mapDictionary = <T, U>(dict: NodeJS.Dict<T>, mapper: (value: T) => U): Nod
 
 export const ParseNumberQuery = (query: NodeJS.Dict<string | string[]>): NodeJS.Dict<number> =>
   mapDictionary(ParseQuery(query), value => Number(value))
+
+export const ParseEncodedQuery = (query: NodeJS.Dict<string | string[]>): NodeJS.Dict<string> =>
+  mapDictionary(ParseQuery(query), value => decodeURIComponent(value))
 
 export const ParseActiveItemQuery = (query: any, project: ActiveProject) => {
   let { p: promptID, c: chainID, m: compare, e: endpoints, s: settings } = ParseNumberQuery(query)

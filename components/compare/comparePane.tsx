@@ -12,7 +12,7 @@ import {
 import ProjectItemSelector from '../projects/projectItemSelector'
 import VersionSelector from '../versions/versionSelector'
 import RunTimeline from '../runs/runTimeline'
-import PromptPanel, { PromptTab } from '../prompts/promptPanel'
+import PromptPanel from '../prompts/promptPanel'
 import { IsEndpoint } from '@/src/common/activeItem'
 import { ExtractInputKey } from '@/src/common/formatting'
 
@@ -23,8 +23,6 @@ export default function ComparePane({
   activeVersion,
   setItemID,
   setVersionID,
-  activePromptTab,
-  setActivePromptTab,
   disabled,
   includeResponses,
 }: {
@@ -34,8 +32,6 @@ export default function ComparePane({
   activeVersion?: PromptVersion | ChainVersion
   setItemID: (itemID: number) => void
   setVersionID: (versionID: number) => void
-  activePromptTab?: PromptTab
-  setActivePromptTab: (tab: PromptTab) => void
   disabled?: boolean
   includeResponses?: boolean
 }) {
@@ -75,7 +71,7 @@ export default function ComparePane({
   }))
 
   return (
-    <div className='flex flex-col flex-grow w-1/2 h-full'>
+    <div className='flex flex-col w-1/2 h-full grow'>
       <div className='flex items-center gap-1 p-4 border-b border-gray-200'>
         <ProjectItemSelector
           className='w-full max-w-[240px]'
@@ -96,12 +92,8 @@ export default function ComparePane({
         )}
       </div>
       {activeVersion && IsPromptVersion(activeVersion) && (
-        <div className='p-4 border-b border-gray-200 min-h-[226px] h-[226px]'>
-          <PromptPanel
-            version={activeVersion}
-            initialActiveTab={activePromptTab}
-            onActiveTabChange={setActivePromptTab}
-          />
+        <div className='border-b border-gray-200 min-h-[226px] h-[226px] bg-gray-25'>
+          <PromptPanel version={activeVersion} />
         </div>
       )}
       {includeResponses && (activeVersion || IsEndpoint(activeItem)) && (

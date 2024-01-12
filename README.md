@@ -41,6 +41,12 @@ Or just **Open with GitHub Desktop** and clone to a local directory (recommended
 ## Configure environment
 `cd ~/[LOCAL_DIRECTORY]/playfetch`
 
+In order to access the Google Cloud Datastore from your local machine, you will need to install the Google Cloud CLI initialize it as explained [here](https://cloud.google.com/sdk/docs/install-sdk) (you can skip the other steps). Run the following commands to log in with your individual Google account (which should be added to the dev@yello.xyz group).
+
+`gcloud auth login`
+
+`gcloud init`
+
 In order to run the app locally, you will need to add some additional variables to your local `.env.local` file (this file is ignored by source control to avoid leaking keys). For most of these you should avoid using the same values as used in the production environment (e.g. generate your own API free keys so you don't risk messing up analytics or rate limits while testing locally):
 
 `API_URL=http://localhost:3000`
@@ -94,12 +100,6 @@ In order to run the app locally, you will need to add some additional variables 
 `GOOGLE_ANALYTICS_MEASUREMENT_ID=G-7EW4BEVHT1`
 
 `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID=GTM-NCN8W45M`
-
-In order to access the Google Cloud Datastore from your local machine, you will need to install the Google Cloud CLI initialize it as explained [here](https://cloud.google.com/sdk/docs/install-sdk) (you can skip the other steps). Run the following commands to log in with your individual Google account (which should be added to the dev@yello.xyz group).
-
-`gcloud auth login`
-
-`gcloud init`
 
 ## Build and run
 `npm install`

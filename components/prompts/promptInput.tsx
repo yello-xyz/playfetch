@@ -29,16 +29,24 @@ const variableParser = (stream: StringStream) => {
   return tokenFromTag(tags.string)
 }
 
-type Selection = { text: string; from: number; to: number; isToken: boolean; popupX?: number; popupY?: number }
+type Selection = {
+  root: Node
+  text: string
+  from: number
+  to: number
+  isToken: boolean
+  popupX?: number
+  popupY?: number
+}
 
 const extractSelection = (editorSelection?: Selection) => {
   const documentSelection = document.getSelection()
-  if (editorSelection && documentSelection) {
-    const isContentEditable = documentSelection.anchorNode?.parentElement?.isContentEditable
+  if (editorSelection && documentSelection && documentSelection.rangeCount > 0) {
+    const isSameContext = documentSelection.anchorNode && editorSelection.root.contains(documentSelection.anchorNode)
     const isSingleNode = documentSelection.anchorNode === documentSelection.focusNode
     const range = documentSelection.getRangeAt(0)
     const selectionRect = range.getBoundingClientRect()
-    if (isContentEditable && isSingleNode && editorSelection.text.length > 0 && !!selectionRect.width) {
+    if (isSameContext && isSingleNode && editorSelection.text.length > 0 && !!selectionRect.width) {
       const popupX = selectionRect.left + selectionRect.width / 2
       const popupY = selectionRect.top - 34
       return { ...editorSelection, popupX, popupY }
@@ -96,6 +104,7 @@ export default function PromptInput({
 
   return (
     <Editor
+      className={disabled ? undefined : 'bg-white'}
       value={value}
       setValue={setValue}
       tokenizer={variableParser}

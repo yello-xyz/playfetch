@@ -1,7 +1,7 @@
 import { InputValues, TestConfig } from '@/types'
 
 export const SelectAnyInputRow = (inputValues: InputValues, variables: string[]) =>
-  SelectInputRows(inputValues, variables, { mode: 'first', rowIndices: [] })[0][0] ??
+  SelectInputRows(inputValues, variables, { rowIndices: [0] })[0][0] ??
   Object.fromEntries(variables.map(variable => [variable, '']))
 
 export const SelectAnyInputValue =
@@ -12,21 +12,10 @@ export const SelectAnyInputValue =
       : SelectInputRows(inputValues, [variable], config)[0][0]?.[variable] ??
         SelectAnyInputRow(inputValues, [variable])[variable]
 
-const shuffleArray = <T>(source: T[]): T[] => {
-  const array = [...source]
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
-  return array
-}
-
 export const SelectInputRows = (
   inputValues: InputValues,
   variables: string[],
-  config: TestConfig,
-  count = 1,
-  start = 0
+  config?: TestConfig
 ): [{ [key: string]: string }[], number[]] => {
   const inputs = Object.fromEntries(variables.map(variable => [variable, inputValues[variable] ?? []]))
 
@@ -36,12 +25,8 @@ export const SelectInputRows = (
     columns.every(column => column[index] === undefined || column[index].length === 0)
   )
   const isNonEmptyRow = (index: number) => !emptyRowIndices.includes(index)
-  const filteredRowIndices = config.rowIndices.filter(isNonEmptyRow).sort()
 
   const indexArray = (count: number) => Array.from({ length: count }, (_, index) => index)
-  const startIndex = indexArray(maxRowCount)
-    .filter(isNonEmptyRow)
-    .findIndex(index => index >= start)
 
   const filteredPaddedInputs: InputValues = {}
   for (const [key, values] of Object.entries(inputs)) {
@@ -56,25 +41,14 @@ export const SelectInputRows = (
   }
 
   const entries = Object.entries(filteredPaddedInputs)
-  const allRowIndices = indexArray(rowCount)
-  const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
-  const selectedIndices = (() => {
-    switch (config.mode) {
-      default:
-      case 'first':
-        return [0]
-      case 'last':
-        return [rowCount - 1]
-      case 'range':
-        return allRowIndices.slice(startIndex, startIndex + count)
-      case 'random':
-        return shuffleArray(allRowIndices).slice(0, count)
-      case 'all':
-        return allRowIndices
-      case 'custom':
-        return filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
-    }
-  })()
+  let selectedIndices
+  if (config) {
+    const filteredRowIndices = config.rowIndices.filter(isNonEmptyRow).sort()
+    const mappedRowIndices = filteredRowIndices.map(index => index - emptyRowIndices.filter(i => i < index).length)
+    selectedIndices = mappedRowIndices.length > 0 ? mappedRowIndices : [0]
+  } else {
+    selectedIndices = indexArray(rowCount)
+  }
 
   const originalIndices = [] as number[]
   for (let i = 0, offset = 0; i < maxRowCount; ++i) {
@@ -85,5 +59,6 @@ export const SelectInputRows = (
     }
   }
 
+  const selectRow = (index: number) => Object.fromEntries(entries.map(([key, values]) => [key, values[index]]))
   return [selectedIndices.map(selectRow), originalIndices]
 }

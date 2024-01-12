@@ -60,7 +60,10 @@ export default function ChainNodeEditor({
   const isPromptChainItemActive = IsPromptChainItem(activeItem)
   const activePrompt = isPromptChainItemActive ? promptCache.promptForItem(activeItem) : undefined
   const initialActivePromptVersion = isPromptChainItemActive ? promptCache.versionForItem(activeItem) : undefined
-  const [activePromptVersion, setActivePromptVersion] = useState(initialActivePromptVersion)
+  const [activePromptVersion, setActivePromptVersion] = useInitialState(
+    initialActivePromptVersion,
+    (a, b) => a?.id === b?.id
+  )
   const [savePrompt, setModifiedVersion] = useSavePrompt(activePrompt, activePromptVersion, setActivePromptVersion)
 
   const updateVersion = (version?: PromptVersion) => {
@@ -69,7 +72,7 @@ export default function ChainNodeEditor({
   }
 
   const selectVersion = (version?: PromptVersion) => {
-    saveAndRefreshPrompt()
+    isPromptChainItemActive && savePrompt(() => promptCache.refreshItem(activeItem.promptID))
     setActivePromptVersion(version)
     updatePromptDirty(false)
     if (version) {
@@ -77,19 +80,14 @@ export default function ChainNodeEditor({
     }
   }
 
-  const saveAndRefreshPrompt = (onSavePrompt?: (versionID: number) => void) => {
-    if (isPromptChainItemActive) {
-      return savePrompt(() => promptCache.refreshPrompt(activeItem.promptID)).then(
-        versionID => versionID && onSavePrompt?.(versionID)
-      )
-    }
-  }
-
   const setDialogPrompt = useModalDialogPrompt()
 
   const saveAndClose = async () => {
-    saveItems(updatedItems)
-    await saveAndRefreshPrompt(versionID => saveItems(itemsWithUpdate({ ...activeItem, versionID })))
+    if (isPromptChainItemActive) {
+      savePrompt().then(versionID => versionID && saveItems(itemsWithUpdate({ ...activeItem, versionID })))
+    } else {
+      saveItems(updatedItems)
+    }
     dismiss()
   }
 
@@ -107,11 +105,9 @@ export default function ChainNodeEditor({
     }
   }
 
-  const colorClass = IsPromptChainItem(activeItem) ? 'bg-white' : 'bg-gray-25'
-
   return (
     <>
-      <div className={`flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden ${colorClass}`}>
+      <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
         {IsPromptChainItem(activeItem) && (
           <PromptNodeEditor
             item={activeItem}

@@ -38,16 +38,25 @@ export default function useActiveItemCache(
     [project, findItemForID, onRefreshItem]
   )
 
+  const [itemIDsToReload, setItemIDsToReload] = useState<Set<number>>(new Set())
+  const reloadItem = (itemID: number) => {
+    setItemIDsToReload(itemIDsToReload.add(itemID))
+    setLoadingItemIDs(new Set([...loadingItemIDs].filter(id => id !== itemID)))
+  }
+
   const [loadingItemIDs, setLoadingItemIDs] = useState<Set<number>>(new Set())
   useEffect(() => {
-    const unloadedItemID = itemIDs.find(itemID => !activeItemCache[itemID] && !loadingItemIDs.has(itemID))
+    const unloadedItemID = itemIDs.find(
+      itemID => (!activeItemCache[itemID] || itemIDsToReload.has(itemID)) && !loadingItemIDs.has(itemID)
+    )
     if (unloadedItemID) {
       setLoadingItemIDs(loadingItemIDs => loadingItemIDs.add(unloadedItemID))
+      setItemIDsToReload(new Set([...itemIDsToReload].filter(id => id !== unloadedItemID)))
       refreshItem(unloadedItemID)
     }
-  }, [project, itemIDs, activeItemCache, refreshItem, loadingItemIDs])
+  }, [project, itemIDs, activeItemCache, refreshItem, loadingItemIDs, itemIDsToReload])
 
   const nameForID = (itemID: number) => findItemForID(itemID)!.name
 
-  return { nameForID, itemForID: id => activeItemCache[id], refreshItem }
+  return { nameForID, itemForID: id => activeItemCache[id], refreshItem: reloadItem }
 }

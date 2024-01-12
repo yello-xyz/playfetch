@@ -1,22 +1,33 @@
 import { StaticImageData } from 'next/image'
 import { KeyboardEvent, ReactNode, useCallback, useState } from 'react'
 import Icon from './icon'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
 
 export function SingleTabHeader({
   label,
   icon,
   secondaryLabel,
   onUpdateLabel,
+  draggableTab,
+  dropTarget,
   children,
 }: {
   label: string
   icon?: StaticImageData
   secondaryLabel?: string
   onUpdateLabel?: (label: string) => void
+  draggableTab?: boolean
+  dropTarget?: string
   children?: ReactNode
 }) {
   return (
-    <TabSelector tabs={[label]} icon={icon} secondaryLabel={secondaryLabel} onUpdateLabel={onUpdateLabel}>
+    <TabSelector
+      tabs={[label]}
+      icon={icon}
+      secondaryLabel={secondaryLabel}
+      onUpdateLabel={onUpdateLabel}
+      draggableTabs={draggableTab}
+      dropTarget={dropTarget}>
       {children}
     </TabSelector>
   )
@@ -29,6 +40,8 @@ export default function TabSelector<T extends string>({
   icon,
   secondaryLabel,
   onUpdateLabel,
+  draggableTabs,
+  dropTarget,
   children,
 }: {
   tabs: T[]
@@ -37,6 +50,8 @@ export default function TabSelector<T extends string>({
   icon?: StaticImageData
   secondaryLabel?: string
   onUpdateLabel?: (label: string) => void
+  draggableTabs?: boolean
+  dropTarget?: string
   children?: ReactNode
 }) {
   const [label, setLabel] = useState<string>()
@@ -46,7 +61,7 @@ export default function TabSelector<T extends string>({
   }
 
   return (
-    <CustomHeader>
+    <CustomHeader dropTarget={dropTarget}>
       <div className='flex items-center gap-0.5'>
         {icon && label === undefined && <Icon className='-mr-1.5' icon={icon} />}
         {label !== undefined ? (
@@ -64,6 +79,7 @@ export default function TabSelector<T extends string>({
               activeTab={tabs.length > 1 ? activeTab : undefined}
               setActiveTab={tabs.length > 1 ? setActiveTab : onUpdateLabel ? () => setLabel(tabs[0]) : undefined}
               cursor={onUpdateLabel ? 'cursor-text' : undefined}
+              draggable={draggableTabs}
             />
           ))
         )}
@@ -74,9 +90,14 @@ export default function TabSelector<T extends string>({
   )
 }
 
-export function CustomHeader({ children }: { children?: ReactNode }) {
+export function CustomHeader({ children, dropTarget }: { children?: ReactNode; dropTarget?: string }) {
+  const { isOver, setNodeRef } = useDroppable({ id: dropTarget ?? '', disabled: !dropTarget })
+  const color = isOver ? 'bg-gray-50' : 'bg-white'
+
   return (
-    <div className='flex items-center justify-between gap-2 px-2 bg-white border-b border-gray-200'>{children}</div>
+    <div ref={setNodeRef} className={`${color} flex items-center justify-between gap-2 px-2 border-b border-gray-200`}>
+      {children}
+    </div>
   )
 }
 
@@ -85,17 +106,20 @@ function TabButton<T extends string>({
   activeTab,
   setActiveTab,
   cursor = 'cursor-pointer',
+  draggable = false,
 }: {
   tab: T
   activeTab?: T
   setActiveTab?: (tab: T) => void
   cursor?: string
+  draggable?: boolean
 }) {
   return (
     <HeaderItem
       active={activeTab === undefined || activeTab === tab}
-      className={activeTab === tab ? 'border-b border-black -mb-px' : cursor}
-      onClick={() => setActiveTab?.(tab)}>
+      className={activeTab === tab ? 'border-b border-black -mb-px' : setActiveTab ? cursor : undefined}
+      onClick={() => setActiveTab?.(tab)}
+      draggableID={draggable ? tab : undefined}>
       {tab}
     </HeaderItem>
   )
@@ -108,16 +132,27 @@ export function HeaderItem({
   active = true,
   className = '',
   onClick,
+  draggableID,
   children,
 }: {
   active?: boolean
   className?: string
   onClick?: () => void
+  draggableID?: string
   children?: ReactNode
 }) {
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    disabled: !draggableID,
+    id: draggableID ?? '',
+    data: { name: draggableID },
+  })
   const activeClass = active ? '' : 'opacity-40 hover:opacity-70'
+
   return (
-    <div className={`flex ${className} ${headerClassName} ${activeClass}`} onClick={onClick}>
+    <div
+      {...(draggableID ? { ref: setNodeRef, ...listeners, ...attributes } : {})}
+      className={`flex ${className} ${headerClassName} ${activeClass}`}
+      onClick={onClick}>
       {children}
     </div>
   )

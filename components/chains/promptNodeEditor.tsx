@@ -1,12 +1,7 @@
 import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
-import VersionTimeline from '../versions/versionTimeline'
-import PromptPanel from '../prompts/promptPanel'
-import { Allotment } from 'allotment'
-import { SingleTabHeader } from '../tabSelector'
-import { useState } from 'react'
-import promptIcon from '@/public/prompt.svg'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
+import PromptTabs from '../prompts/promptTabs'
 
 export default function PromptNodeEditor({
   item,
@@ -45,35 +40,16 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [updateVersion] = usePromptVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, updatePrompt, updateConfig] = usePromptVersion(activeVersion, setModifiedVersion)
 
-  const minVersionHeight = 120
-  const [promptHeight, setPromptHeight] = useState(1)
-  const minHeight = promptHeight + 16
   return (
-    <Allotment vertical>
-      <Allotment.Pane minSize={minVersionHeight}>
-        <div className='flex flex-col h-full'>
-          <div className='flex-1 overflow-y-auto'>
-            <VersionTimeline
-              activeItem={prompt}
-              versions={prompt.versions}
-              activeVersion={activeVersion}
-              setActiveVersion={selectVersion}
-              tabSelector={() => <SingleTabHeader label='Prompt versions' icon={promptIcon} />}
-            />
-          </div>
-        </div>
-      </Allotment.Pane>
-      <Allotment.Pane minSize={minHeight} preferredSize={minHeight}>
-        <div className='h-full px-4 pt-4 bg-white'>
-          <PromptPanel
-            version={activeVersion}
-            setModifiedVersion={updateVersion}
-            setPreferredHeight={setPromptHeight}
-          />
-        </div>
-      </Allotment.Pane>
-    </Allotment>
+    <PromptTabs
+      prompt={prompt}
+      activeVersion={activeVersion}
+      setActiveVersion={selectVersion}
+      currentVersion={currentVersion}
+      updatePrompt={updatePrompt}
+      updateConfig={updateConfig}
+    />
   )
 }

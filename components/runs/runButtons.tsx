@@ -1,27 +1,8 @@
-import { startTransition, useCallback, useEffect } from 'react'
+import { ReactNode, startTransition, useCallback, useEffect } from 'react'
 import { PendingButton } from '../button'
 import { InputValues, PromptInputs, TestConfig } from '@/types'
-import TestDataSelector from './testDataSelector'
 import { SelectInputRows } from '@/src/client/inputRows'
 import SavePromptButton from './savePromptButton'
-
-type TestMode = TestConfig['mode']
-
-const selectValidRowIndices = (
-  mode: TestMode,
-  selectInputs: (mode: TestMode) => ReturnType<typeof SelectInputRows>
-) => {
-  switch (mode) {
-    case 'first':
-    case 'last':
-      return selectInputs(mode)[1]
-    case 'custom':
-    case 'range':
-    case 'random':
-    case 'all':
-      return selectInputs('all')[1]
-  }
-}
 
 export default function RunButtons({
   runTitle,
@@ -49,36 +30,20 @@ export default function RunButtons({
   const inputVariables =
     testConfig.autoRespond !== undefined && (testConfig.maxResponses ?? 0) > 0 ? variables : staticVariables
   const selectInputs = useCallback(
-    (config: TestConfig | { mode: TestMode; count?: number; start?: number }) =>
-      SelectInputRows(
-        inputValues,
-        inputVariables,
-        {
-          mode: config.mode,
-          rowIndices: 'rowIndices' in config ? config.rowIndices : [],
-        },
-        'rowIndices' in config ? config.rowIndices.length : config.count,
-        'rowIndices' in config ? config.rowIndices[0] : config.start
-      ),
+    (config?: TestConfig) => SelectInputRows(inputValues, inputVariables, config),
     [inputValues, inputVariables]
   )
-  const getIndicesForMode = (mode: TestMode, count?: number, start?: number) => selectInputs({ mode, count, start })[1]
 
   const [, rowIndices] = selectInputs(testConfig)
-  const fallbackIndices = getIndicesForMode('first')
   useEffect(() => {
-    const validRowIndices = selectValidRowIndices(testConfig.mode, mode =>
-      selectInputs({ mode, count: testConfig.rowIndices.length })
-    )
+    const validRowIndices = selectInputs()[1]
     if (
       testConfig.rowIndices.length !== rowIndices.length ||
       testConfig.rowIndices.some(index => !validRowIndices.includes(index))
     ) {
       startTransition(() => setTestConfig({ ...testConfig, rowIndices }))
-    } else if (testConfig.mode === 'custom' && testConfig.rowIndices.length === 0) {
-      startTransition(() => setTestConfig({ ...testConfig, mode: 'first', rowIndices: fallbackIndices }))
     }
-  }, [testConfig, setTestConfig, rowIndices, fallbackIndices, selectInputs])
+  }, [testConfig, setTestConfig, rowIndices, selectInputs])
 
   const testPrompt = () => {
     const [inputs, indices] = selectInputs(testConfig)
@@ -89,25 +54,21 @@ export default function RunButtons({
     return callback(filterInputs(inputs, staticVariables), filterInputs(inputs, dynamicVariables))
   }
 
-  const showTestDataSelector = getIndicesForMode('all').length > 1
   const isMissingTestData = rowIndices.length === 0 && staticVariables.length > 0
-  const roundedClass =
-    showTestDataSelector && onSave ? '' : showTestDataSelector ? 'rounded-r-lg' : onSave ? 'rounded-l-lg' : undefined
+  const showMultipleInputsWarning = testConfig && testConfig.rowIndices.length > 1
 
   return (
-    <div className='flex items-center self-end gap-3'>
+    <div className='flex items-center gap-3 grow'>
+      {showMultipleInputsWarning ? (
+        <WarningBanner>Running this prompt will use {testConfig.rowIndices.length} rows of test data.</WarningBanner>
+      ) : (
+        <div className='grow' />
+      )}
       <div className='flex items-center'>
-        {showTestDataSelector && (
-          <TestDataSelector
-            testConfig={testConfig}
-            setTestConfig={setTestConfig}
-            getIndicesForMode={getIndicesForMode}
-          />
-        )}
         <PendingButton
           title={runTitle ?? 'Run'}
           pendingTitle='Running'
-          roundedClass={roundedClass}
+          roundedClass={onSave ? 'rounded-l-lg' : undefined}
           disabled={disabled || isMissingTestData}
           onClick={testPrompt}
           onDisabledClick={!disabled && isMissingTestData ? onShowTestConfig : undefined}
@@ -117,3 +78,9 @@ export default function RunButtons({
     </div>
   )
 }
+
+const WarningBanner = ({ children }: { children: ReactNode }) => (
+  <div className='flex-1 h-8 px-3 py-2 overflow-hidden border rounded-lg border-pink-50 bg-pink-25 text-ellipsis whitespace-nowrap'>
+    {children}
+  </div>
+)

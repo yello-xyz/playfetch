@@ -1,11 +1,11 @@
 import { withLoggedOutSession } from '@/src/server/session'
 import { getCsrfToken, signIn } from 'next-auth/react'
-import ClientRoute, { ParseNumberQuery } from '@/src/common/clientRoute'
+import ClientRoute, { ParseEncodedQuery, ParseNumberQuery } from '@/src/common/clientRoute'
 import githubIcon from '@/public/github.svg'
 import googleIcon from '@/public/google.svg'
 import Icon from '@/components/icon'
 import { useState } from 'react'
-import { CheckValidEmail } from '@/src/common/formatting'
+import { Capitalize, CheckValidEmail } from '@/src/common/formatting'
 import { useRouter } from 'next/router'
 import logo from '@/public/logo.svg'
 import Image from 'next/image'
@@ -20,6 +20,7 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
   useDocumentationCookie('remove')
   const router = useRouter()
   const { w: joinedWaitList } = ParseNumberQuery(router.query)
+  const { e: waitlistEmail, p: waitlistProvider } = ParseEncodedQuery(router.query)
 
   const [email, setEmail] = useState('')
 
@@ -32,6 +33,11 @@ export default function Login({ tokenCSRF }: { tokenCSRF: string }) {
             <>
               <p>Thanks for signing up! We’re currently in closed beta,</p>
               <p>but will notify you when we open up more broadly.</p>
+              {waitlistEmail?.length && (
+                <p className='italic'>
+                  Account: {waitlistEmail} {waitlistProvider?.length && <span>({Capitalize(waitlistProvider)})</span>}
+                </p>
+              )}
             </>
           ) : (
             <>

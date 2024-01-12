@@ -43,7 +43,7 @@ export default function ChainEditor({
   activeIndex: number | undefined
   setActiveIndex: (index: number) => void
   prompts: Prompt[]
-  addPrompt: () => Promise<{ promptID: number; versionID: number }>
+  addPrompt: () => Promise<number>
   showVersions: boolean
   setShowVersions?: (show: boolean) => void
   isTestMode: boolean
@@ -93,7 +93,7 @@ export default function ChainEditor({
     })
 
   const insertNewPrompt = (index: number, branch: number) =>
-    addPrompt().then(({ promptID, versionID }) => insertPrompt(index, branch, promptID, versionID))
+    addPrompt().then(promptID => insertPrompt(index, branch, promptID))
 
   const insertCodeBlock = (index: number, branch: number) => insertItem(index, branch, { code: '' })
   const insertBranch = (index: number, branch: number) =>

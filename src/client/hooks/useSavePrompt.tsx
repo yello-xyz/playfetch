@@ -1,5 +1,5 @@
 import api from '@/src/client/api'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { ActivePrompt, PromptVersion } from '@/types'
 import { PromptConfigsAreEqual, PromptVersionsAreEqual, VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 

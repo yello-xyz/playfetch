@@ -6,7 +6,6 @@ import useActiveItemCache, { ActiveItemCache } from './useActiveItemCache'
 export type ChainPromptCache = ActiveItemCache & {
   promptForItem: (item: Omit<PromptChainItem, 'branch'>) => ActivePrompt | undefined
   versionForItem: (item: Omit<PromptChainItem, 'branch'>) => PromptVersion | undefined
-  refreshPrompt: (promptID: number) => void
 }
 
 const specifiedOrLastVersion = (versions: PromptVersion[], versionID?: number) =>
@@ -44,7 +43,6 @@ export default function useChainPromptCache(
 
   const chainPromptCache: ChainPromptCache = {
     ...promptCache,
-    refreshPrompt: promptCache.refreshItem,
     promptForItem,
     versionForItem: item => selectVersion(promptForItem(item), item.versionID),
   }

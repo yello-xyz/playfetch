@@ -10,10 +10,14 @@ export default function PromptVersionCellBody({
   version,
   isActiveVersion,
   compareVersion,
+  isExpanded,
+  setExpanded,
 }: {
   version: PromptVersion
   isActiveVersion: boolean
   compareVersion?: PromptVersion
+  isExpanded?: boolean
+  setExpanded: (expanded: boolean, isShiftClick: boolean) => void
 }) {
   const availableProviders = useAvailableModelProviders()
   const getConfig = (version: PromptVersion) => FormatPromptConfig(version.config, availableProviders)
@@ -24,16 +28,18 @@ export default function PromptVersionCellBody({
       ? formatFunctions(version.prompts.functions, compareVersion?.prompts?.functions)
       : undefined
 
+  const commonContentSectionProps = { version, compareVersion, isExpanded, setExpanded }
+
   return (
     <>
-      <ContentSection title='System' version={version} compareVersion={compareVersion} getContent={getSystem} />
-      <Collapsible title='Prompt' initiallyExpanded>
+      <ContentSection title='System' getContent={getSystem} {...commonContentSectionProps} />
+      <Collapsible title='Prompt' initiallyExpanded={isExpanded !== false} onSetExpanded={setExpanded}>
         <div className={isActiveVersion ? '' : 'line-clamp-2'}>
           <VersionComparison version={version} compareVersion={compareVersion} />
         </div>
       </Collapsible>
-      <ContentSection title='Parameters' version={version} compareVersion={compareVersion} getContent={getConfig} />
-      <ContentSection title='Functions' version={version} compareVersion={compareVersion} getContent={getFunctions} />
+      <ContentSection title='Parameters' getContent={getConfig} {...commonContentSectionProps} />
+      <ContentSection title='Functions' getContent={getFunctions} {...commonContentSectionProps} />
     </>
   )
 }
@@ -62,17 +68,21 @@ function ContentSection({
   version,
   compareVersion,
   getContent,
+  isExpanded,
+  setExpanded,
 }: {
   title: string
   version: PromptVersion
   compareVersion?: PromptVersion
   getContent: (version: PromptVersion) => string | undefined
+  isExpanded?: boolean
+  setExpanded: (expanded: boolean, isShiftClick: boolean) => void
 }) {
   const content = getContent(version)
   const compareContent = compareVersion ? getContent(compareVersion) : undefined
 
   return (content && content.length > 0) || (compareContent && compareContent.length > 0) ? (
-    <Collapsible title={title}>
+    <Collapsible title={title} initiallyExpanded={isExpanded} onSetExpanded={setExpanded}>
       <ContentComparison content={content ?? ''} compareContent={compareContent} />
     </Collapsible>
   ) : null

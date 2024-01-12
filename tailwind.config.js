@@ -127,6 +127,16 @@ module.exports = {
       boxShadow: {
         sm: '0px 0px 32px 0px rgba(0, 0, 0, 0.08)',
       },
+      keyframes: {
+        slideInLeft: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        slideOutLeft: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+      },
     },
   },
 }

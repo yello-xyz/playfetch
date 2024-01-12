@@ -32,6 +32,7 @@ export const PublicLanguageModels: DefaultLanguageModel[] = [
   'claude-2',
   'text-bison',
   'chat-bison',
+  'gemini-pro',
   'command',
 ]
 export const GatedLanguageModels: DefaultLanguageModel[] = [] // used to contain 'gpt-4-32k'
@@ -87,6 +88,7 @@ export const isCustomModel = (model: LanguageModel | EmbeddingModel): model is C
     case 'claude-2':
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
     case 'command':
       return false
     default:
@@ -131,6 +133,7 @@ export const SupportsSeed = (model: LanguageModel): boolean => {
     case 'claude-2':
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
     case 'command':
       return false
     default:
@@ -149,6 +152,7 @@ export const SupportsJsonMode = (model: LanguageModel): boolean => {
     case 'claude-2':
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
     case 'command':
       return false
     default:
@@ -167,6 +171,7 @@ export const SupportsSystemPrompt = (model: LanguageModel): boolean => {
     case 'claude-instant-1':
     case 'claude-2':
     case 'text-bison':
+    case 'gemini-pro':
     case 'command':
       return false
     default:
@@ -185,6 +190,7 @@ export const SupportsFunctionsPrompt = (model: LanguageModel): boolean => {
     case 'claude-2':
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
     case 'command':
       return false
     default:
@@ -247,6 +253,7 @@ export const ProviderForModel = (model: LanguageModel | EmbeddingModel): ModelPr
       return 'anthropic'
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
       return 'google'
     case 'command':
       return 'cohere'
@@ -273,6 +280,8 @@ export const LabelForModel = (model: LanguageModel, providers: AvailableModelPro
       return 'PaLM 2 for Text'
     case 'chat-bison':
       return 'PaLM 2 for Chat'
+    case 'gemini-pro':
+      return 'Gemini Pro'
     case 'command':
       return 'Command'
     default:
@@ -299,6 +308,8 @@ export const WebsiteLinkForModel = (model: LanguageModel): string => {
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text'
     case 'chat-bison':
       return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text-chat'
+    case 'gemini-pro':
+      return 'https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini'
     case 'command':
       return 'https://docs.cohere.com/docs/models'
     default:
@@ -318,13 +329,15 @@ export const DescriptionForModel = (model: LanguageModel, providers: AvailableMo
     case 'gpt-4-turbo':
       return 'Preview of OpenAI’s most advanced model, offering a 128K context window and knowledge of world events up to April 2023 (gpt-4-1106-preview). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'claude-instant-1':
-      return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension.'
+      return 'A faster, cheaper yet still very capable version of Claude, which can handle a range of tasks including casual dialogue, text analysis, summarization, and document comprehension (claude-instant-1).'
     case 'claude-2':
-      return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction. It is good for complex reasoning, creativity, thoughtful dialogue, coding,and detailed content creation.'
+      return 'Anthropic’s most powerful model that excels at a wide range of tasks from sophisticated dialogue and creative content generation to detailed instruction (claude-2). It is good for complex reasoning, creativity, thoughtful dialogue, coding, and detailed content creation.'
     case 'text-bison':
-      return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation. Fine-tuned for tasks that can be completed with one response, without the need for continuous conversation.'
+      return 'Google’s foundation model optimized for a variety of natural language tasks such as sentiment analysis, entity extraction, and content creation (text-bison). Fine-tuned for tasks that can be completed with one response, without the need for continuous conversation.'
     case 'chat-bison':
-      return 'Google’s foundation model optimized for language understanding, language generation, and conversations. Fine-tuned to conduct natural multi-turn conversations, and for text tasks about code that require back-and-forth interactions.'
+      return 'Google’s foundation model optimized for language understanding, language generation, and conversations (chat-bison). Fine-tuned to conduct natural multi-turn conversations, and for text tasks about code that require back-and-forth interactions.'
+    case 'gemini-pro':
+      return 'Preview of the latest family of generative AI models developed by Google DeepMind (gemini-pro). Suitable for testing and evaluations, not recommended for production usage due to restrictive rate limits under preview.'
     case 'command':
       return 'An instruction-following conversational model by Cohere that performs language tasks with high quality and reliability while providing longer context compared to generative models.'
     default:
@@ -350,6 +363,8 @@ export const MaxTokensForModel = (model: LanguageModel): number => {
     case 'chat-bison':
       // TODO should we separate max input tokens vs max output tokens? (8192 vs 1024)
       return 8192
+    case 'gemini-pro':
+      return 16384
     case 'command':
       return 4096
     default:
@@ -377,6 +392,7 @@ export const InputPriceForModel = (model: LanguageModel | EmbeddingModel): numbe
       return 15
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo
@@ -404,6 +420,7 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
       return 15
     case 'text-bison':
     case 'chat-bison':
+    case 'gemini-pro':
       return 0
     default:
       // TODO generalise when we extend fine-tuning support beyond gpt-3.5-turbo

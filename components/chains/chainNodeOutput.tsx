@@ -99,7 +99,7 @@ export default function ChainNodeOutput({
   const activeNode = nodes[activeIndex]
   const items = nodes.filter(IsChainItem)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(chain, JSON.stringify(activeNode))
-  const [testConfig, setTestConfig] = useState<TestConfig>({ mode: 'first', rowIndices: [0] })
+  const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
 
   const [checkProviderAvailable, checkModelAvailable] = useCheckProviders()
   const areProvidersAvailable = (items: ChainItem[]) =>
@@ -199,7 +199,7 @@ export default function ChainNodeOutput({
       <div className='flex flex-col items-end flex-1 h-full gap-4 pb-4 overflow-hidden'>
         {activeNode === InputNode && canShowTestData ? (
           <div className='flex flex-col flex-1 w-full overflow-y-auto'>
-            <SingleTabHeader label='Test data' />
+            <SingleTabHeader label='Test Data' />
             <TestDataPane
               variables={variables}
               staticVariables={staticVariables}
@@ -230,7 +230,7 @@ export default function ChainNodeOutput({
           </div>
         )}
         {showRunButtons && (
-          <div className='flex items-center justify-end w-full gap-4 px-4'>
+          <div className='flex items-center w-full gap-4 px-4'>
             <RunButtons
               variables={variables}
               staticVariables={staticVariables}

@@ -1,30 +1,36 @@
-import { KeyboardEvent, useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import useGlobalPopup, { WithDismiss } from '@/src/client/context/globalPopupContext'
 import { PopupContent } from '../../../components/popupMenu'
-import Button from '../../../components/button'
-import TestDataHeader from '../../../components/testData/testDataHeader'
-import Editor from '@/components/editor'
+import TestDataPane from '@/components/testData/testDataPane'
+import { InputValues, TestConfig } from '@/types'
+import Label from '@/components/label'
+import IconButton from '@/components/iconButton'
+import closeIcon from '@/public/close.svg'
 
 export default function useTestDataPopup(
   variables: string[],
   staticVariables: string[],
-  getInputValue: (row: number, variable: string) => string,
-  setInputValue: (row: number, variable: string, value: string) => void
+  inputValues: InputValues,
+  setInputValues: Dispatch<SetStateAction<InputValues>>,
+  persistInputValuesIfNeeded: () => void,
+  testConfig: TestConfig,
+  setTestConfig: (testConfig: TestConfig) => void
 ) {
   const setPopup = useGlobalPopup<TestDataPopupProps>()
 
-  const expandCell = (row: number, variable: string) => {
+  const expandCell = () => {
     setPopup(
       TestDataPopup,
       {
-        variable,
         variables,
         staticVariables,
-        row,
-        value: getInputValue(row, variable),
-        setValue: value => setInputValue(row, variable, value),
+        inputValues,
+        setInputValues,
+        persistInputValuesIfNeeded,
+        testConfig,
+        setTestConfig,
       },
-      { top: 150, left: 200, right: 200, bottom: 150 }
+      { top: 0, left: 100, right: 100, bottom: 0 }
     )
   }
 
@@ -32,47 +38,53 @@ export default function useTestDataPopup(
 }
 
 type TestDataPopupProps = {
-  variable: string
   variables: string[]
   staticVariables: string[]
-  row: number
-  value: string
-  setValue: (value: string) => void
+  inputValues: InputValues
+  setInputValues: Dispatch<SetStateAction<InputValues>>
+  persistInputValuesIfNeeded: () => void
+  testConfig: TestConfig
+  setTestConfig: (testConfig: TestConfig) => void
 }
 
 const TestDataPopup = ({
-  variable,
   variables,
   staticVariables,
-  row,
-  value,
-  setValue,
+  inputValues,
+  setInputValues,
+  persistInputValuesIfNeeded,
+  testConfig,
+  setTestConfig,
   withDismiss,
 }: TestDataPopupProps & WithDismiss) => {
-  const [currentValue, setCurrentValue] = useState(value)
+  const [currentInputValues, setCurrentInputValues] = useState(inputValues)
+  const updateInputValues = (inputValues: SetStateAction<InputValues>) => {
+    setCurrentInputValues(inputValues)
+    setInputValues(inputValues)
+  }
 
-  const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      withDismiss(() => {})()
-    }
+  const [currentTestConfig, setCurrentTestConfig] = useState(testConfig)
+  const updateTestConfig = (testConfig: TestConfig) => {
+    setCurrentTestConfig(testConfig)
+    setTestConfig(testConfig)
   }
 
   return (
-    <PopupContent className='h-full'>
-      <div className='flex flex-col w-full h-full'>
-        <div className='flex items-stretch w-full'>
-          <div className='w-10 border-b border-gray-200 bg-gray-25' />
-          <TestDataHeader grow variable={variable} variables={variables} staticVariables={staticVariables} />
-        </div>
-        <div className='flex items-stretch flex-1 w-full min-h-0'>
-          <div className='min-w-[40px] py-1 text-center text-gray-400'>#{row + 1}</div>
-          <div className='border-l border-gray-200' />
-          <Editor value={currentValue} setValue={setCurrentValue} onKeyDown={onKeyDown} bordered={false} />
-        </div>
-        <div className='flex justify-end p-2 bg-gray-50'>
-          <Button onClick={withDismiss(() => setValue(currentValue))}>Done</Button>
-        </div>
+    <PopupContent className='flex flex-col h-full'>
+      <div className='flex items-center p-1.5 border-b border-gray-200'>
+        <Label className='flex-1 text-center'>Test Data</Label>
+        <IconButton icon={closeIcon} onClick={withDismiss(() => {})} />
       </div>
+      <TestDataPane
+        variables={variables}
+        staticVariables={staticVariables}
+        inputValues={currentInputValues}
+        setInputValues={updateInputValues}
+        persistInputValuesIfNeeded={persistInputValuesIfNeeded}
+        testConfig={currentTestConfig}
+        setTestConfig={updateTestConfig}
+        asModalPopup
+      />
     </PopupContent>
   )
 }
