@@ -1,4 +1,4 @@
-import { ActivePrompt, PromptConfig, PromptVersion, Prompts } from '@/types'
+import { ActivePrompt, ChainVersion, PromptConfig, PromptVersion, Prompts } from '@/types'
 import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { SupportedPromptKeysForModel, SupportsJsonMode, SupportsSeed } from '@/src/common/providerMetadata'
@@ -43,18 +43,35 @@ export default function usePromptVersion(
   const versions = isDirty
     ? [
         ...prompt.versions.filter(version => version.didRun),
-        ...(draftVersion
-          ? [
-              {
-                ...draftVersion,
-                previousID: currentVersion.id,
-                prompts: currentVersion.prompts,
-                config: currentVersion.config,
-              },
-            ]
-          : []),
+        AugmentVersion(draftVersion ?? DummyVersion, currentVersion),
       ]
     : prompt.versions
 
   return [currentVersion, versions, updatePrompt, updateConfig, isDirty] as const
 }
+
+type PartialVersion = Omit<PromptVersion, 'previousID' | 'prompts' | 'config' | 'userID' | 'parentID' | 'timestamp'>
+
+const AugmentVersion = (partialVersion: PartialVersion | PromptVersion, version: PromptVersion) => ({
+  ...partialVersion,
+  previousID: version.id,
+  prompts: version.prompts,
+  config: version.config,
+  userID: version.userID,
+  parentID: version.parentID,
+  timestamp: version.timestamp,
+})
+
+const DummyVersionID = 1
+
+const DummyVersion: PartialVersion = {
+  id: DummyVersionID,
+  labels: [],
+  runs: [],
+  comments: [],
+  didRun: false,
+  usedAsEndpoint: false,
+  usedInChain: null,
+}
+
+export const IsDummyVersion = (version: PromptVersion | ChainVersion) => version.id === DummyVersionID

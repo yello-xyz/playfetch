@@ -105,12 +105,10 @@ export default function Home({
   }
 
   const selectVersion = (version: PromptVersion | ChainVersion) => {
-    if (version.id !== activeVersion?.id) {
-      if (activePrompt) {
-        savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
-      }
-      updateVersion(version)
+    if (activePrompt) {
+      savePrompt(_ => refreshPrompt(activePrompt.id, version.id))
     }
+    updateVersion(version)
   }
 
   const refreshActiveItem = (versionID?: number, allowResave?: boolean) => {
@@ -186,10 +184,10 @@ export default function Home({
   const currentQueryState = compare
     ? CompareItem
     : endpoints
-      ? EndpointsItem
-      : settings
-        ? SettingsItem
-        : promptID ?? chainID
+    ? EndpointsItem
+    : settings
+    ? SettingsItem
+    : promptID ?? chainID
   const [query, setQuery] = useState(currentQueryState)
   if (currentQueryState !== query) {
     if (compare) {
