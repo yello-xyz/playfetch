@@ -95,7 +95,9 @@ export function CustomHeader({ children, dropTarget }: { children?: ReactNode; d
   const color = isOver ? 'bg-gray-50' : 'bg-white'
 
   return (
-    <div ref={setNodeRef} className={`${color} flex items-center justify-between gap-2 px-2 border-b border-gray-200 drop-shadow-[0_4px_14px_rgba(0,0,0,0.04)]`}>
+    <div
+      ref={setNodeRef}
+      className={`${color} flex items-center justify-between gap-2 px-2 border-b border-gray-200 drop-shadow-[0_4px_14px_rgba(0,0,0,0.04)]`}>
       {children}
     </div>
   )
