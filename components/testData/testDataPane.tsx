@@ -66,16 +66,16 @@ export default function TestDataPane({
       variable => getInputValue(row, variable).length === 0
     )
 
+  const canAddRow = !isRowEmpty(rowCount - 1)
+
   const addInput = () => {
-    if (!isRowEmpty(rowCount - 1)) {
-      persistInputValuesIfNeeded()
-      setTimeout(() => {
-        setInputValues(inputValues =>
-          Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
-        )
-        // TODO focus on last cell in newly added row?
-      })
-    }
+    persistInputValuesIfNeeded()
+    setTimeout(() => {
+      setInputValues(inputValues =>
+        Object.fromEntries(Object.entries(inputValues).map(([variable, values]) => [variable, [...values, '']]))
+      )
+      // TODO focus on last cell in newly added row?
+    })
   }
 
   const checkDeleteRow = (event: KeyboardEvent, row: number) => {
@@ -186,9 +186,9 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className='flex items-center justify-center py-1 border-b border-gray-200 cursor-pointer bg-gray-25 hover:bg-gray-50 font-regular'
-        onClick={addInput}>
-        <Icon icon={addIcon} />
+        className={`flex items-center justify-center py-1 border-b border-gray-200 bg-gray-25 font-regular ${canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'}`}
+        onClick={canAddRow ? addInput : undefined}>
+        <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
         Add Row
       </div>
       {!asModalPopup && dynamicInputRows.length > 0 && (

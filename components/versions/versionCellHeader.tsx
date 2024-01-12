@@ -9,6 +9,7 @@ import { FormatRelativeDate } from '@/src/common/formatting'
 import { VersionLabels } from './versionLabels'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
+import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
 
 const extractSelection = (identifier: string) => {
   const selection = document.getSelection()
@@ -71,17 +72,19 @@ export default function VersionCellHeader<Version extends PromptVersion | ChainV
             )}
           </div>
         </div>
-        <div className='flex items-center gap-1'>
-          <CommentPopupMenu
-            comments={version.comments.filter(comment => !comment.action)}
-            versionID={version.id}
-            selection={selection}
-            users={activeItem.users}
-            selectedCell={isActiveVersion}
-          />
-          <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
-          <VersionPopupMenu activeItem={activeItem} version={version} selectedCell={isActiveVersion} />
-        </div>
+        {!IsDummyVersion(version) && (
+          <div className='flex items-center gap-1'>
+            <CommentPopupMenu
+              comments={version.comments.filter(comment => !comment.action)}
+              versionID={version.id}
+              selection={selection}
+              users={activeItem.users}
+              selectedCell={isActiveVersion}
+            />
+            <LabelPopupMenu activeItem={activeItem} item={version} selectedCell={isActiveVersion} />
+            <VersionPopupMenu activeItem={activeItem} version={version} selectedCell={isActiveVersion} />
+          </div>
+        )}
       </div>
       <VersionLabels className='ml-3.5 -mt-1' version={version} colors={labelColors} />
     </>

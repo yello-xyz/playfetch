@@ -15,27 +15,27 @@ export default function ProjectPaneWrapper({
   children: ReactNode
 }) {
   const [showStickySidebar, setShowStickySidebar] = useState(true)
-  const [showHoverSidebar, setShowHoverSidebar] = useState(false)
-  const [isHidingHoverSidebar, setIsHidingHoverSidebar] = useState(false)
+  const [showFloatingSidebar, setShowFloatingSidebar] = useState(false)
+  const [isHidingFloatingSidebar, setIsHidingFloatingSidebar] = useState(false)
 
   const [isOverLeftEdge, setOverLeftEdge] = useState(false)
-  const [isOverHoverSidebar, setOverHoverSidebar] = useState(false)
+  const [isOverFloatingSidebar, setOverFloatingSidebar] = useState(false)
   const [isOverToggleButton, setOverToggleButton] = useState(false)
 
-  const scheduleHideHoverSidebar = (delay = 0) => {
-    if (isOverHoverSidebar || isOverToggleButton || isOverLeftEdge) {
+  const scheduleHideFloatingSidebar = (delay = 0) => {
+    if (isOverFloatingSidebar || isOverToggleButton || isOverLeftEdge) {
       setTimeout(
         () =>
-          setOverHoverSidebar(overHoverSidebar => {
+          setOverFloatingSidebar(overFloatingSidebar => {
             setOverToggleButton(overToggleButton => {
               setOverLeftEdge(overLeftEdge => {
-                if (!overHoverSidebar && !overToggleButton && !overLeftEdge) {
-                  setIsHidingHoverSidebar(true)
+                if (!overFloatingSidebar && !overToggleButton && !overLeftEdge) {
+                  setIsHidingFloatingSidebar(true)
                   setTimeout(() => {
-                    setIsHidingHoverSidebar(false)
+                    setIsHidingFloatingSidebar(false)
                     setOverToggleButton(overToggleButton => {
                       if (!overToggleButton) {
-                        setShowHoverSidebar(false)
+                        setShowFloatingSidebar(false)
                       }
                       return overToggleButton
                     })
@@ -45,7 +45,7 @@ export default function ProjectPaneWrapper({
               })
               return overToggleButton
             })
-            return overHoverSidebar
+            return overFloatingSidebar
           }),
         delay
       )
@@ -53,23 +53,23 @@ export default function ProjectPaneWrapper({
   }
 
   const onLeaveSidebar = () => {
-    setOverHoverSidebar(false)
-    scheduleHideHoverSidebar()
+    setOverFloatingSidebar(false)
+    scheduleHideFloatingSidebar()
   }
 
   const onLeaveButton = () => {
     setOverToggleButton(false)
-    scheduleHideHoverSidebar(300)
+    scheduleHideFloatingSidebar(300)
   }
 
   const onEnterButton = () => {
     setOverToggleButton(true)
-    setShowHoverSidebar(true)
+    setShowFloatingSidebar(true)
   }
 
   const onClickButton = () => {
     setOverToggleButton(true)
-    setShowHoverSidebar(showStickySidebar)
+    setShowFloatingSidebar(showStickySidebar)
     setShowStickySidebar(!showStickySidebar)
   }
 
@@ -77,15 +77,15 @@ export default function ProjectPaneWrapper({
     const overLeftEdge = event.clientX <= 2
     if (!isOverLeftEdge && overLeftEdge) {
       setOverLeftEdge(true)
-      setShowHoverSidebar(true)
+      setShowFloatingSidebar(true)
     } else if (isOverLeftEdge && !overLeftEdge) {
       setOverLeftEdge(false)
-      scheduleHideHoverSidebar(300)
+      scheduleHideFloatingSidebar(300)
     }
   }
 
-  const hoverSidebarStyle = 'bg-white border border-gray-200 rounded-lg shadow-[0_0px_8px_8px_rgba(0,0,0,0.04)]'
-  const animation = isHidingHoverSidebar
+  const floatingSidebarStyle = 'bg-white border border-gray-200 rounded-lg shadow-[0_0px_8px_8px_rgba(0,0,0,0.04)]'
+  const animation = isHidingFloatingSidebar
     ? 'animate-[slideOutLeft_200ms_ease-in]'
     : 'animate-[slideInLeft_200ms_ease-out]'
 
@@ -103,10 +103,10 @@ export default function ProjectPaneWrapper({
         onMouseMove={showStickySidebar ? undefined : detectLeftEdge}>
         {showStickySidebar && sidebar(true)}
         {children}
-        {showHoverSidebar && (
+        {showFloatingSidebar && (
           <div
-            className={`absolute overflow-y-auto z-40 top-3 left-4 bottom-4 ${hoverSidebarStyle} ${animation}`}
-            onMouseEnter={() => setOverHoverSidebar(true)}
+            className={`absolute overflow-y-auto z-40 top-3 left-4 bottom-4 ${floatingSidebarStyle} ${animation}`}
+            onMouseEnter={() => setOverFloatingSidebar(true)}
             onMouseLeave={onLeaveSidebar}>
             {sidebar(false)}
           </div>

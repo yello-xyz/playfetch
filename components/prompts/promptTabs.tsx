@@ -21,6 +21,7 @@ type Target = Tab | 'left' | 'right' | 'mergedTabs'
 
 export default function PromptTabs({
   prompt,
+  versions,
   activeVersion,
   setActiveVersion,
   currentVersion,
@@ -28,6 +29,7 @@ export default function PromptTabs({
   updateConfig,
 }: {
   prompt: ActivePrompt
+  versions: PromptVersion[]
   activeVersion: PromptVersion
   setActiveVersion: (version: PromptVersion) => void
   currentVersion: PromptVersion
@@ -58,7 +60,7 @@ export default function PromptTabs({
           <div className='flex-1 h-full min-h-0'>
             <VersionTimeline
               activeItem={prompt}
-              versions={prompt.versions}
+              versions={versions}
               activeVersion={activeVersion}
               setActiveVersion={setActiveVersion}
               tabSelector={tabSelector}

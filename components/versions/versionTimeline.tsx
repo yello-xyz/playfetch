@@ -1,9 +1,10 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { ActiveChain, ActivePrompt, ChainVersion, PromptVersion } from '@/types'
+import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
+import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -29,8 +30,10 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   const [focusedVersion, setFocusedVersion] = useState(versions[0])
 
   const selectVersion = (version: Version) => {
-    setFocusedVersion(version)
-    setActiveVersion(version)
+    if (!IsDummyVersion(version)) {
+      setFocusedVersion(version)
+      setActiveVersion(version)
+    }
   }
 
   useEffect(() => {
@@ -66,7 +69,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
                 labelColors={labelColors}
                 version={version}
                 index={versions.findIndex(v => v.id === version.id)}
-                isActiveVersion={version.id === activeVersion.id}
+                isActiveVersion={version.id === (versions.find(IsDummyVersion)?.id ?? activeVersion.id)}
                 compareVersion={versions.find(v => v.id === version.previousID)}
                 activeItem={activeItem}
                 onSelect={selectVersion}
