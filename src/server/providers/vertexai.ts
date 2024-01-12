@@ -1,4 +1,4 @@
-import { VertexAI, Content, GenerateContentResponse } from '@google-cloud/vertexai'
+import { VertexAI, Content, GenerateContentResponse, GenerateContentRequest } from '@google-cloud/vertexai'
 import { GoogleLanguageModel } from '@/types'
 import { Predictor, PromptContext } from '../evaluationEngine/promptEngine'
 import { CostForModel } from './integration'
@@ -106,7 +106,10 @@ async function completePreview(
     const previousContents = usePreviousContext ? context.contents ?? [] : []
     const promptAsContent = { role: 'user', parts: [{ text: prompt }] }
     const inputContents: Content[] = [...previousContents, promptAsContent]
-    const request = { contents: inputContents, temperature, maxTokens }
+    const request: GenerateContentRequest = {
+      contents: inputContents,
+      generation_config: { temperature, max_output_tokens: maxTokens },
+    }
 
     const projectID = await getProjectID()
     const vertexAI = new VertexAI({ project: projectID, location })
