@@ -76,7 +76,7 @@ export default function PromptView({
   const minWidth = 400
   const minTopPaneHeight = 120
   const rowCount = GetTestDataRowCount(variables, inputValues)
-  const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 162 + rowCount * 33) : 94) : 64
+  const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 162 + rowCount * 33) : 84) : 51
   const maxBottomPaneHeight = canShowTestData && testDataExpanded ? Infinity : minBottomPaneHeight
   return (
     <Allotment vertical>
@@ -136,7 +136,7 @@ export default function PromptView({
             </Collapsible>
           </div>
         )}
-        <div className='p-4'>
+        <div className='px-2 py-2.5'>
           <RunButtons
             runTitle={activeVersion.runs.length > 0 && !isDirty ? 'Run again' : 'Run'}
             variables={variables}

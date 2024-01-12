@@ -30,7 +30,7 @@ export default function RunCell({
   const continuationID = run.continuationID
   const isContinuation = !!continuationID || (run.continuations ?? []).length > 0
 
-  const baseClass = 'flex flex-col gap-2.5 p-4 whitespace-pre-wrap border rounded-lg text-gray-700'
+  const baseClass = 'flex flex-col gap-2.5 p-3 whitespace-pre-wrap border rounded-lg text-gray-700'
   const anyRunFailed = [run, ...(run.continuations ?? [])].some(run => run.failed)
   const selected = isSelected || !onSelect
   const colorClass = anyRunFailed

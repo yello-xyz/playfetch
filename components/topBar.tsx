@@ -5,7 +5,7 @@ import Button from './button'
 
 export default function TopBar({ children }: { children: ReactNode }) {
   return (
-    <div className='z-20 flex items-center justify-between w-full py-2 pl-2 pr-4 border-b border-gray-200'>
+    <div className='z-20 flex items-center justify-between w-full py-2 pl-2 pr-2 border-b border-gray-200'>
       {children}
     </div>
   )
@@ -20,8 +20,8 @@ export const TopBarBackItem = ({
   onNavigateBack: () => void
   children?: ReactNode
 }) => (
-  <TopBarAccessoryItem className='flex gap-2.5'>
-    <Button type='outline' onClick={onNavigateBack}>
+  <TopBarAccessoryItem className='flex gap-2'>
+    <Button type='outline' onClick={onNavigateBack} paddingClass='pl-2 pr-3'>
       <Icon icon={backIcon} />
       <span className='font-normal'>{title ?? 'Back'}</span>
     </Button>
