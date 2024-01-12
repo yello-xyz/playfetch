@@ -8,7 +8,7 @@ import feedbackIcon from '@/public/feedback.svg'
 export default function Sidebar({ children, rightBorder }: { children: ReactNode; rightBorder?: boolean }) {
   const borderClass = rightBorder ? 'border-r border-gray-200' : ''
   return (
-    <div className={`flex flex-col h-full gap-4 px-2 pt-2 pb-4 overflow-y-auto ${borderClass}`}>
+    <div className={`flex flex-col h-full gap-3 px-1.5 pt-1.5 pb-1.5 overflow-y-auto ${borderClass}`}>
       {children}
       <FeedbackSection />
     </div>
@@ -74,7 +74,7 @@ export function SidebarButton({
 }) {
   const activeClass = 'bg-blue-50'
   const baseHoverClass = 'hover:bg-gray-100'
-  const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg group w-[220px] h-8'
+  const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg group w-[196px] h-8'
   const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
     <LinkWrapper link={link} target={target} prefetch={prefetch}>

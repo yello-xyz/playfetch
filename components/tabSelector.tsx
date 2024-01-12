@@ -128,7 +128,7 @@ function TabButton<T extends string>({
 }
 
 const headerClassName =
-  'select-none px-2 py-2.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 bg-transparent'
+  'select-none px-2 py-1.5 font-medium outline-none whitespace-nowrap leading-6 text-gray-700 bg-transparent'
 
 export function HeaderItem({
   active = true,
