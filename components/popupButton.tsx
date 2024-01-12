@@ -18,7 +18,7 @@ export function PopupButton({
   popUpAbove?: boolean
   children: ReactNode
 }) {
-  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-8 border border-gray-300 '
+  const baseClass = 'flex items-center justify-between gap-1 px-2 rounded-md h-8 border border-gray-300 shadow-lg'
   const disabledClass = disabled ? 'opacity-40 select-none' : 'cursor-pointer hover:bg-gray-100'
 
   return (
@@ -60,7 +60,7 @@ export function CustomPopupButton({
         onSetPopup({
           top: !popUpAbove ? iconRect.y + 48 : undefined,
           left: (!alignRight && !popUpAbove) || fixedWidth ? iconRect.x : undefined,
-          bottom: popUpAbove ? iconRect.y - 10 : undefined,
+          bottom: popUpAbove ? iconRect.y - 6 : undefined,
           right: alignRight || popUpAbove || fixedWidth ? iconRect.x + iconRect.width : undefined,
         })
       }
