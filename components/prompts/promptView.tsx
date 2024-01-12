@@ -71,8 +71,8 @@ export default function PromptView({
 
   const minWidth = 400
   const minTopPaneHeight = 120
-  const minBottomPaneHeight = testDataExpanded ? 195 : 94
-  const maxBottomPaneHeight = testDataExpanded ? Infinity : 94
+  const minBottomPaneHeight = canShowTestData ? testDataExpanded ? 195 : 94 : 64
+  const maxBottomPaneHeight = canShowTestData && testDataExpanded ? Infinity : minBottomPaneHeight
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>
