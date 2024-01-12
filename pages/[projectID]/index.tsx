@@ -253,7 +253,7 @@ export default function Home({
                           </ProjectTopBar>
                         </Suspense>
                       )}
-                      sidebar={
+                      sidebar={rightBorder => 
                         <Suspense>
                           <ProjectSidebar
                             activeItem={activeItem}
@@ -266,6 +266,7 @@ export default function Home({
                             onSelectCompare={selectCompare}
                             onSelectEndpoints={selectEndpoints}
                             onSelectSettings={selectSettings}
+                            rightBorder={rightBorder}
                           />
                         </Suspense>
                       }>

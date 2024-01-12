@@ -11,7 +11,7 @@ export default function ProjectPaneWrapper({
   children,
 }: {
   topBar: (toggleSidebarButton: ReactNode) => ReactNode
-  sidebar: ReactNode
+  sidebar: (rightBorder: boolean) => ReactNode
   children: ReactNode
 }) {
   const [showStickySidebar, setShowStickySidebar] = useState(true)
@@ -84,7 +84,7 @@ export default function ProjectPaneWrapper({
     }
   }
 
-  const hoverSidebarStyle = 'bg-white border border-gray-200 rounded-lg drop-shadow'
+  const hoverSidebarStyle = 'bg-white border border-gray-200 rounded-lg shadow'
   const animation = isHidingHoverSidebar
     ? 'animate-[slideOutLeft_200ms_ease-in]'
     : 'animate-[slideInLeft_200ms_ease-out]'
@@ -101,14 +101,14 @@ export default function ProjectPaneWrapper({
       <div
         className='relative flex items-stretch flex-1 overflow-hidden'
         onMouseMove={showStickySidebar ? undefined : detectLeftEdge}>
-        {showStickySidebar && sidebar}
+        {showStickySidebar && sidebar(true)}
         {children}
         {showHoverSidebar && (
           <div
             className={`absolute overflow-y-auto z-10 top-4 left-4 bottom-4 ${hoverSidebarStyle} ${animation}`}
             onMouseEnter={() => setOverHoverSidebar(true)}
             onMouseLeave={onLeaveSidebar}>
-            {sidebar}
+            {sidebar(false)}
           </div>
         )}
       </div>
