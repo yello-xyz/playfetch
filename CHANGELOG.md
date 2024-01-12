@@ -1,5 +1,9 @@
 ## PlayFetch Changelog
 
+### v0.22 - 2024-01-12
+- Improved layout for prompts
+- Support for Gemini Pro (preview)
+
 ### v0.21 - 2024-01-05
 - Improved text editor performance and usability
 - Show token counts in responses
