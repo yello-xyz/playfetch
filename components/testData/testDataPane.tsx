@@ -118,6 +118,7 @@ export default function TestDataPane({
   return (
     <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
       <div
+        key={allVariables.join(',')}
         ref={containerRef}
         className='grid w-full overflow-x-auto bg-gray-25 shrink-0'
         style={{ gridTemplateColumns }}>
