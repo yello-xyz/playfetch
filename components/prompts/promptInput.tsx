@@ -124,7 +124,7 @@ function VariablePopup({ selection, toggleInput }: VariablePopupProps) {
     <div className='flex items-center justify-center overflow-visible text-center max-w-0'>
       <div className='bg-white border border-gray-200 rounded-lg shadow-md whitespace-nowrap hover:border-gray-300'>
         <div
-          className='py-1.5 px-2 text-gray-600 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
+          className='py-1.5 px-1.5 text-dark-gray-700 rounded cursor-pointer hover:bg-gray-50 hover:text-gray-700 rounded-lg'
           onMouseDown={() => toggleInput(selection)}>
           {selection.isToken ? 'Remove Input' : 'Create Input'}
         </div>
