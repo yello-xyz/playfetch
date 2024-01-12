@@ -42,12 +42,11 @@ type Selection = {
 const extractSelection = (editorSelection?: Selection) => {
   const documentSelection = document.getSelection()
   if (editorSelection && documentSelection && documentSelection.rangeCount > 0) {
-    const isContentEditable = documentSelection.anchorNode?.parentElement?.isContentEditable
+    const isSameContext = documentSelection.anchorNode && editorSelection.root.contains(documentSelection.anchorNode)
     const isSingleNode = documentSelection.anchorNode === documentSelection.focusNode
-    const isSameRoot = documentSelection.anchorNode && editorSelection.root.contains(documentSelection.anchorNode)
     const range = documentSelection.getRangeAt(0)
     const selectionRect = range.getBoundingClientRect()
-    if (isContentEditable && isSingleNode && isSameRoot && editorSelection.text.length > 0 && !!selectionRect.width) {
+    if (isSameContext && isSingleNode && editorSelection.text.length > 0 && !!selectionRect.width) {
       const popupX = selectionRect.left + selectionRect.width / 2
       const popupY = selectionRect.top - 34
       return { ...editorSelection, popupX, popupY }
