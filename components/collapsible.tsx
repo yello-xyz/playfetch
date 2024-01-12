@@ -5,7 +5,8 @@ import useInitialState from '@/src/client/hooks/useInitialState'
 
 export default function Collapsible({
   title,
-  className = 'ml-6',
+  className = '',
+  contentClassName = 'ml-6',
   titleClassName = '',
   initiallyExpanded = false,
   onSetExpanded,
@@ -14,6 +15,7 @@ export default function Collapsible({
 }: {
   title?: string
   className?: string
+  contentClassName?: string
   titleClassName?: string
   initiallyExpanded?: boolean
   onSetExpanded?: (expanded: boolean, shiftClick: boolean) => void
@@ -28,13 +30,13 @@ export default function Collapsible({
   }
 
   return (
-    <div className='flex flex-col'>
+    <div className={className}>
       <div className={`${titleClassName} flex items-center cursor-pointer`} onClick={toggleExpanded}>
         <Icon className={isExpanded ? '' : '-rotate-90'} icon={chevronIcon} />
         <span className='flex-1 font-medium text-gray-700'>{title}</span>
         {rightHandItems && <div className='self-end'>{rightHandItems}</div>}
       </div>
-      {isExpanded && <div className={className}>{children}</div>}
+      {isExpanded && <div className={contentClassName}>{children}</div>}
     </div>
   )
 }

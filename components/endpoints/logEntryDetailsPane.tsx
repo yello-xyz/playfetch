@@ -136,7 +136,7 @@ function CollapsibleContent({
       initiallyExpanded={isExpanded ?? true}
       onSetExpanded={setExpanded}
       title={formattedDate}
-      className='flex flex-col gap-6 pt-2 ml-6'>
+      contentClassName='flex flex-col gap-6 pt-2 ml-6'>
       {children}
     </Collapsible>
   ) : (

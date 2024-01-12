@@ -119,7 +119,8 @@ const PromptSection = ({
   <Collapsible
     title={title}
     initiallyExpanded={isExpanded}
-    className='pt-1 ml-4'
+    className='flex flex-col'
+    contentClassName='pt-1 ml-4'
     titleClassName='-ml-2'
     onSetExpanded={setExpanded}>
     {children}

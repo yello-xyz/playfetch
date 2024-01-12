@@ -108,12 +108,13 @@ export default function PromptView({
       </Allotment.Pane>
       <Allotment.Pane minSize={minBottomPaneHeight} maxSize={maxBottomPaneHeight} className='flex flex-col'>
         {canShowTestData && (
-          <div className='flex-1 min-h-0 overflow-y-auto'>
+          <div className='flex-1 min-h-0'>
             <Collapsible
               key={testDataExpanded.toString()}
               title='Test Data'
               initiallyExpanded={testDataExpanded}
-              className='mt-1.5 border-t border-gray-200'
+              className='flex flex-col h-full'
+              contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto'
               titleClassName='pt-1.5 pl-0.5'
               rightHandItems={<IconButton className='mr-3 rounded' icon={expandIcon} onClick={expandTestData} />}
               onSetExpanded={setTestDataExpanded}>
