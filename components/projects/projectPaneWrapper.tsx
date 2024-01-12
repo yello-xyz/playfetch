@@ -84,7 +84,7 @@ export default function ProjectPaneWrapper({
     }
   }
 
-  const hoverSidebarStyle = 'bg-white border border-gray-200 rounded-lg shadow'
+  const hoverSidebarStyle = 'bg-white border border-gray-200 rounded-lg shadow-[0_0px_8px_8px_rgba(0,0,0,0.04)]'
   const animation = isHidingHoverSidebar
     ? 'animate-[slideOutLeft_200ms_ease-in]'
     : 'animate-[slideInLeft_200ms_ease-out]'
