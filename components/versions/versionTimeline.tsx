@@ -57,7 +57,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
             setFilters={setFilters}
             tabSelector={tabSelector}
           />
-          <div className='flex flex-col px-3 pb-1.5 pt-3 overflow-y-auto gap-0'>
+          <div className='flex flex-col pl-1.5 pr-3 pb-1.5 pt-2 overflow-y-auto gap-0'>
             {filteredVersions.map((version, index) => (
               <VersionCell
                 key={index}

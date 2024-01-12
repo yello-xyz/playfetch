@@ -101,7 +101,7 @@ function VerticalBarWrapper({
   children: ReactNode
 }) {
   const bulletColor =
-    sequenceNumber === undefined ? 'border border-gray-700' : isActive ? 'bg-dark-gray-700' : 'bg-gray-200'
+    sequenceNumber === undefined ? 'border border-gray-200' : isActive ? 'bg-dark-gray-700' : 'bg-gray-200'
   return (
     <div id={id} className='flex items-stretch gap-3'>
       {!(isFirst && isLast) && (

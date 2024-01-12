@@ -136,7 +136,7 @@ export default function RunTimeline({
         </div>
       )}
       {runs.length > 0 ? (
-        <div className='flex flex-col flex-1 gap-3 p-4 overflow-y-auto'>
+        <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
           {sortedRuns.map(run => (
             <RunCell
               key={run.id}
