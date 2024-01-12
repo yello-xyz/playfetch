@@ -59,7 +59,13 @@ export default function Editor({
   tokenizer?: (stream: StringStream) => string
   tokenStyle?: TagStyle
   setExtractSelection?: (
-    extractSelection: () => (tokenType: string) => { text: string; from: number; to: number; isToken: boolean }
+    extractSelection: () => (tokenType: string) => {
+      root: Node
+      text: string
+      from: number
+      to: number
+      isToken: boolean
+    }
   ) => void
   className?: string
   placeholder?: string
@@ -141,7 +147,7 @@ export default function Editor({
         const isToken = node.type.name === tokenType
         const from = isToken ? node.from : selection.from
         const to = isToken ? node.to : selection.to
-        return { isToken, text: view.state.sliceDoc(from, to).toString(), from, to }
+        return { root: view.dom, isToken, text: view.state.sliceDoc(from, to).toString(), from, to }
       })
     }
   }, [view, setExtractSelection])
