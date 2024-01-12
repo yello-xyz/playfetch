@@ -105,7 +105,7 @@ function VerticalBarWrapper({
   return (
     <div id={id} className='flex items-stretch gap-3'>
       {!(isFirst && isLast) && (
-        <div className='flex flex-col items-end w-10 gap-1 -ml-2'>
+        <div className='flex flex-col items-end min-w-[40px] gap-1 -ml-2'>
           <div className='flex items-center gap-2'>
             <span className={`${isActive ? 'text-gray-700' : 'text-gray-300'} text-xs font-medium`}>
               {sequenceNumber}
