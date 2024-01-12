@@ -57,7 +57,7 @@ export default function usePromptVersion(
       }
       setPreviousLastVersion(lastVersion)
     }
-  }, [previousLastVersion, lastVersion, activeVersion])
+  }, [setCurrentVersion, previousLastVersion, lastVersion, activeVersion])
 
   return [currentVersion, versions, updatePrompt, updateConfig, isDirty] as const
 }
