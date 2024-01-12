@@ -161,7 +161,12 @@ export default function TestDataPane({
                     className={`h-full ${border(col)} ${truncate}`}
                     value={getInputValue(row, variable)}
                     setValue={value => setInputValue(row, variable, value)}
-                    onBlur={() => persistInputValuesIfNeeded()}
+                    onBlur={() => {
+                      persistInputValuesIfNeeded()
+                      setActiveCell(activeCell =>
+                        activeCell?.[0] === row && activeCell?.[1] === col ? undefined : activeCell
+                      )
+                    }}
                     onFocus={() => setActiveCell([row, col])}
                     onKeyDown={event => checkDeleteRow(event, row)}
                     bordered={false}
