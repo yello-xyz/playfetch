@@ -26,6 +26,7 @@ export default function ProjectSidebar({
   onSelectCompare,
   onSelectEndpoints,
   onSelectSettings,
+  rightBorder,
 }: {
   activeItem?: ActiveItem
   workspaces: Workspace[]
@@ -37,6 +38,7 @@ export default function ProjectSidebar({
   onSelectCompare: () => void
   onSelectEndpoints: () => void
   onSelectSettings: () => void
+  rightBorder: boolean
 }) {
   const activeProject = useActiveProject()
   const reference = (item: Prompt | Chain) =>
@@ -62,7 +64,7 @@ export default function ProjectSidebar({
     activeItem?.id === item.id
 
   return (
-    <Sidebar>
+    <Sidebar rightBorder={rightBorder}>
       <SidebarSection>
         <SidebarButton
           title='Compare'

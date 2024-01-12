@@ -5,9 +5,10 @@ import Link from 'next/link'
 import documentationIcon from '@/public/help.svg'
 import feedbackIcon from '@/public/feedback.svg'
 
-export default function Sidebar({ children }: { children: ReactNode }) {
+export default function Sidebar({ children, rightBorder }: { children: ReactNode; rightBorder?: boolean }) {
+  const borderClass = rightBorder ? 'border-r border-gray-200' : ''
   return (
-    <div className='flex flex-col h-full gap-4 px-2 pt-2 pb-4 overflow-y-auto border-r border-gray-200'>
+    <div className={`flex flex-col h-full gap-4 px-2 pt-2 pb-4 overflow-y-auto ${borderClass}`}>
       {children}
       <FeedbackSection />
     </div>
