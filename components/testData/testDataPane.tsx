@@ -130,7 +130,7 @@ export default function TestDataPane({
           const isRowSelected = testConfig.rowIndices.includes(row)
           const border = (col: number) =>
             isCellActive(row, col) ? 'border border-blue-400' : 'border-b border-l border-gray-200'
-          const truncate = isRowActive(row) ? '' : 'max-h-[46px] line-clamp-2'
+          const truncate = isRowActive(row) ? '' : `max-h-[46px] ${isRowEmpty(row) ? '' : 'line-clamp-2'}`
           return (
             <Fragment key={row}>
               <div className='px-2 py-1 border-b border-gray-200'>
