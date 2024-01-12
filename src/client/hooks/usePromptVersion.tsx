@@ -1,9 +1,10 @@
-import { PromptConfig, PromptVersion, Prompts } from '@/types'
+import { ActivePrompt, PromptConfig, PromptVersion, Prompts } from '@/types'
 import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
 import { SupportedPromptKeysForModel, SupportsJsonMode, SupportsSeed } from '@/src/common/providerMetadata'
 
 export default function usePromptVersion(
+  prompt: ActivePrompt,
   activeVersion: PromptVersion,
   setModifiedVersion: (version: PromptVersion) => void
 ) {
@@ -37,5 +38,7 @@ export default function usePromptVersion(
       return { ...currentVersion, prompts }
     })
 
-  return [currentVersion, updatePrompt, updateConfig, isDirty] as const
+  const versions = prompt.versions
+
+  return [currentVersion, versions, updatePrompt, updateConfig, isDirty] as const
 }

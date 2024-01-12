@@ -51,7 +51,11 @@ export default function PromptView({
   const saveAndRun = async (inputs: PromptInputs[], dynamicInputs: PromptInputs[]) =>
     runPrompt(savePrompt, inputs, dynamicInputs)
 
-  const [currentVersion, updatePrompt, updateConfig, isDirty] = usePromptVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, versions, updatePrompt, updateConfig, isDirty] = usePromptVersion(
+    prompt,
+    activeVersion,
+    setModifiedVersion
+  )
 
   const checkModelAvailable = useCheckModelAvailable()
   const isModelAvailable = checkModelAvailable(currentVersion.config.model)
@@ -81,6 +85,7 @@ export default function PromptView({
           <Allotment.Pane minSize={minWidth} preferredSize='50%'>
             <PromptTabs
               prompt={prompt}
+              versions={versions}
               activeVersion={activeVersion}
               setActiveVersion={setActiveVersion}
               currentVersion={currentVersion}

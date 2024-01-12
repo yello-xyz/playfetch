@@ -40,11 +40,16 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
-  const [currentVersion, updatePrompt, updateConfig] = usePromptVersion(activeVersion, setModifiedVersion)
+  const [currentVersion, versions, updatePrompt, updateConfig] = usePromptVersion(
+    prompt,
+    activeVersion,
+    setModifiedVersion
+  )
 
   return (
     <PromptTabs
       prompt={prompt}
+      versions={versions}
       activeVersion={activeVersion}
       setActiveVersion={selectVersion}
       currentVersion={currentVersion}
