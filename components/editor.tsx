@@ -25,7 +25,7 @@ const editorTheme = (preformatted: boolean, bordered: boolean) =>
     '.cm-content': {
       fontFamily: preformatted ? mono.style.fontFamily : inter.style.fontFamily,
       color: preformatted ? '#71B892' : '#333A46',
-      padding: '4px 8px',
+      padding: '6px 10px',
     },
     '.cm-line': { padding: '0px' },
     '.cm-placeholder': { color: '#B5B7BF' },

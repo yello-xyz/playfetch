@@ -44,7 +44,7 @@ export default function VersionCell<Version extends PromptVersion | ChainVersion
       isLast={isLast}
       isActive={isActiveVersion}>
       <div
-        className={`flex-1 border rounded-lg cursor-pointer px-3 py-2.5 flex flex-col gap-2 mb-1.5 mt-1 ${
+        className={`flex-1 border rounded-lg cursor-pointer pl-4 pr-3 py-2.5 flex flex-col gap-2 mb-1.5 mt-1 ${
           isActiveVersion
             ? 'bg-blue-25 border-blue-100'
             : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
