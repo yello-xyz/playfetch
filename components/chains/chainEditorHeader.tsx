@@ -61,11 +61,11 @@ function HeaderTitle({
   const submitRename = (name: string) => onRename(name).then(() => setLabel(undefined))
 
   return (
-    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-11'>
+    <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-9'>
       <div
-        className='flex items-center h-full font-medium select-none whitespace-nowrap cursor-text'
+        className='flex items-center h-full font-medium select-none whitespace-nowrap cursor-text gap-1'
         onClick={() => setLabel(chainName)}>
-        {label === undefined && <Icon icon={chainIcon} className='h-full py-2.5' />}
+        {label === undefined && <Icon icon={chainIcon} className='h-full py-1.5' />}
         {label !== undefined ? (
           <EditableHeaderItem
             value={label}
@@ -81,7 +81,7 @@ function HeaderTitle({
         (versionIsSaved && versionIsPublished ? (
           <span className='text-gray-400 whitespace-nowrap'>Version {versionIndex + 1}</span>
         ) : (
-          <span className='px-2 py-1 text-gray-400 rounded bg-gray-50'>
+          <span className='px-2 py-0.5 text-gray-400 rounded bg-gray-50'>
             {versionIsSaved ? 'Draft Version' : 'Unsaved'}
           </span>
         ))}
