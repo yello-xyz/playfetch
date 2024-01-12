@@ -68,7 +68,7 @@ export default function ProjectTopBar({
             </div>
           </div>
         </div>
-        <TopBarAccessoryItem className='flex items-center justify-end gap-4'>
+        <TopBarAccessoryItem className='flex items-center justify-end gap-2'>
           <UserAvatars users={activeProject.users} />
           <InviteButton
             users={activeProject.users}
