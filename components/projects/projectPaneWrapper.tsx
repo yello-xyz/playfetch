@@ -105,7 +105,7 @@ export default function ProjectPaneWrapper({
         {children}
         {showHoverSidebar && (
           <div
-            className={`absolute overflow-y-auto z-10 top-4 left-4 bottom-4 ${hoverSidebarStyle} ${animation}`}
+            className={`absolute overflow-y-auto z-40 top-4 left-4 bottom-4 ${hoverSidebarStyle} ${animation}`}
             onMouseEnter={() => setOverHoverSidebar(true)}
             onMouseLeave={onLeaveSidebar}>
             {sidebar(false)}
