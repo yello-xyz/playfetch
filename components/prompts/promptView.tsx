@@ -115,7 +115,7 @@ export default function PromptView({
               title='Test Data'
               initiallyExpanded={testDataExpanded}
               className='flex flex-col h-full'
-              contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto'
+              contentClassName='mt-1.5 border-t border-gray-200 overflow-y-auto '
               titleClassName='pt-1.5 pl-0.5'
               rightHandItems={<IconButton className='mr-3 rounded' icon={expandIcon} onClick={expandTestData} />}
               onSetExpanded={setTestDataExpanded}>
