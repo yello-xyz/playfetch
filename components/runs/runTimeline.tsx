@@ -14,6 +14,8 @@ import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import { MergeRuns, SortRuns } from '@/src/client/runMerging'
 
+const identifierForRun = (runID: number) => `r${runID}`
+
 export default function RunTimeline({
   runs = [],
   version,
@@ -42,8 +44,6 @@ export default function RunTimeline({
   isRunning?: boolean
   skipHeader?: boolean
 }) {
-  const identifierForRun = (runID: number) => `r${runID}`
-
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
       setTimeout(() => {
@@ -81,12 +81,6 @@ export default function RunTimeline({
       ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
       : undefined
 
-  const runContinuation =
-    version && runVersion
-      ? async (continuationID: number, message: string, inputKey: string) =>
-          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [{}], continuationID)
-      : undefined
-
   return (
     <div className='relative flex flex-col h-full'>
       {!skipHeader && (
@@ -106,7 +100,7 @@ export default function RunTimeline({
               isRunning={isRunning}
               isSelected={isRunSelected(run)}
               onSelect={selectRun(run)}
-              runContinuation={runContinuation}
+              runVersion={runVersion}
               selectInputValue={selectInputValue}
               onRatingUpdate={onRatingUpdate}
             />
