@@ -84,6 +84,7 @@ const TestDataPopup = ({
         testConfig={currentTestConfig}
         setTestConfig={updateTestConfig}
         asModalPopup
+        skipButtonBorder
       />
     </PopupContent>
   )

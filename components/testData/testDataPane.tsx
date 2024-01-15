@@ -33,6 +33,7 @@ export default function TestDataPane({
   testConfig,
   setTestConfig,
   asModalPopup = false,
+  skipButtonBorder = false,
 }: {
   variables: string[]
   staticVariables: string[]
@@ -42,6 +43,7 @@ export default function TestDataPane({
   testConfig: TestConfig
   setTestConfig: (testConfig: TestConfig) => void
   asModalPopup?: boolean
+  skipButtonBorder?: boolean
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -124,8 +126,12 @@ export default function TestDataPane({
 
   const dynamicVariables = variables.filter(variable => !staticVariables.includes(variable))
   const [_, dynamicInputRows] = SelectInputRows(inputValues, dynamicVariables, testConfig)
+  const shouldShowOptions = !asModalPopup && dynamicInputRows.length > 0
 
   const gridTemplateColumns = `58px repeat(${allVariables.length}, minmax(240px, 1fr))`
+  const buttonBaseClass = 'flex items-center justify-center py-1 bg-gray-25 font-regular'
+  const buttonCursorClass = canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
+  const buttonBorderClass = !skipButtonBorder || shouldShowOptions ? 'border-b border-gray-200' : ''
   return (
     <div className='flex flex-col items-stretch flex-1 h-full overflow-y-auto'>
       <div
@@ -186,15 +192,13 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className={`flex items-center justify-center py-1 bg-gray-25 font-regular ${
-          canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
-        }`}
+        className={`${buttonBaseClass} ${buttonCursorClass} ${buttonBorderClass}`}
         onClick={canAddRow ? addInput : undefined}>
         <Icon icon={addIcon} className={canAddRow ? '' : 'opacity-40'} />
         Add Row
       </div>
-      {!asModalPopup && dynamicInputRows.length > 0 && (
-        <div className='flex flex-wrap items-center px-3 pt-2 gap-y-2 gap-x-4'>
+      {shouldShowOptions && (
+        <div className='flex flex-wrap items-center px-3 py-2 gap-y-2 gap-x-4'>
           <OptionSection
             label={
               <>
