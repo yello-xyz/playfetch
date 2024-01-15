@@ -9,10 +9,10 @@ import {
   Run,
 } from '@/types'
 import { useState } from 'react'
-import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { IdentifierForRun, MergeRuns, SortRuns } from '@/src/client/runMerging'
+import { GroupRuns, IdentifierForRun, MergeRuns, SortRuns } from '@/src/client/runMerging'
+import { RunGroup } from './runGroup'
 
 export default function RunTimeline({
   runs = [],
@@ -88,18 +88,18 @@ export default function RunTimeline({
       )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
-          {mergedRuns.map(run => (
-            <RunCell
-              key={run.id}
-              run={run}
+          {GroupRuns(mergedRuns).map((group, index) => (
+            <RunGroup
+              key={index}
+              group={group}
               version={version}
               activeItem={activeItem}
-              isRunning={isRunning}
-              isSelected={isRunSelected(run)}
-              onSelect={selectRun(run)}
+              isRunSelected={isRunSelected}
+              selectRun={selectRun}
               runVersion={runVersion}
               selectInputValue={selectInputValue}
               onRatingUpdate={onRatingUpdate}
+              isRunning={isRunning}
             />
           ))}
         </div>
