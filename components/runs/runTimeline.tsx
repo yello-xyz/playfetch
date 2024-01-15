@@ -12,9 +12,7 @@ import { useState } from 'react'
 import RunCell from './runCell'
 import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { MergeRuns, SortRuns } from '@/src/client/runMerging'
-
-const identifierForRun = (runID: number) => `r${runID}`
+import { IdentifierForRun, MergeRuns, SortRuns } from '@/src/client/runMerging'
 
 export default function RunTimeline({
   runs = [],
@@ -47,7 +45,7 @@ export default function RunTimeline({
   const focusRun = (focusRunID?: number) => {
     if (focusRunID !== undefined) {
       setTimeout(() => {
-        const element = document.getElementById(identifierForRun(focusRunID))
+        const element = document.getElementById(IdentifierForRun(focusRunID))
         if (runs.length > 1 && element) {
           element.scrollIntoView({ behavior: 'auto', block: 'start' })
         }
@@ -93,7 +91,6 @@ export default function RunTimeline({
           {mergedRuns.map(run => (
             <RunCell
               key={run.id}
-              identifierForRun={identifierForRun}
               run={run}
               version={version}
               activeItem={activeItem}

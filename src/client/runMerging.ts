@@ -1,5 +1,7 @@
 import { IsProperRun, PartialRun, Run } from '@/types'
 
+export const IdentifierForRun = (runID: number) => `r${runID}`
+
 const lastContinuationTimestamp = <T extends { timestamp: number; continuationID?: number }>(run: T, runs: T[]) =>
   run.continuationID
     ? Math.max(...runs.filter(r => r.continuationID === run.continuationID).map(r => r.timestamp))

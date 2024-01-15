@@ -5,7 +5,6 @@ import RunCellBody from './runCellBody'
 import RunCellContinuation from './runCellContinuation'
 
 export default function RunCell({
-  identifierForRun,
   run,
   version,
   activeItem,
@@ -16,7 +15,6 @@ export default function RunCell({
   selectInputValue,
   onRatingUpdate,
 }: {
-  identifierForRun: (runID: number) => string
   run: PartialRun | Run
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
@@ -55,7 +53,6 @@ export default function RunCell({
       <div className='flex flex-col gap-2.5'>
         <RunCellHeader run={run} />
         <RunCellBody
-          identifierForRun={identifierForRun}
           run={run}
           version={version}
           activeItem={activeItem}
@@ -73,7 +70,6 @@ export default function RunCell({
         <RunCellContinuation
           run={run}
           continuations={run.continuations ?? []}
-          identifierForRun={identifierForRun}
           activeItem={activeItem}
           version={version}
           isRunning={isRunning}

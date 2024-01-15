@@ -12,7 +12,6 @@ import useInitialState from '@/src/client/hooks/useInitialState'
 export default function RunCellContinuation({
   run,
   continuations,
-  identifierForRun,
   activeItem,
   version,
   isRunning,
@@ -23,7 +22,6 @@ export default function RunCellContinuation({
 }: {
   run: PartialRun | Run
   continuations: (PartialRun | Run)[]
-  identifierForRun: (runID: number) => string
   activeItem?: ActivePrompt | ActiveChain
   version?: PromptVersion | ChainVersion
   isRunning?: boolean
@@ -71,7 +69,6 @@ export default function RunCellContinuation({
             </>
           )}
           <RunCellBody
-            identifierForRun={identifierForRun}
             run={run}
             version={version}
             activeItem={activeItem}

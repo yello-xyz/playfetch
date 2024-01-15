@@ -6,15 +6,14 @@ import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import useGlobalPopup from '@/src/client/context/globalPopupContext'
 import CommentInputPopup, { CommentInputProps, CommentSelection, useExtractCommentSelection } from './commentInputPopup'
 import { useLoggedInUser } from '@/src/client/context/userContext'
+import { IdentifierForRun } from '@/src/client/runMerging'
 
 export default function RunCellBody({
-  identifierForRun,
   run,
   version,
   activeItem,
   isContinuation,
 }: {
-  identifierForRun: (runID: number) => string
   run: PartialRun | Run
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
@@ -96,7 +95,7 @@ export default function RunCellBody({
     [version, setPopup, updateSelectionForComment]
   )
 
-  useExtractCommentSelection(IsProperRun(run) ? identifierForRun(run.id) : null, onUpdateSelection)
+  useExtractCommentSelection(IsProperRun(run) ? IdentifierForRun(run.id) : null, onUpdateSelection)
 
   const spans = []
 
@@ -128,7 +127,7 @@ export default function RunCellBody({
     <>
       {isContinuation && (IsProperRun(run) || !run.userID ? <RoleHeader /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
-        <div className='flex-1' id={identifierForRun(run.id)}>
+        <div className='flex-1' id={IdentifierForRun(run.id)}>
           {spans}
         </div>
       </BorderedSection>
