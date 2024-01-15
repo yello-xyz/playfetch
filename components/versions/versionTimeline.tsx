@@ -1,10 +1,22 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import Filters, { BuildFilter, Filter } from '../filters'
+import Filters, { BuildFilter, Filter, FilterItem } from '../filters'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
+import { FilterContentForPromptVersion } from '@/src/common/versionsEqual'
+
+const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(version: Version): FilterItem => ({
+  userID: version.userID,
+  labels: version.labels,
+  content: IsPromptVersion(version) ? FilterContentForPromptVersion(version) : '',
+})
+
+const BuildVersionFilter =
+  (filters: Filter[]) =>
+  <Version extends PromptVersion | ChainVersion>(version: Version) =>
+    BuildFilter(filters)(FilterItemFromVersion(version))
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -46,7 +58,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     }
   }, [focusedVersion, activeVersion, identifierForVersion])
 
-  const filteredVersions = versions.filter(BuildFilter(filters))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters))
 
   return (
     <div className='relative flex h-full'>
@@ -55,7 +67,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
           <Filters
             users={activeItem.users}
             labelColors={labelColors}
-            items={versions}
+            items={versions.map(FilterItemFromVersion)}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}

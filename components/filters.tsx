@@ -1,4 +1,4 @@
-import { User, PromptVersion, ChainVersion, IsPromptVersion, Run } from '@/types'
+import { User } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import filterIcon from '@/public/filter.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -10,13 +10,13 @@ import { ReactNode, useRef, useState } from 'react'
 import PopupMenu from './popupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
-import { PromptVersionMatchesFilter } from '@/src/common/versionsEqual'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
 type TextFilter = { text: string }
 
 export type Filter = UserFilter | LabelFilter | TextFilter
+export type FilterItem = { userID: number; labels: string[]; content: string }
 
 const isUserFilter = (filter: Filter): filter is UserFilter => 'userID' in filter
 const isLabelFilter = (filter: Filter): filter is LabelFilter => 'label' in filter
@@ -25,28 +25,21 @@ const isTextFilter = (filter: Filter): filter is TextFilter => 'text' in filter
 const userIDsFromFilters = (filters: Filter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
 const labelsFromFilters = (filters: Filter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
 
-export const BuildFilter =
-  <Item extends PromptVersion | ChainVersion | Run>(filters: Filter[]) =>
-  (item: Item) => {
-    const userIDs = userIDsFromFilters(filters)
-    const userFilter = (item: Item) => !userIDs.length || userIDs.includes(item.userID)
+export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
+  const userIDs = userIDsFromFilters(filters)
+  const passedUserFilter = !userIDs.length || userIDs.includes(item.userID)
 
-    const labels = labelsFromFilters(filters)
-    const labelFilter = (item: Item) => !labels.length || item.labels.some(label => labels.includes(label))
+  const labels = labelsFromFilters(filters)
+  const passesLabelFilter = !labels.length || item.labels.some(label => labels.includes(label))
 
-    const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
-    const textFilter = (item: Item) =>
-      !textStrings.length ||
-      textStrings.every(filter =>
-        'output' in item
-          ? item.output.toLowerCase().includes(filter)
-          : IsPromptVersion(item) && PromptVersionMatchesFilter(item, filter)
-      )
+  const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
+  const passesTextFilter =
+    !textStrings.length || textStrings.every(filter => item.content.toLowerCase().includes(filter))
 
-    return userFilter(item) && labelFilter(item) && textFilter(item)
-  }
+  return passedUserFilter && passesLabelFilter && passesTextFilter
+}
 
-export default function Filters<Item extends PromptVersion | ChainVersion | Run>({
+export default function Filters({
   users,
   labelColors,
   items,
@@ -56,7 +49,7 @@ export default function Filters<Item extends PromptVersion | ChainVersion | Run>
 }: {
   users: User[]
   labelColors: Record<string, string>
-  items: Item[]
+  items: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
   tabSelector: (children?: ReactNode) => ReactNode
@@ -130,7 +123,7 @@ const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }
   ) : null
 }
 
-function FilterButton<Item extends PromptVersion | ChainVersion | Run>({
+function FilterButton({
   users,
   labelColors,
   items: items,
@@ -139,7 +132,7 @@ function FilterButton<Item extends PromptVersion | ChainVersion | Run>({
 }: {
   users: User[]
   labelColors: Record<string, string>
-  items: Item[]
+  items: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
 }) {

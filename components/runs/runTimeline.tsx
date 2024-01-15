@@ -11,9 +11,16 @@ import {
 import { useState } from 'react'
 import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
-import { GroupRuns, IdentifierForRun, MergeRuns, SortRuns } from '@/src/client/runMerging'
+import {
+  BuildRunFilter,
+  GroupRuns,
+  IdentifierForRun,
+  MergeRuns,
+  FilterItemFromRun,
+  SortRuns,
+} from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
-import Filters, { BuildFilter, Filter } from '../filters'
+import Filters, { Filter } from '../filters'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
 export default function RunTimeline({
@@ -65,9 +72,7 @@ export default function RunTimeline({
   const [filters, setFilters] = useState<Filter[]>([])
   const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
 
-  const mergedRuns = MergeRuns(SortRuns(runs))
-    .filter(IsProperRun)
-    .filter(run => BuildFilter(filters)({ userID: run.userID, labels: run.labels, content: run.output }))
+  const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
@@ -92,7 +97,7 @@ export default function RunTimeline({
         <Filters
           users={activeItem.users}
           labelColors={labelColors}
-          items={mergedRuns.filter(IsProperRun)}
+          items={mergedRuns.filter(IsProperRun).map(FilterItemFromRun)}
           filters={filters}
           setFilters={setFilters}
           tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
