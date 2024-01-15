@@ -59,6 +59,7 @@ export default function EndpointsTable({
         )
       )}
       <div className={containerClass}>
+        <AnalyticsDashboards analytics={analytics} refreshAnalytics={refreshAnalytics} />
         {groupsLength > 0 ? (
           groups.map((group, index) => (
             <EndpointsGroup
