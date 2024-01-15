@@ -38,7 +38,7 @@ export function RunGroup({
 
   return (
     <div className='flex flex-col flex-1 gap-3'>
-      <div className='font-medium text-center text-gray-500'>{formattedDate}</div>
+      <div className='font-medium text-center text-xs text-gray-500'>{formattedDate}</div>
       {group.map(run => (
         <RunCell
           key={run.id}
