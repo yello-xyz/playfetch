@@ -186,7 +186,7 @@ export default function TestDataPane({
         })}
       </div>
       <div
-        className={`flex items-center justify-center py-1 border-b border-gray-200 bg-gray-25 font-regular ${
+        className={`flex items-center justify-center py-1 bg-gray-25 font-regular ${
           canAddRow ? 'cursor-pointer hover:bg-gray-50' : 'text-gray-400 select-none'
         }`}
         onClick={canAddRow ? addInput : undefined}>
