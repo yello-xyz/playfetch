@@ -64,18 +64,10 @@ export default function Filters<Item extends PromptVersion | ChainVersion | Run>
   const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4 py-2' : ''
 
   return (
-    <div className='flex flex-col'>
-      <div className='z-5 '>
-        {tabSelector(
-          <FilterButton
-            users={users}
-            labelColors={labelColors}
-            items={items}
-            filters={filters}
-            setFilters={setFilters}
-          />
-        )}
-      </div>
+    <div className='z-10 flex flex-col'>
+      {tabSelector(
+        <FilterButton users={users} labelColors={labelColors} items={items} filters={filters} setFilters={setFilters} />
+      )}
       <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell

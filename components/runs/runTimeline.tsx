@@ -13,6 +13,8 @@ import { SingleTabHeader } from '../tabSelector'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import { GroupRuns, IdentifierForRun, MergeRuns, SortRuns } from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
+import Filters, { BuildFilter, Filter } from '../filters'
+import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
 export default function RunTimeline({
   runs = [],
@@ -60,7 +62,12 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
+  const [filters, setFilters] = useState<Filter[]>([])
+  const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
+
   const mergedRuns = MergeRuns(SortRuns(runs))
+    .filter(IsProperRun)
+    .filter(run => BuildFilter(filters)({ userID: run.userID, labels: run.labels, content: run.output }))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
@@ -81,7 +88,16 @@ export default function RunTimeline({
 
   return (
     <div className='relative flex flex-col h-full'>
-      {!skipHeader && <SingleTabHeader label='Responses' />}
+      {!skipHeader && activeItem && (
+        <Filters
+          users={activeItem.users}
+          labelColors={labelColors}
+          items={mergedRuns.filter(IsProperRun)}
+          filters={filters}
+          setFilters={setFilters}
+          tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
+        />
+      )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
           {GroupRuns(mergedRuns).map((group, index) => (
