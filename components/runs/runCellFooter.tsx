@@ -1,10 +1,8 @@
 import { FormatCost, FormatDuration } from '@/src/common/formatting'
 import { ActiveChain, ActivePrompt, IsProperRun, PartialRun, Run } from '@/types'
-import useFormattedDate from '@/src/client/hooks/useFormattedDate'
 import { BorderedSection } from './runCellContinuation'
 import durationIcon from '@/public/duration.svg'
 import costIcon from '@/public/cost.svg'
-import dateIcon from '@/public/date.svg'
 import tokensIcon from '@/public/tokens.svg'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
@@ -25,7 +23,7 @@ export default function RunCellFooter({
   isSelected: boolean
   onRatingUpdate?: (run: Run) => Promise<void>
 }) {
-  return run.duration || run.cost || run.timestamp ? (
+  return run.duration || run.cost ? (
     <BorderedSection border={isContinuation} bridgingGap>
       <div className='flex flex-col w-full gap-2 pt-2 border-t border-gray-200'>
         {IsProperRun(run) && run.labels.length > 0 && activeItem && (
@@ -47,14 +45,11 @@ export default function RunCellFooter({
   ) : null
 }
 
-const RunAttributes = ({ run }: { run: { timestamp?: number; duration?: number; cost?: number; tokens?: number } }) => {
-  const formattedDate = useFormattedDate(run.timestamp)
-
+const RunAttributes = ({ run }: { run: { duration?: number; cost?: number; tokens?: number } }) => {
   return (
     <>
       {!!run.duration && <Attribute icon={durationIcon} value={FormatDuration(run.duration)} />}
       {!!run.cost && <Attribute icon={costIcon} value={FormatCost(run.cost)} />}
-      {formattedDate && <Attribute icon={dateIcon} value={formattedDate} />}
       {!!run.tokens && <Attribute icon={tokensIcon} value={`${run.tokens} tokens`} />}
     </>
   )
