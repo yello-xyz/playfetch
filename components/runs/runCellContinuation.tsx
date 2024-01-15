@@ -68,12 +68,7 @@ export default function RunCellContinuation({
               </BorderedSection>
             </>
           )}
-          <RunCellBody
-            run={run}
-            version={version}
-            activeItem={activeItem}
-            isContinuation
-          />
+          <RunCellBody run={run} version={version} activeItem={activeItem} isContinuation />
           <RunCellFooter
             run={run}
             activeItem={activeItem}

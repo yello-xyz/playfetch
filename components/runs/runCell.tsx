@@ -45,19 +45,14 @@ export default function RunCell({
   const colorClass = anyRunFailed
     ? 'bg-red-25 border-red-50'
     : selected
-    ? 'bg-blue-25 border-blue-100'
-    : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
+      ? 'bg-blue-25 border-blue-100'
+      : 'bg-gray-25 border-gray-200 hover:bg-gray-50 cursor-pointer'
 
   return (
     <div className={`${baseClass} ${colorClass}`} onClick={isSelected ? undefined : onSelect}>
       <div className='flex flex-col gap-2.5'>
         <RunCellHeader run={run} />
-        <RunCellBody
-          run={run}
-          version={version}
-          activeItem={activeItem}
-          isContinuation={isContinuation}
-        />
+        <RunCellBody run={run} version={version} activeItem={activeItem} isContinuation={isContinuation} />
       </div>
       <RunCellFooter
         run={run}

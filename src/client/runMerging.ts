@@ -22,38 +22,43 @@ export const SortRuns = <T extends { timestamp?: number }>(runs: T[]): T[] => [
 ]
 
 export const MergeRuns = (runs: (PartialRun | Run)[]) =>
-  runs.reduce((runs, run) => {
-    const previousRun = runs.slice(-1)[0]
-    const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+  runs.reduce(
+    (runs, run) => {
+      const previousRun = runs.slice(-1)[0]
+      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
 
-    const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
-    const isParentRun = compareRun && compareRun.parentRunID === run.id
-    const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
-    const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
+      const isParentRun = compareRun && compareRun.parentRunID === run.id
+      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
+      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
 
-    return wasPartialRun || isParentRun || sameParentRun || sameContinuation
-      ? [
-          ...runs.slice(0, -1),
-          {
-            ...previousRun,
-            id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
-            continuations: [...(previousRun.continuations ?? []), run],
-            continuationID: compareRun.continuationID ?? run.continuationID,
-          },
-        ]
-      : [...runs, run]
-  }, [] as (PartialRun | Run)[])
+      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
+        ? [
+            ...runs.slice(0, -1),
+            {
+              ...previousRun,
+              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
+              continuations: [...(previousRun.continuations ?? []), run],
+              continuationID: compareRun.continuationID ?? run.continuationID,
+            },
+          ]
+        : [...runs, run]
+    },
+    [] as (PartialRun | Run)[]
+  )
 
 const groupGranularity = 5 * 60 * 1000
 export const GroupRuns = (runs: (PartialRun | Run)[]): (PartialRun | Run)[][] =>
-  runs.reduce((groupedRuns, run) => {
-    const previousTimestamp = groupedRuns.length > 0
-      ? groupedRuns.slice(-1)[0][0].timestamp ?? new Date().getTime()
-      : undefined
-    const nextTimestamp = run.timestamp ?? new Date().getTime()
-    if (!previousTimestamp || nextTimestamp - previousTimestamp > groupGranularity) {
-      return [...groupedRuns, [run]]
-    } else {
-      return [...groupedRuns.slice(0, -1), [...groupedRuns.slice(-1)[0], run]]
-    }
-  }, [] as (PartialRun | Run)[][])
+  runs.reduce(
+    (groupedRuns, run) => {
+      const previousTimestamp =
+        groupedRuns.length > 0 ? groupedRuns.slice(-1)[0][0].timestamp ?? new Date().getTime() : undefined
+      const nextTimestamp = run.timestamp ?? new Date().getTime()
+      if (!previousTimestamp || nextTimestamp - previousTimestamp > groupGranularity) {
+        return [...groupedRuns, [run]]
+      } else {
+        return [...groupedRuns.slice(0, -1), [...groupedRuns.slice(-1)[0], run]]
+      }
+    },
+    [] as (PartialRun | Run)[][]
+  )
