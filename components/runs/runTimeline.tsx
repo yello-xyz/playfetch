@@ -32,6 +32,32 @@ const sortRuns = <T extends { timestamp?: number }>(runs: T[]): T[] => [
   ...runs.filter(run => !hasTimestamp(run)),
 ]
 
+const mergeRuns = (runs: (PartialRun | Run)[]) =>
+  runs.reduce(
+    (runs, run) => {
+      const previousRun = runs.slice(-1)[0]
+      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+
+      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
+      const isParentRun = compareRun && compareRun.parentRunID === run.id
+      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
+      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
+
+      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
+        ? [
+            ...runs.slice(0, -1),
+            {
+              ...previousRun,
+              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
+              continuations: [...(previousRun.continuations ?? []), run],
+              continuationID: compareRun.continuationID ?? run.continuationID,
+            },
+          ]
+        : [...runs, run]
+    },
+    [] as (PartialRun | Run)[]
+  )
+
 export default function RunTimeline({
   runs = [],
   version,
@@ -80,32 +106,9 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
-  const sortedRuns = sortRuns(runs).reduce(
-    (sortedRuns, run) => {
-      const previousRun = sortedRuns.slice(-1)[0]
-      const compareRun = previousRun?.continuations ? previousRun.continuations.slice(-1)[0] : previousRun
+  const mergedRuns = mergeRuns(sortRuns(runs))
 
-      const wasPartialRun = compareRun && !IsProperRun(compareRun) && compareRun.index < run.index
-      const isParentRun = compareRun && compareRun.parentRunID === run.id
-      const sameParentRun = compareRun && !!run.parentRunID && run.parentRunID === compareRun.parentRunID
-      const sameContinuation = compareRun && !!run.continuationID && run.continuationID === compareRun.continuationID
-
-      return wasPartialRun || isParentRun || sameParentRun || sameContinuation
-        ? [
-            ...sortedRuns.slice(0, -1),
-            {
-              ...previousRun,
-              id: (wasPartialRun && previousRun.id === compareRun.id) || isParentRun ? run.id : previousRun.id,
-              continuations: [...(previousRun.continuations ?? []), run],
-              continuationID: compareRun.continuationID ?? run.continuationID,
-            },
-          ]
-        : [...sortedRuns, run]
-    },
-    [] as (PartialRun | Run)[]
-  )
-
-  const lastPartialRunID = sortedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
+  const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
   const [previousLastRunID, setPreviousLastRunID] = useState(lastPartialRunID)
   if (lastPartialRunID !== previousLastRunID) {
     focusRun(lastPartialRunID)
@@ -118,7 +121,7 @@ export default function RunTimeline({
     run.id === activeRunID ||
     (run.continuations ?? []).some(run => run.id === activeRunID)
   const selectRun = (run: PartialRun | Run) =>
-    sortedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
+    mergedRuns.length > 1 && (setFocusRunID ? activeRunID !== run.id : activeRunID !== undefined)
       ? () => (setFocusRunID ? setFocusRunID(run.id) : setActiveRunID(undefined))
       : undefined
 
@@ -137,7 +140,7 @@ export default function RunTimeline({
       )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
-          {sortedRuns.map(run => (
+          {mergedRuns.map(run => (
             <RunCell
               key={run.id}
               identifierForRun={identifierForRun}
