@@ -24,18 +24,21 @@ const isTextFilter = (filter: Filter): filter is TextFilter => 'text' in filter
 
 const userIDsFromFilters = (filters: Filter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
 const labelsFromFilters = (filters: Filter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
+const contentsFromFilters = (filters: Filter[]) => filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
 
 export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
   const userIDs = userIDsFromFilters(filters)
-  const passedUserFilter = !userIDs.length || item.userIDs.some(userID => userIDs.includes(userID))
+  const itemUserIDs = [...new Set(item.userIDs)]
+  const passedUserFilter = !userIDs.length || itemUserIDs.some(userID => userIDs.includes(userID))
 
   const labels = labelsFromFilters(filters)
-  const passesLabelFilter = !labels.length || item.labels.some(label => labels.includes(label))
+  const itemLabels = [...new Set(item.labels)]
+  const passesLabelFilter = !labels.length || itemLabels.some(label => labels.includes(label))
 
-  const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
+  const contents = contentsFromFilters(filters)
+  const itemContents = [...new Set(item.contents.map(content => content.toLowerCase()))]
   const passesTextFilter =
-    !textStrings.length ||
-    textStrings.every(filter => item.contents.some(content => content.toLowerCase().includes(filter)))
+    !contents.length || contents.every(filter => itemContents.some(content => content.includes(filter)))
 
   return passedUserFilter && passesLabelFilter && passesTextFilter
 }
