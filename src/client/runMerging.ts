@@ -43,3 +43,17 @@ export const MergeRuns = (runs: (PartialRun | Run)[]) =>
         ]
       : [...runs, run]
   }, [] as (PartialRun | Run)[])
+
+const groupGranularity = 5 * 60 * 1000
+export const GroupRuns = (runs: (PartialRun | Run)[]): (PartialRun | Run)[][] =>
+  runs.reduce((groupedRuns, run) => {
+    const previousTimestamp = groupedRuns.length > 0
+      ? groupedRuns.slice(-1)[0][0].timestamp ?? new Date().getTime()
+      : undefined
+    const nextTimestamp = run.timestamp ?? new Date().getTime()
+    if (!previousTimestamp || nextTimestamp - previousTimestamp > groupGranularity) {
+      return [...groupedRuns, [run]]
+    } else {
+      return [...groupedRuns.slice(0, -1), [...groupedRuns.slice(-1)[0], run]]
+    }
+  }, [] as (PartialRun | Run)[][])
