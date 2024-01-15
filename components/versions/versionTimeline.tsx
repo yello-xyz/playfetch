@@ -55,7 +55,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
           <Filters
             users={activeItem.users}
             labelColors={labelColors}
-            versions={versions}
+            items={versions}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}

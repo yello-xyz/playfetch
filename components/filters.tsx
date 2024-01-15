@@ -1,4 +1,4 @@
-import { User, PromptVersion, ChainVersion, IsPromptVersion } from '@/types'
+import { User, PromptVersion, ChainVersion, IsPromptVersion, Run } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import filterIcon from '@/public/filter.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -26,7 +26,7 @@ const userIDsFromFilters = (filters: Filter[]) => filters.filter(isUserFilter).m
 const labelsFromFilters = (filters: Filter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
 
 export const BuildFilter =
-  <Item extends PromptVersion | ChainVersion>(filters: Filter[]) =>
+  <Item extends PromptVersion | ChainVersion | Run>(filters: Filter[]) =>
   (item: Item) => {
     const userIDs = userIDsFromFilters(filters)
     const userFilter = (item: Item) => !userIDs.length || userIDs.includes(item.userID)
@@ -37,12 +37,16 @@ export const BuildFilter =
     const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
     const textFilter = (item: Item) =>
       !textStrings.length ||
-      textStrings.every(filter => IsPromptVersion(item) && PromptVersionMatchesFilter(item, filter))
+      textStrings.every(filter =>
+        'output' in item
+          ? item.output.toLowerCase().includes(filter)
+          : IsPromptVersion(item) && PromptVersionMatchesFilter(item, filter)
+      )
 
     return userFilter(item) && labelFilter(item) && textFilter(item)
   }
 
-export default function Filters<Item extends PromptVersion | ChainVersion>({
+export default function Filters<Item extends PromptVersion | ChainVersion | Run>({
   users,
   labelColors,
   items,
@@ -134,7 +138,7 @@ const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }
   ) : null
 }
 
-function FilterButton<Item extends PromptVersion | ChainVersion>({
+function FilterButton<Item extends PromptVersion | ChainVersion | Run>({
   users,
   labelColors,
   items: items,
