@@ -81,11 +81,7 @@ export default function RunTimeline({
 
   return (
     <div className='relative flex flex-col h-full'>
-      {!skipHeader && (
-        <div className='z-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.03)]'>
-          <SingleTabHeader label='Responses' />
-        </div>
-      )}
+      {!skipHeader && <SingleTabHeader label='Responses' />}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
           {GroupRuns(mergedRuns).map((group, index) => (

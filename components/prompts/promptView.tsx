@@ -95,7 +95,6 @@ export default function PromptView({
           </Allotment.Pane>
           <Allotment.Pane minSize={minWidth}>
             <div className='flex flex-col h-full border-l border-gray-200'>
-              <SingleTabHeader label='Responses' />
               <div className='flex-1 min-h-0 overflow-y-auto'>
                 <RunTimeline
                   runs={[...activeVersion.runs, ...partialRuns]}
@@ -105,7 +104,6 @@ export default function PromptView({
                   runVersion={runPrompt}
                   selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
                   isRunning={isRunning}
-                  skipHeader
                 />
               </div>
             </div>
