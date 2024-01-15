@@ -1,4 +1,4 @@
-import { User, PromptVersion, ChainVersion, IsPromptVersion } from '@/types'
+import { User } from '@/types'
 import clearIcon from '@/public/clear.svg'
 import filterIcon from '@/public/filter.svg'
 import chevronIcon from '@/public/chevron.svg'
@@ -7,71 +7,64 @@ import labelIcon from '@/public/label.svg'
 import textIcon from '@/public/text.svg'
 import UserAvatar from '@/components/users/userAvatar'
 import { ReactNode, useRef, useState } from 'react'
-import PopupMenu from '../popupMenu'
-import Icon from '../icon'
+import PopupMenu from './popupMenu'
+import Icon from './icon'
 import { StaticImageData } from 'next/image'
-import { PromptVersionMatchesFilter } from '@/src/common/versionsEqual'
 
 type UserFilter = { userID: number }
 type LabelFilter = { label: string }
 type TextFilter = { text: string }
 
-export type VersionFilter = UserFilter | LabelFilter | TextFilter
+export type Filter = UserFilter | LabelFilter | TextFilter
+export type FilterItem = { userIDs: number[]; labels: string[]; contents: string[] }
 
-const isUserFilter = (filter: VersionFilter): filter is UserFilter => 'userID' in filter
-const isLabelFilter = (filter: VersionFilter): filter is LabelFilter => 'label' in filter
-const isTextFilter = (filter: VersionFilter): filter is TextFilter => 'text' in filter
+const isUserFilter = (filter: Filter): filter is UserFilter => 'userID' in filter
+const isLabelFilter = (filter: Filter): filter is LabelFilter => 'label' in filter
+const isTextFilter = (filter: Filter): filter is TextFilter => 'text' in filter
 
-const userIDsFromFilters = (filters: VersionFilter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
-const labelsFromFilters = (filters: VersionFilter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
+const userIDsFromFilters = (filters: Filter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
+const labelsFromFilters = (filters: Filter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
+const contentsFromFilters = (filters: Filter[]) => filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
 
-export const BuildVersionFilter =
-  <Version extends PromptVersion | ChainVersion>(filters: VersionFilter[]) =>
-  (version: Version) => {
-    const userIDs = userIDsFromFilters(filters)
-    const userFilter = (version: Version) => !userIDs.length || userIDs.includes(version.userID)
+export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
+  const userIDs = userIDsFromFilters(filters)
+  const itemUserIDs = [...new Set(item.userIDs)]
+  const passedUserFilter = !userIDs.length || itemUserIDs.some(userID => userIDs.includes(userID))
 
-    const labels = labelsFromFilters(filters)
-    const labelFilter = (version: Version) => !labels.length || version.labels.some(label => labels.includes(label))
+  const labels = labelsFromFilters(filters)
+  const itemLabels = [...new Set(item.labels)]
+  const passesLabelFilter = !labels.length || itemLabels.some(label => labels.includes(label))
 
-    const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
-    const textFilter = (version: Version) =>
-      !textStrings.length ||
-      textStrings.every(filter => IsPromptVersion(version) && PromptVersionMatchesFilter(version, filter))
+  const contents = contentsFromFilters(filters)
+  const itemContents = [...new Set(item.contents.map(content => content.toLowerCase()))]
+  const passesTextFilter =
+    !contents.length || contents.every(filter => itemContents.some(content => content.includes(filter)))
 
-    return userFilter(version) && labelFilter(version) && textFilter(version)
-  }
+  return passedUserFilter && passesLabelFilter && passesTextFilter
+}
 
-export default function VersionFilters<Version extends PromptVersion | ChainVersion>({
+export default function Filters({
   users,
   labelColors,
-  versions,
+  items,
   filters,
   setFilters,
   tabSelector,
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: Version[]
-  filters: VersionFilter[]
-  setFilters: (filters: VersionFilter[]) => void
+  items: FilterItem[]
+  filters: Filter[]
+  setFilters: (filters: Filter[]) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4 py-2' : ''
 
   return (
-    <div className='flex flex-col'>
-      <div className='z-5 '>
-        {tabSelector(
-          <FilterButton
-            users={users}
-            labelColors={labelColors}
-            versions={versions}
-            filters={filters}
-            setFilters={setFilters}
-          />
-        )}
-      </div>
+    <div className='z-10 flex flex-col'>
+      {tabSelector(
+        <FilterButton users={users} labelColors={labelColors} items={items} filters={filters} setFilters={setFilters} />
+      )}
       <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
           <FilterCell
@@ -100,7 +93,7 @@ function FilterCell({
   labelColors,
   onClick,
 }: {
-  filter: VersionFilter
+  filter: Filter
   users: User[]
   labelColors: Record<string, string>
   onClick: () => void
@@ -134,37 +127,37 @@ const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }
   ) : null
 }
 
-function FilterButton<Version extends PromptVersion | ChainVersion>({
+function FilterButton({
   users,
   labelColors,
-  versions,
+  items: items,
   filters,
   setFilters,
 }: {
   users: User[]
   labelColors: Record<string, string>
-  versions: Version[]
-  filters: VersionFilter[]
-  setFilters: (filters: VersionFilter[]) => void
+  items: FilterItem[]
+  filters: Filter[]
+  setFilters: (filters: Filter[]) => void
 }) {
   const activeUserIDs = userIDsFromFilters(filters)
-  const versionUserIDs = versions.map(version => version.userID)
-  const countForUserID = (userID: number) => versionUserIDs.filter(id => id === userID).length
+  const itemUserIDs = items.flatMap(item => item.userIDs)
+  const countForUserID = (userID: number) => itemUserIDs.filter(id => id === userID).length
   const availableUsers = users.filter(
-    user => !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < versions.length
+    user => !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < items.length
   )
 
   const activeLabels = labelsFromFilters(filters)
-  const versionLabels = versions.map(version => version.labels)
-  const countForLabel = (label: string) => versionLabels.filter(labels => labels.includes(label)).length
-  const availableLabels = [...new Set(versionLabels.flat())].filter(
-    label => !activeLabels.includes(label) && countForLabel(label) < versions.length
+  const itemLabels = items.map(item => item.labels)
+  const countForLabel = (label: string) => itemLabels.filter(labels => labels.includes(label)).length
+  const availableLabels = [...new Set(itemLabels.flat())].filter(
+    label => !activeLabels.includes(label) && countForLabel(label) < items.length
   )
 
   const [text, setText] = useState('')
   const [menuState, setMenuState] = useState<'collapsed' | 'expanded' | 'user' | 'label' | 'text'>('collapsed')
 
-  const addFilter = (filter: VersionFilter) => {
+  const addFilter = (filter: Filter) => {
     setMenuState('collapsed')
     setFilters([...filters, filter])
   }

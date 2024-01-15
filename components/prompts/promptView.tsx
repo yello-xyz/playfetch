@@ -76,7 +76,7 @@ export default function PromptView({
   const minWidth = 400
   const minTopPaneHeight = 120
   const rowCount = GetTestDataRowCount(variables, inputValues)
-  const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 162 + rowCount * 33) : 84) : 51
+  const minBottomPaneHeight = canShowTestData ? (testDataExpanded ? Math.min(240, 150 + rowCount * 33) : 84) : 52
   const maxBottomPaneHeight = canShowTestData && testDataExpanded ? Infinity : minBottomPaneHeight
   return (
     <Allotment vertical>
@@ -95,7 +95,6 @@ export default function PromptView({
           </Allotment.Pane>
           <Allotment.Pane minSize={minWidth}>
             <div className='flex flex-col h-full border-l border-gray-200'>
-              <SingleTabHeader label='Responses' />
               <div className='flex-1 min-h-0 overflow-y-auto'>
                 <RunTimeline
                   runs={[...activeVersion.runs, ...partialRuns]}
@@ -105,7 +104,6 @@ export default function PromptView({
                   runVersion={runPrompt}
                   selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
                   isRunning={isRunning}
-                  skipHeader
                 />
               </div>
             </div>
@@ -132,6 +130,7 @@ export default function PromptView({
                 persistInputValuesIfNeeded={persistInputValuesIfNeeded}
                 testConfig={testConfig}
                 setTestConfig={setTestConfig}
+                skipButtonBorder
               />
             </Collapsible>
           </div>

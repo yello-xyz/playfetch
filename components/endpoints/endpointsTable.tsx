@@ -150,12 +150,12 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
   )
 
   return (
-    <div className='w-full h-full pb-4 bg-white text-gray-700'>
+    <div className='w-full h-full pb-4 text-gray-700 bg-white'>
       <div className='flex flex-col items-center justify-center h-full gap-1 p-6 border border-gray-200 rounded-lg bg-gray-25'>
         <span className='font-medium'>No Endpoints</span>
-        <span className='w-72 text-sm text-center text-gray-400'>
+        <span className='text-sm text-center text-gray-400 w-72'>
           {onAddEndpoint ? (
-            <span>Create an endpoint to allow integrating prompts or chains into your codebase.</span>
+            <span>Create an endpoint to allow integrating prompts or chains into your code base.</span>
           ) : (
             <span>Create some prompts or chains first to integrate this project into your code base.</span>
           )}

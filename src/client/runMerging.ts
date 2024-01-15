@@ -1,3 +1,4 @@
+import { BuildFilter, Filter, FilterItem } from '@/components/filters'
 import { IsProperRun, PartialRun, Run } from '@/types'
 
 export const IdentifierForRun = (runID: number) => `r${runID}`
@@ -46,6 +47,19 @@ export const MergeRuns = (runs: (PartialRun | Run)[]) =>
     },
     [] as (PartialRun | Run)[]
   )
+
+export const FilterItemFromRun = (run: Run): FilterItem => {
+  const runs = [run, ...(run.continuations ?? [])]
+  const properRuns = runs.filter(IsProperRun)
+  return {
+    userIDs: properRuns.map(run => run.userID),
+    labels: properRuns.flatMap(run => run.labels),
+    contents: [...runs.map(run => run.output), ...properRuns.flatMap(run => Object.entries(run.inputs).flat())],
+  }
+}
+
+export const BuildRunFilter = (filters: Filter[]) => (run: PartialRun | Run) =>
+  !IsProperRun(run) || BuildFilter(filters)(FilterItemFromRun(run))
 
 const groupGranularity = 5 * 60 * 1000
 export const GroupRuns = (runs: (PartialRun | Run)[]): (PartialRun | Run)[][] =>

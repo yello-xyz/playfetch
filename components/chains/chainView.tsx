@@ -175,9 +175,12 @@ export default function ChainView({
               versions={chain.versions}
               activeVersion={activeVersion}
               setActiveVersion={setActiveVersion}
-              tabSelector={() => (
+              tabSelector={children => (
                 <SingleTabHeader label='Version history'>
-                  <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
+                  <div className='flex items-center gap-1'>
+                    {children}
+                    <IconButton icon={closeIcon} onClick={() => setShowVersions(false)} />
+                  </div>
                 </SingleTabHeader>
               )}
               chainItemCache={promptCache}

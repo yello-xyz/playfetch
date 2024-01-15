@@ -84,7 +84,7 @@ module.exports = {
       'yellow-200': '#FAE3A8',
       'yellow-300': '#F8D784',
       'yellow-400': '#F6CD65',
-      'white': '#FFFFFF',
+      white: '#FFFFFF',
     },
     borderColor: {
       transparent: 'transparent',

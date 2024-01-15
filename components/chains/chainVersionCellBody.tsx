@@ -15,7 +15,7 @@ export default function ChainVersionCellBody({
   compareVersion?: ChainVersion
   itemCache: ActiveItemCache
 }) {
-  const getContent = (version: ChainVersion) => version.items.map(item => GetChainItemTitle(item, itemCache)).join('\n')
+  const getContent = (version: ChainVersion) => ContentsForChainVersion(version, itemCache).join('\n')
 
   return (
     <div className={isActiveVersion ? '' : 'line-clamp-2'}>
@@ -26,6 +26,9 @@ export default function ChainVersionCellBody({
     </div>
   )
 }
+
+export const ContentsForChainVersion = (version: ChainVersion, itemCache: ActiveItemCache) =>
+  version.items.map(item => GetChainItemTitle(item, itemCache))
 
 export const GetChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
   if (IsCodeChainItem(item)) {

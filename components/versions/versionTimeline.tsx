@@ -1,10 +1,30 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
+import Filters, { BuildFilter, Filter, FilterItem } from '../filters'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
+import { FilterContentsForPromptVersion } from '@/src/common/versionsEqual'
+import { ContentsForChainVersion } from '../chains/chainVersionCellBody'
+
+const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
+  version: Version,
+  chainItemCache: ActiveItemCache | undefined
+): FilterItem => ({
+  userIDs: [version.userID],
+  labels: version.labels,
+  contents: IsPromptVersion(version)
+    ? FilterContentsForPromptVersion(version)
+    : chainItemCache
+      ? ContentsForChainVersion(version, chainItemCache)
+      : [],
+})
+
+const BuildVersionFilter =
+  (filters: Filter[], chainItemCache: ActiveItemCache | undefined) =>
+  <Version extends PromptVersion | ChainVersion>(version: Version) =>
+    BuildFilter(filters)(FilterItemFromVersion(version, chainItemCache))
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -21,7 +41,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   tabSelector: (children?: ReactNode) => ReactNode
   chainItemCache?: ActiveItemCache
 }) {
-  const [filters, setFilters] = useState<VersionFilter[]>([])
+  const [filters, setFilters] = useState<Filter[]>([])
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
 
@@ -46,16 +66,16 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     }
   }, [focusedVersion, activeVersion, identifierForVersion])
 
-  const filteredVersions = versions.filter(BuildVersionFilter(filters))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters, chainItemCache))
 
   return (
     <div className='relative flex h-full'>
       {versions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
-          <VersionFilters
+          <Filters
             users={activeItem.users}
             labelColors={labelColors}
-            versions={versions}
+            items={versions.map(version => FilterItemFromVersion(version, chainItemCache))}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}
