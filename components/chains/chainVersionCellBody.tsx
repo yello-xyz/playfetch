@@ -15,18 +15,20 @@ export default function ChainVersionCellBody({
   compareVersion?: ChainVersion
   itemCache: ActiveItemCache
 }) {
+  const getContent = (version: ChainVersion) => ContentsForChainVersion(version, itemCache).join('\n')
+
   return (
     <div className={isActiveVersion ? '' : 'line-clamp-2'}>
       <ContentComparison
-        content={ContentForChainVersion(version, itemCache)}
-        compareContent={compareVersion ? ContentForChainVersion(compareVersion, itemCache) : undefined}
+        content={getContent(version)}
+        compareContent={compareVersion ? getContent(compareVersion) : undefined}
       />
     </div>
   )
 }
 
-export const ContentForChainVersion = (version: ChainVersion, itemCache: ActiveItemCache) =>
-  version.items.map(item => GetChainItemTitle(item, itemCache)).join('\n')
+export const ContentsForChainVersion = (version: ChainVersion, itemCache: ActiveItemCache) =>
+  version.items.map(item => GetChainItemTitle(item, itemCache))
 
 export const GetChainItemTitle = (item: ChainItemWithInputs, itemCache: ActiveItemCache) => {
   if (IsCodeChainItem(item)) {

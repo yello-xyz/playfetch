@@ -5,20 +5,20 @@ import Filters, { BuildFilter, Filter, FilterItem } from '../filters'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
-import { FilterContentForPromptVersion } from '@/src/common/versionsEqual'
-import { ContentForChainVersion } from '../chains/chainVersionCellBody'
+import { FilterContentsForPromptVersion } from '@/src/common/versionsEqual'
+import { ContentsForChainVersion } from '../chains/chainVersionCellBody'
 
 const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
   version: Version,
   chainItemCache: ActiveItemCache | undefined
 ): FilterItem => ({
-  userID: version.userID,
+  userIDs: [version.userID],
   labels: version.labels,
-  content: IsPromptVersion(version)
-    ? FilterContentForPromptVersion(version)
+  contents: IsPromptVersion(version)
+    ? FilterContentsForPromptVersion(version)
     : chainItemCache
-    ? ContentForChainVersion(version, chainItemCache)
-    : '',
+      ? ContentsForChainVersion(version, chainItemCache)
+      : [],
 })
 
 const BuildVersionFilter =

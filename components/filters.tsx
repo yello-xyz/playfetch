@@ -16,7 +16,7 @@ type LabelFilter = { label: string }
 type TextFilter = { text: string }
 
 export type Filter = UserFilter | LabelFilter | TextFilter
-export type FilterItem = { userID: number; labels: string[]; content: string }
+export type FilterItem = { userIDs: number[]; labels: string[]; contents: string[] }
 
 const isUserFilter = (filter: Filter): filter is UserFilter => 'userID' in filter
 const isLabelFilter = (filter: Filter): filter is LabelFilter => 'label' in filter
@@ -27,14 +27,15 @@ const labelsFromFilters = (filters: Filter[]) => filters.filter(isLabelFilter).m
 
 export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
   const userIDs = userIDsFromFilters(filters)
-  const passedUserFilter = !userIDs.length || userIDs.includes(item.userID)
+  const passedUserFilter = !userIDs.length || item.userIDs.some(userID => userIDs.includes(userID))
 
   const labels = labelsFromFilters(filters)
   const passesLabelFilter = !labels.length || item.labels.some(label => labels.includes(label))
 
   const textStrings = filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
   const passesTextFilter =
-    !textStrings.length || textStrings.every(filter => item.content.toLowerCase().includes(filter))
+    !textStrings.length ||
+    textStrings.every(filter => item.contents.some(content => content.toLowerCase().includes(filter)))
 
   return passedUserFilter && passesLabelFilter && passesTextFilter
 }
@@ -137,7 +138,7 @@ function FilterButton({
   setFilters: (filters: Filter[]) => void
 }) {
   const activeUserIDs = userIDsFromFilters(filters)
-  const itemUserIDs = items.map(item => item.userID)
+  const itemUserIDs = items.flatMap(item => item.userIDs)
   const countForUserID = (userID: number) => itemUserIDs.filter(id => id === userID).length
   const availableUsers = users.filter(
     user => !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < items.length

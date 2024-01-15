@@ -37,11 +37,8 @@ export const VersionHasNonEmptyPrompts = (version: { prompts: Prompts; config: P
     version.prompts.functions &&
     version.prompts.functions.trim().length > 0)
 
-export const FilterContentForPromptVersion = (version: { prompts: Prompts; config: PromptConfig }): string =>
-  [
-    version.prompts.main,
-    ...(SupportsSystemPrompt(version.config.model) ? [version.prompts.system ?? ''] : []),
-    ...(SupportsFunctionsPrompt(version.config.model) ? [version.prompts.functions ?? ''] : []),
-  ]
-    .map(prompt => prompt.toLowerCase())
-    .join('\n')
+export const FilterContentsForPromptVersion = (version: { prompts: Prompts; config: PromptConfig }) => [
+  version.prompts.main,
+  ...(SupportsSystemPrompt(version.config.model) && version.prompts.system ? [version.prompts.system] : []),
+  ...(SupportsFunctionsPrompt(version.config.model) && version.prompts.functions ? [version.prompts.functions] : []),
+]

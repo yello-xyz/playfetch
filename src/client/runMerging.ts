@@ -49,9 +49,9 @@ export const MergeRuns = (runs: (PartialRun | Run)[]) =>
   )
 
 export const FilterItemFromRun = (run: Run): FilterItem => ({
-  userID: run.userID,
-  labels: [...run.labels, ...(run.continuations ?? []).flatMap(run => IsProperRun(run) ? run.labels : [])],
-  content: [run.output, ...(run.continuations ?? []).map(run => IsProperRun(run) ? run.output : [])].join('\n'),
+  userIDs: [run.userID],
+  labels: [...run.labels, ...(run.continuations ?? []).flatMap(run => (IsProperRun(run) ? run.labels : []))],
+  contents: [run.output, ...(run.continuations ?? []).map(run => run.output)],
 })
 
 export const BuildRunFilter = (filters: Filter[]) => (run: PartialRun | Run) =>
