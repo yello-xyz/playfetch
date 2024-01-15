@@ -6,17 +6,25 @@ import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
 import { FilterContentForPromptVersion } from '@/src/common/versionsEqual'
+import { ContentForChainVersion } from '../chains/chainVersionCellBody'
 
-const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(version: Version): FilterItem => ({
+const FilterItemFromVersion = <Version extends PromptVersion | ChainVersion>(
+  version: Version,
+  chainItemCache: ActiveItemCache | undefined
+): FilterItem => ({
   userID: version.userID,
   labels: version.labels,
-  content: IsPromptVersion(version) ? FilterContentForPromptVersion(version) : '',
+  content: IsPromptVersion(version)
+    ? FilterContentForPromptVersion(version)
+    : chainItemCache
+    ? ContentForChainVersion(version, chainItemCache)
+    : '',
 })
 
 const BuildVersionFilter =
-  (filters: Filter[]) =>
+  (filters: Filter[], chainItemCache: ActiveItemCache | undefined) =>
   <Version extends PromptVersion | ChainVersion>(version: Version) =>
-    BuildFilter(filters)(FilterItemFromVersion(version))
+    BuildFilter(filters)(FilterItemFromVersion(version, chainItemCache))
 
 export default function VersionTimeline<Version extends PromptVersion | ChainVersion>({
   activeItem,
@@ -58,7 +66,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     }
   }, [focusedVersion, activeVersion, identifierForVersion])
 
-  const filteredVersions = versions.filter(BuildVersionFilter(filters))
+  const filteredVersions = versions.filter(BuildVersionFilter(filters, chainItemCache))
 
   return (
     <div className='relative flex h-full'>
@@ -67,7 +75,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
           <Filters
             users={activeItem.users}
             labelColors={labelColors}
-            items={versions.map(FilterItemFromVersion)}
+            items={versions.map(version => FilterItemFromVersion(version, chainItemCache))}
             filters={filters}
             setFilters={setFilters}
             tabSelector={tabSelector}
