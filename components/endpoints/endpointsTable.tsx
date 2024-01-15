@@ -43,7 +43,7 @@ export default function EndpointsTable({
     .filter(group => group.length > 0)
   const groupsLength = groups.length
   const baseClass = 'flex flex-col w-full h-full min-h-0 gap-2 px-4 pt-4 overflow-y-auto text-gray-500'
-  const bgColor = (groupsLength > 0) ? 'bg-gray-25' : 'bg-white'
+  const bgColor = groupsLength > 0 ? 'bg-gray-25' : 'bg-white'
   const containerClass = baseClass + ' ' + bgColor
 
   return (
@@ -154,22 +154,14 @@ function EmptyTable({ onAddEndpoint }: { onAddEndpoint?: () => void }) {
         <span className='font-medium'>No Endpoints</span>
         <span className='w-72 text-sm text-center text-gray-400'>
           {onAddEndpoint ? (
-            <span>
-              Create an endpoint to allow integrating prompts or chains into your codebase.
-            </span>
+            <span>Create an endpoint to allow integrating prompts or chains into your codebase.</span>
           ) : (
             <span>Create some prompts or chains first to integrate this project into your code base.</span>
           )}
         </span>
         <span className='mt-2'>
-          <TopBarButton
-            type='primary'
-            title='New Endpoint'
-            icon={addIconWhite}
-            onClick={onAddEndpoint}
-          />
+          <TopBarButton type='primary' title='New Endpoint' icon={addIconWhite} onClick={onAddEndpoint} />
         </span>
-
       </div>
     </div>
   )
