@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import VersionFilters, { BuildVersionFilter, VersionFilter } from './versionFilters'
+import Filters, { BuildFilter, Filter } from '../filters'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
@@ -21,7 +21,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
   tabSelector: (children?: ReactNode) => ReactNode
   chainItemCache?: ActiveItemCache
 }) {
-  const [filters, setFilters] = useState<VersionFilter[]>([])
+  const [filters, setFilters] = useState<Filter[]>([])
 
   const labelColors = AvailableLabelColorsForItem(activeItem)
 
@@ -46,13 +46,13 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     }
   }, [focusedVersion, activeVersion, identifierForVersion])
 
-  const filteredVersions = versions.filter(BuildVersionFilter(filters))
+  const filteredVersions = versions.filter(BuildFilter(filters))
 
   return (
     <div className='relative flex h-full'>
       {versions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
-          <VersionFilters
+          <Filters
             users={activeItem.users}
             labelColors={labelColors}
             versions={versions}
