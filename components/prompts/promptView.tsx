@@ -3,7 +3,6 @@ import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import { useState } from 'react'
-import { SingleTabHeader } from '../tabSelector'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
@@ -14,10 +13,11 @@ import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 import Collapsible from '../collapsible'
-import PromptTabs, { PromptTab } from './promptTabs'
+import PromptTabs from './promptTabs'
 import IconButton from '../iconButton'
 import expandIcon from '@/public/expand.svg'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
+import { usePromptTabs } from '@/src/client/context/userPresetsContext'
 
 export default function PromptView({
   prompt,
@@ -34,7 +34,7 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  const [promptTabs, setPromptTabs] = useState<PromptTab[][]>([['New Prompt', 'Version History']])
+  const [promptTabs, setPromptTabs] = usePromptTabs()
   const [testDataExpanded, setTestDataExpanded] = useState(false)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, testDataExpanded.toString())
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })

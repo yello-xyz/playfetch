@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import { LanguageModel, PromptConfig } from '@/types'
-import { UserPresets } from '@/src/common/userPresets'
+import { LayoutConfig, PromptTab, UserPresets } from '@/src/common/userPresets'
 import api from '../api'
 
 type UserPresetsContextType = {
@@ -32,7 +32,7 @@ function useLayoutConfig() {
 
   const currentUserPresets = context.currentUserPresets!
 
-  const updateConfig = (config: Partial<UserPresets['layoutConfig']>) => {
+  const updateConfig = (config: Partial<LayoutConfig>) => {
     api
       .updateLayoutConfig(config)
       .then(layoutConfig => context.setCurrentUserPresets!({ ...currentUserPresets, layoutConfig }))
@@ -41,10 +41,10 @@ function useLayoutConfig() {
   const floatingSidebar = currentUserPresets.layoutConfig.floatingSidebar
   const setFloatingSidebar = (floatingSidebar: boolean) => updateConfig({ floatingSidebar })
   
-  const splitPromptTabs = currentUserPresets.layoutConfig.splitPromptTabs
-  const setSplitPromptTabs = (splitPromptTabs: boolean) => updateConfig({ splitPromptTabs })
+  const promptTabs = currentUserPresets.layoutConfig.promptTabs
+  const setPromptTabs = (promptTabs: PromptTab[][]) => updateConfig({ promptTabs })
 
-  return [floatingSidebar, splitPromptTabs, setFloatingSidebar, setSplitPromptTabs] as const
+  return [floatingSidebar, promptTabs, setFloatingSidebar, setPromptTabs] as const
 }
 
 export function useFloatingSidebar() {
@@ -52,7 +52,7 @@ export function useFloatingSidebar() {
   return [floatingSidebar, setFloatingSidebar] as const
 }
 
-export function useSplitPromptTabs() {
-  const [_, splitPromptTabs, __, setSplitPromptTabs] = useLayoutConfig()
-  return [splitPromptTabs, setSplitPromptTabs] as const
+export function usePromptTabs() {
+  const [_, promptTabs, __, setPromptTabs] = useLayoutConfig()
+  return [promptTabs, setPromptTabs] as const
 }

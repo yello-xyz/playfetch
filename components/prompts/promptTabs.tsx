@@ -1,5 +1,6 @@
 import { ActivePrompt, PromptVersion, Prompts } from '@/types'
 
+import { PromptTab } from '@/src/common/userPresets'
 import { ReactNode, useState } from 'react'
 import TabSelector, { SingleTabHeader } from '../tabSelector'
 import PromptPanel from './promptPanel'
@@ -16,7 +17,6 @@ import {
 } from '@dnd-kit/core'
 import { Allotment } from 'allotment'
 
-export type PromptTab = 'New Prompt' | 'Version History'
 type Target = PromptTab | 'left' | 'right' | 'mergedTabs'
 
 export default function PromptTabs({

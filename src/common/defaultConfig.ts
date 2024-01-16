@@ -1,5 +1,5 @@
 import { PromptConfig, ModelProvider } from '@/types'
-import { UserPresets } from './userPresets'
+import { LayoutConfig, UserPresets } from './userPresets'
 
 export const DefaultProvider: ModelProvider = 'google'
 
@@ -14,7 +14,7 @@ export const DefaultPromptConfig: PromptConfig = {
   maxTokens: 1000,
 }
 
-export const DefaultLayoutConfig: UserPresets['layoutConfig'] = {
+export const DefaultLayoutConfig: LayoutConfig = {
   floatingSidebar: false,
-  splitPromptTabs: false,
+  promptTabs: [['New Prompt', 'Version History']],
 }

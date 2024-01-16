@@ -24,7 +24,7 @@ import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
 import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaultConfig'
 import { ValidatePromptConfig } from '@/src/common/providerMetadata'
-import { UserPresets } from '@/src/common/userPresets'
+import { LayoutConfig, UserPresets } from '@/src/common/userPresets'
 
 export async function migrateUsers(postMerge: boolean) {
   const datastore = getDatastore()
@@ -132,7 +132,7 @@ const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[])
 }
 
 const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperature', 'maxTokens', 'seed', 'jsonMode']
-const layoutConfigKeys: (keyof UserPresets['layoutConfig'])[] = ['floatingSidebar', 'splitPromptTabs']
+const layoutConfigKeys: (keyof LayoutConfig)[] = ['floatingSidebar', 'promptTabs']
 
 const filterOptionalKeys = <T extends object>(obj: T): T =>
   Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T
@@ -158,7 +158,7 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
   return ensureValidPromptConfig({ ...DefaultPromptConfig, ...userConfig })
 }
 
-export async function saveLayoutConfigForUser(userID: number, config: Partial<UserPresets['layoutConfig']>) {
+export async function saveLayoutConfigForUser(userID: number, config: Partial<LayoutConfig>) {
   const userData = await getUserData(userID)
   const [previousConfig, otherPresets] = loadFilteredPresets(userData, layoutConfigKeys)
   const userConfig = { ...previousConfig, ...config }
