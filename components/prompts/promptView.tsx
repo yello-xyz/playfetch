@@ -34,6 +34,7 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
+  const [areTabsMerged, setTabsMerged] = useState(true)
   const [testDataExpanded, setTestDataExpanded] = useState(false)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, testDataExpanded.toString())
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
@@ -81,8 +82,8 @@ export default function PromptView({
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>
-        <Allotment className='flex-1 bg-gray-25'>
-          <Allotment.Pane minSize={minWidth} preferredSize='50%'>
+        <Allotment key={areTabsMerged.toString()} className='flex-1 bg-gray-25'>
+          <Allotment.Pane minSize={minWidth} preferredSize={areTabsMerged ? '50%' : '66%'}>
             <PromptTabs
               prompt={prompt}
               versions={versions}
@@ -91,6 +92,8 @@ export default function PromptView({
               currentVersion={currentVersion}
               updatePrompt={updatePrompt}
               updateConfig={updateConfig}
+              areTabsMerged={areTabsMerged}
+              setTabsMerged={setTabsMerged}
             />
           </Allotment.Pane>
           <Allotment.Pane minSize={minWidth}>

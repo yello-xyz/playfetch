@@ -27,6 +27,8 @@ export default function PromptTabs({
   currentVersion,
   updatePrompt,
   updateConfig,
+  areTabsMerged,
+  setTabsMerged,
 }: {
   prompt: ActivePrompt
   versions: PromptVersion[]
@@ -35,8 +37,9 @@ export default function PromptTabs({
   currentVersion: PromptVersion
   updatePrompt: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig: (config: PromptVersion['config']) => void
+  areTabsMerged: boolean
+  setTabsMerged: (merged: boolean) => void
 }) {
-  const [areTabsMerged, setTabsMerged] = useState(true)
   const [tabs, setTabs] = useState<Tab[]>(['New Prompt', 'Version History'])
   const [activeTab, setActiveTab] = useState<Tab>('New Prompt')
 
