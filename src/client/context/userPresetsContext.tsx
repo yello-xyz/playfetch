@@ -15,10 +15,11 @@ export function useDefaultPromptConfig() {
 
   const currentUserPresets = context.currentUserPresets!
 
-  const updateConfig = (config: Partial<PromptConfig>) =>
+  const updateConfig = (config: Partial<PromptConfig>) => {
     api
       .updateDefaultPromptConfig(config)
       .then(defaultPromptConfig => context.setCurrentUserPresets!({ ...currentUserPresets, defaultPromptConfig }))
+  }
 
   const updateDefaultModel = (model: LanguageModel) => updateConfig({ model })
   const updateDefaultParameters = (config: Omit<PromptConfig, 'model'>) => updateConfig(config)
@@ -31,10 +32,11 @@ function useLayoutConfig() {
 
   const currentUserPresets = context.currentUserPresets!
 
-  const updateConfig = (config: Partial<UserPresets['layoutConfig']>) =>
+  const updateConfig = (config: Partial<UserPresets['layoutConfig']>) => {
     api
       .updateLayoutConfig(config)
       .then(layoutConfig => context.setCurrentUserPresets!({ ...currentUserPresets, layoutConfig }))
+  }
 
   const floatingSidebar = currentUserPresets.layoutConfig.floatingSidebar
   const setFloatingSidebar = (floatingSidebar: boolean) => updateConfig({ floatingSidebar })
