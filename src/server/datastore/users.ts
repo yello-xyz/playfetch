@@ -59,7 +59,7 @@ const updateUserData = (userData: any) =>
     userData.lastLoginAt,
     userData.presets ? JSON.parse(userData.presets) : undefined,
     getID(userData),
-    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
+    userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined
   )
 
 const updateUser = (userData: any) => getDatastore().save(updateUserData(userData))
@@ -75,7 +75,7 @@ const toUserData = (
   lastLoginAt?: Date,
   presets?: any,
   userID?: number,
-  defaultPromptConfig?: Partial<PromptConfig>, // TODO delete after next push to prod (also in excludeFromIndexes)
+  defaultPromptConfig?: Partial<PromptConfig> // TODO delete after next push to prod (also in excludeFromIndexes)
 ) => ({
   key: buildKey(Entity.USER, userID),
   data: {
@@ -114,9 +114,7 @@ const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
 
 export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
   const userData = await getUserData(userID)
-  const userConfig: Partial<PromptConfig> = userData?.defaultPromptConfig
-    ? JSON.parse(userData.defaultPromptConfig)
-    : {}
+  const userConfig: Partial<PromptConfig> = userData.presets ? JSON.parse(userData.presets) : {}
   return { ...DefaultPromptConfig, ...userConfig }
 }
 
@@ -125,11 +123,9 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
 
   const userData = await getUserData(userID)
   if (userData) {
-    const previousConfig: Partial<PromptConfig> = userData.defaultPromptConfig
-      ? JSON.parse(userData.defaultPromptConfig)
-      : {}
+    const previousConfig: Partial<PromptConfig> = userData.presets ? JSON.parse(userData.presets) : {}
     userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
-    await updateUser({ ...userData, defaultPromptConfig: JSON.stringify(userConfig) })
+    await updateUser({ ...userData, presets: JSON.stringify(userConfig) })
   }
 
   return { ...DefaultPromptConfig, ...userConfig }
@@ -171,7 +167,7 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
     previousUserData?.lastLoginAt,
     previousUserData?.presets ? JSON.parse(previousUserData.presets) : undefined,
     previousUserData ? getID(previousUserData) : undefined,
-    previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined,
+    previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined
   )
   await getDatastore().save(userData)
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {
