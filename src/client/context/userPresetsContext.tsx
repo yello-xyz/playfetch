@@ -17,7 +17,7 @@ export function useDefaultPromptConfig() {
 
   const updateConfig = (config: Partial<PromptConfig>) =>
     api
-      .updateDefaultConfig(config)
+      .updateDefaultPromptConfig(config)
       .then(defaultPromptConfig => context.setCurrentUserPresets!({ ...currentUserPresets, defaultPromptConfig }))
 
   const updateDefaultModel = (model: LanguageModel) => updateConfig({ model })
