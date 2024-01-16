@@ -27,7 +27,7 @@ export default function PromptTabs({
   currentVersion,
   updatePrompt,
   updateConfig,
-  initialTabs = [['New Prompt', 'Version History']],
+  initialTabs,
   persistTabs,
 }: {
   prompt: ActivePrompt
@@ -37,8 +37,8 @@ export default function PromptTabs({
   currentVersion: PromptVersion
   updatePrompt: (promptKey: keyof Prompts, prompt: string) => void
   updateConfig: (config: PromptVersion['config']) => void
-  initialTabs?: PromptTab[][]
-  persistTabs?: (tabs: PromptTab[][]) => void
+  initialTabs: PromptTab[][]
+  persistTabs: (tabs: PromptTab[][]) => void
 }) {
   const [tabs, setTabs] = useState(initialTabs.flat())
   const [areTabsMerged, setTabsMerged] = useState(initialTabs.length === 1)

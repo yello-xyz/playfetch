@@ -2,6 +2,7 @@ import { ActivePrompt, PromptChainItem, PromptVersion } from '@/types'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import PromptTabs from '../prompts/promptTabs'
+import { usePromptTabs } from '@/src/client/context/userPresetsContext'
 
 export default function PromptNodeEditor({
   item,
@@ -40,6 +41,7 @@ function PromptEditor({
   selectVersion: (version: PromptVersion) => void
   setModifiedVersion: (version: PromptVersion) => void
 }) {
+  const [promptTabs, setPromptTabs] = usePromptTabs()
   const [currentVersion, versions, updatePrompt, updateConfig] = usePromptVersion(
     prompt,
     activeVersion,
@@ -55,6 +57,8 @@ function PromptEditor({
       currentVersion={currentVersion}
       updatePrompt={updatePrompt}
       updateConfig={updateConfig}
+      initialTabs={promptTabs}
+      persistTabs={setPromptTabs}
     />
   )
 }
