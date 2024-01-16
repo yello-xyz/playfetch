@@ -5,9 +5,10 @@ import chevronIcon from '@/public/chevron.svg'
 import userIcon from '@/public/user.svg'
 import labelIcon from '@/public/label.svg'
 import textIcon from '@/public/text.svg'
+import checkIcon from '@/public/check.svg'
 import UserAvatar from '@/components/users/userAvatar'
 import { ReactNode, useRef, useState } from 'react'
-import PopupMenu from './popupMenu'
+import PopupMenu, { PopupSectionTitle } from './popupMenu'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 
@@ -43,12 +44,15 @@ export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
   return passedUserFilter && passesLabelFilter && passesTextFilter
 }
 
-export default function Filters({
+export default function Filters<SortOption extends string>({
   users,
   labelColors,
   items,
   filters,
   setFilters,
+  sortOptions = [],
+  activeSortOption,
+  setActiveSortOption,
   tabSelector,
 }: {
   users: User[]
@@ -56,6 +60,9 @@ export default function Filters({
   items: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
+  sortOptions?: SortOption[]
+  activeSortOption?: SortOption
+  setActiveSortOption?: (option: SortOption) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4 py-2' : ''
@@ -63,7 +70,16 @@ export default function Filters({
   return (
     <div className='z-10 flex flex-col'>
       {tabSelector(
-        <FilterButton users={users} labelColors={labelColors} items={items} filters={filters} setFilters={setFilters} />
+        <FilterButton
+          users={users}
+          labelColors={labelColors}
+          items={items}
+          filters={filters}
+          setFilters={setFilters}
+          sortOptions={sortOptions}
+          activeSortOption={activeSortOption}
+          setActiveSortOption={setActiveSortOption}
+        />
       )}
       <div className={`flex flex-wrap flex-1 gap-2 mx-4 text-xs text-gray-700 ${markup}`}>
         {filters.map((filter, index) => (
@@ -127,18 +143,24 @@ const UserFilterCell = ({ filter, users }: { filter: UserFilter; users: User[] }
   ) : null
 }
 
-function FilterButton({
+function FilterButton<SortOption extends string>({
   users,
   labelColors,
   items: items,
   filters,
   setFilters,
+  sortOptions = [],
+  activeSortOption,
+  setActiveSortOption,
 }: {
   users: User[]
   labelColors: Record<string, string>
   items: FilterItem[]
   filters: Filter[]
   setFilters: (filters: Filter[]) => void
+  sortOptions?: SortOption[]
+  activeSortOption?: SortOption
+  setActiveSortOption?: (option: SortOption) => void
 }) {
   const activeUserIDs = userIDsFromFilters(filters)
   const itemUserIDs = items.flatMap(item => item.userIDs)
@@ -194,6 +216,7 @@ function FilterButton({
           collapse={() => setMenuState('collapsed')}>
           {menuState === 'expanded' && (
             <>
+              {sortOptions.length > 0 && <PopupSectionTitle>Filter</PopupSectionTitle>}
               <FilterCategoryItem
                 title='Created by'
                 icon={userIcon}
@@ -207,6 +230,15 @@ function FilterButton({
                 disabled={!availableLabels.length}
               />
               <FilterCategoryItem title='Contains' icon={textIcon} onClick={() => setMenuState('text')} />
+              {sortOptions.length > 0 && <PopupSectionTitle>Sort by</PopupSectionTitle>}
+              {sortOptions.map((option, index) => (
+                <SortOptionItem
+                  key={index}
+                  option={option}
+                  onClick={() => setActiveSortOption && setActiveSortOption(option)}
+                  isActive={option === activeSortOption}
+                />
+              ))}
             </>
           )}
           {menuState === 'label' &&
@@ -240,7 +272,7 @@ function FilterButton({
   )
 }
 
-function FilterCategoryItem({
+const FilterCategoryItem = ({
   title,
   icon,
   onClick,
@@ -250,17 +282,30 @@ function FilterCategoryItem({
   icon: StaticImageData
   onClick: () => void
   disabled?: boolean
-}) {
-  return (
-    <FilterPopupItem onClick={onClick} disabled={disabled}>
-      <Icon icon={icon} />
-      <div className='grow'>{title}</div>
-      <Icon className='-rotate-90' icon={chevronIcon} />
-    </FilterPopupItem>
-  )
-}
+}) => (
+  <FilterPopupItem onClick={onClick} disabled={disabled}>
+    <Icon icon={icon} />
+    <div className='grow'>{title}</div>
+    <Icon className='-rotate-90' icon={chevronIcon} />
+  </FilterPopupItem>
+)
 
-function FilterPopupItem({
+const SortOptionItem = <SortOption extends string>({
+  option,
+  onClick,
+  isActive,
+}: {
+  option: SortOption
+  onClick: () => void
+  isActive?: boolean
+}) => (
+  <FilterPopupItem onClick={onClick}>
+    {isActive && <Icon icon={checkIcon} />}
+    <div className={!isActive ? 'ml-8 h-6 flex items-center' : undefined}>{option}</div>
+  </FilterPopupItem>
+)
+
+const FilterPopupItem = ({
   children,
   onClick,
   disabled,
@@ -268,7 +313,7 @@ function FilterPopupItem({
   children: ReactNode
   onClick: () => void
   disabled?: boolean
-}) {
+}) => {
   const activeClass = disabled ? 'opacity-50' : 'cursor-pointer hover:bg-gray-100'
   return (
     <div className={`flex items-center gap-2 p-1 rounded ${activeClass}`} onClick={disabled ? undefined : onClick}>

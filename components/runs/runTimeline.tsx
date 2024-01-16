@@ -72,11 +72,13 @@ export default function RunTimeline({
     setPreviousActiveRunID(activeRunID)
   }
 
+  type SortOption = 'Date' | 'Test Data Row'
+  const sortOptions: SortOption[] = ['Date', 'Test Data Row']
+  const [activeSortOption, setActiveSortOption] = useState(sortOptions[0])
   const [filters, setFilters] = useState<Filter[]>([])
   const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
 
-  const shouldSortByInput = true
-  const sortByInputMap = shouldSortByInput ? BuildInputMap(inputs) : undefined
+  const sortByInputMap = activeSortOption === 'Test Data Row' ? BuildInputMap(inputs) : undefined
   const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
@@ -105,6 +107,9 @@ export default function RunTimeline({
           items={mergedRuns.filter(IsProperRun).map(FilterItemFromRun)}
           filters={filters}
           setFilters={setFilters}
+          sortOptions={sortOptions}
+          activeSortOption={activeSortOption}
+          setActiveSortOption={setActiveSortOption}
           tabSelector={children => <SingleTabHeader label='Responses'>{children}</SingleTabHeader>}
         />
       )}
