@@ -1,10 +1,7 @@
 import { createContext, useContext } from 'react'
 import { LanguageModel, PromptConfig } from '@/types'
+import { UserPresets } from '@/src/common/userPresets'
 import api from '../api'
-
-export type UserPresets = {
-  defaultPromptConfig: PromptConfig
-}
 
 type UserPresetsContextType = {
   currentUserPresets?: UserPresets

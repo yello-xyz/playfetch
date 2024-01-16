@@ -32,12 +32,13 @@ import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/comm
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import { UserPresets, UserPresetsContext } from '@/src/client/context/userPresetsContext'
+import { UserPresetsContext } from '@/src/client/context/userPresetsContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
 import { ProviderContext } from '@/src/client/context/providerContext'
 
 import dynamic from 'next/dynamic'
 import ProjectPaneWrapper from '@/components/projects/projectPaneWrapper'
+import { UserPresets } from '@/src/common/userPresets'
 
 const MainProjectPane = dynamic(() => import('@/components/projects/mainProjectPane'))
 const ProjectSidebar = dynamic(() => import('@/components/projects/projectSidebar'))
