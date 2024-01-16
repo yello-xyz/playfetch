@@ -12,8 +12,6 @@ import PromptConfigSettings from './promptConfigSettings'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
 import Collapsible from '../collapsible'
 
-export type PromptTab = keyof Prompts
-
 export default function PromptPanel({
   version,
   updatePrompt,
@@ -36,7 +34,7 @@ export default function PromptPanel({
   const setExpanded = (expanded: boolean, shiftClick: boolean) => shiftClick && setAllSectionsExpanded(expanded)
 
   return (
-    <div className='flex flex-col flex-1 h-full gap-4 pl-4 pr-3 pt-2 overflow-y-auto text-gray-500'>
+    <div className='flex flex-col flex-1 h-full gap-4 pt-2 pl-4 pr-3 overflow-y-auto text-gray-500'>
       <div className='flex flex-col flex-1 min-h-0 gap-3'>
         {primaryPromptKeys.map(promptKey => (
           <PromptInputSection

@@ -14,7 +14,7 @@ import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
 import Collapsible from '../collapsible'
-import PromptTabs from './promptTabs'
+import PromptTabs, { PromptTab } from './promptTabs'
 import IconButton from '../iconButton'
 import expandIcon from '@/public/expand.svg'
 import useTestDataPopup from '@/src/client/hooks/useTestDataPopup'
@@ -34,7 +34,7 @@ export default function PromptView({
   savePrompt: () => Promise<number>
   focusRunID?: number
 }) {
-  const [areTabsMerged, setTabsMerged] = useState(true)
+  const [promptTabs, setPromptTabs] = useState<PromptTab[][]>([['New Prompt', 'Version History']])
   const [testDataExpanded, setTestDataExpanded] = useState(false)
   const [inputValues, setInputValues, persistInputValuesIfNeeded] = useInputValues(prompt, testDataExpanded.toString())
   const [testConfig, setTestConfig] = useState<TestConfig>({ rowIndices: [0] })
@@ -74,6 +74,7 @@ export default function PromptView({
     setTestConfig
   )
 
+  const areTabsMerged = promptTabs.length === 1
   const minWidth = 400
   const minTopPaneHeight = 120
   const rowCount = GetTestDataRowCount(variables, inputValues)
@@ -92,8 +93,8 @@ export default function PromptView({
               currentVersion={currentVersion}
               updatePrompt={updatePrompt}
               updateConfig={updateConfig}
-              areTabsMerged={areTabsMerged}
-              setTabsMerged={setTabsMerged}
+              initialTabs={promptTabs}
+              persistTabs={setPromptTabs}
             />
           </Allotment.Pane>
           <Allotment.Pane minSize={minWidth}>
