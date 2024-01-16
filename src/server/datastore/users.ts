@@ -114,6 +114,14 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
 
 const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
 
+const ensureUserData = async (userID: number) => {
+  const userData = await getUserData(userID)
+  if (!userData) {
+    throw new Error(`User with ID ${userID} does not exist or user has no access`)
+  }
+  return userData
+}
+
 const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[]): [Partial<T>, any] => {
   const presetEntries = Object.entries(userData.presets ? JSON.parse(userData.presets) : {})
   const [filteredEntries, otherEntries] = presetEntries.reduce(
@@ -126,38 +134,35 @@ const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[])
 const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperature', 'maxTokens', 'seed', 'jsonMode']
 const layoutConfigKeys: (keyof UserPresets['layoutConfig'])[] = ['floatingSidebar', 'splitPromptTabs']
 
+const filterOptionalKeys = <T extends object>(obj: T): T =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T
+
+const ensureValidPromptConfig = (config: PromptConfig) => filterOptionalKeys(ValidatePromptConfig(config))
+
 export async function getPresetsForUser(userID: number): Promise<UserPresets> {
   const userData = await getUserData(userID)
-  const [promptConfig] = loadFilteredPresets(userData, promptConfigKeys)
-  const [layoutConfig] = loadFilteredPresets(userData, layoutConfigKeys)
+  const [userPromptConfig] = loadFilteredPresets(userData, promptConfigKeys)
+  const [userLayoutConfig] = loadFilteredPresets(userData, layoutConfigKeys)
   return {
-    defaultPromptConfig: ValidatePromptConfig({ ...DefaultPromptConfig, ...promptConfig }),
-    layoutConfig: { ...DefaultLayoutConfig, ...layoutConfig },
+    defaultPromptConfig: ensureValidPromptConfig({ ...DefaultPromptConfig, ...userPromptConfig }),
+    layoutConfig: { ...DefaultLayoutConfig, ...userLayoutConfig },
   }
 }
 
 export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {
-  let userConfig: Partial<PromptConfig> = {}
+  const userData = await ensureUserData(userID)
+  const [previousConfig, otherPresets] = loadFilteredPresets(userData, promptConfigKeys)
+  const userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
+  await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
 
-  const userData = await getUserData(userID)
-  if (userData) {
-    const [previousConfig, otherPresets] = loadFilteredPresets(userData, promptConfigKeys)
-    userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
-    await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
-  }
-
-  return ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig })
+  return ensureValidPromptConfig({ ...DefaultPromptConfig, ...userConfig })
 }
 
 export async function saveLayoutConfigForUser(userID: number, config: Partial<UserPresets['layoutConfig']>) {
-  let userConfig: Partial<UserPresets['layoutConfig']> = {}
-
   const userData = await getUserData(userID)
-  if (userData) {
-    const [previousConfig, otherPresets] = loadFilteredPresets(userData, layoutConfigKeys)
-    userConfig = { ...previousConfig, ...config }
-    await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
-  }
+  const [previousConfig, otherPresets] = loadFilteredPresets(userData, layoutConfigKeys)
+  const userConfig = { ...previousConfig, ...config }
+  await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
 
   return { ...DefaultLayoutConfig, ...userConfig }
 }
