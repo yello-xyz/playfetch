@@ -1,4 +1,4 @@
-import { BuildFilter, Filter, FilterItem } from '@/components/filters'
+import { BuildFilter, Filter, FilterItem } from '@/components/filters/filtersHeader'
 import { IsProperRun, PartialRun, Run } from '@/types'
 import HashValue from '../common/hashing'
 

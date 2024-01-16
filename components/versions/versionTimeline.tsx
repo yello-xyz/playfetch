@@ -1,7 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { ActiveChain, ActivePrompt, ChainVersion, IsPromptVersion, PromptVersion } from '@/types'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
-import Filters, { BuildFilter, Filter, FilterItem } from '../filters'
+import FiltersHeader, { BuildFilter, Filter, FilterItem } from '../filters/filtersHeader'
 import VersionCell from './versionCell'
 import { ActiveItemCache } from '@/src/client/hooks/useActiveItemCache'
 import { IsDummyVersion } from '@/src/client/hooks/usePromptVersion'
@@ -72,7 +72,7 @@ export default function VersionTimeline<Version extends PromptVersion | ChainVer
     <div className='relative flex h-full'>
       {versions.length > 0 ? (
         <div className={`flex flex-col w-full ${filteredVersions.length > 0 ? 'overflow-hidden' : ''}`}>
-          <Filters
+          <FiltersHeader
             users={activeItem.users}
             labelColors={labelColors}
             items={versions.map(version => FilterItemFromVersion(version, chainItemCache))}

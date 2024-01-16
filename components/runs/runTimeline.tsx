@@ -21,7 +21,7 @@ import {
   BuildInputMap,
 } from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
-import Filters, { Filter } from '../filters'
+import FiltersHeader, { Filter } from '../filters/filtersHeader'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 
 export default function RunTimeline({
@@ -101,7 +101,7 @@ export default function RunTimeline({
   return (
     <div className='relative flex flex-col h-full'>
       {!skipHeader && activeItem && (
-        <Filters
+        <FiltersHeader
           users={activeItem.users}
           labelColors={labelColors}
           items={mergedRuns.filter(IsProperRun).map(FilterItemFromRun)}

@@ -8,8 +8,8 @@ import textIcon from '@/public/text.svg'
 import checkIcon from '@/public/check.svg'
 import UserAvatar from '@/components/users/userAvatar'
 import { ReactNode, useRef, useState } from 'react'
-import PopupMenu, { PopupSectionTitle } from './popupMenu'
-import Icon from './icon'
+import PopupMenu, { PopupSectionTitle } from '../popupMenu'
+import Icon from '../icon'
 import { StaticImageData } from 'next/image'
 
 type UserFilter = { userID: number }
@@ -44,7 +44,7 @@ export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
   return passedUserFilter && passesLabelFilter && passesTextFilter
 }
 
-export default function Filters<SortOption extends string>({
+export default function FiltersHeader<SortOption extends string>({
   users,
   labelColors,
   items,
