@@ -66,7 +66,8 @@ export default function Filters<SortOption extends string>({
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
   const isCustomSortOption = sortOptions.length > 0 && activeSortOption && activeSortOption !== sortOptions[0]
-  const markup = filters.length > 0 || isCustomSortOption ? 'border-b border-gray-200 mb-4 py-2' : ''
+  const hasFilters = filters.length > 0 || isCustomSortOption
+  const markup = hasFilters ? 'border-b border-gray-200 mb-4 py-2' : ''
   const resetSortOption = () => setActiveSortOption && setActiveSortOption(sortOptions[0])
   const resetFilters = () => {
     setFilters([])
@@ -100,7 +101,7 @@ export default function Filters<SortOption extends string>({
         {isCustomSortOption && (
           <FilterCell filter={activeSortOption} users={users} labelColors={labelColors} onClick={resetSortOption} />
         )}
-        {(filters.length > 1 || (filters.length > 0 && isCustomSortOption)) && (
+        {hasFilters && (
           <div
             className='px-2 py-1 border border-gray-300 border-dashed rounded-md cursor-pointer'
             onClick={resetFilters}>
