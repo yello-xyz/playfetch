@@ -432,8 +432,12 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
 export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean =>
   InputPriceForModel(model) === 0 && OutputPriceForModel(model) === 0
 
-export const ValidatePromptConfig = (config: PromptConfig) => ({
-  ...config,
-  seed: SupportsSeed(config.model) ? config.seed : undefined,
-  jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
-})
+const filterOptionalKeys = <T extends object>(obj: T): T =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T
+
+export const ValidatePromptConfig = (config: PromptConfig): PromptConfig =>
+  filterOptionalKeys({
+    ...config,
+    seed: SupportsSeed(config.model) ? config.seed : undefined,
+    jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
+  })
