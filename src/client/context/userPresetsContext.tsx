@@ -46,7 +46,7 @@ function useLayoutConfig() {
 
   const floatingSidebar = currentConfig.floatingSidebar
   const setFloatingSidebar = (floatingSidebar: boolean) => updateConfig({ floatingSidebar })
-  
+
   const promptTabs = currentConfig.promptTabs
   const setPromptTabs = (promptTabs: PromptTab[][]) => updateConfig({ promptTabs })
 

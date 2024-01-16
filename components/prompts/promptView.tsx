@@ -2,7 +2,7 @@ import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
@@ -74,7 +74,8 @@ export default function PromptView({
     setTestConfig
   )
 
-  const areTabsMerged = promptTabs.length === 1
+  const [preferredPromptTabsWidth, setPreferredPromptTabsWidth] = useState('50%')
+  useEffect(() => setPreferredPromptTabsWidth(promptTabs.length > 1 ? '66%' : '50%'), [promptTabs])
   const minWidth = 400
   const minTopPaneHeight = 120
   const rowCount = GetTestDataRowCount(variables, inputValues)
@@ -83,8 +84,8 @@ export default function PromptView({
   return (
     <Allotment vertical>
       <Allotment.Pane minSize={minTopPaneHeight}>
-        <Allotment key={areTabsMerged.toString()} className='flex-1 bg-gray-25'>
-          <Allotment.Pane minSize={minWidth} preferredSize={areTabsMerged ? '50%' : '66%'}>
+        <Allotment key={preferredPromptTabsWidth} className='flex-1 bg-gray-25'>
+          <Allotment.Pane minSize={minWidth} preferredSize={preferredPromptTabsWidth}>
             <PromptTabs
               prompt={prompt}
               versions={versions}
