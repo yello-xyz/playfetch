@@ -11,38 +11,18 @@ import { ReactNode, useRef, useState } from 'react'
 import PopupMenu, { PopupSectionTitle } from '../popupMenu'
 import Icon from '../icon'
 import { StaticImageData } from 'next/image'
-
-type UserFilter = { userID: number }
-type LabelFilter = { label: string }
-type TextFilter = { text: string }
-
-export type Filter = UserFilter | LabelFilter | TextFilter
-export type FilterItem = { userIDs: number[]; labels: string[]; contents: string[] }
-
-const isUserFilter = (filter: Filter): filter is UserFilter => 'userID' in filter
-const isLabelFilter = (filter: Filter): filter is LabelFilter => 'label' in filter
-const isTextFilter = (filter: Filter): filter is TextFilter => 'text' in filter
-
-const userIDsFromFilters = (filters: Filter[]) => filters.filter(isUserFilter).map(filter => filter.userID)
-const labelsFromFilters = (filters: Filter[]) => filters.filter(isLabelFilter).map(filter => filter.label)
-const contentsFromFilters = (filters: Filter[]) => filters.filter(isTextFilter).map(filter => filter.text.toLowerCase())
-
-export const BuildFilter = (filters: Filter[]) => (item: FilterItem) => {
-  const userIDs = userIDsFromFilters(filters)
-  const itemUserIDs = [...new Set(item.userIDs)]
-  const passedUserFilter = !userIDs.length || itemUserIDs.some(userID => userIDs.includes(userID))
-
-  const labels = labelsFromFilters(filters)
-  const itemLabels = [...new Set(item.labels)]
-  const passesLabelFilter = !labels.length || itemLabels.some(label => labels.includes(label))
-
-  const contents = contentsFromFilters(filters)
-  const itemContents = [...new Set(item.contents.map(content => content.toLowerCase()))]
-  const passesTextFilter =
-    !contents.length || contents.every(filter => itemContents.some(content => content.includes(filter)))
-
-  return passedUserFilter && passesLabelFilter && passesTextFilter
-}
+import {
+  Filter,
+  FilterItem,
+  IsLabelFilter,
+  IsTextFilter,
+  IsUserFilter,
+  LabelFilter,
+  LabelsFromFilters,
+  TextFilter,
+  UserFilter,
+  UserIDsFromFilters,
+} from './filters'
 
 export default function FiltersHeader<SortOption extends string>({
   users,
@@ -130,9 +110,9 @@ function FilterCell<SortOption extends string>({
         <SortOptionCell option={filter} />
       ) : (
         <>
-          {isTextFilter(filter) && <TextFilterCell filter={filter} />}
-          {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
-          {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
+          {IsTextFilter(filter) && <TextFilterCell filter={filter} />}
+          {IsLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
+          {IsUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
         </>
       )}
       <Icon className='cursor-pointer' icon={clearIcon} onClick={onClick} />
@@ -180,14 +160,14 @@ function FilterButton<SortOption extends string>({
   activeSortOption?: SortOption
   setActiveSortOption?: (option: SortOption) => void
 }) {
-  const activeUserIDs = userIDsFromFilters(filters)
+  const activeUserIDs = UserIDsFromFilters(filters)
   const itemUserIDs = items.flatMap(item => item.userIDs)
   const countForUserID = (userID: number) => itemUserIDs.filter(id => id === userID).length
   const availableUsers = users.filter(
     user => !activeUserIDs.includes(user.id) && countForUserID(user.id) > 0 && countForUserID(user.id) < items.length
   )
 
-  const activeLabels = labelsFromFilters(filters)
+  const activeLabels = LabelsFromFilters(filters)
   const itemLabels = items.map(item => item.labels)
   const countForLabel = (label: string) => itemLabels.filter(labels => labels.includes(label)).length
   const availableLabels = [...new Set(itemLabels.flat())].filter(
@@ -214,7 +194,7 @@ function FilterButton<SortOption extends string>({
   const updateText = (newText: string) => {
     setText(newText)
     setFilters([
-      ...filters.filter(filter => !isTextFilter(filter) || filter.text !== text),
+      ...filters.filter(filter => !IsTextFilter(filter) || filter.text !== text),
       ...(newText.trim().length > 0 ? [{ text: newText }] : []),
     ])
   }

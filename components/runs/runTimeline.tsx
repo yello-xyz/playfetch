@@ -21,8 +21,9 @@ import {
   BuildInputMap,
 } from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
-import FiltersHeader, { Filter } from '../filters/filtersHeader'
+import FiltersHeader from '../filters/filtersHeader'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
+import { Filter } from '../filters/filters'
 
 export default function RunTimeline({
   runs = [],
