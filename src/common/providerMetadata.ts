@@ -7,6 +7,7 @@ import {
   EmbeddingModel,
   LanguageModel,
   ModelProvider,
+  PromptConfig,
   Prompts,
   QueryProvider,
   SourceControlProvider,
@@ -430,3 +431,9 @@ export const OutputPriceForModel = (model: LanguageModel | EmbeddingModel): numb
 
 export const IsModelFreeToUse = (model: LanguageModel | EmbeddingModel): boolean =>
   InputPriceForModel(model) === 0 && OutputPriceForModel(model) === 0
+
+export const ValidatePromptConfig = (config: PromptConfig) => ({
+  ...config,
+  seed: SupportsSeed(config.model) ? config.seed : undefined,
+  jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
+})

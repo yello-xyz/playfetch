@@ -23,6 +23,7 @@ import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
 import { DefaultPromptConfig } from '@/src/common/defaultConfig'
+import { ValidatePromptConfig } from '@/src/common/providerMetadata'
 
 export async function migrateUsers(postMerge: boolean) {
   const datastore = getDatastore()
@@ -126,7 +127,7 @@ const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperatur
 export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
   const userData = await getUserData(userID)
   const [userConfig] = loadFilteredPresets(userData, promptConfigKeys)
-  return { ...DefaultPromptConfig, ...userConfig }
+  return ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig })
 }
 
 export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {
@@ -139,7 +140,7 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
     await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
   }
 
-  return { ...DefaultPromptConfig, ...userConfig }
+  return ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig })
 }
 
 export async function markUserAsOnboarded(userID: number) {

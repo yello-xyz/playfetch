@@ -1,7 +1,7 @@
 import { ActivePrompt, ChainVersion, PromptConfig, PromptVersion, Prompts } from '@/types'
 import useInitialState from './useInitialState'
 import { PromptVersionsAreEqual } from '@/src/common/versionsEqual'
-import { SupportedPromptKeysForModel, SupportsJsonMode, SupportsSeed } from '@/src/common/providerMetadata'
+import { SupportedPromptKeysForModel, ValidatePromptConfig } from '@/src/common/providerMetadata'
 import { useEffect, useState } from 'react'
 
 export default function usePromptVersion(
@@ -23,11 +23,7 @@ export default function usePromptVersion(
           SupportedPromptKeysForModel(config.model).includes(key as keyof Prompts)
         )
       ) as Prompts
-      config = {
-        ...config,
-        seed: SupportsSeed(config.model) ? config.seed : undefined,
-        jsonMode: SupportsJsonMode(config.model) ? config.jsonMode ?? false : undefined,
-      }
+      config = ValidatePromptConfig(config)
       onUpdate(prompts, config)
       return { ...currentVersion, prompts, config }
     })
