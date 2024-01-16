@@ -25,12 +25,10 @@ import { getRecentRuns } from './runs'
 import { DefaultPromptConfig } from '@/src/common/defaultConfig'
 
 export async function migrateUsers(postMerge: boolean) {
-  if (postMerge) {
-    return
-  }
   const datastore = getDatastore()
   const [allUsers] = await datastore.runQuery(datastore.createQuery(Entity.USER))
   for (const userData of allUsers) {
+    const defaultPromptConfig = userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined
     await getDatastore().save(
       toUserData(
         userData.email,
@@ -41,8 +39,9 @@ export async function migrateUsers(postMerge: boolean) {
         userData.isAdmin,
         userData.createdAt,
         userData.lastLoginAt,
-        userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-        getID(userData)
+        userData.presets ? JSON.parse(userData.presets) : defaultPromptConfig,
+        getID(userData),
+        postMerge ? undefined : defaultPromptConfig
       )
     )
   }
@@ -58,8 +57,9 @@ const updateUserData = (userData: any) =>
     userData.isAdmin,
     userData.createdAt,
     userData.lastLoginAt,
+    userData.presets ? JSON.parse(userData.presets) : undefined,
+    getID(userData),
     userData.defaultPromptConfig ? JSON.parse(userData.defaultPromptConfig) : undefined,
-    getID(userData)
   )
 
 const updateUser = (userData: any) => getDatastore().save(updateUserData(userData))
@@ -73,8 +73,9 @@ const toUserData = (
   isAdmin: boolean,
   createdAt: Date,
   lastLoginAt?: Date,
-  defaultPromptConfig?: Partial<PromptConfig>,
-  userID?: number
+  presets?: any,
+  userID?: number,
+  defaultPromptConfig?: Partial<PromptConfig>, // TODO delete after next push to prod (also in excludeFromIndexes)
 ) => ({
   key: buildKey(Entity.USER, userID),
   data: {
@@ -86,9 +87,10 @@ const toUserData = (
     isAdmin,
     createdAt,
     lastLoginAt,
+    presets: presets ? JSON.stringify(presets) : undefined,
     defaultPromptConfig: defaultPromptConfig ? JSON.stringify(defaultPromptConfig) : undefined,
   },
-  excludeFromIndexes: ['fullName', 'imageURL', 'defaultPromptConfig'],
+  excludeFromIndexes: ['fullName', 'imageURL', 'presets', 'defaultPromptConfig'],
 })
 
 export const toUser = (data: any): User => ({
@@ -167,8 +169,9 @@ export async function saveUser(email: string, fullName: string, hasAccess = fals
     isAdmin,
     hasAccess ? previousUserData?.createdAt ?? new Date() : new Date(),
     previousUserData?.lastLoginAt,
+    previousUserData?.presets ? JSON.parse(previousUserData.presets) : undefined,
+    previousUserData ? getID(previousUserData) : undefined,
     previousUserData?.defaultPromptConfig ? JSON.parse(previousUserData.defaultPromptConfig) : undefined,
-    previousUserData ? getID(previousUserData) : undefined
   )
   await getDatastore().save(userData)
   if (hasAccess && (!previousUserData || !previousUserData.hasAccess)) {
