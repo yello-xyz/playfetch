@@ -65,7 +65,13 @@ export default function Filters<SortOption extends string>({
   setActiveSortOption?: (option: SortOption) => void
   tabSelector: (children?: ReactNode) => ReactNode
 }) {
-  const markup = filters.length > 0 ? 'border-b border-gray-200 mb-4 py-2' : ''
+  const isCustomSortOption = sortOptions.length > 0 && activeSortOption && activeSortOption !== sortOptions[0]
+  const markup = filters.length > 0 || isCustomSortOption ? 'border-b border-gray-200 mb-4 py-2' : ''
+  const resetSortOption = () => setActiveSortOption && setActiveSortOption(sortOptions[0])
+  const resetFilters = () => {
+    setFilters([])
+    resetSortOption()
+  }
 
   return (
     <div className='z-10 flex flex-col'>
@@ -91,10 +97,13 @@ export default function Filters<SortOption extends string>({
             onClick={() => setFilters(filters.filter((_, i) => i !== index))}
           />
         ))}
-        {filters.length > 1 && (
+        {isCustomSortOption && (
+          <FilterCell filter={activeSortOption} users={users} labelColors={labelColors} onClick={resetSortOption} />
+        )}
+        {(filters.length > 1 || (filters.length > 0 && isCustomSortOption)) && (
           <div
             className='px-2 py-1 border border-gray-300 border-dashed rounded-md cursor-pointer'
-            onClick={() => setFilters([])}>
+            onClick={resetFilters}>
             clear filters
           </div>
         )}
@@ -103,26 +112,34 @@ export default function Filters<SortOption extends string>({
   )
 }
 
-function FilterCell({
+function FilterCell<SortOption extends string>({
   filter,
   users,
   labelColors,
   onClick,
 }: {
-  filter: Filter
+  filter: Filter | SortOption
   users: User[]
   labelColors: Record<string, string>
   onClick: () => void
 }) {
   return (
     <div className='flex items-center gap-1 p-1 pl-2 border border-gray-300 rounded-md'>
-      {isTextFilter(filter) && <TextFilterCell filter={filter} />}
-      {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
-      {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
+      {typeof filter === 'string' ? (
+        <SortOptionCell option={filter} />
+      ) : (
+        <>
+          {isTextFilter(filter) && <TextFilterCell filter={filter} />}
+          {isLabelFilter(filter) && <LabelFilterCell filter={filter} labelColors={labelColors} />}
+          {isUserFilter(filter) && <UserFilterCell filter={filter} users={users} />}
+        </>
+      )}
       <Icon className='cursor-pointer' icon={clearIcon} onClick={onClick} />
     </div>
   )
 }
+
+const SortOptionCell = <SortOption extends string>({ option }: { option: SortOption }) => <>sort by: {option}</>
 
 const TextFilterCell = ({ filter }: { filter: TextFilter }) => <>contains: “{filter.text}”</>
 
