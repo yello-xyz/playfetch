@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { LanguageModel, PromptConfig } from '@/types'
 import { LayoutConfig, PromptTab, UserPresets } from '@/src/common/userPresets'
 import api from '../api'
@@ -14,8 +14,11 @@ export function useDefaultPromptConfig() {
   const context = useContext(UserPresetsContext)
 
   const currentUserPresets = context.currentUserPresets!
+  const initialConfig = currentUserPresets.defaultPromptConfig
+  const [currentConfig, setCurrentConfig] = useState(initialConfig)
 
   const updateConfig = (config: Partial<PromptConfig>) => {
+    setCurrentConfig({ ...currentConfig, ...config })
     api
       .updateDefaultPromptConfig(config)
       .then(defaultPromptConfig => context.setCurrentUserPresets!({ ...currentUserPresets, defaultPromptConfig }))
@@ -24,24 +27,27 @@ export function useDefaultPromptConfig() {
   const updateDefaultModel = (model: LanguageModel) => updateConfig({ model })
   const updateDefaultParameters = (config: Omit<PromptConfig, 'model'>) => updateConfig(config)
 
-  return [currentUserPresets.defaultPromptConfig, updateDefaultModel, updateDefaultParameters] as const
+  return [currentConfig, updateDefaultModel, updateDefaultParameters] as const
 }
 
 function useLayoutConfig() {
   const context = useContext(UserPresetsContext)
 
   const currentUserPresets = context.currentUserPresets!
+  const initialConfig = currentUserPresets.layoutConfig
+  const [currentConfig, setCurrentConfig] = useState(initialConfig)
 
   const updateConfig = (config: Partial<LayoutConfig>) => {
+    setCurrentConfig({ ...currentConfig, ...config })
     api
       .updateLayoutConfig(config)
       .then(layoutConfig => context.setCurrentUserPresets!({ ...currentUserPresets, layoutConfig }))
   }
 
-  const floatingSidebar = currentUserPresets.layoutConfig.floatingSidebar
+  const floatingSidebar = currentConfig.floatingSidebar
   const setFloatingSidebar = (floatingSidebar: boolean) => updateConfig({ floatingSidebar })
   
-  const promptTabs = currentUserPresets.layoutConfig.promptTabs
+  const promptTabs = currentConfig.promptTabs
   const setPromptTabs = (promptTabs: PromptTab[][]) => updateConfig({ promptTabs })
 
   return [floatingSidebar, promptTabs, setFloatingSidebar, setPromptTabs] as const
