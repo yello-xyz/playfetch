@@ -2,7 +2,7 @@ import { PartialRun, Run } from '@/types'
 import Collapsible from '../collapsible'
 import { useState } from 'react'
 
-export default function RunCellHeader({ run }: { run: Run | PartialRun }) {
+export default function RunCellHeader({ run }: { run: PartialRun | Run }) {
   const [areChildrenExpanded, setChildrenExpanded] = useState(false)
   const onSetExpanded = (expanded: boolean, isShiftClick: boolean) => isShiftClick && setChildrenExpanded(expanded)
 

@@ -1,9 +1,28 @@
 import { ActiveChain, ActivePrompt, ChainVersion, PartialRun, PromptInputs, PromptVersion, Run } from '@/types'
 import RunCell from './runCell'
 import useFormattedDate from '@/src/client/hooks/useFormattedDate'
+import { BuildInputMap, GetMappedRowForRun } from '@/src/client/runMerging'
+
+type InputMap = ReturnType<typeof BuildInputMap>
+
+const getRowLabelForGroup = (group: (PartialRun | Run)[], sortByInputMap: InputMap | undefined) => {
+  if (sortByInputMap) {
+    const row = GetMappedRowForRun(group[0], sortByInputMap)
+    switch (row) {
+      case Infinity:
+        return undefined
+      case -1:
+        return 'Older Test Data Rows'
+      default:
+        return `Test Data Row #${row + 1}`
+    }
+  }
+  return undefined
+}
 
 export function RunGroup({
   group,
+  sortByInputMap,
   version,
   activeItem,
   isRunSelected,
@@ -14,6 +33,7 @@ export function RunGroup({
   isRunning,
 }: {
   group: (PartialRun | Run)[]
+  sortByInputMap?: InputMap
   version?: PromptVersion | ChainVersion
   activeItem?: ActivePrompt | ActiveChain
   isRunSelected: (run: PartialRun | Run) => boolean
@@ -29,16 +49,11 @@ export function RunGroup({
   isRunning?: boolean
 }) {
   const formattedDate = useFormattedDate(group[0].timestamp ?? new Date().getTime())
-
-  const runContinuation =
-    version && runVersion
-      ? async (continuationID: number, message: string, inputKey: string) =>
-          runVersion(() => Promise.resolve(version.id), [{ [inputKey]: message }], [{}], continuationID)
-      : undefined
+  const groupLabel = getRowLabelForGroup(group, sortByInputMap) ?? formattedDate
 
   return (
     <div className='flex flex-col flex-1 gap-3'>
-      <div className='font-medium text-center text-xs text-gray-500'>{formattedDate}</div>
+      <div className='text-xs font-medium text-center text-gray-500'>{groupLabel}</div>
       {group.map(run => (
         <RunCell
           key={run.id}

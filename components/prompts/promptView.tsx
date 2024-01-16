@@ -9,7 +9,7 @@ import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import TestDataPane, { GetTestDataRowCount } from '../testData/testDataPane'
 import usePromptVersion from '@/src/client/hooks/usePromptVersion'
-import { SelectAnyInputValue } from '@/src/client/inputRows'
+import { SelectAnyInputValue, SelectInputRows } from '@/src/client/inputRows'
 import RunButtons from '../runs/runButtons'
 import { VersionHasNonEmptyPrompts } from '@/src/common/versionsEqual'
 import { useCheckModelAvailable } from '@/src/client/context/providerContext'
@@ -105,6 +105,7 @@ export default function PromptView({
                   version={activeVersion}
                   focusRunID={focusRunID}
                   runVersion={runPrompt}
+                  inputs={SelectInputRows(inputValues, variables)}
                   selectInputValue={SelectAnyInputValue(inputValues, testConfig)}
                   isRunning={isRunning}
                 />

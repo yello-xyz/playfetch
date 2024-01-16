@@ -18,6 +18,7 @@ import {
   MergeRuns,
   FilterItemFromRun,
   SortRuns,
+  BuildInputMap,
 } from '@/src/client/runMerging'
 import { RunGroup } from './runGroup'
 import Filters, { Filter } from '../filters'
@@ -30,6 +31,7 @@ export default function RunTimeline({
   focusRunID,
   setFocusRunID,
   runVersion,
+  inputs = [[], []],
   selectInputValue = () => undefined,
   onRatingUpdate,
   isRunning,
@@ -46,6 +48,7 @@ export default function RunTimeline({
     dynamicInputs: PromptInputs[],
     continuationID?: number
   ) => Promise<any>
+  inputs?: [{ [key: string]: string }[], number[]]
   selectInputValue?: (inputKey: string) => string | undefined
   onRatingUpdate?: (run: Run) => Promise<void>
   isRunning?: boolean
@@ -72,6 +75,8 @@ export default function RunTimeline({
   const [filters, setFilters] = useState<Filter[]>([])
   const labelColors = activeItem ? AvailableLabelColorsForItem(activeItem) : {}
 
+  const shouldSortByInput = true
+  const sortByInputMap = shouldSortByInput ? BuildInputMap(inputs) : undefined
   const mergedRuns = MergeRuns(SortRuns(runs)).filter(BuildRunFilter(filters))
 
   const lastPartialRunID = mergedRuns.filter(run => !('inputs' in run)).slice(-1)[0]?.id
@@ -105,10 +110,11 @@ export default function RunTimeline({
       )}
       {runs.length > 0 ? (
         <div className='flex flex-col flex-1 gap-3 p-3 overflow-y-auto'>
-          {GroupRuns(mergedRuns).map((group, index) => (
+          {GroupRuns(mergedRuns, sortByInputMap).map((group, index) => (
             <RunGroup
               key={index}
               group={group}
+              sortByInputMap={sortByInputMap}
               version={version}
               activeItem={activeItem}
               isRunSelected={isRunSelected}
