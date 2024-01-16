@@ -112,9 +112,20 @@ export async function getUserForEmail(email: string, includingWithoutAccess = fa
 
 const getUserData = (userID: number) => getKeyedEntity(Entity.USER, userID)
 
+const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[]): [Partial<T>, any] => {
+  const presetEntries = Object.entries(userData.presets ? JSON.parse(userData.presets) : {})
+  const [filteredEntries, otherEntries] = presetEntries.reduce(
+    ([pass, fail], entry) => (keys.includes(entry[0] as keyof T) ? [[...pass, entry], fail] : [pass, [...fail, entry]]),
+    [[], []] as [[string, unknown][], [string, unknown][]]
+  )
+  return [Object.fromEntries(filteredEntries) as Partial<T>, Object.fromEntries(otherEntries)]
+}
+
+const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperature', 'maxTokens', 'seed', 'jsonMode']
+
 export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
   const userData = await getUserData(userID)
-  const userConfig: Partial<PromptConfig> = userData.presets ? JSON.parse(userData.presets) : {}
+  const [userConfig] = loadFilteredPresets(userData, promptConfigKeys)
   return { ...DefaultPromptConfig, ...userConfig }
 }
 
@@ -123,9 +134,9 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
 
   const userData = await getUserData(userID)
   if (userData) {
-    const previousConfig: Partial<PromptConfig> = userData.presets ? JSON.parse(userData.presets) : {}
+    const [previousConfig, otherPresets] = loadFilteredPresets(userData, promptConfigKeys)
     userConfig = config.model ? { ...previousConfig, ...config } : { model: previousConfig.model, ...config }
-    await updateUser({ ...userData, presets: JSON.stringify(userConfig) })
+    await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
   }
 
   return { ...DefaultPromptConfig, ...userConfig }
