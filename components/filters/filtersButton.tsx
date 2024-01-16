@@ -1,16 +1,14 @@
 import { User } from '@/types'
 import filterIcon from '@/public/filter.svg'
-import chevronIcon from '@/public/chevron.svg'
 import userIcon from '@/public/user.svg'
 import labelIcon from '@/public/label.svg'
 import textIcon from '@/public/text.svg'
-import checkIcon from '@/public/check.svg'
 import UserAvatar from '@/components/users/userAvatar'
-import { ReactNode, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import PopupMenu, { PopupSectionTitle } from '../popupMenu'
 import Icon from '../icon'
-import { StaticImageData } from 'next/image'
 import { Filter, FilterItem, IsTextFilter, LabelsFromFilters, UserIDsFromFilters } from './filters'
+import FilterPopupItem, { FilterCategoryItem, SortOptionItem } from './filterPopupItem'
 
 export function FiltersButton<SortOption extends string>({
   users,
@@ -137,56 +135,6 @@ export function FiltersButton<SortOption extends string>({
           )}
         </PopupMenu>
       </div>
-    </div>
-  )
-}
-
-const FilterCategoryItem = ({
-  title,
-  icon,
-  onClick,
-  disabled,
-}: {
-  title: string
-  icon: StaticImageData
-  onClick: () => void
-  disabled?: boolean
-}) => (
-  <FilterPopupItem onClick={onClick} disabled={disabled}>
-    <Icon icon={icon} />
-    <div className='grow'>{title}</div>
-    <Icon className='-rotate-90' icon={chevronIcon} />
-  </FilterPopupItem>
-)
-
-const SortOptionItem = <SortOption extends string>({
-  option,
-  onClick,
-  isActive,
-}: {
-  option: SortOption
-  onClick: () => void
-  isActive?: boolean
-}) => (
-  <FilterPopupItem onClick={onClick}>
-    {isActive && <Icon icon={checkIcon} />}
-    <div className={!isActive ? 'ml-8 h-6 flex items-center' : undefined}>{option}</div>
-  </FilterPopupItem>
-)
-
-const FilterPopupItem = ({
-  children,
-  onClick,
-  disabled,
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-}) => {
-  const activeClass = disabled ? 'opacity-50' : 'cursor-pointer hover:bg-gray-100'
-  return (
-    <div className={`flex items-center gap-2 p-1 rounded ${activeClass}`} onClick={disabled ? undefined : onClick}>
-      {children}
     </div>
   )
 }
