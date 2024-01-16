@@ -1,4 +1,5 @@
 import { PromptConfig, ModelProvider } from '@/types'
+import { UserPresets } from './userPresets'
 
 export const DefaultProvider: ModelProvider = 'google'
 
@@ -11,4 +12,9 @@ export const DefaultPromptConfig: PromptConfig = {
   isChat: false,
   temperature: 0.5,
   maxTokens: 1000,
+}
+
+export const DefaultLayoutConfig: UserPresets['layoutConfig'] = {
+  floatingSidebar: false,
+  splitPromptTabs: false,
 }

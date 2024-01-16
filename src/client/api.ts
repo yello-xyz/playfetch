@@ -25,6 +25,7 @@ import {
 import ClientRoute from '../common/clientRoute'
 import { BuildActiveChain, BuildActivePrompt } from '../common/activeItem'
 import Progress from 'nprogress'
+import { UserPresets } from '../common/userPresets'
 
 export type StreamReader = ReadableStreamDefaultReader<Uint8Array>
 
@@ -280,6 +281,9 @@ const api = {
   },
   updateDefaultPromptConfig: function (defaultPromptConfig: Partial<PromptConfig>) {
     return post(this.updateDefaultPromptConfig, { defaultPromptConfig })
+  },
+  updateLayoutConfig: function (layoutConfig: Partial<UserPresets['layoutConfig']>) {
+    return post(this.updateLayoutConfig, { layoutConfig })
   },
   getAvailableProviders: function (projectID: number): Promise<AvailableProvider[]> {
     return post(this.getAvailableProviders, { projectID })

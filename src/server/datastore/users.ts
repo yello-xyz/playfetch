@@ -22,8 +22,9 @@ import { getRecentEndpoints } from './endpoints'
 import { and } from '@google-cloud/datastore'
 import { getRecentProjects, getSharedProjectsForUser } from './projects'
 import { getRecentRuns } from './runs'
-import { DefaultPromptConfig } from '@/src/common/defaultConfig'
+import { DefaultPromptConfig, DefaultLayoutConfig } from '@/src/common/defaultConfig'
 import { ValidatePromptConfig } from '@/src/common/providerMetadata'
+import { UserPresets } from '@/src/common/userPresets'
 
 export async function migrateUsers(postMerge: boolean) {
   const datastore = getDatastore()
@@ -123,11 +124,16 @@ const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[])
 }
 
 const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperature', 'maxTokens', 'seed', 'jsonMode']
+const layoutConfigKeys: (keyof UserPresets['layoutConfig'])[] = ['floatingSidebar', 'splitPromptTabs']
 
-export async function getPresetsForUser(userID: number): Promise<{ defaultPromptConfig: PromptConfig }> {
+export async function getPresetsForUser(userID: number): Promise<UserPresets> {
   const userData = await getUserData(userID)
-  const [userConfig] = loadFilteredPresets(userData, promptConfigKeys)
-  return { defaultPromptConfig: ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig }) }
+  const [promptConfig] = loadFilteredPresets(userData, promptConfigKeys)
+  const [layoutConfig] = loadFilteredPresets(userData, layoutConfigKeys)
+  return {
+    defaultPromptConfig: ValidatePromptConfig({ ...DefaultPromptConfig, ...promptConfig }),
+    layoutConfig: { ...DefaultLayoutConfig, ...layoutConfig },
+  }
 }
 
 export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {
@@ -141,6 +147,19 @@ export async function saveDefaultPromptConfigForUser(userID: number, config: Par
   }
 
   return ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig })
+}
+
+export async function saveLayoutConfigForUser(userID: number, config: Partial<UserPresets['layoutConfig']>) {
+  let userConfig: Partial<UserPresets['layoutConfig']> = {}
+
+  const userData = await getUserData(userID)
+  if (userData) {
+    const [previousConfig, otherPresets] = loadFilteredPresets(userData, layoutConfigKeys)
+    userConfig = { ...previousConfig, ...config }
+    await updateUser({ ...userData, presets: JSON.stringify({ ...userConfig, ...otherPresets }) })
+  }
+
+  return { ...DefaultLayoutConfig, ...userConfig }
 }
 
 export async function markUserAsOnboarded(userID: number) {
