@@ -23,7 +23,7 @@ export default function FilterCells<SortOption extends string>({
 }) {
   const isCustomSortOption = sortOptions.length > 0 && activeSortOption && activeSortOption !== sortOptions[0]
   const hasFilters = filters.length > 0 || isCustomSortOption
-  const markup = hasFilters ? 'border-b border-gray-200 mb-4 py-2' : ''
+  const markup = hasFilters ? 'border-b border-gray-200 py-2' : ''
   const resetSortOption = () => setActiveSortOption && setActiveSortOption(sortOptions[0])
   const resetFilters = () => {
     setFilters([])
