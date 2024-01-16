@@ -18,7 +18,7 @@ import { useModelProviders } from '@/src/client/context/providerContext'
 import { useState } from 'react'
 import IconButton from '../iconButton'
 import dotsIcon from '@/public/dots.svg'
-import { useDefaultPromptConfig } from '@/src/client/context/promptConfigContext'
+import { useDefaultPromptConfig } from '@/src/client/context/userPresetsContext'
 import { PromptConfigsAreEqual } from '@/src/common/versionsEqual'
 import { ModelUnavailableWarning } from './modelUnavailableWarning'
 

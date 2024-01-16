@@ -32,7 +32,7 @@ import { ActiveItem, CompareItem, EndpointsItem, SettingsItem } from '@/src/comm
 import loadActiveItem from '@/src/server/activeItem'
 import useActiveItem from '@/src/client/hooks/useActiveItem'
 import useCommentSelection from '@/src/client/hooks/useCommentSelection'
-import { PromptConfigContext } from '@/src/client/context/promptConfigContext'
+import { UserPresets, UserPresetsContext } from '@/src/client/context/userPresetsContext'
 import { useDocumentationCookie } from '@/components/cookieBanner'
 import { ProviderContext } from '@/src/client/context/providerContext'
 
@@ -55,7 +55,7 @@ export default function Home({
   initialAnalytics,
   initialAvailableProviders,
   initialScopedProviders,
-  initialPromptConfig,
+  initialUserPresets,
 }: {
   user: User
   workspaces: Workspace[]
@@ -64,7 +64,7 @@ export default function Home({
   initialAnalytics: Analytics | null
   initialAvailableProviders: AvailableProvider[]
   initialScopedProviders: AvailableProvider[]
-  initialPromptConfig: PromptConfig
+  initialUserPresets: UserPresets
 }) {
   useDocumentationCookie('set')
   const [
@@ -228,13 +228,13 @@ export default function Home({
     }
   })
 
-  const [defaultPromptConfig, setDefaultPromptConfig] = useState(initialPromptConfig)
+  const [currentUserPresets, setCurrentUserPresets] = useState(initialUserPresets)
 
   return (
     <>
       <UserContext.Provider value={{ loggedInUser: user }}>
         <ProviderContext.Provider value={{ availableProviders }}>
-          <PromptConfigContext.Provider value={{ defaultPromptConfig, setDefaultPromptConfig }}>
+          <UserPresetsContext.Provider value={{ currentUserPresets, setCurrentUserPresets }}>
             <ProjectContext.Provider value={{ activeProject, refreshActiveItem, refreshProject }}>
               <ModalDialogContext.Provider value={{ setDialogPrompt }}>
                 <GlobalPopupContext.Provider value={globalPopupProviderProps}>
@@ -299,7 +299,7 @@ export default function Home({
               <GlobalPopup {...globalPopupProps} {...popupProps} />
               <ModalDialog prompt={dialogPrompt} onDismiss={() => setDialogPrompt(undefined)} />
             </ProjectContext.Provider>
-          </PromptConfigContext.Provider>
+          </UserPresetsContext.Provider>
         </ProviderContext.Provider>
       </UserContext.Provider>
     </>

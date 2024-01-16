@@ -124,10 +124,10 @@ const loadFilteredPresets = <T extends object>(userData: any, keys: (keyof T)[])
 
 const promptConfigKeys: (keyof PromptConfig)[] = ['model', 'isChat', 'temperature', 'maxTokens', 'seed', 'jsonMode']
 
-export async function getDefaultPromptConfigForUser(userID: number): Promise<PromptConfig> {
+export async function getPresetsForUser(userID: number): Promise<{ defaultPromptConfig: PromptConfig }> {
   const userData = await getUserData(userID)
   const [userConfig] = loadFilteredPresets(userData, promptConfigKeys)
-  return ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig })
+  return { defaultPromptConfig: ValidatePromptConfig({ ...DefaultPromptConfig, ...userConfig }) }
 }
 
 export async function saveDefaultPromptConfigForUser(userID: number, config: Partial<PromptConfig>) {

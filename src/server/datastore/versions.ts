@@ -27,7 +27,7 @@ import {
   getVerifiedUserChainData,
   updateChainOnDeletedVersion,
 } from './chains'
-import { getDefaultPromptConfigForUser } from './users'
+import { getPresetsForUser } from './users'
 import { DefaultPrompts } from '@/src/common/defaultConfig'
 import { deleteEntity } from './cleanup'
 
@@ -107,12 +107,12 @@ export async function getTrustedVersion(versionID: number, markAsRun = false) {
 
 export async function addInitialVersion(userID: number, parentID: number, isChainVersion: boolean) {
   const versionID = await allocateID(Entity.VERSION)
-  const promptConfig = isChainVersion ? null : await getDefaultPromptConfigForUser(userID)
+  const { defaultPromptConfig } = isChainVersion ? { defaultPromptConfig: null } : await getPresetsForUser(userID)
   return toVersionData(
     userID,
     parentID,
     isChainVersion ? null : DefaultPrompts,
-    promptConfig,
+    defaultPromptConfig,
     isChainVersion ? [] : null,
     [],
     new Date(),
@@ -358,8 +358,8 @@ export async function deleteVersionForUser(userID: number, versionID: number) {
   const anyVersionWithSameParentKey = await getEntityKey(Entity.VERSION, 'parentID', parentID)
   if (!anyVersionWithSameParentKey) {
     if (wasPromptVersion) {
-      const promptConfig = await getDefaultPromptConfigForUser(userID)
-      await savePromptVersionForUser(userID, parentID, DefaultPrompts, promptConfig)
+      const { defaultPromptConfig } = await getPresetsForUser(userID)
+      await savePromptVersionForUser(userID, parentID, DefaultPrompts, defaultPromptConfig)
     } else {
       await saveChainVersionForUser(userID, parentID, [])
     }
