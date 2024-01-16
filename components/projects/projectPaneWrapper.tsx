@@ -4,6 +4,7 @@ import Icon from '@/components/icon'
 import menuIcon from '@/public/menu.svg'
 import collapseMenuIcon from '@/public/collapseMenu.svg'
 import expandMenuIcon from '@/public/expandMenu.svg'
+import { useFloatingSidebar } from '@/src/client/context/userPresetsContext'
 
 export default function ProjectPaneWrapper({
   topBar,
@@ -14,7 +15,8 @@ export default function ProjectPaneWrapper({
   sidebar: (rightBorder: boolean) => ReactNode
   children: ReactNode
 }) {
-  const [showStickySidebar, setShowStickySidebar] = useState(true)
+  const [shouldUseFloatingSidebar, persistFloatingSidebar] = useFloatingSidebar()
+  const [showStickySidebar, setShowStickySidebar] = useState(!shouldUseFloatingSidebar)
   const [showFloatingSidebar, setShowFloatingSidebar] = useState(false)
   const [isHidingFloatingSidebar, setIsHidingFloatingSidebar] = useState(false)
 
@@ -70,6 +72,7 @@ export default function ProjectPaneWrapper({
   const onClickButton = () => {
     setOverToggleButton(true)
     setShowFloatingSidebar(showStickySidebar)
+    persistFloatingSidebar(showStickySidebar)
     setShowStickySidebar(!showStickySidebar)
   }
 
