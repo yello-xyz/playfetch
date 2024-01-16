@@ -1,5 +1,6 @@
 import { BuildFilter, Filter, FilterItem } from '@/components/filters'
 import { IsProperRun, PartialRun, Run } from '@/types'
+import HashValue from '../common/hashing'
 
 export const IdentifierForRun = (runID: number) => `r${runID}`
 
@@ -61,18 +62,54 @@ export const FilterItemFromRun = (run: Run): FilterItem => {
 export const BuildRunFilter = (filters: Filter[]) => (run: PartialRun | Run) =>
   !IsProperRun(run) || BuildFilter(filters)(FilterItemFromRun(run))
 
+type Input = { [key: string]: string }
+type Inputs = [Input[], number[]]
+type InputMap = { [hash: number]: number }
+
+const HashInput = (input: Input) =>
+  HashValue(
+    Object.entries(input)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(kvp => kvp.join(':'))
+      .join(':')
+  )
+
+export const BuildInputMap = (inputs: Inputs): InputMap => {
+  const inputMap = {} as InputMap
+  inputs[0].forEach((input, index) => (inputMap[HashInput(input)] = inputs[1][index]))
+  return inputMap
+}
+
+export const GetMappedRowForRun = (run: PartialRun | Run, inputMap: InputMap): number => {
+  if (!IsProperRun(run)) {
+    return Infinity
+  }
+  const row = inputMap[HashInput(run.inputs)]
+  return row !== undefined ? row : -1
+}
+
+const sortByInput = (runs: (PartialRun | Run)[], inputMap: InputMap): (PartialRun | Run)[] =>
+  runs.sort((a, b) => {
+    const rowA = GetMappedRowForRun(a, inputMap)
+    const rowB = GetMappedRowForRun(b, inputMap)
+    return rowA !== rowB ? rowA - rowB : runs.indexOf(a) - runs.indexOf(b)
+  })
+
 const groupGranularity = 5 * 60 * 1000
-export const GroupRuns = (runs: (PartialRun | Run)[]): (PartialRun | Run)[][] =>
-  runs.reduce(
+export const GroupRuns = (runs: (PartialRun | Run)[], sortByInputMap: InputMap | undefined): (PartialRun | Run)[][] =>
+  (sortByInputMap ? sortByInput(runs, sortByInputMap) : runs).reduce(
     (groupedRuns, run) => {
-      const previousTimestamp =
-        groupedRuns.length > 0 ? groupedRuns.slice(-1)[0][0].timestamp ?? new Date().getTime() : undefined
-      const nextTimestamp = run.timestamp ?? new Date().getTime()
-      if (!previousTimestamp || nextTimestamp - previousTimestamp > groupGranularity) {
-        return [...groupedRuns, [run]]
-      } else {
-        return [...groupedRuns.slice(0, -1), [...groupedRuns.slice(-1)[0], run]]
-      }
+      const getValue = (run: PartialRun | Run) =>
+        sortByInputMap ? GetMappedRowForRun(run, sortByInputMap) : run.timestamp ?? new Date().getTime()
+
+      const previousValue = groupedRuns.length > 0 ? getValue(groupedRuns.slice(-1)[0][0]) : undefined
+      const nextValue = getValue(run)
+
+      const isNewGroup =
+        previousValue === undefined ||
+        (sortByInputMap ? nextValue !== previousValue : nextValue - previousValue > groupGranularity)
+
+      return isNewGroup ? [...groupedRuns, [run]] : [...groupedRuns.slice(0, -1), [...groupedRuns.slice(-1)[0], run]]
     },
     [] as (PartialRun | Run)[][]
   )
