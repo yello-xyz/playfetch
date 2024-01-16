@@ -85,7 +85,7 @@ export default function CompareView({ logEntries = [] }: { logEntries?: LogEntry
 
   return ItemsInProject(activeProject).length > 0 ? (
     <>
-      <div className='flex flex-col h-full'>
+      <div className='flex flex-col h-full bg-gray-25'>
         <div className={isDiffMode ? 'flex' : 'flex h-full'}>
           <ComparePane
             project={activeProject}
