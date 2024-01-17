@@ -1,5 +1,5 @@
 import { ActiveChain, ChainVersion } from '@/types'
-import { CustomHeader, EditableHeaderItem } from '../tabSelector'
+import { CustomHeader } from '../tabSelector'
 import Icon from '../icon'
 import chainIcon from '@/public/chain.svg'
 import historyIcon from '@/public/history.svg'
@@ -7,6 +7,7 @@ import { StaticImageData } from 'next/image'
 import { useState } from 'react'
 import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import api from '@/src/client/api'
+import { EditableHeaderItem } from '../headerItem'
 
 export default function ChainEditorHeader({
   chain,
@@ -63,7 +64,7 @@ function HeaderTitle({
   return (
     <div className='flex flex-wrap items-center justify-center h-full gap-2 overflow-hidden shrink-0 max-h-9'>
       <div
-        className='flex items-center h-full font-medium select-none whitespace-nowrap cursor-text gap-1'
+        className='flex items-center h-full gap-1 font-medium select-none whitespace-nowrap cursor-text'
         onClick={() => setLabel(chainName)}>
         {label === undefined && <Icon icon={chainIcon} className='h-full py-1.5' />}
         {label !== undefined ? (

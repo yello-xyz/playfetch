@@ -4,15 +4,12 @@ import {
   ChainNode,
   InputNode,
   IsBranchChainItem,
-  IsChainItem,
   IsCodeChainItem,
   IsPromptChainItem,
   IsQueryChainItem,
   NameForCodeChainItem,
   OutputNode,
-  SubtreeForChainNode,
 } from './chainNode'
-import { EditableHeaderItem, HeaderItem } from '../tabSelector'
 import promptIcon from '@/public/prompt.svg'
 import codeIcon from '@/public/code.svg'
 import queryIcon from '@/public/query.svg'
@@ -21,7 +18,7 @@ import Icon from '../icon'
 import ChainNodePopupMenu from './chainNodePopupMenu'
 import CommentPopupMenu from '../commentPopupMenu'
 import { ReactNode, useState } from 'react'
-import { ShouldBranchLoopOnCompletion } from '@/src/common/branching'
+import { EditableHeaderItem, HeaderItem } from '../headerItem'
 
 export default function ChainNodeBoxHeader({
   nodes,

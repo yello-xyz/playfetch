@@ -18,7 +18,7 @@ import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-import TabSelector, { HeaderItem, SingleTabHeader } from '../tabSelector'
+import TabSelector, { SingleTabHeader } from '../tabSelector'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from '../iconButton'
@@ -30,6 +30,7 @@ import chevronIcon from '@/public/chevron.svg'
 import { ExtractUnboundChainInputs } from '../chains/chainNodeOutput'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
+import { HeaderItem } from '../headerItem'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,
