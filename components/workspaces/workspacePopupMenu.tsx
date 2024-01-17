@@ -1,9 +1,9 @@
 import { ActiveWorkspace } from '@/types'
-import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
 import { useState } from 'react'
 import PickNameDialog from '../pickNameDialog'
+import useWorkspaceActions from '@/src/client/hooks/useWorkspaceActions'
 
 export default function WorkspacePopupMenu({
   workspace,
@@ -21,40 +21,39 @@ export default function WorkspacePopupMenu({
   const setDialogPrompt = useModalDialogPrompt()
 
   const [showPickNamePrompt, setShowPickNamePrompt] = useState(false)
+  const [renameWorkspace, deleteWorkspace, leaveWorkspace] = useWorkspaceActions(onRenamed, onDeleted)
 
-  const deleteWorkspace = () => {
+  const withDismiss = (callback: () => void) => () => {
     setMenuExpanded(false)
+    callback()
+  }
+
+  const promptDelete = () => {
     setDialogPrompt({
       title: 'Are you sure you want to delete this workspace and ALL its projects? This action cannot be undone.',
-      callback: () => api.deleteWorkspace(workspace.id).then(onDeleted),
+      callback: () => deleteWorkspace(workspace),
       destructive: true,
     })
   }
 
-  const leaveWorkspace = () => {
-    setMenuExpanded(false)
+  const promptLeave = () => {
     setDialogPrompt({
       title: `Are you sure you want to leave “${workspace.name}”?`,
       content: 'If you leave this workspace, you will no longer have access to any of its projects.',
       confirmTitle: 'Leave Workspace',
-      callback: () => api.leaveWorkspace(workspace.id).then(onDeleted),
+      callback: () => leaveWorkspace(workspace),
       destructive: true,
     })
-  }
-
-  const renameWorkspace = () => {
-    setMenuExpanded(false)
-    setShowPickNamePrompt(true)
   }
 
   return (
     <>
       <PopupMenu className='w-48' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename Workspace…' callback={renameWorkspace} first />
+        <PopupMenuItem title='Rename Workspace…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
         {workspace.users.length === 1 ? (
-          <PopupMenuItem separated destructive title='Delete Workspace' callback={deleteWorkspace} last />
+          <PopupMenuItem separated destructive title='Delete Workspace' callback={withDismiss(promptDelete)} last />
         ) : (
-          <PopupMenuItem separated destructive title='Leave Workspace' callback={leaveWorkspace} last />
+          <PopupMenuItem separated destructive title='Leave Workspace' callback={withDismiss(promptLeave)} last />
         )}
       </PopupMenu>
       {showPickNamePrompt && (
@@ -63,7 +62,7 @@ export default function WorkspacePopupMenu({
           confirmTitle='Rename'
           label='Name'
           initialName={workspace.name}
-          onConfirm={name => api.renameWorkspace(workspace.id, name).then(onRenamed)}
+          onConfirm={name => renameWorkspace(workspace, name)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
