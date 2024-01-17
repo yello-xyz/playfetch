@@ -59,20 +59,6 @@ const editorTheme = (preformatted: boolean, bordered: boolean, tokenStyle?: TagS
     '.cm-tooltip-autocomplete li[aria-selected] .cm-completionLabel': { backgroundColor: '#E14BD2' },
   })
 
-const autocompleteExtension = (variables: string[]) =>
-  autocompletion({
-    activateOnTyping: true,
-    icons: false,
-    override: [
-      (context: CompletionContext) => {
-        const word = context.matchBefore(/{{[^}]*}?/)
-        return word && word.from !== word.to
-          ? { from: word.from, options: variables.map(variable => ({ label: `{{${variable}}}` })) }
-          : null
-      },
-    ],
-  })
-
 export default function Editor({
   value,
   setValue,
@@ -134,10 +120,30 @@ export default function Editor({
     []
   )
 
+  const autocomplete = useMemo(
+    () =>
+      variables
+        ? autocompletion({
+            activateOnTyping: true,
+            icons: false,
+            override: [
+              (context: CompletionContext) => {
+                const word = context.matchBefore(/{{[^}]*}?/)
+                return word && word.from !== word.to
+                  ? { from: word.from, options: variables.map(variable => ({ label: `{{${variable}}}` })) }
+                  : null
+              },
+            ],
+          })
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
   const extensions = useMemo(
     () => [
       ...(tokenizer ? [StreamLanguage.define({ token: tokenizer })] : []),
-      ...(variables ? [autocompleteExtension(variables)] : []),
+      ...(autocomplete ? [autocomplete] : []),
       ...(tokenStyle ? [syntaxHighlighting(HighlightStyle.define([tokenStyle]))] : []),
       ...(preformatted ? [lineNumbers()] : []),
       EditorView.lineWrapping,
@@ -148,7 +154,7 @@ export default function Editor({
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
     ],
-    [tokenizer, tokenStyle, disabled, placeholder, preformatted, bordered, onUpdate]
+    [tokenizer, tokenStyle, disabled, placeholder, preformatted, bordered, onUpdate, autocomplete]
   )
 
   useEffect(() => {
