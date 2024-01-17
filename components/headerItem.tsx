@@ -63,7 +63,7 @@ export function EditableItem({
 }) {
   const inputRef = useCallback((node: any) => node?.select(), [])
 
-  const submit = () => value.trim().length > 0 ? onSubmit() : onCancel()
+  const submit = () => (value.trim().length > 0 ? onSubmit() : onCancel())
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {

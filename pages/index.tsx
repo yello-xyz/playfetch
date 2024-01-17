@@ -177,6 +177,7 @@ export default function Home({
                   sharedProjects={sharedProjects}
                   onSelectWorkspace={selectWorkspace}
                   onSelectSharedProjects={() => selectWorkspace(SharedProjectsWorkspaceID)}
+                  onRefreshWorkspace={() => refreshWorkspace(activeWorkspace.id)}
                   onRefreshWorkspaces={refreshWorkspaces}
                 />
               </Suspense>
