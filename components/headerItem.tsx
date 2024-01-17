@@ -34,12 +34,28 @@ export function HeaderItem({
   )
 }
 
-export function EditableHeaderItem({
+export const EditableHeaderItem = ({
   value,
   onChange,
   onSubmit,
   onCancel,
 }: {
+  value: string
+  onChange: (value: string) => void
+  onSubmit: () => void
+  onCancel: () => void
+}) => (
+  <EditableItem className={headerClassName} value={value} onChange={onChange} onSubmit={onSubmit} onCancel={onCancel} />
+)
+
+export function EditableItem({
+  className = '',
+  value,
+  onChange,
+  onSubmit,
+  onCancel,
+}: {
+  className?: string
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
@@ -58,7 +74,7 @@ export function EditableHeaderItem({
   return (
     <input
       ref={inputRef}
-      className={headerClassName}
+      className={className}
       value={value}
       onChange={event => onChange(event.target.value)}
       onKeyDown={onKeyDown}
