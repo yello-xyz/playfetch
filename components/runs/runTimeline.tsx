@@ -141,7 +141,7 @@ export default function RunTimeline({
 
 function EmptyRuns({ isRunning }: { isRunning?: boolean }) {
   return isRunning ? (
-    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-4 bg-gray-50 rounded-lg'>
+    <div className='flex flex-col items-center justify-center h-full gap-2 p-6 m-4 rounded-lg bg-gray-50'>
       <span className='font-medium text-gray-600'>Waiting for responses…</span>
     </div>
   ) : (

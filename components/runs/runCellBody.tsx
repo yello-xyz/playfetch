@@ -125,7 +125,8 @@ export default function RunCellBody({
 
   return (
     <>
-      {isContinuation && (IsProperRun(run) || !run.userID ? <RoleHeader /> : <RoleHeader user={user} />)}
+      {isContinuation &&
+        (IsProperRun(run) || !run.userID ? <RoleHeader onCancel={run.onCancel} /> : <RoleHeader user={user} />)}
       <BorderedSection border={isContinuation}>
         <div className='flex-1' id={IdentifierForRun(run.id)}>
           {spans}

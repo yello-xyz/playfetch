@@ -8,6 +8,8 @@ import { useLoggedInUser } from '@/src/client/context/userContext'
 import RunCellBody from './runCellBody'
 import { ExtractInputKey, FormatCost } from '@/src/common/formatting'
 import useInitialState from '@/src/client/hooks/useInitialState'
+import Icon from '../icon'
+import cancelIcon from '@/public/cancel.svg'
 
 export default function RunCellContinuation({
   run,
@@ -109,7 +111,7 @@ export default function RunCellContinuation({
   )
 }
 
-export const RoleHeader = ({ user }: { user?: User }) => {
+export const RoleHeader = ({ user, onCancel }: { user?: User; onCancel?: () => void }) => {
   const role = user?.fullName ?? 'Assistant'
   return (
     <div className='flex items-center gap-2'>
@@ -120,10 +122,18 @@ export const RoleHeader = ({ user }: { user?: User }) => {
           {role.slice(0, 1)}
         </span>
       )}
-      <span className='font-medium text-gray-700'>{role}</span>
+      <span className='flex-1 font-medium text-gray-700'>{role}</span>
+      {onCancel && <CancelButton callback={onCancel} />}
     </div>
   )
 }
+
+export const CancelButton = ({ callback }: { callback: () => void }) => (
+  <div className='flex items-center gap-1 pl-1 pr-2 rounded-md cursor-pointer hover:bg-blue-50' onClick={callback}>
+    <Icon icon={cancelIcon} />
+    Cancel
+  </div>
+)
 
 export const BorderedSection = ({
   border = true,
