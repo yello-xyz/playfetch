@@ -1,5 +1,5 @@
 import PromptInput from '../prompts/promptInput'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import branchIcon from '@/public/branch.svg'
 import { BranchChainItem, ChainItem } from '@/types'
 import TextInput from '../textInput'

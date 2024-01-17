@@ -22,7 +22,7 @@ export function SingleTabHeader({
   children?: ReactNode
 }) {
   return (
-    <TabSelector
+    <TabsHeader
       tabs={[label]}
       icon={icon}
       secondaryLabel={secondaryLabel}
@@ -30,11 +30,11 @@ export function SingleTabHeader({
       draggableTabs={draggableTab}
       dropTarget={dropTarget}>
       {children}
-    </TabSelector>
+    </TabsHeader>
   )
 }
 
-export default function TabSelector<T extends string>({
+export default function TabsHeader<T extends string>({
   tabs,
   activeTab,
   setActiveTab,

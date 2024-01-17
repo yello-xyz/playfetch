@@ -1,5 +1,5 @@
 import { ActiveChain, ChainVersion } from '@/types'
-import { CustomHeader } from '../tabSelector'
+import { CustomHeader } from '../tabsHeader'
 import Icon from '../icon'
 import chainIcon from '@/public/chain.svg'
 import historyIcon from '@/public/history.svg'

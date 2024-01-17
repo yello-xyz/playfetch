@@ -2,7 +2,7 @@ import { ActivePrompt, PromptVersion, Prompts } from '@/types'
 
 import { PromptTab } from '@/src/common/userPresets'
 import { ReactNode, useState } from 'react'
-import TabSelector, { SingleTabHeader } from '../tabSelector'
+import TabsHeader, { SingleTabHeader } from '../tabsHeader'
 import PromptPanel from './promptPanel'
 import VersionTimeline from '../versions/versionTimeline'
 import {
@@ -45,9 +45,9 @@ export default function PromptTabs({
   const [activeTab, setActiveTab] = useState<PromptTab>('New Prompt')
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs dropTarget='mergedTabs'>
+    <TabsHeader tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} draggableTabs dropTarget='mergedTabs'>
       {children}
-    </TabSelector>
+    </TabsHeader>
   )
 
   const renderTab = (tab: PromptTab, tabSelector: (children?: ReactNode) => ReactNode) => {

@@ -9,7 +9,7 @@ import {
   Run,
 } from '@/types'
 import { useState } from 'react'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import {
   BuildRunFilter,

@@ -1,6 +1,6 @@
 import PromptInput from '../prompts/promptInput'
 import { NameForCodeChainItem } from './chainNode'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import codeIcon from '@/public/code.svg'
 import { CodeChainItem } from '@/types'
 import TextInput from '../textInput'

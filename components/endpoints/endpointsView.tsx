@@ -18,7 +18,7 @@ import EndpointSettingsPane, { EndpointSettings } from './endpointSettingsPane'
 import EndpointsTable from './endpointsTable'
 import { ExtractPromptVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
-import TabSelector, { SingleTabHeader } from '../tabSelector'
+import TabsHeader, { SingleTabHeader } from '../tabsHeader'
 import LogEntriesView from './logEntriesView'
 import LogEntryDetailsPane from './logEntryDetailsPane'
 import IconButton from '../iconButton'
@@ -83,14 +83,14 @@ export default function EndpointsView({
   }
 
   const tabSelector = (children?: ReactNode) => (
-    <TabSelector
+    <TabsHeader
       tabs={
         logEntries.some(entry => endpoints.some(e => e.id === entry.endpointID)) ? ['Endpoints', 'Logs'] : ['Endpoints']
       }
       activeTab={activeTab}
       setActiveTab={selectTab}>
       {children}
-    </TabSelector>
+    </TabsHeader>
   )
 
   const startsEditing = newParentID !== undefined && newVersionID !== undefined

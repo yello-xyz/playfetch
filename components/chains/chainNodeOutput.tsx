@@ -16,7 +16,7 @@ import {
   OutputNode,
   SubtreeForChainNode,
 } from './chainNode'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
 import { useCheckProviders } from '@/src/client/context/providerContext'

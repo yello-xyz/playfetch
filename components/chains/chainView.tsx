@@ -16,7 +16,7 @@ import {
 import { Allotment } from 'allotment'
 import { useActiveProject, useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
 import VersionTimeline from '../versions/versionTimeline'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
 import ChainNodeOutput, { ExtractChainItemVariables } from './chainNodeOutput'

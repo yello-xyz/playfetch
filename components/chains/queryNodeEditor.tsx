@@ -1,5 +1,5 @@
 import PromptInput from '../prompts/promptInput'
-import { SingleTabHeader } from '../tabSelector'
+import { SingleTabHeader } from '../tabsHeader'
 import queryIcon from '@/public/query.svg'
 import { EmbeddingModel, QueryChainItem, QueryProvider } from '@/types'
 import TextInput from '../textInput'
