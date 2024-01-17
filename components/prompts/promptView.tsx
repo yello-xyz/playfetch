@@ -3,7 +3,7 @@ import { ActivePrompt, PromptInputs, PromptVersion, TestConfig } from '@/types'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import { useEffect, useState } from 'react'
-import { ExtractPromptVariables } from '@/src/common/formatting'
+import { ExtractPromptVariables, GetEditorVariables } from '@/src/common/formatting'
 import { Allotment } from 'allotment'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import TestDataPane, { GetTestDataRowCount } from '../testData/testDataPane'
@@ -96,7 +96,7 @@ export default function PromptView({
               updateConfig={updateConfig}
               initialTabs={promptTabs}
               persistTabs={setPromptTabs}
-              variables={staticVariables}
+              variables={GetEditorVariables(inputValues, variables, staticVariables)}
             />
           </Allotment.Pane>
           <Allotment.Pane minSize={minWidth}>

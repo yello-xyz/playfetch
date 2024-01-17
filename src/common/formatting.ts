@@ -1,5 +1,5 @@
 import { SupportsFunctionsPrompt, SupportsSystemPrompt } from '@/src/common/providerMetadata'
-import { PromptConfig, Prompts } from '@/types'
+import { InputValues, PromptConfig, Prompts } from '@/types'
 
 const validEmailRegExp =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -157,6 +157,11 @@ export const ExtractPromptVariables = (prompts: Prompts, config: PromptConfig, i
     ...(SupportsFunctionsPrompt(config.model) && prompts.functions ? ExtractVariables(prompts.functions) : []),
     ...(includingDynamic ? ExtractDynamicPromptInputs(prompts, config) : []),
   ]),
+]
+
+export const GetEditorVariables = (inputValues: InputValues, variables: string[], staticVariables: string[]) => [
+  ...staticVariables,
+  ...Object.keys(inputValues).filter(variable => !variables.includes(variable)),
 ]
 
 export const CheckValidURLPath = (urlPath: string) => {

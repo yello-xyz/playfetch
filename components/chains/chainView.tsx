@@ -14,6 +14,7 @@ import ChainNodeOutput from './chainNodeOutput'
 import useChainPromptCache from '../../src/client/hooks/useChainPromptCache'
 import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
 import { ExtractUnboundChainVariables, GetChainItemsSaveKey, GetItemsToSave } from './chainItems'
+import { GetEditorVariables } from '@/src/common/formatting'
 
 export default function ChainView({
   chain,
@@ -199,7 +200,7 @@ export default function ChainView({
                 setDirty={setNodeDirty}
                 promptCache={promptCache}
                 dismiss={() => updateActiveNodeIndex(undefined)}
-                variables={staticVariables}
+                variables={GetEditorVariables(chain.inputValues, variables, staticVariables)}
               />
             )}
           </Allotment.Pane>
