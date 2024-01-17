@@ -1,9 +1,10 @@
-import { HTMLAttributeAnchorTarget, ReactNode } from 'react'
+import { HTMLAttributeAnchorTarget, ReactNode, useState } from 'react'
 import Icon from './icon'
 import { StaticImageData } from 'next/image'
 import Link from 'next/link'
 import documentationIcon from '@/public/help.svg'
 import feedbackIcon from '@/public/feedback.svg'
+import { EditableItem } from './headerItem'
 
 export default function Sidebar({ children, rightBorder }: { children: ReactNode; rightBorder?: boolean }) {
   const borderClass = rightBorder ? 'border-r border-gray-200' : ''
@@ -62,6 +63,7 @@ export function SidebarButton({
   target,
   actionComponent,
   prefetch = true,
+  onRename,
 }: {
   title: string
   icon?: StaticImageData
@@ -71,19 +73,35 @@ export function SidebarButton({
   target?: HTMLAttributeAnchorTarget
   actionComponent?: ReactNode
   prefetch?: boolean
+  onRename?: (name: string) => Promise<void>
 }) {
+  const [label, setLabel] = useState<string>()
+  const submitRename = (name: string) => onRename?.(name).then(() => setLabel(undefined))
+
   const activeClass = 'bg-blue-50'
   const baseHoverClass = 'hover:bg-gray-100'
   const baseClass = 'flex gap-1 items-center pl-3 p-1 cursor-pointer select-none rounded-lg group w-[196px] h-8'
   const className = `${active ? activeClass : baseHoverClass} ${baseClass}`
   return (
     <LinkWrapper link={link} target={target} prefetch={prefetch}>
-      <div className={className} onClick={onClick}>
+      <div className={className} onClick={active && onRename ? () => setLabel(title) : onClick}>
         {icon && <Icon icon={icon} />}
-        <div className='flex-1 w-40 overflow-hidden font-normal text-gray-700 text-ellipsis whitespace-nowrap'>
-          {title}
-        </div>
-        {actionComponent}
+        {label !== undefined ? (
+          <EditableItem
+            className='leading-6 select-none bg-blue-25 whitespace-nowrap'
+            value={label}
+            onChange={setLabel}
+            onSubmit={() => submitRename(label)}
+            onCancel={() => setLabel(undefined)}
+          />
+        ) : (
+          <>
+            <div className='flex-1 w-40 overflow-hidden font-normal text-gray-700 text-ellipsis whitespace-nowrap'>
+              {title}
+            </div>
+            {actionComponent}
+          </>
+        )}
       </div>
     </LinkWrapper>
   )
