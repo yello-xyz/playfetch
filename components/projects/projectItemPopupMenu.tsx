@@ -33,10 +33,14 @@ export default function ProjectItemPopupMenu({
 
   const isChain = ProjectItemIsChain(item)
   const refreshProject = useRefreshProject()
-  const [renameCall, duplicateCall, deleteCall] = useProjectItemActions(onDelete)
+  const [renameItem, duplicateItem, deleteItem] = useProjectItemActions(onDelete)
 
-  const deleteItem = () => {
+  const withDismiss = (callback: () => void) => () => {
     setMenuExpanded(false)
+    callback()
+  }
+
+  const promptDeleteItem = () => {
     const label = isChain ? 'chain' : 'prompt'
     if (reference) {
       const reason = 'name' in reference ? `it is referenced by chain “${reference.name}”` : `has published endpoints`
@@ -48,24 +52,13 @@ export default function ProjectItemPopupMenu({
     } else {
       setDialogPrompt({
         title: `Are you sure you want to delete this ${label}? This action cannot be undone.`,
-        callback: () => deleteCall(item),
+        callback: () => deleteItem(item),
         destructive: true,
       })
     }
   }
 
-  const renameItem = () => {
-    setMenuExpanded(false)
-    setShowPickNamePrompt(true)
-  }
-
-  const duplicateItem = async () => {
-    setMenuExpanded(false)
-    duplicateCall(item)
-  }
-
   const copyPromptToProject = () => {
-    setMenuExpanded(false)
     api.getSharedProjects().then(([projects]) => setSharedProjects(projects))
     setShowMovePromptDialog(true)
   }
@@ -81,10 +74,10 @@ export default function ProjectItemPopupMenu({
   return (
     <>
       <PopupMenu className='w-40' expanded={isMenuExpanded} collapse={() => setMenuExpanded(false)}>
-        <PopupMenuItem title='Rename…' callback={renameItem} first />
-        <PopupMenuItem title='Duplicate' callback={duplicateItem} />
-        {!isChain && <PopupMenuItem title='Copy to Project…' callback={copyPromptToProject} />}
-        <PopupMenuItem separated destructive title='Delete' callback={deleteItem} last />
+        <PopupMenuItem title='Rename…' callback={withDismiss(() => setShowPickNamePrompt(true))} first />
+        <PopupMenuItem title='Duplicate' callback={withDismiss(() => duplicateItem(item))} />
+        {!isChain && <PopupMenuItem title='Copy to Project…' callback={withDismiss(copyPromptToProject)} />}
+        <PopupMenuItem separated destructive title='Delete' callback={withDismiss(promptDeleteItem)} last />
       </PopupMenu>
       {showPickNamePrompt && (
         <PickNameDialog
@@ -92,7 +85,7 @@ export default function ProjectItemPopupMenu({
           confirmTitle='Rename'
           label='Name'
           initialName={item.name}
-          onConfirm={name => renameCall(item, name)}
+          onConfirm={name => renameItem(item, name)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
