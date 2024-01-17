@@ -10,7 +10,7 @@ export const ConsumeStream = async (
 ) => {
   const runs = Object.fromEntries(inputs.map((_, inputIndex) => [inputIndex, {} as { [id: number]: PartialRun }]))
   while (streamReader) {
-    const { done, value } = await streamReader.read()
+    const { done, value } = await streamReader.read().catch(() => ({ done: true, value: undefined }))
     if (done) {
       break
     }
@@ -69,13 +69,15 @@ export default function useRunVersion(activeVersionID: number) {
     setHighestRunIndex(-1)
     const versionID = await getVersion()
     setRunningVersionID(versionID)
+    const abortController = new AbortController()
     const streamReader = await api.runVersion(
       versionID,
       inputs,
       dynamicInputs,
       continuationID,
       autoRespond,
-      maxResponses
+      maxResponses,
+      abortController.signal
     )
     let anyRunFailed = false
     await ConsumeStream(inputs, streamReader, runs => {
