@@ -15,7 +15,7 @@ import { Inter, Roboto_Mono } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'] })
 const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500', '600'] })
 
-const editorTheme = (preformatted: boolean, bordered: boolean) =>
+const editorTheme = (preformatted: boolean, bordered: boolean, tokenStyle?: TagStyle) =>
   EditorView.theme({
     '&': {
       ...(bordered ? { border: '1px solid #CFD3D8', borderRadius: '8px' } : {}),
@@ -37,6 +37,26 @@ const editorTheme = (preformatted: boolean, bordered: boolean) =>
       fontFamily: mono.style.fontFamily,
       padding: '0px 6px',
     },
+    '.cm-tooltip-autocomplete': {
+      padding: '4px 8px',
+      backgroundColor: '#DCEAFA',
+      border: '1px solid #E3E6E9',
+      borderRadius: '4px',
+    },
+    '.cm-tooltip-autocomplete ul li': {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'start',
+    },
+    '.cm-tooltip-autocomplete ul li[aria-selected]': { backgroundColor: 'transparent' },
+    '.cm-tooltip-autocomplete .cm-completionLabel': {
+      ...tokenStyle,
+      tag: null,
+      backgroundColor: '#F4B8EE',
+      fontFamily: preformatted ? mono.style.fontFamily : inter.style.fontFamily,
+    },
+    '.cm-tooltip-autocomplete li[aria-selected] .cm-completionLabel': { backgroundColor: '#E14BD2' },
   })
 
 const autocompleteExtension = (variables: string[]) =>
@@ -45,7 +65,7 @@ const autocompleteExtension = (variables: string[]) =>
     icons: false,
     override: [
       (context: CompletionContext) => {
-        const word = context.matchBefore(/{{/)
+        const word = context.matchBefore(/{{[^}]*}?/)
         return word && word.from !== word.to
           ? { from: word.from, options: variables.map(variable => ({ label: `{{${variable}}}` })) }
           : null
@@ -123,7 +143,7 @@ export default function Editor({
       EditorView.lineWrapping,
       placeholderText(placeholder ?? ''),
       EditorView.editable.of(!disabled),
-      editorTheme(preformatted, bordered),
+      editorTheme(preformatted, bordered, tokenStyle),
       onUpdate,
       history(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
