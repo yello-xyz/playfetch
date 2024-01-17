@@ -1,5 +1,4 @@
 import {
-  ActiveProject,
   Chain,
   ProjectItemIsChain,
   ItemsInProject,

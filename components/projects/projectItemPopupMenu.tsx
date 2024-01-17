@@ -1,4 +1,4 @@
-import { Chain, Endpoint, Project, Prompt, Workspace } from '@/types'
+import { Chain, Endpoint, Project, ProjectItemIsChain, Prompt, Workspace } from '@/types'
 import api from '@/src/client/api'
 import PopupMenu, { PopupMenuItem } from '../popupMenu'
 import useModalDialogPrompt from '@/src/client/context/modalDialogContext'
@@ -7,7 +7,8 @@ import PickNameDialog from '../pickNameDialog'
 import MovePromptDialog from '../prompts/movePromptDialog'
 import { useLoggedInUser } from '@/src/client/context/userContext'
 import { SharedProjectsWorkspace } from '@/pages'
-import { useRefreshActiveItem, useRefreshProject } from '@/src/client/context/projectContext'
+import { useRefreshProject } from '@/src/client/context/projectContext'
+import useProjectItemActions from '@/src/client/hooks/useProjectItemActions'
 
 export default function ProjectItemPopupMenu({
   item,
@@ -30,20 +31,9 @@ export default function ProjectItemPopupMenu({
   const [showMovePromptDialog, setShowMovePromptDialog] = useState(false)
   const [sharedProjects, setSharedProjects] = useState<Project[]>([])
 
-  const isChain = 'referencedItemIDs' in item
-
-  const refreshActiveItem = useRefreshActiveItem()
+  const isChain = ProjectItemIsChain(item)
   const refreshProject = useRefreshProject()
-  const refreshOnRename = () => {
-    if (isChain) {
-      refreshActiveItem()
-    }
-    refreshProject()
-  }
-
-  const deleteCall = () => (isChain ? api.deleteChain(item.id) : api.deletePrompt(item.id))
-  const duplicateCall = () => (isChain ? api.duplicateChain(item.id) : api.duplicatePrompt(item.id))
-  const renameCall = (name: string) => (isChain ? api.renameChain(item.id, name) : api.renamePrompt(item.id, name))
+  const [renameCall, duplicateCall, deleteCall] = useProjectItemActions()
 
   const deleteItem = () => {
     setMenuExpanded(false)
@@ -58,7 +48,7 @@ export default function ProjectItemPopupMenu({
     } else {
       setDialogPrompt({
         title: `Are you sure you want to delete this ${label}? This action cannot be undone.`,
-        callback: () => deleteCall().then(onDelete),
+        callback: () => deleteCall(item).then(onDelete),
         destructive: true,
       })
     }
@@ -71,7 +61,7 @@ export default function ProjectItemPopupMenu({
 
   const duplicateItem = async () => {
     setMenuExpanded(false)
-    duplicateCall().then(refreshProject)
+    duplicateCall(item).then(refreshProject)
   }
 
   const copyPromptToProject = () => {
@@ -102,7 +92,7 @@ export default function ProjectItemPopupMenu({
           confirmTitle='Rename'
           label='Name'
           initialName={item.name}
-          onConfirm={name => renameCall(name).then(refreshOnRename)}
+          onConfirm={name => renameCall(item, name)}
           onDismiss={() => setShowPickNamePrompt(false)}
         />
       )}
