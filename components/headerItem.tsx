@@ -63,9 +63,11 @@ export function EditableItem({
 }) {
   const inputRef = useCallback((node: any) => node?.select(), [])
 
+  const submit = () => value.trim().length > 0 ? onSubmit() : onCancel()
+
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter') {
-      onSubmit()
+      submit()
     } else if (event.key === 'Escape') {
       onCancel()
     }
@@ -78,7 +80,7 @@ export function EditableItem({
       value={value}
       onChange={event => onChange(event.target.value)}
       onKeyDown={onKeyDown}
-      onBlur={onSubmit}
+      onBlur={submit}
     />
   )
 }

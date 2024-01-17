@@ -33,7 +33,7 @@ export default function ProjectItemPopupMenu({
 
   const isChain = ProjectItemIsChain(item)
   const refreshProject = useRefreshProject()
-  const [renameCall, duplicateCall, deleteCall] = useProjectItemActions()
+  const [renameCall, duplicateCall, deleteCall] = useProjectItemActions(onDelete)
 
   const deleteItem = () => {
     setMenuExpanded(false)
@@ -48,7 +48,7 @@ export default function ProjectItemPopupMenu({
     } else {
       setDialogPrompt({
         title: `Are you sure you want to delete this ${label}? This action cannot be undone.`,
-        callback: () => deleteCall(item).then(onDelete),
+        callback: () => deleteCall(item),
         destructive: true,
       })
     }
@@ -61,7 +61,7 @@ export default function ProjectItemPopupMenu({
 
   const duplicateItem = async () => {
     setMenuExpanded(false)
-    duplicateCall(item).then(refreshProject)
+    duplicateCall(item)
   }
 
   const copyPromptToProject = () => {
