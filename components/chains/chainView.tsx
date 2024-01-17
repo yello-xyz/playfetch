@@ -10,10 +10,10 @@ import VersionTimeline from '../versions/versionTimeline'
 import { SingleTabHeader } from '../tabsHeader'
 import IconButton from '../iconButton'
 import closeIcon from '@/public/close.svg'
-import ChainNodeOutput, { ExtractUnboundChainVariables } from './chainNodeOutput'
+import ChainNodeOutput from './chainNodeOutput'
 import useChainPromptCache from '../../src/client/hooks/useChainPromptCache'
 import { OnSavedChain } from '@/src/client/hooks/useSaveChain'
-import { GetChainItemsSaveKey, GetItemsToSave } from './chainItems'
+import { ExtractUnboundChainVariables, GetChainItemsSaveKey, GetItemsToSave } from './chainItems'
 
 export default function ChainView({
   chain,

@@ -12,10 +12,10 @@ import { VersionLabels } from '../versions/versionLabels'
 import { AvailableLabelColorsForItem } from '../labelPopupMenu'
 import { TaggedContent } from '../versions/versionComparison'
 import { ReactNode } from 'react'
-import { ExtractUnboundChainVariables } from './chainNodeOutput'
 import { InputVariableClass } from '../prompts/promptInput'
 import { VersionDescription } from '../commentsPane'
 import { Highlight, themes } from 'prism-react-renderer'
+import { ExtractUnboundChainVariables } from './chainItems'
 
 export default function ChainNodeBoxBody({
   items,

@@ -1,7 +1,7 @@
 import { LoopCompletionIndexForNode, ShouldBranchLoopOnCompletion, SubtreeForNode } from '@/src/common/branching'
 import { BranchChainItem, ChainItem, CodeChainItem, PromptChainItem, QueryChainItem } from '@/types'
-import { ExtractChainItemVariables } from './chainNodeOutput'
 import { ChainPromptCache } from '@/src/client/hooks/useChainPromptCache'
+import { ExtractChainItemVariables } from './chainItems'
 
 export const InputNode = 'input'
 export const OutputNode = 'output'

@@ -27,10 +27,10 @@ import { EndpointsRoute, LogsRoute, ParseNumberQuery } from '@/src/common/client
 import { useRouter } from 'next/router'
 import Icon from '../icon'
 import chevronIcon from '@/public/chevron.svg'
-import { ExtractUnboundChainInputs } from '../chains/chainNodeOutput'
 import useActiveItemCache from '@/src/client/hooks/useActiveItemCache'
 import { useActiveProject, useRefreshProject } from '@/src/client/context/projectContext'
 import { HeaderItem } from '../headerItem'
+import { ExtractUnboundChainInputs } from '../chains/chainItems'
 
 const NewEndpointSettings = (parentID?: number, versionID?: number): EndpointSettings => ({
   id: undefined,

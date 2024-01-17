@@ -1,21 +1,10 @@
-import { ActiveChain, ChainItem, ChainItemWithInputs, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
+import { ActiveChain, ChainItem, ChainVersion, PromptInputs, Run, TestConfig } from '@/types'
 import { useEffect, useRef, useState } from 'react'
-import { ExtractCodeInterrupts, ExtractPromptVariables, ExtractVariables } from '@/src/common/formatting'
 import useInputValues from '@/src/client/hooks/useInputValues'
 import RunTimeline from '../runs/runTimeline'
 import TestDataPane from '../testData/testDataPane'
 import RunButtons from '../runs/runButtons'
-import {
-  ChainNode,
-  InputNode,
-  IsBranchChainItem,
-  IsChainItem,
-  IsCodeChainItem,
-  IsPromptChainItem,
-  IsQueryChainItem,
-  OutputNode,
-  SubtreeForChainNode,
-} from './chainNode'
+import { ChainNode, InputNode, IsChainItem, IsPromptChainItem, IsQueryChainItem, OutputNode } from './chainNode'
 import { SingleTabHeader } from '../tabsHeader'
 import useRunVersion from '@/src/client/hooks/useRunVersion'
 import { ChainPromptCache } from '../../src/client/hooks/useChainPromptCache'
@@ -24,56 +13,7 @@ import { ProviderForModel } from '@/src/common/providerMetadata'
 import { SelectAnyInputValue } from '@/src/client/inputRows'
 import useInitialState from '@/src/client/hooks/useInitialState'
 import api from '@/src/client/api'
-
-export const ExtractChainItemVariables = (item: ChainItem, cache: ChainPromptCache, includingDynamic: boolean) => {
-  if (IsCodeChainItem(item) || IsBranchChainItem(item)) {
-    return [...ExtractVariables(item.code), ...(includingDynamic ? ExtractCodeInterrupts(item.code) : [])]
-  }
-  if (IsQueryChainItem(item)) {
-    return ExtractVariables(item.query)
-  }
-  const version = cache.versionForItem(item)
-  return version
-    ? ExtractPromptVariables(version.prompts, version.config, includingDynamic)
-    : extractChainItemInputs(item, includingDynamic)
-}
-
-const extractChainItemInputs = (item: ChainItem, includingDynamic: boolean) => [
-  ...(item.inputs ?? []),
-  ...(includingDynamic && IsPromptChainItem(item) ? item.dynamicInputs ?? [] : []),
-]
-
-export const ExtractUnboundChainVariables = (chain: ChainItem[], cache: ChainPromptCache, includingDynamic: boolean) =>
-  excludeBoundChainVariables(
-    chain.map(item => ({ ...item, inputs: ExtractChainItemVariables(item, cache, includingDynamic) }))
-  )
-
-export const ExtractUnboundChainInputs = (chainWithInputs: ChainItemWithInputs[], includingDynamic: boolean) =>
-  excludeBoundChainVariables(
-    chainWithInputs.map(item => ({ ...item, inputs: extractChainItemInputs(item, includingDynamic) }))
-  )
-
-const excludeBoundChainVariables = (chain: Omit<ChainItemWithInputs, 'dynamicInputs'>[]) => {
-  const outputToSubtreeIndex = {} as Record<string, number[]>
-  chain.forEach(({ output }, index) => {
-    if (output) {
-      outputToSubtreeIndex[output] = [...(outputToSubtreeIndex[output] ?? []), index]
-    }
-  })
-  const unmappedInputs = [] as string[]
-  chain.forEach(item => {
-    item.inputs.forEach(input => {
-      if (
-        !(outputToSubtreeIndex[input] ?? []).some(index =>
-          SubtreeForChainNode(chain[index] as ChainNode, chain as ChainNode[], false).includes(item as ChainItem)
-        )
-      ) {
-        unmappedInputs.push(input)
-      }
-    })
-  })
-  return [...new Set(unmappedInputs)]
-}
+import { ExtractUnboundChainVariables } from './chainItems'
 
 export default function ChainNodeOutput({
   chain,
